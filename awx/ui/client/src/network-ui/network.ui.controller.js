@@ -115,6 +115,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.version = null;
   $scope.test_events = [];
   $scope.test_results = [];
+  $scope.test_errors = [];
   $scope.streams = [];
   $scope.view_port = {'x': 0,
                       'y': 0,
@@ -1730,7 +1731,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             test_event = $scope.test_events.shift();
             console.log(test_event);
             test_event.sender = 0;
-            $scope.first_channel.send(test_event.msg_type, test_event);
+            try {
+                $scope.first_channel.send(test_event.msg_type, test_event);
+            } catch (err) {
+                $scope.test_errors.push(err);
+            }
         }
         $scope.$apply();
     }, 10);
@@ -1759,6 +1764,33 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 }
             }
         }
+    };
+
+    $scope.reset_fsm_state = function () {
+        $scope.null_controller.state = null_fsm.Start;
+        $scope.null_controller.state.start($scope.null_controller);
+        $scope.hotkeys_controller.state = hotkeys.Start;
+        $scope.hotkeys_controller.state.start($scope.hotkeys_controller);
+        $scope.view_controller.state = view.Start;
+        $scope.view_controller.state.start($scope.view_controller);
+        $scope.device_detail_controller.state = device_detail_fsm.Start;
+        $scope.device_detail_controller.state.start($scope.device_detail_controller);
+        $scope.move_controller.state = move.Start;
+        $scope.move_controller.state.start($scope.move_controller);
+        $scope.link_controller.state = link.Start;
+        $scope.link_controller.state.start($scope.link_controller);
+        $scope.stream_controller.state = stream_fsm.Start;
+        $scope.stream_controller.state.start($scope.stream_controller);
+        $scope.group_controller.state = group.Start;
+        $scope.group_controller.state.start($scope.group_controller);
+        $scope.rack_controller.state = rack_fsm.Disable;
+        $scope.rack_controller.state.start($scope.rack_controller);
+        $scope.site_controller.state = site_fsm.Disable;
+        $scope.site_controller.state.start($scope.site_controller);
+        $scope.buttons_controller.state = buttons.Start;
+        $scope.buttons_controller.state.start($scope.buttons_controller);
+        $scope.time_controller.state = time.Start;
+        $scope.time_controller.state.start($scope.time_controller);
     };
 };
 

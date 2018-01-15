@@ -82,9 +82,13 @@ _Reporting.prototype.start = function (controller) {
     controller.scope.replay = false;
     controller.scope.disconnected = false;
     controller.scope.recording = false;
+    var result = "passed";
+    if (controller.scope.test_errors.length > 0) {
+        result = "errored";
+    }
     test_result = new models.TestResult(controller.scope.test_result_id_seq(),
                                         controller.scope.current_test.name,
-                                        "passed",
+                                        result,
                                         new Date().toISOString(),
                                         controller.scope.version);
     controller.scope.test_results.push(test_result);
@@ -114,9 +118,11 @@ _Loading.prototype.start = function (controller) {
         controller.scope.onSnapshot(controller.scope.current_test.pre_test_snapshot);
         controller.scope.replay = true;
         controller.scope.disconnected = true;
+        controller.scope.test_errors = [];
         controller.scope.test_events = controller.scope.current_test.event_trace.slice();
         controller.scope.test_events.push(new messages.TestCompleted());
         controller.scope.reset_coverage();
+        controller.scope.reset_fsm_state();
         controller.changeState(Running);
     }
 };
