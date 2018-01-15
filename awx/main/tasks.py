@@ -1040,7 +1040,13 @@ class RunJob(BaseTask):
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
         if job.use_fact_cache and not kwargs.get('isolated'):
-            env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
+            library_path = env.get('ANSIBLE_LIBRARY')
+            env['ANSIBLE_LIBRARY'] = ':'.join(
+                filter(None, [
+                    library_path,
+                    self.get_path_to('..', 'plugins', 'library')
+                ])
+            )
             env['ANSIBLE_CACHE_PLUGIN'] = "jsonfile"
             env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = os.path.join(kwargs['private_data_dir'], 'facts')
         if job.project:
