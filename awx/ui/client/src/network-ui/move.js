@@ -119,14 +119,6 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
                                    scope.scaledY,
                                    "switch");
 	}
-    else if (message.type === "rack") {
-        id = controller.scope.device_id_seq();
-		device = new models.Device(id,
-                                   "Rack" + id,
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "rack");
-	}
     else if (message.type === "host") {
         id = controller.scope.device_id_seq();
 		device = new models.Device(id,
