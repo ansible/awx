@@ -21,13 +21,6 @@ tower.config(function($stateProvider, $urlRouterProvider) {
             url: '/topology',
             template: "<awx-network-ui></awx-network-ui>"
         });
-
-    $stateProvider
-        .state({
-            name: 'tables',
-            url: '/tables',
-            template: "<awx-tables-ui></awx-tables-ui>"
-        });
 });
 
 exports.tower = tower;
