@@ -103,8 +103,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.frame = 0;
   $scope.recording = false;
   $scope.replay = false;
-  $scope.touch_data = {};
-  $scope.touches = [];
   $scope.devices = [];
   $scope.links = [];
   $scope.groups = [];
@@ -573,77 +571,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     };
 
     $document.bind("keydown", $scope.onKeyDown);
-
-    // Touch Event Handlers
-    //
-
-	$scope.onTouchStart = function($event) {
-     var touches = [];
-     var i = 0;
-     for (i = 0; i < $event.touches.length; i++) {
-           touches.push({screenX: $event.touches[i].screenX, screenY: $event.touches[i].screenY});
-     }
-     $scope.touches = touches;
-     if ($scope.recording) {
-          $scope.send_control_message(new messages.TouchEvent($scope.client_id, "touchstart", touches));
-     }
-
-     if ($event.touches.length === 1) {
-          $scope.cursor.hidden = false;
-          $scope.cursor.x = $event.touches[0].screenX;
-          $scope.cursor.y = $event.touches[0].screenY;
-          $scope.mouseX = $event.touches[0].screenX;
-          $scope.mouseY = $event.touches[0].screenY;
-          $scope.updateScaledXY();
-     }
-      $scope.first_channel.send('TouchStart', $event);
-      $scope.onTouchStartEvent = $event;
-	  $event.preventDefault();
-	};
-
-	$scope.onTouchEnd = function($event) {
-     var touches = [];
-     var i = 0;
-     for (i = 0; i < $event.touches.length; i++) {
-           touches.push({screenX: $event.touches[i].screenX, screenY: $event.touches[i].screenY});
-     }
-     $scope.touches = touches;
-     if ($scope.recording) {
-          $scope.send_control_message(new messages.TouchEvent($scope.client_id, "touchend", touches));
-     }
-      $scope.first_channel.send('TouchEnd', $event);
-      $scope.onTouchEndEvent = $event;
-	  $event.preventDefault();
-	};
-
-	$scope.onTouchMove = function($event) {
-     var touches = [];
-     var i = 0;
-     for (i = 0; i < $event.touches.length; i++) {
-           touches.push({screenX: $event.touches[i].screenX, screenY: $event.touches[i].screenY});
-     }
-     $scope.touches = touches;
-     if ($scope.recording) {
-          $scope.send_control_message(new messages.TouchEvent($scope.client_id, "touchmove", touches));
-     }
-
-     if ($event.touches.length === 1) {
-          $scope.cursor.hidden = false;
-          $scope.cursor.x = $event.touches[0].screenX;
-          $scope.cursor.y = $event.touches[0].screenY;
-          $scope.mouseX = $event.touches[0].screenX;
-          $scope.mouseY = $event.touches[0].screenY;
-          $scope.updateScaledXY();
-     }
-
-      $scope.first_channel.send('TouchMove', $event);
-      $scope.onTouchMoveEvent = $event;
-	  $event.preventDefault();
-	};
-
-    $scope.$watchCollection('selected_items', function(){
-        $scope.onDetailsContextButton(false);
-    });
 
     // Conext Menu Button Handlers
     $scope.onDetailsContextButton = function (panelBoolean) {

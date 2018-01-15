@@ -213,14 +213,6 @@ function KeyEvent(sender, key, keyCode, type, altKey, shiftKey, ctrlKey, metaKey
 }
 exports.KeyEvent = KeyEvent;
 
-function TouchEvent(sender, type, touches) {
-    this.msg_type = "TouchEvent";
-    this.sender = sender;
-    this.type = type;
-    this.touches = touches;
-}
-exports.TouchEvent = TouchEvent;
-
 function StartRecording(sender, trace_id) {
     this.msg_type = "StartRecording";
     this.sender = sender;
