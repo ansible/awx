@@ -533,18 +533,6 @@ Group.prototype.has_corner_selected = function (x, y) {
     return false;
 };
 
-Group.prototype.corners = function () {
-
-    return [{x: this.left_extent(),
-             y: this.top_extent()},
-            {x: this.right_extent(),
-             y: this.top_extent()},
-            {x: this.left_extent(),
-             y: this.bottom_extent()},
-            {x: this.left_extent(),
-             y: this.bottom_extent()}];
-};
-
 Group.prototype.select_corner = function (x, y) {
 
     var corners = [[util.distance(this.x1, this.y1, x, y), TOP_LEFT],
