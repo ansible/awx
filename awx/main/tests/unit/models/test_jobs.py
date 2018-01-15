@@ -47,6 +47,17 @@ def test_start_job_fact_cache(hosts, job, inventory, tmpdir):
         assert filepath in modified_times
 
 
+def test_fact_cache_with_invalid_path_traversal(job, inventory, tmpdir, mocker):
+    job._get_inventory_hosts = mocker.Mock(return_value=[
+        Host(name='../foo', ansible_facts={"a": 1, "b": 2},),
+    ])
+
+    fact_cache = str(tmpdir)
+    job.start_job_fact_cache(fact_cache, {}, 0)
+    # a file called "foo" should _not_ be written outside the facts dir
+    assert os.listdir(os.path.join(fact_cache, 'facts', '..')) == ['facts']
+
+
 def test_finish_job_fact_cache_with_existing_data(job, hosts, inventory, mocker, tmpdir):
     fact_cache = str(tmpdir)
     modified_times = {}

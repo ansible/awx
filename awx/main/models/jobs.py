@@ -731,6 +731,9 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             hosts = hosts.filter(ansible_facts_modified__gte=timeout)
         for host in hosts:
             filepath = os.sep.join(map(six.text_type, [destination, host.name]))
+            if not os.path.realpath(filepath).startswith(destination):
+                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
+                continue
             with codecs.open(filepath, 'w', encoding='utf-8') as f:
                 os.chmod(f.name, 0600)
                 json.dump(host.ansible_facts, f)
@@ -741,6 +744,9 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         destination = os.path.join(destination, 'facts')
         for host in self._get_inventory_hosts():
             filepath = os.sep.join(map(six.text_type, [destination, host.name]))
+            if not os.path.realpath(filepath).startswith(destination):
+                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
+                continue
             if os.path.exists(filepath):
                 # If the file changed since we wrote it pre-playbook run...
                 modified = os.path.getmtime(filepath)
