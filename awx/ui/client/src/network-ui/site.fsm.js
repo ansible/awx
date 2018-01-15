@@ -506,6 +506,7 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     if (selected) {
         controller.changeState(Selected1);
+        controller.scope.onDetailsContextButton();
     } else {
         controller.delegate_channel.send(msg_type, $event);
     }

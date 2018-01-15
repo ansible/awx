@@ -207,10 +207,13 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     if (last_selected.last_selected_device !== null) {
         controller.changeState(Selected1);
+        controller.scope.onDetailsContextButton();
     } else if (last_selected.last_selected_link !== null) {
         controller.changeState(Selected1);
+        controller.scope.onDetailsContextButton();
     } else if (last_selected.last_selected_interface !== null) {
         controller.changeState(Selected1);
+        controller.scope.onDetailsContextButton();
     } else {
         controller.delegate_channel.send(msg_type, $event);
     }
