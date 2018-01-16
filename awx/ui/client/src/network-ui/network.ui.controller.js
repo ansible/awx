@@ -107,7 +107,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.links = [];
   $scope.groups = [];
   $scope.processes = [];
-  $scope.configurations = [];
   $scope.tests = [];
   $scope.current_tests = [];
   $scope.current_test = null;

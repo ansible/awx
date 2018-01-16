@@ -19,7 +19,6 @@ var chevronLeft = require('./chevron.left.directive.js');
 var contextMenu = require('./context.menu.directive.js');
 var contextMenuButton = require('./context.menu.button.directive.js');
 var process = require('./process.directive.js');
-var configuration = require('./configuration.directive.js');
 var map = require('./map.directive.js');
 var deviceDetail = require('./device.detail.directive.js');
 var defaultd = require('./default.directive.js');
@@ -52,7 +51,6 @@ var networkUI = angular.module('networkUI', [
     .directive('awxNetContextMenu', contextMenu.contextMenu)
     .directive('awxNetContextMenuButton', contextMenuButton.contextMenuButton)
     .directive('awxNetProcess', process.process)
-    .directive('awxNetConfiguration', configuration.configuration)
     .directive('awxNetMap', map.map)
     .directive('awxNetDeviceDetail', deviceDetail.deviceDetail)
     .directive('awxNetDefault', defaultd.defaultd)
