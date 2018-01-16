@@ -620,7 +620,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     };
 
     $scope.onDestroyButton = function (button) {
-        $scope.resetStatus();
         $scope.send_control_message(new messages.Destroy($scope.client_id));
     };
 
@@ -775,56 +774,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.all_buttons.extend($scope.context_menu_buttons);
     $scope.all_buttons.extend($scope.action_icons);
     $scope.all_buttons.extend($scope.buttons);
-
-    $scope.onTaskStatus = function(data) {
-        var i = 0;
-        var j = 0;
-        var found = false;
-        for (i = 0; i < $scope.devices.length; i++) {
-            if ($scope.devices[i].name === data.device_name) {
-                found = false;
-                for (j = 0; j < $scope.devices[i].tasks.length; j++) {
-                    if ($scope.devices[i].tasks[j].id === data.task_id) {
-                        found = true;
-                    }
-                }
-                if (!found) {
-                    $scope.devices[i].tasks.push(new models.Task(data.task_id,
-                                                                 data.device_name));
-                }
-                for (j = 0; j < $scope.devices[i].tasks.length; j++) {
-                    if ($scope.devices[i].tasks[j].id === data.task_id) {
-                        if (data.status !== null) {
-                            $scope.devices[i].tasks[j].status = data.status === "pass";
-                        }
-                        if (data.working !== null) {
-                            $scope.devices[i].tasks[j].working = data.working;
-                        }
-                    }
-                }
-                if (data.status !== null) {
-                    $scope.devices[i].status = data.status === "pass";
-                }
-                if (data.working !== null) {
-                    $scope.devices[i].working = data.working;
-                }
-            }
-        }
-    };
-
-    $scope.onDeviceStatus = function(data) {
-        var i = 0;
-        for (i = 0; i < $scope.devices.length; i++) {
-            if ($scope.devices[i].name === data.name) {
-                if (data.status !== null) {
-                    $scope.devices[i].status = data.status === "pass";
-                }
-                if (data.working !== null) {
-                    $scope.devices[i].working = data.working;
-                }
-            }
-        }
-    };
 
     $scope.onFacts = function(data) {
         var i = 0;
@@ -1552,26 +1501,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             }
         }
     };
-
-    $scope.resetStatus = function() {
-        var i = 0;
-        var j = 0;
-        var devices = $scope.devices;
-        var links = $scope.links;
-        for (i = 0; i < devices.length; i++) {
-            devices[i].status = null;
-            devices[i].working = false;
-            devices[i].tasks = [];
-            for (j = devices[i].interfaces.length - 1; j >= 0; j--) {
-                devices[i].interfaces[j].status = null;
-            }
-        }
-        for (i = 0; i < links.length; i++) {
-            links[i].status = null;
-        }
-    };
-
-
 
     $scope.control_socket.onmessage = function(message) {
         $scope.first_channel.send('Message', message);
