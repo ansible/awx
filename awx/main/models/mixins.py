@@ -300,7 +300,8 @@ class SurveyJobTemplateMixin(models.Model):
             rejected.update(extra_vars)
             # ignored variables does not block manual launch
             if 'prompts' not in _exclude_errors:
-                errors['extra_vars'] = [_('Variables {list_of_keys} are not allowed on launch.').format(
+                errors['extra_vars'] = [_('Variables {list_of_keys} are not allowed on launch. Check the Prompt on Launch setting '+
+                                        'on the Job Template to include Extra Variables.').format(
                     list_of_keys=', '.join(extra_vars.keys()))]
 
         return (accepted, rejected, errors)
