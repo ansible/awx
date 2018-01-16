@@ -201,6 +201,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                    let host = hosts[i];
                    console.log(host);
                    host.data = jsyaml.safeLoad(host.variables);
+                   if (host.data.type == undefined) {
+                       host.data.type = 'unknown';
+                   }
+                   if (host.data.name == undefined) {
+                       host.data.name = host.name;
+                   }
                    var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id, host.variables);
                    device.icon = true;
                    $scope.inventory_toolbox.items.push(device);
