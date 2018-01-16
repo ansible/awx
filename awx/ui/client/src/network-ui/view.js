@@ -80,6 +80,8 @@ _Scale.prototype.onMouseWheel = function (controller, msg_type, message) {
       controller.scope.current_scale = new_scale;
       controller.scope.panX = new_panX;
       controller.scope.panY = new_panY;
+      var item = controller.scope.context_menus[0];
+      item.enabled = false;
       controller.scope.updatePanAndScale();
       controller.changeState(Ready);
 };
