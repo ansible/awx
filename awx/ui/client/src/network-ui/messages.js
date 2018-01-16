@@ -347,17 +347,6 @@ function GroupMembership(sender, id, members) {
 }
 exports.GroupMembership = GroupMembership;
 
-function TableCellEdit(sender, sheet, col, row, old_value, new_value) {
-    this.msg_type = "TableCellEdit";
-    this.sender = sender;
-    this.sheet = sheet;
-    this.col = col;
-    this.row = row;
-    this.old_value = old_value;
-    this.new_value = new_value;
-}
-exports.TableCellEdit = TableCellEdit;
-
 function ProcessCreate(sender, id, name, type, device_id, x, y) {
     this.msg_type = "ProcessCreate";
     this.id = id;
