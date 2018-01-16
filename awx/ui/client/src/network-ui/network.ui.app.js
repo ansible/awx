@@ -24,8 +24,6 @@ var map = require('./map.directive.js');
 var deviceDetail = require('./device.detail.directive.js');
 var defaultd = require('./default.directive.js');
 var quadrants = require('./quadrants.directive.js');
-var stencil = require('./stencil.directive.js');
-var layer = require('./layer.directive.js');
 var button = require('./button.directive.js');
 var inventoryToolbox = require('./inventory.toolbox.directive.js');
 var inventoryToolboxClipPath = require('./inventory.toolbox.clip.path.directive.js');
@@ -61,8 +59,6 @@ var networkUI = angular.module('networkUI', [
     .directive('awxNetDeviceDetail', deviceDetail.deviceDetail)
     .directive('awxNetDefault', defaultd.defaultd)
     .directive('awxNetQuadrants', quadrants.quadrants)
-    .directive('awxNetStencil', stencil.stencil)
-    .directive('awxNetLayer', layer.layer)
     .directive('awxNetButton', button.button)
     .directive('awxNetInventoryToolbox', inventoryToolbox.inventoryToolbox)
     .directive('awxNetInventoryToolboxClipPath', inventoryToolboxClipPath.inventoryToolboxClipPath)

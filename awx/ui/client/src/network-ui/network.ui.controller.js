@@ -771,36 +771,10 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       new models.Button("RUN TESTS", button_offset + 120, 88, 100, 30, $scope.onRunTestsButton, $scope),
     ];
 
-    var LAYERS_X = 160;
-
-    $scope.layers = [
-      new models.ToggleButton("APPLICATION", $scope.graph.width - LAYERS_X, 10, 120, 30, util.noop, util.noop, true, $scope),
-      new models.ToggleButton("PRESENTATION", $scope.graph.width - LAYERS_X, 50, 120, 30, util.noop, util.noop, true, $scope),
-      new models.ToggleButton("SESSION", $scope.graph.width - LAYERS_X, 90, 120, 30, util.noop, util.noop, true, $scope),
-      new models.ToggleButton("TRANSPORT", $scope.graph.width - LAYERS_X, 130, 120, 30, util.noop, util.noop, true, $scope),
-      new models.ToggleButton("NETWORK", $scope.graph.width - LAYERS_X, 170, 120, 30, util.noop, util.noop, true, $scope),
-      new models.ToggleButton("DATA-LINK", $scope.graph.width - LAYERS_X, 210, 120, 30, util.noop, util.noop, true, $scope),
-      new models.ToggleButton("PHYSICAL",
-                              $scope.graph.width - LAYERS_X, 250, 120, 30,
-                              $scope.onTogglePhysical,
-                              $scope.onUnTogglePhysical,
-                              true,
-                              $scope),
-      new models.ToggleButton("GROUP",
-                              $scope.graph.width - LAYERS_X, 290, 120, 30,
-                              $scope.onToggleGroup,
-                              $scope.onUnToggleGroup,
-                              true,
-                              $scope)
-    ];
-
-    $scope.layers = [];
-
     $scope.all_buttons = [];
     $scope.all_buttons.extend($scope.context_menu_buttons);
     $scope.all_buttons.extend($scope.action_icons);
     $scope.all_buttons.extend($scope.buttons);
-    $scope.all_buttons.extend($scope.layers);
 
     $scope.onTaskStatus = function(data) {
         var i = 0;
@@ -1673,10 +1647,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     });
 
     $scope.update_size = function () {
-        var i = 0;
-        for (i = 0; i < $scope.layers.length; i++) {
-            $scope.layers[i].x = $scope.graph.width - 140;
-        }
     };
 
     $scope.update_offsets = function () {
