@@ -147,7 +147,7 @@ class CallbackBrokerWorker(ConsumerMixin):
                     from pprint import pformat
                     logger.info('Body: {}'.format(
                         highlight(pformat(body, width=160), PythonLexer(), Terminal256Formatter(style='friendly'))
-                    ))
+                    )[:1024 * 4])
 
                 def _save_event_data():
                     for key, cls in event_map.items():
