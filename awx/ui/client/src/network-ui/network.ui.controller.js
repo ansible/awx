@@ -38,9 +38,17 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
   $scope.inventory_id = $state.params.inventory_id;
 
+  var protocol = null;
+
+  if ($location.protocol() === 'http') {
+    protocol = 'ws';
+  } else if ($location.protocol() === 'https') {
+    protocol = 'wss';
+  }
+
   $scope.initial_messages = [];
   if (!$scope.disconnected) {
-      $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
+      $scope.control_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
                                                          null,
                                                          {debug: false, reconnectInterval: 300});
   } else {
@@ -391,9 +399,9 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 devices[i].selected = true;
                 $scope.send_control_message(new messages.DeviceSelected($scope.client_id, devices[i].id));
                 last_selected_device = devices[i];
-				  if ($scope.selected_items.indexOf($scope.devices[i]) === -1) {
-					  $scope.selected_items.push($scope.devices[i]);
-				  }
+                  if ($scope.selected_items.indexOf($scope.devices[i]) === -1) {
+                      $scope.selected_items.push($scope.devices[i]);
+                  }
                 if ($scope.selected_devices.indexOf(devices[i]) === -1) {
                     $scope.selected_devices.push(devices[i]);
                 }
@@ -481,7 +489,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       $scope.last_event = $event;
       $scope.first_channel.send('MouseDown', $event);
       $scope.onMouseDownResult = getMouseEventResult($event);
-	  $event.preventDefault();
+      $event.preventDefault();
     };
 
     $scope.onMouseUp = function ($event) {
@@ -492,7 +500,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       $scope.last_event = $event;
       $scope.first_channel.send('MouseUp', $event);
       $scope.onMouseUpResult = getMouseEventResult($event);
-	  $event.preventDefault();
+      $event.preventDefault();
     };
 
     $scope.onMouseLeave = function ($event) {
@@ -502,7 +510,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       }
       $scope.onMouseLeaveResult = getMouseEventResult($event);
       $scope.cursor.hidden = true;
-	  $event.preventDefault();
+      $event.preventDefault();
     };
 
     $scope.onMouseMove = function ($event) {
@@ -519,7 +527,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       $scope.updateScaledXY();
       $scope.first_channel.send('MouseMove', $event);
       $scope.onMouseMoveResult = getMouseEventResult($event);
-	  $event.preventDefault();
+      $event.preventDefault();
     };
 
     $scope.onMouseOver = function ($event) {
@@ -529,7 +537,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       }
       $scope.onMouseOverResult = getMouseEventResult($event);
       $scope.cursor.hidden = false;
-	  $event.preventDefault();
+      $event.preventDefault();
     };
 
     $scope.onMouseEnter = $scope.onMouseOver;
@@ -732,19 +740,19 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonRight, false, $scope)
     ];
 
-	$scope.onDownloadTraceButton = function (button) {
+    $scope.onDownloadTraceButton = function (button) {
         window.open("/network_ui/download_trace?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
     };
 
-	$scope.onDownloadRecordingButton = function (button) {
+    $scope.onDownloadRecordingButton = function (button) {
         window.open("/network_ui/download_recording?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
     };
 
-	$scope.onUploadTestButton = function (button) {
+    $scope.onUploadTestButton = function (button) {
         window.open("/network_ui/upload_test", "_top");
     };
 
-	$scope.onRunTestsButton = function (button) {
+    $scope.onRunTestsButton = function (button) {
 
         $scope.test_results = [];
         $scope.current_tests = $scope.tests.slice();
@@ -1373,14 +1381,14 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                   process.type,
                                                   0,
                                                   0));
-				new_process.device = new_device;
+                new_process.device = new_device;
                 new_device.processes.push(new_process);
             }
             for (j = 0; j < device.interfaces.length; j++) {
                 intf = device.interfaces[j];
                 new_intf = (new models.Interface(intf.id,
                                                  intf.name));
-				new_intf.device = new_device;
+                new_intf.device = new_device;
                 device_interface_map[device.id][intf.id] = new_intf;
                 new_device.interfaces.push(new_intf);
             }
@@ -1506,11 +1514,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.$apply();
     };
 
-	$scope.control_socket.onopen = function() {
+    $scope.control_socket.onopen = function() {
         //ignore
     };
 
-	$scope.send_initial_messages = function() {
+    $scope.send_initial_messages = function() {
         var i = 0;
         var messages_to_send = $scope.initial_messages;
         var message = null;
@@ -1522,12 +1530,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             data = messages.serialize(message);
             $scope.control_socket.send(data);
         }
-	};
+    };
 
-	// Call onopen directly if $scope.control_socket is already open
-	if ($scope.control_socket.readyState === WebSocket.OPEN) {
-		$scope.control_socket.onopen();
-	}
+    // Call onopen directly if $scope.control_socket is already open
+    if ($scope.control_socket.readyState === WebSocket.OPEN) {
+        $scope.control_socket.onopen();
+    }
 
     $scope.send_control_message = function (message) {
         var i = 0;
@@ -1548,17 +1556,17 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     // End web socket
     //
 
-	angular.element($window).bind('resize', function(){
+    angular.element($window).bind('resize', function(){
 
-		$scope.graph.width = $window.innerWidth;
-	  	$scope.graph.right_column = 300;
-	  	$scope.graph.height = $window.innerHeight;
+        $scope.graph.width = $window.innerWidth;
+        $scope.graph.right_column = 300;
+        $scope.graph.height = $window.innerHeight;
 
         $scope.update_size();
 
-		// manuall $digest required as resize event
-		// is outside of angular
-	 	$scope.$digest();
+        // manuall $digest required as resize event
+        // is outside of angular
+        $scope.$digest();
     });
 
     //60fps ~ 17ms delay
@@ -1605,6 +1613,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             try {
                 $scope.first_channel.send(test_event.msg_type, test_event);
             } catch (err) {
+                console.log(["Test Error:", $scope.current_test, err]);
                 $scope.test_errors.push(err);
             }
         }
@@ -1612,7 +1621,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     }, 10);
 
     ConfigService
-		.getConfig()
+        .getConfig()
         .then(function(config){
             $scope.version = config.version;
         });
