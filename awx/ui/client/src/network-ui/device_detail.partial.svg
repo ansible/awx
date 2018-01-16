@@ -25,8 +25,6 @@
    <g ng-switch-default> <!-- begin default -->
         <g awx-net-default></g>
    </g> <!-- end default -->
-   <g awx-net-status-light></g>
-   <g awx-net-task-status></g>
 </g> <!-- end transform class switch -->
 
 <g transform="translate(0, 500)">
