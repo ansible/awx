@@ -2,13 +2,14 @@
     height: 100vh;
     width: 100vw;
     display: flex;
+    overflow: hidden;
 
     &-topNav {
         display: flex;
         background-color: @at-color-top-nav-background;
         border-bottom: @at-border-default-width solid @at-color-top-nav-border-bottom;
         z-index: @at-z-index-nav;
-        position: fixed;
+        position: relative;
         right: 0;
         left: 0;
         top: 0;
@@ -136,10 +137,6 @@
                 align-items: center;
                 padding-right: @at-padding-between-side-nav-icon-text;
             }
-
-            + .at-Layout-main {
-                padding-left: @at-width-expanded-side-nav;
-            }
         }
     }
 
@@ -148,7 +145,6 @@
         height: 100%;
         width: 100%;
         flex-direction: column;
-        padding-left: @at-width-collapsed-side-nav;
         overflow-x: hidden;
     }
 
