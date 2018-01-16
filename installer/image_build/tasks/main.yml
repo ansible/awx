@@ -1,6 +1,6 @@
 ---
 - name: Get Version from checkout if not provided
-  shell: "git describe --long | sed 's/\\-g.*//' | sed 's/\\-/\\./'"
+  shell: "git describe --long --first-parent | sed 's/\\-g.*//' | sed 's/\\-/\\./'"
   delegate_to: localhost
   register: awx_version_command
   when: awx_version is not defined
