@@ -372,8 +372,6 @@ _Move.prototype.start = function (controller) {
     for (i = 0; i < devices.length; i++) {
         devices[i].moving = true;
         for (j = 0; j < controller.scope.devices.length; j++) {
-            console.log(Math.pow(devices[i].x - controller.scope.devices[j].x, 2) +
-                        Math.pow(devices[i].y - controller.scope.devices[j].y, 2));
             if ((Math.pow(devices[i].x - controller.scope.devices[j].x, 2) +
                  Math.pow(devices[i].y - controller.scope.devices[j].y, 2)) < 160000) {
                 controller.scope.devices[j].moving = true;
