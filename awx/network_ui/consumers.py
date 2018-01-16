@@ -45,6 +45,10 @@ RACK_SPACING = 50
 
 logger = logging.getLogger("awx.network_ui.consumers")
 
+class NetworkUIException(Exception):
+
+    pass
+
 
 def circular_layout(topology_id):
     n = Device.objects.filter(topology_id=topology_id).count()
@@ -291,7 +295,17 @@ class _Persistence(object):
                         message_data=message['text']).save()
         handler = self.get_handler(message_type)
         if handler is not None:
-            handler(message_value, topology_id, client_id)
+            try:
+                handler(message_value, topology_id, client_id)
+            except NetworkUIException, e:
+                Group("client-%s" % client_id).send({"text": json.dumps(["Error", str(e)])})
+                raise
+            except Exception, e:
+                Group("client-%s" % client_id).send({"text": json.dumps(["Error", "Server Error"])})
+                raise
+            except BaseException, e:
+                Group("client-%s" % client_id).send({"text": json.dumps(["Error", "Server Error"])})
+                raise
         else:
             logger.warning("Unsupported message %s: no handler", message_type)
 
@@ -851,6 +865,7 @@ def ws_connect(message):
     client = Client()
     client.save()
     message.channel_session['client_id'] = client.pk
+    Group("client-%s" % client.pk).add(message.reply_channel)
     message.reply_channel.send({"text": json.dumps(["id", client.pk])})
     message.reply_channel.send({"text": json.dumps(["topology_id", topology_id])})
     topology_data = transform_dict(dict(topology_id='topology_id',
