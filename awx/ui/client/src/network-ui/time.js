@@ -503,7 +503,7 @@ _Present.prototype.onTestCase = function(controller, msg_type, message) {
     }
     controller.scope.tests.push(new models.Test(message[0],
                                                 message[1].event_trace,
-                                                message[1].fsm_trace,
+                                                [],
                                                 message[1].snapshots[0],
                                                 message[1].snapshots[1]));
 };
