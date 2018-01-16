@@ -258,11 +258,6 @@ function NewGroup(type) {
 }
 exports.NewGroup = NewGroup;
 
-function PasteGroup(group) {
-    this.group = group;
-}
-exports.PasteGroup = PasteGroup;
-
 function PasteRack(group) {
     this.group = group;
 }
