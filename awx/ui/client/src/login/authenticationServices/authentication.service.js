@@ -21,21 +21,13 @@ export default
     $injector) {
         return {
             setToken: function (token, expires) {
-                // set the session cookie
-                // $cookies.remove('token');
                 $cookies.remove('token_expires');
                 $cookies.remove('userLoggedIn');
-
-                // if (token && !(/^"[a-f0-9]+"$/ig.test(token))) {
-                //     $cookies.put('token', `"${token}"`);
-                // } else {
-                //     $cookies.put('token', token);
-                // }
 
                 $cookies.put('token_expires', expires);
                 $cookies.put('userLoggedIn', true);
                 $cookies.put('sessionExpired', false);
-                // $rootScope.token = token;
+
                 $rootScope.userLoggedIn = true;
                 $rootScope.token_expires = expires;
                 $rootScope.sessionExpired = false;
@@ -50,23 +42,28 @@ export default
                 return $rootScope.userLoggedIn;
             },
             retrieveToken: function (username, password) {
-                return $http({
-                    method: 'POST',
-                    url: GetBasePath('authtoken'),
-                    data: {
-                        "username": username,
-                        "password": password
-                    },
-                    headers: {
-                        'Cache-Control': 'no-store',
-                        'Pragma': 'no-cache'
-                    }
+                var getCSRFToken = $http({
+                    method: 'GET',
+                    url: `/api/login/`
+                });
+
+                return getCSRFToken.then(function({data}) {
+                    var csrfmiddlewaretoken = /name='csrfmiddlewaretoken' value='([0-9a-zA-Z]+)' \//.exec(data)[1];
+                    // TODO: data needs to be encoded
+                    return $http({
+                        method: 'POST',
+                        url: `/api/login/`,
+                        data: `username=${username}&password=${password}&csrfmiddlewaretoken=${csrfmiddlewaretoken}&next=%2fapi%2f`,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    });
                 });
             },
             deleteToken: function () {
                 return $http({
-                    method: 'DELETE',
-                    url: GetBasePath('authtoken')
+                    method: 'GET',
+                    url: '/api/logout/'
                 });
             },
 
