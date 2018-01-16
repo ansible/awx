@@ -97,14 +97,6 @@
                     <g awx-net-button></g>
                 </g>
             </g> <!-- end buttons -->
-
-            <g> <!-- layers -->
-                <g ng-repeat="layer in layers"
-                   ng-attr-transform="translate({{layer.x}},{{layer.y}})"
-                   class="button">
-                    <g awx-net-layer> </g>
-                </g>
-            </g> <!-- end layers -->
         </g>
         <g awx-net-context-menu
                 context_menu="context_menus[0]"
