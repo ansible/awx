@@ -1652,6 +1652,15 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         }
     };
 
+    $scope.reset_flags = function () {
+      $scope.debug = {'hidden': true};
+      $scope.hide_buttons = false;
+      $scope.hide_links = false;
+      $scope.hide_interfaces = false;
+      $scope.hide_groups = false;
+    };
+
+
     $scope.reset_fsm_state = function () {
         $scope.null_controller.state = null_fsm.Start;
         $scope.null_controller.state.start($scope.null_controller);
@@ -1677,6 +1686,35 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.buttons_controller.state.start($scope.buttons_controller);
         $scope.time_controller.state = time.Start;
         $scope.time_controller.state.start($scope.time_controller);
+        $scope.app_toolbox_controller.state = toolbox_fsm.Start;
+        $scope.app_toolbox_controller.state.start($scope.app_toolbox_controller);
+        $scope.inventory_toolbox_controller.state = toolbox_fsm.Start;
+        $scope.inventory_toolbox_controller.state.start($scope.inventory_toolbox_controller);
+        $scope.rack_toolbox_controller.state = toolbox_fsm.Start;
+        $scope.rack_toolbox_controller.state.start($scope.rack_toolbox_controller);
+        $scope.site_toolbox_controller.state = toolbox_fsm.Start;
+        $scope.site_toolbox_controller.state.start($scope.site_toolbox_controller);
+        $scope.mode_controller.state = mode_fsm.Start;
+        $scope.mode_controller.state.start($scope.mode_controller);
+    };
+
+    $scope.reset_history =  function () {
+        $scope.history = [];
+    };
+
+    $scope.reset_toolboxes = function () {
+        $scope.app_toolbox.items = [];
+        $scope.app_toolbox.items.push(new models.Process(0, 'BGP', 'process', 0, 0));
+        $scope.app_toolbox.items.push(new models.Process(0, 'OSPF', 'process', 0, 0));
+        $scope.app_toolbox.items.push(new models.Process(0, 'STP', 'process', 0, 0));
+        $scope.app_toolbox.items.push(new models.Process(0, 'Zero Pipeline', 'process', 0, 0));
+
+        for(i = 0; i < $scope.app_toolbox.items.length; i++) {
+            $scope.app_toolbox.items[i].icon = true;
+        }
+        $scope.inventory_toolbox.items = [];
+        $scope.rack_toolbox.items = [];
+        $scope.site_toolbox.items = [];
     };
 };
 

@@ -122,7 +122,10 @@ _Loading.prototype.start = function (controller) {
         controller.scope.test_events = controller.scope.current_test.event_trace.slice();
         controller.scope.test_events.push(new messages.TestCompleted());
         controller.scope.reset_coverage();
+        controller.scope.reset_flags();
         controller.scope.reset_fsm_state();
+        controller.scope.reset_history();
+        controller.scope.reset_toolboxes();
         controller.changeState(Running);
     }
 };
