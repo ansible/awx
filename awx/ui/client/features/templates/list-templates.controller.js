@@ -1,45 +1,43 @@
-function ListTemplatesController (model, strings, $state, $scope, rbacUiControlService, Dataset, $filter, Alert, InitiatePlaybookRun, Prompt, Wait, ProcessErrors, TemplateCopyService) {
-    const vm = this || {}
-    const unifiedJobTemplate = model;
+function ListTemplatesController (model, JobTemplate, WorkflowJobTemplate, strings, $state, $scope, rbacUiControlService, Dataset, $filter, Alert, InitiatePlaybookRun, Prompt, Wait, ProcessErrors, TemplateCopyService) {
+    const vm = this || {},
+          unifiedJobTemplate = model,
+          jobTemplate = new JobTemplate(),
+          workflowJobTemplate = new WorkflowJobTemplate();
 
-    init();
+    vm.strings = strings;
 
-    function init() {
-        vm.strings = strings;
-
-        // TODO: add the permission based functionality to the base model
-        $scope.canAdd = false;
-        rbacUiControlService.canAdd("job_templates")
-            .then(function(params) {
-                $scope.canAddJobTemplate = params.canAdd;
-            });
-        rbacUiControlService.canAdd("workflow_job_templates")
-            .then(function(params) {
-                $scope.canAddWorkflowJobTemplate = params.canAdd;
-            });
-        $scope.$watchGroup(["canAddJobTemplate", "canAddWorkflowJobTemplate"], function() {
-            if ($scope.canAddJobTemplate || $scope.canAddWorkflowJobTemplate) {
-                $scope.canAdd = true;
-            } else {
-                $scope.canAdd = false;
-            }
+    // TODO: add the permission based functionality to the base model
+    $scope.canAdd = false;
+    rbacUiControlService.canAdd("job_templates")
+    .then(function(params) {
+        $scope.canAddJobTemplate = params.canAdd;
+    });
+    rbacUiControlService.canAdd("workflow_job_templates")
+        .then(function(params) {
+            $scope.canAddWorkflowJobTemplate = params.canAdd;
         });
+    $scope.$watchGroup(["canAddJobTemplate", "canAddWorkflowJobTemplate"], function() {
+        if ($scope.canAddJobTemplate || $scope.canAddWorkflowJobTemplate) {
+            $scope.canAdd = true;
+        } else {
+            $scope.canAdd = false;
+        }
+    });
 
-        $scope.list = {
-            iterator: 'template',
-            name: 'templates'
-        };
-        $scope.collection = {
-            basePath: 'unified_job_templates',
-            iterator: 'template'
-        };
-        $scope[`${$scope.list.iterator}_dataset`] = Dataset.data;
-        $scope[$scope.list.name] = $scope[`${$scope.list.iterator}_dataset`].results;
-        $scope.$on('updateDataset', function(e, dataset) {
-            $scope[`${$scope.list.iterator}_dataset`] = dataset;
-            $scope[$scope.list.name] = dataset.results;
-        });
-    }
+    $scope.list = {
+        iterator: 'template',
+        name: 'templates'
+    };
+    $scope.collection = {
+        basePath: 'unified_job_templates',
+        iterator: 'template'
+    };
+    $scope[`${$scope.list.iterator}_dataset`] = Dataset.data;
+    $scope[$scope.list.name] = $scope[`${$scope.list.iterator}_dataset`].results;
+    $scope.$on('updateDataset', function(e, dataset) {
+        $scope[`${$scope.list.iterator}_dataset`] = dataset;
+        $scope[$scope.list.name] = dataset.results;
+    });
 
     // get modified date and user who modified it
     vm.getModified = function(template) {
@@ -261,32 +259,52 @@ function ListTemplatesController (model, strings, $state, $scope, rbacUiControlS
         var action = function() {
             $('#prompt-modal').modal('hide');
             Wait('start');
-            // TODO: The request url doesn't work here
-            unifiedJobTemplate.request('delete', template.id)
-                .then(() => {
 
-                    let reloadListStateParams = null;
+            let deleteComplete = () => {
+                let reloadListStateParams = null;
 
-                    if($scope.templates.length === 1 && $state.params.template_search && !_.isEmpty($state.params.template_search.page) && $state.params.template_search.page !== '1') {
-                        reloadListStateParams = _.cloneDeep($state.params);
-                        reloadListStateParams.template_search.page = (parseInt(reloadListStateParams.template_search.page)-1).toString();
-                    }
+                if($scope.templates.length === 1 && $state.params.template_search && !_.isEmpty($state.params.template_search.page) && $state.params.template_search.page !== '1') {
+                    reloadListStateParams = _.cloneDeep($state.params);
+                    reloadListStateParams.template_search.page = (parseInt(reloadListStateParams.template_search.page)-1).toString();
+                }
 
-                    if (parseInt($state.params.template_id) === template.id) {
-                        $state.go("^", reloadListStateParams, { reload: true });
-                    } else {
-                        $state.go('.', reloadListStateParams, {reload: true});
-                    }
-                })
-                .catch(({data, status}) => {
-                    ProcessErrors($scope, data, status, null, {
-                        hdr: strings.get('error.HEADER'),
-                        msg: strings.get('error.CALL', {path: "" + unifiedJobTemplate.path + template.id, status})
+                if (parseInt($state.params.template_id) === template.id) {
+                    $state.go("^", reloadListStateParams, { reload: true });
+                } else {
+                    $state.go('.', reloadListStateParams, {reload: true});
+                }
+            };
+
+            if(template.type === "job_template") {
+                jobTemplate.request('delete', template.id)
+                    .then(() => {
+                        deleteComplete();
+                    })
+                    .catch(({data, status}) => {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: strings.get('error.HEADER'),
+                            msg: strings.get('error.CALL', {path: "" + unifiedJobTemplate.path + template.id, status})
+                        });
+                    })
+                    .finally(function() {
+                        Wait('stop');
                     });
-                })
-                .finally(function() {
-                    Wait('stop');
-                });
+            } else if(template.type === "workflow_job_template") {
+                workflowJobTemplate.request('delete', template.id)
+                    .then(() => {
+                        deleteComplete();
+                    })
+                    .catch(({data, status}) => {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: strings.get('error.HEADER'),
+                            msg: strings.get('error.CALL', {path: "" + unifiedJobTemplate.path + template.id, status})
+                        });
+                    })
+                    .finally(function() {
+                        Wait('stop');
+                    });
+            }
+
         };
 
         let deleteModalBody = `<div class="Prompt-bodyQuery">${strings.get('deleteResource.CONFIRM', 'template')}</div>`;
@@ -303,6 +321,8 @@ function ListTemplatesController (model, strings, $state, $scope, rbacUiControlS
 
 ListTemplatesController.$inject = [
     'resolvedModels',
+    'JobTemplateModel',
+    'WorkflowJobTemplateModel',
     'TemplatesStrings',
     '$state',
     '$scope',

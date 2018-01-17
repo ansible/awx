@@ -12,6 +12,7 @@ import WorkflowJobTemplateNode from '~models/WorkflowJobTemplateNode';
 import InventorySource from '~models/InventorySource';
 import Inventory from '~models/Inventory';
 import InventoryScript from '~models/InventoryScript';
+import WorkflowJobTemplate from '~models/WorkflowJobTemplate';
 
 import ModelsStrings from '~models/models.strings';
 import UnifiedJobTemplate from '~models/UnifiedJobTemplate';
@@ -34,6 +35,7 @@ angular
     .service('InventorySourceModel', InventorySource)
     .service('InventoryModel', Inventory)
     .service('InventoryScriptModel', InventoryScript)
+    .service('WorkflowJobTemplateModel', WorkflowJobTemplate)
     .service('ModelsStrings', ModelsStrings)
     .service('UnifiedJobTemplateModel', UnifiedJobTemplate);
 
