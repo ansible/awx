@@ -99,7 +99,7 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
         scope.credential_dataset = { results: [], count: 0 };
         scope.credentials = scope.credential_dataset.results;
 
-        scope.credentialType = `${types.Vault}`;
+        scope.credentialType = getInitialCredentialType();
         scope.displayedCredentialTypes = scope.credentialTypes;
 
         const watchType = scope.$watch('credentialType', (newValue, oldValue) => {
@@ -154,6 +154,17 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
         });
 
         scope.displayedCredentialTypes = displayedCredentialTypes;
+    }
+
+    function getInitialCredentialType () {
+        const selectedMachineCredential = scope.modalSelectedCredentials
+            .find(c => c.id === types.Machine);
+
+        if (selectedMachineCredential && isReadOnly(selectedMachineCredential)) {
+            return `${types.Vault}`;
+        }
+
+        return `${types.Machine}`;
     }
 
     function fetchCredentials (credentialType) {
