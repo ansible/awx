@@ -84,6 +84,7 @@ function MultiCredentialService (Rest, ProcessErrors, $q, GetBasePath)  {
         return {
             id: credential.id,
             name: credential.name,
+            kind: _.get(credentialType, 'kind'),
             typeName: _.get(credentialType, 'name'),
             info: _.get(credential, 'inputs.vault_id'),
             readOnly: this.isReadOnly(credential),
