@@ -281,10 +281,6 @@ _Present.prototype.onDeviceStatus = function(controller, msg_type, message) {
     controller.scope.onDeviceStatus(message);
 };
 
-_Present.prototype.onTaskStatus = function(controller, msg_type, message) {
-        controller.scope.onTaskStatus(message);
-};
-
 _Present.prototype.onFacts = function(controller, msg_type, message) {
         controller.scope.onFacts(message);
 };

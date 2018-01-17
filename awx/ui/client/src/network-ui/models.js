@@ -419,16 +419,6 @@ ContextMenuButton.prototype.is_selected = function (x, y) {
 
 };
 
-function Task(id, name) {
-    this.id = id;
-    this.name = name;
-    this.status = null;
-    this.working = null;
-}
-exports.Task = Task;
-
-Task.prototype.describeArc = util.describeArc;
-
 
 function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.id = id;
@@ -685,22 +675,6 @@ function ToolBox(id, name, type, x, y, width, height) {
 }
 exports.ToolBox = ToolBox;
 
-
-function Configuration(id, name, type, x, y, content) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
-    this.x = x;
-    this.y = y;
-    this.height = 50;
-    this.width = 50;
-    this.size = 50;
-    this.content = content;
-    this.selected = null;
-    this.enabled = true;
-    this.icon = false;
-}
-exports.Configuration = Configuration;
 
 function Process(id, name, type, x, y) {
     this.id = id;
