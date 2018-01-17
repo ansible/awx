@@ -3896,8 +3896,8 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer):
             raise serializers.ValidationError(_('Manual Project cannot have a schedule set.'))
         elif type(value) == InventorySource and value.source == 'scm' and value.update_on_project_update:
             raise serializers.ValidationError(_(
-                'Inventory sources with `update_on_project_update` cannot be scheduled. '
-                'Schedule its source project `{}` instead.'.format(value.source_project.name)))
+                six.text_type('Inventory sources with `update_on_project_update` cannot be scheduled. '
+                              'Schedule its source project `{}` instead.').format(value.source_project.name)))
         return value
 
     # We reject rrules if:
