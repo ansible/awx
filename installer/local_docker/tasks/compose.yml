@@ -1,0 +1,14 @@
+---
+- name: Create {{ docker_compose_dir }} directory
+  file:
+    path: "{{ docker_compose_dir }}"
+    state: directory
+
+- name: Create docker-compose.yml file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ docker_compose_dir }}/docker-compose.yml"
+
+- name: Start the containers
+  docker_service:
+    project_src: "{{ docker_compose_dir }}"
