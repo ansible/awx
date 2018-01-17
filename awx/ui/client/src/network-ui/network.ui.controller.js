@@ -694,24 +694,52 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $scope.deleteGroup = function(){
         var i = 0;
         var index = -1;
-        var groups = $scope.selected_groups;
+        var selected_groups = $scope.selected_groups;
         $scope.selected_groups = [];
         $scope.group_controller.changeState(group.Ready);
         $scope.context_menus[0].enabled = false;
-        for (i = 0; i < groups.length; i++) {
-            index = $scope.groups.indexOf(groups[i]);
+
+
+        function removeSingleGroup(group){
+            index = $scope.groups.indexOf(group);
             if (index !== -1) {
-                groups[i].selected = false;
-                groups[i].remote_selected = false;
+                group.selected = false;
+                group.remote_selected = false;
                 $scope.groups.splice(index, 1);
             }
             $scope.send_control_message(new messages.GroupDestroy($scope.client_id,
-                                                                            groups[i].id,
-                                                                            groups[i].x1,
-                                                                            groups[i].y1,
-                                                                            groups[i].x2,
-                                                                            groups[i].y2,
-                                                                            groups[i].name));
+                                                                            group.id,
+                                                                            group.x1,
+                                                                            group.y1,
+                                                                            group.x2,
+                                                                            group.y2,
+                                                                            group.name));
+        }
+
+        if($scope.current_scale <= 0.5){
+            // current scale is in racks mode or sites mode
+            for (i = 0; i < selected_groups.length; i++) {
+                let group = selected_groups[i];
+                if(group.groups.length > 0){
+                    for(var k = 0; k < group.groups.length; k++){
+                        let nested_group = group.groups[k];
+                        removeSingleGroup(nested_group);
+                    }
+                }
+                // remove all the nested devices and links
+                $scope.selected_devices = group.devices;
+                $scope.selected_links = group.links;
+                $scope.deleteDevice();
+
+                removeSingleGroup(group);
+            }
+        }
+        if($scope.current_scale > 0.5){
+            // current scale is in devices mode
+            for (i = 0; i < selected_groups.length; i++) {
+                let group = selected_groups[i];
+                removeSingleGroup(group);
+            }
         }
     };
 
