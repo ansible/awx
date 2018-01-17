@@ -162,6 +162,7 @@ def test_base_logging_handler_emit_system_tracking():
     )
     record.inventory_id = 11
     record.host_name = 'my_lucky_host'
+    record.job_id = 777
     record.ansible_facts = {
         "ansible_kernel": "4.4.66-boot2docker",
         "ansible_machine": "x86_64",
@@ -172,8 +173,12 @@ def test_base_logging_handler_emit_system_tracking():
 
     assert len(sent_payloads) == 1
     assert sent_payloads[0]['ansible_facts'] == record.ansible_facts
+    assert sent_payloads[0]['ansible_facts_modified'] == record.ansible_facts_modified
     assert sent_payloads[0]['level'] == 'INFO'
     assert sent_payloads[0]['logger_name'] == 'awx.analytics.system_tracking'
+    assert sent_payloads[0]['job_id'] == record.job_id
+    assert sent_payloads[0]['inventory_id'] == record.inventory_id
+    assert sent_payloads[0]['host_name'] == record.host_name
 
 
 @pytest.mark.parametrize('host, port, normalized, hostname_only', [

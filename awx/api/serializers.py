@@ -1224,8 +1224,9 @@ class HostSerializer(BaseSerializerWithVariables):
         model = Host
         fields = ('*', 'inventory', 'enabled', 'instance_id', 'variables',
                   'has_active_failures', 'has_inventory_sources', 'last_job',
-                  'last_job_host_summary', 'insights_system_id')
-        read_only_fields = ('last_job', 'last_job_host_summary', 'insights_system_id',)
+                  'last_job_host_summary', 'insights_system_id', 'ansible_facts_modified',)
+        read_only_fields = ('last_job', 'last_job_host_summary', 'insights_system_id',
+                            'ansible_facts_modified',)
 
     def build_relational_field(self, field_name, relation_info):
         field_class, field_kwargs = super(HostSerializer, self).build_relational_field(field_name, relation_info)
