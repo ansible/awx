@@ -1,6 +1,7 @@
 import pytest
 import base64
 import json
+from StringIO import StringIO
 
 from awx.main.utils import OutputEventFilter
 
@@ -99,3 +100,46 @@ def test_large_data_payload(fake_callback, fake_cache, wrapped_handle):
     assert recomb_data['role'] == 'some_path_to_role'
     assert 'event' in recomb_data
     assert recomb_data['event'] == 'foo'
+
+
+def test_event_lazy_parsing(fake_callback, fake_cache, wrapped_handle):
+    # Pretend that this is done by the Ansible callback module
+    fake_cache[':1:ev-{}'.format(EXAMPLE_UUID)] = {'event': 'foo'}
+    buff = StringIO()
+    event_data_to_encode = {
+        'uuid': EXAMPLE_UUID,
+        'host': 'localhost',
+        'role': 'some_path_to_role'
+    }
+    write_encoded_event_data(buff, event_data_to_encode)
+
+    # write the data to the event filter in chunks to test lazy event matching
+    buff.seek(0)
+    start_token_chunk = buff.read(1)  # \x1b
+    start_token_remainder = buff.read(2)  # [K
+    body = buff.read(15)  # next 15 bytes of base64 data
+    remainder = buff.read()  # the remainder
+    for chunk in (start_token_chunk, start_token_remainder, body, remainder):
+        wrapped_handle.write(chunk)
+
+    wrapped_handle.write('\r\nTASK [Gathering Facts] *********************************************************\n')
+    wrapped_handle.write('\u001b[0;33mchanged: [localhost]\u001b[0m\n')
+    write_encoded_event_data(wrapped_handle, {})
+    # stop pretending
+
+    assert len(fake_callback) == 1
+    recomb_data = fake_callback[0]
+    assert 'role' in recomb_data
+    assert recomb_data['role'] == 'some_path_to_role'
+    assert 'event' in recomb_data
+    assert recomb_data['event'] == 'foo'
+
+
+@pytest.mark.timeout(1)
+def test_large_stdout_blob():
+    def _callback(*args, **kw):
+        pass
+
+    f = OutputEventFilter(_callback)
+    for x in range(1024 * 10):
+        f.write('x' * 1024)
