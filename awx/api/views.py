@@ -3319,7 +3319,8 @@ class JobTemplateCallback(GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Everything is fine; actually create the job.
-        kv = {"limit": limit, "launch_type": 'callback'}
+        kv = {"limit": limit}
+        kv.setdefault('_eager_fields', {})['launch_type'] = 'callback'
         if extra_vars is not None and job_template.ask_variables_on_launch:
             extra_vars_redacted, removed = extract_ansible_vars(extra_vars)
             kv['extra_vars'] = extra_vars_redacted
