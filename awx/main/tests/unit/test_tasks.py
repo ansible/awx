@@ -28,7 +28,8 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     UnifiedJob,
-    User
+    User,
+    build_safe_env
 )
 
 from awx.main import tasks
@@ -91,14 +92,12 @@ def test_send_notifications_list(mocker):
     ('CALLBACK_CONNECTION', 'amqp://tower:password@localhost:5672/tower'),
 ])
 def test_safe_env_filtering(key, value):
-    task = tasks.RunJob()
-    assert task.build_safe_env({key: value})[key] == tasks.HIDDEN_PASSWORD
+    assert build_safe_env({key: value})[key] == tasks.HIDDEN_PASSWORD
 
 
 def test_safe_env_returns_new_copy():
-    task = tasks.RunJob()
     env = {'foo': 'bar'}
-    assert task.build_safe_env(env) is not env
+    assert build_safe_env(env) is not env
 
 
 def test_openstack_client_config_generation(mocker):
@@ -227,6 +226,8 @@ class TestJobExecution:
             # the update we care about for testing purposes
             if 'status' in kwargs:
                 self.instance.status = kwargs['status']
+            if 'job_env' in kwargs:
+                self.instance.job_env = kwargs['job_env']
             return self.instance
 
         self.task = self.TASK_CLS()
@@ -682,6 +683,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
         assert 'AWS_SECURITY_TOKEN' not in env
+        assert self.instance.job_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
 
     def test_aws_cloud_credential_with_sts_token(self):
         aws = CredentialType.defaults['aws']()
@@ -702,6 +704,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AWS_ACCESS_KEY_ID'] == 'bob'
         assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
         assert env['AWS_SECURITY_TOKEN'] == 'token'
+        assert self.instance.job_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
 
     def test_gce_credentials(self):
         gce = CredentialType.defaults['gce']()
@@ -753,6 +756,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_SECRET'] == 'some-secret'
         assert env['AZURE_TENANT'] == 'some-tenant'
         assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
+        assert self.instance.job_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
 
     def test_azure_rm_with_password(self):
         azure = CredentialType.defaults['azure_rm']()
@@ -779,6 +783,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['AZURE_AD_USER'] == 'bob'
         assert env['AZURE_PASSWORD'] == 'secret'
         assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
+        assert self.instance.job_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_vmware_credentials(self):
         vmware = CredentialType.defaults['vmware']()
@@ -798,6 +803,7 @@ class TestJobCredentials(TestJobExecution):
         assert env['VMWARE_USER'] == 'bob'
         assert env['VMWARE_PASSWORD'] == 'secret'
         assert env['VMWARE_HOST'] == 'https://example.org'
+        assert self.instance.job_env['VMWARE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_openstack_credentials(self):
         openstack = CredentialType.defaults['openstack']()
@@ -895,6 +901,7 @@ class TestJobCredentials(TestJobExecution):
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
+        assert self.instance.job_env['ANSIBLE_NET_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_custom_environment_injectors_with_jinja_syntax_error(self):
         some_cloud = CredentialType(
@@ -1052,6 +1059,7 @@ class TestJobCredentials(TestJobExecution):
 
         assert env['MY_CLOUD_PRIVATE_VAR'] == 'SUPER-SECRET-123'
         assert 'SUPER-SECRET-123' not in json.dumps(self.task.update_model.call_args_list)
+        assert self.instance.job_env['MY_CLOUD_PRIVATE_VAR'] == tasks.HIDDEN_PASSWORD
 
     def test_custom_environment_injectors_with_extra_vars(self):
         some_cloud = CredentialType(
@@ -1260,6 +1268,7 @@ class TestJobCredentials(TestJobExecution):
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
+        assert self.instance.job_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_awx_task_env(self):
         patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
@@ -1420,6 +1429,46 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
+    @pytest.mark.parametrize('with_credential', [True, False])
+    def test_custom_source(self, with_credential):
+        self.instance.source = 'custom'
+        self.instance.source_vars = '{"FOO": "BAR"}'
+        patch = mock.patch.object(InventoryUpdate, 'source_script', mock.Mock(
+            script='#!/bin/sh\necho "Hello, World!"')
+        )
+        self.patches.append(patch)
+        patch.start()
+
+        if with_credential:
+            azure_rm = CredentialType.defaults['azure_rm']()
+            self.instance.credential = Credential(
+                pk=1,
+                credential_type=azure_rm,
+                inputs = {
+                    'client': 'some-client',
+                    'secret': 'some-secret',
+                    'tenant': 'some-tenant',
+                    'subscription': 'some-subscription',
+                }
+            )
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert '--custom' in ' '.join(args)
+            script = args[args.index('--source') + 1]
+            with open(script, 'r') as f:
+                assert f.read() == self.instance.source_script.script
+            assert env['FOO'] == 'BAR'
+            if with_credential:
+                assert env['AZURE_CLIENT_ID'] == 'some-client'
+                assert env['AZURE_SECRET'] == 'some-secret'
+                assert env['AZURE_TENANT'] == 'some-tenant'
+                assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
     def test_ec2_source(self):
         aws = CredentialType.defaults['aws']()
         self.instance.source = 'ec2'
@@ -1446,6 +1495,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
+        assert self.instance.job_env['AWS_SECRET_ACCESS_KEY'] == tasks.HIDDEN_PASSWORD
 
     def test_vmware_source(self):
         vmware = CredentialType.defaults['vmware']()
@@ -1471,6 +1521,78 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
+
+    def test_azure_rm_source_with_tenant(self):
+        azure_rm = CredentialType.defaults['azure_rm']()
+        self.instance.source = 'azure_rm'
+        self.instance.source_regions = 'north, south, east, west'
+        self.instance.credential = Credential(
+            pk=1,
+            credential_type=azure_rm,
+            inputs = {
+                'client': 'some-client',
+                'secret': 'some-secret',
+                'tenant': 'some-tenant',
+                'subscription': 'some-subscription',
+                'cloud_environment': 'foobar'
+            }
+        )
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert env['AZURE_CLIENT_ID'] == 'some-client'
+            assert env['AZURE_SECRET'] == 'some-secret'
+            assert env['AZURE_TENANT'] == 'some-tenant'
+            assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
+            assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
+
+            config = ConfigParser.ConfigParser()
+            config.read(env['AZURE_INI_PATH'])
+            assert config.get('azure', 'include_powerstate') == 'yes'
+            assert config.get('azure', 'group_by_resource_group') == 'yes'
+            assert config.get('azure', 'group_by_location') == 'yes'
+            assert config.get('azure', 'group_by_tag') == 'yes'
+            assert config.get('azure', 'locations') == 'north,south,east,west'
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+        assert self.instance.job_env['AZURE_SECRET'] == tasks.HIDDEN_PASSWORD
+
+    def test_azure_rm_source_with_password(self):
+        azure_rm = CredentialType.defaults['azure_rm']()
+        self.instance.source = 'azure_rm'
+        self.instance.source_regions = 'all'
+        self.instance.credential = Credential(
+            pk=1,
+            credential_type=azure_rm,
+            inputs = {
+                'subscription': 'some-subscription',
+                'username': 'bob',
+                'password': 'secret',
+                'cloud_environment': 'foobar'
+            }
+        )
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
+            assert env['AZURE_AD_USER'] == 'bob'
+            assert env['AZURE_PASSWORD'] == 'secret'
+            assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
+
+            config = ConfigParser.ConfigParser()
+            config.read(env['AZURE_INI_PATH'])
+            assert config.get('azure', 'include_powerstate') == 'yes'
+            assert config.get('azure', 'group_by_resource_group') == 'yes'
+            assert config.get('azure', 'group_by_location') == 'yes'
+            assert config.get('azure', 'group_by_tag') == 'yes'
+            assert 'locations' not in config.items('azure')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+        assert self.instance.job_env['AZURE_PASSWORD'] == tasks.HIDDEN_PASSWORD
 
     def test_gce_source(self):
         gce = CredentialType.defaults['gce']()

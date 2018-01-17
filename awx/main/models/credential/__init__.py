@@ -6,6 +6,7 @@ import json
 import logging
 import operator
 import os
+import re
 import stat
 import tempfile
 
@@ -33,10 +34,33 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.utils import encrypt_field
+from . import injectors as builtin_injectors
 
-__all__ = ['Credential', 'CredentialType', 'V1Credential']
+__all__ = ['Credential', 'CredentialType', 'V1Credential', 'build_safe_env']
 
 logger = logging.getLogger('awx.main.models.credential')
+
+HIDDEN_PASSWORD = '**********'
+
+
+def build_safe_env(env):
+    '''
+    Build environment dictionary, hiding potentially sensitive information
+    such as passwords or keys.
+    '''
+    hidden_re = re.compile(r'API|TOKEN|KEY|SECRET|PASS', re.I)
+    urlpass_re = re.compile(r'^.*?://[^:]+:(.*?)@.*?$')
+    safe_env = dict(env)
+    for k, v in safe_env.items():
+        if k == 'AWS_ACCESS_KEY_ID':
+            continue
+        elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
+            continue
+        elif hidden_re.search(k):
+            safe_env[k] = HIDDEN_PASSWORD
+        elif type(v) == str and urlpass_re.match(v):
+            safe_env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
+    return safe_env
 
 
 class V1Credential(object):
@@ -562,6 +586,11 @@ class CredentialType(CommonModelNameNotUnique):
                                  files)
         """
         if not self.injectors:
+            if self.managed_by_tower and credential.kind in dir(builtin_injectors):
+                injected_env = {}
+                getattr(builtin_injectors, credential.kind)(credential, injected_env)
+                env.update(injected_env)
+                safe_env.update(build_safe_env(injected_env))
             return
 
         class TowerNamespace:
