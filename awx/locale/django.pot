@@ -791,7 +791,7 @@ msgid "Request to {} timed out."
 msgstr ""
 
 #: awx/api/views.py:2129
-msgid "Unkown exception {} while trying to GET {}"
+msgid "Unknown exception {} while trying to GET {}"
 msgstr ""
 
 #: awx/api/views.py:2132
@@ -3727,7 +3727,7 @@ msgid ""
 "Mapping of LDAP user schema to Tower API user attributes. The default "
 "setting is valid for ActiveDirectory but users with other LDAP "
 "configurations may need to change the values. Refer to the Ansible Tower "
-"documentation for additonal details."
+"documentation for additional details."
 msgstr ""
 
 #: awx/sso/conf.py:269
@@ -4466,7 +4466,7 @@ msgstr ""
 
 #: awx/ui/conf.py:61
 msgid ""
-"Maximum number of job events for the UI to retreive within a single request."
+"Maximum number of job events for the UI to retrieve within a single request."
 msgstr ""
 
 #: awx/ui/fields.py:29
