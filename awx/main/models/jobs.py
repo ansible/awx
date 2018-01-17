@@ -812,7 +812,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                         smart_str(host.inventory.name), smart_str(host.name)),
                     extra=dict(inventory_id=host.inventory.id, host_name=host.name,
                                ansible_facts=host.ansible_facts,
-                               ansible_facts_modified=host.ansible_facts_modified.isoformat()))
+                               ansible_facts_modified=host.ansible_facts_modified.isoformat(),
+                               job_id=self.id))
 
 
 # Add on aliases for the non-related-model fields

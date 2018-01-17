@@ -111,6 +111,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
             data_for_log['ansible_facts_modified'] = raw_data['ansible_facts_modified']
             data_for_log['inventory_id'] = raw_data['inventory_id']
             data_for_log['host_name'] = raw_data['host_name']
+            data_for_log['job_id'] = raw_data['job_id']
         elif kind == 'performance':
             request = raw_data['python_objects']['request']
             response = raw_data['python_objects']['response']
