@@ -37,7 +37,7 @@ function JobsRun ($stateExtender, strings) {
                         pageCache: true,
                         pageLimit: 2,
                         params: {
-                            page_size: 25,
+                            page_size: 1000,
                             order_by: 'start_line'
                         },
                     }));

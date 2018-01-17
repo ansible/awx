@@ -16,10 +16,14 @@ const meta = {
     scroll: {}
 };
 
+const ROW_LIMIT = 200;
 const SCROLL_BUFFER = 250;
+const SCROLL_LOAD_DELAY = 100;
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
 const EVENT_STATS_PLAY = 'playbook_on_stats';
+const ELEMENT_TBODY = '#atStdoutResultTable';
+const ELEMENT_CONTAINER = '.at-Stdout-container';
 
 const EVENT_GROUPS = [
     EVENT_START_TASK,
@@ -70,8 +74,8 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
     };
 
     $timeout(() => {
-        const table = $('#result-table');
-        container = $('.at-Stdout-container');
+        const table = $(ELEMENT_TBODY);
+        container = $(ELEMENT_CONTAINER);
 
         table.html($sce.getTrustedHtml(html));
         $compile(table.contents())($scope);
@@ -90,14 +94,65 @@ function next () {
             meta.next = job.get('related.job_events.next');
             meta.prev = job.get('related.job_events.previous');
 
+            console.log(ROW_LIMIT);
+            console.log(getRowCount());
+            console.log(getRowHeight());
+            console.log(getRowsInView());
+            console.log(getScrollPosition());
+
+            console.log('above:', getRowsAbove());
+            console.log('below:', getRowsBelow());
             append(cursor);
         });
+}
+
+function getRowCount () {
+    return $(ELEMENT_TBODY).children().length;
+}
+
+function getRowHeight () {
+    return $(ELEMENT_TBODY).children()[0].offsetHeight;
+}
+
+function getViewHeight () {
+    return $(ELEMENT_CONTAINER)[0].offsetHeight;
+}
+
+function getScrollPosition () {
+    return $(ELEMENT_CONTAINER)[0].scrollTop;
+}
+
+function getScrollHeight () {
+    return $(ELEMENT_CONTAINER)[0].scrollHeight;
+}
+
+function getRowsAbove () {
+    const top = getScrollPosition();
+
+    if (top === 0) {
+        return 0;
+    }
+
+    return Math.floor(top / getRowHeight());
+}
+
+function getRowsBelow () {
+    const bottom = getScrollPosition() + getViewHeight();
+
+    return Math.floor((getScrollHeight() - bottom) / getRowHeight());
+}
+
+function getRowsInView () {
+    const rowHeight = getRowHeight();
+    const viewHeight = getViewHeight();
+
+    return Math.floor(viewHeight / rowHeight);
 }
 
 function append (cursor) {
     const events = job.get('related.job_events.results').slice(cursor);
     const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parseEvents(events))));
-    const table = $('#result-table');
+    const table = $(ELEMENT_TBODY);
 
     table.append(rows);
     $compile(rows.contents())($scope);
@@ -351,7 +406,7 @@ function onScroll () {
         if (bottom >= container[0].scrollHeight && meta.next) {
             next();
         }
-    }, 250);
+    }, SCROLL_LOAD_DELAY);
 }
 
 JobsIndexController.$inject = ['job', 'JobEventModel', '$sce', '$timeout', '$scope', '$compile'];
