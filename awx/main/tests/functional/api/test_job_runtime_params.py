@@ -560,10 +560,11 @@ def test_callback_accept_prompted_extra_var(mocker, survey_spec_factory, job_tem
                         dict(extra_vars={"job_launch_var": 3, "survey_var": 4}, host_config_key="foo"),
                         admin_user, expect=201, format='json')
                     assert JobTemplate.create_unified_job.called
-                    assert JobTemplate.create_unified_job.call_args == ({'extra_vars': {'survey_var': 4,
-                                                                                        'job_launch_var': 3},
-                                                                         'launch_type': 'callback',
-                                                                         'limit': 'single-host'},)
+                    assert JobTemplate.create_unified_job.call_args == ({
+                        'extra_vars': {'survey_var': 4, 'job_launch_var': 3},
+                        '_eager_fields': {'launch_type': 'callback'},
+                        'limit': 'single-host'},
+                    )
 
     mock_job.signal_start.assert_called_once()
 
@@ -585,8 +586,10 @@ def test_callback_ignore_unprompted_extra_var(mocker, survey_spec_factory, job_t
                         dict(extra_vars={"job_launch_var": 3, "survey_var": 4}, host_config_key="foo"),
                         admin_user, expect=201, format='json')
                     assert JobTemplate.create_unified_job.called
-                    assert JobTemplate.create_unified_job.call_args == ({'launch_type': 'callback',
-                                                                         'limit': 'single-host'},)
+                    assert JobTemplate.create_unified_job.call_args == ({
+                        '_eager_fields': {'launch_type': 'callback'},
+                        'limit': 'single-host'},
+                    )
 
     mock_job.signal_start.assert_called_once()
 
