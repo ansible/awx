@@ -505,27 +505,7 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
 
     if ($event.keyCode === 8) {
         //Delete
-        controller.changeState(Ready);
-
-        var i = 0;
-        var index = -1;
-        var groups = controller.scope.selected_groups;
-        controller.scope.selected_groups = [];
-        for (i = 0; i < groups.length; i++) {
-            index = controller.scope.groups.indexOf(groups[i]);
-            if (index !== -1) {
-                groups[i].selected = false;
-                groups[i].remote_selected = false;
-                controller.scope.groups.splice(index, 1);
-            }
-            controller.scope.send_control_message(new messages.GroupDestroy(controller.scope.client_id,
-                                                                            groups[i].id,
-                                                                            groups[i].x1,
-                                                                            groups[i].y1,
-                                                                            groups[i].x2,
-                                                                            groups[i].y2,
-                                                                            groups[i].name));
-        }
+        controller.scope.deleteGroup();
     } else {
         controller.delegate_channel.send(msg_type, $event);
     }
