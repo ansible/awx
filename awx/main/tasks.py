@@ -670,25 +670,6 @@ class BaseTask(LogErrorsTask):
             env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         return env
 
-    def build_safe_env(self, env, **kwargs):
-        '''
-        Build environment dictionary, hiding potentially sensitive information
-        such as passwords or keys.
-        '''
-        hidden_re = re.compile(r'API|TOKEN|KEY|SECRET|PASS', re.I)
-        urlpass_re = re.compile(r'^.*?://[^:]+:(.*?)@.*?$')
-        safe_env = dict(env)
-        for k,v in safe_env.items():
-            if k == 'AWS_ACCESS_KEY_ID':
-                continue
-            elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
-                continue
-            elif hidden_re.search(k):
-                safe_env[k] = HIDDEN_PASSWORD
-            elif type(v) == str and urlpass_re.match(v):
-                safe_env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
-        return safe_env
-
     def should_use_proot(self, instance, **kwargs):
         '''
         Return whether this task should use proot.
@@ -815,7 +796,7 @@ class BaseTask(LogErrorsTask):
             output_replacements = self.build_output_replacements(instance, **kwargs)
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
-            safe_env = self.build_safe_env(env, **kwargs)
+            safe_env = build_safe_env(env)
 
             # handle custom injectors specified on the CredentialType
             credentials = []
@@ -1064,33 +1045,8 @@ class RunJob(BaseTask):
         # Set environment variables for cloud credentials.
         cred_files = kwargs.get('private_data_files', {}).get('credentials', {})
         for cloud_cred in job.cloud_credentials:
-            if cloud_cred and cloud_cred.kind == 'aws':
-                env['AWS_ACCESS_KEY_ID'] = cloud_cred.username
-                env['AWS_SECRET_ACCESS_KEY'] = decrypt_field(cloud_cred, 'password')
-                if len(cloud_cred.security_token) > 0:
-                    env['AWS_SECURITY_TOKEN'] = decrypt_field(cloud_cred, 'security_token')
-                # FIXME: Add EC2_URL, maybe EC2_REGION!
-            elif cloud_cred and cloud_cred.kind == 'gce':
-                env['GCE_EMAIL'] = cloud_cred.username
-                env['GCE_PROJECT'] = cloud_cred.project
+            if cloud_cred and cloud_cred.kind == 'gce':
                 env['GCE_PEM_FILE_PATH'] = cred_files.get(cloud_cred, '')
-            elif cloud_cred and cloud_cred.kind == 'azure_rm':
-                if len(cloud_cred.client) and len(cloud_cred.tenant):
-                    env['AZURE_CLIENT_ID'] = cloud_cred.client
-                    env['AZURE_SECRET'] = decrypt_field(cloud_cred, 'secret')
-                    env['AZURE_TENANT'] = cloud_cred.tenant
-                    env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
-                else:
-                    env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
-                    env['AZURE_AD_USER'] = cloud_cred.username
-                    env['AZURE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
-                if cloud_cred.inputs.get('cloud_environment', None):
-                    env['AZURE_CLOUD_ENVIRONMENT'] = cloud_cred.inputs['cloud_environment']
-            elif cloud_cred and cloud_cred.kind == 'vmware':
-                env['VMWARE_USER'] = cloud_cred.username
-                env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
-                env['VMWARE_HOST'] = cloud_cred.host
-                env['VMWARE_VALIDATE_CERTS'] = str(settings.VMWARE_VALIDATE_CERTS)
             elif cloud_cred and cloud_cred.kind == 'openstack':
                 env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
 
@@ -1839,38 +1795,22 @@ class RunInventoryUpdate(BaseTask):
         # The inventory modules are vendored in AWX in the
         # `awx/plugins/inventory` directory; those files should be kept in
         # sync with those in Ansible core at all times.
-        passwords = kwargs.get('passwords', {})
-        cred_data = kwargs.get('private_data_files', {}).get('credentials', '')
-        cloud_credential = cred_data.get(inventory_update.credential, '')
-        if inventory_update.source == 'ec2':
-            if passwords.get('source_username', '') and passwords.get('source_password', ''):
-                env['AWS_ACCESS_KEY_ID'] = passwords['source_username']
-                env['AWS_SECRET_ACCESS_KEY'] = passwords['source_password']
-                if len(passwords['source_security_token']) > 0:
-                    env['AWS_SECURITY_TOKEN'] = passwords['source_security_token']
-            env['EC2_INI_PATH'] = cloud_credential
-        elif inventory_update.source == 'vmware':
-            env['VMWARE_INI_PATH'] = cloud_credential
-        elif inventory_update.source == 'azure_rm':
-            if len(passwords.get('source_client', '')) and \
-               len(passwords.get('source_tenant', '')):
-                env['AZURE_CLIENT_ID'] = passwords.get('source_client', '')
-                env['AZURE_SECRET'] = passwords.get('source_secret', '')
-                env['AZURE_TENANT'] = passwords.get('source_tenant', '')
-                env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
-            else:
-                env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
-                env['AZURE_AD_USER'] = passwords.get('source_username', '')
-                env['AZURE_PASSWORD'] = passwords.get('source_password', '')
-            env['AZURE_INI_PATH'] = cloud_credential
-            if inventory_update.credential and \
-                    inventory_update.credential.inputs.get('cloud_environment', None):
-                env['AZURE_CLOUD_ENVIRONMENT'] = inventory_update.credential.inputs['cloud_environment']
-        elif inventory_update.source == 'gce':
-            env['GCE_EMAIL'] = passwords.get('source_username', '')
-            env['GCE_PROJECT'] = passwords.get('source_project', '')
-            env['GCE_PEM_FILE_PATH'] = cloud_credential
-            env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''
+
+        ini_mapping = {
+            'ec2': 'EC2_INI_PATH',
+            'vmware': 'VMWARE_INI_PATH',
+            'azure_rm': 'AZURE_INI_PATH',
+            'gce': 'GCE_PEM_FILE_PATH',
+            'openstack': 'OS_CLIENT_CONFIG_FILE',
+            'satellite6': 'FOREMAN_INI_PATH',
+            'cloudforms': 'CLOUDFORMS_INI_PATH'
+        }
+        if inventory_update.source in ini_mapping:
+            cred_data = kwargs.get('private_data_files', {}).get('credentials', '')
+            env[ini_mapping[inventory_update.source]] = cred_data.get(inventory_update.credential, '')
+
+        if inventory_update.source == 'gce':
+            env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''  # noqa
 
             # by default, the GCE inventory source caches results on disk for
             # 5 minutes; disable this behavior
@@ -1881,12 +1821,6 @@ class RunInventoryUpdate(BaseTask):
             cp.write(os.fdopen(handle, 'w'))
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
             env['GCE_INI_PATH'] = path
-        elif inventory_update.source == 'openstack':
-            env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
-        elif inventory_update.source == 'satellite6':
-            env['FOREMAN_INI_PATH'] = cloud_credential
-        elif inventory_update.source == 'cloudforms':
-            env['CLOUDFORMS_INI_PATH'] = cloud_credential
         elif inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
