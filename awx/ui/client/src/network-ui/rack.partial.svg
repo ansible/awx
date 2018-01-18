@@ -110,10 +110,11 @@
     <g ng-attr-transform="scale({{1/current_scale}})">
         <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__rack-text--selected' : 'NetworkUI--hidden'}}"
               filter="url(#selected)"
-              x="-20"
+              text-anchor="middle"
+              x="0"
               ng-attr-y="{{180*current_scale}}"> {{item.name}}
         </text>
-        <text class="NetworkUI__rack-text" x="-20" ng-attr-y="{{180*current_scale}}">{{item.name}}{{item.edit_label?'_':''}}</text>
+        <text class="NetworkUI__rack-text" text-anchor="middle" x="0" ng-attr-y="{{180*current_scale}}">{{item.name}}{{item.edit_label?'_':''}}</text>
     </g>
 </g>
 
@@ -230,9 +231,10 @@
    <g ng-attr-transform="scale({{1}})">
        <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__rack-text--selected' : 'NetworkUI--hidden'}}"
              filter="url(#selected)"
-             x="-20"
-             ng-attr-y="{{180*current_scale}}"> {{item.name}}
+             text-anchor="middle"
+             x="0"
+             y="70"> {{item.name}}
        </text>
-       <text class="NetworkUI__rack-text" x="-20" ng-attr-y="{{180*current_scale}}">{{item.name}}{{item.edit_label?'_':''}}</text>
+       <text class="NetworkUI__rack-text" text-anchor="middle" x="0" y="70">{{item.name}}{{item.edit_label?'_':''}}</text>
    </g>
 </g>

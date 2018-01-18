@@ -73,7 +73,8 @@
 <g ng-show="item.icon || current_scale > 0.5">
     <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__router-text--selected' : 'NetworkUI--hidden'}}"
           filter="url(#selected)"
-          x="-30"
+          text-anchor="middle"
+          x="0"
           y="70"> {{item.name}}</text>
-    <text class="NetworkUI__router-text" x="-30" y="70">{{item.name}}{{item.edit_label?'_':''}}</text>
+    <text class="NetworkUI__router-text" text-anchor="middle" x="0" y="70">{{item.name}}{{item.edit_label?'_':''}}</text>
 </g>

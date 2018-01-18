@@ -80,8 +80,9 @@
 <g ng-show="item.icon || current_scale > 0.5">
     <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__host-text--selected' : 'NetworkUI--hidden'}}"
           filter="url(#selected)"
-          x="-25"
+          text-anchor="middle"
+          x="0"
           y="50"> {{item.name}}
     </text>
-    <text class="NetworkUI__host-text" x="-25" y="50">{{item.name}}{{item.edit_label?'_':''}}</text>
+    <text class="NetworkUI__host-text" text-anchor="middle" x="0" y="50">{{item.name}}{{item.edit_label?'_':''}}</text>
 </g>
