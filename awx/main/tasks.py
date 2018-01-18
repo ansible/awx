@@ -654,6 +654,11 @@ class BaseTask(LogErrorsTask):
         Build environment dictionary for ansible-playbook.
         '''
         env = dict(os.environ.items())
+        # Set the inventory plugin to use
+        plugin_name = self.get_inventory_plugin_name(instance)
+        if plugin_name is not None:
+            env['ANSIBLE_INVENTORY_ENABLED'] = plugin_name
+        env['INVENTORY_UNPARSED_IS_FAILED'] = 'true'
         # Add ANSIBLE_* settings to the subprocess environment.
         for attr in dir(settings):
             if attr == attr.upper() and attr.startswith('ANSIBLE_'):
@@ -753,6 +758,12 @@ class BaseTask(LogErrorsTask):
             dispatcher.dispatch(event_data)
 
         return OutputEventFilter(event_callback)
+
+    def get_inventory_plugin_name(self, instance):
+        '''
+        Return name of Ansible inventory plugin to use - override in subclasses
+        '''
+        return 'script'
 
     def pre_run_hook(self, instance, **kwargs):
         '''
@@ -1882,7 +1893,7 @@ class RunInventoryUpdate(BaseTask):
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
             env['GCE_INI_PATH'] = path
         elif inventory_update.source == 'openstack':
-            env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
+            pass  # openstack clouds.yml is defined in its inventory file
         elif inventory_update.source == 'satellite6':
             env['FOREMAN_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'cloudforms':
@@ -1899,6 +1910,60 @@ class RunInventoryUpdate(BaseTask):
         # add private_data_files
         env['AWX_PRIVATE_DATA_DIR'] = kwargs.get('private_data_dir', '')
         return env
+
+    def get_inventory_plugin_name(self, inventory_update):
+        if inventory_update.source in Inventory.SOURCE_PLUGINS:
+            return Inventory.SOURCE_PLUGINS[inventory_update.source]
+        if inventory_update.source == 'custom':
+            # TODO: allow user to specify which plugin to use
+            return None  # intentionally allow other defaults, like ini
+        return 'script'
+
+    def build_inventory(self, inventory_update, **kwargs):
+        src = inventory_update.source
+        if src in Inventory.SOURCE_PLUGINS and Version(kwargs['ansible_version']) >= Version('2.4.0'):
+            cred_data = kwargs.get('private_data_files', {}).get('credentials', '')
+            cloud_credential = cred_data.get(inventory_update.credential, '')
+            # Build inventory contents specific to each plugin type
+            if src == 'openstack':
+                if (not inventory_update.credential) or inventory_update.credential.kind != 'openstack':
+                    raise RuntimeError('Openstack plugin needs corresponding openstack credential')
+                contents = yaml.safe_dump({
+                    'plugin': 'openstack',
+                    'fail_on_errors': True,
+                    'clouds_yaml_path': [cloud_credential]
+                }, default_flow_style=False)
+            else:
+                raise NotImplementedError('Only openstack plugins have been implemented (so far).')
+            # Write the inventory file and return its path
+            runpath = os.path.dirname(cloud_credential)
+            handle, path = tempfile.mkstemp(dir=runpath, suffix='openstack.yml')
+            f = os.fdopen(handle, 'w')
+            f.write(contents)
+            f.close()
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+            return path
+        elif src in CLOUD_PROVIDERS:
+            # Get the path to the inventory plugin, and append it to our
+            # arguments.
+            plugin_path = self.get_path_to('..', 'plugins', 'inventory',
+                                           '%s.py' % src)
+            return plugin_path
+        elif src == 'scm':
+            return inventory_update.get_actual_source_path()
+        elif src == 'custom':
+            runpath = tempfile.mkdtemp(prefix='awx_inventory_', dir=settings.AWX_PROOT_BASE_PATH)
+            handle, path = tempfile.mkstemp(dir=runpath)
+            f = os.fdopen(handle, 'w')
+            if inventory_update.source_script is None:
+                raise RuntimeError('Inventory Script does not exist')
+            f.write(inventory_update.source_script.script.encode('utf-8'))
+            f.close()
+            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+            self.cleanup_paths.append(runpath)
+            return path
+        else:
+            raise NotImplementedError('Could not obtain source destination for {} source'.format(src))
 
     def build_args(self, inventory_update, **kwargs):
         """Build the command line argument list for running an inventory
@@ -1944,26 +2009,9 @@ class RunInventoryUpdate(BaseTask):
                         getattr(settings, '%s_INSTANCE_ID_VAR' % src.upper()),])
         # Add arguments for the source inventory script
         args.append('--source')
-        if src in CLOUD_PROVIDERS:
-            # Get the path to the inventory plugin, and append it to our
-            # arguments.
-            plugin_path = self.get_path_to('..', 'plugins', 'inventory',
-                                           '%s.py' % src)
-            args.append(plugin_path)
-        elif src == 'scm':
-            args.append(inventory_update.get_actual_source_path())
-        elif src == 'custom':
-            runpath = tempfile.mkdtemp(prefix='awx_inventory_', dir=settings.AWX_PROOT_BASE_PATH)
-            handle, path = tempfile.mkstemp(dir=runpath)
-            f = os.fdopen(handle, 'w')
-            if inventory_update.source_script is None:
-                raise RuntimeError('Inventory Script does not exist')
-            f.write(inventory_update.source_script.script.encode('utf-8'))
-            f.close()
-            os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-            args.append(path)
+        args.append(self.build_inventory(inventory_update, **kwargs))
+        if src == "custom":
             args.append("--custom")
-            self.cleanup_paths.append(runpath)
         args.append('-v%d' % inventory_update.verbosity)
         if settings.DEBUG:
             args.append('--traceback')

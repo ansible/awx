@@ -55,6 +55,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         ('smart', _('Hosts for inventory generated using the host_filter property.')),
     ]
 
+    # Mapping of source to corresponding plugin name
+    SOURCE_PLUGINS = {
+        'openstack': 'openstack'
+    }
+
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('inventories')
