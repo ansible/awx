@@ -281,7 +281,7 @@ For feature work, take a look at the current [Enhancements](https://github.com/a
 
 If it has someone assigned to it then that person is the person responsible for working the enhancement. If you feel like you could contribute then reach out to that person.
 
-Fixing bugs, adding translations, and updating the documentation are always appreciated, so reviewing the backlog of issues is always a good place to start.
+Fixing bugs, adding translations, and updating the documentation are always appreciated, so reviewing the backlog of issues is always a good place to start. For extra information on debugging tools, see [Debugging](https://github.com/ansible/awx/blob/devel/docs/debugging.md).
 
 **NOTE**
 
