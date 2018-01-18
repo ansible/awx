@@ -88,6 +88,13 @@ inherits(_Placing, _State);
 var Placing = new _Placing();
 exports.Placing = Placing;
 
+function _ContextMenu () {
+    this.name = 'ContextMenu';
+}
+inherits(_ContextMenu, _State);
+var ContextMenu = new _ContextMenu();
+exports.ContextMenu = ContextMenu;
+
 _State.prototype.onUnselectAll = function (controller, msg_type, $event) {
 
     controller.changeState(Ready);
@@ -244,12 +251,21 @@ _Selected3.prototype.onMouseMove = function (controller) {
 };
 _Selected3.prototype.onMouseMove.transitions = ['Move'];
 
-_Selected3.prototype.onMouseUp = function (controller) {
+_Selected3.prototype.onMouseUp = function (controller, msg_type, $event) {
+    let context_menu = controller.scope.context_menus[0];
+    context_menu.enabled = true;
+    context_menu.x = $event.x;
+    context_menu.y = $event.y;
+    context_menu.buttons.forEach(function(button, index){
+        button.x = $event.x;
+        let menuPaddingTop = 5;
+        button.y = $event.y + menuPaddingTop + (button.height * index);
+    });
 
-    controller.changeState(EditLabel);
+    controller.changeState(ContextMenu);
 
 };
-_Selected3.prototype.onMouseUp.transitions = ['EditLabel'];
+_Selected3.prototype.onMouseUp.transitions = ['ContextMenu'];
 
 
 _Move.prototype.onMouseMove = function (controller) {
@@ -555,3 +571,19 @@ _Placing.prototype.onMouseDown = function (controller) {
 };
 _Placing.prototype.onMouseDown.transitions = ['Resize'];
 
+
+_ContextMenu.prototype.onLabelEdit = function (controller) {
+
+    controller.changeState(EditLabel);
+
+};
+_ContextMenu.prototype.onLabelEdit.transitions = ['EditLabel'];
+
+_ContextMenu.prototype.onMouseDown = function (controller) {
+
+    var item = controller.scope.context_menus[0];
+    item.enabled = false;
+    controller.changeState(Ready);
+
+};
+_ContextMenu.prototype.onMouseDown.transitions = ['Ready'];
