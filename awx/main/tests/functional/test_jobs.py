@@ -30,13 +30,15 @@ def test_job_capacity_and_with_inactive_node():
 
 
 @pytest.mark.django_db
-def test_job_notification_data(inventory):
+def test_job_notification_data(inventory, machine_credential, project):
     encrypted_str = "$encrypted$"
     job = Job.objects.create(
         job_template=None, inventory=inventory, name='hi world',
         extra_vars=json.dumps({"SSN": "123-45-6789"}),
-        survey_passwords={"SSN": encrypted_str}
+        survey_passwords={"SSN": encrypted_str},
+        project=project,
     )
+    job.credentials = [machine_credential]
     notification_data = job.notification_data(block=0)
     assert json.loads(notification_data['extra_vars'])['SSN'] == encrypted_str
 
