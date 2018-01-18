@@ -48,6 +48,14 @@
                 CallbackHelpInit({ scope: $scope });
 
                 $scope.surveyTooltip = i18n._('Please save before adding a survey to this job template.');
+
+                MultiCredentialService.getCredentialTypes()
+                    .then(({ data }) => {
+                        $scope.multiCredential = {
+                            credentialTypes: data.results,
+                            selectedCredentials: []
+                        };
+                    });
             }
 
             callback = function() {
@@ -280,25 +288,13 @@
                     data.ask_credential_on_launch = $scope.ask_credential_on_launch ? $scope.ask_credential_on_launch : false;
                     data.job_tags = (Array.isArray($scope.job_tags)) ? $scope.job_tags.join() : "";
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ? $scope.skip_tags.join() : "";
-                    if ($scope.selectedCredentials && $scope.selectedCredentials
-                        .machine && $scope.selectedCredentials
-                            .machine) {
-                                data.credential = $scope.selectedCredentials
-                                    .machine.id;
-                    } else {
-                        data.credential = null;
-                    }
-                    if ($scope.selectedCredentials && $scope.selectedCredentials
-                        .vault && $scope.selectedCredentials
-                            .vault.id) {
-                                data.vault_credential = $scope.selectedCredentials
-                                    .vault.id;
-                    } else {
-                        data.vault_credential = null;
-                    }
 
-                    data.extra_vars = ToJSON($scope.parseType,
-                        $scope.variables, true);
+                    // drop legacy 'credential' and 'vault_credential' keys from the creation request as they will
+                    // be provided to the related credentials endpoint by the template save success handler.
+                    delete data.credential;
+                    delete data.vault_credential;
+
+                    data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
 
                     // We only want to set the survey_enabled flag to
                     // true for this job template if a survey exists
@@ -340,7 +336,6 @@
                     Rest.setUrl(defaultUrl);
                     Rest.post(data)
                         .then(({data}) => {
-
                             if (data.related && data.related.callback) {
                                 Alert('Callback URL',
                                     `Host callbacks are enabled for this template. The callback URL is:
@@ -358,12 +353,6 @@
                                     'alert-danger', saveCompleted, null, null,
                                     null, true);
                             }
-
-                            MultiCredentialService
-                                .saveExtraCredentials({
-                                    creds: $scope.selectedCredentials.extra,
-                                    url: data.related.extra_credentials
-                                });
 
                             var orgDefer = $q.defer();
                             var associationDefer = $q.defer();
@@ -453,7 +442,9 @@
                                                     });
                                             }
 
-                                            saveCompleted(data.id);
+                                            MultiCredentialService
+                                                .saveRelated(data, $scope.multiCredential.selectedCredentials)
+                                                .then(() => saveCompleted(data.id));
                                         });
                                 });
                             });

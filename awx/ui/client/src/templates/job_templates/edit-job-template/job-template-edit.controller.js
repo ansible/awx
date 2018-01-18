@@ -362,74 +362,37 @@ export default
 
                 $scope.can_edit = jobTemplateData.summary_fields.user_capabilities.edit;
 
-                if($scope.job_template_obj.summary_fields.user_capabilities.edit) {
-                    MultiCredentialService.loadCredentials(jobTemplateData)
-                        .then(([selectedCredentials, credTypes, credTypeOptions,
-                            credTags, credentialGetPermissionDenied]) => {
-                                $scope.canGetAllRelatedResources = !projectGetPermissionDenied && !inventoryGetPermissionDenied && !credentialGetPermissionDenied ? true : false;
-                                $scope.selectedCredentials = selectedCredentials;
-                                $scope.credential_types = credTypes;
-                                $scope.credentialTypeOptions = credTypeOptions;
-                                $scope.credentialsToPost = credTags;
-                                $scope.$emit('jobTemplateLoaded', master);
-                            });
-                }
-                else {
+                const multiCredential = {};
+                const credentialTypesPromise = MultiCredentialService.getCredentialTypes()
+                    .then(({ data }) => {
+                        multiCredential.credentialTypes = data.results;
+                    });
+                const multiCredentialPromises = [credentialTypesPromise];
 
-                    if (jobTemplateData.summary_fields.credential) {
-                        $scope.selectedCredentials.machine = jobTemplateData.summary_fields.credential;
-                    }
-
-                    if (jobTemplateData.summary_fields.vault_credential) {
-                        $scope.selectedCredentials.vault = jobTemplateData.summary_fields.vault_credential;
-                    }
-
-                    if (jobTemplateData.summary_fields.extra_credentials) {
-                        $scope.selectedCredentials.extra = jobTemplateData.summary_fields.extra_credentials;
-                    }
-
-                    MultiCredentialService.getCredentialTypes()
-                        .then(({credential_types, credentialTypeOptions}) => {
-                            let typesArray = Object.keys(credential_types).map(key => credential_types[key]);
-                            let credTypeOptions = credentialTypeOptions;
-
-                            let machineAndVaultCreds = [],
-                                extraCreds = [];
-
-                            if($scope.selectedCredentials.machine) {
-                                machineAndVaultCreds.push($scope.selectedCredentials.machine);
+                if ($scope.can_edit) {
+                    const selectedCredentialsPromise =  MultiCredentialService
+                        .getRelated(jobTemplateData, { permitted: [403] })
+                        .then(({ data, status }) => {
+                            if (status === 403) {
+                                $scope.canGetAllRelatedResources = false;
+                                multiCredential.selectedCredentials = _.get(jobTemplateData, 'summary_fields.credentials');
+                            } else {
+                                $scope.canGetAllRelatedResources = !projectGetPermissionDenied && !inventoryGetPermissionDenied;
+                                multiCredential.selectedCredentials = data.results;
                             }
-                            if($scope.selectedCredentials.vault) {
-                                machineAndVaultCreds.push($scope.selectedCredentials.vault);
-                            }
-
-                            machineAndVaultCreds.map(cred => ({
-                                name: cred.name,
-                                id: cred.id,
-                                postType: cred.postType,
-                                kind: typesArray
-                                    .filter(type => {
-                                        return cred.kind === type.kind || parseInt(cred.credential_type) === type.value;
-                                    })[0].name + ":"
-                            }));
-
-                            if($scope.selectedCredentials.extra && $scope.selectedCredentials.extra.length > 0) {
-                                extraCreds = extraCreds.concat($scope.selectedCredentials.extra).map(cred => ({
-                                    name: cred.name,
-                                    id: cred.id,
-                                    postType: cred.postType,
-                                    kind: credTypeOptions
-                                        .filter(type => {
-                                            return parseInt(cred.credential_type_id) === type.value;
-                                        })[0].name + ":"
-                                }));
-                            }
-
-                            $scope.credentialsToPost = machineAndVaultCreds.concat(extraCreds);
-
-                            $scope.$emit('jobTemplateLoaded', master);
                         });
+
+                    multiCredentialPromises.push(selectedCredentialsPromise);
+                } else {
+                    $scope.canGetAllRelatedResources = false;
+                    multiCredential.selectedCredentials = _.get(jobTemplateData, 'summary_fields.credentials');
                 }
+
+                $q.all(multiCredentialPromises)
+                    .then(() => {
+                        $scope.multiCredential = multiCredential;
+                        $scope.$emit('jobTemplateLoaded', master);
+                    });
             });
 
             if ($scope.removeChoicesReady) {
@@ -522,10 +485,7 @@ export default
                 }
 
                 MultiCredentialService
-                    .findChangedExtraCredentials({
-                        creds: $scope.selectedCredentials.extra,
-                        url: data.related.extra_credentials
-                    });
+                    .saveRelated(jobTemplateData, $scope.multiCredential.selectedCredentials);
 
                 InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
                     .catch(({data, status}) => {
@@ -724,6 +684,10 @@ export default
                     data.job_tags = (Array.isArray($scope.job_tags)) ? _.uniq($scope.job_tags).join() : "";
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ?  _.uniq($scope.skip_tags).join() : "";
 
+                    // drop legacy 'credential' and 'vault_credential' keys from the update request as they will
+                    // be provided to the related credentials endpoint by the template save success handler.
+                    delete data.credential;
+                    delete data.vault_credential;
 
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
                     Rest.put(data)

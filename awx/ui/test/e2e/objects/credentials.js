@@ -39,6 +39,7 @@ const vault = createFormSection({
     selector: '.at-InputGroup-inset',
     labels: {
         vaultPassword: 'Vault Password',
+        vaultIdentifier: 'Vault Identifier'
     }
 });
 
