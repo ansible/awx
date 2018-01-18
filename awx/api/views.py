@@ -3285,7 +3285,9 @@ class JobTemplateCallback(GenericAPIView):
             for inventory_source in inventory_sources:
                 if inventory_source.needs_update_on_launch:
                     # FIXME: Doesn't check for any existing updates.
-                    inventory_update = inventory_source.create_inventory_update(launch_type='callback')
+                    inventory_update = inventory_source.create_inventory_update(
+                        **{'_eager_fields': {'launch_type': 'callback'}}
+                    )
                     inventory_update.signal_start()
                     inventory_update_pks.add(inventory_update.pk)
             inventory_update_qs = InventoryUpdate.objects.filter(pk__in=inventory_update_pks, status__in=('pending', 'waiting', 'running'))
