@@ -80,3 +80,5 @@ pg_port=5432
 # Container networking configuration
 # Set the awx_task and awx_web containers' search domain(s)
 #awx_container_search_domains=example.com,ansible.com
+# Alternate DNS servers
+#awx_alternate_dns_servers="10.1.2.3,10.2.3.4"
