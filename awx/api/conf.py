@@ -6,25 +6,25 @@ from awx.conf import fields, register
 from awx.api.fields import OAuth2ProviderField
 
 
-register(
-    'AUTH_TOKEN_EXPIRATION',
-    field_class=fields.IntegerField,
-    min_value=60,
-    label=_('Idle Time Force Log Out'),
-    help_text=_('Number of seconds that a user is inactive before they will need to login again.'),
-    category=_('Authentication'),
-    category_slug='authentication',
-)
-
-register(
-    'AUTH_TOKEN_PER_USER',
-    field_class=fields.IntegerField,
-    min_value=-1,
-    label=_('Maximum number of simultaneous logins'),
-    help_text=_('Maximum number of simultaneous logins a user may have. To disable enter -1.'),
-    category=_('Authentication'),
-    category_slug='authentication',
-)
+# register(
+#     'AUTH_TOKEN_EXPIRATION',
+#     field_class=fields.IntegerField,
+#     min_value=60,
+#     label=_('Idle Time Force Log Out'),
+#     help_text=_('Number of seconds that a user is inactive before they will need to login again.'),
+#     category=_('Authentication'),
+#     category_slug='authentication',
+# )
+# 
+# register(
+#     'AUTH_TOKEN_PER_USER',
+#     field_class=fields.IntegerField,
+#     min_value=-1,
+#     label=_('Maximum number of simultaneous logins'),
+#     help_text=_('Maximum number of simultaneous logins a user may have. To disable enter -1.'),
+#     category=_('Authentication'),
+#     category_slug='authentication',
+# )
 register(
     'SESSION_COOKIE_AGE',
     field_class=fields.IntegerField,
@@ -54,7 +54,7 @@ register(
 register(
     'OAUTH2_PROVIDER',
     field_class=OAuth2ProviderField,
-    default={'ACCESS_TOKEN_EXPIRE_SECONDS': 36000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 60},
+    default={'ACCESS_TOKEN_EXPIRE_SECONDS': 315360000000, 'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600},
     label=_('OAuth 2 Timeout Settings'),
     help_text=_('Dictionary for customizing OAuth 2 timeouts, available items are '
                 '`ACCESS_TOKEN_EXPIRE_SECONDS`, the duration of access tokens in the number '

@@ -13,12 +13,6 @@ from django.views.generic.base import RedirectView
 from django.utils.encoding import smart_text
 from django.contrib import auth
 
-# Django REST Framework
-from rest_framework.renderers import JSONRenderer
-
-# AWX
-from awx.api.serializers import UserSerializer
-
 logger = logging.getLogger('awx.sso.views')
 
 
@@ -47,12 +41,6 @@ class CompleteView(BaseRedirectView):
         if self.request.user and self.request.user.is_authenticated():
             auth.login(self.request, self.request.user)
             logger.info(smart_text(u"User {} logged in".format(self.request.user.username)))
-            # TODO: remove these 2 cookie-sets after UI removes them
-            response.set_cookie('userLoggedIn', 'true')
-            current_user = UserSerializer(self.request.user)
-            current_user = JSONRenderer().render(current_user.data)
-            current_user = urllib.quote('%s' % current_user, '')
-            response.set_cookie('current_user', current_user)
         return response
 
 

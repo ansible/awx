@@ -28,7 +28,6 @@ def mock_response_new(mocker):
 class TestApiRootView:
     def test_get_endpoints(self, mocker, mock_response_new):
         endpoints = [
-            'authtoken',
             'ping',
             'config',
             #'settings',

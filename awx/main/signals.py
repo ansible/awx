@@ -418,6 +418,8 @@ def activity_stream_create(sender, instance, created, **kwargs):
         if type(instance) == Job:
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
+        if type(instance) == OAuth2AccessToken:
+            changes['token'] = '*************'
         activity_entry = ActivityStream(
             operation='create',
             object1=object1,
@@ -608,21 +610,21 @@ def save_user_session_membership(sender, **kwargs):
         )
 
 
-@receiver(post_save, sender=AccessToken)
+@receiver(post_save, sender=OAuth2AccessToken)
 def create_access_token_user_if_missing(sender, **kwargs):
     obj = kwargs['instance']
     if obj.application and obj.application.user:
         obj.user = obj.application.user
-        post_save.disconnect(create_access_token_user_if_missing, sender=AccessToken)
+        post_save.disconnect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
         obj.save()
-        post_save.connect(create_access_token_user_if_missing, sender=AccessToken)
+        post_save.connect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
 
 
 @receiver(post_save, sender=User)
 def create_default_oauth_app(sender, **kwargs):
     if kwargs.get('created', False):
         user = kwargs['instance']
-        Application.objects.create(
+        OAuth2Application.objects.create(
             name='Default application for {}'.format(user.username),
             user=user, client_type='confidential', redirect_uris='',
             authorization_grant_type='password'

@@ -290,12 +290,6 @@ def run_administrative_checks(self):
                   fail_silently=True)
 
 
-@shared_task(bind=True, queue='tower', base=LogErrorsTask)
-def cleanup_authtokens(self):
-    logger.warn("Cleaning up expired authtokens.")
-    AuthToken.objects.filter(expires__lt=now()).delete()
-
-
 @shared_task(bind=True, base=LogErrorsTask)
 def purge_old_stdout_files(self):
     nowtime = time.time()

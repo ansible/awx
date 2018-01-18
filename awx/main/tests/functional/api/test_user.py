@@ -1,7 +1,8 @@
 import pytest
 
 from awx.api.versioning import reverse
-from awx.main.models import User, Application
+from awx.main.models import User
+from awx.main.models.oauth import OAuth2Application as Application
 
 
 #

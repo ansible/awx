@@ -16,7 +16,6 @@ from awx.api.views import (
     ApiV1PingView,
     ApiV1ConfigView,
     AuthView,
-    AuthTokenView,
     UserMeList,
     DashboardView,
     DashboardJobsGraphView,
@@ -29,6 +28,11 @@ from awx.api.views import (
     JobTemplateExtraCredentialsList,
     SchedulePreview,
     ScheduleZoneInfo,
+    OAuth2ApplicationList,
+    OAuth2TokenList,
+    ApplicationOAuth2TokenList,
+    OAuth2ApplicationDetail,
+    
 )
 
 from .organization import urls as organization_urls
@@ -73,7 +77,6 @@ v1_urls = [
     url(r'^ping/$', ApiV1PingView.as_view(), name='api_v1_ping_view'),
     url(r'^config/$', ApiV1ConfigView.as_view(), name='api_v1_config_view'),
     url(r'^auth/$', AuthView.as_view()),
-    url(r'^authtoken/$', AuthTokenView.as_view(), name='auth_token_view'),
     url(r'^me/$', UserMeList.as_view(), name='user_me_list'),
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard_view'),
     url(r'^dashboard/graphs/jobs/$', DashboardJobsGraphView.as_view(), name='dashboard_jobs_graph_view'),
@@ -122,9 +125,13 @@ v2_urls = [
     url(r'^jobs/(?P<pk>[0-9]+)/credentials/$', JobCredentialsList.as_view(), name='job_credentials_list'),
     url(r'^job_templates/(?P<pk>[0-9]+)/extra_credentials/$', JobTemplateExtraCredentialsList.as_view(), name='job_template_extra_credentials_list'),
     url(r'^job_templates/(?P<pk>[0-9]+)/credentials/$', JobTemplateCredentialsList.as_view(), name='job_template_credentials_list'),
-    url(r'^me/oauth/', include(user_oauth_urls))
     url(r'^schedules/preview/$', SchedulePreview.as_view(), name='schedule_rrule'),
     url(r'^schedules/zoneinfo/$', ScheduleZoneInfo.as_view(), name='schedule_zoneinfo'),
+    url(r'^applications/$', OAuth2ApplicationList.as_view(), name='o_auth2_application_list'),
+    url(r'^applications/(?P<pk>[0-9]+)/$', OAuth2ApplicationDetail.as_view(), name='o_auth2_application_detail'),
+    url(r'^applications/(?P<pk>[0-9]+)/tokens/$', ApplicationOAuth2TokenList.as_view(), name='application_o_auth2_token_list'),
+    url(r'^tokens/$', OAuth2TokenList.as_view(), name='o_auth2_token_list'),
+    url(r'^', include(user_oauth_urls)),
 ]
 
 app_name = 'api'
@@ -139,7 +146,7 @@ urlpatterns = [
     url(r'^logout/$', LoggedLogoutView.as_view(
         next_page='/api/', redirect_field_name='next'
     ), name='logout'),
-    url(r'^o/', include(oauth_urls))
+    url(r'^o/', include(oauth_urls)),
 ]
 if settings.SETTINGS_MODULE == 'awx.settings.development':
     from awx.api.swagger import SwaggerSchemaView

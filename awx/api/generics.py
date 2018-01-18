@@ -68,8 +68,12 @@ class LoggedLoginView(auth_views.LoginView):
         current_user = getattr(request, 'user', None)
         if current_user and getattr(current_user, 'pk', None) and current_user != original_user:
             logger.info("User {} logged in.".format(current_user.username))
-        return ret
-
+        if request.user.is_authenticated:
+            return ret
+        else:
+            ret.status = 401
+            return ret
+            
 
 class LoggedLogoutView(auth_views.LogoutView):
 

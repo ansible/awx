@@ -1,4 +1,6 @@
 ## Introduction
+>> Updated to these docs coming soon.
+
 Before Tower 3.3, auth token is used as the main authentication method. Starting from Tower 3.3,
 session-based authentication will take the place as the main authentication, while auth token
 will be replaced by OAuth tokens also introduced in 3.3.

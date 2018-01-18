@@ -14,8 +14,11 @@ from awx.api.views import (
     UserRolesList,
     UserActivityStreamList,
     UserAccessList,
+    OAuth2ApplicationList,
+    OAuth2TokenList,
+    OAuth2AuthorizedTokenList,
+    OAuth2PersonalTokenList
 )
-
 
 urls = [ 
     url(r'^$', UserList.as_view(), name='user_list'),
@@ -28,6 +31,11 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/roles/$', UserRolesList.as_view(), name='user_roles_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$', UserActivityStreamList.as_view(), name='user_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/access_list/$', UserAccessList.as_view(), name='user_access_list'),
+    url(r'^(?P<pk>[0-9]+)/applications/$', OAuth2ApplicationList.as_view(), name='o_auth2_application_list'),
+    url(r'^(?P<pk>[0-9]+)/tokens/$', OAuth2TokenList.as_view(), name='o_auth2_token_list'),
+    url(r'^(?P<pk>[0-9]+)/authorized_tokens/$', OAuth2AuthorizedTokenList.as_view(), name='o_auth2_authorized_token_list'),
+    url(r'^(?P<pk>[0-9]+)/personal_tokens/$', OAuth2PersonalTokenList.as_view(), name='o_auth2_personal_token_list'),
+    
 ] 
 
 __all__ = ['urls']

@@ -47,7 +47,7 @@ from awx.main.models.notifications import (
 )
 from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
-from awx.main.models import Application
+from awx.main.models.oauth import OAuth2Application as Application
 
 __SWAGGER_REQUESTS__ = {}
 

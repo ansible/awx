@@ -1,4 +1,7 @@
 {% ifmeth POST %}
+
+## DEPRICATED
+
 # Generate an Auth Token
 Make a POST request to this resource with `username` and `password` fields to
 obtain an authentication token to use for subsequent requests.

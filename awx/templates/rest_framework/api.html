@@ -34,7 +34,7 @@
       <div class="collapse navbar-collapse" id="navbar-collapse">
         <ul class="nav navbar-nav navbar-right">
           {% if user.is_authenticated and not inside_login_context %}
-          <li><a href="{% url 'api:user_me_list' version=request.version %}" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Logged in as {{ user }}{% if user.get_full_name %} ({{ user.get_full_name }}){% endif %}"><span class="glyphicon glyphicon-user"></span> <span class="visible-xs-inline">Logged in as </span>{{ user }}{% if user.get_full_name %}<span class="visible-xs-inline"> ({{ user.get_full_name }})</span>{% endif %}</a></li>
+          <li><a href="{% if request.version %}{% url 'api:user_me_list' version=request.version%}{% else %}{% url 'api:user_me_list' version="v2" %}{% endif %}" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Logged in as {{ user }}{% if user.get_full_name %} ({{ user.get_full_name }}){% endif %}"><span class="glyphicon glyphicon-user"></span> <span class="visible-xs-inline">Logged in as </span>{{ user }}{% if user.get_full_name %}<span class="visible-xs-inline"> ({{ user.get_full_name }})</span>{% endif %}</a></li>
           <li><a href="{% url 'api:logout' %}?next=/api/login/" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Log out"><span class="glyphicon glyphicon-log-out"></span>Log out</a></li>
           {% else %}
           <li><a href="{% url 'api:login' %}" data-toggle="tooltip" data-placement="bottom" data-delay="1000" title="Log in"><span class="glyphicon glyphicon-log-in"></span>Log in</a></li>
