@@ -109,8 +109,9 @@
 <g ng-show="item.icon || current_scale > 0.5">
     <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__rack-text--selected' : 'NetworkUI--hidden'}}"
           filter="url(#selected)"
-          x="-25"
+          text-anchor="middle"
+          x="0"
           y="70"> {{item.name}}
     </text>
-    <text class="NetworkUI__rack-text" x="-25" y="70">{{item.name}}{{item.edit_label?'_':''}}</text>
+    <text class="NetworkUI__rack-text" text-anchor="middle" x="0" y="70">{{item.name}}{{item.edit_label?'_':''}}</text>
 </g>

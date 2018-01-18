@@ -200,8 +200,9 @@
 <g transform="scale(1)">
     <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__site-text--selected' : 'NetworkUI--hidden'}}"
         filter="url(#selected)"
-        ng-attr-x="0"
-        ng-attr-y="{{180*current_scale}}"> {{item.name}} </text>
-        <text class="NetworkUI__site-text"  x="0" ng-attr-y="{{180*current_scale}}">{{item.name}}{{item.edit_label?'_':''}}</text>
+        text-anchor="middle"
+        x="0"
+        y="70"> {{item.name}} </text>
+        <text class="NetworkUI__site-text" text-anchor="middle" x="0" y="70">{{item.name}}{{item.edit_label?'_':''}}</text>
     </g>
 </g>
