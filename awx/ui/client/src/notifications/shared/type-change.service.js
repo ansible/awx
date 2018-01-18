@@ -61,7 +61,7 @@ function (i18n) {
                     obj.portLabel = ' ' + i18n._('IRC Server Port');
                     obj.passwordLabel = ' ' + i18n._('IRC Server Password');
                     obj.irc_required = true;
-                    obj.password_required = true;
+                    obj.password_required = false;
                     obj.port_required = true;
                     break;
             }
