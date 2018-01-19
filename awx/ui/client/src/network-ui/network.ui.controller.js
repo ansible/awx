@@ -586,17 +586,25 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     // Conext Menu Button Handlers
     $scope.onDetailsContextButton = function (panelBoolean) {
         if (!$scope.disconnected) {
-            if ($scope.selected_items.length === 1){
-                if ($scope.selected_items[0].host_id === 0){
-                    $scope.$emit('retrievedHostData', {}, panelBoolean !== null ? panelBoolean: true);
+
+            // show details for devices
+            if ($scope.selected_devices.length === 1){
+
+                // following block is intended for devices added in the network UI but not in Tower
+                if ($scope.selected_devices[0].host_id === 0){
+                    let host = $scope.selected_devices[0];
+                    $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
                 }
-                if ($scope.selected_items[0].host_id !== 0){
-                    let host_id = $scope.selected_items[0].host_id;
+
+                // following block is intended for devices that are saved in the API
+                if ($scope.selected_devices[0].host_id !== 0){
+                    let host_id = $scope.selected_devices[0].host_id;
                     let url = `/api/v2/hosts/${host_id}/`;
                     $http.get(url)
                          .then(function(response) {
                              let host = response.data;
-                             $scope.$emit('retrievedHostData', host, panelBoolean !== null ? panelBoolean: true);
+                             host.host_id = host.id;
+                             $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
                              $scope.context_menus[0].enabled = false;
                          })
                          .catch(({data, status}) => {
@@ -604,12 +612,144 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                          });
                 }
             }
+
+            // show details for interfaces
+            else if($scope.selected_interfaces.length === 1){
+                let selected_interface  = $scope.selected_interfaces[0];
+                $scope.$emit('showDetails', selected_interface, panelBoolean !== null ? panelBoolean: true);
+                $scope.context_menus[0].enabled = false;
+            }
+
+            // show details for links
+            else if($scope.selected_links.length === 1){
+                let link  = $scope.selected_links[0];
+                $scope.$emit('showDetails', link, panelBoolean !== null ? panelBoolean: true);
+                $scope.context_menus[0].enabled = false;
+            }
+
+            //show details for groups, racks, and sites
+            else if ($scope.selected_groups.length === 1){
+                let group = $scope.selected_groups[0];
+                $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);
+                $scope.context_menus[0].enabled = false;
+            }
          }
     };
 
     $scope.onRenameContextButton = function (button) {
         $scope.context_menus[0].enabled = false;
         $scope.first_channel.send("LabelEdit", {});
+    };
+
+    $scope.deleteDevice = function(){
+        var i = 0;
+        var j = 0;
+        var index = -1;
+        var devices = $scope.selected_devices;
+        var links = $scope.selected_links;
+        var all_links = $scope.links.slice();
+        $scope.selected_devices = [];
+        $scope.selected_links = [];
+        $scope.context_menus[0].enabled = false;
+        $scope.move_controller.changeState(move.Ready);
+        for (i = 0; i < links.length; i++) {
+            index = $scope.links.indexOf(links[i]);
+            if (index !== -1) {
+                links[i].selected = false;
+                links[i].remote_selected = false;
+                $scope.links.splice(index, 1);
+                $scope.send_control_message(new messages.LinkDestroy($scope.client_id,
+                                                                               links[i].id,
+                                                                               links[i].from_device.id,
+                                                                               links[i].to_device.id,
+                                                                               links[i].from_interface.id,
+                                                                               links[i].to_interface.id,
+                                                                               links[i].name));
+            }
+        }
+        for (i = 0; i < devices.length; i++) {
+            index = $scope.devices.indexOf(devices[i]);
+            if (index !== -1) {
+                $scope.devices.splice(index, 1);
+                $scope.send_control_message(new messages.DeviceDestroy($scope.client_id,
+                                                                                 devices[i].id,
+                                                                                 devices[i].x,
+                                                                                 devices[i].y,
+                                                                                 devices[i].name,
+                                                                                 devices[i].type,
+                                                                                 devices[i].host_id));
+            }
+            for (j = 0; j < all_links.length; j++) {
+                if (all_links[j].to_device === devices[i] ||
+                    all_links[j].from_device === devices[i]) {
+                    index = $scope.links.indexOf(all_links[j]);
+                    if (index !== -1) {
+                        $scope.links.splice(index, 1);
+                    }
+                }
+            }
+        }
+    };
+
+    $scope.deleteGroup = function(){
+        var i = 0;
+        var index = -1;
+        var selected_groups = $scope.selected_groups;
+        $scope.selected_groups = [];
+        $scope.group_controller.changeState(group.Ready);
+        $scope.context_menus[0].enabled = false;
+
+
+        function removeSingleGroup(group){
+            index = $scope.groups.indexOf(group);
+            if (index !== -1) {
+                group.selected = false;
+                group.remote_selected = false;
+                $scope.groups.splice(index, 1);
+            }
+            $scope.send_control_message(new messages.GroupDestroy($scope.client_id,
+                                                                            group.id,
+                                                                            group.x1,
+                                                                            group.y1,
+                                                                            group.x2,
+                                                                            group.y2,
+                                                                            group.name));
+        }
+
+        if($scope.current_scale <= 0.5){
+            // current scale is in racks mode or sites mode
+            for (i = 0; i < selected_groups.length; i++) {
+                let group = selected_groups[i];
+                if(group.groups.length > 0){
+                    for(var k = 0; k < group.groups.length; k++){
+                        let nested_group = group.groups[k];
+                        removeSingleGroup(nested_group);
+                    }
+                }
+                // remove all the nested devices and links
+                $scope.selected_devices = group.devices;
+                $scope.selected_links = group.links;
+                $scope.deleteDevice();
+
+                removeSingleGroup(group);
+            }
+        }
+        if($scope.current_scale > 0.5){
+            // current scale is in devices mode
+            for (i = 0; i < selected_groups.length; i++) {
+                let group = selected_groups[i];
+                removeSingleGroup(group);
+            }
+        }
+    };
+
+    $scope.onDeleteContextMenu = function($event){
+        if($scope.selected_devices.length === 1){
+            $scope.deleteDevice();
+        }
+        else if($scope.selected_groups.length === 1){
+            $scope.deleteGroup();
+        }
     };
 
     // Button Event Handlers
@@ -732,12 +872,13 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     // Context Menu Buttons
     $scope.context_menu_buttons = [
         new models.ContextMenuButton("Rename", 210, 200, 160, 26, $scope.onRenameContextButton, $scope),
-        new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope)
+        new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope),
+        new models.ContextMenuButton("Delete", 256, 231, 160, 26, $scope.onDeleteContextMenu, $scope)
     ];
 
     // Context Menus
     $scope.context_menus = [
-        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
+        new models.ContextMenu('HOST', 210, 200, 160, 90, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
     ];
 
     // Icons

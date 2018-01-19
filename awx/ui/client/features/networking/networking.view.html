@@ -36,33 +36,31 @@
 
     <div class="Networking-rightPanel" ng-show="vm.panelIsExpanded">
 
-        <div ng-if="hostDetail===false">
-            NO HOST DETAIL
-        </div>
-
-
-        <div ng-if="hostDetail!==false">
             <!--beginning of header-->
             <div class="Networking-panelHeader">
                 <div class="JobResults-panelHeaderText" translate="">
-                    DETAILS
+                    DETAILS <span ng-if="!item.host_id">| {{item.name}}</span>
                 </div>
             </div>
             <!--end of header-->
 
             <!--beginning of name row -->
-            <div class="JobResults-resultRow">
-                <label class="JobResults-resultRowLabel" translate="">
+            <div class="JobResults-resultRow" ng-if="item.host_id">
+                <label class="JobResults-resultRowLabel Networking-resultRowLabel" translate="">
                     Name
                 </label>
                  <div class="JobResults-resultRowText">
-                     {{hostDetail.name}}
+                     {{item.name}}
                  </div>
              </div>
              <!--end of name row -->
 
+             <div class="List-noItems Networking-noItems" ng-if="!item.host_id">
+                 {{item.type}} DETAILS NOT AVAILABLE
+             </div>
+
              <!-- beginning of extra variable row -->
-             <div class="JobResults-resultRow JobResults-resultRow--variables" ng-show="hostDetail.variables">
+             <div class="JobResults-resultRow JobResults-resultRow--variables" ng-show="item.variables">
                  <label class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth">
                      <span translate>
                          Extra Variables
@@ -74,7 +72,7 @@
                  </label>
                  <textarea
                      rows="6"
-                     ng-model="hostDetail.variables"
+                     ng-model="item.variables"
                      name="variables"
                      class="form-control Form-textArea Form-textAreaLabel Form-formGroup--fullWidth"
                      id="pre-formatted-variables"
@@ -82,7 +80,7 @@
                  </textarea>
              </div>
              <!-- end of extra variable row -->
-         </div>
+
      </div>
 </div>
 <!--end of Networking-rightPanel -->

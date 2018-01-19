@@ -88,6 +88,13 @@ inherits(_Placing, _State);
 var Placing = new _Placing();
 exports.Placing = Placing;
 
+function _ContextMenu () {
+    this.name = 'ContextMenu';
+}
+inherits(_ContextMenu, _State);
+var ContextMenu = new _ContextMenu();
+exports.ContextMenu = ContextMenu;
+
 _State.prototype.onUnselectAll = function (controller, msg_type, $event) {
 
     controller.changeState(Ready);
@@ -244,12 +251,21 @@ _Selected3.prototype.onMouseMove = function (controller) {
 };
 _Selected3.prototype.onMouseMove.transitions = ['Move'];
 
-_Selected3.prototype.onMouseUp = function (controller) {
+_Selected3.prototype.onMouseUp = function (controller, msg_type, $event) {
+    let context_menu = controller.scope.context_menus[0];
+    context_menu.enabled = true;
+    context_menu.x = $event.x;
+    context_menu.y = $event.y;
+    context_menu.buttons.forEach(function(button, index){
+        button.x = $event.x;
+        let menuPaddingTop = 5;
+        button.y = $event.y + menuPaddingTop + (button.height * index);
+    });
 
-    controller.changeState(EditLabel);
+    controller.changeState(ContextMenu);
 
 };
-_Selected3.prototype.onMouseUp.transitions = ['EditLabel'];
+_Selected3.prototype.onMouseUp.transitions = ['ContextMenu'];
 
 
 _Move.prototype.onMouseMove = function (controller) {
@@ -505,27 +521,7 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
 
     if ($event.keyCode === 8) {
         //Delete
-        controller.changeState(Ready);
-
-        var i = 0;
-        var index = -1;
-        var groups = controller.scope.selected_groups;
-        controller.scope.selected_groups = [];
-        for (i = 0; i < groups.length; i++) {
-            index = controller.scope.groups.indexOf(groups[i]);
-            if (index !== -1) {
-                groups[i].selected = false;
-                groups[i].remote_selected = false;
-                controller.scope.groups.splice(index, 1);
-            }
-            controller.scope.send_control_message(new messages.GroupDestroy(controller.scope.client_id,
-                                                                            groups[i].id,
-                                                                            groups[i].x1,
-                                                                            groups[i].y1,
-                                                                            groups[i].x2,
-                                                                            groups[i].y2,
-                                                                            groups[i].name));
-        }
+        controller.scope.deleteGroup();
     } else {
         controller.delegate_channel.send(msg_type, $event);
     }
@@ -575,3 +571,19 @@ _Placing.prototype.onMouseDown = function (controller) {
 };
 _Placing.prototype.onMouseDown.transitions = ['Resize'];
 
+
+_ContextMenu.prototype.onLabelEdit = function (controller) {
+
+    controller.changeState(EditLabel);
+
+};
+_ContextMenu.prototype.onLabelEdit.transitions = ['EditLabel'];
+
+_ContextMenu.prototype.onMouseDown = function (controller) {
+
+    var item = controller.scope.context_menus[0];
+    item.enabled = false;
+    controller.changeState(Ready);
+
+};
+_ContextMenu.prototype.onMouseDown.transitions = ['Ready'];
