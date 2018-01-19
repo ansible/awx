@@ -53,6 +53,7 @@ import ansiconv
 # Python Social Auth
 from social_core.backends.utils import load_backends
 
+import pytz
 from wsgiref.util import FileWrapper
 
 # AWX
@@ -606,6 +607,31 @@ class ScheduleDetail(RetrieveUpdateDestroyAPIView):
     model = Schedule
     serializer_class = ScheduleSerializer
     new_in_148 = True
+
+
+class SchedulePreview(GenericAPIView):
+
+    model = Schedule
+    view_name = _('Schedule Recurrence Rule Preview')
+    serializer_class = SchedulePreviewSerializer
+    new_in_api_v2 = True
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            schedule = list(Schedule.rrulestr(serializer.validated_data['rrule']).xafter(now(), count=10))
+            return Response({
+                'local': schedule,
+                'utc': [s.astimezone(pytz.utc) for s in schedule]
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ScheduleZoneInfo(APIView):
+
+    def get(self, request):
+        from dateutil.zoneinfo import get_zonefile_instance
+        return Response(sorted(get_zonefile_instance().zones.keys()))
 
 
 class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):

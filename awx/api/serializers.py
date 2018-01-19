@@ -9,7 +9,6 @@ import re
 import six
 import urllib
 from collections import OrderedDict
-from dateutil import rrule
 
 # Django
 from django.conf import settings
@@ -3873,7 +3872,67 @@ class LabelSerializer(BaseSerializer):
         return res
 
 
-class ScheduleSerializer(LaunchConfigurationBaseSerializer):
+class SchedulePreviewSerializer(BaseSerializer):
+
+    class Meta:
+        model = Schedule
+        fields = ('rrule',)
+
+    # We reject rrules if:
+    # - DTSTART is not include
+    # - INTERVAL is not included
+    # - SECONDLY is used
+    # - TZID is used
+    # - BYDAY prefixed with a number (MO is good but not 20MO)
+    # - BYYEARDAY
+    # - BYWEEKNO
+    # - Multiple DTSTART or RRULE elements
+    # - COUNT > 999
+    def validate_rrule(self, value):
+        rrule_value = value
+        multi_by_month_day = ".*?BYMONTHDAY[\:\=][0-9]+,-*[0-9]+"
+        multi_by_month = ".*?BYMONTH[\:\=][0-9]+,[0-9]+"
+        by_day_with_numeric_prefix = ".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
+        match_count = re.match(".*?(COUNT\=[0-9]+)", rrule_value)
+        match_multiple_dtstart = re.findall(".*?(DTSTART(;[^:]+)?\:[0-9]+T[0-9]+Z?)", rrule_value)
+        match_native_dtstart = re.findall(".*?(DTSTART:[0-9]+T[0-9]+) ", rrule_value)
+        match_multiple_rrule = re.findall(".*?(RRULE\:)", rrule_value)
+        if not len(match_multiple_dtstart):
+            raise serializers.ValidationError(_('Valid DTSTART required in rrule. Value should start with: DTSTART:YYYYMMDDTHHMMSSZ'))
+        if len(match_native_dtstart):
+            raise serializers.ValidationError(_('DTSTART cannot be a naive datetime.  Specify ;TZINFO= or YYYYMMDDTHHMMSSZZ.'))
+        if len(match_multiple_dtstart) > 1:
+            raise serializers.ValidationError(_('Multiple DTSTART is not supported.'))
+        if not len(match_multiple_rrule):
+            raise serializers.ValidationError(_('RRULE required in rrule.'))
+        if len(match_multiple_rrule) > 1:
+            raise serializers.ValidationError(_('Multiple RRULE is not supported.'))
+        if 'interval' not in rrule_value.lower():
+            raise serializers.ValidationError(_('INTERVAL required in rrule.'))
+        if 'secondly' in rrule_value.lower():
+            raise serializers.ValidationError(_('SECONDLY is not supported.'))
+        if re.match(multi_by_month_day, rrule_value):
+            raise serializers.ValidationError(_('Multiple BYMONTHDAYs not supported.'))
+        if re.match(multi_by_month, rrule_value):
+            raise serializers.ValidationError(_('Multiple BYMONTHs not supported.'))
+        if re.match(by_day_with_numeric_prefix, rrule_value):
+            raise serializers.ValidationError(_("BYDAY with numeric prefix not supported."))
+        if 'byyearday' in rrule_value.lower():
+            raise serializers.ValidationError(_("BYYEARDAY not supported."))
+        if 'byweekno' in rrule_value.lower():
+            raise serializers.ValidationError(_("BYWEEKNO not supported."))
+        if match_count:
+            count_val = match_count.groups()[0].strip().split("=")
+            if int(count_val[1]) > 999:
+                raise serializers.ValidationError(_("COUNT > 999 is unsupported."))
+        try:
+            Schedule.rrulestr(rrule_value)
+        except Exception:
+            raise serializers.ValidationError(_("rrule parsing failed validation."))
+        return value
+
+
+class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
     show_capabilities = ['edit', 'delete']
 
     class Meta:
@@ -3898,58 +3957,6 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer):
             raise serializers.ValidationError(_(
                 six.text_type('Inventory sources with `update_on_project_update` cannot be scheduled. '
                               'Schedule its source project `{}` instead.').format(value.source_project.name)))
-        return value
-
-    # We reject rrules if:
-    # - DTSTART is not include
-    # - INTERVAL is not included
-    # - SECONDLY is used
-    # - TZID is used
-    # - BYDAY prefixed with a number (MO is good but not 20MO)
-    # - BYYEARDAY
-    # - BYWEEKNO
-    # - Multiple DTSTART or RRULE elements
-    # - COUNT > 999
-    def validate_rrule(self, value):
-        rrule_value = value
-        multi_by_month_day = ".*?BYMONTHDAY[\:\=][0-9]+,-*[0-9]+"
-        multi_by_month = ".*?BYMONTH[\:\=][0-9]+,[0-9]+"
-        by_day_with_numeric_prefix = ".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
-        match_count = re.match(".*?(COUNT\=[0-9]+)", rrule_value)
-        match_multiple_dtstart = re.findall(".*?(DTSTART\:[0-9]+T[0-9]+Z)", rrule_value)
-        match_multiple_rrule = re.findall(".*?(RRULE\:)", rrule_value)
-        if not len(match_multiple_dtstart):
-            raise serializers.ValidationError(_('DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ'))
-        if len(match_multiple_dtstart) > 1:
-            raise serializers.ValidationError(_('Multiple DTSTART is not supported.'))
-        if not len(match_multiple_rrule):
-            raise serializers.ValidationError(_('RRULE require in rrule.'))
-        if len(match_multiple_rrule) > 1:
-            raise serializers.ValidationError(_('Multiple RRULE is not supported.'))
-        if 'interval' not in rrule_value.lower():
-            raise serializers.ValidationError(_('INTERVAL required in rrule.'))
-        if 'tzid' in rrule_value.lower():
-            raise serializers.ValidationError(_('TZID is not supported.'))
-        if 'secondly' in rrule_value.lower():
-            raise serializers.ValidationError(_('SECONDLY is not supported.'))
-        if re.match(multi_by_month_day, rrule_value):
-            raise serializers.ValidationError(_('Multiple BYMONTHDAYs not supported.'))
-        if re.match(multi_by_month, rrule_value):
-            raise serializers.ValidationError(_('Multiple BYMONTHs not supported.'))
-        if re.match(by_day_with_numeric_prefix, rrule_value):
-            raise serializers.ValidationError(_("BYDAY with numeric prefix not supported."))
-        if 'byyearday' in rrule_value.lower():
-            raise serializers.ValidationError(_("BYYEARDAY not supported."))
-        if 'byweekno' in rrule_value.lower():
-            raise serializers.ValidationError(_("BYWEEKNO not supported."))
-        if match_count:
-            count_val = match_count.groups()[0].strip().split("=")
-            if int(count_val[1]) > 999:
-                raise serializers.ValidationError(_("COUNT > 999 is unsupported."))
-        try:
-            rrule.rrulestr(rrule_value)
-        except Exception:
-            raise serializers.ValidationError(_("rrule parsing failed validation."))
         return value
 
 
