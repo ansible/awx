@@ -72,7 +72,7 @@ The RBAC system defines a few new models. These models represent the underlying 
 
 ##### `visible_roles(cls, user)`
 
-`visible_roles` is a class method that will lookup all of the `Role` instances a user can "see". This includes any roles the user is a direct decendent of as well as any ancestor roles.
+`visible_roles` is a class method that will lookup all of the `Role` instances a user can "see". This includes any roles the user is a direct descendant of as well as any ancestor roles.
 
 ##### `singleton(cls, name)`
 
