@@ -6,55 +6,55 @@ localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env pyth
 # Otherwise the setup playbook will install the official Ansible images. Versions may
 # be selected based on: latest, 1, 1.0, 1.0.0, 1.0.0.123
 # by default the base will be used to search for ansible/awx_web and ansible/awx_task
-dockerhub_base=ansible
-dockerhub_version=latest
+dockerhub_base={{ dockerhub_base|default('ansible') }}
+dockerhub_version={{ dockerhub_version|default('latest') }}
 
 # This will create or update a default admin (superuser) account in AWX, if not provided
 # then these default values are used
-# default_admin_user=admin
-# default_admin_password=password
+default_admin_user={{ default_admin_user|default('admin') }}
+default_admin_password={{ default_admin_password|default('password') }}
 
 # AWX Secret key
 # It's *very* important that this stay the same between upgrades or you will lose the ability to decrypt
 # your credentials
-awx_secret_key=awxsecret
+awx_secret_key={{ awx_secret_key|default('awxsecret') }}
 
 # Openshift Install
 # Will need to set -e openshift_password=developer -e docker_registry_password=$(oc whoami -t)
-# openshift_host=127.0.0.1:8443
-# awx_openshift_project=awx
-# openshift_user=developer
-# awx_node_port=30083
+# openshift_host={{ openshift_host|default('127.0.0.1:8443') }}
+# awx_openshift_project={{ awx_openshift_project|default('awx') }}
+# openshift_user={{ openshift_user|default('developer') }}
+# awx_node_port={{ awx_node_port|default('30083') }}
 
 # Kubernetes Install
 # kubernetes_context=test-cluster
 # awx_kubernetes_namespace=awx
 
 # Standalone Docker Install
-postgres_data_dir=/tmp/pgdocker
-host_port=80
+postgres_data_dir={{ postgres_data_dir|default('/tmp/pgdocker') }}
+host_port={{ host_port|default('80') }}
 
 # Required for Openshift when building the image on your own
 # Optional for Openshift if using Dockerhub or another prebuilt registry
 # Required for Standalone Docker Install if building the image on your own
 # Optional for Standalone Docker Install if using Dockerhub or another prebuilt registry
 # Define if you want the image pushed to a registry. The container definition will also use these images
-# docker_registry=172.30.1.1:5000
-# docker_registry_repository=awx
-# docker_registry_username=developer
+# docker_registry={{ docker_registry|default('172.30.1.1:5000') }}
+# docker_registry_repository={{ docker_registry_repository|default('awx') }}
+# docker_registry_username={{ docker_registry_username|default('developer') }}
 
 
 # Docker_image will not attempt to push to remote if the image already exists locally
 # Set this to true to delete images from docker on the build host so that they are pushed to the remote repository
-# docker_remove_local_images=False
+# docker_remove_local_images={{ docker_remove_local_images|default('False') }}
 
 # Set pg_hostname if you have an external postgres server, otherwise
 # a new postgres service will be created
-# pg_hostname=postgresql
-pg_username=awx
-pg_password=awxpass
-pg_database=awx
-pg_port=5432
+# pg_hostname={{ pg_hostname|default('postgresql') }}
+pg_username={{ pg_username|default('awx') }}
+pg_password={{ pg_password|default('awxpass') }}
+pg_database={{ pg_database|default('awx') }}
+pg_port={{ pg_port|default('5432') }}
 
 # Use a local distribution build container image for building the AWX package
 # This is helpful if you don't want to bother installing the build-time dependencies as
@@ -65,18 +65,18 @@ pg_port=5432
 #                  Thus this setting must be set to False which will trigger a local build. To view the
 #                  typical dependencies that you might need to install see:
 #                  installer/image_build/files/Dockerfile.sdist
-# use_container_for_build=true
+# use_container_for_build={{ use_container_for_build|default('true') }}
 
 # Build AWX with official logos
 # Requires cloning awx-logos repo into the project root.
 # Review the trademark guidelines at https://github.com/ansible/awx-logos/blob/master/TRADEMARKS.md
-# awx_official=false
+# awx_official={{ awx_official|default('false') }}
 
 # Proxy
-#http_proxy=http://proxy:3128
-#https_proxy=http://proxy:3128
-#no_proxy=mycorp.org
+#http_proxy={{ http_proxy|default('http://proxy:3128') }}
+#https_proxy={{ https_proxy|default('http://proxy:3128') }}
+#no_proxy={{ no_proxy|default('mycorp.org') }}
 
 # Container networking configuration
 # Set the awx_task and awx_web containers' search domain(s)
-#awx_container_search_domains=example.com,ansible.com
+#awx_container_search_domains={{ awx_container_search_domains|default('example.com,ansible.com') }}
