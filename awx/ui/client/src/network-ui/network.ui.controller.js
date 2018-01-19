@@ -584,9 +584,22 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $document.bind("keydown", $scope.onKeyDown);
 
     // Conext Menu Button Handlers
+
+    $scope.removeContextMenu = function(){
+        let context_menu = $scope.context_menus[0];
+        context_menu.enabled = false;
+        context_menu.x = -100000;
+        context_menu.y = -100000;
+        context_menu.buttons.forEach(function(button, index){
+            button.enabled = false;
+            button.x = -100000;
+            button.y = -100000;
+        });
+    }
+
     $scope.onDetailsContextButton = function (panelBoolean) {
         if (!$scope.disconnected) {
-
+            $scope.removeContextMenu();
             // show details for devices
             if ($scope.selected_devices.length === 1){
 
@@ -605,7 +618,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                              let host = response.data;
                              host.host_id = host.id;
                              $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
-                             $scope.context_menus[0].enabled = false;
+
                          })
                          .catch(({data, status}) => {
                              ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
@@ -617,27 +630,24 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             else if($scope.selected_interfaces.length === 1){
                 let selected_interface  = $scope.selected_interfaces[0];
                 $scope.$emit('showDetails', selected_interface, panelBoolean !== null ? panelBoolean: true);
-                $scope.context_menus[0].enabled = false;
             }
 
             // show details for links
             else if($scope.selected_links.length === 1){
                 let link  = $scope.selected_links[0];
                 $scope.$emit('showDetails', link, panelBoolean !== null ? panelBoolean: true);
-                $scope.context_menus[0].enabled = false;
             }
 
             //show details for groups, racks, and sites
             else if ($scope.selected_groups.length === 1){
                 let group = $scope.selected_groups[0];
                 $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);
-                $scope.context_menus[0].enabled = false;
             }
          }
     };
 
     $scope.onRenameContextButton = function (button) {
-        $scope.context_menus[0].enabled = false;
+        $scope.removeContextMenu();
         $scope.first_channel.send("LabelEdit", {});
     };
 
@@ -650,7 +660,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         var all_links = $scope.links.slice();
         $scope.selected_devices = [];
         $scope.selected_links = [];
-        $scope.context_menus[0].enabled = false;
         $scope.move_controller.changeState(move.Ready);
         for (i = 0; i < links.length; i++) {
             index = $scope.links.indexOf(links[i]);
@@ -697,8 +706,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         var selected_groups = $scope.selected_groups;
         $scope.selected_groups = [];
         $scope.group_controller.changeState(group.Ready);
-        $scope.context_menus[0].enabled = false;
-
 
         function removeSingleGroup(group){
             index = $scope.groups.indexOf(group);
@@ -744,6 +751,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     };
 
     $scope.onDeleteContextMenu = function($event){
+        $scope.removeContextMenu();
         if($scope.selected_devices.length === 1){
             $scope.deleteDevice();
         }
