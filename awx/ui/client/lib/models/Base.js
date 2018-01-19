@@ -106,9 +106,10 @@ function httpGet (config = {}) {
         req.params = config.params;
 
         if (config.params.page_size) {
-            this.pageSize = config.params.page_size;
-            this.pageLimit = config.pageLimit || false;
-            this.pageCache = config.pageCache || false;
+            this.page.size = config.params.page_size;
+            this.page.limit = config.pageLimit || false;
+            this.page.cache = config.pageCache || false;
+            this.page.current = 1;
         }
     }
 
@@ -120,6 +121,7 @@ function httpGet (config = {}) {
         req.url = `${this.path}${config.resource}/`;
     }
 
+    console.log(req, this.path);
     return $http(req)
         .then(res => {
             this.model.GET = res.data;
@@ -337,9 +339,11 @@ function extend (related, config) {
     const req = this.parseRequestConfig('GET', config);
 
     if (config.params.page_size) {
-        this.pageSize = config.params.page_size;
-        this.pageLimit = config.pageLimit || false;
-        this.pageCache = config.pageCache || false;
+        this.page.size = config.params.page_size;
+        this.page.limit = config.pageLimit || false;
+        this.page.cache = config.pageCache || false;
+        this.page.current = 1;
+        this.page.cursor = 0;
     }
 
     if (this.has(req.method, `related.${related}`)) {
@@ -358,53 +362,145 @@ function extend (related, config) {
     return Promise.reject(new Error(`No related property, ${related}, exists`));
 }
 
-function next (config = {}) {
+function goToPage (config, page) {
+    const params = config.params || {};
+
     let url;
-    let results;
+    // let results;
+    let cursor;
+    let pageNumber;
 
     if (config.related) {
-        url = this.get(`related.${config.related}.next`);
-        results = this.get(`related.${config.related}.results`) || [];
+        // results = this.get(`related.${config.related}.results`) || [];
+        url = `${this.endpoint}${config.related}/`;
     } else {
-        url = this.get('next');
-        results = this.get('results');
+        // results = this.get('results');
+        url = this.endpoint;
     }
 
-    if (!url) {
-        return Promise.resolve(null);
+    params.page_size = this.page.size;
+
+    if (page === 'next') {
+        // if (at max)
+
+        pageNumber = this.page.current + 1;
+        cursor = this.page.cursor + this.page.size;
+    } else if (page === 'prev') {
+        // if (at min)
+
+        pageNumber = this.page.current - 1;
+        cursor = this.page.cursor - this.page.size;
+    } else {
+        pageNumber = page;
+        cursor = this.page.size * (pageNumber - 1);
     }
+
+    if (cursor !== 0 && cursor !== (this.page.limit * this.page.size)) {
+        this.page.cursor = cursor;
+        this.page.current = pageNumber;
+
+        return Promise.resolve(cursor);
+    }
+
+    params.page_size = this.page.size;
+    params.page = this.page.current;
 
     const req = {
         method: 'GET',
-        url
+        url,
+        params
     };
 
     return $http(req)
         .then(({ data }) => {
-            let cursor = 0;
-
-            if (this.pageCache) {
-                results = results || [];
-                data.results = results.concat(data.results);
-                cursor = results.length;
-
-                if (this.pageLimit && this.pageLimit * this.pageSize < data.results.length) {
-                    const removeCount = data.results.length - this.pageLimit * this.pageSize;
-
-                    data.results.splice(0, removeCount);
-                    cursor -= removeCount;
-                }
-            }
-
-            if (config.related) {
-                this.set('get', `related.${config.related}`, data);
-            } else {
-                this.set('get', data);
-            }
-
-            return cursor <= 0 ? 0 : cursor;
+            console.log(data);
         });
 }
+
+function next (config = {}) {
+    return this.goToPage(config, 'next');
+/*
+ *        .then(({ data }) => {
+ *            let cursor = 0;
+ *
+ *            if (this.pageCache) {
+ *                results = results || [];
+ *                data.results = results.concat(data.results);
+ *                cursor = results.length;
+ *
+ *                if (this.pageLimit && this.pageLimit * this.pageSize < data.results.length) {
+ *                    const removeCount = data.results.length - this.pageLimit * this.pageSize;
+ *
+ *                    data.results.splice(0, removeCount);
+ *                    cursor -= removeCount;
+ *                }
+ *            }
+ *
+ *            if (config.related) {
+ *                this.set('get', `related.${config.related}`, data);
+ *            } else {
+ *                this.set('get', data);
+ *            }
+ *
+ *            this.page.current++;
+ *
+ *            return cursor <= 0 ? 0 : cursor;
+ *        });
+ */
+}
+
+function prev (config = {}) {
+    return this.goToPage(config, 'next');
+}
+/*
+ *    let url;
+ *    let results;
+ *
+ *    console.log(config, config.cursor)
+ *    if (config.related) {
+ *        url = this.get(`related.${config.related}.next`);
+ *        results = this.get(`related.${config.related}.results`) || [];
+ *    } else {
+ *        url = this.get('next');
+ *        results = this.get('results');
+ *    }
+ *
+ *    if (!url) {
+ *        return Promise.resolve(null);
+ *    }
+ *
+ *    const req = {
+ *        method: 'GET',
+ *        url
+ *    };
+ *
+ *    return $http(req)
+ *        .then(({ data }) => {
+ *            let cursor = 0;
+ *
+ *            if (this.pageCache) {
+ *                results = results || [];
+ *                data.results = results.concat(data.results);
+ *                cursor = results.length;
+ *
+ *                if (this.pageLimit && this.pageLimit * this.pageSize < data.results.length) {
+ *                    const removeCount = data.results.length - this.pageLimit * this.pageSize;
+ *
+ *                    data.results.splice(0, removeCount);
+ *                    cursor -= removeCount;
+ *                }
+ *            }
+ *
+ *            if (config.related) {
+ *                this.set('get', `related.${config.related}`, data);
+ *            } else {
+ *                this.set('get', data);
+ *            }
+ *
+ *            return cursor <= 0 ? 0 : cursor;
+ *        });
+ *}
+ */
 
 function normalizePath (resource) {
     const version = '/api/v2/';
@@ -515,6 +611,10 @@ function create (method, resource, config) {
         return this;
     }
 
+    if (req.resource) {
+        this.setEndpoint(req.resource);
+    }
+
     this.promise = this.request(req);
 
     if (req.graft) {
@@ -523,6 +623,10 @@ function create (method, resource, config) {
 
     return this.promise
         .then(() => this);
+}
+
+function setEndpoint (resource) {
+    this.endpoint = `${this.path}${resource}/`;
 }
 
 function parseRequestConfig (method, resource, config) {
@@ -577,6 +681,7 @@ function BaseModel (resource, settings) {
     this.create = create;
     this.find = find;
     this.get = get;
+    this.goToPage = goToPage;
     this.graft = graft;
     this.has = has;
     this.isEditable = isEditable;
@@ -587,10 +692,12 @@ function BaseModel (resource, settings) {
     this.normalizePath = normalizePath;
     this.options = options;
     this.parseRequestConfig = parseRequestConfig;
+    this.prev = prev;
     this.request = request;
     this.requestWithCache = requestWithCache;
     this.search = search;
     this.set = set;
+    this.setEndpoint = setEndpoint;
     this.unset = unset;
     this.extend = extend;
     this.copy = copy;
@@ -605,6 +712,7 @@ function BaseModel (resource, settings) {
         delete: httpDelete.bind(this)
     };
 
+    this.page = {};
     this.model = {};
     this.path = this.normalizePath(resource);
     this.label = strings.get(`${resource}.LABEL`);

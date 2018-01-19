@@ -89,20 +89,36 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
 }
 
 function next () {
-    job.next({ related: 'job_events' })
+    const config = {
+        related: 'job_events',
+        params: {
+            order_by: 'start_line'
+        }
+    };
+
+    job.next(config)
         .then(cursor => {
             meta.next = job.get('related.job_events.next');
             meta.prev = job.get('related.job_events.previous');
 
             console.log(ROW_LIMIT);
             console.log(getRowCount());
-            console.log(getRowHeight());
             console.log(getRowsInView());
             console.log(getScrollPosition());
 
             console.log('above:', getRowsAbove());
             console.log('below:', getRowsBelow());
             append(cursor);
+            shift();
+
+            debugger;
+        });
+}
+
+function prev () {
+    job.prev({ related: 'job_events' })
+        .then(cursor => {
+            console.log(cursor);
         });
 }
 
@@ -156,6 +172,22 @@ function append (cursor) {
 
     table.append(rows);
     $compile(rows.contents())($scope);
+}
+
+/*
+ *function prepend (cursor) {
+ *
+ *}
+ *
+ */
+function shift () {
+    const count = getRowCount() - ROW_LIMIT;
+    const rows = $(ELEMENT_TBODY).children().slice(0, count);
+
+    console.log(count, rows);
+
+    rows.empty();
+    rows.remove();
 }
 
 function expand () {
@@ -397,6 +429,8 @@ function onScroll () {
 
         if (top === 0) {
             vm.menu.scroll.display = false;
+
+            prev();
 
             return;
         }
