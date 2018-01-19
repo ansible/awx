@@ -525,7 +525,10 @@ _Move.prototype.onMouseMove = function (controller) {
 
 _Move.prototype.onTouchMove = _Move.prototype.onMouseMove;
 
+_ContextMenu.prototype.end = function (controller) {
 
+    controller.scope.removeContextMenu();
+};
 
 _ContextMenu.prototype.onLabelEdit = function (controller) {
 
@@ -536,8 +539,6 @@ _ContextMenu.prototype.onLabelEdit.transitions = ['EditLabel'];
 
 _ContextMenu.prototype.onMouseDown = function (controller) {
 
-    var item = controller.scope.context_menus[0];
-    item.enabled = false;
     controller.changeState(Ready);
 
 };

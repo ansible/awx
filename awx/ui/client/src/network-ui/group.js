@@ -572,6 +572,11 @@ _Placing.prototype.onMouseDown = function (controller) {
 _Placing.prototype.onMouseDown.transitions = ['Resize'];
 
 
+_ContextMenu.prototype.end = function (controller) {
+
+    controller.scope.removeContextMenu();
+};
+
 _ContextMenu.prototype.onLabelEdit = function (controller) {
 
     controller.changeState(EditLabel);
@@ -581,8 +586,6 @@ _ContextMenu.prototype.onLabelEdit.transitions = ['EditLabel'];
 
 _ContextMenu.prototype.onMouseDown = function (controller) {
 
-    var item = controller.scope.context_menus[0];
-    item.enabled = false;
     controller.changeState(Ready);
 
 };
