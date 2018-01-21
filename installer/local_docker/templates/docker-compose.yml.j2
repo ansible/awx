@@ -18,6 +18,9 @@ services:
     {% if awx_container_search_domains is defined %}
     dns_search: "{{ awx_container_search_domains }}"
     {% endif %}
+    {% if awx_container_search_domains is defined %}
+    dns: "{{ awx_alternate_dns_servers }}"
+    {% endif %}
     environment:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
@@ -52,6 +55,9 @@ services:
     restart: unless-stopped
     {% if awx_container_search_domains is defined %}
     dns_search: "{{ awx_container_search_domains }}"
+    {% endif %}
+    {% if awx_container_search_domains is defined %}
+    dns: "{{ awx_alternate_dns_servers }}"
     {% endif %}
     environment:
       http_proxy: {{ http_proxy | default('') }}
