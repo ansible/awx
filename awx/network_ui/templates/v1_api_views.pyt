@@ -2,7 +2,7 @@ from rest_framework import viewsets
 {%for model in models%}
 from {{app}}.models import {{model.name}}{%endfor%}
 {%for model in models%}
-from {{app}}.api_serializers import {{model.name}}Serializer{%endfor%}
+from {{app}}.v1_api_serializers import {{model.name}}Serializer{%endfor%}
 
 {%for model in models%}
 

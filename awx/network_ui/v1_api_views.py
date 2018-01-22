@@ -26,31 +26,31 @@ from awx.network_ui.models import Result
 from awx.network_ui.models import CodeUnderTest
 from awx.network_ui.models import TestResult
 
-from awx.network_ui.api_serializers import DeviceSerializer
-from awx.network_ui.api_serializers import LinkSerializer
-from awx.network_ui.api_serializers import TopologySerializer
-from awx.network_ui.api_serializers import ClientSerializer
-from awx.network_ui.api_serializers import TopologyHistorySerializer
-from awx.network_ui.api_serializers import MessageTypeSerializer
-from awx.network_ui.api_serializers import InterfaceSerializer
-from awx.network_ui.api_serializers import GroupSerializer
-from awx.network_ui.api_serializers import GroupDeviceSerializer
-from awx.network_ui.api_serializers import DataBindingSerializer
-from awx.network_ui.api_serializers import DataTypeSerializer
-from awx.network_ui.api_serializers import DataSheetSerializer
-from awx.network_ui.api_serializers import StreamSerializer
-from awx.network_ui.api_serializers import ProcessSerializer
-from awx.network_ui.api_serializers import ToolboxSerializer
-from awx.network_ui.api_serializers import ToolboxItemSerializer
-from awx.network_ui.api_serializers import FSMTraceSerializer
-from awx.network_ui.api_serializers import TopologyInventorySerializer
-from awx.network_ui.api_serializers import EventTraceSerializer
-from awx.network_ui.api_serializers import CoverageSerializer
-from awx.network_ui.api_serializers import TopologySnapshotSerializer
-from awx.network_ui.api_serializers import TestCaseSerializer
-from awx.network_ui.api_serializers import ResultSerializer
-from awx.network_ui.api_serializers import CodeUnderTestSerializer
-from awx.network_ui.api_serializers import TestResultSerializer
+from awx.network_ui.v1_api_serializers import DeviceSerializer
+from awx.network_ui.v1_api_serializers import LinkSerializer
+from awx.network_ui.v1_api_serializers import TopologySerializer
+from awx.network_ui.v1_api_serializers import ClientSerializer
+from awx.network_ui.v1_api_serializers import TopologyHistorySerializer
+from awx.network_ui.v1_api_serializers import MessageTypeSerializer
+from awx.network_ui.v1_api_serializers import InterfaceSerializer
+from awx.network_ui.v1_api_serializers import GroupSerializer
+from awx.network_ui.v1_api_serializers import GroupDeviceSerializer
+from awx.network_ui.v1_api_serializers import DataBindingSerializer
+from awx.network_ui.v1_api_serializers import DataTypeSerializer
+from awx.network_ui.v1_api_serializers import DataSheetSerializer
+from awx.network_ui.v1_api_serializers import StreamSerializer
+from awx.network_ui.v1_api_serializers import ProcessSerializer
+from awx.network_ui.v1_api_serializers import ToolboxSerializer
+from awx.network_ui.v1_api_serializers import ToolboxItemSerializer
+from awx.network_ui.v1_api_serializers import FSMTraceSerializer
+from awx.network_ui.v1_api_serializers import TopologyInventorySerializer
+from awx.network_ui.v1_api_serializers import EventTraceSerializer
+from awx.network_ui.v1_api_serializers import CoverageSerializer
+from awx.network_ui.v1_api_serializers import TopologySnapshotSerializer
+from awx.network_ui.v1_api_serializers import TestCaseSerializer
+from awx.network_ui.v1_api_serializers import ResultSerializer
+from awx.network_ui.v1_api_serializers import CodeUnderTestSerializer
+from awx.network_ui.v1_api_serializers import TestResultSerializer
 
 
 class DeviceViewSet(viewsets.ModelViewSet):
