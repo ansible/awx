@@ -355,7 +355,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         fields = self._get_unified_job_field_names()
         unallowed_fields = set(kwargs.keys()) - set(fields)
         if unallowed_fields:
-            raise Exception('Fields {} are not allowed as overrides.'.format(unallowed_fields))
+            logger.warn('Fields {} are not allowed as overrides.'.format(unallowed_fields))
+            map(kwargs.pop, unallowed_fields)
 
         unified_job = copy_model_by_class(self, unified_job_class, fields, kwargs)
 
