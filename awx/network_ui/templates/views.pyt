@@ -12,4 +12,5 @@ class {{model.name}}ViewSet(viewsets.ModelViewSet):
 
     queryset = {{model.name}}.objects.all()
     serializer_class = {{model.name}}Serializer
+
 {%endfor%}

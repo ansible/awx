@@ -30,148 +30,148 @@ from awx.network_ui.models import TestResult
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
-        fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq', 'host_id',)
+        fields = ('device_id', 'topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq', 'host_id',)
 
 
 class LinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Link
-        fields = ('from_device', 'to_device', 'from_interface', 'to_interface', 'id', 'name',)
+        fields = ('link_id', 'from_device', 'to_device', 'from_interface', 'to_interface', 'id', 'name',)
 
 
 class TopologySerializer(serializers.ModelSerializer):
     class Meta:
         model = Topology
-        fields = ('name', 'scale', 'panX', 'panY', 'device_id_seq', 'link_id_seq', 'group_id_seq', 'stream_id_seq',)
+        fields = ('topology_id', 'name', 'scale', 'panX', 'panY', 'device_id_seq', 'link_id_seq', 'group_id_seq', 'stream_id_seq',)
 
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ()
+        fields = ('client_id',)
 
 
 class TopologyHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = TopologyHistory
-        fields = ('topology', 'client', 'message_type', 'message_id', 'message_data', 'undone',)
+        fields = ('topology_history_id', 'topology', 'client', 'message_type', 'message_id', 'message_data', 'undone',)
 
 
 class MessageTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageType
-        fields = ('name',)
+        fields = ('message_type_id', 'name',)
 
 
 class InterfaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interface
-        fields = ('device', 'name', 'id',)
+        fields = ('interface_id', 'device', 'name', 'id',)
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ('id', 'name', 'x1', 'y1', 'x2', 'y2', 'topology', 'type',)
+        fields = ('group_id', 'id', 'name', 'x1', 'y1', 'x2', 'y2', 'topology', 'type',)
 
 
 class GroupDeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupDevice
-        fields = ('group', 'device',)
+        fields = ('group_device_id', 'group', 'device',)
 
 
 class DataBindingSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataBinding
-        fields = ('column', 'row', 'table', 'primary_key_id', 'field', 'data_type', 'sheet',)
+        fields = ('data_binding_id', 'column', 'row', 'table', 'primary_key_id', 'field', 'data_type', 'sheet',)
 
 
 class DataTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataType
-        fields = ('type_name',)
+        fields = ('data_type_id', 'type_name',)
 
 
 class DataSheetSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataSheet
-        fields = ('name', 'topology', 'client',)
+        fields = ('data_sheet_id', 'name', 'topology', 'client',)
 
 
 class StreamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stream
-        fields = ('from_device', 'to_device', 'label', 'id',)
+        fields = ('stream_id', 'from_device', 'to_device', 'label', 'id',)
 
 
 class ProcessSerializer(serializers.ModelSerializer):
     class Meta:
         model = Process
-        fields = ('device', 'name', 'type', 'id',)
+        fields = ('process_id', 'device', 'name', 'type', 'id',)
 
 
 class ToolboxSerializer(serializers.ModelSerializer):
     class Meta:
         model = Toolbox
-        fields = ('name',)
+        fields = ('toolbox_id', 'name',)
 
 
 class ToolboxItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ToolboxItem
-        fields = ('toolbox', 'data',)
+        fields = ('toolbox_item_id', 'toolbox', 'data',)
 
 
 class FSMTraceSerializer(serializers.ModelSerializer):
     class Meta:
         model = FSMTrace
-        fields = ('fsm_name', 'from_state', 'to_state', 'message_type', 'client', 'trace_session_id', 'order',)
+        fields = ('fsm_trace_id', 'fsm_name', 'from_state', 'to_state', 'message_type', 'client', 'trace_session_id', 'order',)
 
 
 class TopologyInventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = TopologyInventory
-        fields = ('topology', 'inventory_id',)
+        fields = ('topology_inventory_id', 'topology', 'inventory_id',)
 
 
 class EventTraceSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventTrace
-        fields = ('client', 'trace_session_id', 'event_data', 'message_id',)
+        fields = ('event_trace_id', 'client', 'trace_session_id', 'event_data', 'message_id',)
 
 
 class CoverageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coverage
-        fields = ('coverage_data', 'test_result',)
+        fields = ('coverage_id', 'coverage_data', 'test_result',)
 
 
 class TopologySnapshotSerializer(serializers.ModelSerializer):
     class Meta:
         model = TopologySnapshot
-        fields = ('client', 'topology_id', 'trace_session_id', 'snapshot_data', 'order',)
+        fields = ('topology_snapshot_id', 'client', 'topology_id', 'trace_session_id', 'snapshot_data', 'order',)
 
 
 class TestCaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestCase
-        fields = ('name', 'test_case_data',)
+        fields = ('test_case_id', 'name', 'test_case_data',)
 
 
 class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
-        fields = ('name',)
+        fields = ('result_id', 'name',)
 
 
 class CodeUnderTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = CodeUnderTest
-        fields = ('version_x', 'version_y', 'version_z', 'commits_since', 'commit_hash',)
+        fields = ('code_under_test_id', 'version_x', 'version_y', 'version_z', 'commits_since', 'commit_hash',)
 
 
 class TestResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestResult
-        fields = ('test_case', 'result', 'code_under_test', 'time', 'id', 'client',)
+        fields = ('test_result_id', 'test_case', 'result', 'code_under_test', 'time', 'id', 'client',)
