@@ -1,5 +1,10 @@
-from awx.main.models import JobTemplate, Schedule
+from datetime import datetime
+
+import mock
 import pytest
+import pytz
+
+from awx.main.models import JobTemplate, Schedule
 
 
 @pytest.fixture
@@ -166,3 +171,24 @@ def test_utc_until_in_the_past(job_template):
     s.save()
 
     assert s.next_run is s.dtstart is s.dtend is None
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.models.schedules.now', lambda: datetime(2030, 03, 05, tzinfo=pytz.utc))
+def test_dst_phantom_hour(job_template):
+    # The DST period in the United States begins at 02:00 (2 am) local time, so
+    # the hour from 2:00:00 to 2:59:59 does not exist in the night of the
+    # switch.
+
+    # Three Sundays, starting 2:30AM America/New_York, starting Mar 3, 2030,
+    # (which doesn't exist)
+    rrule = 'DTSTART;TZID=America/New_York:20300303T023000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+
+    # 3/10/30 @ 2:30AM is skipped because it _doesn't exist_ <cue twilight zone music>
+    assert str(s.next_run) == '2030-03-17 06:30:00+00:00'

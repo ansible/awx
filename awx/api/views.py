@@ -619,7 +619,19 @@ class SchedulePreview(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            schedule = list(Schedule.rrulestr(serializer.validated_data['rrule']).xafter(now(), count=10))
+            next_stamp = now()
+            schedule = []
+            gen = Schedule.rrulestr(serializer.validated_data['rrule']).xafter(next_stamp, count=20)
+
+            # loop across the entire generator and grab the first 10 events
+            for event in gen:
+                if len(schedule) >= 10:
+                    break
+                if not dateutil.tz.datetime_exists(event):
+                    # skip imaginary dates, like 2:30 on DST boundaries
+                    continue
+                schedule.append(event)
+
             return Response({
                 'local': schedule,
                 'utc': [s.astimezone(pytz.utc) for s in schedule]

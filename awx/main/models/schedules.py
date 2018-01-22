@@ -5,7 +5,7 @@ import re
 import logging
 import datetime
 import dateutil.rrule
-from dateutil.tz import gettz
+from dateutil.tz import gettz, datetime_exists
 
 # Django
 from django.db import models
@@ -185,7 +185,11 @@ class Schedule(CommonModel, LaunchTimeConfig):
     def update_computed_fields(self):
         future_rs = Schedule.rrulestr(self.rrule, forceset=True)
         next_run_actual = future_rs.after(now())
+
         if next_run_actual is not None:
+            if not datetime_exists(next_run_actual):
+                # skip imaginary dates, like 2:30 on DST boundaries
+                next_run_actual = future_rs.after(next_run_actual)
             next_run_actual = next_run_actual.astimezone(pytz.utc)
 
         self.next_run = next_run_actual

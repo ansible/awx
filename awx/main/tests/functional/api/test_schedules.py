@@ -158,3 +158,118 @@ def test_interval_by_local_day(post, admin_user):
         '2030-04-07 01:00:00+00:00',
         '2030-05-05 01:00:00+00:00',
     ]
+
+
+@pytest.mark.django_db
+def test_weekday_timezone_boundary(post, admin_user):
+    url = reverse('api:schedule_rrule')
+    rrule = 'DTSTART;TZID=America/New_York:20300101T210000 RRULE:FREQ=WEEKLY;BYDAY=TU;INTERVAL=1;COUNT=3'
+    r = post(url, {'rrule': rrule}, admin_user, expect=200)
+
+    assert map(str, r.data['local']) == [
+        '2030-01-01 21:00:00-05:00',
+        '2030-01-08 21:00:00-05:00',
+        '2030-01-15 21:00:00-05:00',
+    ]
+
+    assert map(str, r.data['utc']) == [
+        '2030-01-02 02:00:00+00:00',
+        '2030-01-09 02:00:00+00:00',
+        '2030-01-16 02:00:00+00:00',
+    ]
+
+
+@pytest.mark.django_db
+def test_first_monthly_weekday_timezone_boundary(post, admin_user):
+    url = reverse('api:schedule_rrule')
+    rrule = 'DTSTART;TZID=America/New_York:20300101T210000 RRULE:FREQ=MONTHLY;BYDAY=SU;BYSETPOS=1;INTERVAL=1;COUNT=3'
+    r = post(url, {'rrule': rrule}, admin_user, expect=200)
+
+    assert map(str, r.data['local']) == [
+        '2030-01-06 21:00:00-05:00',
+        '2030-02-03 21:00:00-05:00',
+        '2030-03-03 21:00:00-05:00',
+    ]
+
+    assert map(str, r.data['utc']) == [
+        '2030-01-07 02:00:00+00:00',
+        '2030-02-04 02:00:00+00:00',
+        '2030-03-04 02:00:00+00:00',
+    ]
+
+
+@pytest.mark.django_db
+def test_annual_timezone_boundary(post, admin_user):
+    url = reverse('api:schedule_rrule')
+    rrule = 'DTSTART;TZID=America/New_York:20301231T230000 RRULE:FREQ=YEARLY;INTERVAL=1;COUNT=3'
+    r = post(url, {'rrule': rrule}, admin_user, expect=200)
+
+    assert map(str, r.data['local']) == [
+        '2030-12-31 23:00:00-05:00',
+        '2031-12-31 23:00:00-05:00',
+        '2032-12-31 23:00:00-05:00',
+    ]
+
+    assert map(str, r.data['utc']) == [
+        '2031-01-01 04:00:00+00:00',
+        '2032-01-01 04:00:00+00:00',
+        '2033-01-01 04:00:00+00:00',
+    ]
+
+
+def test_dst_phantom_hour(post, admin_user):
+    # The DST period in the United States begins at 02:00 (2 am) local time, so
+    # the hour from 2:00:00 to 2:59:59 does not exist in the night of the
+    # switch.
+
+    # Three Sundays, starting 2:30AM America/New_York, starting Mar 3, 2030,
+    # should _not_ include Mar 10, 2030 @ 2:30AM (because it doesn't exist)
+    url = reverse('api:schedule_rrule')
+    rrule = 'DTSTART;TZID=America/New_York:20300303T023000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3'
+    r = post(url, {'rrule': rrule}, admin_user, expect=200)
+
+    assert map(str, r.data['local']) == [
+        '2030-03-03 02:30:00-05:00',
+        '2030-03-17 02:30:00-04:00',  # Skip 3/10 because 3/10 @ 2:30AM isn't a real date
+    ]
+
+    assert map(str, r.data['utc']) == [
+        '2030-03-03 07:30:00+00:00',
+        '2030-03-17 06:30:00+00:00',  # Skip 3/10 because 3/10 @ 2:30AM isn't a real date
+    ]
+
+
+@pytest.mark.django_db
+def test_months_with_31_days(post, admin_user):
+    url = reverse('api:schedule_rrule')
+    rrule = 'DTSTART;TZID=America/New_York:20300101T000000 RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=31;COUNT=7'
+    r = post(url, {'rrule': rrule}, admin_user, expect=200)
+
+    # 30 days have September, April, June, and November...
+    assert map(str, r.data['local']) == [
+        '2030-01-31 00:00:00-05:00',
+        '2030-03-31 00:00:00-04:00',
+        '2030-05-31 00:00:00-04:00',
+        '2030-07-31 00:00:00-04:00',
+        '2030-08-31 00:00:00-04:00',
+        '2030-10-31 00:00:00-04:00',
+        '2030-12-31 00:00:00-05:00',
+    ]
+
+
+def test_dst_rollback_duplicates(post, admin_user):
+    # From Nov 2 -> Nov 3, 2030, daylight savings ends and we "roll back" an hour.
+    # Make sure we don't "double count" duplicate times in the "rolled back"
+    # hour.
+
+    url = reverse('api:schedule_rrule')
+    rrule = 'DTSTART;TZID=America/New_York:20301102T233000 RRULE:FREQ=HOURLY;INTERVAL=1;COUNT=5'
+    r = post(url, {'rrule': rrule}, admin_user, expect=200)
+
+    assert map(str, r.data['local']) == [
+        '2030-11-02 23:30:00-04:00',
+        '2030-11-03 00:30:00-04:00',
+        '2030-11-03 01:30:00-04:00',
+        '2030-11-03 02:30:00-05:00',
+        '2030-11-03 03:30:00-05:00',
+    ]
