@@ -110,8 +110,6 @@ function next () {
             console.log('below:', getRowsBelow());
             append(cursor);
             shift();
-
-            debugger;
         });
 }
 

@@ -107,9 +107,15 @@ function httpGet (config = {}) {
 
         if (config.params.page_size) {
             this.page.size = config.params.page_size;
-            this.page.limit = config.pageLimit || false;
-            this.page.cache = config.pageCache || false;
             this.page.current = 1;
+
+            if (config.pageCache) {
+                this.page.cache = {
+                    root: {}
+                };
+
+                this.page.limit = config.pageLimit || false;
+            }
         }
     }
 
@@ -121,10 +127,13 @@ function httpGet (config = {}) {
         req.url = `${this.path}${config.resource}/`;
     }
 
-    console.log(req, this.path);
     return $http(req)
         .then(res => {
             this.model.GET = res.data;
+
+            if (config.pageCache) {
+                this.page.cache[this.page.current] = res.data.results;
+            }
 
             return res;
         });
@@ -340,10 +349,12 @@ function extend (related, config) {
 
     if (config.params.page_size) {
         this.page.size = config.params.page_size;
-        this.page.limit = config.pageLimit || false;
-        this.page.cache = config.pageCache || false;
         this.page.current = 1;
-        this.page.cursor = 0;
+
+        if (config.pageCache) {
+            this.page.cache = this.page.cache || {};
+            this.page.limit = config.pageLimit || false;
+        }
     }
 
     if (this.has(req.method, `related.${related}`)) {
@@ -354,6 +365,12 @@ function extend (related, config) {
         return $http(req)
             .then(({ data }) => {
                 this.set(req.method, `related.${related}`, data);
+
+                if (config.pageCache) {
+                    const key = `related.${related}.${this.page.current}`;
+
+                    _.set(this.page.cache, key, data.results);
+                }
 
                 return this;
             });
@@ -366,40 +383,42 @@ function goToPage (config, page) {
     const params = config.params || {};
 
     let url;
-    // let results;
-    let cursor;
+    let count;
+    let key;
     let pageNumber;
 
     if (config.related) {
-        // results = this.get(`related.${config.related}.results`) || [];
+        count = this.get(`related.${config.related}.count`);
         url = `${this.endpoint}${config.related}/`;
+        key = `related.${config.related}`;
     } else {
-        // results = this.get('results');
+        count = this.get('count');
         url = this.endpoint;
+        key = 'root';
     }
 
     params.page_size = this.page.size;
 
     if (page === 'next') {
         // if (at max)
-
         pageNumber = this.page.current + 1;
-        cursor = this.page.cursor + this.page.size;
-    } else if (page === 'prev') {
+    } else if (page === 'previous') {
+        // if (at min)
+        pageNumber = this.page.current - 1;
+    } else if (page === 'first') {
         // if (at min)
 
-        pageNumber = this.page.current - 1;
-        cursor = this.page.cursor - this.page.size;
-    } else {
+        pageNumber = 1;
+    } else if (page === 'last') {
+        // if (at min)
+
+        pageNumber = Math.floor(count / this.page.size);
+    } else if (typeof pageNumber === 'number') {
         pageNumber = page;
-        cursor = this.page.size * (pageNumber - 1);
     }
 
-    if (cursor !== 0 && cursor !== (this.page.limit * this.page.size)) {
-        this.page.cursor = cursor;
-        this.page.current = pageNumber;
-
-        return Promise.resolve(cursor);
+    if (this.page.cache && this.page.cache[pageNumber]) {
+        return Promise.resolve(this.page.cache[pageNumber]);
     }
 
     params.page_size = this.page.size;
@@ -413,7 +432,11 @@ function goToPage (config, page) {
 
     return $http(req)
         .then(({ data }) => {
-            console.log(data);
+            if (this.page.cache) {
+                _.set(this.page.cache, `${key}.${pageNumber}`, data.results);
+            }
+
+            console.log('cache', this.page.cache);
         });
 }
 
@@ -450,7 +473,7 @@ function next (config = {}) {
 }
 
 function prev (config = {}) {
-    return this.goToPage(config, 'next');
+    return this.goToPage(config, 'prev');
 }
 /*
  *    let url;
