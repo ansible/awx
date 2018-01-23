@@ -199,7 +199,7 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
         scope.modalSelectedCredentials = _.cloneDeep(scope.selectedCredentials);
     };
 
-    vm.removeCredential = id => {
+    vm.removeCredential = ({ id }) => {
         const index = scope.modalSelectedCredentials.map(c => c.id).indexOf(id);
         const isSelected = index > -1;
 
