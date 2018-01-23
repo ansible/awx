@@ -71,15 +71,28 @@ export default ['i18n', function(i18n) {
                 codeMirror: true,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth'
             },
+            SOCIAL_AUTH_SAML_ORGANIZATION_ATTR: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_SAML_ORGANIZATION_ATTR',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
             SOCIAL_AUTH_SAML_TEAM_MAP: {
                 type: 'textarea',
                 reset: 'SOCIAL_AUTH_SAML_TEAM_MAP',
                 rows: 6,
                 codeMirror: true,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth'
-            }
+            },
+            SOCIAL_AUTH_SAML_TEAM_ATTR: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_SAML_TEAM_ATTR',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
         },
-
         buttons: {
             reset: {
                 ngShow: '!user_is_system_auditor',
