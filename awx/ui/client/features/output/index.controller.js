@@ -10,6 +10,7 @@ let $timeout;
 let $sce;
 let $compile;
 let $scope;
+let $q;
 
 const record = {};
 const meta = {
@@ -18,7 +19,7 @@ const meta = {
 
 const ROW_LIMIT = 200;
 const SCROLL_BUFFER = 250;
-const SCROLL_LOAD_DELAY = 100;
+// const SCROLL_LOAD_DELAY = 100;
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
 const EVENT_STATS_PLAY = 'playbook_on_stats';
@@ -36,11 +37,20 @@ const TIME_EVENTS = [
     EVENT_STATS_PLAY
 ];
 
-function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_, _$compile_) {
+function JobsIndexController (
+    _job_,
+    JobEventModel,
+    _$sce_,
+    _$timeout_,
+    _$scope_,
+    _$compile_,
+    _$q_
+) {
     $timeout = _$timeout_;
     $sce = _$sce_;
     $compile = _$compile_;
     $scope = _$scope_;
+    $q = _$q_;
     job = _job_;
 
     ansi = new Ansi();
@@ -80,10 +90,6 @@ function JobsIndexController (_job_, JobEventModel, _$sce_, _$timeout_, _$scope_
         table.html($sce.getTrustedHtml(html));
         $compile(table.contents())($scope);
 
-        meta.next = job.get('related.job_events.next');
-        meta.prev = job.get('related.job_events.previous');
-        meta.cursor = job.get('related.job_events.results').length;
-
         container.scroll(onScroll);
     });
 }
@@ -96,10 +102,13 @@ function next () {
         }
     };
 
-    job.next(config)
-        .then(cursor => {
-            meta.next = job.get('related.job_events.next');
-            meta.prev = job.get('related.job_events.previous');
+    console.log('[2] getting next page');
+    return job.next(config)
+        .then(events => {
+            console.log(events);
+            if (!events) {
+                return $q.resolve();
+            }
 
             console.log(ROW_LIMIT);
             console.log(getRowCount());
@@ -108,15 +117,21 @@ function next () {
 
             console.log('above:', getRowsAbove());
             console.log('below:', getRowsBelow());
-            append(cursor);
-            shift();
+            return shift()
+                .then(() => append(events));
         });
 }
 
 function prev () {
-    job.prev({ related: 'job_events' })
-        .then(cursor => {
-            console.log(cursor);
+    console.log('[2] getting previous page');
+    return job.prev({ related: 'job_events' })
+        .then(events => {
+            if (!events) {
+                return $q.resolve();
+            }
+
+            return pop()
+                .then(() => prepend(events));
         });
 }
 
@@ -163,29 +178,66 @@ function getRowsInView () {
     return Math.floor(viewHeight / rowHeight);
 }
 
-function append (cursor) {
-    const events = job.get('related.job_events.results').slice(cursor);
-    const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parseEvents(events))));
-    const table = $(ELEMENT_TBODY);
+function append (events) {
+    console.log('[4] appending next page');
 
-    table.append(rows);
-    $compile(rows.contents())($scope);
+    return $q(resolve => {
+        const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parseEvents(events))));
+        const table = $(ELEMENT_TBODY);
+
+        table.append(rows);
+        $compile(rows.contents())($scope);
+
+        $timeout(() => {
+            resolve();
+        });
+    });
 }
 
-/*
- *function prepend (cursor) {
- *
- *}
- *
- */
+function prepend (events) {
+    console.log('[4] prepending next page');
+
+    return $q(resolve => {
+        const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parseEvents(events))));
+        const table = $(ELEMENT_TBODY);
+
+        table.prepend(rows);
+        $compile(rows.contents())($scope);
+
+        $timeout(() => {
+            resolve();
+        });
+    });
+}
+
+function pop () {
+    console.log('[3] popping old page');
+    return $q(resolve => {
+        const count = getRowCount() - ROW_LIMIT;
+        const rows = $(ELEMENT_TBODY).children().slice(-count);
+
+        rows.empty();
+        rows.remove();
+
+        $timeout(() => {
+            resolve();
+        });
+    });
+}
+
 function shift () {
-    const count = getRowCount() - ROW_LIMIT;
-    const rows = $(ELEMENT_TBODY).children().slice(0, count);
+    console.log('[3] shifting old page');
+    return $q(resolve => {
+        const count = getRowCount() - ROW_LIMIT;
+        const rows = $(ELEMENT_TBODY).children().slice(0, count);
 
-    console.log(count, rows);
+        rows.empty();
+        rows.remove();
 
-    rows.empty();
-    rows.remove();
+        $timeout(() => {
+            resolve();
+        });
+    });
 }
 
 function expand () {
@@ -419,28 +471,43 @@ function onScroll () {
 
     meta.scroll.inProgress = true;
 
-    $timeout(() => {
-        const top = container[0].scrollTop;
-        const bottom = top + SCROLL_BUFFER + container[0].offsetHeight;
+    const top = container[0].scrollTop;
+    const bottom = top + SCROLL_BUFFER + container[0].offsetHeight;
 
-        meta.scroll.inProgress = false;
+    if (top === 0) {
+        console.log('[1] scroll to top');
+        vm.menu.scroll.display = false;
 
-        if (top === 0) {
-            vm.menu.scroll.display = false;
+        prev()
+            .then(() => {
+                console.log('[5] scroll reset');
+                meta.scroll.inProgress = false;
+            });
 
-            prev();
+        return;
+    }
 
-            return;
-        }
+    vm.menu.scroll.display = true;
 
-        vm.menu.scroll.display = true;
+    if (bottom >= container[0].scrollHeight) {
+        console.log('[1] scroll to bottom');
 
-        if (bottom >= container[0].scrollHeight && meta.next) {
-            next();
-        }
-    }, SCROLL_LOAD_DELAY);
+        next()
+            .then(() => {
+                console.log('[5] scroll reset');
+                meta.scroll.inProgress = false;
+            });
+    }
 }
 
-JobsIndexController.$inject = ['job', 'JobEventModel', '$sce', '$timeout', '$scope', '$compile'];
+JobsIndexController.$inject = [
+    'job',
+    'JobEventModel',
+    '$sce',
+    '$timeout',
+    '$scope',
+    '$compile',
+    '$q'
+];
 
 module.exports = JobsIndexController;

@@ -110,11 +110,17 @@ function httpGet (config = {}) {
             this.page.current = 1;
 
             if (config.pageCache) {
-                this.page.cache = {
-                    root: {}
-                };
-
+                this.page.cachedPages = this.page.cachedPages || {};
+                this.page.cache = this.page.cache || {};
                 this.page.limit = config.pageLimit || false;
+
+                if (!_.has(this.page.cachedPages, 'root')) {
+                    this.page.cachedPages.root = [];
+                }
+
+                if (!_.has(this.page.cache, 'root')) {
+                    this.page.cache.root = {};
+                }
             }
         }
     }
@@ -132,7 +138,10 @@ function httpGet (config = {}) {
             this.model.GET = res.data;
 
             if (config.pageCache) {
-                this.page.cache[this.page.current] = res.data.results;
+                this.page.cache.root[this.page.current] = res.data.results;
+                this.page.cachedPages.root.push(this.page.current);
+                this.page.count = res.data.count;
+                this.page.last = Math.ceil(res.data.count / this.page.size);
             }
 
             return res;
@@ -352,8 +361,17 @@ function extend (related, config) {
         this.page.current = 1;
 
         if (config.pageCache) {
+            this.page.cachedPages = this.page.cachedPages || {};
             this.page.cache = this.page.cache || {};
             this.page.limit = config.pageLimit || false;
+
+            if (!_.has(this.page.cachedPages, `related.${related}`)) {
+                _.set(this.page.cachedPages, `related.${related}`, []);
+            }
+
+            if (!_.has(this.page.cache, `related.${related}`)) {
+                _.set(this.page.cache, `related.${related}`, []);
+            }
         }
     }
 
@@ -367,9 +385,10 @@ function extend (related, config) {
                 this.set(req.method, `related.${related}`, data);
 
                 if (config.pageCache) {
-                    const key = `related.${related}.${this.page.current}`;
-
-                    _.set(this.page.cache, key, data.results);
+                    this.page.cache.related[related][this.page.current] = data.results;
+                    this.page.cachedPages.related[related].push(this.page.current);
+                    this.page.count = data.count;
+                    this.page.last = Math.ceil(data.count / this.page.size);
                 }
 
                 return this;
@@ -383,16 +402,15 @@ function goToPage (config, page) {
     const params = config.params || {};
 
     let url;
-    let count;
     let key;
     let pageNumber;
+    let pageCache;
+    let pagesInCache;
 
     if (config.related) {
-        count = this.get(`related.${config.related}.count`);
         url = `${this.endpoint}${config.related}/`;
         key = `related.${config.related}`;
     } else {
-        count = this.get('count');
         url = this.endpoint;
         key = 'root';
     }
@@ -400,29 +418,34 @@ function goToPage (config, page) {
     params.page_size = this.page.size;
 
     if (page === 'next') {
-        // if (at max)
         pageNumber = this.page.current + 1;
     } else if (page === 'previous') {
-        // if (at min)
         pageNumber = this.page.current - 1;
     } else if (page === 'first') {
-        // if (at min)
-
         pageNumber = 1;
     } else if (page === 'last') {
-        // if (at min)
-
-        pageNumber = Math.floor(count / this.page.size);
-    } else if (typeof pageNumber === 'number') {
+        pageNumber = this.page.last;
+    } else {
         pageNumber = page;
     }
 
-    if (this.page.cache && this.page.cache[pageNumber]) {
-        return Promise.resolve(this.page.cache[pageNumber]);
+    this.page.current = pageNumber;
+
+    if (pageNumber < 1 || pageNumber > this.page.last) {
+        return Promise.resolve(null);
+    }
+
+    if (this.page.cache) {
+        pageCache = _.get(this.page.cache, key);
+        pagesInCache = _.get(this.page.cachedPages, key);
+
+        if (_.has(pageCache, pageNumber)) {
+            return Promise.resolve(pageCache[pageNumber]);
+        }
     }
 
     params.page_size = this.page.size;
-    params.page = this.page.current;
+    params.page = pageNumber;
 
     const req = {
         method: 'GET',
@@ -432,98 +455,28 @@ function goToPage (config, page) {
 
     return $http(req)
         .then(({ data }) => {
-            if (this.page.cache) {
-                _.set(this.page.cache, `${key}.${pageNumber}`, data.results);
+            if (pageCache) {
+                pageCache[pageNumber] = data.results;
+                pagesInCache.push(pageNumber);
+
+                if (pagesInCache.length > this.page.limit) {
+                    const pageToDelete = pagesInCache.shift();
+
+                    delete pageCache[pageToDelete];
+                }
             }
 
-            console.log('cache', this.page.cache);
+            return data.results;
         });
 }
 
 function next (config = {}) {
     return this.goToPage(config, 'next');
-/*
- *        .then(({ data }) => {
- *            let cursor = 0;
- *
- *            if (this.pageCache) {
- *                results = results || [];
- *                data.results = results.concat(data.results);
- *                cursor = results.length;
- *
- *                if (this.pageLimit && this.pageLimit * this.pageSize < data.results.length) {
- *                    const removeCount = data.results.length - this.pageLimit * this.pageSize;
- *
- *                    data.results.splice(0, removeCount);
- *                    cursor -= removeCount;
- *                }
- *            }
- *
- *            if (config.related) {
- *                this.set('get', `related.${config.related}`, data);
- *            } else {
- *                this.set('get', data);
- *            }
- *
- *            this.page.current++;
- *
- *            return cursor <= 0 ? 0 : cursor;
- *        });
- */
 }
 
 function prev (config = {}) {
-    return this.goToPage(config, 'prev');
+    return this.goToPage(config, 'previous');
 }
-/*
- *    let url;
- *    let results;
- *
- *    console.log(config, config.cursor)
- *    if (config.related) {
- *        url = this.get(`related.${config.related}.next`);
- *        results = this.get(`related.${config.related}.results`) || [];
- *    } else {
- *        url = this.get('next');
- *        results = this.get('results');
- *    }
- *
- *    if (!url) {
- *        return Promise.resolve(null);
- *    }
- *
- *    const req = {
- *        method: 'GET',
- *        url
- *    };
- *
- *    return $http(req)
- *        .then(({ data }) => {
- *            let cursor = 0;
- *
- *            if (this.pageCache) {
- *                results = results || [];
- *                data.results = results.concat(data.results);
- *                cursor = results.length;
- *
- *                if (this.pageLimit && this.pageLimit * this.pageSize < data.results.length) {
- *                    const removeCount = data.results.length - this.pageLimit * this.pageSize;
- *
- *                    data.results.splice(0, removeCount);
- *                    cursor -= removeCount;
- *                }
- *            }
- *
- *            if (config.related) {
- *                this.set('get', `related.${config.related}`, data);
- *            } else {
- *                this.set('get', data);
- *            }
- *
- *            return cursor <= 0 ? 0 : cursor;
- *        });
- *}
- */
 
 function normalizePath (resource) {
     const version = '/api/v2/';
