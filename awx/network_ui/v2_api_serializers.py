@@ -56,8 +56,6 @@ class LinkSerializer(serializers.HyperlinkedModelSerializer):
 class TopologySerializer(serializers.HyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="network_ui:topology-detail", lookup_field='pk')
 
-    group_id_seq = serializers.HyperlinkedRelatedField(view_name="network_ui:topology-detail", lookup_field="pk", read_only=True)
-
     class Meta:
         model = Topology
         fields = ('url', 'topology_id', 'name', 'scale', 'panX', 'panY', 'device_id_seq', 'link_id_seq', 'group_id_seq', 'stream_id_seq',)
