@@ -2,7 +2,9 @@ from collections import OrderedDict
 import json
 import mock
 import os
+import shutil
 import sys
+import tempfile
 
 import pytest
 
@@ -254,3 +256,26 @@ def test_callback_plugin_strips_task_environ_variables(executor, cache, playbook
     assert len(cache)
     for event in cache.values():
         assert os.environ['PATH'] not in json.dumps(event)
+
+
+@pytest.mark.parametrize('playbook', [
+{'custom_set_stat.yml': '''
+- name: custom set_stat calls should persist to the local disk so awx can save them
+  connection: local
+  hosts: all
+  tasks:
+    - set_stats:
+        data:
+          foo: "bar"
+'''},  # noqa
+])
+def test_callback_plugin_saves_custom_stats(executor, cache, playbook):
+    try:
+        private_data_dir = tempfile.mkdtemp()
+        with mock.patch.dict(os.environ, {'AWX_PRIVATE_DATA_DIR': private_data_dir}):
+            executor.run()
+            artifacts_path = os.path.join(private_data_dir, 'artifacts', 'custom')
+            with open(artifacts_path, 'r') as f:
+                assert json.load(f) == {'foo': 'bar'}
+    finally:
+        shutil.rmtree(os.path.join(private_data_dir))
