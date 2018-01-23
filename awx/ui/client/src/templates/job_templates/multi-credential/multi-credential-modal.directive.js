@@ -145,7 +145,7 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
 
             if(isReadOnly(credential) && credentialTypeId !== types.Vault) {
                 const index = displayedCredentialTypes
-                    .map(t => t.id).indexOf(credential.credential_type);
+                    .map(t => t.id).indexOf(credentialTypeId);
 
                 if (index > -1) {
                     displayedCredentialTypes.splice(index, 1);
@@ -227,13 +227,17 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
             return;
         }
 
-        if (credential.credential_type === types.Vault) {
+        const credentialTypeId = credential.credential_type || credential.credential_type_id;
+
+        if (credentialTypeId === types.Vault) {
+            const vaultId = _.get(credential, 'inputs.vault_id');
+
             scope.modalSelectedCredentials = scope.modalSelectedCredentials
-                .filter(({ inputs }) => inputs.vault_id !== credential.inputs.vault_id)
+                .filter(c => (c.credential_type !== types.Vault) || (c.inputs.vault_id !== vaultId))
                 .concat([credential]);
         } else {
             scope.modalSelectedCredentials = scope.modalSelectedCredentials
-                .filter(({ credential_type }) => credential_type !== credential.credential_type)
+                .filter(({ credential_type }) => credential_type !== credentialTypeId)
                 .concat([credential]);
         }
     };
