@@ -88,8 +88,6 @@ models:
     type: IntegerField
   - default: 0
     name: group_id_seq
-    ref: Topology
-    ref_field: group_id_seq
     type: IntegerField
   - default: 0
     name: stream_id_seq
