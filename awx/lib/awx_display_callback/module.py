@@ -18,7 +18,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 # Python
+import codecs
 import contextlib
+import json
+import os
+import stat
 import sys
 import uuid
 from copy import copy
@@ -292,9 +296,21 @@ class BaseCallbackModule(CallbackBase):
             failures=stats.failures,
             ok=stats.ok,
             processed=stats.processed,
-            skipped=stats.skipped,
-            artifact_data=stats.custom.get('_run', {}) if hasattr(stats, 'custom') else {}
+            skipped=stats.skipped
         )
+
+        # write custom set_stat artifact data to the local disk so that it can
+        # be persisted by awx after the process exits
+        custom_artifact_data = stats.custom.get('_run', {}) if hasattr(stats, 'custom') else {}
+        if custom_artifact_data:
+            # create the directory for custom stats artifacts to live in (if it doesn't exist)
+            custom_artifacts_dir = os.path.join(os.getenv('AWX_PRIVATE_DATA_DIR'), 'artifacts')
+            os.makedirs(custom_artifacts_dir, mode=stat.S_IXUSR + stat.S_IWUSR + stat.S_IRUSR)
+
+            custom_artifacts_path = os.path.join(custom_artifacts_dir, 'custom')
+            with codecs.open(custom_artifacts_path, 'w', encoding='utf-8') as f:
+                os.chmod(custom_artifacts_path, stat.S_IRUSR | stat.S_IWUSR)
+                json.dump(custom_artifact_data, f)
 
         with self.capture_event_data('playbook_on_stats', **event_data):
             super(BaseCallbackModule, self).v2_playbook_on_stats(stats)

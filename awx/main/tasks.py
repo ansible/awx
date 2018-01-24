@@ -659,6 +659,7 @@ class BaseTask(LogErrorsTask):
         # Derived class should call add_ansible_venv() or add_awx_venv()
         if self.should_use_proot(instance, **kwargs):
             env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
+        env['AWX_PRIVATE_DATA_DIR'] = kwargs['private_data_dir']
         return env
 
     def build_safe_env(self, env, **kwargs):
@@ -1307,6 +1308,21 @@ class RunJob(BaseTask):
                 kwargs['private_data_dir'],
                 kwargs['fact_modification_times']
             )
+
+        # persist artifacts set via `set_stat` (if any)
+        custom_stats_path = os.path.join(kwargs['private_data_dir'], 'artifacts', 'custom')
+        if os.path.exists(custom_stats_path):
+            with open(custom_stats_path, 'r') as f:
+                custom_stat_data = None
+                try:
+                    custom_stat_data = json.load(f)
+                except ValueError:
+                    logger.warning('Could not parse custom `set_fact` data for job {}'.format(job.id))
+
+                if custom_stat_data:
+                    job.artifacts = custom_stat_data
+                    job.save(update_fields=['artifacts'])
+
         try:
             inventory = job.inventory
         except Inventory.DoesNotExist:
