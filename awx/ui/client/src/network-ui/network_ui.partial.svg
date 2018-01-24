@@ -51,15 +51,15 @@
                ng-attr-class="{{item.type}}"
                ng-switch on="item.type">
                <g ng-switch-when="router"><!-- begin router -->
-                   <g name="{{::item.type + '_' + item.id + '_' + item.name}}" awx-net-router></g>
+                   <g awx-net-router name="{{item.type + '_' + item.id + '_' + item.name}}"></g>
                </g> <!-- end router -->
 
                <g ng-switch-when="switch"> <!-- begin switch -->
-                   <g name="{{::item.type + '_' + item.id + '_' + item.name}}" awx-net-switch> </g>
+                   <g awx-net-switch name="{{item.type + '_' + item.id + '_' + item.name}}"> </g>
                </g> <!-- end switch -->
 
                <g ng-switch-when="host"> <!-- begin host -->
-                    <g name="{{::item.type + '_' + item.id + '_' + item.name}}" awx-net-host> </g>
+                    <g awx-net-host name="{{item.type + '_' + item.id + '_' + item.name}}"> </g>
 
                </g> <!-- end host -->
 
@@ -77,7 +77,7 @@
             </g>
             </g>
             <g ng-repeat="item in groups">
-            <g name="{{::item.type + '_' + item.id + '_' + item.name}}" awx-net-group></g>
+            <g awx-net-group name="{{item.type + '_' + item.id + '_' + item.name}}"></g>
             </g>
             <g ng-attr-transform="translate({{scaledX}},{{scaledY}})" ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug-cursor" >
                 <line x1="-5" y1="0" x2="5" y2="0"/>
