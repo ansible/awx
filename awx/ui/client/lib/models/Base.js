@@ -398,8 +398,9 @@ function extend (related, config) {
     return Promise.reject(new Error(`No related property, ${related}, exists`));
 }
 
-function goToPage (config, page) {
+function goToPage (config) {
     const params = config.params || {};
+    const page = config.page;
 
     let url;
     let key;
@@ -429,18 +430,22 @@ function goToPage (config, page) {
         pageNumber = page;
     }
 
-    this.page.current = pageNumber;
-
+    console.log('pageNumber', page, pageNumber);
     if (pageNumber < 1 || pageNumber > this.page.last) {
         return Promise.resolve(null);
     }
+
+    this.page.current = pageNumber;
 
     if (this.page.cache) {
         pageCache = _.get(this.page.cache, key);
         pagesInCache = _.get(this.page.cachedPages, key);
 
         if (_.has(pageCache, pageNumber)) {
-            return Promise.resolve(pageCache[pageNumber]);
+            return Promise.resolve({
+                results: pageCache[pageNumber],
+                page: pageNumber
+            });
         }
     }
 
@@ -455,6 +460,8 @@ function goToPage (config, page) {
 
     return $http(req)
         .then(({ data }) => {
+            let ejected;
+
             if (pageCache) {
                 pageCache[pageNumber] = data.results;
                 pagesInCache.push(pageNumber);
@@ -466,16 +473,23 @@ function goToPage (config, page) {
                 }
             }
 
-            return data.results;
+            return {
+                results: data.results,
+                page: pageNumber
+            }
         });
 }
 
 function next (config = {}) {
-    return this.goToPage(config, 'next');
+    config.page = 'next';
+
+    return this.goToPage(config);
 }
 
 function prev (config = {}) {
-    return this.goToPage(config, 'previous');
+    config.page = 'previous';
+
+    return this.goToPage(config);
 }
 
 function normalizePath (resource) {

@@ -14,12 +14,14 @@ let $q;
 
 const record = {};
 const meta = {
-    scroll: {}
+    scroll: {},
+    page: {}
 };
 
 const ROW_LIMIT = 200;
+const PAGE_LIMIT = 3;
 const SCROLL_BUFFER = 250;
-// const SCROLL_LOAD_DELAY = 100;
+const SCROLL_LOAD_DELAY = 250;
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
 const EVENT_STATS_PLAY = 'playbook_on_stats';
@@ -83,6 +85,11 @@ function JobsIndexController (
         }
     };
 
+    meta.page.cache = [{
+        page: 1,
+        count: events.length
+    }];
+
     $timeout(() => {
         const table = $(ELEMENT_TBODY);
         container = $(ELEMENT_CONTAINER);
@@ -97,41 +104,54 @@ function JobsIndexController (
 function next () {
     const config = {
         related: 'job_events',
+        page: meta.page.cache[meta.page.cache.length - 1].page + 1,
         params: {
             order_by: 'start_line'
         }
     };
 
-    console.log('[2] getting next page');
-    return job.next(config)
-        .then(events => {
-            console.log(events);
-            if (!events) {
+    console.log('[2] getting next page', config.page, meta.page.cache);
+    return job.goToPage(config)
+        .then(data => {
+            if (!data || !data.results) {
                 return $q.resolve();
             }
 
-            console.log(ROW_LIMIT);
-            console.log(getRowCount());
-            console.log(getRowsInView());
-            console.log(getScrollPosition());
+            meta.page.cache.push({
+                page: data.page,
+                count: data.results.length
+            });
 
-            console.log('above:', getRowsAbove());
-            console.log('below:', getRowsBelow());
+            console.log(data.results);
             return shift()
-                .then(() => append(events));
+                .then(() => append(data.results));
         });
 }
 
 function prev () {
-    console.log('[2] getting previous page');
-    return job.prev({ related: 'job_events' })
-        .then(events => {
-            if (!events) {
+    const config = {
+        related: 'job_events',
+        page: meta.page.cache[0].page - 1,
+        params: {
+            order_by: 'start_line'
+        }
+    };
+
+    console.log('[2] getting previous page', config.page, meta.page.cache);
+
+    return job.goToPage(config)
+        .then(data => {
+            if (!data || !data.results) {
                 return $q.resolve();
             }
 
+            meta.page.cache.unshift({
+                page: data.page,
+                count: data.results.length
+            });
+
             return pop()
-                .then(() => prepend(events));
+                .then(() => prepend(data.results));
         });
 }
 
@@ -187,7 +207,6 @@ function append (events) {
 
         table.append(rows);
         $compile(rows.contents())($scope);
-
         $timeout(() => {
             resolve();
         });
@@ -201,6 +220,10 @@ function prepend (events) {
         const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parseEvents(events))));
         const table = $(ELEMENT_TBODY);
 
+        // Set row count added
+        // pop number of rows (not number of events)
+        // meta.page.cache[0].rows = rows.length;
+
         table.prepend(rows);
         $compile(rows.contents())($scope);
 
@@ -213,14 +236,20 @@ function prepend (events) {
 function pop () {
     console.log('[3] popping old page');
     return $q(resolve => {
-        const count = getRowCount() - ROW_LIMIT;
-        const rows = $(ELEMENT_TBODY).children().slice(-count);
+        if (meta.page.cache.length <= PAGE_LIMIT) {
+            console.log('[3.1] nothing to pop');
+            return resolve();
+        }
+
+        const ejected = meta.page.cache.pop();
+        console.log('[3.1] popping', ejected);
+        const rows = $(ELEMENT_TBODY).children().slice(-ejected.count);
 
         rows.empty();
         rows.remove();
 
         $timeout(() => {
-            resolve();
+            return resolve();
         });
     });
 }
@@ -228,14 +257,20 @@ function pop () {
 function shift () {
     console.log('[3] shifting old page');
     return $q(resolve => {
-        const count = getRowCount() - ROW_LIMIT;
-        const rows = $(ELEMENT_TBODY).children().slice(0, count);
+        if (meta.page.cache.length <= PAGE_LIMIT) {
+            console.log('[3.1] nothing to shift');
+            return resolve();
+        }
+
+        const ejected = meta.page.cache.shift();
+        console.log('[3.1] shifting', ejected);
+        const rows = $(ELEMENT_TBODY).children().slice(0, ejected.count);
 
         rows.empty();
         rows.remove();
 
         $timeout(() => {
-            resolve();
+            return resolve();
         });
     });
 }
@@ -471,33 +506,37 @@ function onScroll () {
 
     meta.scroll.inProgress = true;
 
-    const top = container[0].scrollTop;
-    const bottom = top + SCROLL_BUFFER + container[0].offsetHeight;
+    $timeout(() => {
+        const top = container[0].scrollTop;
+        const bottom = top + SCROLL_BUFFER + container[0].offsetHeight;
 
-    if (top === 0) {
-        console.log('[1] scroll to top');
-        vm.menu.scroll.display = false;
+        if (top <= SCROLL_BUFFER) {
+            console.log('[1] scroll to top');
+            vm.menu.scroll.display = false;
 
-        prev()
-            .then(() => {
-                console.log('[5] scroll reset');
+            prev()
+                .then(() => {
+                    console.log('[5] scroll reset');
+                    meta.scroll.inProgress = false;
+                });
+
+            return;
+        } else {
+            vm.menu.scroll.display = true;
+
+            if (bottom >= container[0].scrollHeight) {
+                console.log('[1] scroll to bottom');
+
+                next()
+                    .then(() => {
+                        console.log('[5] scroll reset');
+                        meta.scroll.inProgress = false;
+                    });
+            } else {
                 meta.scroll.inProgress = false;
-            });
-
-        return;
-    }
-
-    vm.menu.scroll.display = true;
-
-    if (bottom >= container[0].scrollHeight) {
-        console.log('[1] scroll to bottom');
-
-        next()
-            .then(() => {
-                console.log('[5] scroll reset');
-                meta.scroll.inProgress = false;
-            });
-    }
+            }
+        }
+    }, SCROLL_LOAD_DELAY);
 }
 
 JobsIndexController.$inject = [

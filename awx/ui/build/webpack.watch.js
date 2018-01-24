@@ -20,16 +20,18 @@ const watch = {
     output: {
         filename: OUTPUT
     },
-    module: {
-        rules: [
-            {
-                test: /\.js$/,
-                enforce: 'pre',
-                exclude: /node_modules/,
-                loader: 'eslint-loader'
-            }
-        ]
-    },
+    /*
+     *module: {
+     *    rules: [
+     *        {
+     *            test: /\.js$/,
+     *            enforce: 'pre',
+     *            exclude: /node_modules/,
+     *            loader: 'eslint-loader'
+     *        }
+     *    ]
+     *},
+     */
     plugins: [
         new HtmlWebpackHarddiskPlugin(),
         new HardSourceWebpackPlugin({
