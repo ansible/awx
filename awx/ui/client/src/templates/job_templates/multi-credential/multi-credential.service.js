@@ -66,7 +66,7 @@ function MultiCredentialService (Rest, ProcessErrors, $q, GetBasePath)  {
     this.getCredentialTypes = () => {
         Rest.setUrl(GetBasePath('credential_types'));
         return Rest
-            .get()
+            .get({ params: { page_size: 200 }})
             .catch(handleError('GET', 'credential types'));
     };
 
