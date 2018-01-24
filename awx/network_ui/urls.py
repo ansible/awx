@@ -19,5 +19,6 @@ urlpatterns = [
     url(r'^topology.yaml$', views.yaml_topology_data, name='json_topology_data'),
     url(r'^api/v1/', include(v1_api_urls.router.urls)),
     url(r'^api/v2/', include(v2_api_urls.router.urls)),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 
