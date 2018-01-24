@@ -24,7 +24,7 @@ This document provides a guide for installing AWX.
   - [Prerequisites](#prerequisites-2)
   - [Pre-build steps](#pre-build-steps-1)
   - [Start the build](#start-the-build-1)
-  - [Accessingm AWX](#accessing-awx-1)
+  - [Accessing AWX](#accessing-awx-1)
   - [SSL Termination](#ssl-termination)
 - [Docker](#docker)
   - [Prerequisites](#prerequisites-3)
@@ -60,7 +60,7 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [Docker](https://docs.docker.com/engine/installation/)
 - [docker-py](https://github.com/docker/docker-py) Python module
 - [GNU Make](https://www.gnu.org/software/make/)
-- [Git](https://git-scm.com/)
+- [Git](https://git-scm.com/) Requires Version 1.8.4+
 
 ### System Requirements
 
