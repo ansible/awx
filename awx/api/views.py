@@ -4641,7 +4641,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                     return Response(mark_safe(data))
                 if target_format == 'json':
                     if content_encoding == 'base64' and content_format == 'ansi':
-                        return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': b64encode(content)})
+                        return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': b64encode(content.encode('utf-8'))})
                     elif content_format == 'html':
                         return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
                 return Response(data)
