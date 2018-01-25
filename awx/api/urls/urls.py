@@ -22,6 +22,8 @@ from awx.api.views import (
     JobExtraCredentialsList,
     JobTemplateCredentialsList,
     JobTemplateExtraCredentialsList,
+    SchedulePreview,
+    ScheduleZoneInfo,
 )
 
 from .organization import urls as organization_urls
@@ -113,6 +115,8 @@ v2_urls = [
     url(r'^jobs/(?P<pk>[0-9]+)/credentials/$', JobCredentialsList.as_view(), name='job_credentials_list'),
     url(r'^job_templates/(?P<pk>[0-9]+)/extra_credentials/$', JobTemplateExtraCredentialsList.as_view(), name='job_template_extra_credentials_list'),
     url(r'^job_templates/(?P<pk>[0-9]+)/credentials/$', JobTemplateCredentialsList.as_view(), name='job_template_credentials_list'),
+    url(r'^schedules/preview/$', SchedulePreview.as_view(), name='schedule_rrule'),
+    url(r'^schedules/zoneinfo/$', ScheduleZoneInfo.as_view(), name='schedule_zoneinfo'),
 ]
 
 app_name = 'api'
