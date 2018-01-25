@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import base64
+import json
 import re
 import shutil
 import tempfile
@@ -251,3 +253,19 @@ def test_text_with_unicode_stdout(sqlite_copy_expert, Parent, Child, relation,
 
     response = get(url, user=admin, expect=200)
     assert response.content.splitlines() == ['オ%d' % i for i in range(3)]
+
+
+@pytest.mark.django_db
+def test_unicode_with_base64_ansi(sqlite_copy_expert, get, admin):
+    job = Job()
+    job.save()
+    for i in range(3):
+        JobEvent(job=job, stdout=u'オ{}\n'.format(i), start_line=i).save()
+    url = reverse(
+        'api:job_stdout',
+        kwargs={'pk': job.pk}
+    ) + '?format=json&content_encoding=base64&content_format=ansi'
+
+    response = get(url, user=admin, expect=200)
+    content = base64.b64decode(json.loads(response.content)['content'])
+    assert content.splitlines() == ['オ%d' % i for i in range(3)]
