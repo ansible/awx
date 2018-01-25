@@ -6,9 +6,6 @@ import glob
 import os
 import shutil
 
-# RedBaron
-from redbaron import RedBaron, indent
-
 # AWX
 from awx.conf.registry import settings_registry
 
@@ -33,6 +30,8 @@ def comment_assignments(patterns, assignment_names, dry_run=True, backup_suffix=
 
 
 def comment_assignments_in_file(filename, assignment_names, dry_run=True, backup_filename=None):
+    from redbaron import RedBaron, indent
+
     if isinstance(assignment_names, basestring):
         assignment_names = [assignment_names]
     else:
