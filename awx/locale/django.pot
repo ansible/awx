@@ -3748,7 +3748,7 @@ msgstr ""
 #: awx/sso/conf.py:287
 msgid ""
 "The group type may need to be changed based on the type of the LDAP server.  "
-"Values are listed at: http://pythonhosted.org/django-auth-ldap/groups."
+"Values are listed at: https://django-auth-ldap.readthedocs.io/en/latest/groups.html."
 "html#types-of-groups"
 msgstr ""
 
