@@ -192,3 +192,16 @@ def test_dst_phantom_hour(job_template):
 
     # 3/10/30 @ 2:30AM is skipped because it _doesn't exist_ <cue twilight zone music>
     assert str(s.next_run) == '2030-03-17 06:30:00+00:00'
+
+
+@pytest.mark.django_db
+def test_beginning_of_time(job_template):
+    # ensure that really large generators don't have performance issues
+    rrule = 'DTSTART:19700101T000000Z RRULE:FREQ=MINUTELY;INTERVAL=1'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    with pytest.raises(ValueError):
+        s.save()

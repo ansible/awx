@@ -3927,8 +3927,8 @@ class SchedulePreviewSerializer(BaseSerializer):
                 raise serializers.ValidationError(_("COUNT > 999 is unsupported."))
         try:
             Schedule.rrulestr(rrule_value)
-        except Exception:
-            raise serializers.ValidationError(_("rrule parsing failed validation."))
+        except Exception as e:
+            raise serializers.ValidationError(_("rrule parsing failed validation: {}").format(e))
         return value
 
 
