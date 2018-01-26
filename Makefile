@@ -116,6 +116,12 @@ clean: clean-ui clean-dist
 	find . -type f -regex ".*\.py[co]$$" -delete
 	find . -type d -name "__pycache__" -delete
 
+# force uwsgi to reload (useful if you introduced a syntax error and uwsgi
+# died)
+pyreload:
+	docker exec -it tools_awx_1 bash -c "pgrep uwsgi | head -n1 | xargs kill -HUP"
+
+
 # convenience target to assert environment variables are defined
 guard-%:
 	@if [ "$${$*}" = "" ]; then \
