@@ -991,7 +991,7 @@ class CredentialAccess(BaseAccess):
     def can_change(self, obj, data):
         if not obj:
             return False
-        return self.user in obj.admin_role and self.check_related('organization', Organization, data, obj=obj)
+        return self.user in obj.admin_role and self.check_related('organization', Organization, data, obj=obj, role_field='credential_admin_role')
 
     def can_delete(self, obj):
         # Unassociated credentials may be marked deleted by anyone, though we

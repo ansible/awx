@@ -49,6 +49,9 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     inventory_admin_role = ImplicitRoleField(
         parent_role='admin_role',
     )
+    credential_admin_role = ImplicitRoleField(
+        parent_role='admin_role',
+    )
     auditor_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
     )
