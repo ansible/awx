@@ -1178,6 +1178,10 @@ class RunJob(BaseTask):
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def pre_run_hook(self, job, **kwargs):
+        if job.inventory is None:
+            error = _('Job could not start because it does not have a valid inventory.')
+            self.update_model(job.pk, status='failed', job_explanation=error)
+            raise RuntimeError(error)
         if job.project and job.project.scm_type:
             job_request_id = '' if self.request.id is None else self.request.id
             pu_ig = job.instance_group

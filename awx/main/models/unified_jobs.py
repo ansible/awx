@@ -1119,6 +1119,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def can_schedule(self):
         if getattr(self, 'passwords_needed_to_start', None):
             return False
+        if getattr(self, 'inventory', None) is None:
+            return False
         JobLaunchConfig = self._meta.get_field('launch_config').related_model
         try:
             self.launch_config
