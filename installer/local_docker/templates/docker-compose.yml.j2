@@ -1,0 +1,103 @@
+#jinja2: lstrip_blocks: True
+version: '2'
+services:
+
+  web:
+    image: {{ awx_web_docker_actual_image }}
+    depends_on:
+      - rabbitmq
+      - memcached
+      {% if pg_hostname is not defined %}
+      - postgres
+      {% endif %}
+    ports:
+      - "{{ host_port }}:8052"
+    hostname: awxweb
+    user: root
+    restart: unless-stopped
+    {% if awx_container_search_domains is defined %}
+    dns_search: "{{ awx_container_search_domains }}"
+    {% endif %}
+    {% if awx_container_search_domains is defined %}
+    dns: "{{ awx_alternate_dns_servers }}"
+    {% endif %}
+    environment:
+      http_proxy: {{ http_proxy | default('') }}
+      https_proxy: {{ https_proxy | default('') }}
+      no_proxy: {{ no_proxy | default('') }}
+      SECRET_KEY: {{ awx_secret_key }}
+      DATABASE_NAME: {{ pg_database }}
+      DATABASE_USER: {{ pg_username }}
+      DATABASE_PASSWORD: {{ pg_password }}
+      DATABASE_PORT: {{ pg_port }}
+      DATABASE_HOST: {{ pg_hostname|default("postgres") }}
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: awx
+      MEMCACHED_HOST: memcached
+      MEMCACHED_PORT: 11211
+      AWX_ADMIN_USER: {{ default_admin_user|default('admin') }}
+      AWX_ADMIN_PASSWORD: {{ default_admin_password|default('password') }}
+
+  task:
+    image: {{ awx_task_docker_actual_image }}
+    depends_on:
+      - rabbitmq
+      - memcached
+      - web
+      {% if pg_hostname is not defined %}
+      - postgres
+      {% endif %}
+    hostname: awx
+    user: root
+    restart: unless-stopped
+    {% if awx_container_search_domains is defined %}
+    dns_search: "{{ awx_container_search_domains }}"
+    {% endif %}
+    {% if awx_container_search_domains is defined %}
+    dns: "{{ awx_alternate_dns_servers }}"
+    {% endif %}
+    environment:
+      http_proxy: {{ http_proxy | default('') }}
+      https_proxy: {{ https_proxy | default('') }}
+      no_proxy: {{ no_proxy | default('') }}
+      SECRET_KEY: {{ awx_secret_key }}
+      DATABASE_NAME: {{ pg_database }}
+      DATABASE_USER: {{ pg_username }}
+      DATABASE_PASSWORD: {{ pg_password }}
+      DATABASE_HOST: {{ pg_hostname|default("postgres") }}
+      DATABASE_PORT: {{ pg_port }}
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: awx
+      MEMCACHED_HOST: memcached
+      MEMCACHED_PORT: 11211
+      AWX_ADMIN_USER: {{ default_admin_user|default('admin') }}
+      AWX_ADMIN_PASSWORD: {{ default_admin_password|default('password') }}
+
+  rabbitmq:
+    image: rabbitmq:3
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_VHOST: awx
+
+  memcached:
+    image: memcached:alpine
+    restart: unless-stopped
+
+  {% if pg_hostname is not defined %}
+  postgres:
+    image: postgres:9.6
+    restart: unless-stopped
+    volumes:
+      - {{ postgres_data_dir }}:/var/lib/postgresql/data:Z
+    environment:
+      POSTGRES_USER: {{ pg_username }}
+      POSTGRES_PASSWORD: {{ pg_password }}
+      POSTGRES_DB: {{ pg_database }}
+      PGDATA: /var/lib/postgresql/data/pgdata
+  {% endif %}
