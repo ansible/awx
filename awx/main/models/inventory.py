@@ -132,7 +132,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         blank=True,
     )
     admin_role = ImplicitRoleField(
-        parent_role='organization.admin_role',
+        parent_role='organization.inventory_admin_role',
     )
     update_role = ImplicitRoleField(
         parent_role='admin_role',

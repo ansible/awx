@@ -641,9 +641,9 @@ class InventoryAccess(BaseAccess):
     def can_add(self, data):
         # If no data is specified, just checking for generic add permission?
         if not data:
-            return Organization.accessible_objects(self.user, 'admin_role').exists()
+            return Organization.accessible_objects(self.user, 'inventory_admin_role').exists()
 
-        return self.check_related('organization', Organization, data)
+        return self.check_related('organization', Organization, data, role_field='inventory_admin_role')
 
     @check_superuser
     def can_change(self, obj, data):
