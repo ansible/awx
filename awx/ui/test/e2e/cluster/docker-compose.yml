@@ -2,11 +2,14 @@
 version: '2'
 services:
   hub:
-    image: selenium/hub
+    image: selenium/hub:3.8.1-erbium
     ports:
       - 4444:4444
   chrome:
-    image: selenium/node-chrome
+    image: selenium/node-chrome:3.8.1-erbium
+    # uncomment the two lines below to make tests watchable at vnc://localhost:secret@localhost:5900
+    # image: selenium/node-chrome-debug:3.8.1-erbium
+    # ports: ['5900:5900']
     links:
       - hub
     volumes:
@@ -15,7 +18,7 @@ services:
       HUB_PORT_4444_TCP_ADDR: hub
       HUB_PORT_4444_TCP_PORT: 4444
   firefox:
-    image: selenium/node-firefox
+    image: selenium/node-firefox:3.8.1-erbium
     links:
       - hub
     environment:
