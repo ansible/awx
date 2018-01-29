@@ -59,9 +59,10 @@ def test_valid_survey_answer(post, admin_user, project, inventory, survey_spec_f
     ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYYEARDAY=100", "BYYEARDAY not supported"),  # noqa
     ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYWEEKNO=20", "BYWEEKNO not supported"),
     ("DTSTART:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000", "COUNT > 999 is unsupported"),  # noqa
-    ("DTSTART:20300308T050000Z RRULE:FREQ=REGULARLY;INTERVAL=1", "rrule parsing failed validation"),  # noqa
-    ("DTSTART;TZID=America/New_York:30200308T050000Z RRULE:FREQ=DAILY;INTERVAL=1", "rrule parsing failed validation"),
+    ("DTSTART:20300308T050000Z RRULE:FREQ=REGULARLY;INTERVAL=1", "rrule parsing failed validation: invalid 'FREQ': REGULARLY"),  # noqa
+    ("DTSTART;TZID=America/New_York:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1", "rrule parsing failed validation"),
     ("DTSTART:20300308T050000 RRULE:FREQ=DAILY;INTERVAL=1", "DTSTART cannot be a naive datetime"),
+    ("DTSTART:19700101T000000Z RRULE:FREQ=MINUTELY;INTERVAL=1", "more than 1000 events are not allowed"),  # noqa
 ])
 def test_invalid_rrules(post, admin_user, project, inventory, rrule, error):
     job_template = JobTemplate.objects.create(

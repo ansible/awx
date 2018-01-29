@@ -166,6 +166,15 @@ class Schedule(CommonModel, LaunchTimeConfig):
                 rrule = rrule.replace(match_until.group('until'), 'UNTIL={}'.format(utc))
             kwargs['tzinfos']['TZI'] = timezone
         x = dateutil.rrule.rrulestr(rrule, **kwargs)
+
+        try:
+            first_event = x[0]
+            if first_event < now() - datetime.timedelta(days=365 * 5):
+                # For older DTSTART values, if there are more than 1000 recurrences...
+                if len(x[:1001]) > 1000:
+                    raise ValueError('RRULE values that yield more than 1000 events are not allowed.')
+        except IndexError:
+            pass
         return x
 
     def __unicode__(self):
