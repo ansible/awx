@@ -9,7 +9,7 @@ import logging
 from django.conf import settings
 
 # Celery
-from celery import current_app
+from celery import Celery
 
 logger = logging.getLogger('awx.main.utils.reload')
 
@@ -23,8 +23,10 @@ def _uwsgi_fifo_command(uwsgi_command):
 
 
 def _reset_celery_thread_pool():
-    # Send signal to restart thread pool
-    app = current_app._get_current_object()
+    # Do not use current_app because of this outstanding issue:
+    # https://github.com/celery/celery/issues/4410
+    app = Celery('awx')
+    app.config_from_object('django.conf:settings', namespace='CELERY')
     app.control.broadcast('pool_restart', arguments={'reload': True},
                           destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
 
