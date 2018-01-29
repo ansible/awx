@@ -1,4 +1,4 @@
-function InstancesController ($scope, $state, models, strings, Dataset) {
+function InstancesController ($scope, $state, $http, models, Instance, strings, Dataset) {
     const { instanceGroup } = models;
     const vm = this || {};
     vm.strings = strings;
@@ -37,7 +37,6 @@ function InstancesController ($scope, $state, models, strings, Dataset) {
         }
     };
 
-
     $scope.isActive = function(id) {
         let selected = parseInt($state.params.instance_id);
         return id === selected;
@@ -47,7 +46,9 @@ function InstancesController ($scope, $state, models, strings, Dataset) {
 InstancesController.$inject = [
     '$scope',
     '$state',
+    '$http',
     'resolvedModels',
+    'InstanceModel',
     'InstanceGroupsStrings',
     'Dataset'
 ];

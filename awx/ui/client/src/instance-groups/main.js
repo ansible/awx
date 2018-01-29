@@ -5,6 +5,7 @@ import InstanceGroupJobsListController from './jobs/jobs.controller';
 import InstanceListController from './instances/instances.controller';
 import InstanceJobsController from './instances/instance-jobs/instance-jobs.controller';
 import CapacityBar from './capacity-bar/main';
+import CapacityAdjuster from './capacity-adjuster/capacity-adjuster.directive';
 import list from './instance-groups.list';
 import service from './instance-groups.service';
 
@@ -324,6 +325,7 @@ angular.module(MODULE_NAME, [CapacityBar.name])
     .controller('InstanceJobsController', InstanceJobsController)
     .directive('instanceGroupsMultiselect', instanceGroupsMultiselect)
     .directive('instanceGroupsModal', instanceGroupsModal)
+    .directive('capacityAdjuster', CapacityAdjuster)
     .service('InstanceGroupsStrings', InstanceGroupsStrings)
     .service('JobStrings', JobStrings)
     .run(InstanceGroupsRun);

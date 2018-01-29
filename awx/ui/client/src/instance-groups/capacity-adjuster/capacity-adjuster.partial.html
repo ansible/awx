@@ -1,0 +1,14 @@
+<div class="at-InputSlider"
+style="align-items:center;margin-right:20px">
+    <p>{{min_capacity.label}}</p>
+    <p>{{min_capacity.value}}</p>
+        <input string-to-number
+        type="range"
+        ng-model="state.capacity_adjustment"
+        min="0"
+        max="1"
+        step="0.1"
+        ng-change="vm.slide(state)"/>
+    <p>{{max_capacity.label}}</p>
+    <p>{{max_capacity.value}}</p>
+</div>
