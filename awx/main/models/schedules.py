@@ -10,7 +10,7 @@ from dateutil.tz import gettz, datetime_exists
 # Django
 from django.db import models
 from django.db.models.query import QuerySet
-from django.utils.timezone import now, make_aware
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
@@ -21,7 +21,6 @@ from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.consumers import emit_channel_notification
 
 import pytz
-import six
 
 
 logger = logging.getLogger('awx.main.models.schedule')
@@ -103,69 +102,53 @@ class Schedule(CommonModel, LaunchTimeConfig):
     @classmethod
     def rrulestr(cls, rrule, **kwargs):
         """
-        Apply our own custom rrule parsing logic.  This applies some extensions
-        and limitations to parsing that are specific to our supported
-        implementation.  Namely:
+        Apply our own custom rrule parsing logic to support TZID=
 
-        * python-dateutil doesn't _natively_ support `DTSTART;TZID=`; this
-          function parses out the TZID= component and uses it to produce the
-          `tzinfos` keyword argument to `dateutil.rrule.rrulestr()`. In this
-          way, we translate:
+        python-dateutil doesn't _natively_ support `DTSTART;TZID=`; this
+        function parses out the TZID= component and uses it to produce the
+        `tzinfos` keyword argument to `dateutil.rrule.rrulestr()`. In this
+        way, we translate:
 
-          DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1
+        DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1
 
-          ...into...
+        ...into...
 
-          DTSTART:20180601T120000TZID RRULE:FREQ=DAILY;INTERVAL=1
+        DTSTART:20180601T120000TZID RRULE:FREQ=DAILY;INTERVAL=1
 
-          ...and we pass a hint about the local timezone to dateutil's parser:
-          `dateutil.rrule.rrulestr(rrule, {
-              'tzinfos': {
-                  'TZID': dateutil.tz.gettz('America/New_York')
-                }
-           })`
+        ...and we pass a hint about the local timezone to dateutil's parser:
+        `dateutil.rrule.rrulestr(rrule, {
+            'tzinfos': {
+                'TZID': dateutil.tz.gettz('America/New_York')
+              }
+         })`
 
-          it's possible that we can remove the custom code that performs this
-          parsing if TZID= gains support in upstream dateutil:
-          https://github.com/dateutil/dateutil/pull/615
-
-        * RFC5545 specifies that: if the "DTSTART" property is specified as
-          a date with local time (in our case, TZID=), then the UNTIL rule part
-          MUST also be treated as a date with local time.  If the "DTSTART"
-          property is specified as a date with UTC time (with a Z suffix),
-          then the UNTIL rule part MUST be specified as a date with UTC time.
-
-          this function provides additional parsing to translate RRULES like this:
-
-          DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180602T170000
-
-          ...into this (under the hood):
-
-          DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180602T210000Z
+        it's likely that we can remove the custom code that performs this
+        parsing if TZID= gains support in upstream dateutil:
+        https://github.com/dateutil/dateutil/pull/619
         """
-        source_rrule = rrule
+        kwargs['forceset'] = True
         kwargs['tzinfos'] = {}
         match = cls.TZID_REGEX.match(rrule)
         if match is not None:
             rrule = cls.TZID_REGEX.sub("DTSTART\g<stamp>TZI\g<rrule>", rrule)
             timezone = gettz(match.group('tzid'))
-            if 'until' in rrule.lower():
-                # if DTSTART;TZID= is used, coerce "naive" UNTIL values
-                # to the proper UTC date
-                match_until = re.match(".*?(?P<until>UNTIL\=[0-9]+T[0-9]+)(?P<utcflag>Z?)", rrule)
-                until_date = match_until.group('until').split("=")[1]
-                if len(match_until.group('utcflag')):
-                    raise ValueError(six.text_type(
-                        _('invalid rrule `{}` includes TZINFO= stanza and UTC-based UNTIL clause').format(source_rrule)
-                    ))  # noqa
-                localized = make_aware(
-                    datetime.datetime.strptime(until_date, "%Y%m%dT%H%M%S"),
-                    timezone
-                )
-                utc = localized.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
-                rrule = rrule.replace(match_until.group('until'), 'UNTIL={}'.format(utc))
             kwargs['tzinfos']['TZI'] = timezone
         x = dateutil.rrule.rrulestr(rrule, **kwargs)
+
+        for r in x._rrule:
+            if r._dtstart and r._until:
+                if all((
+                    r._dtstart.tzinfo != dateutil.tz.tzlocal(),
+                    r._until.tzinfo != dateutil.tz.tzutc(),
+                )):
+                    # According to RFC5545 Section 3.3.10:
+                    # https://tools.ietf.org/html/rfc5545#section-3.3.10
+                    #
+                    # > If the "DTSTART" property is specified as a date with UTC
+                    # > time or a date with local time and time zone reference,
+                    # > then the UNTIL rule part MUST be specified as a date with
+                    # > UTC time.
+                    raise ValueError('RRULE UNTIL values must be specified in UTC')
 
         try:
             first_event = x[0]
@@ -192,7 +175,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
         return job_kwargs
 
     def update_computed_fields(self):
-        future_rs = Schedule.rrulestr(self.rrule, forceset=True)
+        future_rs = Schedule.rrulestr(self.rrule)
         next_run_actual = future_rs.after(now())
 
         if next_run_actual is not None:
