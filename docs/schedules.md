@@ -50,7 +50,10 @@ A list of _valid_ zone identifiers (which can vary by system) can be found at:
 
 UNTIL and Timezones
 ===================
-RFC5545 specifies that:
+`DTSTART` values provided to awx _must_ provide timezone information (they may
+not be naive dates).
+
+Additionally, RFC5545 specifies that:
 
 > Furthermore, if the "DTSTART" property is specified as a date with local
 > time, then the UNTIL rule part MUST also be specified as a date with local
@@ -58,19 +61,16 @@ RFC5545 specifies that:
 > a date with local time and time zone reference, then the UNTIL rule part
 > MUST be specified as a date with UTC time.
 
-Given this, this RRULE:
+Given this, `RRULE` values that specify `UNTIL` datetimes must *always* be in UTC.
 
+Valid:
     `DTSTART:20180601T120000Z RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000Z`
+    `DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000Z`
 
-...will be interpretted as "Starting on June 1st, 2018 at noon UTC, repeat
-daily, ending on June 6th, 2018 at 5PM UTC".
+Not Valid:
 
-This RRULE:
-
+    `DTSTART:20180601T120000Z RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000`
     `DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180606T170000`
-
-...will be interpretted as "Starting on June 1st, 2018 at noon EDT, repeat
-daily, ending on June 6th, 2018 at 5PM EDT".
 
 
 Previewing Schedules
