@@ -10,7 +10,7 @@ export default ['templateUrl', 'Rest', 'GetBasePath', 'generateList', '$compile'
         templateUrl: templateUrl('templates/job_templates/multi-credential/multi-credential-modal'),
 
         link: function(scope, element) {
-            credentialTypesLookup()
+            credentialTypesLookup({ page_size: 200 })
                 .then(kinds => {
                     scope.credentialKinds = kinds;
 

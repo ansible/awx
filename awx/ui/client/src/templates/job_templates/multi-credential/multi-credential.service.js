@@ -77,7 +77,7 @@ export default ['Rest', 'ProcessErrors', '$q', 'GetBasePath', function(Rest, Pro
     // credential type selector
     val.getCredentialTypes = () => {
         Rest.setUrl(GetBasePath('credential_types'));
-        return Rest.get()
+        return Rest.get({ params: { page_size: 200 }})
             .then(({data}) => {
                 let credential_types = {}, credentialTypeOptions = [];
 
