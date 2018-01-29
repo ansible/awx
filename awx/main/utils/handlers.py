@@ -292,6 +292,21 @@ class UDPHandler(BaseHandler):
         payload = _encode_payload_for_socket(payload)
         return self.socket.sendto(payload, (self._get_host(hostname_only=True), self.port or 0))
 
+    @classmethod
+    def perform_test(cls, settings):
+        """
+        Tests logging connectivity for the current logging settings.
+        """
+        handler = cls.from_django_settings(settings)
+        handler.enabled_flag = True
+        handler.setFormatter(LogstashFormatter(settings_module=settings))
+        logger = logging.getLogger(__file__)
+        fn, lno, func = logger.findCaller()
+        record = logger.makeRecord('awx', 10, fn, lno,
+                                   'AWX Connection Test', tuple(),
+                                   None, func)
+        handler.emit(_encode_payload_for_socket(record))
+
 
 HANDLER_MAPPING = {
     'https': BaseHTTPSHandler,
