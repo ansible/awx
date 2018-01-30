@@ -4,7 +4,7 @@ import requests
 import util
 import json
 
-{%for model in models%}
+{%for model in models%}{%if model.api%}
 def list_{{model.name.lower()}}(**kwargs):
     response = requests.get(util.get_url() + "/{{model.name.lower()}}/", verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
     return response.json()
@@ -39,4 +39,4 @@ def delete_{{model.name.lower()}}({%for field in model.fields%}{%if field.pk%}{{
     response = requests.delete(util.get_url() + "/{{model.name.lower()}}/" + str({%for field in model.fields%}{%if field.pk%}{{field.name}}{%endif%}{%endfor%}), verify=util.get_verify(), auth=util.get_auth())
     return response
 
-{%endfor%}
+{%endif%}{%endfor%}
