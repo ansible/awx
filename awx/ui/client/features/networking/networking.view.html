@@ -36,9 +36,28 @@
         <button ng-click="vm.key()" type="button" class="Networking-toolbarIcon">
             <i class="fa fa-key"></i>
         </button>
-        <button ng-click="vm.close()" type="button" class="Networking-toolbarIcon">
+        <button ng-click="vm.jumpTo()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.jumpToPanelExpanded}">
             <i class="fa fa-search-plus"></i>
         </button>
+    </div>
+    <div class="Networking-keyDropDownPanel">
+    </div>
+    <div class="Networking-jumpToDropDownPanel" ng-if="vm.jumpToPanelExpanded">
+        <div class="Networking-jumpToPanelTitle">
+            JUMP TO
+        </div>
+        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('site')">
+            SITE
+        </div>
+        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('rack')">
+            RACK
+        </div>
+        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('inventory')">
+            INVENTORY
+        </div>
+        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('process')">
+            PROCESS
+        </div>
     </div>
 </div>
 

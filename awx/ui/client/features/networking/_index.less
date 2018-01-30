@@ -41,11 +41,16 @@
     color: @default-icon;
     background-color: inherit;
     border: none;
-    border-radius: 50%;
+    border-radius: 5px;
     margin-left: 20px;
 }
 
 .Networking-toolbarIcon:hover{
+    background-color:@default-link;
+    color: @default-bg;
+}
+
+.Networking-toolbarIcon--selected{
     background-color:@default-link;
     color: @default-bg;
 }
@@ -139,7 +144,7 @@
     cursor: pointer;
     min-width: 70px;
     height: 25px;
-    font-size: small;
+    font-size: 12px;
 }
 
 .Networking-toolbarButton:hover {
@@ -171,4 +176,38 @@
 
 .Networking-searchButton i{
     color:#848992
+}
+
+.Networking-jumpToDropDownPanel{
+    width: 150px;
+    padding: 10px 0px 10px 0px;
+    border: 1px solid #b7b7b7;
+    position: absolute;
+    right: 20px;
+    top: 35px;
+    background-color: white;
+}
+
+.Networking-jumpToPanelTitle{
+    color: #707070;
+    padding-left:15px;
+    min-height: 25px;
+    font-size: 12px;
+    font-weight: bold;
+    display:flex;
+    align-items: center;
+}
+
+.Networking-jumpToPanelOption{
+    color: #707070;
+    padding-left:15px;
+    min-height: 25px;
+    font-size: 12px;
+    cursor: pointer;
+    display:flex;
+    align-items: center;
+}
+
+.Networking-jumpToPanelOption:hover{
+    background-color: #FAFAFA;
 }
