@@ -1,0 +1,23 @@
+models:
+- name: Device
+  api: true
+- name: Link
+  api: true
+- name: Interface
+  api: true
+- name: Group
+  api: true
+- name: GroupDevice
+  api: true
+- name: Topology
+  api: true
+- name: TopologyInventory
+  api: true
+- name: Toolbox
+  api: true
+- name: ToolboxItem
+  api: true
+- name: Stream
+  api: true
+- name: Process
+  api: true

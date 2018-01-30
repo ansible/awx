@@ -1,7 +1,8 @@
 app: awx.network_ui
 external_models: []
 models:
-- display: name
+- api: true
+  display: name
   fields:
   - name: device_id
     pk: true
@@ -34,7 +35,8 @@ models:
   name: Device
   x: 348
   y: 124
-- fields:
+- api: true
+  fields:
   - name: link_id
     pk: true
     type: AutoField
@@ -66,7 +68,8 @@ models:
   name: Link
   x: 837
   y: 10
-- display: name
+- api: true
+  display: name
   fields:
   - name: topology_id
     pk: true
@@ -139,7 +142,8 @@ models:
   name: MessageType
   x: -501
   y: 428
-- display: name
+- api: true
+  display: name
   fields:
   - name: interface_id
     pk: true
@@ -156,7 +160,8 @@ models:
   name: Interface
   x: 1157
   y: 337
-- fields:
+- api: true
+  fields:
   - name: group_id
     pk: true
     type: AutoField
@@ -183,7 +188,8 @@ models:
   name: Group
   x: 407
   y: -379
-- fields:
+- api: true
+  fields:
   - name: group_device_id
     pk: true
     type: AutoField
@@ -253,7 +259,8 @@ models:
   name: DataSheet
   x: -207
   y: -282
-- fields:
+- api: true
+  fields:
   - name: stream_id
     pk: true
     ref: Stream
@@ -278,7 +285,8 @@ models:
   name: Stream
   x: 709
   y: 527
-- fields:
+- api: true
+  fields:
   - name: process_id
     pk: true
     type: AutoField
@@ -298,7 +306,8 @@ models:
   name: Process
   x: 654
   y: 778
-- fields:
+- api: true
+  fields:
   - name: toolbox_id
     pk: true
     type: AutoField
@@ -308,7 +317,8 @@ models:
   name: Toolbox
   x: 179
   y: 644
-- fields:
+- api: true
+  fields:
   - name: toolbox_item_id
     pk: true
     type: AutoField
@@ -350,7 +360,8 @@ models:
   name: FSMTrace
   x: -872
   y: 507
-- fields:
+- api: true
+  fields:
   - name: topology_inventory_id
     pk: true
     type: AutoField
@@ -492,3 +503,4 @@ view:
   panX: 213.729555519212
   panY: 189.446959094643
   scaleXY: 0.69
+
