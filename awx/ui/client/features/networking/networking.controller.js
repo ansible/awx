@@ -11,13 +11,20 @@ function NetworkingController (models, $state, $scope, strings) {
 
     vm.rightPanelIsExpanded = false;
     vm.leftPanelIsExpanded = true;
-
+    vm.jumpToPanelExpanded = false;
     vm.close = () => {
         $state.go('inventories');
     };
 
     vm.redirectButtonHandler = (string) => {
         $scope.$broadcast('toolbarButtonEvent', string);
+    };
+
+    vm.jumpTo = (string) => {
+        vm.jumpToPanelExpanded = !vm.jumpToPanelExpanded;
+        if (string) {
+            $scope.$broadcast('jumpTo', string);
+        }
     };
 
     $scope.$on('overall_toolbox_collapsed', () => {

@@ -783,6 +783,25 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope[`on${functionName}Button`]();
     });
 
+    $scope.$on('jumpTo', function(e, zoomLevel){
+        switch (zoomLevel){
+            case 'site':
+                $scope.current_scale = 0.051;
+                break;
+            case 'rack':
+                $scope.current_scale = 0.11;
+                break;
+            case 'inventory':
+                $scope.current_scale = 0.51;
+                break;
+            case 'process':
+                $scope.current_scale = 1.1;
+                break;
+        }
+        $scope.updateScaledXY();
+        $scope.updatePanAndScale();
+    });
+
     $scope.onDeployButton = function (button) {
         $scope.send_control_message(new messages.Deploy($scope.client_id));
     };
