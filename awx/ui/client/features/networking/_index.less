@@ -1,5 +1,6 @@
 .Networking-header{
-    border: 1px solid @at-color-panel-border;
+    border-top: 1px solid @at-color-panel-border;
+    border-bottom: 1px solid @at-color-panel-border;
     display:flex;
     height: 40px;
     position: absolute;
@@ -33,7 +34,7 @@
     font-size: 20px;
 }
 
-.Networking-actionButton{
+.Networking-toolbarIcon{
     font-size: 16px;
     height: 30px;
     min-width: 30px;
@@ -41,9 +42,10 @@
     background-color: inherit;
     border: none;
     border-radius: 50%;
+    margin-left: 20px;
 }
 
-.Networking-actionButton:hover{
+.Networking-toolbarIcon:hover{
     background-color:@default-link;
     color: @default-bg;
 }
@@ -100,4 +102,73 @@
 
 .Networking-noItems{
     margin-top: 0px;
+}
+
+.Networking-toolbar{
+    min-height: 35px;
+    width: calc(~"100% - 45px");
+    position: absolute;
+    background-color: #ebebeb;
+    top: 40px;
+    left:46px;
+    display:flex;
+}
+
+.Networking-toolbarLeftSide--expanded{
+    width: calc(~"100% - 200px");
+    left:201px;
+}
+
+.Networking-toolbarBothPanels--expanded{
+    width: calc(~"100% - 600px");
+    left:201px;
+}
+
+.Networking-toolbarRightSide--expanded{
+    width: calc(~"100% - 445px");
+}
+
+.Networking-toolbarButton{
+    margin-right: 10px;
+    margin-top: 5px;
+    text-transform: uppercase;
+    background-color: #FFFFFF;
+    border-radius: 5px;
+    color: #707070;
+    border: 1px solid #B7B7B7;
+    cursor: pointer;
+    min-width: 70px;
+    height: 25px;
+    font-size: small;
+}
+
+.Networking-toolbarButton:hover {
+    background-color: #FAFAFA;
+}
+
+.Networking-toolbarLeftSide{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    padding-left: 20px;
+}
+
+.Networking-toolbarRightSide{
+    align-items: center;
+    flex-wrap: wrap;
+    display: flex;
+    min-width: 400px;
+    padding-right: 20px;
+}
+
+.Networking-searchBarContainer{
+    height: 25px
+}
+
+.Networking-searchButton{
+    padding: 1px 10px;
+}
+
+.Networking-searchButton i{
+    color:#848992
 }
