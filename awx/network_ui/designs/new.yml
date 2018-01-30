@@ -1,0 +1,526 @@
+app: awx.network_ui
+external_models: []
+models:
+- api: true
+  display: name
+  fields:
+  - name: device_id
+    pk: true
+    type: AutoField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
+  - len: 200
+    name: name
+    type: CharField
+  - name: x
+    type: IntegerField
+  - name: y
+    type: IntegerField
+  - name: id
+    type: IntegerField
+  - len: 200
+    name: type
+    type: CharField
+  - default: 0
+    name: interface_id_seq
+    type: IntegerField
+  - default: 0
+    name: process_id_seq
+    type: IntegerField
+  - default: 0
+    name: host_id
+    type: IntegerField
+  name: Device
+  topology_id_query: topology_id
+  x: 348
+  y: 124
+- api: true
+  create_transform:
+    from_device__id: from_device_id
+    from_interface__id: from_interface_id
+    id: id
+    name: name
+    to_device__id: to_device_id
+    to_interface__id: to_interface_id
+  fields:
+  - name: link_id
+    pk: true
+    type: AutoField
+  - name: from_device
+    ref: Device
+    ref_field: device_id
+    related_name: from_link
+    type: ForeignKey
+  - name: to_device
+    ref: Device
+    ref_field: device_id
+    related_name: to_link
+    type: ForeignKey
+  - name: from_interface
+    ref: Interface
+    ref_field: interface_id
+    related_name: from_link
+    type: ForeignKey
+  - name: to_interface
+    ref: Interface
+    ref_field: interface_id
+    related_name: to_link
+    type: ForeignKey
+  - name: id
+    type: IntegerField
+  - len: 200
+    name: name
+    type: CharField
+  name: Link
+  topology_id_query: from_device__topology_id
+  x: 837
+  y: 10
+- api: true
+  display: name
+  fields:
+  - name: topology_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: name
+    type: CharField
+  - name: scale
+    type: FloatField
+  - name: panX
+    type: FloatField
+  - name: panY
+    type: FloatField
+  - default: 0
+    name: device_id_seq
+    type: IntegerField
+  - default: 0
+    name: link_id_seq
+    type: IntegerField
+  - default: 0
+    name: group_id_seq
+    type: IntegerField
+  - default: 0
+    name: stream_id_seq
+    type: IntegerField
+  name: Topology
+  topology_id_query: topology_id
+  x: 111
+  y: 127
+- fields:
+  - name: client_id
+    pk: true
+    type: AutoField
+  name: Client
+  x: -518
+  y: 138
+- fields:
+  - name: topology_history_id
+    pk: true
+    type: AutoField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - name: message_type
+    ref: MessageType
+    ref_field: message_type_id
+    type: ForeignKey
+  - name: message_id
+    type: IntegerField
+  - name: message_data
+    type: TextField
+  - default: false
+    name: undone
+    type: BooleanField
+  name: TopologyHistory
+  x: -205
+  y: 282
+- display: name
+  fields:
+  - name: message_type_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: name
+    type: CharField
+  name: MessageType
+  x: -501
+  y: 428
+- api: true
+  create_transform:
+    device__id: device_id
+    id: id
+    name: name
+  display: name
+  fields:
+  - name: interface_id
+    pk: true
+    type: AutoField
+  - name: device
+    ref: Device
+    ref_field: device_id
+    type: ForeignKey
+  - len: 200
+    name: name
+    type: CharField
+  - name: id
+    type: IntegerField
+  name: Interface
+  topology_id_query: device__topology_id
+  x: 1157
+  y: 337
+- api: true
+  fields:
+  - name: group_id
+    pk: true
+    type: AutoField
+  - name: id
+    type: IntegerField
+  - len: 200
+    name: name
+    type: CharField
+  - name: x1
+    type: IntegerField
+  - name: y1
+    type: IntegerField
+  - name: x2
+    type: IntegerField
+  - name: y2
+    type: IntegerField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
+  - len: 200
+    name: type
+    type: CharField
+  name: Group
+  topology_id_query: topology_id
+  x: 407
+  y: -379
+- api: true
+  fields:
+  - name: group_device_id
+    pk: true
+    type: AutoField
+  - name: group
+    ref: Group
+    ref_field: group_id
+    type: ForeignKey
+  - name: device
+    ref: Device
+    ref_field: device_id
+    type: ForeignKey
+  name: GroupDevice
+  topology_id_query: group__topology_id
+  x: 739
+  y: -234
+- fields:
+  - name: data_binding_id
+    pk: true
+    type: AutoField
+  - name: column
+    type: IntegerField
+  - name: row
+    type: IntegerField
+  - len: 200
+    name: table
+    type: CharField
+  - name: primary_key_id
+    type: IntegerField
+  - len: 200
+    name: field
+    type: CharField
+  - name: data_type
+    ref: DataType
+    ref_field: data_type_id
+    type: ForeignKey
+  - name: sheet
+    ref: DataSheet
+    ref_field: data_sheet_id
+    type: ForeignKey
+  name: DataBinding
+  x: -515
+  y: -370
+- fields:
+  - name: data_type_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: type_name
+    type: CharField
+  name: DataType
+  x: -782
+  y: -172
+- fields:
+  - name: data_sheet_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: name
+    type: CharField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  name: DataSheet
+  x: -207
+  y: -282
+- api: true
+  fields:
+  - name: stream_id
+    pk: true
+    ref: Stream
+    ref_field: stream_id
+    type: AutoField
+  - name: from_device
+    ref: Device
+    ref_field: device_id
+    related_name: from_stream
+    type: ForeignKey
+  - name: to_device
+    ref: Device
+    ref_field: device_id
+    related_name: to_stream
+    type: ForeignKey
+  - len: 200
+    name: label
+    type: CharField
+  - default: 0
+    name: id
+    type: IntegerField
+  name: Stream
+  topology_id_query: from_device__topology_id
+  x: 709
+  y: 527
+- api: true
+  fields:
+  - name: process_id
+    pk: true
+    type: AutoField
+  - name: device
+    ref: Device
+    ref_field: device_id
+    type: ForeignKey
+  - len: 200
+    name: name
+    type: CharField
+  - len: 200
+    name: type
+    type: CharField
+  - default: 0
+    name: id
+    type: IntegerField
+  name: Process
+  topology_id_query: device__topology_id
+  x: 654
+  y: 778
+- api: true
+  fields:
+  - name: toolbox_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: name
+    type: CharField
+  name: Toolbox
+  x: 179
+  y: 644
+- api: true
+  fields:
+  - name: toolbox_item_id
+    pk: true
+    type: AutoField
+  - name: toolbox
+    ref: Toolbox
+    ref_field: toolbox_id
+    type: ForeignKey
+  - name: data
+    type: TextField
+  name: ToolboxItem
+  x: 391
+  y: 645
+- fields:
+  - name: fsm_trace_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: fsm_name
+    type: CharField
+  - len: 200
+    name: from_state
+    type: CharField
+  - len: 200
+    name: to_state
+    type: CharField
+  - len: 200
+    name: message_type
+    type: CharField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - default: 0
+    name: trace_session_id
+    type: IntegerField
+  - default: 0
+    name: order
+    type: IntegerField
+  name: FSMTrace
+  x: -872
+  y: 507
+- api: true
+  fields:
+  - name: topology_inventory_id
+    pk: true
+    type: AutoField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
+  - name: inventory_id
+    type: IntegerField
+  name: TopologyInventory
+  topology_id_query: topology_id
+  x: -226
+  y: -19
+- fields:
+  - name: event_trace_id
+    pk: true
+    type: AutoField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - default: 0
+    name: trace_session_id
+    type: IntegerField
+  - name: event_data
+    type: TextField
+  - name: message_id
+    type: IntegerField
+  name: EventTrace
+  x: -1087
+  y: 202
+- fields:
+  - name: coverage_id
+    pk: true
+    type: AutoField
+  - name: coverage_data
+    type: TextField
+  - name: test_result
+    ref: TestResult
+    ref_field: test_result_id
+    type: ForeignKey
+  name: Coverage
+  x: -1068
+  y: -4
+- fields:
+  - name: topology_snapshot_id
+    pk: true
+    type: AutoField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - name: topology_id
+    type: IntegerField
+  - name: trace_session_id
+    type: IntegerField
+  - name: snapshot_data
+    ref: TopologySnapshot
+    ref_field: snapshot_data
+    type: TextField
+  - name: order
+    type: IntegerField
+  name: TopologySnapshot
+  x: -1123
+  y: -277
+- fields:
+  - name: test_case_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: name
+    ref: TestCase
+    ref_field: name
+    type: CharField
+  - name: test_case_data
+    type: TextField
+  name: TestCase
+  x: -1642
+  y: -38
+- fields:
+  - name: result_id
+    pk: true
+    type: AutoField
+  - len: 20
+    name: name
+    type: CharField
+  name: Result
+  x: -1610
+  y: 120
+- fields:
+  - name: code_under_test_id
+    pk: true
+    ref: CodeUnderTest
+    ref_field: code_under_test_id
+    type: AutoField
+  - name: version_x
+    type: IntegerField
+  - name: version_y
+    type: IntegerField
+  - name: version_z
+    type: IntegerField
+  - name: commits_since
+    type: IntegerField
+  - len: 40
+    name: commit_hash
+    type: CharField
+  name: CodeUnderTest
+  x: -1612
+  y: 259
+- fields:
+  - name: test_result_id
+    pk: true
+    type: AutoField
+  - name: test_case
+    ref: TestCase
+    ref_field: test_case_id
+    type: ForeignKey
+  - name: result
+    ref: Result
+    ref_field: result_id
+    type: ForeignKey
+  - name: code_under_test
+    ref: CodeUnderTest
+    ref_field: code_under_test_id
+    type: ForeignKey
+  - name: time
+    type: DateTimeField
+  - default: 0
+    name: id
+    type: IntegerField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  name: TestResult
+  x: -1336
+  y: -49
+modules: []
+view:
+  panX: 213.729555519212
+  panY: 189.446959094643
+  scaleXY: 0.69
+

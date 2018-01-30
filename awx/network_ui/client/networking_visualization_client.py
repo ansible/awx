@@ -6,16 +6,17 @@ Usage:
     networking_visualization_client.py [options] (create|list|get|update|delete) [device|topology|interface|link] [<filter>...]
 
 Options:
-    -h, --help              Show this page
-    --user=<u>              User
-    --password-file=<f>     Password file
-    --debug                 Show debug logging
-    --verbose               Show verbose logging
+    -h, --help                   Show this page
+    --user=<u>                   User
+    --password-file=<f>|-p=<f>   Password file
+    --debug                      Show debug logging
+    --verbose                    Show verbose logging
 """
 from docopt import docopt
 import logging
 import sys
 from getpass import getpass
+from pprint import pprint
 
 from conf import settings
 import json
@@ -79,7 +80,8 @@ def main(args=None):
             result = v1_api_client.__dict__[operation + "_interface"](**query_filter)
         elif (parsed_args['link']):
             result = v1_api_client.__dict__[operation + "_link"](**query_filter)
-        print (result)
+        if isinstance(result, dict) or isinstance(result, list):
+            print json.dumps(result, sort_keys=True, indent=4)
 
     except BaseException, e:
         print ("Error: {0}".format(e))

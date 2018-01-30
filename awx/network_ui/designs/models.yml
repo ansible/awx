@@ -3,6 +3,7 @@ external_models: []
 models:
 - api: true
   display: name
+  end_point: /network_ui/api/v1/device/
   fields:
   - name: device_id
     pk: true
@@ -33,9 +34,18 @@ models:
     name: host_id
     type: IntegerField
   name: Device
+  topology_id_query: topology_id
   x: 348
   y: 124
 - api: true
+  create_transform:
+    from_device__id: from_device_id
+    from_interface__id: from_interface_id
+    id: id
+    name: name
+    to_device__id: to_device_id
+    to_interface__id: to_interface_id
+  end_point: /network_ui/api/v1/link/
   fields:
   - name: link_id
     pk: true
@@ -66,10 +76,12 @@ models:
     name: name
     type: CharField
   name: Link
+  topology_id_query: from_device__topology_id
   x: 837
   y: 10
 - api: true
   display: name
+  end_point: /network_ui/api/v1/topology/
   fields:
   - name: topology_id
     pk: true
@@ -96,6 +108,7 @@ models:
     name: stream_id_seq
     type: IntegerField
   name: Topology
+  topology_id_query: topology_id
   x: 111
   y: 127
 - fields:
@@ -143,7 +156,12 @@ models:
   x: -501
   y: 428
 - api: true
+  create_transform:
+    device__id: device_id
+    id: id
+    name: name
   display: name
+  end_point: /network_ui/api/v1/interface/
   fields:
   - name: interface_id
     pk: true
@@ -158,9 +176,11 @@ models:
   - name: id
     type: IntegerField
   name: Interface
+  topology_id_query: device__topology_id
   x: 1157
   y: 337
 - api: true
+  end_point: /network_ui/api/v1/group/
   fields:
   - name: group_id
     pk: true
@@ -186,9 +206,11 @@ models:
     name: type
     type: CharField
   name: Group
+  topology_id_query: topology_id
   x: 407
   y: -379
 - api: true
+  end_point: /network_ui/api/v1/groupdevice/
   fields:
   - name: group_device_id
     pk: true
@@ -202,6 +224,7 @@ models:
     ref_field: device_id
     type: ForeignKey
   name: GroupDevice
+  topology_id_query: group__topology_id
   x: 739
   y: -234
 - fields:
@@ -260,6 +283,7 @@ models:
   x: -207
   y: -282
 - api: true
+  end_point: /network_ui/api/v1/stream/
   fields:
   - name: stream_id
     pk: true
@@ -283,9 +307,11 @@ models:
     name: id
     type: IntegerField
   name: Stream
+  topology_id_query: from_device__topology_id
   x: 709
   y: 527
 - api: true
+  end_point: /network_ui/api/v1/process/
   fields:
   - name: process_id
     pk: true
@@ -304,9 +330,11 @@ models:
     name: id
     type: IntegerField
   name: Process
+  topology_id_query: device__topology_id
   x: 654
   y: 778
 - api: true
+  end_point: /network_ui/api/v1/toolbox/
   fields:
   - name: toolbox_id
     pk: true
@@ -318,6 +346,7 @@ models:
   x: 179
   y: 644
 - api: true
+  end_point: /network_ui/api/v1/toolboxitem/
   fields:
   - name: toolbox_item_id
     pk: true
@@ -361,6 +390,7 @@ models:
   x: -872
   y: 507
 - api: true
+  end_point: /network_ui/api/v1/topologyinventory/
   fields:
   - name: topology_inventory_id
     pk: true
@@ -372,6 +402,7 @@ models:
   - name: inventory_id
     type: IntegerField
   name: TopologyInventory
+  topology_id_query: topology_id
   x: -226
   y: -19
 - fields:

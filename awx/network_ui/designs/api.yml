@@ -1,23 +1,54 @@
 models:
 - name: Device
   api: true
+  end_point: /network_ui/api/v1/device/
+  topology_id_query: topology_id
 - name: Link
   api: true
+  end_point: /network_ui/api/v1/link/
+  topology_id_query: from_device__topology_id
+  create_transform:
+      id: id
+      name: name
+      from_device__id: from_device_id
+      from_interface__id: from_interface_id
+      to_device__id: to_device_id
+      to_interface__id: to_interface_id
 - name: Interface
   api: true
+  end_point: /network_ui/api/v1/interface/
+  topology_id_query: device__topology_id
+  create_transform:
+      id: id
+      name: name
+      device__id: device_id
 - name: Group
   api: true
+  end_point: /network_ui/api/v1/group/
+  topology_id_query: topology_id
 - name: GroupDevice
   api: true
+  end_point: /network_ui/api/v1/groupdevice/
+  topology_id_query: group__topology_id
 - name: Topology
   api: true
+  end_point: /network_ui/api/v1/topology/
+  topology_id_query: topology_id
 - name: TopologyInventory
   api: true
+  end_point: /network_ui/api/v1/topologyinventory/
+  topology_id_query: topology_id
 - name: Toolbox
   api: true
+  end_point: /network_ui/api/v1/toolbox/
 - name: ToolboxItem
   api: true
+  end_point: /network_ui/api/v1/toolboxitem/
 - name: Stream
   api: true
+  end_point: /network_ui/api/v1/stream/
+  topology_id_query: from_device__topology_id
 - name: Process
   api: true
+  end_point: /network_ui/api/v1/process/
+  topology_id_query: device__topology_id
