@@ -1,6 +1,6 @@
 import pytest
 
-from awx.main.models import JobTemplate
+from awx.main.models import JobTemplate, Job
 
 
 @pytest.mark.django_db
@@ -38,3 +38,14 @@ def test_awx_custom_virtualenv(inventory, project, machine_credential):
     job.job_template.custom_virtualenv = '/venv/fancy-jt'
     job.job_template.save()
     assert job.ansible_virtualenv_path == '/venv/fancy-jt'
+
+
+@pytest.mark.django_db
+def test_awx_custom_virtualenv_without_jt(project):
+    project.custom_virtualenv = '/venv/fancy-proj'
+    project.save()
+    job = Job(project=project)
+    job.save()
+
+    job = Job.objects.get(pk=job.id)
+    assert job.ansible_virtualenv_path == '/venv/fancy-proj'
