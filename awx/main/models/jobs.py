@@ -518,7 +518,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def ansible_virtualenv_path(self):
         # the order here enforces precedence (it matters)
         for virtualenv in (
-            self.job_template.custom_virtualenv,
+            self.job_template.custom_virtualenv if self.job_template else None,
             self.project.custom_virtualenv,
             self.project.organization.custom_virtualenv
         ):
