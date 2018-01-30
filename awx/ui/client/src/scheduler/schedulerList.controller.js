@@ -12,10 +12,10 @@
 
 
 export default [
-    '$scope', '$location', '$stateParams', 'ScheduleList', 'Rest',
+    '$filter', '$scope', '$location', '$stateParams', 'ScheduleList', 'Rest',
     'rbacUiControlService',
     'ToggleSchedule', 'DeleteSchedule', '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions',
-    function($scope, $location, $stateParams,
+    function($filter, $scope, $location, $stateParams,
         ScheduleList, Rest,
         rbacUiControlService,
         ToggleSchedule, DeleteSchedule,
@@ -90,7 +90,7 @@ export default [
                 schedule.status_tip = 'Schedule is stopped. Click to activate.';
             }
 
-            schedule.nameTip = schedule.name;
+            schedule.nameTip = $filter('sanitize')(schedule.name);
             // include the word schedule if the schedule name does not include the word schedule
             if (schedule.name.indexOf("schedule") === -1 && schedule.name.indexOf("Schedule") === -1) {
                 schedule.nameTip += " schedule";
@@ -99,7 +99,7 @@ export default [
             if (job.name.indexOf("job") === -1 && job.name.indexOf("Job") === -1) {
                 schedule.nameTip += "job ";
             }
-            schedule.nameTip += job.name;
+            schedule.nameTip += $filter('sanitize')(job.name);
             schedule.nameTip += ". Click to edit schedule.";
         }
 
