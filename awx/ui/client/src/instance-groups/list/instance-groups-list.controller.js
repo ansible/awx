@@ -4,10 +4,11 @@ export default ['$scope', 'InstanceGroupList', 'resolvedModels', 'GetBasePath', 
         const vm = this;
         const { instanceGroup } = resolvedModels;
 
+        vm.strings = strings;
+
         init();
 
         function init(){
-            vm.panelTitle = strings.get('layout.INSTANCE_GROUPS');
             $scope.list = list;
             $scope[`${list.iterator}_dataset`] = Dataset.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
@@ -23,18 +24,18 @@ export default ['$scope', 'InstanceGroupList', 'resolvedModels', 'GetBasePath', 
         vm.delete = () => {
             let deletables = $scope.selection;
             deletables = Object.keys(deletables).filter((n) => deletables[n]);
-            //refactor
+
             deletables.forEach((data) => {
-                let promise = instanceGroup.http.delete({resource: data})
+                let promise = instanceGroup.http.delete({resource: data});
                 Promise.resolve(promise).then(vm.onSaveSuccess);
             });
-        }
+        };
 
         vm.onSaveSuccess = () => {
             $state.transitionTo($state.current, $state.params, {
                 reload: true, location: true, inherit: false, notify: true
             });
-        }
+        };
 
         $scope.createInstanceGroup = () => {
             $state.go('instanceGroups.add');

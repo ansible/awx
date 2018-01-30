@@ -9,8 +9,7 @@
         <at-tab state="vm.tab.jobs" ng-hide="$state.current.name === 'instanceGroups.add'">{{:: vm.strings.get('tab.JOBS') }}</at-tab>
     </at-tab-group>
 
-    <at-panel-body
-        style="margin-top: 20px">
+    <at-panel-body>
         <div class="at-List-toolbar">
             <smart-search
                 class="at-List-search"
@@ -22,13 +21,12 @@
                 collection="collection"
                 search-tags="searchTags">
             </smart-search>
-            <!-- TODO: only show when permission -->
+
             <div class="at-List-toolbarAction">
                 <button
                     type="button"
                     ng-click="$state.go('instanceGroups.instances.modal.add')"
                     class="at-Button--add"
-                    aria-haspopup="true"
                     aria-expanded="false">
                 </button>
                 <div ui-view="modal"></div>
@@ -37,12 +35,24 @@
         <at-list results='vm.instances'>
             <at-row ng-repeat="instance in vm.instances"
                 ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
+                <div class="at-Row-firstColumn">
+                    <div class="ScheduleToggle"
+                        ng-class="{'is-on': instance.enabled}">
+                        <button ng-show="instance.enabled"
+                            class="ScheduleToggle-switch is-on ng-hide"
+                            ng-click="vm.toggle(instance)">
+                            {{:: vm.strings.get('ON') }}
+                        </button>
+                        <button ng-show="!instance.enabled"
+                            class="ScheduleToggle-switch"
+                            ng-click="vm.toggle(instance)">
+                            {{:: vm.strings.get('OFF') }}
+                        </button>
+                    </div>
+                </div>
 
                 <div class="at-Row-items">
-                    <at-row-item
-                        header-value="{{ instance.hostname }}"
-                        header-tag="{{ vm.instanceTypes[instance.type] }}"></at-row-item>
-                    </at-row-item>
+                    <at-row-item header-value="{{ instance.hostname }}"></at-row-item>
                     <div class="at-Row--rowLayout">
                         <at-row-item
                             label-value="Running Jobs"

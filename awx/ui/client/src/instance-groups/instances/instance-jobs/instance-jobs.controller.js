@@ -12,7 +12,7 @@ function InstanceJobsController ($scope, GetBasePath, Rest, Dataset, Find, $filt
         vm.jobs = instance.get('related.jobs.results');
         vm.dataset = instance.get('related.jobs');
         vm.count = instance.get('related.jobs.count');
-        vm.panelTitle = `${jobStrings.get('list.PANEL_TITLE')} | ${instance.get('hostname')}`
+        vm.panelTitle = `${jobStrings.get('list.PANEL_TITLE')} | ${instance.get('hostname')}`;
 
         vm.tab = {
             details: {_hide: true},

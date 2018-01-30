@@ -7,7 +7,7 @@ function InstanceModalController ($scope, $state, $http, $q, models, strings) {
             instance.isSelected = false;
             return instance;
         });
-    }
+    };
 
     vm.setRelatedInstances = () => {
         vm.instanceGroupName = instanceGroup.get('name');
@@ -17,7 +17,7 @@ function InstanceModalController ($scope, $state, $http, $q, models, strings) {
             instance.isSelected = vm.relatedInstanceIds.includes(instance.id);
             return instance;
         });
-    }
+    };
 
     init();
 
@@ -31,10 +31,10 @@ function InstanceModalController ($scope, $state, $http, $q, models, strings) {
         } else {
             vm.setRelatedInstances();
         }
-    };
+    }
 
     $scope.$watch('vm.instances', function() {
-        vm.selectedRows = _.filter(vm.instances, 'isSelected')
+        vm.selectedRows = _.filter(vm.instances, 'isSelected');
         vm.deselectedRows = _.filter(vm.instances, 'isSelected', false);
      }, true);
 
@@ -49,7 +49,7 @@ function InstanceModalController ($scope, $state, $http, $q, models, strings) {
             let config = {
                 url: `${vm.instanceGroupId}/instances/`,
                 data: data
-            }
+            };
             return instanceGroup.http.post(config);
         });
 

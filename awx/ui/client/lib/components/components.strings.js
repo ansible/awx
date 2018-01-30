@@ -78,11 +78,6 @@ function ComponentsStrings (BaseString) {
         FOOTER_COPYRIGHT: t.s('Copyright © 2017 Red Hat, Inc.')
     };
 
-    ns.capacityBar = {
-        IS_OFFLINE: t.s('Unavailable to run jobs.'),
-        IS_OFFLINE_LABEL: t.s('Unavailable')
-    };
-
     ns.relaunch = {
         DEFAULT: t.s('Relaunch using the same parameters'),
         HOSTS: t.s('Relaunch using host parameters'),

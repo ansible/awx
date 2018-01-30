@@ -48,7 +48,7 @@ function InstanceGroupJobsController ($scope, GetBasePath, Rest, Dataset, Find, 
         return (status === "successful");
     };
 
-    $scope.viewjobResults = function(job) {
+    vm.viewjobResults = function(job) {
         var goTojobResults = function(state) {
             $state.go(state, { id: job.id }, { reload: true });
         };

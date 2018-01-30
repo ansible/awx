@@ -1,38 +1,43 @@
-import InstanceGroupsList from './list/instance-groups-list.controller';
+import { templateUrl } from '../shared/template-url/template-url.factory';
+import CapacityAdjuster from './capacity-adjuster/capacity-adjuster.directive';
+import CapacityBar from './capacity-bar/main';
 import instanceGroupsMultiselect from '../shared/instance-groups-multiselect/instance-groups.directive';
 import instanceGroupsModal from '../shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.directive';
-import InstanceGroupJobsListController from './jobs/jobs.controller';
+
+import AddEditTemplate from './add-edit/add-edit-instance-groups.view.html';
+import AddInstanceGroupController from './add-edit/add-instance-group.controller';
+import EditInstanceGroupController from './add-edit/edit-instance-group.controller';
+import InstanceListPolicyTemplate from './add-edit/instance-list-policy.partial.html';
+import InstanceListPolicyController from './add-edit/instance-list-policy.controller.js';
+
+import InstanceGroupsTemplate from './list/instance-groups-list.partial.html';
+import InstanceGroupsListController from './list/instance-groups-list.controller';
+
+import InstancesTemplate from './instances/instances-list.partial.html';
 import InstanceListController from './instances/instances.controller';
-import InstanceJobsController from './instances/instance-jobs/instance-jobs.controller';
-import CapacityBar from './capacity-bar/main';
-import CapacityAdjuster from './capacity-adjuster/capacity-adjuster.directive';
+
+import JobsTemplate from './jobs/jobs-list.partial.html';
+import InstanceGroupJobsListController from './jobs/jobs.controller';
+import InstanceJobsListController from './instances/instance-jobs/instance-jobs.controller';
+
+import InstanceModalTemplate from './instances/instance-modal.partial.html';
+import InstanceModalController from './instances/instance-modal.controller.js';
+
 import list from './instance-groups.list';
 import service from './instance-groups.service';
 
-import { templateUrl } from '../shared/template-url/template-url.factory';
-
-import addEditTemplate from './add-edit/add-edit-instance-groups.view.html';
-import addInstanceModalTemplate from './add-edit/add-instance-list-policy.partial.html';
-import addInstanceModalController from './add-edit/add-instance-list-policy.controller.js';
-import instancesTemplate from './instances/instances-list.partial.html';
-import instanceModalTemplate from './instances/instance-modal.partial.html';
-import instanceModalController from './instances/instance-modal.controller.js';
-import AddInstanceGroupController from './add-edit/add-instance-group.controller';
-import EditInstanceGroupController from './add-edit/edit-instance-group.controller';
 import InstanceGroupsStrings from './instance-groups.strings';
 import JobStrings from './jobs/jobs.strings';
 
-import jobsTemplate from './jobs/list.view.html';
-
 const MODULE_NAME = 'instanceGroups';
 
-function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance, Job) {
+function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance) {
     const instanceGroupId = $stateParams.instance_group_id;
     const instanceId = $stateParams.instance_id;
     let promises = {};
 
     if (!instanceGroupId && !instanceId) {
-        promises.instanceGroup = new InstanceGroup(['get', 'options'])
+        promises.instanceGroup = new InstanceGroup(['get', 'options']);
         promises.instance = new Instance(['get', 'options']);
 
         return $q.all(promises);
@@ -40,15 +45,16 @@ function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance, Job) 
 
     if (instanceGroupId && instanceId) {
         promises.instance = new Instance(['get', 'options'], [instanceId, instanceId])
-            .then((instance) => instance.extend('get', 'jobs', {params: {page_size: "10", order_by: "-finished"}}))
+            .then((instance) => instance.extend('get', 'jobs', {params: {page_size: "10", order_by: "-finished"}}));
+
         return $q.all(promises);
     }
 
     promises.instanceGroup = new InstanceGroup(['get', 'options'], [instanceGroupId, instanceGroupId])
             .then((instanceGroup) =>  instanceGroup.extend('get', 'jobs', {params: {page_size: "10", order_by: "-finished"}}))
-            .then((instanceGroup) =>  instanceGroup.extend('get', 'instances'))
-
+            .then((instanceGroup) =>  instanceGroup.extend('get', 'instances'));
     promises.instance = new Instance('get');
+
 
     return $q.all(promises)
         .then(models => models);
@@ -58,8 +64,7 @@ InstanceGroupsResolve.$inject = [
     '$q',
     '$stateParams',
     'InstanceGroupModel',
-    'InstanceModel',
-    'JobModel'
+    'InstanceModel'
 ];
 
 function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
@@ -87,8 +92,8 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
                 templateUrl: templateUrl('./instance-groups/instance-groups'),
             },
             'list@instanceGroups': {
-                templateUrl: templateUrl('./instance-groups/list/instance-groups-list'),
-                controller: 'InstanceGroupsList',
+                templateUrl: InstanceGroupsTemplate,
+                controller: 'InstanceGroupsListController',
                 controllerAs: 'vm'
             }
         },
@@ -111,7 +116,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             'add@instanceGroups': {
-                templateUrl: addEditTemplate,
+                templateUrl: AddEditTemplate,
                 controller: AddInstanceGroupController,
                 controllerAs: 'vm'
             }
@@ -142,8 +147,8 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             "modal": {
-                templateUrl: addInstanceModalTemplate,
-                controller: addInstanceModalController,
+                templateUrl: InstanceListPolicyTemplate,
+                controller: InstanceListPolicyController,
                 controllerAs: 'vm'
             }
         },
@@ -158,7 +163,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             'edit@instanceGroups': {
-                templateUrl: addEditTemplate,
+                templateUrl: AddEditTemplate,
                 controller: EditInstanceGroupController,
                 controllerAs: 'vm'
             }
@@ -190,8 +195,8 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             "modal": {
-                templateUrl: addInstanceModalTemplate,
-                controller: addInstanceModalController,
+                templateUrl: InstanceListPolicyTemplate,
+                controller: InstanceListPolicyController,
                 controllerAs: 'vm'
             }
         },
@@ -216,7 +221,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             'instances@instanceGroups': {
-                templateUrl: instancesTemplate,
+                templateUrl: InstancesTemplate,
                 controller: 'InstanceListController',
                 controllerAs: 'vm'
             }
@@ -247,8 +252,8 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             "modal": {
-                templateUrl: instanceModalTemplate,
-                controller: instanceModalController,
+                templateUrl: InstanceModalTemplate,
+                controller: InstanceModalController,
                 controllerAs: 'vm'
             }
         },
@@ -264,8 +269,8 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             'instanceJobs@instanceGroups': {
-                templateUrl: jobsTemplate,
-                controller: 'InstanceJobsController',
+                templateUrl: JobsTemplate,
+                controller: 'InstanceJobsListController',
                 controllerAs: 'vm'
             },
         },
@@ -299,7 +304,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             'jobs@instanceGroups': {
-                templateUrl: jobsTemplate,
+                templateUrl: JobsTemplate,
                 controller: 'InstanceGroupJobsListController',
                 controllerAs: 'vm'
             },
@@ -307,7 +312,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         resolve: {
             resolvedModels: InstanceGroupsResolve
         }
-    })
+    });
 }
 
 InstanceGroupsRun.$inject = [
@@ -319,10 +324,10 @@ InstanceGroupsRun.$inject = [
 angular.module(MODULE_NAME, [CapacityBar.name])
     .service('InstanceGroupsService', service)
     .factory('InstanceGroupList', list)
-    .controller('InstanceGroupsList', InstanceGroupsList)
+    .controller('InstanceGroupsListController', InstanceGroupsListController)
     .controller('InstanceGroupJobsListController', InstanceGroupJobsListController)
     .controller('InstanceListController', InstanceListController)
-    .controller('InstanceJobsController', InstanceJobsController)
+    .controller('InstanceJobsListController', InstanceJobsListController)
     .directive('instanceGroupsMultiselect', instanceGroupsMultiselect)
     .directive('instanceGroupsModal', instanceGroupsModal)
     .directive('capacityAdjuster', CapacityAdjuster)

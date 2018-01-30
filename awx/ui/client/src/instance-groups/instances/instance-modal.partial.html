@@ -4,8 +4,7 @@
             {{ vm.panelTitle }} | {{ vm.instanceGroupName}}
         </at-panel-heading>
         <multi-select-preview selected-rows='vm.selectedRows' available-rows='vm.instances'></multi-select-preview>
-        <at-panel-body
-            style="margin: 20px 0">
+        <at-panel-body>
             <div class="at-List-toolbar">
                 <smart-search
                     class="at-List-search"
@@ -23,7 +22,7 @@
                     ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
 
                     <input type="checkbox"
-                        style="margin-right: 20px"
+                        class="at-Row-checkbox"
                         ng-class="{ 'at-Input--rejected': state.rejected }"
                         ng-model="instance.isSelected"
                         ng-checked="instance.isSelected"
@@ -39,16 +38,17 @@
                 </at-row>
 
             </at-list>
-            <div class="pull-right" style="margin-top:20px">
-                <button class="btn at-ButtonHollow--default"
-                    style="margin-right:10px"
-                    ng-click="$state.go('instanceGroups.instances')">
-                    {{:: vm.strings.get('CANCEL') }}
-                </button>
-                <button class="btn at-Button--success"
-                    ng-click="vm.submit()">
-                    {{:: vm.strings.get('SAVE') }}
-                </button>
+            <div class="at-ActionGroup">
+                <div class="pull-right">
+                    <button class="btn at-ButtonHollow--default"
+                        ng-click="$state.go('instanceGroups.instances')">
+                        {{:: vm.strings.get('CANCEL') }}
+                    </button>
+                    <button class="btn at-Button--success"
+                        ng-click="vm.submit()">
+                        {{:: vm.strings.get('SAVE') }}
+                    </button>
+                </div>
             </div>
         </at-panel-body>
     </at-panel>

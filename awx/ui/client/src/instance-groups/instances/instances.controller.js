@@ -37,6 +37,29 @@ function InstancesController ($scope, $state, $http, models, Instance, strings, 
         }
     };
 
+    vm.toggle = (toggled) => {
+        let instance = _.find(vm.instances, 'id', toggled.id);
+        instance.enabled = !instance.enabled;
+
+        let data = {
+            "enabled": instance.enabled
+        };
+
+        let req = {
+            method: 'PUT',
+            url: instance.url,
+            data
+        };
+
+        $http(req).then(vm.onSaveSuccess);
+    };
+
+    vm.onSaveSuccess = () => {
+        $state.transitionTo($state.current, $state.params, {
+            reload: true, location: true, inherit: false, notify: true
+        });
+    };
+
     $scope.isActive = function(id) {
         let selected = parseInt($state.params.instance_id);
         return id === selected;

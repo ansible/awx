@@ -1,17 +1,17 @@
 <div id="instance-modal" class="modal-dialog">
     <at-panel on-dismiss="^.^">
         <at-panel-heading>
-            {{ vm.panelTitle }} | {{ vm.instanceGroupName}}
+            {{:: vm.strings.get('instance.PANEL_TITLE') }}
         </at-panel-heading>
         <multi-select-preview selected-rows='vm.selectedRows' available-rows='vm.instances'></multi-select-preview>
-        <at-panel-body
-            style="margin: 20px 0">
+        <at-panel-body>
             <div class="at-List-toolbar">
                 <smart-search
                     class="at-List-search"
                     django-model="instances"
                     base-path="instances"
                     iterator="instance"
+                    default-params="vm.defaultParams"
                     list="list"
                     dataset="vm.instances"
                     collection="collection"
@@ -23,8 +23,7 @@
                     ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
 
                     <input type="checkbox"
-                        style="margin-right: 20px"
-                        ng-class="{ 'at-Input--rejected': state.rejected }"
+                        class="at-Row-checkbox"
                         ng-model="instance.isSelected"
                         ng-checked="instance.isSelected"
                         ng-attr-tabindex="{{ tab || undefined }}"
@@ -36,17 +35,18 @@
                         </at-row-item>
                     </div>
                 </at-row>
-
             </at-list>
-            <div class="pull-right" style="margin-top:20px">
-                <button class="btn at-ButtonHollow--default"
-                    ng-click="$state.go('^.^')">
-                    {{:: vm.strings.get('CANCEL') }}
-                </button>
-                <button class="btn at-Button--success"
-                    ng-click="vm.submit()">
-                    {{:: vm.strings.get('SAVE') }}
-                </button>
+            <div class="at-ActionGroup">
+                <div class="pull-right">
+                    <button class="btn at-ButtonHollow--default"
+                        ng-click="$state.go('^.^')">
+                        {{:: vm.strings.get('CANCEL') }}
+                    </button>
+                    <button class="btn at-Button--success"
+                        ng-click="vm.submit()">
+                        {{:: vm.strings.get('SAVE') }}
+                    </button>
+                </div>
             </div>
         </at-panel-body>
     </at-panel>

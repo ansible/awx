@@ -1,11 +1,10 @@
 function AddController ($scope, $state, models, strings) {
     const vm = this || {};
-
     const { instanceGroup, instance } = models;
 
     vm.mode = 'add';
     vm.strings = strings;
-    vm.panelTitle = "New Instance Group";
+    vm.panelTitle = strings.get('state.ADD_BREADCRUMB_LABEL');
 
     vm.tab = {
         details: { _active: true },
@@ -15,6 +14,7 @@ function AddController ($scope, $state, models, strings) {
 
     vm.form = instanceGroup.createFormSchema('post');
 
+    // Default policy instance percentage value is 0
     vm.form.policy_instance_percentage._value = 0;
 
     vm.form.policy_instance_list._lookupTags = true;

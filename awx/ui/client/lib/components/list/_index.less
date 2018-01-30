@@ -99,6 +99,15 @@
     }
 }
 
+.at-RowStatus {
+    align-self: flex-start;
+    margin: 0 10px 0 0;
+}
+
+.at-Row-firstColumn {
+    margin-right: @at-space-4x;
+}
+
 .at-Row-actions {
     display: flex;
 }
@@ -118,6 +127,14 @@
     color: @at-color-body-text;
     margin-bottom: @at-margin-bottom-list-header;
     line-height: @at-line-height-list-row-item-header;
+}
+
+.at-RowItem--isHeaderLink {
+    color: @at-blue;
+    cursor: pointer;
+}
+.at-RowItem--isHeaderLink:hover {
+    color: @at-blue-hover;
 }
 
 .at-RowItem--labels {

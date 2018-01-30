@@ -6,7 +6,7 @@ function JobStrings (BaseString) {
 
     ns.state = {
         LIST_BREADCRUMB_LABEL: t.s('JOBS')
-    }
+    };
 
     ns.list = {
         PANEL_TITLE: t.s('JOBS'),
@@ -22,7 +22,7 @@ function JobStrings (BaseString) {
         ROW_ITEM_LABEL_RAN: t.s('Last Ran'),
         ROW_ITEM_LABEL_STARTED: t.s('Started'),
         ROW_ITEM_LABEL_FINISHED: t.s('Finished')
-    }
+    };
 }
 
 JobStrings.$inject = ['BaseStringService'];

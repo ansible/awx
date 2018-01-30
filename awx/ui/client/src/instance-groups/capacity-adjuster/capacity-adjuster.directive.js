@@ -1,4 +1,4 @@
-function CapacityAdjuster (templateUrl, $http) {
+function CapacityAdjuster (templateUrl) {
     return {
         scope: {
             state: '='
@@ -18,7 +18,7 @@ function CapacityAdjuster (templateUrl, $http) {
             scope.max_capacity = _.max(adjustment_values, 'value');
 
         },
-        controller: function($http, $scope) {
+        controller: function($http) {
             const vm = this || {};
 
             vm.slide = (state) => {
@@ -31,15 +31,14 @@ function CapacityAdjuster (templateUrl, $http) {
                     data
                 };
                 $http(req);
-            }
+            };
         },
         controllerAs: 'vm'
     };
 }
 
 CapacityAdjuster.$inject = [
-    'templateUrl',
-    '$http'
+    'templateUrl'
 ];
 
 export default CapacityAdjuster;

@@ -1,6 +1,5 @@
 function EditController ($rootScope, $state, models, strings) {
     const vm = this || {};
-
     const { instanceGroup, instance } = models;
 
     $rootScope.breadcrumb.instance_group_name = instanceGroup.get('name');
@@ -36,7 +35,7 @@ function EditController ($rootScope, $state, models, strings) {
 
     vm.form.save = data => {
         instanceGroup.unset('policy_instance_list');
-        data.policy_instance_list = data.policy_instance_list.map(instance => instance.hostname);
+        data.policy_instance_list = data.policy_instance_list.map(instance => instance.hostname || instance);
         return instanceGroup.request('put', { data });
     };
 

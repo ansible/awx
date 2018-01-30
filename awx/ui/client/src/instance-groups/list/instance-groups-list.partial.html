@@ -1,6 +1,6 @@
 <at-panel>
     <at-panel-heading hide-dismiss="true">
-        {{ vm.panelTitle }}
+        {{ vm.strings.get('layout.INSTANCE_GROUPS') }}
         <span class="badge List-titleBadge">
             {{ instanceGroupCount }}
         </span>
@@ -18,11 +18,9 @@
                 collection="collection"
                 search-tags="searchTags">
             </smart-search>
-            <!-- TODO: only show when permission -->
             <div class="at-List-toolbarAction">
                 <div ng-click="vm.delete()"
-                    class="at-RowAction at-RowAction--danger"
-                    style="margin-right:10px">
+                    class="at-RowAction at-RowAction--danger">
                     <i class="fa fa-trash"></i>
                 </div>
                 <button

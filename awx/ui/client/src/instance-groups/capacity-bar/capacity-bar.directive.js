@@ -1,4 +1,4 @@
-export default ['templateUrl', 'ComponentsStrings',
+export default ['templateUrl', 'InstanceGroupsStrings',
 function (templateUrl, strings) {
     return {
         scope: {
