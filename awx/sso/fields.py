@@ -50,25 +50,25 @@ class AuthenticationBackendsField(fields.StringListField):
         ('awx.sso.backends.RADIUSBackend', [
             'RADIUS_SERVER',
         ]),
-        ('social.backends.google.GoogleOAuth2', [
+        ('social_core.backends.google.GoogleOAuth2', [
             'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY',
             'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET',
         ]),
-        ('social.backends.github.GithubOAuth2', [
+        ('social_core.backends.github.GithubOAuth2', [
             'SOCIAL_AUTH_GITHUB_KEY',
             'SOCIAL_AUTH_GITHUB_SECRET',
         ]),
-        ('social.backends.github.GithubOrganizationOAuth2', [
+        ('social_core.backends.github.GithubOrganizationOAuth2', [
             'SOCIAL_AUTH_GITHUB_ORG_KEY',
             'SOCIAL_AUTH_GITHUB_ORG_SECRET',
             'SOCIAL_AUTH_GITHUB_ORG_NAME',
         ]),
-        ('social.backends.github.GithubTeamOAuth2', [
+        ('social_core.backends.github.GithubTeamOAuth2', [
             'SOCIAL_AUTH_GITHUB_TEAM_KEY',
             'SOCIAL_AUTH_GITHUB_TEAM_SECRET',
             'SOCIAL_AUTH_GITHUB_TEAM_ID',
         ]),
-        ('social.backends.azuread.AzureADOAuth2', [
+        ('social_core.backends.azuread.AzureADOAuth2', [
             'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY',
             'SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET',
         ]),
