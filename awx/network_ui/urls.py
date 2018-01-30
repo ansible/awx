@@ -5,7 +5,6 @@ import awx.api.urls
 
 from awx.network_ui import views
 from awx.network_ui import v1_api_urls
-from awx.network_ui import v2_api_urls
 
 import awx.network_ui.v2_api_access
 

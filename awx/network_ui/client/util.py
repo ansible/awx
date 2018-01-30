@@ -6,7 +6,7 @@ from conf import settings
 
 
 def get_url():
-    return settings.SERVER + settings.NETWORKING_API + settings.API_VERSION
+    return settings.SERVER
 
 
 def get_auth():

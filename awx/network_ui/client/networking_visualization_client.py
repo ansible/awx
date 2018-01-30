@@ -6,16 +6,17 @@ Usage:
     networking_visualization_client.py [options] (create|list|get|update|delete) [device|topology|interface|link] [<filter>...]
 
 Options:
-    -h, --help              Show this page
-    --user=<u>              User
-    --password-file=<f>     Password file
-    --debug                 Show debug logging
-    --verbose               Show verbose logging
+    -h, --help                   Show this page
+    --user=<u>                   User
+    --password-file=<f>|-p=<f>   Password file
+    --debug                      Show debug logging
+    --verbose                    Show verbose logging
 """
 from docopt import docopt
 import logging
 import sys
 from getpass import getpass
+from pprint import pprint
 
 from conf import settings
 import json
