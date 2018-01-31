@@ -3946,6 +3946,12 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         ))
         if obj.unified_job_template:
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url(self.context.get('request'))
+            if obj.unified_job_template.project:
+                res['project'] = obj.unified_job_template.project.get_absolute_url(self.context.get('request'))
+        if obj.inventory:
+            res['inventory'] = obj.inventory.get_absolute_url(self.context.get('request'))
+        elif obj.unified_job_template and obj.unified_job_template.inventory:
+            res['inventory'] = obj.unified_job_template.inventory.get_absolute_url(self.context.get('request'))
         return res
 
     def validate_unified_job_template(self, value):
