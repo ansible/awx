@@ -26,7 +26,7 @@ This document provides a guide for installing AWX.
   - [Start the build](#start-the-build-1)
   - [Accessing AWX](#accessing-awx-1)
   - [SSL Termination](#ssl-termination)
-- [Docker and Docker Compose](#docker-and-docker-compose)
+- [Docker or Docker Compose](#docker-or-docker-compose)
   - [Prerequisites](#prerequisites-3)
   - [Pre-build steps](#pre-build-steps-2)
     - [Deploying to a remote host](#deploying-to-a-remote-host)
