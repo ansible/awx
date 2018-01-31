@@ -46,7 +46,7 @@ class SlackBackend(AWXBaseEmailBackend):
                 for r in m.recipients():
                     if r.startswith('#'):
                         r = r[1:]
-                    self.connection.rtm_send_message(r, m.subject)
+                    self.connection.api_call("chat.postMessage", channel=r, text=m.subject)
                     sent_messages += 1
             except Exception as e:
                 logger.error(smart_text(_("Exception sending messages: {}").format(e)))
