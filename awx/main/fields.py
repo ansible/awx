@@ -696,7 +696,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 'file': {
                     'type': 'object',
                     'patternProperties': {
-                        '^template(\.[a-zA-Z_]+)?$': {'type': 'string'},
+                        '^template(\.[a-zA-Z_]+[a-zA-Z0-9_]*)?$': {'type': 'string'},
                     },
                     'additionalProperties': False,
                 },
@@ -751,9 +751,7 @@ class CredentialTypeInjectorField(JSONSchemaField):
         valid_namespace['tower'] = TowerNamespace()
 
         # ensure either single file or multi-file syntax is used (but not both)
-        template_names = set(key for type_, injector in value.items()
-                             for key, tmpl in injector.items()
-                             if key.startswith('template'))
+        template_names = [x for x in value.get('file', {}).keys() if x.startswith('template')]
         if 'template' in template_names and len(template_names) > 1:
             raise django_exceptions.ValidationError(
                 _('Must use multi-file syntax when injecting multiple files'),
