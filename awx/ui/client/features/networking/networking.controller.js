@@ -12,6 +12,7 @@ function NetworkingController (models, $state, $scope, strings) {
     vm.rightPanelIsExpanded = false;
     vm.leftPanelIsExpanded = true;
     vm.jumpToPanelExpanded = false;
+    vm.keyPanelExpanded = false;
     vm.close = () => {
         $state.go('inventories');
     };
@@ -22,9 +23,15 @@ function NetworkingController (models, $state, $scope, strings) {
 
     vm.jumpTo = (string) => {
         vm.jumpToPanelExpanded = !vm.jumpToPanelExpanded;
+        vm.keyPanelExpanded = false;
         if (string) {
             $scope.$broadcast('jumpTo', string);
         }
+    };
+
+    vm.key = () => {
+        vm.keyPanelExpanded = !vm.keyPanelExpanded;
+        vm.jumpToPanelExpanded = false;
     };
 
     $scope.$on('overall_toolbox_collapsed', () => {
@@ -33,6 +40,8 @@ function NetworkingController (models, $state, $scope, strings) {
 
     $scope.$on('closeDetailsPanel', () => {
         vm.rightPanelIsExpanded = false;
+        vm.jumpToPanelExpanded = false;
+        vm.keyPanelExpanded = false;
     });
 
     $scope.$on('showDetails', (e, data, expand) => {

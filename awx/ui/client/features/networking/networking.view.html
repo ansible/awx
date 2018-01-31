@@ -33,17 +33,76 @@
                 <i class="fa fa-search"></i>
             </div>
         </div>
-        <button ng-click="vm.key()" type="button" class="Networking-toolbarIcon">
+        <button ng-click="vm.key()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.keyPanelExpanded}">
             <i class="fa fa-key"></i>
         </button>
         <button ng-click="vm.jumpTo()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.jumpToPanelExpanded}">
             <i class="fa fa-search-plus"></i>
         </button>
     </div>
-    <div class="Networking-keyDropDownPanel">
+    <div class="Networking-keyDropDownPanel" ng-if="vm.keyPanelExpanded">
+        <div class="Networking-dropdownPanelTitle">
+            KEY
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">e</div>
+            <div class="Networking-keySymbolLabel">NEW SITE</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">a</div>
+            <div class="Networking-keySymbolLabel">NEW RACK</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">g</div>
+            <div class="Networking-keySymbolLabel">NEW GROUP</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">r</div>
+            <div class="Networking-keySymbolLabel">NEW ROUTER</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">s</div>
+            <div class="Networking-keySymbolLabel">NEW SWITCH</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">h</div>
+            <div class="Networking-keySymbolLabel">NEW HOST</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">l</div>
+            <div class="Networking-keySymbolLabel">NEW LINK</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">m</div>
+            <div class="Networking-keySymbolLabel">NEW STREAM</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">d</div>
+            <div class="Networking-keySymbolLabel">DEBUG MODE</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">p</div>
+            <div class="Networking-keySymbolLabel">HIDE CURSOR</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">b</div>
+            <div class="Networking-keySymbolLabel">HIDE BUTTONS</div>
+        </div>
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">i</div>
+            <div class="Networking-keySymbolLabel">HIDE INTERFACES</div>
+        </div>
+        <!-- <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">CMD + c</div>
+            <div class="Networking-keySymbolLabel">COPY</div>
+        </div> -->
+        <div class="Networking-keyPanelOption">
+            <div class="Networking-keySymbol">0</div>
+            <div class="Networking-keySymbolLabel">RESET ZOOM</div>
+        </div>
     </div>
     <div class="Networking-jumpToDropDownPanel" ng-if="vm.jumpToPanelExpanded">
-        <div class="Networking-jumpToPanelTitle">
+        <div class="Networking-dropdownPanelTitle">
             JUMP TO
         </div>
         <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('site')">

@@ -50,6 +50,10 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         scope.first_channel.send("CopySelected", $event);
     }
 
+    if ($event.key === 'r' && ($event.ctrlKey || $event.metaKey)) {
+        location.reload();
+    }
+
     if ($event.key === 'l') {
         scope.first_channel.send("NewLink", $event);
         return;
