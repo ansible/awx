@@ -1,0 +1,84 @@
+<div>
+    <div class="Prompt-previewRow--flex">
+        <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.JOB_TYPE') }}</div>
+        <div class="Prompt-previewRowValue">
+            <span ng-if="promptData.prompts.jobType.value.value === 'run'">{{:: vm.strings.get('prompt.PLAYBOOK_RUN') }}</span>
+            <span ng-if="promptData.prompts.jobType.value.value === 'check'">{{:: vm.strings.get('prompt.CHECK') }}</span>
+        </div>
+    </div>
+    <div class="Prompt-previewRow--flex">
+        <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.CREDENTIAL') }}</div>
+        <div class="Prompt-previewRowValue"  style="display: flex">
+            <div class="Prompt-previewTagContainer u-wordwrap" ng-repeat="credential in promptData.prompts.credentials.value">
+                <div class="Prompt-previewTag">
+                    <span ng-switch="promptData.prompts.credentials.credentialTypes[credential.credential_type]">
+                        <span class="fa fa-cloud" ng-switch-when="cloud"></span>
+                        <span class="fa fa-info" ng-switch-when="insights"></span>
+                        <span class="fa fa-sitemap" ng-switch-when="net"></span>
+                        <span class="fa fa-code-fork" ng-switch-when="scm"></span>
+                        <span class="fa fa-key" ng-switch-when="ssh"></span>
+                        <span class="fa fa-archive" ng-switch-when="vault"></span>
+                    </span>
+                    <span ng-bind="credential.name"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="Prompt-previewRow--flex">
+        <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.INVENTORY') }}</div>
+        <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.inventory.value.name"></div>
+    </div>
+    <div class="Prompt-previewRow--flex">
+        <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.LIMIT') }}</div>
+        <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.limit.value"></div>
+    </div>
+    <div class="Prompt-previewRow--flex">
+        <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.VERBOSITY') }}</div>
+        <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.verbosity.value.label"></div>
+    </div>
+    <div class="Prompt-previewRow--noflex">
+        <div class="Prompt-previewRowTitle">
+            <span>{{:: vm.strings.get('prompt.JOB_TAGS') }}&nbsp;</span>
+            <span ng-click="vm.showJobTags = !vm.showJobTags">
+                <span class="fa fa-caret-down" ng-show="vm.showJobTags" ></span>
+                <span class="fa fa-caret-left" ng-show="!vm.showJobTags"></span>
+            </span>
+        </div>
+        <div ng-show="vm.showJobTags" style="display: flex">
+            <div class="Prompt-previewTagContainer u-wordwrap" ng-repeat="tag in promptData.prompts.tags.value">
+                <div class="LabelList-tag">
+                    <span>{{tag.name}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="Prompt-previewRow--noflex">
+        <div class="Prompt-previewRowTitle">
+            <span>{{:: vm.strings.get('prompt.SKIP_TAGS') }}&nbsp;</span>
+            <span ng-click="vm.showSkipTags = !vm.showSkipTags">
+                <span class="fa fa-caret-down" ng-show="vm.showSkipTags" ></span>
+                <span class="fa fa-caret-left" ng-show="!vm.showSkipTags"></span>
+            </span>
+        </div>
+        <div ng-show="vm.showSkipTags" style="display: flex">
+            <div class="Prompt-previewTagContainer u-wordwrap" ng-repeat="tag in promptData.prompts.skipTags.value">
+                <div class="LabelList-tag">
+                    <span>{{tag.name}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="Prompt-previewRow--flex">
+        <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.SHOW_CHANGES') }}</div>
+        <div class="Prompt-previewRowValue">
+            <span ng-if="promptData.prompts.diffMode.value">{{:: vm.strings.get('ON') }}</span>
+            <span ng-if="!promptData.prompts.diffMode.value">{{:: vm.strings.get('OFF') }}</span>
+        </div>
+    </div>
+    <div class="Prompt-previewRow--noflex">
+        <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.EXTRA_VARIABLES') }}</div>
+        <div>
+            <textarea rows="6" ng-model="promptExtraVars" name="preview_variables" class="form-control Form-textArea Form-textAreaLabel" id="job_launch_preview_variables"></textarea>
+        </div>
+    </div>
+</div>

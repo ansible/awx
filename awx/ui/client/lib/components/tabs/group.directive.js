@@ -10,6 +10,12 @@ function AtTabGroupController () {
 
         vm.tabs.push(tab);
     };
+
+    vm.clearActive = () => {
+        vm.tabs.forEach((tab) => {
+            tab.state._active = false;
+        });
+    };
 }
 
 function atTabGroup () {

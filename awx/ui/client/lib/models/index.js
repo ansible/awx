@@ -12,6 +12,8 @@ import WorkflowJobTemplateNode from '~models/WorkflowJobTemplateNode';
 import InventorySource from '~models/InventorySource';
 import Inventory from '~models/Inventory';
 import InventoryScript from '~models/InventoryScript';
+import Job from '~models/Job';
+import WorkflowJob from '~models/WorkflowJob';
 import WorkflowJobTemplate from '~models/WorkflowJobTemplate';
 
 import ModelsStrings from '~models/models.strings';
@@ -37,6 +39,9 @@ angular
     .service('InventoryScriptModel', InventoryScript)
     .service('WorkflowJobTemplateModel', WorkflowJobTemplate)
     .service('ModelsStrings', ModelsStrings)
-    .service('UnifiedJobTemplateModel', UnifiedJobTemplate);
+    .service('UnifiedJobTemplateModel', UnifiedJobTemplate)
+    .service('JobModel', Job)
+    .service('WorkflowJobModel', WorkflowJob)
+    .service('WorkflowJobTemplateModel', WorkflowJobTemplate);
 
 export default MODULE_NAME;
