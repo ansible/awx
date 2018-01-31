@@ -1,4 +1,4 @@
-function InstanceModalController ($scope, $state, $http, $q, models, strings) {
+function InstanceModalController ($scope, $state, models, strings) {
     const { instance, instanceGroup } = models;
     const vm = this || {};
 
@@ -47,8 +47,6 @@ function InstanceModalController ($scope, $state, $http, $q, models, strings) {
 InstanceModalController.$inject = [
     '$scope',
     '$state',
-    '$http',
-    '$q',
     'resolvedModels',
     'InstanceGroupsStrings'
 ];

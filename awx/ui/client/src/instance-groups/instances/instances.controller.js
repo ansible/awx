@@ -1,4 +1,4 @@
-function InstancesController ($scope, $state, $http, models, Instance, strings, Dataset) {
+function InstancesController ($scope, $state, $http, models, Instance, strings, Dataset, ProcessErrors) {
     const { instanceGroup } = models;
     const vm = this || {};
     vm.strings = strings;
@@ -51,7 +51,13 @@ function InstancesController ($scope, $state, $http, models, Instance, strings, 
             data
         };
 
-        $http(req).then(vm.onSaveSuccess);
+        $http(req).then(vm.onSaveSuccess)
+            .catch(({data, status}) => {
+                ProcessErrors($scope, data, status, null, {
+                    hdr: 'Error!',
+                    msg: 'Call failed. Return status: ' + status
+                });
+            });
     };
 
     vm.onSaveSuccess = () => {
@@ -73,7 +79,8 @@ InstancesController.$inject = [
     'resolvedModels',
     'InstanceModel',
     'InstanceGroupsStrings',
-    'Dataset'
+    'Dataset',
+    'ProcessErrors'
 ];
 
 export default InstancesController;

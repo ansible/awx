@@ -1,5 +1,5 @@
-export default ['$scope', 'InstanceGroupList', 'resolvedModels', 'GetBasePath', 'Rest', 'Dataset','Find', '$state', '$q', 'ComponentsStrings',
-    function($scope, InstanceGroupList, resolvedModels, GetBasePath, Rest, Dataset, Find, $state, $q, strings) {
+export default ['$scope', 'InstanceGroupList', 'resolvedModels', 'Dataset', '$state', 'ComponentsStrings', 'ProcessErrors',
+    function($scope, InstanceGroupList, resolvedModels, Dataset, $state, strings, ProcessErrors) {
         let list = InstanceGroupList;
         const vm = this;
         const { instanceGroup } = resolvedModels;
@@ -27,7 +27,13 @@ export default ['$scope', 'InstanceGroupList', 'resolvedModels', 'GetBasePath', 
 
             deletables.forEach((data) => {
                 let promise = instanceGroup.http.delete({resource: data});
-                Promise.resolve(promise).then(vm.onSaveSuccess);
+                Promise.resolve(promise).then(vm.onSaveSuccess)
+                    .catch(({data, status}) => {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: 'Error!',
+                            msg: 'Call failed. Return status: ' + status
+                        });
+                    });
             });
         };
 

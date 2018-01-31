@@ -1,6 +1,6 @@
 import { templateUrl } from '../shared/template-url/template-url.factory';
 import CapacityAdjuster from './capacity-adjuster/capacity-adjuster.directive';
-import CapacityBar from './capacity-bar/main';
+import CapacityBar from './capacity-bar/capacity-bar.directive';
 import instanceGroupsMultiselect from '../shared/instance-groups-multiselect/instance-groups.directive';
 import instanceGroupsModal from '../shared/instance-groups-multiselect/instance-groups-modal/instance-groups-modal.directive';
 
@@ -321,7 +321,7 @@ InstanceGroupsRun.$inject = [
     'ComponentsStrings'
 ];
 
-angular.module(MODULE_NAME, [CapacityBar.name])
+angular.module(MODULE_NAME, [])
     .service('InstanceGroupsService', service)
     .factory('InstanceGroupList', list)
     .controller('InstanceGroupsListController', InstanceGroupsListController)
@@ -331,6 +331,7 @@ angular.module(MODULE_NAME, [CapacityBar.name])
     .directive('instanceGroupsMultiselect', instanceGroupsMultiselect)
     .directive('instanceGroupsModal', instanceGroupsModal)
     .directive('capacityAdjuster', CapacityAdjuster)
+    .directive('capacityBar', CapacityBar)
     .service('InstanceGroupsStrings', InstanceGroupsStrings)
     .service('JobStrings', JobStrings)
     .run(InstanceGroupsRun);

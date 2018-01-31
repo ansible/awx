@@ -1,4 +1,4 @@
-function InstanceModalController ($scope, $state, $http, $q, models, strings) {
+function InstanceModalController ($scope, $state, models, strings, ProcessErrors) {
     const { instance, instanceGroup } = models;
     const vm = this || {};
 
@@ -54,7 +54,13 @@ function InstanceModalController ($scope, $state, $http, $q, models, strings) {
         });
 
         Promise.all(defers)
-            .then(vm.onSaveSuccess);
+            .then(vm.onSaveSuccess)
+            .catch(({data, status}) => {
+                ProcessErrors($scope, data, status, null, {
+                    hdr: 'Error!',
+                    msg: 'Call failed. Return status: ' + status
+                });
+            });
     };
 
     vm.onSaveSuccess = () => {
@@ -65,10 +71,9 @@ function InstanceModalController ($scope, $state, $http, $q, models, strings) {
 InstanceModalController.$inject = [
     '$scope',
     '$state',
-    '$http',
-    '$q',
     'resolvedModels',
-    'InstanceGroupsStrings'
+    'InstanceGroupsStrings',
+    'ProcessErrors'
 ];
 
 export default InstanceModalController;

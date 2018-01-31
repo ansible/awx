@@ -1,5 +1,5 @@
 
-function InstanceGroupJobsController ($scope, GetBasePath, Rest, Dataset, Find, $filter, $state, $q, model, strings, jobStrings) {
+function InstanceGroupJobsController ($scope, $filter, $state, model, strings, jobStrings) {
     const vm = this || {};
     const { instanceGroup } = model;
 
@@ -78,13 +78,8 @@ function InstanceGroupJobsController ($scope, GetBasePath, Rest, Dataset, Find, 
 
 InstanceGroupJobsController.$inject = [
     '$scope',
-    'GetBasePath',
-    'Rest',
-    'Dataset',
-    'Find',
     '$filter',
     '$state',
-    '$q',
     'resolvedModels',
     'InstanceGroupsStrings',
     'JobStrings'

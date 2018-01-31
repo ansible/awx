@@ -1,5 +1,4 @@
-export default ['templateUrl', 'InstanceGroupsStrings',
-function (templateUrl, strings) {
+function CapacityBar (templateUrl, strings) {
     return {
         scope: {
             capacity: '=',
@@ -44,4 +43,10 @@ function (templateUrl, strings) {
         }
     };
 }
+
+CapacityBar.$inject = [
+    'templateUrl',
+    'InstanceGroupsStrings'
 ];
+
+export default CapacityBar;
