@@ -3,17 +3,29 @@
     border-bottom: 1px solid @at-color-panel-border;
     display:flex;
     height: 40px;
-    position: absolute;
+    position:absolute;
     width:100%;
     background-color: @default-bg;
 }
+
+.Networking-top{
+    display:flex;
+    flex-direction: column;
+    // width:100%;
+    width: calc(~"100% - 46px");
+    position:absolute;
+    top: 40px;
+    left:46px;
+    align-items: flex-end;
+}
+
 
 .Networking-headerTitle{
     color: @default-interface-txt;
     flex: 1 0 auto;
     font-size: 14px;
     font-weight: bold;
-    padding-left: 10px;
+    padding-left: 20px;
     align-items: center;
     display: flex;
 }
@@ -30,7 +42,7 @@
 .Networking-headerActionItem{
     justify-content: flex-end;
     display: flex;
-    padding-right: 10px;
+    padding-right: 20px;
     font-size: 20px;
 }
 
@@ -110,22 +122,37 @@
 }
 
 .Networking-toolbar{
-    min-height: 35px;
-    width: calc(~"100% - 45px");
-    position: absolute;
+    min-height: 40px;
+    // width: calc(~"100% - 45px");
+    width:100%;
     background-color: #ebebeb;
-    top: 40px;
-    left:46px;
     display:flex;
+    flex: 1 0 auto;
+    // margin-left: 46px;
+    align-items: center;
+}
+
+.Networking-breadCrumbBar{
+    background-color: white;
+    min-height: 35px;
+    border-bottom: 1px solid @at-color-panel-border;
+    align-items: center;
+    padding-left:20px;
+}
+
+.Networking-breadCrumbText{
+    color:@default-link;
 }
 
 .Networking-toolbarLeftSide--expanded{
-    width: calc(~"100% - 200px");
+    width: calc(~"100% - 201px");
+    // margin-left:201px;
     left:201px;
 }
 
 .Networking-toolbarBothPanels--expanded{
-    width: calc(~"100% - 600px");
+    width: calc(~"100% - 601px");
+    // margin-right:400px;
     left:201px;
 }
 
@@ -134,8 +161,7 @@
 }
 
 .Networking-toolbarButton{
-    margin-right: 10px;
-    margin-top: 5px;
+    margin: 4px 20px 5px 0px;
     text-transform: uppercase;
     background-color: #FFFFFF;
     border-radius: 5px;
@@ -143,12 +169,12 @@
     border: 1px solid #B7B7B7;
     cursor: pointer;
     min-width: 70px;
-    height: 25px;
+    min-height: 30px;
     font-size: 12px;
 }
 
 .Networking-toolbarButton:hover {
-    background-color: #FAFAFA;
+    background-color: #f2f2f2;
 }
 
 .Networking-toolbarLeftSide{
@@ -167,11 +193,11 @@
 }
 
 .Networking-searchBarContainer{
-    height: 25px
+    height: 30px
 }
 
 .Networking-searchButton{
-    padding: 1px 10px;
+    padding: 4px 10px;
 }
 
 .Networking-searchButton i{
@@ -182,26 +208,28 @@
     width: 150px;
     padding: 10px 0px 10px 0px;
     border: 1px solid #b7b7b7;
-    position: absolute;
-    right: 20px;
-    top: 35px;
+    // position: absolute;
+    // right: 20px;
+    // top: 35px;
+    margin-right: 20px;
+    margin-top: -35px;
     background-color: white;
 }
 
 .Networking-dropdownPanelTitle{
     color: #707070;
     padding-left:15px;
-    min-height: 25px;
-    font-size: 12px;
+    min-height: 30px;
+    font-size: 14px;
     font-weight: bold;
-    display:flex;
+    display: flex;
     align-items: center;
 }
 
 .Networking-jumpToPanelOption{
     color: #707070;
     padding-left:15px;
-    min-height: 25px;
+    min-height: 30px;
     font-size: 12px;
     cursor: pointer;
     display:flex;
@@ -209,35 +237,34 @@
 }
 
 .Networking-jumpToPanelOption:hover{
-    background-color: #FAFAFA;
+    background-color: #f2f2f2;
 }
 
 .Networking-keyDropDownPanel{
     width: 180px;
     padding: 10px 0px 10px 0px;
     border: 1px solid #b7b7b7;
-    position: absolute;
-    right: 70px;
-    top: 35px;
     background-color: white;
+    margin-right: 70px;
+    margin-top: -35px;
 }
 
 .Networking-keyPanelOption{
     color: #707070;
     padding-left:15px;
-    min-height: 25px;
+    min-height: 30px;
     font-size: 12px;
     display:flex;
     align-items: center;
 }
 
 .Networking-keySymbol{
-    background-color: #707070;
+    background-color: #848992;
     color: white;
     border-radius: 50%;
-    width: 17px;
-    height: 17px;
-    font-size: 12px;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -246,4 +273,5 @@
 .Networking-keySymbolLabel{
     font-size: 12px;
     padding-left: 15px;
+    color: #707070
 }
