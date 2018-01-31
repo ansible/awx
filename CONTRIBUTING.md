@@ -57,7 +57,7 @@ For Linux platforms, refer to the following from Docker:
 
 > https://docs.docker.com/engine/installation/linux/docker-ce/fedora/
 
-**Centos**
+**CentOS**
 
 > https://docs.docker.com/engine/installation/linux/docker-ce/centos/
 
