@@ -4,7 +4,6 @@ import hasAnsi from 'has-ansi';
 let vm;
 let ansi;
 let job;
-let jobEvent;
 let container;
 let $timeout;
 let $sce;
@@ -18,7 +17,6 @@ const meta = {
     page: {}
 };
 
-const ROW_LIMIT = 200;
 const PAGE_LIMIT = 3;
 const SCROLL_BUFFER = 250;
 const SCROLL_LOAD_DELAY = 250;
@@ -41,7 +39,6 @@ const TIME_EVENTS = [
 
 function JobsIndexController (
     _job_,
-    JobEventModel,
     _$sce_,
     _$timeout_,
     _$scope_,
@@ -56,10 +53,10 @@ function JobsIndexController (
     job = _job_;
 
     ansi = new Ansi();
-    jobEvent = new JobEventModel();
 
     const events = job.get('related.job_events.results');
-    const html = $sce.trustAsHtml(parseEvents(events));
+    const parsed = parseEvents(events);
+    const html = $sce.trustAsHtml(parsed.html);
 
     vm = this || {};
 
@@ -87,7 +84,7 @@ function JobsIndexController (
 
     meta.page.cache = [{
         page: 1,
-        count: events.length
+        lines: parsed.lines
     }];
 
     $timeout(() => {
@@ -118,11 +115,9 @@ function next () {
             }
 
             meta.page.cache.push({
-                page: data.page,
-                count: data.results.length
+                page: data.page
             });
 
-            console.log(data.results);
             return shift()
                 .then(() => append(data.results));
         });
@@ -138,7 +133,6 @@ function prev () {
     };
 
     console.log('[2] getting previous page', config.page, meta.page.cache);
-
     return job.goToPage(config)
         .then(data => {
             if (!data || !data.results) {
@@ -146,8 +140,7 @@ function prev () {
             }
 
             meta.page.cache.unshift({
-                page: data.page,
-                count: data.results.length
+                page: data.page
             });
 
             return pop()
@@ -202,8 +195,12 @@ function append (events) {
     console.log('[4] appending next page');
 
     return $q(resolve => {
-        const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parseEvents(events))));
+        const parsed = parseEvents(events);
+        const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parsed.html)));
         const table = $(ELEMENT_TBODY);
+        const index = meta.page.cache.length - 1;
+
+        meta.page.cache[index].lines = parsed.lines;
 
         table.append(rows);
         $compile(rows.contents())($scope);
@@ -217,12 +214,11 @@ function prepend (events) {
     console.log('[4] prepending next page');
 
     return $q(resolve => {
-        const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parseEvents(events))));
+        const parsed = parseEvents(events);
+        const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parsed.html)));
         const table = $(ELEMENT_TBODY);
 
-        // Set row count added
-        // pop number of rows (not number of events)
-        // meta.page.cache[0].rows = rows.length;
+        meta.page.cache[0].lines = parsed.lines;
 
         table.prepend(rows);
         $compile(rows.contents())($scope);
@@ -243,7 +239,7 @@ function pop () {
 
         const ejected = meta.page.cache.pop();
         console.log('[3.1] popping', ejected);
-        const rows = $(ELEMENT_TBODY).children().slice(-ejected.count);
+        const rows = $(ELEMENT_TBODY).children().slice(-ejected.lines);
 
         rows.empty();
         rows.remove();
@@ -264,7 +260,7 @@ function shift () {
 
         const ejected = meta.page.cache.shift();
         console.log('[3.1] shifting', ejected);
-        const rows = $(ELEMENT_TBODY).children().slice(0, ejected.count);
+        const rows = $(ELEMENT_TBODY).children().slice(0, ejected.lines);
 
         rows.empty();
         rows.remove();
@@ -288,9 +284,22 @@ function scrollTo (direction) {
 }
 
 function parseEvents (events) {
+    let lines = 0;
+    let html = '';
+
     events.sort(orderByLineNumber);
 
-    return events.reduce((html, event) => `${html}${parseLine(event)}`, '');
+    events.forEach(event => {
+        const line = parseLine(event);
+
+        html += line.html;
+        lines += line.count;
+    });
+
+    return {
+        html,
+        lines
+    };
 }
 
 function orderByLineNumber (a, b) {
@@ -307,17 +316,18 @@ function orderByLineNumber (a, b) {
 
 function parseLine (event) {
     if (!event || !event.stdout) {
-        return '';
+        return { html: '', count: 0 };
     }
 
     const { stdout } = event;
     const lines = stdout.split('\r\n');
 
+    let count = lines.length;
     let ln = event.start_line;
 
     const current = createRecord(ln, lines, event);
 
-    return lines.reduce((html, line, i) => {
+    const html = lines.reduce((html, line, i) => {
         ln++;
 
         const isLastLine = i === lines.length - 1;
@@ -325,10 +335,13 @@ function parseLine (event) {
 
         if (current && current.isTruncated && isLastLine) {
             row += createRow(current);
+            count++;
         }
 
         return `${html}${row}`;
     }, '');
+
+    return { html, count };
 }
 
 function createRecord (ln, lines, event) {
@@ -541,7 +554,6 @@ function onScroll () {
 
 JobsIndexController.$inject = [
     'job',
-    'JobEventModel',
     '$sce',
     '$timeout',
     '$scope',

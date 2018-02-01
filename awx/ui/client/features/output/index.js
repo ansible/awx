@@ -10,10 +10,48 @@ const indexTemplate = require('~features/output/index.view.html');
 
 const MODULE_NAME = 'at.features.output';
 
+function resolveJob (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJob, $stateParams) {
+    const { id } = $stateParams;
+    const { type } = $stateParams;
+
+    let Resource;
+
+    switch (type) {
+        case 'project':
+            Resource = ProjectUpdate;
+            break;
+        case 'playbook':
+            Resource = Job;
+            break;
+        case 'command':
+            Resource = AdHocCommand;
+            break;
+        case 'system':
+            Resource = SystemJob;
+            break;
+        case 'workflow':
+            Resource = WorkflowJob;
+            break;
+        default:
+            // Redirect
+            return null;
+    }
+
+    return new Resource('get', id)
+        .then(resource => resource.extend('job_events', {
+            pageCache: true,
+            pageLimit: 3,
+            params: {
+                page_size: 100,
+                order_by: 'start_line'
+            }
+        }));
+}
+
 function JobsRun ($stateExtender, strings) {
     $stateExtender.addState({
         name: 'jobz',
-        route: '/jobz/:id',
+        route: '/jobz/:type/:id',
         ncyBreadcrumb: {
             label: strings.get('state.TITLE')
         },
@@ -29,19 +67,15 @@ function JobsRun ($stateExtender, strings) {
             }
         },
         resolve: {
-            job: ['JobModel', '$stateParams', (Jobs, $stateParams) => {
-                const { id } = $stateParams;
-
-                return new Jobs('get', id)
-                    .then(job => job.extend('job_events', {
-                        pageCache: true,
-                        pageLimit: 3,
-                        params: {
-                            page_size: 100,
-                            order_by: 'start_line'
-                        },
-                    }));
-            }]
+            job: [
+                'JobModel',
+                'ProjectUpdateModel',
+                'AdHocCommandModel',
+                'SystemJobModel',
+                'WorkflowJobModel',
+                '$stateParams',
+                resolveJob
+            ]
         }
     });
 }

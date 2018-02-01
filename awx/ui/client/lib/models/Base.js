@@ -460,8 +460,6 @@ function goToPage (config) {
 
     return $http(req)
         .then(({ data }) => {
-            let ejected;
-
             if (pageCache) {
                 pageCache[pageNumber] = data.results;
                 pagesInCache.push(pageNumber);
@@ -469,7 +467,9 @@ function goToPage (config) {
                 if (pagesInCache.length > this.page.limit) {
                     const pageToDelete = pagesInCache.shift();
 
+                    console.log(pageCache);
                     delete pageCache[pageToDelete];
+                    console.log(this.page.cache);
                 }
             }
 

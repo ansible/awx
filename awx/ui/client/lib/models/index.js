@@ -14,12 +14,13 @@ import InventorySource from '~models/InventorySource';
 import Job from '~models/Job';
 import JobEvent from '~models/JobEvent';
 import JobTemplate from '~models/JobTemplate';
-import Jobs from '~models/Jobs';
 import Me from '~models/Me';
 import NotificationTemplate from '~models/NotificationTemplate';
 import Organization from '~models/Organization';
 import Project from '~models/Project';
 import Schedule from '~models/Schedule';
+import ProjectUpdate from '~models/ProjectUpdate';
+import SystemJob from '~models/SystemJob';
 import UnifiedJobTemplate from '~models/UnifiedJobTemplate';
 import WorkflowJob from '~models/WorkflowJob';
 import WorkflowJobTemplate from '~models/WorkflowJobTemplate';
@@ -48,17 +49,17 @@ angular
     .service('JobEventModel', JobEvent)
     .service('JobModel', Job)
     .service('JobTemplateModel', JobTemplate)
-    .service('JobsModel', Jobs)
     .service('MeModel', Me)
     .service('NotificationTemplate', NotificationTemplate)
     .service('OrganizationModel', Organization)
     .service('ProjectModel', Project)
     .service('ScheduleModel', Schedule)
     .service('UnifiedJobModel', UnifiedJob)
+    .service('ProjectUpdateModel', ProjectUpdate)
+    .service('SystemJobModel', SystemJob)
     .service('UnifiedJobTemplateModel', UnifiedJobTemplate)
     .service('WorkflowJobModel', WorkflowJob)
     .service('WorkflowJobTemplateModel', WorkflowJobTemplate)
-    .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode)
     .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode)
     .service('ModelsStrings', ModelsStrings);
 
