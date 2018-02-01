@@ -52,11 +52,14 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     credential_admin_role = ImplicitRoleField(
         parent_role='admin_role',
     )
+    workflow_admin_role = ImplicitRoleField(
+        parent_role='admin_role',
+    )
     auditor_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
     )
     member_role = ImplicitRoleField(
-        parent_role=['admin_role', 'project_admin_role', 'inventory_admin_role']
+        parent_role=['admin_role', 'project_admin_role', 'inventory_admin_role', 'workflow_admin_role']
     )
     read_role = ImplicitRoleField(
         parent_role=['member_role', 'auditor_role'],

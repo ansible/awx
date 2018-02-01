@@ -608,6 +608,7 @@ class InventoryAccess(BaseAccess):
     I can see inventory when:
      - I'm a superuser.
      - I'm an org admin of the inventory's org.
+     - I'm an inventory admin of the inventory's org.
      - I have read, write or admin permissions on it.
     I can change inventory when:
      - I'm a superuser.
@@ -945,8 +946,12 @@ class CredentialAccess(BaseAccess):
      - I'm a superuser.
      - It's a user credential and it's my credential.
      - It's a user credential and I'm an admin of an organization where that
-       user is a member of admin of the organization.
+       user is a member.
+     - It's a user credential and I'm a credential_admin of an organization
+       where that user is a member.
      - It's a team credential and I'm an admin of the team's organization.
+     - It's a team credential and I'm a credential admin of the team's
+       organization.
      - It's a team credential and I'm a member of the team.
     I can change/delete when:
      - I'm a superuser.
@@ -1067,6 +1072,7 @@ class ProjectAccess(BaseAccess):
     I can see projects when:
      - I am a superuser.
      - I am an admin in an organization associated with the project.
+     - I am a project admin in an organization associated with the project.
      - I am a user in an organization associated with the project.
      - I am on a team associated with the project.
      - I have been explicitly granted permission to run/check jobs using the
@@ -1174,6 +1180,7 @@ class JobTemplateAccess(BaseAccess):
         a user can create a job template if
          - they are a superuser
          - an org admin of any org that the project is a member
+         - if they are a project_admin for any org that project is a member of
          - if they have user or team
         based permissions tying the project to the inventory source for the
         given action as well as the 'create' deploy permission.
@@ -1725,13 +1732,14 @@ class WorkflowJobTemplateAccess(BaseAccess):
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data:  # So the browseable API will work
-            return Organization.accessible_objects(self.user, 'admin_role').exists()
+            return Organization.accessible_objects(self.user, 'workflow_admin_role').exists()
 
         # will check this if surveys are added to WFJT
         if 'survey_enabled' in data and data['survey_enabled']:
             self.check_license(feature='surveys')
 
-        return self.check_related('organization', Organization, data, mandatory=True)
+        return self.check_related('organization', Organization, data, role_field='workflow_admin_role',
+                                  mandatory=True)
 
     def can_copy(self, obj):
         if self.save_messages:
@@ -1758,7 +1766,8 @@ class WorkflowJobTemplateAccess(BaseAccess):
             if missing_inventories:
                 self.messages['inventories_unable_to_copy'] = missing_inventories
 
-        return self.check_related('organization', Organization, {'reference_obj': obj}, mandatory=True)
+        return self.check_related('organization', Organization, {'reference_obj': obj}, role_field='workflow_admin_role',
+                                  mandatory=True)
 
     def can_start(self, obj, validate_license=True):
         if validate_license:
@@ -1783,7 +1792,8 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        return self.check_related('organization', Organization, data, obj=obj) and self.user in obj.admin_role
+        return (self.check_related('organization', Organization, data, role_field='workflow_admin_field', obj=obj)
+                and self.user in obj.admin_role)
 
     def can_delete(self, obj):
         is_delete_allowed = self.user.is_superuser or self.user in obj.admin_role
@@ -1824,7 +1834,7 @@ class WorkflowJobAccess(BaseAccess):
     def can_delete(self, obj):
         return (obj.workflow_job_template and
                 obj.workflow_job_template.organization and
-                self.user in obj.workflow_job_template.organization.admin_role)
+                self.user in obj.workflow_job_template.organization.workflow_admin_role)
 
     def get_method_capability(self, method, obj, parent_obj):
         if method == 'start':
