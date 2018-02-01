@@ -127,7 +127,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
         https://github.com/dateutil/dateutil/pull/619
         """
         kwargs['forceset'] = True
-        kwargs['tzinfos'] = {}
+        kwargs['tzinfos'] = {x: dateutil.tz.tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
         match = cls.TZID_REGEX.match(rrule)
         if match is not None:
             rrule = cls.TZID_REGEX.sub("DTSTART\g<stamp>TZI\g<rrule>", rrule)
