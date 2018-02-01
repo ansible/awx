@@ -56,7 +56,7 @@ function InstanceListPolicyController ($scope, $state, strings) {
         form.components
             .filter(component => component.category === 'input')
             .filter(component => component.state.id === 'policy_instance_list')
-            .map(component => {
+            .forEach(component => {
                 component.state._value = vm.selectedRows;
             });
 
