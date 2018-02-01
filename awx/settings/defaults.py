@@ -218,6 +218,7 @@ TEMPLATES = [
                 ('django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',),
             )],
+            'builtins': ['awx.main.templatetags.swagger'],
         },
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),

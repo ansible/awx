@@ -1,3 +1,5 @@
+# List Fact Scans for a Host by Module and Date
+
 Make a GET request to this resource to retrieve system tracking scans by module and date/time
 
 You may filter scan runs using the `from` and `to` properties:

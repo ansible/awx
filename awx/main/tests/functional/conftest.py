@@ -1,4 +1,3 @@
-
 # Python
 import pytest
 import mock

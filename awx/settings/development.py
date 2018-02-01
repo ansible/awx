@@ -101,6 +101,8 @@ if 'django_jenkins' in INSTALLED_APPS:
     PEP8_RCFILE = "setup.cfg"
     PYLINT_RCFILE = ".pylintrc"
 
+INSTALLED_APPS += ('rest_framework_swagger',)
+
 # Much faster than the default
 # https://docs.djangoproject.com/en/1.6/topics/auth/passwords/#how-django-stores-passwords
 PASSWORD_HASHERS = (
