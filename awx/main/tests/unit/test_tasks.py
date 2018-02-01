@@ -1757,7 +1757,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             self.instance.credential, 'password'
         )
 
-        self.instance.source_vars_dict['prefer_ipv4'] = True
+        self.instance.source_vars['prefer_ipv4'] = True
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
