@@ -2,7 +2,11 @@
 Security Assertion Markup Language, or SAML, is an open standard for exchanging authentication and/or authorization data between an identity provider (i.e. LDAP) and a service provider (i.e. AWX). More concretely, AWX can be configured to talk with SAML in order to authenticate (create/login/logout) users of AWX. User Team and Organization membership can be embedded in the SAML response to AWX. 
 
 # Configure SAML Authentication
-Please see the Tower documentation as well as Ansible blog posts for basic SAML configuration.
+Please see the Tower documentation as well as Ansible blog posts for basic SAML configuration. Note that AWX's SAML implementation relies on python-social-auth which uses python-saml. AWX exposes 3 fields that are directly passed to the lower libraries:
+* `SOCIAL_AUTH_SAML_SP_EXTRA` is passed to the `python-saml` library configuration's `sp` setting.  
+* `SOCIAL_AUTH_SAML_SECURITY_CONFIG` is passed to the `python-saml` library configuration's `security` setting.
+* `SOCIAL_AUTH_SAML_EXTRA_DATA`
+See http://python-social-auth-docs.readthedocs.io/en/latest/backends/saml.html#advanced-settings for more information.
 
 # Configure SAML for Team and Organization Membership
 AWX can be configured to look for particular attributes that contain AWX Team and Organization membership to associate with users when they login to AWX. The attribute names are defined in AWX settings. Specifically, the authentication settings tab and SAML sub category fields *SAML Team Map* and *SAML Organization Attribute Mapping*. The meaning and usefulness of these settings is best motivated through example.
@@ -84,4 +88,3 @@ Below is another example of a SAML attribute that contains a Team membership in 
 **remove:** True to remove user from all Teams before adding the user to the list of Teams. False to keep the user in whatever Team(s) they are in while adding the user to the Team(s) in the SAML attribute.
 
 **team_org_map:** An array of dictionaries of the form `{ "team": "<AWX Team Name>", "organization": "<AWX Org Name>" }` that defines mapping from AWX Team -> AWX Organization. This is needed because the same named Team can exist in multiple Organizations in Tower. The organization to which a team listed in a SAML attribute belongs to would be ambiguous without this mapping.
-
