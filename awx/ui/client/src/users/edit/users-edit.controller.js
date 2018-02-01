@@ -132,6 +132,9 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
                 case 'organization':
                     $state.go('organizations.edit', { "organization_id": id }, { reload: true });
                     break;
+                case 'team':
+                    $state.go('teams.edit', { "team_id": id }, { reload: true });
+                    break;
                 case 'credential':
                     $state.go('credentials.edit', { "credential_id": id }, { reload: true });
                     break;
