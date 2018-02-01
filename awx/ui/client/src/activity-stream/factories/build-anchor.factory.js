@@ -20,10 +20,10 @@ export default function BuildAnchor($log, $filter) {
                      if (activity.operation === 'create' || activity.operation === 'delete'){
                          // the API formats the changes.inventory field as str 'myInventoryName-PrimaryKey'
                          var inventory_id = _.last(activity.changes.inventory.split('-'));
-                         url += 'inventories/' + inventory_id + '/groups/edit/' + activity.changes.id;
+                         url += 'inventories/inventory/' + inventory_id + '/groups/edit/' + activity.changes.id;
                      }
                      else {
-                         url += 'inventories/' + activity.summary_fields.inventory[0].id + '/groups/edit/' + (activity.changes.id || activity.changes.object1_pk);
+                         url += 'inventories/inventory/' + activity.summary_fields.inventory[0].id + '/groups/edit/' + (activity.changes.id || activity.changes.object1_pk);
                      }
                      break;
                  case 'host':
@@ -33,7 +33,7 @@ export default function BuildAnchor($log, $filter) {
                      url += 'jobs/' + obj.id;
                      break;
                  case 'inventory':
-                     url += 'inventories/' + obj.id + '/';
+                     url += obj.kind && obj.kind === "smart" ? 'inventories/smart/' + obj.id + '/' : 'inventories/inventory' + obj.id + '/';
                      break;
                  case 'schedule':
                      // schedule urls depend on the resource they're associated with
