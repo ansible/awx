@@ -12,6 +12,7 @@ import {
     getSmartInventory,
     getTeam,
     getUpdatedProject,
+    getJobs,
 } from '../fixtures';
 
 const data = {};
@@ -49,6 +50,7 @@ module.exports = {
                 pages.teams = client.page.teams();
                 pages.users = client.page.users();
                 pages.notificationTemplates = client.page.notificationTemplates();
+                pages.jobs = client.page.jobs();
 
                 urls.organization = `${pages.organizations.url()}/${data.organization.id}`;
                 urls.inventory = `${pages.inventories.url()}/inventory/${data.inventory.id}`;
@@ -63,6 +65,8 @@ module.exports = {
                 urls.team = `${pages.teams.url()}/${data.team.id}`;
                 urls.user = `${pages.users.url()}/${data.user.id}`;
                 urls.notification = `${pages.notificationTemplates.url()}/${data.notification.id}`;
+                urls.jobs = `${pages.jobs.url()}`;
+                urls.jobsSchedules = `${pages.jobs.url()}/schedules`;
 
                 client.useCss();
                 client.login();
@@ -655,6 +659,26 @@ module.exports = {
         client.navigateTo(urls.jobTemplateSchedule);
         client.expect.element('#xss').not.present;
         client.expect.element('[class=xss]').not.present;
+    },
+    'check job schedules view for unsanitized content': client => {
+        const itemRow = `#schedules_table tr[id="${data.jobTemplateSchedule.id}"]`;
+        const itemName = `${itemRow} td[class*="name-"] a`;
+
+        client.navigateTo(urls.jobsSchedules);
+
+        client.moveToElement(itemName, 0, 0, () => {
+            client.expect.element(itemName).attribute('aria-describedby');
+            client.getAttribute(itemName, 'aria-describedby', ({ value }) => {
+                const tooltip = `#${value}`;
+                client.expect.element(tooltip).present;
+                client.expect.element(tooltip).visible;
+
+                client.expect.element('#xss').not.present;
+                client.expect.element('[class=xss]').not.present;
+                client.expect.element(tooltip).attribute('innerHTML')
+                    .contains('&lt;div id="xss" class="xss"&gt;test&lt;/div&gt;');
+            });
+        });
         client.end();
     },
 };
