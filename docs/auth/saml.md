@@ -80,6 +80,8 @@ Below is another example of a SAML attribute that contains a Team membership in 
 }
 ```
 **saml_attr:** The saml attribute name where the team array can be found.
+
 **remove:** True to remove user from all Teams before adding the user to the list of Teams. False to keep the user in whatever Team(s) they are in while adding the user to the Team(s) in the SAML attribute.
+
 **team_org_map:** An array of dictionaries of the form `{ "team": "<AWX Team Name>", "organization": "<AWX Org Name>" }` that defines mapping from AWX Team -> AWX Organization. This is needed because the same named Team can exist in multiple Organizations in Tower. The organization to which a team listed in a SAML attribute belongs to would be ambiguous without this mapping.
 
