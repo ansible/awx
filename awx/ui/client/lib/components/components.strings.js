@@ -90,7 +90,7 @@ function ComponentsStrings (BaseString) {
     };
 
     ns.list = {
-        DEFAULT_EMPTY_LIST: t.s('List is empty.')
+        DEFAULT_EMPTY_LIST: t.s('Please add items to this list.')
     };
 }
 
