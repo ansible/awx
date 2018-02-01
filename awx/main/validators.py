@@ -21,7 +21,7 @@ def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
     """
     Validate the given PEM data is valid and contains the required numbers of
     keys and certificates.
-    
+
     Return a list of PEM objects, where each object is a dict with the following
     keys:
       - 'all': The entire string for the PEM object including BEGIN/END lines.
@@ -48,24 +48,32 @@ def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
 
     # Build regular expressions for matching each object in the PEM file.
     pem_obj_re = re.compile(
-        r'^(-{4,}) *BEGIN ([A-Z ]+?) *\1[\r\n]+' +
-        r'(.+?)[\r\n]+\1 *END \2 *\1[\r\n]?(.*?)$', re.DOTALL,
+        r'^-{5}\ *BEGIN ([A-Z ]+?)\ *-{5}' +
+        r'\s*(.+?)\s*' +
+        r'-{5}\ *END [A-Z ]+?\ *-{5}' +
+        r'\s?(.*?)$',
+        re.DOTALL
     )
     pem_obj_header_re = re.compile(r'^(.+?):\s*?(.+?)(\\??)$')
 
     pem_objects = []
     key_count, cert_count = 0, 0
+
+    # Strip leading whitespaces at the start of the PEM data
     data = data.lstrip()
+
     while data:
         match = pem_obj_re.match(data)
         if not match:
             raise ValidationError(_('Invalid certificate or key: %s...') % data[:100])
-        data = match.group(4).lstrip()
+
+        # The rest of the PEM data to process
+        data = match.group(3).lstrip()
 
         # Check PEM object type, check key type if private key.
         pem_obj_info = {}
         pem_obj_info['all'] = match.group(0)
-        pem_obj_info['type'] = pem_obj_type = match.group(2)
+        pem_obj_info['type'] = pem_obj_type = match.group(1)
         if pem_obj_type.endswith('PRIVATE KEY'):
             key_count += 1
             pem_obj_info['type'] = 'PRIVATE KEY'
@@ -80,7 +88,7 @@ def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
             raise ValidationError(_('Unsupported PEM object type: "%s"') % pem_obj_type)
 
         # Ensure that this PEM object is valid base64 data.
-        pem_obj_info['data'] = match.group(3)
+        pem_obj_info['data'] = match.group(2)
         base64_data = ''
         line_continues = False
         for line in pem_obj_info['data'].splitlines():
@@ -186,4 +194,3 @@ def vars_validate_or_raise(vars_str):
         return vars_str
     except ParseError as e:
         raise RestValidationError(str(e))
-
