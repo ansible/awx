@@ -146,15 +146,16 @@ def test_tzinfo_naive_until(job_template, dtstart, until):
 
 
 @pytest.mark.django_db
-def test_mismatched_until_timezone(job_template):
-    rrule = 'DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180602T000000' + 'Z'  # noqa the Z isn't allowed, because we have a TZID=America/New_York
+def test_until_must_be_utc(job_template):
+    rrule = 'DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180602T000000'  # noqa the Z is required
     s = Schedule(
         name='Some Schedule',
         rrule=rrule,
         unified_job_template=job_template
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as e:
         s.save()
+    assert 'RRULE UNTIL values must be specified in UTC' in str(e)
 
 
 @pytest.mark.django_db
