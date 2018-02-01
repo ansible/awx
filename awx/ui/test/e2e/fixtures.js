@@ -61,8 +61,21 @@ const getInventory = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventories/', {
         name: `${namespace}-inventory`,
         description: namespace,
-        organization: organization.id
-    }));
+        organization: organization.id,
+    }).then(inventory => getOrCreate('/hosts/', {
+        name: `${namespace}-host`,
+        description: namespace,
+        inventory: inventory.id,
+        variables: JSON.stringify({ ansible_connection: 'local' }),
+    }).then(() => inventory)));
+
+const getHost = (namespace = session) => getInventory(namespace)
+    .then(inventory => getOrCreate('/hosts/', {
+        name: `${namespace}-host`,
+        description: namespace,
+        inventory: inventory.id,
+        variables: JSON.stringify({ ansible_connection: 'local' }),
+    }).then((host) => host));
 
 const getInventoryScript = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventory_scripts/', {
@@ -182,7 +195,7 @@ const waitForJob = endpoint => {
                 const completed = statuses.indexOf(update.data.status) > -1;
 
                 if (completed) {
-                    return resolve();
+                    return resolve(update.data);
                 }
 
                 if (--attempts <= 0) {
@@ -204,6 +217,15 @@ const getUpdatedProject = (namespace = session) => getProject(namespace)
         }
 
         return project;
+    });
+
+const getJob = (namespace = session) => getJobTemplate(namespace)
+    .then(template => {
+        const launchURL = template.related.launch;
+        return post(launchURL, {}).then(response => {
+            const jobURL = response.data.url;
+            return waitForJob(jobURL).then(() => response.data);
+        });
     });
 
 const getJobTemplate = (namespace = session) => {
@@ -302,5 +324,7 @@ module.exports = {
     getSmartInventory,
     getTeam,
     getUpdatedProject,
-    getUser
+    getUser,
+    getJob,
+    getHost,
 };

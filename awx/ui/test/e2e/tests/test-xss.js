@@ -1,5 +1,6 @@
 import {
     getAdminMachineCredential,
+    getHost,
     getInventory,
     getInventoryScript,
     getInventorySource,
@@ -12,7 +13,7 @@ import {
     getSmartInventory,
     getTeam,
     getUpdatedProject,
-    getJobs,
+    getJob,
 } from '../fixtures';
 
 const data = {};
@@ -22,9 +23,11 @@ const pages = {};
 module.exports = {
     before: (client, done) => {
         const namespace = '<div id="xss" class="xss">test</div>';
+        const namespaceShort = '<div class="xss">t</div>';
 
         const resources = [
             getOrganization(namespace).then(obj => { data.organization = obj; }),
+            getHost(namespaceShort).then(obj => { data.host = obj; }),
             getInventory(namespace).then(obj => { data.inventory = obj; }),
             getInventoryScript(namespace).then(obj => { data.inventoryScript = obj; }),
             getSmartInventory(namespace).then(obj => { data.smartInventory = obj; }),
@@ -37,6 +40,7 @@ module.exports = {
             getTeam(namespace).then(obj => { data.team = obj; }),
             getJobTemplateAdmin(namespace).then(obj => { data.user = obj; }),
             getNotificationTemplate(namespace).then(obj => { data.notification = obj; }),
+            getJob(namespaceShort).then(obj => { data.job = obj; }),
         ];
 
         Promise.all(resources)
@@ -44,6 +48,7 @@ module.exports = {
                 pages.organizations = client.page.organizations();
                 pages.inventories = client.page.inventories();
                 pages.inventoryScripts = client.page.inventoryScripts();
+                pages.hosts = client.page.hosts();
                 pages.projects = client.page.projects();
                 pages.credentials = client.page.credentials();
                 pages.templates = client.page.templates();
@@ -54,6 +59,7 @@ module.exports = {
 
                 urls.organization = `${pages.organizations.url()}/${data.organization.id}`;
                 urls.inventory = `${pages.inventories.url()}/inventory/${data.inventory.id}`;
+                urls.hosts = `${pages.hosts.url()}`;
                 urls.inventoryScript = `${pages.inventoryScripts.url()}/${data.inventoryScript.id}`;
                 urls.inventorySource = `${urls.inventory}/inventory_sources/edit/${data.inventorySource.id}`;
                 urls.sourceSchedule = `${urls.inventorySource}/schedules/${data.sourceSchedule.id}`;
@@ -679,6 +685,20 @@ module.exports = {
                     .contains('&lt;div id="xss" class="xss"&gt;test&lt;/div&gt;');
             });
         });
+        client.end();
+    },
+    'check host recent jobs popup for unsanitized content': client => {
+        const itemRow = `#hosts_table tr[id="${data.host.id}"]`;
+        const itemName = `${itemRow} td[class*="active_failures-"] a`;
+        const popOver = `${itemRow} td[class*="active_failures-"] div[class*="popover"]`;
+
+        client.navigateTo(urls.hosts);
+
+        client.click(itemName);
+        client.expect.element(popOver).present;
+
+        client.expect.element('[class=xss]').not.present;
+
         client.end();
     },
 };
