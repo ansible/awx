@@ -7,8 +7,7 @@ import instanceGroupsModal from '../shared/instance-groups-multiselect/instance-
 import AddEditTemplate from './add-edit/add-edit-instance-groups.view.html';
 import AddInstanceGroupController from './add-edit/add-instance-group.controller';
 import EditInstanceGroupController from './add-edit/edit-instance-group.controller';
-import InstanceListPolicyTemplate from './add-edit/instance-list-policy.partial.html';
-import InstanceListPolicyController from './add-edit/instance-list-policy.controller.js';
+import InstanceListPolicy from './add-edit/instance-list-policy.directive.js';
 
 import InstanceGroupsTemplate from './list/instance-groups-list.partial.html';
 import InstanceGroupsListController from './list/instance-groups-list.controller';
@@ -147,9 +146,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             "modal": {
-                templateUrl: InstanceListPolicyTemplate,
-                controller: InstanceListPolicyController,
-                controllerAs: 'vm'
+                template: '<instance-list-policy></instance-list-policy>',
             }
         },
         resolvedModels: InstanceGroupsResolve
@@ -195,9 +192,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         },
         views: {
             "modal": {
-                templateUrl: InstanceListPolicyTemplate,
-                controller: InstanceListPolicyController,
-                controllerAs: 'vm'
+                template: '<instance-list-policy></instance-list-policy>',
             }
         },
         resolvedModels: InstanceGroupsResolve
@@ -328,6 +323,7 @@ angular.module(MODULE_NAME, [])
     .controller('InstanceGroupJobsListController', InstanceGroupJobsListController)
     .controller('InstanceListController', InstanceListController)
     .controller('InstanceJobsListController', InstanceJobsListController)
+    .directive('instanceListPolicy', InstanceListPolicy)
     .directive('instanceGroupsMultiselect', instanceGroupsMultiselect)
     .directive('instanceGroupsModal', instanceGroupsModal)
     .directive('capacityAdjuster', CapacityAdjuster)

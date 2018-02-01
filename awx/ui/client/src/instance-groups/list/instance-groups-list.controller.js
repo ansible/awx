@@ -1,6 +1,6 @@
 export default ['$scope', 'InstanceGroupList', 'resolvedModels', 'Dataset', '$state', 'ComponentsStrings', 'ProcessErrors',
     function($scope, InstanceGroupList, resolvedModels, Dataset, $state, strings, ProcessErrors) {
-        let list = InstanceGroupList;
+        const list = InstanceGroupList;
         const vm = this;
         const { instanceGroup } = resolvedModels;
 

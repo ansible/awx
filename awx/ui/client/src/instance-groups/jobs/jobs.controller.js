@@ -6,7 +6,7 @@ function InstanceGroupJobsController ($scope, $filter, $state, model, strings, j
     init();
 
     function init(){
-        let instance_group_id = instanceGroup.get('id');
+        const instance_group_id = instanceGroup.get('id');
         vm.strings = strings;
         vm.jobStrings = jobStrings;
         vm.queryset = { page_size: '10', order_by: '-finished', instance_group_id: instance_group_id };

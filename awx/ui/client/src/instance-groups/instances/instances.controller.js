@@ -38,14 +38,14 @@ function InstancesController ($scope, $state, $http, models, Instance, strings, 
     };
 
     vm.toggle = (toggled) => {
-        let instance = _.find(vm.instances, 'id', toggled.id);
+        const instance = _.find(vm.instances, 'id', toggled.id);
         instance.enabled = !instance.enabled;
 
-        let data = {
+        const data = {
             "enabled": instance.enabled
         };
 
-        let req = {
+        const req = {
             method: 'PUT',
             url: instance.url,
             data

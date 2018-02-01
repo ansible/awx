@@ -5,8 +5,9 @@ function CapacityAdjuster (templateUrl) {
         },
         templateUrl: templateUrl('instance-groups/capacity-adjuster/capacity-adjuster'),
         restrict: 'E',
+        replace: true,
         link: function(scope) {
-            let adjustment_values = [{
+            const adjustment_values = [{
                 label: 'CPU',
                 value: scope.state.cpu_capacity,
             },{
@@ -22,10 +23,10 @@ function CapacityAdjuster (templateUrl) {
             const vm = this || {};
 
             vm.slide = (state) => {
-                let data = {
-                    "capacity_adjustment": state.capacity_adjustment
+                const data = {
+                    "capacity_adjustment": `${state.capacity_adjustment}`
                 };
-                let req = {
+                const req = {
                     method: 'PUT',
                     url: state.url,
                     data

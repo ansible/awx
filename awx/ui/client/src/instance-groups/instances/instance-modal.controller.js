@@ -39,14 +39,14 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
      }, true);
 
     vm.submit = () => {
-        let associate = vm.selectedRows
+        const associate = vm.selectedRows
             .map(instance => ({id: instance.id}));
-        let disassociate = vm.deselectedRows
+        const disassociate = vm.deselectedRows
             .map(instance => ({id: instance.id, disassociate: true}));
 
-        let all = associate.concat(disassociate);
-        let defers = all.map((data) => {
-            let config = {
+        const all = associate.concat(disassociate);
+        const defers = all.map((data) => {
+            const config = {
                 url: `${vm.instanceGroupId}/instances/`,
                 data: data
             };
