@@ -1185,7 +1185,7 @@ register(
     field_class=fields.SAMLTeamAttrField,
     allow_null=True,
     default=None,
-    label=_('SAML Team Map'),
+    label=_('SAML Team Attribute Mapping'),
     help_text=_('Used to translate user team membership into Tower.'),
     category=_('SAML'),
     category_slug='saml',

@@ -15,6 +15,11 @@ export default [
     'configurationGithubTeamForm',
     'configurationGoogleForm',
     'configurationLdapForm',
+    'configurationLdap1Form',
+    'configurationLdap2Form',
+    'configurationLdap3Form',
+    'configurationLdap4Form',
+    'configurationLdap5Form',
     'configurationRadiusForm',
     'configurationTacacsForm',
     'configurationSamlForm',
@@ -34,6 +39,11 @@ export default [
         configurationGithubTeamForm,
         configurationGoogleForm,
         configurationLdapForm,
+        configurationLdap1Form,
+        configurationLdap2Form,
+        configurationLdap3Form,
+        configurationLdap4Form,
+        configurationLdap5Form,
         configurationRadiusForm,
         configurationTacacsForm,
         configurationSamlForm,
@@ -52,6 +62,11 @@ export default [
             'github_team': configurationGithubTeamForm,
             'google_oauth': configurationGoogleForm,
             'ldap': configurationLdapForm,
+            'ldap1': configurationLdap1Form,
+            'ldap2': configurationLdap2Form,
+            'ldap3': configurationLdap3Form,
+            'ldap4': configurationLdap4Form,
+            'ldap5': configurationLdap5Form,
             'radius': configurationRadiusForm,
             'tacacs': configurationTacacsForm,
             'saml': configurationSamlForm,
@@ -85,9 +100,14 @@ export default [
                                 // the ConfigurationUtils.arrayToList()
                                 // does a string.split(', ') w/ an extra space
                                 // behind the comma.
+
+                                const isLdap = (key.indexOf("AUTH_LDAP") !== -1);
+                                const isLdapUserSearch = isLdap && (key.indexOf("USER_SEARCH") !== -1);
+                                const isLdapGroupSearch = isLdap && (key.indexOf("GROUP_SEARCH") !== -1);
+
                                 if(key === "AD_HOC_COMMANDS"){
                                     $scope[key] = data[key];
-                                } else if (key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH") {
+                                } else if (isLdapUserSearch || isLdapGroupSearch) {
                                     $scope[key] = JSON.stringify(data[key]);
                                 } else {
                                     $scope[key] = ConfigurationUtils.arrayToList(data[key], key);
@@ -339,7 +359,12 @@ export default [
                         $scope.$broadcast(key+'_reverted');
                     }
                     else if($scope[key + '_field'].hasOwnProperty('codeMirror')){
-                        if (key === "AUTH_LDAP_USER_SEARCH" || key === "AUTH_LDAP_GROUP_SEARCH") {
+                        const isLdap = (key.indexOf("AUTH_LDAP") !== -1);
+
+                        const isLdapUserSearch = isLdap && (key.indexOf("USER_SEARCH") !== -1);
+                        const isLdapGroupSearch = isLdap && (key.indexOf("GROUP_SEARCH") !== -1);
+
+                        if (isLdapUserSearch || isLdapGroupSearch) {
                             $scope[key] = '[]';
                         } else {
                             $scope[key] = '{}';
