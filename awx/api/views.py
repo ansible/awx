@@ -192,7 +192,7 @@ class ApiRootView(APIView):
     swagger_topic = 'Versioning'
 
     def get(self, request, format=None):
-        ''' list supported API versions '''
+        ''' List supported API versions '''
 
         v1 = reverse('api:api_v1_root_view', kwargs={'version': 'v1'})
         v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
@@ -214,7 +214,7 @@ class ApiVersionRootView(APIView):
     swagger_topic = 'Versioning'
 
     def get(self, request, format=None):
-        ''' list top level resources '''
+        ''' List top level resources '''
         data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view', request=request)
         data['ping'] = reverse('api:api_v1_ping_view', request=request)
@@ -280,7 +280,7 @@ class ApiV1PingView(APIView):
     swagger_topic = 'System Configuration'
 
     def get(self, request, format=None):
-        """Return some basic information about this instance.
+        """Return some basic information about this instance
 
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
@@ -316,7 +316,7 @@ class ApiV1ConfigView(APIView):
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
     def get(self, request, format=None):
-        '''Return various sitewide configuration settings.'''
+        '''Return various sitewide configuration settings'''
 
         if request.user.is_superuser or request.user.is_system_auditor:
             license_data = get_license(show_key=True)
@@ -754,11 +754,12 @@ class ScheduleUnifiedJobsList(SubListAPIView):
 
 
 class AuthView(APIView):
+    ''' List enabled single-sign-on endpoints '''
 
     authentication_classes = []
     permission_classes = (AllowAny,)
     new_in_240 = True
-    swagger_topic = 'Authentication'
+    swagger_topic = 'System Configuration'
 
     def get(self, request):
         from rest_framework.reverse import reverse
@@ -4780,6 +4781,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
 
 
 class NotificationTemplateTest(GenericAPIView):
+    '''Test a Notification Template'''
 
     view_name = _('Notification Template Test')
     model = NotificationTemplate

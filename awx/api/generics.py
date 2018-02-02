@@ -217,7 +217,7 @@ class APIView(views.APIView):
             context['deprecated'] = True
 
         description = render_to_string(template_list, context)
-        if context.get('deprecated'):
+        if context.get('deprecated') and context.get('swagger_method') is None:
             # render deprecation messages at the very top
             description = '\n'.join([render_to_string('api/_deprecated.md', context), description])
         return description

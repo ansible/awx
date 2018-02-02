@@ -1,3 +1,4 @@
+{% ifmeth GET %}
 # List Root {{ model_verbose_name_plural|title }} for {{ parent_model_verbose_name|title|anora }}:
 
 Make a GET request to this resource to retrieve a list of root (top-level)
@@ -5,3 +6,4 @@ Make a GET request to this resource to retrieve a list of root (top-level)
 {{ parent_model_verbose_name }}.
 
 {% include "api/_list_common.md" %}
+{% endifmeth %}
