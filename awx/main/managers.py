@@ -2,12 +2,9 @@
 # All Rights Reserved.
 
 import sys
-from datetime import timedelta
 import logging
 
 from django.db import models
-from django.utils.timezone import now
-from django.db.models import Sum
 from django.conf import settings
 
 from awx.main.utils.filters import SmartFilter
@@ -92,11 +89,6 @@ class InstanceManager(models.Manager):
     def active_count(self):
         """Return count of active Tower nodes for licensing."""
         return self.all().count()
-
-    def total_capacity(self):
-        sumval = self.filter(modified__gte=now() - timedelta(seconds=settings.AWX_ACTIVE_NODE_TIME)) \
-                     .aggregate(total_capacity=Sum('capacity'))['total_capacity']
-        return max(50, sumval)
 
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing

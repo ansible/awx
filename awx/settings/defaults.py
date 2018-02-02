@@ -392,6 +392,18 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
+# The number of seconds to sleep between status checks for jobs running on isolated nodes
+AWX_ISOLATED_CHECK_INTERVAL = 30
+
+# The timeout (in seconds) for launching jobs on isolated nodes
+AWX_ISOLATED_LAUNCH_TIMEOUT = 600
+
+# Ansible connection timeout (in seconds) for communicating with isolated instances
+AWX_ISOLATED_CONNECTION_TIMEOUT = 10
+
+# The time (in seconds) between the periodic isolated heartbeat status check
+AWX_ISOLATED_PERIODIC_CHECK = 600
+
 # Memcached django cache configuration
 # CACHES = {
 #     'default': {
@@ -420,6 +432,7 @@ DEVSERVER_DEFAULT_PORT = '8013'
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
+BROKER_POOL_LIMIT = None
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_EVENT_QUEUE_TTL = 5
 CELERY_TASK_DEFAULT_QUEUE = 'tower'
@@ -435,18 +448,10 @@ CELERY_BEAT_MAX_LOOP_INTERVAL = 60
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
 CELERY_TASK_QUEUES = (
-    Queue('default', Exchange('default'), routing_key='default'),
     Queue('tower', Exchange('tower'), routing_key='tower'),
-    Queue('tower_scheduler', Exchange('scheduler', type='topic'), routing_key='tower_scheduler.job.#', durable=False),
     Broadcast('tower_broadcast_all')
 )
-CELERY_TASK_ROUTES = {
-    'awx.main.scheduler.tasks.run_task_manager': {'queue': 'tower', 'routing_key': 'tower'},
-    'awx.main.scheduler.tasks.run_job_launch': {'queue': 'tower_scheduler', 'routing_key': 'tower_scheduler.job.launch'},
-    'awx.main.scheduler.tasks.run_job_complete': {'queue': 'tower_scheduler', 'routing_key': 'tower_scheduler.job.complete'},
-    'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default', 'routing_key': 'cluster.heartbeat'},
-    'awx.main.tasks.purge_old_stdout_files': {'queue': 'default', 'routing_key': 'cluster.heartbeat'},
-}
+CELERY_TASK_ROUTES = {}
 
 CELERY_BEAT_SCHEDULE = {
     'tower_scheduler': {
@@ -474,10 +479,20 @@ CELERY_BEAT_SCHEDULE = {
     'task_manager': {
         'task': 'awx.main.scheduler.tasks.run_task_manager',
         'schedule': timedelta(seconds=20),
-        'options': {'expires': 20,}
+        'options': {'expires': 20}
     },
+    'isolated_heartbeat': {
+        'task': 'awx.main.tasks.awx_isolated_heartbeat',
+        'schedule': timedelta(seconds=AWX_ISOLATED_PERIODIC_CHECK),
+        'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2},
+    }
 }
 AWX_INCONSISTENT_TASK_INTERVAL = 60 * 3
+
+# Celery queues that will always be listened to by celery workers
+# Note: Broadcast queues have unique, auto-generated names, with the alias
+# property value of the original queue name.
+AWX_CELERY_QUEUES_STATIC = ['tower_broadcast_all',]
 
 # Django Caching Configuration
 if is_testing():
@@ -624,20 +639,8 @@ AWX_PROOT_BASE_PATH = "/tmp"
 # Note: This setting may be overridden by database settings.
 AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 
-# Time at which an HA node is considered active
-AWX_ACTIVE_NODE_TIME = 7200
-
-# The number of seconds to sleep between status checks for jobs running on isolated nodes
-AWX_ISOLATED_CHECK_INTERVAL = 30
-
-# The timeout (in seconds) for launching jobs on isolated nodes
-AWX_ISOLATED_LAUNCH_TIMEOUT = 600
-
-# Ansible connection timeout (in seconds) for communicating with isolated instances
-AWX_ISOLATED_CONNECTION_TIMEOUT = 10
-
-# The time (in seconds) between the periodic isolated heartbeat status check
-AWX_ISOLATED_PERIODIC_CHECK = 600
+# Automatically remove nodes that have missed their heartbeats after some time
+AWX_AUTO_DEPROVISION_INSTANCES = False
 
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
 # Note: This setting may be overridden by database settings.
@@ -1118,9 +1121,11 @@ LOGGING = {
         },
         'awx.main.tasks': {
             'handlers': ['task_system'],
+            'propagate': False
         },
         'awx.main.scheduler': {
             'handlers': ['task_system'],
+            'propagate': False
         },
         'awx.main.consumers': {
             'handlers': ['null']

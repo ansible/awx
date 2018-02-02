@@ -21,12 +21,12 @@ class LogErrorsTask(Task):
         super(LogErrorsTask, self).on_failure(exc, task_id, args, kwargs, einfo)
 
 
-@shared_task
+@shared_task(base=LogErrorsTask)
 def run_job_launch(job_id):
     TaskManager().schedule()
 
 
-@shared_task
+@shared_task(base=LogErrorsTask)
 def run_job_complete(job_id):
     TaskManager().schedule()
 

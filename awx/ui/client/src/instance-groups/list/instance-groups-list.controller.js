@@ -1,6 +1,10 @@
-export default ['$scope', 'InstanceGroupList', 'GetBasePath', 'Rest', 'Dataset','Find', '$state',
-    function($scope, InstanceGroupList, GetBasePath, Rest, Dataset, Find, $state) {
-        let list = InstanceGroupList;
+export default ['$scope', 'InstanceGroupList', 'resolvedModels', 'Dataset', '$state', 'ComponentsStrings', 'ProcessErrors',
+    function($scope, InstanceGroupList, resolvedModels, Dataset, $state, strings, ProcessErrors) {
+        const list = InstanceGroupList;
+        const vm = this;
+        const { instanceGroup } = resolvedModels;
+
+        vm.strings = strings;
 
         init();
 
@@ -11,9 +15,36 @@ export default ['$scope', 'InstanceGroupList', 'GetBasePath', 'Rest', 'Dataset',
             $scope.instanceGroupCount = Dataset.data.count;
         }
 
-        $scope.isActive = function(id) {
-            let selected = parseInt($state.params.instance_group_id);
-            return id === selected;
+        $scope.selection = {};
+
+        $scope.$watch('$state.params.instance_group_id', () => {
+            vm.activeId = parseInt($state.params.instance_group_id);
+        });
+
+        vm.delete = () => {
+            let deletables = $scope.selection;
+            deletables = Object.keys(deletables).filter((n) => deletables[n]);
+
+            deletables.forEach((data) => {
+                let promise = instanceGroup.http.delete({resource: data});
+                Promise.resolve(promise).then(vm.onSaveSuccess)
+                    .catch(({data, status}) => {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: 'Error!',
+                            msg: 'Call failed. Return status: ' + status
+                        });
+                    });
+            });
+        };
+
+        vm.onSaveSuccess = () => {
+            $state.transitionTo($state.current, $state.params, {
+                reload: true, location: true, inherit: false, notify: true
+            });
+        };
+
+        $scope.createInstanceGroup = () => {
+            $state.go('instanceGroups.add');
         };
     }
 ];

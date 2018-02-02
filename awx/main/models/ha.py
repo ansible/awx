@@ -1,8 +1,10 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-from django.db import models
-from django.db.models.signals import post_save
+from decimal import Decimal
+
+from django.db import models, connection
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -10,12 +12,15 @@ from django.utils.timezone import now, timedelta
 
 from solo.models import SingletonModel
 
+from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager
+from awx.main.fields import JSONField
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.models.unified_jobs import UnifiedJob
+from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_capacity
 
 __all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
 
@@ -36,6 +41,30 @@ class Instance(models.Model):
     version = models.CharField(max_length=24, blank=True)
     capacity = models.PositiveIntegerField(
         default=100,
+        editable=False,
+    )
+    capacity_adjustment = models.DecimalField(
+        default=Decimal(1.0),
+        max_digits=3,
+        decimal_places=2,
+    )
+    enabled = models.BooleanField(
+        default=True
+    )
+    cpu = models.IntegerField(
+        default=0,
+        editable=False,
+    )
+    memory = models.BigIntegerField(
+        default=0,
+        editable=False,
+    )
+    cpu_capacity = models.IntegerField(
+        default=0,
+        editable=False,
+    )
+    mem_capacity = models.IntegerField(
+        default=0,
         editable=False,
     )
 
@@ -63,6 +92,23 @@ class Instance(models.Model):
             grace_period = settings.AWX_ISOLATED_PERIODIC_CHECK * 2
         return self.modified < ref_time - timedelta(seconds=grace_period)
 
+    def is_controller(self):
+        return Instance.objects.filter(rampart_groups__controller__instances=self).exists()
+
+
+    def refresh_capacity(self):
+        cpu = get_cpu_capacity()
+        mem = get_mem_capacity()
+        self.capacity = get_system_task_capacity(self.capacity_adjustment)
+        self.cpu = cpu[0]
+        self.memory = mem[0]
+        self.cpu_capacity = cpu[1]
+        self.mem_capacity = mem[1]
+        self.version = awx_application_version
+        self.save(update_fields=['capacity', 'version', 'modified', 'cpu',
+                                 'memory', 'cpu_capacity', 'mem_capacity'])
+
+    
 
 class InstanceGroup(models.Model):
     """A model representing a Queue/Group of AWX Instances."""
@@ -84,6 +130,19 @@ class InstanceGroup(models.Model):
         editable=False,
         default=None,
         null=True
+    )
+    policy_instance_percentage = models.IntegerField(
+        default=0,
+        help_text=_("Percentage of Instances to automatically assign to this group")
+    )
+    policy_instance_minimum = models.IntegerField(
+        default=0,
+        help_text=_("Static minimum number of Instances to automatically assign to this group")
+    )
+    policy_instance_list = JSONField(
+        default=[],
+        blank=True,
+        help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )
 
     def get_absolute_url(self, request=None):
@@ -117,6 +176,32 @@ class JobOrigin(models.Model):
 
     class Meta:
         app_label = 'main'
+
+
+@receiver(post_save, sender=InstanceGroup)
+def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
+    if created:
+        from awx.main.tasks import apply_cluster_membership_policies
+        connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+
+
+@receiver(post_save, sender=Instance)
+def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
+    if created:
+        from awx.main.tasks import apply_cluster_membership_policies
+        connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+
+
+@receiver(post_delete, sender=InstanceGroup)
+def on_instance_group_deleted(sender, instance, using, **kwargs):
+    from awx.main.tasks import apply_cluster_membership_policies
+    connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+
+
+@receiver(post_delete, sender=Instance)
+def on_instance_deleted(sender, instance, using, **kwargs):
+    from awx.main.tasks import apply_cluster_membership_policies
+    connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
 
 
 # Unfortunately, the signal can't just be connected against UnifiedJob; it

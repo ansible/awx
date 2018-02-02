@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 # Python
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 import ConfigParser
 import cStringIO
 import functools
@@ -25,8 +25,8 @@ except Exception:
     psutil = None
 
 # Celery
-from celery import Task, shared_task
-from celery.signals import celeryd_init, worker_process_init, worker_shutdown
+from celery import Task, shared_task, Celery
+from celery.signals import celeryd_init, worker_process_init, worker_shutdown, worker_ready, celeryd_after_setup
 
 # Django
 from django.conf import settings
@@ -53,16 +53,17 @@ from awx.main.queue import CallbackQueueDispatcher
 from awx.main.expect import run, isolated_manager
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
-                            wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
-                            ignore_inventory_computed_fields, ignore_inventory_group_removal,
-                            get_type_for_model, extract_ansible_vars)
+                            wrap_args_with_proot, OutputEventFilter, ignore_inventory_computed_fields,
+                            ignore_inventory_group_removal, get_type_for_model, extract_ansible_vars)
 from awx.main.utils.reload import restart_local_services, stop_local_services
+from awx.main.utils.pglock import advisory_lock
+from awx.main.utils.ha import update_celery_worker_routes, register_celery_worker_queues
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 from awx.conf import settings_registry
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
+           'RunAdHocCommand', 'handle_work_error', 'handle_work_success', 'apply_cluster_membership_policies',
            'update_inventory_computed_fields', 'update_host_smart_inventory_memberships',
            'send_notifications', 'run_administrative_checks', 'purge_old_stdout_files']
 
@@ -130,6 +131,56 @@ def inform_cluster_of_shutdown(*args, **kwargs):
         logger.exception('Encountered problem with normal shutdown signal.')
 
 
+@shared_task(bind=True, queue='tower_instance_router', base=LogErrorsTask)
+def apply_cluster_membership_policies(self):
+    with advisory_lock('cluster_policy_lock', wait=True):
+        considered_instances = Instance.objects.all().order_by('id')
+        total_instances = considered_instances.count()
+        filtered_instances = []
+        actual_groups = []
+        actual_instances = []
+        Group = namedtuple('Group', ['obj', 'instances'])
+        Node = namedtuple('Instance', ['obj', 'groups'])
+        # Process policy instance list first, these will represent manually managed instances
+        # that will not go through automatic policy determination
+        for ig in InstanceGroup.objects.all():
+            logger.info("Considering group {}".format(ig.name))
+            ig.instances.clear()
+            group_actual = Group(obj=ig, instances=[])
+            for i in ig.policy_instance_list:
+                inst = Instance.objects.filter(hostname=i)
+                if not inst.exists():
+                    continue
+                inst = inst[0]
+                logger.info("Policy List, adding {} to {}".format(inst.hostname, ig.name))
+                group_actual.instances.append(inst.id)
+                ig.instances.add(inst)
+                filtered_instances.append(inst)
+            actual_groups.append(group_actual)
+        # Process Instance minimum policies next, since it represents a concrete lower bound to the
+        # number of instances to make available to instance groups
+        actual_instances = [Node(obj=i, groups=[]) for i in filter(lambda x: x not in filtered_instances, considered_instances)]
+        logger.info("Total instances not directly associated: {}".format(total_instances))
+        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+                if len(g.instances) >= g.obj.policy_instance_minimum:
+                    break
+                logger.info("Policy minimum, adding {} to {}".format(i.obj.hostname, g.obj.name))
+                g.obj.instances.add(i.obj)
+                g.instances.append(i.obj.id)
+                i.groups.append(g.obj.id)
+        # Finally process instance policy percentages
+        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+                if 100 * float(len(g.instances)) / len(actual_instances) >= g.obj.policy_instance_percentage:
+                    break
+                logger.info("Policy percentage, adding {} to {}".format(i.obj.hostname, g.obj.name))
+                g.instances.append(i.obj.id)
+                g.obj.instances.add(i.obj)
+                i.groups.append(g.obj.id)
+        handle_ha_toplogy_changes.apply_async()
+
+
 @shared_task(queue='tower_broadcast_all', bind=True, base=LogErrorsTask)
 def handle_setting_changes(self, setting_keys):
     orig_len = len(setting_keys)
@@ -145,6 +196,45 @@ def handle_setting_changes(self, setting_keys):
         if key.startswith('LOG_AGGREGATOR_'):
             restart_local_services(['uwsgi', 'celery', 'beat', 'callback'])
             break
+
+
+@shared_task(bind=True, queue='tower_broadcast_all', base=LogErrorsTask)
+def handle_ha_toplogy_changes(self):
+    instance = Instance.objects.me()
+    logger.debug("Reconfigure celeryd queues task on host {}".format(self.request.hostname))
+    awx_app = Celery('awx')
+    awx_app.config_from_object('django.conf:settings', namespace='CELERY')
+    (instance, removed_queues, added_queues) = register_celery_worker_queues(awx_app, self.request.hostname)
+    logger.info("Workers on tower node '{}' removed from queues {} and added to queues {}"
+                .format(instance.hostname, removed_queues, added_queues))
+    updated_routes = update_celery_worker_routes(instance, settings)
+    logger.info("Worker on tower node '{}' updated celery routes {} all routes are now {}"
+                .format(instance.hostname, updated_routes, self.app.conf.CELERY_TASK_ROUTES))
+
+
+@worker_ready.connect
+def handle_ha_toplogy_worker_ready(sender, **kwargs):
+    logger.debug("Configure celeryd queues task on host {}".format(sender.hostname))
+    (instance, removed_queues, added_queues) = register_celery_worker_queues(sender.app, sender.hostname)
+    logger.info("Workers on tower node '{}' unsubscribed from queues {} and subscribed to queues {}"
+                .format(instance.hostname, removed_queues, added_queues))
+
+
+@celeryd_init.connect
+def handle_update_celery_routes(sender=None, conf=None, **kwargs):
+    conf = conf if conf else sender.app.conf
+    logger.debug("Registering celery routes for {}".format(sender))
+    instance = Instance.objects.me()
+    added_routes = update_celery_worker_routes(instance, conf)
+    logger.info("Workers on tower node '{}' added routes {} all routes are now {}"
+                .format(instance.hostname, added_routes, conf.CELERY_TASK_ROUTES))
+
+
+@celeryd_after_setup.connect
+def handle_update_celery_hostname(sender, instance, **kwargs):
+    tower_instance = Instance.objects.me()
+    instance.hostname = 'celery@{}'.format(tower_instance.hostname)
+    logger.warn("Set hostname to {}".format(instance.hostname))
 
 
 @shared_task(queue='tower', base=LogErrorsTask)
@@ -215,6 +305,7 @@ def cluster_node_heartbeat(self):
     instance_list = list(Instance.objects.filter(rampart_groups__controller__isnull=True).distinct())
     this_inst = None
     lost_instances = []
+
     for inst in list(instance_list):
         if inst.hostname == settings.CLUSTER_HOST_ID:
             this_inst = inst
@@ -224,11 +315,15 @@ def cluster_node_heartbeat(self):
             instance_list.remove(inst)
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
-        if this_inst.capacity == 0:
+        if this_inst.capacity == 0 and this_inst.enabled:
             logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
-        this_inst.capacity = get_system_task_capacity()
-        this_inst.version = awx_application_version
-        this_inst.save(update_fields=['capacity', 'version', 'modified'])
+        if this_inst.enabled:
+            this_inst.refresh_capacity()
+            handle_ha_toplogy_changes.apply_async()
+        elif this_inst.capacity != 0 and not this_inst.enabled:
+            this_inst.capacity = 0
+            this_inst.save(update_fields=['capacity'])
+            handle_ha_toplogy_changes.apply_async()
         if startup_event:
             return
     else:
@@ -237,7 +332,7 @@ def cluster_node_heartbeat(self):
     for other_inst in instance_list:
         if other_inst.version == "":
             continue
-        if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version) and not settings.DEBUG:
+        if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version.split('-', 1)[0]) and not settings.DEBUG:
             logger.error("Host {} reports version {}, but this node {} is at {}, shutting down".format(other_inst.hostname,
                                                                                                        other_inst.version,
                                                                                                        this_inst.hostname,
@@ -254,6 +349,10 @@ def cluster_node_heartbeat(self):
             other_inst.save(update_fields=['capacity'])
             logger.error("Host {} last checked in at {}, marked as lost.".format(
                 other_inst.hostname, other_inst.modified))
+            if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+                deprovision_hostname = other_inst.hostname
+                other_inst.delete()
+                logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
         except DatabaseError as e:
             if 'did not affect any rows' in str(e):
                 logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))

@@ -20,6 +20,8 @@ import six
 import psutil
 from StringIO import StringIO
 
+from decimal import Decimal
+
 # Decorator
 from decorator import decorator
 
@@ -45,7 +47,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
            'get_current_apps', 'set_current_apps', 'OutputEventFilter',
-           'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity',
+           'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity', 'get_cpu_capacity', 'get_mem_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
            'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices']
@@ -632,19 +634,52 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
     return vars_dict
 
 
-@memoize()
-def get_system_task_capacity():
+def get_cpu_capacity():
+    from django.conf import settings
+    settings_forkcpu = getattr(settings, 'SYSTEM_TASK_FORKS_CPU', None)
+    env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
+    cpu = psutil.cpu_count()
+
+    if env_forkcpu:
+        forkcpu = int(env_forkcpu)
+    elif settings_forkcpu:
+        forkcpu = int(settings_forkcpu)
+    else:
+        forkcpu = 4
+    return (cpu, cpu * forkcpu)
+
+
+def get_mem_capacity():
+    from django.conf import settings
+    settings_forkmem = getattr(settings, 'SYSTEM_TASK_FORKS_MEM', None)
+    env_forkmem = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
+    if env_forkmem:
+        forkmem = int(env_forkmem)
+    elif settings_forkmem:
+        forkmem = int(settings_forkmem)
+    else:
+        forkmem = 100
+
+    mem = psutil.virtual_memory().total
+    return (mem, max(1, ((mem / 1024 / 1024) - 2048) / forkmem))
+
+
+def get_system_task_capacity(scale=Decimal(1.0)):
     '''
     Measure system memory and use it as a baseline for determining the system's capacity
     '''
     from django.conf import settings
-    if hasattr(settings, 'SYSTEM_TASK_CAPACITY'):
-        return settings.SYSTEM_TASK_CAPACITY
-    mem = psutil.virtual_memory()
-    total_mem_value = mem.total / 1024 / 1024
-    if total_mem_value <= 2048:
-        return 50
-    return 50 + ((total_mem_value / 1024) - 2) * 75
+    settings_forks = getattr(settings, 'SYSTEM_TASK_FORKS_CAPACITY', None)
+    env_forks = os.getenv('SYSTEM_TASK_FORKS_CAPACITY', None)
+
+    if env_forks:
+        return int(env_forks)
+    elif settings_forks:
+        return int(settings_forks)
+
+    _, cpu_cap = get_cpu_capacity()
+    _, mem_cap = get_mem_capacity()
+    return min(mem_cap, cpu_cap) + ((max(mem_cap, cpu_cap) - min(mem_cap, cpu_cap)) * scale)
 
 
 _inventory_updates = threading.local()

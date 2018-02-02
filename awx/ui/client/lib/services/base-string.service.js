@@ -60,6 +60,8 @@ function BaseStringService (namespace) {
     this.CANCEL = t.s('CANCEL');
     this.SAVE = t.s('SAVE');
     this.OK = t.s('OK');
+    this.ON = t.s('ON');
+    this.OFF = t.s('OFF');
     this.deleteResource = {
         HEADER: t.s('Delete'),
         USED_BY: resourceType => t.s('The {{ resourceType }} is currently being used by other resources.', { resourceType }),

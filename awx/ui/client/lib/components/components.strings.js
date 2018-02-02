@@ -71,14 +71,11 @@ function ComponentsStrings (BaseString) {
         INVENTORY_SCRIPTS: t.s('Inventory Scripts'),
         NOTIFICATIONS: t.s('Notifications'),
         MANAGEMENT_JOBS: t.s('Management Jobs'),
+        INSTANCES: t.s('Instances'),
         INSTANCE_GROUPS: t.s('Instance Groups'),
         SETTINGS: t.s('Settings'),
         FOOTER_ABOUT: t.s('About'),
         FOOTER_COPYRIGHT: t.s('Copyright © 2017 Red Hat, Inc.')
-    };
-
-    ns.capacityBar = {
-        IS_OFFLINE: t.s('Unavailable to run jobs.')
     };
 
     ns.relaunch = {

@@ -38,7 +38,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities'])
     };
 })
 
-// caplitalize  Add to any input field where the first letter of each
+// capitalize  Add to any input field where the first letter of each
 //              word should be capitalized. Use in place of css test-transform.
 //              For some reason "text-transform: capitalize" in breadcrumbs
 //              causes a break at each blank space. And of course,
@@ -60,6 +60,26 @@ angular.module('AWDirectives', ['RestServices', 'Utilities'])
                     ctrl.$render();
                 }
                 return result;
+            });
+        }
+    };
+})
+
+// stringToNumber
+//
+// If your model does not contain actual numbers then this directive
+// will do the conversion in the ngModel $formatters and $parsers pipeline.
+//
+.directive('stringToNumber', function() {
+    return {
+        require: 'ngModel',
+        restrict: 'A',
+        link: function(scope, element, attrs, ngModel) {
+            ngModel.$parsers.push(function(value) {
+                return '' + value;
+            });
+            ngModel.$formatters.push(function(value) {
+                return parseFloat(value);
             });
         }
     };

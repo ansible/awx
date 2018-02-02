@@ -23,7 +23,7 @@ COMPOSE_HOST ?= $(shell hostname)
 
 VENV_BASE ?= /venv
 SCL_PREFIX ?=
-CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
+CELERY_SCHEDULE_FILE ?= /var/lib/awx/beat.db
 
 DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Python packages to install only from source (not from binary wheels)
@@ -216,13 +216,11 @@ init:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	$(MANAGEMENT_COMMAND) provision_instance --hostname=$(COMPOSE_HOST); \
-	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --hostnames=$(COMPOSE_HOST);\
+	$(MANAGEMENT_COMMAND) register_queue --queuename=tower --instance_percent=100;\
 	if [ "$(AWX_GROUP_QUEUES)" == "tower,thepentagon" ]; then \
 		$(MANAGEMENT_COMMAND) provision_instance --hostname=isolated; \
 		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
 		$(MANAGEMENT_COMMAND) generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat > /root/.ssh/authorized_keys'; \
-	elif [ "$(AWX_GROUP_QUEUES)" != "tower" ]; then \
-		$(MANAGEMENT_COMMAND) register_queue --queuename=$(firstword $(subst $(comma), ,$(AWX_GROUP_QUEUES))) --hostnames=$(COMPOSE_HOST); \
 	fi;
 
 # Refresh development environment after pulling new code.
@@ -326,7 +324,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	celery worker -A awx -l DEBUG -B -Ofair --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_scheduler,tower_broadcast_all,$(COMPOSE_HOST),$(AWX_GROUP_QUEUES) -n celery@$(COMPOSE_HOST) --pidfile /tmp/celery_pid
+	celery worker -A awx -l DEBUG -B -Ofair --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -Q tower_broadcast_all -n celery@$(COMPOSE_HOST) --pidfile /tmp/celery_pid
 
 # Run to start the zeromq callback receiver
 receiver:

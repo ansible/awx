@@ -35,8 +35,9 @@ def mk_instance(persisted=True, hostname='instance.example.org'):
     return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname=hostname)[0]
 
 
-def mk_instance_group(name='tower', instance=None):
-    ig, status = InstanceGroup.objects.get_or_create(name=name)
+def mk_instance_group(name='tower', instance=None, minimum=0, percentage=0):
+    ig, status = InstanceGroup.objects.get_or_create(name=name, policy_instance_minimum=minimum,
+                                                     policy_instance_percentage=percentage)
     if instance is not None:
         if type(instance) == list:
             for i in instance:

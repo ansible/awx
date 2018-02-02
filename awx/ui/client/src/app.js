@@ -97,7 +97,6 @@ angular
         users.name,
         projects.name,
         scheduler.name,
-        instanceGroups.name,
 
         'Utilities',
         'templates',
@@ -105,6 +104,7 @@ angular
         'AWDirectives',
         'features',
 
+        instanceGroups,
         atFeatures,
         atLibComponents,
         atLibModels,

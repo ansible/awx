@@ -623,7 +623,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             count_hosts = 1
         else:
             count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
-        return min(count_hosts, 5 if self.forks == 0 else self.forks) * 10
+        return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     @property
     def successful_hosts(self):
@@ -1190,7 +1190,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     @property
     def task_impact(self):
-        return 150
+        return 5
 
     @property
     def preferred_instance_groups(self):

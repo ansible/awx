@@ -31,9 +31,6 @@ AWX_PROOT_ENABLED = False
 
 CLUSTER_HOST_ID = "awx"
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
-CELERY_TASK_QUEUES += (Queue(CLUSTER_HOST_ID, Exchange(CLUSTER_HOST_ID), routing_key=CLUSTER_HOST_ID),)
-CELERY_TASK_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
-CELERY_TASK_ROUTES['awx.main.tasks.purge_old_stdout_files'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
 
 
 ###############################################################################

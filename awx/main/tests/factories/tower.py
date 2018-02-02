@@ -135,8 +135,8 @@ def create_instance(name, instance_groups=None):
     return mk_instance(hostname=name)
 
 
-def create_instance_group(name, instances=None):
-    return mk_instance_group(name=name, instance=instances)
+def create_instance_group(name, instances=None, minimum=0, percentage=0):
+    return mk_instance_group(name=name, instance=instances, minimum=minimum, percentage=percentage)
 
 
 def create_survey_spec(variables=None, default_type='integer', required=True, min=None, max=None):

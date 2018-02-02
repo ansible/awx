@@ -1,21 +1,22 @@
 capacity-bar {
-
-    width: 50%;
-    margin-right: 25px;
-    min-width: 100px;
-    display: flex;
     align-items: center;
+    color: @at-color-body-background-dark;
+    display: flex;
+    font-size: @at-font-size;
+    min-width: 100px;
+    white-space: nowrap;
 
     .CapacityBar {
         background-color: @default-bg;
-        display: flex;
-        flex: 0 0 auto;
-        height: 10px;
-        border: 1px solid @default-link;
-        width: 100%;
         border-radius: 100vw;
+        border: 1px solid @default-link;
+        display: flex;
+        flex: 1;
+        height: 10px;
+        margin-right: @at-space-2x;
+        min-width: 100px;
         overflow: hidden;
-        margin-right: 10px;
+        width: 100%;
     }
 
     .CapacityBar-remaining {
@@ -28,14 +29,21 @@ capacity-bar {
     }
 
     .CapacityBar--offline {
-        border-color: @d7grey;
+        color: @at-red;
+        border-color:  @at-gray-a9;
 
         .CapacityBar-remaining {
-            background-color: @d7grey;
+            background-color:  @at-gray-b7;
         }
     }
 
+    .Capacity-details--label {
+        margin-right: @at-space-2x;
+        text-align: right;
+        text-transform: uppercase;
+    }
+
     .Capacity-details--percentage {
-        color: @default-data-txt;
+        width: 40px;
     }
 }

@@ -121,6 +121,15 @@
     dest: "{{ openshift_base_path }}/deployment.yml"
     mode: '0600'
 
+- name: Template Openshift AWX etcd2
+  template:
+    src: etcd.yml.j2
+    dest: "{{ openshift_base_path }}/etcd.yml"
+    mode: '0600'
+
+- name: Apply etcd deployment
+  shell: "oc apply -f {{ openshift_base_path }}/etcd.yml"
+
 - name: Apply Configmap
   shell: "oc apply -f {{ openshift_base_path }}/configmap.yml"
 

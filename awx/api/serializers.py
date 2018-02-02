@@ -3977,8 +3977,10 @@ class InstanceSerializer(BaseSerializer):
 
     class Meta:
         model = Instance
-        fields = ("id", "type", "url", "related", "uuid", "hostname", "created", "modified",
-                  "version", "capacity", "consumed_capacity", "percent_capacity_remaining", "jobs_running")
+        read_only_fields = ('uuid', 'hostname', 'version')
+        fields = ("id", "type", "url", "related", "uuid", "hostname", "created", "modified", 'capacity_adjustment',
+                  "version", "capacity", "consumed_capacity", "percent_capacity_remaining", "jobs_running",
+                  "cpu", "memory", "cpu_capacity", "mem_capacity", "enabled")
 
     def get_related(self, obj):
         res = super(InstanceSerializer, self).get_related(obj)
@@ -4011,7 +4013,8 @@ class InstanceGroupSerializer(BaseSerializer):
         model = InstanceGroup
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
-                  "percent_capacity_remaining", "jobs_running", "instances", "controller")
+                  "percent_capacity_remaining", "jobs_running", "instances", "controller",
+                  "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list")
 
     def get_related(self, obj):
         res = super(InstanceGroupSerializer, self).get_related(obj)

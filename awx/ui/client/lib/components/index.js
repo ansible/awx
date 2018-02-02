@@ -12,6 +12,7 @@ import inputLookup from '~components/input/lookup.directive';
 import inputMessage from '~components/input/message.directive';
 import inputSecret from '~components/input/secret.directive';
 import inputSelect from '~components/input/select.directive';
+import inputSlider from '~components/input/slider.directive';
 import inputText from '~components/input/text.directive';
 import inputTextarea from '~components/input/textarea.directive';
 import inputTextareaSecret from '~components/input/textarea-secret.directive';
@@ -54,6 +55,7 @@ angular
     .directive('atInputMessage', inputMessage)
     .directive('atInputSecret', inputSecret)
     .directive('atInputSelect', inputSelect)
+    .directive('atInputSlider', inputSlider)
     .directive('atInputText', inputText)
     .directive('atInputTextarea', inputTextarea)
     .directive('atInputTextareaSecret', inputTextareaSecret)

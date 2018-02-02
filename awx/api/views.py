@@ -57,7 +57,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # AWX
-from awx.main.tasks import send_notifications
+from awx.main.tasks import send_notifications, handle_ha_toplogy_changes
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TokenGetAuthentication
@@ -146,6 +146,41 @@ class UnifiedJobDeletionMixin(object):
             raise PermissionDenied(detail=_("Cannot delete running job resource."))
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class InstanceGroupMembershipMixin(object):
+    '''
+    Manages signaling celery to reload its queue configuration on Instance Group membership changes
+    '''
+    def attach(self, request, *args, **kwargs):
+        response = super(InstanceGroupMembershipMixin, self).attach(request, *args, **kwargs)
+        sub_id, res = self.attach_validate(request)
+        if status.is_success(response.status_code):
+            if self.parent_model is Instance:
+                ig_obj = get_object_or_400(self.model, pk=sub_id)
+                inst_name = ig_obj.hostname
+            else:
+                ig_obj = self.get_parent_object()
+                inst_name = get_object_or_400(self.model, pk=sub_id).hostname
+            if inst_name not in ig_obj.policy_instance_list:
+                ig_obj.policy_instance_list.append(inst_name)
+                ig_obj.save()
+        return response
+
+    def unattach(self, request, *args, **kwargs):
+        response = super(InstanceGroupMembershipMixin, self).unattach(request, *args, **kwargs)
+        sub_id, res = self.attach_validate(request)
+        if status.is_success(response.status_code):
+            if self.parent_model is Instance:
+                ig_obj = get_object_or_400(self.model, pk=sub_id)
+                inst_name = self.get_parent_object().hostname
+            else:
+                ig_obj = self.get_parent_object()
+                inst_name = get_object_or_400(self.model, pk=sub_id).hostname
+            if inst_name in ig_obj.policy_instance_list:
+                ig_obj.policy_instance_list.pop(ig_obj.policy_instance_list.index(inst_name))
+                ig_obj.save()
+        return response
 
 
 class ApiRootView(APIView):
@@ -525,12 +560,26 @@ class InstanceList(ListAPIView):
     new_in_320 = True
 
 
-class InstanceDetail(RetrieveAPIView):
+class InstanceDetail(RetrieveUpdateAPIView):
 
     view_name = _("Instance Detail")
     model = Instance
     serializer_class = InstanceSerializer
     new_in_320 = True
+
+
+    def update(self, request, *args, **kwargs):
+        r = super(InstanceDetail, self).update(request, *args, **kwargs)
+        if status.is_success(r.status_code):
+            obj = self.get_object()
+            if obj.enabled:
+                obj.refresh_capacity()
+            else:
+                obj.capacity = 0
+            obj.save()
+            handle_ha_toplogy_changes.apply_async()
+            r.data = InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
+        return r
 
 
 class InstanceUnifiedJobsList(SubListAPIView):
@@ -548,7 +597,7 @@ class InstanceUnifiedJobsList(SubListAPIView):
         return qs
 
 
-class InstanceInstanceGroupsList(SubListAPIView):
+class InstanceInstanceGroupsList(InstanceGroupMembershipMixin, SubListCreateAttachDetachAPIView):
 
     view_name = _("Instance's Instance Groups")
     model = InstanceGroup
@@ -558,7 +607,7 @@ class InstanceInstanceGroupsList(SubListAPIView):
     relationship = 'rampart_groups'
 
 
-class InstanceGroupList(ListAPIView):
+class InstanceGroupList(ListCreateAPIView):
 
     view_name = _("Instance Groups")
     model = InstanceGroup
@@ -566,7 +615,7 @@ class InstanceGroupList(ListAPIView):
     new_in_320 = True
 
 
-class InstanceGroupDetail(RetrieveAPIView):
+class InstanceGroupDetail(RetrieveUpdateDestroyAPIView):
 
     view_name = _("Instance Group Detail")
     model = InstanceGroup
@@ -584,7 +633,7 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
     new_in_320 = True
 
 
-class InstanceGroupInstanceList(SubListAPIView):
+class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetachAPIView):
 
     view_name = _("Instance Group's Instances")
     model = Instance
