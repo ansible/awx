@@ -255,7 +255,7 @@ def _register_ldap(append=None):
         help_text=_('Mapping of LDAP user schema to Tower API user attributes. The default'
                     ' setting is valid for ActiveDirectory but users with other LDAP'
                     ' configurations may need to change the values. Refer to the Ansible'
-                    ' Tower documentation for additonal details.'),
+                    ' Tower documentation for additional details.'),
         category=_('LDAP'),
         category_slug='ldap',
         placeholder=collections.OrderedDict([
