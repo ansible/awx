@@ -76,7 +76,7 @@ class TestSwaggerGeneration():
 
         revised_paths = {}
         deprecated_paths = JSON.pop('deprecated_paths', [])
-        for path, node in self.__class__.JSON['paths'].items():
+        for path, node in JSON['paths'].items():
             # change {version} in paths to the actual default API version (e.g., v2)
             revised_paths[path.replace(
                 '{version}',
@@ -90,7 +90,34 @@ class TestSwaggerGeneration():
                     lines = node[method]['description'].splitlines()
                     node[method]['summary'] = lines.pop(0).strip('#:')
                     node[method]['description'] = '\n'.join(lines)
-        self.__class__.JSON['paths'] = revised_paths
+        JSON['paths'] = revised_paths
+
+        # Make some basic assertions about the rendered JSON so we can
+        # be sure it doesn't break across DRF upgrades and view/serializer
+        # changes.
+        assert len(JSON['tags'])
+        assert JSON['info']['version'] == release
+        assert len(JSON['paths'])
+
+        # The number of API endpoints changes over time, but let's just check
+        # for a reasonable number here; if this test starts failing, raise/lower the bounds
+        paths = JSON['paths']
+        assert 250 < len(paths) < 300
+        assert paths['/api/'].keys() == ['get']
+        assert paths['/api/v2/'].keys() == ['get']
+        assert sorted(
+            paths['/api/v2/credentials/'].keys()
+        ) == ['get', 'post']
+        assert sorted(
+            paths['/api/v2/credentials/{id}/'].keys()
+        ) == ['delete', 'get', 'patch', 'put']
+        assert paths['/api/v2/settings/'].keys() == ['get']
+        assert paths['/api/v2/settings/{category_slug}/'].keys() == [
+            'get', 'put', 'patch', 'delete'
+        ]
+
+        # Test deprecated paths
+        assert paths['/api/v2/jobs/{id}/extra_credentials/']['get']['deprecated'] is True
 
     @classmethod
     def teardown_class(cls):
