@@ -80,10 +80,15 @@ def test_job_template_access_use_level(jt_linked, rando):
 
 
 @pytest.mark.django_db
-def test_job_template_access_org_admin(jt_linked, rando):
+@pytest.mark.parametrize("role_names", [("admin_role",), ("inventory_admin_role", "project_admin_role")])
+def test_job_template_access_admin(role_names, jt_linked, rando):
     access = JobTemplateAccess(rando)
     # Appoint this user as admin of the organization
-    jt_linked.inventory.organization.admin_role.members.add(rando)
+    #jt_linked.inventory.organization.admin_role.members.add(rando)
+    for role_name in role_names:
+        role = getattr(jt_linked.inventory.organization, role_name)
+        role.members.add(rando)
+
     # Assign organization permission in the same way the create view does
     organization = jt_linked.inventory.organization
     jt_linked.get_deprecated_credential('ssh').admin_role.parents.add(organization.admin_role)

@@ -244,8 +244,7 @@ class TestWorkflowAccessMethods:
     def test_workflow_can_add(self, workflow, user_unit):
         organization = Organization(name='test-org')
         workflow.organization = organization
-        organization.admin_role = Role()
-
+        organization.workflow_admin_role = Role()
         def mock_get_object(Class, **kwargs):
             if Class == Organization:
                 return organization

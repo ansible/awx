@@ -35,9 +35,31 @@ def test_credential_access_auditor(credential, organization_factory):
 
 
 @pytest.mark.django_db
-def test_org_credential_access_member(alice, org_credential, credential):
-    org_credential.admin_role.members.add(alice)
+def test_credential_access_member(alice, credential):
     credential.admin_role.members.add(alice)
+    access = CredentialAccess(alice)
+    assert access.can_change(credential, {
+        'description': 'New description.',
+        'organization': None})
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("role_name", ["admin_role", "credential_admin_role"])
+def test_org_credential_access_admin(role_name, alice, org_credential):
+    role = getattr(org_credential.organization, role_name)
+    role.members.add(alice)
+
+    access = CredentialAccess(alice)
+
+    # Alice should be able to PATCH if organization is not changed
+    assert access.can_change(org_credential, {
+        'description': 'New description.',
+        'organization': org_credential.organization.pk})
+
+
+@pytest.mark.django_db
+def test_org_credential_access_member(alice, org_credential):
+    org_credential.admin_role.members.add(alice)
 
     access = CredentialAccess(alice)
 
@@ -47,9 +69,6 @@ def test_org_credential_access_member(alice, org_credential, credential):
         'organization': org_credential.organization.pk})
     assert access.can_change(org_credential, {
         'description': 'New description.'})
-    assert access.can_change(credential, {
-        'description': 'New description.',
-        'organization': None})
 
 
 @pytest.mark.django_db

@@ -62,10 +62,13 @@ def test_org_member_inventory_script_permissions(org_member, organization):
 
 
 @pytest.mark.django_db
-def test_access_admin(organization, inventory, user):
+@pytest.mark.parametrize("role", ["admin_role", "inventory_admin_role"])
+def test_access_admin(role, organization, inventory, user):
     a = user('admin', False)
     inventory.organization = organization
-    organization.admin_role.members.add(a)
+
+    role = getattr(organization, role)
+    role.members.add(a)
 
     access = InventoryAccess(a)
     assert access.can_read(inventory)
