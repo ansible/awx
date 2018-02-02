@@ -473,6 +473,22 @@ function getTime (created) {
     return `${hour}:${minute}:${second}`;
 }
 
+function pageUp () {
+
+}
+
+function pageDown () {
+
+}
+
+function jumpToStart () {
+
+}
+
+function jumpToEnd () {
+
+}
+
 function showHostDetails (id) {
     jobEvent.request('get', id)
         .then(() => {

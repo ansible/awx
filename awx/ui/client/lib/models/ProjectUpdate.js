@@ -1,7 +1,7 @@
 let BaseModel;
 
 function ProjectUpdateModel (method, resource, config) {
-    BaseModel.call(this, 'jobs');
+    BaseModel.call(this, 'project_updates');
 
     this.Constructor = ProjectUpdateModel;
 

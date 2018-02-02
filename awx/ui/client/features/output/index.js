@@ -15,13 +15,16 @@ function resolveJob (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJob, $
     const { type } = $stateParams;
 
     let Resource;
+    let related;
 
     switch (type) {
         case 'project':
             Resource = ProjectUpdate;
+            related = 'events';
             break;
         case 'playbook':
             Resource = Job;
+            related = 'job_events';
             break;
         case 'command':
             Resource = AdHocCommand;
@@ -38,14 +41,17 @@ function resolveJob (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJob, $
     }
 
     return new Resource('get', id)
-        .then(resource => resource.extend('job_events', {
+        .then(resource => resource.extend(related, {
             pageCache: true,
             pageLimit: 3,
             params: {
                 page_size: 100,
                 order_by: 'start_line'
             }
-        }));
+        }))
+        .catch(err => {
+            console.error(err);
+        });
 }
 
 function JobsRun ($stateExtender, strings) {
