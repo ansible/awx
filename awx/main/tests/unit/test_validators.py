@@ -12,10 +12,23 @@ from awx.main.tests.data.ssh import (
     TEST_OPENSSH_KEY_DATA,
     TEST_OPENSSH_KEY_DATA_LOCKED,
     TEST_SSH_CERT_KEY,
+    TEST_CATTED_SSH_KEY_DATA,
 )
 from rest_framework.serializers import ValidationError as RestValidationError
 
 import pytest
+
+
+def test_valid_catted_rsa_key():
+    valid_key = TEST_CATTED_SSH_KEY_DATA
+    pem_objects = validate_private_key(valid_key)
+    assert pem_objects[0]['key_type'] == 'rsa'
+    assert not pem_objects[0]['key_enc']
+    with pytest.raises(ValidationError):
+        validate_certificate(valid_key)
+    pem_objects = validate_ssh_private_key(valid_key)
+    assert pem_objects[0]['key_type'] == 'rsa'
+    assert not pem_objects[0]['key_enc']
 
 
 def test_valid_rsa_key():
@@ -126,5 +139,3 @@ def test_valid_vars(var_str):
 def test_invalid_vars(var_str):
     with pytest.raises(RestValidationError):
         vars_validate_or_raise(var_str)
-
-
