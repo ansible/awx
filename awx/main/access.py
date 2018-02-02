@@ -2218,6 +2218,7 @@ class NotificationTemplateAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
+            Q(organization__in=Organization.objects.filter(notification_admin_role__members=self.user)) |
             Q(organization__in=self.user.admin_of_organizations) |
             Q(organization__in=self.user.auditor_of_organizations)
         ).distinct()
@@ -2226,22 +2227,22 @@ class NotificationTemplateAccess(BaseAccess):
         if self.user.is_superuser or self.user.is_system_auditor:
             return True
         if obj.organization is not None:
-            if self.user in obj.organization.admin_role or self.user in obj.organization.auditor_role:
+            if self.user in obj.organization.notification_admin_role or self.user in obj.organization.auditor_role:
                 return True
         return False
 
     @check_superuser
     def can_add(self, data):
         if not data:
-            return Organization.accessible_objects(self.user, 'admin_role').exists()
-        return self.check_related('organization', Organization, data, mandatory=True)
+            return Organization.accessible_objects(self.user, 'notification_admin_role').exists()
+        return self.check_related('organization', Organization, data, role_field='notification_admin_role', mandatory=True)
 
     @check_superuser
     def can_change(self, obj, data):
         if obj.organization is None:
             # only superusers are allowed to edit orphan notification templates
             return False
-        return self.check_related('organization', Organization, data, obj=obj, mandatory=True)
+        return self.check_related('organization', Organization, data, obj=obj, role_field='notification_admin_role', mandatory=True)
 
     def can_admin(self, obj, data):
         return self.can_change(obj, data)
@@ -2253,7 +2254,7 @@ class NotificationTemplateAccess(BaseAccess):
     def can_start(self, obj, validate_license=True):
         if obj.organization is None:
             return False
-        return self.user in obj.organization.admin_role
+        return self.user in obj.organization.notification_admin_role
 
 
 class NotificationAccess(BaseAccess):
@@ -2265,6 +2266,7 @@ class NotificationAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
+            Q(notification_template__organization__in=Organization.objects.filter(notification_admin_role__members=self.user)) |
             Q(notification_template__organization__in=self.user.admin_of_organizations) |
             Q(notification_template__organization__in=self.user.auditor_of_organizations)
         ).distinct()

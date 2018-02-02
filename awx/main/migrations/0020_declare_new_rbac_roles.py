@@ -35,6 +35,11 @@ class Migration(migrations.Migration):
             name='workflow_admin_role',
             field=awx.main.fields.ImplicitRoleField(null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=b'admin_role', related_name='+', to='main.Role'),
         ),
+        migrations.AddField(
+            model_name='organization',
+            name='notification_admin_role',
+            field=awx.main.fields.ImplicitRoleField(null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=b'admin_role', related_name='+', to='main.Role'),
+        ),
         migrations.AlterField(
             model_name='credential',
             name='admin_role',
@@ -63,6 +68,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='organization',
             name='member_role',
-            field=awx.main.fields.ImplicitRoleField(null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=[b'admin_role', b'project_admin_role', b'inventory_admin_role', b'workflow_admin_role'], related_name='+', to='main.Role'),
+            field=awx.main.fields.ImplicitRoleField(null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=[b'admin_role', b'project_admin_role', b'inventory_admin_role', b'workflow_admin_role', b'notification_admin_role'], related_name='+', to='main.Role'),
         ),
     ]
