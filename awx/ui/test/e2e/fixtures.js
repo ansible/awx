@@ -282,7 +282,7 @@ const getJobTemplateSchedule = (namespace = session) => getJobTemplate(namespace
     .then(template => getOrCreate(template.related.schedules, {
         name: `${template.name}-schedule`,
         description: namespace,
-        rrule: 'DTSTART:20171104T040000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
+        rrule: 'DTSTART:20351104T040000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
     }));
 
 module.exports = {
