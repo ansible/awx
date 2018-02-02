@@ -20,9 +20,13 @@ Make a PUT or PATCH request to this resource to update this
 {% with write_only=1 %}
 {% include "api/_result_fields_common.md" with serializer_fields=serializer_update_fields %}
 {% endwith %}
+{% endifmeth %}
 
+{% ifmeth PUT %}
 For a PUT request, include **all** fields in the request.
+{% endifmeth %}
 
+{% ifmeth PATCH %}
 For a PATCH request, include only the fields that are being modified.
 {% endifmeth %}
 
