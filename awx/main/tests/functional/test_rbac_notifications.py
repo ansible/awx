@@ -32,11 +32,13 @@ def test_notification_template_get_queryset_orgadmin(notification_template, user
     notification_template.organization.admin_role.members.add(user('admin', False))
     assert access.get_queryset().count() == 1
 
+
 @pytest.mark.django_db
 def test_notification_template_get_queryset_notificationadmin(notification_template, user):
     access = NotificationTemplateAccess(user('admin', False))
     notification_template.organization.notification_admin_role.members.add(user('admin', False))
     assert access.get_queryset().count() == 1
+
 
 @pytest.mark.django_db
 def test_notification_template_get_queryset_org_auditor(notification_template, org_auditor):

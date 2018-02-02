@@ -309,7 +309,8 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         'organization.workflow_admin_role'
     ])
     execute_role = ImplicitRoleField(parent_role=[
-        'admin_role'
+        'admin_role',
+        'organization.execute_role',
     ])
     read_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,

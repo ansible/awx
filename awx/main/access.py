@@ -1792,8 +1792,8 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        return (self.check_related('organization', Organization, data, role_field='workflow_admin_field', obj=obj)
-                and self.user in obj.admin_role)
+        return (self.check_related('organization', Organization, data, role_field='workflow_admin_field', obj=obj) and
+                self.user in obj.admin_role)
 
     def can_delete(self, obj):
         is_delete_allowed = self.user.is_superuser or self.user in obj.admin_role
