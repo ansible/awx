@@ -1227,6 +1227,50 @@ class TestJobCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
+    def test_custom_environment_injectors_with_files(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'cert',
+                    'label': 'Certificate',
+                    'type': 'string'
+                }, {
+                    'id': 'key',
+                    'label': 'Key',
+                    'type': 'string'
+                }]
+            },
+            injectors={
+                'file': {
+                    'template.cert': '[mycert]\n{{cert}}',
+                    'template.key': '[mykey]\n{{key}}'
+                },
+                'env': {
+                    'MY_CERT_INI_FILE': '{{tower.filename.cert}}',
+                    'MY_KEY_INI_FILE': '{{tower.filename.key}}'
+                }
+            }
+        )
+        credential = Credential(
+            pk=1,
+            credential_type=some_cloud,
+            inputs = {'cert': 'CERT123', 'key': 'KEY123'}
+        )
+        self.instance.credentials.add(credential)
+        self.task.run(self.pk)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert open(env['MY_CERT_INI_FILE'], 'rb').read() == '[mycert]\nCERT123'
+            assert open(env['MY_KEY_INI_FILE'], 'rb').read() == '[mykey]\nKEY123'
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
     def test_multi_cloud(self):
         gce = CredentialType.defaults['gce']()
         gce_credential = Credential(
