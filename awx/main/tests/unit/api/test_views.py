@@ -130,7 +130,7 @@ class TestHostInsights():
     @pytest.mark.parametrize("status_code, exception, error, message", [
         (502, requests.exceptions.SSLError, 'SSLError while trying to connect to https://myexample.com/whocares/me/', None,),
         (504, requests.exceptions.Timeout, 'Request to https://myexample.com/whocares/me/ timed out.', None,),
-        (502, requests.exceptions.RequestException, 'booo!', 'Unkown exception booo! while trying to GET https://myexample.com/whocares/me/'),
+        (502, requests.exceptions.RequestException, 'booo!', 'Unknown exception booo! while trying to GET https://myexample.com/whocares/me/'),
     ])
     def test_get_insights_request_exception(self, patch_parent, mocker, status_code, exception, error, message):
         view = HostInsights()
