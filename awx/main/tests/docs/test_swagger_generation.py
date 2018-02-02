@@ -42,27 +42,27 @@ class TestSwaggerGeneration():
             url = drf_reverse('api:swagger_view') + '?format=openapi'
             response = get(url, user=admin)
             data = generate_swagger_object(response.data)
+            if response.has_header('X-Deprecated-Paths'):
+                data['deprecated_paths'] = json.loads(response['X-Deprecated-Paths'])
             data.update(response.accepted_renderer.get_customizations() or {})
             self.__class__.JSON = data
-
-    def _lookup_display_name(self, method, path):
-        return path
 
     def test_transform_metadata(self, release):
         """
         This test takes the JSON output from the swagger endpoint and applies
         various transformations to it.
         """
-        self.__class__.JSON['info']['version'] = release
-        self.__class__.JSON['host'] = None
-        self.__class__.JSON['schemes'] = ['https']
-        self.__class__.JSON['produces'] = ['application/json']
-        self.__class__.JSON['consumes'] = ['application/json']
+        JSON = self.__class__.JSON
+        JSON['info']['version'] = release
+        JSON['host'] = None
+        JSON['schemes'] = ['https']
+        JSON['produces'] = ['application/json']
+        JSON['consumes'] = ['application/json']
 
         # Inject a top-level description into the OpenAPI document
         if os.path.exists(description_file):
             with open(description_file, 'r') as f:
-                self.__class__.JSON['info']['description'] = f.read()
+                JSON['info']['description'] = f.read()
 
         # Write tags in the order we want them sorted
         if os.path.exists(config_file):
@@ -72,9 +72,10 @@ class TestSwaggerGeneration():
                     tag = {'name': category['name']}
                     if 'description' in category:
                         tag['description'] = category['description']
-                    self.__class__.JSON.setdefault('tags', []).append(tag)
+                    JSON.setdefault('tags', []).append(tag)
 
         revised_paths = {}
+        deprecated_paths = JSON.pop('deprecated_paths', [])
         for path, node in self.__class__.JSON['paths'].items():
             # change {version} in paths to the actual default API version (e.g., v2)
             revised_paths[path.replace(
@@ -82,6 +83,8 @@ class TestSwaggerGeneration():
                 settings.REST_FRAMEWORK['DEFAULT_VERSION']
             )] = node
             for method in node:
+                if path in deprecated_paths:
+                    node[method]['deprecated'] = True
                 if 'description' in node[method]:
                     # Pop off the first line and use that as the summary
                     lines = node[method]['description'].splitlines()

@@ -1,3 +1,4 @@
+import json
 import warnings
 
 from coreapi.document import Object, Link
@@ -24,6 +25,8 @@ class AutoSchema(DRFAuthSchema):
                           'schema generation. Serializer fields will not be '
                           'generated for {} {}.'
                           .format(self.view.__class__.__name__, method, path))
+
+        link.__dict__['deprecated'] = getattr(self.view, 'deprecated', False)
 
         # auto-generate a topic/tag for the serializer based on its model
         if hasattr(self.view, 'swagger_topic'):
@@ -62,6 +65,9 @@ class SwaggerSchemaView(APIView):
             urlconf=None
         )
         schema = generator.get_schema(request=request)
+        # python core-api doesn't support the deprecation yet, so track it
+        # ourselves and return it in a response header
+        _deprecated = []
 
         # By default, DRF OpenAPI serialization places all endpoints in
         # a single node based on their root path (/api).  Instead, we want to
@@ -75,6 +81,11 @@ class SwaggerSchemaView(APIView):
                     if topic:
                         schema._data.setdefault(topic, Object())
                         schema._data[topic]._data[path] = node
+
+                    if isinstance(action, Object):
+                        for link in action.links.values():
+                            if link.deprecated:
+                                _deprecated.append(link.url)
             elif isinstance(node, Link):
                 topic = getattr(node, 'topic', None)
                 if topic:
@@ -86,4 +97,7 @@ class SwaggerSchemaView(APIView):
                 'The schema generator did not return a schema Document'
             )
 
-        return Response(schema)
+        return Response(
+            schema,
+            headers={'X-Deprecated-Paths': json.dumps(_deprecated)}
+        )
