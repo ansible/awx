@@ -622,6 +622,14 @@ class BaseTask(LogErrorsTask):
             '': '',
         }
 
+    def build_extra_vars_file(self, vars, **kwargs):
+        handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
+        f = os.fdopen(handle, 'w')
+        f.write(json.dumps(vars))
+        f.close()
+        os.chmod(path, stat.S_IRUSR)
+        return path
+
     def add_ansible_venv(self, env, add_awx_lib=True):
         env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
         env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
@@ -1205,7 +1213,8 @@ class RunJob(BaseTask):
                 extra_vars.update(json.loads(job.display_extra_vars()))
             else:
                 extra_vars.update(json.loads(job.decrypted_extra_vars()))
-        args.extend(['-e', json.dumps(extra_vars)])
+        extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
+        args.extend(['-e', '@%s' % (extra_vars_path)])
 
         # Add path to playbook (relative to project.local_path).
         args.append(job.playbook)
@@ -1460,7 +1469,8 @@ class RunProjectUpdate(BaseTask):
             'scm_revision_output': self.revision_path,
             'scm_revision': project_update.project.scm_revision,
         })
-        args.extend(['-e', json.dumps(extra_vars)])
+        extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
+        args.extend(['-e', '@%s' % (extra_vars_path)])
         args.append('project_update.yml')
         return args
 
@@ -2220,7 +2230,8 @@ class RunAdHocCommand(BaseTask):
                     "{} are prohibited from use in ad hoc commands."
                 ).format(", ".join(removed_vars)))
             extra_vars.update(ad_hoc_command.extra_vars_dict)
-        args.extend(['-e', json.dumps(extra_vars)])
+        extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
+        args.extend(['-e', '@%s' % (extra_vars_path)])
 
         args.extend(['-m', ad_hoc_command.module_name])
         args.extend(['-a', ad_hoc_command.module_args])
