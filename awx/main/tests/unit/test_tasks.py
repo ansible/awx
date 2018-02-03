@@ -174,6 +174,15 @@ def pytest_generate_tests(metafunc):
             )
 
 
+def parse_extra_vars(args):
+    extra_vars = {}
+    for chunk in args:
+        if chunk.startswith('@/tmp/'):
+            with open(chunk.strip('@'), 'r') as f:
+                extra_vars.update(json.load(f))
+    return extra_vars
+
+
 class TestJobExecution:
     """
     For job runs, test that `ansible-playbook` is invoked with the proper
@@ -318,15 +327,18 @@ class TestGenericRun(TestJobExecution):
 
     def test_created_by_extra_vars(self):
         self.instance.created_by = User(pk=123, username='angry-spud')
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-        assert '"tower_user_id": 123,' in ' '.join(args)
-        assert '"tower_user_name": "angry-spud"' in ' '.join(args)
-        assert '"awx_user_id": 123,' in ' '.join(args)
-        assert '"awx_user_name": "angry-spud"' in ' '.join(args)
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['tower_user_id'] == 123
+            assert extra_vars['tower_user_name'] == "angry-spud"
+            assert extra_vars['awx_user_id'] == 123
+            assert extra_vars['awx_user_name'] == "angry-spud"
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
 
     def test_survey_extra_vars(self):
         self.instance.extra_vars = json.dumps({
@@ -335,12 +347,15 @@ class TestGenericRun(TestJobExecution):
         self.instance.survey_passwords = {
             'super_secret': '$encrypted$'
         }
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-        assert '"super_secret": "CLASSIFIED"' in ' '.join(args)
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['super_secret'] == "CLASSIFIED"
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
 
     def test_awx_task_env(self):
         patch = mock.patch('awx.main.tasks.settings.AWX_TASK_ENV', {'FOO': 'BAR'})
@@ -394,16 +409,19 @@ class TestAdhocRun(TestJobExecution):
 
     def test_created_by_extra_vars(self):
         self.instance.created_by = User(pk=123, username='angry-spud')
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-        assert '"tower_user_id": 123,' in ' '.join(args)
-        assert '"tower_user_name": "angry-spud"' in ' '.join(args)
-        assert '"awx_user_id": 123,' in ' '.join(args)
-        assert '"awx_user_name": "angry-spud"' in ' '.join(args)
-        assert '"awx_foo": "awx-bar' in ' '.join(args)
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['tower_user_id'] == 123
+            assert extra_vars['tower_user_name'] == "angry-spud"
+            assert extra_vars['awx_user_id'] == 123
+            assert extra_vars['awx_user_name'] == "angry-spud"
+            assert extra_vars['awx_foo'] == "awx-bar"
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
 
 
 class TestIsolatedExecution(TestJobExecution):
@@ -1082,13 +1100,15 @@ class TestJobCredentials(TestJobExecution):
             inputs = {'api_token': 'ABC123'}
         )
         self.instance.credentials.add(credential)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars["api_token"] == "ABC123"
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
-
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-
-        assert '-e {"api_token": "ABC123"}' in ' '.join(args)
 
     def test_custom_environment_injectors_with_boolean_extra_vars(self):
         some_cloud = CredentialType(
@@ -1114,12 +1134,15 @@ class TestJobCredentials(TestJobExecution):
             inputs={'turbo_button': True}
         )
         self.instance.credentials.add(credential)
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-        assert '-e {"turbo_button": "True"}' in ' '.join(args)
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars["turbo_button"] == "True"
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
 
     def test_custom_environment_injectors_with_complicated_boolean_template(self):
         some_cloud = CredentialType(
@@ -1145,12 +1168,15 @@ class TestJobCredentials(TestJobExecution):
             inputs={'turbo_button': True}
         )
         self.instance.credentials.add(credential)
-        self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-        assert '-e {"turbo_button": "FAST!"}' in ' '.join(args)
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars["turbo_button"] == "FAST!"
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
 
     def test_custom_environment_injectors_with_secret_extra_vars(self):
         """
@@ -1181,13 +1207,16 @@ class TestJobCredentials(TestJobExecution):
         )
         credential.inputs['password'] = encrypt_field(credential, 'password')
         self.instance.credentials.add(credential)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars["password"] == "SUPER-SECRET-123"
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
-        assert self.run_pexpect.call_count == 1
-        call_args, _ = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-
-        assert '-e {"password": "SUPER-SECRET-123"}' in ' '.join(args)
         assert 'SUPER-SECRET-123' not in json.dumps(self.task.update_model.call_args_list)
 
     def test_custom_environment_injectors_with_file(self):
@@ -1358,19 +1387,17 @@ class TestProjectUpdateCredentials(TestJobExecution):
             pk=1,
             credential_type=ssh,
         )
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert ' '.join(args).startswith('bwrap')
+            assert ' '.join(['--bind', settings.PROJECTS_ROOT, settings.PROJECTS_ROOT]) in ' '.join(args)
+            assert extra_vars["scm_revision_output"].startswith(settings.PROJECTS_ROOT)
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
-
-        assert self.run_pexpect.call_count == 1
-        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
-        args, cwd, env, stdout = call_args
-
-        assert ' '.join(args).startswith('bwrap')
-        ' '.join([
-            '--bind',
-            settings.PROJECTS_ROOT,
-            settings.PROJECTS_ROOT,
-        ]) in ' '.join(args)
-        assert '"scm_revision_output": "/projects/tmp' in ' '.join(args)
 
     def test_username_and_password_auth(self, scm_type):
         ssh = CredentialType.defaults['ssh']()
