@@ -52,6 +52,11 @@ from .credential_type import ( # noqa
     CredentialTypeActivityStreamList,
 )
 
+from .dashboard import ( # noqa
+    DashboardView,
+    DashboardJobsGraphView,
+)
+
 from .workflow import ( # noqa
     WorkflowJobTemplateSurveySpec,
     WorkflowJobNodeList,
