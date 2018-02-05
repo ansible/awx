@@ -16,7 +16,7 @@ from awx.api.generics import (
     RetrieveDestroyAPIView,
 )
 from awx.api.base import BaseAdHocCommandEventsList
-from awx.api.serializer import (
+from awx.api.serializers import (
     ActivityStreamSerializer,
     AdHocCommandSerializer,
     AdHocCommandEventSerializer,
