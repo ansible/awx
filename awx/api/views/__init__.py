@@ -57,6 +57,21 @@ from .dashboard import ( # noqa
     DashboardJobsGraphView,
 )
 
+from .group import ( # noqa
+    GroupList,
+    GroupDetail,
+    GroupChildrenList,
+    GroupHostsList,
+    GroupAllHostsList,
+    GroupVariableData,
+    GroupJobEventsList,
+    GroupJobHostSummariesList,
+    GroupPotentialChildrenList,
+    GroupActivityStreamList,
+    GroupInventorySourcesList,
+    GroupAdHocCommandsList,
+)
+
 from .workflow import ( # noqa
     WorkflowJobTemplateSurveySpec,
     WorkflowJobNodeList,
