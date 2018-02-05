@@ -278,6 +278,13 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
                 dynamic: true
             },
         },
+        data: {
+            socket: {
+                "groups": {
+                    "jobs": ["status_changed"],
+                }
+            }
+        },
         resolvedModels: InstanceGroupsResolve
     });
 
@@ -295,6 +302,13 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
                     order_by: '-finished'
                 },
                 dynamic: true
+            }
+        },
+        data: {
+            socket: {
+                "groups": {
+                    "jobs": ["status_changed"],
+                }
             }
         },
         views: {

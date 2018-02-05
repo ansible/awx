@@ -1,12 +1,12 @@
 
-function InstanceGroupJobsController ($scope, $filter, $state, model, strings, jobStrings) {
+function InstanceGroupJobsController ($scope, $filter, $state, model, strings, jobStrings, InstanceGroup) {
     const vm = this || {};
-    const { instanceGroup } = model;
+    let { instanceGroup } = model;
+    const instance_group_id = instanceGroup.get('id');
 
     init();
 
     function init(){
-        const instance_group_id = instanceGroup.get('id');
         vm.strings = strings;
         vm.jobStrings = jobStrings;
         vm.queryset = { page_size: '10', order_by: '-finished', instance_group_id: instance_group_id };
@@ -72,8 +72,19 @@ function InstanceGroupJobsController ($scope, $filter, $state, model, strings, j
                 goTojobResults('workflowResults');
                 break;
         }
-
     };
+
+    $scope.$on('ws-jobs', () => {
+        new InstanceGroup(['get', 'options'], [instance_group_id, instance_group_id])
+            .then((instance_group) =>  {
+                return instance_group.extend('get', 'jobs', {params: {page_size: "10", order_by: "-finished"}});
+            })
+            .then((instance_group) => {
+                instanceGroup = instance_group;
+                init();
+            });
+    });
+
 }
 
 InstanceGroupJobsController.$inject = [
@@ -82,7 +93,8 @@ InstanceGroupJobsController.$inject = [
     '$state',
     'resolvedModels',
     'InstanceGroupsStrings',
-    'JobStrings'
+    'JobStrings',
+    'InstanceGroupModel'
 ];
 
 export default InstanceGroupJobsController;
