@@ -9,13 +9,13 @@ from rest_framework import status
 
 from awx.api.generics import (
     GenericAPIView,
-    BaseAdHocCommandEventsList,
     ListAPIView,
     ListCreateAPIView,
     SubListAPIView,
     RetrieveAPIView,
     RetrieveDestroyAPIView,
 )
+from awx.api.base import BaseAdHocCommandEventsList
 from awx.api.serializer import (
     ActivityStreamSerializer,
     AdHocCommandSerializer,

@@ -90,6 +90,13 @@ from .host import ( # noqa
     HostInsights,
 )
 
+from .instance import ( # noqa
+    InstanceList,
+    InstanceDetail,
+    InstanceUnifiedJobsList,
+    InstanceInstanceGroupsList,
+)
+
 from .workflow import ( # noqa
     WorkflowJobTemplateSurveySpec,
     WorkflowJobNodeList,
