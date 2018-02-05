@@ -17,6 +17,19 @@ from .activity_stream import ( # noqa
     ActivityStreamDetail,
 )
 
+from .adhoc import ( # noqa
+    AdHocCommandEventList,
+    AdHocCommandEventDetail,
+    AdHocCommandList,
+    AdHocCommandDetail,
+    AdHocCommandCancel,
+    AdHocCommandRelaunch,
+    AdHocCommandAdHocCommandEventsList,
+    AdHocCommandActivityStreamList,
+    AdHocCommandNotificationsList,
+    AdHocCommandStdout,
+)
+
 from .workflow import ( # noqa
     WorkflowJobTemplateSurveySpec,
     WorkflowJobNodeList,
