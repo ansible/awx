@@ -3,13 +3,18 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from .root import ( #noqa
+from .root import ( # noqa
     ApiRootView,
     ApiVersionRootView,
     ApiV1RootView,
     ApiV1PingView,
     ApiV1ConfigView,
     ApiV2RootView,
+)
+
+from .activity_stream import ( # noqa
+    ActivityStreamList,
+    ActivityStreamDetail,
 )
 
 from .workflow import ( # noqa
