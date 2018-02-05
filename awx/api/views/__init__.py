@@ -30,6 +30,11 @@ from .adhoc import ( # noqa
     AdHocCommandStdout,
 )
 
+from .auth import ( # noqa
+    AuthView,
+    AuthTokenView,
+)
+
 from .workflow import ( # noqa
     WorkflowJobTemplateSurveySpec,
     WorkflowJobNodeList,
