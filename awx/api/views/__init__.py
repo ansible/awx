@@ -35,6 +35,16 @@ from .auth import ( # noqa
     AuthTokenView,
 )
 
+from .credential import ( # noqa
+    CredentialList,
+    CredentialActivityStreamList,
+    CredentialDetail,
+    CredentialAccessList,
+    CredentialObjectRolesList,
+    CredentialOwnerUsersList,
+    CredentialOwnerTeamsList,
+)
+
 from .workflow import ( # noqa
     WorkflowJobTemplateSurveySpec,
     WorkflowJobNodeList,
