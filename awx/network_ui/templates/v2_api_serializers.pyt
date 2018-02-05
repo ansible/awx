@@ -7,14 +7,8 @@ from {{app}}.models import {{model.name}}{%endif%}{%endfor%}
 
 
 
-class {{model.name}}Serializer(serializers.HyperlinkedModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name="network_ui:{{model.name.lower()}}-detail", lookup_field='pk')
-    {%for field in model.fields%}
-    {%if field.ref_field%}
-    {{field.name}} = serializers.HyperlinkedRelatedField(view_name="network_ui:{{field.ref.lower()}}-detail", lookup_field="pk", read_only=True)
-    {%endif%}
-    {%endfor%}
+class {{model.name}}Serializer(serializers.ModelSerializer):
     class Meta:
         model = {{model.name}}
-        fields = ('url', {%for field in model.fields%}'{{field.name}}',{%endfor%})
+        fields = ({%for field in model.fields%}'{{field.name}}',{%endfor%})
 {%endif%}{%endfor%}
