@@ -3,7 +3,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: etcd
-  namespace: {{ awx_kubernetes_project }}
+  namespace: {{ awx_kubernetes_namespace }}
 spec:
   replicas: 1
   template:
@@ -31,7 +31,7 @@ metadata:
   labels:
     name: awx-etcd
   name: etcd
-  namespace: {{ awx_kubernetes_project }}
+  namespace: {{ awx_kubernetes_namespace }}
 spec:
   ports:
     - name: etcd
