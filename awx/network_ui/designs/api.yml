@@ -1,6 +1,9 @@
 models:
 - name: Device
   api: true
+  end_point: /network_ui/api/v1/device/
+  topology_id_query: topology_id
+  v2_lookup_field: host_id
 - name: Link
   api: true
 - name: Interface

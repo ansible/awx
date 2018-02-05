@@ -33,6 +33,8 @@ models:
     name: host_id
     type: IntegerField
   name: Device
+  topology_id_query: topology_id
+  v2_lookup_field: host_id
   x: 348
   y: 124
 - api: true
