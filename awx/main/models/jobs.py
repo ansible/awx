@@ -620,7 +620,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
         if self.launch_type == 'callback':
-            count_hosts = 1
+            count_hosts = 2
         else:
             count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
         return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
