@@ -21,8 +21,8 @@ from rest_framework import status
 
 # AWX
 from awx.main.ha import is_ha_environment
-from awx.main.utils import get_awx_version
-from awx.main.common import (
+from awx.main.utils import (
+    get_awx_version,
     get_ansible_version,
     to_python_boolean,
 )

@@ -38,7 +38,7 @@ class BaseUsersList(SubListCreateAttachDetachAPIView):
             print(exc)
             pass
         return ret
- 
+
 
 class BaseVariableData(RetrieveUpdateAPIView):
 

@@ -72,6 +72,24 @@ from .group import ( # noqa
     GroupAdHocCommandsList,
 )
 
+from .host import ( # noqa
+    HostList,
+    HostDetail,
+    HostVariableData,
+    HostGroupsList,
+    HostAllGroupsList,
+    HostJobEventsList,
+    HostJobHostSummariesList,
+    HostActivityStreamList,
+    HostInventorySourcesList,
+    HostSmartInventoriesList,
+    HostAdHocCommandsList,
+    HostAdHocCommandEventsList,
+    HostFactVersionsList,
+    HostFactCompareView,
+    HostInsights,
+)
+
 from .workflow import ( # noqa
     WorkflowJobTemplateSurveySpec,
     WorkflowJobNodeList,

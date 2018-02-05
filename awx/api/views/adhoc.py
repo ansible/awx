@@ -3,7 +3,6 @@
 
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
-from django.shortcuts import get_object_or_400
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -40,7 +39,10 @@ from awx.main.models import (
     Notification,
     UnifiedJobStdout,
 )
-from awx.main.common.utils import get_pk_from_dict
+from awx.main.utils import (
+    get_pk_from_dict,
+    get_object_or_400,
+)
 
 
 class AdHocCommandList(ListCreateAPIView):
