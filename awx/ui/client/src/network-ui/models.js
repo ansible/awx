@@ -1,8 +1,9 @@
-/* Copyright (c) 2017 Red Hat, Inc. */
+/* Copyright (c) 2017-2018 Red Hat, Inc. */
 var fsm = require('./fsm.js');
 var button = require('./button.js');
 var util = require('./util.js');
 var inherits = require('inherits');
+var animation_fsm = require('./animation.fsm.js');
 
 function Device(id, name, x, y, type, host_id) {
     this.id = id;
@@ -908,3 +909,18 @@ function TestResult(id, name, result, date, code_under_test) {
     this.code_under_test = code_under_test;
 }
 exports.TestResult = TestResult;
+
+function Animation(id, steps, data, scope, tracer, callback) {
+
+    this.id = id;
+    this.steps = steps;
+    this.active = true;
+    this.frame_number_seq = util.natural_numbers(0);
+    this.frame_number = 0;
+    this.data = data;
+    this.callback = callback;
+    this.scope = scope;
+    this.interval = null;
+    this.fsm = new fsm.FSMController(this, "animation_fsm", animation_fsm.Start, tracer);
+}
+exports.Animation = Animation;

@@ -2,6 +2,8 @@
 var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var messages = require('./messages.js');
+var animations = require('./animations.js');
+var models = require('./models.js');
 
 function _State () {
 }
@@ -99,11 +101,33 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         return;
 	}
     else if ($event.key === '0') {
-        scope.panX = 0;
-        scope.panY = 0;
-        scope.current_scale = 1.0;
-        scope.updateScaledXY();
-        scope.updatePanAndScale();
+        scope.cancel_animations();
+        var num_frames = 30;
+        console.log(num_frames);
+        var scale_animation = new models.Animation(scope.animation_id_seq(),
+                                                  num_frames,
+                                                  {
+                                                      new_scale: 1.0,
+                                                      current_scale: scope.current_scale,
+                                                      scope: scope
+                                                  },
+                                                  scope,
+                                                  scope,
+                                                  animations.scale_animation);
+        scope.animations.push(scale_animation);
+        var pan_animation = new models.Animation(scope.animation_id_seq(),
+                                                  num_frames,
+                                                  {
+                                                      x2: 0,
+                                                      y2: 0,
+                                                      x1: scope.panX,
+                                                      y1: scope.panY,
+                                                      scope: scope
+                                                  },
+                                                  scope,
+                                                  scope,
+                                                  animations.pan_animation);
+        scope.animations.push(pan_animation);
     }
 
 	controller.delegate_channel.send(msg_type, $event);

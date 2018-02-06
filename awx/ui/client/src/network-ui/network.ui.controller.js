@@ -106,6 +106,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.message_id_seq = util.natural_numbers(0);
   $scope.stream_id_seq = util.natural_numbers(0);
   $scope.test_result_id_seq = util.natural_numbers(0);
+  $scope.animation_id_seq = util.natural_numbers(0);
   $scope.overall_toolbox_collapsed = false;
   $scope.time_pointer = -1;
   $scope.frame = 0;
@@ -124,6 +125,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.test_results = [];
   $scope.test_errors = [];
   $scope.streams = [];
+  $scope.animations = [];
   $scope.view_port = {'x': 0,
                       'y': 0,
                       'width': 0,
@@ -201,10 +203,10 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                    let host = hosts[i];
                    console.log(host);
                    host.data = jsyaml.safeLoad(host.variables);
-                   if (host.data.type == undefined) {
+                   if (host.data.type === undefined) {
                        host.data.type = 'unknown';
                    }
-                   if (host.data.name == undefined) {
+                   if (host.data.name === undefined) {
                        host.data.name = host.name;
                    }
                    var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id, host.variables);
@@ -590,12 +592,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         context_menu.enabled = false;
         context_menu.x = -100000;
         context_menu.y = -100000;
-        context_menu.buttons.forEach(function(button, index){
+        context_menu.buttons.forEach(function(button){
             button.enabled = false;
             button.x = -100000;
             button.y = -100000;
         });
-    }
+    };
 
     $scope.onDetailsContextButton = function (panelBoolean) {
         if (!$scope.disconnected) {
@@ -1864,6 +1866,15 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.inventory_toolbox.items = [];
         $scope.rack_toolbox.items = [];
         $scope.site_toolbox.items = [];
+    };
+
+    $scope.cancel_animations = function () {
+
+        var i = 0;
+        for (i = 0; i < $scope.animations.length; i++) {
+            this.animations[i].fsm.handle_message('AnimationCancelled');
+        }
+        $scope.animations = [];
     };
 };
 
