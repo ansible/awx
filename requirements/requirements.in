@@ -24,6 +24,7 @@ django-split-settings==0.2.5
 django-taggit==0.22.1
 djangorestframework==3.7.3
 djangorestframework-yaml==1.0.3
+django-rest-swagger==2.1.2
 gevent-websocket==0.9.5
 irc==15.1.1
 jsonschema==2.6.0

@@ -68,6 +68,7 @@ django-taggit==0.22.1
 django==1.11.7
 djangorestframework-yaml==1.0.3
 djangorestframework==3.7.3
+django-rest-swagger==2.1.2
 #dm.xmlsec.binding==1.3.2  # via python-saml
 #docutils==0.14            # via botocore
 dogpile.cache==0.6.3      # via python-ironicclient, shade
