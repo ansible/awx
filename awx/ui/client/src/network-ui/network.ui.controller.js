@@ -169,8 +169,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.app_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
 
   //App Toolbox Setup
-  $scope.app_toolbox = new models.ToolBox(0, 'Process', 'app', 0, 40, 200, $scope.graph.height - 40);
-  $scope.app_toolbox.title_coordinates = {x: 70, y: 70};
+  // const toolboxTopMargin = 115;
+  var toolboxTopMargin = $('.Networking-top').height();
+  var toolboxTitleMargin = toolboxTopMargin + 35;
+  var toolboxHeight = $scope.graph.height - $('.Networking-top').height();
+  $scope.app_toolbox = new models.ToolBox(0, 'Process', 'app', 0, toolboxTopMargin, 200, toolboxHeight);
+  $scope.app_toolbox.title_coordinates = {x: 70, y: toolboxTitleMargin};
   $scope.app_toolbox.spacing = 150;
   $scope.app_toolbox.enabled = false;
   $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
@@ -192,7 +196,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
 
   //Inventory Toolbox Setup
-  $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, 40, 200, $scope.graph.height - 40);
+  $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, toolboxTopMargin, 200, toolboxHeight);
   if (!$scope.disconnected) {
       console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
       console.log($scope.my_location);
@@ -220,7 +224,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   }
   $scope.inventory_toolbox.spacing = 150;
   $scope.inventory_toolbox.enabled = true;
-  $scope.inventory_toolbox.title_coordinates = {x: 60, y: 70};
+  $scope.inventory_toolbox.title_coordinates = {x: 60, y: toolboxTitleMargin};
   $scope.inventory_toolbox_controller.toolbox = $scope.inventory_toolbox;
   $scope.inventory_toolbox_controller.remove_on_drop = true;
   $scope.inventory_toolbox_controller.debug = true;
@@ -231,8 +235,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   //End Inventory Toolbox Setup
   $scope.rack_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
   //Rack Toolbox Setup
-  $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 0, 40, 200, $scope.graph.height - 40);
-  $scope.rack_toolbox.title_coordinates = {x: 80, y: 70};
+  $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 0, toolboxTopMargin, 200, toolboxHeight);
+  $scope.rack_toolbox.title_coordinates = {x: 80, y: toolboxTitleMargin};
   $scope.rack_toolbox.spacing = 200;
   $scope.rack_toolbox.enabled = false;
   $scope.rack_toolbox_controller.remove_on_drop = false;
@@ -248,8 +252,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   //End Rack Toolbox Setup
   $scope.site_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
   //Site Toolbox Setup
-  $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 0, 40, 200, $scope.graph.height - 40);
-  $scope.site_toolbox.title_coordinates = {x: 80, y: 70};
+  $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 0, toolboxTopMargin, 200, toolboxHeight);
+  $scope.site_toolbox.title_coordinates = {x: 80, y: toolboxTitleMargin};
   $scope.site_toolbox.spacing = 200;
   $scope.site_toolbox.enabled = false;
   $scope.site_toolbox_controller.remove_on_drop = false;
@@ -608,6 +612,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 // following block is intended for devices added in the network UI but not in Tower
                 if ($scope.selected_devices[0].host_id === 0){
                     let host = $scope.selected_devices[0];
+                    $scope.update_toolbox_heights();
                     $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
                 }
 
@@ -619,6 +624,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                          .then(function(response) {
                              let host = response.data;
                              host.host_id = host.id;
+                             $scope.update_toolbox_heights();
                              $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
 
                          })
@@ -631,18 +637,21 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             // show details for interfaces
             else if($scope.selected_interfaces.length === 1){
                 let selected_interface  = $scope.selected_interfaces[0];
+                $scope.update_toolbox_heights();
                 $scope.$emit('showDetails', selected_interface, panelBoolean !== null ? panelBoolean: true);
             }
 
             // show details for links
             else if($scope.selected_links.length === 1){
                 let link  = $scope.selected_links[0];
+                $scope.update_toolbox_heights();
                 $scope.$emit('showDetails', link, panelBoolean !== null ? panelBoolean: true);
             }
 
             //show details for groups, racks, and sites
             else if ($scope.selected_groups.length === 1){
                 let group = $scope.selected_groups[0];
+                $scope.update_toolbox_heights();
                 $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);
             }
          }
@@ -798,6 +807,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 $scope.current_scale = 1.1;
                 break;
         }
+        // var new_panX = controller.scope.{{somethinghere}} - new_scale * ((controller.scope.mouseX - controller.scope.panX) / controller.scope.current_scale);
+        // var new_panY = controller.scope.mouseY - new_scale * ((controller.scope.mouseY - controller.scope.panY) / controller.scope.current_scale);
+        // // controller.scope.updateScaledXY();
+        // // controller.scope.current_scale = new_scale;
+        // controller.scope.panX = new_panX;
+        // controller.scope.panY = new_panY;
         $scope.updateScaledXY();
         $scope.updatePanAndScale();
     });
@@ -916,9 +931,10 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     ];
 
     // Icons
+    var actionIconVerticalOffset = toolboxTopMargin + (toolboxHeight/2);
     $scope.action_icons = [
-        new models.ActionIcon("chevron-left", 170, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonLeft, true, $scope),
-        new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonRight, false, $scope)
+        new models.ActionIcon("chevron-left", 170, actionIconVerticalOffset, 16, $scope.onToggleToolboxButtonLeft, true, $scope),
+        new models.ActionIcon("chevron-right", 15, actionIconVerticalOffset, 16, $scope.onToggleToolboxButtonRight, false, $scope)
     ];
 
     $scope.onDownloadTraceButton = function (button) {
@@ -1763,7 +1779,29 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $document.unbind('keydown', $scope.onKeyDown);
     });
 
+    $scope.update_toolbox_heights = function(){
+        toolboxTopMargin = $('.Networking-top').height();
+        toolboxTitleMargin = toolboxTopMargin + 35;
+        toolboxHeight = $scope.graph.height - toolboxTopMargin;
+
+        let toolboxes = ['site_toolbox', 'rack_toolbox', 'inventory_toolbox', 'app_toolbox'];
+        toolboxes.forEach((toolbox) => {
+            $scope[toolbox].y = toolboxTopMargin;
+            $scope[toolbox].height = toolboxHeight;
+            $scope[toolbox].title_coordinates.y = toolboxTitleMargin;
+        });
+
+        $scope.action_icons.forEach((icon) => {
+            actionIconVerticalOffset = toolboxTopMargin + (toolboxHeight/2);
+            icon.y = actionIconVerticalOffset;
+        });
+
+        $('.Networking-detailPanel').height(toolboxHeight);
+        $('.Networking-detailPanel').css('top', toolboxTopMargin);
+    };
+
     $scope.update_size = function () {
+        $scope.update_toolbox_heights();
     };
 
     $scope.update_offsets = function () {

@@ -1,24 +1,23 @@
+.Networking-shell{
+    display:flex;
+    flex-direction: column;
+    width:100%;
+    align-items: flex-end;
+    position:absolute;
+}
+
+.Networking-top{
+    width:100%;
+}
+
 .Networking-header{
     border-top: 1px solid @at-color-panel-border;
     border-bottom: 1px solid @at-color-panel-border;
     display:flex;
     height: 40px;
-    position:absolute;
     width:100%;
     background-color: @default-bg;
 }
-
-.Networking-top{
-    display:flex;
-    flex-direction: column;
-    // width:100%;
-    width: calc(~"100% - 46px");
-    position:absolute;
-    top: 40px;
-    left:46px;
-    align-items: flex-end;
-}
-
 
 .Networking-headerTitle{
     color: @default-interface-txt;
@@ -67,26 +66,23 @@
     color: @default-bg;
 }
 
-.Networking-panels{
-    display:flex;
-}
-
-.Networking-leftPanel{
+.Networking-canvasPanel{
     width:100%
 }
 
-.Networking-rightPanel{
+.Networking-detailPanel{
     border-left: 1px solid @at-color-panel-border;
+    border-bottom: 1px solid @at-color-panel-border;
     width:400px;
-    height: calc(~"100vh - 40px");
+    height: calc(~"100vh - 115px");
     padding: 20px;
     color: @default-interface-txt;
     font-size: 14px;
     font-weight: bold;
-    position: absolute;
-    top: 40px;
-    right: 0px;
     background-color: @default-bg;
+    position: absolute;
+    top:115px;
+    right:0px;
 }
 
 
@@ -123,12 +119,10 @@
 
 .Networking-toolbar{
     min-height: 40px;
-    // width: calc(~"100% - 45px");
     width:100%;
     background-color: #ebebeb;
     display:flex;
     flex: 1 0 auto;
-    // margin-left: 46px;
     align-items: center;
 }
 
@@ -208,11 +202,8 @@
     width: 150px;
     padding: 10px 0px 10px 0px;
     border: 1px solid #b7b7b7;
-    // position: absolute;
-    // right: 20px;
-    // top: 35px;
-    margin-right: 20px;
-    margin-top: -35px;
+    position: absolute;
+    right: 0px;
     background-color: white;
 }
 
@@ -240,13 +231,19 @@
     background-color: #f2f2f2;
 }
 
+.Networking-jumpToContainer,
+.Networking-keyContainer{
+    display: inline-block;
+    position: relative;
+}
+
 .Networking-keyDropDownPanel{
     width: 180px;
     padding: 10px 0px 10px 0px;
     border: 1px solid #b7b7b7;
     background-color: white;
-    margin-right: 70px;
-    margin-top: -35px;
+    position: absolute;
+    right:0px;
 }
 
 .Networking-keyPanelOption{
