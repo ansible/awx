@@ -4,7 +4,7 @@
 <g ng-if="overall_toolbox_collapsed">
 <rect class="NetworkUI__toolbox-collapsed"
       x=0
-      y=40
+      ng-attr-y={{toolbox.y}}
       width=45
       ng-attr-height={{toolbox.height}}>
 </rect>
