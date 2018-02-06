@@ -3,7 +3,8 @@ import hasAnsi from 'has-ansi';
 
 let vm;
 let ansi;
-let job;
+let resource;
+let related;
 let container;
 let $timeout;
 let $sce;
@@ -38,7 +39,7 @@ const TIME_EVENTS = [
 ];
 
 function JobsIndexController (
-    _job_,
+    _resource_,
     _$sce_,
     _$timeout_,
     _$scope_,
@@ -50,11 +51,12 @@ function JobsIndexController (
     $compile = _$compile_;
     $scope = _$scope_;
     $q = _$q_;
-    job = _job_;
+    resource = _resource_;
 
     ansi = new Ansi();
+    related = getRelated();
 
-    const events = job.get('related.job_events.results');
+    const events = resource.get(`related.${related}.results`);
     const parsed = parseEvents(events);
     const html = $sce.trustAsHtml(parsed.html);
 
@@ -98,9 +100,20 @@ function JobsIndexController (
     });
 }
 
+function getRelated () {
+    const name = resource.constructor.name;
+
+    switch (name) {
+        case 'ProjectUpdateModel':
+            return 'events';
+        case 'JobModel':
+            return 'job_events';
+    }
+}
+
 function next () {
     const config = {
-        related: 'job_events',
+        related,
         page: meta.page.cache[meta.page.cache.length - 1].page + 1,
         params: {
             order_by: 'start_line'
@@ -108,7 +121,7 @@ function next () {
     };
 
     console.log('[2] getting next page', config.page, meta.page.cache);
-    return job.goToPage(config)
+    return resource.goToPage(config)
         .then(data => {
             if (!data || !data.results) {
                 return $q.resolve();
@@ -125,7 +138,7 @@ function next () {
 
 function prev () {
     const config = {
-        related: 'job_events',
+        related,
         page: meta.page.cache[0].page - 1,
         params: {
             order_by: 'start_line'
@@ -133,7 +146,7 @@ function prev () {
     };
 
     console.log('[2] getting previous page', config.page, meta.page.cache);
-    return job.goToPage(config)
+    return resource.goToPage(config)
         .then(data => {
             if (!data || !data.results) {
                 return $q.resolve();
@@ -569,7 +582,7 @@ function onScroll () {
 }
 
 JobsIndexController.$inject = [
-    'job',
+    'resource',
     '$sce',
     '$timeout',
     '$scope',

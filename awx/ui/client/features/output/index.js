@@ -10,7 +10,7 @@ const indexTemplate = require('~features/output/index.view.html');
 
 const MODULE_NAME = 'at.features.output';
 
-function resolveJob (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJob, $stateParams) {
+function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJob, $stateParams) {
     const { id } = $stateParams;
     const { type } = $stateParams;
 
@@ -73,14 +73,14 @@ function JobsRun ($stateExtender, strings) {
             }
         },
         resolve: {
-            job: [
+            resource: [
                 'JobModel',
                 'ProjectUpdateModel',
                 'AdHocCommandModel',
                 'SystemJobModel',
                 'WorkflowJobModel',
                 '$stateParams',
-                resolveJob
+                resolveResource
             ]
         }
     });
