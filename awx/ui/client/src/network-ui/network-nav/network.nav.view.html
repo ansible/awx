@@ -22,14 +22,13 @@
                 <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('RunTests')">RUN TESTS</button>
             </div>
             <div class="Networking-toolbarRightSide">
-                <div class="SmartSearch-searchTermContainer Networking-searchBarContainer">
-                    <!-- string search input -->
-                    <form name="smartSearch" class="SmartSearch-form ng-pristine ng-valid" aw-enter-key="addTerm(searchTerm)" novalidate="">
-                        <input class="SmartSearch-input ng-pristine ng-valid ng-empty ng-touched" ng-model="searchTerm" placeholder="Search" ng-disabled="disableSearch">
-                    </form>
-                    <div type="submit" class="SmartSearch-searchButton Networking-searchButton" ng-disabled="!searchTerm" ng-click="addTerm(searchTerm)" disabled="disabled">
-                        <i class="fa fa-search"></i>
-                    </div>
+                <div class="Networking-searchBarContainer">
+                    <select id="networking-search" ng-model="device" ng-options="device.label for device in devices track by device.id">
+                        <option></option>
+                    </select>
+                    <!-- <select id="networking-search" style="width:100%"><option></option></select> -->
+                    <!-- <select class="Form-dropDown" id="networking-search"> -->
+                        <!-- <option ng-repeat="device in devices" value="{{device.id}}">{{device.name}}</option> -->
                 </div>
                 <div class="Networking-keyContainer">
                     <button ng-click="vm.key()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.keyPanelExpanded}">
@@ -118,9 +117,9 @@
             </div>
         </div>
         <div class="Networking-toolbar Networking-breadCrumbBar">
-            <div class="Networking-breadCrumbText">foo-bar</div>
+            <div class="Networking-breadCrumbText"></div>
         </div>
-        
+
     </div>
 </div>
 
@@ -143,6 +142,17 @@
          </div>
      </div>
      <!--end of name row -->
+
+     <!--beginning of name row -->
+     <div class="JobResults-resultRow" ng-if="item.host_id">
+         <label class="JobResults-resultRowLabel Networking-resultRowLabel" translate="">
+             Description
+         </label>
+          <input class="JobResults-resultRowText">
+
+          </input>
+      </div>
+      <!--end of name row -->
 
      <div class="List-noItems Networking-noItems" ng-if="!item.host_id">
          {{item.type}} DETAILS NOT AVAILABLE

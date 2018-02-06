@@ -1,17 +1,27 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
-                 <line x1="-100000"
-                       y1="0"
-                       x2="100000"
-                       y2="0"
-                       ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || 'NetworkUI--debug'}}" />
-                 <line x1="0"
-                       y1="-100000"
-                       x2="0"
-                       y2="100000"
-                       ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || 'NetworkUI--debug'}}" />
-                 <rect ng-attr-x="{{view_port.x}}"
-                       ng-attr-y="{{view_port.y}}"
-                       ng-attr-width="{{view_port.width}}"
-                       ng-attr-height="{{view_port.height}}"
-                       ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || 'NetworkUI--debug'}}"
-                       ng-attr-style="stroke-width: {{2 / current_scale}}"></rect>
+<g ng-attr-transform="scale({{1/(current_scale)}})">
+             <line x1="-10000"
+                   y1="0"
+                   x2="10000"
+                   y2="0"
+                   ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || 'NetworkUI--debug'}}" />
+             <line x1="0"
+                   y1="-10000"
+                   x2="0"
+                   y2="10000"
+                   ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || 'NetworkUI--debug'}}" />
+</g>
+<rect ng-attr-x="{{view_port.x}}"
+      ng-attr-y="{{view_port.y}}"
+      ng-attr-width="{{view_port.width}}"
+      ng-attr-height="{{view_port.height}}"
+      ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || 'NetworkUI--debug'}}"
+      ng-attr-style="stroke-width: {{2 / current_scale}}"></rect>
+<g ng-if="!debug.hidden">
+<line ng-attr-x1="{{jump.from_x}}"
+      ng-attr-y1="{{jump.from_y}}"
+      ng-attr-x2="{{jump.to_x}}"
+      ng-attr-y2="{{jump.to_y}}"
+      stroke="#4dc8f2"
+      ng-attr-stroke-width="{{10/current_scale}}" />
+</g>

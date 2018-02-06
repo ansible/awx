@@ -1,5 +1,7 @@
 /* Copyright (c) 2017 Red Hat, Inc. */
 
+import atFeaturesNetworking from './network-nav/index';
+
 //console.log = function () { };
 var angular = require('angular');
 var NetworkUIController = require('./network.ui.controller.js');
@@ -31,6 +33,7 @@ var awxNetworkUI = require('./network.ui.directive.js');
 
 var networkUI = angular.module('networkUI', [
         'monospaced.mousewheel',
+        atFeaturesNetworking
     ])
     .controller('NetworkUIController', NetworkUIController.NetworkUIController)
     .directive('awxNetCursor', cursor.cursor)

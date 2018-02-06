@@ -85,7 +85,7 @@
             </g>
             <g awx-net-quadrants>
             </g>
-        </g>
+        </g> <!-- end frame_g -->
         <g ng-repeat="toolbox in [site_toolbox, rack_toolbox, inventory_toolbox, app_toolbox]">
         <g awx-net-inventory-toolbox></g>
         </g>
