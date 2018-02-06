@@ -152,9 +152,10 @@ class ApiRootView(APIView):
     permission_classes = (AllowAny,)
     view_name = _('REST API')
     versioning_class = None
+    swagger_topic = 'Versioning'
 
     def get(self, request, format=None):
-        ''' list supported API versions '''
+        ''' List supported API versions '''
 
         v1 = reverse('api:api_v1_root_view', kwargs={'version': 'v1'})
         v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
@@ -173,9 +174,10 @@ class ApiVersionRootView(APIView):
 
     authentication_classes = []
     permission_classes = (AllowAny,)
+    swagger_topic = 'Versioning'
 
     def get(self, request, format=None):
-        ''' list top level resources '''
+        ''' List top level resources '''
         data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view', request=request)
         data['ping'] = reverse('api:api_v1_ping_view', request=request)
@@ -238,9 +240,10 @@ class ApiV1PingView(APIView):
     authentication_classes = ()
     view_name = _('Ping')
     new_in_210 = True
+    swagger_topic = 'System Configuration'
 
     def get(self, request, format=None):
-        """Return some basic information about this instance.
+        """Return some basic information about this instance
 
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
@@ -268,6 +271,7 @@ class ApiV1ConfigView(APIView):
 
     permission_classes = (IsAuthenticated,)
     view_name = _('Configuration')
+    swagger_topic = 'System Configuration'
 
     def check_permissions(self, request):
         super(ApiV1ConfigView, self).check_permissions(request)
@@ -275,7 +279,7 @@ class ApiV1ConfigView(APIView):
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
     def get(self, request, format=None):
-        '''Return various sitewide configuration settings.'''
+        '''Return various sitewide configuration settings'''
 
         if request.user.is_superuser or request.user.is_system_auditor:
             license_data = get_license(show_key=True)
@@ -369,6 +373,7 @@ class DashboardView(APIView):
 
     view_name = _("Dashboard")
     new_in_14 = True
+    swagger_topic = 'Dashboard'
 
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
@@ -468,6 +473,7 @@ class DashboardJobsGraphView(APIView):
 
     view_name = _("Dashboard Jobs Graphs")
     new_in_200 = True
+    swagger_topic = 'Jobs'
 
     def get(self, request, format=None):
         period = request.query_params.get('period', 'month')
@@ -606,6 +612,85 @@ class ScheduleDetail(RetrieveUpdateDestroyAPIView):
     new_in_148 = True
 
 
+class SchedulePreview(GenericAPIView):
+
+    model = Schedule
+    view_name = _('Schedule Recurrence Rule Preview')
+    serializer_class = SchedulePreviewSerializer
+    new_in_api_v2 = True
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            next_stamp = now()
+            schedule = []
+            gen = Schedule.rrulestr(serializer.validated_data['rrule']).xafter(next_stamp, count=20)
+
+            # loop across the entire generator and grab the first 10 events
+            for event in gen:
+                if len(schedule) >= 10:
+                    break
+                if not dateutil.tz.datetime_exists(event):
+                    # skip imaginary dates, like 2:30 on DST boundaries
+                    continue
+                schedule.append(event)
+
+            return Response({
+                'local': schedule,
+                'utc': [s.astimezone(pytz.utc) for s in schedule]
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ScheduleZoneInfo(APIView):
+
+    swagger_topic = 'System Configuration'
+
+    def get(self, request):
+        from dateutil.zoneinfo import get_zonefile_instance
+        return Response(sorted(get_zonefile_instance().zones.keys()))
+
+
+class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    relationship = 'credentials'
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if not parent.unified_job_template:
+            return {"msg": _("Cannot assign credential when related template is null.")}
+
+        ask_mapping = parent.unified_job_template.get_ask_mapping()
+
+        if self.relationship not in ask_mapping:
+            return {"msg": _("Related template cannot accept {} on launch.").format(self.relationship)}
+        elif sub.passwords_needed:
+            return {"msg": _("Credential that requires user input on launch "
+                             "cannot be used in saved launch configuration.")}
+
+        ask_field_name = ask_mapping[self.relationship]
+
+        if not getattr(parent.unified_job_template, ask_field_name):
+            return {"msg": _("Related template is not configured to accept credentials on launch.")}
+        elif sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
+            return {"msg": _("This launch configuration already provides a {credential_type} credential.").format(
+                credential_type=sub.unique_hash(display=True))}
+        elif sub.pk in parent.unified_job_template.credentials.values_list('pk', flat=True):
+            return {"msg": _("Related template already uses {credential_type} credential.").format(
+                credential_type=sub.name)}
+
+        # None means there were no validation errors
+        return None
+
+
+class ScheduleCredentialsList(LaunchConfigCredentialsBase):
+
+    parent_model = Schedule
+    new_in_330 = True
+    new_in_api_v2 = True
+
+
 class ScheduleUnifiedJobsList(SubListAPIView):
 
     model = UnifiedJob
@@ -617,10 +702,12 @@ class ScheduleUnifiedJobsList(SubListAPIView):
 
 
 class AuthView(APIView):
+    ''' List enabled single-sign-on endpoints '''
 
     authentication_classes = []
     permission_classes = (AllowAny,)
     new_in_240 = True
+    swagger_topic = 'System Configuration'
 
     def get(self, request):
         from rest_framework.reverse import reverse
@@ -664,6 +751,7 @@ class AuthTokenView(APIView):
     permission_classes = (AllowAny,)
     serializer_class = AuthTokenSerializer
     model = AuthToken
+    swagger_topic = 'Authentication'
 
     def get_serializer(self, *args, **kwargs):
         serializer = self.serializer_class(*args, **kwargs)
@@ -853,7 +941,7 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
     def get_serializer_context(self, *args, **kwargs):
         full_context = super(OrganizationDetail, self).get_serializer_context(*args, **kwargs)
 
-        if not hasattr(self, 'kwargs'):
+        if not hasattr(self, 'kwargs') or 'pk' not in self.kwargs:
             return full_context
         org_id = int(self.kwargs['pk'])
 
@@ -2497,7 +2585,7 @@ class InventorySourceList(ListCreateAPIView):
     @property
     def allowed_methods(self):
         methods = super(InventorySourceList, self).allowed_methods
-        if get_request_version(self.request) == 1:
+        if get_request_version(getattr(self, 'request', None)) == 1:
             methods.remove('POST')
         return methods
 
@@ -3694,7 +3782,7 @@ class JobList(ListCreateAPIView):
     @property
     def allowed_methods(self):
         methods = super(JobList, self).allowed_methods
-        if get_request_version(self.request) > 1:
+        if get_request_version(getattr(self, 'request', None)) > 1:
             methods.remove('POST')
         return methods
 
@@ -4441,6 +4529,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
 
 
 class NotificationTemplateTest(GenericAPIView):
+    '''Test a Notification Template'''
 
     view_name = _('Notification Template Test')
     model = NotificationTemplate
