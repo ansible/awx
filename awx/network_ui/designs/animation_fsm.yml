@@ -1,0 +1,29 @@
+diagram_id: 58
+name: animation_fsm
+states:
+- id: 4
+  label: Cancelled
+  x: 590
+  y: 602
+- id: 3
+  label: Completed
+  x: 225
+  y: 604
+- id: 2
+  label: Running
+  x: 418
+  y: 362
+- id: 1
+  label: Start
+  x: 454
+  y: 158
+transitions:
+- from_state: Running
+  label: onAnimationCancelled
+  to_state: Cancelled
+- from_state: Running
+  label: onAnimationCompleted
+  to_state: Completed
+- from_state: Start
+  label: start
+  to_state: Running
