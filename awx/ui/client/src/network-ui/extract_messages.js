@@ -20,19 +20,19 @@ var next_message = message_iter.next();
 var next_field = null;
 var message = null;
 var message_instance = null;
-var field = null;
 var fields = null;
-var i = 0;
+// var field = null;
+// var i = 0;
 while(next_message !== undefined) {
     message = implementation[next_message];
     try {
-        message_instance = new message()
+        message_instance = new message();
     } catch(err) {
         next_message = message_iter.next();
         continue;
     }
     fields = [];
-    field_iter = Iterator(message_instance)
+    field_iter = Iterator(message_instance);
     next_field = field_iter.next();
     while (next_field !== undefined) {
         fields.push(next_field);
