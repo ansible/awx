@@ -1,3 +1,5 @@
+# View Statistics for Job Runs
+
 Make a GET request to this resource to retrieve aggregate statistics about job runs suitable for graphing.
 
 ## Parmeters and Filtering

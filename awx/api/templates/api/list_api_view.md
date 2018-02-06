@@ -1,3 +1,4 @@
+{% ifmeth GET %}
 # List {{ model_verbose_name_plural|title }}:
 
 Make a GET request to this resource to retrieve the list of
@@ -6,3 +7,4 @@ Make a GET request to this resource to retrieve the list of
 {% include "api/_list_common.md" %}
 
 {% include "api/_new_in_awx.md" %}
+{% endifmeth %}

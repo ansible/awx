@@ -353,6 +353,13 @@ used to specify a preferred instance group on the job template or inventory,
 but still allow the job to be submitted to any instance if those are out of
 capacity.
 
+#### Instance Enable / Disable
+
+In order to support temporarily taking an `Instance` offline there is a boolean property `enabled` defined on each instance.
+
+When this property is disabled no jobs will be assigned to that `Instance`. Existing jobs will finish but no new work will be
+assigned.
+
 ## Acceptance Criteria
 
 When verifying acceptance we should ensure the following statements are true

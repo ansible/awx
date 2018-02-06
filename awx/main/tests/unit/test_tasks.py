@@ -1757,6 +1757,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             self.instance.credential, 'password'
         )
 
+        self.instance.source_vars = '{"prefer_ipv4": True}'
+
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
             config = ConfigParser.ConfigParser()
@@ -1765,6 +1767,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('cloudforms', 'username') == 'bob'
             assert config.get('cloudforms', 'password') == 'secret'
             assert config.get('cloudforms', 'ssl_verify') == 'false'
+            assert config.get('cloudforms', 'prefer_ipv4') == 'True'
 
             cache_path = config.get('cache', 'path')
             assert cache_path.startswith(env['AWX_PRIVATE_DATA_DIR'])
