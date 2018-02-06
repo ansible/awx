@@ -1,7 +1,8 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
 
 
-        <g ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || ''}}">
+<g ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || ''}}">
+    <g transform="translate(0, 100)">
         <text ng-attr-x="{{graph.right_column}}" y="35" class="NetworkUI__debug-text">view_port.x: {{view_port.x}}</text>
         <text ng-attr-x="{{graph.right_column}}" y="55" class="NetworkUI__debug-text">view_port.y: {{view_port.y}}</text>
         <text ng-attr-x="{{graph.right_column}}" y="75" class="NetworkUI__debug-text">view_port.width: {{view_port.width}}</text>
@@ -45,5 +46,16 @@
         <text ng-attr-x="{{graph.right_column}}" y="855" class="NetworkUI__debug-text">Inventory Toolbox State: {{inventory_toolbox_controller.state.name}}</text>
         <text ng-attr-x="{{graph.right_column}}" y="875" class="NetworkUI__debug-text">Rack Toolbox State: {{rack_toolbox_controller.state.name}}</text>
         <text ng-attr-x="{{graph.right_column}}" y="895" class="NetworkUI__debug-text">Site Toolbox State: {{site_toolbox_controller.state.name}}</text>
-        <rect x=10 y=10 ng-attr-width="{{graph.width - 20}}" ng-attr-height="{{graph.height - 20}}" class="NetworkUI--debug"></rect>
-        </g>
+    </g>
+    <rect x=10 y=10 ng-attr-width="{{graph.width - 20}}" ng-attr-height="{{graph.height - 20}}" class="NetworkUI--debug"></rect>
+     <line x1="-10000"
+           ng-attr-y1="{{graph.height/2}}"
+           x2="10000"
+           ng-attr-y2="{{graph.height/2}}"
+           ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || 'NetworkUI--debug'}}" />
+     <line ng-attr-x1="{{graph.width/2}}"
+           y1="-10000"
+           ng-attr-x2="{{graph.width/2}}"
+           y2="10000"
+           ng-attr-class="{{debug.hidden && 'NetworkUI--hidden' || 'NetworkUI--debug'}}" />
+</g>

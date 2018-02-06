@@ -26,7 +26,7 @@ var transition = null;
 var i = 0;
 while(next_state !== undefined) {
     state = implementation[next_state];
-    transition_iter = Iterator(state.constructor.prototype)
+    transition_iter = Iterator(state.constructor.prototype);
     next_transition = transition_iter.next();
     while (next_transition !== undefined) {
         transition = state.constructor.prototype[next_transition];

@@ -1,9 +1,9 @@
-import NetworkingController from './networking.controller';
-import NetworkingStrings from './networking.strings';
+import NetworkingController from './network.nav.controller';
+import NetworkingStrings from './network.nav.strings';
 
 const MODULE_NAME = 'at.features.networking';
 
-const networkingTemplate = require('~features/networking/networking.view.html');
+const networkNavTemplate = require('~network-ui/network-nav/network.nav.view.html');
 
 function NetworkingResolve ($stateParams, resourceData) {
     const resolve = {
@@ -31,7 +31,7 @@ function NetworkingRun ($stateExtender, strings) {
         },
         views: {
             'networking@': {
-                templateUrl: networkingTemplate,
+                templateUrl: networkNavTemplate,
                 controller: NetworkingController,
                 controllerAs: 'vm'
             }
