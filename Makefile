@@ -367,7 +367,7 @@ swagger: reports
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	(set -o pipefail && py.test awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(SWAGGER_RELEASE_VERSION:-$RELEASE_VERSION) | tee reports/$@.report)
+	(set -o pipefail && py.test awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
 
 check: flake8 pep8 # pyflakes pylint
 
