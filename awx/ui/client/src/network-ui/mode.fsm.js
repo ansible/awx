@@ -1,8 +1,8 @@
 /* Copyright (c) 2017 Red Hat, Inc. */
 var inherits = require('inherits');
 var fsm = require('./fsm.js');
-var move = require('./move.js');
-var group = require('./group.js');
+var move = require('./move.fsm.js');
+var group = require('./group.fsm.js');
 var rack_fsm = require('./rack.fsm.js');
 var site_fsm = require('./site.fsm.js');
 
