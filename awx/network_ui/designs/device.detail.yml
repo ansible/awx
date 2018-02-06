@@ -1,4 +1,4 @@
-finite_state_machine_id: 131
+finite_state_machine_id: 19
 name: device_detail_fsm
 states:
 - id: 2
