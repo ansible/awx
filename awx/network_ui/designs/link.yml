@@ -1,4 +1,4 @@
-finite_state_machine_id: 10
+finite_state_machine_id: 4
 name: link_fsm
 states:
 - id: 5

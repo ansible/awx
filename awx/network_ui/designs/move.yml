@@ -1,4 +1,5 @@
 diagram_id: 64
+finite_state_machine_id: 3
 name: move
 states:
 - id: 1

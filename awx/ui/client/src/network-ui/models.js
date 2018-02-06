@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2018 Red Hat, Inc. */
 var fsm = require('./fsm.js');
-var button = require('./button.js');
+var button = require('./button.fsm.js');
 var util = require('./util.js');
 var inherits = require('inherits');
 var animation_fsm = require('./animation.fsm.js');

@@ -1,0 +1,43 @@
+diagram_id: 66
+name: 'button_fsm'
+finite_state_machine_id: 12
+states:
+- id: 3
+  label: Clicked
+  x: 331
+  y: 568
+- id: 5
+  label: Disabled
+  x: 719
+  y: 283
+- id: 4
+  label: Pressed
+  x: 606
+  y: 563
+- id: 1
+  label: Ready
+  x: 471
+  y: 376
+- id: 2
+  label: Start
+  x: 468
+  y: 170
+transitions:
+- from_state: Clicked
+  label: start
+  to_state: Ready
+- from_state: Disabled
+  label: onEnable
+  to_state: Ready
+- from_state: Pressed
+  label: onMouseUp
+  to_state: Clicked
+- from_state: Ready
+  label: onDisable
+  to_state: Disabled
+- from_state: Ready
+  label: onMouseDown
+  to_state: Pressed
+- from_state: Start
+  label: start
+  to_state: Ready

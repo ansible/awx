@@ -1,4 +1,5 @@
 diagram_id: 70
+finite_state_machine_id: 21
 name: diagram
 states:
 - id: 1
