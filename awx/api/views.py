@@ -189,9 +189,10 @@ class ApiRootView(APIView):
     permission_classes = (AllowAny,)
     view_name = _('REST API')
     versioning_class = None
+    swagger_topic = 'Versioning'
 
     def get(self, request, format=None):
-        ''' list supported API versions '''
+        ''' List supported API versions '''
 
         v1 = reverse('api:api_v1_root_view', kwargs={'version': 'v1'})
         v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
@@ -210,9 +211,10 @@ class ApiVersionRootView(APIView):
 
     authentication_classes = []
     permission_classes = (AllowAny,)
+    swagger_topic = 'Versioning'
 
     def get(self, request, format=None):
-        ''' list top level resources '''
+        ''' List top level resources '''
         data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view', request=request)
         data['ping'] = reverse('api:api_v1_ping_view', request=request)
@@ -275,9 +277,10 @@ class ApiV1PingView(APIView):
     authentication_classes = ()
     view_name = _('Ping')
     new_in_210 = True
+    swagger_topic = 'System Configuration'
 
     def get(self, request, format=None):
-        """Return some basic information about this instance.
+        """Return some basic information about this instance
 
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
@@ -305,6 +308,7 @@ class ApiV1ConfigView(APIView):
 
     permission_classes = (IsAuthenticated,)
     view_name = _('Configuration')
+    swagger_topic = 'System Configuration'
 
     def check_permissions(self, request):
         super(ApiV1ConfigView, self).check_permissions(request)
@@ -312,7 +316,7 @@ class ApiV1ConfigView(APIView):
             self.permission_denied(request)  # Raises PermissionDenied exception.
 
     def get(self, request, format=None):
-        '''Return various sitewide configuration settings.'''
+        '''Return various sitewide configuration settings'''
 
         if request.user.is_superuser or request.user.is_system_auditor:
             license_data = get_license(show_key=True)
@@ -407,6 +411,7 @@ class DashboardView(APIView):
 
     view_name = _("Dashboard")
     new_in_14 = True
+    swagger_topic = 'Dashboard'
 
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
@@ -506,6 +511,7 @@ class DashboardJobsGraphView(APIView):
 
     view_name = _("Dashboard Jobs Graphs")
     new_in_200 = True
+    swagger_topic = 'Jobs'
 
     def get(self, request, format=None):
         period = request.query_params.get('period', 'month')
@@ -690,6 +696,8 @@ class SchedulePreview(GenericAPIView):
 
 class ScheduleZoneInfo(APIView):
 
+    swagger_topic = 'System Configuration'
+
     def get(self, request):
         from dateutil.zoneinfo import get_zonefile_instance
         return Response(sorted(get_zonefile_instance().zones.keys()))
@@ -746,10 +754,12 @@ class ScheduleUnifiedJobsList(SubListAPIView):
 
 
 class AuthView(APIView):
+    ''' List enabled single-sign-on endpoints '''
 
     authentication_classes = []
     permission_classes = (AllowAny,)
     new_in_240 = True
+    swagger_topic = 'System Configuration'
 
     def get(self, request):
         from rest_framework.reverse import reverse
@@ -793,6 +803,7 @@ class AuthTokenView(APIView):
     permission_classes = (AllowAny,)
     serializer_class = AuthTokenSerializer
     model = AuthToken
+    swagger_topic = 'Authentication'
 
     def get_serializer(self, *args, **kwargs):
         serializer = self.serializer_class(*args, **kwargs)
@@ -982,7 +993,7 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
     def get_serializer_context(self, *args, **kwargs):
         full_context = super(OrganizationDetail, self).get_serializer_context(*args, **kwargs)
 
-        if not hasattr(self, 'kwargs'):
+        if not hasattr(self, 'kwargs') or 'pk' not in self.kwargs:
             return full_context
         org_id = int(self.kwargs['pk'])
 
@@ -2680,7 +2691,7 @@ class InventorySourceList(ListCreateAPIView):
     @property
     def allowed_methods(self):
         methods = super(InventorySourceList, self).allowed_methods
-        if get_request_version(self.request) == 1:
+        if get_request_version(getattr(self, 'request', None)) == 1:
             methods.remove('POST')
         return methods
 
@@ -3994,7 +4005,7 @@ class JobList(ListCreateAPIView):
     @property
     def allowed_methods(self):
         methods = super(JobList, self).allowed_methods
-        if get_request_version(self.request) > 1:
+        if get_request_version(getattr(self, 'request', None)) > 1:
             methods.remove('POST')
         return methods
 
@@ -4770,6 +4781,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
 
 
 class NotificationTemplateTest(GenericAPIView):
+    '''Test a Notification Template'''
 
     view_name = _('Notification Template Test')
     model = NotificationTemplate

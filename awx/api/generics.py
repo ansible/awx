@@ -28,6 +28,7 @@ from rest_framework import status
 from rest_framework import views
 
 # AWX
+from awx.api.swagger import AutoSchema
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
 from awx.main.access import access_registry
@@ -93,6 +94,7 @@ def get_view_description(cls, request, html=False):
 
 class APIView(views.APIView):
 
+    schema = AutoSchema()
     versioning_class = URLPathVersioning
 
     def initialize_request(self, request, *args, **kwargs):
@@ -176,7 +178,7 @@ class APIView(views.APIView):
         and in the browsable API.
         """
         func = self.settings.VIEW_DESCRIPTION_FUNCTION
-        return func(self.__class__, self._request, html)
+        return func(self.__class__, getattr(self, '_request', None), html)
 
     def get_description_context(self):
         return {
@@ -197,6 +199,7 @@ class APIView(views.APIView):
             'new_in_330': getattr(self, 'new_in_330', False),
             'new_in_api_v2': getattr(self, 'new_in_api_v2', False),
             'deprecated': getattr(self, 'deprecated', False),
+            'swagger_method': getattr(self.request, 'swagger_method', None),
         }
 
     def get_description(self, request, html=False):
@@ -214,7 +217,7 @@ class APIView(views.APIView):
             context['deprecated'] = True
 
         description = render_to_string(template_list, context)
-        if context.get('deprecated'):
+        if context.get('deprecated') and context.get('swagger_method') is None:
             # render deprecation messages at the very top
             description = '\n'.join([render_to_string('api/_deprecated.md', context), description])
         return description

@@ -1,4 +1,3 @@
-
 # Python
 import pytest
 import mock
@@ -46,6 +45,13 @@ from awx.main.models.notifications import (
 )
 from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
+
+__SWAGGER_REQUESTS__ = {}
+
+
+@pytest.fixture(scope="session")
+def swagger_autogen(requests=__SWAGGER_REQUESTS__):
+    return requests
 
 
 @pytest.fixture(autouse=True)
@@ -547,6 +553,9 @@ def _request(verb):
             assert response.status_code == expect
         if hasattr(response, 'render'):
             response.render()
+        __SWAGGER_REQUESTS__.setdefault(request.path, {})[
+            (request.method.lower(), response.status_code)
+        ] = (response.get('Content-Type', None), response.content, kwargs.get('data'))
         return response
     return rf
 

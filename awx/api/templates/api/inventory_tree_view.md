@@ -1,4 +1,4 @@
-# Group Tree for this {{ model_verbose_name|title }}:
+# Group Tree for {{ model_verbose_name|title|anora }}:
 
 Make a GET request to this resource to retrieve a hierarchical view of groups
 associated with the selected {{ model_verbose_name }}.
