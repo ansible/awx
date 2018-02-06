@@ -152,7 +152,10 @@ class TestSwaggerGeneration():
                         content_type, resp, request_data = value
                         if method in node:
                             status_code = str(status_code)
-                            node[method].setdefault('produces', []).append(content_type)
+                            if content_type:
+                                produces = node[method].setdefault('produces', [])
+                                if content_type not in produces:
+                                    produces.append(content_type)
                             if request_data and status_code.startswith('2'):
                                 # DRF builds a schema based on the serializer
                                 # fields.  This is _pretty good_, but if we
@@ -181,5 +184,5 @@ class TestSwaggerGeneration():
     def teardown_class(cls):
         with open('swagger.json', 'w') as f:
             f.write(force_bytes(
-                json.dumps(cls.JSON, cls=i18nEncoder, indent=5)
+                json.dumps(cls.JSON, cls=i18nEncoder)
             ))
