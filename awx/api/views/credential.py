@@ -22,6 +22,7 @@ from awx.api.generics import (
 from awx.main.models import (
     ActivityStream,
     Credential,
+    Job,
     User,
     Team,
     Role,
@@ -111,3 +112,13 @@ class CredentialObjectRolesList(SubListAPIView):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
+
+
+class JobExtraCredentialsList(SubListAPIView):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    parent_model = Job
+    relationship = 'extra_credentials'
+    new_in_320 = True
+    new_in_api_v2 = True

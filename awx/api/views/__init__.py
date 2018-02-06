@@ -43,6 +43,7 @@ from .credential import ( # noqa
     CredentialObjectRolesList,
     CredentialOwnerUsersList,
     CredentialOwnerTeamsList,
+    JobExtraCredentialsList,
 )
 
 from .credential_type import ( # noqa
@@ -128,6 +129,26 @@ from .inventory import ( # noqa
     InventoryScriptList,
     InventoryScriptDetail,
     InventoryScriptObjectRolesList,
+)
+
+from .job import ( # noqa
+    JobList,
+    JobDetail,
+    JobStart,
+    JobCancel,
+    JobRelaunch,
+    JobCreateSchedule,
+    JobJobHostSummariesList,
+    JobJobEventsList,
+    JobActivityStreamList,
+    JobStdout,
+    JobNotificationsList,
+    JobLabelList,
+    JobHostSummaryDetail,
+    JobEventList,
+    JobEventDetail,
+    JobEventChildrenList,
+    JobEventHostsList,
 )
 
 from .workflow import ( # noqa

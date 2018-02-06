@@ -25,7 +25,7 @@ from awx.api.serializers import (
     AdHocCommandRelaunchSerializer,
     NotificationSerializer,
 )
-from awx.api.mixins import (
+from awx.api.views.mixins import (
     ActivityStreamEnforcementMixin,
     UnifiedJobDeletionMixin,
 )
