@@ -1,7 +1,12 @@
-<circle
-    ng-attr-class="{{actionIcon.is_pressed ? 'NetworkUI__iconBackground--pressed' : actionIcon.mouse_over ? 'NetworkUI_iconBackground--hover' : 'NetworkUI_iconBackground'}}"
-    cx=8 cy=9 r=16 />
+<rect
+    ng-attr-class="{{actionIcon.is_pressed ? 'NetworkUI__iconBackground--pressed' : actionIcon.mouse_over ? 'NetworkUI__iconBackground--hover' : 'NetworkUI__iconBackground'}}"
+    width=30
+    height=30
+    rx=5
+    ry=5
+    x=-5
+    y=-6 />
 <path
-    ng-attr-class="{{actionIcon.is_pressed ? 'NetworkUI_chevron--pressed' : actionIcon.mouse_over ? 'NetworkUI_chevron--hover' : 'NetworkUI_chevron'}}"
+    ng-attr-class="{{actionIcon.is_pressed ? 'NetworkUI__chevron--pressed' : actionIcon.mouse_over ? 'NetworkUI__chevron--hover' : 'NetworkUI__chevron'}}"
     ng-attr-transform="scale(0.01)"
     d="M1363 877l-742 742q-19 19-45 19t-45-19l-166-166q-19-19-19-45t19-45l531-531-531-531q-19-19-19-45t19-45l166-166q19-19 45-19t45 19l742 742q19 19 19 45t-19 45z"/>

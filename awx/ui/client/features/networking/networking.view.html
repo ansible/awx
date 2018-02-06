@@ -1,89 +1,180 @@
-<div class="Networking-header">
-    <div class="Networking-headerTitle">{{vm.panelTitle}}</div>
-    <div class="Netowrking-headerActions">
-        <div class="Networking-headerActionItem">
-            <button class="Networking-actionButton"
-                aw-tool-tip="Expand Output"
-                data-placement="bottom"
-                data-original-title="Expand Output"
-                ng-click="vm.togglePanel()"
-                ng-hide="vm.panelIsExpanded">
-                    <i class="fa fa-chevron-left"></i>
-            </button>
-            <button class="Networking-actionButton"
-                aw-tool-tip="Collapse Output"
-                data-placement="left"
-                data-original-title="Collapse Output"
-                ng-click="vm.togglePanel()"
-                ng-hide="!vm.panelIsExpanded">
-                    <i class="fa fa-chevron-right"></i>
-            </button>
-        </div>
-        <div class="Networking-headerActionItem">
-            <button ng-click="vm.close()" type="button" class="close">
-				<i class="fa fa-times-circle"></i>
-			</button>
-        </div>
-    </div>
-</div>
-
-
-<div class="Networking-panels">
-    <div class="Networking-leftPanel">
-        <awx-network-ui></awx-network-ui>
-    </div>
-
-
-    <div class="Networking-rightPanel" ng-show="vm.panelIsExpanded">
-
-            <!--beginning of header-->
-            <div class="Networking-panelHeader">
-                <div class="JobResults-panelHeaderText" translate="">
-                    DETAILS <span ng-if="!item.host_id">| {{item.name}}</span>
+<div class="Networking-shell">
+    <div class="Networking-top">
+        <div class="Networking-header">
+            <div class="Networking-headerTitle">{{vm.panelTitle}}</div>
+            <div class="Netowrking-headerActions">
+                <div class="Networking-headerActionItem">
+                    <button ng-click="vm.close()" type="button" class="close">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
                 </div>
             </div>
-            <!--end of header-->
-
-            <!--beginning of name row -->
-            <div class="JobResults-resultRow" ng-if="item.host_id">
-                <label class="JobResults-resultRowLabel Networking-resultRowLabel" translate="">
-                    Name
-                </label>
-                 <div class="JobResults-resultRowText">
-                     {{item.name}}
-                 </div>
-             </div>
-             <!--end of name row -->
-
-             <div class="List-noItems Networking-noItems" ng-if="!item.host_id">
-                 {{item.type}} DETAILS NOT AVAILABLE
-             </div>
-
-             <!-- beginning of extra variable row -->
-             <div class="JobResults-resultRow JobResults-resultRow--variables" ng-show="item.variables">
-                 <label class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth">
-                     <span translate>
-                         Extra Variables
-                     </span>
-                     <i class="JobResults-extraVarsHelp fa fa-question-circle"
-                         aw-tool-tip="{{'Read only view of extra variables added to the job template.' | translate}}"
-                         data-placement="top">
-                     </i>
-                 </label>
-                 <textarea
-                     rows="6"
-                     ng-model="item.variables"
-                     name="variables"
-                     class="form-control Form-textArea Form-textAreaLabel Form-formGroup--fullWidth"
-                     id="pre-formatted-variables"
-                     disabled="disabled">
-                 </textarea>
-             </div>
-             <!-- end of extra variable row -->
-
-     </div>
+        </div>
+        <div class="Networking-toolbar">
+            <div class="Networking-toolbarLeftSide">
+                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('Record')">RECORD</button>
+                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('Export')">EXPORT</button>
+                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('Layout')">LAYOUT</button>
+                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('ExportYaml')">EXPORT YAML</button>
+                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('DownloadTrace')">DOWNLOAD TRACE</button>
+                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('DownloadRecording')">DOWNLOAD RECORDING</button>
+                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('UploadTest')">UPLOAD TEST</button>
+                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('RunTests')">RUN TESTS</button>
+            </div>
+            <div class="Networking-toolbarRightSide">
+                <div class="SmartSearch-searchTermContainer Networking-searchBarContainer">
+                    <!-- string search input -->
+                    <form name="smartSearch" class="SmartSearch-form ng-pristine ng-valid" aw-enter-key="addTerm(searchTerm)" novalidate="">
+                        <input class="SmartSearch-input ng-pristine ng-valid ng-empty ng-touched" ng-model="searchTerm" placeholder="Search" ng-disabled="disableSearch">
+                    </form>
+                    <div type="submit" class="SmartSearch-searchButton Networking-searchButton" ng-disabled="!searchTerm" ng-click="addTerm(searchTerm)" disabled="disabled">
+                        <i class="fa fa-search"></i>
+                    </div>
+                </div>
+                <div class="Networking-keyContainer">
+                    <button ng-click="vm.key()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.keyPanelExpanded}">
+                        <i class="fa fa-key"></i>
+                    </button>
+                    <div class="Networking-keyDropDownPanel" ng-if="vm.keyPanelExpanded">
+                        <div class="Networking-dropdownPanelTitle">
+                            KEY
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">e</div>
+                            <div class="Networking-keySymbolLabel">NEW SITE</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">a</div>
+                            <div class="Networking-keySymbolLabel">NEW RACK</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">g</div>
+                            <div class="Networking-keySymbolLabel">NEW GROUP</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">r</div>
+                            <div class="Networking-keySymbolLabel">NEW ROUTER</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">s</div>
+                            <div class="Networking-keySymbolLabel">NEW SWITCH</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">h</div>
+                            <div class="Networking-keySymbolLabel">NEW HOST</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">l</div>
+                            <div class="Networking-keySymbolLabel">NEW LINK</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">m</div>
+                            <div class="Networking-keySymbolLabel">NEW STREAM</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">d</div>
+                            <div class="Networking-keySymbolLabel">DEBUG MODE</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">p</div>
+                            <div class="Networking-keySymbolLabel">HIDE CURSOR</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">b</div>
+                            <div class="Networking-keySymbolLabel">HIDE BUTTONS</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">i</div>
+                            <div class="Networking-keySymbolLabel">HIDE INTERFACES</div>
+                        </div>
+                        <div class="Networking-keyPanelOption">
+                            <div class="Networking-keySymbol">0</div>
+                            <div class="Networking-keySymbolLabel">RESET ZOOM</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="Networking-jumpToContainer">
+                    <button ng-click="vm.jumpTo()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.jumpToPanelExpanded}">
+                        <i class="fa fa-dot-circle-o"></i>
+                    </button>
+                    <div class="Networking-jumpToDropDownPanel" ng-if="vm.jumpToPanelExpanded">
+                        <div class="Networking-dropdownPanelTitle">
+                            JUMP TO
+                        </div>
+                        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('site')">
+                            SITE
+                        </div>
+                        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('rack')">
+                            RACK
+                        </div>
+                        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('inventory')">
+                            INVENTORY
+                        </div>
+                        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('process')">
+                            PROCESS
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="Networking-toolbar Networking-breadCrumbBar">
+            <div class="Networking-breadCrumbText">foo-bar</div>
+        </div>
+        
+    </div>
 </div>
-<!--end of Networking-rightPanel -->
+
+<div class="Networking-detailPanel" ng-show="vm.rightPanelIsExpanded">
+    <!--beginning of header-->
+    <div class="Networking-panelHeader">
+        <div class="JobResults-panelHeaderText" translate="">
+            DETAILS <span ng-if="!item.host_id && item.name">| {{item.name}}</span>
+        </div>
+    </div>
+    <!--end of header-->
+
+    <!--beginning of name row -->
+    <div class="JobResults-resultRow" ng-if="item.host_id">
+        <label class="JobResults-resultRowLabel Networking-resultRowLabel" translate="">
+            Name
+        </label>
+         <div class="JobResults-resultRowText">
+             {{item.name}}
+         </div>
+     </div>
+     <!--end of name row -->
+
+     <div class="List-noItems Networking-noItems" ng-if="!item.host_id">
+         {{item.type}} DETAILS NOT AVAILABLE
+     </div>
+
+     <!-- beginning of extra variable row -->
+     <div class="JobResults-resultRow JobResults-resultRow--variables" ng-show="item.variables">
+         <label class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth">
+             <span translate>
+                 Extra Variables
+             </span>
+             <i class="JobResults-extraVarsHelp fa fa-question-circle"
+                 aw-tool-tip="{{'Read only view of extra variables added to the job template.' | translate}}"
+                 data-placement="top">
+             </i>
+         </label>
+         <textarea
+             rows="6"
+             ng-model="item.variables"
+             name="variables"
+             class="form-control Form-textArea Form-textAreaLabel Form-formGroup--fullWidth"
+             id="pre-formatted-variables"
+             disabled="disabled">
+         </textarea>
+     </div>
+     <!-- end of extra variable row -->
+ </div>
+
+
+<div class="Networking-canvasPanel">
+    <awx-network-ui></awx-network-ui>
+</div>
 
 
 

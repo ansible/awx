@@ -551,7 +551,7 @@
     stroke: @button-outline;
     stroke-width: 1;
     rx: 0;
-    stroke-dasharray: calc(~"100vh - 40px");
+    stroke-dasharray: calc(~"100vh - 115px");
     stroke-dashoffset: -45;
 }
 
@@ -560,7 +560,7 @@
     stroke-width: 1;
     fill: none;
     rx: 0;
-    stroke-dasharray: calc(~"100vh - 40px");
+    stroke-dasharray: calc(~"100vh - 115px");
     stroke-dashoffset: -200;
 }
 
@@ -636,22 +636,26 @@
     font-family: 'Open Sans';
 }
 
-.NetworkUI_chevron{
+.NetworkUI__chevron{
     fill: @button-body-pressed;
 }
 
-.NetworkUI_chevron--hover{
+.NetworkUI__chevron--hover,
+.NetworkUI__chevron--pressed{
     cursor: pointer;
     fill: white;
 }
 
-.NetworkUI_iconBackground{
+.NetworkUI__iconBackground{
     fill:@button-body;
+    cursor: pointer;
 }
 
-.NetworkUI_iconBackground--hover{
-    fill:@icon-background-hover;
+.NetworkUI__iconBackground--hover,
+.NetworkUI__iconBackground--pressed{
+    fill: @icon-background-hover;
 }
+
 
 .NetworkUI__toolbox--title{
     fill: @dark-widget-detail;
