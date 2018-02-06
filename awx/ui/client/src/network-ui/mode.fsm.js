@@ -88,6 +88,8 @@ _Interface.prototype.onMouseWheel = function (controller, msg_type, $event) {
 };
 _Interface.prototype.onMouseWheel.transitions = ['Device'];
 
+_Interface.prototype.onScaleChanged = _Interface.prototype.onMouseWheel;
+
 _Site.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
     controller.scope.rack_toolbox_controller.handle_message('Enable', {});
@@ -115,6 +117,7 @@ _Site.prototype.onMouseWheel = function (controller, msg_type, $event) {
 };
 _Site.prototype.onMouseWheel.transitions = ['MultiSite', 'Rack'];
 
+_Site.prototype.onScaleChanged = _Site.prototype.onMouseWheel;
 
 
 _Process.prototype.onMouseWheel = function (controller, msg_type, $event) {
@@ -125,6 +128,8 @@ _Process.prototype.onMouseWheel = function (controller, msg_type, $event) {
 
 };
 _Process.prototype.onMouseWheel.transitions = ['Device'];
+
+_Process.prototype.onScaleChanged = _Process.prototype.onMouseWheel;
 
 _MultiSite.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
@@ -148,6 +153,8 @@ _MultiSite.prototype.onMouseWheel = function (controller, msg_type, $event) {
     controller.delegate_channel.send(msg_type, $event);
 };
 _MultiSite.prototype.onMouseWheel.transitions = ['Site'];
+
+_MultiSite.prototype.onScaleChanged = _MultiSite.prototype.onMouseWheel;
 
 _Device.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
@@ -175,6 +182,7 @@ _Device.prototype.onMouseWheel = function (controller, msg_type, $event) {
 };
 _Device.prototype.onMouseWheel.transitions = ['Process', 'Interface', 'Rack'];
 
+_Device.prototype.onScaleChanged = _Device.prototype.onMouseWheel;
 
 _Rack.prototype.start = function (controller) {
     controller.scope.current_mode = controller.state.name;
@@ -203,3 +211,5 @@ _Rack.prototype.onMouseWheel = function (controller, msg_type, $event) {
     controller.delegate_channel.send(msg_type, $event);
 };
 _Rack.prototype.onMouseWheel.transitions = ['Site', 'Device'];
+
+_Rack.prototype.onScaleChanged = _Rack.prototype.onMouseWheel;

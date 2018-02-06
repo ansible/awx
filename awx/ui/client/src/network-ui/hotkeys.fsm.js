@@ -77,8 +77,13 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         scope.hide_interfaces = !scope.hide_interfaces;
         return;
     }
+    if($event.keyCode === 27){
+        // 27 is the escape key
+        scope.reset_fsm_state();
+        return;
+    }
 
-	if ($event.key === 'r') {
+	if ($event.key === 'r' && !($event.ctrlKey || $event.metaKey)) {
         scope.first_channel.send("NewDevice", new messages.NewDevice("router"));
         return;
 	}
@@ -103,11 +108,7 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         return;
 	}
     else if ($event.key === '0') {
-        scope.panX = 0;
-        scope.panY = 0;
-        scope.current_scale = 1.0;
-        scope.updateScaledXY();
-        scope.updatePanAndScale();
+        scope.jump_to_animation(0, 0, 1.0);
     }
 
 	controller.delegate_channel.send(msg_type, $event);

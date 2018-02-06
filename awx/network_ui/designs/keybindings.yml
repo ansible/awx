@@ -1,0 +1,25 @@
+diagram_id: 60
+name: diagram
+states:
+- id: 3
+  label: Enabled
+  x: 842
+  y: 533
+- id: 2
+  label: Start
+  x: 839
+  y: 270
+- id: 6
+  label: Disabled
+  x: 1231
+  y: 532
+transitions:
+- from_state: Start
+  label: start
+  to_state: Enabled
+- from_state: Disabled
+  label: onBindDocument
+  to_state: Enabled
+- from_state: Enabled
+  label: onUnbindDocument
+  to_state: Disabled

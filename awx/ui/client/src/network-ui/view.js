@@ -50,7 +50,7 @@ _Ready.prototype.onMouseDown = function (controller) {
     controller.scope.pressedY = controller.scope.mouseY;
     controller.scope.lastPanX = controller.scope.panX;
     controller.scope.lastPanY = controller.scope.panY;
-    controller.scope.$emit('closeDetailsPanel');
+    controller.scope.closeDetailsPanel();
     controller.changeState(Pressed);
 
 };
