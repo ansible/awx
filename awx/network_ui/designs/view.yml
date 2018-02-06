@@ -1,4 +1,4 @@
-finite_state_machine_id: 15
+finite_state_machine_id: 2
 name: view_fsm
 states:
 - id: 1

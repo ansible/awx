@@ -1,20 +1,7 @@
 
 
-Building
-========
-
-To build the UI:
-
-make
-
-To push the UI to AWX code base:
-
-make deploy
-
-
-
-Getting Started With Development
-================================
+Getting Started With Network UI Development
+===========================================
 
 
 **Introduction**

@@ -1,4 +1,4 @@
-finite_state_machine_id: 11
+finite_state_machine_id: 8
 name: time_fsm
 states:
 - id: 1
