@@ -28,6 +28,12 @@ def test_non_job_extra_vars_prohibited(post, project, admin_user):
 
 
 @pytest.mark.django_db
+def test_wfjt_schedule_accepted(post, workflow_job_template, admin_user):
+    url = reverse('api:workflow_job_template_schedules_list', kwargs={'pk': workflow_job_template.id})
+    post(url, {'name': 'test sch', 'rrule': RRULE_EXAMPLE}, admin_user, expect=201)
+
+
+@pytest.mark.django_db
 def test_valid_survey_answer(post, admin_user, project, inventory, survey_spec_factory):
     job_template = JobTemplate.objects.create(
         name='test-jt',
