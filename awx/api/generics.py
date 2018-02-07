@@ -96,7 +96,7 @@ def get_default_schema():
         from awx.api.swagger import AutoSchema
         return AutoSchema()
     else:
-        views.APIView.schema
+        return views.APIView.schema
 
 
 class APIView(views.APIView):
