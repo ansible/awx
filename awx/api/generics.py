@@ -28,7 +28,6 @@ from rest_framework import status
 from rest_framework import views
 
 # AWX
-from awx.api.swagger import AutoSchema
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
 from awx.main.access import access_registry
@@ -92,9 +91,17 @@ def get_view_description(cls, request, html=False):
     return mark_safe(desc)
 
 
+def get_default_schema():
+    if settings.SETTINGS_MODULE == 'awx.settings.development':
+        from awx.api.swagger import AutoSchema
+        return AutoSchema()
+    else:
+        views.APIView.schema
+
+
 class APIView(views.APIView):
 
-    schema = AutoSchema()
+    schema = get_default_schema()
     versioning_class = URLPathVersioning
 
     def initialize_request(self, request, *args, **kwargs):
