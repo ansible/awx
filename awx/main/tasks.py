@@ -178,7 +178,7 @@ def apply_cluster_membership_policies(self):
                 g.instances.append(i.obj.id)
                 g.obj.instances.add(i.obj)
                 i.groups.append(g.obj.id)
-        handle_ha_toplogy_changes.apply_async()
+        handle_ha_toplogy_changes()
 
 
 @shared_task(queue='tower_broadcast_all', bind=True, base=LogErrorsTask)
