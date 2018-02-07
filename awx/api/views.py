@@ -2972,9 +2972,9 @@ class JobTemplateLaunch(RetrieveAPIView):
                     if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, basestring):
                         prompted_value = [prompted_value]
 
-                    # If user gave extra_credentials, special case to use exactly
+                    # If user gave legacy credentials, special case to use exactly
                     # the given list without merging with JT credentials
-                    if key == 'extra_credentials' and prompted_value:
+                    if key in ('credential', 'vault_credential', 'extra_credentials') and prompted_value:
                         obj._deprecated_credential_launch = True  # signal to not merge credentials
                     new_credentials.extend(prompted_value)
 

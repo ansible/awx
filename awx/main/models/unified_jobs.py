@@ -379,7 +379,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         unified_job.save()
 
         # Labels and credentials copied here
-        if kwargs.get('credentials'):
+        if kwargs.get('credentials') and unified_job.spawned_by_workflow:
             Credential = UnifiedJob._meta.get_field('credentials').related_model
             cred_dict = Credential.unique_dict(self.credentials.all())
             prompted_dict = Credential.unique_dict(kwargs['credentials'])
