@@ -1,4 +1,4 @@
-function NetworkingController (models, $state, $scope, strings) {
+function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     const vm = this || {};
 
     const {
@@ -21,11 +21,14 @@ function NetworkingController (models, $state, $scope, strings) {
         $scope.$broadcast('toolbarButtonEvent', string);
     };
 
-    vm.jumpTo = (string) => {
+    vm.jumpTo = (thing) => {
         vm.jumpToPanelExpanded = !vm.jumpToPanelExpanded;
         vm.keyPanelExpanded = false;
-        if (string) {
-            $scope.$broadcast('jumpTo', string);
+        if (thing && typeof thing === 'string') {
+            $scope.$broadcast('jumpTo', thing);
+        }
+        if (thing && typeof thing === 'object') {
+            $scope.$broadcast('search', thing);
         }
     };
 
@@ -54,13 +57,30 @@ function NetworkingController (models, $state, $scope, strings) {
             $scope.item = data;
         }
     });
+
+    $scope.$on('select', (e, options) => {
+        $scope.devices = options;
+        CreateSelect2({
+            element: '#networking-search',
+            multiple: false,
+            addNew: true,
+            scope: $scope,
+            options: 'devices',
+            placeholder: 'SEARCH'
+        });
+    });
+
+    $('#networking-search').on('select2:select', (e) => {
+        $scope.$broadcast('search', e.params.data);
+    });
 }
 
 NetworkingController.$inject = [
     'resolvedModels',
     '$state',
     '$scope',
-    'NetworkingStrings'
+    'NetworkingStrings',
+    'CreateSelect2'
 ];
 
 export default NetworkingController;

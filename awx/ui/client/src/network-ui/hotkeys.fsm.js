@@ -81,7 +81,7 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         return;
     }
 
-	if ($event.key === 'r') {
+	if ($event.key === 'r' && !($event.ctrlKey || $event.metaKey)) {
         scope.first_channel.send("NewDevice", new messages.NewDevice("router"));
         return;
 	}
