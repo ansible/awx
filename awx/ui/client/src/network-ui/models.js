@@ -11,9 +11,9 @@ function Device(id, name, x, y, type, host_id) {
     this.name = name;
     this.x = x;
     this.y = y;
-    this.height = type === "host" ? 30 : 50;
-    this.width = 50;
-    this.size = 50;
+    this.height = type === "host" ? 20 : 37.5;
+    this.width = 37.5;
+    this.size = 37.5;
     this.type = type;
     this.selected = false;
     this.remote_selected = false;
