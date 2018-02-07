@@ -68,13 +68,13 @@
                       rotate({{-link.slope()}})
                       translate(0, -5)
                       ">
-<text ng-attr-class="{{link.selected && ! link.edit_label ? 'selected' : 'NetworkUI--hidden'}}"
-      filter="url(#selected)"
+<text ng-attr-class="{{link.selected && ! link.edit_label ? 'NetworkUI__interface-text--selected' : 'NetworkUI--hidden'}}"
+      filter="url(#background)"
       text-anchor="middle"
       font-size="8"
       x="0"
       y="0"> {{link.name}}</text>
-<text class="NetworkUI__link-text" text-anchor="middle" x="0" y="0">{{link.name}}{{link.edit_label?'_':''}}</text>
+<text class="NetworkUI__link-text" filter="url(#background)" text-anchor="middle" x="0" y="0">{{link.name}}{{link.edit_label?'_':''}}</text>
 </g>
 
 <g ng-if="current_scale > 1.0 && link.to_device !== null"
@@ -85,12 +85,12 @@
                       rotate({{-link.slope()}})
                       ">
 <text ng-attr-class="{{link.from_interface.selected && ! link.from_interface.edit_label ? 'NetworkUI__interface-text--selected' : 'NetworkUI--hidden'}}"
-      filter="url(#selected)"
+      filter="url(#background)"
       text-anchor="middle"
       font-size="8"
       x="0"
       y="0"> {{link.from_interface.name}}</text>
-<text class="NetworkUI__interface-text" text-anchor="middle" x="0" y="0">{{link.from_interface.name}}{{link.from_interface.edit_label ?'_':''}}</text>
+<text class="NetworkUI__interface-text" filter="url(#background)" text-anchor="middle" x="0" y="0">{{link.from_interface.name}}{{link.from_interface.edit_label ?'_':''}}</text>
 </g>
 
 <g ng-if="current_scale > 1.0 && link.to_device !== null"
@@ -101,11 +101,11 @@
                       rotate({{-link.slope()}})
                       ">
 <text ng-attr-class="{{link.to_interface.selected && ! link.to_interface.edit_label ? 'NetworkUI__interface-text--selected' : 'NetworkUI--hidden'}}"
-      filter="url(#selected)"
+      filter="url(#background)"
       text-anchor="middle"
       x="0"
       y="0"> {{link.to_interface.name}}</text>
-<text class="NetworkUI__interface-text" text-anchor="middle" x="0" y="0">{{link.to_interface.name}}{{link.to_interface.edit_label?'_':''}}</text>
+<text class="NetworkUI__interface-text" filter="url(#background)" text-anchor="middle" x="0" y="0">{{link.to_interface.name}}{{link.to_interface.edit_label?'_':''}}</text>
 </g>
 <g ng-if="current_scale > 1.0 && link.to_device !== null">
 <circle ng-attr-cx="{{link.from_interface.dot_x}}"

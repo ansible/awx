@@ -114,19 +114,18 @@
       ng-attr-x="{{item.left_extent(scaledX)}}"
       ng-attr-y="{{item.top_extent(scaledY)}}"
       class="NetworkUI__group"/>
-
 <g ng-attr-transform="translate({{item.left_extent(scaledX)}},{{item.top_extent(scaledY)}})">
-<g ng-if="current_scale > 0.5 && item.type == 'group'">
-<text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
-      filter="url(#selected)"
-      text-anchor="left"
-      x="20"
-      y="32"> {{item.name}} </text>
-<text class="NetworkUI__group-text" text-anchor="left" x="20" y="32">{{item.name}}{{item.edit_label?'_':''}}</text>
-</g>
+    <g ng-if="current_scale > 0.5 && item.type == 'group'">
+        <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__group-text--selected' : 'NetworkUI--hidden'}}"
+              filter="url(#background)"
+              text-anchor="left"
+              x="20"
+              y="32"> {{item.name}} </text>
+        <text class="NetworkUI__group-text" filter="url(#background)" text-anchor="left" x="20" y="32">{{item.name}}{{item.edit_label?'_':''}}</text>
+    </g>
 
-<g awx-net-rack></g>
-<g awx-net-site></g>
+    <g awx-net-rack></g>
+    <g awx-net-site></g>
 </g>
 </g>
 

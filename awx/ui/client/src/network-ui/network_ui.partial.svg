@@ -17,7 +17,7 @@
 		</filter>
 		<filter x="0" y="0" width="1" height="1" id="background">
 		  <feFlood flood-color="#ffffff"/>
-		  <feComposite in="SourceGraphic" operator="xor"/>
+		  <feComposite in="SourceGraphic"/>
 		</filter>
 		<clipPath id="inventory-toolbox-clip-path">
         <rect ng-attr-x="{{inventory_toolbox.x}}"
