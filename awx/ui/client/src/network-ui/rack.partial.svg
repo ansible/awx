@@ -1,5 +1,5 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
-<g transform="scale(0.75)">
+<!-- <g transform="scale(0.75)"> -->
     <g ng-if="current_scale >= 0.1 && current_scale <= 0.5 && item.type == 'rack'" ng-attr-transform="translate({{item.width()/2}}, {{item.height()/2}})">
         <g ng-attr-transform="scale({{1/0.5}})">
             <g ng-if="item.moving">
@@ -118,9 +118,9 @@
             <text class="NetworkUI__rack-text" filter="url(#background)" text-anchor="middle" x="0" ng-attr-y="{{180*current_scale}}">{{item.name}}{{item.edit_label?'_':''}}</text>
         </g>
     </g>
+<!-- </g> -->
 
-
-
+<g transform="scale(0.75)">
     <g ng-if="current_scale >= 0.5 && current_scale <= 5 && item.type == 'rack'">
        <g ng-attr-transform="scale({{1}})">
            <g ng-if="item.moving">
