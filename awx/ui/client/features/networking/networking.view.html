@@ -22,14 +22,10 @@
                 <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('RunTests')">RUN TESTS</button>
             </div>
             <div class="Networking-toolbarRightSide">
-                <div class="SmartSearch-searchTermContainer Networking-searchBarContainer">
-                    <!-- string search input -->
-                    <form name="smartSearch" class="SmartSearch-form ng-pristine ng-valid" aw-enter-key="addTerm(searchTerm)" novalidate="">
-                        <input class="SmartSearch-input ng-pristine ng-valid ng-empty ng-touched" ng-model="searchTerm" placeholder="Search" ng-disabled="disableSearch">
-                    </form>
-                    <div type="submit" class="SmartSearch-searchButton Networking-searchButton" ng-disabled="!searchTerm" ng-click="addTerm(searchTerm)" disabled="disabled">
-                        <i class="fa fa-search"></i>
-                    </div>
+                <div class="Networking-searchBarContainer">
+                    <select id="networking-search" ng-model="device">
+                        <option ng-repeat="option in devices" value="{{option.id}}" ng-click="jumpTo(option)">{{option.name}}</option>
+                    </select>
                 </div>
                 <div class="Networking-keyContainer">
                     <button ng-click="vm.key()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.keyPanelExpanded}">
@@ -120,7 +116,7 @@
         <div class="Networking-toolbar Networking-breadCrumbBar">
             <div class="Networking-breadCrumbText">foo-bar</div>
         </div>
-        
+
     </div>
 </div>
 
