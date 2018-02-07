@@ -13,8 +13,17 @@
                        ng-class="{ 'fa-minus': vm.menu.top.isExpanded, 'fa-plus': !vm.menu.top.isExpanded }"></i>
                 </div>
 
-                <div class="pull-right" ng-click="vm.menu.scroll.to('bottom')">
-                    <i class="at-Stdout-menuIcon fa fa-arrow-down"></i>
+                <div class="pull-right" ng-click="vm.menu.scroll.end()">
+                    <i class="at-Stdout-menuIcon--lg fa fa-angle-double-down"></i>
+                </div>
+                <div class="pull-right" ng-click="vm.menu.scroll.down()">
+                    <i class="at-Stdout-menuIcon--lg fa fa-angle-down"></i>
+                </div>
+                <div class="pull-right" ng-click="vm.menu.scroll.up()">
+                    <i class="at-Stdout-menuIcon--lg fa fa-angle-up"></i>
+                </div>
+                <div class="pull-right" ng-click="vm.menu.scroll.home()">
+                    <i class="at-Stdout-menuIcon--lg fa fa-angle-double-up"></i>
                 </div>
 
                 <div class="at-u-clear"></div>
@@ -23,8 +32,8 @@
             <pre class="at-Stdout-container"><table><thead><tr><th class="at-Stdout-toggle">&nbsp;</th><th class="at-Stdout-line"></th><th class="at-Stdout-event"></th></tr></thead><tbody id="atStdoutResultTable"></tbody></table></pre>
 
             <div ng-show="vm.menu.scroll.display" class="at-Stdout-menuBottom">
-                <div class="at-Stdout-menuIconGroup" ng-click="vm.menu.scroll.to('top')">
-                    <p class="pull-left"><i class="fa fa-caret-up"></i></p>
+                <div class="at-Stdout-menuIconGroup" ng-click="vm.menu.scroll.home()">
+                    <p class="pull-left"><i class="fa fa-angle-double-up"></i></p>
                     <p class="pull-right">Back to Top</p>
                 </div>
 

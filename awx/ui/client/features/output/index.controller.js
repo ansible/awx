@@ -73,7 +73,10 @@ function JobsIndexController (
     vm.menu = {
         scroll: {
             display: false,
-            to: scrollTo
+            home: scrollHome,
+            end: scrollEnd,
+            down: scrollPageDown,
+            up: scrollPageUp
         },
         top: {
             expand,
@@ -137,6 +140,8 @@ function next () {
 }
 
 function prev () {
+    const container = $(ELEMENT_CONTAINER)[0];
+
     const config = {
         related,
         page: meta.page.cache[0].page - 1,
@@ -157,7 +162,10 @@ function prev () {
             });
 
             return pop()
-                .then(() => prepend(data.results));
+                .then(() => prepend(data.results))
+                .then(lines => {
+                    container.scrollTop = (getRowHeight() * lines)
+                });
         });
 }
 
@@ -236,9 +244,7 @@ function prepend (events) {
         table.prepend(rows);
         $compile(rows.contents())($scope);
 
-        $timeout(() => {
-            resolve();
-        });
+        $timeout(() => resolve(parsed.lines));
     });
 }
 
@@ -257,9 +263,7 @@ function pop () {
         rows.empty();
         rows.remove();
 
-        $timeout(() => {
-            return resolve();
-        });
+        $timeout(() => resolve(ejected));
     });
 }
 
@@ -278,22 +282,24 @@ function shift () {
         rows.empty();
         rows.remove();
 
-        $timeout(() => {
-            return resolve();
-        });
+        $timeout(() => resolve());
+    });
+}
+
+function clear () {
+    console.log('[3] clearing pages');
+    return $q(resolve => {
+        const rows = $(ELEMENT_TBODY).children();
+
+        rows.empty();
+        rows.remove();
+
+        $timeout(() => resolve());
     });
 }
 
 function expand () {
     vm.toggle(meta.parent, true);
-}
-
-function scrollTo (direction) {
-    if (direction === 'top') {
-        container[0].scrollTop = 0;
-    } else {
-        container[0].scrollTop = container[0].scrollHeight;
-    }
 }
 
 function parseEvents (events) {
@@ -486,22 +492,6 @@ function getTime (created) {
     return `${hour}:${minute}:${second}`;
 }
 
-function pageUp () {
-
-}
-
-function pageDown () {
-
-}
-
-function jumpToStart () {
-
-}
-
-function jumpToEnd () {
-
-}
-
 function showHostDetails (id) {
     jobEvent.request('get', id)
         .then(() => {
@@ -579,6 +569,91 @@ function onScroll () {
             }
         }
     }, SCROLL_LOAD_DELAY);
+}
+
+function scrollHome () {
+    const config = {
+        related,
+        page: 'first',
+        params: {
+            order_by: 'start_line'
+        }
+    };
+
+    meta.scroll.inProgress = true;
+
+    console.log('[2] getting first page', config.page, meta.page.cache);
+    return resource.goToPage(config)
+        .then(data => {
+            if (!data || !data.results) {
+                return $q.resolve();
+            }
+
+            meta.page.cache = [{
+                page: data.page
+            }]
+
+            return clear()
+                .then(() => prepend(data.results))
+                .then(() => {
+                    meta.scroll.inProgress = false;
+                });
+        });
+}
+
+function scrollEnd () {
+    const config = {
+        related,
+        page: 'last',
+        params: {
+            order_by: 'start_line'
+        }
+    };
+
+    meta.scroll.inProgress = true;
+
+    console.log('[2] getting last page', config.page, meta.page.cache);
+    return resource.goToPage(config)
+        .then(data => {
+            if (!data || !data.results) {
+                return $q.resolve();
+            }
+
+            meta.page.cache = [{
+                page: data.page
+            }]
+
+            return clear()
+                .then(() => append(data.results))
+                .then(() => {
+                    const container = $(ELEMENT_CONTAINER)[0];
+
+                    container.scrollTop = getScrollHeight();
+                    meta.scroll.inProgress = false;
+                });
+        });
+}
+
+function scrollPageUp () {
+    const container = $(ELEMENT_CONTAINER)[0];
+    const jump = container.scrollTop - container.offsetHeight;
+
+    if (jump < 0) {
+        container.scrollTop = 0;
+    } else {
+        container.scrollTop = jump;
+    }
+}
+
+function scrollPageDown () {
+    const container = $(ELEMENT_CONTAINER)[0];
+    const jump = container.scrollTop + container.offsetHeight;
+
+    if (jump > container.scrollHeight) {
+        container.scrollTop = container.scrollHeight;
+    } else {
+        container.scrollTop = jump;
+    }
 }
 
 JobsIndexController.$inject = [
