@@ -353,7 +353,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         workflow_job.copy_nodes_from_original(original=self)
         return workflow_job
 
-    def _accept_or_ignore_job_kwargs(self, **kwargs):
+    def _accept_or_ignore_job_kwargs(self, _exclude_errors=(), **kwargs):
         prompted_fields = {}
         rejected_fields = {}
         accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(kwargs.get('extra_vars', {}))
