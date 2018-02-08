@@ -11,5 +11,3 @@ also containing a list of its children.
 Each group data structure includes the following fields:
 
 {% include "api/_result_fields_common.md" %}
-
-{% include "api/_new_in_awx.md" %}

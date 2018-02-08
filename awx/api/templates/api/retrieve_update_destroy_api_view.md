@@ -35,5 +35,3 @@ For a PATCH request, include only the fields that are being modified.
 
 Make a DELETE request to this resource to delete this {{ model_verbose_name }}.
 {% endifmeth %}
-
-{% include "api/_new_in_awx.md" %}

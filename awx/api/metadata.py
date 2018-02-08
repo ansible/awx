@@ -190,23 +190,6 @@ class Metadata(metadata.SimpleMetadata):
         finally:
             delattr(view, '_request')
 
-        # Add version number in which view was added to Tower.
-        added_in_version = '1.2'
-        for version in ('3.2.0', '3.1.0', '3.0.0', '2.4.0', '2.3.0', '2.2.0',
-                        '2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
-            if getattr(view, 'new_in_%s' % version.replace('.', ''), False):
-                added_in_version = version
-                break
-        metadata['added_in_version'] = added_in_version
-
-        # Add API version number in which view was added to Tower.
-        added_in_api_version = 'v1'
-        for version in ('v2',):
-            if getattr(view, 'new_in_api_%s' % version, False):
-                added_in_api_version = version
-                break
-        metadata['added_in_api_version'] = added_in_api_version
-
         # Add type(s) handled by this view/serializer.
         if hasattr(view, 'get_serializer'):
             serializer = view.get_serializer()

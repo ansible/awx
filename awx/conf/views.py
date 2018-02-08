@@ -44,7 +44,6 @@ class SettingCategoryList(ListAPIView):
     model = Setting  # Not exactly, but needed for the view.
     serializer_class = SettingCategorySerializer
     filter_backends = []
-    new_in_310 = True
     view_name = _('Setting Categories')
 
     def get_queryset(self):
@@ -69,7 +68,6 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
     model = Setting  # Not exactly, but needed for the view.
     serializer_class = SettingSingletonSerializer
     filter_backends = []
-    new_in_310 = True
     view_name = _('Setting Detail')
 
     def get_queryset(self):
@@ -170,7 +168,6 @@ class SettingLoggingTest(GenericAPIView):
     serializer_class = SettingSingletonSerializer
     permission_classes = (IsSuperUser,)
     filter_backends = []
-    new_in_320 = True
 
     def post(self, request, *args, **kwargs):
         defaults = dict()
