@@ -281,3 +281,10 @@ def test_dst_rollback_duplicates(post, admin_user):
         '2030-11-03 02:30:00-05:00',
         '2030-11-03 03:30:00-05:00',
     ]
+
+
+@pytest.mark.django_db
+def test_zoneinfo(get, admin_user):
+    url = reverse('api:schedule_zoneinfo')
+    r = get(url, admin_user, expect=200)
+    assert {'name': 'America/New_York'} in r.data

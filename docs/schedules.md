@@ -41,9 +41,9 @@ A list of _valid_ zone identifiers (which can vary by system) can be found at:
     HTTP GET /api/v2/schedules/zoneinfo/
 
     [
-        "Africa/Abidjan",
-        "Africa/Accra",
-        "Africa/Addis_Ababa",
+        {"name": "Africa/Abidjan"},
+        {"name": "Africa/Accra"},
+        {"name": "Africa/Addis_Ababa"},
         ...
     ]
 

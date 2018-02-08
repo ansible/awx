@@ -700,7 +700,10 @@ class ScheduleZoneInfo(APIView):
 
     def get(self, request):
         from dateutil.zoneinfo import get_zonefile_instance
-        return Response(sorted(get_zonefile_instance().zones.keys()))
+        return Response([
+            {'name': zone}
+            for zone in sorted(get_zonefile_instance().zones)
+        ])
 
 
 class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
