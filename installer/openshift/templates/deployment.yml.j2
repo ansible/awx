@@ -36,6 +36,10 @@ spec:
               value: ({{ pg_port|default('5432') }})
             - name: DATABASE_PASSWORD
               value: {{ pg_password }}
+            - name: MEMCACHED_HOST
+              value: {{ memcached_hostname|default('localhost') }}
+            - name: RABBITMQ_HOST
+              value: {{ rabbitmq_hostname|default('localhost') }}
             - name: AWX_ADMIN_USER
               value: {{ default_admin_user|default('admin') }}
             - name: AWX_ADMIN_PASSWORD
