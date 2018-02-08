@@ -1,6 +1,8 @@
 import pytest
 
 from datetime import timedelta
+from six.moves import xrange
+
 from django.utils import timezone
 
 from awx.main.models import Fact
@@ -19,7 +21,7 @@ def setup_common(hosts, fact_scans, ts_from=None, ts_to=None, epoch=timezone.now
                 continue
             facts_known.append(f)
     fact_objs = Fact.get_timeline(hosts[0].id, module=module_name, ts_from=ts_from, ts_to=ts_to)
-    return (facts_known, fact_objs) 
+    return (facts_known, fact_objs)
 
 
 @pytest.mark.django_db
@@ -27,7 +29,7 @@ def test_all(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_from = epoch - timedelta(days=1)
     ts_to = epoch + timedelta(days=10)
-    
+
     (facts_known, fact_objs) = setup_common(hosts, fact_scans, ts_from, ts_to, module_name=None, epoch=epoch)
     assert 9 == len(facts_known)
     assert 9 == len(fact_objs)
@@ -53,7 +55,7 @@ def test_empty_db(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_from = epoch - timedelta(days=1)
     ts_to = epoch + timedelta(days=10)
-    
+
     fact_objs = Fact.get_timeline(hosts[0].id, 'ansible', ts_from, ts_to)
 
     assert 0 == len(fact_objs)
@@ -64,7 +66,7 @@ def test_no_results(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_from = epoch - timedelta(days=100)
     ts_to = epoch - timedelta(days=50)
-    
+
     (facts_known, fact_objs) = setup_common(hosts, fact_scans, ts_from, ts_to, epoch=epoch)
     assert 0 == len(fact_objs)
 

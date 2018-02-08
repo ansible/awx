@@ -5,6 +5,7 @@ import json
 import os
 import six
 from datetime import timedelta
+from six.moves import xrange
 
 # Django
 from django.core.urlresolvers import resolve
