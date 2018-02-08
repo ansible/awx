@@ -10,6 +10,8 @@ from awx.main.utils.filters import SmartFilter
 # Django
 from django.db.models import Q
 
+import six
+
 
 Field = namedtuple('Field', 'name')
 Meta = namedtuple('Meta', 'fields')
@@ -43,7 +45,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_query_generated(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert unicode(q) == unicode(q_expected)
+        assert six.text_type(q) == six.text_type(q_expected)
 
     @pytest.mark.parametrize("filter_string", [
         'ansible_facts__facts__facts__blank='
@@ -60,7 +62,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_unicode(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert unicode(q) == unicode(q_expected)
+        assert six.text_type(q) == six.text_type(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('(a=b)', Q(**{u"a": u"b"})),
@@ -76,7 +78,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_boolean_parenthesis(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert unicode(q) == unicode(q_expected)
+        assert six.text_type(q) == six.text_type(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('ansible_facts__a__b__c[]=3', Q(**{u"ansible_facts__contains": {u"a": {u"b": {u"c": [3]}}}})),
@@ -99,7 +101,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_contains_query_generated(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert unicode(q) == unicode(q_expected)
+        assert six.text_type(q) == six.text_type(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         #('a__b__c[]="true"', Q(**{u"a__b__c__contains": u"\"true\""})),
@@ -109,7 +111,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_contains_query_generated_unicode(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert unicode(q) == unicode(q_expected)
+        assert six.text_type(q) == six.text_type(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('ansible_facts__a=null', Q(**{u"ansible_facts__contains": {u"a": u"null"}})),
@@ -117,7 +119,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_contains_query_generated_null(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert unicode(q) == unicode(q_expected)
+        assert six.text_type(q) == six.text_type(q_expected)
 
 
     @pytest.mark.parametrize("filter_string,q_expected", [
@@ -132,7 +134,7 @@ class TestSmartFilterQueryFromString():
     ])
     def test_search_related_fields(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)
-        assert unicode(q) == unicode(q_expected)
+        assert six.text_type(q) == six.text_type(q_expected)
 
 
 '''

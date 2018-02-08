@@ -72,7 +72,7 @@ class PlainTextRenderer(renderers.BaseRenderer):
 
     def render(self, data, media_type=None, renderer_context=None):
         if not isinstance(data, six.string_types):
-            data = unicode(data)
+            data = six.text_type(data)
         return data.encode(self.charset)
 
 

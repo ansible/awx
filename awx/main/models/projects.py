@@ -15,6 +15,8 @@ from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now, make_aware, get_default_timezone
 
+import six
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
@@ -124,7 +126,7 @@ class ProjectOptions(models.Model):
     def clean_scm_url(self):
         if self.scm_type == 'insights':
             self.scm_url = settings.INSIGHTS_URL_BASE
-        scm_url = unicode(self.scm_url or '')
+        scm_url = six.text_type(self.scm_url or '')
         if not self.scm_type:
             return ''
         try:
@@ -135,7 +137,7 @@ class ProjectOptions(models.Model):
         scm_url_parts = urlparse.urlsplit(scm_url)
         if self.scm_type and not any(scm_url_parts):
             raise ValidationError(_('SCM URL is required.'))
-        return unicode(self.scm_url or '')
+        return six.text_type(self.scm_url or '')
 
     def clean_credential(self):
         if not self.scm_type:
@@ -328,7 +330,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
                     update_fields.append('scm_delete_on_next_update')
         # Create auto-generated local path if project uses SCM.
         if self.pk and self.scm_type and not self.local_path.startswith('_'):
-            slug_name = slugify(unicode(self.name)).replace(u'-', u'_')
+            slug_name = slugify(six.text_type(self.name)).replace(u'-', u'_')
             self.local_path = u'_%d__%s' % (int(self.pk), slug_name)
             if 'local_path' not in update_fields:
                 update_fields.append('local_path')

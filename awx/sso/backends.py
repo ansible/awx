@@ -269,7 +269,7 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
             logger.warn("Could not map user detail '%s' from SAML attribute '%s'; "
                         "update SOCIAL_AUTH_SAML_ENABLED_IDPS['%s']['%s'] with the correct SAML attribute.",
                         conf_key[5:], key, self.name, conf_key)
-        return unicode(value) if value is not None else value
+        return six.text_type(value) if value is not None else value
 
 
 class SAMLAuth(BaseSAMLAuth):

@@ -5,6 +5,8 @@
 import datetime
 import logging
 
+import six
+
 # Django
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -66,7 +68,7 @@ class Command(BaseCommand):
         jobs = Job.objects.filter(created__lt=self.cutoff)
         for job in jobs.iterator():
             job_display = '"%s" (%d host summaries, %d events)' % \
-                          (unicode(job),
+                          (six.text_type(job),
                            job.job_host_summaries.count(), job.job_events.count())
             if job.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
@@ -87,7 +89,7 @@ class Command(BaseCommand):
         ad_hoc_commands = AdHocCommand.objects.filter(created__lt=self.cutoff)
         for ad_hoc_command in ad_hoc_commands.iterator():
             ad_hoc_command_display = '"%s" (%d events)' % \
-                (unicode(ad_hoc_command),
+                (six.text_type(ad_hoc_command),
                  ad_hoc_command.ad_hoc_command_events.count())
             if ad_hoc_command.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
@@ -107,7 +109,7 @@ class Command(BaseCommand):
         skipped, deleted = 0, 0
         project_updates = ProjectUpdate.objects.filter(created__lt=self.cutoff)
         for pu in project_updates.iterator():
-            pu_display = '"%s" (type %s)' % (unicode(pu), unicode(pu.launch_type))
+            pu_display = '"%s" (type %s)' % (six.text_type(pu), six.text_type(pu.launch_type))
             if pu.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s project update %s', action_text, pu.status, pu_display)
@@ -130,7 +132,7 @@ class Command(BaseCommand):
         skipped, deleted = 0, 0
         inventory_updates = InventoryUpdate.objects.filter(created__lt=self.cutoff)
         for iu in inventory_updates.iterator():
-            iu_display = '"%s" (source %s)' % (unicode(iu), unicode(iu.source))
+            iu_display = '"%s" (source %s)' % (six.text_type(iu), six.text_type(iu.source))
             if iu.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s inventory update %s', action_text, iu.status, iu_display)
@@ -153,7 +155,7 @@ class Command(BaseCommand):
         skipped, deleted = 0, 0
         system_jobs = SystemJob.objects.filter(created__lt=self.cutoff)
         for sj in system_jobs.iterator():
-            sj_display = '"%s" (type %s)' % (unicode(sj), unicode(sj.job_type))
+            sj_display = '"%s" (type %s)' % (six.text_type(sj), six.text_type(sj.job_type))
             if sj.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s system_job %s', action_text, sj.status, sj_display)
@@ -183,7 +185,7 @@ class Command(BaseCommand):
         workflow_jobs = WorkflowJob.objects.filter(created__lt=self.cutoff)
         for workflow_job in workflow_jobs.iterator():
             workflow_job_display = '"{}" ({} nodes)'.format(
-                unicode(workflow_job),
+                six.text_type(workflow_job),
                 workflow_job.workflow_nodes.count())
             if workflow_job.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
@@ -204,7 +206,7 @@ class Command(BaseCommand):
         notifications = Notification.objects.filter(created__lt=self.cutoff)
         for notification in notifications.iterator():
             notification_display = '"{}" (started {}, {} type, {} sent)'.format(
-                unicode(notification), unicode(notification.created),
+                six.text_type(notification), six.text_type(notification.created),
                 notification.notification_type, notification.notifications_sent)
             if notification.status in ('pending',):
                 action_text = 'would skip' if self.dry_run else 'skipping'
@@ -246,4 +248,3 @@ class Command(BaseCommand):
                         self.logger.log(99, '%s: %d would be deleted, %d would be skipped.', m.replace('_', ' '), deleted, skipped)
                     else:
                         self.logger.log(99, '%s: %d deleted, %d skipped.', m.replace('_', ' '), deleted, skipped)
-

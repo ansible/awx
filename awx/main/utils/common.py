@@ -43,7 +43,7 @@ logger = logging.getLogger('awx.main.utils')
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize', 'memoize_delete',
            'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'copy_model_by_class',
-           'copy_m2m_relationships' ,'cache_list_capabilities', 'to_python_boolean',
+           'copy_m2m_relationships', 'cache_list_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
            'get_current_apps', 'set_current_apps', 'OutputEventFilter',
@@ -84,7 +84,7 @@ def get_object_or_403(klass, *args, **kwargs):
 
 
 def to_python_boolean(value, allow_none=False):
-    value = unicode(value)
+    value = six.text_type(value)
     if value.lower() in ('true', '1', 't'):
         return True
     elif value.lower() in ('false', '0', 'f'):
@@ -92,7 +92,7 @@ def to_python_boolean(value, allow_none=False):
     elif allow_none and value.lower() in ('none', 'null'):
         return None
     else:
-        raise ValueError(_(u'Unable to convert "%s" to boolean') % unicode(value))
+        raise ValueError(_(u'Unable to convert "%s" to boolean') % six.text_type(value))
 
 
 def camelcase_to_underscore(s):
@@ -325,7 +325,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
         netloc = u''
     netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
     if parts.port:
-        netloc = u':'.join([netloc, unicode(parts.port)])
+        netloc = u':'.join([netloc, six.text_type(parts.port)])
     new_url = urlparse.urlunsplit([parts.scheme, netloc, parts.path,
                                    parts.query, parts.fragment])
     if scp_format and parts.scheme == 'git+ssh':

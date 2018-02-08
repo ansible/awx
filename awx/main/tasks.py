@@ -44,6 +44,8 @@ from django.core.exceptions import ObjectDoesNotExist
 # Django-CRUM
 from crum import impersonate
 
+import six
+
 # AWX
 from awx import __version__ as awx_application_version
 from awx import celery_app
@@ -1160,7 +1162,7 @@ class RunJob(BaseTask):
                 env['ANSIBLE_NET_SSH_KEYFILE'] = ssh_keyfile
 
             authorize = network_cred.authorize
-            env['ANSIBLE_NET_AUTHORIZE'] = unicode(int(authorize))
+            env['ANSIBLE_NET_AUTHORIZE'] = six.text_type(int(authorize))
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = decrypt_field(network_cred, 'authorize_password')
 
@@ -1757,7 +1759,7 @@ class RunInventoryUpdate(BaseTask):
                 ec2_opts['cache_path'] = cache_path
             ec2_opts.setdefault('cache_max_age', '300')
             for k,v in ec2_opts.items():
-                cp.set(section, k, unicode(v))
+                cp.set(section, k, six.text_type(v))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
             credential = inventory_update.credential
@@ -1777,7 +1779,7 @@ class RunInventoryUpdate(BaseTask):
                 vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
 
             for k,v in vmware_opts.items():
-                cp.set(section, k, unicode(v))
+                cp.set(section, k, six.text_type(v))
 
         elif inventory_update.source == 'satellite6':
             section = 'foreman'
@@ -1793,7 +1795,7 @@ class RunInventoryUpdate(BaseTask):
                 elif k == 'satellite6_group_prefix' and isinstance(v, basestring):
                     group_prefix = v
                 else:
-                    cp.set(section, k, unicode(v))
+                    cp.set(section, k, six.text_type(v))
 
             credential = inventory_update.credential
             if credential:
@@ -1929,7 +1931,7 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
-                    env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
+                    env[str(env_k)] = six.text_type(inventory_update.source_vars_dict[env_k])
         elif inventory_update.source == 'tower':
             env['TOWER_INVENTORY'] = inventory_update.instance_filters
             env['TOWER_LICENSE_TYPE'] = get_licenser().validate()['license_type']
