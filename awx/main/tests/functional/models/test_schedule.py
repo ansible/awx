@@ -172,7 +172,7 @@ def test_utc_until_in_the_past(job_template):
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.models.schedules.now', lambda: datetime(2030, 03, 05, tzinfo=pytz.utc))
+@mock.patch('awx.main.models.schedules.now', lambda: datetime(2030, 3, 5, tzinfo=pytz.utc))
 def test_dst_phantom_hour(job_template):
     # The DST period in the United States begins at 02:00 (2 am) local time, so
     # the hour from 2:00:00 to 2:59:59 does not exist in the night of the

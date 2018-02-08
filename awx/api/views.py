@@ -2045,7 +2045,7 @@ class InventoryDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
         try:
             obj.schedule_deletion(getattr(request.user, 'id', None))
             return Response(status=status.HTTP_202_ACCEPTED)
-        except RuntimeError, e:
+        except RuntimeError as e:
             return Response(dict(error=_("{0}".format(e))), status=status.HTTP_400_BAD_REQUEST)
 
 

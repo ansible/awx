@@ -17,19 +17,19 @@ class Migration(DataMigration):
                 obj1 = eval(obj_type + ".objects.get(id=" + str(activity_stream_object.object1_id) + ")")
                 if hasattr(activity_stream_object, activity_stream_object.object1):
                     getattr(activity_stream_object, activity_stream_object.object1).add(obj1)
-            except ObjectDoesNotExist, e:
+            except ObjectDoesNotExist as e:
                 print("Object 1 for AS id=%s does not exist. (Object Type: %s, id: %s" % (str(activity_stream_object.id),
                                                                                           activity_stream_object.object1_type,
                                                                                           str(activity_stream_object.object1_id)))
                 continue
             if activity_stream_object.operation in ('associate', 'disassociate'):
                 try:
-                    obj_type = "orm." + activity_stream_object.object2_type.split(".")[-1] 
+                    obj_type = "orm." + activity_stream_object.object2_type.split(".")[-1]
                     if obj_type == 'orm.User':
                         obj_type = 'orm["auth.User"]'
                     obj2 = eval(obj_type + ".objects.get(id=" + str(activity_stream_object.object2_id) + ")")
                     getattr(activity_stream_object, activity_stream_object.object2).add(obj2)
-                except ObjectDoesNotExist, e:
+                except ObjectDoesNotExist as e:
                     print("Object 2 for AS id=%s does not exist. (Object Type: %s, id: %s" % (str(activity_stream_object.id),
                                                                                               activity_stream_object.object2_type,
                                                                                               str(activity_stream_object.object2_id)))

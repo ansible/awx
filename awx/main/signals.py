@@ -577,5 +577,5 @@ def delete_inventory_for_org(sender, instance, **kwargs):
     for inventory in inventories:
         try:
             inventory.schedule_deletion(user_id=getattr(user, 'id', None))
-        except RuntimeError, e:
+        except RuntimeError as e:
             logger.debug(e)
