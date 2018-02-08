@@ -159,6 +159,24 @@ def test_text_stdout_from_system_job_events(sqlite_copy_expert, get, admin):
 
 
 @pytest.mark.django_db
+def test_text_stdout_with_max_stdout(sqlite_copy_expert, get, admin):
+    job = SystemJob()
+    job.save()
+    total_bytes = settings.STDOUT_MAX_BYTES_DISPLAY + 1
+    large_stdout = 'X' * total_bytes
+    SystemJobEvent(system_job=job, stdout=large_stdout, start_line=0).save()
+    url = reverse('api:system_job_detail', kwargs={'pk': job.pk})
+    response = get(url, user=admin, expect=200)
+    assert response.data['result_stdout'] == (
+        'Standard Output too large to display ({actual} bytes), only download '
+        'supported for sizes over {max} bytes'.format(
+            actual=total_bytes,
+            max=settings.STDOUT_MAX_BYTES_DISPLAY
+        )
+    )
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('Parent, Child, relation, view', [
     [Job, JobEvent, 'job', 'api:job_stdout'],
     [AdHocCommand, AdHocCommandEvent, 'ad_hoc_command', 'api:ad_hoc_command_stdout'],

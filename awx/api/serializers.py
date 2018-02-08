@@ -2968,7 +2968,14 @@ class SystemJobSerializer(UnifiedJobSerializer):
         return res
 
     def get_result_stdout(self, obj):
-        return obj.result_stdout
+        try:
+            return obj.result_stdout
+        except StdoutMaxBytesExceeded as e:
+            return _(
+                "Standard Output too large to display ({text_size} bytes), "
+                "only download supported for sizes over {supported_size} bytes").format(
+                    text_size=e.total, supported_size=e.supported
+            )
 
 
 class SystemJobCancelSerializer(SystemJobSerializer):
