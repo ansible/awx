@@ -6,10 +6,10 @@ import {
     getInventorySource,
     getInventorySourceSchedule,
     getJobTemplate,
-    getJobTemplateAdmin,
     getJobTemplateSchedule,
     getNotificationTemplate,
     getOrganization,
+    getProjectAdmin,
     getSmartInventory,
     getTeam,
     getUpdatedProject,
@@ -38,7 +38,7 @@ module.exports = {
             getJobTemplate(namespace).then(obj => { data.jobTemplate = obj; }),
             getJobTemplateSchedule(namespace).then(obj => { data.jobTemplateSchedule = obj; }),
             getTeam(namespace).then(obj => { data.team = obj; }),
-            getJobTemplateAdmin(namespace).then(obj => { data.user = obj; }),
+            getProjectAdmin(namespace).then(obj => { data.user = obj; }),
             getNotificationTemplate(namespace).then(obj => { data.notification = obj; }),
             getJob(namespaceShort).then(obj => { data.job = obj; }),
         ];
@@ -48,7 +48,6 @@ module.exports = {
                 pages.organizations = client.page.organizations();
                 pages.inventories = client.page.inventories();
                 pages.inventoryScripts = client.page.inventoryScripts();
-                pages.hosts = client.page.hosts();
                 pages.projects = client.page.projects();
                 pages.credentials = client.page.credentials();
                 pages.templates = client.page.templates();
@@ -59,7 +58,7 @@ module.exports = {
 
                 urls.organization = `${pages.organizations.url()}/${data.organization.id}`;
                 urls.inventory = `${pages.inventories.url()}/inventory/${data.inventory.id}`;
-                urls.hosts = `${pages.hosts.url()}`;
+                urls.inventoryHosts = `${urls.inventory}/hosts`;
                 urls.inventoryScript = `${pages.inventoryScripts.url()}/${data.inventoryScript.id}`;
                 urls.inventorySource = `${urls.inventory}/inventory_sources/edit/${data.inventorySource.id}`;
                 urls.sourceSchedule = `${urls.inventorySource}/schedules/${data.sourceSchedule.id}`;
@@ -106,75 +105,6 @@ module.exports = {
 
         client.pause(500).expect.element('div.spinny').not.visible;
         client.expect.element('#multi-credential-modal').not.present;
-    },
-    'check template roles list for unsanitized content': client => {
-        const itemDelete = `#permissions_table tr[id="${data.user.id}"] div[class*="RoleList-deleteContainer"]`;
-
-        client.expect.element('#permissions_tab').visible;
-        client.expect.element('#permissions_tab').enabled;
-
-        client.click('#permissions_tab');
-
-        client.expect.element('div.spinny').visible;
-        client.expect.element('div.spinny').not.visible;
-
-        client.expect.element('#xss').not.present;
-        client.expect.element('[class=xss]').not.present;
-
-        client.expect.element('div[ui-view="related"]').visible;
-        client.expect.element('div[ui-view="related"] smart-search input').enabled;
-
-        client.sendKeys('div[ui-view="related"] smart-search input', `id:${data.user.id}`);
-        client.sendKeys('div[ui-view="related"] smart-search input', client.Keys.ENTER);
-
-        client.expect.element('div.spinny').not.visible;
-
-        client.expect.element(itemDelete).visible;
-        client.expect.element(itemDelete).enabled;
-
-        client.click(itemDelete);
-
-        client.expect.element('#prompt-header').visible;
-        client.expect.element('#prompt-header').text.equal('USER ACCESS REMOVAL');
-        client.expect.element('#prompt_cancel_btn').enabled;
-
-        client.expect.element('#xss').not.present;
-        client.expect.element('[class=xss]').not.present;
-
-        client.click('#prompt_cancel_btn');
-
-        client.expect.element('#prompt-header').not.visible;
-    },
-    'check template permissions view for unsanitized content': client => {
-        client.expect.element('button[aw-tool-tip="Add a permission"]').visible;
-        client.expect.element('button[aw-tool-tip="Add a permission"]').enabled;
-
-        client.click('button[aw-tool-tip="Add a permission"]');
-        client.expect.element('div.spinny').not.visible;
-
-        client.expect.element('div[class="AddPermissions-header"]').visible;
-        client.expect.element('div[class="AddPermissions-header"]').attribute('innerHTML')
-            .contains('&lt;div id="xss" class="xss"&gt;test&lt;/div&gt;');
-
-        client.expect.element('#xss').not.present;
-        client.expect.element('[class=xss]').not.present;
-
-        client.expect.element('div[class="AddPermissions-dialog"] button[class*="exit"]').enabled;
-
-        client.click('div[class="AddPermissions-dialog"] button[class*="exit"]');
-
-        client.expect.element('div.spinny').visible;
-        client.expect.element('div.spinny').not.visible;
-
-        // client.expect.element('div.spinny').visible;
-        client.expect.element('div.spinny').not.visible;
-        client.waitForAngular();
-
-        client.expect.element('#job_template_tab').enabled;
-
-        client.click('#job_template_tab');
-
-        client.expect.element('#job_template_form').visible;
     },
     'check template list for unsanitized content': client => {
         const itemRow = `#row-${data.jobTemplate.id}`;
@@ -229,7 +159,7 @@ module.exports = {
         client.expect.element('[class=xss]').not.present;
     },
     'check user roles list for unsanitized content': client => {
-        const adminRole = data.jobTemplate.summary_fields.object_roles.admin_role;
+        const adminRole = data.project.summary_fields.object_roles.admin_role;
         const itemDelete = `#permissions_table tr[id="${adminRole.id}"] #delete-action`;
 
         client.expect.element('#permissions_tab').visible;
@@ -508,6 +438,75 @@ module.exports = {
         client.expect.element('#xss').not.present;
         client.expect.element('[class=xss]').not.present;
     },
+    'check project roles list for unsanitized content': client => {
+        const itemDelete = `#permissions_table tr[id="${data.user.id}"] div[class*="RoleList-deleteContainer"]`;
+
+        client.expect.element('#permissions_tab').visible;
+        client.expect.element('#permissions_tab').enabled;
+
+        client.click('#permissions_tab');
+
+        client.expect.element('div.spinny').visible;
+        client.expect.element('div.spinny').not.visible;
+
+        client.expect.element('#xss').not.present;
+        client.expect.element('[class=xss]').not.present;
+
+        client.expect.element('div[ui-view="related"]').visible;
+        client.expect.element('div[ui-view="related"] smart-search input').enabled;
+
+        client.sendKeys('div[ui-view="related"] smart-search input', `id:${data.user.id}`);
+        client.sendKeys('div[ui-view="related"] smart-search input', client.Keys.ENTER);
+
+        client.expect.element('div.spinny').not.visible;
+
+        client.expect.element(itemDelete).visible;
+        client.expect.element(itemDelete).enabled;
+
+        client.click(itemDelete);
+
+        client.expect.element('#prompt-header').visible;
+        client.expect.element('#prompt-header').text.equal('USER ACCESS REMOVAL');
+        client.expect.element('#prompt_cancel_btn').enabled;
+
+        client.expect.element('#xss').not.present;
+        client.expect.element('[class=xss]').not.present;
+
+        client.click('#prompt_cancel_btn');
+
+        client.expect.element('#prompt-header').not.visible;
+    },
+    'check project permissions view for unsanitized content': client => {
+        client.expect.element('button[aw-tool-tip="Add a permission"]').visible;
+        client.expect.element('button[aw-tool-tip="Add a permission"]').enabled;
+
+        client.click('button[aw-tool-tip="Add a permission"]');
+        client.expect.element('div.spinny').not.visible;
+
+        client.expect.element('div[class="AddPermissions-header"]').visible;
+        client.expect.element('div[class="AddPermissions-header"]').attribute('innerHTML')
+            .contains('&lt;div id="xss" class="xss"&gt;test&lt;/div&gt;');
+
+        client.expect.element('#xss').not.present;
+        client.expect.element('[class=xss]').not.present;
+
+        client.expect.element('div[class="AddPermissions-dialog"] button[class*="exit"]').enabled;
+
+        client.click('div[class="AddPermissions-dialog"] button[class*="exit"]');
+
+        client.expect.element('div.spinny').visible;
+        client.expect.element('div.spinny').not.visible;
+
+        // client.expect.element('div.spinny').visible;
+        client.expect.element('div.spinny').not.visible;
+        client.waitForAngular();
+
+        client.expect.element('#project_tab').enabled;
+
+        client.click('#project_tab');
+
+        client.expect.element('#project_form').visible;
+    },
     'check project list for unsanitized content': client => {
         const itemRow = `#projects_table tr[id="${data.project.id}"]`;
         const itemName = `${itemRow} td[class*="name-"] a`;
@@ -692,7 +691,7 @@ module.exports = {
         const itemName = `${itemRow} td[class*="active_failures-"] a`;
         const popOver = `${itemRow} td[class*="active_failures-"] div[class*="popover"]`;
 
-        client.navigateTo(urls.hosts);
+        client.navigateTo(urls.inventoryHosts);
 
         client.click(itemName);
         client.expect.element(popOver).present;
