@@ -9,5 +9,3 @@ from its inventory source.  The response will include the following field:
 Make a POST request to this resource to update the inventory source.  If
 successful, the response status code will be 202.  If the inventory source is
 not defined or cannot be updated, a 405 status code will be returned.
-
-{% include "api/_new_in_awx.md" %}

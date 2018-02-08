@@ -37,5 +37,3 @@ remove the {{ model_verbose_name }} from this {{ parent_model_verbose_name }}
 {% if model_verbose_name != "label" %} without deleting the {{ model_verbose_name }}{% endif %}.
 {% endif %}
 {% endif %}
-
-{% include "api/_new_in_awx.md" %}

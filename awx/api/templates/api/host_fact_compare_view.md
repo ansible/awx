@@ -9,5 +9,3 @@ You may filter by datetime:
 and module
 
 `?datetime=2015-06-01&module=ansible`
-
-{% include "api/_new_in_awx.md" %}

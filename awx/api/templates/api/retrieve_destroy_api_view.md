@@ -16,5 +16,3 @@ record containing the following fields:
 
 Make a DELETE request to this resource to delete this {{ model_verbose_name }}.
 {% endifmeth %}
-
-{% include "api/_new_in_awx.md" %}

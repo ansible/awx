@@ -8,5 +8,3 @@ fields to create a new {{ model_verbose_name }}:
 {% with write_only=1 %}
 {% include "api/_result_fields_common.md" with serializer_fields=serializer_create_fields %}
 {% endwith %}
-
-{% include "api/_new_in_awx.md" %}

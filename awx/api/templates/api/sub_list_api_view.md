@@ -6,5 +6,4 @@ Make a GET request to this resource to retrieve a list of
 {{ parent_model_verbose_name }}.
 
 {% include "api/_list_common.md" %}
-{% include "api/_new_in_awx.md" %}
 {% endifmeth %}

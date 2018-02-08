@@ -23,5 +23,3 @@ Will show only failed plays.  Alternatively `false` may be used.
     ?play__icontains=test
 
 Will filter plays matching the substring `test`
-
-{% include "api/_new_in_awx.md" %}

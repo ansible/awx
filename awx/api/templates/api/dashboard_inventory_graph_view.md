@@ -38,5 +38,3 @@ Data about failed and successfull hosts by inventory will be given as:
             "id": 2, 
             "name": "Test Inventory"
      },
-
-{% include "api/_new_in_awx.md" %}
