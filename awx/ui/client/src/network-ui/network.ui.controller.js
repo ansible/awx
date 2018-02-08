@@ -619,8 +619,14 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     $document.bind("keydown", $scope.onKeyDown);
 
-    // Conext Menu Button Handlers
+    $('#networking-search').on('select2:open', () => {
+        $document.unbind('keydown', $scope.onKeyDown);
+    });
 
+    $('#networking-search').on('select2:close', () => {
+        $document.bind('keydown', $scope.onKeyDown);
+    });
+    // Conext Menu Button Handlers
     $scope.removeContextMenu = function(){
         let context_menu = $scope.context_menus[0];
         context_menu.enabled = false;
@@ -633,6 +639,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         });
     };
 
+
+    $scope.closeDetailsPanel = function () {
+        $scope.$emit('closeDetailsPanel');
+        $document.bind('keydown', $scope.onKeyDown);
+    };
+
     $scope.onDetailsContextButton = function (panelBoolean) {
         if (!$scope.disconnected) {
             $scope.removeContextMenu();
@@ -643,6 +655,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 if ($scope.selected_devices[0].host_id === 0){
                     let host = $scope.selected_devices[0];
                     $scope.update_toolbox_heights();
+                    $document.unbind('keydown', $scope.onKeyDown);
                     $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
                 }
 
@@ -655,6 +668,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                              let host = response.data;
                              host.host_id = host.id;
                              $scope.update_toolbox_heights();
+                             $document.unbind('keydown', $scope.onKeyDown);
                              $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
 
                          })
@@ -668,6 +682,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             else if($scope.selected_interfaces.length === 1){
                 let selected_interface  = $scope.selected_interfaces[0];
                 $scope.update_toolbox_heights();
+                $document.unbind('keydown', $scope.onKeyDown);
                 $scope.$emit('showDetails', selected_interface, panelBoolean !== null ? panelBoolean: true);
             }
 
@@ -675,6 +690,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             else if($scope.selected_links.length === 1){
                 let link  = $scope.selected_links[0];
                 $scope.update_toolbox_heights();
+                $document.unbind('keydown', $scope.onKeyDown);
                 $scope.$emit('showDetails', link, panelBoolean !== null ? panelBoolean: true);
             }
 
@@ -682,6 +698,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             else if ($scope.selected_groups.length === 1){
                 let group = $scope.selected_groups[0];
                 $scope.update_toolbox_heights();
+                $document.unbind('keydown', $scope.onKeyDown);
                 $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);
             }
          }

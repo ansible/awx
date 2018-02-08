@@ -23,9 +23,10 @@
             </div>
             <div class="Networking-toolbarRightSide">
                 <div class="Networking-searchBarContainer">
-                    <select id="networking-search" ng-model="device">
-                        <option ng-repeat="option in devices" value="{{option.id}}" ng-click="jumpTo(option)">{{option.name}}</option>
-                    </select>
+                    <!-- <select id="networking-search" ng-model="device" ng-options="device.label for device in devices track by device.id"></select> -->
+                    <select id="networking-search"></select>
+                    <!-- <select class="Form-dropDown" id="networking-search"> -->
+                        <!-- <option ng-repeat="device in devices" value="{{device.id}}">{{device.name}}</option> -->
                 </div>
                 <div class="Networking-keyContainer">
                     <button ng-click="vm.key()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.keyPanelExpanded}">
@@ -114,7 +115,7 @@
             </div>
         </div>
         <div class="Networking-toolbar Networking-breadCrumbBar">
-            <div class="Networking-breadCrumbText">foo-bar</div>
+            <div class="Networking-breadCrumbText"></div>
         </div>
 
     </div>
@@ -139,6 +140,17 @@
          </div>
      </div>
      <!--end of name row -->
+
+     <!--beginning of name row -->
+     <div class="JobResults-resultRow" ng-if="item.host_id">
+         <label class="JobResults-resultRowLabel Networking-resultRowLabel" translate="">
+             Description
+         </label>
+          <input class="JobResults-resultRowText">
+
+          </input>
+      </div>
+      <!--end of name row -->
 
      <div class="List-noItems Networking-noItems" ng-if="!item.host_id">
          {{item.type}} DETAILS NOT AVAILABLE
