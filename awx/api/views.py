@@ -16,7 +16,7 @@ import six
 
 # Django
 from django.conf import settings
-from django.core.exceptions import FieldError
+from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.db.models import Q, Count, F
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
@@ -4201,7 +4201,15 @@ class JobCreateSchedule(RetrieveAPIView):
         obj = self.get_object()
 
         if not obj.can_schedule:
-            return Response({"error": _('Information needed to schedule this job is missing.')},
+            if getattr(obj, 'passwords_needed_to_start', None):
+                return Response({"error": _('Cannot create schedule because job requires credential passwords.')},
+                                status=status.HTTP_400_BAD_REQUEST)
+            try:
+                obj.launch_config
+            except ObjectDoesNotExist:
+                return Response({"error": _('Cannot create schedule because job was launched by legacy method.')},
+                                status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _('Cannot create schedule because a related resource is missing.')},
                             status=status.HTTP_400_BAD_REQUEST)
 
         config = obj.launch_config
