@@ -1040,6 +1040,11 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_clean'):
                 if get_field_from_model_or_attrs(fd):
                     raise serializers.ValidationError({fd: _('Update options must be set to false for manual projects.')})
+        # If client modifies any attributes affecting checking, must reset SCM revision
+        # so that next update will perform a checkout
+        if 'scm_revision' not in attrs:
+            if any(fd in attrs for fd in ('scm_type', 'scm_url', 'scm_branch')):
+                attrs['scm_revision'] = ''
         return super(ProjectSerializer, self).validate(attrs)
 
 
