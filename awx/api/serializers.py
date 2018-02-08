@@ -3107,6 +3107,12 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             ret['extra_data'] = obj.display_extra_data()
         return ret
 
+    def get_summary_fields(self, obj):
+        summary_fields = super(LaunchConfigurationBaseSerializer, self).get_summary_fields(obj)
+        # Credential would be an empty dictionary in this case
+        summary_fields.pop('credential', None)
+        return summary_fields
+
     def validate(self, attrs):
         attrs = super(LaunchConfigurationBaseSerializer, self).validate(attrs)
 
