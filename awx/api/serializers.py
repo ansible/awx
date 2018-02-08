@@ -3887,6 +3887,7 @@ class SchedulePreviewSerializer(BaseSerializer):
     # - BYYEARDAY
     # - BYWEEKNO
     # - Multiple DTSTART or RRULE elements
+    # - Can't contain both COUNT and UNTIL
     # - COUNT > 999
     def validate_rrule(self, value):
         rrule_value = value
@@ -3921,6 +3922,8 @@ class SchedulePreviewSerializer(BaseSerializer):
             raise serializers.ValidationError(_("BYYEARDAY not supported."))
         if 'byweekno' in rrule_value.lower():
             raise serializers.ValidationError(_("BYWEEKNO not supported."))
+        if 'COUNT' in rrule_value and 'UNTIL' in rrule_value:
+            raise serializers.ValidationError(_("RRULE may not contain both COUNT and UNTIL"))
         if match_count:
             count_val = match_count.groups()[0].strip().split("=")
             if int(count_val[1]) > 999:
