@@ -1,3 +1,4 @@
+/* eslint-disable */
 function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     const vm = this || {};
 
@@ -13,6 +14,8 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     vm.leftPanelIsExpanded = true;
     vm.jumpToPanelExpanded = false;
     vm.keyPanelExpanded = false;
+    $scope.devices = [];
+    // $scope.device = null;
     vm.close = () => {
         $state.go('inventories');
     };
@@ -59,13 +62,17 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     });
 
     $scope.$on('select', (e, options) => {
-        $scope.devices = options;
-        CreateSelect2({
-            element: '#networking-search',
-            multiple: false,
-            addNew: true,
-            scope: $scope,
-            options: 'devices',
+        options.forEach((device) => {
+            $('#networking-search').append($('<option>', {
+                value: device.id,
+                text: device.name,
+                id: device.id
+            }));
+        });
+
+        $("#networking-search").select2({
+            width:'100%',
+            containerCssClass: 'Form-dropDown',
             placeholder: 'SEARCH'
         });
     });
@@ -84,3 +91,4 @@ NetworkingController.$inject = [
 ];
 
 export default NetworkingController;
+/* eslint-disable */
