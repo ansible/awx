@@ -2192,6 +2192,19 @@ class CredentialSerializer(BaseSerializer):
                         _('You cannot change the credential type of the credential, as it may break the functionality'
                           ' of the resources using it.'),
                     )
+
+            # TODO: When this code lands in awx, these relationships won't exist
+            # anymore, so we need to remove this code and make sure the related
+            # tests still pass.
+            for cls in (JobTemplate, Job):
+                for rel in ('extra_credentials__id', 'vault_credential_id'):
+                    if cls.objects.filter(**{
+                        rel: self.instance.pk
+                    }).count() > 0:
+                        raise ValidationError(
+                            _('You cannot change the credential type of the credential, as it may break the functionality'
+                              ' of the resources using it.'),
+                        )
         return credential_type
 
 
