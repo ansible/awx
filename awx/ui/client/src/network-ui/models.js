@@ -915,7 +915,7 @@ function Animation(id, steps, data, scope, tracer, callback) {
     this.id = id;
     this.steps = steps;
     this.active = true;
-    this.frame_number_seq = util.natural_numbers(0);
+    this.frame_number_seq = util.natural_numbers(-1);
     this.frame_number = 0;
     this.data = data;
     this.callback = callback;
