@@ -293,6 +293,29 @@ const getJobTemplateAdmin = (namespace = session) => {
         .then(spread(user => user));
 };
 
+const getProjectAdmin = (namespace = session) => {
+    const rolePromise = getUpdatedProject(namespace)
+        .then(obj => obj.summary_fields.object_roles.admin_role);
+
+    const userPromise = getOrganization(namespace)
+        .then(obj => getOrCreate('/users/', {
+            username: `project-admin-${uuid().substr(0, 8)}`,
+            organization: obj.id,
+            first_name: 'firstname',
+            last_name: 'lastname',
+            email: 'null@ansible.com',
+            is_superuser: false,
+            is_system_auditor: false,
+            password: AWX_E2E_PASSWORD
+        }));
+
+    const assignRolePromise = Promise.all([userPromise, rolePromise])
+        .then(spread((user, role) => post(`/api/v2/roles/${role.id}/users/`, { id: user.id })));
+
+    return Promise.all([userPromise, assignRolePromise])
+        .then(spread(user => user));
+};
+
 const getInventorySourceSchedule = (namespace = session) => getInventorySource(namespace)
     .then(source => getOrCreate(source.related.schedules, {
         name: `${source.name}-schedule`,
@@ -321,6 +344,7 @@ module.exports = {
     getNotificationTemplate,
     getOrCreate,
     getOrganization,
+    getProjectAdmin,
     getSmartInventory,
     getTeam,
     getUpdatedProject,
