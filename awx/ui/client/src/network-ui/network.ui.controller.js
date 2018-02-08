@@ -19,6 +19,7 @@ var test_fsm = require('./test.fsm.js');
 var util = require('./util.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
+var animations = require('./animations.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
@@ -821,6 +822,44 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope[`on${functionName}Button`]();
     });
 
+    $scope.$on('search', function(e, device){
+
+        $scope.cancel_animations();
+        var num_frames = 30;
+        var searched;
+        for(var i = 0; i < $scope.devices.length; i++){
+            if(Number(device.id) === $scope.devices[i].id){
+                searched = $scope.devices[i];
+            }
+        }
+        console.log(searched);
+        var scale_animation = new models.Animation($scope.animation_id_seq(),
+                                                  num_frames,
+                                                  {
+                                                      new_scale: 0.10,
+                                                      current_scale: scope.current_scale,
+                                                      scope: $scope
+                                                  },
+                                                  $scope,
+                                                  $scope,
+                                                  animations.scale_animation);
+        $scope.animations.push(scale_animation);
+        var pan_animation = new models.Animation($scope.animation_id_seq(),
+                                                  num_frames,
+                                                  {
+                                                      x2: 0,
+                                                      y2: 0,
+                                                      x1: searched.x,
+                                                      y1: searched.y,
+                                                      scope: $scope
+                                                  },
+                                                  $scope,
+                                                  $scope,
+                                                  animations.pan_animation);
+        $scope.animations.push(pan_animation);
+        $scope.first_channel.send("ScaleChanged", {});
+    });
+
     $scope.$on('jumpTo', function(e, zoomLevel){
         switch (zoomLevel){
             case 'site':
@@ -833,15 +872,16 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 $scope.current_scale = 0.51;
                 break;
             case 'process':
-                $scope.current_scale = 1.1;
+                $scope.current_scale = 5.1;
                 break;
         }
-        // var new_panX = controller.scope.{{somethinghere}} - new_scale * ((controller.scope.mouseX - controller.scope.panX) / controller.scope.current_scale);
-        // var new_panY = controller.scope.mouseY - new_scale * ((controller.scope.mouseY - controller.scope.panY) / controller.scope.current_scale);
-        // // controller.scope.updateScaledXY();
-        // // controller.scope.current_scale = new_scale;
-        // controller.scope.panX = new_panX;
-        // controller.scope.panY = new_panY;
+        var new_panX = $scope.mouseX - $scope.current_scale * (($scope.mouseX - $scope.panX) / $scope.current_scale);
+        var new_panY = $scope.mouseY - $scope.current_scale * (($scope.mouseY - $scope.panY) / $scope.current_scale);
+        $scope.panX = new_panX;
+        $scope.panY = new_panY;
+        $scope.first_channel.send("ScaleChanged", {});
+        $scope.first_channel.send("ScaleChanged", {});
+        $scope.first_channel.send("ScaleChanged", {});
         $scope.updateScaledXY();
         $scope.updatePanAndScale();
     });
@@ -1722,6 +1762,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         }
 
         $scope.updateInterfaceDots();
+        $scope.$emit('select', $scope.devices);
     };
 
     $scope.updateInterfaceDots = function() {
