@@ -36,3 +36,16 @@ def test_project_invalid_custom_virtualenv(get, patch, project, admin):
     assert resp.data['custom_virtualenv'] == [
         '/foo/bar is not a valid virtualenv in {}'.format(settings.BASE_VENV_PATH)
     ]
+
+
+@pytest.mark.django_db
+def test_project_edit_resets_revision(patch, project, admin_user):
+    old_rev = project.scm_revision
+    assert old_rev != ''  # counting on fixture to have dummy revision
+    patch(
+        project.get_absolute_url(), {'scm_url': 'http://foobar.invalid'},
+        user=admin_user, expect=200
+    )
+    project.refresh_from_db()
+    assert project.scm_revision != old_rev
+    assert project.scm_revision == ''
