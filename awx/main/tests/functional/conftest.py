@@ -32,7 +32,8 @@ from awx.main.models.inventory import (
     Group,
     Inventory,
     InventoryUpdate,
-    InventorySource
+    InventorySource,
+    CustomInventoryScript
 )
 from awx.main.models.organization import (
     Organization,
@@ -494,6 +495,13 @@ def inventory_source_factory(inventory_factory):
 @pytest.fixture
 def inventory_update(inventory_source):
     return InventoryUpdate.objects.create(inventory_source=inventory_source)
+
+
+@pytest.fixture
+def inventory_script(organization):
+    return CustomInventoryScript.objects.create(name='test inv script',
+                                                organization=organization,
+                                                script='#!/usr/bin/python')
 
 
 @pytest.fixture

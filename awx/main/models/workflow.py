@@ -110,6 +110,13 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
 
 
 class WorkflowJobTemplateNode(WorkflowNodeBase):
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'unified_job_template', 'workflow_job_template', 'success_nodes', 'failure_nodes',
+        'always_nodes', 'credentials', 'inventory', 'extra_data', 'survey_passwords',
+        'char_prompts'
+    ]
+    REENCRYPTION_BLACKLIST_AT_COPY = ['extra_data', 'survey_passwords']
+
     workflow_job_template = models.ForeignKey(
         'WorkflowJobTemplate',
         related_name='workflow_job_template_nodes',
@@ -283,6 +290,9 @@ class WorkflowJobOptions(BaseModel):
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'labels', 'instance_groups', 'workflow_job_template_nodes', 'credentials', 'survey_spec'
+    ]
 
     class Meta:
         app_label = 'main'
@@ -393,11 +403,6 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
             if prompts_errors:
                 node_list.append(node.pk)
         return node_list
-
-    def user_copy(self, user):
-        new_wfjt = self.copy_unified_jt()
-        new_wfjt.copy_nodes_from_original(original=self, user=user)
-        return new_wfjt
 
 
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):

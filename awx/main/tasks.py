@@ -6,6 +6,7 @@ from collections import OrderedDict, namedtuple
 import ConfigParser
 import cStringIO
 import functools
+import importlib
 import json
 import logging
 import os
@@ -31,6 +32,7 @@ from celery.signals import celeryd_init, worker_process_init, worker_shutdown, w
 # Django
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
+from django.db.models.fields.related import ForeignKey
 from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.core.mail import send_mail
@@ -2257,6 +2259,62 @@ class RunSystemJob(BaseTask):
 
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR
+
+
+def _reconstruct_relationships(copy_mapping):
+    for old_obj, new_obj in copy_mapping.items():
+        model = type(old_obj)
+        for field_name in getattr(model, 'FIELDS_TO_PRESERVE_AT_COPY', []):
+            field = model._meta.get_field(field_name)
+            if isinstance(field, ForeignKey):
+                if getattr(new_obj, field_name, None):
+                    continue
+                related_obj = getattr(old_obj, field_name)
+                related_obj = copy_mapping.get(related_obj, related_obj)
+                setattr(new_obj, field_name, related_obj)
+            elif field.many_to_many:
+                for related_obj in getattr(old_obj, field_name).all():
+                    getattr(new_obj, field_name).add(copy_mapping.get(related_obj, related_obj))
+        new_obj.save()
+
+
+@shared_task(bind=True, queue='tower', base=LogErrorsTask)
+def deep_copy_model_obj(
+    self, model_module, model_name, obj_pk, new_obj_pk,
+    user_pk, sub_obj_list, permission_check_func=None
+):
+    logger.info('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
+    from awx.api.generics import CopyAPIView
+    model = getattr(importlib.import_module(model_module), model_name, None)
+    if model is None:
+        return
+    try:
+        obj = model.objects.get(pk=obj_pk)
+        new_obj = model.objects.get(pk=new_obj_pk)
+        creater = User.objects.get(pk=user_pk)
+    except ObjectDoesNotExist:
+        logger.warning("Object or user no longer exists.")
+        return
+    with transaction.atomic():
+        copy_mapping = {}
+        for sub_obj_setup in sub_obj_list:
+            sub_model = getattr(importlib.import_module(sub_obj_setup[0]),
+                                sub_obj_setup[1], None)
+            if sub_model is None:
+                continue
+            try:
+                sub_obj = sub_model.objects.get(pk=sub_obj_setup[2])
+            except ObjectDoesNotExist:
+                continue
+            copy_mapping.update(CopyAPIView.copy_model_obj(
+                obj, new_obj, sub_model, sub_obj, creater
+            ))
+        _reconstruct_relationships(copy_mapping)
+        if permission_check_func:
+            permission_check_func = getattr(getattr(
+                importlib.import_module(permission_check_func[0]), permission_check_func[1]
+            ), permission_check_func[2])
+            permission_check_func(creater, copy_mapping.values())
 
 
 celery_app.register_task(RunJob())

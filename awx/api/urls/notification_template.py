@@ -8,6 +8,7 @@ from awx.api.views import (
     NotificationTemplateDetail,
     NotificationTemplateTest,
     NotificationTemplateNotificationList,
+    NotificationTemplateCopy,
 )
 
 
@@ -16,6 +17,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/$', NotificationTemplateDetail.as_view(), name='notification_template_detail'),
     url(r'^(?P<pk>[0-9]+)/test/$', NotificationTemplateTest.as_view(), name='notification_template_test'),
     url(r'^(?P<pk>[0-9]+)/notifications/$', NotificationTemplateNotificationList.as_view(), name='notification_template_notification_list'),
+    url(r'^(?P<pk>[0-9]+)/copy/$', NotificationTemplateCopy.as_view(), name='notification_template_copy'),
 ]
 
 __all__ = ['urls']

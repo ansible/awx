@@ -1563,6 +1563,12 @@ class ProjectObjectRolesList(SubListAPIView):
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
+class ProjectCopy(CopyAPIView):
+
+    model = Project
+    copy_return_serializer_class = ProjectSerializer
+
+
 class UserList(ListCreateAPIView):
 
     model = User
@@ -1944,6 +1950,12 @@ class CredentialObjectRolesList(SubListAPIView):
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
+class CredentialCopy(CopyAPIView):
+
+    model = Credential
+    copy_return_serializer_class = CredentialSerializer
+
+
 class InventoryScriptList(ListCreateAPIView):
 
     model = CustomInventoryScript
@@ -1979,6 +1991,12 @@ class InventoryScriptObjectRolesList(SubListAPIView):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
+
+
+class InventoryScriptCopy(CopyAPIView):
+
+    model = CustomInventoryScript
+    copy_return_serializer_class = CustomInventoryScriptSerializer
 
 
 class InventoryList(ListCreateAPIView):
@@ -2106,6 +2124,12 @@ class InventoryJobTemplateList(SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(inventory=parent)
+
+
+class InventoryCopy(CopyAPIView):
+
+    model = Inventory
+    copy_return_serializer_class = InventorySerializer
 
 
 class HostRelatedSearchMixin(object):
@@ -3479,6 +3503,12 @@ class JobTemplateObjectRolesList(SubListAPIView):
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
+class JobTemplateCopy(CopyAPIView):
+
+    model = JobTemplate
+    copy_return_serializer_class = JobTemplateSerializer
+
+
 class WorkflowJobNodeList(WorkflowsEnforcementMixin, ListAPIView):
 
     model = WorkflowJobNode
@@ -3642,10 +3672,10 @@ class WorkflowJobTemplateDetail(WorkflowsEnforcementMixin, RetrieveUpdateDestroy
     new_in_310 = True
 
 
-class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, GenericAPIView):
+class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, CopyAPIView):
 
     model = WorkflowJobTemplate
-    serializer_class = EmptySerializer
+    copy_return_serializer_class = WorkflowJobTemplateSerializer
     new_in_310 = True
 
     def get(self, request, *args, **kwargs):
@@ -3662,17 +3692,20 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, GenericAPIView):
             data.update(messages)
         return Response(data)
 
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if not request.user.can_access(self.model, 'copy', obj):
-            raise PermissionDenied()
-        new_obj = obj.user_copy(request.user)
-        if request.user not in new_obj.admin_role:
-            new_obj.admin_role.members.add(request.user)
-        data = OrderedDict()
-        data.update(WorkflowJobTemplateSerializer(
-            new_obj, context=self.get_serializer_context()).to_representation(new_obj))
-        return Response(data, status=status.HTTP_201_CREATED)
+    @staticmethod
+    def deep_copy_permission_check_func(user, new_objs):
+        for obj in new_objs:
+            for field_name in obj._get_workflow_job_field_names():
+                item = getattr(obj, field_name, None)
+                if item is None:
+                    continue
+                if field_name in ['inventory']:
+                    if not user.can_access(item.__class__, 'use', item):
+                        setattr(obj, field_name, None)
+                if field_name in ['unified_job_template']:
+                    if not user.can_access(item.__class__, 'start', item, validate_license=False):
+                        setattr(obj, field_name, None)
+            obj.save()
 
 
 class WorkflowJobTemplateLabelList(WorkflowsEnforcementMixin, JobTemplateLabelList):
@@ -4825,6 +4858,12 @@ class NotificationTemplateNotificationList(SubListAPIView):
     relationship = 'notifications'
     parent_key = 'notification_template'
     new_in_300 = True
+
+
+class NotificationTemplateCopy(CopyAPIView):
+
+    model = NotificationTemplate
+    copy_return_serializer_class = NotificationTemplateSerializer
 
 
 class NotificationList(ListAPIView):

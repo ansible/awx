@@ -50,6 +50,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     an inventory source contains lists and hosts.
     '''
 
+    FIELDS_TO_PRESERVE_AT_COPY = ['hosts', 'groups', 'instance_groups']
     KIND_CHOICES = [
         ('', _('Hosts have a direct link to this inventory.')),
         ('smart', _('Hosts for inventory generated using the host_filter property.')),
@@ -505,6 +506,10 @@ class Host(CommonModelNameNotUnique):
     A managed node
     '''
 
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'name', 'description', 'groups', 'inventory', 'enabled', 'instance_id', 'variables'
+    ]
+
     class Meta:
         app_label = 'main'
         unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
@@ -691,6 +696,10 @@ class Group(CommonModelNameNotUnique):
     A group containing managed hosts.  A group or host may belong to multiple
     groups.
     '''
+
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'name', 'description', 'inventory', 'children', 'parents', 'hosts', 'variables'
+    ]
 
     class Meta:
         app_label = 'main'
