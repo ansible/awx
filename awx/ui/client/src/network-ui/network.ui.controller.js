@@ -133,6 +133,10 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.trace_id_seq = util.natural_numbers(0);
   $scope.trace_order_seq = util.natural_numbers(0);
   $scope.trace_id = $scope.trace_id_seq();
+  $scope.jump = {from_x: 0,
+                 from_y: 0,
+                 to_x: 0,
+                 to_y: 0};
 
     $scope.send_trace_message = function (message) {
         if (!$scope.recording) {
@@ -204,21 +208,28 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
            .then(function(response) {
                let hosts = response.data.results;
                for(var i = 0; i<hosts.length; i++){
-                   let host = hosts[i];
-                   console.log(host);
-                   host.data = jsyaml.safeLoad(host.variables);
-                   if (host.data.type === undefined) {
-                       host.data.type = 'unknown';
+                   try {
+                       let host = hosts[i];
+                       console.log(host);
+                       if (host.variables !== "") {
+                           host.data = jsyaml.safeLoad(host.variables);
+                           if (host.data.type === undefined) {
+                               host.data.type = 'unknown';
+                           }
+                           if (host.data.name === undefined) {
+                               host.data.name = host.name;
+                           }
+                           var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id, host.variables);
+                           device.icon = true;
+                           $scope.inventory_toolbox.items.push(device);
+                       }
+                   } catch (error) {
+                       console.log(error);
                    }
-                   if (host.data.name === undefined) {
-                       host.data.name = host.name;
-                   }
-                   var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id, host.variables);
-                   device.icon = true;
-                   $scope.inventory_toolbox.items.push(device);
                }
            })
            .catch(({data, status}) => {
+               console.log([data, status]);
                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
            });
   }
@@ -354,6 +365,24 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         }
         var g = document.getElementById('frame_g');
         g.setAttribute('transform','translate(' + $scope.panX + ',' + $scope.panY + ') scale(' + $scope.current_scale + ')');
+    };
+
+    $scope.to_virtual_coordinates = function (b_x, b_y) {
+        var v_x = (b_x - $scope.panX) / $scope.current_scale;
+        var v_y = (b_y - $scope.panY) / $scope.current_scale;
+        return {x: v_x, y: v_y};
+    };
+
+    $scope.to_browser_coordinates = function (v_x, v_y) {
+        var b_x = (v_x * $scope.current_scale) + $scope.panX;
+        var b_y = (v_y * $scope.current_scale) + $scope.panY;
+        return {x: b_x, y: b_y};
+    };
+
+    $scope.to_pan = function (v_x, v_y) {
+        var p_x = v_x * $scope.current_scale * -1;
+        var p_y = v_y * $scope.current_scale * -1;
+        return {x: p_x, y: p_y};
     };
 
     $scope.clear_selections = function () {
