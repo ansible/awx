@@ -275,7 +275,7 @@ class SettingsWrapper(UserSettingsHolder):
                 setting_ids[setting.key] = setting.id
                 try:
                     value = decrypt_field(setting, 'value')
-                except ValueError, e:
+                except ValueError as e:
                     #TODO: Remove in Tower 3.3
                     logger.debug('encountered error decrypting field: %s - attempting fallback to old', e)
                     value = old_decrypt_field(setting, 'value')

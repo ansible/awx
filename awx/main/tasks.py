@@ -1135,7 +1135,7 @@ class RunJob(BaseTask):
         # job and visible inside the proot environment (when enabled).
         cp_dir = os.path.join(kwargs['private_data_dir'], 'cp')
         if not os.path.exists(cp_dir):
-            os.mkdir(cp_dir, 0700)
+            os.mkdir(cp_dir, 0o700)
         env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, '%%h%%p%%r')
 
         # Allow the inventory script to include host variables inline via ['_meta']['hostvars'].

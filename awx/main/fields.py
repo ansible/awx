@@ -356,7 +356,7 @@ class SmartFilterField(models.TextField):
         value = urllib.unquote(value)
         try:
             SmartFilter().query_from_string(value)
-        except RuntimeError, e:
+        except RuntimeError as e:
             raise models.base.ValidationError(e)
         return super(SmartFilterField, self).get_prep_value(value)
 
