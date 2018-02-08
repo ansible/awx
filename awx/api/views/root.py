@@ -1,0 +1,259 @@
+# Copyright (c) 2015 Ansible, Inc.
+# All Rights Reserved.
+
+# Python
+import json
+import logging
+from collections import OrderedDict
+
+# Django
+from django.conf import settings
+from django.utils.encoding import smart_text
+from django.template.loader import render_to_string
+from django.utils.translation import ugettext_lazy as _
+
+
+# Django REST Framework
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
+
+# AWX
+from awx.main.ha import is_ha_environment
+from awx.main.utils import (
+    get_awx_version,
+    get_ansible_version,
+    to_python_boolean,
+)
+from awx.api.generics import APIView
+from awx.main.models import (
+    Instance,
+    InstanceGroup,
+    Organization,
+    Project,
+)
+
+from awx.api.versioning import reverse, get_request_version
+from awx.conf.license import get_license, feature_enabled
+
+logger = logging.getLogger('awx.api.views')
+
+
+class ApiRootView(APIView):
+
+    authentication_classes = []
+    permission_classes = (AllowAny,)
+    view_name = _('REST API')
+    versioning_class = None
+
+    def get(self, request, format=None):
+        ''' list supported API versions '''
+
+        v1 = reverse('api:api_v1_root_view', kwargs={'version': 'v1'})
+        v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
+        data = dict(
+            description = _('AWX REST API'),
+            current_version = v2,
+            available_versions = dict(v1 = v1, v2 = v2),
+        )
+        if feature_enabled('rebranding'):
+            data['custom_logo'] = settings.CUSTOM_LOGO
+            data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
+        return Response(data)
+
+
+class ApiVersionRootView(APIView):
+
+    authentication_classes = []
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None):
+        ''' list top level resources '''
+        data = OrderedDict()
+        data['authtoken'] = reverse('api:auth_token_view', request=request)
+        data['ping'] = reverse('api:api_v1_ping_view', request=request)
+        data['instances'] = reverse('api:instance_list', request=request)
+        data['instance_groups'] = reverse('api:instance_group_list', request=request)
+        data['config'] = reverse('api:api_v1_config_view', request=request)
+        data['settings'] = reverse('api:setting_category_list', request=request)
+        data['me'] = reverse('api:user_me_list', request=request)
+        data['dashboard'] = reverse('api:dashboard_view', request=request)
+        data['organizations'] = reverse('api:organization_list', request=request)
+        data['users'] = reverse('api:user_list', request=request)
+        data['projects'] = reverse('api:project_list', request=request)
+        data['project_updates'] = reverse('api:project_update_list', request=request)
+        data['teams'] = reverse('api:team_list', request=request)
+        data['credentials'] = reverse('api:credential_list', request=request)
+        if get_request_version(request) > 1:
+            data['credential_types'] = reverse('api:credential_type_list', request=request)
+        data['inventory'] = reverse('api:inventory_list', request=request)
+        data['inventory_scripts'] = reverse('api:inventory_script_list', request=request)
+        data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
+        data['inventory_updates'] = reverse('api:inventory_update_list', request=request)
+        data['groups'] = reverse('api:group_list', request=request)
+        data['hosts'] = reverse('api:host_list', request=request)
+        data['job_templates'] = reverse('api:job_template_list', request=request)
+        data['jobs'] = reverse('api:job_list', request=request)
+        data['job_events'] = reverse('api:job_event_list', request=request)
+        data['ad_hoc_commands'] = reverse('api:ad_hoc_command_list', request=request)
+        data['system_job_templates'] = reverse('api:system_job_template_list', request=request)
+        data['system_jobs'] = reverse('api:system_job_list', request=request)
+        data['schedules'] = reverse('api:schedule_list', request=request)
+        data['roles'] = reverse('api:role_list', request=request)
+        data['notification_templates'] = reverse('api:notification_template_list', request=request)
+        data['notifications'] = reverse('api:notification_list', request=request)
+        data['labels'] = reverse('api:label_list', request=request)
+        data['unified_job_templates'] = reverse('api:unified_job_template_list', request=request)
+        data['unified_jobs'] = reverse('api:unified_job_list', request=request)
+        data['activity_stream'] = reverse('api:activity_stream_list', request=request)
+        data['workflow_job_templates'] = reverse('api:workflow_job_template_list', request=request)
+        data['workflow_jobs'] = reverse('api:workflow_job_list', request=request)
+        data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list', request=request)
+        data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
+        return Response(data)
+
+
+class ApiV1RootView(ApiVersionRootView):
+    view_name = _('Version 1')
+
+
+class ApiV2RootView(ApiVersionRootView):
+    view_name = _('Version 2')
+    new_in_320 = True
+    new_in_api_v2 = True
+
+
+class ApiV1PingView(APIView):
+    """A simple view that reports very basic information about this
+    instance, which is acceptable to be public information.
+    """
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+    view_name = _('Ping')
+    new_in_210 = True
+
+    def get(self, request, format=None):
+        """Return some basic information about this instance.
+
+        Everything returned here should be considered public / insecure, as
+        this requires no auth and is intended for use by the installer process.
+        """
+        response = {
+            'ha': is_ha_environment(),
+            'version': get_awx_version(),
+            'active_node': settings.CLUSTER_HOST_ID,
+        }
+
+        response['instances'] = []
+        for instance in Instance.objects.all():
+            response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified,
+                                              capacity=instance.capacity, version=instance.version))
+            response['instances'].sort()
+        response['instance_groups'] = []
+        for instance_group in InstanceGroup.objects.all():
+            response['instance_groups'].append(dict(name=instance_group.name,
+                                                    capacity=instance_group.capacity,
+                                                    instances=[x.hostname for x in instance_group.instances.all()]))
+        return Response(response)
+
+
+class ApiV1ConfigView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    view_name = _('Configuration')
+
+    def check_permissions(self, request):
+        super(ApiV1ConfigView, self).check_permissions(request)
+        if not request.user.is_superuser and request.method.lower() not in {'options', 'head', 'get'}:
+            self.permission_denied(request)  # Raises PermissionDenied exception.
+
+    def get(self, request, format=None):
+        '''Return various sitewide configuration settings.'''
+
+        if request.user.is_superuser or request.user.is_system_auditor:
+            license_data = get_license(show_key=True)
+        else:
+            license_data = get_license(show_key=False)
+        if not license_data.get('valid_key', False):
+            license_data = {}
+        if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
+            # FIXME: Make the final setting value dependent on the feature?
+            license_data['features']['activity_streams'] &= settings.ACTIVITY_STREAM_ENABLED
+
+        pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
+
+        data = dict(
+            time_zone=settings.TIME_ZONE,
+            license_info=license_data,
+            version=get_awx_version(),
+            ansible_version=get_ansible_version(),
+            eula=render_to_string("eula.md") if license_data.get('license_type', 'UNLICENSED') != 'open' else '',
+            analytics_status=pendo_state
+        )
+
+        # If LDAP is enabled, user_ldap_fields will return a list of field
+        # names that are managed by LDAP and should be read-only for users with
+        # a non-empty ldap_dn attribute.
+        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
+            user_ldap_fields = ['username', 'password']
+            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
+            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
+            data['user_ldap_fields'] = user_ldap_fields
+
+        if request.user.is_superuser \
+                or request.user.is_system_auditor \
+                or Organization.accessible_objects(request.user, 'admin_role').exists() \
+                or Organization.accessible_objects(request.user, 'auditor_role').exists():
+            data.update(dict(
+                project_base_dir = settings.PROJECTS_ROOT,
+                project_local_paths = Project.get_local_path_choices(),
+            ))
+
+        return Response(data)
+
+    def post(self, request):
+        if not isinstance(request.data, dict):
+            return Response({"error": _("Invalid license data")}, status=status.HTTP_400_BAD_REQUEST)
+        if "eula_accepted" not in request.data:
+            return Response({"error": _("Missing 'eula_accepted' property")}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            eula_accepted = to_python_boolean(request.data["eula_accepted"])
+        except ValueError:
+            return Response({"error": _("'eula_accepted' value is invalid")}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not eula_accepted:
+            return Response({"error": _("'eula_accepted' must be True")}, status=status.HTTP_400_BAD_REQUEST)
+        request.data.pop("eula_accepted")
+        try:
+            data_actual = json.dumps(request.data)
+        except Exception:
+            logger.info(smart_text(u"Invalid JSON submitted for license."),
+                        extra=dict(actor=request.user.username))
+            return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            from awx.main.utils.common import get_licenser
+            license_data = json.loads(data_actual)
+            license_data_validated = get_licenser(**license_data).validate()
+        except Exception:
+            logger.warning(smart_text(u"Invalid license submitted."),
+                           extra=dict(actor=request.user.username))
+            return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
+
+        # If the license is valid, write it to the database.
+        if license_data_validated['valid_key']:
+            settings.LICENSE = license_data
+            settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
+            return Response(license_data_validated)
+
+        logger.warning(smart_text(u"Invalid license submitted."),
+                       extra=dict(actor=request.user.username))
+        return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        try:
+            settings.LICENSE = {}
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception:
+            # FIX: Log
+            return Response({"error": _("Failed to remove license")}, status=status.HTTP_400_BAD_REQUEST)
