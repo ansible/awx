@@ -20,7 +20,7 @@ const meta = {
 
 const PAGE_LIMIT = 3;
 const SCROLL_BUFFER = 250;
-const SCROLL_LOAD_DELAY = 250;
+const SCROLL_LOAD_DELAY = 50;
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
 const EVENT_STATS_PLAY = 'playbook_on_stats';
@@ -161,55 +161,16 @@ function prev () {
                 page: data.page
             });
 
+            const previousHeight = container.scrollHeight;
+
             return pop()
                 .then(() => prepend(data.results))
                 .then(lines => {
-                    container.scrollTop = (getRowHeight() * lines)
+                    const currentHeight = container.scrollHeight;
+
+                    container.scrollTop = currentHeight - previousHeight;
                 });
         });
-}
-
-function getRowCount () {
-    return $(ELEMENT_TBODY).children().length;
-}
-
-function getRowHeight () {
-    return $(ELEMENT_TBODY).children()[0].offsetHeight;
-}
-
-function getViewHeight () {
-    return $(ELEMENT_CONTAINER)[0].offsetHeight;
-}
-
-function getScrollPosition () {
-    return $(ELEMENT_CONTAINER)[0].scrollTop;
-}
-
-function getScrollHeight () {
-    return $(ELEMENT_CONTAINER)[0].scrollHeight;
-}
-
-function getRowsAbove () {
-    const top = getScrollPosition();
-
-    if (top === 0) {
-        return 0;
-    }
-
-    return Math.floor(top / getRowHeight());
-}
-
-function getRowsBelow () {
-    const bottom = getScrollPosition() + getViewHeight();
-
-    return Math.floor((getScrollHeight() - bottom) / getRowHeight());
-}
-
-function getRowsInView () {
-    const rowHeight = getRowHeight();
-    const viewHeight = getViewHeight();
-
-    return Math.floor(viewHeight / rowHeight);
 }
 
 function append (events) {
@@ -628,7 +589,7 @@ function scrollEnd () {
                 .then(() => {
                     const container = $(ELEMENT_CONTAINER)[0];
 
-                    container.scrollTop = getScrollHeight();
+                    container.scrollTop = container.scrollHeight;
                     meta.scroll.inProgress = false;
                 });
         });
@@ -638,22 +599,14 @@ function scrollPageUp () {
     const container = $(ELEMENT_CONTAINER)[0];
     const jump = container.scrollTop - container.offsetHeight;
 
-    if (jump < 0) {
-        container.scrollTop = 0;
-    } else {
-        container.scrollTop = jump;
-    }
+    container.scrollTop = jump;
 }
 
 function scrollPageDown () {
     const container = $(ELEMENT_CONTAINER)[0];
     const jump = container.scrollTop + container.offsetHeight;
 
-    if (jump > container.scrollHeight) {
-        container.scrollTop = container.scrollHeight;
-    } else {
-        container.scrollTop = jump;
-    }
+    container.scrollTop = jump;
 }
 
 JobsIndexController.$inject = [
