@@ -184,5 +184,5 @@ class TestSwaggerGeneration():
     def teardown_class(cls):
         with open('swagger.json', 'w') as f:
             f.write(force_bytes(
-                json.dumps(cls.JSON, cls=i18nEncoder)
+                json.dumps(cls.JSON, cls=i18nEncoder, indent=2)
             ))
