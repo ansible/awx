@@ -80,6 +80,14 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     $('#networking-search').on('select2:select', (e) => {
         $scope.$broadcast('search', e.params.data);
     });
+
+    $('#networking-search').on('select2:open', () => {
+        $scope.$broadcast('unbind');
+    });
+
+    $('#networking-search').on('select2:close', () => {
+        $scope.$broadcast('bind');
+    });
 }
 
 NetworkingController.$inject = [
