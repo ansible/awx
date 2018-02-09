@@ -25,7 +25,12 @@ function AtTabController ($state) {
             return;
         }
 
-        $state.go(scope.state._go, scope.state._params, { reload: true });
+        if (scope.state._go) {
+            $state.go(scope.state._go, scope.state._params, { reload: true });
+        } else {
+            group.clearActive();
+            scope.state._active = true;
+        }
     };
 }
 

@@ -39,27 +39,27 @@
     color: @default-link-hov;
 }
 
-.LabelList-tag--deletable, .JobSubmission-previewTag--deletable {
+.LabelList-tag--deletable, .JobSubmission-previewTag--deletable, .Prompt-previewTag--deletable {
     color: @default-bg;
     background-color: @default-link;
     margin-right: 0px;
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
     border-right: 0;
     max-width: ~"calc(100% - 23px)";
-    margin-right: 5px;
 }
 
-.LabelList-deleteContainer, .JobSubmission-previewTagContainerDelete {
+.LabelList-deleteContainer, .JobSubmission-previewTagContainerDelete, .Prompt-previewTagContainerDelete {
     background-color: @default-link;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
     color: @default-bg;
     padding: 0 5px;
     margin: 3px 0px;
     align-items: center;
     display: flex;
     cursor: pointer;
+    margin-right: 5px;
 }
 
 .LabelList-tagDelete {
@@ -76,12 +76,12 @@
     max-width: ~"calc(100% - 23px)";
 }
 
-.LabelList-deleteContainer:hover, .JobSubmission-previewTagContainerDelete:hover {
+.LabelList-deleteContainer:hover, .JobSubmission-previewTagContainerDelete:hover, .Prompt-previewTagContainerDelete:hover {
     border-color: @default-err;
     background-color: @default-err;
 }
 
-.LabelList-deleteContainer:hover > .LabelList-tagDelete, .JobSubmission-previewTagContainerDelete:hover > .JobSubmission-previewTagContainerTagDelete {
+.LabelList-deleteContainer:hover > .LabelList-tagDelete, .JobSubmission-previewTagContainerDelete:hover > .JobSubmission-previewTagContainerTagDelete, .Prompt-previewTagContainerDelete:hover > .Prompt-previewTagContainerTagDelete {
     color: @default-bg;
 }
 

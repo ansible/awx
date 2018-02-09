@@ -626,9 +626,18 @@ input[type='radio']:checked:before {
     background-color: @submit-button-bg-dis;
 }
 
+.Form-saveButton--disabled {
+    background-color: @submit-button-bg-dis;
+    cursor: not-allowed;
+}
+
 .Form-saveButton:hover, .Form-launchButton:hover {
     background-color: @submit-button-bg-hov;
     color: @submit-button-text;
+}
+
+.Form-saveButton--disabled:hover {
+    background-color: @submit-button-bg-dis;
 }
 
 .Form-cancelButton {
@@ -666,6 +675,10 @@ input[type='radio']:checked:before {
 
 .Form-primaryButton.Form-tab--disabled:hover {
     background-color: @default-link;
+}
+
+.Form-primaryButton--noMargin {
+    margin-right: 0px;
 }
 
 .Form-formGroup--singleColumn {

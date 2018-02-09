@@ -31,11 +31,11 @@
                             <div class="JobSubmission-previewTags--outer">
                                 <div class="JobSubmission-previewTags--inner">
                                     <div class="JobSubmission-previewTagContainer">
-                                        <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteSelectedInventory()">
-                                            <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
-                                        </div>
                                         <div class="JobSubmission-previewTag JobSubmission-previewTag--deletable">
                                             <span>{{selected_inventory.name}}</span>
+                                        </div>
+                                        <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteSelectedInventory()">
+                                            <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -58,21 +58,21 @@
                             <div class="JobSubmission-previewTags--outer">
                                 <div class="JobSubmission-previewTags--inner">
                                     <div class="JobSubmission-previewTagContainer u-wordwrap" ng-show="selected_credentials.machine">
-                                        <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteMachineCred()" ng-show="ask_credential_on_launch">
-                                            <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
-                                        </div>
                                         <div class="JobSubmission-previewTag" ng-class="{'JobSubmission-previewTag--deletable': ask_credential_on_launch}">
                                             <span><span class="JobSubmission-previewTagLabel" ng-class="{'JobSubmission-previewTagLabel--deletable': ask_credential_on_launch}">
                                                 MACHINE</span>:&nbsp;{{selected_credentials.machine.name}}</span>
                                         </div>
-                                    </div>
-                                    <div class="JobSubmission-previewTagContainer" ng-repeat="extraCredential in selected_credentials.extra">
-                                        <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteExtraCred($index)" ng-show="ask_credential_on_launch">
+                                        <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteMachineCred()" ng-show="ask_credential_on_launch">
                                             <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
                                         </div>
+                                    </div>
+                                    <div class="JobSubmission-previewTagContainer" ng-repeat="extraCredential in selected_credentials.extra">
                                         <div class="JobSubmission-previewTag" ng-class="{'JobSubmission-previewTag--deletable': ask_credential_on_launch}">
                                             <span><span class="JobSubmission-previewTagLabel" ng-class="{'JobSubmission-previewTagLabel--deletable': ask_credential_on_launch}">
                                                 {{credential_types[extraCredential.credential_type].name | uppercase}}</span>:&nbsp;{{extraCredential.name}}</span>
+                                        </div>
+                                        <div class="JobSubmission-previewTagContainerDelete" ng-click="deleteExtraCred($index)" ng-show="ask_credential_on_launch">
+                                            <i class="fa fa-times JobSubmission-previewTagContainerTagDelete"></i>
                                         </div>
                                     </div>
                                     <div class="JobSubmission-previewTagContainer JobSubmission-previewTagContainer--vault" ng-show="selected_credentials.vault">

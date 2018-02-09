@@ -1,4 +1,4 @@
-function ListTemplatesController (model, JobTemplate, WorkflowJobTemplate, strings, $state, $scope, rbacUiControlService, Dataset, $filter, Alert, InitiatePlaybookRun, Prompt, Wait, ProcessErrors, TemplateCopyService) {
+function ListTemplatesController (model, JobTemplate, WorkflowJobTemplate, strings, $state, $scope, rbacUiControlService, Dataset, $filter, Alert, InitiatePlaybookRun, Prompt, Wait, ProcessErrors, TemplateCopyService, $q, Empty, i18n, PromptService) {
     const vm = this || {},
           unifiedJobTemplate = model,
           jobTemplate = new JobTemplate(),
@@ -85,28 +85,157 @@ function ListTemplatesController (model, JobTemplate, WorkflowJobTemplate, strin
     // TODO: edit indicator doesn't update when you enter edit route after initial load right now
     vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_template_id);
 
-    // TODO: update to new way of launching job after mike opens his pr
     vm.submitJob = function(template) {
         if(template) {
             if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
-                InitiatePlaybookRun({ scope: $scope, id: template.id, job_type: 'job_template' });
+                let jobTemplate = new JobTemplate();
+
+                $q.all([jobTemplate.optionsLaunch(template.id), jobTemplate.getLaunch(template.id)])
+                    .then((responses) => {
+                        if(jobTemplate.canLaunchWithoutPrompt()) {
+                            jobTemplate.postLaunch({id: template.id})
+                                .then((launchRes) => {
+                                    $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
+                                });
+                        } else {
+
+                            if(responses[1].data.survey_enabled) {
+
+                                // go out and get the survey questions
+                                jobTemplate.getSurveyQuestions(template.id)
+                                    .then((surveyQuestionRes) => {
+
+                                        let processed = PromptService.processSurveyQuestions({
+                                            surveyQuestions: surveyQuestionRes.data.spec
+                                        });
+                                        
+                                        $scope.promptData = {
+                                            launchConf: responses[1].data,
+                                            launchOptions: responses[0].data,
+                                            surveyQuestions: processed.surveyQuestions,
+                                            template: template.id,
+                                            prompts: PromptService.processPromptValues({
+                                                launchConf: responses[1].data,
+                                                launchOptions: responses[0].data
+                                            }),
+                                            triggerModalOpen: true
+                                        };
+                                    });
+                            }
+                            else {
+                                $scope.promptData = {
+                                    launchConf: responses[1].data,
+                                    launchOptions: responses[0].data,
+                                    template: template.id,
+                                    prompts: PromptService.processPromptValues({
+                                        launchConf: responses[1].data,
+                                        launchOptions: responses[0].data
+                                    }),
+                                    triggerModalOpen: true
+                                };
+                            }
+                        }
+                    });
             }
             else if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
                 InitiatePlaybookRun({ scope: $scope, id: template.id, job_type: 'workflow_job_template' });
             }
             else {
-                var alertStrings = {
-                    header: 'Error: Unable to determine template type',
-                    body: 'We were unable to determine this template\'s type while launching.'
+                // Something went wrong - Let the user know that we're unable to launch because we don't know
+                // what type of job template this is
+                Alert('Error: Unable to determine template type', 'We were unable to determine this template\'s type while launching.');
+            }
+        }
+        else {
+            Alert('Error: Unable to launch template', 'Template parameter is missing');
+        }
+    };
+
+    $scope.launchJob = () => {
+
+        let jobLaunchData = {
+            extra_vars: $scope.promptData.extraVars
+        };
+
+        let jobTemplate = new JobTemplate();
+
+        if($scope.promptData.launchConf.ask_tags_on_launch){
+            jobLaunchData.job_tags = $scope.promptData.prompts.tags.value.map(a => a.value).join();
+        }
+        if($scope.promptData.launchConf.ask_skip_tags_on_launch){
+            jobLaunchData.skip_tags = $scope.promptData.prompts.skipTags.value.map(a => a.value).join();
+        }
+        if($scope.promptData.launchConf.ask_limit_on_launch && _.has($scope, 'promptData.prompts.limit.value')){
+            jobLaunchData.limit = $scope.promptData.prompts.limit.value;
+        }
+        if($scope.promptData.launchConf.ask_job_type_on_launch && _.has($scope, 'promptData.prompts.jobType.value.value')) {
+            jobLaunchData.job_type = $scope.promptData.prompts.jobType.value.value;
+        }
+        if($scope.promptData.launchConf.ask_verbosity_on_launch && _.has($scope, 'promptData.prompts.verbosity.value.value')) {
+            jobLaunchData.verbosity = $scope.promptData.prompts.verbosity.value.value;
+        }
+        if($scope.promptData.launchConf.ask_inventory_on_launch && !Empty($scope.promptData.prompts.inventory.value.id)){
+            jobLaunchData.inventory_id = $scope.promptData.prompts.inventory.value.id;
+        }
+        if($scope.promptData.launchConf.ask_credential_on_launch){
+            jobLaunchData.credentials = [];
+            $scope.promptData.prompts.credentials.value.forEach((credential) => {
+                jobLaunchData.credentials.push(credential.id);
+            });
+        }
+        if($scope.promptData.launchConf.ask_diff_mode_on_launch && _.has($scope, 'promptData.prompts.diffMode.value')) {
+            jobLaunchData.diff_mode = $scope.promptData.prompts.diffMode.value;
+        }
+
+        if($scope.promptData.prompts.credentials.passwords) {
+            _.forOwn($scope.promptData.prompts.credentials.passwords, (val, key) => {
+                if(!jobLaunchData.credential_passwords) {
+                    jobLaunchData.credential_passwords = {};
                 }
-                Alert(strings.get('ALERT', alertStrings));
+                if(key === "ssh_key_unlock") {
+                    jobLaunchData.credential_passwords.ssh_key_unlock = val.value;
+                } else if(key !== "vault") {
+                    jobLaunchData.credential_passwords[`${key}_password`] = val.value;
+                } else {
+                    _.each(val, (vaultCred) => {
+                        jobLaunchData.credential_passwords[vaultCred.vault_id ? `${key}_password.${vaultCred.vault_id}` : `${key}_password`] = vaultCred.value;
+                    });
+                }
+            });
+        }
+
+        // If the extra_vars dict is empty, we don't want to include it if we didn't prompt for anything.
+        if(_.isEmpty(jobLaunchData.extra_vars) && !($scope.promptData.launchConf.ask_variables_on_launch && $scope.promptData.launchConf.survey_enabled && $scope.promptData.surveyQuestions.length > 0)){
+            delete jobLaunchData.extra_vars;
+        }
+
+        jobTemplate.postLaunch({
+            id: $scope.promptData.template,
+            launchData: jobLaunchData
+        }).then((launchRes) => {
+            $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
+        }).catch(({data, status}) => {
+            ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
+            msg: i18n.sprintf(i18n._('Failed to launch job template. POST returned: %d'), $scope.promptData.template, status) });
+        });
+    };
+
+    vm.scheduleJob = (template) => {
+        if(template) {
+            if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
+                $state.go('jobTemplateSchedules', {id: template.id});
             }
-        } else {
-            var alertStrings = {
-                header: 'Error: Unable to launch template',
-                body: 'Template parameter is missing'
+            else if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
+                $state.go('workflowJobTemplateSchedules', {id: template.id});
             }
-            Alert(strings.get('ALERT', alertStrings));
+            else {
+                // Something went wrong  Let the user know that we're unable to redirect to schedule because we don't know
+                // what type of job template this is
+                Alert('Error: Unable to determine template type', 'We were unable to determine this template\'s type while routing to schedule.');
+            }
+        }
+        else {
+            Alert('Error: Unable to schedule job', 'Template parameter is missing');
         }
     };
 
@@ -334,7 +463,11 @@ ListTemplatesController.$inject = [
     'Prompt',
     'Wait',
     'ProcessErrors',
-    'TemplateCopyService'
+    'TemplateCopyService',
+    '$q',
+    'Empty',
+    'i18n',
+    'PromptService'
 ];
 
 export default ListTemplatesController;

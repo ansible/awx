@@ -10,6 +10,7 @@ import jobTemplates from './job_templates/main';
 import workflowAdd from './workflows/add-workflow/main';
 import workflowEdit from './workflows/edit-workflow/main';
 import labels from './labels/main';
+import prompt from './prompt/main';
 import workflowChart from './workflows/workflow-chart/main';
 import workflowMaker from './workflows/workflow-maker/main';
 import workflowControls from './workflows/workflow-controls/main';
@@ -23,7 +24,7 @@ import TemplatesStrings from './templates.strings';
 import listRoute from '~features/templates/list.route.js';
 
 export default
-angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, workflowAdd.name, workflowEdit.name,
+angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, prompt.name, workflowAdd.name, workflowEdit.name,
         workflowChart.name, workflowMaker.name, workflowControls.name
     ])
     .service('TemplatesService', templatesService)

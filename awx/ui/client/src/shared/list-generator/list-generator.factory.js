@@ -344,7 +344,7 @@ export default ['$compile', 'Attr', 'Icon',
                     }
                     else { // its assumed that options.input_type = checkbox
                         innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
-                            list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
+                            list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ", true)\" ng-true-value=\"1\" " +
                             "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" /></td>";
                     }
                 }
@@ -368,11 +368,11 @@ export default ['$compile', 'Attr', 'Icon',
                 if (options.mode === 'select') {
                     if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
                         innerTable += "<td class=\"List-tableCell\"><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
-                            list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-value=\"1\" " +
+                            list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ", true)\" ng-value=\"1\" " +
                             "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
                     } else { // its assumed that options.input_type = checkbox
                         innerTable += "<td class=\"List-tableCell\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
-                            list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
+                            list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ", true)\" ng-true-value=\"1\" " +
                             "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
                     }
                 } else if ((options.mode === 'edit' || options.mode === 'summary') && list.fieldActions) {
