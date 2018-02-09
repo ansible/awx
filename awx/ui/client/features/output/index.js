@@ -54,13 +54,38 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
         });
 }
 
-function JobsRun ($stateExtender, strings) {
-    $stateExtender.addState({
+function resolveSocket (SocketService, $stateParams) {
+    const { id } = $stateParams;
+    const { type } = $stateParams;
+
+    // TODO: accommodate other result types (management, scm_update, etc)
+    const state = {
+        data: {
+            socket: {
+                groups: {
+                    jobs: ['status_changed', 'summary'],
+                    job_events: []
+                }
+            }
+        }
+    };
+
+    SocketService.addStateResolve(state, id);
+
+    return SocketService;
+}
+
+function resolveBreadcrumb (strings) {
+    return {
+        label: strings.get('state.TITLE')
+    };
+}
+
+function JobsRun ($stateRegistry) {
+    const state = {
         name: 'jobz',
+        url: '/jobz/:type/:id',
         route: '/jobz/:type/:id',
-        ncyBreadcrumb: {
-            label: strings.get('state.TITLE')
-        },
         data: {
             activityStream: true,
             activityStreamTarget: 'jobs'
@@ -81,12 +106,23 @@ function JobsRun ($stateExtender, strings) {
                 'WorkflowJobModel',
                 '$stateParams',
                 resolveResource
+            ],
+            ncyBreadcrumb: [
+                'JobsStrings',
+                resolveBreadcrumb
+            ],
+            socket: [
+                'SocketService',
+                '$stateParams',
+                resolveSocket
             ]
-        }
-    });
+        },
+    };
+
+    $stateRegistry.register(state);
 }
 
-JobsRun.$inject = ['$stateExtender', 'JobsStrings'];
+JobsRun.$inject = ['$stateRegistry'];
 
 angular
     .module(MODULE_NAME, [

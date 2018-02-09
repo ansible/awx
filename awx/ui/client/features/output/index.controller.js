@@ -5,6 +5,7 @@ let vm;
 let ansi;
 let resource;
 let related;
+let socket;
 let container;
 let $timeout;
 let $sce;
@@ -40,6 +41,7 @@ const TIME_EVENTS = [
 
 function JobsIndexController (
     _resource_,
+    _socket_,
     _$sce_,
     _$timeout_,
     _$scope_,
@@ -52,6 +54,7 @@ function JobsIndexController (
     $scope = _$scope_;
     $q = _$q_;
     resource = _resource_;
+    socket = _socket_;
 
     ansi = new Ansi();
     related = getRelated();
@@ -611,6 +614,7 @@ function scrollPageDown () {
 
 JobsIndexController.$inject = [
     'resource',
+    'socket',
     '$sce',
     '$timeout',
     '$scope',
