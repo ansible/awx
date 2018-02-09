@@ -20,6 +20,7 @@ var util = require('./util.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
 var animations = require('./animations.js');
+var keybindings = require('./keybindings.fsm.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
@@ -157,9 +158,30 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         }
     };
 
+    $scope.onKeyDown = function ($event) {
+        if ($scope.recording) {
+            $scope.send_control_message(new messages.KeyEvent($scope.client_id,
+                                                              $event.key,
+                                                              $event.keyCode,
+                                                              $event.type,
+                                                              $event.altKey,
+                                                              $event.shiftKey,
+                                                              $event.ctrlKey,
+                                                              $event.metaKey,
+                                                              $scope.trace_id));
+        }
+        $scope.last_event = $event;
+        $scope.last_key = $event.key;
+        $scope.last_key_code = $event.keyCode;
+        $scope.first_channel.send('KeyDown', $event);
+        $scope.$apply();
+        $event.preventDefault();
+    };
+
   //Define the FSMs
   $scope.null_controller = new fsm.FSMController($scope, "null_fsm", null_fsm.Start, $scope);
   $scope.hotkeys_controller = new fsm.FSMController($scope, "hotkeys_fsm", hotkeys.Start, $scope);
+  $scope.keybindings_controller = new fsm.FSMController($scope, "keybindings_fsm", keybindings.Start, $scope);
   $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
   $scope.device_detail_controller = new fsm.FSMController($scope, "device_detail_fsm", device_detail_fsm.Start, $scope);
   $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope);
@@ -283,8 +305,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.mode_controller = new fsm.FSMController($scope, "mode_fsm", mode_fsm.Start, $scope);
 
   //Wire up the FSMs
-  $scope.view_controller.delegate_channel = new fsm.Channel($scope.view_controller,
+  $scope.keybindings_controller.delegate_channel = new fsm.Channel($scope.keybindings_controller,
                                                             $scope.hotkeys_controller,
+                                                            $scope);
+
+  $scope.view_controller.delegate_channel = new fsm.Channel($scope.view_controller,
+                                                            $scope.keybindings_controller,
                                                             $scope);
   $scope.device_detail_controller.delegate_channel = new fsm.Channel($scope.device_detail_controller,
                                                             $scope.view_controller,
@@ -597,28 +623,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
       $event.preventDefault();
     };
 
-    $scope.onKeyDown = function ($event) {
-        if ($scope.recording) {
-            $scope.send_control_message(new messages.KeyEvent($scope.client_id,
-                                                              $event.key,
-                                                              $event.keyCode,
-                                                              $event.type,
-                                                              $event.altKey,
-                                                              $event.shiftKey,
-                                                              $event.ctrlKey,
-                                                              $event.metaKey,
-                                                              $scope.trace_id));
-        }
-        $scope.last_event = $event;
-        $scope.last_key = $event.key;
-        $scope.last_key_code = $event.keyCode;
-        $scope.first_channel.send('KeyDown', $event);
-        $scope.$apply();
-        $event.preventDefault();
-    };
-
-    $document.bind("keydown", $scope.onKeyDown);
-
     // Conext Menu Button Handlers
     $scope.removeContextMenu = function(){
         let context_menu = $scope.context_menus[0];
@@ -631,7 +635,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             button.y = -100000;
         });
     };
-
 
     $scope.closeDetailsPanel = function () {
         $scope.$emit('closeDetailsPanel');
@@ -826,6 +829,13 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope[`on${functionName}Button`]();
     });
 
+    $scope.$on('unbind', function(){
+        $scope.first_channel.send('UnbindDocument', {});
+    });
+
+    $scope.$on('bind', function(){
+        $scope.first_channel.send('BindDocument', {});
+    });
 
     $scope.jump_to_animation = function(jump_to_x, jump_to_y, jump_to_scale) {
         $scope.cancel_animations();
@@ -1857,7 +1867,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     $scope.$on('$destroy', function () {
         console.log("Network UI stopping");
-        $document.unbind('keydown', $scope.onKeyDown);
+        $scope.first_channel.send('UnbindDocument', {});
     });
 
     $scope.update_toolbox_heights = function(){
@@ -1960,6 +1970,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.null_controller.state.start($scope.null_controller);
         $scope.hotkeys_controller.state = hotkeys.Start;
         $scope.hotkeys_controller.state.start($scope.hotkeys_controller);
+        $scope.keybindings_controller.state = keybindings.Start;
+        $scope.keybindings_controller.state.start($scope.keybindings_controller);
         $scope.view_controller.state = view.Start;
         $scope.view_controller.state.start($scope.view_controller);
         $scope.device_detail_controller.state = device_detail_fsm.Start;
