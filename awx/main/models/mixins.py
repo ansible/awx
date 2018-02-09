@@ -3,8 +3,6 @@ import os
 import json
 from copy import copy, deepcopy
 
-import six
-
 # Django
 from django.conf import settings
 from django.db import models
@@ -199,7 +197,7 @@ class SurveyJobTemplateMixin(models.Model):
                 errors.append("'%s' value missing" % survey_element['variable'])
         elif survey_element['type'] in ["textarea", "text", "password"]:
             if survey_element['variable'] in data:
-                if type(data[survey_element['variable']]) not in six.string_types:
+                if type(data[survey_element['variable']]) not in (str, unicode):
                     errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']],
                                                                                   survey_element['variable']))
                     return errors
