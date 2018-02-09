@@ -9,6 +9,7 @@ from pyparsing import (
 )
 
 import django
+import six
 
 from awx.main.utils.common import get_search_fields
 
@@ -54,12 +55,12 @@ class SmartFilter(object):
                 self.result = Host.objects.filter(**kwargs)
 
         def strip_quotes_traditional_logic(self, v):
-            if type(v) is unicode and v.startswith('"') and v.endswith('"'):
+            if type(v) is six.text_type and v.startswith('"') and v.endswith('"'):
                 return v[1:-1]
             return v
 
         def strip_quotes_json_logic(self, v):
-            if type(v) is unicode and v.startswith('"') and v.endswith('"') and v != u'"null"':
+            if type(v) is six.text_type and v.startswith('"') and v.endswith('"') and v != u'"null"':
                 return v[1:-1]
             return v
 
