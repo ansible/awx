@@ -86,6 +86,7 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     });
 
     $('#networking-search').on('select2:close', () => {
+        $('#networking-search').blur();
         $scope.$broadcast('bind');
     });
 }
