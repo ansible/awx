@@ -10,15 +10,25 @@ function InstancesController ($scope, $state, $http, models, Instance, strings, 
 
     function init() {
         $scope.list = {
+            name: 'instances',
             iterator: 'instance',
-            name: 'instances'
+            basePath: `/api/v2/instance_groups/${vm.instance_group_id}/instances/`
         };
+
         $scope.collection = {
-            basepath: 'instances',
-            iterator: 'instance'
+            iterator: 'instance',
+            basePath: `/api/v2/instance_groups/${vm.instance_group_id}/instances/`
         };
+
         $scope[`${$scope.list.iterator}_dataset`] = Dataset.data;
         $scope[$scope.list.name] = $scope[`${$scope.list.iterator}_dataset`].results;
+        $scope.instances = vm.instances;
+
+        $scope.$on('updateDataset', function(e, dataset) {
+            $scope[`${$scope.list.iterator}_dataset`] = dataset;
+            $scope[$scope.list.name] = dataset.results;
+            vm.instances = dataset.results;
+        });
     }
 
     vm.tab = {
@@ -42,6 +52,7 @@ function InstancesController ($scope, $state, $http, models, Instance, strings, 
         instance.enabled = !instance.enabled;
 
         const data = {
+            "capacity_adjustment": instance.capacity_adjustment,
             "enabled": instance.enabled
         };
 

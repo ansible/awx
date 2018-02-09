@@ -1,4 +1,4 @@
-function InstanceModalController ($scope, $state, models, strings, ProcessErrors) {
+function InstanceModalController ($scope, $state, models, strings, ProcessErrors, Wait) {
     const { instance, instanceGroup } = models;
     const vm = this || {};
 
@@ -39,6 +39,7 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
      }, true);
 
     vm.submit = () => {
+        Wait('start');
         const associate = vm.selectedRows
             .map(instance => ({id: instance.id}));
         const disassociate = vm.deselectedRows
@@ -60,6 +61,9 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
                     hdr: 'Error!',
                     msg: 'Call failed. Return status: ' + status
                 });
+            })
+            .finally(() => {
+                Wait('stop');
             });
     };
 
@@ -73,7 +77,8 @@ InstanceModalController.$inject = [
     '$state',
     'resolvedModels',
     'InstanceGroupsStrings',
-    'ProcessErrors'
+    'ProcessErrors',
+    'Wait'
 ];
 
 export default InstanceModalController;

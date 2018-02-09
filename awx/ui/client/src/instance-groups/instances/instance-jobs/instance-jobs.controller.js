@@ -1,7 +1,8 @@
 
-function InstanceJobsController ($scope, $filter, $state, model, strings, jobStrings) {
+function InstanceJobsController ($scope, $filter, $state, model, strings, jobStrings, Instance) {
     const vm = this || {};
-    const { instance } = model;
+    let { instance } = model;
+    const instance_id = instance.get('id');
 
     init();
 
@@ -62,6 +63,17 @@ function InstanceJobsController ($scope, $filter, $state, model, strings, jobStr
         }
     };
 
+    $scope.$on('ws-jobs', () => {
+        new Instance(['get', 'options'], [instance_id, instance_id])
+            .then((data) =>  {
+                return data.extend('get', 'jobs', {params: {page_size: "10", order_by: "-finished"}});
+            })
+            .then((data) => {
+                instance = data;
+                init();
+            });
+    });
+
 }
 
 InstanceJobsController.$inject = [
@@ -70,7 +82,8 @@ InstanceJobsController.$inject = [
     '$state',
     'resolvedModels',
     'InstanceGroupsStrings',
-    'JobStrings'
+    'JobStrings',
+    'InstanceModel'
 ];
 
 export default InstanceJobsController;
