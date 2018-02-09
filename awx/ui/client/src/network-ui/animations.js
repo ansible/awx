@@ -9,8 +9,8 @@ function scale_animation (scope) {
     var c = scope.data.c;
     var x = scope.frame_number;
     var initial_height = (1 / scope.data.current_scale) - 1;
-    var a = -1 * initial_height / (c * d)
-    var height = (scope.frame_number + a) * (scope.frame_number - d) * c;
+    var a = -1 * initial_height / (c * d);
+    var height = (x + a) * (x - d) * c + scope.data.end_height;
     //console.log({x: x,
     //             c: c,
     //             d: d,
