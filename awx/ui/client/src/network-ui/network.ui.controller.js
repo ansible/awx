@@ -619,13 +619,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     $document.bind("keydown", $scope.onKeyDown);
 
-    $('#networking-search').on('select2:open', () => {
-        $document.unbind('keydown', $scope.onKeyDown);
-    });
-
-    $('#networking-search').on('select2:close', () => {
-        $document.bind('keydown', $scope.onKeyDown);
-    });
     // Conext Menu Button Handlers
     $scope.removeContextMenu = function(){
         let context_menu = $scope.context_menus[0];
@@ -642,7 +635,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     $scope.closeDetailsPanel = function () {
         $scope.$emit('closeDetailsPanel');
-        $document.bind('keydown', $scope.onKeyDown);
     };
 
     $scope.onDetailsContextButton = function (panelBoolean) {
@@ -655,7 +647,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 if ($scope.selected_devices[0].host_id === 0){
                     let host = $scope.selected_devices[0];
                     $scope.update_toolbox_heights();
-                    $document.unbind('keydown', $scope.onKeyDown);
                     $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
                 }
 
@@ -668,7 +659,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                              let host = response.data;
                              host.host_id = host.id;
                              $scope.update_toolbox_heights();
-                             $document.unbind('keydown', $scope.onKeyDown);
                              $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
 
                          })
@@ -682,7 +672,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             else if($scope.selected_interfaces.length === 1){
                 let selected_interface  = $scope.selected_interfaces[0];
                 $scope.update_toolbox_heights();
-                $document.unbind('keydown', $scope.onKeyDown);
                 $scope.$emit('showDetails', selected_interface, panelBoolean !== null ? panelBoolean: true);
             }
 
@@ -690,7 +679,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             else if($scope.selected_links.length === 1){
                 let link  = $scope.selected_links[0];
                 $scope.update_toolbox_heights();
-                $document.unbind('keydown', $scope.onKeyDown);
                 $scope.$emit('showDetails', link, panelBoolean !== null ? panelBoolean: true);
             }
 
@@ -698,7 +686,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             else if ($scope.selected_groups.length === 1){
                 let group = $scope.selected_groups[0];
                 $scope.update_toolbox_heights();
-                $document.unbind('keydown', $scope.onKeyDown);
                 $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);
             }
          }
@@ -839,22 +826,25 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope[`on${functionName}Button`]();
     });
 
-    $scope.$on('search', function(e, device){
 
+    $scope.jump_to_animation = function(jump_to_x, jump_to_y, jump_to_scale) {
         $scope.cancel_animations();
-        var num_frames = 30;
-        var searched;
-        for(var i = 0; i < $scope.devices.length; i++){
-            if(Number(device.id) === $scope.devices[i].id){
-                searched = $scope.devices[i];
-            }
-        }
-        console.log(searched);
+        var v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
+        //console.log({v_center: v_center});
+        $scope.jump.from_x = v_center.x;
+        $scope.jump.from_y = v_center.y;
+        $scope.jump.to_x = jump_to_x;
+        $scope.jump.to_y = jump_to_y;
+        var distance = util.distance(v_center.x, v_center.y, jump_to_x, jump_to_y);
+        //console.log({distance: distance});
+        var num_frames = 30 * Math.floor((1 + 3 * distance / (distance + 3000)));
+        //console.log({num_frames: num_frames});
         var scale_animation = new models.Animation($scope.animation_id_seq(),
                                                   num_frames,
                                                   {
-                                                      new_scale: 0.10,
-                                                      current_scale: scope.current_scale,
+                                                      c: -0.1,
+                                                      end_height: (1.0/jump_to_scale) - 1,
+                                                      current_scale: $scope.current_scale,
                                                       scope: $scope
                                                   },
                                                   $scope,
@@ -864,43 +854,47 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         var pan_animation = new models.Animation($scope.animation_id_seq(),
                                                   num_frames,
                                                   {
-                                                      x2: 0,
-                                                      y2: 0,
-                                                      x1: searched.x,
-                                                      y1: searched.y,
+                                                      x2: jump_to_x,
+                                                      y2: jump_to_y,
+                                                      x1: v_center.x,
+                                                      y1: v_center.y,
                                                       scope: $scope
                                                   },
                                                   $scope,
                                                   $scope,
                                                   animations.pan_animation);
         $scope.animations.push(pan_animation);
-        $scope.first_channel.send("ScaleChanged", {});
+    };
+
+    $scope.$on('search', function(e, device){
+
+        var num_frames = 30;
+        var searched;
+        for(var i = 0; i < $scope.devices.length; i++){
+            if(Number(device.id) === $scope.devices[i].id){
+                searched = $scope.devices[i];
+            }
+        }
+        //console.log(searched);
+        $scope.jump_to_animation(searched.x, searched.y, 1.0);
     });
 
-    $scope.$on('jumpTo', function(e, zoomLevel){
+    $scope.$on('jumpTo', function(e, zoomLevel) {
+        var v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
         switch (zoomLevel){
             case 'site':
-                $scope.current_scale = 0.051;
+                $scope.jump_to_animation(v_center.x, v_center.y, 0.051);
                 break;
             case 'rack':
-                $scope.current_scale = 0.11;
+                $scope.jump_to_animation(v_center.x, v_center.y, 0.11);
                 break;
             case 'inventory':
-                $scope.current_scale = 0.51;
+                $scope.jump_to_animation(v_center.x, v_center.y, 0.51);
                 break;
             case 'process':
-                $scope.current_scale = 5.1;
+                $scope.jump_to_animation(v_center.x, v_center.y, 5.1);
                 break;
         }
-        var new_panX = $scope.mouseX - $scope.current_scale * (($scope.mouseX - $scope.panX) / $scope.current_scale);
-        var new_panY = $scope.mouseY - $scope.current_scale * (($scope.mouseY - $scope.panY) / $scope.current_scale);
-        $scope.panX = new_panX;
-        $scope.panY = new_panY;
-        $scope.first_channel.send("ScaleChanged", {});
-        $scope.first_channel.send("ScaleChanged", {});
-        $scope.first_channel.send("ScaleChanged", {});
-        $scope.updateScaledXY();
-        $scope.updatePanAndScale();
     });
 
     $scope.onDeployButton = function (button) {

@@ -2,9 +2,6 @@
 var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var messages = require('./messages.js');
-var animations = require('./animations.js');
-var models = require('./models.js');
-var util = require('./util.js');
 
 function _State () {
 }
@@ -106,43 +103,7 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         return;
 	}
     else if ($event.key === '0') {
-        scope.cancel_animations();
-        var jump_to_x = 54772;
-        var jump_to_y = 43738;
-        var v_center = scope.to_virtual_coordinates(scope.graph.width/2, scope.graph.height/2);
-        console.log({v_center: v_center});
-        scope.jump.from_x = v_center.x;
-        scope.jump.from_y = v_center.y;
-        scope.jump.to_x = jump_to_x;
-        scope.jump.to_y = jump_to_y;
-        var distance = util.distance(v_center.x, v_center.y, jump_to_x, jump_to_y);
-        console.log({distance: distance});
-        var num_frames = 30 * Math.floor((1 + 3 * distance / (distance + 3000)));
-        console.log({num_frames: num_frames});
-        var scale_animation = new models.Animation(scope.animation_id_seq(),
-                                                  num_frames,
-                                                  {
-                                                      c: -0.1,
-                                                      current_scale: scope.current_scale,
-                                                      scope: scope
-                                                  },
-                                                  scope,
-                                                  scope,
-                                                  animations.scale_animation);
-        scope.animations.push(scale_animation);
-        var pan_animation = new models.Animation(scope.animation_id_seq(),
-                                                  num_frames,
-                                                  {
-                                                      x2: jump_to_x,
-                                                      y2: jump_to_y,
-                                                      x1: v_center.x,
-                                                      y1: v_center.y,
-                                                      scope: scope
-                                                  },
-                                                  scope,
-                                                  scope,
-                                                  animations.pan_animation);
-        scope.animations.push(pan_animation);
+        scope.jump_to_animation(0, 0, 1.0);
     }
 
 	controller.delegate_channel.send(msg_type, $event);
