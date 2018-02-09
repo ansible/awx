@@ -118,6 +118,10 @@ function AtInputLookupController (baseInputController, $q, $state) {
 
         vm.searchAfterDebounce();
     };
+
+    vm.removeTag = (tagToRemove) => {
+        _.remove(scope.state._value, (tag) => tag === tagToRemove);
+    };
 }
 
 AtInputLookupController.$inject = [

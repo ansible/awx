@@ -96,6 +96,12 @@
     path: "{{ kubernetes_base_path }}"
     state: directory
 
+- name: Template Kubernetes AWX etcd2
+  template:
+    src: etcd.yml.j2
+    dest: "{{ kubernetes_base_path }}/etcd.yml"
+    mode: '0600'
+
 - name: Template Kubernetes AWX Config
   template:
     src: configmap.yml.j2
@@ -108,6 +114,9 @@
     dest: "{{ kubernetes_base_path }}/deployment.yml"
     mode: '0600'
 
+- name: Apply etcd deployment
+  shell: "kubectl apply -f {{ kubernetes_base_path }}/etcd.yml"
+  
 - name: Apply Configmap
   shell: "kubectl apply -f {{ kubernetes_base_path }}/configmap.yml"
 

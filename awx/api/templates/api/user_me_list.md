@@ -1,3 +1,5 @@
+# Retrieve Information about the current User
+
 Make a GET request to retrieve user information about the current user.
 
 One result should be returned containing the following fields:

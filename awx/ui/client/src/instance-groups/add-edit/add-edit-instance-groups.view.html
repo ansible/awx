@@ -1,0 +1,30 @@
+<at-panel>
+    <at-panel-heading>
+        {{ vm.panelTitle }}
+    </at-panel-heading>
+
+    <at-tab-group>
+        <at-tab state="vm.tab.details">{{:: vm.strings.get('tab.DETAILS') }}</at-tab>
+        <at-tab state="vm.tab.instances">{{:: vm.strings.get('tab.INSTANCES') }}</at-tab>
+        <at-tab state="vm.tab.jobs">{{:: vm.strings.get('tab.JOBS') }}</at-tab>
+    </at-tab-group>
+
+    <at-panel-body>
+        <at-form state="vm.form" autocomplete="off">
+
+            <at-input-text col="4" tab="1" state="vm.form.name"></at-input-text>
+
+            <at-input-text col="4" tab="3" state="vm.form.policy_instance_minimum"></at-input-text>
+
+            <at-input-slider col="4" tab="3" state="vm.form.policy_instance_percentage"></at-input-slider>
+
+            <at-input-lookup col="4" tab="4" state="vm.form.policy_instance_list"></at-input-lookup>
+            <div ui-view="modal"></div>
+
+            <at-action-group col="12" pos="right">
+                <at-form-action type="cancel" to="instanceGroups"></at-form-action>
+                <at-form-action type="save"></at-form-action>
+            </at-action-group>
+        </at-form>
+    </at-panel-body>
+</at-panel>

@@ -15,7 +15,17 @@
         background: @at-color-disabled;
     }
 }
- 
+
+.at-Button--add {
+    &:extend(.at-Button--success all);
+    &:before {
+        content: "+";
+        font-size: 20px;
+    }
+    border-color: transparent;
+    margin-left: @at-space-2x;
+}
+
 .at-Button--info {
     .at-mixin-Button();
     .at-mixin-ButtonColor('at-color-info', 'at-color-default');
@@ -26,7 +36,7 @@
     .at-mixin-ButtonColor('at-color-error', 'at-color-default');
 }
 
-.at-ButtonHollow--default { 
+.at-ButtonHollow--default {
     .at-mixin-Button();
     .at-mixin-ButtonHollow(
         'at-color-default',
@@ -41,5 +51,5 @@
 }
 
 .at-Button--expand {
-    width: 100%;  
+    width: 100%;
 }

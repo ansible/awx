@@ -29,5 +29,3 @@ Response code from this action will be:
  - 202 if some inventory source updates were successful, but some failed
  - 400 if all of the inventory source updates failed
  - 400 if there are no inventory sources in the inventory
-
-{% include "api/_new_in_awx.md" %}

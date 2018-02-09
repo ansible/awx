@@ -183,7 +183,7 @@ def listen():
     def _consume(queue):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 6899))
-        print 'listening for rdb notifications on :6899...'
+        print('listening for rdb notifications on :6899...')
         while True:
             r, w, x = select.select([sock], [], [])
             for i in r:
@@ -201,13 +201,13 @@ def listen():
                 if port == 'q':
                     break
                 port = int(port)
-                print 'opening telnet session at localhost:%d...' % port
+                print('opening telnet session at localhost:%d...' % port)
                 telnet(port)
-                print 'listening for rdb notifications on :6899...'
+                print('listening for rdb notifications on :6899...')
             except Empty:
                 pass
     except KeyboardInterrupt:
-        print 'got Ctrl-C'
+        print('got Ctrl-C')
         queue.put('q')
 
 
@@ -218,18 +218,18 @@ def telnet(port):
     try:
         s.connect(('0.0.0.0', port))
     except Exception:
-        print 'unable to connect'
+        print('unable to connect')
         return
-    print 'connected to 0.0.0.0:%d' % port
+    print('connected to 0.0.0.0:%d' % port)
 
     while True:
         socket_list = [sys.stdin, s]
-        r, w, e = select.select(socket_list , [], [])
+        r, w, e = select.select(socket_list, [], [])
         for sock in r:
             if sock == s:
                 data = sock.recv(4096)
                 if not data:
-                    print 'connection closed'
+                    print('connection closed')
                     return
                 else:
                     sys.stdout.write(data)

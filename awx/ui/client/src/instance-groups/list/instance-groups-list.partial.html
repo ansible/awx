@@ -1,63 +1,82 @@
-<div class="List-header">
-    <div class="List-title">
-        <div class="List-titleText" translate>
-            INSTANCE GROUPS
-        </div>
+<at-panel>
+    <at-panel-heading hide-dismiss="true">
+        {{ vm.strings.get('layout.INSTANCE_GROUPS') }}
         <span class="badge List-titleBadge">
             {{ instanceGroupCount }}
         </span>
-    </div>
-</div>
+    </at-panel-heading>
 
-<smart-search django-model="instance_groups" base-path="instance_groups" iterator="instance_group" list="list" dataset="instance_group_dataset"
-    collection="instance_groups" search-tags="searchTags">
-</smart-search>
+    <at-panel-body>
+        <div class="at-List-toolbar">
+            <smart-search
+                class="at-List-search"
+                django-model="instance_groups"
+                base-path="instance_groups"
+                iterator="instance_group"
+                list="list"
+                dataset="instance_group_dataset"
+                collection="collection"
+                search-tags="searchTags">
+            </smart-search>
+            <div class="at-List-toolbarAction">
+                <div ng-click="vm.delete()"
+                    class="at-RowAction at-RowAction--danger">
+                    <i class="fa fa-trash"></i>
+                </div>
+                <button
+                    type="button"
+                    ui-sref="instanceGroups.add"
+                    class="at-Button--add"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                </button>
+            </div>
+        </div>
 
-<div class="List-noItems" ng-show="instance_groups.length < 1" translate>PLEASE ADD ITEMS TO THIS LIST</div>
+        <at-list>
+            <at-row ng-repeat="instance_group in instance_groups"
+                ng-class="{'at-Row--active': (instance_group.id === vm.activeId)}">
 
-<div class="list-table-container" ng-show="instance_groups.length > 0">
-    <table id="instance_groups_table" class="List-table" is-extended="false">
-        <thead>
-            <tr class="List-tableHeaderRow">
-                <th id="instance_group-name-header" class="List-tableHeader list-header col-md-5 col-sm-5 col-xs-5" ng-click="columnNoSort !== 'true' &amp;&amp; toggleColumnOrderBy()"
-                    ng-class="{'list-header-noSort' : columnNoSort === 'true'}" base-path="instance_groups" collection="instance_groups"
-                    dataset="instance_group_dataset" column-sort="" column-field="name" column-iterator="instance_group" column-no-sort="undefined"
-                    column-label="Name" column-custom-class="col-md-5 col-sm-5 col-xs-5" query-set="instance_group_queryset">
-                    "{{'Name' | translate}}"
-                    <i ng-if="columnNoSort !== 'true'" class="fa columnSortIcon fa-sort-up" ng-class="orderByIcon()"></i>
-                </th>
-                <th id="instance_group-jobs_running-header" class="List-tableHeader list-header list-header-noSort" translate>
-                    Running Jobs
-                </th>
-                <th id="instance_group-consumed_capacity-header" class="List-tableHeader list-header list-header-noSort" translate>
-                    Used Capacity
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- ngRepeat: instance_group in instance_groups -->
-            <tr ng-class="{isActive: isActive(instance_group.id)}" id="instance_group.id" class="List-tableRow instance_group_class ng-scope" ng-repeat="instance_group in instance_groups">
-                <td class="List-tableCell name-column col-md-5 col-sm-5 col-xs-5">
-                    <a ui-sref="instanceGroups.instances.list({instance_group_id: instance_group.id})" class="ng-binding" >{{ instance_group.name }}</a>
-                    <span class="badge List-titleBadge">{{ instance_group.instances }}</span>
-                </td>
-                <td class="List-tableCell jobs_running-column ng-binding">
-                    <a ui-sref="instanceGroups.instances.jobs({instance_group_id: instance_group.id})">
-                        {{ instance_group.jobs_running }}
-                    </a>
-                </td>
-                <td class="List-tableCell List-tableCell--capacityColumn ng-binding">
-                    <capacity-bar capacity="instance_group.consumed_capacity" total-capacity="instance_group.capacity"></capacity-bar>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+                <input type="checkbox"
+                class="at-Row-checkbox"
+                ng-model="selection[instance_group.id]"/>
 
-<paginate
-    base-path="instance_groups"
-    iterator="instance_group"
-    dataset="instance_group_dataset"
-    collection="instance_groups"
-    query-set="instance_group_queryset">
-</paginate>
+                <div class="at-Row-items">
+                    <at-row-item
+                        header-value="{{ instance_group.name }}"
+                        header-link="/#/instance_groups/{{ instance_group.id }}">
+                    </at-row-item>
+
+                    <div class="at-Row--rowLayout">
+                        <at-row-item
+                            label-value="Instances"
+                            label-link="/#/instance_groups/{{ instance_group.id }}/instances"
+                            value="{{ instance_group.instances }}"
+                            badge="true">
+                        </at-row-item>
+
+                        <at-row-item
+                            label-value="Running Jobs"
+                            label-link="/#/instance_groups/{{ instance_group.id }}/jobs"
+                            value="{{ instance_group.jobs_running }}"
+                            badge="true">
+                        </at-row-item>
+                    </div>
+
+                </div>
+
+                <div class="at-Row-actions">
+                    <capacity-bar label-value="Used Capacity" capacity="instance_group.consumed_capacity" total-capacity="instance_group.capacity"></capacity-bar>
+                </div>
+            </at-row>
+        </at-list>
+    </at-panel-body>
+    <paginate
+        base-path="instance_groups"
+        iterator="instance_group"
+        dataset="instance_group_dataset"
+        collection="instance_groups"
+        query-set="instance_group_queryset">
+    </paginate>
+</at-panel>
+

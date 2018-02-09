@@ -229,6 +229,8 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     '''
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
+    FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'instance_groups', 'credentials']
+    FIELDS_TO_DISCARD_AT_COPY = ['local_path']
 
     class Meta:
         app_label = 'main'
@@ -492,7 +494,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
 
     @property
     def task_impact(self):
-        return 0 if self.job_type == 'run' else 20
+        return 0 if self.job_type == 'run' else 1
 
     @property
     def result_stdout(self):

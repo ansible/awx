@@ -61,8 +61,21 @@ const getInventory = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventories/', {
         name: `${namespace}-inventory`,
         description: namespace,
-        organization: organization.id
-    }));
+        organization: organization.id,
+    }).then(inventory => getOrCreate('/hosts/', {
+        name: `${namespace}-host`,
+        description: namespace,
+        inventory: inventory.id,
+        variables: JSON.stringify({ ansible_connection: 'local' }),
+    }).then(() => inventory)));
+
+const getHost = (namespace = session) => getInventory(namespace)
+    .then(inventory => getOrCreate('/hosts/', {
+        name: `${namespace}-host`,
+        description: namespace,
+        inventory: inventory.id,
+        variables: JSON.stringify({ ansible_connection: 'local' }),
+    }).then((host) => host));
 
 const getInventoryScript = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventory_scripts/', {
@@ -182,7 +195,7 @@ const waitForJob = endpoint => {
                 const completed = statuses.indexOf(update.data.status) > -1;
 
                 if (completed) {
-                    return resolve();
+                    return resolve(update.data);
                 }
 
                 if (--attempts <= 0) {
@@ -204,6 +217,15 @@ const getUpdatedProject = (namespace = session) => getProject(namespace)
         }
 
         return project;
+    });
+
+const getJob = (namespace = session) => getJobTemplate(namespace)
+    .then(template => {
+        const launchURL = template.related.launch;
+        return post(launchURL, {}).then(response => {
+            const jobURL = response.data.url;
+            return waitForJob(jobURL).then(() => response.data);
+        });
     });
 
 const getJobTemplate = (namespace = session) => {
@@ -271,6 +293,29 @@ const getJobTemplateAdmin = (namespace = session) => {
         .then(spread(user => user));
 };
 
+const getProjectAdmin = (namespace = session) => {
+    const rolePromise = getUpdatedProject(namespace)
+        .then(obj => obj.summary_fields.object_roles.admin_role);
+
+    const userPromise = getOrganization(namespace)
+        .then(obj => getOrCreate('/users/', {
+            username: `project-admin-${uuid().substr(0, 8)}`,
+            organization: obj.id,
+            first_name: 'firstname',
+            last_name: 'lastname',
+            email: 'null@ansible.com',
+            is_superuser: false,
+            is_system_auditor: false,
+            password: AWX_E2E_PASSWORD
+        }));
+
+    const assignRolePromise = Promise.all([userPromise, rolePromise])
+        .then(spread((user, role) => post(`/api/v2/roles/${role.id}/users/`, { id: user.id })));
+
+    return Promise.all([userPromise, assignRolePromise])
+        .then(spread(user => user));
+};
+
 const getInventorySourceSchedule = (namespace = session) => getInventorySource(namespace)
     .then(source => getOrCreate(source.related.schedules, {
         name: `${source.name}-schedule`,
@@ -282,7 +327,7 @@ const getJobTemplateSchedule = (namespace = session) => getJobTemplate(namespace
     .then(template => getOrCreate(template.related.schedules, {
         name: `${template.name}-schedule`,
         description: namespace,
-        rrule: 'DTSTART:20171104T040000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
+        rrule: 'DTSTART:20351104T040000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
     }));
 
 module.exports = {
@@ -299,8 +344,11 @@ module.exports = {
     getNotificationTemplate,
     getOrCreate,
     getOrganization,
+    getProjectAdmin,
     getSmartInventory,
     getTeam,
     getUpdatedProject,
-    getUser
+    getUser,
+    getJob,
+    getHost,
 };

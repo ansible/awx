@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import hashlib
+from supervisor import childutils
+
+
+def hash(f):
+    s = hashlib.sha1()
+    with open(f, "rb") as fd:
+        for chunk in iter(lambda: fd.read(4096), b""):
+            s.update(chunk)
+    return s.hexdigest()
+
+
+def last_hash(f):
+    with open(f, "r") as fd:
+        return fd.read().strip()
+
+
+def write_hash(f, h):
+    with open(f, "w") as fd:
+        fd.write(h)
+
+
+def main():
+    while 1:
+        rpc = childutils.getRPCInterface(os.environ)
+        headers, payload = childutils.listener.wait(sys.stdin, sys.stdout)
+        if not headers['eventname'].startswith('TICK'):
+            childutils.listener.ok(sys.stdout)
+            continue
+        try:
+            current_hash = hash("/etc/tower/settings.py")
+        except:
+            sys.stderr.write("Could not open settings.py, skipping config watcher")
+            childutils.listener.ok(sys.stdout)
+            continue
+        try:
+            if current_hash == last_hash("/var/lib/awx/.configsha"):
+                childutils.listener.ok(sys.stdout)
+                continue
+            else:
+                sys.stderr.write("Config changed, reloading services")
+                for proc in rpc.supervisor.getAllProcessInfo():
+                    group = proc['group']
+                    name = proc['name']
+                    program = "{}:{}".format(group, name)
+                    if group == "tower-processes":
+                        sys.stderr.write('Restarting %s\n' % program)
+                        rpc.supervisor.stopProcess(program)
+                        rpc.supervisor.startProcess(program)
+                    
+        except:
+            sys.stderr.write("No previous hash found")
+        write_hash("/var/lib/awx/.configsha")
+        childutils.listener.ok(sys.stdout)

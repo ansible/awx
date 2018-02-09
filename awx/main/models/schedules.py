@@ -127,7 +127,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
         https://github.com/dateutil/dateutil/pull/619
         """
         kwargs['forceset'] = True
-        kwargs['tzinfos'] = {}
+        kwargs['tzinfos'] = {x: dateutil.tz.tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
         match = cls.TZID_REGEX.match(rrule)
         if match is not None:
             rrule = cls.TZID_REGEX.sub("DTSTART\g<stamp>TZI\g<rrule>", rrule)
@@ -150,14 +150,13 @@ class Schedule(CommonModel, LaunchTimeConfig):
                     # > UTC time.
                     raise ValueError('RRULE UNTIL values must be specified in UTC')
 
-        try:
-            first_event = x[0]
-            if first_event < now() - datetime.timedelta(days=365 * 5):
-                # For older DTSTART values, if there are more than 1000 recurrences...
-                if len(x[:1001]) > 1000:
-                    raise ValueError('RRULE values that yield more than 1000 events are not allowed.')
-        except IndexError:
-            pass
+        if 'MINUTELY' in rrule or 'HOURLY' in rrule:
+            try:
+                first_event = x[0]
+                if first_event < now() - datetime.timedelta(days=365 * 5):
+                    raise ValueError('RRULE values with more than 1000 events are not allowed.')
+            except IndexError:
+                pass
         return x
 
     def __unicode__(self):

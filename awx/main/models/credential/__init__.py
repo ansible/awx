@@ -594,7 +594,7 @@ class CredentialType(CommonModelNameNotUnique):
             return
 
         class TowerNamespace:
-            filename = None
+            pass
 
         tower_namespace = TowerNamespace()
 
@@ -622,17 +622,25 @@ class CredentialType(CommonModelNameNotUnique):
             if len(value):
                 namespace[field_name] = value
 
-        file_tmpl = self.injectors.get('file', {}).get('template')
-        if file_tmpl is not None:
-            # If a file template is provided, render the file and update the
-            # special `tower` template namespace so the filename can be
-            # referenced in other injectors
+        file_tmpls = self.injectors.get('file', {})
+        # If any file templates are provided, render the files and update the
+        # special `tower` template namespace so the filename can be
+        # referenced in other injectors
+        for file_label, file_tmpl in file_tmpls.items():
             data = Template(file_tmpl).render(**namespace)
             _, path = tempfile.mkstemp(dir=private_data_dir)
             with open(path, 'w') as f:
                 f.write(data)
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-            namespace['tower'].filename = path
+
+            # determine if filename indicates single file or many
+            if file_label.find('.') == -1:
+                tower_namespace.filename = path
+            else:
+                if not hasattr(tower_namespace, 'filename'):
+                    tower_namespace.filename = TowerNamespace()
+                file_label = file_label.split('.')[1]
+                setattr(tower_namespace.filename, file_label, path)
 
         for env_var, tmpl in self.injectors.get('env', {}).items():
             if env_var.startswith('ANSIBLE_') or env_var in self.ENV_BLACKLIST:

@@ -163,19 +163,25 @@
     dest: "{{ docker_base_path }}/requirements"
   delegate_to: localhost
 
+- name: Stage config watcher
+  copy:
+    src: ../tools/scripts/config-watcher
+    dest: "{{ docker_base_path }}/config-watcher"
+  delegate_to: localhost
+
 - name: Stage Makefile
   copy:
     src: ../Makefile
     dest: "{{ docker_base_path }}/Makefile"
   delegate_to: localhost
 
-- name: State ansible repo
+- name: Stage ansible repo
   copy:
     src: 'ansible.repo'
     dest: '{{ docker_base_path }}/ansible.repo'
   delegate_to: localhost
 
-- name: State ansible repo key
+- name: Stage ansible repo key
   copy:
     src: 'RPM-GPG-KEY-ansible-release'
     dest: '{{ docker_base_path }}/RPM-GPG-KEY-ansible-release'

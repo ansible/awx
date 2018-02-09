@@ -130,6 +130,22 @@ def reverse_gfk(content_object, request):
     }
 
 
+class CopySerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+
+    def validate(self, attrs):
+        name = attrs.get('name')
+        view = self.context.get('view', None)
+        obj = view.get_object()
+        if name == obj.name:
+            raise serializers.ValidationError(_(
+                'The original object is already named {}, a copy from'
+                ' it cannot have the same name.'.format(name)
+            ))
+        return attrs
+
+
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
     '''
     Custom metaclass to enable attribute inheritance from Meta objects on
@@ -1003,6 +1019,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notification_templates_error = self.reverse('api:project_notification_templates_error_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:project_access_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:project_object_roles_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:project_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail',
@@ -1156,6 +1173,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             access_list = self.reverse('api:inventory_access_list',         kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:inventory_instance_groups_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:inventory_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.insights_credential:
             res['insights_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.insights_credential.pk})
@@ -1173,7 +1191,7 @@ class InventorySerializer(BaseSerializerWithVariables):
         if host_filter:
             try:
                 SmartFilter().query_from_string(host_filter)
-            except RuntimeError, e:
+            except RuntimeError as e:
                 raise models.base.ValidationError(e)
         return host_filter
 
@@ -1513,6 +1531,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
         res = super(CustomInventoryScriptSerializer, self).get_related(obj)
         res.update(dict(
             object_roles = self.reverse('api:inventory_script_object_roles_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:inventory_script_copy', kwargs={'pk': obj.pk}),
         ))
 
         if obj.organization:
@@ -2070,6 +2089,7 @@ class CredentialSerializer(BaseSerializer):
             object_roles = self.reverse('api:credential_object_roles_list', kwargs={'pk': obj.pk}),
             owner_users = self.reverse('api:credential_owner_users_list', kwargs={'pk': obj.pk}),
             owner_teams = self.reverse('api:credential_owner_teams_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:credential_copy', kwargs={'pk': obj.pk}),
         ))
 
         # TODO: remove when API v1 is removed
@@ -2547,6 +2567,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:job_template_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.host_config_key:
             res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
@@ -2968,7 +2989,14 @@ class SystemJobSerializer(UnifiedJobSerializer):
         return res
 
     def get_result_stdout(self, obj):
-        return obj.result_stdout
+        try:
+            return obj.result_stdout
+        except StdoutMaxBytesExceeded as e:
+            return _(
+                "Standard Output too large to display ({text_size} bytes), "
+                "only download supported for sizes over {supported_size} bytes").format(
+                    text_size=e.total, supported_size=e.supported
+            )
 
 
 class SystemJobCancelSerializer(SystemJobSerializer):
@@ -3106,6 +3134,12 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         if 'extra_data' in ret and obj.survey_passwords:
             ret['extra_data'] = obj.display_extra_data()
         return ret
+
+    def get_summary_fields(self, obj):
+        summary_fields = super(LaunchConfigurationBaseSerializer, self).get_summary_fields(obj)
+        # Credential would be an empty dictionary in this case
+        summary_fields.pop('credential', None)
+        return summary_fields
 
     def validate(self, attrs):
         attrs = super(LaunchConfigurationBaseSerializer, self).validate(attrs)
@@ -3782,6 +3816,7 @@ class NotificationTemplateSerializer(BaseSerializer):
         res.update(dict(
             test = self.reverse('api:notification_template_test', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:notification_template_notification_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:notification_template_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
@@ -3887,6 +3922,7 @@ class SchedulePreviewSerializer(BaseSerializer):
     # - BYYEARDAY
     # - BYWEEKNO
     # - Multiple DTSTART or RRULE elements
+    # - Can't contain both COUNT and UNTIL
     # - COUNT > 999
     def validate_rrule(self, value):
         rrule_value = value
@@ -3921,6 +3957,8 @@ class SchedulePreviewSerializer(BaseSerializer):
             raise serializers.ValidationError(_("BYYEARDAY not supported."))
         if 'byweekno' in rrule_value.lower():
             raise serializers.ValidationError(_("BYWEEKNO not supported."))
+        if 'COUNT' in rrule_value and 'UNTIL' in rrule_value:
+            raise serializers.ValidationError(_("RRULE may not contain both COUNT and UNTIL"))
         if match_count:
             count_val = match_count.groups()[0].strip().split("=")
             if int(count_val[1]) > 999:
@@ -3946,6 +3984,15 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
         ))
         if obj.unified_job_template:
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url(self.context.get('request'))
+            try:
+                if obj.unified_job_template.project:
+                    res['project'] = obj.unified_job_template.project.get_absolute_url(self.context.get('request'))
+            except ObjectDoesNotExist:
+                pass
+        if obj.inventory:
+            res['inventory'] = obj.inventory.get_absolute_url(self.context.get('request'))
+        elif obj.unified_job_template and getattr(obj.unified_job_template, 'inventory', None):
+            res['inventory'] = obj.unified_job_template.inventory.get_absolute_url(self.context.get('request'))
         return res
 
     def validate_unified_job_template(self, value):
@@ -3968,8 +4015,10 @@ class InstanceSerializer(BaseSerializer):
 
     class Meta:
         model = Instance
-        fields = ("id", "type", "url", "related", "uuid", "hostname", "created", "modified",
-                  "version", "capacity", "consumed_capacity", "percent_capacity_remaining", "jobs_running")
+        read_only_fields = ('uuid', 'hostname', 'version')
+        fields = ("id", "type", "url", "related", "uuid", "hostname", "created", "modified", 'capacity_adjustment',
+                  "version", "capacity", "consumed_capacity", "percent_capacity_remaining", "jobs_running",
+                  "cpu", "memory", "cpu_capacity", "mem_capacity", "enabled")
 
     def get_related(self, obj):
         res = super(InstanceSerializer, self).get_related(obj)
@@ -4002,7 +4051,8 @@ class InstanceGroupSerializer(BaseSerializer):
         model = InstanceGroup
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
-                  "percent_capacity_remaining", "jobs_running", "instances", "controller")
+                  "percent_capacity_remaining", "jobs_running", "instances", "controller",
+                  "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list")
 
     def get_related(self, obj):
         res = super(InstanceGroupSerializer, self).get_related(obj)

@@ -198,6 +198,27 @@ LOGGING['handlers']['syslog'] = {
     'formatter': 'simple',
 }
 
+LOGGING['loggers']['django.request']['handlers'] = ['console']
+LOGGING['loggers']['rest_framework.request']['handlers'] = ['console']
+LOGGING['loggers']['awx']['handlers'] = ['console']
+LOGGING['loggers']['awx.main.commands.run_callback_receiver']['handlers'] = ['console']
+LOGGING['loggers']['awx.main.commands.inventory_import']['handlers'] = ['console']
+LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console']
+LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console']
+LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
+LOGGING['loggers']['social']['handlers'] = ['console']
+LOGGING['loggers']['system_tracking_migrations']['handlers'] = ['console']
+LOGGING['loggers']['rbac_migrations']['handlers'] = ['console']
+LOGGING['loggers']['awx.isolated.manager.playbooks']['handlers'] = ['console']
+LOGGING['handlers']['callback_receiver'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['fact_receiver'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['task_system'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['tower_warnings'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['rbac_migrations'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['system_tracking_migrations'] = {'class': 'logging.NullHandler'}
+LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
+
+
 # Enable the following lines to also log to a file.
 #LOGGING['handlers']['file'] = {
 #    'class': 'logging.FileHandler',

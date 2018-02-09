@@ -5,6 +5,8 @@
 import logging
 import os
 
+from six.moves import xrange
+
 # Django
 from django.conf import settings
 
@@ -46,6 +48,6 @@ class CallbackQueueDispatcher(object):
                                  delivery_mode="persistent" if settings.PERSISTENT_CALLBACK_MESSAGES else "transient",
                                  routing_key=self.connection_queue)
                 return
-            except Exception, e:
+            except Exception as e:
                 self.logger.info('Publish Job Event Exception: %r, retry=%d', e,
                                  retry_count, exc_info=True)

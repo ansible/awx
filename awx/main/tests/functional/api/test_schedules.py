@@ -28,6 +28,12 @@ def test_non_job_extra_vars_prohibited(post, project, admin_user):
 
 
 @pytest.mark.django_db
+def test_wfjt_schedule_accepted(post, workflow_job_template, admin_user):
+    url = reverse('api:workflow_job_template_schedules_list', kwargs={'pk': workflow_job_template.id})
+    post(url, {'name': 'test sch', 'rrule': RRULE_EXAMPLE}, admin_user, expect=201)
+
+
+@pytest.mark.django_db
 def test_valid_survey_answer(post, admin_user, project, inventory, survey_spec_factory):
     job_template = JobTemplate.objects.create(
         name='test-jt',
@@ -60,6 +66,7 @@ def test_valid_survey_answer(post, admin_user, project, inventory, survey_spec_f
     ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYWEEKNO=20", "BYWEEKNO not supported"),
     ("DTSTART:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000", "COUNT > 999 is unsupported"),  # noqa
     ("DTSTART:20300308T050000Z RRULE:FREQ=REGULARLY;INTERVAL=1", "rrule parsing failed validation: invalid 'FREQ': REGULARLY"),  # noqa
+    ("DTSTART:20030925T104941Z RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z", "RRULE may not contain both COUNT and UNTIL"),  # noqa
     ("DTSTART;TZID=America/New_York:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1", "rrule parsing failed validation"),
     ("DTSTART:20300308T050000 RRULE:FREQ=DAILY;INTERVAL=1", "DTSTART cannot be a naive datetime"),
     ("DTSTART:19700101T000000Z RRULE:FREQ=MINUTELY;INTERVAL=1", "more than 1000 events are not allowed"),  # noqa
@@ -274,3 +281,10 @@ def test_dst_rollback_duplicates(post, admin_user):
         '2030-11-03 02:30:00-05:00',
         '2030-11-03 03:30:00-05:00',
     ]
+
+
+@pytest.mark.django_db
+def test_zoneinfo(get, admin_user):
+    url = reverse('api:schedule_zoneinfo')
+    r = get(url, admin_user, expect=200)
+    assert {'name': 'America/New_York'} in r.data

@@ -1,4 +1,4 @@
-# Group Tree for this {{ model_verbose_name|title }}:
+# Group Tree for {{ model_verbose_name|title|anora }}:
 
 Make a GET request to this resource to retrieve a hierarchical view of groups
 associated with the selected {{ model_verbose_name }}.
@@ -11,5 +11,3 @@ also containing a list of its children.
 Each group data structure includes the following fields:
 
 {% include "api/_result_fields_common.md" %}
-
-{% include "api/_new_in_awx.md" %}

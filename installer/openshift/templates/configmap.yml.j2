@@ -12,7 +12,10 @@ data:
     
     # Container environments don't like chroots
     AWX_PROOT_ENABLED = False
-    
+
+    # Automatically deprovision pods that go offline
+    AWX_AUTO_DEPROVISION_INSTANCES = True
+
     #Autoprovisioning should replace this
     CLUSTER_HOST_ID = socket.gethostname()
     SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'

@@ -79,6 +79,7 @@
     state: started
     restart_policy: unless-stopped
     image: "{{ awx_web_docker_actual_image }}"
+    volumes: "{{ project_data_dir + ':/var/lib/awx/projects:rw' if project_data_dir is defined else omit }}"
     user: root
     ports:
       - "{{ host_port }}:8052"
@@ -112,6 +113,7 @@
     state: started
     restart_policy: unless-stopped
     image: "{{ awx_task_docker_actual_image }}"
+    volumes: "{{ project_data_dir + ':/var/lib/awx/projects:rw' if project_data_dir is defined else omit }}"
     links: "{{ awx_task_container_links|list }}"
     user: root
     hostname: awx

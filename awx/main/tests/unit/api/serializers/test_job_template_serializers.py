@@ -2,6 +2,8 @@
 import pytest
 import mock
 
+from six.moves import xrange
+
 # AWX
 from awx.api.serializers import (
     JobTemplateSerializer,

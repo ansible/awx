@@ -1,44 +1,73 @@
-<div class="instances-list">
-    <smart-search django-model="instances" base-path="instances" iterator="instance" dataset="instance_dataset"
-        list="list" collection="instances" search-tags="searchTags">
-    </smart-search>
+<at-panel>
+    <at-panel-heading>
+        {{ vm.panelTitle }}
+    </at-panel-heading>
 
-    <div class="List-noItems ng-hide" ng-show="instances.length === 0 &amp;&amp; (searchTags | isEmpty)" translate>PLEASE ADD ITEMS TO THIS LIST</div>
-    <div class="list-table-container" ng-show="instances.length > 0">
-        <table id="instances_table" class="List-table" is-extended="false">
-            <thead>
-                <tr class="List-tableHeaderRow">
-                    <th id="instance-hostname-header" class="List-tableHeader list-header col-md-5 col-sm-5 col-xs-5" ng-click="columnNoSort !== 'true' &amp;&amp; toggleColumnOrderBy()"
-                        ng-class="{'list-header-noSort' : columnNoSort === 'true'}" base-path="instances" collection="instances"
-                        dataset="instance_dataset" column-sort="" column-field="hostname" column-iterator="instance" column-no-sort="undefined"
-                        column-label="Name" column-custom-class="col-md-5 col-sm-5 col-xs-5" query-set="instance_queryset">
-                        "{{'Name' | translate}}"
-                        <i ng-if="columnNoSort !== 'true'" class="fa columnSortIcon fa-sort-up" ng-class="orderByIcon()"></i>
-                    </th>
-                    <th id="instance-jobs_running-header" class="List-tableHeader list-header  list-header-noSort" translate>
-                        Running Jobs
-                    </th>
-                    <th id="instance-consumed_capacity-header" class="List-tableHeader list-header  list-header-noSort" translate>
-                        Used Capacity
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- ngRepeat: instance in instances -->
-                <tr ng-class="{isActive: isActive(instance.id)}" id="instance.id" class="List-tableRow instance_class ng-scope" ng-repeat="instance in instances">
-                    <td class="List-tableCell hostname-column col-md-5 col-sm-5 col-xs-5">
-                        <a ui-sref="instanceGroups.instances.list.job.list({instance_id: instance.id})" class="ng-binding">{{ instance.hostname }}</a>
-                    </td>
-                    <td class="List-tableCell jobs_running-column ng-binding">
-                        <a ui-sref="instanceGroups.instances.jobs({instance_group_id: $stateParams.instance_group_id})">
-                            {{ instance.jobs_running }}
-                        </a>
-                    </td>
-                    <td class="List-tableCell List-tableCell--capacityColumn ng-binding">
-                        <capacity-bar capacity="instance.consumed_capacity" total-capacity="instance.capacity">
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+    <at-tab-group>
+        <at-tab state="vm.tab.details">{{:: vm.strings.get('tab.DETAILS') }}</at-tab>
+        <at-tab state="vm.tab.instances">{{:: vm.strings.get('tab.INSTANCES') }}</at-tab>
+        <at-tab state="vm.tab.jobs" ng-hide="$state.current.name === 'instanceGroups.add'">{{:: vm.strings.get('tab.JOBS') }}</at-tab>
+    </at-tab-group>
+
+    <at-panel-body>
+        <div class="at-List-toolbar">
+            <smart-search
+                class="at-List-search"
+                django-model="instances"
+                base-path="{{list.basePath}}"
+                iterator="instance"
+                list="list"
+                dataset="instance_dataset"
+                collection="collection"
+                search-tags="searchTags">
+            </smart-search>
+
+            <div class="at-List-toolbarAction">
+                <button
+                    type="button"
+                    ng-click="$state.go('instanceGroups.instances.modal.add')"
+                    class="at-Button--add"
+                    aria-expanded="false">
+                </button>
+                <div ui-view="modal"></div>
+            </div>
+        </div>
+        <at-list results='vm.instances'>
+            <at-row ng-repeat="instance in vm.instances"
+                ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
+                <div class="at-Row-firstColumn">
+                    <div class="ScheduleToggle"
+                        ng-class="{'is-on': instance.enabled}">
+                        <button ng-show="instance.enabled"
+                            class="ScheduleToggle-switch is-on ng-hide"
+                            ng-click="vm.toggle(instance)">
+                            {{:: vm.strings.get('ON') }}
+                        </button>
+                        <button ng-show="!instance.enabled"
+                            class="ScheduleToggle-switch"
+                            ng-click="vm.toggle(instance)">
+                            {{:: vm.strings.get('OFF') }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="at-Row-items">
+                    <at-row-item header-value="{{ instance.hostname }}"></at-row-item>
+                    <div class="at-Row--rowLayout">
+                        <at-row-item
+                            label-value="Running Jobs"
+                            label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}})"
+                            value="{{ instance.jobs_running }}"
+                            badge="true">
+                        </at-row-item>
+                    </div>
+                </div>
+
+                <div class="at-Row-actions">
+                    <capacity-adjuster state="instance"></capacity-adjuster>
+                    <capacity-bar label-value="Used Capacity" capacity="instance.consumed_capacity" total-capacity="instance.capacity"></capacity-bar>
+                </div>
+            </at-row>
+        </at-list>
+    </at-panel-body>
+</at-panel>

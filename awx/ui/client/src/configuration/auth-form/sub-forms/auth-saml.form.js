@@ -71,15 +71,49 @@ export default ['i18n', function(i18n) {
                 codeMirror: true,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth'
             },
+            SOCIAL_AUTH_SAML_ORGANIZATION_ATTR: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_SAML_ORGANIZATION_ATTR',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
             SOCIAL_AUTH_SAML_TEAM_MAP: {
                 type: 'textarea',
                 reset: 'SOCIAL_AUTH_SAML_TEAM_MAP',
                 rows: 6,
                 codeMirror: true,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth'
-            }
+            },
+            SOCIAL_AUTH_SAML_TEAM_ATTR: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_SAML_TEAM_ATTR',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
+            SOCIAL_AUTH_SAML_SECURITY_CONFIG: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_SAML_SECURITY_CONFIG',
+                codeMirror: true,
+                rows: 6,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            },
+            SOCIAL_AUTH_SAML_SP_EXTRA: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_SAML_SP_EXTRA',
+                codeMirror: true,
+                rows: 6,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            },
+            SOCIAL_AUTH_SAML_EXTRA_DATA: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_SAML_EXTRA_DATA',
+                codeMirror: true,
+                rows: 6,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            },
         },
-
         buttons: {
             reset: {
                 ngShow: '!user_is_system_auditor',

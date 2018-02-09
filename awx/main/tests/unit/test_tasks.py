@@ -29,6 +29,7 @@ from awx.main.models import (
     ProjectUpdate,
     UnifiedJob,
     User,
+    Organization,
     build_safe_env
 )
 
@@ -204,7 +205,6 @@ class TestJobExecution:
             mock.patch.object(Project, 'get_project_path', lambda *a, **kw: self.project_path),
             # don't emit websocket statuses; they use the DB and complicate testing
             mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
-            mock.patch.object(Job, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH),
             mock.patch('awx.main.expect.run.run_pexpect', self.run_pexpect),
         ]
         for cls in (Job, AdHocCommand):
@@ -266,6 +266,8 @@ class TestJobExecution:
         }))
         self.patches.append(patch)
         patch.start()
+
+        job.project = Project(organization=Organization())
 
         return job
 
@@ -353,11 +355,9 @@ class TestGenericRun(TestJobExecution):
 
     def test_valid_custom_virtualenv(self):
         with TemporaryDirectory(dir=settings.BASE_VENV_PATH) as tempdir:
+            self.instance.project.custom_virtualenv = tempdir
             os.makedirs(os.path.join(tempdir, 'lib'))
             os.makedirs(os.path.join(tempdir, 'bin', 'activate'))
-            venv_patch = mock.patch.object(Job, 'ansible_virtualenv_path', tempdir)
-            self.patches.append(venv_patch)
-            venv_patch.start()
 
             self.task.run(self.pk)
 
@@ -371,14 +371,11 @@ class TestGenericRun(TestJobExecution):
                 assert '--ro-bind {} {}'.format(path, path) in ' '.join(args)
 
     def test_invalid_custom_virtualenv(self):
-        venv_patch = mock.patch.object(Job, 'ansible_virtualenv_path', '/venv/missing')
-        self.patches.append(venv_patch)
-        venv_patch.start()
-
         with pytest.raises(Exception):
+            self.instance.project.custom_virtualenv = '/venv/missing'
             self.task.run(self.pk)
-            tb = self.task.update_model.call_args[-1]['result_traceback']
-            assert 'a valid Python virtualenv does not exist at /venv/missing' in tb
+        tb = self.task.update_model.call_args[-1]['result_traceback']
+        assert 'a valid Python virtualenv does not exist at /venv/missing' in tb
 
 
 class TestAdhocRun(TestJobExecution):
@@ -1230,6 +1227,50 @@ class TestJobCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
+    def test_custom_environment_injectors_with_files(self):
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={
+                'fields': [{
+                    'id': 'cert',
+                    'label': 'Certificate',
+                    'type': 'string'
+                }, {
+                    'id': 'key',
+                    'label': 'Key',
+                    'type': 'string'
+                }]
+            },
+            injectors={
+                'file': {
+                    'template.cert': '[mycert]\n{{cert}}',
+                    'template.key': '[mykey]\n{{key}}'
+                },
+                'env': {
+                    'MY_CERT_INI_FILE': '{{tower.filename.cert}}',
+                    'MY_KEY_INI_FILE': '{{tower.filename.key}}'
+                }
+            }
+        )
+        credential = Credential(
+            pk=1,
+            credential_type=some_cloud,
+            inputs = {'cert': 'CERT123', 'key': 'KEY123'}
+        )
+        self.instance.credentials.add(credential)
+        self.task.run(self.pk)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert open(env['MY_CERT_INI_FILE'], 'rb').read() == '[mycert]\nCERT123'
+            assert open(env['MY_KEY_INI_FILE'], 'rb').read() == '[mykey]\nKEY123'
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
     def test_multi_cloud(self):
         gce = CredentialType.defaults['gce']()
         gce_credential = Credential(
@@ -1716,6 +1757,8 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             self.instance.credential, 'password'
         )
 
+        self.instance.source_vars = '{"prefer_ipv4": True}'
+
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
             config = ConfigParser.ConfigParser()
@@ -1724,6 +1767,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('cloudforms', 'username') == 'bob'
             assert config.get('cloudforms', 'password') == 'secret'
             assert config.get('cloudforms', 'ssl_verify') == 'false'
+            assert config.get('cloudforms', 'prefer_ipv4') == 'True'
 
             cache_path = config.get('cache', 'path')
             assert cache_path.startswith(env['AWX_PRIVATE_DATA_DIR'])

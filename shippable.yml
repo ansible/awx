@@ -7,6 +7,7 @@ env:
   - AWX_BUILD_TARGET=test
   - AWX_BUILD_TARGET=ui-test-ci
   - AWX_BUILD_TARGET="flake8 jshint"
+  - AWX_BUILD_TARGET="swagger"
 
 branches:
   only:

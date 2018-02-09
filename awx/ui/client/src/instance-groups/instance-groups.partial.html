@@ -1,11 +1,13 @@
 <div class="tab-pane InstanceGroups" id="instance-groups-panel">
     <aw-limit-panels max-panels="2" panel-container="instance-groups-panel"></aw-limit-panels>
+    <div ui-view="add"></div>
+    <div ui-view="edit"></div>
 
     <div ui-view="instanceJobs"></div>
 
     <div ui-view="instances"></div>
 
-    <div ng-cloak id="htmlTemplate" class="Panel">
-        <div ui-view="list"></div>
-    </div>
+    <div ui-view="jobs"></div>
+
+    <div ui-view="list"></div>
 </div>

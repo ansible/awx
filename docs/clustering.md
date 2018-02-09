@@ -28,6 +28,8 @@ It's important to point out a few existing things:
 * Existing old-style HA deployments will be transitioned automatically to the new HA system during the upgrade process to 3.1.
 * Manual projects will need to be synced to all instances by the customer
 
+Ansible Tower 3.3 adds support for container-based clusters using Openshift or Kubernetes
+
 ## Important Changes
 
 * There is no concept of primary/secondary in the new Tower system. *All* systems are primary.
@@ -226,6 +228,47 @@ show up in api endpoints and stats monitoring. These groups can be removed with 
 $ awx-manage unregister_queue --queuename=<name>
 ```
 
+### Configuring Instances and Instance Groups from the API
+
+Instance Groups can be created by posting to `/api/v2/instance_groups` as a System Admin.
+
+Once created, `Instances` can be associated with an Instance Group with:
+
+```
+HTTP POST /api/v2/instance_groups/x/instances/ {'id': y}`
+```
+
+An `Instance` that is added to an `InstanceGroup` will automatically reconfigure itself to listen on the group's work queue. See the following
+section `Instance Group Policies` for more details.
+
+### Instance Group Policies
+
+Tower `Instances` can be configured to automatically join `Instance Groups` when they come online by defining a policy. These policies are evaluated for
+every new Instance that comes online.
+
+Instance Group Policies are controlled by 3 optional fields on an `Instance Group`:
+
+* `policy_instance_percentage`: This is a number between 0 - 100. It gaurantees that this percentage of active Tower instances will be added
+  to this `Instance Group`. As new instances come online, if the number of Instances in this group relative to the total number of instances
+  is less than the given percentage then new ones will be added until the percentage condition is satisfied.
+* `policy_instance_minimum`: This policy attempts to keep at least this many `Instances` in the `Instance Group`. If the number of
+  available instances is lower than this minimum then all `Instances` will be placed in this `Instance Group`.
+* `policy_instance_list`: This is a fixed list of `Instance` names. These `Instances` will *always* be added to this `Instance Group`.
+  Further, by adding Instances to this list you are declaring that you will manually manage those Instances and they will not be eligible under any other
+  policy. This means they will not be automatically added to any other `Instance Group` even if the policy would cause them to be matched.
+
+> NOTES
+
+* `Instances` that are assigned directly to `Instance Groups` by posting to `/api/v2/instance_groups/x/instances` or
+  `/api/v2/instances/x/instance_groups` are automatically added to the `policy_instance_list`. This means they are subject to the
+  normal caveats for `policy_instance_list` and must be manually managed.
+* `policy_instance_percentage` and `policy_instance_minimum` work together. For example, if you have a `policy_instance_percentage` of
+  50% and a `policy_instance_minimum` of 2 and you start 6 `Instances`. 3 of them would be assigned to the `Instance Group`. If you reduce the number
+  of `Instances` to 2 then both of them would be assigned to the `Instance Group` to satisfy `policy_instance_minimum`. In this way, you can set a lower
+  bound on the amount of available resources.
+* Policies don't actively prevent `Instances` from being associated with multiple `Instance Groups` but this can effectively be achieved by making the percentages
+  sum to 100. If you have 4 `Instance Groups` assign each a percentage value of 25 and the `Instances` will be distributed among them with no overlap.
+
 ### Status and Monitoring
 
 Tower itself reports as much status as it can via the api at `/api/v2/ping` in order to provide validation of the health
@@ -309,6 +352,13 @@ any of the custom instance groups defined in the playbook. This can be
 used to specify a preferred instance group on the job template or inventory,
 but still allow the job to be submitted to any instance if those are out of
 capacity.
+
+#### Instance Enable / Disable
+
+In order to support temporarily taking an `Instance` offline there is a boolean property `enabled` defined on each instance.
+
+When this property is disabled no jobs will be assigned to that `Instance`. Existing jobs will finish but no new work will be
+assigned.
 
 ## Acceptance Criteria
 

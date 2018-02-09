@@ -24,6 +24,7 @@ Have questions about this document or anything not covered here? Come chat with 
      * [Start a shell](#start-the-shell)
      * [Create a superuser](#create-a-superuser)
      * [Load the data](#load-the-data)
+     * [Building API Documentation](#build-documentation)
   * [Accessing the AWX web interface](#accessing-the-awx-web-interface)
   * [Purging containers and images](#purging-containers-and-images)
 * [What should I work on?](#what-should-i-work-on)
@@ -260,6 +261,20 @@ You can optionally load some demo data. This will create a demo project, invento
 
 > This information will persist in the database running in the `tools_postgres_1` container, until the container is removed. You may periodically need to recreate
 this container, and thus the database, if the database schema changes in an upstream commit.
+
+##### Building API Documentation
+
+AWX includes support for building [Swagger/OpenAPI
+documentation](https://swagger.io).  To build the documentation locally, run:
+
+```bash
+(container)/awx_devel$ make swagger
+```
+
+This will write a file named `swagger.json` that contains the API specification
+in OpenAPI format.  A variety of online tools are available for translating
+this data into more consumable formats (such as HTML). http://editor.swagger.io
+is an example of one such service.
 
 ### Accessing the AWX web interface 
 

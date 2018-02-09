@@ -1,0 +1,44 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: etcd
+  namespace: {{ awx_openshift_project }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: awx-etcd2
+        service: etcd
+    spec:
+      containers:
+        - name: etcd
+          image: elcolio/etcd:latest
+          ports:
+            - containerPort: 4001
+          volumeMounts:
+            - mountPath: /data
+              name: datadir
+      volumes:
+        - name: datadir
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  labels:
+    name: awx-etcd
+  name: etcd
+  namespace: {{ awx_openshift_project }}
+spec:
+  ports:
+    - name: etcd
+      port: 4001
+      protocol: TCP
+      targetPort: 4001
+  selector:
+    name: awx-etcd2
+  sessionAffinity: None
+  type: ClusterIP

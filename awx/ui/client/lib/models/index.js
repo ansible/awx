@@ -9,6 +9,8 @@ import Organization from '~models/Organization';
 import Project from '~models/Project';
 import JobTemplate from '~models/JobTemplate';
 import WorkflowJobTemplateNode from '~models/WorkflowJobTemplateNode';
+import Instance from '~models/Instance';
+import InstanceGroup from '~models/InstanceGroup';
 import InventorySource from '~models/InventorySource';
 import Inventory from '~models/Inventory';
 import InventoryScript from '~models/InventoryScript';
@@ -34,6 +36,8 @@ angular
     .service('ProjectModel', Project)
     .service('JobTemplateModel', JobTemplate)
     .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode)
+    .service('InstanceModel', Instance)
+    .service('InstanceGroupModel', InstanceGroup)
     .service('InventorySourceModel', InventorySource)
     .service('InventoryModel', Inventory)
     .service('InventoryScriptModel', InventoryScript)

@@ -220,6 +220,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
     '''
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'labels', 'instance_groups', 'credentials', 'survey_spec'
+    ]
+    FIELDS_TO_DISCARD_AT_COPY = ['vault_credential', 'credential']
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name')]
 
     class Meta:
@@ -620,10 +624,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
         if self.launch_type == 'callback':
-            count_hosts = 1
+            count_hosts = 2
         else:
             count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
-        return min(count_hosts, 5 if self.forks == 0 else self.forks) * 10
+        return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     @property
     def successful_hosts(self):
@@ -1190,7 +1194,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     @property
     def task_impact(self):
-        return 150
+        return 5
 
     @property
     def preferred_instance_groups(self):

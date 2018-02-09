@@ -1,3 +1,5 @@
+# View Statistics for Job Runs
+
 Make a GET request to this resource to retrieve aggregate statistics about job runs suitable for graphing.
 
 ## Parmeters and Filtering
@@ -33,5 +35,3 @@ Data will be returned in the following format:
 
 Each element contains an epoch timestamp represented in seconds and a numerical value indicating
 the number of events during that time period
-
-{% include "api/_new_in_awx.md" %}

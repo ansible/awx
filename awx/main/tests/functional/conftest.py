@@ -1,4 +1,3 @@
-
 # Python
 import pytest
 import mock
@@ -6,6 +5,7 @@ import json
 import os
 import six
 from datetime import timedelta
+from six.moves import xrange
 
 # Django
 from django.core.urlresolvers import resolve
@@ -33,7 +33,8 @@ from awx.main.models.inventory import (
     Group,
     Inventory,
     InventoryUpdate,
-    InventorySource
+    InventorySource,
+    CustomInventoryScript
 )
 from awx.main.models.organization import (
     Organization,
@@ -46,6 +47,13 @@ from awx.main.models.notifications import (
 )
 from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
+
+__SWAGGER_REQUESTS__ = {}
+
+
+@pytest.fixture(scope="session")
+def swagger_autogen(requests=__SWAGGER_REQUESTS__):
+    return requests
 
 
 @pytest.fixture(autouse=True)
@@ -491,6 +499,13 @@ def inventory_update(inventory_source):
 
 
 @pytest.fixture
+def inventory_script(organization):
+    return CustomInventoryScript.objects.create(name='test inv script',
+                                                organization=organization,
+                                                script='#!/usr/bin/python')
+
+
+@pytest.fixture
 def host(group, inventory):
     return group.hosts.create(name='single-host', inventory=inventory)
 
@@ -547,6 +562,9 @@ def _request(verb):
             assert response.status_code == expect
         if hasattr(response, 'render'):
             response.render()
+        __SWAGGER_REQUESTS__.setdefault(request.path, {})[
+            (request.method.lower(), response.status_code)
+        ] = (response.get('Content-Type', None), response.content, kwargs.get('data'))
         return response
     return rf
 

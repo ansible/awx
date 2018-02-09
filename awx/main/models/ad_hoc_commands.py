@@ -184,7 +184,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
         count_hosts = Host.objects.filter( enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
-        return min(count_hosts, 5 if self.forks == 0 else self.forks) * 10
+        return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     def copy(self):
         data = {}

@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 from __future__ import absolute_import, unicode_literals
+from django.conf import settings
 from django.conf.urls import include, url
 
 from awx.api.views import (
@@ -123,5 +124,10 @@ app_name = 'api'
 urlpatterns = [
     url(r'^$', ApiRootView.as_view(), name='api_root_view'),
     url(r'^(?P<version>(v2))/', include(v2_urls)),
-    url(r'^(?P<version>(v1|v2))/', include(v1_urls))
+    url(r'^(?P<version>(v1|v2))/', include(v1_urls)),
 ]
+if settings.SETTINGS_MODULE == 'awx.settings.development':
+    from awx.api.swagger import SwaggerSchemaView
+    urlpatterns += [
+        url(r'^swagger/$', SwaggerSchemaView.as_view(), name='swagger_view'),
+    ]

@@ -101,6 +101,8 @@ if 'django_jenkins' in INSTALLED_APPS:
     PEP8_RCFILE = "setup.cfg"
     PYLINT_RCFILE = ".pylintrc"
 
+INSTALLED_APPS += ('rest_framework_swagger',)
+
 # Much faster than the default
 # https://docs.djangoproject.com/en/1.6/topics/auth/passwords/#how-django-stores-passwords
 PASSWORD_HASHERS = (
@@ -138,15 +140,6 @@ except ImportError:
     sys.exit(1)
 
 CLUSTER_HOST_ID = socket.gethostname()
-CELERY_TASK_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
-# Production only runs this schedule on controlling nodes
-# but development will just run it on all nodes
-CELERY_TASK_ROUTES['awx.main.tasks.awx_isolated_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
-CELERY_BEAT_SCHEDULE['isolated_heartbeat'] = {
-    'task': 'awx.main.tasks.awx_isolated_heartbeat',
-    'schedule': timedelta(seconds = AWX_ISOLATED_PERIODIC_CHECK),
-    'options': {'expires': AWX_ISOLATED_PERIODIC_CHECK * 2,}
-}
 
 # Supervisor service name dictionary used for programatic restart
 SERVICE_NAME_DICT = {

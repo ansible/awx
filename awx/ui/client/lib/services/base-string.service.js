@@ -67,6 +67,7 @@ function BaseStringService (namespace) {
     this.OFF = t.s('OFF');
     this.YAML = t.s('YAML');
     this.JSON = t.s('JSON');
+
     this.deleteResource = {
         HEADER: t.s('Delete'),
         USED_BY: resourceType => t.s('The {{ resourceType }} is currently being used by other resources.', { resourceType }),
