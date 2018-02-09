@@ -22,7 +22,8 @@ build:
     options: "-v /awx_devel:/awx_devel"
   ci:
     - cp -R . /awx_devel
-    - pip install -U docker-compose
+    - pip install --upgrade pip
+    - pip install --upgrade docker-compose
     - docker-compose -f tools/docker-compose/unit-tests/docker-compose-shippable.yml build --build-arg TAG=latest unit-tests
     - docker-compose -f tools/docker-compose/unit-tests/docker-compose-shippable.yml run unit-tests "make ${AWX_BUILD_TARGET}" 
     - python tools/docker-compose/unit-tests/collect_shippable_results.py
