@@ -209,13 +209,11 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
         }
     };
 
-    vm.toggle_credential = id => {
-        // This is called only when a checkbox input is clicked directly. Clicks anywhere else on
-        // the row or direct radio button clicks invoke the toggle_row handler instead with a
-        // different set of arguments. We normalize those arguments here and pass them through to
-        // the other function so that the behavior is consistent.
-        const credential = scope.credentials.find(c => c.id === id);
-        scope.toggle_row(credential);
+    vm.toggle_credential = credential => {
+        // This is called only when a checkbox input is clicked directly. Clicks anywhere else
+        // on the row or direct radio button clicks invoke the toggle_row handler instead. We 
+        // pass this through to the other function so that the behavior is consistent.
+        vm.toggle_row(credential);
     };
 
     vm.toggle_row = credential => {
