@@ -1,3 +1,4 @@
+import datetime
 import json
 import re
 
@@ -48,6 +49,7 @@ class TestSwaggerGeneration():
             data.update(response.accepted_renderer.get_customizations() or {})
 
             data['host'] = None
+            data['modified'] = datetime.datetime.utcnow().isoformat()
             data['schemes'] = ['https']
             data['consumes'] = ['application/json']
 
@@ -156,6 +158,14 @@ class TestSwaggerGeneration():
     @classmethod
     def teardown_class(cls):
         with open('swagger.json', 'w') as f:
-            f.write(force_bytes(
+            data = force_bytes(
                 json.dumps(cls.JSON, cls=i18nEncoder, indent=2)
-            ))
+            )
+            # replace ISO dates w/ the same value so we don't generate
+            # needless diffs
+            data = re.sub(
+                '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+Z',
+                '2018-02-01T08:00:00.000000Z',
+                data
+            )
+            f.write(data)
