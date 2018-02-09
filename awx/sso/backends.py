@@ -6,6 +6,7 @@ import logging
 import uuid
 
 import ldap
+import six
 
 # Django
 from django.dispatch import receiver
@@ -249,7 +250,7 @@ class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
 
     def get_user_permanent_id(self, attributes):
         uid = attributes[self.conf.get('attr_user_permanent_id', OID_USERID)]
-        if isinstance(uid, basestring):
+        if isinstance(uid, six.string_types):
             return uid
         return uid[0]
 
@@ -321,10 +322,10 @@ def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=True):
     elif opts is True:
         should_add = True
     else:
-        if isinstance(opts, basestring):
+        if isinstance(opts, six.string_types):
             opts = [opts]
         for group_dn in opts:
-            if not isinstance(group_dn, basestring):
+            if not isinstance(group_dn, six.string_types):
                 continue
             if ldap_user._get_groups().is_member_of(group_dn):
                 should_add = True

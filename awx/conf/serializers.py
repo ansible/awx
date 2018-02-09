@@ -1,6 +1,8 @@
 # Django REST Framework
 from rest_framework import serializers
 
+import six
+
 # Tower
 from awx.api.fields import VerbatimField
 from awx.api.serializers import BaseSerializer
@@ -45,12 +47,12 @@ class SettingFieldMixin(object):
     """Mixin to use a registered setting field class for API display/validation."""
 
     def to_representation(self, obj):
-        if getattr(self, 'encrypted', False) and isinstance(obj, basestring) and obj:
+        if getattr(self, 'encrypted', False) and isinstance(obj, six.string_types) and obj:
             return '$encrypted$'
         return obj
 
     def to_internal_value(self, value):
-        if getattr(self, 'encrypted', False) and isinstance(value, basestring) and value.startswith('$encrypted$'):
+        if getattr(self, 'encrypted', False) and isinstance(value, six.string_types) and value.startswith('$encrypted$'):
             raise serializers.SkipField()
         obj = super(SettingFieldMixin, self).to_internal_value(value)
         return super(SettingFieldMixin, self).to_representation(obj)
