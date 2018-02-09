@@ -78,10 +78,12 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     });
 
     $('#networking-search').on('select2:select', (e) => {
+        $('#networking-search').blur();
         $scope.$broadcast('search', e.params.data);
     });
 
     $('#networking-search').on('select2:open', () => {
+        $('.select2-dropdown').addClass('Networking-dropDown');
         $scope.$broadcast('unbind');
     });
 
