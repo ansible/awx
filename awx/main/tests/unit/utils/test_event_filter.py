@@ -3,6 +3,8 @@ import base64
 import json
 from StringIO import StringIO
 
+from six.moves import xrange
+
 from awx.main.utils import OutputEventFilter
 
 MAX_WIDTH = 78

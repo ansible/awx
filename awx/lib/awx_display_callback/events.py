@@ -29,6 +29,8 @@ import threading
 import uuid
 import memcache
 
+from six.moves import xrange
+
 __all__ = ['event_context']
 
 
