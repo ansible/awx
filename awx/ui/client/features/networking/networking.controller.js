@@ -61,22 +61,48 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
         }
     });
 
-    $scope.$on('instatiateSelect', (e, options) => {
-        for(var i = 0; i < options.length; i++){
-            let device = options[i];
+    $scope.$on('instatiateSelect', (e, devices) => {
+        for(var i = 0; i < devices.length; i++){
+            let device = devices[i];
             $scope.devices.push({
                     value: device.id,
                     text: device.name,
                     label: device.name,
                     id: device.id
                 });
-        };
+        }
 
         $("#networking-search").select2({
             width:'100%',
             containerCssClass: 'Form-dropDown',
             placeholder: 'SEARCH'
         });
+    });
+
+    $scope.$on('addSearchOption', (e, device) => {
+        $scope.devices.push({
+                value: device.id,
+                text: device.name,
+                label: device.name,
+                id: device.id
+            });
+    });
+
+    $scope.$on('editSearchOption', (e, device) => {
+        for(var i = 0; i < $scope.devices.length; i++){
+            if(device.id === $scope.devices[i].id){
+                $scope.devices[i].text = device.name;
+                $scope.devices[i].label = device.name;
+            }
+        }
+    });
+
+    $scope.$on('removeSearchOption', (e, device) => {
+        for (var i = 0; i < $scope.devices.length; i++) {
+            if ($scope.devices[i].id === device.id) {
+                $scope.devices.splice(i, 1);
+            }
+        }
     });
 
     $('#networking-search').on('select2:select', (e) => {
