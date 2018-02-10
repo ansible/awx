@@ -5,6 +5,8 @@
 import re
 import logging
 
+import six
+
 # Python Social Auth
 from social_core.exceptions import AuthException
 
@@ -65,10 +67,10 @@ def _update_m2m_from_expression(user, rel, expr, remove=True):
     elif expr is True:
         should_add = True
     else:
-        if isinstance(expr, (basestring, type(re.compile('')))):
+        if isinstance(expr, (six.string_types, type(re.compile('')))):
             expr = [expr]
         for ex in expr:
-            if isinstance(ex, basestring):
+            if isinstance(ex, six.string_types):
                 if user.username == ex or user.email == ex:
                     should_add = True
             elif isinstance(ex, type(re.compile(''))):
@@ -172,7 +174,7 @@ def update_user_orgs_by_saml_attr(backend, details, user=None, *args, **kwargs):
         org.member_role.members.add(user)
 
     if org_map.get('remove', True):
-        [o.member_role.members.remove(user) for o in 
+        [o.member_role.members.remove(user) for o in
             Organization.objects.filter(Q(member_role__members=user) & ~Q(id__in=org_ids))]
 
 
@@ -212,7 +214,5 @@ def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs)
             team.member_role.members.add(user)
 
     if team_map.get('remove', True):
-        [t.member_role.members.remove(user) for t in 
+        [t.member_role.members.remove(user) for t in
             Team.objects.filter(Q(member_role__members=user) & ~Q(id__in=team_ids))]
-
-

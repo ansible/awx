@@ -611,7 +611,7 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
     '''
     if isinstance(vars_str, dict):
         return vars_str
-    elif isinstance(vars_str, basestring) and vars_str == '""':
+    elif isinstance(vars_str, six.string_types) and vars_str == '""':
         return {}
 
     try:

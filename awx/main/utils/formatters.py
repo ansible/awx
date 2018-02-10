@@ -7,6 +7,8 @@ import json
 import time
 import logging
 
+import six
+
 
 class TimeFormatter(logging.Formatter):
     '''
@@ -41,7 +43,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
             data = copy(raw_data['ansible_facts'])
         else:
             data = copy(raw_data)
-        if isinstance(data, basestring):
+        if isinstance(data, six.string_types):
             data = json.loads(data)
         data_for_log = {}
 

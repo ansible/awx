@@ -74,7 +74,7 @@ class JSONField(upstream_JSONField):
 
 class JSONBField(upstream_JSONBField):
     def get_prep_lookup(self, lookup_type, value):
-        if isinstance(value, basestring) and value == "null":
+        if isinstance(value, six.string_types) and value == "null":
             return 'null'
         return super(JSONBField, self).get_prep_lookup(lookup_type, value)
 
