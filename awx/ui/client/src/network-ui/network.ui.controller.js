@@ -1783,7 +1783,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         }
 
         $scope.updateInterfaceDots();
-        $scope.$emit('select', $scope.devices);
+        $scope.$emit('instatiateSelect', $scope.devices);
     };
 
     $scope.updateInterfaceDots = function() {
