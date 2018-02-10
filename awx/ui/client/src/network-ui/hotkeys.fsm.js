@@ -77,6 +77,11 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
         scope.hide_interfaces = !scope.hide_interfaces;
         return;
     }
+    if($event.keyCode === 27){
+        // 27 is the escape key
+        scope.reset_fsm_state();
+        return;
+    }
 
 	if ($event.key === 'r' && !($event.ctrlKey || $event.metaKey)) {
         scope.first_channel.send("NewDevice", new messages.NewDevice("router"));
