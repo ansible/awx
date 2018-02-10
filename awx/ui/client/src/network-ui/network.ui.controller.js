@@ -728,6 +728,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             index = $scope.devices.indexOf(devices[i]);
             if (index !== -1) {
                 $scope.devices.splice(index, 1);
+                $scope.$emit('removeSearchOption', devices[i]);
                 $scope.send_control_message(new messages.DeviceDestroy($scope.client_id,
                                                                                  devices[i].id,
                                                                                  devices[i].x,
