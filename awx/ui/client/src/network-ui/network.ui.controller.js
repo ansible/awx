@@ -886,6 +886,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 searched = $scope.devices[i];
             }
         }
+        searched.selected = true;
+        $scope.selected_devices.push(searched);
         //console.log(searched);
         $scope.jump_to_animation(searched.x, searched.y, 1.0);
     });
