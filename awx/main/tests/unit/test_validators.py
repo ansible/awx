@@ -19,6 +19,24 @@ from rest_framework.serializers import ValidationError as RestValidationError
 import pytest
 
 
+def test_invalid_keys():
+    invalid_keys = [
+        "---BEGIN FOO -----foobar-----END FOO----",
+        "-----BEGIN FOO---foobar-----END FOO----",
+        "-----BEGIN FOO-----foobar---END FOO----",
+        "-----  BEGIN FOO  ----- foobar -----  FAIL FOO  ----",
+        "-----  FAIL FOO ----- foobar -----  END FOO  ----",
+        "----BEGIN FOO----foobar----END FOO--------BEGIN FOO----foobar----END FOO----"
+    ]
+    for invalid_key in invalid_keys:
+        with pytest.raises(ValidationError):
+            validate_private_key(invalid_key)
+        with pytest.raises(ValidationError):
+            validate_certificate(invalid_key)
+        with pytest.raises(ValidationError):
+            validate_ssh_private_key(invalid_key)
+
+
 def test_valid_catted_rsa_key():
     valid_key = TEST_CATTED_SSH_KEY_DATA
     pem_objects = validate_private_key(valid_key)
@@ -53,16 +71,6 @@ def test_valid_locked_rsa_key():
     pem_objects = validate_ssh_private_key(valid_key)
     assert pem_objects[0]['key_type'] == 'rsa'
     assert pem_objects[0]['key_enc']
-
-
-def test_invalid_rsa_key():
-    invalid_key = TEST_SSH_KEY_DATA.replace('-----END', '----END')
-    with pytest.raises(ValidationError):
-        validate_private_key(invalid_key)
-    with pytest.raises(ValidationError):
-        validate_certificate(invalid_key)
-    with pytest.raises(ValidationError):
-        validate_ssh_private_key(invalid_key)
 
 
 def test_valid_openssh_key():
