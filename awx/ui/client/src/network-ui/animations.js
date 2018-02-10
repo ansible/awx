@@ -21,6 +21,7 @@ function scale_animation (scope) {
     //console.log(scope.data.scope.current_scale);
     //scope.data.scope.current_scale = 1.0;
     scope.data.scope.first_channel.send("ScaleChanged", {});
+    scope.data.scope.first_channel.send("ScaleChanged", {});
     scope.data.scope.updatePanAndScale();
 }
 exports.scale_animation = scale_animation;
