@@ -240,6 +240,9 @@ of what happened.
  - survey password durability
    - schedule has survey password answers from WFJT survey
    - WFJT node has answers to different password questions from JT survey
+   - Saving with "$encrypted$" value will either
+     - become a no-op, removing the key if a valid question default exists
+     - replace with the database value if question was previously answered
    - final job it spawns has both answers encrypted
  - POST to associate credential to WFJT node
    - requires admin to WFJT and execute to JT
