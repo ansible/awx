@@ -68,7 +68,6 @@ def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
 
         # The rest of the PEM data to process
         data = match.group('next').lstrip()
-        print data
 
         # Check PEM object type, check key type if private key.
         pem_obj_info = {}
