@@ -83,8 +83,7 @@ export default ['i18n', function(i18n){
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Copy notification'),
                 dataPlacement: 'top',
-                // requires future  api rbac changes
-                //ngShow: 'notification_template.summary_fields.user_capabilities.copy'
+                ngShow: 'notification_template.summary_fields.user_capabilities.edit'
             },
             view: {
                 ngClick: "editNotification(notification_template.id)",

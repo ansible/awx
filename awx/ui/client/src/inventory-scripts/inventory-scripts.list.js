@@ -63,8 +63,7 @@ export default ['i18n', function(i18n){
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Copy inventory scruot'),
                 dataPlacement: 'top',
-                // requires future  api rbac changes
-                //ngShow: 'inventory_script.summary_fields.user_capabilities.copy'
+                ngShow: 'inventory_script.summary_fields.user_capabilities.edit'
             },
             view: {
                 ngClick: "editCustomInv(inventory_script.id)",
