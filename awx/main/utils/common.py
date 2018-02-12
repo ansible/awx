@@ -803,8 +803,6 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         if not os.path.exists(path):
             continue
         path = os.path.realpath(path)
-        if os.path.isdir(path):
-            path = os.path.join(path, '')  # add a trailing slash
         new_args.extend(['--bind', '%s' % (path,), '%s' % (path,)])
     if kwargs.get('isolated'):
         if 'ansible-playbook' in args:

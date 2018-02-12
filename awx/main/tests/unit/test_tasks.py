@@ -1392,7 +1392,11 @@ class TestProjectUpdateCredentials(TestJobExecution):
             args, cwd, env, stdout = args
             extra_vars = parse_extra_vars(args)
             assert ' '.join(args).startswith('bwrap')
-            assert ' '.join(['--bind', settings.PROJECTS_ROOT, settings.PROJECTS_ROOT]) in ' '.join(args)
+            assert ' '.join([
+                '--bind',
+                os.path.realpath(settings.PROJECTS_ROOT),
+                os.path.realpath(settings.PROJECTS_ROOT)
+            ]) in ' '.join(args)
             assert extra_vars["scm_revision_output"].startswith(settings.PROJECTS_ROOT)
             return ['successful', 0]
 
