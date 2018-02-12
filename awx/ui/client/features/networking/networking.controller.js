@@ -61,14 +61,16 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
         }
     });
 
-    $scope.$on('select', (e, options) => {
-        options.forEach((device) => {
-            $('#networking-search').append($('<option>', {
-                value: device.id,
-                text: device.name,
-                id: device.id
-            }));
-        });
+    $scope.$on('instatiateSelect', (e, devices) => {
+        for(var i = 0; i < devices.length; i++){
+            let device = devices[i];
+            $scope.devices.push({
+                    value: device.id,
+                    text: device.name,
+                    label: device.name,
+                    id: device.id
+                });
+        }
 
         $("#networking-search").select2({
             width:'100%',
@@ -77,9 +79,49 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
         });
     });
 
+    $scope.$on('addSearchOption', (e, device) => {
+        $scope.devices.push({
+                value: device.id,
+                text: device.name,
+                label: device.name,
+                id: device.id
+            });
+    });
+
+    $scope.$on('editSearchOption', (e, device) => {
+        for(var i = 0; i < $scope.devices.length; i++){
+            if(device.id === $scope.devices[i].id){
+                $scope.devices[i].text = device.name;
+                $scope.devices[i].label = device.name;
+            }
+        }
+    });
+
+    $scope.$on('removeSearchOption', (e, device) => {
+        for (var i = 0; i < $scope.devices.length; i++) {
+            if ($scope.devices[i].id === device.id) {
+                $scope.devices.splice(i, 1);
+            }
+        }
+    });
+
     $('#networking-search').on('select2:select', (e) => {
         $scope.$broadcast('search', e.params.data);
     });
+
+    $('#networking-search').on('select2:open', () => {
+        $('.select2-dropdown').addClass('Networking-dropDown');
+        $scope.$broadcast('unbind');
+    });
+
+    $('#networking-search').on('select2:close', () => {
+        setTimeout(function() {
+            $('.select2-container-active').removeClass('select2-container-active');
+            $(':focus').blur();
+        }, 1);
+        $scope.$broadcast('bind');
+    });
+
 }
 
 NetworkingController.$inject = [
