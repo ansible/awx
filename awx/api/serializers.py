@@ -3254,6 +3254,9 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             cred = deprecated_fields['credential']
             attrs['credential'] = cred
             if cred is not None:
+                if not ujt_obj.ask_credential_on_launch:
+                    raise serializers.ValidationError({"credential": _(
+                        "Related template is not configured to accept credentials on launch.")})
                 cred = Credential.objects.get(pk=cred)
                 view = self.context.get('view', None)
                 if (not view) or (not view.request) or (view.request.user not in cred.use_role):
