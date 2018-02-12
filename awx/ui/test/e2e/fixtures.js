@@ -58,13 +58,8 @@ const getInventory = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventories/', {
         name: `${namespace}-inventory`,
         description: namespace,
-        organization: organization.id,
-    }).then(inventory => getOrCreate('/hosts/', {
-        name: `${namespace}-host`,
-        description: namespace,
-        inventory: inventory.id,
-        variables: JSON.stringify({ ansible_connection: 'local' }),
-    }).then(() => inventory)));
+        organization: organization.id
+    }));
 
 const getHost = (namespace = session) => getInventory(namespace)
     .then(inventory => getOrCreate('/hosts/', {
@@ -72,7 +67,7 @@ const getHost = (namespace = session) => getInventory(namespace)
         description: namespace,
         inventory: inventory.id,
         variables: JSON.stringify({ ansible_connection: 'local' }),
-    }).then((host) => host));
+    }));
 
 const getInventoryScript = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventory_scripts/', {
@@ -248,7 +243,7 @@ const getWorkflowTemplate = (namespace = session) => {
 
     const workflowTemplatePromise = getOrganization(namespace)
         .then(organization => getOrCreate(endpoint, {
-            name: `${namespace}-workflow-template`
+            name: `${namespace}-workflow-template`,
             organization: organization.id,
             variables: '---',
             extra_vars: '',
@@ -383,12 +378,12 @@ module.exports = {
     getJobTemplateSchedule,
     getNotificationTemplate,
     getOrganization,
+    getOrCreate,
     getProject,
     getProjectAdmin,
     getSmartInventory,
     getTeam,
     getUpdatedProject,
-    getUser,
     getUser,
     getWorkflowTemplate,
 };
