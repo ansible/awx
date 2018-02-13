@@ -206,20 +206,22 @@ def handle_ha_toplogy_changes(self):
     logger.debug("Reconfigure celeryd queues task on host {}".format(self.request.hostname))
     awx_app = Celery('awx')
     awx_app.config_from_object('django.conf:settings', namespace='CELERY')
-    (instance, removed_queues, added_queues) = register_celery_worker_queues(awx_app, self.request.hostname)
-    logger.info("Workers on tower node '{}' removed from queues {} and added to queues {}"
-                .format(instance.hostname, removed_queues, added_queues))
-    updated_routes = update_celery_worker_routes(instance, settings)
-    logger.info("Worker on tower node '{}' updated celery routes {} all routes are now {}"
-                .format(instance.hostname, updated_routes, self.app.conf.CELERY_TASK_ROUTES))
+    instances, removed_queues, added_queues = register_celery_worker_queues(awx_app, self.request.hostname)
+    for instance in instances:
+        logger.info("Workers on tower node '{}' removed from queues {} and added to queues {}"
+                    .format(instance.hostname, removed_queues, added_queues))
+        updated_routes = update_celery_worker_routes(instance, settings)
+        logger.info("Worker on tower node '{}' updated celery routes {} all routes are now {}"
+                    .format(instance.hostname, updated_routes, self.app.conf.CELERY_TASK_ROUTES))
 
 
 @worker_ready.connect
 def handle_ha_toplogy_worker_ready(sender, **kwargs):
     logger.debug("Configure celeryd queues task on host {}".format(sender.hostname))
-    (instance, removed_queues, added_queues) = register_celery_worker_queues(sender.app, sender.hostname)
-    logger.info("Workers on tower node '{}' unsubscribed from queues {} and subscribed to queues {}"
-                .format(instance.hostname, removed_queues, added_queues))
+    instances, removed_queues, added_queues = register_celery_worker_queues(sender.app, sender.hostname)
+    for instance in instances:
+        logger.info("Workers on tower node '{}' unsubscribed from queues {} and subscribed to queues {}"
+                    .format(instance.hostname, removed_queues, added_queues))
 
 
 @celeryd_init.connect
