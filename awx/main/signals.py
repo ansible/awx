@@ -16,6 +16,8 @@ from django.dispatch import receiver
 from crum import get_current_request, get_current_user
 from crum.signals import current_user_getter
 
+import six
+
 # AWX
 from awx.main.models import * # noqa
 from awx.api.serializers import * # noqa
@@ -88,7 +90,7 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     elif sender == Group.inventory_sources.through:
         sender_name = 'group.inventory_sources'
     else:
-        sender_name = unicode(sender._meta.verbose_name)
+        sender_name = six.text_type(sender._meta.verbose_name)
     if kwargs['signal'] == post_save:
         if sender == Job:
             return
@@ -118,7 +120,7 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         pass
     else:
         return
-    sender_name = unicode(sender._meta.verbose_name)
+    sender_name = six.text_type(sender._meta.verbose_name)
     logger.debug("%s created or deleted, updating inventory computed fields: %r %r",
                  sender_name, sender, kwargs)
     try:

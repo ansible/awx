@@ -2090,7 +2090,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
         try:
             return super(HostList, self).list(*args, **kwargs)
         except Exception as e:
-            return Response(dict(error=_(unicode(e))), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error=_(six.text_type(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
 class HostDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):

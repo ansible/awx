@@ -14,6 +14,8 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now as tz_now
 from django.utils.translation import ugettext_lazy as _
 
+import six
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
@@ -159,7 +161,7 @@ class AuthToken(BaseModel):
     def reason_long(reason):
         for x in AuthToken.REASON_CHOICES:
             if x[0] == reason:
-                return unicode(x[1])
+                return six.text_type(x[1])
         return None
 
     @classmethod
