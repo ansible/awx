@@ -46,6 +46,7 @@ social-auth-core==1.5.0
 social-auth-app-django==2.0.0
 pyvmomi==6.5
 redbaron==0.6.3
+requests<2.16  # Older versions rely on certify
 requests-futures==0.9.7
 service-identity==16.0.0
 shade==1.20.0
