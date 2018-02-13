@@ -344,7 +344,7 @@ class TestReaper():
             j.websocket_emit_status.assert_called_once_with('failed')
             assert j.status == 'failed'
             assert j.job_explanation == (
-                'Task was marked as running in Tower but was not present in Celery, so it has been marked as failed.'
+                'Task was marked as running in Tower but was not present in the job queue, so it has been marked as failed.'
             )
 
     @pytest.mark.django_db
