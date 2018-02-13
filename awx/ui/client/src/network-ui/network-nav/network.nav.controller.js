@@ -15,7 +15,6 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     vm.jumpToPanelExpanded = false;
     vm.keyPanelExpanded = false;
     $scope.devices = [];
-    // $scope.device = null;
     vm.close = () => {
         $state.go('inventories');
     };
@@ -50,12 +49,13 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
         vm.keyPanelExpanded = false;
     });
 
-    $scope.$on('showDetails', (e, data, expand) => {
+    $scope.$on('showDetails', (e, data, expand, canAdd) => {
         if (expand) {
             vm.rightPanelIsExpanded = true;
         }
         if (!_.has(data, 'host_id')) {
             $scope.item = data;
+            $scope.canAdd = canAdd;
         } else {
             $scope.item = data;
         }

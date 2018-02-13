@@ -25,7 +25,7 @@ var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
 var NetworkUIController = function($scope, $document, $location, $window, $http,
-    $q, $state, ProcessErrors, ConfigService) {
+    $q, $state, ProcessErrors, ConfigService, rbacUiControlService) {
 
   window.scope = $scope;
   var i = 0;
@@ -638,60 +638,65 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     $scope.closeDetailsPanel = function () {
         $scope.$emit('closeDetailsPanel');
+        $scope.first_channel.send('BindDocument', {});
     };
 
     $scope.onDetailsContextButton = function (panelBoolean) {
-        if (!$scope.disconnected) {
+        function emitCallback(item, canAdd){
+            $scope.first_channel.send('UnbindDocument', {});
             $scope.removeContextMenu();
-            // show details for devices
-            if ($scope.selected_devices.length === 1){
+            $scope.update_toolbox_heights();
+            $scope.$emit('showDetails', item, panelBoolean !== null ? panelBoolean: true, canAdd);
+        }
 
-                // following block is intended for devices added in the network UI but not in Tower
-                if ($scope.selected_devices[0].host_id === 0){
-                    let host = $scope.selected_devices[0];
-                    $scope.update_toolbox_heights();
-                    $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
-                }
+        // show details for devices
+        if ($scope.selected_devices.length === 1 && $scope.selected_devices[0].host_id === 0){
+            // following block is intended for devices added in the network UI but not in Tower
+            emitCallback($scope.selected_devices[0]);
+        }
 
-                // following block is intended for devices that are saved in the API
-                if ($scope.selected_devices[0].host_id !== 0){
-                    let host_id = $scope.selected_devices[0].host_id;
-                    let url = `/api/v2/hosts/${host_id}/`;
-                    $http.get(url)
-                         .then(function(response) {
-                             let host = response.data;
-                             host.host_id = host.id;
-                             $scope.update_toolbox_heights();
-                             $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
+        // following block is intended for devices that are saved in the API
+        if ($scope.selected_devices.length === 1 && $scope.selected_devices[0].host_id !== 0){
+            let host_id = $scope.selected_devices[0].host_id;
+            let url = `/api/v2/hosts/${host_id}/`;
+            let hostData = $http.get(url)
+                 .then(function(response) {
+                     let host = response.data;
+                     host.host_id = host.id;
+                     return host;
+                 })
+                 .catch(({data, status}) => {
+                     ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
+                 });
+            let canAdd = rbacUiControlService.canAdd('hosts')
+                    .then(function(res) {
+                        return res.canAdd;
+                    })
+                    .catch(function() {
+                        return false;
+                    });
+            Promise.all([hostData, canAdd]).then((values) => {
+                let item = values[0];
+                let canAdd = values[1];
+                emitCallback(item, canAdd);
+            });
+        }
 
-                         })
-                         .catch(({data, status}) => {
-                             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
-                         });
-                }
-            }
+        // show details for interfaces
+        else if($scope.selected_interfaces.length === 1){
+            emitCallback($scope.selected_interfaces[0]);
+        }
 
-            // show details for interfaces
-            else if($scope.selected_interfaces.length === 1){
-                let selected_interface  = $scope.selected_interfaces[0];
-                $scope.update_toolbox_heights();
-                $scope.$emit('showDetails', selected_interface, panelBoolean !== null ? panelBoolean: true);
-            }
+        // show details for links
+        else if($scope.selected_links.length === 1){
+            emitCallback($scope.selected_links[0]);
+        }
 
-            // show details for links
-            else if($scope.selected_links.length === 1){
-                let link  = $scope.selected_links[0];
-                $scope.update_toolbox_heights();
-                $scope.$emit('showDetails', link, panelBoolean !== null ? panelBoolean: true);
-            }
+        //show details for groups, racks, and sites
+        else if ($scope.selected_groups.length === 1){
+            emitCallback($scope.selected_groups[0]);
+        }
 
-            //show details for groups, racks, and sites
-            else if ($scope.selected_groups.length === 1){
-                let group = $scope.selected_groups[0];
-                $scope.update_toolbox_heights();
-                $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);
-            }
-         }
     };
 
     $scope.onRenameContextButton = function (button) {
