@@ -4,124 +4,130 @@
 #
 #    pip-compile --output-file requirements/requirements_ansible.txt requirements/requirements_ansible.in
 #
-adal==0.4.7               # via azure-cli-core, msrestazure
+adal==0.5.0               # via azure-cli-core, msrestazure
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 apache-libcloud==2.0.0
-appdirs==1.4.3            # via os-client-config, python-ironicclient, setuptools
-applicationinsights==0.11.0  # via azure-cli-core
-argcomplete==1.9.2        # via azure-cli-core
-asn1crypto==0.22.0        # via cryptography
-azure-cli-core==2.0.15
+appdirs==1.4.3            # via openstacksdk, os-client-config, python-ironicclient
+applicationinsights==0.11.1  # via azure-cli-core
+argcomplete==1.9.3        # via azure-cli-core, knack
+asn1crypto==0.24.0        # via cryptography
+azure-cli-core==2.0.26
 azure-cli-nspkg==3.0.1    # via azure-cli-core
-azure-common==1.1.8       # via azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-containerservice, azure-mgmt-dns, azure-mgmt-keyvault, azu
+azure-common==1.1.8       # via azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-containerservice, azure-mgmt-dns, azure-mgmt-keyvault, azure-mgmt-network, azure-mgmt-resource, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-web, azure-storage
 azure-mgmt-batch==4.1.0
 azure-mgmt-compute==2.1.0
-azure-mgmt-containerservice==1.0.0
-azure-mgmt-dns==1.0.1
+azure-mgmt-containerservice==3.0.1
+azure-mgmt-dns==1.2.0
 azure-mgmt-keyvault==0.40.0
-azure-mgmt-network==1.4.0
-azure-mgmt-nspkg==2.0.0   # via azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-containerservice, azure-mgmt-dns, azure-mgmt-keyvault, azu
-azure-mgmt-resource==1.1.0
+azure-mgmt-network==1.7.1
+azure-mgmt-nspkg==2.0.0   # via azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-containerservice, azure-mgmt-dns, azure-mgmt-keyvault, azure-mgmt-network, azure-mgmt-resource, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-web
+azure-mgmt-resource==1.2.2
 azure-mgmt-sql==0.7.1
-azure-mgmt-storage==1.2.1
+azure-mgmt-storage==1.5.0
 azure-mgmt-web==0.32.0
 azure-nspkg==2.0.0        # via azure-cli-nspkg, azure-common, azure-mgmt-nspkg, azure-storage
 azure-storage==0.35.1
-babel==2.3.4              # via osc-lib, oslo.i18n, python-cinderclient, python-glanceclient, python-neutronclient, python-novaclient, python-openstackclient
+babel==2.5.3              # via osc-lib, oslo.i18n, python-cinderclient, python-neutronclient, python-novaclient
 backports.ssl-match-hostname==3.5.0.1
+bcrypt==3.1.4             # via paramiko
 boto3==1.4.4
 boto==2.46.1
-botocore==1.5.72          # via boto3, s3transfer
-certifi==2017.4.17        # via msrest
-cffi==1.10.0              # via cryptography
-cliff==2.7.0              # via osc-lib, python-designateclient, python-neutronclient, python-openstackclient
-cmd2==0.7.2               # via cliff
-colorama==0.3.9           # via azure-cli-core
-cryptography==2.0.3       # via adal, azure-storage, paramiko, pyopenssl, secretstorage
-debtcollector==1.15.0     # via oslo.config, oslo.utils, python-designateclient, python-keystoneclient, python-neutronclient
-decorator==4.0.11         # via shade
-deprecation==1.0.1        # via openstacksdk
-#docutils==0.12            # via botocore
-dogpile.cache==0.6.3      # via python-ironicclient, shade
-enum34==1.1.6             # via cryptography, msrest, ovirt-engine-sdk-python
+botocore==1.5.95          # via boto3, s3transfer
+certifi==2018.1.18        # via msrest
+cffi==1.11.4              # via bcrypt, cryptography, pynacl
+cliff==2.11.0             # via osc-lib, python-designateclient, python-neutronclient
+cmd2==0.8.0               # via cliff
+colorama==0.3.9           # via azure-cli-core, knack
+contextlib2==0.5.5        # via cmd2
+cryptography==2.1.4       # via adal, azure-storage, paramiko, pyopenssl, requests-kerberos, requests-ntlm, secretstorage
+debtcollector==1.19.0     # via oslo.config, oslo.utils, python-designateclient, python-keystoneclient, python-neutronclient
+decorator==4.2.1          # via openstacksdk, shade
+deprecation==1.1          # via openstacksdk
+docutils==0.14            # via botocore
+dogpile.cache==0.6.4      # via openstacksdk, python-ironicclient, shade
+enum34==1.1.6             # via cryptography, knack, msrest, ovirt-engine-sdk-python
 funcsigs==1.0.2           # via debtcollector, oslo.utils
 functools32==3.2.3.post2  # via jsonschema
-futures==3.1.1            # via azure-storage, s3transfer, shade
-humanfriendly==4.4.1      # via azure-cli-core
-idna==2.5                 # via cryptography
-ipaddress==1.0.18         # via cryptography, shade
-iso8601==0.1.11           # via keystoneauth1, oslo.utils, python-neutronclient, python-novaclient
-isodate==0.5.4            # via msrest
-jmespath==0.9.3           # via boto3, botocore, shade
-jsonpatch==1.16           # via openstacksdk, shade, warlock
-jsonpointer==1.10         # via jsonpatch
-jsonschema==2.6.0         # via python-designateclient, python-ironicclient, warlock
-keyring==10.3.3           # via msrestazure
-keystoneauth1==2.21.0     # via openstacksdk, os-client-config, osc-lib, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, shade
+futures==3.2.0            # via openstacksdk, s3transfer, shade
+humanfriendly==4.8        # via azure-cli-core
+idna==2.6                 # via cryptography
+ipaddress==1.0.19         # via cryptography, openstacksdk, shade
+iso8601==0.1.12           # via keystoneauth1, openstacksdk, oslo.utils, python-neutronclient, python-novaclient
+isodate==0.6.0            # via msrest
+jmespath==0.9.3           # via azure-cli-core, boto3, botocore, knack, openstacksdk, shade
+jsonpatch==1.21           # via openstacksdk, shade
+jsonpointer==2.0          # via jsonpatch
+jsonschema==2.6.0         # via python-designateclient, python-ironicclient
+keyring==11.0.0           # via msrestazure
+keystoneauth1==3.4.0      # via openstacksdk, os-client-config, osc-lib, python-cinderclient, python-designateclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, shade
+knack==0.3.1              # via azure-cli-core
 kombu==3.0.37
-lxml==3.8.0               # via pyvmomi
-monotonic==1.3            # via oslo.utils
-msgpack-python==0.4.8     # via oslo.serialization
-msrest==0.4.14            # via azure-cli-core, msrestazure
-msrestazure==0.4.13
-munch==2.1.1              # via shade
+lxml==4.1.1               # via pyvmomi
+monotonic==1.4            # via humanfriendly, oslo.utils
+msgpack==0.5.4            # via oslo.serialization
+msrest==0.4.26            # via azure-cli-core, msrestazure
+msrestazure==0.4.21
+munch==2.2.0              # via openstacksdk, shade
 netaddr==0.7.19           # via oslo.config, oslo.utils, python-neutronclient
-netifaces==0.10.6         # via oslo.utils, shade
-ntlm-auth==1.0.4          # via requests-ntlm
-oauthlib==2.0.2           # via requests-oauthlib
-openstacksdk==0.9.17      # via python-openstackclient
-ordereddict==1.1          # via ntlm-auth
-os-client-config==1.27.0  # via openstacksdk, osc-lib, python-neutronclient, shade
-osc-lib==1.6.0            # via python-designateclient, python-ironicclient, python-neutronclient, python-openstackclient
-oslo.config==4.6.0        # via python-keystoneclient
-oslo.i18n==3.15.3         # via osc-lib, oslo.config, oslo.utils, python-cinderclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
-oslo.serialization==2.18.0  # via python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient
-oslo.utils==3.26.0        # via osc-lib, oslo.serialization, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
+netifaces==0.10.6         # via openstacksdk, oslo.utils, shade
+ntlm-auth==1.0.6          # via requests-ntlm
+oauthlib==2.0.6           # via requests-oauthlib
+openstacksdk==0.11.3      # via osc-lib
+os-client-config==1.29.0  # via osc-lib, python-neutronclient, shade
+os-service-types==1.1.0   # via openstacksdk
+osc-lib==1.9.0            # via python-designateclient, python-ironicclient, python-neutronclient
+oslo.config==5.2.0        # via python-keystoneclient
+oslo.i18n==3.19.0         # via osc-lib, oslo.config, oslo.utils, python-cinderclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient
+oslo.serialization==2.24.0  # via python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient
+oslo.utils==3.35.0        # via osc-lib, oslo.serialization, python-cinderclient, python-designateclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient
 ovirt-engine-sdk-python==4.1.6
-packaging==16.8           # via setuptools
-pbr==3.1.1                # via cliff, debtcollector, keystoneauth1, openstacksdk, osc-lib, oslo.i18n, oslo.serialization, oslo.utils, positional, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, requestsexceptions, shade, stevedore
-positional==1.1.1         # via keystoneauth1, python-keystoneclient
-prettytable==0.7.2        # via cliff, python-cinderclient, python-glanceclient, python-ironicclient, python-novaclient
+packaging==16.8           # via deprecation
+paramiko==2.4.0           # via azure-cli-core
+pbr==3.1.1                # via cliff, debtcollector, keystoneauth1, openstacksdk, os-service-types, osc-lib, oslo.i18n, oslo.serialization, oslo.utils, python-cinderclient, python-designateclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, shade, stevedore
+prettytable==0.7.2        # via cliff, python-cinderclient, python-ironicclient, python-novaclient
 psphere==0.5.2
 psutil==5.2.2
-pycparser==2.17           # via cffi
-pygments==2.2.0           # via azure-cli-core
-pyjwt==1.5.2              # via adal, azure-cli-core
-pykerberos==1.1.14        # via requests-kerberos
-pyopenssl==17.2.0         # via azure-cli-core, python-glanceclient, pyvmomi
+pyasn1==0.4.2             # via paramiko
+pycparser==2.18           # via cffi
+pycurl==7.43.0.1          # via ovirt-engine-sdk-python
+pygments==2.2.0           # via azure-cli-core, knack
+pyjwt==1.5.3              # via adal, azure-cli-core
+pykerberos==1.2.1         # via requests-kerberos
+pynacl==1.2.1             # via paramiko
+pyopenssl==17.5.0         # via azure-cli-core, pyvmomi
 pyparsing==2.2.0          # via cliff, cmd2, oslo.utils, packaging
-python-cinderclient==2.2.0  # via python-openstackclient, shade
-python-dateutil==2.6.0    # via adal, azure-storage, botocore
-python-designateclient==2.6.0  # via shade
-python-glanceclient==2.7.0  # via python-openstackclient
-python-ironicclient==1.13.0  # via shade
-python-keystoneclient==3.11.0  # via python-neutronclient, python-openstackclient, shade
+pyperclip==1.6.0          # via cmd2
+python-cinderclient==3.5.0  # via shade
+python-dateutil==2.6.1    # via adal, azure-storage, botocore
+python-designateclient==2.9.0  # via shade
+python-ironicclient==2.2.0  # via shade
+python-keystoneclient==3.15.0  # via python-neutronclient, shade
 python-memcached==1.58
-python-neutronclient==6.3.0  # via shade
-python-novaclient==9.0.1  # via python-openstackclient, shade
-python-openstackclient==3.11.0  # via python-ironicclient
-pytz==2017.2              # via babel, oslo.serialization, oslo.utils
+python-neutronclient==6.7.0  # via shade
+python-novaclient==10.1.0  # via shade
+pytz==2018.3              # via babel, oslo.serialization, oslo.utils
 pyvmomi==6.5
 pywinrm[kerberos]==0.2.2
-pyyaml==3.12              # via cliff, os-client-config, oslo.config, psphere, python-ironicclient
-requests-kerberos==0.11.0  # via pywinrm
-requests-ntlm==1.0.0      # via pywinrm
+pyyaml==3.12              # via azure-cli-core, cliff, knack, openstacksdk, os-client-config, oslo.config, psphere, python-ironicclient
+requests-kerberos==0.12.0  # via pywinrm
+requests-ntlm==1.1.0      # via pywinrm
 requests-oauthlib==0.8.0  # via msrest
-requests==2.14.2          # via adal, apache-libcloud, azure-servicebus, azure-servicemanagement-legacy, azure-storage, keystoneauth1, msrest, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, pyvmomi, pywinrm, requests-kerberos, requests-ntlm, requests-oauthlib
-requestsexceptions==1.2.0  # via os-client-config, shade
-rfc3986==1.0.0            # via oslo.config
-s3transfer==0.1.10        # via boto3
+requests==2.15.1
+requestsexceptions==1.4.0  # via openstacksdk, os-client-config, shade
+rfc3986==1.1.0            # via oslo.config
+s3transfer==0.1.12        # via boto3
 secretstorage==2.3.1
 shade==1.20.0
-simplejson==3.11.1        # via osc-lib, python-cinderclient, python-neutronclient, python-novaclient
-six==1.10.0               # via cliff, cmd2, cryptography, debtcollector, keystoneauth1, munch, ntlm-auth, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, ovirt-engine-sdk-python, packaging, pyopenssl, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, python-openstackclient, pyvmomi, pywinrm, setuptools, shade, stevedore, warlock
-stevedore==1.23.0         # via cliff, keystoneauth1, openstacksdk, osc-lib, oslo.config, python-designateclient, python-keystoneclient
+simplejson==3.13.2        # via osc-lib, python-cinderclient, python-neutronclient, python-novaclient
+six==1.11.0               # via azure-cli-core, bcrypt, cliff, cmd2, cryptography, debtcollector, isodate, keystoneauth1, knack, munch, ntlm-auth, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-cinderclient, python-dateutil, python-designateclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, pyvmomi, pywinrm, shade, stevedore
+stevedore==1.28.0         # via cliff, keystoneauth1, osc-lib, oslo.config, python-designateclient, python-keystoneclient
+subprocess32==3.2.7       # via cmd2
 suds==0.4                 # via psphere
-tabulate==0.7.7           # via azure-cli-core
+tabulate==0.7.7           # via azure-cli-core, knack
 unicodecsv==0.14.1        # via cliff
-warlock==1.2.0            # via python-glanceclient
-wrapt==1.10.10            # via debtcollector, positional, python-glanceclient
+wheel==0.30.0             # via azure-cli-core
+wrapt==1.10.11            # via debtcollector
 xmltodict==0.11.0         # via pywinrm
 
 # The following packages are considered to be unsafe in a requirements file:
