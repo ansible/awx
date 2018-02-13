@@ -664,7 +664,7 @@ def get_mem_capacity():
     return (mem, max(1, ((mem / 1024 / 1024) - 2048) / forkmem))
 
 
-def get_system_task_capacity(scale=Decimal(1.0)):
+def get_system_task_capacity(scale=Decimal(1.0), cpu_capacity=None, mem_capacity=None):
     '''
     Measure system memory and use it as a baseline for determining the system's capacity
     '''
@@ -677,8 +677,14 @@ def get_system_task_capacity(scale=Decimal(1.0)):
     elif settings_forks:
         return int(settings_forks)
 
-    _, cpu_cap = get_cpu_capacity()
-    _, mem_cap = get_mem_capacity()
+    if cpu_capacity is None:
+        _, cpu_cap = get_cpu_capacity()
+    else:
+        cpu_cap = cpu_capacity
+    if mem_capacity is None:
+        _, mem_cap = get_mem_capacity()
+    else:
+        mem_cap = mem_capacity
     return min(mem_cap, cpu_cap) + ((max(mem_cap, cpu_cap) - min(mem_cap, cpu_cap)) * scale)
 
 
