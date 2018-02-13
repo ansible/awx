@@ -28,6 +28,12 @@
                     name="schedulerName"
                     id="schedulerName"
                     ng-model="schedulerName" required
+                    ng-model-options="{
+                        'updateOn': 'default blur',
+                        'debounce': {
+                        'default': 300,
+                        'blur': 0
+                    }}"
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                     placeholder="Schedule name">
                 <div class="error"
@@ -578,7 +584,7 @@
             </p>
         </div>
         <div class="SchedulerFormDetail-container"
-            ng-show="schedulerIsValid">
+            ng-show="schedulerIsValid &&  !preview_list.isEmpty">
             <label class="SchedulerFormDetail-label">
                 Schedule Description
             </label>
@@ -623,15 +629,15 @@
             <ul class="occurrence-list mono-space
                 SchedulerFormDetail-occurrenceList"
                 ng-show="dateChoice == 'utc'">
-                <li ng-repeat="occurrence in occurrence_list">
-                    {{ occurrence.utc }}
+                <li ng-repeat="occurrence in preview_list.utc">
+                    {{ occurrence | date:'MM-dd-yyyy HH:mm:ss'}} UTC
                 </li>
             </ul>
             <ul class="occurrence-list mono-space
                 SchedulerFormDetail-occurrenceList"
                 ng-show="dateChoice == 'local'">
-                <li ng-repeat="occurrence in occurrence_list">
-                    {{ occurrence.local }}
+                <li ng-repeat="occurrence in preview_list.local">
+                    {{ occurrence | date:'MM-dd-yyyy HH:mm:ss'}}
                 </li>
             </ul>
 

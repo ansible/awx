@@ -4,14 +4,14 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$filter', '$state', '$stateParams', 'Wait',
+export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
-    'ProcessErrors', 'SchedulerInit', '$location', 'PromptService',
-    function($filter, $state, $stateParams, Wait,
+    'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI',
+    function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
-        ProcessErrors, SchedulerInit, $location, PromptService) {
+        ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
         scheduler,
@@ -283,6 +283,16 @@ export default ['$filter', '$state', '$stateParams', 'Wait',
     Wait('start');
     $('#form-container').empty();
     scheduler = SchedulerInit({ scope: $scope, requireFutureStartTime: false });
+    let timeZonesAPI = () => {
+        return $http.get(`/api/v2/schedules/zoneinfo/`);
+    };
+    // set API timezones to scheduler object
+    timeZonesAPI().then(({data}) => {
+        scheduler.scope.timeZones = data;
+        scheduler.scope.schedulerTimeZone = _.find(data, (zone) => {
+            return zone.name === scheduler.scope.current_timezone.name;
+        });
+    });
     if($scope.schedulerUTCTime) {
         // The UTC time is already set
         processSchedulerEndDt();
@@ -306,7 +316,22 @@ export default ['$filter', '$state', '$stateParams', 'Wait',
         $scope.$on("formUpdated", function() {
             $rootScope.$broadcast("loadSchedulerDetailPane");
         });
+        $scope.$on("setPreviewPane", (event) => {
+            let rrule = event.currentScope.rrule.toString();
+            let req = RRuleToAPI(rrule, $scope);
 
+            $http.post('/api/v2/schedules/preview/', {'rrule': req})
+                .then(({data}) => {
+
+                    $scope.preview_list = data;
+                    for (let tz in data) {
+                        $scope.preview_list.isEmpty = data[tz].length === 0;
+                        $scope.preview_list[tz] = data[tz].map(function(date) {
+                            return date.replace(/Z/, '');
+                        });
+                    }
+                });
+        });
         $scope.$watchGroup(["schedulerName",
             "schedulerStartDt",
             "schedulerStartHour",

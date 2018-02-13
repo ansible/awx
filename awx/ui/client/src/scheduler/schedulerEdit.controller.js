@@ -1,9 +1,9 @@
 export default ['$filter', '$state', '$stateParams', 'Wait', '$scope',
-'$rootScope', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
-'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService',
+'$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
+'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
 function($filter, $state, $stateParams, Wait, $scope,
-    $rootScope, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
-    GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService) {
+    $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
+    GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI) {
 
     let schedule, scheduler;
 
@@ -85,6 +85,22 @@ function($filter, $state, $stateParams, Wait, $scope,
         callSelect2();
     });
 
+    $scope.$on("setPreviewPane", (event) => {
+        let rrule = event.currentScope.rrule.toString();
+        let req = RRuleToAPI(rrule, $scope);
+
+        $http.post('/api/v2/schedules/preview/', {'rrule': req})
+            .then(({data}) => {
+                $scope.preview_list = data;
+                for (let tz in data) {
+                    $scope.preview_list.isEmpty = data[tz].length === 0;
+                    $scope.preview_list[tz] = data[tz].map(function(date) {
+                        return date.replace(/Z/, '');
+                    });
+                }
+            });
+    });
+
     Wait('start');
 
     // Get the existing record
@@ -111,6 +127,13 @@ function($filter, $state, $stateParams, Wait, $scope,
 
             $('#form-container').empty();
             scheduler = SchedulerInit({ scope: $scope, requireFutureStartTime: false });
+
+            $http.get('/api/v2/schedules/zoneinfo/').then(({data}) => {
+                scheduler.scope.timeZones = data;
+                scheduler.scope.schedulerTimeZone = _.find(data, (zone) => {
+                    return zone.name === scheduler.scope.current_timezone.name;
+                });
+            });
             scheduler.inject('form-container', false);
             scheduler.injectDetail('occurrences', false);
 
