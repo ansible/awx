@@ -23,6 +23,7 @@ psphere==0.5.2
 psutil==5.2.2
 pyvmomi==6.5
 pywinrm[kerberos]==0.2.2
+requests<2.16  # Older versions rely on certify
 secretstorage==2.3.1
 shade==1.20.0
 setuptools==36.0.1
