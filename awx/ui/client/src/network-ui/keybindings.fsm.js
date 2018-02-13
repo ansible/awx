@@ -57,3 +57,37 @@ _Enabled.prototype.onUnbindDocument = function (controller) {
 
 };
 _Enabled.prototype.onUnbindDocument.transitions = ['Disabled'];
+
+_Disabled.prototype.onDetailsPanelClose = function (controller) {
+
+    $(document).bind("keydown", controller.scope.onKeyDown);
+    controller.changeState(Enabled);
+
+};
+_Disabled.prototype.onDetailsPanelClose.transitions = ['Enabled'];
+
+_Disabled.prototype.onSearchDropdownClose = function (controller) {
+
+    $(document).bind("keydown", controller.scope.onKeyDown);
+    controller.changeState(Enabled);
+
+};
+_Disabled.prototype.onSearchDropdownClose.transitions = ['Enabled'];
+
+
+
+_Enabled.prototype.onDetailsPanel = function (controller) {
+
+    $(document).unbind("keydown", controller.scope.onKeyDown);
+    controller.changeState(Disabled);
+
+};
+_Enabled.prototype.onDetailsPanel.transitions = ['Disabled'];
+
+_Enabled.prototype.onSearchDropdown = function (controller) {
+
+    $(document).unbind("keydown", controller.scope.onKeyDown);
+    controller.changeState(Disabled);
+
+};
+_Enabled.prototype.onSearchDropdown.transitions = ['Disabled'];
