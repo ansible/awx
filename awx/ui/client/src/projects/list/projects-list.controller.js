@@ -154,6 +154,21 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             }
         });
 
+        $scope.copyProject = project => {
+            Wait('start');
+            new Project('get', project.id)
+                .then(model => model.copy())
+                .then(({ id }) => {
+                    const params = { project_id: id };
+                    $state.go('projects.edit', params, { reload: true });
+                })
+                .catch(({ data, status }) => {
+                    const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
+                    ProcessErrors($scope, data, status, null, params);
+                })
+                .finally(() => Wait('stop'));
+        };
+
         $scope.showSCMStatus = function(id) {
             // Refresh the project list
             var project = Find({ list: $scope.projects, key: 'id', val: id });

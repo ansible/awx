@@ -15,7 +15,6 @@ import workflowChart from './workflows/workflow-chart/main';
 import workflowMaker from './workflows/workflow-maker/main';
 import workflowControls from './workflows/workflow-controls/main';
 import workflowService from './workflows/workflow.service';
-import templateCopyService from './copy-template/template-copy.service';
 import WorkflowForm from './workflows.form';
 import CompletedJobsList from './completed-jobs.list';
 import InventorySourcesList from './inventory-sources.list';
@@ -29,7 +28,6 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
     ])
     .service('TemplatesService', templatesService)
     .service('WorkflowService', workflowService)
-    .service('TemplateCopyService', templateCopyService)
     .factory('WorkflowForm', WorkflowForm)
     .factory('CompletedJobsList', CompletedJobsList)
     // TODO: currently being kept arround for rbac selection, templates within projects and orgs, etc.

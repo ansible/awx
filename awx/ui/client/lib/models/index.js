@@ -4,22 +4,22 @@ import Base from '~models/Base';
 import Config from '~models/Config';
 import Credential from '~models/Credential';
 import CredentialType from '~models/CredentialType';
-import Me from '~models/Me';
-import Organization from '~models/Organization';
-import Project from '~models/Project';
-import JobTemplate from '~models/JobTemplate';
-import WorkflowJobTemplateNode from '~models/WorkflowJobTemplateNode';
 import Instance from '~models/Instance';
 import InstanceGroup from '~models/InstanceGroup';
-import InventorySource from '~models/InventorySource';
 import Inventory from '~models/Inventory';
 import InventoryScript from '~models/InventoryScript';
+import InventorySource from '~models/InventorySource';
 import Job from '~models/Job';
+import JobTemplate from '~models/JobTemplate';
+import Me from '~models/Me';
+import ModelsStrings from '~models/models.strings';
+import NotificationTemplate from '~models/NotificationTemplate';
+import Organization from '~models/Organization';
+import Project from '~models/Project';
+import UnifiedJobTemplate from '~models/UnifiedJobTemplate';
 import WorkflowJob from '~models/WorkflowJob';
 import WorkflowJobTemplate from '~models/WorkflowJobTemplate';
-
-import ModelsStrings from '~models/models.strings';
-import UnifiedJobTemplate from '~models/UnifiedJobTemplate';
+import WorkflowJobTemplateNode from '~models/WorkflowJobTemplateNode';
 
 const MODULE_NAME = 'at.lib.models';
 
@@ -31,21 +31,21 @@ angular
     .service('ConfigModel', Config)
     .service('CredentialModel', Credential)
     .service('CredentialTypeModel', CredentialType)
-    .service('MeModel', Me)
-    .service('OrganizationModel', Organization)
-    .service('ProjectModel', Project)
-    .service('JobTemplateModel', JobTemplate)
-    .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode)
-    .service('InstanceModel', Instance)
     .service('InstanceGroupModel', InstanceGroup)
-    .service('InventorySourceModel', InventorySource)
+    .service('InstanceModel', Instance)
     .service('InventoryModel', Inventory)
     .service('InventoryScriptModel', InventoryScript)
-    .service('WorkflowJobTemplateModel', WorkflowJobTemplate)
-    .service('ModelsStrings', ModelsStrings)
-    .service('UnifiedJobTemplateModel', UnifiedJobTemplate)
+    .service('InventorySourceModel', InventorySource)
     .service('JobModel', Job)
+    .service('JobTemplateModel', JobTemplate)
+    .service('MeModel', Me)
+    .service('ModelsStrings', ModelsStrings)
+    .service('NotificationTemplate', NotificationTemplate)
+    .service('OrganizationModel', Organization)
+    .service('ProjectModel', Project)
+    .service('UnifiedJobTemplateModel', UnifiedJobTemplate)
     .service('WorkflowJobModel', WorkflowJob)
-    .service('WorkflowJobTemplateModel', WorkflowJobTemplate);
+    .service('WorkflowJobTemplateModel', WorkflowJobTemplate)
+    .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode);
 
 export default MODULE_NAME;

@@ -1,5 +1,3 @@
-import { all } from '../api';
-
 import {
     getAdminAWSCredential,
     getAdminMachineCredential,
@@ -49,7 +47,7 @@ module.exports = {
             getUpdatedProject().then(obj => { data.project = obj; })
         ];
 
-        all(promises)
+        Promise.all(promises)
             .then(() => {
                 client.useCss();
 

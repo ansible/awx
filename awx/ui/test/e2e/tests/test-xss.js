@@ -113,7 +113,7 @@ module.exports = {
         client.expect.element('.at-Panel smart-search').visible;
         client.expect.element('.at-Panel smart-search input').enabled;
 
-        client.sendKeys('.at-Panel smart-search input', `id:${data.jobTemplate.id}`);
+        client.sendKeys('.at-Panel smart-search input', `id:>${data.jobTemplate.id - 1} id:<${data.jobTemplate.id + 1}`);
         client.sendKeys('.at-Panel smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').not.visible;
@@ -176,7 +176,7 @@ module.exports = {
         client.expect.element('div[ui-view="related"]').visible;
         client.expect.element('div[ui-view="related"] smart-search input').enabled;
 
-        client.sendKeys('div[ui-view="related"] smart-search input', `id:${adminRole.id}`);
+        client.sendKeys('div[ui-view="related"] smart-search input', `id:>${adminRole.id - 1} id:<${adminRole.id + 1}`);
         client.sendKeys('div[ui-view="related"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').not.visible;
@@ -231,7 +231,7 @@ module.exports = {
         client.expect.element('div[class^="Panel"] smart-search').visible;
         client.expect.element('div[class^="Panel"] smart-search input').enabled;
 
-        client.sendKeys('div[class^="Panel"] smart-search input', `id:${data.notification.id}`);
+        client.sendKeys('div[class^="Panel"] smart-search input', `id:>${data.notification.id - 1} id:<${data.notification.id + 1}`);
         client.sendKeys('div[class^="Panel"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').visible;
@@ -282,7 +282,7 @@ module.exports = {
         client.expect.element('div[class^="Panel"] smart-search').visible;
         client.expect.element('div[class^="Panel"] smart-search input').enabled;
 
-        client.sendKeys('div[class^="Panel"] smart-search input', `id:${data.organization.id}`);
+        client.sendKeys('div[class^="Panel"] smart-search input', `id:>${data.organization.id - 1} id:<${data.organization.id + 1}`);
         client.sendKeys('div[class^="Panel"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').visible;
@@ -333,7 +333,7 @@ module.exports = {
         client.expect.element('div[class^="Panel"] smart-search').visible;
         client.expect.element('div[class^="Panel"] smart-search input').enabled;
 
-        client.sendKeys('div[class^="Panel"] smart-search input', `id:${data.inventory.id}`);
+        client.sendKeys('div[class^="Panel"] smart-search input', `id:>${data.inventory.id - 1} id:<${data.inventory.id + 1}`);
         client.sendKeys('div[class^="Panel"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').visible;
@@ -393,7 +393,7 @@ module.exports = {
         client.expect.element('div[class^="Panel"] smart-search').visible;
         client.expect.element('div[class^="Panel"] smart-search input').enabled;
 
-        client.sendKeys('div[class^="Panel"] smart-search input', `id:${data.inventoryScript.id}`);
+        client.sendKeys('div[class^="Panel"] smart-search input', `id:>${data.inventoryScript.id - 1} id:<${data.inventoryScript.id + 1}`);
         client.sendKeys('div[class^="Panel"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').visible;
@@ -455,7 +455,7 @@ module.exports = {
         client.expect.element('div[ui-view="related"]').visible;
         client.expect.element('div[ui-view="related"] smart-search input').enabled;
 
-        client.sendKeys('div[ui-view="related"] smart-search input', `id:${data.user.id}`);
+        client.sendKeys('div[ui-view="related"] smart-search input', `id:>${data.user.id - 1} id:<${data.user.id + 1}`);
         client.sendKeys('div[ui-view="related"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').not.visible;
@@ -514,7 +514,7 @@ module.exports = {
         client.expect.element('div[class^="Panel"] smart-search').visible;
         client.expect.element('div[class^="Panel"] smart-search input').enabled;
 
-        client.sendKeys('div[class^="Panel"] smart-search input', `id:${data.project.id}`);
+        client.sendKeys('div[class^="Panel"] smart-search input', `id:>${data.project.id - 1} id:<${data.project.id + 1}`);
         client.sendKeys('div[class^="Panel"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').visible;
@@ -566,7 +566,7 @@ module.exports = {
         client.expect.element('div[ui-view="list"] smart-search').visible;
         client.expect.element('div[ui-view="list"] smart-search input').enabled;
 
-        client.sendKeys('div[ui-view="list"] smart-search input', `id:${data.credential.id}`);
+        client.sendKeys('div[ui-view="list"] smart-search input', `id:>${data.credential.id - 1} id:<${data.credential.id + 1}`);
         client.sendKeys('div[ui-view="list"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').visible;
@@ -618,7 +618,7 @@ module.exports = {
         client.expect.element('div[class^="Panel"] smart-search').visible;
         client.expect.element('div[class^="Panel"] smart-search input').enabled;
 
-        client.sendKeys('div[class^="Panel"] smart-search input', `id:${data.team.id}`);
+        client.sendKeys('div[class^="Panel"] smart-search input', `id:>${data.team.id - 1} id:<${data.team.id + 1}`);
         client.sendKeys('div[class^="Panel"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').visible;
@@ -684,7 +684,6 @@ module.exports = {
                     .contains('&lt;div id="xss" class="xss"&gt;test&lt;/div&gt;');
             });
         });
-        client.end();
     },
     'check host recent jobs popup for unsanitized content': client => {
         const itemRow = `#hosts_table tr[id="${data.host.id}"]`;

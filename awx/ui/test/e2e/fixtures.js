@@ -3,18 +3,15 @@ import uuid from 'uuid';
 import { AWX_E2E_PASSWORD } from './settings';
 
 import {
-    all,
     get,
     post,
-    spread
 } from './api';
 
 const session = `e2e-${uuid().substr(0, 8)}`;
-
 const store = {};
 
-const getOrCreate = (endpoint, data) => {
-    const identifier = Object.keys(data).find(key => ['name', 'username'].includes(key));
+const getOrCreate = (endpoint, data, unique = ['name', 'username', 'id']) => {
+    const identifier = Object.keys(data).find(key => unique.includes(key));
 
     if (identifier === undefined) {
         throw new Error('A unique key value must be provided.');
@@ -22,12 +19,10 @@ const getOrCreate = (endpoint, data) => {
 
     const identity = data[identifier];
 
-    if (store[endpoint] && store[endpoint][identity]) {
-        return store[endpoint][identity].then(created => created.data);
-    }
+    store[endpoint] = store[endpoint] || {};
 
-    if (!store[endpoint]) {
-        store[endpoint] = {};
+    if (store[endpoint][identity]) {
+        return store[endpoint][identity].then(created => created.data);
     }
 
     const query = { params: { [identifier]: identity } };
@@ -61,13 +56,8 @@ const getInventory = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventories/', {
         name: `${namespace}-inventory`,
         description: namespace,
-        organization: organization.id,
-    }).then(inventory => getOrCreate('/hosts/', {
-        name: `${namespace}-host`,
-        description: namespace,
-        inventory: inventory.id,
-        variables: JSON.stringify({ ansible_connection: 'local' }),
-    }).then(() => inventory)));
+        organization: organization.id
+    }));
 
 const getHost = (namespace = session) => getInventory(namespace)
     .then(inventory => getOrCreate('/hosts/', {
@@ -75,7 +65,7 @@ const getHost = (namespace = session) => getInventory(namespace)
         description: namespace,
         inventory: inventory.id,
         variables: JSON.stringify({ ansible_connection: 'local' }),
-    }).then((host) => host));
+    }));
 
 const getInventoryScript = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventory_scripts/', {
@@ -91,14 +81,14 @@ const getInventorySource = (namespace = session) => {
         getInventoryScript(namespace)
     ];
 
-    return all(promises)
-        .then(spread((inventory, inventoryScript) => getOrCreate('/inventory_sources/', {
+    return Promise.all(promises)
+        .then(([inventory, inventoryScript]) => getOrCreate('/inventory_sources/', {
             name: `${namespace}-inventory-source-custom`,
             description: namespace,
             source: 'custom',
             inventory: inventory.id,
             source_script: inventoryScript.id
-        })));
+        }));
 };
 
 const getAdminAWSCredential = (namespace = session) => {
@@ -109,8 +99,8 @@ const getAdminAWSCredential = (namespace = session) => {
         })
     ];
 
-    return all(promises)
-        .then(spread((me, credentialType) => {
+    return Promise.all(promises)
+        .then(([me, credentialType]) => {
             const [admin] = me.data.results;
 
             return getOrCreate('/credentials/', {
@@ -124,7 +114,7 @@ const getAdminAWSCredential = (namespace = session) => {
                     security_token: 'AAAAAAAAAAAAAAAA'
                 }
             });
-        }));
+        });
 };
 
 const getAdminMachineCredential = (namespace = session) => {
@@ -133,17 +123,16 @@ const getAdminMachineCredential = (namespace = session) => {
         getOrCreate('/credential_types/', { name: 'Machine' })
     ];
 
-    return all(promises)
-        .then(spread((me, credentialType) => {
+    return Promise.all(promises)
+        .then(([me, credentialType]) => {
             const [admin] = me.data.results;
-
             return getOrCreate('/credentials/', {
                 name: `${namespace}-credential-machine-admin`,
                 description: namespace,
                 credential_type: credentialType.id,
                 user: admin.id
             });
-        }));
+        });
 };
 
 const getTeam = (namespace = session) => getOrganization(namespace)
@@ -235,15 +224,57 @@ const getJobTemplate = (namespace = session) => {
         getUpdatedProject(namespace)
     ];
 
-    return all(promises)
-        .then(spread((inventory, credential, project) => getOrCreate('/job_templates/', {
+    return Promise.all(promises)
+        .then(([inventory, credential, project]) => getOrCreate('/job_templates/', {
             name: `${namespace}-job-template`,
             description: namespace,
             inventory: inventory.id,
             credential: credential.id,
             project: project.id,
             playbook: 'hello_world.yml',
-        })));
+        }));
+};
+
+const getWorkflowTemplate = (namespace = session) => {
+    const endpoint = '/workflow_job_templates/';
+
+    const workflowTemplatePromise = getOrganization(namespace)
+        .then(organization => getOrCreate(endpoint, {
+            name: `${namespace}-workflow-template`,
+            organization: organization.id,
+            variables: '---',
+            extra_vars: '',
+        }));
+
+    const resources = [
+        workflowTemplatePromise,
+        getInventorySource(namespace),
+        getUpdatedProject(namespace),
+        getJobTemplate(namespace),
+    ];
+
+    const workflowNodePromise = Promise.all(resources)
+        .then(([workflowTemplate, source, project, jobTemplate]) => {
+            const workflowNodes = workflowTemplate.related.workflow_nodes;
+            const unique = 'unified_job_template';
+
+            const nodes = [
+                getOrCreate(workflowNodes, { [unique]: project.id }, [unique]),
+                getOrCreate(workflowNodes, { [unique]: jobTemplate.id }, [unique]),
+                getOrCreate(workflowNodes, { [unique]: source.id }, [unique]),
+            ];
+
+            const createSuccessNodes = ([projectNode, jobNode, sourceNode]) => Promise.all([
+                getOrCreate(projectNode.related.success_nodes, { id: jobNode.id }),
+                getOrCreate(jobNode.related.success_nodes, { id: sourceNode.id }),
+            ]);
+
+            return Promise.all(nodes)
+                .then(createSuccessNodes);
+        });
+
+    return Promise.all([workflowTemplatePromise, workflowNodePromise])
+        .then(([workflowTemplate, nodes]) => workflowTemplate);
 };
 
 const getAuditor = (namespace = session) => getOrganization(namespace)
@@ -287,10 +318,10 @@ const getJobTemplateAdmin = (namespace = session) => {
         }));
 
     const assignRolePromise = Promise.all([userPromise, rolePromise])
-        .then(spread((user, role) => post(`/api/v2/roles/${role.id}/users/`, { id: user.id })));
+        .then(([user, role]) => post(`/api/v2/roles/${role.id}/users/`, { id: user.id }));
 
     return Promise.all([userPromise, assignRolePromise])
-        .then(spread(user => user));
+        .then(([user, assignment]) => user);
 };
 
 const getProjectAdmin = (namespace = session) => {
@@ -310,10 +341,10 @@ const getProjectAdmin = (namespace = session) => {
         }));
 
     const assignRolePromise = Promise.all([userPromise, rolePromise])
-        .then(spread((user, role) => post(`/api/v2/roles/${role.id}/users/`, { id: user.id })));
+        .then(([user, role]) => post(`/api/v2/roles/${role.id}/users/`, { id: user.id }));
 
     return Promise.all([userPromise, assignRolePromise])
-        .then(spread(user => user));
+        .then(([user, assignment]) => user);
 };
 
 const getInventorySourceSchedule = (namespace = session) => getInventorySource(namespace)
@@ -334,21 +365,23 @@ module.exports = {
     getAdminAWSCredential,
     getAdminMachineCredential,
     getAuditor,
+    getHost,
     getInventory,
     getInventoryScript,
     getInventorySource,
     getInventorySourceSchedule,
+    getJob,
     getJobTemplate,
     getJobTemplateAdmin,
     getJobTemplateSchedule,
     getNotificationTemplate,
-    getOrCreate,
     getOrganization,
+    getOrCreate,
+    getProject,
     getProjectAdmin,
     getSmartInventory,
     getTeam,
     getUpdatedProject,
     getUser,
-    getJob,
-    getHost,
+    getWorkflowTemplate,
 };
