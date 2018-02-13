@@ -1,4 +1,5 @@
 import re
+from functools import reduce
 from pyparsing import (
     infixNotation,
     opAssoc,

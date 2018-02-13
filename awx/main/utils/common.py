@@ -18,6 +18,7 @@ import contextlib
 import tempfile
 import six
 import psutil
+from functools import reduce
 from StringIO import StringIO
 
 from decimal import Decimal
