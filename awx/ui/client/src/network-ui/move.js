@@ -208,13 +208,10 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     if (last_selected.last_selected_device !== null) {
         controller.changeState(Selected1);
-        controller.scope.onDetailsContextButton();
     } else if (last_selected.last_selected_link !== null) {
         controller.changeState(Selected1);
-        controller.scope.onDetailsContextButton();
     } else if (last_selected.last_selected_interface !== null) {
         controller.changeState(Selected1);
-        controller.scope.onDetailsContextButton();
     } else {
         controller.delegate_channel.send(msg_type, $event);
     }
@@ -289,7 +286,7 @@ _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
             return;
         }
     }
-
+    controller.scope.first_channel.send('BindDocument', {});
     controller.changeState(Ready);
     controller.handle_message(msg_type, $event);
 };
@@ -315,6 +312,9 @@ _Selected1.prototype.onMouseMove.transitions = ['Move'];
 
 _Selected1.prototype.onMouseUp = function (controller) {
 
+    if(controller.scope.$parent.vm.rightPanelIsExpanded){
+        controller.scope.onDetailsContextButton();
+    }
     controller.changeState(Selected2);
 
 };
@@ -511,3 +511,10 @@ _ContextMenu.prototype.onMouseDown = function (controller) {
 
 };
 _ContextMenu.prototype.onMouseDown.transitions = ['Ready'];
+
+_ContextMenu.prototype.onDetailsPanel = function (controller, msg_type, $event) {
+
+    controller.changeState(Selected2);
+    controller.handle_message(msg_type, $event);
+};
+_ContextMenu.prototype.onDetailsPanel.transitions = ['Selected2'];
