@@ -199,7 +199,7 @@ class SurveyJobTemplateMixin(models.Model):
                 errors.append("'%s' value missing" % survey_element['variable'])
         elif survey_element['type'] in ["textarea", "text", "password"]:
             if survey_element['variable'] in data:
-                if type(data[survey_element['variable']]) not in (str, unicode):
+                if not isinstance(data[survey_element['variable']], six.string_types):
                     errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']],
                                                                                   survey_element['variable']))
                     return errors
