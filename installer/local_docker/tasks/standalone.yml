@@ -116,7 +116,7 @@
     volumes: "{{ project_data_dir + ':/var/lib/awx/projects:rw' if project_data_dir is defined else omit }}"
     links: "{{ awx_task_container_links|list }}"
     user: root
-    hostname: awx
+    hostname: "{{ ansible_hostname | default('awx') }}"
     dns_search_domains: "{{ awx_container_search_domains.split(',') if awx_container_search_domains is defined else omit }}"
     dns_servers: "{{ awx_alternate_dns_servers.split(',') if awx_alternate_dns_servers is defined else omit }}"
     env:
