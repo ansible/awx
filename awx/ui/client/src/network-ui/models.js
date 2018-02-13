@@ -28,6 +28,7 @@ function Device(id, name, x, y, type, host_id) {
     this.interfaces = [];
     this.process_id_seq = util.natural_numbers(0);
     this.processes = [];
+    this.in_group = false;
 }
 exports.Device = Device;
 
@@ -640,6 +641,7 @@ Group.prototype.update_membership = function (devices, groups) {
             devices[i].y > y1 &&
             devices[i].x < x2 &&
             devices[i].y < y2) {
+            devices[i].in_group = true;
             this.devices.push(devices[i]);
             device_ids.push(devices[i].id);
         }
@@ -918,6 +920,7 @@ function Animation(id, steps, data, scope, tracer, callback) {
     this.frame_number_seq = util.natural_numbers(-1);
     this.frame_number = 0;
     this.data = data;
+    this.data.updateZoomBoolean = data.updateZoomBoolean !== undefined ? data.updateZoomBoolean : true;
     this.callback = callback;
     this.scope = scope;
     this.interval = null;

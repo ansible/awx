@@ -1,0 +1,59 @@
+.Networking-zoomPanel{
+    position: absolute;
+    bottom:0px;
+    right:0px;
+    border-top: 1px solid #B7B7B7;
+    border-left: 1px solid #B7B7B7;
+    width: 200px;
+    height:60px;
+}
+
+.Networking-zoomPanel--expanded{
+    right:400px;
+}
+
+.NetworkingControls-manualControls{
+    position: absolute;
+    background-color: #FFFFFF;
+    padding-left:15px;
+    width: 100%;
+}
+
+.NetworkingControls-Zoom{
+    display: flex;
+    flex: 1 0 auto;
+}
+
+.NetworkingControls-Zoom--button {
+    line-height: 60px;
+    color: @default-icon;
+}
+
+.NetworkingControls-Zoom--button:hover {
+    color: @default-link-hov;
+}
+
+.NetworkingControls-zoomSlider {
+    width: 150px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.NetworkingControls-zoomPercentage {
+    text-align: center;
+    font-size: 0.7em;
+    height: 24px;
+    line-height: 24px;
+}
+
+.ui-slider-handle.ui-state-default.ui-corner-all {
+    border-radius: 50%;
+    border-color: @default-link;
+    background: @default-link;
+}
+
+.ui-slider-handle.ui-state-default.ui-corner-all:hover,
+.ui-slider-handle.ui-state-default.ui-corner-all:active {
+    border-color: @default-link-hov;
+    background: @default-link-hov;
+}

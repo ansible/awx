@@ -21,11 +21,12 @@ var models = require('./models.js');
 var messages = require('./messages.js');
 var animations = require('./animations.js');
 var keybindings = require('./keybindings.fsm.js');
+var details_panel_fsm = require('./details.panel.fsm.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
 var NetworkUIController = function($scope, $document, $location, $window, $http,
-    $q, $state, ProcessErrors, ConfigService) {
+    $q, $state, ProcessErrors, ConfigService, rbacUiControlService) {
 
   window.scope = $scope;
   var i = 0;
@@ -185,6 +186,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
   $scope.device_detail_controller = new fsm.FSMController($scope, "device_detail_fsm", device_detail_fsm.Start, $scope);
   $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope);
+  $scope.details_panel_controller = new fsm.FSMController($scope, "details_panel_fsm", details_panel_fsm.Start, $scope);
   $scope.link_controller = new fsm.FSMController($scope, "link_fsm", link.Start, $scope);
   $scope.stream_controller = new fsm.FSMController($scope, "stream_fsm", stream_fsm.Start, $scope);
   $scope.group_controller = new fsm.FSMController($scope, "group_fsm", group.Start, $scope);
@@ -318,8 +320,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.move_controller.delegate_channel = new fsm.Channel($scope.move_controller,
                                                             $scope.device_detail_controller,
                                                             $scope);
+  $scope.details_panel_controller.delegate_channel = new fsm.Channel($scope.details_panel_controller,
+                                                            $scope.move_controller,
+                                                            $scope);
   $scope.link_controller.delegate_channel = new fsm.Channel($scope.link_controller,
-                                                                  $scope.move_controller,
+                                                                  $scope.details_panel_controller,
                                                                   $scope);
   $scope.stream_controller.delegate_channel = new fsm.Channel($scope.stream_controller,
                                                                   $scope.link_controller,
@@ -625,6 +630,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Conext Menu Button Handlers
     $scope.removeContextMenu = function(){
+        $scope.move_controller.handle_message("Ready", {});
         let context_menu = $scope.context_menus[0];
         context_menu.enabled = false;
         context_menu.x = -100000;
@@ -637,61 +643,72 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     };
 
     $scope.closeDetailsPanel = function () {
-        $scope.$emit('closeDetailsPanel');
+        $scope.first_channel.send('DetailsPanelClose', {});
     };
 
-    $scope.onDetailsContextButton = function (panelBoolean) {
-        if (!$scope.disconnected) {
+    $scope.$on('hostUpdateSaved', (e, host) => {
+        if (host.variables !== "" && $scope.selected_devices.length === 1) {
+            host.data = jsyaml.safeLoad(host.variables);
+            $scope.selected_devices[0].type = host.data.type;
+        }
+    });
+
+    $scope.onDetailsContextButton = function () {
+        function emitCallback(item, canAdd){
+            $scope.first_channel.send('DetailsPanel', {});
             $scope.removeContextMenu();
-            // show details for devices
-            if ($scope.selected_devices.length === 1){
+            $scope.update_toolbox_heights();
+            $scope.$emit('showDetails', item, canAdd);
+        }
 
-                // following block is intended for devices added in the network UI but not in Tower
-                if ($scope.selected_devices[0].host_id === 0){
-                    let host = $scope.selected_devices[0];
-                    $scope.update_toolbox_heights();
-                    $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
-                }
+        // show details for devices
+        if ($scope.selected_devices.length === 1 && $scope.selected_devices[0].host_id === 0){
+            // following block is intended for devices added in the network UI but not in Tower
+            emitCallback($scope.selected_devices[0]);
+        }
 
-                // following block is intended for devices that are saved in the API
-                if ($scope.selected_devices[0].host_id !== 0){
-                    let host_id = $scope.selected_devices[0].host_id;
-                    let url = `/api/v2/hosts/${host_id}/`;
-                    $http.get(url)
-                         .then(function(response) {
-                             let host = response.data;
-                             host.host_id = host.id;
-                             $scope.update_toolbox_heights();
-                             $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
+        // following block is intended for devices that are saved in the API
+        if ($scope.selected_devices.length === 1 && $scope.selected_devices[0].host_id !== 0){
+            let host_id = $scope.selected_devices[0].host_id;
+            let url = `/api/v2/hosts/${host_id}/`;
+            let hostData = $http.get(url)
+                 .then(function(response) {
+                     let host = response.data;
+                     host.host_id = host.id;
+                     return host;
+                 })
+                 .catch(({data, status}) => {
+                     ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
+                 });
+            let canAdd = rbacUiControlService.canAdd('hosts')
+                    .then(function(res) {
+                        return res.canAdd;
+                    })
+                    .catch(function() {
+                        return false;
+                    });
+            Promise.all([hostData, canAdd]).then((values) => {
+                let item = values[0];
+                let canAdd = values[1];
+                emitCallback(item, canAdd);
+            });
+        }
 
-                         })
-                         .catch(({data, status}) => {
-                             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
-                         });
-                }
-            }
+        // show details for interfaces
+        else if($scope.selected_interfaces.length === 1){
+            emitCallback($scope.selected_interfaces[0]);
+        }
 
-            // show details for interfaces
-            else if($scope.selected_interfaces.length === 1){
-                let selected_interface  = $scope.selected_interfaces[0];
-                $scope.update_toolbox_heights();
-                $scope.$emit('showDetails', selected_interface, panelBoolean !== null ? panelBoolean: true);
-            }
+        // show details for links
+        else if($scope.selected_links.length === 1){
+            emitCallback($scope.selected_links[0]);
+        }
 
-            // show details for links
-            else if($scope.selected_links.length === 1){
-                let link  = $scope.selected_links[0];
-                $scope.update_toolbox_heights();
-                $scope.$emit('showDetails', link, panelBoolean !== null ? panelBoolean: true);
-            }
+        //show details for groups, racks, and sites
+        else if ($scope.selected_groups.length === 1){
+            emitCallback($scope.selected_groups[0]);
+        }
 
-            //show details for groups, racks, and sites
-            else if ($scope.selected_groups.length === 1){
-                let group = $scope.selected_groups[0];
-                $scope.update_toolbox_heights();
-                $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);
-            }
-         }
     };
 
     $scope.onRenameContextButton = function (button) {
@@ -830,15 +847,30 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope[`on${functionName}Button`]();
     });
 
-    $scope.$on('unbind', function(){
-        $scope.first_channel.send('UnbindDocument', {});
+    $scope.$on('SearchDropdown', function(){
+        $scope.first_channel.send('SearchDropdown', {});
     });
 
-    $scope.$on('bind', function(){
-        $scope.first_channel.send('BindDocument', {});
+    $scope.$on('SearchDropdownClose', function(){
+        $scope.first_channel.send('SearchDropdownClose', {});
     });
 
-    $scope.jump_to_animation = function(jump_to_x, jump_to_y, jump_to_scale) {
+    $scope.$on('search', function(e, device){
+
+        var num_frames = 30;
+        var searched;
+        for(var i = 0; i < $scope.devices.length; i++){
+            if(Number(device.id) === $scope.devices[i].id){
+                searched = $scope.devices[i];
+            }
+        }
+        searched.selected = true;
+        $scope.selected_devices.push(searched);
+        //console.log(searched);
+        $scope.jump_to_animation(searched.x, searched.y, 1.0);
+    });
+
+    $scope.jump_to_animation = function(jump_to_x, jump_to_y, jump_to_scale, updateZoom) {
         $scope.cancel_animations();
         var v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
         //console.log({v_center: v_center});
@@ -857,7 +889,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                       distance: distance,
                                                       end_height: (1.0/jump_to_scale) - 1,
                                                       current_scale: $scope.current_scale,
-                                                      scope: $scope
+                                                      scope: $scope,
+                                                      updateZoomBoolean: updateZoom
                                                   },
                                                   $scope,
                                                   $scope,
@@ -878,21 +911,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.animations.push(pan_animation);
     };
 
-    $scope.$on('search', function(e, device){
-
-        var num_frames = 30;
-        var searched;
-        for(var i = 0; i < $scope.devices.length; i++){
-            if(Number(device.id) === $scope.devices[i].id){
-                searched = $scope.devices[i];
-            }
-        }
-        searched.selected = true;
-        $scope.selected_devices.push(searched);
-        //console.log(searched);
-        $scope.jump_to_animation(searched.x, searched.y, 1.0);
-    });
-
     $scope.$on('jumpTo', function(e, zoomLevel) {
         var v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
         switch (zoomLevel){
@@ -909,6 +927,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 $scope.jump_to_animation(v_center.x, v_center.y, 5.1);
                 break;
         }
+    });
+
+    $scope.$on('zoom', (e, zoomPercent) => {
+        let v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
+        let scale = Math.pow(10, (zoomPercent - 120) / 40)
+        $scope.jump_to_animation(v_center.x, v_center.y, scale, false);
     });
 
     $scope.onDeployButton = function (button) {
@@ -1488,6 +1512,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.panX = data.panX;
         $scope.panY = data.panX;
         $scope.current_scale = data.scale;
+        $scope.$emit('awxNet-UpdateZoomWidget', $scope.current_scale, true);
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
         $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
@@ -1755,6 +1780,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             diff_y = max_y - min_y;
 
             $scope.current_scale = Math.min(2, Math.max(0.10, Math.min((window.innerWidth-200)/diff_x, (window.innerHeight-300)/diff_y)));
+            $scope.$emit('awxNet-UpdateZoomWidget', $scope.current_scale, true);
             $scope.updateScaledXY();
             $scope.updatePanAndScale();
         }
@@ -1982,6 +2008,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.device_detail_controller.state.start($scope.device_detail_controller);
         $scope.move_controller.state = move.Start;
         $scope.move_controller.state.start($scope.move_controller);
+        $scope.details_panel_controller.state = details_panel_fsm.Start;
+        $scope.details_panel_controller.state.start($scope.details_panel_controller);
         $scope.link_controller.state = link.Start;
         $scope.link_controller.state.start($scope.link_controller);
         $scope.stream_controller.state = stream_fsm.Start;
