@@ -42,18 +42,19 @@ spec to exist and `survey_enabled` to be true). On the other hand,
 if `ask_variables_on_launch` is true, users can provide any variables in
 extra_vars.
 
-Prompting enablement for several types of credentials is controlled by a single
+_(supported, but deprecated)_ Prompting enablement for several types of
+credentials is controlled by a single
 field. On launch, multiple types of credentials can be provided in their respective fields
 inside of `credential`, `vault_credential`, and `extra_credentials`. Providing
 credentials that require password input from the user on launch is
 allowed, and the password must be provided along-side the credential, of course.
 
-If the job is being spawned using a saved launch configuration, however,
-all non-machine credential types are managed by a many-to-many relationship
+If the job is being spawned using a saved launch configuration,
+all credential types are managed by a many-to-many relationship
 called `credentials` relative to the launch configuration object.
-When the job is spawned, the credentials in that relationship will be
-sorted into the job's many-to-many credential fields according to their
-type (cloud vs. vault).
+The credentials in this relationship will either add to the job template's
+credential list, or replace a credential in the job template's list if it
+is the same type.
 
 ### Manual use of Prompts
 
@@ -67,14 +68,22 @@ actions in the API.
  - POST to `/api/v2/system_job_templates/N/launch/`
    - can accept certain fields, with no user configuration
 
+When launching manually, certain restrictions apply to the use of credentials
+ - if providing any of `credential`, `vault_credential`, and `extra_credentials`
+   this becomes the "legacy" method, and imposes additional restrictions on
+   relaunch, and is mutually exclusive with the use of `credentials` field
+ - if providing `credentials`, existing credentials on the job template may
+   only be removed if replaced by another credential of the same type
+   this is so that relaunch will use the up-to-date credential on the template
+   if it has been edited since the prior launch
+
 #### Data Rules for Prompts
 
 For the POST action to launch, data for "prompts" are provided as top-level
 keys in the request data. There is a special-case to allow a list to be
 provided for `credentials`, which is otherwise not possible in AWX API design.
-The list of credentials will either add extra credentials, or replace
-existing credentials in the job template if a provided credential is of
-the same type.
+The list of credentials provided in the POST data will become the list
+for the spawned job.
 
 Values of `null` are not allowed, if the field is not being over-ridden,
 the key should not be given in the payload. A 400 should be returned if
@@ -88,7 +97,7 @@ POST to `/api/v2/job_templates/N/launch/` with data:
 {
   "job_type": "check",
   "limit": "",
-  "credentials": [1, 2, 4],
+  "credentials": [1, 2, 4, 5],
   "extra_vars": {}
 }
 ```
@@ -117,10 +126,13 @@ be combined with the job template extra_vars dictionary, with the
 request data taking precedence.
 
 Provided credentials will replace any job template credentials of the same
-exclusive type, but combine with any others. In the example, the job template
+exclusive type. In the example, the job template
 credential 3 was replaced with the provided credential 1, because a job
 may only use 1 gce credential because these two credentials define the
 same environment variables and configuration file.
+If the job had not provided the credential 1, a 400 error would have been
+returned because the job must contain the same types of credentials as its
+job template.
 
 ### Saved Launch-time Configurations
 
@@ -134,6 +146,11 @@ at launch-time that are saved in advance.
 In the case of workflow nodes and schedules, the prompted fields are saved
 directly on the model. Those models include Workflow Job Template Nodes,
 Workflow Job Nodes (a copy of the first), and Schedules.
+
+The many-to-many `credentials` field differs from other fields because
+they are managed through a sub-endpoint relative to the node or schedule.
+This relationship contains the _additional_ credentials to apply when
+it spawns a job.
 
 Jobs, themselves, have a configuration object stored in a related model,
 and only used to prepare the correct launch-time configuration for subsequent

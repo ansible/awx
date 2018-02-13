@@ -2884,6 +2884,7 @@ class JobTemplateLaunch(RetrieveAPIView):
         ):
             # make a list of the current credentials
             existing_credentials = obj.credentials.all()
+            template_credentials = list(existing_credentials)  # save copy of existing
             new_credentials = []
             for key, conditional in (
                 ('credential', lambda cred: cred.credential_type.kind != 'ssh'),
@@ -2910,6 +2911,11 @@ class JobTemplateLaunch(RetrieveAPIView):
             # combine the list of "new" and the filtered list of "old"
             new_credentials.extend([cred.pk for cred in existing_credentials])
             if new_credentials:
+                # If provided list doesn't contain the pre-existing credentials
+                # defined on the template, add them back here
+                for cred_obj in template_credentials:
+                    if cred_obj.pk not in new_credentials:
+                        new_credentials.append(cred_obj.pk)
                 modern_data['credentials'] = new_credentials
 
         # credential passwords were historically provided as top-level attributes

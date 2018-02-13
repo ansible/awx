@@ -283,7 +283,7 @@ def test_job_launch_JT_with_validation(machine_credential, credential, deploy_jo
     deploy_jobtemplate.ask_variables_on_launch = True
     deploy_jobtemplate.save()
 
-    kv = dict(extra_vars={"job_launch_var": 4}, credentials=[machine_credential.pk])
+    kv = dict(extra_vars={"job_launch_var": 4}, credentials=[machine_credential.pk, credential.pk])
     serializer = JobLaunchSerializer(data=kv, context={'template': deploy_jobtemplate})
     validated = serializer.is_valid()
     assert validated, serializer.errors
@@ -338,16 +338,17 @@ def test_job_launch_JT_enforces_unique_credentials_kinds(machine_credential, cre
 
 
 @pytest.mark.django_db
-def test_job_launch_with_empty_creds(machine_credential, vault_credential, deploy_jobtemplate):
+def test_job_launch_with_empty_creds(machine_credential, vault_credential, deploy_jobtemplate, credential):
     deploy_jobtemplate.ask_credential_on_launch = True
     deploy_jobtemplate.credentials.add(machine_credential)
     deploy_jobtemplate.credentials.add(vault_credential)
-    kv = dict(credentials=[])
+    # `credentials` list is strictly those already present on deploy_jobtemplate
+    kv = dict(credentials=[credential.pk, machine_credential.pk, vault_credential.pk])
     serializer = JobLaunchSerializer(data=kv, context={'template': deploy_jobtemplate})
     validated = serializer.is_valid()
-    assert validated
+    assert validated, serializer.errors
 
-    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**kv)
+    prompted_fields, ignored_fields, errors = deploy_jobtemplate._accept_or_ignore_job_kwargs(**serializer.validated_data)
     job_obj = deploy_jobtemplate.create_unified_job(**prompted_fields)
     assert job_obj.credential is deploy_jobtemplate.credential
     assert job_obj.vault_credential is deploy_jobtemplate.vault_credential

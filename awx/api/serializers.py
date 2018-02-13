@@ -3721,15 +3721,30 @@ class JobLaunchSerializer(BaseSerializer):
         distinct_cred_kinds = []
         for cred in accepted.get('credentials', []):
             if cred.unique_hash() in distinct_cred_kinds:
-                errors['credentials'] = _('Cannot assign multiple %s credentials.' % cred.credential_type.name)
+                errors.setdefault('credentials', []).append(_(
+                    'Cannot assign multiple {} credentials.'
+                ).format(cred.unique_hash(display=True)))
             distinct_cred_kinds.append(cred.unique_hash())
+
+        # Prohibit removing credentials from the JT list (unsupported for now)
+        template_credentials = template.credentials.all()
+        if 'credentials' in attrs:
+            removed_creds = set(template_credentials) - set(attrs['credentials'])
+            provided_mapping = Credential.unique_dict(attrs['credentials'])
+            for cred in removed_creds:
+                if cred.unique_hash() in provided_mapping.keys():
+                    continue  # User replaced credential with new of same type
+                errors.setdefault('credentials', []).append(_(
+                    'Removing {} credential at launch time without replacement is not supported. '
+                    'Provided list lacked credential(s): {}.'
+                ).format(cred.unique_hash(display=True), ', '.join([str(c) for c in removed_creds])))
 
         # verify that credentials (either provided or existing) don't
         # require launch-time passwords that have not been provided
         if 'credentials' in accepted:
             launch_credentials = accepted['credentials']
         else:
-            launch_credentials = template.credentials.all()
+            launch_credentials = template_credentials
         passwords = attrs.get('credential_passwords', {})  # get from original attrs
         passwords_lacking = []
         for cred in launch_credentials:
