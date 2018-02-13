@@ -215,6 +215,24 @@ class TestWorkflowJobTemplateNodeSerializerSurveyPasswords():
         assert 'var1' in attrs['survey_passwords']
         assert attrs['extra_data']['var1'] == '$encrypted$foooooo'
 
+    def test_accept_password_default(self, jt, mocker):
+        '''
+        If user provides "$encrypted$" without a corresponding DB value for the
+        node, but survey question has a default, then variables are accepted
+        with that particular var omitted so on launch time the default takes effect
+        '''
+        serializer = WorkflowJobTemplateNodeSerializer()
+        wfjt = WorkflowJobTemplate(name='fake-wfjt')
+        jt.survey_spec['spec'][0]['default'] = '$encrypted$bar'
+        attrs = serializer.validate({
+            'unified_job_template': jt,
+            'workflow_job_template': wfjt,
+            'extra_data': {'var1': '$encrypted$'}
+        })
+        assert 'survey_passwords' in attrs
+        assert attrs['survey_passwords'] == {}
+        assert attrs['extra_data'] == {}
+
 
 @mock.patch('awx.api.serializers.WorkflowJobTemplateNodeSerializer.get_related', lambda x,y: {})
 class TestWorkflowJobNodeSerializerGetRelated():

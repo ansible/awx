@@ -3150,19 +3150,27 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         elif self.instance:
             ujt = self.instance.unified_job_template
 
-        # Insert survey_passwords to track redacted variables
+        # Replace $encrypted$ submissions with db value if exists
+        # build additional field survey_passwords to track redacted variables
         if 'extra_data' in attrs:
             extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
             if hasattr(ujt, 'survey_password_variables'):
+                # Prepare additional field survey_passwords for save
                 password_dict = {}
                 for key in ujt.survey_password_variables():
                     if key in extra_data:
                         password_dict[key] = REPLACE_STR
                 if not self.instance or password_dict != self.instance.survey_passwords:
-                    attrs['survey_passwords'] = password_dict
+                    attrs['survey_passwords'] = password_dict.copy()
+                # Force dict type (cannot preserve YAML formatting if passwords are involved)
                 if not isinstance(attrs['extra_data'], dict):
                     attrs['extra_data'] = parse_yaml_or_json(attrs['extra_data'])
+                # Encrypt the extra_data for save, only current password vars in JT survey
                 encrypt_dict(attrs['extra_data'], password_dict.keys())
+                # For any raw $encrypted$ string, either
+                # - replace with existing DB value
+                # - raise a validation error
+                # - remove key from extra_data if survey default is present
                 if self.instance:
                     db_extra_data = parse_yaml_or_json(self.instance.extra_data)
                 else:
@@ -3170,8 +3178,13 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                 for key in password_dict.keys():
                     if attrs['extra_data'].get(key, None) == REPLACE_STR:
                         if key not in db_extra_data:
-                            raise serializers.ValidationError(
-                                _('Provided variable {} has no database value to replace with.').format(key))
+                            element = ujt.pivot_spec(ujt.survey_spec)[key]
+                            if 'default' in element and element['default']:
+                                attrs['survey_passwords'].pop(key, None)
+                                attrs['extra_data'].pop(key, None)
+                            else:
+                                raise serializers.ValidationError(
+                                    {"extra_data": _('Provided variable {} has no database value to replace with.').format(key)})
                         else:
                             attrs['extra_data'][key] = db_extra_data[key]
 
