@@ -23,12 +23,9 @@
             </div>
             <div class="Networking-toolbarRightSide">
                 <div class="Networking-searchBarContainer">
-                    <select id="networking-search" ng-model="device" ng-options="device.label for device in devices track by device.id">
+                    <select id="networking-search" ng-model="device" ng-options="device.label for device in devices track by device.id" style="width:100%">
                         <option></option>
                     </select>
-                    <!-- <select id="networking-search" style="width:100%"><option></option></select> -->
-                    <!-- <select class="Form-dropDown" id="networking-search"> -->
-                        <!-- <option ng-repeat="device in devices" value="{{device.id}}">{{device.name}}</option> -->
                 </div>
                 <div class="Networking-keyContainer">
                     <button ng-click="vm.key()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.keyPanelExpanded}">
@@ -124,62 +121,8 @@
 </div>
 
 <div class="Networking-detailPanel" ng-show="vm.rightPanelIsExpanded">
-    <!--beginning of header-->
-    <div class="Networking-panelHeader">
-        <div class="JobResults-panelHeaderText" translate="">
-            DETAILS <span ng-if="!item.host_id && item.name">| {{item.name}}</span>
-        </div>
-    </div>
-    <!--end of header-->
-
-    <!--beginning of name row -->
-    <div class="JobResults-resultRow" ng-if="item.host_id">
-        <label class="JobResults-resultRowLabel Networking-resultRowLabel" translate="">
-            Name
-        </label>
-         <div class="JobResults-resultRowText">
-             {{item.name}}
-         </div>
-     </div>
-     <!--end of name row -->
-
-     <!--beginning of name row -->
-     <div class="JobResults-resultRow" ng-if="item.host_id">
-         <label class="JobResults-resultRowLabel Networking-resultRowLabel" translate="">
-             Description
-         </label>
-          <input class="JobResults-resultRowText">
-
-          </input>
-      </div>
-      <!--end of name row -->
-
-     <div class="List-noItems Networking-noItems" ng-if="!item.host_id">
-         {{item.type}} DETAILS NOT AVAILABLE
-     </div>
-
-     <!-- beginning of extra variable row -->
-     <div class="JobResults-resultRow JobResults-resultRow--variables" ng-show="item.variables">
-         <label class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth">
-             <span translate>
-                 Extra Variables
-             </span>
-             <i class="JobResults-extraVarsHelp fa fa-question-circle"
-                 aw-tool-tip="{{'Read only view of extra variables added to the job template.' | translate}}"
-                 data-placement="top">
-             </i>
-         </label>
-         <textarea
-             rows="6"
-             ng-model="item.variables"
-             name="variables"
-             class="form-control Form-textArea Form-textAreaLabel Form-formGroup--fullWidth"
-             id="pre-formatted-variables"
-             disabled="disabled">
-         </textarea>
-     </div>
-     <!-- end of extra variable row -->
- </div>
+    <awx-net-details-panel item="item"></awx-net-details-panel>
+</div>
 
 
 <div class="Networking-canvasPanel">
