@@ -28,6 +28,7 @@ function Device(id, name, x, y, type, host_id) {
     this.interfaces = [];
     this.process_id_seq = util.natural_numbers(0);
     this.processes = [];
+    this.in_group = false;
 }
 exports.Device = Device;
 
@@ -640,6 +641,7 @@ Group.prototype.update_membership = function (devices, groups) {
             devices[i].y > y1 &&
             devices[i].x < x2 &&
             devices[i].y < y2) {
+            devices[i].in_group = true;
             this.devices.push(devices[i]);
             device_ids.push(devices[i].id);
         }
