@@ -43,24 +43,6 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
         vm.leftPanelIsExpanded = !vm.leftPanelIsExpanded;
     });
 
-    $scope.$on('closeDetailsPanel', () => {
-        vm.rightPanelIsExpanded = false;
-        vm.jumpToPanelExpanded = false;
-        vm.keyPanelExpanded = false;
-    });
-
-    $scope.$on('showDetails', (e, data, expand, canAdd) => {
-        if (expand) {
-            vm.rightPanelIsExpanded = true;
-        }
-        if (!_.has(data, 'host_id')) {
-            $scope.item = data;
-            $scope.canAdd = canAdd;
-        } else {
-            $scope.item = data;
-        }
-    });
-
     $scope.$on('instatiateSelect', (e, devices) => {
         for(var i = 0; i < devices.length; i++){
             let device = devices[i];
@@ -111,7 +93,7 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
 
     $('#networking-search').on('select2:open', () => {
         $('.select2-dropdown').addClass('Networking-dropDown');
-        $scope.$broadcast('unbind');
+        $scope.$broadcast('SearchDropdown');
     });
 
     $('#networking-search').on('select2:close', () => {
@@ -119,7 +101,7 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
             $('.select2-container-active').removeClass('select2-container-active');
             $(':focus').blur();
         }, 1);
-        $scope.$broadcast('bind');
+        $scope.$broadcast('SearchDropdownClose');
     });
 
 }
