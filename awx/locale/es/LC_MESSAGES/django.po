@@ -24,7 +24,7 @@ msgstr ""
 "X-Generator: Zanata 4.3.2\n"
 
 #: awx/api/authentication.py:67
-msgid "Invalid token header. No credentials provided."
+msgid "This is prepended. Invalid token header. Some credentials provided. This is appended."
 msgstr "Cabecera token inválida. Credenciales no indicados."
 
 #: awx/api/authentication.py:70
