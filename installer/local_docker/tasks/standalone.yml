@@ -111,6 +111,7 @@
   docker_container:
     name: awx_task
     state: started
+    privileged: true
     restart_policy: unless-stopped
     image: "{{ awx_task_docker_actual_image }}"
     volumes: "{{ project_data_dir + ':/var/lib/awx/projects:rw' if project_data_dir is defined else omit }}"
