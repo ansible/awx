@@ -924,8 +924,11 @@ class BaseTask(LogErrorsTask):
             credentials = []
             if isinstance(instance, Job):
                 credentials = instance.credentials.all()
+            elif isinstance(instance, InventoryUpdate):
+                # TODO: allow multiple custom creds for inv updates
+                credentials = [instance.get_cloud_credential()]
             elif hasattr(instance, 'credential'):
-                # once other UnifiedJobs (project updates, inventory updates)
+                # once other UnifiedJobs (project updates)
                 # move from a .credential -> .credentials model, we can
                 # lose this block
                 credentials = [instance.credential]
@@ -1719,14 +1722,13 @@ class RunInventoryUpdate(BaseTask):
         If no private data is needed, return None.
         """
         private_data = {'credentials': {}}
+        credential = inventory_update.get_cloud_credential()
         # If this is GCE, return the RSA key
         if inventory_update.source == 'gce':
-            credential = inventory_update.credential
             private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data')
             return private_data
 
         if inventory_update.source == 'openstack':
-            credential = inventory_update.credential
             openstack_auth = dict(auth_url=credential.host,
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
@@ -1803,7 +1805,6 @@ class RunInventoryUpdate(BaseTask):
                 cp.set(section, k, six.text_type(v))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
-            credential = inventory_update.credential
 
             section = 'vmware'
             cp.add_section(section)
@@ -1838,7 +1839,6 @@ class RunInventoryUpdate(BaseTask):
                 else:
                     cp.set(section, k, six.text_type(v))
 
-            credential = inventory_update.credential
             if credential:
                 cp.set(section, 'url', credential.host)
                 cp.set(section, 'user', credential.username)
@@ -1859,7 +1859,6 @@ class RunInventoryUpdate(BaseTask):
             section = 'cloudforms'
             cp.add_section(section)
 
-            credential = inventory_update.credential
             if credential:
                 cp.set(section, 'url', credential.host)
                 cp.set(section, 'username', credential.username)
@@ -1897,7 +1896,7 @@ class RunInventoryUpdate(BaseTask):
         if cp.sections():
             f = cStringIO.StringIO()
             cp.write(f)
-            private_data['credentials'][inventory_update.credential] = f.getvalue()
+            private_data['credentials'][credential] = f.getvalue()
             return private_data
 
     def build_passwords(self, inventory_update, **kwargs):
@@ -1912,7 +1911,7 @@ class RunInventoryUpdate(BaseTask):
 
         # Take key fields from the credential in use and add them to the
         # passwords dictionary.
-        credential = inventory_update.credential
+        credential = inventory_update.get_cloud_credential()
         if credential:
             for subkey in ('username', 'host', 'project', 'client', 'tenant', 'subscription'):
                 passwords['source_%s' % subkey] = getattr(credential, subkey)
@@ -1957,7 +1956,9 @@ class RunInventoryUpdate(BaseTask):
         }
         if inventory_update.source in ini_mapping:
             cred_data = kwargs.get('private_data_files', {}).get('credentials', '')
-            env[ini_mapping[inventory_update.source]] = cred_data.get(inventory_update.credential, '')
+            env[ini_mapping[inventory_update.source]] = cred_data.get(
+                inventory_update.get_cloud_credential(), ''
+            )
 
         if inventory_update.source == 'gce':
             env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''  # noqa

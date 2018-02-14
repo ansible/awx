@@ -830,7 +830,8 @@ class InventorySourceAccess(BaseAccess):
     '''
 
     model = InventorySource
-    select_related = ('created_by', 'modified_by', 'inventory',)
+    select_related = ('created_by', 'modified_by', 'inventory')
+    prefetch_related = ('credentials',)
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
@@ -878,6 +879,21 @@ class InventorySourceAccess(BaseAccess):
             return self.user in obj.inventory.update_role
         return False
 
+    @check_superuser
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if relationship == 'credentials' and isinstance(sub_obj, Credential):
+            return (
+                obj and obj.inventory and self.user in obj.inventory.admin_role and
+                self.user in sub_obj.use_role)
+        return super(InventorySourceAccess, self).can_attach(
+            obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
+    @check_superuser
+    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if relationship == 'credentials' and isinstance(sub_obj, Credential):
+            return obj and obj.inventory and self.user in obj.inventory.admin_role
+        return super(InventorySourceAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+
 
 class InventoryUpdateAccess(BaseAccess):
     '''
@@ -888,7 +904,7 @@ class InventoryUpdateAccess(BaseAccess):
 
     model = InventoryUpdate
     select_related = ('created_by', 'modified_by', 'inventory_source__inventory',)
-    prefetch_related = ('unified_job_template', 'instance_group',)
+    prefetch_related = ('unified_job_template', 'instance_group', 'credentials',)
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory_source__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
