@@ -194,6 +194,9 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
 
 _Selected1.prototype.onMouseUp = function (controller) {
 
+    if(controller.scope.$parent.vm.rightPanelIsExpanded){
+        controller.scope.onDetailsContextButton();
+    }
     controller.changeState(Selected2);
 
 };
@@ -418,7 +421,6 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     if (selected) {
         controller.changeState(Selected1);
-        controller.scope.onDetailsContextButton();
     } else {
         controller.delegate_channel.send(msg_type, $event);
     }

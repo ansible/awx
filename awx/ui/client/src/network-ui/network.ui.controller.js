@@ -21,6 +21,7 @@ var models = require('./models.js');
 var messages = require('./messages.js');
 var animations = require('./animations.js');
 var keybindings = require('./keybindings.fsm.js');
+var details_panel_fsm = require('./details.panel.fsm.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
@@ -185,6 +186,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
   $scope.device_detail_controller = new fsm.FSMController($scope, "device_detail_fsm", device_detail_fsm.Start, $scope);
   $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope);
+  $scope.details_panel_controller = new fsm.FSMController($scope, "details_panel_fsm", details_panel_fsm.Start, $scope);
   $scope.link_controller = new fsm.FSMController($scope, "link_fsm", link.Start, $scope);
   $scope.stream_controller = new fsm.FSMController($scope, "stream_fsm", stream_fsm.Start, $scope);
   $scope.group_controller = new fsm.FSMController($scope, "group_fsm", group.Start, $scope);
@@ -318,8 +320,11 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.move_controller.delegate_channel = new fsm.Channel($scope.move_controller,
                                                             $scope.device_detail_controller,
                                                             $scope);
+  $scope.details_panel_controller.delegate_channel = new fsm.Channel($scope.details_panel_controller,
+                                                            $scope.move_controller,
+                                                            $scope);
   $scope.link_controller.delegate_channel = new fsm.Channel($scope.link_controller,
-                                                                  $scope.move_controller,
+                                                                  $scope.details_panel_controller,
                                                                   $scope);
   $scope.stream_controller.delegate_channel = new fsm.Channel($scope.stream_controller,
                                                                   $scope.link_controller,
@@ -625,6 +630,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
     // Conext Menu Button Handlers
     $scope.removeContextMenu = function(){
+        $scope.move_controller.handle_message("Ready", {});
         let context_menu = $scope.context_menus[0];
         context_menu.enabled = false;
         context_menu.x = -100000;
@@ -637,16 +643,22 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     };
 
     $scope.closeDetailsPanel = function () {
-        $scope.$emit('closeDetailsPanel');
-        $scope.first_channel.send('BindDocument', {});
+        $scope.first_channel.send('DetailsPanelClose', {});
     };
 
-    $scope.onDetailsContextButton = function (panelBoolean) {
+    $scope.$on('hostUpdateSaved', (e, host) => {
+        if (host.variables !== "" && $scope.selected_devices.length === 1) {
+            host.data = jsyaml.safeLoad(host.variables);
+            $scope.selected_devices[0].type = host.data.type;
+        }
+    });
+
+    $scope.onDetailsContextButton = function () {
         function emitCallback(item, canAdd){
-            $scope.first_channel.send('UnbindDocument', {});
+            $scope.first_channel.send('DetailsPanel', {});
             $scope.removeContextMenu();
             $scope.update_toolbox_heights();
-            $scope.$emit('showDetails', item, panelBoolean !== null ? panelBoolean: true, canAdd);
+            $scope.$emit('showDetails', item, canAdd);
         }
 
         // show details for devices
@@ -835,12 +847,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope[`on${functionName}Button`]();
     });
 
-    $scope.$on('unbind', function(){
-        $scope.first_channel.send('UnbindDocument', {});
+    $scope.$on('SearchDropdown', function(){
+        $scope.first_channel.send('SearchDropdown', {});
     });
 
-    $scope.$on('bind', function(){
-        $scope.first_channel.send('BindDocument', {});
+    $scope.$on('SearchDropdownClose', function(){
+        $scope.first_channel.send('SearchDropdownClose', {});
     });
 
     $scope.jump_to_animation = function(jump_to_x, jump_to_y, jump_to_scale) {
@@ -1986,6 +1998,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.device_detail_controller.state.start($scope.device_detail_controller);
         $scope.move_controller.state = move.Start;
         $scope.move_controller.state.start($scope.move_controller);
+        $scope.details_panel_controller.state = details_panel_fsm.Start;
+        $scope.details_panel_controller.state.start($scope.details_panel_controller);
         $scope.link_controller.state = link.Start;
         $scope.link_controller.state.start($scope.link_controller);
         $scope.stream_controller.state = stream_fsm.Start;

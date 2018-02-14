@@ -10,9 +10,7 @@
 
         $scope.parseType = 'yaml';
  		$scope.formCancel = function(){
-            $scope.$parent.vm.rightPanelIsExpanded = false;
-            $scope.$parent.vm.jumpToPanelExpanded = false;
-            $scope.$parent.vm.keyPanelExpanded = false;
+            $scope.$parent.$$childTail.closeDetailsPanel();
  		};
 
  		$scope.formSave = function(){
@@ -23,14 +21,26 @@
  				description: $scope.item.description,
  				enabled: $scope.item.enabled
  			};
- 			HostsService.put(host).then(function(){
+ 			HostsService.put(host).then(function(response){
                 $scope.saveConfirmed = true;
+                if(_.has(response, "data")){
+                    $scope.$parent.$broadcast('hostUpdateSaved', response.data);
+                }
                 setTimeout(function(){
                     $scope.saveConfirmed = false;
                 }, 3000);
  			});
 
  		};
+
+        $scope.$parent.$on('showDetails', (e, data, canAdd) => {
+            if (!_.has(data, 'host_id')) {
+                $scope.item = data;
+                $scope.canAdd = canAdd;
+            } else {
+                $scope.item = data;
+            }
+        });
 
         $scope.$watch('item', function(){
             init();
