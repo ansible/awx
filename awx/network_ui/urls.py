@@ -6,6 +6,7 @@ import awx.api.urls
 
 from awx.network_ui import views
 from awx.network_ui import v2_api_views
+from awx.network_ui import v1_api_urls
 
 app_name = 'network_ui'
 urlpatterns = [
@@ -16,6 +17,7 @@ urlpatterns = [
     url(r'^download_recording$', views.download_recording, name='download_recording'),
     url(r'^topology.json$', views.json_topology_data, name='json_topology_data'),
     url(r'^topology.yaml$', views.yaml_topology_data, name='json_topology_data'),
+    url(r'^api/v1/', include(v1_api_urls.router.urls)),
 ]
 
 
