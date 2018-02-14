@@ -1,4 +1,5 @@
-from rest_framework import viewsets
+from awx.api.generics import ListCreateAPIView
+from awx.api.generics import RetrieveUpdateDestroyAPIView
 
 from awx.network_ui.models import Device
 from awx.network_ui.models import Link
@@ -25,343 +26,133 @@ from awx.network_ui.v2_api_serializers import ToolboxItemSerializer
 from awx.network_ui.v2_api_serializers import TopologyInventorySerializer
 
 
-class DeviceViewSet(viewsets.ModelViewSet):
+class DeviceList(ListCreateAPIView):
 
-    queryset = Device.objects.all()
+    model = Device
     serializer_class = DeviceSerializer
-    lookup_field = 'host_id'
-
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(DeviceViewSet, self).retrieve(request, *args, **kwargs)
-        return response
-
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(DeviceViewSet, self).list(request, *args, **kwargs)
-        return response
-
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(DeviceViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(DeviceViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(DeviceViewSet, self).destroy(request, *args, **kwargs)
-        return response
 
 
-class LinkViewSet(viewsets.ModelViewSet):
+class DeviceDetail(RetrieveUpdateDestroyAPIView):
 
-    queryset = Link.objects.all()
+    model = Device
+    serializer_class = DeviceSerializer
+
+
+class LinkList(ListCreateAPIView):
+
+    model = Link
     serializer_class = LinkSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(LinkViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(LinkViewSet, self).list(request, *args, **kwargs)
-        return response
+class LinkDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(LinkViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(LinkViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(LinkViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = Link
+    serializer_class = LinkSerializer
 
 
-class TopologyViewSet(viewsets.ModelViewSet):
+class TopologyList(ListCreateAPIView):
 
-    queryset = Topology.objects.all()
+    model = Topology
     serializer_class = TopologySerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyViewSet, self).list(request, *args, **kwargs)
-        return response
+class TopologyDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = Topology
+    serializer_class = TopologySerializer
 
 
-class InterfaceViewSet(viewsets.ModelViewSet):
+class InterfaceList(ListCreateAPIView):
 
-    queryset = Interface.objects.all()
+    model = Interface
     serializer_class = InterfaceSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(InterfaceViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(InterfaceViewSet, self).list(request, *args, **kwargs)
-        return response
+class InterfaceDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(InterfaceViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(InterfaceViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(InterfaceViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = Interface
+    serializer_class = InterfaceSerializer
 
 
-class GroupViewSet(viewsets.ModelViewSet):
+class GroupList(ListCreateAPIView):
 
-    queryset = Group.objects.all()
+    model = Group
     serializer_class = GroupSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupViewSet, self).list(request, *args, **kwargs)
-        return response
+class GroupDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = Group
+    serializer_class = GroupSerializer
 
 
-class GroupDeviceViewSet(viewsets.ModelViewSet):
+class GroupDeviceList(ListCreateAPIView):
 
-    queryset = GroupDevice.objects.all()
+    model = GroupDevice
     serializer_class = GroupDeviceSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupDeviceViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupDeviceViewSet, self).list(request, *args, **kwargs)
-        return response
+class GroupDeviceDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupDeviceViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupDeviceViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(GroupDeviceViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = GroupDevice
+    serializer_class = GroupDeviceSerializer
 
 
-class StreamViewSet(viewsets.ModelViewSet):
+class StreamList(ListCreateAPIView):
 
-    queryset = Stream.objects.all()
+    model = Stream
     serializer_class = StreamSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(StreamViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(StreamViewSet, self).list(request, *args, **kwargs)
-        return response
+class StreamDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(StreamViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(StreamViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(StreamViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = Stream
+    serializer_class = StreamSerializer
 
 
-class ProcessViewSet(viewsets.ModelViewSet):
+class ProcessList(ListCreateAPIView):
 
-    queryset = Process.objects.all()
+    model = Process
     serializer_class = ProcessSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ProcessViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ProcessViewSet, self).list(request, *args, **kwargs)
-        return response
+class ProcessDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ProcessViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ProcessViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ProcessViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = Process
+    serializer_class = ProcessSerializer
 
 
-class ToolboxViewSet(viewsets.ModelViewSet):
+class ToolboxList(ListCreateAPIView):
 
-    queryset = Toolbox.objects.all()
+    model = Toolbox
     serializer_class = ToolboxSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxViewSet, self).list(request, *args, **kwargs)
-        return response
+class ToolboxDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = Toolbox
+    serializer_class = ToolboxSerializer
 
 
-class ToolboxItemViewSet(viewsets.ModelViewSet):
+class ToolboxItemList(ListCreateAPIView):
 
-    queryset = ToolboxItem.objects.all()
+    model = ToolboxItem
     serializer_class = ToolboxItemSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxItemViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxItemViewSet, self).list(request, *args, **kwargs)
-        return response
+class ToolboxItemDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxItemViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxItemViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(ToolboxItemViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = ToolboxItem
+    serializer_class = ToolboxItemSerializer
 
 
-class TopologyInventoryViewSet(viewsets.ModelViewSet):
+class TopologyInventoryList(ListCreateAPIView):
 
-    queryset = TopologyInventory.objects.all()
+    model = TopologyInventory
     serializer_class = TopologyInventorySerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyInventoryViewSet, self).retrieve(request, *args, **kwargs)
-        return response
 
-    def list(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyInventoryViewSet, self).list(request, *args, **kwargs)
-        return response
+class TopologyInventoryDetail(RetrieveUpdateDestroyAPIView):
 
-    def update(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyInventoryViewSet, self).update(request, *args, **kwargs)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyInventoryViewSet, self).create(request, *args, **kwargs)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        print (args, kwargs)
-        response = super(TopologyInventoryViewSet, self).destroy(request, *args, **kwargs)
-        return response
+    model = TopologyInventory
+    serializer_class = TopologyInventorySerializer
