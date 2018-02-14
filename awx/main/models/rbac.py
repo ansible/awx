@@ -61,7 +61,10 @@ role_descriptions = {
     'workflow_admin_role': _('Can manage all workflows of the %s'),
     'notification_admin_role': _('Can manage all notifications of the %s'),
     'auditor_role': _('Can view all settings for the %s'),
-    'execute_role': _('May run the %s'),
+    'execute_role': {
+        'organization': _('May run any executable resources in the organization'),
+        'default': _('May run the %s'),
+    },
     'member_role': _('User is a member of the %s'),
     'read_role': _('May view settings for the %s'),
     'update_role': _('May update project or inventory or group using the configured source update system'),
@@ -180,12 +183,22 @@ class Role(models.Model):
         global role_descriptions
         description = role_descriptions[self.role_field]
         content_type = self.content_type
-        if '%s' in description and content_type:
+
+        model_name = None
+        if content_type:
             model = content_type.model_class()
             model_name = re.sub(r'([a-z])([A-Z])', r'\1 \2', model.__name__).lower()
-            description = description % model_name
 
-        return description
+        value = description
+        if type(description) == dict:
+            value = description.get(model_name)
+            if value is None:
+                value = description.get('default')
+
+        if '%s' in value and content_type:
+                    value = value % model_name
+
+        return value
 
     @staticmethod
     def rebuild_role_ancestor_list(additions, removals):

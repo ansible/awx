@@ -11,7 +11,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0019_v330_custom_virtualenv'),
+        ('main', '0020_v330_instancegroup_policies'),
     ]
 
     operations = [

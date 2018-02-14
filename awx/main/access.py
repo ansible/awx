@@ -660,7 +660,7 @@ class InventoryAccess(BaseAccess):
         # Verify that the user has access to the new organization if moving an
         # inventory to a new organization.  Otherwise, just check for admin permission.
         return (
-            self.check_related('organization', Organization, data, obj=obj,
+            self.check_related('organization', Organization, data, obj=obj, role_field='inventory_admin_role',
                                mandatory=org_admin_mandatory) and
             self.user in obj.admin_role
         )
@@ -985,7 +985,8 @@ class CredentialAccess(BaseAccess):
             return check_user_access(self.user, Team, 'change', team_obj, None)
         if data and data.get('organization', None):
             organization_obj = get_object_from_data('organization', Organization, data)
-            return check_user_access(self.user, Organization, 'change', organization_obj, None)
+            return any([check_user_access(self.user, Organization, 'change', organization_obj, None),
+                        self.user in organization_obj.credential_admin_role])
         return False
 
     @check_superuser
@@ -1098,7 +1099,7 @@ class ProjectAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
-        if not self.check_related('organization', Organization, data, obj=obj):
+        if not self.check_related('organization', Organization, data, obj=obj, role_field='project_admin_role'):
             return False
         return self.user in obj.admin_role
 
@@ -1439,7 +1440,7 @@ class JobAccess(BaseAccess):
             elif not jt_access:
                 return False
 
-        org_access = obj.inventory and self.user in obj.inventory.organization.admin_role
+        org_access = obj.inventory and self.user in obj.inventory.organization.inventory_admin_role
         project_access = obj.project is None or self.user in obj.project.admin_role
         credential_access = all([self.user in cred.use_role for cred in obj.credentials.all()])
 
@@ -2218,8 +2219,7 @@ class NotificationTemplateAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            Q(organization__in=Organization.objects.filter(notification_admin_role__members=self.user)) |
-            Q(organization__in=self.user.admin_of_organizations) |
+            Q(organization__in=Organization.accessible_objects(self.user, 'notification_admin_role')) |
             Q(organization__in=self.user.auditor_of_organizations)
         ).distinct()
 
@@ -2266,8 +2266,7 @@ class NotificationAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            Q(notification_template__organization__in=Organization.objects.filter(notification_admin_role__members=self.user)) |
-            Q(notification_template__organization__in=self.user.admin_of_organizations) |
+            Q(notification_template__organization__in=Organization.accessible_objects(self.user, 'notification_admin_role')) |
             Q(notification_template__organization__in=self.user.auditor_of_organizations)
         ).distinct()
 
