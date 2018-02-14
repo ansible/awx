@@ -904,7 +904,6 @@ class Command(BaseCommand):
         new_count = Host.objects.active_count()
         if time_remaining <= 0 and not license_info.get('demo', False):
             logger.error(LICENSE_EXPIRED_MESSAGE)
-            raise CommandError("License has expired!")
         if free_instances < 0:
             d = {
                 'new_count': new_count,
@@ -914,7 +913,6 @@ class Command(BaseCommand):
                 logger.error(DEMO_LICENSE_MESSAGE % d)
             else:
                 logger.error(LICENSE_MESSAGE % d)
-            raise CommandError('License count exceeded!')
 
     def mark_license_failure(self, save=True):
         self.inventory_update.license_error = True
