@@ -54,17 +54,27 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
         });
 }
 
-function resolveSocket (SocketService, $stateParams) {
+function resolveWebSocket (SocketService, $stateParams) {
+    const prefix = 'ws';
     const { id } = $stateParams;
     const { type } = $stateParams;
 
-    // TODO: accommodate other result types (management, scm_update, etc)
+    let name;
+
+    switch (type) {
+        case 'playbook':
+            name = 'job_events';
+            break;
+        default:
+            name = 'events';
+    }
+
     const state = {
         data: {
             socket: {
                 groups: {
                     jobs: ['status_changed', 'summary'],
-                    job_events: []
+                    [name]: []
                 }
             }
         }
@@ -72,7 +82,7 @@ function resolveSocket (SocketService, $stateParams) {
 
     SocketService.addStateResolve(state, id);
 
-    return SocketService;
+    return `${prefix}-${name}-${id}`;
 }
 
 function resolveBreadcrumb (strings) {
@@ -111,10 +121,10 @@ function JobsRun ($stateRegistry) {
                 'JobsStrings',
                 resolveBreadcrumb
             ],
-            socket: [
+            webSocketNamespace: [
                 'SocketService',
                 '$stateParams',
-                resolveSocket
+                resolveWebSocket
             ]
         },
     };

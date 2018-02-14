@@ -5,7 +5,6 @@ let vm;
 let ansi;
 let resource;
 let related;
-let socket;
 let container;
 let $timeout;
 let $sce;
@@ -18,6 +17,7 @@ const meta = {
     scroll: {},
     page: {}
 };
+const current = {};
 
 const PAGE_LIMIT = 3;
 const SCROLL_BUFFER = 250;
@@ -41,7 +41,7 @@ const TIME_EVENTS = [
 
 function JobsIndexController (
     _resource_,
-    _socket_,
+    webSocketNamespace,
     _$sce_,
     _$timeout_,
     _$scope_,
@@ -54,7 +54,6 @@ function JobsIndexController (
     $scope = _$scope_;
     $q = _$q_;
     resource = _resource_;
-    socket = _socket_;
 
     ansi = new Ansi();
     related = getRelated();
@@ -72,6 +71,9 @@ function JobsIndexController (
 
     vm.toggle = toggle;
     vm.showHostDetails = showHostDetails;
+    vm.clear = clear;
+
+    $scope.$on(webSocketNamespace, processWebSocketEvents);
 
     vm.menu = {
         scroll: {
@@ -95,6 +97,7 @@ function JobsIndexController (
         lines: parsed.lines
     }];
 
+
     $timeout(() => {
         const table = $(ELEMENT_TBODY);
         container = $(ELEMENT_CONTAINER);
@@ -104,6 +107,22 @@ function JobsIndexController (
 
         container.scroll(onScroll);
     });
+}
+
+function clear () {
+    const rows = $(ELEMENT_TBODY).children();
+
+    rows.empty();
+    rows.remove();
+}
+
+function processWebSocketEvents (scope, data) {
+    meta.scroll.inProgress = true;
+
+    append([data])
+        .then(() => {
+            container[0].scrollTop = container[0].scrollHeight;
+        });
 }
 
 function getRelated () {
@@ -614,7 +633,7 @@ function scrollPageDown () {
 
 JobsIndexController.$inject = [
     'resource',
-    'socket',
+    'webSocketNamespace',
     '$sce',
     '$timeout',
     '$scope',
