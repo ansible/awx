@@ -1,81 +1,83 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
-<g transform="scale(0.75)">
-    <g ng-if="item.moving">
-        <!--horizontal line -->
-        <line x1="-150"
-           y1="0"
-           x2="150"
-           y2="0"
-           class="NetworkUI--construction">
-        </line>
-        <!-- end horizontal line -->
+<g ng-if="item.icon || (current_scale > 0.5 && current_scale < 5) || !item.in_group">
+    <g transform="scale(0.75)">
+        <g ng-if="item.moving">
+            <!--horizontal line -->
+            <line x1="-150"
+               y1="0"
+               x2="150"
+               y2="0"
+               class="NetworkUI--construction">
+            </line>
+            <!-- end horizontal line -->
 
-        <!-- vertical line -->
-        <line x1="0"
-           y1="-150"
-           x2="0"
-           y2="150"
-           class="NetworkUI--construction">
-        </line>
-        <!-- end vertical line -->
-    </g>
-
-    <g ng-if="!debug.hidden">
-        <!--horizontal line -->
-        <line x1="-60"
-            y1="0"
-            x2="60"
-            y2="0"
-            class="NetworkUI--debug">
-        </line>
-        <!-- end horizontal line -->
-
-        <!-- vertical line -->
-        <line x1="0"
-            y1="-60"
-            x2="0"
-            y2="60"
-            class="NetworkUI--debug">
-        </line>
-        <!-- end vertical line -->
-
-        <!-- debug rectangle -->
-        <rect x="-50"
-            y="-50"
-            width="100"
-            height="100"
-            class="NetworkUI--debug">
-        </rect>
-        <!-- end debug rectangle -->
-    </g>
-    <g transform="translate(-50,-50)">
-        <circle
-            cx="50"
-            cy="50"
-            r="50"
-            ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__router--selected-conflict' : item.selected ? 'NetworkUI__router--selected' : 'NetworkUI__router--remote-selected' : 'NetworkUI__router--background'}}">
-        </circle>
-        <g transform="scale(2)">
-            <path
-                class="NetworkUI__router"
-                d="M42.7,7.3c-9.8-9.8-25.6-9.8-35.4,0c-9.8,9.8-9.8,25.6,0,35.4c9.8,9.8,25.6,9.8,35.4,0
-                C52.4,32.9,52.4,17.1,42.7,7.3z M20,12.3l4.2-4.2c0.2-0.2,0.5-0.3,0.8-0.3c0.3,0,0.6,0.1,0.8,0.3l4.2,4.2c0.4,0.4,0.4,1.2,0,1.6
-                c-0.4,0.4-1.2,0.4-1.6,0l-2.3-2.3v10c0,0.6-0.5,1.1-1.1,1.1c-0.6,0-1.1-0.5-1.1-1.1l0-10L21.6,14c-0.4,0.4-1.2,0.4-1.6,0
-                C19.5,13.5,19.5,12.8,20,12.3z M15.6,29.8c-0.4-0.4-0.4-1.2,0-1.6l0,0l2.1-2.1l-8.7,0c-0.6,0-1.1-0.5-1.1-1.1c0-0.3,0.1-0.6,0.3-0.8
-                C8.4,24,8.7,23.8,9,23.8l8.7,0l-2.1-2.1c-0.4-0.4-0.4-1.2,0-1.6c0.4-0.4,1.2-0.4,1.6,0l4,4c0.2,0.2,0.3,0.5,0.3,0.8
-                c0,0.3-0.1,0.6-0.3,0.8l0,0l-4,4C16.8,30.3,16.1,30.3,15.6,29.8z M30,37.7l-4.2,4.2c-0.2,0.2-0.5,0.3-0.8,0.3
-                c-0.3,0-0.6-0.1-0.8-0.3L20,37.7c-0.4-0.4-0.4-1.2,0-1.6c0.4-0.4,1.2-0.4,1.6,0l2.3,2.3l0-10.2c0-0.3,0.1-0.6,0.3-0.8
-                c0.2-0.2,0.5-0.3,0.8-0.3c0.6,0,1.1,0.5,1.1,1.1l0,10.2l2.3-2.3c0.4-0.4,1.2-0.4,1.6,0C30.5,36.5,30.5,37.2,30,37.7z M41,26.2
-                l-8.9,0l2.1,2.1c0.4,0.4,0.5,1.2,0,1.6c-0.4,0.4-1.2,0.4-1.6,0l-4-4c-0.2-0.2-0.3-0.5-0.3-0.8c0-0.3,0.1-0.6,0.3-0.8l0,0l4-4
-                c0.4-0.4,1.2-0.4,1.6,0c0.4,0.4,0.4,1.2,0,1.6l0,0l-2.1,2.1l8.8,0c0.6,0,1.1,0.5,1.1,1.1C42.1,25.6,41.6,26.2,41,26.2z"/>
+            <!-- vertical line -->
+            <line x1="0"
+               y1="-150"
+               x2="0"
+               y2="150"
+               class="NetworkUI--construction">
+            </line>
+            <!-- end vertical line -->
         </g>
-    </g>
-    <g ng-show="item.icon || current_scale > 0.5">
-        <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__router-text--selected' : 'NetworkUI--hidden'}}"
-              filter="url(#background)"
-              text-anchor="middle"
-              x="0"
-              y="70"> {{item.name}}</text>
-        <text class="NetworkUI__router-text" filter="url(#background)" text-anchor="middle" x="0" y="70">{{item.name}}{{item.edit_label?'_':''}}</text>
+
+        <g ng-if="!debug.hidden">
+            <!--horizontal line -->
+            <line x1="-60"
+                y1="0"
+                x2="60"
+                y2="0"
+                class="NetworkUI--debug">
+            </line>
+            <!-- end horizontal line -->
+
+            <!-- vertical line -->
+            <line x1="0"
+                y1="-60"
+                x2="0"
+                y2="60"
+                class="NetworkUI--debug">
+            </line>
+            <!-- end vertical line -->
+
+            <!-- debug rectangle -->
+            <rect x="-50"
+                y="-50"
+                width="100"
+                height="100"
+                class="NetworkUI--debug">
+            </rect>
+            <!-- end debug rectangle -->
+        </g>
+        <g transform="translate(-50,-50)">
+            <circle
+                cx="50"
+                cy="50"
+                r="50"
+                ng-attr-class="{{item.selected || item.remote_selected ? item.selected && item.remote_selected ? 'NetworkUI__router--selected-conflict' : item.selected ? 'NetworkUI__router--selected' : 'NetworkUI__router--remote-selected' : 'NetworkUI__router--background'}}">
+            </circle>
+            <g transform="scale(2)">
+                <path
+                    class="NetworkUI__router"
+                    d="M42.7,7.3c-9.8-9.8-25.6-9.8-35.4,0c-9.8,9.8-9.8,25.6,0,35.4c9.8,9.8,25.6,9.8,35.4,0
+                    C52.4,32.9,52.4,17.1,42.7,7.3z M20,12.3l4.2-4.2c0.2-0.2,0.5-0.3,0.8-0.3c0.3,0,0.6,0.1,0.8,0.3l4.2,4.2c0.4,0.4,0.4,1.2,0,1.6
+                    c-0.4,0.4-1.2,0.4-1.6,0l-2.3-2.3v10c0,0.6-0.5,1.1-1.1,1.1c-0.6,0-1.1-0.5-1.1-1.1l0-10L21.6,14c-0.4,0.4-1.2,0.4-1.6,0
+                    C19.5,13.5,19.5,12.8,20,12.3z M15.6,29.8c-0.4-0.4-0.4-1.2,0-1.6l0,0l2.1-2.1l-8.7,0c-0.6,0-1.1-0.5-1.1-1.1c0-0.3,0.1-0.6,0.3-0.8
+                    C8.4,24,8.7,23.8,9,23.8l8.7,0l-2.1-2.1c-0.4-0.4-0.4-1.2,0-1.6c0.4-0.4,1.2-0.4,1.6,0l4,4c0.2,0.2,0.3,0.5,0.3,0.8
+                    c0,0.3-0.1,0.6-0.3,0.8l0,0l-4,4C16.8,30.3,16.1,30.3,15.6,29.8z M30,37.7l-4.2,4.2c-0.2,0.2-0.5,0.3-0.8,0.3
+                    c-0.3,0-0.6-0.1-0.8-0.3L20,37.7c-0.4-0.4-0.4-1.2,0-1.6c0.4-0.4,1.2-0.4,1.6,0l2.3,2.3l0-10.2c0-0.3,0.1-0.6,0.3-0.8
+                    c0.2-0.2,0.5-0.3,0.8-0.3c0.6,0,1.1,0.5,1.1,1.1l0,10.2l2.3-2.3c0.4-0.4,1.2-0.4,1.6,0C30.5,36.5,30.5,37.2,30,37.7z M41,26.2
+                    l-8.9,0l2.1,2.1c0.4,0.4,0.5,1.2,0,1.6c-0.4,0.4-1.2,0.4-1.6,0l-4-4c-0.2-0.2-0.3-0.5-0.3-0.8c0-0.3,0.1-0.6,0.3-0.8l0,0l4-4
+                    c0.4-0.4,1.2-0.4,1.6,0c0.4,0.4,0.4,1.2,0,1.6l0,0l-2.1,2.1l8.8,0c0.6,0,1.1,0.5,1.1,1.1C42.1,25.6,41.6,26.2,41,26.2z"/>
+            </g>
+        </g>
+        <g ng-show="item.icon || current_scale > 0.5">
+            <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__router-text--selected' : 'NetworkUI--hidden'}}"
+                  filter="url(#background)"
+                  text-anchor="middle"
+                  x="0"
+                  y="70"> {{item.name}}</text>
+            <text class="NetworkUI__router-text" filter="url(#background)" text-anchor="middle" x="0" y="70">{{item.name}}{{item.edit_label?'_':''}}</text>
+        </g>
     </g>
 </g>
