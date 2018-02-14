@@ -1,7 +1,7 @@
-diagram_id: 60
+diagram_id: 68
 name: diagram
 states:
-- id: 3
+- id: 1
   label: Enabled
   x: 842
   y: 533
@@ -9,10 +9,10 @@ states:
   label: Start
   x: 839
   y: 270
-- id: 6
+- id: 3
   label: Disabled
-  x: 1231
-  y: 532
+  x: 1412
+  y: 522
 transitions:
 - from_state: Start
   label: start
@@ -23,3 +23,15 @@ transitions:
 - from_state: Enabled
   label: onUnbindDocument
   to_state: Disabled
+- from_state: Disabled
+  label: onDetailsPanelClose
+  to_state: Enabled
+- from_state: Enabled
+  label: onDetailsPanel
+  to_state: Disabled
+- from_state: Enabled
+  label: onSearchDropdown
+  to_state: Disabled
+- from_state: Disabled
+  label: onSearchDropdownClose
+  to_state: Enabled
