@@ -50,6 +50,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
     an inventory source contains lists and hosts.
     '''
 
+    FIELDS_TO_PRESERVE_AT_COPY = ['hosts', 'groups', 'instance_groups']
     KIND_CHOICES = [
         ('', _('Hosts have a direct link to this inventory.')),
         ('smart', _('Hosts for inventory generated using the host_filter property.')),
@@ -505,6 +506,10 @@ class Host(CommonModelNameNotUnique):
     A managed node
     '''
 
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'name', 'description', 'groups', 'inventory', 'enabled', 'instance_id', 'variables'
+    ]
+
     class Meta:
         app_label = 'main'
         unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
@@ -691,6 +696,10 @@ class Group(CommonModelNameNotUnique):
     A group containing managed hosts.  A group or host may belong to multiple
     groups.
     '''
+
+    FIELDS_TO_PRESERVE_AT_COPY = [
+        'name', 'description', 'inventory', 'children', 'parents', 'hosts', 'variables'
+    ]
 
     class Meta:
         app_label = 'main'
@@ -1265,7 +1274,7 @@ class InventorySourceOptions(BaseModel):
     source_vars_dict = VarsDictProperty('source_vars')
 
     def clean_instance_filters(self):
-        instance_filters = unicode(self.instance_filters or '')
+        instance_filters = six.text_type(self.instance_filters or '')
         if self.source == 'ec2':
             invalid_filters = []
             instance_filter_re = re.compile(r'^((tag:.+)|([a-z][a-z\.-]*[a-z]))=.*$')
@@ -1291,7 +1300,7 @@ class InventorySourceOptions(BaseModel):
             return ''
 
     def clean_group_by(self):
-        group_by = unicode(self.group_by or '')
+        group_by = six.text_type(self.group_by or '')
         if self.source == 'ec2':
             get_choices = getattr(self, 'get_%s_group_by_choices' % self.source)
             valid_choices = [x[0] for x in get_choices()]

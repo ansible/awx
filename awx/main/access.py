@@ -2159,13 +2159,9 @@ class ScheduleAccess(BaseAccess):
     prefetch_related = ('unified_job_template', 'credentials',)
 
     def filtered_queryset(self):
-        qs = self.model.objects.all()
-
-        unified_pk_qs = UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')
-        inv_src_qs = InventorySource.objects.filter(inventory_id=Inventory._accessible_pk_qs(Inventory, self.user, 'read_role'))
-        return qs.filter(
-            Q(unified_job_template_id__in=unified_pk_qs) |
-            Q(unified_job_template_id__in=inv_src_qs.values_list('pk', flat=True)))
+        return self.model.objects.filter(
+            unified_job_template__in=UnifiedJobTemplateAccess(self.user).filtered_queryset()
+        )
 
     @check_superuser
     def can_add(self, data):

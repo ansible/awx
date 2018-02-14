@@ -100,6 +100,14 @@ export default ['i18n', function(i18n) {
                 dataPlacement: 'top',
                 ngShow: "project.summary_fields.user_capabilities.schedule"
             },
+            copy: {
+                label: i18n._('Copy'),
+                ngClick: 'copyProject(project)',
+                "class": 'btn-danger btn-xs',
+                awToolTip: i18n._('Copy project'),
+                dataPlacement: 'top',
+                ngShow: 'project.summary_fields.user_capabilities.edit'
+            },
             edit: {
                 ngClick: "editProject(project.id)",
                 awToolTip: i18n._('Edit the project'),

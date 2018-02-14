@@ -77,6 +77,14 @@ export default ['i18n', function(i18n){
                 dataPlacement: 'top',
                 ngShow: 'notification_template.summary_fields.user_capabilities.edit'
             },
+            copy: {
+                label: i18n._('Copy'),
+                ngClick: 'copyNotification(notification_template)',
+                "class": 'btn-danger btn-xs',
+                awToolTip: i18n._('Copy notification'),
+                dataPlacement: 'top',
+                ngShow: 'notification_template.summary_fields.user_capabilities.edit'
+            },
             view: {
                 ngClick: "editNotification(notification_template.id)",
                 label: i18n._('View'),

@@ -5,6 +5,8 @@ from requests.adapters import HTTPAdapter
 from requests.utils import select_proxy
 from requests.exceptions import ConnectionError
 
+from six.moves import xrange
+
 from awx.api.versioning import reverse
 from awx.main.models.notifications import NotificationTemplate, Notification
 from awx.main.models.inventory import Inventory, InventorySource

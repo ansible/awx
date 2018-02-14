@@ -3,6 +3,8 @@ import os
 import json
 from copy import copy, deepcopy
 
+import six
+
 # Django
 from django.conf import settings
 from django.db import models
@@ -161,7 +163,7 @@ class SurveyJobTemplateMixin(models.Model):
                     decrypted_default = default
                     if (
                         survey_element['type'] == "password" and
-                        isinstance(decrypted_default, basestring) and
+                        isinstance(decrypted_default, six.string_types) and
                         decrypted_default.startswith('$encrypted$')
                     ):
                         decrypted_default = decrypt_value(get_encryption_key('value', pk=None), decrypted_default)
@@ -184,7 +186,7 @@ class SurveyJobTemplateMixin(models.Model):
         if (survey_element['type'] == "password"):
             password_value = data.get(survey_element['variable'])
             if (
-                isinstance(password_value, basestring) and
+                isinstance(password_value, six.string_types) and
                 password_value == '$encrypted$'
             ):
                 if survey_element.get('default') is None and survey_element['required']:
@@ -197,7 +199,7 @@ class SurveyJobTemplateMixin(models.Model):
                 errors.append("'%s' value missing" % survey_element['variable'])
         elif survey_element['type'] in ["textarea", "text", "password"]:
             if survey_element['variable'] in data:
-                if type(data[survey_element['variable']]) not in (str, unicode):
+                if not isinstance(data[survey_element['variable']], six.string_types):
                     errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']],
                                                                                   survey_element['variable']))
                     return errors
@@ -241,7 +243,7 @@ class SurveyJobTemplateMixin(models.Model):
                     errors.append("'%s' value is expected to be a list." % survey_element['variable'])
                 else:
                     choice_list = copy(survey_element['choices'])
-                    if isinstance(choice_list, basestring):
+                    if isinstance(choice_list, six.string_types):
                         choice_list = choice_list.split('\n')
                     for val in data[survey_element['variable']]:
                         if val not in choice_list:
@@ -249,7 +251,7 @@ class SurveyJobTemplateMixin(models.Model):
                                                                                            choice_list))
         elif survey_element['type'] == 'multiplechoice':
             choice_list = copy(survey_element['choices'])
-            if isinstance(choice_list, basestring):
+            if isinstance(choice_list, six.string_types):
                 choice_list = choice_list.split('\n')
             if survey_element['variable'] in data:
                 if data[survey_element['variable']] not in choice_list:
@@ -372,7 +374,7 @@ class SurveyJobMixin(models.Model):
             extra_vars = json.loads(self.extra_vars)
             for key in self.survey_passwords:
                 value = extra_vars.get(key)
-                if value and isinstance(value, basestring) and value.startswith('$encrypted$'):
+                if value and isinstance(value, six.string_types) and value.startswith('$encrypted$'):
                     extra_vars[key] = decrypt_value(get_encryption_key('value', pk=None), value)
             return json.dumps(extra_vars)
         else:

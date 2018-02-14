@@ -6,6 +6,7 @@ from collections import OrderedDict, namedtuple
 import ConfigParser
 import cStringIO
 import functools
+import importlib
 import json
 import logging
 import os
@@ -31,6 +32,7 @@ from celery.signals import celeryd_init, worker_process_init, worker_shutdown, w
 # Django
 from django.conf import settings
 from django.db import transaction, DatabaseError, IntegrityError
+from django.db.models.fields.related import ForeignKey
 from django.utils.timezone import now, timedelta
 from django.utils.encoding import smart_str
 from django.core.mail import send_mail
@@ -41,6 +43,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # Django-CRUM
 from crum import impersonate
+
+import six
 
 # AWX
 from awx import __version__ as awx_application_version
@@ -204,20 +208,22 @@ def handle_ha_toplogy_changes(self):
     logger.debug("Reconfigure celeryd queues task on host {}".format(self.request.hostname))
     awx_app = Celery('awx')
     awx_app.config_from_object('django.conf:settings', namespace='CELERY')
-    (instance, removed_queues, added_queues) = register_celery_worker_queues(awx_app, self.request.hostname)
-    logger.info("Workers on tower node '{}' removed from queues {} and added to queues {}"
-                .format(instance.hostname, removed_queues, added_queues))
-    updated_routes = update_celery_worker_routes(instance, settings)
-    logger.info("Worker on tower node '{}' updated celery routes {} all routes are now {}"
-                .format(instance.hostname, updated_routes, self.app.conf.CELERY_TASK_ROUTES))
+    instances, removed_queues, added_queues = register_celery_worker_queues(awx_app, self.request.hostname)
+    for instance in instances:
+        logger.info("Workers on tower node '{}' removed from queues {} and added to queues {}"
+                    .format(instance.hostname, removed_queues, added_queues))
+        updated_routes = update_celery_worker_routes(instance, settings)
+        logger.info("Worker on tower node '{}' updated celery routes {} all routes are now {}"
+                    .format(instance.hostname, updated_routes, self.app.conf.CELERY_TASK_ROUTES))
 
 
 @worker_ready.connect
 def handle_ha_toplogy_worker_ready(sender, **kwargs):
     logger.debug("Configure celeryd queues task on host {}".format(sender.hostname))
-    (instance, removed_queues, added_queues) = register_celery_worker_queues(sender.app, sender.hostname)
-    logger.info("Workers on tower node '{}' unsubscribed from queues {} and subscribed to queues {}"
-                .format(instance.hostname, removed_queues, added_queues))
+    instances, removed_queues, added_queues = register_celery_worker_queues(sender.app, sender.hostname)
+    for instance in instances:
+        logger.info("Workers on tower node '{}' unsubscribed from queues {} and subscribed to queues {}"
+                    .format(instance.hostname, removed_queues, added_queues))
 
 
 @celeryd_init.connect
@@ -725,6 +731,14 @@ class BaseTask(LogErrorsTask):
             '': '',
         }
 
+    def build_extra_vars_file(self, vars, **kwargs):
+        handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
+        f = os.fdopen(handle, 'w')
+        f.write(json.dumps(vars))
+        f.close()
+        os.chmod(path, stat.S_IRUSR)
+        return path
+
     def add_ansible_venv(self, venv_path, env, add_awx_lib=True):
         env['VIRTUAL_ENV'] = venv_path
         env['PATH'] = os.path.join(venv_path, "bin") + ":" + env['PATH']
@@ -1158,7 +1172,7 @@ class RunJob(BaseTask):
                 env['ANSIBLE_NET_SSH_KEYFILE'] = ssh_keyfile
 
             authorize = network_cred.authorize
-            env['ANSIBLE_NET_AUTHORIZE'] = unicode(int(authorize))
+            env['ANSIBLE_NET_AUTHORIZE'] = six.text_type(int(authorize))
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = decrypt_field(network_cred, 'authorize_password')
 
@@ -1234,7 +1248,8 @@ class RunJob(BaseTask):
                 extra_vars.update(json.loads(job.display_extra_vars()))
             else:
                 extra_vars.update(json.loads(job.decrypted_extra_vars()))
-        args.extend(['-e', json.dumps(extra_vars)])
+        extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
+        args.extend(['-e', '@%s' % (extra_vars_path)])
 
         # Add path to playbook (relative to project.local_path).
         args.append(job.playbook)
@@ -1464,7 +1479,8 @@ class RunProjectUpdate(BaseTask):
             'scm_revision_output': self.revision_path,
             'scm_revision': project_update.project.scm_revision,
         })
-        args.extend(['-e', json.dumps(extra_vars)])
+        extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
+        args.extend(['-e', '@%s' % (extra_vars_path)])
         args.append('project_update.yml')
         return args
 
@@ -1755,7 +1771,7 @@ class RunInventoryUpdate(BaseTask):
                 ec2_opts['cache_path'] = cache_path
             ec2_opts.setdefault('cache_max_age', '300')
             for k,v in ec2_opts.items():
-                cp.set(section, k, unicode(v))
+                cp.set(section, k, six.text_type(v))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
             credential = inventory_update.credential
@@ -1775,7 +1791,7 @@ class RunInventoryUpdate(BaseTask):
                 vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
 
             for k,v in vmware_opts.items():
-                cp.set(section, k, unicode(v))
+                cp.set(section, k, six.text_type(v))
 
         elif inventory_update.source == 'satellite6':
             section = 'foreman'
@@ -1791,7 +1807,7 @@ class RunInventoryUpdate(BaseTask):
                 elif k == 'satellite6_group_prefix' and isinstance(v, basestring):
                     group_prefix = v
                 else:
-                    cp.set(section, k, unicode(v))
+                    cp.set(section, k, six.text_type(v))
 
             credential = inventory_update.credential
             if credential:
@@ -1927,7 +1943,7 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
-                    env[str(env_k)] = unicode(inventory_update.source_vars_dict[env_k])
+                    env[str(env_k)] = six.text_type(inventory_update.source_vars_dict[env_k])
         elif inventory_update.source == 'tower':
             env['TOWER_INVENTORY'] = inventory_update.instance_filters
             env['TOWER_LICENSE_TYPE'] = get_licenser().validate()['license_type']
@@ -2181,7 +2197,8 @@ class RunAdHocCommand(BaseTask):
                     "{} are prohibited from use in ad hoc commands."
                 ).format(", ".join(removed_vars)))
             extra_vars.update(ad_hoc_command.extra_vars_dict)
-        args.extend(['-e', json.dumps(extra_vars)])
+        extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
+        args.extend(['-e', '@%s' % (extra_vars_path)])
 
         args.extend(['-m', ad_hoc_command.module_name])
         args.extend(['-a', ad_hoc_command.module_args])
@@ -2257,6 +2274,62 @@ class RunSystemJob(BaseTask):
 
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR
+
+
+def _reconstruct_relationships(copy_mapping):
+    for old_obj, new_obj in copy_mapping.items():
+        model = type(old_obj)
+        for field_name in getattr(model, 'FIELDS_TO_PRESERVE_AT_COPY', []):
+            field = model._meta.get_field(field_name)
+            if isinstance(field, ForeignKey):
+                if getattr(new_obj, field_name, None):
+                    continue
+                related_obj = getattr(old_obj, field_name)
+                related_obj = copy_mapping.get(related_obj, related_obj)
+                setattr(new_obj, field_name, related_obj)
+            elif field.many_to_many:
+                for related_obj in getattr(old_obj, field_name).all():
+                    getattr(new_obj, field_name).add(copy_mapping.get(related_obj, related_obj))
+        new_obj.save()
+
+
+@shared_task(bind=True, queue='tower', base=LogErrorsTask)
+def deep_copy_model_obj(
+    self, model_module, model_name, obj_pk, new_obj_pk,
+    user_pk, sub_obj_list, permission_check_func=None
+):
+    logger.info('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
+    from awx.api.generics import CopyAPIView
+    model = getattr(importlib.import_module(model_module), model_name, None)
+    if model is None:
+        return
+    try:
+        obj = model.objects.get(pk=obj_pk)
+        new_obj = model.objects.get(pk=new_obj_pk)
+        creater = User.objects.get(pk=user_pk)
+    except ObjectDoesNotExist:
+        logger.warning("Object or user no longer exists.")
+        return
+    with transaction.atomic():
+        copy_mapping = {}
+        for sub_obj_setup in sub_obj_list:
+            sub_model = getattr(importlib.import_module(sub_obj_setup[0]),
+                                sub_obj_setup[1], None)
+            if sub_model is None:
+                continue
+            try:
+                sub_obj = sub_model.objects.get(pk=sub_obj_setup[2])
+            except ObjectDoesNotExist:
+                continue
+            copy_mapping.update(CopyAPIView.copy_model_obj(
+                obj, new_obj, sub_model, sub_obj, creater
+            ))
+        _reconstruct_relationships(copy_mapping)
+        if permission_check_func:
+            permission_check_func = getattr(getattr(
+                importlib.import_module(permission_check_func[0]), permission_check_func[1]
+            ), permission_check_func[2])
+            permission_check_func(creater, copy_mapping.values())
 
 
 celery_app.register_task(RunJob())

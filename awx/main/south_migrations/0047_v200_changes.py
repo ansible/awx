@@ -3,6 +3,7 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
+import six
 
 
 class Migration(DataMigration):
@@ -12,7 +13,7 @@ class Migration(DataMigration):
             if jhs.host is not None and jhs.host.active:
                 jhs.host_name = jhs.host.name
             else:
-                jhs.host_name = "tower_deleted_host-%s" % unicode(idx)
+                jhs.host_name = "tower_deleted_host-%s" % six.text_type(idx)
             jhs.save()
 
     def backwards(self, orm):

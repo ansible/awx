@@ -44,7 +44,7 @@ def could_be_playbook(project_path, dir_path, filename):
     # show up.
     matched = False
     try:
-        for n, line in enumerate(file(playbook_path)):
+        for n, line in enumerate(open(playbook_path)):
             if valid_playbook_re.match(line):
                 matched = True
             # Any YAML file can also be encrypted with vault;

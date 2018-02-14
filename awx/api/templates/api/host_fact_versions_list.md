@@ -9,5 +9,3 @@ You may filter scan runs using the `from` and `to` properties:
 You may also filter by module
 
 `?module=packages`
-
-{% include "api/_new_in_awx.md" %}

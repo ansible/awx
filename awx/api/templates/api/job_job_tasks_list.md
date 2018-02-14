@@ -25,5 +25,3 @@ Will show only failed plays.  Alternatively `false` may be used.
     ?task__icontains=test
 
 Will filter tasks matching the substring `test`
-
-{% include "api/_new_in_awx.md" %}

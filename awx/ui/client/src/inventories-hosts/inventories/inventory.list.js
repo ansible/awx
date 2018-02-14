@@ -100,6 +100,14 @@ export default ['i18n', function(i18n) {
                 dataPlacement: 'top',
                 ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.edit'
             },
+            copy: {
+                label: i18n._('Copy'),
+                ngClick: 'copyInventory(inventory)',
+                "class": 'btn-danger btn-xs',
+                awToolTip: i18n._('Copy inventory'),
+                dataPlacement: 'top',
+                ngShow: 'inventory.summary_fields.user_capabilities.edit'
+            },
             view: {
                 label: i18n._('View'),
                 ngClick: 'editInventory(inventory)',

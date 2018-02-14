@@ -1,6 +1,5 @@
+import datetime
 import json
-import yaml
-import os
 import re
 
 from django.conf import settings
@@ -12,16 +11,7 @@ from coreapi.compat import force_bytes
 from openapi_codec.encode import generate_swagger_object
 import pytest
 
-import awx
 from awx.api.versioning import drf_reverse
-
-
-config_dest = os.sep.join([
-    os.path.realpath(os.path.dirname(awx.__file__)),
-    'api', 'templates', 'swagger'
-])
-config_file = os.sep.join([config_dest, 'config.yml'])
-description_file = os.sep.join([config_dest, 'description.md'])
 
 
 class i18nEncoder(DjangoJSONEncoder):
@@ -59,23 +49,9 @@ class TestSwaggerGeneration():
             data.update(response.accepted_renderer.get_customizations() or {})
 
             data['host'] = None
+            data['modified'] = datetime.datetime.utcnow().isoformat()
             data['schemes'] = ['https']
             data['consumes'] = ['application/json']
-
-            # Inject a top-level description into the OpenAPI document
-            if os.path.exists(description_file):
-                with open(description_file, 'r') as f:
-                    data['info']['description'] = f.read()
-
-            # Write tags in the order we want them sorted
-            if os.path.exists(config_file):
-                with open(config_file, 'r') as f:
-                    config = yaml.load(f.read())
-                    for category in config.get('categories', []):
-                        tag = {'name': category['name']}
-                        if 'description' in category:
-                            tag['description'] = category['description']
-                        data.setdefault('tags', []).append(tag)
 
             revised_paths = {}
             deprecated_paths = data.pop('deprecated_paths', [])
@@ -108,7 +84,6 @@ class TestSwaggerGeneration():
         # Make some basic assertions about the rendered JSON so we can
         # be sure it doesn't break across DRF upgrades and view/serializer
         # changes.
-        assert len(JSON['tags'])
         assert len(JSON['paths'])
 
         # The number of API endpoints changes over time, but let's just check
@@ -183,6 +158,14 @@ class TestSwaggerGeneration():
     @classmethod
     def teardown_class(cls):
         with open('swagger.json', 'w') as f:
-            f.write(force_bytes(
+            data = force_bytes(
                 json.dumps(cls.JSON, cls=i18nEncoder, indent=2)
-            ))
+            )
+            # replace ISO dates w/ the same value so we don't generate
+            # needless diffs
+            data = re.sub(
+                '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+Z',
+                '2018-02-01T08:00:00.000000Z',
+                data
+            )
+            f.write(data)

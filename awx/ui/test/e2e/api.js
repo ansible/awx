@@ -77,6 +77,4 @@ module.exports = {
     post,
     patch,
     put,
-    all: axios.all,
-    spread: axios.spread
 };

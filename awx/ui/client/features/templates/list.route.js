@@ -2,14 +2,6 @@ import ListController from './list-templates.controller';
 const listTemplate = require('~features/templates/list.view.html');
 import { N_ } from '../../src/i18n';
 
-function TemplatesResolve (UnifiedJobTemplate) {
-    return new UnifiedJobTemplate(['get', 'options']);
-}
-
-TemplatesResolve.$inject = [
-    'UnifiedJobTemplateModel'
-];
-
 export default {
     name: 'templates',
     route: '/templates',
@@ -32,10 +24,10 @@ export default {
     },
     params: {
         template_search: {
+            dynamic: true,
             value: {
-                type: 'workflow_job_template,job_template'
-            },
-            dynamic: true
+                type: 'workflow_job_template,job_template',
+            }, 
         }
     },
     searchPrefix: 'template',
@@ -43,16 +35,34 @@ export default {
         '@': {
             controller: ListController,
             templateUrl: listTemplate,
-            controllerAs: 'vm'
+            controllerAs: 'vm',
         }
     },
     resolve: {
-        resolvedModels: TemplatesResolve,
-        Dataset: ['TemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
-            function(list, qs, $stateParams, GetBasePath) {
-                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+        resolvedModels: [
+            'JobTemplateModel',
+            'WorkflowJobTemplateModel',
+            (JobTemplate, WorkflowJobTemplate) => {
+                const models = [
+                    new JobTemplate(['options']),
+                    new WorkflowJobTemplate(['options']),
+                ];
+                return Promise.all(models);
+            },
+        ],
+        Dataset: [
+            '$stateParams',
+            'Wait',
+            'GetBasePath',
+            'QuerySet',
+            ($stateParams, Wait, GetBasePath, qs) => {
+                const searchParam = $stateParams.template_search;
+                const searchPath = GetBasePath('unified_job_templates');
+
+                Wait('start');
+                return qs.search(searchPath, searchParam)
+                    .finally(() => Wait('stop'))
             }
-        ]
+        ],
     }
 };

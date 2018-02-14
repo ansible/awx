@@ -82,9 +82,9 @@ We currently support running AWX as a containerized application using Docker ima
 The [installer](./installer) directory contains an [inventory](./installer/inventory) file, and a playbook, [install.yml](./installer/install.yml). You'll begin by setting variables in the inventory file according to the platform you wish to use, and then you'll start the image build and deployment process by running the playbook.
 
 In the sections below, you'll find deployment details and instructions for each platform:
-- [Docker and Docker Compose](#docker-and-docker-compose)
 - [OpenShift](#openshift)
-- [Kubernetes](#kubernetes).
+- [Kubernetes](#kubernetes)
+- [Docker or Docker Compose](#docker-or-docker-compose).
 
 ### Official vs Building Images
 

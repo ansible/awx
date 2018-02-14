@@ -394,20 +394,9 @@ export default
                 }
             };
 
-            $scope.toggle_inventory = function(id) {
-                $scope.inventories.forEach(function(row, i) {
-                    if (row.id === id) {
-                        $scope.selected_inventory = angular.copy(row);
-                        $scope.inventories[i].checked = 1;
-                    } else {
-                        $scope.inventories[i].checked = 0;
-                    }
-                });
-            };
-
-            $scope.toggle_credential = function(id) {
+            $scope.toggle_credential = function(cred) {
                 $scope.credentials.forEach(function(row, i) {
-                    if (row.id === id) {
+                    if (row.id === cred.id) {
                         $scope.selected_credentials.machine = angular.copy(row);
                         $scope.credentials[i].checked = 1;
                     } else {

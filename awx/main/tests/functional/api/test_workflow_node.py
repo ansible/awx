@@ -108,14 +108,20 @@ class TestOldCredentialField:
     TODO: remove tests when JT vault_credential / credential / other stuff
     is removed
     '''
+    @pytest.fixture
+    def job_template_ask(self, job_template):
+        job_template.ask_credential_on_launch = True
+        job_template.save()
+        return job_template
+
     def test_credential_accepted_create(self, workflow_job_template, post, admin_user,
-                                        job_template, machine_credential):
+                                        job_template_ask, machine_credential):
         r = post(
             reverse(
                 'api:workflow_job_template_workflow_nodes_list',
                 kwargs = {'pk': workflow_job_template.pk}
             ),
-            data = {'credential': machine_credential.pk, 'unified_job_template': job_template.pk},
+            data = {'credential': machine_credential.pk, 'unified_job_template': job_template_ask.pk},
             user = admin_user,
             expect = 201
         )
@@ -128,17 +134,17 @@ class TestOldCredentialField:
         ['read_role', 403]
     ])
     def test_credential_rbac(self, role, code, workflow_job_template, post, rando,
-                             job_template, machine_credential):
+                             job_template_ask, machine_credential):
         role_obj = getattr(machine_credential, role)
         role_obj.members.add(rando)
-        job_template.execute_role.members.add(rando)
+        job_template_ask.execute_role.members.add(rando)
         workflow_job_template.admin_role.members.add(rando)
         post(
             reverse(
                 'api:workflow_job_template_workflow_nodes_list',
                 kwargs = {'pk': workflow_job_template.pk}
             ),
-            data = {'credential': machine_credential.pk, 'unified_job_template': job_template.pk},
+            data = {'credential': machine_credential.pk, 'unified_job_template': job_template_ask.pk},
             user = rando,
             expect = code
         )

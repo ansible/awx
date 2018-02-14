@@ -10,9 +10,7 @@ import editController from './schedulerEdit.controller';
 import {templateUrl} from '../shared/template-url/template-url.factory';
 import schedulerDatePicker from './schedulerDatePicker.directive';
 import { N_ } from '../i18n';
-import AddSchedule from './factories/add-schedule.factory';
 import DeleteSchedule from './factories/delete-schedule.factory';
-import EditSchedule from './factories/edit-schedule.factory';
 import RRuleToAPI from './factories/r-rule-to-api.factory';
 import SchedulePost from './factories/schedule-post.factory';
 import ToggleSchedule from './factories/toggle-schedule.factory';
@@ -24,9 +22,7 @@ export default
         .controller('schedulerListController', listController)
         .controller('schedulerAddController', addController)
         .controller('schedulerEditController', editController)
-        .factory('AddSchedule', AddSchedule)
         .factory('DeleteSchedule', DeleteSchedule)
-        .factory('EditSchedule', EditSchedule)
         .factory('RRuleToAPI', RRuleToAPI)
         .factory('SchedulePost', SchedulePost)
         .factory('ToggleSchedule', ToggleSchedule)
@@ -47,10 +43,10 @@ export default
                     activityStreamTarget: 'job_template',
                     activityStreamId: 'id'
                 },
-                ncyBreadcrumb: {
-                    parent: 'templates.editJobTemplate({job_template_id: parentObject.id})',
-                    label: N_('SCHEDULES')
-                },
+                // ncyBreadcrumb: {
+                //     parent: 'templates.editJobTemplate({job_template_id: parentObject.id})',
+                //     label: N_('SCHEDULES')
+                // },
                 resolve: {
                     Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {

@@ -89,16 +89,16 @@
                     </at-row-item>
                     <at-row-item
                         label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RAN') }}"
-                        value="{{ vm.getRan(template) }}">
+                        value="{{ vm.getLastRan(template) }}">
                     </at-row-item>
                     <labels-list class="LabelList" show-delete="false" is-row-item="true">
                     </labels-list>
                 </div>
                 <div class="at-Row-actions">
-                    <at-row-action icon="icon-launch" ng-click="vm.submitJob(template)"
+                    <at-row-action icon="icon-launch" ng-click="vm.runTemplate(template)"
                         ng-show="template.summary_fields.user_capabilities.start">
                     </at-row-action>
-                    <at-row-action icon="fa-calendar" ng-click="vm.scheduleJob(template)"
+                    <at-row-action icon="fa-calendar" ng-click="vm.scheduleTemplate(template)"
                         ng-show="template.summary_fields.user_capabilities.schedule">
                     </at-row-action>
                     <at-row-action icon="fa-copy" ng-click="vm.copyTemplate(template)"
@@ -118,4 +118,5 @@
             query-set="querySet">
         </paginate>
     </at-panel-body>
+    <prompt prompt-data="promptData" open-modal="openModal" on-finish="launchJob()"></launch>
 </at-panel>

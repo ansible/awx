@@ -89,6 +89,21 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
             }
         }
 
+        $scope.copyCredential = credential => {
+            Wait('start');
+            new Credential('get', credential.id)
+                .then(model => model.copy())
+                .then(({ id }) => {
+                    const params = { credential_id: id };
+                    $state.go('credentials.edit', params, { reload: true });
+                })
+                .catch(({ data, status }) => {
+                    const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
+                    ProcessErrors($scope, data, status, null, params);
+                })
+                .finally(() => Wait('stop'));
+        };
+
         $scope.addCredential = function() {
             $state.go('credentials.add');
         };

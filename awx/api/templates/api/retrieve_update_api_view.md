@@ -29,5 +29,3 @@ For a PUT request, include **all** fields in the request.
 {% ifmeth PATCH %}
 For a PATCH request, include only the fields that are being modified.
 {% endifmeth %}
-
-{% include "api/_new_in_awx.md" %}

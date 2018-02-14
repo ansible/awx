@@ -48,6 +48,7 @@ export default
                         scrollbarStyle: null
                     }
                 };
+
                 scope[fld + 'codeMirror'] = AngularCodeMirror(readOnly);
                 scope[fld + 'codeMirror'].addModes(variableEditModes);
                 scope[fld + 'codeMirror'].showTextArea({
@@ -95,6 +96,7 @@ export default
                     // convert json to yaml
                     try {
                         removeField(fld);
+                        
                         json_obj = JSON.parse(scope[fld]);
                         if ($.isEmptyObject(json_obj)) {
                             scope[fld] = '---';

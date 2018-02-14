@@ -1,4 +1,4 @@
-function CapacityAdjuster (templateUrl) {
+function CapacityAdjuster (templateUrl, ProcessErrors, Wait) {
     return {
         scope: {
             state: '='
@@ -23,6 +23,7 @@ function CapacityAdjuster (templateUrl) {
             const vm = this || {};
 
             vm.slide = (state) => {
+                Wait('start');
                 const data = {
                     "capacity_adjustment": `${state.capacity_adjustment}`
                 };
@@ -31,7 +32,16 @@ function CapacityAdjuster (templateUrl) {
                     url: state.url,
                     data
                 };
-                $http(req);
+                $http(req)
+                    .catch(({data, status}) => {
+                        ProcessErrors(data, status, null, {
+                            hdr: 'Error!',
+                            msg: 'Call failed. Return status: ' + status
+                        });
+                    })
+                    .finally(() => {
+                        Wait('stop');
+                    });
             };
         },
         controllerAs: 'vm'
@@ -39,7 +49,9 @@ function CapacityAdjuster (templateUrl) {
 }
 
 CapacityAdjuster.$inject = [
-    'templateUrl'
+    'templateUrl',
+    'ProcessErrors',
+    'Wait'
 ];
 
 export default CapacityAdjuster;

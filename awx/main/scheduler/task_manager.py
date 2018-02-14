@@ -485,13 +485,13 @@ class TaskManager():
                     task.job_explanation += ' '.join((
                         'Task was marked as running in Tower but its ',
                         'controller management daemon was not present in',
-                        'Celery, so it has been marked as failed.',
+                        'the job queue, so it has been marked as failed.',
                         'Task may still be running, but contactability is unknown.'
                     ))
                 else:
                     task.job_explanation += ' '.join((
                         'Task was marked as running in Tower but was not present in',
-                        'Celery, so it has been marked as failed.',
+                        'the job queue, so it has been marked as failed.',
                     ))
                 try:
                     task.save(update_fields=['status', 'start_args', 'job_explanation'])

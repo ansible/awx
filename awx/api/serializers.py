@@ -130,6 +130,22 @@ def reverse_gfk(content_object, request):
     }
 
 
+class CopySerializer(serializers.Serializer):
+
+    name = serializers.CharField()
+
+    def validate(self, attrs):
+        name = attrs.get('name')
+        view = self.context.get('view', None)
+        obj = view.get_object()
+        if name == obj.name:
+            raise serializers.ValidationError(_(
+                'The original object is already named {}, a copy from'
+                ' it cannot have the same name.'.format(name)
+            ))
+        return attrs
+
+
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
     '''
     Custom metaclass to enable attribute inheritance from Meta objects on
@@ -1003,6 +1019,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
             notification_templates_error = self.reverse('api:project_notification_templates_error_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:project_access_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:project_object_roles_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:project_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail',
@@ -1156,6 +1173,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             access_list = self.reverse('api:inventory_access_list',         kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:inventory_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:inventory_instance_groups_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:inventory_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.insights_credential:
             res['insights_credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.insights_credential.pk})
@@ -1513,6 +1531,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
         res = super(CustomInventoryScriptSerializer, self).get_related(obj)
         res.update(dict(
             object_roles = self.reverse('api:inventory_script_object_roles_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:inventory_script_copy', kwargs={'pk': obj.pk}),
         ))
 
         if obj.organization:
@@ -2070,6 +2089,7 @@ class CredentialSerializer(BaseSerializer):
             object_roles = self.reverse('api:credential_object_roles_list', kwargs={'pk': obj.pk}),
             owner_users = self.reverse('api:credential_owner_users_list', kwargs={'pk': obj.pk}),
             owner_teams = self.reverse('api:credential_owner_teams_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:credential_copy', kwargs={'pk': obj.pk}),
         ))
 
         # TODO: remove when API v1 is removed
@@ -2547,6 +2567,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:job_template_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.host_config_key:
             res['callback'] = self.reverse('api:job_template_callback', kwargs={'pk': obj.pk})
@@ -3129,19 +3150,27 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         elif self.instance:
             ujt = self.instance.unified_job_template
 
-        # Insert survey_passwords to track redacted variables
+        # Replace $encrypted$ submissions with db value if exists
+        # build additional field survey_passwords to track redacted variables
         if 'extra_data' in attrs:
             extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
             if hasattr(ujt, 'survey_password_variables'):
+                # Prepare additional field survey_passwords for save
                 password_dict = {}
                 for key in ujt.survey_password_variables():
                     if key in extra_data:
                         password_dict[key] = REPLACE_STR
                 if not self.instance or password_dict != self.instance.survey_passwords:
-                    attrs['survey_passwords'] = password_dict
+                    attrs['survey_passwords'] = password_dict.copy()
+                # Force dict type (cannot preserve YAML formatting if passwords are involved)
                 if not isinstance(attrs['extra_data'], dict):
                     attrs['extra_data'] = parse_yaml_or_json(attrs['extra_data'])
+                # Encrypt the extra_data for save, only current password vars in JT survey
                 encrypt_dict(attrs['extra_data'], password_dict.keys())
+                # For any raw $encrypted$ string, either
+                # - replace with existing DB value
+                # - raise a validation error
+                # - remove key from extra_data if survey default is present
                 if self.instance:
                     db_extra_data = parse_yaml_or_json(self.instance.extra_data)
                 else:
@@ -3149,8 +3178,13 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
                 for key in password_dict.keys():
                     if attrs['extra_data'].get(key, None) == REPLACE_STR:
                         if key not in db_extra_data:
-                            raise serializers.ValidationError(
-                                _('Provided variable {} has no database value to replace with.').format(key))
+                            element = ujt.pivot_spec(ujt.survey_spec)[key]
+                            if 'default' in element and element['default']:
+                                attrs['survey_passwords'].pop(key, None)
+                                attrs['extra_data'].pop(key, None)
+                            else:
+                                raise serializers.ValidationError(
+                                    {"extra_data": _('Provided variable {} has no database value to replace with.').format(key)})
                         else:
                             attrs['extra_data'][key] = db_extra_data[key]
 
@@ -3233,6 +3267,9 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             cred = deprecated_fields['credential']
             attrs['credential'] = cred
             if cred is not None:
+                if not ujt_obj.ask_credential_on_launch:
+                    raise serializers.ValidationError({"credential": _(
+                        "Related template is not configured to accept credentials on launch.")})
                 cred = Credential.objects.get(pk=cred)
                 view = self.context.get('view', None)
                 if (not view) or (not view.request) or (view.request.user not in cred.use_role):
@@ -3795,6 +3832,7 @@ class NotificationTemplateSerializer(BaseSerializer):
         res.update(dict(
             test = self.reverse('api:notification_template_test', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:notification_template_notification_list', kwargs={'pk': obj.pk}),
+            copy = self.reverse('api:notification_template_copy', kwargs={'pk': obj.pk}),
         ))
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})

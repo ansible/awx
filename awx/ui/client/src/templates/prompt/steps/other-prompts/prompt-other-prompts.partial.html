@@ -1,0 +1,110 @@
+<form name="otherPromptsForm" autocomplete="off" novalidate>
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_job_type_on_launch">
+        <label for="job_type" class="Form-inputLabelContainer">
+            <span class="Form-requiredAsterisk">*</span>
+            <span class="Form-inputLabel" translate>{{:: vm.strings.get('prompt.JOB_TYPE') }}</span>
+        </label>
+        <div>
+            <select
+                id="job_launch_job_type"
+                ng-options="v.label for v in promptData.prompts.jobType.choices track by v.value"
+                ng-model="promptData.prompts.jobType.value"
+                class="form-control Form-dropDown"
+                name="job_type"
+                tabindex="-1"
+                aria-hidden="true"
+                required>
+                <option value="" class="" selected="selected">{{:: vm.strings.get('prompt.CHOOSE_JOB_TYPE') }}</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_limit_on_launch">
+        <label for="limit">
+            <span class="Form-inputLabel">{{:: vm.strings.get('prompt.LIMIT') }}</span>
+        </label>
+        <div>
+            <input type="text" ng-model="promptData.prompts.limit.value" name="limit" class="form-control Form-textInput">
+        </div>
+    </div>
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_verbosity_on_launch">
+        <label for="verbosity" class="Form-inputLabelContainer">
+            <span class="Form-requiredAsterisk">*</span>
+            <span class="Form-inputLabel">{{:: vm.strings.get('prompt.VERBOSITY') }}</span>
+        </label>
+        <div>
+            <select
+                id="job_launch_verbosity"
+                ng-options="v.label for v in promptData.prompts.verbosity.choices track by v.value"
+                ng-model="promptData.prompts.verbosity.value"
+                class="form-control Form-dropDown"
+                name="verbosity"
+                tabindex="-1"
+                aria-hidden="true"
+                required>
+                <option value="" class="" selected="selected">{{:: vm.strings.get('prompt.CHOOSE_VERBOSITY') }}</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_tags_on_launch">
+        <label for="tags">
+            <span class="Form-inputLabel">{{:: vm.strings.get('prompt.JOB_TAGS') }}</span>
+        </label>
+        <div>
+            <select
+                id="job_launch_job_tags"
+                ng-options="v.label for v in promptData.prompts.tags.options track by v.value"
+                ng-model="promptData.prompts.tags.value"
+                class="form-control Form-dropDown"
+                name="job_tags"
+                tabindex="-1"
+                aria-hidden="true"
+                multiple>
+            </select>
+        </div>
+    </div>
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_skip_tags_on_launch">
+        <label for="skip_tags">
+            <span class="Form-inputLabel">{{:: vm.strings.get('prompt.SKIP_TAGS') }}</span>
+        </label>
+        <div>
+            <select
+                id="job_launch_skip_tags"
+                ng-options="v.label for v in promptData.prompts.skipTags.options track by v.value"
+                ng-model="promptData.prompts.skipTags.value"
+                class="form-control Form-dropDown"
+                name="skip_tags"
+                tabindex="-1"
+                aria-hidden="true"
+                multiple>
+            </select>
+        </div>
+    </div>
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_diff_mode_on_launch">
+        <label for="diff_mode">
+            <span class="Form-inputLabel">{{:: vm.strings.get('prompt.SHOW_CHANGES') }}</span>
+        </label>
+        <div>
+            <div class="ScheduleToggle" ng-class="{'is-on': promptData.prompts.diffMode.value}" aw-tool-tip="" data-placement="top" data-original-title="" title="" ng-click="vm.toggleDiff()">
+                <button ng-show="promptData.prompts.diffMode.value" class="ScheduleToggle-switch is-on">{{:: vm.strings.get('ON') }}</button>
+                <button ng-show="!promptData.prompts.diffMode.value" class="ScheduleToggle-switch ng-hide">{{:: vm.strings.get('OFF') }}</button>
+            </div>
+        </div>
+    </div>
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="promptData.launchConf.ask_variables_on_launch && !promptData.prompts.variables.ignore">
+        <label for="variables">
+            <span class="Form-inputLabel">{{:: vm.strings.get('prompt.EXTRA_VARIABLES') }}</span>
+            <a id="awp-variables" href="" aw-pop-over="<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>JSON:<br /><blockquote>{<br />&quot;somevar&quot;: &quot;somevalue&quot;,<br />&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>YAML:<br /><blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>" data-placement="right" data-container="body" over-title="Extra Variables" class="help-link" data-original-title="" title="" tabindex="-1">
+                <i class="fa fa-question-circle"></i>
+            </a>
+            <div class="parse-selection" id="job_launch_variables_parse_type">
+                <input type="radio" ng-model="parseType" value="yaml" ng-change="vm.updateParseType(parseType)">
+                <span class="parse-label">{{:: vm.strings.get('YAML') }}</span>
+                <input type="radio" ng-model="parseType" value="json" ng-change="vm.updateParseType(parseType)">
+                <span class="parse-label">{{:: vm.strings.get('JSON') }}</span>
+            </div>
+        </label>
+        <div>
+            <textarea rows="6" ng-model="promptData.prompts.variables.value" name="variables" class="form-control Form-textArea Form-textAreaLabel" id="job_launch_variables"></textarea>
+        </div>
+    </div>
+</form>

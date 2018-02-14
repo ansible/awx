@@ -322,4 +322,5 @@ if __name__ == '__main__':
         imp.load_source('ansible.cli.inventory', __file__ + '.py', f)
     ansible_path = distutils.spawn.find_executable('ansible')
     sys.argv[0] = 'ansible-inventory'
-    execfile(ansible_path)
+    with open(ansible_path) as in_file:
+        exec(in_file.read())

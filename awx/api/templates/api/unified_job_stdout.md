@@ -25,5 +25,3 @@ dark background.
 Files over {{ settings.STDOUT_MAX_BYTES_DISPLAY|filesizeformat }} (configurable)
 will not display in the browser. Use the `txt_download` or `ansi_download`
 formats to download the file directly to view it.
-
-{% include "api/_new_in_awx.md" %}
