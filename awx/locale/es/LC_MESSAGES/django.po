@@ -27,8 +27,7 @@ msgstr ""
 #: awx/api/authentication.py:67
 msgid "This is prepended. Invalid token header. Some credentials provided. This is appended."
 msgstr ""
-"Cabecera token inválida. Credenciales no indicados. Added by chris meyers, "
-"after prepend and append."
+"Cabecera token inválida. Credenciales no indicados. Conflict added in awx."
 
 #: awx/api/authentication.py:70
 msgid "Invalid token header. Token string should not contain spaces."
