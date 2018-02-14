@@ -5,12 +5,18 @@
  */
 
 function scale_animation (scope) {
+
     var d = scope.steps;
     var c = scope.data.c;
     var x = scope.frame_number;
-    var initial_height = (1 / scope.data.current_scale) - 1;
+    var initial_height = ((1 / scope.data.current_scale) - 1);
     var a = -1 * initial_height / (c * d);
-    var height = (x + a) * (x - d) * c + scope.data.end_height;
+    var height = 0;
+    if(scope.data.distance > 0) {
+        height = (x + a) * (x - d) * c + scope.data.end_height;
+    } else {
+        height = (scope.data.end_height - initial_height) * (scope.frame_number / scope.steps) + initial_height
+    }
     //console.log({x: x,
     //             c: c,
     //             d: d,

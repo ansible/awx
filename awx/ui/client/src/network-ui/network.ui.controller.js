@@ -865,12 +865,13 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.jump.to_y = jump_to_y;
         var distance = util.distance(v_center.x, v_center.y, jump_to_x, jump_to_y);
         //console.log({distance: distance});
-        var num_frames = 30 * Math.floor((1 + 3 * distance / (distance + 3000)));
+        var num_frames = 30 * Math.floor((1 + 4 * distance / (distance + 3000)));
         //console.log({num_frames: num_frames});
         var scale_animation = new models.Animation($scope.animation_id_seq(),
                                                   num_frames,
                                                   {
                                                       c: -0.1,
+                                                      distance: distance,
                                                       end_height: (1.0/jump_to_scale) - 1,
                                                       current_scale: $scope.current_scale,
                                                       scope: $scope
