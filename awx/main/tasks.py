@@ -1903,6 +1903,8 @@ class RunInventoryUpdate(BaseTask):
         # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
+        # Always use the --export option for ansible-inventory
+        env['ANSIBLE_INVENTORY_EXPORT'] = str(True)
 
         # Set environment variables specific to each source.
         #
