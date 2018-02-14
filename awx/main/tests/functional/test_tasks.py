@@ -136,7 +136,8 @@ class TestIsolatedManagementTask:
 
             # Upgrade was completed, health check playbook now reports matching
             # version, make sure capacity is set.
-            update_capacity(old_version, {'version': '5.0.0-things', 'capacity':103}, '5.0.0-stuff')
+            update_capacity(old_version, {'version': '5.0.0-things',
+                                          'capacity_cpu':103, 'capacity_mem':103}, '5.0.0-stuff')
             assert old_version.capacity == 103
 
     def test_takes_action(self, control_instance, needs_updating):

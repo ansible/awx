@@ -14,7 +14,7 @@ from django.conf import settings
 
 import awx
 from awx.main.expect import run
-from awx.main.utils import OutputEventFilter
+from awx.main.utils import OutputEventFilter, get_system_task_capacity
 from awx.main.queue import CallbackQueueDispatcher
 
 logger = logging.getLogger('awx.isolated.manager')
@@ -381,10 +381,14 @@ class IsolatedManager(object):
             logger.error(err_template.format(instance.hostname, instance.version, awx_application_version))
             instance.capacity = 0
         else:
-            if instance.capacity == 0 and task_result['capacity']:
+            if instance.capacity == 0 and task_result['capacity_cpu']:
                 logger.warning('Isolated instance {} has re-joined.'.format(instance.hostname))
-            instance.capacity = int(task_result['capacity'])
-        instance.save(update_fields=['capacity', 'version', 'modified'])
+            instance.cpu_capacity = int(task_result['capacity_cpu'])
+            instance.mem_capacity = int(task_result['capacity_mem'])
+            instance.capacity = get_system_task_capacity(scale=instance.capacity_adjustment,
+                                                         cpu_capacity=int(task_result['capacity_cpu']),
+                                                         mem_capacity=int(task_result['capacity_mem']))
+        instance.save(update_fields=['cpu_capacity', 'mem_capacity', 'capacity', 'version', 'modified'])
 
     @classmethod
     def health_check(cls, instance_qs, awx_application_version):
@@ -428,7 +432,7 @@ class IsolatedManager(object):
                 task_result = result['plays'][0]['tasks'][0]['hosts'][instance.hostname]
             except (KeyError, IndexError):
                 task_result = {}
-            if 'capacity' in task_result:
+            if 'capacity_cpu' in task_result and 'capacity_mem' in task_result:
                 cls.update_capacity(instance, task_result, awx_application_version)
             elif instance.capacity == 0:
                 logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(

@@ -18,6 +18,30 @@
 from ansible.module_utils.basic import AnsibleModule
 
 import subprocess
+import os
+import psutil
+
+
+def get_cpu_capacity():
+    env_forkcpu = os.getenv('SYSTEM_TASK_FORKS_CPU', None)
+    cpu = psutil.cpu_count()
+
+    if env_forkcpu:
+        forkcpu = int(env_forkcpu)
+    else:
+        forkcpu = 4
+    return (cpu, cpu * forkcpu)
+
+
+def get_mem_capacity():
+    env_forkmem = os.getenv('SYSTEM_TASK_FORKS_MEM', None)
+    if env_forkmem:
+        forkmem = int(env_forkmem)
+    else:
+        forkmem = 100
+
+    mem = psutil.virtual_memory().total
+    return (mem, max(1, ((mem / 1024 / 1024) - 2048) / forkmem))
 
 
 def main():
@@ -32,20 +56,13 @@ def main():
     except subprocess.CalledProcessError as e:
         module.fail_json(msg=str(e))
         return
-    # Duplicated with awx.main.utils.common.get_system_task_capacity
-    try:
-        out = subprocess.check_output(['free', '-m'])
-    except subprocess.CalledProcessError as e:
-        module.fail_json(msg=str(e))
-        return
-    total_mem_value = out.split()[7]
-    if int(total_mem_value) <= 2048:
-        cap = 50
-    else:
-        cap = 50 + ((int(total_mem_value) / 1024) - 2) * 75
+    # NOTE: Duplicated with awx.main.utils.common capacity utilities
+    _, capacity_cpu = get_cpu_capacity()
+    _, capacity_mem = get_mem_capacity()
 
     # Module never results in a change
-    module.exit_json(changed=False, capacity=cap, version=version)
+    module.exit_json(changed=False, capacity_cpu=capacity_cpu,
+                     capacity_mem=capacity_mem, version=version)
 
 
 if __name__ == '__main__':

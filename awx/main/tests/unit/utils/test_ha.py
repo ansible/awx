@@ -64,7 +64,7 @@ class TestAddRemoveCeleryWorkerQueues():
         instance = instance_generator(groups=groups, hostname=hostname)
         worker_queues = worker_queues_generator(_worker_queues)
         with mock.patch('awx.main.utils.ha.settings.AWX_CELERY_QUEUES_STATIC', static_queues):
-            (added_queues, removed_queues) = _add_remove_celery_worker_queues(mock_app, instance, worker_queues, hostname)
+            (added_queues, removed_queues) = _add_remove_celery_worker_queues(mock_app, [instance], worker_queues, hostname)
             assert set(added_queues) == set(added_expected)
             assert set(removed_queues) == set(removed_expected)
 
