@@ -4494,7 +4494,7 @@ class UnifiedJobTemplateList(ListAPIView):
     capabilities_prefetch = [
         'admin', 'execute',
         {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use',
-                  'workflowjobtemplate.organization.admin']}
+                  'workflowjobtemplate.organization.workflow_admin']}
     ]
 
 

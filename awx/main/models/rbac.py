@@ -33,29 +33,42 @@ ROLE_SINGLETON_SYSTEM_ADMINISTRATOR='system_administrator'
 ROLE_SINGLETON_SYSTEM_AUDITOR='system_auditor'
 
 role_names = {
-    'system_administrator' : _('System Administrator'),
-    'system_auditor'       : _('System Auditor'),
-    'adhoc_role'           : _('Ad Hoc'),
-    'admin_role'           : _('Admin'),
-    'auditor_role'         : _('Auditor'),
-    'execute_role'         : _('Execute'),
-    'member_role'          : _('Member'),
-    'read_role'            : _('Read'),
-    'update_role'          : _('Update'),
-    'use_role'             : _('Use'),
+    'system_administrator': _('System Administrator'),
+    'system_auditor': _('System Auditor'),
+    'adhoc_role': _('Ad Hoc'),
+    'admin_role': _('Admin'),
+    'project_admin_role': _('Project Admin'),
+    'inventory_admin_role': _('Inventory Admin'),
+    'credential_admin_role': _('Credential Admin'),
+    'workflow_admin_role': _('Workflow Admin'),
+    'notification_admin_role': _('Notification Admin'),
+    'auditor_role': _('Auditor'),
+    'execute_role': _('Execute'),
+    'member_role': _('Member'),
+    'read_role': _('Read'),
+    'update_role': _('Update'),
+    'use_role': _('Use'),
 }
 
 role_descriptions = {
-    'system_administrator' : _('Can manage all aspects of the system'),
-    'system_auditor'       : _('Can view all settings on the system'),
-    'adhoc_role'           : _('May run ad hoc commands on an inventory'),
-    'admin_role'           : _('Can manage all aspects of the %s'),
-    'auditor_role'         : _('Can view all settings for the %s'),
-    'execute_role'         : _('May run the %s'),
-    'member_role'          : _('User is a member of the %s'),
-    'read_role'            : _('May view settings for the %s'),
-    'update_role'          : _('May update project or inventory or group using the configured source update system'),
-    'use_role'             : _('Can use the %s in a job template'),
+    'system_administrator': _('Can manage all aspects of the system'),
+    'system_auditor': _('Can view all settings on the system'),
+    'adhoc_role': _('May run ad hoc commands on an inventory'),
+    'admin_role': _('Can manage all aspects of the %s'),
+    'project_admin_role': _('Can manage all projects of the %s'),
+    'inventory_admin_role': _('Can manage all inventories of the %s'),
+    'credential_admin_role': _('Can manage all credentials of the %s'),
+    'workflow_admin_role': _('Can manage all workflows of the %s'),
+    'notification_admin_role': _('Can manage all notifications of the %s'),
+    'auditor_role': _('Can view all settings for the %s'),
+    'execute_role': {
+        'organization': _('May run any executable resources in the organization'),
+        'default': _('May run the %s'),
+    },
+    'member_role': _('User is a member of the %s'),
+    'read_role': _('May view settings for the %s'),
+    'update_role': _('May update project or inventory or group using the configured source update system'),
+    'use_role': _('Can use the %s in a job template'),
 }
 
 
@@ -170,12 +183,22 @@ class Role(models.Model):
         global role_descriptions
         description = role_descriptions[self.role_field]
         content_type = self.content_type
-        if '%s' in description and content_type:
+
+        model_name = None
+        if content_type:
             model = content_type.model_class()
             model_name = re.sub(r'([a-z])([A-Z])', r'\1 \2', model.__name__).lower()
-            description = description % model_name
 
-        return description
+        value = description
+        if type(description) == dict:
+            value = description.get(model_name)
+            if value is None:
+                value = description.get('default')
+
+        if '%s' in value and content_type:
+                    value = value % model_name
+
+        return value
 
     @staticmethod
     def rebuild_role_ancestor_list(additions, removals):

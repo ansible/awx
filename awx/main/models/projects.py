@@ -286,7 +286,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     )
 
     admin_role = ImplicitRoleField(parent_role=[
-        'organization.admin_role',
+        'organization.project_admin_role',
         'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ])
 

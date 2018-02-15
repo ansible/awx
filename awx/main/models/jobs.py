@@ -270,10 +270,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         allows_field='credentials'
     )
     admin_role = ImplicitRoleField(
-        parent_role=['project.organization.admin_role', 'inventory.organization.admin_role']
+        parent_role=['project.organization.project_admin_role', 'inventory.organization.inventory_admin_role']
     )
     execute_role = ImplicitRoleField(
-        parent_role=['admin_role'],
+        parent_role=['admin_role', 'project.organization.execute_role', 'inventory.organization.execute_role'],
     )
     read_role = ImplicitRoleField(
         parent_role=['project.organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'],

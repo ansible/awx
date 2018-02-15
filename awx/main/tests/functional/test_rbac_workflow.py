@@ -49,6 +49,13 @@ class TestWorkflowJobTemplateAccess:
         assert org_admin in wfjt.execute_role
         assert org_admin in wfjt.read_role
 
+    def test_org_workflow_admin_role_inheritance(self, wfjt, org_member):
+        wfjt.organization.workflow_admin_role.members.add(org_member)
+
+        assert org_member in wfjt.admin_role
+        assert org_member in wfjt.execute_role
+        assert org_member in wfjt.read_role
+
 
 @pytest.mark.django_db
 class TestWorkflowJobTemplateNodeAccess:
@@ -103,8 +110,12 @@ class TestWorkflowJobTemplateNodeAccess:
 @pytest.mark.django_db
 class TestWorkflowJobAccess:
 
-    def test_org_admin_can_delete_workflow_job(self, workflow_job, org_admin):
-        access = WorkflowJobAccess(org_admin)
+    @pytest.mark.parametrize("role_name", ["admin_role", "workflow_admin_role"])
+    def test_org_admin_can_delete_workflow_job(self, role_name, workflow_job, org_member):
+        role = getattr(workflow_job.workflow_job_template.organization, role_name)
+        role.members.add(org_member)
+
+        access = WorkflowJobAccess(org_member)
         assert access.can_delete(workflow_job)
 
     def test_wfjt_admin_can_delete_workflow_job(self, workflow_job, rando):
@@ -132,9 +143,13 @@ class TestWFJTCopyAccess:
         admin_access = WorkflowJobTemplateAccess(org_admin)
         assert admin_access.can_copy(wfjt)
 
+        wfjt.organization.workflow_admin_role.members.add(org_member)
+        admin_access = WorkflowJobTemplateAccess(org_member)
+        assert admin_access.can_copy(wfjt)
+
     def test_copy_permissions_user(self, wfjt, org_admin, org_member):
         '''
-        Only org admins are able to add WFJTs, only org admins
+        Only org admins and org workflow admins are able to add WFJTs, only org admins
         are able to copy them
         '''
         wfjt.admin_role.members.add(org_member)
