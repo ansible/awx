@@ -889,11 +889,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                       distance: distance,
                                                       end_height: (1.0/jump_to_scale) - 1,
                                                       current_scale: $scope.current_scale,
-                                                      scope: $scope
+                                                      scope: $scope,
+                                                      updateZoomBoolean: updateZoom
                                                   },
                                                   $scope,
                                                   $scope,
-                                                  animations.scale_animation, updateZoom);
+                                                  animations.scale_animation);
         $scope.animations.push(scale_animation);
         var pan_animation = new models.Animation($scope.animation_id_seq(),
                                                   num_frames,

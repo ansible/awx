@@ -912,7 +912,7 @@ function TestResult(id, name, result, date, code_under_test) {
 }
 exports.TestResult = TestResult;
 
-function Animation(id, steps, data, scope, tracer, callback, updateZoomBoolean) {
+function Animation(id, steps, data, scope, tracer, callback) {
 
     this.id = id;
     this.steps = steps;
@@ -920,10 +920,10 @@ function Animation(id, steps, data, scope, tracer, callback, updateZoomBoolean) 
     this.frame_number_seq = util.natural_numbers(-1);
     this.frame_number = 0;
     this.data = data;
+    this.data.updateZoomBoolean = data.updateZoomBoolean !== undefined ? data.updateZoomBoolean : true;
     this.callback = callback;
     this.scope = scope;
     this.interval = null;
-    this.updateZoomBoolean = updateZoomBoolean !== undefined ? updateZoomBoolean : true;
     this.fsm = new fsm.FSMController(this, "animation_fsm", animation_fsm.Start, tracer);
 }
 exports.Animation = Animation;
