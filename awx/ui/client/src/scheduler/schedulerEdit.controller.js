@@ -131,8 +131,9 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
             $http.get('/api/v2/schedules/zoneinfo/').then(({data}) => {
                 scheduler.scope.timeZones = data;
-                scheduler.scope.schedulerTimeZone = _.find(data, (zone) => {
-                    return zone.name === scheduler.scope.current_timezone.name;
+                scheduler.scope.schedulerTimeZone = _.find(data, function(x) {
+                    let tz = $scope.schedule_obj.rrule.match(/TZID=\s*(.*?)\s*:/)[1];
+                    return x.name === tz;
                 });
             });
             scheduler.inject('form-container', false);
