@@ -50,7 +50,8 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
                     value: device.id,
                     text: device.name,
                     label: device.name,
-                    id: device.id
+                    id: device.id,
+                    type: device.type
                 });
         }
 
@@ -88,7 +89,7 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     });
 
     $('#networking-search').on('select2:select', (e) => {
-        $scope.$broadcast('search', e.params.data);
+        $scope.$broadcast('search', $scope.device);
     });
 
     $('#networking-search').on('select2:open', () => {

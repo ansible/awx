@@ -23,8 +23,11 @@
             </div>
             <div class="Networking-toolbarRightSide">
                 <div class="Networking-searchBarContainer">
-                    <select id="networking-search" ng-model="device" ng-options="device.label for device in devices track by device.id" style="width:100%">
-                        <option></option>
+                    <select id="networking-search"
+                        ng-model="device"
+                        ng-options="device.label group by device.type | capitalize for device in devices | orderBy:'label' "
+                        style="width:100%">
+                            <option></option>
                     </select>
                 </div>
                 <div class="Networking-keyContainer">
