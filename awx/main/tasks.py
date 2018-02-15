@@ -17,6 +17,7 @@ import stat
 import tempfile
 import time
 import traceback
+import six
 import urlparse
 import uuid
 from distutils.version import LooseVersion as Version
@@ -1543,15 +1544,15 @@ class RunProjectUpdate(BaseTask):
             if not inv_src.update_on_project_update:
                 continue
             if inv_src.scm_last_revision == scm_revision:
-                logger.debug('Skipping SCM inventory update for `{}` because '
-                             'project has not changed.'.format(inv_src.name))
+                logger.debug(six.text_type('Skipping SCM inventory update for `{}` because '
+                                           'project has not changed.').format(inv_src.name))
                 continue
-            logger.debug('Local dependent inventory update for `{}`.'.format(inv_src.name))
+            logger.debug(six.text_type('Local dependent inventory update for `{}`.').format(inv_src.name))
             with transaction.atomic():
                 if InventoryUpdate.objects.filter(inventory_source=inv_src,
                                                   status__in=ACTIVE_STATES).exists():
-                    logger.info('Skipping SCM inventory update for `{}` because '
-                                'another update is already active.'.format(inv_src.name))
+                    logger.info(six.text_type('Skipping SCM inventory update for `{}` because '
+                                              'another update is already active.').format(inv_src.name))
                     continue
                 local_inv_update = inv_src.create_inventory_update(
                     launch_type='scm',
