@@ -119,18 +119,15 @@
 
     </div>
 </div>
-
 <div class="Networking-detailPanel" ng-show="vm.rightPanelIsExpanded">
     <awx-net-details-panel item="item"></awx-net-details-panel>
 </div>
-
-
 <div class="Networking-canvasPanel">
     <awx-network-ui></awx-network-ui>
 </div>
-
-
-
+<div class="Networking-zoomPanel" ng-class="{'Networking-zoomPanel--expanded' : vm.rightPanelIsExpanded}">
+    <awx-net-zoom-widget></awx-net-zoom-widget>
+</div>
 <div id="alert-modal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
