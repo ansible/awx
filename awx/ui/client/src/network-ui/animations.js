@@ -29,7 +29,7 @@ function scale_animation (scope) {
     scope.data.scope.first_channel.send("ScaleChanged", {});
     scope.data.scope.first_channel.send("ScaleChanged", {});
     scope.data.scope.updatePanAndScale();
-    scope.data.scope.$emit('awxNet-UpdateZoomWidget', scope.data.scope.current_scale, scope.updateZoomBoolean);
+    scope.data.scope.$emit('awxNet-UpdateZoomWidget', scope.data.scope.current_scale, scope.data.updateZoomBoolean);
 }
 exports.scale_animation = scale_animation;
 
