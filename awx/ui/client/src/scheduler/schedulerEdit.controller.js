@@ -1,7 +1,7 @@
-export default ['$filter', '$state', '$stateParams', 'Wait', '$scope',
+export default ['$filter', '$state', '$stateParams', 'Wait', '$scope', 'moment',
 '$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
 'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
-function($filter, $state, $stateParams, Wait, $scope,
+function($filter, $state, $stateParams, Wait, $scope, moment,
     $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
     GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI) {
 
@@ -95,7 +95,8 @@ function($filter, $state, $stateParams, Wait, $scope,
                 for (let tz in data) {
                     $scope.preview_list.isEmpty = data[tz].length === 0;
                     $scope.preview_list[tz] = data[tz].map(function(date) {
-                        return date.replace(/Z/, '');
+                        date = date.replace(/Z/, '');
+                        return moment.parseZone(date).format("MM-DD-YYYY HH:mm:ss");
                     });
                 }
             });

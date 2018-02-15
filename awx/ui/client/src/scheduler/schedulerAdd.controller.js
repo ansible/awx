@@ -7,11 +7,11 @@
 export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
-    'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI',
+    'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
     function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
-        ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI) {
+        ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
         scheduler,
@@ -322,12 +322,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
 
             $http.post('/api/v2/schedules/preview/', {'rrule': req})
                 .then(({data}) => {
-
                     $scope.preview_list = data;
                     for (let tz in data) {
                         $scope.preview_list.isEmpty = data[tz].length === 0;
                         $scope.preview_list[tz] = data[tz].map(function(date) {
-                            return date.replace(/Z/, '');
+                            date = date.replace(/Z/, '');
+                            return moment.parseZone(date).format("MM-DD-YYYY HH:mm:ss");
                         });
                     }
                 });

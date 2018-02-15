@@ -630,14 +630,14 @@
                 SchedulerFormDetail-occurrenceList"
                 ng-show="dateChoice == 'utc'">
                 <li ng-repeat="occurrence in preview_list.utc">
-                    {{ occurrence | date:'MM-dd-yyyy HH:mm:ss'}} UTC
+                    {{ occurrence }} UTC
                 </li>
             </ul>
             <ul class="occurrence-list mono-space
                 SchedulerFormDetail-occurrenceList"
                 ng-show="dateChoice == 'local'">
                 <li ng-repeat="occurrence in preview_list.local">
-                    {{ occurrence | date:'MM-dd-yyyy HH:mm:ss'}}
+                    {{ occurrence }}
                 </li>
             </ul>
 
