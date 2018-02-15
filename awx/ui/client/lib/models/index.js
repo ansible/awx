@@ -60,6 +60,7 @@ angular
     .service('UnifiedJobTemplateModel', UnifiedJobTemplate)
     .service('WorkflowJobModel', WorkflowJob)
     .service('WorkflowJobTemplateModel', WorkflowJobTemplate)
-    .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode);
+    .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode)
+    .service('ModelsStrings', ModelsStrings);
 
 export default MODULE_NAME;

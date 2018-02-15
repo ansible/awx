@@ -129,10 +129,10 @@ function getRelated () {
     const name = resource.constructor.name;
 
     switch (name) {
-        case 'ProjectUpdateModel':
-            return 'events';
         case 'JobModel':
             return 'job_events';
+        default:
+            return 'events';
     }
 }
 
