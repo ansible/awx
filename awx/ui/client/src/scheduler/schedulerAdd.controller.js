@@ -308,6 +308,27 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
             }
         });
     }
+
+    let previewList = _.debounce(function(req) {
+        $http.post('/api/v2/schedules/preview/', {'rrule': req})
+            .then(({data}) => {
+                $scope.preview_list = data;
+                for (let tz in data) {
+                    $scope.preview_list.isEmpty = data[tz].length === 0;
+                    $scope.preview_list[tz] = data[tz].map(function(date) {
+                        date = date.replace(/Z/, '');
+                        return moment.parseZone(date).format("MM-DD-YYYY HH:mm:ss");
+                    });
+                }
+            });
+    }, 300);
+
+    $scope.$on("setPreviewPane", (event) => {
+        let rrule = event.currentScope.rrule.toString();
+        let req = RRuleToAPI(rrule, $scope);
+        previewList(req);
+    });
+
     scheduler.inject('form-container', false);
     scheduler.injectDetail('occurrences', false);
     scheduler.clear();
@@ -315,22 +336,6 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         $scope.hideForm = false;
         $scope.$on("formUpdated", function() {
             $rootScope.$broadcast("loadSchedulerDetailPane");
-        });
-        $scope.$on("setPreviewPane", (event) => {
-            let rrule = event.currentScope.rrule.toString();
-            let req = RRuleToAPI(rrule, $scope);
-
-            $http.post('/api/v2/schedules/preview/', {'rrule': req})
-                .then(({data}) => {
-                    $scope.preview_list = data;
-                    for (let tz in data) {
-                        $scope.preview_list.isEmpty = data[tz].length === 0;
-                        $scope.preview_list[tz] = data[tz].map(function(date) {
-                            date = date.replace(/Z/, '');
-                            return moment.parseZone(date).format("MM-DD-YYYY HH:mm:ss");
-                        });
-                    }
-                });
         });
         $scope.$watchGroup(["schedulerName",
             "schedulerStartDt",

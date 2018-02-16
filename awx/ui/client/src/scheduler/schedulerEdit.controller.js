@@ -85,10 +85,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         callSelect2();
     });
 
-    $scope.$on("setPreviewPane", (event) => {
-        let rrule = event.currentScope.rrule.toString();
-        let req = RRuleToAPI(rrule, $scope);
-
+    let previewList = _.debounce(function(req) {
         $http.post('/api/v2/schedules/preview/', {'rrule': req})
             .then(({data}) => {
                 $scope.preview_list = data;
@@ -100,6 +97,12 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                     });
                 }
             });
+    }, 300);
+
+    $scope.$on("setPreviewPane", (event) => {
+        let rrule = event.currentScope.rrule.toString();
+        let req = RRuleToAPI(rrule, $scope);
+        previewList(req);
     });
 
     Wait('start');

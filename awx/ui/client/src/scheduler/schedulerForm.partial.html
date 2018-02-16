@@ -28,12 +28,6 @@
                     name="schedulerName"
                     id="schedulerName"
                     ng-model="schedulerName" required
-                    ng-model-options="{
-                        'updateOn': 'default blur',
-                        'debounce': {
-                        'default': 300,
-                        'blur': 0
-                    }}"
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                     placeholder="Schedule name">
                 <div class="error"
