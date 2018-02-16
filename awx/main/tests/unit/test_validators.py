@@ -26,7 +26,7 @@ def test_invalid_keys():
         "-----BEGIN FOO-----foobar---END FOO----",
         "-----  BEGIN FOO  ----- foobar -----  FAIL FOO  ----",
         "-----  FAIL FOO ----- foobar -----  END FOO  ----",
-        "----BEGIN FOO----foobar----END FOO--------BEGIN FOO----foobar----END FOO----"
+        "----BEGIN FOO----foobar----END BAR----"
     ]
     for invalid_key in invalid_keys:
         with pytest.raises(ValidationError):
@@ -35,6 +35,16 @@ def test_invalid_keys():
             validate_certificate(invalid_key)
         with pytest.raises(ValidationError):
             validate_ssh_private_key(invalid_key)
+
+
+def test_invalid_rsa_key():
+    invalid_key = TEST_SSH_KEY_DATA.replace('-----END', '----END')
+    with pytest.raises(ValidationError):
+        validate_private_key(invalid_key)
+    with pytest.raises(ValidationError):
+        validate_certificate(invalid_key)
+    with pytest.raises(ValidationError):
+        validate_ssh_private_key(invalid_key)
 
 
 def test_valid_catted_rsa_key():
@@ -47,7 +57,6 @@ def test_valid_catted_rsa_key():
     pem_objects = validate_ssh_private_key(valid_key)
     assert pem_objects[0]['key_type'] == 'rsa'
     assert not pem_objects[0]['key_enc']
-
 
 def test_valid_rsa_key():
     valid_key = TEST_SSH_KEY_DATA

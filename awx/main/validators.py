@@ -48,9 +48,9 @@ def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
 
     # Build regular expressions for matching each object in the PEM file.
     pem_obj_re = re.compile(
-        r'^-{4,} *BEGIN (?P<type>[A-Z ]+?) *-{4,}' +
+        r'^(?P<dashes>-{4,}) *BEGIN (?P<type>[A-Z ]+?) *(?P=dashes)' +
         r'\s*(?P<data>.+?)\s*' +
-        r'-{4,} *END [A-Z ]+? *-{4,}' +
+        r'(?P=dashes) *END (?P=type) *(?P=dashes)' +
         r'(?P<next>.*?)$', re.DOTALL
     )
     pem_obj_header_re = re.compile(r'^(.+?):\s*?(.+?)(\\??)$')
