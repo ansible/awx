@@ -855,7 +855,22 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.first_channel.send('SearchDropdownClose', {});
     });
 
-    $scope.jump_to_animation = function(jump_to_x, jump_to_y, jump_to_scale) {
+    $scope.$on('search', function(e, device){
+
+        var num_frames = 30;
+        var searched;
+        for(var i = 0; i < $scope.devices.length; i++){
+            if(Number(device.id) === $scope.devices[i].id){
+                searched = $scope.devices[i];
+            }
+        }
+        searched.selected = true;
+        $scope.selected_devices.push(searched);
+        //console.log(searched);
+        $scope.jump_to_animation(searched.x, searched.y, 1.0);
+    });
+
+    $scope.jump_to_animation = function(jump_to_x, jump_to_y, jump_to_scale, updateZoom) {
         $scope.cancel_animations();
         var v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
         //console.log({v_center: v_center});
@@ -874,7 +889,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                       distance: distance,
                                                       end_height: (1.0/jump_to_scale) - 1,
                                                       current_scale: $scope.current_scale,
-                                                      scope: $scope
+                                                      scope: $scope,
+                                                      updateZoomBoolean: updateZoom
                                                   },
                                                   $scope,
                                                   $scope,
@@ -895,21 +911,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.animations.push(pan_animation);
     };
 
-    $scope.$on('search', function(e, device){
-
-        var num_frames = 30;
-        var searched;
-        for(var i = 0; i < $scope.devices.length; i++){
-            if(Number(device.id) === $scope.devices[i].id){
-                searched = $scope.devices[i];
-            }
-        }
-        searched.selected = true;
-        $scope.selected_devices.push(searched);
-        //console.log(searched);
-        $scope.jump_to_animation(searched.x, searched.y, 1.0);
-    });
-
     $scope.$on('jumpTo', function(e, zoomLevel) {
         var v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
         switch (zoomLevel){
@@ -926,6 +927,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                 $scope.jump_to_animation(v_center.x, v_center.y, 5.1);
                 break;
         }
+    });
+
+    $scope.$on('zoom', (e, zoomPercent) => {
+        let v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
+        let scale = Math.pow(10, (zoomPercent - 120) / 40)
+        $scope.jump_to_animation(v_center.x, v_center.y, scale, false);
     });
 
     $scope.onDeployButton = function (button) {
@@ -1505,6 +1512,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.panX = data.panX;
         $scope.panY = data.panX;
         $scope.current_scale = data.scale;
+        $scope.$emit('awxNet-UpdateZoomWidget', $scope.current_scale, true);
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
         $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
@@ -1772,6 +1780,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             diff_y = max_y - min_y;
 
             $scope.current_scale = Math.min(2, Math.max(0.10, Math.min((window.innerWidth-200)/diff_x, (window.innerHeight-300)/diff_y)));
+            $scope.$emit('awxNet-UpdateZoomWidget', $scope.current_scale, true);
             $scope.updateScaledXY();
             $scope.updatePanAndScale();
         }

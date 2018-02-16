@@ -82,6 +82,7 @@ _Scale.prototype.onMouseWheel = function (controller, msg_type, message) {
       controller.scope.panY = new_panY;
       var item = controller.scope.context_menus[0];
       item.enabled = false;
+      controller.scope.$emit('awxNet-UpdateZoomWidget', controller.scope.current_scale, true);
       controller.scope.updatePanAndScale();
       controller.changeState(Ready);
 };

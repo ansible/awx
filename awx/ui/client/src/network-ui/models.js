@@ -920,6 +920,7 @@ function Animation(id, steps, data, scope, tracer, callback) {
     this.frame_number_seq = util.natural_numbers(-1);
     this.frame_number = 0;
     this.data = data;
+    this.data.updateZoomBoolean = data.updateZoomBoolean !== undefined ? data.updateZoomBoolean : true;
     this.callback = callback;
     this.scope = scope;
     this.interval = null;

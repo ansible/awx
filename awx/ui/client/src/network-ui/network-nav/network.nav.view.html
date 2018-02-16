@@ -23,8 +23,11 @@
             </div>
             <div class="Networking-toolbarRightSide">
                 <div class="Networking-searchBarContainer">
-                    <select id="networking-search" ng-model="device" ng-options="device.label for device in devices track by device.id" style="width:100%">
-                        <option></option>
+                    <select id="networking-search"
+                        ng-model="device"
+                        ng-options="device.label group by device.type | capitalize for device in devices | orderBy:'label' "
+                        style="width:100%">
+                            <option></option>
                     </select>
                 </div>
                 <div class="Networking-keyContainer">
@@ -114,23 +117,23 @@
             </div>
         </div>
         <div class="Networking-toolbar Networking-breadCrumbBar">
-            <div class="Networking-breadCrumbText"></div>
+            <div class="Networking-breadCrumbText">Foo </div><div class="Networking-breadCrumbSlash">/</div>
+            <div class="Networking-breadCrumbText">Bar </div><div class="Networking-breadCrumbSlash">/</div>
+            <div class="Networking-breadCrumbText">Bread </div><div class="Networking-breadCrumbSlash">/</div>
+            <div class="Networking-breadCrumbText Networking-breadCrumbText--last">crumb</div>
         </div>
 
     </div>
 </div>
-
 <div class="Networking-detailPanel" ng-show="vm.rightPanelIsExpanded">
     <awx-net-details-panel item="item"></awx-net-details-panel>
 </div>
-
-
 <div class="Networking-canvasPanel">
     <awx-network-ui></awx-network-ui>
 </div>
-
-
-
+<div class="Networking-zoomPanel" ng-class="{'Networking-zoomPanel--expanded' : vm.rightPanelIsExpanded}">
+    <awx-net-zoom-widget></awx-net-zoom-widget>
+</div>
 <div id="alert-modal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
