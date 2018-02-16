@@ -138,7 +138,7 @@ function ListTemplatesController(
             return undefined;
         }
 
-        let html = $filter('longDate')(modified);
+        let html = $filter('longDate')(lastJobRun);
 
         // TODO: uncomment and update when last job run user is returned by api
         // const { username, id } = _.get(template, 'summary_fields.last_job_run_by', {});
