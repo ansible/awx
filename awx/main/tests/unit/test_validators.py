@@ -26,7 +26,7 @@ def test_invalid_keys():
         "-----BEGIN FOO-----foobar---END FOO----",
         "-----  BEGIN FOO  ----- foobar -----  FAIL FOO  ----",
         "-----  FAIL FOO ----- foobar -----  END FOO  ----",
-        "----BEGIN FOO----foobar----END BAR----"
+        "----BEGIN FOO----foobar----END BAR----",
     ]
     for invalid_key in invalid_keys:
         with pytest.raises(ValidationError):
