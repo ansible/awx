@@ -58,6 +58,7 @@ def test_valid_catted_rsa_key():
     assert pem_objects[0]['key_type'] == 'rsa'
     assert not pem_objects[0]['key_enc']
 
+
 def test_valid_rsa_key():
     valid_key = TEST_SSH_KEY_DATA
     pem_objects = validate_private_key(valid_key)
