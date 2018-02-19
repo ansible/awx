@@ -15,12 +15,11 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
     const { type } = $stateParams;
 
     let Resource;
-    let related;
+    let related = 'events';
 
     switch (type) {
         case 'project':
             Resource = ProjectUpdate;
-            related = 'events';
             break;
         case 'playbook':
             Resource = Job;

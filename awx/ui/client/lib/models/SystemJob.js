@@ -1,7 +1,7 @@
 let BaseModel;
 
 function SystemJobModel (method, resource, config) {
-    BaseModel.call(this, 'jobs');
+    BaseModel.call(this, 'system_jobs');
 
     this.Constructor = SystemJobModel;
 
