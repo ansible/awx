@@ -2811,10 +2811,6 @@ class JobRelaunchSerializer(BaseSerializer):
 
     def validate(self, attrs):
         obj = self.context.get('obj')
-        if not obj.credential and not obj.vault_credential:
-            raise serializers.ValidationError(
-                dict(credential=[_("Neither credential nor vault credential provided.")])
-            )
         if obj.project is None:
             raise serializers.ValidationError(dict(errors=[_("Job Template Project is missing or undefined.")]))
         if obj.inventory is None or obj.inventory.pending_deletion:

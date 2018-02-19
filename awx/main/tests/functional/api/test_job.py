@@ -40,6 +40,21 @@ def test_job_relaunch_permission_denied_response(
 
 
 @pytest.mark.django_db
+def test_job_relaunch_without_creds(post, inventory, project, admin_user):
+    jt = JobTemplate.objects.create(
+        name='testjt', inventory=inventory,
+        project=project
+    )
+    job = jt.create_unified_job()
+    post(
+        url=reverse('api:job_relaunch', kwargs={'pk':job.pk}),
+        data={},
+        user=admin_user,
+        expect=201
+    )
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize("status,hosts", [
     ('all', 'host1,host2,host3'),
     ('failed', 'host3'),
