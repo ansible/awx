@@ -13,7 +13,7 @@ from django.utils.encoding import smart_str
 __all__ = ['skip_directory', 'could_be_playbook', 'could_be_inventory']
 
 
-valid_playbook_re = re.compile(r'^\s*?-?\s*?(?:hosts|include):\s*?.*?$')
+valid_playbook_re = re.compile(r'^\s*?-?\s*?(?:hosts|include|import_playbook):\s*?.*?$')
 valid_inventory_re = re.compile(r'^[a-zA-Z0-9_.=\[\]]')
 
 
