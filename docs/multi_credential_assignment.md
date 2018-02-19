@@ -2,7 +2,7 @@ Multi-Credential Assignment
 ===========================
 
 awx has added support for assigning zero or more credentials to
-a JobTemplate via a singular, unified interface.
+JobTemplates and InventoryUpdates via a singular, unified interface.
 
 Background
 ----------
@@ -220,3 +220,16 @@ POST /api/v2/job_templates/N/launch/
     }
 }
 ```
+
+Inventory Source Credentials
+----------------------------
+
+Inventory sources and inventory updates that they spawn also use the same
+relationship. The new endpoints for this are
+ - `/api/v2/inventory_sources/N/credentials/` and
+ - `/api/v2/inventory_updates/N/credentials/`
+
+Most cloud sources will continue to adhere to the constraint that they
+must have a single credential that corresponds to their cloud type.
+However, this relationship allows users to associate multiple vault
+credentials of different ids to inventory sources.

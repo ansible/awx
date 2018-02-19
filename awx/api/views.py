@@ -2735,11 +2735,8 @@ class InventorySourceCredentialsList(SubListAttachDetachAPIView):
         if error:
             return {'msg': error}
         if sub.credential_type == 'vault':
-            # Vault credentials are only exclusive with others of same ID
-            if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
-                return {"msg": _(
-                    "A credential of type {credential_type} is already assigned to this inventory source."
-                ).format(credential_type=sub.unique_hash(display=True))}
+            # TODO: support this
+            return {"msg": _("Vault credentials are not yet supported for inventory sources.")}
         else:
             # Cloud credentials are exclusive with all other cloud credentials
             cloud_cred_qs = parent.credentials.exclude(credential_type__kind='vault')

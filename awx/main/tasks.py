@@ -927,8 +927,8 @@ class BaseTask(LogErrorsTask):
             elif isinstance(instance, InventoryUpdate):
                 # TODO: allow multiple custom creds for inv updates
                 credentials = [instance.get_cloud_credential()]
-            elif hasattr(instance, 'credential'):
-                # once other UnifiedJobs (project updates)
+            elif isinstance(instance, Project):
+                # once (or if) project updates
                 # move from a .credential -> .credentials model, we can
                 # lose this block
                 credentials = [instance.credential]
