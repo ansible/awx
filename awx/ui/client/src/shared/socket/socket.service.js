@@ -90,11 +90,17 @@ export default
                     // ex: 'ws-jobs-<jobId>'
                     str = `ws-${data.group_name}-${data.job}`;
                 }
+                else if(data.group_name==="project_update_events"){
+                    str = `ws-${data.group_name}-${data.project_update}`;
+                }
                 else if(data.group_name==="ad_hoc_command_events"){
-                    // The naming scheme is "ws" then a
-                    // dash (-) and the group_name, then the job ID
-                    // ex: 'ws-jobs-<jobId>'
                     str = `ws-${data.group_name}-${data.ad_hoc_command}`;
+                }
+                else if(data.group_name==="system_job_events"){
+                    str = `ws-${data.group_name}-${data.system_job}`;
+                }
+                else if(data.group_name==="inventory_update_events"){
+                    str = `ws-${data.group_name}-${data.inventory_update}`;
                 }
                 else if(data.group_name==="control"){
                     // As of v. 3.1.0, there is only 1 "control"

@@ -119,6 +119,7 @@ function clear () {
 function processWebSocketEvents (scope, data) {
     meta.scroll.inProgress = true;
 
+    console.log(data);
     append([data])
         .then(() => {
             container[0].scrollTop = container[0].scrollHeight;

@@ -47,33 +47,45 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
                 page_size: 100,
                 order_by: 'start_line'
             }
-        }))
-        .catch(err => {
-            console.error(err);
-        });
+        }));
 }
 
 function resolveWebSocket (SocketService, $stateParams) {
+    const { type, id } = $stateParams;
     const prefix = 'ws';
-    const { id } = $stateParams;
-    const { type } = $stateParams;
 
     let name;
+    let events;
 
     switch (type) {
-        case 'playbook':
-            name = 'job_events';
+        case 'system':
+            name = 'system_jobs';
+            events = 'system_job_events';
             break;
-        default:
-            name = 'events';
+        case 'project':
+            name = 'project_updates';
+            events = 'project_update_events';
+            break;
+        case 'command':
+            name = 'ad_hoc_commands';
+            events = 'ad_hoc_command_events';
+            break;
+        case 'inventory':
+            name = 'inventory_updates';
+            events = 'inventory_update_events';
+            break;
+        case 'playbook':
+            name = 'jobs';
+            events = 'job_events';
+            break;
     }
 
     const state = {
         data: {
             socket: {
                 groups: {
-                    jobs: ['status_changed', 'summary'],
-                    [name]: []
+                    [name]: ['status_changed', 'summary'],
+                    [events]: []
                 }
             }
         }
@@ -81,7 +93,7 @@ function resolveWebSocket (SocketService, $stateParams) {
 
     SocketService.addStateResolve(state, id);
 
-    return `${prefix}-${name}-${id}`;
+    return `${prefix}-${events}-${id}`;
 }
 
 function resolveBreadcrumb (strings) {
