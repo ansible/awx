@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
 
 <g ng-if="current_scale <= 0.1 && item.type == 'site'" ng-attr-transform="translate({{item.width()/2}}, {{item.height()/2}})">
-    <g ng-attr-transform="scale({{1/(0.1)}})">
+    <g ng-attr-transform="scale({{1/(2*current_scale)}})">
         <g ng-if="item.moving">
             <!--horizontal line -->
             <line x1="-150"
@@ -98,8 +98,8 @@
               filter="url(#background)"
               text-anchor="middle"
               ng-attr-x="0"
-              ng-attr-y="{{1200*current_scale}}"> {{item.name}} </text>
-        <text class="NetworkUI__site-text" filter="url(#background)" text-anchor="middle" x="0" ng-attr-y="{{1200*current_scale}}">{{item.name}}{{item.edit_label?'_':''}}</text>
+              ng-attr-y="50"> {{item.name}} </text>
+        <text class="NetworkUI__site-text" filter="url(#background)" text-anchor="middle" x="0" ng-attr-y="50">{{item.name}}{{item.edit_label?'_':''}}</text>
     </g>
 </g>
 

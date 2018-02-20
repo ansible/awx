@@ -132,7 +132,40 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.view_port = {'x': 0,
                       'y': 0,
                       'width': 0,
-                      'height': 0};
+                      'height': 0,
+                      top_extent: function (scaledY) {
+                          this.x1 = this.x;
+                          this.x2 = this.x + this.width;
+                          this.y1 = this.y;
+                          this.y2 = this.y + this.height;
+                          var y2 = this.y2 !== null ? this.y2 : scaledY;
+                          return (this.y1 < y2? this.y1 : y2);
+                      },
+                      left_extent: function (scaledX) {
+                          this.x1 = this.x;
+                          this.x2 = this.x + this.width;
+                          this.y1 = this.y;
+                          this.y2 = this.y + this.height;
+                          var x2 = this.x2 !== null ? this.x2 : scaledX;
+                          return (this.x1 < x2? this.x1 : x2);
+                      },
+                      bottom_extent: function (scaledY) {
+                          this.x1 = this.x;
+                          this.x2 = this.x + this.width;
+                          this.y1 = this.y;
+                          this.y2 = this.y + this.height;
+                          var y2 = this.y2 !== null ? this.y2 : scaledY;
+                          return (this.y1 > y2? this.y1 : y2);
+                      },
+                      right_extent: function (scaledX) {
+                          this.x1 = this.x;
+                          this.x2 = this.x + this.width;
+                          this.y1 = this.y;
+                          this.y2 = this.y + this.height;
+                          var x2 = this.x2 !== null ? this.x2 : scaledX;
+                          return (this.x1 > x2? this.x1 : x2);
+                      }
+                  };
   $scope.trace_id_seq = util.natural_numbers(0);
   $scope.trace_order_seq = util.natural_numbers(0);
   $scope.trace_id = $scope.trace_id_seq();
@@ -1208,6 +1241,18 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.groups.push(group);
     };
 
+    $scope.breadcrumbGroups = function(){
+        let breadcrumbGroups = [];
+        for(var i = 0; i < $scope.groups.length; i++){
+            let group = $scope.groups[i];
+            if(group.is_in_breadcrumb($scope.view_port)){
+                group.distance = util.distance(group.x1, group.y1, group.x2, group.y2);
+                breadcrumbGroups.push(group);
+            }
+        }
+        return breadcrumbGroups;
+    };
+
     $scope.forDevice = function(device_id, data, fn) {
         var i = 0;
         for (i = 0; i < $scope.devices.length; i++) {
@@ -1418,7 +1463,6 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
             }
         }
     };
-
 
     $scope.onGroupLabelEdit = function(data) {
         $scope.edit_group_label(data);
@@ -1814,6 +1858,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
         $scope.updateInterfaceDots();
         $scope.$emit('instatiateSelect', $scope.devices);
+        $scope.$emit('awxNet-breadcrumbGroups', $scope.breadcrumbGroups());
     };
 
     $scope.updateInterfaceDots = function() {
