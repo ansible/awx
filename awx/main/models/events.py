@@ -288,37 +288,8 @@ class BasePlaybookEvent(CreatedModifiedModel):
             if key not in self.VALID_KEYS:
                 kwargs.pop(key)
 
-        event_data = kwargs.get('event_data', None)
-        artifact_dict = None
-        if event_data:
-            artifact_dict = event_data.pop('artifact_data', None)
-
         job_event = self.objects.create(**kwargs)
-
         analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=job_event)))
-
-        # Save artifact data to parent job (if provided).
-        if artifact_dict:
-            if event_data and isinstance(event_data, dict):
-                # Note: Core has not added support for marking artifacts as
-                # sensitive yet. Going forward, core will not use
-                # _ansible_no_log to denote sensitive set_stats calls.
-                # Instead, they plan to add a flag outside of the traditional
-                # no_log mechanism. no_log will not work for this feature,
-                # in core, because sensitive data is scrubbed before sending
-                # data to the callback. The playbook_on_stats is the callback
-                # in which the set_stats data is used.
-
-                # Again, the sensitive artifact feature has not yet landed in
-                # core. The below is how we mark artifacts payload as
-                # senstive
-                # artifact_dict['_ansible_no_log'] = True
-                #
-                parent_job = self.objects.filter(pk=pk).first()
-                if hasattr(parent_job, 'artifacts') and parent_job.artifacts != artifact_dict:
-                    parent_job.artifacts = artifact_dict
-                    parent_job.save(update_fields=['artifacts'])
-
         return job_event
 
     @property
