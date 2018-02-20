@@ -117,10 +117,14 @@
             </div>
         </div>
         <div class="Networking-toolbar Networking-breadCrumbBar">
-            <div class="Networking-breadCrumbText">Foo </div><div class="Networking-breadCrumbSlash">/</div>
-            <div class="Networking-breadCrumbText">Bar </div><div class="Networking-breadCrumbSlash">/</div>
-            <div class="Networking-breadCrumbText">Bread </div><div class="Networking-breadCrumbSlash">/</div>
-            <div class="Networking-breadCrumbText Networking-breadCrumbText--last">crumb</div>
+            <ol class="Networking-breadCrumbBarItem">
+                <li class="BreadCrumb-item Networking-breadCrumbText" ng-repeat="group in vm.breadcrumb_groups | limitTo:(vm.breadcrumb_groups.length-1)">
+                    <span>{{group.name}}</span>
+                </li>
+                <li class="BreadCrumb-item Networking-breadCrumbText" ng-repeat="group in vm.breadcrumb_groups | limitTo:-1" class="active">
+                    <span>{{group.name}}</span>
+                </li>
+            </ol>
         </div>
 
     </div>

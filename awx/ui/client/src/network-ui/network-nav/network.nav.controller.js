@@ -14,6 +14,7 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
     vm.leftPanelIsExpanded = true;
     vm.jumpToPanelExpanded = false;
     vm.keyPanelExpanded = false;
+    vm.groups = [];
     $scope.devices = [];
     vm.close = () => {
         $state.go('inventories');
@@ -41,6 +42,10 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
 
     $scope.$on('overall_toolbox_collapsed', () => {
         vm.leftPanelIsExpanded = !vm.leftPanelIsExpanded;
+    });
+
+    $scope.$on('awxNet-breadcrumbGroups', (e, groups) => {
+        vm.breadcrumb_groups = _.sortBy(groups, 'distance').reverse();
     });
 
     $scope.$on('instatiateSelect', (e, devices) => {
