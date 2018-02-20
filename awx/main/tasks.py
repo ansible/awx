@@ -901,7 +901,7 @@ class BaseTask(LogErrorsTask):
 
             # Fetch "cached" fact data from prior runs and put on the disk
             # where ansible expects to find it
-            if getattr(instance, 'use_fact_cache', False) and not kwargs.get('isolated'):
+            if getattr(instance, 'use_fact_cache', False):
                 instance.start_job_fact_cache(
                     os.path.join(kwargs['private_data_dir']),
                     kwargs.setdefault('fact_modification_times', {})
@@ -1140,7 +1140,7 @@ class RunJob(BaseTask):
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
-        if job.use_fact_cache and not kwargs.get('isolated'):
+        if job.use_fact_cache:
             library_path = env.get('ANSIBLE_LIBRARY')
             env['ANSIBLE_LIBRARY'] = ':'.join(
                 filter(None, [
@@ -1349,7 +1349,7 @@ class RunJob(BaseTask):
 
     def final_run_hook(self, job, status, **kwargs):
         super(RunJob, self).final_run_hook(job, status, **kwargs)
-        if job.use_fact_cache and not kwargs.get('isolated'):
+        if job.use_fact_cache:
             job.finish_job_fact_cache(
                 kwargs['private_data_dir'],
                 kwargs['fact_modification_times']
