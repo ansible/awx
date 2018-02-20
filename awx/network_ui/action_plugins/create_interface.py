@@ -29,7 +29,7 @@ class ActionModule(ActionBase):
         name = self._task.args.get('name', None)
         id = self._task.args.get('id', None)
 
-        url = server + '/network_ui/api/v1/interface/'
+        url = server + '/api/v2/canvas/interface/'
         headers = {'content-type': 'application/json'}
         response = requests.post(url, data=json.dumps(dict(device=device,
                                                            name=name,

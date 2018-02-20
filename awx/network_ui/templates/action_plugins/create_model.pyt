@@ -31,7 +31,7 @@ class ActionModule(ActionBase):
 {%for field in model.fields%}{%if not field.pk and field.default is defined%}
         {{field.name}} = self._task.args.get('{{field.name}}', {{field.default}}){%endif%}{%endfor%}
 
-        url = server + '{{model.end_point}}'
+        url = server + '{{model.v2_end_point}}'
         headers = {'content-type': 'application/json'}
         response = requests.post(url, data=json.dumps(dict({%for field in model.fields%}{%if not field.pk%}{{field.name}}={{field.name}},
                                                            {%endif%}{%endfor%})),

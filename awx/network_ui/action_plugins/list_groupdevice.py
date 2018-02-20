@@ -32,7 +32,7 @@ class ActionModule(ActionBase):
                            )
         filter_data = {x: y for x, y in filter_data.iteritems() if y is not None}
 
-        url = '/network_ui/api/v1/groupdevice/'
+        url = '/api/v2/canvas/groupdevice/'
         results = []
         while url is not None:
             url = server + url

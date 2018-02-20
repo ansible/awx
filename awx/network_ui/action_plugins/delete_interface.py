@@ -22,7 +22,7 @@ class ActionModule(ActionBase):
 
         interface_id = self._task.args.get('interface_id', None)
 
-        url = server + '/network_ui/api/v1/interface/' + str(interface_id) + '/'
+        url = server + '/api/v2/canvas/interface/' + str(interface_id) + '/'
         response = requests.delete(url,
                                    verify=False,
                                    auth=(user, password))

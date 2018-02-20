@@ -31,7 +31,7 @@ class ActionModule(ActionBase):
                          {%endfor%})
         filter_data={x:y for x,y in filter_data.iteritems() if y is not None}
 
-        url = '{{model.end_point}}'
+        url = '{{model.v2_end_point}}'
         results = []
         while url is not None:
             url = server + url

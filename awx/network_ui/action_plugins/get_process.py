@@ -24,7 +24,7 @@ class ActionModule(ActionBase):
 
         process_id = self._task.args.get('process_id', None)
 
-        url = server + '/network_ui/api/v1/process/' + str(process_id) + '/'
+        url = server + '/api/v2/canvas/process/' + str(process_id) + '/'
         response = requests.get(url,
                                 verify=False,
                                 auth=(user, password))

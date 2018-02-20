@@ -34,7 +34,7 @@ class ActionModule(ActionBase):
         process_id_seq = self._task.args.get('process_id_seq', None)
         host_id = self._task.args.get('host_id', None)
 
-        url = server + '/network_ui/api/v1/device/' + str(device_id) + '/'
+        url = server + '/api/v2/canvas/device/' + str(device_id) + '/'
         headers = {'content-type': 'application/json'}
         data = dict(topology=topology,
                     name=name,

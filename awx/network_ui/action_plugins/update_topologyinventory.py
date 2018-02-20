@@ -27,7 +27,7 @@ class ActionModule(ActionBase):
         topology = self._task.args.get('topology', None)
         inventory_id = self._task.args.get('inventory_id', None)
 
-        url = server + '/network_ui/api/v1/topologyinventory/' + str(topology_inventory_id) + '/'
+        url = server + '/api/v2/canvas/topologyinventory/' + str(topology_inventory_id) + '/'
         headers = {'content-type': 'application/json'}
         data = dict(topology=topology,
                     inventory_id=inventory_id,

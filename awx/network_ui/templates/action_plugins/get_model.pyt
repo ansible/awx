@@ -26,7 +26,7 @@ class ActionModule(ActionBase):
 {%for field in model.fields%}{%if field.pk%}
         {{field.name}} = self._task.args.get('{{field.name}}', None){%endif%}{%endfor%}
 
-        url = server + '{{model.end_point}}' + str({%for field in model.fields%}{%if field.pk%}{{field.name}}{%endif%}{%endfor%}) + '/'
+        url = server + '{{model.v2_end_point}}' + str({%for field in model.fields%}{%if field.pk%}{{field.name}}{%endif%}{%endfor%}) + '/'
         response = requests.get(url,
                                 verify=False,
                                 auth=(user, password))

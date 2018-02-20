@@ -27,7 +27,7 @@ class ActionModule(ActionBase):
         group = self._task.args.get('group', None)
         device = self._task.args.get('device', None)
 
-        url = server + '/network_ui/api/v1/groupdevice/' + str(group_device_id) + '/'
+        url = server + '/api/v2/canvas/groupdevice/' + str(group_device_id) + '/'
         headers = {'content-type': 'application/json'}
         data = dict(group=group,
                     device=device,

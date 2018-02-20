@@ -22,7 +22,7 @@ class ActionModule(ActionBase):
 
         group_device_id = self._task.args.get('group_device_id', None)
 
-        url = server + '/network_ui/api/v1/groupdevice/' + str(group_device_id) + '/'
+        url = server + '/api/v2/canvas/groupdevice/' + str(group_device_id) + '/'
         response = requests.delete(url,
                                    verify=False,
                                    auth=(user, password))

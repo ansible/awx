@@ -24,7 +24,7 @@ class ActionModule(ActionBase):
 
         device_id = self._task.args.get('device_id', None)
 
-        url = server + '/network_ui/api/v1/device/' + str(device_id) + '/'
+        url = server + '/api/v2/canvas/device/' + str(device_id) + '/'
         response = requests.get(url,
                                 verify=False,
                                 auth=(user, password))

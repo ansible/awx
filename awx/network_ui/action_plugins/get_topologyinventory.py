@@ -24,7 +24,7 @@ class ActionModule(ActionBase):
 
         topology_inventory_id = self._task.args.get('topology_inventory_id', None)
 
-        url = server + '/network_ui/api/v1/topologyinventory/' + str(topology_inventory_id) + '/'
+        url = server + '/api/v2/canvas/topologyinventory/' + str(topology_inventory_id) + '/'
         response = requests.get(url,
                                 verify=False,
                                 auth=(user, password))

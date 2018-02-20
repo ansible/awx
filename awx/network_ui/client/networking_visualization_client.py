@@ -22,7 +22,7 @@ from conf import settings
 import json
 import os
 
-import v1_api_client
+import v2_api_client
 
 
 logger = logging.getLogger('networking_visualization_client')
@@ -73,13 +73,13 @@ def main(args=None):
                      'update' if parsed_args['update'] else None)
 
         if (parsed_args['topology']):
-            result = v1_api_client.__dict__[operation + "_topology"](**query_filter)
+            result = v2_api_client.__dict__[operation + "_topology"](**query_filter)
         elif (parsed_args['device']):
-            result = v1_api_client.__dict__[operation + "_device"](**query_filter)
+            result = v2_api_client.__dict__[operation + "_device"](**query_filter)
         elif (parsed_args['interface']):
-            result = v1_api_client.__dict__[operation + "_interface"](**query_filter)
+            result = v2_api_client.__dict__[operation + "_interface"](**query_filter)
         elif (parsed_args['link']):
-            result = v1_api_client.__dict__[operation + "_link"](**query_filter)
+            result = v2_api_client.__dict__[operation + "_link"](**query_filter)
         if isinstance(result, dict) or isinstance(result, list):
             print json.dumps(result, sort_keys=True, indent=4)
 

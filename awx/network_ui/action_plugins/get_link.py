@@ -24,7 +24,7 @@ class ActionModule(ActionBase):
 
         link_id = self._task.args.get('link_id', None)
 
-        url = server + '/network_ui/api/v1/link/' + str(link_id) + '/'
+        url = server + '/api/v2/canvas/link/' + str(link_id) + '/'
         response = requests.get(url,
                                 verify=False,
                                 auth=(user, password))

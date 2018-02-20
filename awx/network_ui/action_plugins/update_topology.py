@@ -33,7 +33,7 @@ class ActionModule(ActionBase):
         group_id_seq = self._task.args.get('group_id_seq', None)
         stream_id_seq = self._task.args.get('stream_id_seq', None)
 
-        url = server + '/network_ui/api/v1/topology/' + str(topology_id) + '/'
+        url = server + '/api/v2/canvas/topology/' + str(topology_id) + '/'
         headers = {'content-type': 'application/json'}
         data = dict(name=name,
                     scale=scale,

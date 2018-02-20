@@ -32,7 +32,7 @@ class ActionModule(ActionBase):
                            )
         filter_data = {x: y for x, y in filter_data.iteritems() if y is not None}
 
-        url = '/network_ui/api/v1/topologyinventory/'
+        url = '/api/v2/canvas/topologyinventory/'
         results = []
         while url is not None:
             url = server + url

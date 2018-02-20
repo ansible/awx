@@ -27,7 +27,7 @@ class ActionModule(ActionBase):
 
         name = self._task.args.get('name', None)
 
-        url = server + '/network_ui/api/v1/toolbox/'
+        url = server + '/api/v2/canvas/toolbox/'
         headers = {'content-type': 'application/json'}
         response = requests.post(url, data=json.dumps(dict(name=name,
                                                            )),

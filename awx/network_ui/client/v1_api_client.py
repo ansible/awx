@@ -6,8 +6,8 @@ import json
 
 
 def list_device(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/device/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/device/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_device(device_id):
@@ -60,8 +60,8 @@ def delete_device(device_id):
 
 
 def list_link(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/link/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/link/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_link(link_id):
@@ -108,8 +108,8 @@ def delete_link(link_id):
 
 
 def list_topology(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/topology/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/topology/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_topology(topology_id):
@@ -160,8 +160,8 @@ def delete_topology(topology_id):
 
 
 def list_interface(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/interface/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/interface/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_interface(interface_id):
@@ -202,8 +202,8 @@ def delete_interface(interface_id):
 
 
 def list_group(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/group/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/group/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_group(group_id):
@@ -254,8 +254,8 @@ def delete_group(group_id):
 
 
 def list_groupdevice(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/groupdevice/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/groupdevice/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_groupdevice(group_device_id):
@@ -294,8 +294,8 @@ def delete_groupdevice(group_device_id):
 
 
 def list_stream(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/stream/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/stream/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_stream(stream_id):
@@ -338,8 +338,8 @@ def delete_stream(stream_id):
 
 
 def list_process(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/process/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/process/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_process(process_id):
@@ -382,8 +382,8 @@ def delete_process(process_id):
 
 
 def list_toolbox(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/toolbox/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/toolbox/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_toolbox(toolbox_id):
@@ -420,8 +420,8 @@ def delete_toolbox(toolbox_id):
 
 
 def list_toolboxitem(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/toolboxitem/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/toolboxitem/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_toolboxitem(toolbox_item_id):
@@ -460,8 +460,8 @@ def delete_toolboxitem(toolbox_item_id):
 
 
 def list_topologyinventory(**kwargs):
-    response = requests.get(util.get_url() + '/network_ui/api/v1/topologyinventory/',  verify=util.get_verify(), auth=util.get_auth(), params=kwargs)
-    return response.json()
+    response = util.unpaginate(util.get_url(), '/network_ui/api/v1/topologyinventory/', util.get_verify(), util.get_auth(), kwargs)
+    return response
 
 
 def get_topologyinventory(topology_inventory_id):

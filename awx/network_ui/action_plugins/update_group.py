@@ -33,7 +33,7 @@ class ActionModule(ActionBase):
         topology = self._task.args.get('topology', None)
         type = self._task.args.get('type', None)
 
-        url = server + '/network_ui/api/v1/group/' + str(group_id) + '/'
+        url = server + '/api/v2/canvas/group/' + str(group_id) + '/'
         headers = {'content-type': 'application/json'}
         data = dict(id=id,
                     name=name,

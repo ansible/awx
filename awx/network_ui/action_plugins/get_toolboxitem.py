@@ -24,7 +24,7 @@ class ActionModule(ActionBase):
 
         toolbox_item_id = self._task.args.get('toolbox_item_id', None)
 
-        url = server + '/network_ui/api/v1/toolboxitem/' + str(toolbox_item_id) + '/'
+        url = server + '/api/v2/canvas/toolboxitem/' + str(toolbox_item_id) + '/'
         response = requests.get(url,
                                 verify=False,
                                 auth=(user, password))
