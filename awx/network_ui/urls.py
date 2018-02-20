@@ -22,9 +22,9 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    url(r'^api/(?P<version>(v2))/', include(v2_api_urls.urls))
+    url(r'^api/(?P<version>(v2))/canvas/', include(v2_api_urls.urls))
 ]
 awx.api.urls.urlpatterns += [
-    url(r'^(?P<version>(v2))/', include(v2_api_urls.urls))
+    url(r'^(?P<version>(v2))/canvas/', include(v2_api_urls.urls))
 ]
 

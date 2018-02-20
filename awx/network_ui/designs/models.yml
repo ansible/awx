@@ -34,10 +34,19 @@ models:
     type: IntegerField
   name: Device
   topology_id_query: topology_id
+  v1_end_point: /network_ui/api/v1/device/
+  v2_end_point: /api/v2/canvas/device/
   v2_lookup_field: host_id
   x: 348
   y: 124
 - api: true
+  create_transform:
+    from_device__id: from_device_id
+    from_interface__id: from_interface_id
+    id: id
+    name: name
+    to_device__id: to_device_id
+    to_interface__id: to_interface_id
   fields:
   - name: link_id
     pk: true
@@ -68,6 +77,9 @@ models:
     name: name
     type: CharField
   name: Link
+  topology_id_query: from_device__topology_id
+  v1_end_point: /network_ui/api/v1/link/
+  v2_end_point: /api/v2/canvas/link/
   x: 837
   y: 10
 - api: true
@@ -98,6 +110,9 @@ models:
     name: stream_id_seq
     type: IntegerField
   name: Topology
+  topology_id_query: topology_id
+  v1_end_point: /network_ui/api/v1/topology/
+  v2_end_point: /api/v2/canvas/topology/
   x: 111
   y: 127
 - fields:
@@ -160,6 +175,9 @@ models:
   - name: id
     type: IntegerField
   name: Interface
+  topology_id_query: device__topology_id
+  v1_end_point: /network_ui/api/v1/interface/
+  v2_end_point: /api/v2/canvas/interface/
   x: 1157
   y: 337
 - api: true
@@ -188,6 +206,9 @@ models:
     name: type
     type: CharField
   name: Group
+  topology_id_query: topology_id
+  v1_end_point: /network_ui/api/v1/group/
+  v2_end_point: /api/v2/canvas/group/
   x: 407
   y: -379
 - api: true
@@ -204,6 +225,9 @@ models:
     ref_field: device_id
     type: ForeignKey
   name: GroupDevice
+  topology_id_query: group__topology_id
+  v1_end_point: /network_ui/api/v1/groupdevice/
+  v2_end_point: /api/v2/canvas/groupdevice/
   x: 739
   y: -234
 - fields:
@@ -285,6 +309,9 @@ models:
     name: id
     type: IntegerField
   name: Stream
+  topology_id_query: from_device__topology_id
+  v1_end_point: /network_ui/api/v1/stream/
+  v2_end_point: /api/v2/canvas/stream/
   x: 709
   y: 527
 - api: true
@@ -306,6 +333,9 @@ models:
     name: id
     type: IntegerField
   name: Process
+  topology_id_query: device__topology_id
+  v1_end_point: /network_ui/api/v1/process/
+  v2_end_point: /api/v2/canvas/process/
   x: 654
   y: 778
 - api: true
@@ -317,6 +347,8 @@ models:
     name: name
     type: CharField
   name: Toolbox
+  v1_end_point: /network_ui/api/v1/toolbox/
+  v2_end_point: /api/v2/canvas/toolbox/
   x: 179
   y: 644
 - api: true
@@ -331,6 +363,8 @@ models:
   - name: data
     type: TextField
   name: ToolboxItem
+  v1_end_point: /network_ui/api/v1/toolboxitem/
+  v2_end_point: /api/v2/canvas/toolboxitem/
   x: 391
   y: 645
 - fields:
@@ -374,6 +408,9 @@ models:
   - name: inventory_id
     type: IntegerField
   name: TopologyInventory
+  topology_id_query: topology_id
+  v1_end_point: /network_ui/api/v1/topologyinventory/
+  v2_end_point: /api/v2/canvas/topologyinventory/
   x: -226
   y: -19
 - fields:
