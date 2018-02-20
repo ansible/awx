@@ -25,3 +25,14 @@
       fail:
         msg: "isolated task is still running"
       when: "is_alive.rc == 0"
+
+    - stat: path="{{src}}/facts/"
+      register: fact_cache
+
+    - name: Copy gathered facts from the isolated host.
+      synchronize:
+        src: "{{src}}/facts/"
+        dest: "{{src}}/facts/"
+        delete: yes  # delete fact cache records that go missing via clear_facts
+        mode: pull
+      when: fact_cache.stat.exists
