@@ -8,21 +8,22 @@
     <div class="col-md-8">
         <at-panel class="at-Stdout">
             <div class="at-Stdout-menuTop">
-                <div class="pull-left" ng-click="vm.menu.top.expand()">
+                <div class="pull-left" ng-click="vm.expand()">
                     <i class="at-Stdout-menuIcon fa"
-                       ng-class="{ 'fa-minus': vm.menu.top.isExpanded, 'fa-plus': !vm.menu.top.isExpanded }"></i>
+                       ng-class="{ 'fa-minus': vm.isExpanded, 'fa-plus': !vm.isExpanded }"></i>
                 </div>
 
-                <div class="pull-right" ng-click="vm.menu.scroll.end()">
-                    <i class="at-Stdout-menuIcon--lg fa fa-angle-double-down"></i>
+                <div class="pull-right" ng-click="vm.scroll.end()">
+                    <i class="at-Stdout-menuIcon--lg fa fa-angle-double-down"
+                       ng-class=" { 'at-Stdout-menuIcon--active': vm.scroll.lock }"></i>
                 </div>
-                <div class="pull-right" ng-click="vm.menu.scroll.home()">
+                <div class="pull-right" ng-click="vm.scroll.home()">
                     <i class="at-Stdout-menuIcon--lg fa fa-angle-double-up"></i>
                 </div>
-                <div class="pull-right" ng-click="vm.menu.scroll.down()">
+                <div class="pull-right" ng-click="vm.scroll.down()">
                     <i class="at-Stdout-menuIcon--lg fa fa-angle-down"></i>
                 </div>
-                <div class="pull-right" ng-click="vm.menu.scroll.up()">
+                <div class="pull-right" ng-click="vm.scroll.up()">
                     <i class="at-Stdout-menuIcon--lg fa fa-angle-up"></i>
                 </div>
 
@@ -31,8 +32,8 @@
 
             <pre class="at-Stdout-container"><table><thead><tr><th class="at-Stdout-toggle">&nbsp;</th><th class="at-Stdout-line"></th><th class="at-Stdout-event"></th></tr></thead><tbody id="atStdoutResultTable"></tbody></table></pre>
 
-            <div ng-show="vm.menu.scroll.display" class="at-Stdout-menuBottom">
-                <div class="at-Stdout-menuIconGroup" ng-click="vm.menu.scroll.home()">
+            <div ng-show="vm.scroll.display" class="at-Stdout-menuBottom">
+                <div class="at-Stdout-menuIconGroup" ng-click="vm.scroll.home()">
                     <p class="pull-left"><i class="fa fa-angle-double-up"></i></p>
                     <p class="pull-right">Back to Top</p>
                 </div>
@@ -41,9 +42,4 @@
             </div>
         </at-panel>
     </div>
-
-    <at-modal>
-        <br />
-        <at-code-stdout state="vm.host"></at-code-stdout>
-    </at-modal>
 </div>

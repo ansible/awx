@@ -9,10 +9,12 @@ import IndexController from '~features/output/index.controller';
 const indexTemplate = require('~features/output/index.view.html');
 
 const MODULE_NAME = 'at.features.output';
+const PAGE_CACHE = true;
+const PAGE_LIMIT = 3;
+const PAGE_SIZE = 100;
 
 function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJob, $stateParams) {
-    const { id } = $stateParams;
-    const { type } = $stateParams;
+    const { id, type } = $stateParams;
 
     let Resource;
     let related = 'events';
@@ -40,52 +42,44 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
     }
 
     return new Resource('get', id)
-        .then(resource => resource.extend(related, {
-            pageCache: true,
-            pageLimit: 3,
+        .then(model => model.extend(related, {
+            pageCache: PAGE_CACHE,
+            pageLimit: PAGE_LIMIT,
             params: {
-                page_size: 100,
+                page_size: PAGE_SIZE,
                 order_by: 'start_line'
             }
-        }));
+        }))
+        .then(model => {
+            return {
+                id,
+                type,
+                model,
+                related,
+                ws: getWebSocketResource(type),
+                page: {
+                    cache: PAGE_CACHE,
+                    limit: PAGE_LIMIT,
+                    size: PAGE_SIZE
+                }
+            };
+        });
 }
 
 function resolveWebSocket (SocketService, $stateParams) {
     const { type, id } = $stateParams;
     const prefix = 'ws';
+    const resource = getWebSocketResource(type);
 
     let name;
     let events;
-
-    switch (type) {
-        case 'system':
-            name = 'system_jobs';
-            events = 'system_job_events';
-            break;
-        case 'project':
-            name = 'project_updates';
-            events = 'project_update_events';
-            break;
-        case 'command':
-            name = 'ad_hoc_commands';
-            events = 'ad_hoc_command_events';
-            break;
-        case 'inventory':
-            name = 'inventory_updates';
-            events = 'inventory_update_events';
-            break;
-        case 'playbook':
-            name = 'jobs';
-            events = 'job_events';
-            break;
-    }
 
     const state = {
         data: {
             socket: {
                 groups: {
-                    [name]: ['status_changed', 'summary'],
-                    [events]: []
+                    [resource.name]: ['status_changed', 'summary'],
+                    [resource.key]: []
                 }
             }
         }
@@ -93,7 +87,7 @@ function resolveWebSocket (SocketService, $stateParams) {
 
     SocketService.addStateResolve(state, id);
 
-    return `${prefix}-${events}-${id}`;
+    return `${prefix}-${resource.key}-${id}`;
 }
 
 function resolveBreadcrumb (strings) {
@@ -101,6 +95,37 @@ function resolveBreadcrumb (strings) {
         label: strings.get('state.TITLE')
     };
 }
+
+function getWebSocketResource (type) {
+    let name;
+    let key;
+
+    switch (type) {
+        case 'system':
+            name = 'system_jobs';
+            key = 'system_job_events';
+            break;
+        case 'project':
+            name = 'project_updates';
+            key = 'project_update_events';
+            break;
+        case 'command':
+            name = 'ad_hoc_commands';
+            key = 'ad_hoc_command_events';
+            break;
+        case 'inventory':
+            name = 'inventory_updates';
+            key = 'inventory_update_events';
+            break;
+        case 'playbook':
+            name = 'jobs';
+            key = 'job_events';
+            break;
+    }
+
+    return { name, key };
+}
+
 
 function JobsRun ($stateRegistry) {
     const state = {
