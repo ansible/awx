@@ -16,6 +16,7 @@ import stat
 import tempfile
 import time
 import traceback
+import six
 import urlparse
 from distutils.version import LooseVersion as Version
 import yaml
@@ -43,8 +44,6 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # Django-CRUM
 from crum import impersonate
-
-import six
 
 # AWX
 from awx import __version__ as awx_application_version
@@ -781,6 +780,7 @@ class BaseTask(LogErrorsTask):
         # Derived class should call add_ansible_venv() or add_awx_venv()
         if self.should_use_proot(instance, **kwargs):
             env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
+        env['AWX_PRIVATE_DATA_DIR'] = kwargs['private_data_dir']
         return env
 
     def should_use_proot(self, instance, **kwargs):
@@ -898,6 +898,15 @@ class BaseTask(LogErrorsTask):
             # Fetch ansible version once here to support version-dependent features.
             kwargs['ansible_version'] = get_ansible_version()
             kwargs['private_data_dir'] = self.build_private_data_dir(instance, **kwargs)
+
+            # Fetch "cached" fact data from prior runs and put on the disk
+            # where ansible expects to find it
+            if getattr(instance, 'use_fact_cache', False) and not kwargs.get('isolated'):
+                instance.start_job_fact_cache(
+                    os.path.join(kwargs['private_data_dir']),
+                    kwargs.setdefault('fact_modification_times', {})
+                )
+
             # May have to serialize the value
             kwargs['private_data_files'] = self.build_private_data_files(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
@@ -1129,11 +1138,15 @@ class RunJob(BaseTask):
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
         if job.use_fact_cache and not kwargs.get('isolated'):
-            env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
-            env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
-            env['ANSIBLE_CACHE_PLUGIN'] = "awx"
-            env['ANSIBLE_CACHE_PLUGIN_TIMEOUT'] = str(settings.ANSIBLE_FACT_CACHE_TIMEOUT)
-            env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
+            library_path = env.get('ANSIBLE_LIBRARY')
+            env['ANSIBLE_LIBRARY'] = ':'.join(
+                filter(None, [
+                    library_path,
+                    self.get_path_to('..', 'plugins', 'library')
+                ])
+            )
+            env['ANSIBLE_CACHE_PLUGIN'] = "jsonfile"
+            env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = os.path.join(kwargs['private_data_dir'], 'facts')
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
@@ -1276,6 +1289,7 @@ class RunJob(BaseTask):
         for method in PRIVILEGE_ESCALATION_METHODS:
             d[re.compile(r'%s password.*:\s*?$' % (method[0]), re.M)] = 'become_password'
             d[re.compile(r'%s password.*:\s*?$' % (method[0].upper()), re.M)] = 'become_password'
+        d[re.compile(r'BECOME password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Vault password:\s*?$', re.M)] = 'vault_password'
@@ -1329,14 +1343,29 @@ class RunJob(BaseTask):
                                                              ('project_update', local_project_sync.name, local_project_sync.id)))
                     raise
 
-        if job.use_fact_cache and not kwargs.get('isolated'):
-            job.start_job_fact_cache()
-
 
     def final_run_hook(self, job, status, **kwargs):
         super(RunJob, self).final_run_hook(job, status, **kwargs)
         if job.use_fact_cache and not kwargs.get('isolated'):
-            job.finish_job_fact_cache()
+            job.finish_job_fact_cache(
+                kwargs['private_data_dir'],
+                kwargs['fact_modification_times']
+            )
+
+        # persist artifacts set via `set_stat` (if any)
+        custom_stats_path = os.path.join(kwargs['private_data_dir'], 'artifacts', 'custom')
+        if os.path.exists(custom_stats_path):
+            with open(custom_stats_path, 'r') as f:
+                custom_stat_data = None
+                try:
+                    custom_stat_data = json.load(f)
+                except ValueError:
+                    logger.warning('Could not parse custom `set_fact` data for job {}'.format(job.id))
+
+                if custom_stat_data:
+                    job.artifacts = custom_stat_data
+                    job.save(update_fields=['artifacts'])
+
         try:
             inventory = job.inventory
         except Inventory.DoesNotExist:
@@ -1554,15 +1583,15 @@ class RunProjectUpdate(BaseTask):
             if not inv_src.update_on_project_update:
                 continue
             if inv_src.scm_last_revision == scm_revision:
-                logger.debug('Skipping SCM inventory update for `{}` because '
-                             'project has not changed.'.format(inv_src.name))
+                logger.debug(six.text_type('Skipping SCM inventory update for `{}` because '
+                                           'project has not changed.').format(inv_src.name))
                 continue
-            logger.debug('Local dependent inventory update for `{}`.'.format(inv_src.name))
+            logger.debug(six.text_type('Local dependent inventory update for `{}`.').format(inv_src.name))
             with transaction.atomic():
                 if InventoryUpdate.objects.filter(inventory_source=inv_src,
                                                   status__in=ACTIVE_STATES).exists():
-                    logger.info('Skipping SCM inventory update for `{}` because '
-                                'another update is already active.'.format(inv_src.name))
+                    logger.info(six.text_type('Skipping SCM inventory update for `{}` because '
+                                              'another update is already active.').format(inv_src.name))
                     continue
                 local_inv_update = inv_src.create_inventory_update(
                     _eager_fields=dict(
@@ -2225,6 +2254,7 @@ class RunAdHocCommand(BaseTask):
         for method in PRIVILEGE_ESCALATION_METHODS:
             d[re.compile(r'%s password.*:\s*?$' % (method[0]), re.M)] = 'become_password'
             d[re.compile(r'%s password.*:\s*?$' % (method[0].upper()), re.M)] = 'become_password'
+        d[re.compile(r'BECOME password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
         return d

@@ -506,6 +506,12 @@ class CredentialInputField(JSONSchemaField):
                 v != '$encrypted$',
                 model_instance.pk
             ]):
+                if not isinstance(getattr(model_instance, k), six.string_types):
+                    raise django_exceptions.ValidationError(
+                        _('secret values must be of type string, not {}').format(type(v).__name__),
+                        code='invalid',
+                        params={'value': v},
+                    )
                 decrypted_values[k] = utils.decrypt_field(model_instance, k)
             else:
                 decrypted_values[k] = v

@@ -60,7 +60,7 @@ export default
 
                             html += "<td class=\"break\"><a href=\"#/jobs/" + job.id + "\" " +
                                 "aw-tool-tip=\"" + job.status.charAt(0).toUpperCase() + job.status.slice(1) +
-                                ". Click for details\" data-placement=\"top\">" + ellipsis(job.name) + "</a></td>\n";
+                                ". Click for details\" data-placement=\"top\">" + $filter('sanitize')(ellipsis(job.name)) + "</a></td>\n";
 
                             html += "</tr>\n";
                         }

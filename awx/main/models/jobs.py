@@ -2,21 +2,22 @@
 # All Rights Reserved.
 
 # Python
+import codecs
 import datetime
 import logging
+import os
 import time
 import json
-import base64
 from urlparse import urljoin
+
+import six
 
 # Django
 from django.conf import settings
 from django.db import models
 #from django.core.cache import cache
-import memcache
-from dateutil import parser
-from dateutil.tz import tzutc
 from django.utils.encoding import smart_str
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, FieldDoesNotExist
 
@@ -738,86 +739,68 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_notification_friendly_name(self):
         return "Job"
 
-    @property
-    def memcached_fact_key(self):
-        return '{}'.format(self.inventory.id)
-
-    def memcached_fact_host_key(self, host_name):
-        return '{}-{}'.format(self.inventory.id, base64.b64encode(host_name.encode('utf-8')))
-
-    def memcached_fact_modified_key(self, host_name):
-        return '{}-{}-modified'.format(self.inventory.id, base64.b64encode(host_name.encode('utf-8')))
-
-    def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'modified',]):
+    def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified',]):
+        if not self.inventory:
+            return []
         return self.inventory.hosts.only(*only)
 
-    def _get_memcache_connection(self):
-        return memcache.Client([settings.CACHES['default']['LOCATION']], debug=0)
-
-    def start_job_fact_cache(self):
-        if not self.inventory:
-            return
-
-        cache = self._get_memcache_connection()
-
-        host_names = []
-
-        for host in self._get_inventory_hosts():
-            host_key = self.memcached_fact_host_key(host.name)
-            modified_key = self.memcached_fact_modified_key(host.name)
-
-            if cache.get(modified_key) is None:
-                if host.ansible_facts_modified:
-                    host_modified = host.ansible_facts_modified.replace(tzinfo=tzutc()).isoformat()
-                else:
-                    host_modified = datetime.datetime.now(tzutc()).isoformat()
-                cache.set(host_key, json.dumps(host.ansible_facts))
-                cache.set(modified_key, host_modified)
-
-            host_names.append(host.name)
-
-        cache.set(self.memcached_fact_key, host_names)
-
-    def finish_job_fact_cache(self):
-        if not self.inventory:
-            return
-
-        cache = self._get_memcache_connection()
-
+    def start_job_fact_cache(self, destination, modification_times, timeout=None):
+        destination = os.path.join(destination, 'facts')
+        os.makedirs(destination, mode=0700)
         hosts = self._get_inventory_hosts()
+        if timeout is None:
+            timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT
+        if timeout > 0:
+            # exclude hosts with fact data older than `settings.ANSIBLE_FACT_CACHE_TIMEOUT seconds`
+            timeout = now() - datetime.timedelta(seconds=timeout)
+            hosts = hosts.filter(ansible_facts_modified__gte=timeout)
         for host in hosts:
-            host_key = self.memcached_fact_host_key(host.name)
-            modified_key = self.memcached_fact_modified_key(host.name)
-
-            modified = cache.get(modified_key)
-            if modified is None:
-                cache.delete(host_key)
+            filepath = os.sep.join(map(six.text_type, [destination, host.name]))
+            if not os.path.realpath(filepath).startswith(destination):
+                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue
+            with codecs.open(filepath, 'w', encoding='utf-8') as f:
+                os.chmod(f.name, 0600)
+                json.dump(host.ansible_facts, f)
+            # make note of the time we wrote the file so we can check if it changed later
+            modification_times[filepath] = os.path.getmtime(filepath)
 
-            # Save facts if cache is newer than DB
-            modified = parser.parse(modified, tzinfos=[tzutc()])
-            if not host.ansible_facts_modified or modified > host.ansible_facts_modified:
-                ansible_facts = cache.get(host_key)
-                try:
-                    ansible_facts = json.loads(ansible_facts)
-                except Exception:
-                    ansible_facts = None
-
-                if ansible_facts is None:
-                    cache.delete(host_key)
-                    continue
-                host.ansible_facts = ansible_facts
-                host.ansible_facts_modified = modified
-                if 'insights' in ansible_facts and 'system_id' in ansible_facts['insights']:
-                    host.insights_system_id = ansible_facts['insights']['system_id']
-                host.save()
+    def finish_job_fact_cache(self, destination, modification_times):
+        destination = os.path.join(destination, 'facts')
+        for host in self._get_inventory_hosts():
+            filepath = os.sep.join(map(six.text_type, [destination, host.name]))
+            if not os.path.realpath(filepath).startswith(destination):
+                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
+                continue
+            if os.path.exists(filepath):
+                # If the file changed since we wrote it pre-playbook run...
+                modified = os.path.getmtime(filepath)
+                if modified > modification_times.get(filepath, 0):
+                    with codecs.open(filepath, 'r', encoding='utf-8') as f:
+                        try:
+                            ansible_facts = json.load(f)
+                        except ValueError:
+                            continue
+                        host.ansible_facts = ansible_facts
+                        host.ansible_facts_modified = now()
+                        if 'insights' in ansible_facts and 'system_id' in ansible_facts['insights']:
+                            host.insights_system_id = ansible_facts['insights']['system_id']
+                        host.save()
+                        system_tracking_logger.info(
+                            'New fact for inventory {} host {}'.format(
+                                smart_str(host.inventory.name), smart_str(host.name)),
+                            extra=dict(inventory_id=host.inventory.id, host_name=host.name,
+                                       ansible_facts=host.ansible_facts,
+                                       ansible_facts_modified=host.ansible_facts_modified.isoformat(),
+                                       job_id=self.id))
+            else:
+                # if the file goes missing, ansible removed it (likely via clear_facts)
+                host.ansible_facts = {}
+                host.ansible_facts_modified = now()
                 system_tracking_logger.info(
-                    'New fact for inventory {} host {}'.format(
-                        smart_str(host.inventory.name), smart_str(host.name)),
-                    extra=dict(inventory_id=host.inventory.id, host_name=host.name,
-                               ansible_facts=host.ansible_facts,
-                               ansible_facts_modified=host.ansible_facts_modified.isoformat(),
-                               job_id=self.id))
+                    'Facts cleared for inventory {} host {}'.format(
+                        smart_str(host.inventory.name), smart_str(host.name)))
+                host.save()
 
 
 # Add on aliases for the non-related-model fields

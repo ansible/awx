@@ -1481,6 +1481,105 @@ def test_credential_type_mutability(patch, organization, admin, credentialtype_s
 
 
 @pytest.mark.django_db
+def test_vault_credential_type_mutability(patch, organization, admin, credentialtype_ssh,
+                                          credentialtype_vault):
+    cred = Credential(
+        credential_type=credentialtype_vault,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'vault_password': u'some-vault',
+        }
+    )
+    cred.save()
+
+    jt = JobTemplate()
+    jt.save()
+    jt.credentials.add(cred)
+
+    def _change_credential_type():
+        return patch(
+            reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
+            {
+                'credential_type': credentialtype_ssh.pk,
+                'inputs': {
+                    'username': u'jim',
+                    'password': u'pass'
+                }
+            },
+            admin
+        )
+
+    response = _change_credential_type()
+    assert response.status_code == 400
+    expected = ['You cannot change the credential type of the credential, '
+                'as it may break the functionality of the resources using it.']
+    assert response.data['credential_type'] == expected
+
+    response = patch(
+        reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
+        {'name': 'Worst credential ever'},
+        admin
+    )
+    assert response.status_code == 200
+    assert Credential.objects.get(pk=cred.pk).name == 'Worst credential ever'
+
+    jt.delete()
+    response = _change_credential_type()
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_cloud_credential_type_mutability(patch, organization, admin, credentialtype_ssh,
+                                          credentialtype_aws):
+    cred = Credential(
+        credential_type=credentialtype_aws,
+        name='Best credential ever',
+        organization=organization,
+        inputs={
+            'username': u'jim',
+            'password': u'pass'
+        }
+    )
+    cred.save()
+
+    jt = JobTemplate()
+    jt.save()
+    jt.credentials.add(cred)
+
+    def _change_credential_type():
+        return patch(
+            reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
+            {
+                'credential_type': credentialtype_ssh.pk,
+                'inputs': {
+                    'username': u'jim',
+                    'password': u'pass'
+                }
+            },
+            admin
+        )
+
+    response = _change_credential_type()
+    assert response.status_code == 400
+    expected = ['You cannot change the credential type of the credential, '
+                'as it may break the functionality of the resources using it.']
+    assert response.data['credential_type'] == expected
+
+    response = patch(
+        reverse('api:credential_detail', kwargs={'version': 'v2', 'pk': cred.pk}),
+        {'name': 'Worst credential ever'},
+        admin
+    )
+    assert response.status_code == 200
+    assert Credential.objects.get(pk=cred.pk).name == 'Worst credential ever'
+
+    jt.delete()
+    response = _change_credential_type()
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('version, params', [
     ['v1', {
         'name': 'Best credential ever',

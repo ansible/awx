@@ -2196,6 +2196,7 @@ class CredentialSerializer(BaseSerializer):
                         _('You cannot change the credential type of the credential, as it may break the functionality'
                           ' of the resources using it.'),
                     )
+
         return credential_type
 
 
