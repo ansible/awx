@@ -2723,6 +2723,28 @@ class InventorySourceUpdatesList(SubListAPIView):
     relationship = 'inventory_updates'
 
 
+class InventorySourceCredentialsList(SubListAttachDetachAPIView):
+
+    parent_model = InventorySource
+    model = Credential
+    serializer_class = CredentialSerializer
+    relationship = 'credentials'
+
+    def is_valid_relation(self, parent, sub, created=False):
+        error = InventorySource.cloud_credential_validation(parent.source, sub)
+        if error:
+            return {'msg': error}
+        if sub.credential_type == 'vault':
+            # TODO: support this
+            return {"msg": _("Vault credentials are not yet supported for inventory sources.")}
+        else:
+            # Cloud credentials are exclusive with all other cloud credentials
+            cloud_cred_qs = parent.credentials.exclude(credential_type__kind='vault')
+            if cloud_cred_qs.exists():
+                return {'msg': _("Source already has cloud credential assigned.")}
+        return None
+
+
 class InventorySourceUpdateView(RetrieveAPIView):
 
     model = InventorySource
@@ -2755,6 +2777,14 @@ class InventoryUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = InventoryUpdate
     serializer_class = InventoryUpdateSerializer
+
+
+class InventoryUpdateCredentialsList(SubListAPIView):
+
+    parent_model = InventoryUpdate
+    model = Credential
+    serializer_class = CredentialSerializer
+    relationship = 'credentials'
 
 
 class InventoryUpdateCancel(RetrieveAPIView):

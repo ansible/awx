@@ -1540,6 +1540,9 @@ class CustomInventoryScriptSerializer(BaseSerializer):
 
 
 class InventorySourceOptionsSerializer(BaseSerializer):
+    credential = models.PositiveIntegerField(
+        blank=True, null=True, default=None,
+        help_text='This resource has been deprecated and will be removed in a future release')
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
@@ -1548,9 +1551,9 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
-        if obj.credential:
+        if obj.credential:  # TODO: remove when 'credential' field is removed
             res['credential'] = self.reverse('api:credential_detail',
-                                             kwargs={'pk': obj.credential.pk})
+                                             kwargs={'pk': obj.credential})
         if obj.source_script:
             res['source_script'] = self.reverse('api:inventory_script_detail', kwargs={'pk': obj.source_script.pk})
         return res
@@ -1590,13 +1593,19 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
         return super(InventorySourceOptionsSerializer, self).validate(attrs)
 
-    def to_representation(self, obj):
-        ret = super(InventorySourceOptionsSerializer, self).to_representation(obj)
-        if obj is None:
-            return ret
-        if 'credential' in ret and not obj.credential:
-            ret['credential'] = None
-        return ret
+    # TODO: remove when old 'credential' fields are removed
+    def get_summary_fields(self, obj):
+        summary_fields = super(InventorySourceOptionsSerializer, self).get_summary_fields(obj)
+        if 'credential' in summary_fields:
+            cred = obj.get_cloud_credential()
+            if cred:
+                summary_fields['credential'] = {
+                    'id': cred.id, 'name': cred.name, 'description': cred.description,
+                    'kind': cred.kind, 'cloud': True, 'credential_type_id': cred.credential_type_id
+                }
+            else:
+                summary_fields.pop('credential')
+        return summary_fields
 
 
 class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOptionsSerializer):
@@ -1620,6 +1629,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             update = self.reverse('api:inventory_source_update_view', kwargs={'pk': obj.pk}),
             inventory_updates = self.reverse('api:inventory_source_updates_list', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:inventory_source_schedules_list', kwargs={'pk': obj.pk}),
+            credentials = self.reverse('api:inventory_source_credentials_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:inventory_source_activity_stream_list', kwargs={'pk': obj.pk}),
             hosts = self.reverse('api:inventory_source_hosts_list', kwargs={'pk': obj.pk}),
             groups = self.reverse('api:inventory_source_groups_list', kwargs={'pk': obj.pk}),
@@ -1673,6 +1683,14 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
 
+    # TODO: remove when old 'credential' fields are removed
+    def build_field(self, field_name, info, model_class, nested_depth):
+        # have to special-case the field so that DRF will not automagically make it
+        # read-only because it's a property on the model.
+        if field_name == 'credential':
+            return self.build_standard_field(field_name, self.credential)
+        return super(InventorySourceOptionsSerializer, self).build_field(field_name, info, model_class, nested_depth)
+
     def to_representation(self, obj):
         ret = super(InventorySourceSerializer, self).to_representation(obj)
         if obj is None:
@@ -1702,7 +1720,44 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             raise serializers.ValidationError({"detail": _("Cannot create Inventory Source for Smart Inventory")})
         return value
 
+    # TODO: remove when old 'credential' fields are removed
+    def create(self, validated_data):
+        deprecated_fields = {}
+        if 'credential' in validated_data:
+            deprecated_fields['credential'] = validated_data.pop('credential')
+        obj = super(InventorySourceSerializer, self).create(validated_data)
+        if deprecated_fields:
+            self._update_deprecated_fields(deprecated_fields, obj)
+        return obj
+
+    # TODO: remove when old 'credential' fields are removed
+    def update(self, obj, validated_data):
+        deprecated_fields = {}
+        if 'credential' in validated_data:
+            deprecated_fields['credential'] = validated_data.pop('credential')
+        obj = super(InventorySourceSerializer, self).update(obj, validated_data)
+        if deprecated_fields:
+            self._update_deprecated_fields(deprecated_fields, obj)
+        return obj
+
+    # TODO: remove when old 'credential' fields are removed
+    def _update_deprecated_fields(self, fields, obj):
+        if 'credential' in fields:
+            new_cred = fields['credential']
+            existing_creds = obj.credentials.exclude(credential_type__kind='vault')
+            for cred in existing_creds:
+                # Remove all other cloud credentials
+                if cred != new_cred:
+                    obj.credentials.remove(cred)
+            if new_cred:
+                # Add new credential
+                obj.credentials.add(new_cred)
+
     def validate(self, attrs):
+        deprecated_fields = {}
+        if 'credential' in attrs:  # TODO: remove when 'credential' field removed
+            deprecated_fields['credential'] = attrs.pop('credential')
+
         def get_field_from_model_or_attrs(fd):
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
@@ -1716,7 +1771,25 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
                     {"detail": _("Cannot set %s if not SCM type." % ' '.join(redundant_scm_fields))}
                 )
 
-        return super(InventorySourceSerializer, self).validate(attrs)
+        attrs = super(InventorySourceSerializer, self).validate(attrs)
+
+        # Check type consistency of source and cloud credential, if provided
+        if 'credential' in deprecated_fields:  # TODO: remove when v2 API is deprecated
+            cred = deprecated_fields['credential']
+            attrs['credential'] = cred
+            if cred is not None:
+                cred = Credential.objects.get(pk=cred)
+                view = self.context.get('view', None)
+                if (not view) or (not view.request) or (view.request.user not in cred.use_role):
+                    raise PermissionDenied()
+            cred_error = InventorySource.cloud_credential_validation(
+                get_field_from_model_or_attrs('source'),
+                cred
+            )
+            if cred_error:
+                raise serializers.ValidationError({"detail": cred_error})
+
+        return attrs
 
 
 class InventorySourceUpdateSerializer(InventorySourceSerializer):
@@ -1746,6 +1819,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
         res.update(dict(
             cancel = self.reverse('api:inventory_update_cancel', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:inventory_update_notifications_list', kwargs={'pk': obj.pk}),
+            credentials = self.reverse('api:inventory_update_credentials_list', kwargs={'pk': obj.pk}),
             events = self.reverse('api:inventory_update_events_list', kwargs={'pk': obj.pk}),
         ))
         if obj.source_project_update_id:
@@ -2183,8 +2257,6 @@ class CredentialSerializer(BaseSerializer):
             for rel in (
                 'ad_hoc_commands',
                 'insights_inventories',
-                'inventorysources',
-                'inventoryupdates',
                 'unifiedjobs',
                 'unifiedjobtemplates',
                 'projects',

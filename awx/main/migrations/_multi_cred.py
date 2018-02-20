@@ -32,3 +32,25 @@ def migrate_workflow_cred_reverse(app, schema_editor):
             if cred:
                 node.credential = cred
                 node.save()
+
+
+def migrate_inventory_source_cred(app, schema_editor):
+    InventoryUpdate = app.get_model('main', 'InventoryUpdate')
+    InventorySource = app.get_model('main', 'InventorySource')
+
+    for cls in (InventoryUpdate, InventorySource):
+        for obj in cls.objects.iterator():
+            if obj.credential:
+                obj.credentials.add(obj.credential)
+
+
+def migrate_inventory_source_cred_reverse(app, schema_editor):
+    InventoryUpdate = app.get_model('main', 'InventoryUpdate')
+    InventorySource = app.get_model('main', 'InventorySource')
+
+    for cls in (InventoryUpdate, InventorySource):
+        for obj in cls.objects.iterator():
+            cred = obj.credentials.first()
+            if cred:
+                obj.credential = cred
+                obj.save()

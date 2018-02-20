@@ -1426,9 +1426,9 @@ def test_field_removal(put, organization, admin, credentialtype_ssh, version, pa
 @pytest.mark.parametrize('relation, related_obj', [
     ['ad_hoc_commands', AdHocCommand()],
     ['insights_inventories', Inventory()],
-    ['inventorysources', InventorySource()],
     ['unifiedjobs', Job()],
     ['unifiedjobtemplates', JobTemplate()],
+    ['unifiedjobtemplates', InventorySource()],
     ['projects', Project()],
     ['workflowjobnodes', WorkflowJobNode()],
 ])
