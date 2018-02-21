@@ -672,12 +672,12 @@ Group.prototype.is_in_breadcrumb = function(viewport){
     var viewportY2 = viewport.bottom_extent();
     var viewportX2 = viewport.right_extent();
 
-    if ( viewportX1 > groupX1 &&
-            viewportY1 > groupY1 &&
-                viewportX2 < groupX2 &&
-                    viewportY2 < groupY2) {
-                        this.on_screen = true;
-                        return true;
+    if (viewportX1 > groupX1 &&
+        viewportY1 > groupY1 &&
+        viewportX2 < groupX2 &&
+        viewportY2 < groupY2) {
+            this.on_screen = true;
+            return true;
     } else {
         this.on_screen = false;
         return false;
