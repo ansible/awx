@@ -36,8 +36,8 @@ export default
             isUserLoggedIn: function () {
                 if ($rootScope.userLoggedIn === undefined) {
                     // Browser refresh may have occurred
-                    $rootScope.userLoggedIn = $cookies.get('userLoggedIn');
-                    $rootScope.sessionExpired = $cookies.get('sessionExpired');
+                    $rootScope.userLoggedIn = ($cookies.get('userLoggedIn') === 'true');
+                    $rootScope.sessionExpired = ($cookies.get('sessionExpired') === 'true');
                 }
                 return $rootScope.userLoggedIn;
             },
