@@ -554,12 +554,12 @@ def make_the_data():
                     if i % 2 == 0:
                         # only apply inventories for every other node
                         kwargs['inventory'] = next(inv_gen)
-                    if i % 3 == 0:
-                        # only apply prompted credential every 3rd node
-                        kwargs['credential'] = next(cred_gen)
                     node, _ = WorkflowJobTemplateNode.objects.get_or_create(
                         **kwargs
                     )
+                    if i % 3 == 0:
+                        # only apply prompted credential every 3rd node
+                        node.credentials.add(next(cred_gen))
                     # nodes.append(node)
                     wfjt_nodes.append(node)
                     if i <= 3:
