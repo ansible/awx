@@ -89,12 +89,15 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         $http.post('/api/v2/schedules/preview/', {'rrule': req})
             .then(({data}) => {
                 $scope.preview_list = data;
-                for (let tz in data) {
-                    $scope.preview_list.isEmpty = data[tz].length === 0;
-                    $scope.preview_list[tz] = data[tz].map(function(date) {
+                let parsePreviewList = (tz) => {
+                    return data[tz].map(function(date) {
                         date = date.replace(/Z/, '');
                         return moment.parseZone(date).format("MM-DD-YYYY HH:mm:ss");
                     });
+                };
+                for (let tz in data) {
+                    $scope.preview_list.isEmpty = data[tz].length === 0;
+                    $scope.preview_list[tz] = parsePreviewList(tz);
                 }
             });
     }, 300);
