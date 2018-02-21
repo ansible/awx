@@ -44,7 +44,7 @@
             <g awx-net-stream></g>
             </g> <!-- end ng-repeat stream in streams-->
             </g> <!-- end ng-if current_scale -->
-            <g>
+             <g ng-if="current_scale < 5">
 
             <g ng-repeat="item in devices"
                ng-attr-transform="translate({{item.x}},{{item.y}})"

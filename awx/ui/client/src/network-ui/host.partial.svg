@@ -1,5 +1,5 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
-<g ng-if="item.icon || (current_scale > 0.5 && current_scale < 5) || !item.in_group">
+<g ng-if="item.icon || current_scale > 0.5 || !item.in_group">
     <g transform="scale(0.75)">
         <g ng-if="item.moving">
             <!--horizontal line -->
