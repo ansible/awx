@@ -15,4 +15,5 @@ extract:
 check: extract
 	for fsm in $(FSMS); do \
 		./tools/fsm-diff ../../../../network_ui/designs/$$fsm.yml extracted/$$fsm.yml; \
+		./tools/copy-layout.py ../../../../network_ui/designs/$$fsm.yml extracted/$$fsm.yml; \
 	done
