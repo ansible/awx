@@ -4,14 +4,14 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$filter', '$state', '$stateParams', 'Wait',
+export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
-    'ProcessErrors', 'SchedulerInit', '$location', 'PromptService',
-    function($filter, $state, $stateParams, Wait,
+    'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
+    function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
-        ProcessErrors, SchedulerInit, $location, PromptService) {
+        ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
         scheduler,
@@ -283,6 +283,16 @@ export default ['$filter', '$state', '$stateParams', 'Wait',
     Wait('start');
     $('#form-container').empty();
     scheduler = SchedulerInit({ scope: $scope, requireFutureStartTime: false });
+    let timeZonesAPI = () => {
+        return $http.get(`/api/v2/schedules/zoneinfo/`);
+    };
+    // set API timezones to scheduler object
+    timeZonesAPI().then(({data}) => {
+        scheduler.scope.timeZones = data;
+        scheduler.scope.schedulerTimeZone = _.find(data, (zone) => {
+            return zone.name === scheduler.scope.current_timezone.name;
+        });
+    });
     if($scope.schedulerUTCTime) {
         // The UTC time is already set
         processSchedulerEndDt();
@@ -298,6 +308,30 @@ export default ['$filter', '$state', '$stateParams', 'Wait',
             }
         });
     }
+
+    let previewList = _.debounce(function(req) {
+        $http.post('/api/v2/schedules/preview/', {'rrule': req})
+            .then(({data}) => {
+                $scope.preview_list = data;
+                let parsePreviewList = (tz) => {
+                    return data[tz].map(function(date) {
+                        date = date.replace(/Z/, '');
+                        return moment.parseZone(date).format("MM-DD-YYYY HH:mm:ss");
+                    });
+                };
+                for (let tz in data) {
+                    $scope.preview_list.isEmpty = data[tz].length === 0;
+                    $scope.preview_list[tz] = parsePreviewList(tz);
+                }
+            });
+    }, 300);
+
+    $scope.$on("setPreviewPane", (event) => {
+        let rrule = event.currentScope.rrule.toString();
+        let req = RRuleToAPI(rrule, $scope);
+        previewList(req);
+    });
+
     scheduler.inject('form-container', false);
     scheduler.injectDetail('occurrences', false);
     scheduler.clear();
@@ -306,7 +340,6 @@ export default ['$filter', '$state', '$stateParams', 'Wait',
         $scope.$on("formUpdated", function() {
             $rootScope.$broadcast("loadSchedulerDetailPane");
         });
-
         $scope.$watchGroup(["schedulerName",
             "schedulerStartDt",
             "schedulerStartHour",

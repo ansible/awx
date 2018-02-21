@@ -14,7 +14,7 @@ export default
                 newSchedule = scheduler.getValue();
                 rrule = scheduler.getRRule();
                 schedule.name = newSchedule.name;
-                schedule.rrule = RRuleToAPI(rrule.toString());
+                schedule.rrule = RRuleToAPI(rrule.toString(), scope);
                 schedule.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
 
                 if (scope.isFactCleanup) {

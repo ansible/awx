@@ -1,9 +1,9 @@
-export default ['$filter', '$state', '$stateParams', 'Wait', '$scope',
-'$rootScope', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
-'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService',
-function($filter, $state, $stateParams, Wait, $scope,
-    $rootScope, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
-    GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService) {
+export default ['$filter', '$state', '$stateParams', 'Wait', '$scope', 'moment',
+'$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
+'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
+function($filter, $state, $stateParams, Wait, $scope, moment,
+    $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
+    GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI) {
 
     let schedule, scheduler;
 
@@ -85,6 +85,29 @@ function($filter, $state, $stateParams, Wait, $scope,
         callSelect2();
     });
 
+    let previewList = _.debounce(function(req) {
+        $http.post('/api/v2/schedules/preview/', {'rrule': req})
+            .then(({data}) => {
+                $scope.preview_list = data;
+                let parsePreviewList = (tz) => {
+                    return data[tz].map(function(date) {
+                        date = date.replace(/Z/, '');
+                        return moment.parseZone(date).format("MM-DD-YYYY HH:mm:ss");
+                    });
+                };
+                for (let tz in data) {
+                    $scope.preview_list.isEmpty = data[tz].length === 0;
+                    $scope.preview_list[tz] = parsePreviewList(tz);
+                }
+            });
+    }, 300);
+
+    $scope.$on("setPreviewPane", (event) => {
+        let rrule = event.currentScope.rrule.toString();
+        let req = RRuleToAPI(rrule, $scope);
+        previewList(req);
+    });
+
     Wait('start');
 
     // Get the existing record
@@ -111,6 +134,14 @@ function($filter, $state, $stateParams, Wait, $scope,
 
             $('#form-container').empty();
             scheduler = SchedulerInit({ scope: $scope, requireFutureStartTime: false });
+
+            $http.get('/api/v2/schedules/zoneinfo/').then(({data}) => {
+                scheduler.scope.timeZones = data;
+                scheduler.scope.schedulerTimeZone = _.find(data, function(x) {
+                    let tz = $scope.schedule_obj.rrule.match(/TZID=\s*(.*?)\s*:/)[1];
+                    return x.name === tz;
+                });
+            });
             scheduler.inject('form-container', false);
             scheduler.injectDetail('occurrences', false);
 
