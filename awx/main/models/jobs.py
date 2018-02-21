@@ -746,7 +746,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def start_job_fact_cache(self, destination, modification_times, timeout=None):
         destination = os.path.join(destination, 'facts')
-        os.makedirs(destination, mode=0700)
+        os.makedirs(destination, mode=0o700)
         hosts = self._get_inventory_hosts()
         if timeout is None:
             timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT
@@ -760,7 +760,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue
             with codecs.open(filepath, 'w', encoding='utf-8') as f:
-                os.chmod(f.name, 0600)
+                os.chmod(f.name, 0o600)
                 json.dump(host.ansible_facts, f)
             # make note of the time we wrote the file so we can check if it changed later
             modification_times[filepath] = os.path.getmtime(filepath)
