@@ -68,7 +68,7 @@ function setDependentResources (id) {
         {
             model: new InventorySource(),
             params: {
-                credential: id
+                credentials: id
             }
         }
     ];
