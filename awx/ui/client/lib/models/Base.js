@@ -430,7 +430,6 @@ function goToPage (config) {
         pageNumber = page;
     }
 
-    console.log('pageNumber', page, pageNumber);
     if (pageNumber < 1 || pageNumber > this.page.last) {
         return Promise.resolve(null);
     }

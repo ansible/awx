@@ -16,8 +16,8 @@ const record = {};
 
 let parent = null;
 let cache = [];
+let buffer = [];
 
-const PAGE_LIMIT = 3;
 const SCROLL_BUFFER = 250;
 const SCROLL_LOAD_DELAY = 50;
 const EVENT_START_TASK = 'playbook_on_task_start';
@@ -67,13 +67,13 @@ function JobsIndexController (
     cache.push({ page: 1, lines: parsed.lines });
 
     // Development helper(s)
-    vm.clear = clear;
+    vm.clear = devClear;
 
     // Stdout Navigation
     vm.scroll = {
-        lock: false,
-        display: false,
-        active: false,
+        isLocked: false,
+        showBackToTop: false,
+        isActive: false,
         home: scrollHome,
         end: scrollEnd,
         down: scrollPageDown,
@@ -88,10 +88,13 @@ function JobsIndexController (
     // Real-time (active between JOB_START and JOB_END events only)
     $scope.$on(webSocketNamespace, processWebSocketEvents);
     vm.stream = {
-        active: false
+        isActive: false,
+        isRendering: false,
+        count: 0,
+        page: 1
     };
 
-    $timeout(() => {
+    window.requestAnimationFrame(() => {
         const table = $(ELEMENT_TBODY);
         container = $(ELEMENT_CONTAINER);
 
@@ -102,30 +105,70 @@ function JobsIndexController (
     });
 }
 
-function clear () {
-    const rows = $(ELEMENT_TBODY).children();
-
-    rows.empty();
-    rows.remove();
-}
-
 function processWebSocketEvents (scope, data) {
-    vm.scroll.active = true;
+    vm.scroll.isActive = true;
 
     if (data.event === JOB_START) {
-        vm.stream.active = true;
-        vm.scroll.lock = true;
+        vm.stream.isActive = true;
+        vm.scroll.isLocked = true;
     } else if (data.event === JOB_END) {
-        vm.stream.active = false;
-        vm.scroll.lock = false;
+        vm.stream.isActive = false;
     }
 
-    append([data])
+    if (vm.stream.count % resource.page.size === 0) {
+        cache.push({
+            page: vm.stream.page
+        });
+
+        vm.stream.page++;
+    }
+
+    vm.stream.count++;
+    buffer.push(data);
+
+    if (vm.stream.isRendering) {
+        return;
+    }
+
+    vm.stream.isRendering = true;
+
+    const events = buffer.slice(0, buffer.length);
+
+    buffer = [];
+
+    return render(events);
+}
+
+function render (events) {
+    return shift()
+        .then(() => append(events))
         .then(() => {
-            if (vm.scroll.lock) {
-                container[0].scrollTop = container[0].scrollHeight;
+            if (vm.scroll.isLocked) {
+                const height = container[0].scrollHeight;
+                container[0].scrollTop = height;
+            }
+
+            if (!vm.stream.isActive) {
+                if (buffer.length) {
+                    events = buffer.slice(0, buffer.length);
+                    buffer = [];
+
+                    return render(events)
+                        .then(() => {
+                            vm.stream.isRendering = false;
+                            vm.scroll.isLocked = false;
+                            vm.scroll.isActive = false;
+                        });
+                }
+            } else {
+                vm.stream.isRendering = false;
             }
         });
+}
+
+function devClear () {
+    cache = [];
+    clear();
 }
 
 function next () {
@@ -137,7 +180,7 @@ function next () {
         }
     };
 
-    console.log('[2] getting next page', config.page, cache);
+    // console.log('[2] getting next page', config.page, cache);
     return model.goToPage(config)
         .then(data => {
             if (!data || !data.results) {
@@ -164,7 +207,7 @@ function prev () {
         }
     };
 
-    console.log('[2] getting previous page', config.page, cache);
+    // console.log('[2] getting previous page', config.page, cache);
     return model.goToPage(config)
         .then(data => {
             if (!data || !data.results) {
@@ -188,88 +231,100 @@ function prev () {
 }
 
 function append (events) {
-    console.log('[4] appending next page');
-
+    // console.log('[4] appending next page');
     return $q(resolve => {
-        const parsed = parseEvents(events);
-        const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parsed.html)));
-        const table = $(ELEMENT_TBODY);
-        const index = cache.length - 1;
+        window.requestAnimationFrame(() => {
+            const parsed = parseEvents(events);
+            const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parsed.html)));
+            const table = $(ELEMENT_TBODY);
+            const index = cache.length - 1;
 
-        cache[index].lines = parsed.lines;
+            if (cache[index].lines) {
+                cache[index].lines += parsed.lines;
+            } else {
+                cache[index].lines = parsed.lines;
+            }
 
-        table.append(rows);
-        $compile(rows.contents())($scope);
-        $timeout(() => {
-            resolve();
+            table.append(rows);
+            $compile(rows.contents())($scope);
+
+            return resolve();
         });
     });
 }
 
 function prepend (events) {
-    console.log('[4] prepending next page');
+    // console.log('[4] prepending next page');
 
     return $q(resolve => {
-        const parsed = parseEvents(events);
-        const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parsed.html)));
-        const table = $(ELEMENT_TBODY);
+        window.requestAnimationFrame(() => {
+            const parsed = parseEvents(events);
+            const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parsed.html)));
+            const table = $(ELEMENT_TBODY);
 
-        cache[0].lines = parsed.lines;
+            cache[0].lines = parsed.lines;
 
-        table.prepend(rows);
-        $compile(rows.contents())($scope);
+            table.prepend(rows);
+            $compile(rows.contents())($scope);
 
-        $timeout(() => resolve(parsed.lines));
+            return resolve(parsed.lines);
+        });
     });
 }
 
 function pop () {
-    console.log('[3] popping old page');
+    // console.log('[3] popping old page');
     return $q(resolve => {
-        if (cache.length <= PAGE_LIMIT) {
-            console.log('[3.1] nothing to pop');
+        if (cache.length <= resource.page.limit) {
+            // console.log('[3.1] nothing to pop');
             return resolve();
         }
 
-        const ejected = cache.pop();
-        console.log('[3.1] popping', ejected);
-        const rows = $(ELEMENT_TBODY).children().slice(-ejected.lines);
+        window.requestAnimationFrame(() => {
+            const ejected = cache.pop();
+            // console.log('[3.1] popping', ejected);
+            const rows = $(ELEMENT_TBODY).children().slice(-ejected.lines);
 
-        rows.empty();
-        rows.remove();
+            rows.empty();
+            rows.remove();
 
-        $timeout(() => resolve(ejected));
+            return resolve(ejected);
+        });
     });
 }
 
 function shift () {
-    console.log('[3] shifting old page');
+    // console.log('[3] shifting old page');
     return $q(resolve => {
-        if (cache.length <= PAGE_LIMIT) {
-            console.log('[3.1] nothing to shift');
+        if (cache.length <= resource.page.limit) {
+            // console.log('[3.1] nothing to shift');
             return resolve();
         }
 
-        const ejected = cache.shift();
-        console.log('[3.1] shifting', ejected);
-        const rows = $(ELEMENT_TBODY).children().slice(0, ejected.lines);
+        window.requestAnimationFrame(() => {
+            const ejected = cache.shift();
+            // console.log('[3.1] shifting', ejected);
+            const rows = $(ELEMENT_TBODY).children().slice(0, ejected.lines);
 
-        rows.empty();
-        rows.remove();
+            rows.empty();
+            rows.remove();
 
-        $timeout(() => resolve());
+            return resolve();
+        });
     });
 }
 
 function clear () {
-    console.log('[3] clearing pages');
+    // console.log('[3] clearing pages');
     return $q(resolve => {
-        const rows = $(ELEMENT_TBODY).children();
+        window.requestAnimationFrame(() => {
+            const rows = $(ELEMENT_TBODY).children();
 
-        rows.empty();
-        rows.remove();
+            rows.empty();
+            rows.remove();
 
-        $timeout(() => resolve());
+            return resolve();
+        });
     });
 }
 
@@ -507,40 +562,40 @@ function toggle (uuid, menu) {
 }
 
 function onScroll () {
-    if (vm.scroll.active) {
+    if (vm.scroll.isActive) {
         return;
     }
 
-    vm.scroll.active = true;
+    vm.scroll.isActive = true;
 
     $timeout(() => {
         const top = container[0].scrollTop;
         const bottom = top + SCROLL_BUFFER + container[0].offsetHeight;
 
         if (top <= SCROLL_BUFFER) {
-            console.log('[1] scroll to top');
-            vm.scroll.display = false;
+            // console.log('[1] scroll to top');
+            vm.scroll.showBackToTop = false;
 
             prev()
                 .then(() => {
-                    console.log('[5] scroll reset');
-                    vm.scroll.active = false;
+                    // console.log('[5] scroll reset');
+                    vm.scroll.isActive = false;
                 });
 
             return;
         } else {
-            vm.scroll.display = true;
+            vm.scroll.showBackToTop = true;
 
             if (bottom >= container[0].scrollHeight) {
-                console.log('[1] scroll to bottom');
+                // console.log('[1] scroll to bottom');
 
                 next()
                     .then(() => {
-                        console.log('[5] scroll reset');
-                        vm.scroll.active = false;
+                        // console.log('[5] scroll reset');
+                        vm.scroll.isActive = false;
                     });
             } else {
-                vm.scroll.active = false;
+                vm.scroll.isActive = false;
             }
         }
     }, SCROLL_LOAD_DELAY);
@@ -555,9 +610,9 @@ function scrollHome () {
         }
     };
 
-    vm.scroll.active = true;
+    vm.scroll.isActive = true;
 
-    console.log('[2] getting first page', config.page, cache);
+    // console.log('[2] getting first page', config.page, cache);
     return model.goToPage(config)
         .then(data => {
             if (!data || !data.results) {
@@ -571,14 +626,14 @@ function scrollHome () {
             return clear()
                 .then(() => prepend(data.results))
                 .then(() => {
-                    vm.scroll.active = false;
+                    vm.scroll.isActive = false;
                 });
         });
 }
 
 function scrollEnd () {
-    if (vm.scroll.lock) {
-        vm.scroll.lock = false;
+    if (vm.scroll.isLocked) {
+        vm.scroll.isLocked = false;
 
         return;
     }
@@ -591,9 +646,9 @@ function scrollEnd () {
         }
     };
 
-    vm.scroll.active = true;
+    vm.scroll.isActive = true;
 
-    console.log('[2] getting last page', config.page, cache);
+    // console.log('[2] getting last page', config.page, cache);
     return model.goToPage(config)
         .then(data => {
             if (!data || !data.results) {
@@ -610,7 +665,7 @@ function scrollEnd () {
                     const container = $(ELEMENT_CONTAINER)[0];
 
                     container.scrollTop = container.scrollHeight;
-                    vm.scroll.active = false;
+                    vm.scroll.isActive = false;
                 });
         });
 }
