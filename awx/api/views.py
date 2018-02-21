@@ -4095,8 +4095,6 @@ class JobCreateSchedule(RetrieveAPIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         config = obj.launch_config
-        if not request.user.can_access(JobLaunchConfig, 'add', {'reference_obj': obj}):
-            raise PermissionDenied()
 
         # Make up a name for the schedule, guarentee that it is unique
         name = 'Auto-generated schedule from job {}'.format(obj.id)
@@ -4109,7 +4107,7 @@ class JobCreateSchedule(RetrieveAPIView):
                 alt_name = '{} - number {}'.format(name, idx)
             name = alt_name
 
-        schedule = Schedule.objects.create(
+        schedule_data = dict(
             name=name,
             unified_job_template=obj.unified_job_template,
             enabled=False,
@@ -4117,11 +4115,18 @@ class JobCreateSchedule(RetrieveAPIView):
             extra_data=config.extra_data,
             survey_passwords=config.survey_passwords,
             inventory=config.inventory,
-            char_prompts=config.char_prompts
+            char_prompts=config.char_prompts,
+            credentials=set(config.credentials.all())
         )
-        schedule.credentials.add(*config.credentials.all())
+        if not request.user.can_access(Schedule, 'add', schedule_data):
+            raise PermissionDenied()
+
+        creds_list = schedule_data.pop('credentials')
+        schedule = Schedule.objects.create(**schedule_data)
+        schedule.credentials.add(*creds_list)
 
         data = ScheduleSerializer(schedule, context=self.get_serializer_context()).data
+        data.serializer.instance = None  # hack to avoid permissions.py assuming this is Job model
         headers = {'Location': schedule.get_absolute_url(request=request)}
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
