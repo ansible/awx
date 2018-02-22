@@ -24,7 +24,7 @@
  			HostsService.put(host).then(function(response){
                 $scope.saveConfirmed = true;
                 if(_.has(response, "data")){
-                    $scope.$parent.$broadcast('hostUpdateSaved', response.data);
+                    $scope.$parent.$broadcast('awxNet-hostUpdateSaved', response.data);
                 }
                 setTimeout(function(){
                     $scope.saveConfirmed = false;
@@ -33,7 +33,7 @@
 
  		};
 
-        $scope.$parent.$on('showDetails', (e, data, canAdd) => {
+        $scope.$parent.$on('awxNet-showDetails', (e, data, canAdd) => {
             if (!_.has(data, 'host_id')) {
                 $scope.item = data;
                 $scope.canAdd = canAdd;

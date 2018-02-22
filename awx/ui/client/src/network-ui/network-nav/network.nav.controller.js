@@ -21,17 +21,17 @@ function NetworkingController (models, $state, $scope, strings) {
     };
 
     vm.redirectButtonHandler = (string) => {
-        $scope.$broadcast('toolbarButtonEvent', string);
+        $scope.$broadcast('awxNet-toolbarButtonEvent', string);
     };
 
     vm.jumpTo = (thing) => {
         vm.jumpToPanelExpanded = !vm.jumpToPanelExpanded;
         vm.keyPanelExpanded = false;
         if (thing && typeof thing === 'string') {
-            $scope.$broadcast('jumpTo', thing);
+            $scope.$broadcast('awxNet-jumpTo', thing);
         }
         if (thing && typeof thing === 'object') {
-            $scope.$broadcast('search', thing);
+            $scope.$broadcast('awxNet-search', thing);
         }
     };
 
@@ -40,7 +40,7 @@ function NetworkingController (models, $state, $scope, strings) {
         vm.jumpToPanelExpanded = false;
     };
 
-    $scope.$on('overall_toolbox_collapsed', () => {
+    $scope.$on('awxNet-overall_toolbox_collapsed', () => {
         vm.leftPanelIsExpanded = !vm.leftPanelIsExpanded;
     });
 
@@ -48,7 +48,7 @@ function NetworkingController (models, $state, $scope, strings) {
         vm.breadcrumb_groups = _.sortBy(groups, 'distance').reverse();
     });
 
-    $scope.$on('instatiateSelect', (e, devices) => {
+    $scope.$on('awxNet-instatiateSelect', (e, devices) => {
         for(var i = 0; i < devices.length; i++){
             let device = devices[i];
             $scope.devices.push({
@@ -67,7 +67,7 @@ function NetworkingController (models, $state, $scope, strings) {
         });
     });
 
-    $scope.$on('addSearchOption', (e, device) => {
+    $scope.$on('awxNet-addSearchOption', (e, device) => {
         $scope.devices.push({
                 value: device.id,
                 text: device.name,
@@ -76,7 +76,7 @@ function NetworkingController (models, $state, $scope, strings) {
             });
     });
 
-    $scope.$on('editSearchOption', (e, device) => {
+    $scope.$on('awxNet-editSearchOption', (e, device) => {
         for(var i = 0; i < $scope.devices.length; i++){
             if(device.id === $scope.devices[i].id){
                 $scope.devices[i].text = device.name;
@@ -85,7 +85,7 @@ function NetworkingController (models, $state, $scope, strings) {
         }
     });
 
-    $scope.$on('removeSearchOption', (e, device) => {
+    $scope.$on('awxNet-removeSearchOption', (e, device) => {
         for (var i = 0; i < $scope.devices.length; i++) {
             if ($scope.devices[i].id === device.id) {
                 $scope.devices.splice(i, 1);
@@ -93,13 +93,13 @@ function NetworkingController (models, $state, $scope, strings) {
         }
     });
 
-    $('#networking-search').on('select2:select', () => {
-        $scope.$broadcast('search', $scope.device);
+    $('#networking-search').on('select2:select', (e) => {
+        $scope.$broadcast('awxNet-search', $scope.device);
     });
 
     $('#networking-search').on('select2:open', () => {
         $('.select2-dropdown').addClass('Networking-dropDown');
-        $scope.$broadcast('SearchDropdown');
+        $scope.$broadcast('awxNet-SearchDropdown');
     });
 
     $('#networking-search').on('select2:close', () => {
@@ -107,7 +107,7 @@ function NetworkingController (models, $state, $scope, strings) {
             $('.select2-container-active').removeClass('select2-container-active');
             $(':focus').blur();
         }, 1);
-        $scope.$broadcast('SearchDropdownClose');
+        $scope.$broadcast('awxNet-SearchDropdownClose');
     });
 
 }

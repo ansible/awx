@@ -144,7 +144,7 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
         scope.create_inventory_host(device);
         scope.selected_devices.push(device);
         device.selected = true;
-        scope.$emit('addSearchOption', device);
+        scope.$emit('awxNet-addSearchOption', device);
         controller.changeState(Placing);
     }
 };
@@ -464,7 +464,7 @@ _EditLabel.prototype.onKeyDown = function (controller, msg_type, $event) {
 	} else if ($event.keyCode >= 186 && $event.keyCode <=222) { //Punctuation
         item.name += $event.key;
 	} else if ($event.keyCode === 13) { //Enter
-        controller.scope.$emit('editSearchOption', item);
+        controller.scope.$emit('awxNet-editSearchOption', item);
         controller.changeState(Selected2);
     }
     if (item.constructor.name === "Device") {
