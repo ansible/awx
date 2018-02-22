@@ -372,7 +372,6 @@ _Move.prototype.end = function (controller) {
 _Move.prototype.onMouseMove = function (controller) {
 
     var devices = controller.scope.selected_devices;
-    var groups = controller.scope.groups;
 
     var diffX = controller.scope.scaledX - controller.scope.pressedScaledX;
     var diffY = controller.scope.scaledY - controller.scope.pressedScaledY;
@@ -402,16 +401,6 @@ _Move.prototype.onMouseMove = function (controller) {
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
 
-
-    //TODO: Improve the performance of this code from O(n^2) to O(n) or better
-    for (i = 0; i < groups.length; i++) {
-        membership_old_new = groups[i].update_membership(controller.scope.devices, controller.scope.groups);
-        controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
-                                                                           groups[i].id,
-                                                                           membership_old_new[2]));
-        controller.scope.create_group_association(groups[i], membership_old_new[6]);
-        controller.scope.delete_group_association(groups[i], membership_old_new[7]);
-    }
 };
 
 _Move.prototype.onMouseUp = function (controller, msg_type, $event) {
