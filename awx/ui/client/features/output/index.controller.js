@@ -115,6 +115,12 @@ function processWebSocketEvents (scope, data) {
         vm.stream.isActive = false;
     }
 
+    if (!vm.scroll.isLocked) {
+        vm.scroll.isActive = false;
+
+        return;
+    }
+
     if (vm.stream.count % resource.page.size === 0) {
         cache.push({
             page: vm.stream.page
@@ -153,12 +159,11 @@ function render (events) {
                     events = buffer.slice(0, buffer.length);
                     buffer = [];
 
-                    return render(events)
-                        .then(() => {
-                            vm.stream.isRendering = false;
-                            vm.scroll.isLocked = false;
-                            vm.scroll.isActive = false;
-                        });
+                    return render(events);
+                } else {
+                    vm.stream.isRendering = false;
+                    vm.scroll.isLocked = false;
+                    vm.scroll.isActive = false;
                 }
             } else {
                 vm.stream.isRendering = false;
