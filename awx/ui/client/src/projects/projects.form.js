@@ -52,6 +52,17 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
                 awLookupWhen: '(project_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
+            custom_virtualenv: {
+                label: i18n._('Ansible Environment'),
+                type: 'select',
+                defaultText: i18n._('Select Ansible Environment'),
+                ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
+                awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this project to run on.") + "</p>",
+                dataTitle: i18n._('Ansible Environment'),
+                dataContainer: 'body',
+                dataPlacement: 'right',
+                ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
+            },
             scm_type: {
                 label: i18n._('SCM Type'),
                 type: 'select',

@@ -103,6 +103,17 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canGetAllRelatedResources',
                     awLookupWhen: 'canGetAllRelatedResources'
                 },
+                custom_virtualenv: {
+                    label: i18n._('Ansible Environment'),
+                    type: 'select',
+                    defaultText: i18n._('Select Ansible Environment'),
+                    ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
+                    awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this job template to run on.") + "</p>",
+                    dataTitle: i18n._('Ansible Environment'),
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
                 playbook: {
                     label: i18n._('Playbook'),
                     type:'select',

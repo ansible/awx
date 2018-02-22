@@ -6,10 +6,10 @@
 
 export default ['$scope', '$location', '$stateParams',
     'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt',
-    'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData',
+    'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', 'ConfigData',
     function($scope, $location, $stateParams,
         OrganizationForm, Rest, ProcessErrors, Prompt,
-        GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData) {
+        GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData, ConfigData) {
 
         let form = OrganizationForm(),
             defaultUrl = GetBasePath('organizations'),
@@ -29,6 +29,7 @@ export default ['$scope', '$location', '$stateParams',
 
             $scope.$emit("HideOrgListHeader");
             $scope.instance_groups = InstanceGroupsData;
+            $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
         }
 
 
@@ -36,20 +37,26 @@ export default ['$scope', '$location', '$stateParams',
         Wait('start');
         Rest.setUrl(defaultUrl + id + '/');
         Rest.get()
-            .then(({data}) => {
-                let fld;
+        .then(({data}) => {
+            let fld;
 
-                $scope.organization_name = data.name;
-                for (fld in form.fields) {
-                    if (data[fld]) {
-                        $scope[fld] = data[fld];
-                        master[fld] = data[fld];
-                    }
+            $scope.organization_name = data.name;
+            for (fld in form.fields) {
+                if (data[fld]) {
+                    $scope[fld] = data[fld];
+                    master[fld] = data[fld];
                 }
+            }
 
-                $scope.organization_obj = data;
-                $scope.$emit('organizationLoaded');
-                Wait('stop');
+            CreateSelect2({
+                element: '#organization_custom_virtualenv',
+                multiple: false,
+                opts: $scope.custom_virtualenvs_options
+            });
+
+            $scope.organization_obj = data;
+            $scope.$emit('organizationLoaded');
+            Wait('stop');
         });
 
         $scope.toggleNotification = function(event, id, column) {

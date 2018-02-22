@@ -55,7 +55,15 @@ angular.module('Organizations', [
                         activityStreamTarget: 'organization'
                     },
                     resolve: {
+                        add: {
+                            ConfigData: ['ConfigService', (ConfigService) => {
+                                return ConfigService.getConfig().then(response => response);
+                            }]
+                        },
                         edit: {
+                            ConfigData: ['ConfigService', (ConfigService) => {
+                                return ConfigService.getConfig().then(response => response);
+                            }],
                             InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
                                 function($stateParams, Rest, GetBasePath, ProcessErrors){
                                     let path = `${GetBasePath('organizations')}${$stateParams.organization_id}/instance_groups/`;

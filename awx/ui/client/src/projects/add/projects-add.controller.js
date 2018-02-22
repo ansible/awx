@@ -7,12 +7,12 @@
 export default ['$scope', '$location', '$stateParams', 'GenerateForm',
     'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath',
     'GetProjectPath', 'GetChoices', 'Wait', '$state', 'CreateSelect2', 'i18n',
-    'CredentialTypes',
+    'CredentialTypes', 'ConfigData',
     function($scope, $location, $stateParams, GenerateForm, ProjectsForm, Rest,
     Alert, ProcessErrors, GetBasePath, GetProjectPath, GetChoices, Wait, $state,
-    CreateSelect2, i18n, CredentialTypes) {
+    CreateSelect2, i18n, CredentialTypes, ConfigData) {
 
-        var form = ProjectsForm(),
+        let form = ProjectsForm(),
             base = $location.path().replace(/^\//, '').split('/')[0],
             defaultUrl = GetBasePath('projects'),
             master = {};
@@ -21,13 +21,21 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
 
         function init() {
             $scope.canEditOrg = true;
+            $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+
             Rest.setUrl(GetBasePath('projects'));
             Rest.options()
-                .then(({data}) => {
-                    if (!data.actions.POST) {
-                        $state.go("^");
-                        Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a project.'), 'alert-info');
-                    }
+            .then(({data}) => {
+                if (!data.actions.POST) {
+                    $state.go("^");
+                    Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a project.'), 'alert-info');
+                }
+            });
+
+            CreateSelect2({
+                element: '#project_custom_virtualenv',
+                multiple: false,
+                opts: $scope.custom_virtualenvs_options
             });
 
             // apply form definition's default field values

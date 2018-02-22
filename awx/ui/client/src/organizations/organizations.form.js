@@ -42,6 +42,17 @@ export default ['NotificationsList', 'i18n',
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(organization_obj.summary_fields.user_capabilities.edit || canAdd)"></instance-groups-multiselect>',
+                },
+                custom_virtualenv: {
+                    label: i18n._('Ansible Environment'),
+                    defaultText: i18n._('Select Ansible Environment'),
+                    type: 'select',
+                    ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
+                    awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this organization to run on.") + "</p>",
+                    dataTitle: i18n._('Ansible Environment'),
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 

@@ -32,7 +32,7 @@ angular.module('Projects', [])
             let stateDefinitions = stateDefinitionsProvider.$get();
             let stateExtender = $stateExtenderProvider.$get();
             var projectResolve = {
-                    CredentialTypes: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors',
+                CredentialTypes: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors',
                     (Rest, $stateParams, GetBasePath, ProcessErrors) => {
                         var path = GetBasePath('credential_types');
                         Rest.setUrl(path);
@@ -47,7 +47,10 @@ angular.module('Projects', [])
                                 });
                             });
                     }
-                ]
+                ],
+                ConfigData: ['ConfigService', (ConfigService) => {
+                    return ConfigService.getConfig().then(response => response);
+                }]
             };
 
             function generateStateTree() {

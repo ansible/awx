@@ -129,7 +129,10 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                     response.status
                                             });
                                         });
-                                    }]
+                            }],
+                            ConfigData: ['ConfigService', (ConfigService) => {
+                                return ConfigService.getConfig().then(response => response);
+                            }]
                         }
                     }
                 });
@@ -260,6 +263,9 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                     response.status
                                             });
                                         });
+                            }],
+                            ConfigData: ['ConfigService', (ConfigService) => {
+                                return ConfigService.getConfig().then(response => response);
                             }]
                         }
                     }
