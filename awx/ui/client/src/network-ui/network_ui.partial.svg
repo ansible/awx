@@ -28,7 +28,6 @@
 		</clipPath>
 		</defs>
          <g transform="scale(1.0)" id="frame_g">
-            <g ng-if="current_mode == 'MultiSite'" transform="translate(-300000, -200000) scale(1000)" awx-net-map></g>
             <g ng-if="!hide_links">
             <g ng-if="current_scale > 0.5 && current_scale < 5">
             <g ng-repeat="link in links">
@@ -37,15 +36,8 @@
             </g> <!-- end ng-if current_scale -->
             </g> <!-- end hide_links -->
             <g ng-repeat="link in links">
-            <g ng-if="link.selected || link.to_interface.selected || link.from_interface.selected" link></g>
+                <g ng-if="link.selected || link.to_interface.selected || link.from_interface.selected" link></g>
             </g>
-            <g ng-if="current_scale > 0.5 && current_scale < 5">
-            <g ng-repeat="stream in streams">
-            <g awx-net-stream></g>
-            </g> <!-- end ng-repeat stream in streams-->
-            </g> <!-- end ng-if current_scale -->
-             <g ng-if="current_scale < 5">
-
             <g ng-repeat="item in devices"
                ng-attr-transform="translate({{item.x}},{{item.y}})"
                ng-attr-class="{{item.type}}"
@@ -66,19 +58,7 @@
                <g ng-switch-default> <!-- begin default -->
                     <g awx-net-default></g>
                </g> <!-- end default -->
-               <g awx-net-status-light></g>
             </g> <!-- end devices -->
-
-            </g>
-            <g ng-if="current_scale >= 5">
-            <g ng-repeat="item in devices"
-               ng-attr-transform="translate({{item.x}},{{item.y}})">
-                <g awx-net-device-detail> </g>
-            </g>
-            </g>
-            <g ng-repeat="item in groups">
-            <g awx-net-group name="{{item.type + '_' + item.id + '_' + item.name}}"></g>
-            </g>
             <g ng-attr-transform="translate({{scaledX}},{{scaledY}})" ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug-cursor" >
                 <line x1="-5" y1="0" x2="5" y2="0"/>
                 <line x1="0" y1="-5" x2="0" y2="5"/>
@@ -86,17 +66,8 @@
             <g awx-net-quadrants>
             </g>
         </g> <!-- end frame_g -->
-        <g ng-repeat="toolbox in [site_toolbox, rack_toolbox, inventory_toolbox, app_toolbox]">
+        <g ng-repeat="toolbox in [inventory_toolbox]">
         <g awx-net-inventory-toolbox></g>
-        </g>
-        <g ng-if="!hide_buttons">
-
-            <g> <!-- buttons -->
-                <g ng-repeat="button in buttons"
-                   ng-attr-transform="translate({{button.x}},{{button.y}})">
-                    <g awx-net-button></g>
-                </g>
-            </g> <!-- end buttons -->
         </g>
         <g awx-net-context-menu
                 context_menu="context_menus[0]"
@@ -106,6 +77,5 @@
         <g awx-net-debug></g>
         <g awx-net-test-results></g>
         <g awx-net-cursor></g>
-        <g ng-if="template_building"><text stroke="none" fill="red" font-size="48" ng-attr-x="{{graph.width/2}}" ng-attr-y="200">TEMPLATE BUILDING</text></g>
     </svg>
     </div>
