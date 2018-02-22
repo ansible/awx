@@ -16,7 +16,7 @@
                 <span class="Form-inputLabel" translate="">Host Name</span><a id="awp-name" href="" aw-pop-over="<p>Provide a host name, ip address, or ip address:port. Examples include:</p><blockquote>myserver.domain.com<br/>127.0.0.1<br />10.1.0.140:25<br />server.example.com:25</blockquote>" data-placement="right" data-container="body" over-title="Host Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a>
             </label>
             <div>
-                <input type="text" ng-model="item.name" name="name" id="host_name" class="form-control Form-textInput Networking-input ng-pristine ng-untouched ng-valid ng-not-empty ng-valid-required" required="" ng-disabled="!(item.summary_fields.user_capabilities.edit || canAdd)">
+                <input readonly type="text" ng-model="item.name" name="name" id="host_name" class="form-control Form-textInput Networking-input ng-pristine ng-untouched ng-valid ng-not-empty ng-valid-required" required="" ng-disabled="!(item.summary_fields.user_capabilities.edit || canAdd)">
                 <div class="error ng-hide" id="host-name-required-error" ng-show="host_form.name.$dirty &amp;&amp; host_form.name.$error.required">Please enter a value.</div>
                 <div class="error api-error ng-binding" id="host-name-api-error" ng-bind="name_api_error"></div>
             </div>
@@ -26,39 +26,16 @@
                 <span class="Form-inputLabel" translate="">Description</span>
             </label>
             <div>
-                <input type="text" ng-model="item.description" name="description" id="host_description" class="form-control Form-textInput Networking-input" ng-disabled="!(item.summary_fields.user_capabilities.edit || canAdd)">
+                <input readonly type="text" ng-model="item.description" name="description" id="host_description" class="form-control Form-textInput Networking-input" ng-disabled="!(item.summary_fields.user_capabilities.edit || canAdd)">
                 <div class="error api-error ng-binding" id="host-description-api-error" ng-bind="description_api_error"></div>
             </div>
         </div>
         <div class="form-group Form-formGroup Form-formGroup--fullWidth">
-            <label class="Form-inputLabelContainer" for="variables">
-                    <span class="Form-inputLabel" translate="">Variables</span>
-                    <a id="awp-variables" href="" aw-pop-over="<p>Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>JSON:<br />
-                        <blockquote>{<br />&emsp;&quot;somevar&quot;: &quot;somevalue&quot;,<br />&emsp;&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>
-                        YAML:<br />
-                        <blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>
-                        <p>View JSON examples at <a href=&quot;http://www.json.org&quot; target=&quot;_blank&quot;>www.json.org</a></p><p>View YAML examples at <a href=&quot;http://docs.ansible.com/YAMLSyntax.html&quot; target=&quot;_blank&quot;>docs.ansible.com</a></p>"
-                        data-placement="right" data-container="body" over-title="Host Variables" class="help-link" data-original-title="" title="" tabindex="-1">
-                            <i class="fa fa-question-circle"></i>
-                    </a>
-                    <div class="FormToggle-container" id="host_variables_parse_type">
-                        <div class="btn-group">
-                            <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs btn-primary">
-                                <input type="radio" value="yaml" ng-model="parseType" ng-change="parseTypeChange('parseType', 'variables')" class="ng-pristine ng-untouched ng-valid ng-not-empty">YAML
-                            </label>
-                            <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs Button-primary--hollow">
-                                <input type="radio" value="json" ng-model="parseType" ng-change="parseTypeChange('parseType', 'variables')" class="ng-pristine ng-untouched ng-valid ng-not-empty">JSON
-                            </label>
-                        </div>
-                    </div>
-                </label>
-            <textarea rows="6" ng-model="variables" name="variables" class="form-control Form-textArea Form-formGroup--fullWidth" id="network_host_variables"></textarea>
+            <awx-net-extra-vars item="item"></awx-net-extra-vars>
         </div>
     </form>
     <div class="buttons Form-buttons" id="host_controls" ng-show="item.host_id">
         <button type="button" class="btn btn-sm Form-cancelButton" id="host_cancel_btn" ng-show="(item.summary_fields.user_capabilities.edit || canAdd)" ng-click="formCancel()"> Cancel</button>
-        <button type="button" class="btn btn-sm Form-cancelButton ng-hide" id="host_close_btn" ng-show="!(item.summary_fields.user_capabilities.edit || canAdd)" ng-click="formCancel()"> Close</button>
-        <button type="button" class="btn btn-sm Form-saveButton" id="host_save_btn" ng-show="(item.summary_fields.user_capabilities.edit || canAdd)" ng-click="formSave()" ng-disabled="host_form.$invalid ||  host_form.$pending"> Save</button>
     </div>
     <div class="Networking-saveConfirmation" ng-show="saveConfirmed">
         Save Complete <i class="fa fa-check-circle"></i>

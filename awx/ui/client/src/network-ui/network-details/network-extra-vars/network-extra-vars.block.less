@@ -1,0 +1,167 @@
+.NetworkingExtraVarsLabel{
+    display: flex;
+    width: 100%;
+}
+
+.NetworkingExtraVars-extraVarsLabelContainer{
+    flex: 1 0 auto;
+}
+
+.NetworkingExtraVars-expandTextContainer{
+    flex: 1 0 auto;
+    text-align: right;
+    font-weight: normal;
+    color: @default-link;
+    cursor: pointer;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
+
+@media screen and (min-width: 768px){
+	.NetworkingExtraVars .modal-dialog{
+		width: 700px;
+	}
+}
+
+.NetworkingExtraVarsModal .modal-dialog{
+    width: calc(~"100% - 200px");
+    height: calc(~"100vh - 80px");
+}
+
+.NetworkingExtraVarsModal .modal-content{
+    height: 100%;
+}
+
+.NetworkingExtraVars .CodeMirror{
+	overflow-x: hidden;
+}
+
+.NetworkingExtraVars-close:hover{
+    color: @btn-txt;
+    background-color: @btn-bg-hov;
+}
+
+.NetworkingExtraVars-body{
+	margin-bottom: 20px;
+}
+
+.NetworkingExtraVars-tab:hover {
+    color: @btn-txt;
+    background-color: @btn-bg-hov;
+    cursor: pointer;
+}
+.NetworkingExtraVars-tab--selected{
+	color: @btn-txt-sel!important;
+    background-color: @default-icon!important;
+    border-color: @default-icon!important;
+}
+.NetworkingExtraVars-view--container{
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+}
+.NetworkingExtraVars .modal-footer{
+	border: 0;
+	margin-top: 0px;
+	padding-top: 5px;
+}
+.NetworkingExtraVars-controls{
+	float: right;
+    margin-top: 15px;
+	button {
+		margin-left: 10px;
+	}
+}
+
+.NetworkingExtraVars-header{
+    padding-bottom: 15px;
+}
+.NetworkingExtraVars-title{
+ 	color: @default-interface-txt;
+ 	font-weight: 600;
+ 	margin-bottom: 8px;
+}
+.NetworkingExtraVarsModal .modal-body{
+	padding: 0px!important;
+    overflow-y: auto;
+}
+.NetworkingExtraVars-nav{
+	padding-top: 12px;
+	padding-bottom: 20px;
+}
+.NetworkingExtraVars-field{
+	margin-bottom: 8px;
+	flex: 0 1 12em;
+}
+.NetworkingExtraVars-field--label{
+	text-transform: uppercase;
+	flex: 0 1 80px;
+	max-width: 80px;
+    min-width: 80px;
+	font-size: 12px;
+	word-wrap: break-word;
+}
+.NetworkingExtraVars-field{
+	.OnePlusTwo-left--detailsRow;
+}
+.NetworkingExtraVars-field--content{
+	word-wrap: break-word;
+}
+.NetworkingExtraVars-field--monospaceContent{
+    font-family: monospace;
+}
+.NetworkingExtraVars-button:disabled {
+	pointer-events: all!important;
+}
+
+.NetworkingExtraVars-numberColumnPreload {
+    background-color: @default-list-header-bg;
+    height: 198px;
+    border-right: 1px solid #ccc;
+    width: 30px;
+    position: fixed;
+}
+
+.NetworkingExtraVars-numberColumn {
+    background-color: @default-list-header-bg;
+    border-right: 1px solid #ccc;
+    border-bottom-left-radius: 5px;
+    color: #999;
+    font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+    position: fixed;
+    padding: 4px 3px 0 5px;
+    text-align: right;
+    white-space: nowrap;
+    width: 30px;
+}
+
+.NetworkingExtraVars-numberColumn--second{
+    padding-top:0px;
+}
+
+.NetworkingExtraVars-noJson{
+    align-items: center;
+    background-color: @default-no-items-bord;
+    border: 1px solid @default-icon-hov;
+    border-radius: 5px;
+    color: @b7grey;
+    display: flex;
+    height: 200px;
+    justify-content: center;
+    text-transform: uppercase;
+    width: 100%;
+}
+
+.NetworkingExtraVarsModal .CodeMirror{
+    max-height: none;
+}

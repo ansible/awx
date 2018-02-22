@@ -17,14 +17,6 @@ function DeviceMove(sender, id, x, y, previous_x, previous_y) {
 }
 exports.DeviceMove = DeviceMove;
 
-function DeviceInventoryUpdate(sender, id, host_id) {
-    this.msg_type = "DeviceInventoryUpdate";
-    this.sender = sender;
-    this.id = id;
-    this.host_id = host_id;
-}
-exports.DeviceInventoryUpdate = DeviceInventoryUpdate;
-
 function DeviceCreate(sender, id, x, y, name, type, host_id) {
     this.msg_type = "DeviceCreate";
     this.sender = sender;
@@ -49,15 +41,6 @@ function DeviceDestroy(sender, id, previous_x, previous_y, previous_name, previo
 }
 exports.DeviceDestroy = DeviceDestroy;
 
-function DeviceLabelEdit(sender, id, name, previous_name) {
-    this.msg_type = "DeviceLabelEdit";
-    this.sender = sender;
-    this.id = id;
-    this.name = name;
-    this.previous_name = previous_name;
-}
-exports.DeviceLabelEdit = DeviceLabelEdit;
-
 function DeviceSelected(sender, id) {
     this.msg_type = "DeviceSelected";
     this.sender = sender;
@@ -80,25 +63,6 @@ function InterfaceCreate(sender, device_id, id, name) {
     this.name = name;
 }
 exports.InterfaceCreate = InterfaceCreate;
-
-function InterfaceLabelEdit(sender, id, device_id, name, previous_name) {
-    this.msg_type = "InterfaceLabelEdit";
-    this.sender = sender;
-    this.id = id;
-    this.device_id = device_id;
-    this.name = name;
-    this.previous_name = previous_name;
-}
-exports.InterfaceLabelEdit = InterfaceLabelEdit;
-
-function LinkLabelEdit(sender, id, name, previous_name) {
-    this.msg_type = "LinkLabelEdit";
-    this.sender = sender;
-    this.id = id;
-    this.name = name;
-    this.previous_name = previous_name;
-}
-exports.LinkLabelEdit = LinkLabelEdit;
 
 function LinkCreate(sender, id, from_device_id, to_device_id, from_interface_id, to_interface_id) {
     this.msg_type = "LinkCreate";
@@ -208,11 +172,6 @@ function ViewPort(sender, scale, panX, panY, graph_width, graph_height, trace_id
 }
 exports.ViewPort = ViewPort;
 
-function NewDevice(type) {
-    this.type = type;
-}
-exports.NewDevice = NewDevice;
-
 function PasteDevice(device) {
     this.device = device;
 }
@@ -230,21 +189,12 @@ function FSMTrace(order, fsm_name, from_state, to_state, recv_message_type) {
 }
 exports.FSMTrace = FSMTrace;
 
-function ChannelTrace(from_fsm, to_fsm, sent_message_type) {
-    this.msg_type = 'ChannelTrace';
-    this.sender = 0;
-    this.trace_id = 0;
-    this.from_fsm = from_fsm;
-    this.to_fsm = to_fsm;
-    this.sent_message_type = sent_message_type;
-}
-exports.ChannelTrace = ChannelTrace;
-
-function Snapshot(sender, devices, links, order, trace_id) {
+function Snapshot(sender, devices, links, inventory_toolbox, order, trace_id) {
     this.msg_type = 'Snapshot';
     this.sender = 0;
     this.devices = devices;
     this.links = links;
+    this.inventory_toolbox = inventory_toolbox;
     this.order = order;
     this.trace_id = trace_id;
 }

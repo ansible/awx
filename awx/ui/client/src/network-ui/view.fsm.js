@@ -73,9 +73,12 @@ _Start.prototype.start.transitions = ['Ready'];
 
 _Scale.prototype.onMouseWheel = function (controller, msg_type, message) {
       var delta = message[1];
+      if (Math.abs(delta) > 100) {
+          delta = delta / 10;
+      }
       var new_scale = Math.max(controller.scope.MIN_ZOOM,
                                Math.min(controller.scope.MAX_ZOOM,
-                                        (controller.scope.current_scale + delta / (controller.scope.MAX_ZOOM / controller.scope.current_scale))));
+                                        (controller.scope.current_scale + delta / (100 / controller.scope.current_scale))));
       var new_panX = controller.scope.mouseX - new_scale * ((controller.scope.mouseX - controller.scope.panX) / controller.scope.current_scale);
       var new_panY = controller.scope.mouseY - new_scale * ((controller.scope.mouseY - controller.scope.panY) / controller.scope.current_scale);
       controller.scope.updateScaledXY();

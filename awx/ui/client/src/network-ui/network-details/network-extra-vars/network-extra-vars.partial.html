@@ -1,0 +1,72 @@
+<label class="NetworkingExtraVarsLabel" for="variables">
+        <div class="NetworkingExtraVars-extraVarsLabelContainer">
+            <span class="Form-inputLabel" translate="">Variables</span>
+            <a id="awp-variables" href="" aw-pop-over="<p>Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>JSON:<br />
+                <blockquote>{<br />&emsp;&quot;somevar&quot;: &quot;somevalue&quot;,<br />&emsp;&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>
+                YAML:<br />
+                <blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>
+                <p>View JSON examples at <a href=&quot;http://www.json.org&quot; target=&quot;_blank&quot;>www.json.org</a></p><p>View YAML examples at <a href=&quot;http://docs.ansible.com/YAMLSyntax.html&quot; target=&quot;_blank&quot;>docs.ansible.com</a></p>"
+                data-placement="right" data-container="body" over-title="Host Variables" class="help-link" data-original-title="" title="" tabindex="-1">
+                    <i class="fa fa-question-circle"></i>
+            </a>
+            <div class="FormToggle-container" id="host_variables_parse_type">
+                <div class="btn-group">
+                    <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs btn-primary">
+                        <input type="radio" value="yaml" ng-model="parseType" ng-change="parseTypeChange('parseType', 'variables')" class="ng-pristine ng-untouched ng-valid ng-not-empty">YAML
+                    </label>
+                    <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs Button-primary--hollow">
+                        <input type="radio" value="json" ng-model="parseType" ng-change="parseTypeChange('parseType', 'variables')" class="ng-pristine ng-untouched ng-valid ng-not-empty">JSON
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="NetworkingExtraVars-expandTextContainer" ng-click="openExtraVarsModal()">Expand</div>
+    </label>
+<textarea readonly rows="6" disabled="disabled" ng-model="variables" name="variables" class="form-control Form-textArea Form-formGroup--fullWidth" id="network_host_variables"></textarea>
+
+
+<div ng-if="networkingExtraVarsModalOpen" id="NetworkingExtraVarsModal" class="NetworkingExtraVarsModal modal" role="dialog">
+	<div id="NetworkingExtraVarsModalDialog" class="modal-dialog">
+		<div class="modal-content">
+		<!-- modal body -->
+		<div class="modal-body">
+			<div class="NetworkingExtraVars-header">
+				<span class="NetworkingExtraVars-title">{{item.name}}</span>
+				<button ng-click="closeExtraVarModal()" type="button" class="close">
+					<i class="fa fa-times-circle"></i>
+				</button>
+			</div>
+            <div class="NetworkingExtraVars-codemirrorContainer">
+                <!-- <textarea ng-hide="no_json" ng-model="variables" id="NetworkingExtraVars-codemirror" class="NetworkingExtraVars-codemirror"></textarea> -->
+                <label class="NetworkingExtraVarsModalLabel" for="variables">
+                            <span class="Form-inputLabel" translate="">Variables</span>
+                            <a id="awp-variables" href="" aw-pop-over="<p>Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>JSON:<br />
+                                <blockquote>{<br />&emsp;&quot;somevar&quot;: &quot;somevalue&quot;,<br />&emsp;&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>
+                                YAML:<br />
+                                <blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>
+                                <p>View JSON examples at <a href=&quot;http://www.json.org&quot; target=&quot;_blank&quot;>www.json.org</a></p><p>View YAML examples at <a href=&quot;http://docs.ansible.com/YAMLSyntax.html&quot; target=&quot;_blank&quot;>docs.ansible.com</a></p>"
+                                data-placement="right" data-container="body" over-title="Host Variables" class="help-link" data-original-title="" title="" tabindex="-1">
+                                    <i class="fa fa-question-circle"></i>
+                            </a>
+                            <div class="FormToggle-container" id="host_variables_parse_type">
+                                <div class="btn-group">
+                                    <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs btn-primary">
+                                        <input type="radio" value="yaml" ng-model="parseType" ng-change="parseTypeChange('parseType', 'variables')" class="ng-pristine ng-untouched ng-valid ng-not-empty">YAML
+                                    </label>
+                                    <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs Button-primary--hollow">
+                                        <input type="radio" value="json" ng-model="parseType" ng-change="parseTypeChange('parseType', 'variables')" class="ng-pristine ng-untouched ng-valid ng-not-empty">JSON
+                                    </label>
+                                </div>
+                            </div>
+                    </label>
+                <textarea readonly disabled ng-model="extra_variables" name="extra_variables" class="form-control Form-textArea Form-formGroup--fullWidth" id="NetworkingExtraVars-codemirror"></textarea>
+
+            </div>
+            <div ng-if="no_json" class="NetworkingExtraVars-noJson" translate>No JSON data returned by the module</div>
+			<div class="NetworkingExtraVars-controls">
+				<button ng-click="closeExtraVarModal()" class="btn btn-sm btn-default NetworkingExtraVars-close">Close</button>
+			</div>
+		</div>
+		</div>
+	</div>
+</div>

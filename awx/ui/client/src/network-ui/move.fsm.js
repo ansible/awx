@@ -4,7 +4,6 @@ var fsm = require('./fsm.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
 var util = require('./util.js');
-var nunjucks = require('nunjucks');
 
 function _State () {
 }
@@ -59,16 +58,6 @@ inherits(_Selected1, _State);
 var Selected1 = new _Selected1();
 exports.Selected1 = Selected1;
 
-
-
-function _EditLabel () {
-    this.name = 'EditLabel';
-}
-inherits(_EditLabel, _State);
-var EditLabel = new _EditLabel();
-exports.EditLabel = EditLabel;
-
-
 function _Placing () {
     this.name = 'Placing';
 }
@@ -91,74 +80,13 @@ _State.prototype.onUnselectAll = function (controller, msg_type, $event) {
     controller.delegate_channel.send(msg_type, $event);
 };
 
-_Ready.prototype.onNewDevice = function (controller, msg_type, message) {
-
-	var scope = controller.scope;
-    var device = null;
-    var id = null;
-
-    scope.pressedX = scope.mouseX;
-    scope.pressedY = scope.mouseY;
-    scope.pressedScaledX = scope.scaledX;
-    scope.pressedScaledY = scope.scaledY;
-
-    scope.clear_selections();
-
-	if (message.type === "router") {
-        id = controller.scope.device_id_seq();
-		device = new models.Device(id,
-                                   "Router" + id,
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "router");
-	}
-    else if (message.type === "switch") {
-        id = controller.scope.device_id_seq();
-		device = new models.Device(id,
-                                   "Switch" + id,
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "switch");
-	}
-    else if (message.type === "host") {
-        id = controller.scope.device_id_seq();
-		device = new models.Device(id,
-                                   "Host" + id,
-                                   scope.scaledX,
-                                   scope.scaledY,
-                                   "host");
-	}
-
-    if (device !== null) {
-        scope.devices.push(device);
-        scope.send_control_message(new messages.DeviceCreate(scope.client_id,
-                                                             device.id,
-                                                             device.x,
-                                                             device.y,
-                                                             device.name,
-                                                             device.type,
-                                                             device.host_id));
-        if (scope.template_building) {
-            device.template = true;
-        }
-        scope.create_inventory_host(device);
-        scope.selected_devices.push(device);
-        device.selected = true;
-        scope.$emit('addSearchOption', device);
-        controller.changeState(Placing);
-    }
-};
-_Ready.prototype.onNewDevice.transitions = ['Placing'];
-
 _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
 
 	var scope = controller.scope;
     var device = null;
     var intf = null;
-    var process = null;
     var i = 0;
     var c_messages = [];
-    var template_context = null;
 
     scope.pressedX = scope.mouseX;
     scope.pressedY = scope.mouseY;
@@ -171,20 +99,6 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                scope.scaledY,
                                message.device.type,
                                message.device.host_id);
-    if (!controller.scope.template_building && message.device.template) {
-        try {
-            template_context = {};
-            template_context.id = device.id;
-            controller.scope.create_template_sequences(controller.scope.sequences, device.name, template_context);
-            device.name = nunjucks.renderString(device.name, template_context);
-            scope.create_inventory_host(device);
-        } catch (err) {
-            console.log(err);
-        }
-    } else {
-        device.template = true;
-    }
-    device.variables = JSON.parse(message.device.variables);
     scope.devices.push(device);
     c_messages.push(new messages.DeviceCreate(scope.client_id,
                                               device.id,
@@ -200,20 +114,6 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                                      device.id,
                                                      intf.id,
                                                      intf.name));
-    }
-    for (i=0; i < message.device.processes.length; i++) {
-        process = new models.Process(message.device.processes[i].id,
-                                     message.device.processes[i].name,
-                                     message.device.processes[i].type, 0, 0);
-        process.device = device;
-        c_messages.push(new messages.ProcessCreate(controller.scope.client_id,
-                                                   process.id,
-                                                   process.name,
-                                                   process.type,
-                                                   process.device.id,
-                                                   process.x,
-                                                   process.y));
-        device.processes.push(process);
     }
     scope.selected_devices.push(device);
     device.selected = true;
@@ -245,38 +145,6 @@ _Start.prototype.start = function (controller) {
 };
 _Start.prototype.start.transitions = ['Ready'];
 
-
-_Selected2.prototype.onNewDevice = function (controller, msg_type, message) {
-
-    controller.changeState(Ready);
-    controller.handle_message(msg_type, message);
-};
-_Selected2.prototype.onNewDevice.transitions = ['Ready'];
-
-_Selected2.prototype.onCopySelected = function (controller) {
-
-    var devices = controller.scope.selected_devices;
-    var device_copy = null;
-    var process_copy = null;
-    var interface_copy = null;
-    var i = 0;
-    var j = 0;
-    for(i=0; i < devices.length; i++) {
-        device_copy = new models.Device(0, devices[i].name, 0, 0, devices[i].type, 0);
-        device_copy.icon = true;
-        for(j=0; j < devices[i].processes.length; j++) {
-            process_copy = new models.Process(0, devices[i].processes[j].name, devices[i].processes[j].name, 0, 0);
-            device_copy.processes.push(process_copy);
-        }
-        for(j=0; j < devices[i].interfaces.length; j++) {
-            interface_copy = new models.Interface(devices[i].interfaces[j].id, devices[i].interfaces[j].name);
-            device_copy.interfaces.push(interface_copy);
-        }
-        device_copy.variables = JSON.stringify(devices[i]);
-        device_copy.template = true;
-        controller.scope.inventory_toolbox.items.push(device_copy);
-    }
-};
 
 _Selected2.prototype.onMouseDown = function (controller, msg_type, $event) {
 
@@ -435,61 +303,6 @@ _Selected3.prototype.onMouseMove = function (controller) {
 };
 _Selected3.prototype.onMouseMove.transitions = ['Move'];
 
-_EditLabel.prototype.start = function (controller) {
-    controller.scope.selected_items[0].edit_label = true;
-};
-
-_EditLabel.prototype.end = function (controller) {
-    controller.scope.selected_items[0].edit_label = false;
-};
-
-_EditLabel.prototype.onMouseDown = function (controller, msg_type, $event) {
-
-    controller.changeState(Ready);
-    controller.handle_message(msg_type, $event);
-
-};
-_EditLabel.prototype.onMouseDown.transitions = ['Ready'];
-
-
-_EditLabel.prototype.onKeyDown = function (controller, msg_type, $event) {
-    //Key codes found here:
-    //https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-	var item = controller.scope.selected_items[0];
-    var previous_name = item.name;
-	if ($event.keyCode === 8 || $event.keyCode === 46) { //Delete
-		item.name = item.name.slice(0, -1);
-	} else if ($event.keyCode >= 48 && $event.keyCode <=90) { //Alphanumeric
-        item.name += $event.key;
-	} else if ($event.keyCode >= 186 && $event.keyCode <=222) { //Punctuation
-        item.name += $event.key;
-	} else if ($event.keyCode === 13) { //Enter
-        controller.scope.$emit('editSearchOption', item);
-        controller.changeState(Selected2);
-    }
-    if (item.constructor.name === "Device") {
-        controller.scope.send_control_message(new messages.DeviceLabelEdit(controller.scope.client_id,
-                                                                           item.id,
-                                                                           item.name,
-                                                                           previous_name));
-    }
-    if (item.constructor.name === "Interface") {
-        controller.scope.send_control_message(new messages.InterfaceLabelEdit(controller.scope.client_id,
-                                                                           item.id,
-                                                                           item.device.id,
-                                                                           item.name,
-                                                                           previous_name));
-    }
-    if (item.constructor.name === "Link") {
-        controller.scope.send_control_message(new messages.LinkLabelEdit(controller.scope.client_id,
-                                                                           item.id,
-                                                                           item.name,
-                                                                           previous_name));
-    }
-};
-_EditLabel.prototype.onKeyDown.transitions = ['Selected2'];
-
-
 _Placing.prototype.onMouseDown = function (controller) {
 
     controller.changeState(Selected1);
@@ -509,13 +322,6 @@ _ContextMenu.prototype.end = function (controller) {
 
     controller.scope.removeContextMenu();
 };
-
-_ContextMenu.prototype.onLabelEdit = function (controller) {
-
-    controller.changeState(EditLabel);
-
-};
-_ContextMenu.prototype.onLabelEdit.transitions = ['EditLabel'];
 
 _ContextMenu.prototype.onMouseDown = function (controller) {
 
