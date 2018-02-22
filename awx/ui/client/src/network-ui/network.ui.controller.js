@@ -6,6 +6,7 @@ var hotkeys = require('./hotkeys.fsm.js');
 var toolbox_fsm = require('./toolbox.fsm.js');
 var view = require('./view.fsm.js');
 var move = require('./move.fsm.js');
+var buttons = require('./buttons.fsm.js');
 var time = require('./time.fsm.js');
 var test_fsm = require('./test.fsm.js');
 var util = require('./util.js');
@@ -14,9 +15,8 @@ var messages = require('./messages.js');
 var animations = require('./animations.js');
 var keybindings = require('./keybindings.fsm.js');
 var details_panel_fsm = require('./details.panel.fsm.js');
-var svg_crowbar = require('./svg-crowbar.js');
+var svg_crowbar = require('./vendor/svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
-var nunjucks = require('nunjucks');
 
 var NetworkUIController = function($scope,
                                    $document,
@@ -30,8 +30,6 @@ var NetworkUIController = function($scope,
                                    rbacUiControlService) {
 
   window.scope = $scope;
-
-  $scope.nunjucks = nunjucks;
 
   $scope.http = $http;
 
@@ -65,7 +63,6 @@ var NetworkUIController = function($scope,
       };
   }
   $scope.my_location = $location.protocol() + "://" + $location.host() + ':' + $location.port();
-  $scope.history = [];
   $scope.client_id = 0;
   $scope.test_client_id = 0;
   $scope.onMouseDownResult = "";
@@ -97,10 +94,11 @@ var NetworkUIController = function($scope,
   $scope.last_key = "";
   $scope.last_key_code = null;
   $scope.last_event = null;
-  $scope.cursor = {'x':100, 'y': 100, 'hidden': false};
+  $scope.cursor = {'x':100, 'y': 100, 'hidden': true};
 
   $scope.debug = {'hidden': true};
   $scope.hide_buttons = false;
+  $scope.hide_menus = false;
   $scope.hide_links = false;
   $scope.hide_interfaces = false;
   $scope.graph = {'width': window.innerWidth,
@@ -123,7 +121,6 @@ var NetworkUIController = function($scope,
   $scope.tests = [];
   $scope.current_tests = [];
   $scope.current_test = null;
-  $scope.testing = false;
   $scope.template_building = false;
   $scope.version = null;
   $scope.test_events = [];
@@ -135,38 +132,6 @@ var NetworkUIController = function($scope,
                       'y': 0,
                       'width': 0,
                       'height': 0,
-                      top_extent: function (scaledY) {
-                          this.x1 = this.x;
-                          this.x2 = this.x + this.width;
-                          this.y1 = this.y;
-                          this.y2 = this.y + this.height;
-                          var y2 = this.y2 !== null ? this.y2 : scaledY;
-                          return (this.y1 < y2? this.y1 : y2);
-                      },
-                      left_extent: function (scaledX) {
-                          this.x1 = this.x;
-                          this.x2 = this.x + this.width;
-                          this.y1 = this.y;
-                          this.y2 = this.y + this.height;
-                          var x2 = this.x2 !== null ? this.x2 : scaledX;
-                          return (this.x1 < x2? this.x1 : x2);
-                      },
-                      bottom_extent: function (scaledY) {
-                          this.x1 = this.x;
-                          this.x2 = this.x + this.width;
-                          this.y1 = this.y;
-                          this.y2 = this.y + this.height;
-                          var y2 = this.y2 !== null ? this.y2 : scaledY;
-                          return (this.y1 > y2? this.y1 : y2);
-                      },
-                      right_extent: function (scaledX) {
-                          this.x1 = this.x;
-                          this.x2 = this.x + this.width;
-                          this.y1 = this.y;
-                          this.y2 = this.y + this.height;
-                          var x2 = this.x2 !== null ? this.x2 : scaledX;
-                          return (this.x1 > x2? this.x1 : x2);
-                      }
                   };
   $scope.trace_id_seq = util.natural_numbers(0);
   $scope.trace_order_seq = util.natural_numbers(0);
@@ -220,6 +185,7 @@ var NetworkUIController = function($scope,
   $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
   $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope);
   $scope.details_panel_controller = new fsm.FSMController($scope, "details_panel_fsm", details_panel_fsm.Start, $scope);
+  $scope.buttons_controller = new fsm.FSMController($scope, "buttons_fsm", buttons.Start, $scope);
   $scope.time_controller = new fsm.FSMController($scope, "time_fsm", time.Start, $scope);
   $scope.test_controller = new fsm.FSMController($scope, "test_fsm", test_fsm.Start, $scope);
 
@@ -312,8 +278,11 @@ var NetworkUIController = function($scope,
   $scope.inventory_toolbox_controller.delegate_channel = new fsm.Channel($scope.inventory_toolbox_controller,
                                                             $scope.details_panel_controller,
                                                             $scope);
-  $scope.time_controller.delegate_channel = new fsm.Channel($scope.time_controller,
+  $scope.buttons_controller.delegate_channel = new fsm.Channel($scope.buttons_controller,
                                                             $scope.inventory_toolbox_controller,
+                                                            $scope);
+  $scope.time_controller.delegate_channel = new fsm.Channel($scope.time_controller,
+                                                            $scope.buttons_controller,
                                                             $scope);
   $scope.mode_controller.delegate_channel = new fsm.Channel($scope.mode_controller,
                                                             $scope.time_controller,
@@ -366,12 +335,6 @@ var NetworkUIController = function($scope,
         var v_x = (b_x - $scope.panX) / $scope.current_scale;
         var v_y = (b_y - $scope.panY) / $scope.current_scale;
         return {x: v_x, y: v_y};
-    };
-
-    $scope.to_browser_coordinates = function (v_x, v_y) {
-        var b_x = (v_x * $scope.current_scale) + $scope.panX;
-        var b_y = (v_y * $scope.current_scale) + $scope.panY;
-        return {x: b_x, y: b_y};
     };
 
     $scope.to_pan = function (v_x, v_y) {
@@ -536,7 +499,6 @@ var NetworkUIController = function($scope,
           $scope.send_test_message(new messages.MouseEvent($scope.test_client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.onMouseLeaveResult = getMouseEventResult($event);
-      $scope.cursor.hidden = true;
       $event.preventDefault();
     };
 
@@ -546,7 +508,6 @@ var NetworkUIController = function($scope,
           $scope.send_test_message(new messages.MouseEvent($scope.test_client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       //var coords = getCrossBrowserElementCoords($event);
-      $scope.cursor.hidden = false;
       $scope.cursor.x = $event.x;
       $scope.cursor.y = $event.y;
       $scope.mouseX = $event.x;
@@ -563,7 +524,6 @@ var NetworkUIController = function($scope,
           $scope.send_test_message(new messages.MouseEvent($scope.test_client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.onMouseOverResult = getMouseEventResult($event);
-      $scope.cursor.hidden = false;
       $event.preventDefault();
     };
 
@@ -600,19 +560,12 @@ var NetworkUIController = function($scope,
         $scope.first_channel.send('DetailsPanelClose', {});
     };
 
-    $scope.$on('hostUpdateSaved', (e, host) => {
-        if (host.variables !== "" && $scope.selected_devices.length === 1) {
-            host.data = jsyaml.safeLoad(host.variables);
-            $scope.selected_devices[0].type = host.data.type;
-        }
-    });
-
     $scope.onDetailsContextButton = function () {
         function emitCallback(item, canAdd){
             $scope.first_channel.send('DetailsPanel', {});
             $scope.removeContextMenu();
             $scope.update_toolbox_heights();
-            $scope.$emit('showDetails', item, canAdd);
+            $scope.$emit('awxNet-showDetails', item, canAdd);
         }
 
         // show details for devices
@@ -660,41 +613,20 @@ var NetworkUIController = function($scope,
 
     };
 
-    $scope.onRenameContextButton = function () {
-        $scope.removeContextMenu();
-        $scope.first_channel.send("LabelEdit", {});
-    };
-
     $scope.deleteDevice = function(){
         var i = 0;
         var j = 0;
         var index = -1;
         var devices = $scope.selected_devices;
-        var links = $scope.selected_links;
         var all_links = $scope.links.slice();
         $scope.selected_devices = [];
         $scope.selected_links = [];
         $scope.move_controller.changeState(move.Ready);
-        for (i = 0; i < links.length; i++) {
-            index = $scope.links.indexOf(links[i]);
-            if (index !== -1) {
-                links[i].selected = false;
-                links[i].remote_selected = false;
-                $scope.links.splice(index, 1);
-                $scope.send_control_message(new messages.LinkDestroy($scope.client_id,
-                                                                     links[i].id,
-                                                                     links[i].from_device.id,
-                                                                     links[i].to_device.id,
-                                                                     links[i].from_interface.id,
-                                                                     links[i].to_interface.id,
-                                                                     links[i].name));
-            }
-        }
         for (i = 0; i < devices.length; i++) {
             index = $scope.devices.indexOf(devices[i]);
             if (index !== -1) {
                 $scope.devices.splice(index, 1);
-                $scope.$emit('removeSearchOption', devices[i]);
+                $scope.$emit('awxNet-removeSearchOption', devices[i]);
                 $scope.send_control_message(new messages.DeviceDestroy($scope.client_id,
                                                                        devices[i].id,
                                                                        devices[i].x,
@@ -722,36 +654,24 @@ var NetworkUIController = function($scope,
         }
     };
 
-    // Button Event Handlers
-    $scope.onToggleToolboxButtonLeft = function () {
+    $scope.$on('awxNet-hideToolbox', () => {
         $scope.first_channel.send("ToggleToolbox", {});
-        $scope.action_icons[0].fsm.handle_message("Disable", {});
-        $scope.action_icons[1].fsm.handle_message("Enable", {});
         $scope.overall_toolbox_collapsed = !$scope.overall_toolbox_collapsed;
-        $scope.$emit('overall_toolbox_collapsed');
-    };
+    });
 
-    $scope.onToggleToolboxButtonRight = function () {
-        $scope.first_channel.send("ToggleToolbox", {});
-        $scope.action_icons[0].fsm.handle_message("Enable", {});
-        $scope.action_icons[1].fsm.handle_message("Disable", {});
-        $scope.overall_toolbox_collapsed = !$scope.overall_toolbox_collapsed;
-        $scope.$emit('overall_toolbox_collapsed');
-    };
-
-    $scope.$on('toolbarButtonEvent', function(e, functionName){
+    $scope.$on('awxNet-toolbarButtonEvent', function(e, functionName){
         $scope[`on${functionName}Button`]();
     });
 
-    $scope.$on('SearchDropdown', function(){
+    $scope.$on('awxNet-SearchDropdown', function(){
         $scope.first_channel.send('SearchDropdown', {});
     });
 
-    $scope.$on('SearchDropdownClose', function(){
+    $scope.$on('awxNet-SearchDropdownClose', function(){
         $scope.first_channel.send('SearchDropdownClose', {});
     });
 
-    $scope.$on('search', function(e, device){
+    $scope.$on('awxNet-search', function(e, device){
 
         var searched;
         for(var i = 0; i < $scope.devices.length; i++){
@@ -802,25 +722,7 @@ var NetworkUIController = function($scope,
         $scope.animations.push(pan_animation);
     };
 
-    $scope.$on('jumpTo', function(e, zoomLevel) {
-        var v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
-        switch (zoomLevel){
-            case 'site':
-                $scope.jump_to_animation(v_center.x, v_center.y, 0.051);
-                break;
-            case 'rack':
-                $scope.jump_to_animation(v_center.x, v_center.y, 0.11);
-                break;
-            case 'inventory':
-                $scope.jump_to_animation(v_center.x, v_center.y, 0.51);
-                break;
-            case 'process':
-                $scope.jump_to_animation(v_center.x, v_center.y, 5.1);
-                break;
-        }
-    });
-
-    $scope.$on('zoom', (e, zoomPercent) => {
+    $scope.$on('awxNet-zoom', (e, zoomPercent) => {
         let v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
         let scale = Math.pow(10, (zoomPercent - 120) / 40);
         $scope.jump_to_animation(v_center.x, v_center.y, scale, false);
@@ -836,10 +738,13 @@ var NetworkUIController = function($scope,
                                                                                          $scope.current_scale,
                                                                                          $scope.panX,
                                                                                          $scope.panY,
+                                                                                         $scope.graph.width,
+                                                                                         $scope.graph.height,
                                                                                          $scope.trace_id),
                                                                    new messages.Snapshot($scope.test_client_id,
                                                                                          $scope.devices,
                                                                                          $scope.links,
+                                                                                         $scope.inventory_toolbox.items,
                                                                                          0,
                                                                                          $scope.trace_id)]));
         } else {
@@ -847,6 +752,7 @@ var NetworkUIController = function($scope,
                                                                   [new messages.Snapshot($scope.test_client_id,
                                                                                          $scope.devices,
                                                                                          $scope.links,
+                                                                                         $scope.inventory_toolbox.items,
                                                                                          1,
                                                                                          $scope.trace_id),
                                                                    new messages.StopRecording($scope.test_client_id, $scope.trace_id)]));
@@ -857,10 +763,12 @@ var NetworkUIController = function($scope,
         $scope.cursor.hidden = true;
         $scope.debug.hidden = true;
         $scope.hide_buttons = true;
+        $scope.hide_menus = true;
         setTimeout(function () {
             svg_crowbar.svg_crowbar();
             $scope.cursor.hidden = false;
             $scope.hide_buttons = false;
+            $scope.hide_menus = false;
             $scope.$apply();
         }, 1000);
     };
@@ -871,21 +779,13 @@ var NetworkUIController = function($scope,
 
     // Context Menu Buttons
     $scope.context_menu_buttons = [
-        new models.ContextMenuButton("Rename", 210, 200, 160, 26, $scope.onRenameContextButton, $scope),
         new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope),
         new models.ContextMenuButton("Delete", 256, 231, 160, 26, $scope.onDeleteContextMenu, $scope)
     ];
 
     // Context Menus
     $scope.context_menus = [
-        new models.ContextMenu('HOST', 210, 200, 160, 90, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
-    ];
-
-    // Icons
-    var actionIconVerticalOffset = toolboxTopMargin + (toolboxHeight/2);
-    $scope.action_icons = [
-        new models.ActionIcon("chevron-left", 170, actionIconVerticalOffset, 16, $scope.onToggleToolboxButtonLeft, true, $scope),
-        new models.ActionIcon("chevron-right", 15, actionIconVerticalOffset, 16, $scope.onToggleToolboxButtonRight, false, $scope)
+        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
     ];
 
     $scope.onDownloadTraceButton = function () {
@@ -909,36 +809,6 @@ var NetworkUIController = function($scope,
 
     $scope.all_buttons = [];
     $scope.all_buttons.extend($scope.context_menu_buttons);
-    $scope.all_buttons.extend($scope.action_icons);
-
-    $scope.getDevice = function(name) {
-
-        var i = 0;
-        for (i = 0; i < $scope.devices.length; i++) {
-            if ($scope.devices[i].name === name) {
-                return $scope.devices[i];
-            }
-        }
-
-        return null;
-    };
-
-
-    $scope.getDeviceInterface = function(device_name, interface_name) {
-
-        var i = 0;
-        var k = 0;
-        for (i = 0; i < $scope.devices.length; i++) {
-            if ($scope.devices[i].name === device_name) {
-                for (k = 0; k < $scope.devices[i].interfaces.length; k++) {
-                    if ($scope.devices[i].interfaces[k].name === interface_name) {
-                        return $scope.devices[i].interfaces[k];
-                    }
-                }
-            }
-        }
-        return null;
-    };
 
     $scope.onDeviceCreate = function(data) {
         $scope.create_device(data);
@@ -956,51 +826,6 @@ var NetworkUIController = function($scope,
         $scope.devices.push(device);
     };
 
-    $scope.forDevice = function(device_id, data, fn) {
-        var i = 0;
-        for (i = 0; i < $scope.devices.length; i++) {
-            if ($scope.devices[i].id === device_id) {
-                fn($scope.devices[i], data);
-                break;
-            }
-        }
-    };
-
-    $scope.forLink = function(link_id, data, fn) {
-        var i = 0;
-        for (i = 0; i < $scope.links.length; i++) {
-            if ($scope.links[i].id === link_id) {
-                fn($scope.links[i], data);
-                break;
-            }
-        }
-    };
-
-    $scope.forDeviceInterface = function(device_id, interface_id, data, fn) {
-        var i = 0;
-        var j = 0;
-        for (i = 0; i < $scope.devices.length; i++) {
-            if ($scope.devices[i].id === device_id) {
-                for (j = 0; j < $scope.devices[i].interfaces.length; j++) {
-                    if ($scope.devices[i].interfaces[j].id === interface_id) {
-                        fn($scope.devices[i].interfaces[j], data);
-                        break;
-                    }
-                }
-            }
-        }
-    };
-
-    $scope.onDeviceLabelEdit = function(data) {
-        $scope.edit_device_label(data);
-    };
-
-    $scope.edit_device_label = function(data) {
-        $scope.forDevice(data.id, data, function(device, data) {
-            device.name = data.name;
-        });
-    };
-
     $scope.onInterfaceCreate = function(data) {
         $scope.create_interface(data);
     };
@@ -1015,16 +840,6 @@ var NetworkUIController = function($scope,
                 $scope.devices[i].interfaces.push(new_interface);
             }
         }
-    };
-
-    $scope.onInterfaceLabelEdit = function(data) {
-        $scope.edit_interface_label(data);
-    };
-
-    $scope.edit_interface_label = function(data) {
-        $scope.forDeviceInterface(data.device_id, data.id, data, function(intf, data) {
-            intf.name = data.name;
-        });
     };
 
     $scope.onLinkCreate = function(data) {
@@ -1091,16 +906,6 @@ var NetworkUIController = function($scope,
         }
     };
 
-    $scope.onLinkLabelEdit = function(data) {
-        $scope.edit_link_label(data);
-    };
-
-    $scope.edit_link_label = function(data) {
-        $scope.forLink(data.id, data, function(link, data) {
-            link.name = data.name;
-        });
-    };
-
     $scope.onDeviceMove = function(data) {
         $scope.move_device(data);
     };
@@ -1159,7 +964,6 @@ var NetworkUIController = function($scope,
 
     $scope.onClientId = function(data) {
         $scope.client_id = data;
-        $scope.send_initial_messages();
     };
 
     $scope.onTopology = function(data) {
@@ -1187,15 +991,6 @@ var NetworkUIController = function($scope,
             if ($scope.devices[i].id === data.id) {
                 $scope.devices[i].remote_selected = false;
             }
-        }
-    };
-
-    $scope.onHistory = function (data) {
-
-        $scope.history = [];
-        var i = 0;
-        for (i = 0; i < data.length; i++) {
-            $scope.history.push(data[i]);
         }
     };
 
@@ -1238,6 +1033,9 @@ var NetworkUIController = function($scope,
             }
             if (max_y === null || device.y > max_y) {
                 max_y = device.y;
+            }
+            if (device.device_type === undefined) {
+                device.device_type = device.type;
             }
             new_device = new models.Device(device.id,
                                            device.name,
@@ -1318,38 +1116,28 @@ var NetworkUIController = function($scope,
             $scope.link_id_seq = util.natural_numbers(max_link_id);
         }
 
+        console.log(['data.inventory_toolbox', data.inventory_toolbox]);
+        if (data.inventory_toolbox !== undefined) {
+            $scope.inventory_toolbox.items = [];
+            for (i = 0; i < data.inventory_toolbox.length; i++) {
+                device = data.inventory_toolbox[i];
+                console.log(device);
+                if (device.device_type === undefined) {
+                    device.device_type = device.type;
+                }
+                new_device = new models.Device(device.id,
+                                               device.name,
+                                               device.x,
+                                               device.y,
+                                               device.device_type,
+                                               device.host_id);
+                $scope.inventory_toolbox.items.push(new_device);
+            }
+            console.log($scope.inventory_toolbox.items);
+        }
+
         $scope.updateInterfaceDots();
-        $scope.$emit('instatiateSelect', $scope.devices);
-        $scope.update_device_variables();
-    };
-
-    $scope.update_device_variables = function () {
-
-      var hosts_by_id = {};
-      var i = 0;
-      for (i = 0; i < $scope.devices.length; i++) {
-          hosts_by_id[$scope.devices[i].host_id] = $scope.devices[i];
-      }
-
-      $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/')
-           .then(function(response) {
-               let hosts = response.data.results;
-               for(var i = 0; i<hosts.length; i++){
-                   try {
-                       let host = hosts[i];
-                       if (hosts_by_id[host.id] !== undefined) {
-                           hosts_by_id[host.id].variables = util.parse_variables(host.variables);
-                       }
-                   } catch (error) {
-                       console.log(error);
-                   }
-               }
-           })
-           .catch(({data, status}) => {
-               console.log([data, status]);
-               ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
-           });
-
+        $scope.$emit('awxNet-instatiateSelect', $scope.devices);
     };
 
     $scope.updateInterfaceDots = function() {
@@ -1379,20 +1167,6 @@ var NetworkUIController = function($scope,
 
     $scope.test_socket.onopen = function() {
         //ignore
-    };
-
-    $scope.send_initial_messages = function() {
-        var i = 0;
-        var messages_to_send = $scope.initial_messages;
-        var message = null;
-        var data = null;
-        $scope.initial_messages = [];
-        for(i = 0; i < messages_to_send.length; i++) {
-            message = messages_to_send[i];
-            message.sender = $scope.test_client_id;
-            data = messages.serialize(message);
-            $scope.test_socket.send(data);
-        }
     };
 
     // Call onopen directly if $scope.control_socket is already open
@@ -1465,9 +1239,9 @@ var NetworkUIController = function($scope,
     });
 
     $scope.update_toolbox_heights = function(){
-        toolboxTopMargin = $('.Networking-top').height();
-        toolboxTitleMargin = toolboxTopMargin + 35;
-        toolboxHeight = $scope.graph.height - toolboxTopMargin;
+        var toolboxTopMargin = $('.Networking-top').height();
+        var toolboxTitleMargin = toolboxTopMargin + 35;
+        var toolboxHeight = $scope.graph.height - toolboxTopMargin;
 
         let toolboxes = ['inventory_toolbox'];
         toolboxes.forEach((toolbox) => {
@@ -1476,37 +1250,12 @@ var NetworkUIController = function($scope,
             $scope[toolbox].title_coordinates.y = toolboxTitleMargin;
         });
 
-        $scope.action_icons.forEach((icon) => {
-            actionIconVerticalOffset = toolboxTopMargin + (toolboxHeight/2);
-            icon.y = actionIconVerticalOffset;
-        });
-
         $('.Networking-detailPanel').height(toolboxHeight);
         $('.Networking-detailPanel').css('top', toolboxTopMargin);
     };
 
     $scope.update_size = function () {
         $scope.update_toolbox_heights();
-    };
-
-    $scope.update_offsets = function () {
-
-        var i = 0;
-        var streams = $scope.streams;
-        var map = new Map();
-        var stream = null;
-        var key = null;
-        for (i = 0; i < streams.length; i++) {
-            stream = streams[i];
-            key = "" + stream.from_device.id + "_" + stream.to_device.id;
-            map.set(key, 0);
-        }
-        for (i = 0; i < streams.length; i++) {
-            stream = streams[i];
-            key = "" + stream.from_device.id + "_" + stream.to_device.id;
-            stream.offset = map.get(key);
-            map.set(key, stream.offset + 1);
-        }
     };
 
     setInterval( function () {
@@ -1577,12 +1326,9 @@ var NetworkUIController = function($scope,
         $scope.mode_controller.state.start($scope.mode_controller);
     };
 
-    $scope.reset_history =  function () {
-        $scope.history = [];
-    };
-
     $scope.reset_toolboxes = function () {
         $scope.inventory_toolbox.items = [];
+        $scope.inventory_toolbox.scroll_offset = 0;
     };
 
     $scope.cancel_animations = function () {

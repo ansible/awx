@@ -10,11 +10,6 @@ function Channel(from_controller, to_controller, tracer) {
 exports.Channel = Channel;
 
 Channel.prototype.send = function(msg_type, message) {
-    if (this.trace && this.from_controller !== null) {
-        this.tracer.send_trace_message(new messages.ChannelTrace(this.from_controller.name,
-                                                                 this.to_controller.name,
-                                                                 msg_type));
-    }
     this.to_controller.handle_message(msg_type, message);
 };
 
@@ -25,11 +20,6 @@ function NullChannel(from_controller, tracer) {
 }
 
 NullChannel.prototype.send = function(msg_type) {
-    if (this.trace) {
-        this.tracer.send_trace_message(new messages.ChannelTrace(this.from_controller.name,
-                                                                 'null',
-                                                                 msg_type));
-    }
 };
 
 function FSMController (scope, name, initial_state, tracer) {
