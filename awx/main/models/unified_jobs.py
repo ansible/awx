@@ -28,7 +28,7 @@ from rest_framework.exceptions import ParseError
 from polymorphic.models import PolymorphicModel
 
 # Django-Celery
-from django_celery_results.models import TaskResult
+from djcelery.models import TaskMeta
 
 # AWX
 from awx.main.models.base import * # noqa
@@ -1093,8 +1093,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def celery_task(self):
         try:
             if self.celery_task_id:
-                return TaskResult.objects.get(task_id=self.celery_task_id)
-        except TaskResult.DoesNotExist:
+                return TaskMeta.objects.get(task_id=self.celery_task_id)
+        except TaskMeta.DoesNotExist:
             pass
 
     def get_passwords_needed_to_start(self):
@@ -1335,7 +1335,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     cancel_fields.append('job_explanation')
                 self.save(update_fields=cancel_fields)
                 self.websocket_emit_status("canceled")
-            if settings.CELERY_BROKER_URL.startswith('amqp://'):
+            if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
         return self.cancel_flag
 

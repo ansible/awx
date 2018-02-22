@@ -5,6 +5,7 @@ import os
 import re  # noqa
 import sys
 import ldap
+import djcelery
 from datetime import timedelta
 
 from kombu import Queue, Exchange
@@ -255,7 +256,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'rest_framework',
     'django_extensions',
-    'django_celery_results',
+    'djcelery',
     'channels',
     'polymorphic',
     'taggit',
@@ -433,28 +434,30 @@ DEVSERVER_DEFAULT_PORT = '8013'
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
+djcelery.setup_loader()
+
 BROKER_POOL_LIMIT = None
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_EVENT_QUEUE_TTL = 5
-CELERY_TASK_DEFAULT_QUEUE = 'tower'
+CELERY_DEFAULT_QUEUE = 'tower'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = None
-CELERY_TASK_SOFT_TIME_LIMIT = None
-CELERY_WORKER_POOL_RESTARTS = True
-CELERY_BEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
-CELERY_BEAT_MAX_LOOP_INTERVAL = 60
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_TRACK_STARTED = True
+CELERYD_TASK_TIME_LIMIT = None
+CELERYD_TASK_SOFT_TIME_LIMIT = None
+CELERYD_POOL_RESTARTS = True
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
-CELERY_TASK_QUEUES = (
+CELERY_QUEUES = (
     Queue('tower', Exchange('tower'), routing_key='tower'),
     Broadcast('tower_broadcast_all')
 )
 CELERY_TASK_ROUTES = {}
 
-CELERY_BEAT_SCHEDULE = {
+CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
+CELERYBEAT_MAX_LOOP_INTERVAL = 60
+CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.awx_periodic_scheduler',
         'schedule': timedelta(seconds=30),

@@ -133,7 +133,7 @@ class TaskManager():
     def get_active_tasks(self):
         if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
             app = Celery('awx')
-            app.config_from_object('django.conf:settings', namespace='CELERY')
+            app.config_from_object('django.conf:settings')
             inspector = Inspect(app=app)
             active_task_queues = inspector.active()
         else:
