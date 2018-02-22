@@ -1,6 +1,14 @@
 ---
-- name: Authenticate with OpenShift
+- name: Authenticate with OpenShift via user and password
   shell: "oc login {{ openshift_host }} -u {{ openshift_user }} -p {{ openshift_password }}"
+  when:
+  - openshift_user is defined
+  - openshift_password is defined
+  - openshift_token is not defined
+
+- name: Authenticate with OpenShift via token
+  shell: "oc login {{ openshift_host }} --token {{ openshift_token }}"
+  when: openshift_token is defined
 
 - name: Get Project Detail
   shell: "oc get project {{ awx_openshift_project }}"

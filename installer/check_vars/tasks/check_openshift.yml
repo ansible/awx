@@ -12,11 +12,12 @@
     - openshift_user is defined and openshift_user != ''
     msg: "Set the value of 'openshift_user' in the inventory file."
 
-- name: openshift_password should be defined
+- name: openshift_password or openshift_token should be defined
   assert:
     that:
-    - openshift_password is defined and openshift_password != ''
-    msg: "Set the value of 'openshift_password' in the inventory file."
+    - (openshift_password is defined and openshift_password != '') or
+      (openshift_token is defined and openshift_token != '')
+    msg: "Set the value of 'openshift_password' or 'openshift_token' in the inventory file."
 
 - name: docker_registry should be defined if not using dockerhub
   assert:
