@@ -25,12 +25,12 @@ export default
                 $cookies.remove('userLoggedIn');
 
                 $cookies.put('token_expires', expires);
-                $cookies.put('userLoggedIn', 'true');
-                $cookies.put('sessionExpired', 'false');
+                $cookies.put('userLoggedIn', true);
+                $cookies.put('sessionExpired', false);
 
-                $rootScope.userLoggedIn = 'true';
+                $rootScope.userLoggedIn = true;
                 $rootScope.token_expires = expires;
-                $rootScope.sessionExpired = 'false';
+                $rootScope.sessionExpired = false;
             },
 
             isUserLoggedIn: function () {
@@ -108,16 +108,14 @@ export default
                     SocketService.disconnect();
                     $cookies.remove('token_expires');
                     $cookies.remove('current_user');
-                    // $cookies.remove('token');
-                    $cookies.put('userLoggedIn', 'false');
-                    $cookies.put('sessionExpired', 'true');
+                    $cookies.put('userLoggedIn', false);
+                    $cookies.put('sessionExpired', false);
                     $cookies.putObject('current_user', {});
                     $rootScope.current_user = {};
                     $rootScope.license_tested = undefined;
-                    $rootScope.userLoggedIn = 'false';
-                    $rootScope.sessionExpired = 'true';
+                    $rootScope.userLoggedIn = false;
+                    $rootScope.sessionExpired = false;
                     $rootScope.licenseMissing = true;
-                    // $rootScope.token = null;
                     $rootScope.token_expires = null;
                     $rootScope.login_username = null;
                     $rootScope.login_password = null;
