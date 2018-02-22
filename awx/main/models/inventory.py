@@ -9,6 +9,7 @@ import copy
 from urlparse import urljoin
 import os.path
 import six
+from distutils.version import LooseVersion
 
 # Django
 from django.conf import settings
@@ -37,7 +38,8 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import _inventory_updates
+from awx.main.utils import _inventory_updates, get_ansible_version
+
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate',
            'CustomInventoryScript', 'SmartInventoryMembership']
@@ -1539,9 +1541,10 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
                                     "Instead, configure the corresponding source project to update on launch."))
         return self.update_on_launch
 
-    def clean_overwrite_vars(self):
+    def clean_overwrite_vars(self):  # TODO: remove when Ansible 2.4 becomes unsupported, obviously
         if self.source == 'scm' and not self.overwrite_vars:
-            raise ValidationError(_("SCM type sources must set `overwrite_vars` to `true`."))
+            if get_ansible_version() < LooseVersion('2.5'):
+                raise ValidationError(_("SCM type sources must set `overwrite_vars` to `true` until Ansible 2.5."))
         return self.overwrite_vars
 
     def clean_source_path(self):
