@@ -8,52 +8,6 @@ Array.prototype.extend = function (other_array) {
 };
 
 var math = require('mathjs');
-var yaml = require('js-yaml');
-var nunjucks = require('nunjucks');
-
-function nunjucks_find_variables (text) {
-
-    var variables = [];
-    var tokenizer = nunjucks.lexer.lex(text, {});
-    var token = tokenizer.nextToken();
-    while (token !== null) {
-        if (token.type === 'variable-start') {
-            token = tokenizer.nextToken();
-            while (token !== null) {
-                if (token.type === 'symbol') {
-                    variables.push(token.value);
-                }
-                if (token.type === 'variable-end') {
-                    break;
-                }
-                token = tokenizer.nextToken();
-            }
-        }
-        token = tokenizer.nextToken();
-    }
-
-    return variables;
-}
-exports.nunjucks_find_variables = nunjucks_find_variables;
-
-function parse_variables (variables) {
-    var parsed_variables = {};
-    try {
-        parsed_variables = JSON.parse(variables);
-    } catch (err) {
-        try {
-            parsed_variables = yaml.safeLoad(variables);
-        } catch (err) {
-            parsed_variables = {};
-        }
-    }
-    if (parsed_variables === undefined) {
-        return {};
-    }
-    return parsed_variables;
-}
-exports.parse_variables = parse_variables;
-
 
 function noop () {
 }
@@ -71,37 +25,6 @@ function distance (x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 exports.distance = distance;
-
-// polarToCartesian
-// @wdebeaum, @opsb
-// from http://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle
-function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
-  var angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
-
-  return {
-    x: centerX + (radius * Math.cos(angleInRadians)),
-    y: centerY + (radius * Math.sin(angleInRadians))
-  };
-}
-
-// describeArc
-// @wdebeaum, @opsb
-// from http://stackoverflow.com/questions/5736398/how-to-calculate-the-svg-path-for-an-arc-of-a-circle
-function describeArc(x, y, radius, startAngle, endAngle){
-
-    var start = polarToCartesian(x, y, radius, endAngle);
-    var end = polarToCartesian(x, y, radius, startAngle);
-
-    var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-
-    var d = [
-        "M", start.x, start.y,
-        "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
-    ].join(" ");
-
-    return d;
-}
-exports.describeArc = describeArc;
 
 function pDistanceLine(x, y, x1, y1, x2, y2) {
   //Code from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment

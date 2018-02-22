@@ -12,8 +12,6 @@ var router = require('./router.directive.js');
 var switchd = require('./switch.directive.js');
 var host = require('./host.directive.js');
 var link = require('./link.directive.js');
-var chevronRight = require('./chevron.right.directive.js');
-var chevronLeft = require('./chevron.left.directive.js');
 var contextMenu = require('./context.menu.directive.js');
 var contextMenuButton = require('./context.menu.button.directive.js');
 var defaultd = require('./default.directive.js');
@@ -36,8 +34,6 @@ var networkUI = angular.module('networkUI', [
     .directive('awxNetSwitch', switchd.switchd)
     .directive('awxNetHost', host.host)
     .directive('awxNetLink', link.link)
-    .directive('awxNetChevronRightIcon', chevronRight.chevronRight)
-    .directive('awxNetChevronLeftIcon', chevronLeft.chevronLeft)
     .directive('awxNetContextMenu', contextMenu.contextMenu)
     .directive('awxNetContextMenuButton', contextMenuButton.contextMenuButton)
     .directive('awxNetDefault', defaultd.defaultd)

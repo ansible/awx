@@ -29,7 +29,7 @@
 		</defs>
          <g transform="scale(1.0)" id="frame_g">
             <g ng-if="!hide_links">
-            <g ng-if="current_scale > 0.5 && current_scale < 5">
+            <g ng-if="current_scale > 0.5">
             <g ng-repeat="link in links">
             <g awx-net-link></g>
             </g> <!-- end ng-repeat link in links-->

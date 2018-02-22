@@ -43,17 +43,17 @@ export default [
 
             scope.zoomTo = function() {
                 scope.zoom = Math.ceil(scope.zoom / 10) * 10;
-                this.$parent.$broadcast('zoom', scope.zoom);
+                this.$parent.$broadcast('awxNet-zoom', scope.zoom);
             };
 
             scope.zoomOut = function(){
                 scope.zoom = scope.zoom - 10 > 0 ? scope.zoom - 10 : 0;
-                this.$parent.$broadcast('zoom', scope.zoom);
+                this.$parent.$broadcast('awxNet-zoom', scope.zoom);
             };
 
             scope.zoomIn = function(){
                 scope.zoom = scope.zoom + 10 < 200 ? scope.zoom + 10 : 200;
-                this.$parent.$broadcast('zoom', scope.zoom);
+                this.$parent.$broadcast('awxNet-zoom', scope.zoom);
             };
         }
     };

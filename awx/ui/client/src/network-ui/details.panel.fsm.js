@@ -55,7 +55,6 @@ _Collapsed.prototype.onDetailsPanel.transitions = ['Expanded'];
 _Expanded.prototype.onDetailsPanelClose = function (controller, msg_type, $event) {
 
     controller.scope.$parent.vm.rightPanelIsExpanded = false;
-    controller.scope.$parent.vm.jumpToPanelExpanded = false;
     controller.scope.$parent.vm.keyPanelExpanded = false;
     controller.changeState(Collapsed);
     controller.handle_message(msg_type, $event);

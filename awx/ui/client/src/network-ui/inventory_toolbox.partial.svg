@@ -1,5 +1,6 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
 
+<g ng-if="!hide_menus">
 <!-- begin collapsed toolbox -->
 <g ng-if="overall_toolbox_collapsed">
 <rect class="NetworkUI__toolbox-collapsed"
@@ -27,10 +28,6 @@
     ng-attr-transform="translate({{toolbox.title_coordinates.x}},{{toolbox.title_coordinates.y}})">
         {{toolbox.name}}
 </text>
-<g awx-net-chevron-left-icon
-    action-icon="action_icons[0]"
-    ng-if="toolbox.enabled"
-    ng-attr-transform="translate({{action_icons[0].x}}, {{action_icons[0].y}})"></g>
 
 <g clip-path="url(#inventory-toolbox-clip-path)">
 <g ng-attr-transform="translate({{toolbox.x}}, {{toolbox.y+20}})">
@@ -112,3 +109,4 @@
 </g> <!-- end selected item -->
 </g> <!-- ng-if -->
 </g> <!-- ng-if toolbox.enabled -->
+</g> <!-- ng-if !hide_menus -->

@@ -53,7 +53,7 @@ _Running.prototype.start = function (controller) {
         }
         controller.scope.callback(controller.scope);
         controller.scope.scope.$apply();
-    }, 17);
+    }, controller.scope.frame_delay);
 };
 
 _Running.prototype.onAnimationCancelled = function (controller) {

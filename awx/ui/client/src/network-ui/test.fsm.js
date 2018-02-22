@@ -106,6 +106,7 @@ _Reporting.prototype.start = function (controller) {
     controller.scope.replay = false;
     controller.scope.disconnected = false;
     controller.scope.recording = false;
+    controller.scope.cursor.hidden = true;
     var result = "passed";
     if (controller.scope.test_errors.length > 0) {
         result = "errored";
@@ -138,18 +139,19 @@ _Loading.prototype.start = function (controller) {
         controller.changeState(Disabled);
     } else {
         console.log("Starting test");
+        controller.scope.reset_coverage();
         controller.scope.current_test = controller.scope.current_tests.shift();
+        controller.scope.reset_toolboxes();
         controller.scope.onSnapshot(controller.scope.current_test.pre_test_snapshot);
         controller.scope.replay = true;
         controller.scope.disconnected = true;
         controller.scope.test_errors = [];
         controller.scope.test_events = controller.scope.current_test.event_trace.slice();
         controller.scope.test_events.push(new messages.TestCompleted());
-        controller.scope.reset_coverage();
         controller.scope.reset_flags();
         controller.scope.reset_fsm_state();
-        controller.scope.reset_history();
-        controller.scope.reset_toolboxes();
+        controller.scope.cancel_animations();
+        controller.scope.cursor.hidden = false;
         controller.changeState(Running);
     }
 };
