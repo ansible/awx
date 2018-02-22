@@ -275,3 +275,24 @@ class TestJobTemplateSchedules:
         schedule = Schedule.objects.create(unified_job_template=job_template, rrule=self.rrule, created_by=rando)
         access = ScheduleAccess(rando)
         assert access.can_change(schedule, {'rrule': self.rrule2})
+
+    def test_prompts_access_checked(self, job_template, inventory, credential, rando):
+        job_template.execute_role.members.add(rando)
+        access = ScheduleAccess(rando)
+        data = dict(
+            unified_job_template=job_template,
+            rrule=self.rrule,
+            created_by=rando,
+            inventory=inventory,
+            credentials=[credential]
+        )
+        with mock.patch('awx.main.access.JobLaunchConfigAccess.can_add') as mock_add:
+            mock_add.return_value = True
+            assert access.can_add(data)
+            mock_add.assert_called_once_with(data)
+        data.pop('credentials')
+        schedule = Schedule.objects.create(**data)
+        with mock.patch('awx.main.access.JobLaunchConfigAccess.can_change') as mock_change:
+            mock_change.return_value = True
+            assert access.can_change(schedule, {'inventory': 42})
+            mock_change.assert_called_once_with(schedule, {'inventory': 42})
