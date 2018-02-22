@@ -308,7 +308,7 @@ class BaseAccess(object):
         if check_expiration and validation_info.get('time_remaining', None) is None:
             raise PermissionDenied(_("License is missing."))
         if check_expiration and validation_info.get("grace_period_remaining") <= 0:
-            logger.error(_("License has expired."))
+            raise PermissionDenied(_("License has expired."))
 
         free_instances = validation_info.get('free_instances', 0)
         available_instances = validation_info.get('available_instances', 0)
@@ -316,11 +316,11 @@ class BaseAccess(object):
         if add_host_name:
             host_exists = Host.objects.filter(name=add_host_name).exists()
             if not host_exists and free_instances == 0:
-                logger.error(_("License count of %s instances has been reached.") % available_instances)
+                raise PermissionDenied(_("License count of %s instances has been reached.") % available_instances)
             elif not host_exists and free_instances < 0:
-                logger.error(_("License count of %s instances has been exceeded.") % available_instances)
+                raise PermissionDenied(_("License count of %s instances has been exceeded.") % available_instances)
         elif not add_host_name and free_instances < 0:
-            raise logger.error(_("Host count exceeds available instances."))
+            raise PermissionDenied(_("Host count exceeds available instances."))
 
         if feature is not None:
             if "features" in validation_info and not validation_info["features"].get(feature, False):
