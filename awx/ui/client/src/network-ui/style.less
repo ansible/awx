@@ -1,6 +1,7 @@
 /* Copyright (c) 2017 Red Hat, Inc. */
 @import 'network-nav/network.nav.block.less';
 @import 'network-details/details.block.less';
+@import 'network-details/network-extra-vars/network-extra-vars.block.less';
 @import 'zoom-widget/zoom.block.less';
 
 @font-face {
@@ -38,10 +39,10 @@
 @blue: #337AB7;
 @light-toolbox-background: #f6f6f6;
 @icon-background-hover:@blue;
+@context-menu-text: #333;
 
 .NetworkUI {
     background-color: @light-toolbox-background;
-    cursor: none;
 }
 
 .NetworkUI__text {
@@ -551,7 +552,7 @@
     stroke: @button-outline;
     stroke-width: 1;
     rx: 0;
-    stroke-dasharray: calc(~"100vh - 115px");
+    stroke-dasharray: calc(~"100vh - 80px");
     stroke-dashoffset: -45;
 }
 
@@ -560,7 +561,7 @@
     stroke-width: 1;
     fill: none;
     rx: 0;
-    stroke-dasharray: calc(~"100vh - 115px");
+    stroke-dasharray: calc(~"100vh - 80px");
     stroke-dashoffset: -200;
 }
 
@@ -636,27 +637,6 @@
     font-family: 'Open Sans';
 }
 
-.NetworkUI__chevron{
-    fill: @button-body-pressed;
-}
-
-.NetworkUI__chevron--hover,
-.NetworkUI__chevron--pressed{
-    cursor: pointer;
-    fill: white;
-}
-
-.NetworkUI__iconBackground{
-    fill:@button-body;
-    cursor: pointer;
-}
-
-.NetworkUI__iconBackground--hover,
-.NetworkUI__iconBackground--pressed{
-    fill: @icon-background-hover;
-}
-
-
 .NetworkUI__toolbox--title{
     fill: @dark-widget-detail;
     text-transform: uppercase;
@@ -676,13 +656,13 @@
 }
 
 .NetworkUI__contextMenuButtonText{
-    fill: #333; //@button-text;
+    fill: @context-menu-text;
     font-family: 'Open Sans';
     font-size: 14px;
 }
 
 .NetworkUI__contextMenuButtonText-hover{
-    fill: #333; //@button-text;
+    fill: @context-menu-text;
     font-family: 'Open Sans';
     font-size: 14px;
 }

@@ -12,24 +12,20 @@
         </div>
         <div class="Networking-toolbar">
             <div class="Networking-toolbarLeftSide">
-                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('Record')">RECORD</button>
-                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('Export')">EXPORT</button>
-                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('Layout')">LAYOUT</button>
-                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('ExportYaml')">EXPORT YAML</button>
-                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('DownloadTrace')">DOWNLOAD TRACE</button>
-                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('DownloadRecording')">DOWNLOAD RECORDING</button>
-                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('UploadTest')">UPLOAD TEST</button>
-                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('RunTests')">RUN TESTS</button>
-                <button class="Networking-toolbarButton" ng-click="vm.redirectButtonHandler('CompileVariables')">COMPILE VARIABLES</button>
+                <div class="Networking-actionsDropDownContainer">
+                    <select id="networking-actionsDropdown"
+                        style="width:400px">
+                            <option></option>
+                            <option value="Export" title="Export">Export SVG</option>
+                            <option value="ExportYaml" title="ExportYaml">Export YAML</option>
+                    </select>
+                </div>
             </div>
             <div class="Networking-toolbarRightSide">
-                <div class="Networking-searchBarContainer">
-                    <select id="networking-search"
-                        ng-model="device"
-                        ng-options="device.label group by device.type | capitalize for device in devices | orderBy:'label' "
-                        style="width:100%">
-                            <option></option>
-                    </select>
+                <div class="">
+                    <button ng-click="vm.hideToolbox()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected Networking-toolboxPanelToolbarIcon--selected' : vm.leftPanelIsExpanded}">
+                        <i class="fa fa-wrench"></i>
+                    </button>
                 </div>
                 <div class="Networking-keyContainer">
                     <button ng-click="vm.key()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.keyPanelExpanded}">
@@ -38,38 +34,6 @@
                     <div class="Networking-keyDropDownPanel" ng-if="vm.keyPanelExpanded">
                         <div class="Networking-dropdownPanelTitle">
                             KEY
-                        </div>
-                        <div class="Networking-keyPanelOption">
-                            <div class="Networking-keySymbol">e</div>
-                            <div class="Networking-keySymbolLabel">NEW SITE</div>
-                        </div>
-                        <div class="Networking-keyPanelOption">
-                            <div class="Networking-keySymbol">a</div>
-                            <div class="Networking-keySymbolLabel">NEW RACK</div>
-                        </div>
-                        <div class="Networking-keyPanelOption">
-                            <div class="Networking-keySymbol">g</div>
-                            <div class="Networking-keySymbolLabel">NEW GROUP</div>
-                        </div>
-                        <div class="Networking-keyPanelOption">
-                            <div class="Networking-keySymbol">r</div>
-                            <div class="Networking-keySymbolLabel">NEW ROUTER</div>
-                        </div>
-                        <div class="Networking-keyPanelOption">
-                            <div class="Networking-keySymbol">s</div>
-                            <div class="Networking-keySymbolLabel">NEW SWITCH</div>
-                        </div>
-                        <div class="Networking-keyPanelOption">
-                            <div class="Networking-keySymbol">h</div>
-                            <div class="Networking-keySymbolLabel">NEW HOST</div>
-                        </div>
-                        <div class="Networking-keyPanelOption">
-                            <div class="Networking-keySymbol">l</div>
-                            <div class="Networking-keySymbolLabel">NEW LINK</div>
-                        </div>
-                        <div class="Networking-keyPanelOption">
-                            <div class="Networking-keySymbol">m</div>
-                            <div class="Networking-keySymbolLabel">NEW STREAM</div>
                         </div>
                         <div class="Networking-keyPanelOption">
                             <div class="Networking-keySymbol">d</div>
@@ -93,39 +57,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="Networking-jumpToContainer">
-                    <button ng-click="vm.jumpTo()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected' : vm.jumpToPanelExpanded}">
-                        <i class="fa fa-dot-circle-o"></i>
-                    </button>
-                    <div class="Networking-jumpToDropDownPanel" ng-if="vm.jumpToPanelExpanded">
-                        <div class="Networking-dropdownPanelTitle">
-                            JUMP TO
-                        </div>
-                        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('site')">
-                            SITE
-                        </div>
-                        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('rack')">
-                            RACK
-                        </div>
-                        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('inventory')">
-                            INVENTORY
-                        </div>
-                        <div class="Networking-jumpToPanelOption" ng-click="vm.jumpTo('process')">
-                            PROCESS
-                        </div>
-                    </div>
+                <div class="Networking-searchBarContainer">
+                    <select id="networking-search"
+                        ng-model="device"
+                        ng-options="device.label group by device.type | capitalize for device in devices | orderBy:'label' "
+                        style="width:400px">
+                            <option></option>
+                    </select>
                 </div>
             </div>
-        </div>
-        <div class="Networking-toolbar Networking-breadCrumbBar">
-            <ol class="Networking-breadCrumbBarItem">
-                <li class="BreadCrumb-item Networking-breadCrumbText" ng-repeat="group in vm.breadcrumb_groups | limitTo:(vm.breadcrumb_groups.length-1)">
-                    <span>{{group.name}}</span>
-                </li>
-                <li class="BreadCrumb-item Networking-breadCrumbText" ng-repeat="group in vm.breadcrumb_groups | limitTo:-1" class="active">
-                    <span>{{group.name}}</span>
-                </li>
-            </ol>
         </div>
 
     </div>

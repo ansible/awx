@@ -73,6 +73,18 @@ function InventoriesList($scope,
         inventory.linkToDetails = (inventory.kind && inventory.kind === 'smart') ? `inventories.editSmartInventory({smartinventory_id:${inventory.id}})` : `inventories.edit({inventory_id:${inventory.id}})`;
     }
 
+    $scope.copyInventory = inventory => {
+        Wait('start');
+        new Inventory('get', inventory.id)
+            .then(model => model.copy())
+            .then(copy => $scope.editInventory(copy))
+            .catch(({ data, status }) => {
+                const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
+                ProcessErrors($scope, data, status, null, params);
+            })
+            .finally(() => Wait('stop'));
+    };
+    
     $scope.goToGraph = function(inventory){
          $state.go('inventories.edit.networking', {inventory_id: inventory.id, inventory_name: inventory.name});
         // let url = $state.href('inventories.edit.networking', {inventory_id: inventory.id, inventory_name: inventory.name});
