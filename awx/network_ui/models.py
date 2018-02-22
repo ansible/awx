@@ -102,32 +102,6 @@ class GroupDevice(models.Model):
     device = models.ForeignKey('Device',)
 
 
-class DataBinding(models.Model):
-
-    data_binding_id = models.AutoField(primary_key=True,)
-    column = models.IntegerField()
-    row = models.IntegerField()
-    table = models.CharField(max_length=200, blank=True)
-    primary_key_id = models.IntegerField()
-    field = models.CharField(max_length=200, blank=True)
-    data_type = models.ForeignKey('DataType',)
-    sheet = models.ForeignKey('DataSheet',)
-
-
-class DataType(models.Model):
-
-    data_type_id = models.AutoField(primary_key=True,)
-    type_name = models.CharField(max_length=200, blank=True)
-
-
-class DataSheet(models.Model):
-
-    data_sheet_id = models.AutoField(primary_key=True,)
-    name = models.CharField(max_length=200, blank=True)
-    topology = models.ForeignKey('Topology',)
-    client = models.ForeignKey('Client',)
-
-
 class Stream(models.Model):
 
     stream_id = models.AutoField('Stream', primary_key=True,)
