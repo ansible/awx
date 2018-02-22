@@ -57,4 +57,3 @@ uWSGI==2.0.14
 xmltodict==0.11.0
 pip==9.0.1
 setuptools==36.0.1
-dpath==1.4.0
