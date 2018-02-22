@@ -1,5 +1,6 @@
 diagram_id: 66
 name: 'button_fsm'
+finite_state_machine_id: 12
 states:
 - id: 3
   label: Clicked

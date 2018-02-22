@@ -1,4 +1,5 @@
 app: buttons_fsm
+finite_state_machine_id: 7
 panX: 133
 panY: 41
 scaleXY: 1

@@ -1,4 +1,5 @@
 diagram_id: 61
+finite_state_machine_id: 5
 name: group_fsm
 states:
 - id: 12

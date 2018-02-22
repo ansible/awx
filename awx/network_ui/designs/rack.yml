@@ -1,4 +1,5 @@
 diagram_id: 65
+finite_state_machine_id: 6
 name: rack_fsm
 states:
 - id: 9
