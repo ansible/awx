@@ -23,7 +23,6 @@ from django.utils.dateparse import parse_datetime
 
 
 from awx.network_ui.utils import transform_dict
-import dpath.util
 from pprint import pformat
 
 import json
@@ -721,7 +720,7 @@ class _Discovery(object):
             return
 
         try:
-            interfaces = dpath.util.get(message, '/value/ansible_net_neighbors')
+            interfaces = message.get('value', {}).get('ansible_net_neighbors', {})
             logger.info(pformat(interfaces))
         except KeyError:
             interfaces = {}

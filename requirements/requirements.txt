@@ -50,7 +50,6 @@ cmd2==0.7.2               # via cliff
 constantly==15.1.0        # via twisted
 cryptography==1.9         # via adal, azure-storage, pyopenssl, secretstorage, twilio
 daphne==1.3.0
-dpath==1.4.0
 debtcollector==1.15.0     # via oslo.config, oslo.utils, python-designateclient, python-keystoneclient, python-neutronclient
 decorator==4.0.11         # via shade
 defusedxml==0.4.1         # via python-saml
