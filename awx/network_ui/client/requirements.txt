@@ -1,3 +1,0 @@
-docopt
-requests
-pyyaml

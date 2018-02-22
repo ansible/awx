@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^sso/', include('awx.sso.urls', namespace='sso')),
     url(r'^sso/', include('social_django.urls', namespace='social')),
     url(r'^network_ui/', include('awx.network_ui.urls', namespace='network_uiui', app_name='network_ui')),
+    url(r'^network_ui_test/', include('awx.network_ui_test.urls', namespace='network_ui_test', app_name='network_ui_test')),
     url(r'^(?:api/)?400.html$', handle_400),
     url(r'^(?:api/)?403.html$', handle_403),
     url(r'^(?:api/)?404.html$', handle_404),
