@@ -1205,7 +1205,6 @@ class ProjectList(ListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
-    capabilities_prefetch = ['admin', 'update']
 
     def get_queryset(self):
         projects_qs = Project.accessible_objects(self.request.user, 'read_role')
@@ -1814,7 +1813,6 @@ class CredentialList(CredentialViewMixin, ListCreateAPIView):
 
     model = Credential
     serializer_class = CredentialSerializerCreate
-    capabilities_prefetch = ['admin', 'use']
     filter_backends = ListCreateAPIView.filter_backends + [V1CredentialFilterBackend]
 
 
@@ -1981,7 +1979,6 @@ class InventoryList(ListCreateAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
-    capabilities_prefetch = ['admin', 'adhoc']
 
     def get_queryset(self):
         qs = Inventory.accessible_objects(self.request.user, 'read_role')
@@ -2120,7 +2117,6 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
     always_allow_superuser = False
     model = Host
     serializer_class = HostSerializer
-    capabilities_prefetch = ['inventory.admin']
 
     def get_queryset(self):
         qs = super(HostList, self).get_queryset()
@@ -2157,7 +2153,6 @@ class InventoryHostsList(HostRelatedSearchMixin, SubListCreateAttachDetachAPIVie
     parent_model = Inventory
     relationship = 'hosts'
     parent_key = 'inventory'
-    capabilities_prefetch = ['inventory.admin']
 
     def get_queryset(self):
         inventory = self.get_parent_object()
@@ -2334,7 +2329,6 @@ class GroupList(ListCreateAPIView):
 
     model = Group
     serializer_class = GroupSerializer
-    capabilities_prefetch = ['inventory.admin', 'inventory.adhoc']
 
 
 class EnforceParentRelationshipMixin(object):
@@ -2421,7 +2415,6 @@ class GroupHostsList(HostRelatedSearchMixin,
     serializer_class = HostSerializer
     parent_model = Group
     relationship = 'hosts'
-    capabilities_prefetch = ['inventory.admin']
 
     def update_raw_data(self, data):
         data.pop('inventory', None)
@@ -2448,7 +2441,6 @@ class GroupAllHostsList(HostRelatedSearchMixin, SubListAPIView):
     serializer_class = HostSerializer
     parent_model = Group
     relationship = 'hosts'
-    capabilities_prefetch = ['inventory.admin']
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -2747,7 +2739,6 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     parent_model = InventorySource
     relationship = 'hosts'
     check_sub_obj_permission = False
-    capabilities_prefetch = ['inventory.admin']
 
 
 class InventorySourceGroupsList(SubListDestroyAPIView):
@@ -2860,10 +2851,6 @@ class JobTemplateList(ListCreateAPIView):
     metadata_class = JobTypeMetadata
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
-    capabilities_prefetch = [
-        'admin', 'execute',
-        {'copy': ['project.use', 'inventory.use']}
-    ]
 
     def post(self, request, *args, **kwargs):
         ret = super(JobTemplateList, self).post(request, *args, **kwargs)
@@ -4276,7 +4263,6 @@ class JobEventHostsList(HostRelatedSearchMixin, SubListAPIView):
     parent_model = JobEvent
     relationship = 'hosts'
     view_name = _('Job Event Hosts List')
-    capabilities_prefetch = ['inventory.admin']
 
 
 class BaseJobEventsList(SubListAPIView):
@@ -4570,11 +4556,6 @@ class UnifiedJobTemplateList(ListAPIView):
 
     model = UnifiedJobTemplate
     serializer_class = UnifiedJobTemplateSerializer
-    capabilities_prefetch = [
-        'admin', 'execute',
-        {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use',
-                  'workflowjobtemplate.organization.workflow_admin']}
-    ]
 
 
 class UnifiedJobList(ListAPIView):

@@ -48,7 +48,8 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
-    has_model_field_prefetched, extract_ansible_vars, encrypt_dict)
+    has_model_field_prefetched, extract_ansible_vars, encrypt_dict,
+    prefetch_page_capabilities)
 from awx.main.utils.filters import SmartFilter
 from awx.main.redact import REPLACE_STR
 
@@ -404,17 +405,46 @@ class BaseSerializer(serializers.ModelSerializer):
 
         # Advance display of RBAC capabilities
         if hasattr(self, 'show_capabilities'):
-            view = self.context.get('view', None)
-            parent_obj = None
-            if view and hasattr(view, 'parent_model') and hasattr(view, 'get_parent_object'):
-                parent_obj = view.get_parent_object()
-            if view and view.request and view.request.user:
-                user_capabilities = get_user_capabilities(
-                    view.request.user, obj, method_list=self.show_capabilities, parent_obj=parent_obj)
-                if user_capabilities:
-                    summary_fields['user_capabilities'] = user_capabilities
+            user_capabilities = self._obj_capability_dict(obj)
+            if user_capabilities:
+                summary_fields['user_capabilities'] = user_capabilities
 
         return summary_fields
+
+    def _obj_capability_dict(self, obj):
+        """
+        Returns the user_capabilities dictionary for a single item
+        If inside of a list view, it runs the prefetching algorithm for
+        the entire current page, saves it into context
+        """
+        view = self.context.get('view', None)
+        parent_obj = None
+        if view and hasattr(view, 'parent_model') and hasattr(view, 'get_parent_object'):
+            parent_obj = view.get_parent_object()
+        if view and view.request and view.request.user:
+            capabilities_cache = {}
+            # if serializer has parent, it is ListView, apply page capabilities prefetch
+            if self.parent and hasattr(self, 'capabilities_prefetch') and self.capabilities_prefetch:
+                qs = self.parent.instance
+                if 'capability_map' not in self.context:
+                    if hasattr(self, 'polymorphic_base'):
+                        model = self.polymorphic_base.Meta.model
+                        prefetch_list = self.polymorphic_base.capabilities_prefetch
+                    else:
+                        model = self.Meta.model
+                        prefetch_list = self.capabilities_prefetch
+                    self.context['capability_map'] = prefetch_page_capabilities(
+                        model, qs, prefetch_list, view.request.user
+                    )
+                if obj.id in self.context['capability_map']:
+                    capabilities_cache = self.context['capability_map'][obj.id]
+            return get_user_capabilities(
+                view.request.user, obj, method_list=self.show_capabilities, parent_obj=parent_obj,
+                capabilities_cache=capabilities_cache
+            )
+        else:
+            # Contextual information to produce user_capabilities doesn't exist
+            return {}
 
     def get_created(self, obj):
         if obj is None:
@@ -600,6 +630,11 @@ class BaseFactSerializer(BaseSerializer):
 
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
+    capabilities_prefetch = [
+        'admin', 'execute',
+        {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use',
+                  'workflowjobtemplate.organization.workflow_admin']}
+    ]
 
     class Meta:
         model = UnifiedJobTemplate
@@ -637,6 +672,13 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer_class = WorkflowJobTemplateSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
+            # preserve links for list view
+            if self.parent:
+                serializer.parent = self.parent
+                serializer.polymorphic_base = self
+                # Exclude certain models from capabilities prefetch
+                if isinstance(obj, (Project, InventorySource, SystemJobTemplate)):
+                    obj.capabilities_prefetch = None
             return serializer.to_representation(obj)
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
@@ -1305,7 +1347,11 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
-    show_capabilities = ['start', 'schedule', 'edit', 'delete']
+    show_capabilities = ['start', 'schedule', 'edit', 'delete', 'copy']
+    capabilities_prefetch = [
+        'admin', 'update',
+        {'copy': 'organization.project_admin'}
+    ]
 
     class Meta:
         model = Project
@@ -1457,7 +1503,11 @@ class BaseSerializerWithVariables(BaseSerializer):
 
 
 class InventorySerializer(BaseSerializerWithVariables):
-    show_capabilities = ['edit', 'delete', 'adhoc']
+    show_capabilities = ['edit', 'delete', 'adhoc', 'copy']
+    capabilities_prefetch = [
+        'admin', 'adhoc',
+        {'copy': 'organization.inventory_admin'}
+    ]
 
     class Meta:
         model = Inventory
@@ -1547,6 +1597,7 @@ class InventoryScriptSerializer(InventorySerializer):
 
 class HostSerializer(BaseSerializerWithVariables):
     show_capabilities = ['edit', 'delete']
+    capabilities_prefetch = ['inventory.admin']
 
     class Meta:
         model = Host
@@ -1676,6 +1727,7 @@ class AnsibleFactsSerializer(BaseSerializer):
 
 
 class GroupSerializer(BaseSerializerWithVariables):
+    capabilities_prefetch = ['inventory.admin', 'inventory.adhoc']
 
     class Meta:
         model = Group
@@ -1815,7 +1867,10 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 class CustomInventoryScriptSerializer(BaseSerializer):
 
     script = serializers.CharField(trim_whitespace=False)
-    show_capabilities = ['edit', 'delete']
+    show_capabilities = ['edit', 'delete', 'copy']
+    capabilities_prefetch = [
+        {'edit': 'organization.admin'}
+    ]
 
     class Meta:
         model = CustomInventoryScript
@@ -2431,7 +2486,8 @@ class V2CredentialFields(BaseSerializer):
 
 
 class CredentialSerializer(BaseSerializer):
-    show_capabilities = ['edit', 'delete']
+    show_capabilities = ['edit', 'delete', 'copy']
+    capabilities_prefetch = ['admin', 'use']
 
     class Meta:
         model = Credential
@@ -2926,6 +2982,10 @@ class JobTemplateMixin(object):
 
 class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
+    capabilities_prefetch = [
+        'admin', 'execute',
+        {'copy': ['project.use', 'inventory.use']}
+    ]
 
     status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
 
@@ -3389,6 +3449,10 @@ class SystemJobCancelSerializer(SystemJobSerializer):
 
 class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJobTemplateSerializer):
     show_capabilities = ['start', 'schedule', 'edit', 'copy', 'delete']
+    capabilities_prefetch = [
+        'admin', 'execute',
+        {'copy': 'organization.workflow_admin'}
+    ]
 
     class Meta:
         model = WorkflowJobTemplate
@@ -4203,7 +4267,8 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
 
 
 class NotificationTemplateSerializer(BaseSerializer):
-    show_capabilities = ['edit', 'delete']
+    show_capabilities = ['edit', 'delete', 'copy']
+    capabilities_prefetch = [{'copy': 'organization.admin'}]
 
     class Meta:
         model = NotificationTemplate

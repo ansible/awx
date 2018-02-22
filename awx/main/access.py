@@ -238,6 +238,9 @@ class BaseAccess(object):
     def can_delete(self, obj):
         return self.user.is_superuser
 
+    def can_copy(self, obj):
+        return self.can_add({'reference_obj': obj})
+
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
         if skip_sub_obj_read_check:
@@ -333,7 +336,7 @@ class BaseAccess(object):
             elif "features" not in validation_info:
                 raise LicenseForbids(_("Features not found in active license."))
 
-    def get_user_capabilities(self, obj, method_list=[], parent_obj=None):
+    def get_user_capabilities(self, obj, method_list=[], parent_obj=None, capabilities_cache={}):
         if obj is None:
             return {}
         user_capabilities = {}
@@ -356,6 +359,10 @@ class BaseAccess(object):
             elif display_method == 'copy' and isinstance(obj, WorkflowJobTemplate) and obj.organization_id is None:
                 user_capabilities[display_method] = self.user.is_superuser
                 continue
+            elif display_method == 'copy' and isinstance(obj, Project) and obj.scm_type == '':
+                # Connot copy manual project without errors
+                user_capabilities[display_method] = False
+                continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, Group):  # TODO: remove in 3.3
                 try:
                     if obj.deprecated_inventory_source and not obj.deprecated_inventory_source._can_update():
@@ -370,8 +377,8 @@ class BaseAccess(object):
                     continue
 
             # Grab the answer from the cache, if available
-            if hasattr(obj, 'capabilities_cache') and display_method in obj.capabilities_cache:
-                user_capabilities[display_method] = obj.capabilities_cache[display_method]
+            if display_method in capabilities_cache:
+                user_capabilities[display_method] = capabilities_cache[display_method]
                 if self.user.is_superuser and not user_capabilities[display_method]:
                     # Cache override for models with bad orphaned state
                     user_capabilities[display_method] = True
@@ -389,10 +396,10 @@ class BaseAccess(object):
             if display_method == 'schedule':
                 user_capabilities['schedule'] = user_capabilities['start']
                 continue
-            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
+            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CustomInventoryScript)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
-            elif display_method == 'copy' and isinstance(obj, (Group, Host)):
+            elif display_method == 'copy' and isinstance(obj, (Group, Host, CustomInventoryScript)):
                 user_capabilities['copy'] = user_capabilities['edit']
                 continue
 
@@ -1315,9 +1322,6 @@ class JobTemplateAccess(BaseAccess):
             return self.user in project.use_role
         else:
             return False
-
-    def can_copy(self, obj):
-        return self.can_add({'reference_obj': obj})
 
     def can_start(self, obj, validate_license=True):
         # Check license.
