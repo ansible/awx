@@ -9,13 +9,15 @@
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
         'ProcessErrors', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state', 'availableLabels',
-        'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService', 'MultiCredentialService',
+        'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService',
+        'MultiCredentialService', 'ConfigData',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
-             $state, availableLabels, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService, MultiCredentialService
+             $state, availableLabels, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService,
+             MultiCredentialService, ConfigData
          ) {
 
             // Inject dynamic view
@@ -50,12 +52,12 @@
                 $scope.surveyTooltip = i18n._('Please save before adding a survey to this job template.');
 
                 MultiCredentialService.getCredentialTypes()
-                    .then(({ data }) => {
-                        $scope.multiCredential = {
-                            credentialTypes: data.results,
-                            selectedCredentials: []
-                        };
-                    });
+                .then(({ data }) => {
+                    $scope.multiCredential = {
+                        credentialTypes: data.results,
+                        selectedCredentials: []
+                    };
+                });
             }
 
             callback = function() {
@@ -80,6 +82,7 @@
                         }
                     }
                     $scope.job_type = $scope.job_type_options[form.fields.job_type.default];
+                    $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
 
                     CreateSelect2({
                         element:'#job_template_job_type',
@@ -108,6 +111,12 @@
                         element:'#job_template_skip_tags',
                         multiple: true,
                         addNew: true
+                    });
+
+                    CreateSelect2({
+                        element: '#job_template_custom_virtualenv',
+                        multiple: false,
+                        opts: $scope.custom_virtualenvs_options
                     });
                 }
             });
@@ -259,7 +268,7 @@
                 try {
                     for (fld in form.fields) {
                         if (form.fields[fld].type === 'select' &&
-                            fld !== 'playbook' && $scope[fld]) {
+                            fld !== 'playbook' && fld !== 'custom_virtualenv' && $scope[fld]) {
                             data[fld] = $scope[fld].value;
                         }
                         else if(form.fields[fld].type === 'checkbox_group') {

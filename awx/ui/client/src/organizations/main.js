@@ -55,7 +55,32 @@ angular.module('Organizations', [
                         activityStreamTarget: 'organization'
                     },
                     resolve: {
+                        add: {
+                            ConfigData: ['ConfigService', 'ProcessErrors', (ConfigService, ProcessErrors) => {
+                                return ConfigService.getConfig()
+                                    .then(response => response)
+                                    .catch(({data, status}) => {
+                                        ProcessErrors(null, data, status, null, {
+                                            hdr: 'Error!',
+                                            msg: 'Failed to get config. GET returned status: ' +
+                                                'status: ' + status
+                                        });
+                                    });
+
+                            }]
+                        },
                         edit: {
+                            ConfigData: ['ConfigService', 'ProcessErrors', (ConfigService, ProcessErrors) => {
+                                return ConfigService.getConfig()
+                                    .then(response => response)
+                                    .catch(({data, status}) => {
+                                        ProcessErrors(null, data, status, null, {
+                                            hdr: 'Error!',
+                                            msg: 'Failed to get config. GET returned status: ' +
+                                                'status: ' + status
+                                        });
+                                    });
+                            }],
                             InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
                                 function($stateParams, Rest, GetBasePath, ProcessErrors){
                                     let path = `${GetBasePath('organizations')}${$stateParams.organization_id}/instance_groups/`;

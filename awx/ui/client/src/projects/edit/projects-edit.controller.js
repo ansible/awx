@@ -8,14 +8,14 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
     'Alert', 'ProcessErrors', 'GenerateForm', 'Prompt',
     'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
     'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification',
-    'i18n', 'CredentialTypes', 'OrgAdminLookup',
+    'i18n', 'CredentialTypes', 'OrgAdminLookup', 'ConfigData',
     function($scope, $rootScope, $stateParams, ProjectsForm, Rest, Alert,
     ProcessErrors, GenerateForm, Prompt, GetBasePath,
     GetProjectPath, Authorization, GetChoices, Empty, Wait, ProjectUpdate,
     $state, CreateSelect2, ToggleNotification, i18n, CredentialTypes,
-    OrgAdminLookup) {
+    OrgAdminLookup, ConfigData) {
 
-        var form = ProjectsForm(),
+        let form = ProjectsForm(),
             defaultUrl = GetBasePath('projects') + $stateParams.project_id + '/',
             master = {},
             id = $stateParams.project_id;
@@ -25,6 +25,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
         function init() {
             $scope.project_local_paths = [];
             $scope.base_dir = '';
+            $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
         }
 
         $scope.$watch('project_obj.summary_fields.user_capabilities.edit', function(val) {
@@ -145,6 +146,12 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                     OrgAdminLookup.checkForAdminAccess({organization: data.organization})
                     .then(function(canEditOrg){
                         $scope.canEditOrg = canEditOrg;
+                    });
+
+                    CreateSelect2({
+                        element: '#project_custom_virtualenv',
+                        multiple: false,
+                        opts: $scope.custom_virtualenvs_options
                     });
 
                     $scope.project_obj = data;

@@ -17,16 +17,19 @@ export default
         'ParseTypeChange', 'Wait', 'selectedLabels', 'i18n',
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
-        'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData', 'MultiCredentialService', 'availableLabels',
-        'projectGetPermissionDenied', 'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString',
+        'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData',
+        'MultiCredentialService', 'availableLabels', 'projectGetPermissionDenied',
+        'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString', 'ConfigData',
         function(
             $filter, $scope, $rootScope,
             $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
             ProcessErrors, GetBasePath, md5Setup,
             ParseTypeChange, Wait, selectedLabels, i18n,
-            Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
-            CreateSelect2, ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData, MultiCredentialService, availableLabels,
-            projectGetPermissionDenied, inventoryGetPermissionDenied, jobTemplateData, ParseVariableString
+            Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit,
+            InitiatePlaybookRun, SurveyControllerInit, $state, CreateSelect2,
+            ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData,
+            MultiCredentialService, availableLabels, projectGetPermissionDenied,
+            inventoryGetPermissionDenied, jobTemplateData, ParseVariableString, ConfigData
         ) {
 
             $scope.$watch('job_template_obj.summary_fields.user_capabilities.edit', function(val) {
@@ -60,6 +63,7 @@ export default
                 $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
                 $scope.job_tag_options = [];
                 $scope.skip_tag_options = [];
+                $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -197,6 +201,12 @@ export default
                     element:'#job_template_skip_tags',
                     multiple: true,
                     addNew: true
+                });
+
+                CreateSelect2({
+                    element: '#job_template_custom_virtualenv',
+                    multiple: false,
+                    opts: $scope.custom_virtualenvs_options
                 });
             }
 
@@ -598,7 +608,7 @@ export default
                 try {
                     for (fld in form.fields) {
                         if (form.fields[fld].type === 'select' &&
-                            fld !== 'playbook' && $scope[fld]) {
+                            fld !== 'playbook' && fld !== 'custom_virtualenv' && $scope[fld]) {
                             data[fld] = $scope[fld].value;
                         }
                         else if(form.fields[fld].type === 'checkbox_group') {
