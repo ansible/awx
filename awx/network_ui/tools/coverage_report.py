@@ -46,8 +46,8 @@ def main(args=None):
             f.write(requests.get(server + test['coverage'], verify=False).text)
 
 
-    for test in tests['tests']:
-        subprocess.Popen('istanbul report html', shell=True, cwd=test['name']).wait()
+    #for test in tests['tests']:
+    #    subprocess.Popen('istanbul report html', shell=True, cwd=test['name']).wait()
 
 
     subprocess.Popen('istanbul report html', shell=True).wait()
@@ -55,7 +55,7 @@ def main(args=None):
 
     return 0
 
+
 if __name__ == '__main__':
-    import sys
     sys.exit(main(sys.argv[1:]))
 

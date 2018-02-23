@@ -5,14 +5,14 @@ class Device(models.Model):
 
     device_id = models.AutoField(primary_key=True,)
     topology = models.ForeignKey('Topology',)
-    name = models.CharField(max_length=200,)
+    name = models.CharField(max_length=200, blank=True)
     x = models.IntegerField()
     y = models.IntegerField()
     id = models.IntegerField()
-    type = models.CharField(max_length=200,)
-    interface_id_seq = models.IntegerField(default=0)
-    process_id_seq = models.IntegerField(default=0)
-    host_id = models.IntegerField(default=0)
+    device_type = models.CharField(max_length=200, blank=True)
+    interface_id_seq = models.IntegerField(default=0,)
+    process_id_seq = models.IntegerField(default=0,)
+    host_id = models.IntegerField(default=0,)
 
     def __unicode__(self):
         return self.name
@@ -26,20 +26,20 @@ class Link(models.Model):
     from_interface = models.ForeignKey('Interface', related_name='from_link',)
     to_interface = models.ForeignKey('Interface', related_name='to_link',)
     id = models.IntegerField()
-    name = models.CharField(max_length=200,)
+    name = models.CharField(max_length=200, blank=True)
 
 
 class Topology(models.Model):
 
     topology_id = models.AutoField(primary_key=True,)
-    name = models.CharField(max_length=200,)
+    name = models.CharField(max_length=200, blank=True)
     scale = models.FloatField()
     panX = models.FloatField()
     panY = models.FloatField()
-    device_id_seq = models.IntegerField(default=0)
-    link_id_seq = models.IntegerField(default=0)
-    group_id_seq = models.IntegerField(default=0)
-    stream_id_seq = models.IntegerField(default=0)
+    device_id_seq = models.IntegerField(default=0,)
+    link_id_seq = models.IntegerField(default=0,)
+    group_id_seq = models.IntegerField(default=0,)
+    stream_id_seq = models.IntegerField(default=0,)
 
     def __unicode__(self):
         return self.name
@@ -58,13 +58,13 @@ class TopologyHistory(models.Model):
     message_type = models.ForeignKey('MessageType',)
     message_id = models.IntegerField()
     message_data = models.TextField()
-    undone = models.BooleanField(default=False)
+    undone = models.BooleanField(default=False,)
 
 
 class MessageType(models.Model):
 
     message_type_id = models.AutoField(primary_key=True,)
-    name = models.CharField(max_length=200,)
+    name = models.CharField(max_length=200, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -74,7 +74,7 @@ class Interface(models.Model):
 
     interface_id = models.AutoField(primary_key=True,)
     device = models.ForeignKey('Device',)
-    name = models.CharField(max_length=200,)
+    name = models.CharField(max_length=200, blank=True)
     id = models.IntegerField()
 
     def __unicode__(self):
@@ -85,13 +85,14 @@ class Group(models.Model):
 
     group_id = models.AutoField(primary_key=True,)
     id = models.IntegerField()
-    name = models.CharField(max_length=200,)
+    name = models.CharField(max_length=200, blank=True)
     x1 = models.IntegerField()
     y1 = models.IntegerField()
     x2 = models.IntegerField()
     y2 = models.IntegerField()
     topology = models.ForeignKey('Topology',)
-    type = models.CharField(max_length=200,)
+    group_type = models.CharField(max_length=200, blank=True)
+    inventory_group_id = models.IntegerField(default=0,)
 
 
 class GroupDevice(models.Model):
@@ -106,9 +107,9 @@ class DataBinding(models.Model):
     data_binding_id = models.AutoField(primary_key=True,)
     column = models.IntegerField()
     row = models.IntegerField()
-    table = models.CharField(max_length=200,)
+    table = models.CharField(max_length=200, blank=True)
     primary_key_id = models.IntegerField()
-    field = models.CharField(max_length=200,)
+    field = models.CharField(max_length=200, blank=True)
     data_type = models.ForeignKey('DataType',)
     sheet = models.ForeignKey('DataSheet',)
 
@@ -116,13 +117,13 @@ class DataBinding(models.Model):
 class DataType(models.Model):
 
     data_type_id = models.AutoField(primary_key=True,)
-    type_name = models.CharField(max_length=200,)
+    type_name = models.CharField(max_length=200, blank=True)
 
 
 class DataSheet(models.Model):
 
     data_sheet_id = models.AutoField(primary_key=True,)
-    name = models.CharField(max_length=200,)
+    name = models.CharField(max_length=200, blank=True)
     topology = models.ForeignKey('Topology',)
     client = models.ForeignKey('Client',)
 
@@ -132,23 +133,23 @@ class Stream(models.Model):
     stream_id = models.AutoField('Stream', primary_key=True,)
     from_device = models.ForeignKey('Device', related_name='from_stream',)
     to_device = models.ForeignKey('Device', related_name='to_stream',)
-    label = models.CharField(max_length=200,)
-    id = models.IntegerField(default=0)
+    label = models.CharField(max_length=200, blank=True)
+    id = models.IntegerField(default=0,)
 
 
 class Process(models.Model):
 
     process_id = models.AutoField(primary_key=True,)
     device = models.ForeignKey('Device',)
-    name = models.CharField(max_length=200,)
-    type = models.CharField(max_length=200,)
-    id = models.IntegerField(default=0)
+    name = models.CharField(max_length=200, blank=True)
+    process_type = models.CharField(max_length=200, blank=True)
+    id = models.IntegerField(default=0,)
 
 
 class Toolbox(models.Model):
 
     toolbox_id = models.AutoField(primary_key=True,)
-    name = models.CharField(max_length=200,)
+    name = models.CharField(max_length=200, blank=True)
 
 
 class ToolboxItem(models.Model):
@@ -161,13 +162,13 @@ class ToolboxItem(models.Model):
 class FSMTrace(models.Model):
 
     fsm_trace_id = models.AutoField(primary_key=True,)
-    fsm_name = models.CharField(max_length=200,)
-    from_state = models.CharField(max_length=200,)
-    to_state = models.CharField(max_length=200,)
-    message_type = models.CharField(max_length=200,)
+    fsm_name = models.CharField(max_length=200, blank=True)
+    from_state = models.CharField(max_length=200, blank=True)
+    to_state = models.CharField(max_length=200, blank=True)
+    message_type = models.CharField(max_length=200, blank=True)
     client = models.ForeignKey('Client',)
-    trace_session_id = models.IntegerField(default=0)
-    order = models.IntegerField(default=0)
+    trace_session_id = models.IntegerField(default=0,)
+    order = models.IntegerField(default=0,)
 
 
 class TopologyInventory(models.Model):
@@ -181,7 +182,7 @@ class EventTrace(models.Model):
 
     event_trace_id = models.AutoField(primary_key=True,)
     client = models.ForeignKey('Client',)
-    trace_session_id = models.IntegerField(default=0)
+    trace_session_id = models.IntegerField(default=0,)
     event_data = models.TextField()
     message_id = models.IntegerField()
 
@@ -206,14 +207,14 @@ class TopologySnapshot(models.Model):
 class TestCase(models.Model):
 
     test_case_id = models.AutoField(primary_key=True,)
-    name = models.CharField('TestCase', max_length=200,)
+    name = models.CharField('TestCase', max_length=200, blank=True)
     test_case_data = models.TextField()
 
 
 class Result(models.Model):
 
     result_id = models.AutoField(primary_key=True,)
-    name = models.CharField(max_length=20,)
+    name = models.CharField(max_length=20, blank=True)
 
 
 class CodeUnderTest(models.Model):
@@ -223,7 +224,7 @@ class CodeUnderTest(models.Model):
     version_y = models.IntegerField()
     version_z = models.IntegerField()
     commits_since = models.IntegerField()
-    commit_hash = models.CharField(max_length=40,)
+    commit_hash = models.CharField(max_length=40, blank=True)
 
 
 class TestResult(models.Model):
@@ -233,5 +234,5 @@ class TestResult(models.Model):
     result = models.ForeignKey('Result',)
     code_under_test = models.ForeignKey('CodeUnderTest',)
     time = models.DateTimeField()
-    id = models.IntegerField(default=0)
+    id = models.IntegerField(default=0,)
     client = models.ForeignKey('Client',)

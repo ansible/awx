@@ -60,7 +60,7 @@ def topology_data(topology_id):
                                ) for x in interfaces]
             processes = list(Process.objects.filter(device_id=device.pk).values())
             data['devices'].append(dict(name=device.name,
-                                        type=device.type,
+                                        type=device.device_type,
                                         x=device.x,
                                         y=device.y,
                                         id=device.id,
