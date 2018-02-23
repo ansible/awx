@@ -98,7 +98,6 @@ angular
         users.name,
         projects.name,
         scheduler.name,
-        instanceGroups.name,
         networkUI.tower.name,
 
         'Utilities',
