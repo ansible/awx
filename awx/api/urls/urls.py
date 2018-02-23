@@ -32,7 +32,6 @@ from awx.api.views import (
     OAuth2TokenList,
     ApplicationOAuth2TokenList,
     OAuth2ApplicationDetail,
-    
 )
 
 from .organization import urls as organization_urls

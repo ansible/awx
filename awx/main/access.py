@@ -557,7 +557,7 @@ class UserAccess(BaseAccess):
         return super(UserAccess, self).can_unattach(obj, sub_obj, relationship, *args, **kwargs)
 
 
-class OauthApplicationAccess(BaseAccess):
+class OAuth2ApplicationAccess(BaseAccess):
     '''
     I can read, change or delete OAuth applications when:
      - I am a superuser.
@@ -592,7 +592,7 @@ class OauthApplicationAccess(BaseAccess):
         return set(self.user.admin_of_organizations.all()) & set(user.organizations.all())
 
 
-class OauthTokenAccess(BaseAccess):
+class OAuth2TokenAccess(BaseAccess):
     '''
     I can read, change or delete an OAuth token when:
      - I am a superuser.
@@ -621,7 +621,7 @@ class OauthTokenAccess(BaseAccess):
         app = get_object_from_data('application', OAuth2Application, data)
         if not app:
             return True
-        return OauthApplicationAccess(self.user).can_read(app)
+        return OAuth2ApplicationAccess(self.user).can_read(app)
 
 
 class OrganizationAccess(BaseAccess):

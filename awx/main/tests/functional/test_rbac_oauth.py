@@ -1,8 +1,8 @@
 import pytest
 
 from awx.main.access import (
-    OauthApplicationAccess,
-    OauthTokenAccess,
+    OAuth2ApplicationAccess,
+    OAuth2TokenAccess,
 )
 from awx.main.models.oauth import (
     OAuth2Application as Application,
@@ -24,7 +24,7 @@ class TestOAuthApplication:
         self, admin, org_admin, org_member, alice, user_for_access, can_access_list
     ):
         user_list = [admin, org_admin, org_member, alice]
-        access = OauthApplicationAccess(user_list[user_for_access])
+        access = OAuth2ApplicationAccess(user_list[user_for_access])
         for user, can_access in zip(user_list, can_access_list):
             app = Application.objects.create(
                 name='test app for {}'.format(user.username), user=user,
@@ -35,7 +35,7 @@ class TestOAuthApplication:
             assert access.can_delete(app) is can_access
 
     def test_superuser_can_always_create(self, admin, org_admin, org_member, alice):
-        access = OauthApplicationAccess(admin)
+        access = OAuth2ApplicationAccess(admin)
         for user in [admin, org_admin, org_member, alice]:
             assert access.can_add({
                 'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
@@ -44,7 +44,7 @@ class TestOAuthApplication:
 
     def test_normal_user_cannot_create(self, admin, org_admin, org_member, alice):
         for access_user in [org_member, alice]:
-            access = OauthApplicationAccess(access_user)
+            access = OAuth2ApplicationAccess(access_user)
             for user in [admin, org_admin, org_member, alice]:
                 assert not access.can_add({
                     'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
@@ -52,7 +52,7 @@ class TestOAuthApplication:
                 })
 
     def test_org_admin_can_create_in_org(self, admin, org_admin, org_member, alice):
-        access = OauthApplicationAccess(org_admin)
+        access = OAuth2ApplicationAccess(org_admin)
         for user in [admin, alice]:
             assert not access.can_add({
                 'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
@@ -79,7 +79,7 @@ class TestOAuthToken:
         self, post, admin, org_admin, org_member, alice, user_for_access, can_access_list
     ):
         user_list = [admin, org_admin, org_member, alice]
-        access = OauthTokenAccess(user_list[user_for_access])
+        access = OAuth2TokenAccess(user_list[user_for_access])
         for user, can_access in zip(user_list, can_access_list):
             app = Application.objects.create(
                 name='test app for {}'.format(user.username), user=user,

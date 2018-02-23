@@ -1507,7 +1507,7 @@ class OAuth2ApplicationList(ListCreateAPIView):
     view_name = _("OAuth Applications")
 
     model = OAuth2Application
-    serializer_class = OauthApplicationSerializer
+    serializer_class = OAuth2ApplicationSerializer
 
 
 class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
@@ -1515,7 +1515,7 @@ class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
     view_name = _("OAuth Application Detail")
 
     model = OAuth2Application
-    serializer_class = OauthApplicationSerializer
+    serializer_class = OAuth2ApplicationSerializer
 
 
 class ApplicationOAuth2TokenList(SubListCreateAPIView):
@@ -1523,7 +1523,7 @@ class ApplicationOAuth2TokenList(SubListCreateAPIView):
     view_name = _("OAuth Application Tokens")
 
     model = OAuth2AccessToken
-    serializer_class = OauthTokenSerializer
+    serializer_class = OAuth2TokenSerializer
     parent_model = OAuth2Application
     relationship = 'oauth2accesstoken_set'
     parent_key = 'application'
@@ -1539,10 +1539,10 @@ class OAuth2ApplicationActivityStreamList(ActivityStreamEnforcementMixin, SubLis
 
 class OAuth2TokenList(ListCreateAPIView):
 
-    view_name = _("OAuth Tokens")
+    view_name = _("OAuth2 Tokens")
 
     model = OAuth2AccessToken
-    serializer_class = OauthTokenSerializer
+    serializer_class = OAuth2TokenSerializer
     
     
 class OAuth2AuthorizedTokenList(SubListCreateAPIView):
@@ -1554,6 +1554,20 @@ class OAuth2AuthorizedTokenList(SubListCreateAPIView):
     parent_model = OAuth2Application
     relationship = 'oauth2accesstoken_set'
     parent_key = 'application'
+
+    def get_queryset(self):
+        return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
+        
+        
+class UserAuthorizedTokenList(SubListCreateAPIView):
+
+    view_name = _("OAuth2 User Authorized Access Tokens")
+    
+    model = OAuth2AccessToken
+    serializer_class = OAuth2AuthorizedTokenSerializer
+    parent_model = User
+    relationship = 'oauth2accesstoken_set'
+    parent_key = 'user'
 
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
@@ -1578,7 +1592,7 @@ class OAuth2TokenDetail(RetrieveUpdateDestroyAPIView):
     view_name = _("OAuth Token Detail")
 
     model = OAuth2AccessToken
-    serializer_class = OauthTokenSerializer
+    serializer_class = OAuth2TokenSerializer
 
 
 class OAuth2TokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
