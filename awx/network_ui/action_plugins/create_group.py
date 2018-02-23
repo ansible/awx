@@ -34,6 +34,8 @@ class ActionModule(ActionBase):
         topology = self._task.args.get('topology', None)
         type = self._task.args.get('type', None)
 
+        inventory_group_id = self._task.args.get('inventory_group_id', 0)
+
         url = server + '/api/v2/canvas/group/'
         headers = {'content-type': 'application/json'}
         response = requests.post(url, data=json.dumps(dict(id=id,
@@ -44,6 +46,7 @@ class ActionModule(ActionBase):
                                                            y2=y2,
                                                            topology=topology,
                                                            type=type,
+                                                           inventory_group_id=inventory_group_id,
                                                            )),
                                  verify=False,
                                  auth=(user, password),

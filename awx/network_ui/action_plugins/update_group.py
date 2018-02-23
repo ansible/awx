@@ -32,6 +32,7 @@ class ActionModule(ActionBase):
         y2 = self._task.args.get('y2', None)
         topology = self._task.args.get('topology', None)
         type = self._task.args.get('type', None)
+        inventory_group_id = self._task.args.get('inventory_group_id', None)
 
         url = server + '/api/v2/canvas/group/' + str(group_id) + '/'
         headers = {'content-type': 'application/json'}
@@ -43,6 +44,7 @@ class ActionModule(ActionBase):
                     y2=y2,
                     topology=topology,
                     type=type,
+                    inventory_group_id=inventory_group_id,
                     )
         data = {x: y for x, y in data.iteritems() if y is not None}
         response = requests.patch(url,

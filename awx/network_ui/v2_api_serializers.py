@@ -74,7 +74,8 @@ class GroupSerializer(BaseSerializer):
                   'x2',
                   'y2',
                   'topology',
-                  'type')
+                  'type',
+                  'inventory_group_id')
 
 
 class GroupDeviceSerializer(BaseSerializer):

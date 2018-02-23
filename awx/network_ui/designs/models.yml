@@ -206,7 +206,7 @@ models:
     name: type
     type: CharField
   - default: 0
-    name: group_id
+    name: inventory_group_id
     type: IntegerField
   name: Group
   topology_id_query: topology_id

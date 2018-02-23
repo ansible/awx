@@ -31,6 +31,7 @@ class ActionModule(ActionBase):
         y2 = self._task.args.get('y2', None)
         topology = self._task.args.get('topology', None)
         type = self._task.args.get('type', None)
+        inventory_group_id = self._task.args.get('inventory_group_id', None)
 
         filter_data = dict(group_id=group_id,
                            id=id,
@@ -41,6 +42,7 @@ class ActionModule(ActionBase):
                            y2=y2,
                            topology=topology,
                            type=type,
+                           inventory_group_id=inventory_group_id,
                            )
         filter_data = {x: y for x, y in filter_data.iteritems() if y is not None}
 

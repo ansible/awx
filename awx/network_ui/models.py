@@ -92,6 +92,7 @@ class Group(models.Model):
     y2 = models.IntegerField()
     topology = models.ForeignKey('Topology',)
     type = models.CharField(max_length=200,)
+    inventory_group_id = models.IntegerField(default=0)
 
 
 class GroupDevice(models.Model):
