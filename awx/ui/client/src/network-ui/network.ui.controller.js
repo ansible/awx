@@ -25,8 +25,18 @@ var details_panel_fsm = require('./details.panel.fsm.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
 
-var NetworkUIController = function($scope, $document, $location, $window, $http,
-    $q, $state, ProcessErrors, ConfigService, rbacUiControlService) {
+var NetworkUIController = function($scope,
+                                   $document,
+                                   $location,
+                                   $window,
+                                   $http,
+                                   $q,
+                                   $state,
+                                   ProcessErrors,
+                                   ConfigService,
+                                   rbacUiControlService,
+                                   HostsService,
+                                   GroupsService) {
 
   window.scope = $scope;
   var i = 0;
@@ -277,8 +287,9 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                            if (host.data.name === undefined) {
                                host.data.name = host.name;
                            }
-                           var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id, host.variables);
+                           var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id);
                            device.icon = true;
+                           device.variables = host.variables;
                            $scope.inventory_toolbox.items.push(device);
                        }
                    } catch (error) {
@@ -819,7 +830,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                                                             group.y1,
                                                                             group.x2,
                                                                             group.y2,
-                                                                            group.name));
+                                                                            group.name,
+                                                                            group.group_id));
         }
 
         if($scope.current_scale <= 0.5){
@@ -1107,6 +1119,32 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.first_channel.send("EnableTest", new messages.EnableTest());
     };
 
+    $scope.onCompileVariablesButton = function (button) {
+
+
+        function noop (response) {
+            console.log(response);
+        };
+
+        function error_handler (response) {
+
+            console.log(response);
+        };
+
+        var i = 0;
+        var variables = null;
+        for(i = 0; i < $scope.devices.length; i++) {
+            variables = $scope.devices[i].compile_variables();
+            $http.put('/api/v2/hosts/' + $scope.devices[i].host_id + '/variable_data/', JSON.stringify(variables)).then(noop).catch(error_handler);
+        }
+
+        for(i = 0; i < $scope.groups.length; i++) {
+            variables = $scope.groups[i].compile_variables();
+            $http.put('/api/v2/groups/' + $scope.groups[i].group_id + '/variable_data/', JSON.stringify(variables)).then(noop).catch(error_handler);
+
+        }
+    };
+
     // Buttons
     var button_offset = 200;
 
@@ -1193,6 +1231,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         return null;
     };
 
+
     $scope.getDeviceInterface = function(device_name, interface_name) {
 
         var i = 0;
@@ -1209,11 +1248,50 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         return null;
     };
 
+    $scope.create_inventory_host = function (device, callback) {
+        console.log(device);
+        HostsService.post({inventory: $scope.inventory_id,
+                           name: device.name,
+                           variables: JSON.stringify({name: device.name,
+                                                      type: device.type})})
+                    .then(function (res) {
+                        console.log(res);
+                        device.host_id = res.data.id;
+                        device.variables = JSON.parse(res.data.varaibles);
+                        $scope.send_control_message(new messages.DeviceInventoryUpdate($scope.client_id,
+                                                                                       device.id,
+                                                                                       device.host_id));
+                    })
+                    .catch(function (res) {
+                        console.log(res);
+                    });
+    };
+
+    $scope.create_inventory_group = function (group, callback) {
+        console.log(group);
+        GroupsService.post({inventory: $scope.inventory_id,
+                           name: group.name,
+                           variables: JSON.stringify({name: group.name,
+                                                      type: group.type})})
+                    .then(function (res) {
+                        console.log(res);
+                        group.group_id = res.data.id;
+                        group.variables = JSON.parse(res.data.varaibles);
+                        $scope.send_control_message(new messages.GroupInventoryUpdate($scope.client_id,
+                                                                                      group.id,
+                                                                                      group.group_id));
+                    })
+                    .catch(function (res) {
+                        console.log(res);
+                    });
+    };
+
     $scope.onDeviceCreate = function(data) {
         $scope.create_device(data);
     };
 
     $scope.create_device = function(data) {
+        console.log(data);
         var device = new models.Device(data.id,
                                        data.name,
                                        data.x,
@@ -1801,6 +1879,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
                                          group.x2,
                                          group.y2,
                                          false);
+            new_group.group_id = group.inventory_group_id;
             if (group.members !== undefined) {
                 for (j=0; j < group.members.length; j++) {
                     new_group.devices.push(device_map[group.members[j]]);
@@ -1859,6 +1938,36 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.updateInterfaceDots();
         $scope.$emit('instatiateSelect', $scope.devices);
         $scope.$emit('awxNet-breadcrumbGroups', $scope.breadcrumbGroups());
+        $scope.update_device_variables();
+    };
+
+    $scope.update_device_variables = function () {
+
+      var hosts_by_id = {};
+      var i = 0;
+      for (i = 0; i < $scope.devices.length; i++) {
+          hosts_by_id[$scope.devices[i].host_id] = $scope.devices[i];
+      }
+
+      $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/')
+           .then(function(response) {
+               let hosts = response.data.results;
+               for(var i = 0; i<hosts.length; i++){
+                   try {
+                       let host = hosts[i];
+                       if (hosts_by_id[host.id] !== undefined) {
+                           hosts_by_id[host.id].variables = JSON.parse(host.variables);
+                       }
+                   } catch (error) {
+                       console.log(error);
+                   }
+               }
+           })
+           .catch(({data, status}) => {
+               console.log([data, status]);
+               ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
+           });
+
     };
 
     $scope.updateInterfaceDots = function() {

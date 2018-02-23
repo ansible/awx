@@ -336,6 +336,12 @@ class _Persistence(object):
     def onDeviceMove(self, device, topology_id, client_id):
         Device.objects.filter(topology_id=topology_id, id=device['id']).update(x=device['x'], y=device['y'])
 
+    def onDeviceInventoryUpdate(self, device, topology_id, client_id):
+        Device.objects.filter(topology_id=topology_id, id=device['id']).update(host_id=device['host_id'])
+
+    def onGroupInventoryUpdate(self, group, topology_id, client_id):
+        DeviceGroup.objects.filter(topology_id=topology_id, id=group['id']).update(inventory_group_id=group['group_id'])
+
     def onDeviceLabelEdit(self, device, topology_id, client_id):
         Device.objects.filter(topology_id=topology_id, id=device['id']).update(name=device['name'])
         for pk in Device.objects.filter(topology_id=topology_id, id=device['id']).values_list('pk', flat=True):
@@ -528,13 +534,15 @@ class _Persistence(object):
 
     def onGroupCreate(self, group, topology_id, client_id):
         logger.info("GroupCreate %s %s %s", group['id'], group['name'], group['type'])
+        print ("GroupCreate %s %s %s %s" % (group['id'], group['name'], group['type'], group['group_id']))
         group = transform_dict(dict(x1='x1',
                                     y1='y1',
                                     x2='x2',
                                     y2='y2',
                                     name='name',
                                     id='id',
-                                    type='type'), group)
+                                    type='type',
+                                    group_id='inventory_group_id'), group)
         d, _ = DeviceGroup.objects.get_or_create(topology_id=topology_id, id=group['id'], defaults=group)
         d.x1 = group['x1']
         d.y1 = group['y1']

@@ -29,6 +29,7 @@ function Device(id, name, x, y, type, host_id) {
     this.process_id_seq = util.natural_numbers(0);
     this.processes = [];
     this.in_group = false;
+    this.variables = [];
 }
 exports.Device = Device;
 
@@ -57,6 +58,27 @@ Device.prototype.is_selected = function (x, y) {
 
 Device.prototype.describeArc = util.describeArc;
 
+
+Device.prototype.compile_variables = function () {
+    var variables = JSON.parse(JSON.stringify(this.variables));
+    variables.name = this.name;
+    variables.type = this.type;
+    variables.interfaces = [];
+    var i = 0;
+    var intf = null;
+    for (i = 0; i < this.interfaces.length; i++) {
+        intf = {name: this.interfaces[i].name,
+                id: this.interfaces[i].id};
+        if (this.interfaces[i].link !== null) {
+            intf.link_id = this.interfaces[i].link.id;
+            intf.link_name = this.interfaces[i].link.name;
+            intf.remote_interface_name = this.interfaces[i].remote_interface().name;
+            intf.remote_device_name = this.interfaces[i].remote_interface().device.name;
+        }
+        variables.interfaces.push(intf);
+    }
+    return variables;
+};
 
 function Interface(id, name) {
     this.id = id;
@@ -439,9 +461,17 @@ function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.links = [];
     this.groups = [];
     this.streams = [];
+    this.group_id = 0;
     this.icon_size = type === 'site' ? 500 : 100;
+    this.variables = [];
 }
 exports.Group = Group;
+
+Group.prototype.compile_variables = function () {
+
+    var variables = JSON.parse(JSON.stringify(this.variables));
+    return variables;
+}
 
 Group.prototype.toJSON = function () {
 

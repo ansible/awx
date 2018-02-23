@@ -551,6 +551,7 @@ _Placing.prototype.onMouseDown = function (controller) {
                              scope.scaledX,
                              scope.scaledY,
                              false);
+
     scope.send_control_message(new messages.GroupCreate(scope.client_id,
                                                         group.id,
                                                         group.x1,
@@ -558,8 +559,10 @@ _Placing.prototype.onMouseDown = function (controller) {
                                                         group.x2,
                                                         group.y2,
                                                         group.name,
-                                                        group.type));
+                                                        group.type,
+                                                        group.group_id));
 
+    scope.create_inventory_group(group);
     scope.groups.push(group);
     scope.selected_groups.push(group);
     group.selected = true;

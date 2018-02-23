@@ -137,6 +137,7 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
                                                              device.name,
                                                              device.type,
                                                              device.host_id));
+        scope.create_inventory_host(device);
         scope.selected_devices.push(device);
         device.selected = true;
         scope.$emit('addSearchOption', device);
@@ -165,6 +166,7 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                scope.scaledY,
                                message.device.type,
                                message.device.host_id);
+    device.variables = JSON.parse(message.device.variables);
     scope.devices.push(device);
     c_messages.push(new messages.DeviceCreate(scope.client_id,
                                               device.id,

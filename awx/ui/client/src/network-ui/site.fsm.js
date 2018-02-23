@@ -125,7 +125,8 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                              group.x2,
                                              group.y2,
                                              group.name,
-                                             group.type));
+                                             group.type,
+                                             0));
 
     scope.groups.push(group);
 
@@ -225,7 +226,8 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                                  inner_group.x2,
                                                  inner_group.y2,
                                                  inner_group.name,
-                                                 inner_group.type));
+                                                 inner_group.type,
+                                                 0));
     }
     for(i=0; i< group.groups.length; i++) {
         membership_old_new = group.groups[i].update_membership(scope.devices, scope.groups);
