@@ -16,7 +16,6 @@ from awx.api.views import (
     UserAccessList,
     OAuth2ApplicationList,
     OAuth2TokenList,
-    OAuth2AuthorizedTokenList,
     OAuth2PersonalTokenList,
     UserAuthorizedTokenList,
 )

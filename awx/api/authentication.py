@@ -51,8 +51,8 @@ class LoggedOAuth2Authentication(OAuth2Authentication):
             user, token = ret
             username = user.username if user else '<none>'
             logger.debug(smart_text(
-                u"User {} performed a {} to {} through the API using OAuth token {}".format(
-                    username, request.method, request.path, user
+                u"User {} performed a {} to {} through the API using OAuth token {}.".format(
+                    username, request.method, request.path, token.pk
                 )
             ))
             setattr(user, 'oauth_scopes', [x for x in token.scope.split() if x])

@@ -128,8 +128,6 @@ Strict-Transport-Security: max-age=15768000
 {"access_token": "9epHOqHhnXUcgYK8QanOmUQPSgX92g", "token_type": "Bearer", "expires_in": 36000, "refresh_token": "jMRX6QvzOTf046KHee3TU5mT3nyXsz", "scope": "read"}
 ```
 
-## Verify by introspecting the access token:
->> Need to fill in Introspection Example in the docs here #TODO: Add Introspection
 
 ## Refresh an existing access token
 Suppose we have an existing access token with refresh token provided:
@@ -146,7 +144,7 @@ Suppose we have an existing access token with refresh token provided:
     "scope": "read write"
 }
 ```
-`/api/o/token/` endpoint is used for refreshing access token:
+The `/api/o/token/` endpoint is used for refreshing access token:
 ```bash
 curl -X POST \
   -d "grant_type=refresh_token&refresh_token=AL0NK9TTpv0qp54dGbC4VUZtsZ9r8z" \

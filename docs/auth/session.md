@@ -1,9 +1,8 @@
 ## Introduction
->> Updated to these docs coming soon.
 
-Before Tower 3.3, auth token is used as the main authentication method. Starting from Tower 3.3,
-session-based authentication will take the place as the main authentication, while auth token
-will be replaced by OAuth tokens also introduced in 3.3.
+Before Tower 3.3, auth token was used as the main authentication method. Starting from Tower 3.3,
+session-based authentication will take the place as the main authentication method, and auth token
+will be replaced by OAuth 2 tokens.
 
 Session authentication is a safer way of utilizing HTTP(S) cookies:
 
@@ -11,19 +10,19 @@ Theoretically, user can provide authentication information, like username and pa
 `Cookie` header, but this method is vulnerable to cookie hijacks, where crackers can see and steal user
 information from cookie payload.
 
-Session authentication, on the other hand, sets a single `sessionid` cookie, called 'session'. Session
+Session authentication, on the other hand, sets a single `session_id` cookie. The session_id
 is *a random string which will be mapped to user authentication informations by server*. Crackers who
-hijacks cookie will only get session itself, which does not imply any critical user info, valid only for
+hijacks cookie will only get the session_id itself, which does not imply any critical user info, is valid only for
 a limited time, and can be revoked at any time.
 
 ## Usage
 
-In session authentication, user log in using endpoint `/api/login/`. GET to `/api/login/` displays the
+In session authentication, users log in using the `/api/login/` endpoint. A GET to `/api/login/` displays the
 log in page of API browser:
 
 ![Example session log in page](../img/auth_session_1.png?raw=true)
 
-User should enter correct username and password before clicking on 'LOG IN' button, which fires a POST
+Users should enter correct username and password before clicking on 'LOG IN' button, which fires a POST
 to `/api/login/` to actually log the user in. The return code of a successful login is 302, meaning upon
 successful login, the browser will be redirected, the redirected destination is determined by `next` form
 item described below.
@@ -35,7 +34,7 @@ be provided in the form:
 * `next`: The path of the redirect destination, in API browser `"/api/"` is used.
 * `csrfmiddlewaretoken`: The CSRF token, usually populated by using Django template `{% csrf_token %}`.
 
-Session is provided as a return `Set-Cookie` header. Here is a typical one:
+The session_id is provided as a return `Set-Cookie` header. Here is a typical one:
 ```
 Set-Cookie: sessionid=lwan8l5ynhrqvps280rg5upp7n3yp6ds; expires=Tue, 21-Nov-2017 16:33:13 GMT; httponly; Max-Age=1209600; Path=/
 ```
@@ -45,10 +44,10 @@ session cookie value, expiration date, duration, etc.
 
 The duration of the cookie is configurable by Tower Configuration setting `SESSION_COOKIE_AGE` under
 category `authentication`. It is an integer denoting the number of seconds the session cookie should
-live.
+live. The default session cookie age is 2 weeks.  
 
-After a valid session is acquired, a client should provide session as a cookie for subsequent requests
-in order to be authenticated. like
+After a valid session is acquired, a client should provide the session_id as a cookie for subsequent requests
+in order to be authenticated. For example:
 ```
 Cookie: sessionid=lwan8l5ynhrqvps280rg5upp7n3yp6ds; ...
 ```
@@ -63,8 +62,7 @@ by performing session acquire with the session provided.
 
 A Tower configuration setting, `SESSIONS_PER_USER` under category `authentication`, is used to set the
 maximum number of valid sessions a user can have at the same time. For example, if `SESSIONS_PER_USER`
-is set to 3, while the same user is logged in via 5 different places, and thus have 5 valid sessions
-available at the same time, the earliest 2 (5 - 3) sessions created will be invalidated. Tower will try
+is set to 3 and the same user is logged in from 5 different places, the earliest 2 sessions created will be invalidated. Tower will try
 broadcasting, via websocket, to all available clients. The websocket message body will contain a list of
 invalidated sessions. If a client finds its session in that list, it should try logging out.
 
@@ -79,7 +77,7 @@ is updated, all sessions she owned will be invalidated and deleted.
 * The maximum number of concurrent login for one user should be configurable by `SESSIONS_PER_USER`,
   and over-limit user sessions should be warned by websocket.
 * When a user's password is changed, all her sessions should be invalidated and deleted.
-* User should not be able to authenticate either HTTPS(S) request or websocket connect using invalid
+* User should not be able to authenticate by HTTPS(S) request nor websocket connect using invalid
   sessions.
 * No existing behavior, like job run, inventory update or callback receiver, should be affected
   by session auth.
