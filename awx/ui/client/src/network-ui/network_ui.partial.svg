@@ -106,5 +106,6 @@
         <g awx-net-debug></g>
         <g awx-net-test-results></g>
         <g awx-net-cursor></g>
+        <g ng-if="template_building"><text stroke="none" fill="red" font-size="48" ng-attr-x="{{graph.width/2}}" ng-attr-y="200">TEMPLATE BUILDING</text></g>
     </svg>
     </div>

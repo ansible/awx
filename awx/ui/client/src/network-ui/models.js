@@ -29,6 +29,8 @@ function Device(id, name, x, y, type, host_id) {
     this.process_id_seq = util.natural_numbers(0);
     this.processes = [];
     this.in_group = false;
+    this.template = false;
+    this.variables = {};
 }
 exports.Device = Device;
 
@@ -57,6 +59,29 @@ Device.prototype.is_selected = function (x, y) {
 
 Device.prototype.describeArc = util.describeArc;
 
+
+Device.prototype.compile_variables = function () {
+    var variables = JSON.parse(JSON.stringify(this.variables));
+    var awx_variables = {};
+    variables.awx = awx_variables;
+    awx_variables.name = this.name;
+    awx_variables.type = this.type;
+    awx_variables.interfaces = [];
+    var i = 0;
+    var intf = null;
+    for (i = 0; i < this.interfaces.length; i++) {
+        intf = {name: this.interfaces[i].name,
+                id: this.interfaces[i].id};
+        if (this.interfaces[i].link !== null) {
+            intf.link_id = this.interfaces[i].link.id;
+            intf.link_name = this.interfaces[i].link.name;
+            intf.remote_interface_name = this.interfaces[i].remote_interface().name;
+            intf.remote_device_name = this.interfaces[i].remote_interface().device.name;
+        }
+        awx_variables.interfaces.push(intf);
+    }
+    return variables;
+};
 
 function Interface(id, name) {
     this.id = id;
@@ -439,9 +464,19 @@ function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.links = [];
     this.groups = [];
     this.streams = [];
+    this.group_id = 0;
     this.icon_size = type === 'site' ? 500 : 100;
+    this.template = false;
+    this.variables = {};
+    this.sequences = {};
 }
 exports.Group = Group;
+
+Group.prototype.compile_variables = function () {
+
+    var variables = JSON.parse(JSON.stringify(this.variables));
+    return variables;
+};
 
 Group.prototype.toJSON = function () {
 
@@ -634,7 +669,10 @@ Group.prototype.update_membership = function (devices, groups) {
     var y2 = this.bottom_extent();
     var x2 = this.right_extent();
     var old_devices = this.devices;
+    var new_devices = [];
+    var removed_devices = old_devices.slice();
     var device_ids = [];
+    var index = -1;
     this.devices = [];
     for (i = 0; i < devices.length; i++) {
         if (devices[i].x > x1 &&
@@ -644,6 +682,12 @@ Group.prototype.update_membership = function (devices, groups) {
             devices[i].in_group = true;
             this.devices.push(devices[i]);
             device_ids.push(devices[i].id);
+            index = removed_devices.indexOf(devices[i]);
+            if (index !== -1) {
+                removed_devices.splice(index, 1);
+            } else {
+                new_devices.push(devices[i]);
+            }
         }
     }
     var old_groups = this.groups;
@@ -658,7 +702,7 @@ Group.prototype.update_membership = function (devices, groups) {
             group_ids.push(groups[i].id);
         }
     }
-    return [old_devices, this.devices, device_ids, old_groups, this.groups, group_ids];
+    return [old_devices, this.devices, device_ids, old_groups, this.groups, group_ids, new_devices, removed_devices];
 };
 
 Group.prototype.is_in_breadcrumb = function(viewport){

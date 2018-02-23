@@ -4,6 +4,7 @@ var fsm = require('./fsm.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
 var util = require('./util.js');
+var nunjucks = require('nunjucks');
 
 function _State () {
 }
@@ -137,6 +138,10 @@ _Ready.prototype.onNewDevice = function (controller, msg_type, message) {
                                                              device.name,
                                                              device.type,
                                                              device.host_id));
+        if (scope.template_building) {
+            device.template = true;
+        }
+        scope.create_inventory_host(device);
         scope.selected_devices.push(device);
         device.selected = true;
         scope.$emit('addSearchOption', device);
@@ -153,6 +158,7 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
     var process = null;
     var i = 0;
     var c_messages = [];
+    var template_context = null;
 
     scope.pressedX = scope.mouseX;
     scope.pressedY = scope.mouseY;
@@ -165,6 +171,20 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                scope.scaledY,
                                message.device.type,
                                message.device.host_id);
+    if (!controller.scope.template_building && message.device.template) {
+        try {
+            template_context = {};
+            template_context.id = device.id;
+            controller.scope.create_template_sequences(controller.scope.sequences, device.name, template_context);
+            device.name = nunjucks.renderString(device.name, template_context);
+            scope.create_inventory_host(device);
+        } catch (err) {
+            console.log(err);
+        }
+    } else {
+        device.template = true;
+    }
+    device.variables = JSON.parse(message.device.variables);
     scope.devices.push(device);
     c_messages.push(new messages.DeviceCreate(scope.client_id,
                                               device.id,
@@ -242,7 +262,7 @@ _Selected2.prototype.onCopySelected = function (controller) {
     var i = 0;
     var j = 0;
     for(i=0; i < devices.length; i++) {
-        device_copy = new models.Device(0, devices[i].name, 0, 0, devices[i].type);
+        device_copy = new models.Device(0, devices[i].name, 0, 0, devices[i].type, 0);
         device_copy.icon = true;
         for(j=0; j < devices[i].processes.length; j++) {
             process_copy = new models.Process(0, devices[i].processes[j].name, devices[i].processes[j].name, 0, 0);
@@ -252,6 +272,8 @@ _Selected2.prototype.onCopySelected = function (controller) {
             interface_copy = new models.Interface(devices[i].interfaces[j].id, devices[i].interfaces[j].name);
             device_copy.interfaces.push(interface_copy);
         }
+        device_copy.variables = JSON.stringify(devices[i]);
+        device_copy.template = true;
         controller.scope.inventory_toolbox.items.push(device_copy);
     }
 };
@@ -387,6 +409,8 @@ _Move.prototype.onMouseMove = function (controller) {
         controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
                                                                            groups[i].id,
                                                                            membership_old_new[2]));
+        controller.scope.create_group_association(groups[i], membership_old_new[6]);
+        controller.scope.delete_group_association(groups[i], membership_old_new[7]);
     }
 };
 
