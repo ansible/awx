@@ -79,13 +79,13 @@ Content-Type: application/json
 ```
 
 ## Authorization using application of grant type `password`
-Suppose we have an application `curl for admin` with grant type `password`:
+Suppose we have an application `Default Application` with grant type `password`:
 ```text
 {
     "id": 6,
     "type": "application",
     ...
-    "name": "curl for admin",
+    "name": "Default Application",
     "user": 1,
     "client_id": "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l",
     "client_secret": "fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo",

@@ -63,7 +63,6 @@ from wsgiref.util import FileWrapper
 from awx.main.tasks import send_notifications, handle_ha_toplogy_changes
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
-# from awx.api.authentication import TokenGetAuthentication
 from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
@@ -187,7 +186,6 @@ class InstanceGroupMembershipMixin(object):
 
 class ApiRootView(APIView):
 
-    # authentication_classes = []
     permission_classes = (AllowAny,)
     view_name = _('REST API')
     versioning_class = None
@@ -212,7 +210,6 @@ class ApiRootView(APIView):
 
 class ApiOAuthAuthorizationRootView(APIView):
 
-    # authentication_classes = []
     permission_classes = (AllowAny,)
     view_name = _("API OAuth Authorization Root")
     versioning_class = None
@@ -222,13 +219,11 @@ class ApiOAuthAuthorizationRootView(APIView):
         data['authorize'] = drf_reverse('api:authorize')
         data['token'] = drf_reverse('api:token')
         data['revoke_token'] = drf_reverse('api:revoke-token')
-        # data['introspect'] = drf_reverse('api:introspect')            #TODO: Add Introspect Endpoint
         return Response(data)
 
 
 class ApiVersionRootView(APIView):
 
-    # authentication_classes = []
     permission_classes = (AllowAny,)
     swagger_topic = 'Versioning'
 

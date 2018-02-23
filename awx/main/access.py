@@ -594,7 +594,7 @@ class OAuth2ApplicationAccess(BaseAccess):
 
 class OAuth2TokenAccess(BaseAccess):
     '''
-    I can read, change or delete an OAuth token when:
+    I can read, change or delete an OAuth2 token when:
      - I am a superuser.
      - I am the admin of the organization of the user of the token.
      - I am the user of the token.
