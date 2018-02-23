@@ -48,8 +48,16 @@ angular.module('Projects', [])
                             });
                     }
                 ],
-                ConfigData: ['ConfigService', (ConfigService) => {
-                    return ConfigService.getConfig().then(response => response);
+                ConfigData: ['ConfigService', 'ProcessErrors', (ConfigService, ProcessErrors) => {
+                    return ConfigService.getConfig()
+                        .then(response => response)
+                        .catch(({data, status}) => {
+                            ProcessErrors(null, data, status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get config. GET returned status: ' +
+                                    'status: ' + status
+                            });
+                        });
                 }]
             };
 
