@@ -676,9 +676,9 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             if self.parent:
                 serializer.parent = self.parent
                 serializer.polymorphic_base = self
-                # Exclude certain models from capabilities prefetch
-                if isinstance(obj, (Project, InventorySource, SystemJobTemplate)):
-                    obj.capabilities_prefetch = None
+                # capabilities prefetch is only valid for these models
+                if not isinstance(obj, (JobTemplate, WorkflowJobTemplate)):
+                    serializer.capabilities_prefetch = None
             return serializer.to_representation(obj)
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
@@ -761,6 +761,11 @@ class UnifiedJobSerializer(BaseSerializer):
                 serializer_class = WorkflowJobSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
+            # preserve links for list view
+            if self.parent:
+                serializer.parent = self.parent
+                serializer.polymorphic_base = self
+                # TODO: restrict models for capabilities prefetch, when it is added
             ret = serializer.to_representation(obj)
         else:
             ret = super(UnifiedJobSerializer, self).to_representation(obj)

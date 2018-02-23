@@ -5,8 +5,8 @@ from django.test.client import RequestFactory
 
 from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate
 from awx.main.access import access_registry
-from awx.main.utils import cache_list_capabilities
-from awx.api.serializers import JobTemplateSerializer
+from awx.main.utils import prefetch_page_capabilities
+from awx.api.serializers import JobTemplateSerializer, UnifiedJobTemplateSerializer
 
 # This file covers special-cases of displays of user_capabilities
 # general functionality should be covered fully by unit tests, see:
@@ -253,35 +253,52 @@ def test_user_roles_unattach_functional(organization, alice, bob, get):
 def test_prefetch_jt_capabilities(job_template, rando):
     job_template.execute_role.members.add(rando)
     qs = JobTemplate.objects.all()
-    cache_list_capabilities(qs, ['admin', 'execute'], JobTemplate, rando)
-    assert qs[0].capabilities_cache == {'edit': False, 'start': True}
+    mapping = prefetch_page_capabilities(JobTemplate, qs, ['admin', 'execute'], rando)
+    assert mapping[job_template.id] == {'edit': False, 'start': True}
 
 
 @pytest.mark.django_db
 def test_prefetch_ujt_job_template_capabilities(alice, bob, job_template):
     job_template.execute_role.members.add(alice)
     qs = UnifiedJobTemplate.objects.all()
-    cache_list_capabilities(qs, ['admin', 'execute'], UnifiedJobTemplate, alice)
-    assert qs[0].capabilities_cache == {'edit': False, 'start': True}
+    mapping = prefetch_page_capabilities(UnifiedJobTemplate, qs, ['admin', 'execute'], alice)
+    assert mapping[job_template.id] == {'edit': False, 'start': True}
     qs = UnifiedJobTemplate.objects.all()
-    cache_list_capabilities(qs, ['admin', 'execute'], UnifiedJobTemplate, bob)
-    assert qs[0].capabilities_cache == {'edit': False, 'start': False}
+    mapping = prefetch_page_capabilities(UnifiedJobTemplate, qs, ['admin', 'execute'], bob)
+    assert mapping[job_template.id] == {'edit': False, 'start': False}
 
 
 @pytest.mark.django_db
-def test_prefetch_ujt_project_capabilities(alice, project):
+def test_prefetch_ujt_project_capabilities(alice, project, job_template, mocker):
     project.update_role.members.add(alice)
     qs = UnifiedJobTemplate.objects.all()
-    cache_list_capabilities(qs, ['admin', 'execute'], UnifiedJobTemplate, alice)
-    assert qs[0].capabilities_cache == {}
+
+    class MockObj:
+        pass
+
+    view = MockObj()
+    view.request = MockObj()
+    view.request.user = alice
+    view.request.method = 'GET'
+    view.kwargs = {}
+
+    list_serializer = UnifiedJobTemplateSerializer(qs, many=True, context={'view': view})
+
+    # Project form of UJT serializer does not fill in or reference the prefetch dict
+    list_serializer.child.to_representation(project)
+    assert 'capability_map' not in list_serializer.child.context
+
+    # Models for which the prefetch is valid for do
+    list_serializer.child.to_representation(job_template)
+    assert set(list_serializer.child.context['capability_map'][job_template.id].keys()) == set(('copy', 'edit', 'start'))
 
 
 @pytest.mark.django_db
 def test_prefetch_group_capabilities(group, rando):
     group.inventory.adhoc_role.members.add(rando)
     qs = Group.objects.all()
-    cache_list_capabilities(qs, ['inventory.admin', 'inventory.adhoc'], Group, rando)
-    assert qs[0].capabilities_cache == {'edit': False, 'adhoc': True}
+    mapping = prefetch_page_capabilities(Group, qs, ['inventory.admin', 'inventory.adhoc'], rando)
+    assert mapping[group.id] == {'edit': False, 'adhoc': True}
 
 
 @pytest.mark.django_db
@@ -291,18 +308,18 @@ def test_prefetch_jt_copy_capability(job_template, project, inventory, rando):
     job_template.save()
 
     qs = JobTemplate.objects.all()
-    cache_list_capabilities(qs, [{'copy': [
+    mapping = prefetch_page_capabilities(JobTemplate, qs, [{'copy': [
         'project.use', 'inventory.use',
-    ]}], JobTemplate, rando)
-    assert qs[0].capabilities_cache == {'copy': False}
+    ]}], rando)
+    assert mapping[job_template.id] == {'copy': False}
 
     project.use_role.members.add(rando)
     inventory.use_role.members.add(rando)
 
-    cache_list_capabilities(qs, [{'copy': [
+    mapping = prefetch_page_capabilities(JobTemplate, qs, [{'copy': [
         'project.use', 'inventory.use',
-    ]}], JobTemplate, rando)
-    assert qs[0].capabilities_cache == {'copy': True}
+    ]}], rando)
+    assert mapping[job_template.id] == {'copy': True}
 
 
 @pytest.mark.django_db
