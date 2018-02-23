@@ -231,76 +231,93 @@ def dict_to_mem_data(data, inventory=None):
     May be destructive on `data`
     '''
     assert isinstance(data, dict), 'Expected dict, received {}'.format(type(data))
+    data = data.copy()
     if inventory is None:
         inventory = MemInventory()
 
     _meta = data.pop('_meta', {})
 
-    for k,v in data.iteritems():
-        group = inventory.get_group(k)
-        if not group:
-            continue
+    additional_data = {}
+    while True:
 
-        # Load group hosts/vars/children from a dictionary.
-        if isinstance(v, dict):
-            # Process hosts within a group.
-            hosts = v.get('hosts', {})
-            if isinstance(hosts, dict):
-                for hk, hv in hosts.iteritems():
-                    host = inventory.get_host(hk)
+        if additional_data:
+            data = additional_data
+            additional_data = {}
+
+        for k,v in data.iteritems():
+            group = inventory.get_group(k)
+            if not group:
+                continue
+
+            # Load group hosts/vars/children from a dictionary.
+            if isinstance(v, dict):
+                # Process hosts within a group.
+                hosts = v.get('hosts', {})
+                if isinstance(hosts, dict):
+                    for hk, hv in hosts.iteritems():
+                        host = inventory.get_host(hk)
+                        if not host:
+                            continue
+                        if isinstance(hv, dict):
+                            host.variables.update(hv)
+                        else:
+                            logger.warning('Expected dict of vars for '
+                                           'host "%s", got %s instead',
+                                           hk, str(type(hv)))
+                        group.add_host(host)
+                elif isinstance(hosts, (list, tuple)):
+                    for hk in hosts:
+                        host = inventory.get_host(hk)
+                        if not host:
+                            continue
+                        group.add_host(host)
+                else:
+                    logger.warning('Expected dict or list of "hosts" for '
+                                   'group "%s", got %s instead', k,
+                                   str(type(hosts)))
+                # Process group variables.
+                vars = v.get('vars', {})
+                if isinstance(vars, dict):
+                    group.variables.update(vars)
+                else:
+                    logger.warning('Expected dict of vars for '
+                                   'group "%s", got %s instead',
+                                   k, str(type(vars)))
+                # Process child groups.
+                children = v.get('children', [])
+                if isinstance(children, (list, tuple, dict)):
+                    for c in children:
+                        child = inventory.get_group(c, inventory.all_group, child=True)
+                        if child and c != 'ungrouped':
+                            group.add_child_group(child)
+                    if c in additional_data:
+                        logger.warning('Group %s was defined in children list of multiple'
+                                       'other groups. Recursive scripts can have extreme'
+                                       'performance problems and/or be self-contradictory.', c)
+                    if isinstance(children, dict):
+                        # ansible-inventory `--yaml` format gives recursive structure
+                        additional_data.update(children)
+                else:
+                    logger.warning('Expected list of children for '
+                                   'group "%s", got %s instead',
+                                   k, str(type(children)))
+
+            # Load host names from a list.
+            elif isinstance(v, (list, tuple)):
+                for h in v:
+                    host = inventory.get_host(h)
                     if not host:
                         continue
-                    if isinstance(hv, dict):
-                        host.variables.update(hv)
-                    else:
-                        logger.warning('Expected dict of vars for '
-                                       'host "%s", got %s instead',
-                                       hk, str(type(hv)))
-                    group.add_host(host)
-            elif isinstance(hosts, (list, tuple)):
-                for hk in hosts:
-                    host = inventory.get_host(hk)
-                    if not host:
-                        continue
                     group.add_host(host)
             else:
-                logger.warning('Expected dict or list of "hosts" for '
-                               'group "%s", got %s instead', k,
-                               str(type(hosts)))
-            # Process group variables.
-            vars = v.get('vars', {})
-            if isinstance(vars, dict):
-                group.variables.update(vars)
-            else:
-                logger.warning('Expected dict of vars for '
-                               'group "%s", got %s instead',
-                               k, str(type(vars)))
-            # Process child groups.
-            children = v.get('children', [])
-            if isinstance(children, (list, tuple)):
-                for c in children:
-                    child = inventory.get_group(c, inventory.all_group, child=True)
-                    if child and c != 'ungrouped':
-                        group.add_child_group(child)
-            else:
-                logger.warning('Expected list of children for '
-                               'group "%s", got %s instead',
-                               k, str(type(children)))
+                logger.warning('Expected dict or list for group "%s", '
+                               'got %s instead', k, str(type(v)))
 
-        # Load host names from a list.
-        elif isinstance(v, (list, tuple)):
-            for h in v:
-                host = inventory.get_host(h)
-                if not host:
-                    continue
-                group.add_host(host)
-        else:
-            logger.warning('')
-            logger.warning('Expected dict or list for group "%s", '
-                           'got %s instead', k, str(type(v)))
+            if k not in ['all', 'ungrouped']:
+                inventory.all_group.add_child_group(group)
 
-        if k not in ['all', 'ungrouped']:
-            inventory.all_group.add_child_group(group)
+        if not additional_data:
+            break
 
     if _meta:
         for k,v in inventory.all_group.all_hosts.iteritems():

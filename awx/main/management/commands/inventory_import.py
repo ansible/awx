@@ -11,6 +11,7 @@ import sys
 import time
 import traceback
 import shutil
+import yaml
 
 # Django
 from django.conf import settings
@@ -95,7 +96,7 @@ class AnsibleInventoryLoader(object):
             potential_path = os.path.join(path.strip('"'), 'ansible-inventory')
             if os.path.isfile(potential_path) and os.access(potential_path, os.X_OK):
                 logger.debug('Using system install of ansible-inventory CLI: {}'.format(potential_path))
-                return [potential_path, '-i', self.source]
+                return [potential_path, '-i', self.source, '--yaml']
 
         # Stopgap solution for group_vars, do not use backported module for official
         # vendored cloud modules or custom scripts TODO: remove after Ansible 2.3 deprecation
@@ -141,7 +142,7 @@ class AnsibleInventoryLoader(object):
 
         return wrap_args_with_proot(cmd, cwd, **kwargs)
 
-    def command_to_json(self, cmd):
+    def command_to_dict(self, cmd):
         data = {}
         stdout, stderr = '', ''
         env = self.build_env()
@@ -162,7 +163,7 @@ class AnsibleInventoryLoader(object):
         for line in stderr.splitlines():
             logger.error(line)
         try:
-            data = json.loads(stdout)
+            data = yaml.load(stdout)
             if not isinstance(data, dict):
                 raise TypeError('Returned JSON must be a dictionary, got %s instead' % str(type(data)))
         except Exception:
@@ -174,10 +175,11 @@ class AnsibleInventoryLoader(object):
         base_args = self.get_base_args()
         logger.info('Reading Ansible inventory source: %s', self.source)
 
-        data = self.command_to_json(base_args + ['--list'])
+        data = self.command_to_dict(base_args + ['--list'])
 
         # TODO: remove after we run custom scripts through ansible-inventory
-        if self.is_custom and '_meta' not in data or 'hostvars' not in data['_meta']:
+        if (self.method != 'ansible-inventory' and self.is_custom and
+                ('_meta' not in data or 'hostvars' not in data['_meta'])):
             # Invoke the executable once for each host name we've built up
             # to set their variables
             data.setdefault('_meta', {})
@@ -198,7 +200,7 @@ class AnsibleInventoryLoader(object):
 
                 for hostname in group_host_list:
                     logger.debug('Obtaining hostvars for %s' % hostname.encode('utf-8'))
-                    hostdata = self.command_to_json(
+                    hostdata = self.command_to_dict(
                         base_args + ['--host', hostname.encode("utf-8")]
                     )
                     if isinstance(hostdata, dict):
@@ -611,7 +613,7 @@ class Command(BaseCommand):
         db_variables = all_obj.variables_dict
         db_variables.update(self.all_group.variables)
         if db_variables != all_obj.variables_dict:
-            all_obj.variables = json.dumps(db_variables)
+            all_obj.variables = yaml.dump(db_variables, default_flow_style=False)
             all_obj.save(update_fields=['variables'])
             logger.info('Inventory variables updated from "all" group')
         else:
@@ -644,7 +646,7 @@ class Command(BaseCommand):
                 else:
                     db_variables.update(mem_group.variables)
                 if db_variables != group.variables_dict:
-                    group.variables = json.dumps(db_variables)
+                    group.variables = yaml.dump(db_variables, default_flow_style=False)
                     group.save(update_fields=['variables'])
                     if self.overwrite_vars:
                         logger.info('Group "%s" variables replaced', group.name)
@@ -661,7 +663,7 @@ class Command(BaseCommand):
             group = self.inventory.groups.update_or_create(
                 name=group_name,
                 defaults={
-                    'variables':json.dumps(mem_group.variables),
+                    'variables': yaml.dump(mem_group.variables, default_flow_style=False),
                     'description':'imported'
                 }
             )[0]
@@ -682,7 +684,7 @@ class Command(BaseCommand):
             db_variables.update(mem_host.variables)
         update_fields = []
         if db_variables != db_host.variables_dict:
-            db_host.variables = json.dumps(db_variables)
+            db_host.variables = yaml.dump(db_variables, default_flow_style=False)
             update_fields.append('variables')
         # Update host enabled flag.
         enabled = self._get_enabled(mem_host.variables)
@@ -785,7 +787,7 @@ class Command(BaseCommand):
         # Create any new hosts.
         for mem_host_name in sorted(mem_host_names_to_update):
             mem_host = self.all_group.all_hosts[mem_host_name]
-            host_attrs = dict(variables=json.dumps(mem_host.variables),
+            host_attrs = dict(variables=yaml.dump(mem_host.variables, default_flow_style=False),
                               description='imported')
             enabled = self._get_enabled(mem_host.variables)
             if enabled is not None:
