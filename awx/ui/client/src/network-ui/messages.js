@@ -17,6 +17,22 @@ function DeviceMove(sender, id, x, y, previous_x, previous_y) {
 }
 exports.DeviceMove = DeviceMove;
 
+function DeviceInventoryUpdate(sender, id, host_id) {
+    this.msg_type = "DeviceInventoryUpdate";
+    this.sender = sender;
+    this.id = id;
+    this.host_id = host_id;
+}
+exports.DeviceInventoryUpdate = DeviceInventoryUpdate;
+
+function GroupInventoryUpdate(sender, id, group_id) {
+    this.msg_type = "GroupInventoryUpdate";
+    this.sender = sender;
+    this.id = id;
+    this.group_id = group_id;
+}
+exports.GroupInventoryUpdate = GroupInventoryUpdate;
+
 function DeviceCreate(sender, id, x, y, name, type, host_id) {
     this.msg_type = "DeviceCreate";
     this.sender = sender;
@@ -290,7 +306,7 @@ function GroupMove(sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previou
 }
 exports.GroupMove = GroupMove;
 
-function GroupCreate(sender, id, x1, y1, x2, y2, name, type) {
+function GroupCreate(sender, id, x1, y1, x2, y2, name, type, group_id) {
     this.msg_type = "GroupCreate";
     this.sender = sender;
     this.id = id;
@@ -300,10 +316,11 @@ function GroupCreate(sender, id, x1, y1, x2, y2, name, type) {
     this.y2 = y2;
     this.name = name;
     this.type = type;
+    this.group_id = group_id;
 }
 exports.GroupCreate = GroupCreate;
 
-function GroupDestroy(sender, id, previous_x1, previous_y1, previous_x2, previous_y2, previous_name, previous_type) {
+function GroupDestroy(sender, id, previous_x1, previous_y1, previous_x2, previous_y2, previous_name, previous_type, previous_group_id) {
     this.msg_type = "GroupDestroy";
     this.sender = sender;
     this.id = id;
@@ -313,6 +330,7 @@ function GroupDestroy(sender, id, previous_x1, previous_y1, previous_x2, previou
     this.previous_y2 = previous_y2;
     this.previous_name = previous_name;
     this.previous_type = previous_type;
+    this.previous_group_id = previous_group_id;
 }
 exports.GroupDestroy = GroupDestroy;
 

@@ -163,6 +163,8 @@ _Resize.prototype.onMouseMove = function (controller) {
         controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
                                                                            groups[i].id,
                                                                            membership_old_new[2]));
+        controller.scope.create_group_association(groups[i], membership_old_new[6]);
+        controller.scope.delete_group_association(groups[i], membership_old_new[7]);
     }
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
@@ -310,6 +312,8 @@ _Move.prototype.onMouseMove = function (controller) {
         controller.scope.send_control_message(new messages.GroupMembership(controller.scope.client_id,
                                                                            groups[i].id,
                                                                            membership_old_new[2]));
+        controller.scope.create_group_association(groups[i], membership_old_new[6]);
+        controller.scope.delete_group_association(groups[i], membership_old_new[7]);
     }
     controller.scope.pressedScaledX = controller.scope.scaledX;
     controller.scope.pressedScaledY = controller.scope.scaledY;
@@ -551,6 +555,7 @@ _Placing.prototype.onMouseDown = function (controller) {
                              scope.scaledX,
                              scope.scaledY,
                              false);
+
     scope.send_control_message(new messages.GroupCreate(scope.client_id,
                                                         group.id,
                                                         group.x1,
@@ -558,8 +563,10 @@ _Placing.prototype.onMouseDown = function (controller) {
                                                         group.x2,
                                                         group.y2,
                                                         group.name,
-                                                        group.type));
+                                                        group.type,
+                                                        group.group_id));
 
+    scope.create_inventory_group(group);
     scope.groups.push(group);
     scope.selected_groups.push(group);
     group.selected = true;

@@ -83,14 +83,13 @@ _Dropping.prototype.start = function (controller) {
 
     var i = 0;
     var toolbox = controller.toolbox;
-    console.log(["Dropping", toolbox.selected_item]);
     for(i = 0; i < toolbox.items.length; i++) {
         toolbox.items[i].selected = false;
     }
 
     controller.dropped_action(toolbox.selected_item);
 
-    if (controller.remove_on_drop) {
+    if (controller.remove_on_drop && !toolbox.selected_item.template) {
         var dindex = toolbox.items.indexOf(toolbox.selected_item);
         if (dindex !== -1) {
             toolbox.items.splice(dindex, 1);
@@ -213,7 +212,8 @@ _Scrolling.prototype.onMouseWheel = function (controller, msg_type, $event) {
     var delta = $event[1];
     controller.toolbox.scroll_offset += -1 * delta;
     controller.toolbox.scroll_offset = Math.min(controller.toolbox.scroll_offset, 0);
-    controller.toolbox.scroll_offset = Math.max(controller.toolbox.scroll_offset, -1 * controller.toolbox.spacing * controller.toolbox.items.length + controller.toolbox.height);
+    controller.toolbox.scroll_offset = Math.max(controller.toolbox.scroll_offset,
+                                                -1 * controller.toolbox.spacing * (controller.toolbox.items.length + 1) + controller.toolbox.height);
 
 
     controller.changeState(Ready);

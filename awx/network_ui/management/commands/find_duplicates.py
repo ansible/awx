@@ -12,13 +12,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dups = list(Device.objects
-                         .values('topology_id', 'id')
-                         .annotate(Count('pk'))
-                         .order_by()
-                         .filter(pk__count__gt=1))
+                    .values('topology_id', 'id')
+                    .annotate(Count('pk'))
+                    .order_by()
+                    .filter(pk__count__gt=1))
         pprint(dups)
         for dup in dups:
             del dup['pk__count']
             pprint(list(Device.objects
-                             .filter(**dup)
-                             .values()))
+                        .filter(**dup)
+                        .values()))

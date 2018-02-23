@@ -1,5 +1,5 @@
 /* eslint-disable */
-function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
+function NetworkingController (models, $state, $scope, strings) {
     const vm = this || {};
 
     const {
@@ -93,7 +93,7 @@ function NetworkingController (models, $state, $scope, strings, CreateSelect2) {
         }
     });
 
-    $('#networking-search').on('select2:select', (e) => {
+    $('#networking-search').on('select2:select', () => {
         $scope.$broadcast('search', $scope.device);
     });
 

@@ -14,3 +14,4 @@ class TestToString(TestCase):
         print str(Device(name='foo'))
         print str(Interface(name='foo'))
         print str(MessageType(name='foo'))
+        print str(Link(name='foo'))
