@@ -41,7 +41,25 @@ class DeviceList(ListCreateAPIView):
         pk = response.data['device_id']
         message = dict()
 
-        message.update(response.data)
+        message.update(transform_dict({'interface_id_seq': 'interface_id_seq',
+                                       'name': 'name',
+                                       'process_id_seq': 'process_id_seq',
+                                       'device_type': 'type',
+                                       'host_id': 'host_id',
+                                       'y': 'y',
+                                       'x': 'x',
+                                       'topology_id': 'topology_id',
+                                       'id': 'id',
+                                       }, Device.objects.filter(pk=pk).values(*['interface_id_seq',
+                                                                                'name',
+                                                                                'process_id_seq',
+                                                                                'device_type',
+                                                                                'host_id',
+                                                                                'y',
+                                                                                'x',
+                                                                                'topology_id',
+                                                                                'id',
+                                                                                ])[0]))
 
         message['msg_type'] = "DeviceCreate"
         message['device_id'] = pk

@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
- 	['$scope', '$state', '$stateParams', 'GenerateForm', 'ParseTypeChange', 'HostsService', '$rootScope',
- 	function($scope, $state, $stateParams, GenerateForm, ParseTypeChange, HostsService, $rootScope){
+ 	['$scope', '$state', '$stateParams', 'GenerateForm', 'ParseTypeChange', 'HostsService',
+ 	function($scope, $state, $stateParams, GenerateForm, ParseTypeChange, HostsService){
 
         $scope.parseType = 'yaml';
  		$scope.formCancel = function(){
@@ -42,10 +42,6 @@
             }
         });
 
-        $scope.$watch('item', function(){
-            init();
-        });
-
  		var init = function(){
             if($scope.item && $scope.item.host_id){
     			$scope.variables = getVars($scope.item.variables);
@@ -57,6 +53,10 @@
             }
 
  		};
+
+        $scope.$watch('item', function(){
+            init();
+        });
 
 		// Adding this function b/c sometimes extra vars are returned to the
 		// UI as a string (ex: "foo: bar"), and other times as a

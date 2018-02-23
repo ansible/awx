@@ -25,13 +25,13 @@ class ActionModule(ActionBase):
         process_id = self._task.args.get('process_id', None)
         device = self._task.args.get('device', None)
         name = self._task.args.get('name', None)
-        type = self._task.args.get('type', None)
+        process_type = self._task.args.get('process_type', None)
         id = self._task.args.get('id', None)
 
         filter_data = dict(process_id=process_id,
                            device=device,
                            name=name,
-                           type=type,
+                           process_type=process_type,
                            id=id,
                            )
         filter_data = {x: y for x, y in filter_data.iteritems() if y is not None}

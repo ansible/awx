@@ -3,6 +3,7 @@ var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
+var nunjucks = require('nunjucks');
 
 function _State () {
 }
@@ -100,6 +101,10 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
     var inner_group = null;
     var c_messages = [];
     var membership_old_new = null;
+    var site_template_context = null;
+    var rack_template_context = null;
+    var device_template_context = null;
+    var promises = [];
     scope.hide_groups = false;
 
     scope.pressedX = scope.mouseX;
@@ -125,7 +130,8 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                              group.x2,
                                              group.y2,
                                              group.name,
-                                             group.type));
+                                             group.type,
+                                             0));
 
     scope.groups.push(group);
 
@@ -225,7 +231,8 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                                  inner_group.x2,
                                                  inner_group.y2,
                                                  inner_group.name,
-                                                 inner_group.type));
+                                                 inner_group.type,
+                                                 0));
     }
     for(i=0; i< group.groups.length; i++) {
         membership_old_new = group.groups[i].update_membership(scope.devices, scope.groups);
@@ -239,7 +246,73 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                                  group.id,
                                                  membership_old_new[2]));
 
+    if (!controller.scope.template_building && message.group.template) {
+        try {
+            site_template_context = {};
+            site_template_context.id = group.id;
+            controller.scope.create_template_sequences(controller.scope.sequences, group.name, site_template_context);
+            group.name = nunjucks.renderString(group.name, site_template_context);
+            promises.push(scope.create_inventory_group(group));
+            c_messages.push(new messages.GroupLabelEdit(controller.scope.client_id,
+                                                        group.id,
+                                                        group.name,
+                                                        group.name));
+
+            rack_template_context = Object.assign({}, site_template_context);
+            rack_template_context.site_id = group.id;
+
+            for (i = 0; i < group.groups.length; i++) {
+                controller.scope.create_template_sequences(group.sequences,
+                                                           group.groups[i].name,
+                                                           rack_template_context);
+            }
+            for (i = 0; i < group.groups.length; i++) {
+                rack_template_context.id = group.groups[i].id;
+                group.groups[i].name = nunjucks.renderString(group.groups[i].name, rack_template_context);
+                promises.push(scope.create_inventory_group(group.groups[i]));
+                c_messages.push(new messages.GroupLabelEdit(controller.scope.client_id,
+                                                            group.groups[i].id,
+                                                            group.groups[i].name,
+                                                            group.groups[i].name));
+
+                if (group.groups[i].type !== "rack") {
+                    continue;
+                }
+                device_template_context = Object.assign({}, rack_template_context);
+                device_template_context.rack_id = group.groups[i].id;
+                for(j=0; j<group.groups[i].devices.length;j++) {
+                    controller.scope.create_template_sequences(group.groups[i].sequences,
+                                                               group.groups[i].devices[j].name,
+                                                               device_template_context);
+                }
+                for (j=0; j < group.groups[i].devices.length; j++) {
+                    device_template_context.id = group.groups[i].devices[j].id;
+                    group.groups[i].devices[j].name = nunjucks.renderString(group.groups[i].devices[j].name, device_template_context);
+                    console.log(group.groups[i].devices[j].name);
+                    promises.push(scope.create_inventory_host(group.groups[i].devices[j]));
+                    c_messages.push(new messages.DeviceLabelEdit(controller.scope.client_id,
+                                                                group.groups[i].devices[j].id,
+                                                                group.groups[i].devices[j].name,
+                                                                group.groups[i].devices[j].name));
+                }
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
+
+    Promise.all(promises)
+           .then(function () {
+                controller.scope.create_group_association(group, group.devices);
+                for (i = 0; i < group.groups.length; i++) {
+                    controller.scope.create_group_association(group.groups[i], group.groups[i].devices);
+                }
+           })
+           .catch(function(res) {
+               console.log(res);
+           });
 };
 
 
@@ -297,6 +370,7 @@ _Selected2.prototype.onCopySelected = function (controller) {
                                       group.bottom_extent() - group.top_extent(),
                                       false);
         group_copy.icon = true;
+        group_copy.template = true;
 
         devices = group.devices;
 
