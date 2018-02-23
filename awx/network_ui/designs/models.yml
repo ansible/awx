@@ -205,6 +205,9 @@ models:
   - len: 200
     name: type
     type: CharField
+  - default: 0
+    name: group_id
+    type: IntegerField
   name: Group
   topology_id_query: topology_id
   v1_end_point: /network_ui/api/v1/group/
