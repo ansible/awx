@@ -49,7 +49,10 @@ module.exports = {
     'create project': client => {
         const projects = client.page.projects();
 
-        projects.navigate();
+        projects.section.navigation.waitForElementVisible('@projects');
+        projects.section.navigation.expect.element('@projects').enabled;
+        projects.section.navigation.click('@projects');
+
         projects.waitForElementVisible('div.spinny');
         projects.waitForElementNotVisible('div.spinny');
 
@@ -236,7 +239,10 @@ module.exports = {
     'create job template': client => {
         const templates = client.page.templates();
 
-        templates.navigate();
+        templates.section.navigation.waitForElementVisible('@templates');
+        templates.section.navigation.expect.element('@templates').enabled;
+        templates.section.navigation.click('@templates');
+
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
 
