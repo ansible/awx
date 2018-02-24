@@ -61,9 +61,11 @@ Device.prototype.describeArc = util.describeArc;
 
 Device.prototype.compile_variables = function () {
     var variables = JSON.parse(JSON.stringify(this.variables));
-    variables.name = this.name;
-    variables.type = this.type;
-    variables.interfaces = [];
+    var awx_variables = {}
+    variables.awx = awx_variables;
+    awx_variables.name = this.name;
+    awx_variables.type = this.type;
+    awx_variables.interfaces = [];
     var i = 0;
     var intf = null;
     for (i = 0; i < this.interfaces.length; i++) {
@@ -75,7 +77,7 @@ Device.prototype.compile_variables = function () {
             intf.remote_interface_name = this.interfaces[i].remote_interface().name;
             intf.remote_device_name = this.interfaces[i].remote_interface().device.name;
         }
-        variables.interfaces.push(intf);
+        awx_variables.interfaces.push(intf);
     }
     return variables;
 };

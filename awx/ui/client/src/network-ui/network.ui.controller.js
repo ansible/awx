@@ -270,35 +270,45 @@ var NetworkUIController = function($scope,
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, toolboxTopMargin, 200, toolboxHeight);
   if (!$scope.disconnected) {
-      console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
-      console.log($scope.my_location);
       $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/')
            .then(function(response) {
                let hosts = response.data.results;
-               for(var i = 0; i<hosts.length; i++){
+               for(var i = 0; i<hosts.length; i++) {
                    try {
+                       var device_type = null;
+                       var device_name = null;
+                       var device = null;
                        let host = hosts[i];
-                       console.log(host);
                        if (host.variables !== "") {
                            host.data = jsyaml.safeLoad(host.variables);
-                           if (host.data.type === undefined) {
-                               host.data.type = 'unknown';
-                           }
-                           if (host.data.name === undefined) {
-                               host.data.name = host.name;
-                           }
-                           var device = new models.Device(0, host.data.name, 0, 0, host.data.type, host.id);
-                           device.icon = true;
-                           device.variables = host.variables;
-                           $scope.inventory_toolbox.items.push(device);
+                       } else {
+                           host.data = {};
                        }
+                       if (host.data.awx === undefined) {
+                           device_type = 'unknown';
+                           device_name = host.name;
+                       } else {
+                           if (host.data.awx.type === undefined) {
+                               device_type = 'unknown';
+                           } else {
+                               device_type = host.data.awx.type;
+                           }
+                           if (host.data.awx.name === undefined) {
+                               device_name = host.name;
+                           } else {
+                               device_name = host.data.awx.name;
+                           }
+                       }
+                       device = new models.Device(0, device_name, 0, 0, device_type, host.id);
+                       device.icon = true;
+                       device.variables = host.variables;
+                       $scope.inventory_toolbox.items.push(device);
                    } catch (error) {
                        console.log(error);
                    }
                }
            })
            .catch(({data, status}) => {
-               console.log([data, status]);
                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
            });
   }
@@ -911,22 +921,18 @@ var NetworkUIController = function($scope,
         }
         searched.selected = true;
         $scope.selected_devices.push(searched);
-        //console.log(searched);
         $scope.jump_to_animation(searched.x, searched.y, 1.0);
     });
 
     $scope.jump_to_animation = function(jump_to_x, jump_to_y, jump_to_scale, updateZoom) {
         $scope.cancel_animations();
         var v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
-        //console.log({v_center: v_center});
         $scope.jump.from_x = v_center.x;
         $scope.jump.from_y = v_center.y;
         $scope.jump.to_x = jump_to_x;
         $scope.jump.to_y = jump_to_y;
         var distance = util.distance(v_center.x, v_center.y, jump_to_x, jump_to_y);
-        //console.log({distance: distance});
         var num_frames = 30 * Math.floor((1 + 4 * distance / (distance + 3000)));
-        //console.log({num_frames: num_frames});
         var scale_animation = new models.Animation($scope.animation_id_seq(),
                                                   num_frames,
                                                   {
@@ -1035,30 +1041,6 @@ var NetworkUIController = function($scope,
         $scope.send_control_message(new messages.Layout($scope.client_id));
     };
 
-    $scope.onDiscoverButton = function (button) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/7/launch/", true);
-        xhr.onload = function () {
-            console.log(xhr.readyState);
-        };
-        xhr.onerror = function () {
-            console.error(xhr.statusText);
-        };
-        xhr.send();
-    };
-
-    $scope.onConfigureButton = function (button) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "http://" + window.location.host + "/api/v1/job_templates/9/launch/", true);
-        xhr.onload = function () {
-            console.log(xhr.readyState);
-        };
-        xhr.onerror = function () {
-            console.error(xhr.statusText);
-        };
-        xhr.send();
-    };
-
     $scope.onTogglePhysical = function () {
         $scope.hide_links = false;
     };
@@ -1135,12 +1117,16 @@ var NetworkUIController = function($scope,
         var variables = null;
         for(i = 0; i < $scope.devices.length; i++) {
             variables = $scope.devices[i].compile_variables();
-            $http.put('/api/v2/hosts/' + $scope.devices[i].host_id + '/variable_data/', JSON.stringify(variables)).then(noop).catch(error_handler);
+            if ($scope.devices[i].host_id !== 0) {
+                $http.put('/api/v2/hosts/' + $scope.devices[i].host_id + '/variable_data/', JSON.stringify(variables)).then(noop).catch(error_handler);
+            }
         }
 
         for(i = 0; i < $scope.groups.length; i++) {
             variables = $scope.groups[i].compile_variables();
-            $http.put('/api/v2/groups/' + $scope.groups[i].group_id + '/variable_data/', JSON.stringify(variables)).then(noop).catch(error_handler);
+            if ($scope.groups[i].group_id !== 0) {
+                $http.put('/api/v2/groups/' + $scope.groups[i].group_id + '/variable_data/', JSON.stringify(variables)).then(noop).catch(error_handler);
+            }
 
         }
     };
@@ -1252,12 +1238,12 @@ var NetworkUIController = function($scope,
         console.log(device);
         HostsService.post({inventory: $scope.inventory_id,
                            name: device.name,
-                           variables: JSON.stringify({name: device.name,
-                                                      type: device.type})})
+                           variables: JSON.stringify({awx: {name: device.name,
+                                                            type: device.type}})})
                     .then(function (res) {
                         console.log(res);
                         device.host_id = res.data.id;
-                        device.variables = JSON.parse(res.data.varaibles);
+                        device.variables = util.parse_variables(res.data.variables);
                         $scope.send_control_message(new messages.DeviceInventoryUpdate($scope.client_id,
                                                                                        device.id,
                                                                                        device.host_id));
@@ -1271,12 +1257,12 @@ var NetworkUIController = function($scope,
         console.log(group);
         GroupsService.post({inventory: $scope.inventory_id,
                            name: group.name,
-                           variables: JSON.stringify({name: group.name,
-                                                      type: group.type})})
+                           variables: JSON.stringify({awx: {name: group.name,
+                                                            type: group.type}})})
                     .then(function (res) {
                         console.log(res);
                         group.group_id = res.data.id;
-                        group.variables = JSON.parse(res.data.varaibles);
+                        group.variables = util.parse_variables(res.data.variables);
                         $scope.send_control_message(new messages.GroupInventoryUpdate($scope.client_id,
                                                                                       group.id,
                                                                                       group.group_id));
@@ -1669,7 +1655,7 @@ var NetworkUIController = function($scope,
 
     $scope.onToolboxItem = function (data) {
         if (data.toolbox_name === "Site") {
-            var site = JSON.parse(data.data);
+            var site = util.parse_variables(data.data);
             var i = 0;
             var j = 0;
             var site_copy = new models.Group(site.id,
@@ -1956,7 +1942,7 @@ var NetworkUIController = function($scope,
                    try {
                        let host = hosts[i];
                        if (hosts_by_id[host.id] !== undefined) {
-                           hosts_by_id[host.id].variables = JSON.parse(host.variables);
+                           hosts_by_id[host.id].variables = util.parse_variables(host.variables);
                        }
                    } catch (error) {
                        console.log(error);

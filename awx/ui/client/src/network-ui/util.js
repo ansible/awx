@@ -7,8 +7,27 @@ Array.prototype.extend = function (other_array) {
     }
 };
 
-
 var math = require('mathjs');
+var yaml = require('js-yaml');
+
+function parse_variables (variables) {
+    var parsed_variables = {};
+    try {
+        parsed_variables = JSON.parse(variables);
+    } catch (err) {
+        try {
+            parsed_variables = yaml.safeLoad(variables);
+        } catch (err) {
+            parsed_variables = {};
+        }
+    }
+    if (parsed_variables === undefined) {
+        return {};
+    }
+    return parsed_variables;
+}
+exports.parse_variables = parse_variables;
+
 
 function noop () {
 }
