@@ -272,8 +272,13 @@ var NetworkUIController = function($scope,
   if (!$scope.disconnected) {
       $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/')
            .then(function(response) {
+               var devices_by_name = {};
+               var i = 0;
+               for (i = 0; i < $scope.devices.length; i++) {
+                   devices_by_name[$scope.devices[i].name] = $scope.devices[i];
+               }
                let hosts = response.data.results;
-               for(var i = 0; i<hosts.length; i++) {
+               for(i = 0; i<hosts.length; i++) {
                    try {
                        var device_type = null;
                        var device_name = null;
@@ -299,10 +304,12 @@ var NetworkUIController = function($scope,
                                device_name = host.data.awx.name;
                            }
                        }
-                       device = new models.Device(0, device_name, 0, 0, device_type, host.id);
-                       device.icon = true;
-                       device.variables = host.variables;
-                       $scope.inventory_toolbox.items.push(device);
+                       if (devices_by_name[device_name] === undefined) {
+                           device = new models.Device(0, device_name, 0, 0, device_type, host.id);
+                           device.icon = true;
+                           device.variables = host.variables;
+                           $scope.inventory_toolbox.items.push(device);
+                       }
                    } catch (error) {
                        console.log(error);
                    }
@@ -1829,6 +1836,13 @@ var NetworkUIController = function($scope,
                                            device.y,
                                            device.type,
                                            device.host_id);
+
+            for (j=0; j < $scope.inventory_toolbox.items.length; j++) {
+                 if($scope.inventory_toolbox.items[j].name === device.name) {
+                     $scope.inventory_toolbox.items.splice(j, 1);
+                     break;
+                 }
+            }
             new_device.interface_seq = util.natural_numbers(device.interface_id_seq);
             new_device.process_id_seq = util.natural_numbers(device.process_id_seq);
             $scope.devices.push(new_device);
