@@ -666,7 +666,10 @@ Group.prototype.update_membership = function (devices, groups) {
     var y2 = this.bottom_extent();
     var x2 = this.right_extent();
     var old_devices = this.devices;
+    var new_devices = [];
+    var removed_devices = old_devices.slice();
     var device_ids = [];
+    var index = -1;
     this.devices = [];
     for (i = 0; i < devices.length; i++) {
         if (devices[i].x > x1 &&
@@ -676,6 +679,12 @@ Group.prototype.update_membership = function (devices, groups) {
             devices[i].in_group = true;
             this.devices.push(devices[i]);
             device_ids.push(devices[i].id);
+            index = removed_devices.indexOf(devices[i]);
+            if (index != -1) {
+                removed_devices.splice(index, 1);
+            } else {
+                new_devices.push(devices[i]);
+            }
         }
     }
     var old_groups = this.groups;
@@ -690,7 +699,7 @@ Group.prototype.update_membership = function (devices, groups) {
             group_ids.push(groups[i].id);
         }
     }
-    return [old_devices, this.devices, device_ids, old_groups, this.groups, group_ids];
+    return [old_devices, this.devices, device_ids, old_groups, this.groups, group_ids, new_devices, removed_devices];
 };
 
 Group.prototype.is_in_breadcrumb = function(viewport){

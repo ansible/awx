@@ -234,12 +234,16 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
         c_messages.push(new messages.GroupMembership(controller.scope.client_id,
                                                      group.groups[i].id,
                                                      membership_old_new[2]));
+        controller.scope.create_group_association(groups[i], membership_old_new[6]);
+        controller.scope.delete_group_association(groups[i], membership_old_new[7]);
     }
 
     membership_old_new = group.update_membership(scope.devices, scope.groups);
     c_messages.push(new messages.GroupMembership(controller.scope.client_id,
                                                  group.id,
                                                  membership_old_new[2]));
+    controller.scope.create_group_association(group, membership_old_new[6]);
+    controller.scope.delete_group_association(group, membership_old_new[7]);
 
     scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
 };

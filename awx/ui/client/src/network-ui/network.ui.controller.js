@@ -1234,7 +1234,7 @@ var NetworkUIController = function($scope,
         return null;
     };
 
-    $scope.create_inventory_host = function (device, callback) {
+    $scope.create_inventory_host = function (device) {
         console.log(device);
         HostsService.post({inventory: $scope.inventory_id,
                            name: device.name,
@@ -1253,7 +1253,7 @@ var NetworkUIController = function($scope,
                     });
     };
 
-    $scope.create_inventory_group = function (group, callback) {
+    $scope.create_inventory_group = function (group) {
         console.log(group);
         GroupsService.post({inventory: $scope.inventory_id,
                            name: group.name,
@@ -1270,6 +1270,42 @@ var NetworkUIController = function($scope,
                     .catch(function (res) {
                         console.log(res);
                     });
+    };
+
+    $scope.create_group_association = function (group, devices) {
+
+        console.log(['create_group_association', group, devices]);
+
+        function noop (response) {
+            console.log(response);
+        };
+
+        function error_handler (response) {
+            console.log(response);
+        };
+
+        var i = 0;
+        for (i = 0; i < devices.length; i ++) {
+            $http.post('/api/v2/groups/' + group.group_id + '/hosts/', JSON.stringify({name: devices[i].name})).then(noop).catch(error_handler);
+        }
+    };
+
+    $scope.delete_group_association = function (group, devices) {
+
+        console.log(['delete_group_association', group, devices]);
+
+        function noop (response) {
+            console.log(response);
+        };
+
+        function error_handler (response) {
+            console.log(response);
+        };
+
+        var i = 0;
+        for (i = 0; i < devices.length; i ++) {
+            GroupsService.disassociateHost(devices[i].host_id, group.group_id).then(noop).catch(error_handler);
+        }
     };
 
     $scope.onDeviceCreate = function(data) {
