@@ -10,24 +10,17 @@ import {
 const session = `e2e-${uuid().substr(0, 8)}`;
 const store = {};
 
-const getOrCreate = (endpoint, data, unique = ['name', 'username', 'id']) => {
-    const identifier = Object.keys(data).find(key => unique.includes(key));
+const getOrCreate = (endpoint, data, unique = ['name']) => {
+    const identifiers = Object.keys(data).filter(key => unique.indexOf(key) > -1);
 
-    if (identifier === undefined) {
+    if (identifiers.length < 1) {
         throw new Error('A unique key value must be provided.');
     }
 
-    const identity = data[identifier];
+    const lookup = `${endpoint}/${identifiers.map(key => data[key]).join('-')}`;
+    const params = Object.assign(...identifiers.map(key => ({ [key]: data[key] })));
 
-    store[endpoint] = store[endpoint] || {};
-
-    if (store[endpoint][identity]) {
-        return store[endpoint][identity].then(created => created.data);
-    }
-
-    const query = { params: { [identifier]: identity } };
-
-    store[endpoint][identity] = get(endpoint, query)
+    store[lookup] = store[lookup] || get(endpoint, { params })
         .then(res => {
             if (res.data.results.length > 1) {
                 return Promise.reject(new Error('More than one matching result.'));
@@ -44,7 +37,7 @@ const getOrCreate = (endpoint, data, unique = ['name', 'username', 'id']) => {
             return Promise.reject(new Error(`unexpected response: ${res}`));
         });
 
-    return store[endpoint][identity].then(created => created.data);
+    return store[lookup].then(created => created.data);
 };
 
 const getOrganization = (namespace = session) => getOrCreate('/organizations/', {
@@ -57,7 +50,12 @@ const getInventory = (namespace = session) => getOrganization(namespace)
         name: `${namespace}-inventory`,
         description: namespace,
         organization: organization.id
-    }));
+    }).then(inventory => getOrCreate('/hosts/', {
+        name: `${namespace}-host`,
+        description: namespace,
+        inventory: inventory.id,
+        variables: JSON.stringify({ ansible_connection: 'local' }),
+    }, ['name', 'inventory']).then(() => inventory)));
 
 const getHost = (namespace = session) => getInventory(namespace)
     .then(inventory => getOrCreate('/hosts/', {
@@ -65,7 +63,7 @@ const getHost = (namespace = session) => getInventory(namespace)
         description: namespace,
         inventory: inventory.id,
         variables: JSON.stringify({ ansible_connection: 'local' }),
-    }));
+    }, ['name', 'inventory']));
 
 const getInventoryScript = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/inventory_scripts/', {
@@ -265,8 +263,8 @@ const getWorkflowTemplate = (namespace = session) => {
             ];
 
             const createSuccessNodes = ([projectNode, jobNode, sourceNode]) => Promise.all([
-                getOrCreate(projectNode.related.success_nodes, { id: jobNode.id }),
-                getOrCreate(jobNode.related.success_nodes, { id: sourceNode.id }),
+                getOrCreate(projectNode.related.success_nodes, { id: jobNode.id }, ['id']),
+                getOrCreate(jobNode.related.success_nodes, { id: sourceNode.id }, ['id']),
             ]);
 
             return Promise.all(nodes)
@@ -287,7 +285,7 @@ const getAuditor = (namespace = session) => getOrganization(namespace)
         is_superuser: false,
         is_system_auditor: true,
         password: AWX_E2E_PASSWORD
-    }));
+    }, ['username']));
 
 const getUser = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate('/users/', {
@@ -299,7 +297,7 @@ const getUser = (namespace = session) => getOrganization(namespace)
         is_superuser: false,
         is_system_auditor: false,
         password: AWX_E2E_PASSWORD
-    }));
+    }, ['username']));
 
 const getJobTemplateAdmin = (namespace = session) => {
     const rolePromise = getJobTemplate(namespace)
@@ -315,7 +313,7 @@ const getJobTemplateAdmin = (namespace = session) => {
             is_superuser: false,
             is_system_auditor: false,
             password: AWX_E2E_PASSWORD
-        }));
+        }, ['username']));
 
     const assignRolePromise = Promise.all([userPromise, rolePromise])
         .then(([user, role]) => post(`/api/v2/roles/${role.id}/users/`, { id: user.id }));
@@ -338,7 +336,7 @@ const getProjectAdmin = (namespace = session) => {
             is_superuser: false,
             is_system_auditor: false,
             password: AWX_E2E_PASSWORD
-        }));
+        }, ['username']));
 
     const assignRolePromise = Promise.all([userPromise, rolePromise])
         .then(([user, role]) => post(`/api/v2/roles/${role.id}/users/`, { id: user.id }));

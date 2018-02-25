@@ -40,7 +40,7 @@ module.exports = {
             getTeam(namespace).then(obj => { data.team = obj; }),
             getProjectAdmin(namespace).then(obj => { data.user = obj; }),
             getNotificationTemplate(namespace).then(obj => { data.notification = obj; }),
-            getJob(namespaceShort).then(obj => { data.job = obj; }),
+            getJob(namespace).then(obj => { data.job = obj; }),
         ];
 
         Promise.all(resources)
@@ -58,7 +58,6 @@ module.exports = {
 
                 urls.organization = `${pages.organizations.url()}/${data.organization.id}`;
                 urls.inventory = `${pages.inventories.url()}/inventory/${data.inventory.id}`;
-                urls.inventoryHosts = `${urls.inventory}/hosts`;
                 urls.inventoryScript = `${pages.inventoryScripts.url()}/${data.inventoryScript.id}`;
                 urls.inventorySource = `${urls.inventory}/inventory_sources/edit/${data.inventorySource.id}`;
                 urls.sourceSchedule = `${urls.inventorySource}/schedules/${data.sourceSchedule.id}`;
@@ -72,6 +71,7 @@ module.exports = {
                 urls.notification = `${pages.notificationTemplates.url()}/${data.notification.id}`;
                 urls.jobs = `${pages.jobs.url()}`;
                 urls.jobsSchedules = `${pages.jobs.url()}/schedules`;
+                urls.inventoryHosts = `${pages.inventories.url()}/inventory/${data.host.summary_fields.inventory.id}/hosts`;
 
                 client.useCss();
                 client.login();
@@ -691,6 +691,14 @@ module.exports = {
         const popOver = `${itemRow} td[class*="active_failures-"] div[class*="popover"]`;
 
         client.navigateTo(urls.inventoryHosts);
+        client.expect.element('div[class^="Panel"] smart-search').visible;
+        client.expect.element('div[class^="Panel"] smart-search input').enabled;
+
+        client.sendKeys('div[class^="Panel"] smart-search input', `id:>${data.host.id - 1} id:<${data.host.id + 1}`);
+        client.sendKeys('div[class^="Panel"] smart-search input', client.Keys.ENTER);
+
+        client.expect.element('div.spinny').visible;
+        client.expect.element('div.spinny').not.visible;
 
         client.click(itemName);
         client.expect.element(popOver).present;
