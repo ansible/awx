@@ -64,7 +64,9 @@ module.exports = {
         const { details } = credentials.section.add.section;
         const { gce } = details.section;
 
-        gce.section.serviceAccountFile.setValue('form input[type="file"]', GCE_SERVICE_ACCOUNT_FILE);
+        client.pushFileToWorker(GCE_SERVICE_ACCOUNT_FILE, file => {
+            gce.section.serviceAccountFile.setValue('form input[type="file"]', file);
+        });
 
         gce.expect.element('@email').not.enabled;
         gce.expect.element('@sshKeyData').not.enabled;
@@ -100,7 +102,9 @@ module.exports = {
         const { details } = credentials.section.add.section;
         const { gce } = details.section;
 
-        gce.section.serviceAccountFile.setValue('form input[type="file"]', GCE_SERVICE_ACCOUNT_FILE_MISSING);
+        client.pushFileToWorker(GCE_SERVICE_ACCOUNT_FILE_MISSING, file => {
+            gce.section.serviceAccountFile.setValue('form input[type="file"]', file);
+        });
 
         gce.expect.element('@email').not.enabled;
         gce.expect.element('@sshKeyData').not.enabled;
@@ -142,7 +146,9 @@ module.exports = {
         const { details } = credentials.section.add.section;
         const { gce } = details.section;
 
-        gce.section.serviceAccountFile.setValue('form input[type="file"]', GCE_SERVICE_ACCOUNT_FILE_INVALID);
+        client.pushFileToWorker(GCE_SERVICE_ACCOUNT_FILE_INVALID, file => {
+            gce.section.serviceAccountFile.setValue('form input[type="file"]', file);
+        });
 
         gce.expect.element('@email').not.enabled;
         gce.expect.element('@sshKeyData').not.enabled;
@@ -184,7 +190,9 @@ module.exports = {
         const add = credentials.section.add.section.details;
         const edit = credentials.section.edit.section.details;
 
-        add.section.gce.section.serviceAccountFile.setValue('form input[type="file"]', GCE_SERVICE_ACCOUNT_FILE);
+        client.pushFileToWorker(GCE_SERVICE_ACCOUNT_FILE, file => {
+            add.section.gce.section.serviceAccountFile.setValue('form input[type="file"]', file);
+        });
 
         add.section.gce.expect.element('@email').not.enabled;
         add.section.gce.expect.element('@sshKeyData').not.enabled;
@@ -224,7 +232,9 @@ module.exports = {
         gce.section.project.expect.element('@error').not.present;
         gce.section.serviceAccountFile.expect.element('@error').not.present;
 
-        gce.section.serviceAccountFile.setValue('form input[type="file"]', GCE_SERVICE_ACCOUNT_FILE_ALT);
+        client.pushFileToWorker(GCE_SERVICE_ACCOUNT_FILE_ALT, file => {
+            gce.section.serviceAccountFile.setValue('form input[type="file"]', file);
+        });
 
         gce.expect.element('@serviceAccountFile').enabled;
 
