@@ -1,25 +1,32 @@
+import { range } from 'lodash';
+
+import { getOrganization } from '../fixtures';
+
 module.exports = {
     before: (client, done) => {
-        const credentials = client.page.credentials();
-        const { details } = credentials.section.add.section;
+        const resources = range(100).map(n => getOrganization(`test-lookup-${n}`));
 
-        client.login();
-        client.waitForAngular();
+        Promise.all(resources)
+            .then(() => {
+                const credentials = client.page.credentials();
+                const { details } = credentials.section.add.section;
 
-        credentials.section.navigation
-            .waitForElementVisible('@credentials')
-            .click('@credentials');
+                client.login();
+                client.waitForAngular();
 
-        credentials
-            .waitForElementVisible('div.spinny')
-            .waitForElementNotVisible('div.spinny');
+                credentials.section.navigation.waitForElementVisible('@credentials');
+                credentials.section.navigation.click('@credentials');
 
-        credentials.section.list
-            .waitForElementVisible('@add')
-            .click('@add');
+                credentials.waitForElementVisible('div.spinny');
+                credentials.waitForElementNotVisible('div.spinny');
 
-        details
-            .waitForElementVisible('@save', done);
+                credentials.section.list.waitForElementVisible('@add');
+                credentials.section.list.click('@add');
+
+                details.waitForElementVisible('@save');
+
+                done();
+            });
     },
     'open the lookup modal': client => {
         const credentials = client.page.credentials();
