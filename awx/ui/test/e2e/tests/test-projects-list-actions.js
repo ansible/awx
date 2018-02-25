@@ -16,7 +16,7 @@ module.exports = {
         client.login();
         client.waitForAngular();
 
-        projects.navigate();
+        projects.load();
         projects.waitForElementVisible('div.spinny');
         projects.waitForElementNotVisible('div.spinny');
 

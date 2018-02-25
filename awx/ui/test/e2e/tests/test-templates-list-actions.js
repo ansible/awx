@@ -30,7 +30,7 @@ module.exports = {
         client.login();
         client.waitForAngular();
 
-        templates.navigate();
+        templates.load();
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
 
@@ -70,7 +70,7 @@ module.exports = {
         client.login();
         client.waitForAngular();
 
-        templates.navigate();
+        templates.load();
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
 

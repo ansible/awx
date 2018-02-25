@@ -1,8 +1,13 @@
-exports.command = function navigateTo (url) {
+const spinny = 'div.spinny';
+
+exports.command = function navigateTo (url, expectSpinny = true) {
+    this.url('data:,'); // https://github.com/nightwatchjs/nightwatch/issues/1724
     this.url(url);
 
-    this.waitForElementVisible('div.spinny');
-    this.waitForElementNotVisible('div.spinny');
+    if (expectSpinny) {
+        this.waitForElementVisible(spinny);
+        this.waitForElementNotVisible(spinny);
+    }
 
     return this;
 };

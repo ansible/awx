@@ -26,6 +26,12 @@ module.exports = {
     url () {
         return `${this.api.globals.launch_url}/#/organizations`;
     },
+    commands: [{
+        load () {
+            this.api.url('data:,'); // https://github.com/nightwatchjs/nightwatch/issues/1724
+            return this.navigate();
+        },
+    }],
     sections: {
         header,
         navigation,

@@ -16,7 +16,7 @@ module.exports = {
         client.login();
         client.waitForAngular();
 
-        notifications.navigate();
+        notifications.load();
         notifications.waitForElementVisible('div.spinny');
         notifications.waitForElementNotVisible('div.spinny');
 

@@ -16,7 +16,7 @@ module.exports = {
         client.login();
         client.waitForAngular();
 
-        inventoryScripts.navigate();
+        inventoryScripts.load();
         inventoryScripts.waitForElementVisible('div.spinny');
         inventoryScripts.waitForElementNotVisible('div.spinny');
 

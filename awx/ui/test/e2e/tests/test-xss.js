@@ -85,7 +85,7 @@ module.exports = {
         const multiCredentialOpen = 'multi-credential button i[class*="search"]';
         const multiCredentialExit = 'multi-credential-modal button[class*="exit"]';
 
-        client.url(urls.jobTemplate);
+        client.navigateTo(urls.jobTemplate, false);
 
         client.expect.element('#job_template_form').visible;
         client.expect.element('#xss').not.present;
@@ -371,7 +371,7 @@ module.exports = {
         client.expect.element('#prompt-header').not.visible;
     },
     'check smart inventory form for unsanitized content': client => {
-        client.url(urls.smartInventory);
+        client.navigateTo(urls.smartInventory, false);
 
         client.expect.element('#smartinventory_form').visible;
 

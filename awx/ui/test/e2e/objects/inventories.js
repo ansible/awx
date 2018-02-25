@@ -116,6 +116,10 @@ module.exports = {
         save: 'button[class*="Form-saveButton"]'
     },
     commands: [{
+        load () {
+            this.api.url('data:,'); // https://github.com/nightwatchjs/nightwatch/issues/1724
+            return this.navigate();
+        },
         selectAdd (name) {
             this.api.waitForElementVisible('button span[class="List-dropdownCarat"]');
             this.expect.element('button span[class="List-dropdownCarat"]').enabled;

@@ -116,6 +116,10 @@ module.exports = {
         save: 'button[class*="Form-saveButton"]'
     },
     commands: [{
+        load () {
+            this.api.url('data:,'); // https://github.com/nightwatchjs/nightwatch/issues/1724
+            return this.navigate();
+        },
         clickWhenEnabled (selector) {
             this.api.waitForElementVisible(selector);
             this.expect.element(selector).enabled;
