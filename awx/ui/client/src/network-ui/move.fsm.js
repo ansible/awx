@@ -176,7 +176,7 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
         try {
             template_context = {};
             template_context['id'] = device.id;
-            controller.scope.create_template_sequences(device.name, template_context);
+            controller.scope.create_template_sequences(controller.scope.sequences, device.name, template_context);
             device.name = nunjucks.renderString(device.name, template_context);
             scope.create_inventory_host(device);
         } catch (err) {

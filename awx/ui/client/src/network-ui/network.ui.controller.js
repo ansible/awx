@@ -1246,15 +1246,15 @@ var NetworkUIController = function($scope,
         return null;
     };
 
-    $scope.create_template_sequences = function (template, template_context) {
+    $scope.create_template_sequences = function (sequences, template, template_context) {
         var i = 0;
         var template_variables  = util.nunjucks_find_variables(template);
         for (i = 0; i < template_variables.length; i++) {
             if (template_context[template_variables[i]] === undefined) {
-                if ($scope.sequences[template_variables[i]] === undefined) {
-                    $scope.sequences[template_variables[i]] = util.natural_numbers(0);
+                if (sequences[template_variables[i]] === undefined) {
+                    sequences[template_variables[i]] = util.natural_numbers(0);
                 }
-                template_context[template_variables[i]] = $scope.sequences[template_variables[i]]();
+                template_context[template_variables[i]] = sequences[template_variables[i]]();
             }
         }
     };
@@ -1264,23 +1264,6 @@ var NetworkUIController = function($scope,
             return;
         }
         console.log(device);
-        HostsService.get({inventory: $scope.inventory_id,
-                          name: device.name})
-                    .then(function (res) {
-                        console.log(res);
-                        if (res.data.count === 0) {
-                            update_inventory();
-                        } else if (res.data.count === 1) {
-                            device.host_id = res.data.results[0].id;
-                            device.variables = util.parse_variables(res.data.results[0].variables);
-                            $scope.send_control_message(new messages.DeviceInventoryUpdate($scope.client_id,
-                                                                                           device.id,
-                                                                                           device.host_id));
-                        }
-                    })
-                    .catch(function (res) {
-                        console.log(res);
-                    });
 
         function update_inventory () {
             HostsService.post({inventory: $scope.inventory_id,
@@ -1299,6 +1282,25 @@ var NetworkUIController = function($scope,
                             console.log(res);
                         });
         }
+
+        return HostsService.get({inventory: $scope.inventory_id,
+                          name: device.name})
+                    .then(function (res) {
+                        console.log(res);
+                        if (res.data.count === 0) {
+                            update_inventory();
+                        } else if (res.data.count === 1) {
+                            device.host_id = res.data.results[0].id;
+                            device.variables = util.parse_variables(res.data.results[0].variables);
+                            $scope.send_control_message(new messages.DeviceInventoryUpdate($scope.client_id,
+                                                                                           device.id,
+                                                                                           device.host_id));
+                        }
+                    })
+                    .catch(function (res) {
+                        console.log(res);
+                    });
+
     };
 
     $scope.create_inventory_group = function (group) {
@@ -1306,24 +1308,6 @@ var NetworkUIController = function($scope,
             return;
         }
         console.log(group);
-        GroupsService.get({inventory: $scope.inventory_id,
-                          name: group.name})
-                    .then(function (res) {
-                        console.log(res);
-                        if (res.data.count === 0) {
-                            update_inventory();
-                        } else if (res.data.count === 1) {
-                            group.group_id = res.data.results[0].id;
-                            group.variables = util.parse_variables(res.data.results[0].variables);
-                            $scope.send_control_message(new messages.GroupInventoryUpdate($scope.client_id,
-                                                                                          group.id,
-                                                                                          group.group_id));
-                        }
-                    })
-                    .catch(function (res) {
-                        console.log(res);
-                    });
-
         function update_inventory () {
             GroupsService.post({inventory: $scope.inventory_id,
                                name: group.name,
@@ -1341,6 +1325,24 @@ var NetworkUIController = function($scope,
                             console.log(res);
                         });
         }
+        return GroupsService.get({inventory: $scope.inventory_id,
+                          name: group.name})
+                    .then(function (res) {
+                        console.log(res);
+                        if (res.data.count === 0) {
+                            update_inventory();
+                        } else if (res.data.count === 1) {
+                            group.group_id = res.data.results[0].id;
+                            group.variables = util.parse_variables(res.data.results[0].variables);
+                            $scope.send_control_message(new messages.GroupInventoryUpdate($scope.client_id,
+                                                                                          group.id,
+                                                                                          group.group_id));
+                        }
+                    })
+                    .catch(function (res) {
+                        console.log(res);
+                    });
+
     };
 
     $scope.create_group_association = function (group, devices) {

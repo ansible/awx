@@ -468,6 +468,7 @@ function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.icon_size = type === 'site' ? 500 : 100;
     this.template = false;
     this.variables = {};
+    this.sequences = {};
 }
 exports.Group = Group;
 
