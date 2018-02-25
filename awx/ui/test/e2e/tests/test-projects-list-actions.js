@@ -1,10 +1,10 @@
-import { getProject } from '../fixtures';
+import { getUpdatedProject } from '../fixtures';
 
 const data = {};
 
 module.exports = {
     before: (client, done) => {
-        getProject('test-actions')
+        getUpdatedProject('test-actions')
             .then(obj => { data.project = obj; })
             .then(done);
     },
