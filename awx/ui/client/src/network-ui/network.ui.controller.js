@@ -24,6 +24,7 @@ var keybindings = require('./keybindings.fsm.js');
 var details_panel_fsm = require('./details.panel.fsm.js');
 var svg_crowbar = require('./svg-crowbar.js');
 var ReconnectingWebSocket = require('reconnectingwebsocket');
+var nunjucks = require('nunjucks');
 
 var NetworkUIController = function($scope,
                                    $document,
@@ -40,6 +41,8 @@ var NetworkUIController = function($scope,
 
   window.scope = $scope;
   var i = 0;
+
+  $scope.nunjucks = nunjucks;
 
   $scope.http = $http;
 
@@ -133,12 +136,14 @@ var NetworkUIController = function($scope,
   $scope.current_tests = [];
   $scope.current_test = null;
   $scope.testing = false;
+  $scope.template_building = false;
   $scope.version = null;
   $scope.test_events = [];
   $scope.test_results = [];
   $scope.test_errors = [];
   $scope.streams = [];
   $scope.animations = [];
+  $scope.sequences = {};
   $scope.view_port = {'x': 0,
                       'y': 0,
                       'width': 0,
@@ -307,7 +312,7 @@ var NetworkUIController = function($scope,
                        if (devices_by_name[device_name] === undefined) {
                            device = new models.Device(0, device_name, 0, 0, device_type, host.id);
                            device.icon = true;
-                           device.variables = host.variables;
+                           device.variables = JSON.stringify(host.data);
                            $scope.inventory_toolbox.items.push(device);
                        }
                    } catch (error) {
@@ -1241,45 +1246,107 @@ var NetworkUIController = function($scope,
         return null;
     };
 
+    $scope.create_template_sequences = function (template, template_context) {
+        var i = 0;
+        var template_variables  = util.nunjucks_find_variables(template);
+        for (i = 0; i < template_variables.length; i++) {
+            if (template_context[template_variables[i]] === undefined) {
+                if ($scope.sequences[template_variables[i]] === undefined) {
+                    $scope.sequences[template_variables[i]] = util.natural_numbers(0);
+                }
+                template_context[template_variables[i]] = $scope.sequences[template_variables[i]]();
+            }
+        }
+    };
+
     $scope.create_inventory_host = function (device) {
+        if ($scope.template_building || device.template) {
+            return;
+        }
         console.log(device);
-        HostsService.post({inventory: $scope.inventory_id,
-                           name: device.name,
-                           variables: JSON.stringify({awx: {name: device.name,
-                                                            type: device.type}})})
+        HostsService.get({inventory: $scope.inventory_id,
+                          name: device.name})
                     .then(function (res) {
                         console.log(res);
-                        device.host_id = res.data.id;
-                        device.variables = util.parse_variables(res.data.variables);
-                        $scope.send_control_message(new messages.DeviceInventoryUpdate($scope.client_id,
-                                                                                       device.id,
-                                                                                       device.host_id));
+                        if (res.data.count === 0) {
+                            update_inventory();
+                        } else if (res.data.count === 1) {
+                            device.host_id = res.data.results[0].id;
+                            device.variables = util.parse_variables(res.data.results[0].variables);
+                            $scope.send_control_message(new messages.DeviceInventoryUpdate($scope.client_id,
+                                                                                           device.id,
+                                                                                           device.host_id));
+                        }
                     })
                     .catch(function (res) {
                         console.log(res);
                     });
+
+        function update_inventory () {
+            HostsService.post({inventory: $scope.inventory_id,
+                               name: device.name,
+                               variables: JSON.stringify({awx: {name: device.name,
+                                                                type: device.type}})})
+                        .then(function (res) {
+                            console.log(res);
+                            device.host_id = res.data.id;
+                            device.variables = util.parse_variables(res.data.variables);
+                            $scope.send_control_message(new messages.DeviceInventoryUpdate($scope.client_id,
+                                                                                           device.id,
+                                                                                           device.host_id));
+                        })
+                        .catch(function (res) {
+                            console.log(res);
+                        });
+        }
     };
 
     $scope.create_inventory_group = function (group) {
+        if ($scope.template_building || group.template) {
+            return;
+        }
         console.log(group);
-        GroupsService.post({inventory: $scope.inventory_id,
-                           name: group.name,
-                           variables: JSON.stringify({awx: {name: group.name,
-                                                            type: group.type}})})
+        GroupsService.get({inventory: $scope.inventory_id,
+                          name: group.name})
                     .then(function (res) {
                         console.log(res);
-                        group.group_id = res.data.id;
-                        group.variables = util.parse_variables(res.data.variables);
-                        $scope.send_control_message(new messages.GroupInventoryUpdate($scope.client_id,
-                                                                                      group.id,
-                                                                                      group.group_id));
+                        if (res.data.count === 0) {
+                            update_inventory();
+                        } else if (res.data.count === 1) {
+                            group.group_id = res.data.results[0].id;
+                            group.variables = util.parse_variables(res.data.results[0].variables);
+                            $scope.send_control_message(new messages.GroupInventoryUpdate($scope.client_id,
+                                                                                          group.id,
+                                                                                          group.group_id));
+                        }
                     })
                     .catch(function (res) {
                         console.log(res);
                     });
+
+        function update_inventory () {
+            GroupsService.post({inventory: $scope.inventory_id,
+                               name: group.name,
+                               variables: JSON.stringify({awx: {name: group.name,
+                                                                type: group.type}})})
+                        .then(function (res) {
+                            console.log(res);
+                            group.group_id = res.data.id;
+                            group.variables = util.parse_variables(res.data.variables);
+                            $scope.send_control_message(new messages.GroupInventoryUpdate($scope.client_id,
+                                                                                          group.id,
+                                                                                          group.group_id));
+                        })
+                        .catch(function (res) {
+                            console.log(res);
+                        });
+        }
     };
 
     $scope.create_group_association = function (group, devices) {
+        if ($scope.template_building || group.template) {
+            return;
+        }
 
         console.log(['create_group_association', group, devices]);
 
@@ -1293,11 +1360,16 @@ var NetworkUIController = function($scope,
 
         var i = 0;
         for (i = 0; i < devices.length; i ++) {
-            $http.post('/api/v2/groups/' + group.group_id + '/hosts/', JSON.stringify({name: devices[i].name})).then(noop).catch(error_handler);
+            if (!devices[i].template) {
+                $http.post('/api/v2/groups/' + group.group_id + '/hosts/', JSON.stringify({name: devices[i].name})).then(noop).catch(error_handler);
+            }
         }
     };
 
     $scope.delete_group_association = function (group, devices) {
+        if ($scope.template_building || group.template) {
+            return;
+        }
 
         console.log(['delete_group_association', group, devices]);
 
@@ -1311,7 +1383,9 @@ var NetworkUIController = function($scope,
 
         var i = 0;
         for (i = 0; i < devices.length; i ++) {
-            GroupsService.disassociateHost(devices[i].host_id, group.group_id).then(noop).catch(error_handler);
+            if (!devices[i].template) {
+                GroupsService.disassociateHost(devices[i].host_id, group.group_id).then(noop).catch(error_handler);
+            }
         }
     };
 

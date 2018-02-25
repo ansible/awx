@@ -29,6 +29,7 @@ function Device(id, name, x, y, type, host_id) {
     this.process_id_seq = util.natural_numbers(0);
     this.processes = [];
     this.in_group = false;
+    this.template = false;
     this.variables = {};
 }
 exports.Device = Device;
@@ -465,6 +466,7 @@ function Group(id, name, type, x1, y1, x2, y2, selected) {
     this.streams = [];
     this.group_id = 0;
     this.icon_size = type === 'site' ? 500 : 100;
+    this.template = false;
     this.variables = {};
 }
 exports.Group = Group;

@@ -9,6 +9,32 @@ Array.prototype.extend = function (other_array) {
 
 var math = require('mathjs');
 var yaml = require('js-yaml');
+var nunjucks = require('nunjucks');
+
+function nunjucks_find_variables (text) {
+
+    var variables = [];
+    var tokenizer = nunjucks.lexer.lex(text, {});
+    var token = tokenizer.nextToken();
+    while (token !== null) {
+        if (token.type === 'variable-start') {
+            token = tokenizer.nextToken();
+            while (token !== null) {
+                if (token.type === 'symbol') {
+                    variables.push(token.value);
+                }
+                if (token.type === 'variable-end') {
+                    break;
+                }
+                token = tokenizer.nextToken();
+            }
+        }
+        token = tokenizer.nextToken();
+    }
+
+    return variables;
+};
+exports.nunjucks_find_variables = nunjucks_find_variables;
 
 function parse_variables (variables) {
     var parsed_variables = {};

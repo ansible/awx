@@ -3,6 +3,8 @@ var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
+var util = require('./util.js');
+var nunjucks = require('nunjucks');
 
 function _State () {
 }
@@ -95,6 +97,8 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
     var top_left_x, top_left_y;
     var device_map = {};
     var c_messages = [];
+    var template_context = null;
+    var template_variables = null;
     scope.hide_groups = false;
 
     scope.pressedX = scope.mouseX;
@@ -113,6 +117,18 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
                                  top_left_y + message.group.y2,
                                  false);
 
+    if (!controller.scope.template_building && message.group.template) {
+        try {
+            template_context = {};
+            template_context['id'] = group.id;
+            controller.scope.create_template_sequences(group.name, template_context);
+            group.name = nunjucks.renderString(group.name, template_context);
+            scope.create_inventory_group(group);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     c_messages.push(new messages.GroupCreate(scope.client_id,
                                              group.id,
                                              group.x1,
@@ -120,7 +136,8 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
                                              group.x2,
                                              group.y2,
                                              group.name,
-                                             group.type));
+                                             group.type,
+                                             0));
 
     scope.groups.push(group);
 
@@ -262,6 +279,8 @@ _Selected2.prototype.onCopySelected = function (controller) {
                 device_copy.interfaces.push(interface_copy);
                 device_copy.interface_map[interface_copy.id] = interface_copy;
             }
+            device_copy.variables = JSON.stringify(devices[j].variables);
+            device_copy.template = true;
             group_copy.devices.push(device_copy);
         }
 
@@ -286,6 +305,8 @@ _Selected2.prototype.onCopySelected = function (controller) {
             }
         }
 
+        group_copy.variables = JSON.stringify(group.variables);
+        group_copy.template = true;
         controller.scope.rack_toolbox.items.push(group_copy);
     }
 };
