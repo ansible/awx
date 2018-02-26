@@ -303,6 +303,17 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
     }
 
     scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
+
+    Promise.all(promises)
+           .then(function (res) {
+                controller.scope.create_group_association(group, group.devices);
+                for (i = 0; i < group.groups.length; i++) {
+                    controller.scope.create_group_association(group.groups[i], group.groups[i].devices);
+                }
+           })
+           .catch(function(res) {
+               console.log(res);
+           });
 };
 
 
