@@ -21,21 +21,13 @@ export default
     $injector) {
         return {
             setToken: function (token, expires) {
-                // set the session cookie
-                $cookies.remove('token');
                 $cookies.remove('token_expires');
                 $cookies.remove('userLoggedIn');
-
-                if (token && !(/^"[a-f0-9]+"$/ig.test(token))) {
-                    $cookies.put('token', `"${token}"`);
-                } else {
-                    $cookies.put('token', token);
-                }
 
                 $cookies.put('token_expires', expires);
                 $cookies.put('userLoggedIn', true);
                 $cookies.put('sessionExpired', false);
-                $rootScope.token = token;
+
                 $rootScope.userLoggedIn = true;
                 $rootScope.token_expires = expires;
                 $rootScope.sessionExpired = false;
@@ -44,43 +36,34 @@ export default
             isUserLoggedIn: function () {
                 if ($rootScope.userLoggedIn === undefined) {
                     // Browser refresh may have occurred
-                    $rootScope.userLoggedIn = $cookies.get('userLoggedIn');
-                    $rootScope.sessionExpired = $cookies.get('sessionExpired');
+                    $rootScope.userLoggedIn = ($cookies.get('userLoggedIn') === 'true');
+                    $rootScope.sessionExpired = ($cookies.get('sessionExpired') === 'true');
                 }
                 return $rootScope.userLoggedIn;
             },
-
-            getToken: function () {
-                if ($rootScope.token) {
-                    return $rootScope.token;
-                }
-
-                let token = $cookies.get('token');
-
-                return token ? token.replace(/"/g, '') : undefined;
-            },
-
             retrieveToken: function (username, password) {
-                return $http({
-                    method: 'POST',
-                    url: GetBasePath('authtoken'),
-                    data: {
-                        "username": username,
-                        "password": password
-                    },
-                    headers: {
-                        'Cache-Control': 'no-store',
-                        'Pragma': 'no-cache'
-                    }
+                var getCSRFToken = $http({
+                    method: 'GET',
+                    url: `/api/login/`
+                });
+
+                return getCSRFToken.then(function({data}) {
+                    var csrfmiddlewaretoken = /name='csrfmiddlewaretoken' value='([0-9a-zA-Z]+)' \//.exec(data)[1];
+                    // TODO: data needs to be encoded
+                    return $http({
+                        method: 'POST',
+                        url: `/api/login/`,
+                        data: `username=${username}&password=${password}&csrfmiddlewaretoken=${csrfmiddlewaretoken}&next=%2fapi%2f`,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    });
                 });
             },
             deleteToken: function () {
                 return $http({
-                    method: 'DELETE',
-                    url: GetBasePath('authtoken'),
-                    headers: {
-                        'Authorization': 'Token ' + this.getToken()
-                    }
+                    method: 'GET',
+                    url: '/api/logout/'
                 });
             },
 
@@ -125,7 +108,6 @@ export default
                     SocketService.disconnect();
                     $cookies.remove('token_expires');
                     $cookies.remove('current_user');
-                    $cookies.remove('token');
                     $cookies.put('userLoggedIn', false);
                     $cookies.put('sessionExpired', false);
                     $cookies.putObject('current_user', {});
@@ -134,7 +116,6 @@ export default
                     $rootScope.userLoggedIn = false;
                     $rootScope.sessionExpired = false;
                     $rootScope.licenseMissing = true;
-                    $rootScope.token = null;
                     $rootScope.token_expires = null;
                     $rootScope.login_username = null;
                     $rootScope.login_password = null;
@@ -168,11 +149,7 @@ export default
             getUser: function () {
                 return $http({
                     method: 'GET',
-                    url: GetBasePath('me'),
-                    headers: {
-                        'Authorization': 'Token ' + this.getToken(),
-                        "X-Auth-Token": 'Token ' + this.getToken()
-                    }
+                    url: GetBasePath('me')
                 });
             },
 

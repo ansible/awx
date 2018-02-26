@@ -55,8 +55,8 @@
  */
 
 export default
-    ['$http', '$rootScope', '$q', 'Authorization',
-        function ($http, $rootScope, $q, Authorization) {
+    ['$http', '$rootScope', '$q',
+        function ($http, $rootScope, $q) {
             return {
 
                 headers: {},
@@ -113,150 +113,88 @@ export default
                     args = (args) ? args : {};
                     this.params = (args.params) ? args.params : null;
                     this.pReplace();
-                    var expired = this.checkExpired(),
-                        token = Authorization.getToken();
+                    var expired = this.checkExpired();
                     if (expired) {
                         return this.createResponse({
-                            detail: 'Token is expired'
+                            detail: 'Session is expired'
                         }, 401);
-                    } else if (token) {
-                        this.setHeader({
-                            Authorization: 'Token ' + token
-                        });
-                        this.setHeader({
-                            "X-Auth-Token": 'Token ' + token
-                        });
+                    } else {
                         return $http({
                             method: 'GET',
                             url: this.url,
                             headers: this.headers,
                             params: this.params
                         });
-                    } else {
-                        return this.createResponse({
-                            detail: 'Invalid token'
-                        }, 401);
                     }
                 },
                 post: function (data) {
-                    var token = Authorization.getToken(),
-                        expired = this.checkExpired();
+                    var expired = this.checkExpired();
                     if (expired) {
                         return this.createResponse({
-                            detail: 'Token is expired'
+                            detail: 'Session is expired'
                         }, 401);
-                    } else if (token) {
-                        this.setHeader({
-                            Authorization: 'Token ' + token
-                        });
-                        this.setHeader({
-                            "X-Auth-Token": 'Token ' + token
-                        });
+                    } else {
                         return $http({
                             method: 'POST',
                             url: this.url,
                             headers: this.headers,
                             data: data
                         });
-                    } else {
-                        return this.createResponse({
-                            detail: 'Invalid token'
-                        }, 401);
                     }
                 },
                 put: function (data) {
-                    var token = Authorization.getToken(),
-                        expired = this.checkExpired();
+                    var expired = this.checkExpired();
                     if (expired) {
                         return this.createResponse({
-                            detail: 'Token is expired'
+                            detail: 'Session is expired'
                         }, 401);
-                    } else if (token) {
-                        this.setHeader({
-                            Authorization: 'Token ' + token
-                        });
-                        this.setHeader({
-                            "X-Auth-Token": 'Token ' + token
-                        });
+                    } else {
                         return $http({
                             method: 'PUT',
                             url: this.url,
                             headers: this.headers,
                             data: data
                         });
-                    } else {
-                        return this.createResponse({
-                            detail: 'Invalid token'
-                        }, 401);
                     }
                 },
                 patch: function (data) {
-                    var token = Authorization.getToken(),
-                        expired = this.checkExpired();
+                    var expired = this.checkExpired();
                     if (expired) {
                         return this.createResponse({
-                            detail: 'Token is expired'
+                            detail: 'Session is expired'
                         }, 401);
-                    } else if (token) {
-                        this.setHeader({
-                            Authorization: 'Token ' + token
-                        });
-                        this.setHeader({
-                            "X-Auth-Token": 'Token ' + token
-                        });
+                    } else {
                         return $http({
                             method: 'PATCH',
                             url: this.url,
                             headers: this.headers,
                             data: data
                         });
-                    } else {
-                        return this.createResponse({
-                            detail: 'Invalid token'
-                        }, 401);
                     }
                 },
                 destroy: function (data) {
-                    var token = Authorization.getToken(),
-                        expired = this.checkExpired();
+                    var expired = this.checkExpired();
                     if (expired) {
                         return this.createResponse({
-                            detail: 'Token is expired'
+                            detail: 'Session is expired'
                         }, 401);
-                    } else if (token) {
-                        this.setHeader({
-                            Authorization: 'Token ' + token
-                        });
-                        this.setHeader({
-                            "X-Auth-Token": 'Token ' + token
-                        });
+                    } else {
                         return $http({
                             method: 'DELETE',
                             url: this.url,
                             headers: this.headers,
                             data: data
                         });
-                    } else {
-                        return this.createResponse({
-                            detail: 'Invalid token'
-                        }, 401);
                     }
                 },
                 options: function (cache) {
                     var params,
-                        token = Authorization.getToken(),
                         expired = this.checkExpired();
                     if (expired) {
                         return this.createResponse({
-                            detail: 'Token is expired'
+                            detail: 'Session is expired'
                         }, 401);
-                    } else if (token) {
-                        this.setHeader({
-                            Authorization: 'Token ' + token
-                        });
-                        this.setHeader({
-                            "X-Auth-Token": 'Token ' + token
-                        });
+                    } else {
                         params = {
                             method: 'OPTIONS',
                             url: this.url,
@@ -265,10 +203,6 @@ export default
                             cache: (cache ? true : false)
                         };
                         return $http(params);
-                    } else {
-                        return this.createResponse({
-                            detail: 'Invalid token'
-                        }, 401);
                     }
                 }
             };

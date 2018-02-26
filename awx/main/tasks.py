@@ -199,6 +199,8 @@ def handle_setting_changes(self, setting_keys):
         if key.startswith('LOG_AGGREGATOR_'):
             restart_local_services(['uwsgi', 'celery', 'beat', 'callback'])
             break
+        elif key == 'OAUTH2_PROVIDER':
+            restart_local_services(['uwsgi'])
 
 
 @shared_task(bind=True, queue='tower_broadcast_all', base=LogErrorsTask)
@@ -286,12 +288,6 @@ def run_administrative_checks(self):
                   _("Ansible Tower license will expire soon"),
                   tower_admin_emails,
                   fail_silently=True)
-
-
-@shared_task(bind=True, queue='tower', base=LogErrorsTask)
-def cleanup_authtokens(self):
-    logger.warn("Cleaning up expired authtokens.")
-    AuthToken.objects.filter(expires__lt=now()).delete()
 
 
 @shared_task(bind=True, base=LogErrorsTask)

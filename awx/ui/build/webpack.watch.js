@@ -52,6 +52,7 @@ const watch = {
         publicPath: '/static/',
         host: '127.0.0.1',
         port: 3000,
+        https: true,
         proxy: {
             '/': {
                 target: TARGET,

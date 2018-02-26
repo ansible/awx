@@ -374,7 +374,7 @@ angular
                     }
                 });
 
-                if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
+                if (!Authorization.isUserLoggedIn()) {
                     // User not authenticated, redirect to login page
                     if (!/^\/(login|logout)/.test($location.path())) {
                         $rootScope.preAuthUrl = $location.path();

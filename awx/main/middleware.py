@@ -22,7 +22,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 
 from awx.main.models import ActivityStream
-from awx.api.authentication import TokenAuthentication
 from awx.main.utils.named_url_graph import generate_graph, GraphNode
 from awx.conf import fields, register
 
@@ -117,21 +116,6 @@ class ActivityStreamMiddleware(threading.local):
             else:
                 if instance.id not in self.instance_ids:
                     self.instance_ids.append(instance.id)
-
-
-class AuthTokenTimeoutMiddleware(object):
-    """Presume that when the user includes the auth header, they go through the
-    authentication mechanism. Further, that mechanism is presumed to extend
-    the users session validity time by AUTH_TOKEN_EXPIRATION.
-
-    If the auth token is not supplied, then don't include the header
-    """
-    def process_response(self, request, response):
-        if not TokenAuthentication._get_x_auth_token_header(request):
-            return response
-
-        response['Auth-Token-Timeout'] = int(settings.AUTH_TOKEN_EXPIRATION)
-        return response
 
 
 def _customize_graph():

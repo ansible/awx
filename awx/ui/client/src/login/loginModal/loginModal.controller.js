@@ -169,7 +169,7 @@ export default ['$log', '$cookies', '$compile', '$rootScope',
             Authorization.retrieveToken(username, password)
                 .then(function (data) {
                     $('#login-modal').modal('hide');
-                    Authorization.setToken(data.data.token, data.data.expires);
+                    Authorization.setToken(data.data.expires);
                     scope.$emit('AuthorizationGetUser');
                 },
                 function (data) {

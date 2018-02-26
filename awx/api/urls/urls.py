@@ -5,6 +5,10 @@ from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.conf.urls import include, url
 
+from awx.api.generics import (
+    LoggedLoginView,
+    LoggedLogoutView,
+)
 from awx.api.views import (
     ApiRootView,
     ApiV1RootView,
@@ -12,7 +16,6 @@ from awx.api.views import (
     ApiV1PingView,
     ApiV1ConfigView,
     AuthView,
-    AuthTokenView,
     UserMeList,
     DashboardView,
     DashboardJobsGraphView,
@@ -25,6 +28,10 @@ from awx.api.views import (
     JobTemplateExtraCredentialsList,
     SchedulePreview,
     ScheduleZoneInfo,
+    OAuth2ApplicationList,
+    OAuth2TokenList,
+    ApplicationOAuth2TokenList,
+    OAuth2ApplicationDetail,
 )
 
 from .organization import urls as organization_urls
@@ -60,6 +67,8 @@ from .schedule import urls as schedule_urls
 from .activity_stream import urls as activity_stream_urls
 from .instance import urls as instance_urls
 from .instance_group import urls as instance_group_urls
+from .user_oauth import urls as user_oauth_urls
+from .oauth import urls as oauth_urls
 
 
 v1_urls = [
@@ -67,7 +76,6 @@ v1_urls = [
     url(r'^ping/$', ApiV1PingView.as_view(), name='api_v1_ping_view'),
     url(r'^config/$', ApiV1ConfigView.as_view(), name='api_v1_config_view'),
     url(r'^auth/$', AuthView.as_view()),
-    url(r'^authtoken/$', AuthTokenView.as_view(), name='auth_token_view'),
     url(r'^me/$', UserMeList.as_view(), name='user_me_list'),
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard_view'),
     url(r'^dashboard/graphs/jobs/$', DashboardJobsGraphView.as_view(), name='dashboard_jobs_graph_view'),
@@ -118,6 +126,11 @@ v2_urls = [
     url(r'^job_templates/(?P<pk>[0-9]+)/credentials/$', JobTemplateCredentialsList.as_view(), name='job_template_credentials_list'),
     url(r'^schedules/preview/$', SchedulePreview.as_view(), name='schedule_rrule'),
     url(r'^schedules/zoneinfo/$', ScheduleZoneInfo.as_view(), name='schedule_zoneinfo'),
+    url(r'^applications/$', OAuth2ApplicationList.as_view(), name='o_auth2_application_list'),
+    url(r'^applications/(?P<pk>[0-9]+)/$', OAuth2ApplicationDetail.as_view(), name='o_auth2_application_detail'),
+    url(r'^applications/(?P<pk>[0-9]+)/tokens/$', ApplicationOAuth2TokenList.as_view(), name='application_o_auth2_token_list'),
+    url(r'^tokens/$', OAuth2TokenList.as_view(), name='o_auth2_token_list'),
+    url(r'^', include(user_oauth_urls)),
 ]
 
 app_name = 'api'
@@ -125,6 +138,14 @@ urlpatterns = [
     url(r'^$', ApiRootView.as_view(), name='api_root_view'),
     url(r'^(?P<version>(v2))/', include(v2_urls)),
     url(r'^(?P<version>(v1|v2))/', include(v1_urls)),
+    url(r'^login/$', LoggedLoginView.as_view(
+        template_name='rest_framework/login.html',
+        extra_context={'inside_login_context': True}
+    ), name='login'),
+    url(r'^logout/$', LoggedLogoutView.as_view(
+        next_page='/api/', redirect_field_name='next'
+    ), name='logout'),
+    url(r'^o/', include(oauth_urls)),
 ]
 if settings.SETTINGS_MODULE == 'awx.settings.development':
     from awx.api.swagger import SwaggerSchemaView

@@ -14,17 +14,17 @@ from base64 import b64encode
 from collections import OrderedDict, Iterable
 import six
 
+
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.db.models import Q, Count, F
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
-from django.utils.encoding import smart_text, force_text
+from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.cache import never_cache
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
@@ -53,6 +53,9 @@ import ansiconv
 # Python Social Auth
 from social_core.backends.utils import load_backends
 
+# Django OAuth Toolkit
+from oauth2_provider.models import get_access_token_model
+
 import pytz
 from wsgiref.util import FileWrapper
 
@@ -60,11 +63,10 @@ from wsgiref.util import FileWrapper
 from awx.main.tasks import send_notifications, handle_ha_toplogy_changes
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
-from awx.api.authentication import TokenGetAuthentication
 from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
-from awx.api.versioning import reverse, get_request_version
+from awx.api.versioning import reverse, get_request_version, drf_reverse
 from awx.conf.license import get_license, feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
@@ -80,7 +82,6 @@ from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata, JobTypeMetadata
-from awx.main.consumers import emit_channel_notification
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.scheduler.tasks import run_job_complete
 
@@ -185,7 +186,6 @@ class InstanceGroupMembershipMixin(object):
 
 class ApiRootView(APIView):
 
-    authentication_classes = []
     permission_classes = (AllowAny,)
     view_name = _('REST API')
     versioning_class = None
@@ -204,19 +204,32 @@ class ApiRootView(APIView):
         if feature_enabled('rebranding'):
             data['custom_logo'] = settings.CUSTOM_LOGO
             data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
+        data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
+        return Response(data)
+
+
+class ApiOAuthAuthorizationRootView(APIView):
+
+    permission_classes = (AllowAny,)
+    view_name = _("API OAuth Authorization Root")
+    versioning_class = None
+
+    def get(self, request, format=None):
+        data = OrderedDict()
+        data['authorize'] = drf_reverse('api:authorize')
+        data['token'] = drf_reverse('api:token')
+        data['revoke_token'] = drf_reverse('api:revoke-token')
         return Response(data)
 
 
 class ApiVersionRootView(APIView):
 
-    authentication_classes = []
     permission_classes = (AllowAny,)
     swagger_topic = 'Versioning'
 
     def get(self, request, format=None):
         ''' List top level resources '''
         data = OrderedDict()
-        data['authtoken'] = reverse('api:auth_token_view', request=request)
         data['ping'] = reverse('api:api_v1_ping_view', request=request)
         data['instances'] = reverse('api:instance_list', request=request)
         data['instance_groups'] = reverse('api:instance_group_list', request=request)
@@ -232,6 +245,8 @@ class ApiVersionRootView(APIView):
         data['credentials'] = reverse('api:credential_list', request=request)
         if get_request_version(request) > 1:
             data['credential_types'] = reverse('api:credential_type_list', request=request)
+            data['applications'] = reverse('api:o_auth2_application_list', request=request)
+            data['tokens'] = reverse('api:o_auth2_token_list', request=request)
         data['inventory'] = reverse('api:inventory_list', request=request)
         data['inventory_scripts'] = reverse('api:inventory_script_list', request=request)
         data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
@@ -779,78 +794,6 @@ class AuthView(APIView):
                 data[name] = backend_data
         return Response(data)
 
-
-class AuthTokenView(APIView):
-
-    authentication_classes = []
-    permission_classes = (AllowAny,)
-    serializer_class = AuthTokenSerializer
-    model = AuthToken
-    swagger_topic = 'Authentication'
-
-    def get_serializer(self, *args, **kwargs):
-        serializer = self.serializer_class(*args, **kwargs)
-        # Override when called from browsable API to generate raw data form;
-        # update serializer "validated" data to be displayed by the raw data
-        # form.
-        if hasattr(self, '_raw_data_form_marker'):
-            # Always remove read only fields from serializer.
-            for name, field in serializer.fields.items():
-                if getattr(field, 'read_only', None):
-                    del serializer.fields[name]
-            serializer._data = self.update_raw_data(serializer.data)
-        return serializer
-
-    @never_cache
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            request_hash = AuthToken.get_request_hash(self.request)
-            try:
-                token = AuthToken.objects.filter(user=serializer.validated_data['user'],
-                                                 request_hash=request_hash,
-                                                 expires__gt=now(),
-                                                 reason='')[0]
-                token.refresh()
-                if 'username' in request.data:
-                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])),
-                                extra=dict(actor=request.data['username']))
-            except IndexError:
-                token = AuthToken.objects.create(user=serializer.validated_data['user'],
-                                                 request_hash=request_hash)
-                if 'username' in request.data:
-                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])),
-                                extra=dict(actor=request.data['username']))
-                # Get user un-expired tokens that are not invalidated that are
-                # over the configured limit.
-                # Mark them as invalid and inform the user
-                invalid_tokens = AuthToken.get_tokens_over_limit(serializer.validated_data['user'])
-                for t in invalid_tokens:
-                    emit_channel_notification('control-limit_reached', dict(group_name='control',
-                                                                            reason=force_text(AuthToken.reason_long('limit_reached')),
-                                                                            token_key=t.key))
-                    t.invalidate(reason='limit_reached')
-
-            # Note: This header is normally added in the middleware whenever an
-            # auth token is included in the request header.
-            headers = {
-                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION),
-                'Pragma': 'no-cache',
-            }
-            return Response({'token': token.key, 'expires': token.expires}, headers=headers)
-        if 'username' in request.data:
-            logger.warning(smart_text(u"Login failed for user {}".format(request.data['username'])),
-                           extra=dict(actor=request.data['username']))
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request):
-        if 'HTTP_AUTHORIZATION' in request.META:
-            token_match = re.match("Token\s(.+)", request.META['HTTP_AUTHORIZATION'])
-            if token_match:
-                filter_tokens = AuthToken.objects.filter(key=token_match.groups()[0])
-                if filter_tokens.exists():
-                    filter_tokens[0].invalidate()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OrganizationCountsMixin(object):
@@ -1552,6 +1495,107 @@ class UserMeList(ListAPIView):
 
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
+
+
+class OAuth2ApplicationList(ListCreateAPIView):
+
+    view_name = _("OAuth Applications")
+
+    model = OAuth2Application
+    serializer_class = OAuth2ApplicationSerializer
+
+
+class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
+
+    view_name = _("OAuth Application Detail")
+
+    model = OAuth2Application
+    serializer_class = OAuth2ApplicationSerializer
+
+
+class ApplicationOAuth2TokenList(SubListCreateAPIView):
+
+    view_name = _("OAuth Application Tokens")
+
+    model = OAuth2AccessToken
+    serializer_class = OAuth2TokenSerializer
+    parent_model = OAuth2Application
+    relationship = 'oauth2accesstoken_set'
+    parent_key = 'application'
+
+
+class OAuth2ApplicationActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = OAuth2Application
+    relationship = 'activitystream_set'
+
+
+class OAuth2TokenList(ListCreateAPIView):
+
+    view_name = _("OAuth2 Tokens")
+
+    model = OAuth2AccessToken
+    serializer_class = OAuth2TokenSerializer
+    
+    
+class OAuth2AuthorizedTokenList(SubListCreateAPIView):
+
+    view_name = _("OAuth2 Authorized Access Tokens")
+    
+    model = OAuth2AccessToken
+    serializer_class = OAuth2AuthorizedTokenSerializer
+    parent_model = OAuth2Application
+    relationship = 'oauth2accesstoken_set'
+    parent_key = 'application'
+
+    def get_queryset(self):
+        return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
+        
+        
+class UserAuthorizedTokenList(SubListCreateAPIView):
+
+    view_name = _("OAuth2 User Authorized Access Tokens")
+    
+    model = OAuth2AccessToken
+    serializer_class = OAuth2AuthorizedTokenSerializer
+    parent_model = User
+    relationship = 'oauth2accesstoken_set'
+    parent_key = 'user'
+
+    def get_queryset(self):
+        return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
+
+
+class OAuth2PersonalTokenList(SubListCreateAPIView):
+    
+    view_name = _("OAuth2 Personal Access Tokens")
+    
+    model = OAuth2AccessToken
+    serializer_class = OAuth2PersonalTokenSerializer
+    parent_model = User
+    relationship = 'main_oauth2accesstoken'
+    parent_key = 'user'
+    
+    def get_queryset(self):
+        return get_access_token_model().objects.filter(application__isnull=True, user=self.request.user)
+
+
+class OAuth2TokenDetail(RetrieveUpdateDestroyAPIView):
+
+    view_name = _("OAuth Token Detail")
+
+    model = OAuth2AccessToken
+    serializer_class = OAuth2TokenSerializer
+
+
+class OAuth2TokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = OAuth2AccessToken
+    relationship = 'activitystream_set'
 
 
 class UserTeamsList(ListAPIView):
@@ -4568,7 +4612,7 @@ class StdoutANSIFilter(object):
 
 class UnifiedJobStdout(RetrieveAPIView):
 
-    authentication_classes = [TokenGetAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
                         PlainTextRenderer, AnsiTextRenderer,

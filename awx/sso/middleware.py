@@ -8,17 +8,13 @@ import urllib
 import six
 
 # Django
-from django.contrib.auth import login, logout
+from django.utils.functional import LazyObject
 from django.shortcuts import redirect
-from django.utils.timezone import now
 
 # Python Social Auth
 from social_core.exceptions import SocialAuthBaseException
 from social_core.utils import social_logger
 from social_django.middleware import SocialAuthExceptionMiddleware
-
-# Ansible Tower
-from awx.main.models import AuthToken
 
 
 class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
@@ -35,33 +31,14 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
             request.successful_authenticator = None
 
         if not request.path.startswith('/sso/') and 'migrations_notran' not in request.path:
-
-            # If token isn't present but we still have a user logged in via Django
-            # sessions, log them out.
-            if not token_key and request.user and request.user.is_authenticated():
-                logout(request)
-
-            # If a token is present, make sure it matches a valid one in the
-            # database, and log the user via Django session if necessary.
-            # Otherwise, log the user out via Django sessions.
-            elif token_key:
-
-                try:
-                    auth_token = AuthToken.objects.filter(key=token_key, expires__gt=now())[0]
-                except IndexError:
-                    auth_token = None
-
-                if not auth_token and request.user and request.user.is_authenticated():
-                    logout(request)
-                elif auth_token and request.user.is_anonymous is False and request.user != auth_token.user:
-                    logout(request)
-                    auth_token.user.backend = ''
-                    login(request, auth_token.user)
-                    auth_token.refresh()
-
-                if auth_token and request.user and request.user.is_authenticated():
-                    request.session.pop('social_auth_error', None)
-                    request.session.pop('social_auth_last_backend', None)
+            if request.user and request.user.is_authenticated():
+                # The rest of the code base rely hevily on type/inheritance checks,
+                # LazyObject sent from Django auth middleware can be buggy if not
+                # converted back to its original object.
+                if isinstance(request.user, LazyObject) and request.user._wrapped:
+                    request.user = request.user._wrapped
+                request.session.pop('social_auth_error', None)
+                request.session.pop('social_auth_last_backend', None)
 
     def process_exception(self, request, exception):
         strategy = getattr(request, 'social_strategy', None)

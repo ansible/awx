@@ -19,6 +19,7 @@ from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth import views as auth_views
 
 # Django REST Framework
 from rest_framework.authentication import get_authorization_header
@@ -57,6 +58,33 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
 
 logger = logging.getLogger('awx.api.generics')
 analytics_logger = logging.getLogger('awx.analytics.performance')
+
+
+class LoggedLoginView(auth_views.LoginView):
+
+    def post(self, request, *args, **kwargs):
+        original_user = getattr(request, 'user', None)
+        ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
+        current_user = getattr(request, 'user', None)
+        if current_user and getattr(current_user, 'pk', None) and current_user != original_user:
+            logger.info("User {} logged in.".format(current_user.username))
+        if request.user.is_authenticated:
+            return ret
+        else:
+            ret.status = 401
+            return ret
+            
+
+class LoggedLogoutView(auth_views.LogoutView):
+
+    def dispatch(self, request, *args, **kwargs):
+        original_user = getattr(request, 'user', None)
+        ret = super(LoggedLogoutView, self).dispatch(request, *args, **kwargs)
+        current_user = getattr(request, 'user', None)
+        if (not current_user or not getattr(current_user, 'pk', True)) \
+                and current_user != original_user:
+            logger.info("User {} logged out.".format(original_user.username))
+        return ret
 
 
 def get_view_name(cls, suffix=None):
