@@ -9,7 +9,7 @@ Python processes in Tower's development environment are kept running in the
 background via supervisord.  As such, interacting with them via Python's
 standard `pdb.set_trace()` isn't possible.
 
-Bundled in our container environment is a remote debugging tool, `rdb`.  You
+Bundled in our container environment is a remote debugging tool, `sdb`.  You
 can use it to set remote breakpoints in Tower code and debug interactively over
 a telnet session:
 
@@ -28,8 +28,8 @@ a telnet session:
             # You can access it from your host machine using telnet:
             #
             # $ telnet localhost <port>
-            import rdb
-            rdb.set_trace()
+            import sdb
+            sdb.set_trace()
 ```
 
 Keep in mind that when you interactively debug in this way, any process
@@ -43,7 +43,7 @@ remote debugging sessions and automatically connect to them.  From your *host*
 machine (i.e., _outside_ of the development container), you can run:
 
 ```
-make rdb
+sdb-listen
 ```
 
 This will open a Python process that listens for new debugger sessions and
