@@ -23,6 +23,7 @@ function ListTemplatesController(
     resolvedModels,
     strings,
     Wait,
+    Empty
 ) {
     const vm = this || {};
     const [jobTemplate, workflowTemplate] = resolvedModels;
@@ -34,8 +35,8 @@ function ListTemplatesController(
     vm.templateTypes = mapChoices(choices);
     vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_template_id);
 
-    $scope.canAddJobTemplate = jobTemplate.options('actions.POST')
-    $scope.canAddWorkflowJobTemplate = workflowTemplate.options('actions.POST')
+    $scope.canAddJobTemplate = jobTemplate.options('actions.POST');
+    $scope.canAddWorkflowJobTemplate = workflowTemplate.options('actions.POST');
     $scope.canAdd = ($scope.canAddJobTemplate || $scope.canAddWorkflowJobTemplate);
 
     // smart-search
@@ -169,7 +170,7 @@ function ListTemplatesController(
             })
             .catch(createErrorHandler('copy job template', 'POST'))
             .finally(() => Wait('stop'));
-    };
+    }
 
     function copyWorkflowTemplate(template) {
         Wait('start');
@@ -251,7 +252,7 @@ function ListTemplatesController(
                     .request('delete', template.id)
                     .then(() => handleSuccessfulDelete(template))
                     .catch(createErrorHandler('delete template', 'DELETE'))
-                    .finally(() => Wait('stop'))
+                    .finally(() => Wait('stop'));
             },
             hdr: strings.get('DELETE'),
             resourceName: $filter('sanitize')(template.name),
@@ -321,7 +322,7 @@ function ListTemplatesController(
                     return selectedJobTemplate
                         .postLaunch({ id: template.id })
                         .then(({ data }) => {
-                            $state.go('jobResult', { id: data.job }, { reload: true })
+                            $state.go('jobResult', { id: data.job }, { reload: true });
                         });
                 }
 
@@ -333,7 +334,7 @@ function ListTemplatesController(
                         launchConf: launchData.data,
                         launchOptions: launchOptions.data
                     }),
-                    triggerModalOpen: true, 
+                    triggerModalOpen: true,
                 };
 
                 if (launchData.data.survey_enabled) {
@@ -378,7 +379,7 @@ function ListTemplatesController(
             jobLaunchData.verbosity = $scope.promptData.prompts.verbosity.value.value;
         }
 
-        if ($scope.promptData.launchConf.ask_inventory_on_launch && !_.isEmpty($scope.promptData.prompts.inventory.value.id)){
+        if ($scope.promptData.launchConf.ask_inventory_on_launch && !Empty($scope.promptData.prompts.inventory.value.id)){
             jobLaunchData.inventory_id = $scope.promptData.prompts.inventory.value.id;
         }
 
@@ -422,7 +423,7 @@ function ListTemplatesController(
         .then((launchRes) => {
             $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
         })
-        .catch(createErrorHandler('launch job template', 'POST'))
+        .catch(createErrorHandler('launch job template', 'POST'));
     };
 }
 
@@ -439,6 +440,7 @@ ListTemplatesController.$inject = [
     'resolvedModels',
     'TemplatesStrings',
     'Wait',
+    'Empty'
 ];
 
 export default ListTemplatesController;
