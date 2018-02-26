@@ -1,8 +1,6 @@
 import pytest
 
 from awx.api.versioning import reverse
-from awx.main.models import User
-from awx.main.models.oauth import OAuth2Application as Application
 
 
 #
@@ -25,11 +23,6 @@ def test_user_create(post, admin):
     assert response.status_code == 201
     assert not response.data['is_superuser']
     assert not response.data['is_system_auditor']
-    user = User.objects.get(username='affable')
-    assert Application.objects.filter(user=user).count() == 1
-    app = Application.objects.filter(user=user).first()
-    assert app.name == 'Default application for affable'
-    assert app.client_type == 'confidential'
 
 
 @pytest.mark.django_db
