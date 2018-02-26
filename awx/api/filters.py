@@ -27,13 +27,6 @@ from awx.main.models.credential import CredentialType
 from awx.main.models.rbac import RoleAncestorEntry
 
 
-class MongoFilterBackend(BaseFilterBackend):
-
-    # FIX: Note that MongoEngine can't use the filter backends from DRF
-    def filter_queryset(self, request, queryset, view):
-        return queryset
-
-
 class V1CredentialFilterBackend(BaseFilterBackend):
     '''
     For /api/v1/ requests, filter out v2 (custom) credentials

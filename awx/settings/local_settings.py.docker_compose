@@ -78,8 +78,6 @@ if is_testing(sys.argv):
         }
     }
 
-    MONGO_DB = 'system_tracking_test'
-
 # Celery AMQP configuration.
 CELERY_BROKER_URL = "amqp://{}:{}@{}/{}".format(os.environ.get("RABBITMQ_USER"),
                                          os.environ.get("RABBITMQ_PASS"),
