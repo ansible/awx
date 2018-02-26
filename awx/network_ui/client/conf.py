@@ -9,4 +9,5 @@ class _Settings(object):
         self.user = None
         self.password = None
 
+
 settings = _Settings()

@@ -44,6 +44,7 @@ RACK_SPACING = 50
 
 logger = logging.getLogger("awx.network_ui.consumers")
 
+
 class NetworkUIException(Exception):
 
     pass
@@ -534,7 +535,6 @@ class _Persistence(object):
 
     def onGroupCreate(self, group, topology_id, client_id):
         logger.info("GroupCreate %s %s %s", group['id'], group['name'], group['type'])
-        print ("GroupCreate %s %s %s %s" % (group['id'], group['name'], group['type'], group['group_id']))
         group = transform_dict(dict(x1='x1',
                                     y1='y1',
                                     x2='x2',

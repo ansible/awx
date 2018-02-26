@@ -43,7 +43,7 @@ def main(args=None):
     print (yaml.safe_dump(a, default_flow_style=False))
     return 0
 
+
 if __name__ == '__main__':
-    import sys
     sys.exit(main(sys.argv[1:]))
 
