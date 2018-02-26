@@ -21,7 +21,9 @@ class {{model.name}}ViewSet(viewsets.ModelViewSet):
         pk = response.data['{%for field in model.fields%}{%if field.pk%}{{field.name}}{%endif%}{%endfor%}']
         message = dict()
         {%if model.create_transform%}
-        message.update(transform_dict({{model.create_transform}}, {{model.name}}.objects.filter(pk=pk).values(*{{model.create_transform.keys()}})[0]))
+        message.update(transform_dict({ {% for key, value in model.create_transform.iteritems()%} '{{key}}':'{{value}}',
+                                       {%endfor%} },{{model.name}}.objects.filter(pk=pk).values(*[{% for key in model.create_transform.keys()%}'{{key}}',
+                                                                                                  {%endfor%}])[0]))
         {%else%}
         message.update(response.data)
         {%endif%}

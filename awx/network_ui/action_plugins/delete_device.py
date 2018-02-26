@@ -23,7 +23,7 @@ class ActionModule(ActionBase):
         device_id = self._task.args.get('device_id', None)
 
         url = server + '/api/v2/canvas/device/' + str(device_id) + '/'
-        response = requests.delete(url,
-                                   verify=False,
-                                   auth=(user, password))
+        requests.delete(url,
+                        verify=False,
+                        auth=(user, password))
         return result

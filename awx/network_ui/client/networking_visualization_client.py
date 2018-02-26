@@ -16,7 +16,6 @@ from docopt import docopt
 import logging
 import sys
 from getpass import getpass
-from pprint import pprint
 
 from conf import settings
 import json

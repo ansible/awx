@@ -58,7 +58,8 @@ messages:
     - {msg_type: CopySite, fields: [msg_type, site]}
     - {msg_type: GroupMove, fields: [msg_type, sender, id, x1, y1, x2, y2, previous_x1, previous_y1, previous_x2, previous_y2]}
     - {msg_type: GroupCreate, fields: [msg_type, sender, id, x1, y1, x2, y2, name, type, group_id]}
-    - {msg_type: GroupDestroy, fields: [msg_type, sender, id, previous_x1, previous_y1, previous_x2, previous_y2, previous_name, previous_type, previous_group_id]}
+    - {msg_type: GroupDestroy, fields: [msg_type, sender, id, previous_x1, previous_y1, previous_x2,
+                     previous_y2, previous_name, previous_type, previous_group_id]}
     - {msg_type: GroupLabelEdit, fields: [msg_type, sender, id, name, previous_name]}
     - {msg_type: GroupSelected, fields: [msg_type, sender, id]}
     - {msg_type: GroupUnSelected, fields: [msg_type, sender, id]}
@@ -88,6 +89,7 @@ def populate_message_types(apps, schema_editor):
     for message in messages['messages']:
         MessageType.objects.get_or_create(name=message['msg_type'])
 
+
 results = ['passed',
            'failed',
            'errored',
@@ -106,7 +108,42 @@ def populate_result_types(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'network_ui', '0001_initial'), (b'network_ui', '0002_remove_topology_id'), (b'network_ui', '0003_device_type'), (b'network_ui', '0004_client_messagetype_topologyhistory'), (b'network_ui', '0005_topologyhistory_undone'), (b'network_ui', '0006_auto_20170321_1236'), (b'network_ui', '0007_auto_20170328_1655'), (b'network_ui', '0008_interface_id'), (b'network_ui', '0009_auto_20170403_1912'), (b'network_ui', '0010_link_id'), (b'network_ui', '0011_link_name'), (b'network_ui', '0012_auto_20170706_1526'), (b'network_ui', '0013_auto_20170710_1840'), (b'network_ui', '0014_group_topology'), (b'network_ui', '0015_auto_20170710_1937'), (b'network_ui', '0016_auto_20170717_1520'), (b'network_ui', '0017_auto_20170717_1813'), (b'network_ui', '0018_auto_20170821_1557'), (b'network_ui', '0019_auto_20170822_1723'), (b'network_ui', '0020_device_process_id_seq'), (b'network_ui', '0021_toolbox_toolboxitem'), (b'network_ui', '0022_fsmtrace'), (b'network_ui', '0023_auto_20171213_1623'), (b'network_ui', '0024_auto_20171213_1949'), (b'network_ui', '0025_devicehost_topologyinventory'), (b'network_ui', '0026_auto_20180105_1403'), (b'network_ui', '0027_eventtrace'), (b'network_ui', '0028_coverage'), (b'network_ui', '0029_topologysnapshot'), (b'network_ui', '0030_auto_20180110_1751'), (b'network_ui', '0031_auto_20180110_1752'), (b'network_ui', '0032_auto_20180112_2135'), (b'network_ui', '0033_auto_20180112_2202'), (b'network_ui', '0034_auto_20180113_1725'), (b'network_ui', '0035_auto_20180223_0040'), (b'network_ui', '0036_auto_20180223_0119')]
+    replaces = [(b'network_ui', '0001_initial'),
+                (b'network_ui', '0002_remove_topology_id'),
+                (b'network_ui', '0003_device_type'),
+                (b'network_ui', '0004_client_messagetype_topologyhistory'),
+                (b'network_ui', '0005_topologyhistory_undone'),
+                (b'network_ui', '0006_auto_20170321_1236'),
+                (b'network_ui', '0007_auto_20170328_1655'),
+                (b'network_ui', '0008_interface_id'),
+                (b'network_ui', '0009_auto_20170403_1912'),
+                (b'network_ui', '0010_link_id'),
+                (b'network_ui', '0011_link_name'),
+                (b'network_ui', '0012_auto_20170706_1526'),
+                (b'network_ui', '0013_auto_20170710_1840'),
+                (b'network_ui', '0014_group_topology'),
+                (b'network_ui', '0015_auto_20170710_1937'),
+                (b'network_ui', '0016_auto_20170717_1520'),
+                (b'network_ui', '0017_auto_20170717_1813'),
+                (b'network_ui', '0018_auto_20170821_1557'),
+                (b'network_ui', '0019_auto_20170822_1723'),
+                (b'network_ui', '0020_device_process_id_seq'),
+                (b'network_ui', '0021_toolbox_toolboxitem'),
+                (b'network_ui', '0022_fsmtrace'),
+                (b'network_ui', '0023_auto_20171213_1623'),
+                (b'network_ui', '0024_auto_20171213_1949'),
+                (b'network_ui', '0025_devicehost_topologyinventory'),
+                (b'network_ui', '0026_auto_20180105_1403'),
+                (b'network_ui', '0027_eventtrace'),
+                (b'network_ui', '0028_coverage'),
+                (b'network_ui', '0029_topologysnapshot'),
+                (b'network_ui', '0030_auto_20180110_1751'),
+                (b'network_ui', '0031_auto_20180110_1752'),
+                (b'network_ui', '0032_auto_20180112_2135'),
+                (b'network_ui', '0033_auto_20180112_2202'),
+                (b'network_ui', '0034_auto_20180113_1725'),
+                (b'network_ui', '0035_auto_20180223_0040'),
+                (b'network_ui', '0036_auto_20180223_0119')]
 
     initial = True
 

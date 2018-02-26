@@ -23,7 +23,7 @@ class ActionModule(ActionBase):
         topology_id = self._task.args.get('topology_id', None)
 
         url = server + '/api/v2/canvas/topology/' + str(topology_id) + '/'
-        response = requests.delete(url,
-                                   verify=False,
-                                   auth=(user, password))
+        requests.delete(url,
+                        verify=False,
+                        auth=(user, password))
         return result

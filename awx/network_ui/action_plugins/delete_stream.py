@@ -23,7 +23,7 @@ class ActionModule(ActionBase):
         stream_id = self._task.args.get('stream_id', None)
 
         url = server + '/api/v2/canvas/stream/' + str(stream_id) + '/'
-        response = requests.delete(url,
-                                   verify=False,
-                                   auth=(user, password))
+        requests.delete(url,
+                        verify=False,
+                        auth=(user, password))
         return result

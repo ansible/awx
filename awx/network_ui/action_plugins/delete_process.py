@@ -23,7 +23,7 @@ class ActionModule(ActionBase):
         process_id = self._task.args.get('process_id', None)
 
         url = server + '/api/v2/canvas/process/' + str(process_id) + '/'
-        response = requests.delete(url,
-                                   verify=False,
-                                   auth=(user, password))
+        requests.delete(url,
+                        verify=False,
+                        auth=(user, password))
         return result

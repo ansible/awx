@@ -1,4 +1,3 @@
-from rest_framework import routers
 from django.conf.urls import url
 
 from awx.network_ui.v2_api_views import (DeviceList, DeviceDetail)

@@ -23,7 +23,7 @@ class ActionModule(ActionBase):
         toolbox_id = self._task.args.get('toolbox_id', None)
 
         url = server + '/api/v2/canvas/toolbox/' + str(toolbox_id) + '/'
-        response = requests.delete(url,
-                                   verify=False,
-                                   auth=(user, password))
+        requests.delete(url,
+                        verify=False,
+                        auth=(user, password))
         return result

@@ -18,7 +18,7 @@ v1_api_serializers:
 
 v1_api_views:
 	jinja2 templates/v1_api_views.pyt designs/models.yml > v1_api_views.py
-	autopep8 -i v1_api_views.py --ignore-local-config --max-line-length 160
+	autopep8 -i v1_api_views.py --ignore-local-config --max-line-length 80
 
 v1_api_urls:
 	jinja2 templates/v1_api_urls.pyt designs/models.yml > v1_api_urls.py

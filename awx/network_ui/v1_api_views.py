@@ -48,7 +48,8 @@ class DeviceViewSet(viewsets.ModelViewSet):
         print "sending to topologies", Device.objects.filter(pk=pk).values_list('topology_id', flat=True)
         for topology_id in Device.objects.filter(pk=pk).values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -61,7 +62,8 @@ class DeviceViewSet(viewsets.ModelViewSet):
 
         for topology_id in Device.objects.filter(pk=pk).values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(DeviceViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -83,8 +85,19 @@ class LinkViewSet(viewsets.ModelViewSet):
         pk = response.data['link_id']
         message = dict()
 
-        message.update(transform_dict({'to_device__id': 'to_device_id', 'from_interface__id': 'from_interface_id', 'name': 'name', 'from_device__id': 'from_device_id', 'id': 'id',
-                                       'to_interface__id': 'to_interface_id'}, Link.objects.filter(pk=pk).values(*['to_device__id', 'from_interface__id', 'name', 'from_device__id', 'id', 'to_interface__id'])[0]))
+        message.update(transform_dict({'to_device__id': 'to_device_id',
+                                       'from_interface__id': 'from_interface_id',
+                                       'name': 'name',
+                                       'from_device__id': 'from_device_id',
+                                       'id': 'id',
+                                       'to_interface__id': 'to_interface_id',
+                                       }, Link.objects.filter(pk=pk).values(*['to_device__id',
+                                                                              'from_interface__id',
+                                                                              'name',
+                                                                              'from_device__id',
+                                                                              'id',
+                                                                              'to_interface__id',
+                                                                              ])[0]))
 
         message['msg_type'] = "LinkCreate"
         message['link_id'] = pk
@@ -93,7 +106,8 @@ class LinkViewSet(viewsets.ModelViewSet):
         print "sending to topologies", Link.objects.filter(pk=pk).values_list('from_device__topology_id', flat=True)
         for topology_id in Link.objects.filter(pk=pk).values_list('from_device__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -106,7 +120,8 @@ class LinkViewSet(viewsets.ModelViewSet):
 
         for topology_id in Link.objects.filter(pk=pk).values_list('from_device__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(LinkViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -137,7 +152,8 @@ class TopologyViewSet(viewsets.ModelViewSet):
         print "sending to topologies", Topology.objects.filter(pk=pk).values_list('topology_id', flat=True)
         for topology_id in Topology.objects.filter(pk=pk).values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -150,7 +166,8 @@ class TopologyViewSet(viewsets.ModelViewSet):
 
         for topology_id in Topology.objects.filter(pk=pk).values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(TopologyViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -167,13 +184,19 @@ class InterfaceViewSet(viewsets.ModelViewSet):
     serializer_class = InterfaceSerializer
 
     def create(self, request, *args, **kwargs):
-        response = super(InterfaceViewSet, self).create(request, *args, **kwargs)
+        response = super(InterfaceViewSet, self).create(
+            request, *args, **kwargs)
         print response.data
         pk = response.data['interface_id']
         message = dict()
 
-        message.update(transform_dict({'id': 'id', 'device__id': 'device_id', 'name': 'name'},
-                                      Interface.objects.filter(pk=pk).values(*['id', 'device__id', 'name'])[0]))
+        message.update(transform_dict({'id': 'id',
+                                       'device__id': 'device_id',
+                                       'name': 'name',
+                                       }, Interface.objects.filter(pk=pk).values(*['id',
+                                                                                   'device__id',
+                                                                                   'name',
+                                                                                   ])[0]))
 
         message['msg_type'] = "InterfaceCreate"
         message['interface_id'] = pk
@@ -182,7 +205,8 @@ class InterfaceViewSet(viewsets.ModelViewSet):
         print "sending to topologies", Interface.objects.filter(pk=pk).values_list('device__topology_id', flat=True)
         for topology_id in Interface.objects.filter(pk=pk).values_list('device__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -195,7 +219,8 @@ class InterfaceViewSet(viewsets.ModelViewSet):
 
         for topology_id in Interface.objects.filter(pk=pk).values_list('device__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(InterfaceViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -226,7 +251,8 @@ class GroupViewSet(viewsets.ModelViewSet):
         print "sending to topologies", Group.objects.filter(pk=pk).values_list('topology_id', flat=True)
         for topology_id in Group.objects.filter(pk=pk).values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -239,7 +265,8 @@ class GroupViewSet(viewsets.ModelViewSet):
 
         for topology_id in Group.objects.filter(pk=pk).values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(GroupViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -256,7 +283,8 @@ class GroupDeviceViewSet(viewsets.ModelViewSet):
     serializer_class = GroupDeviceSerializer
 
     def create(self, request, *args, **kwargs):
-        response = super(GroupDeviceViewSet, self).create(request, *args, **kwargs)
+        response = super(GroupDeviceViewSet, self).create(
+            request, *args, **kwargs)
         print response.data
         pk = response.data['group_device_id']
         message = dict()
@@ -270,7 +298,8 @@ class GroupDeviceViewSet(viewsets.ModelViewSet):
         print "sending to topologies", GroupDevice.objects.filter(pk=pk).values_list('group__topology_id', flat=True)
         for topology_id in GroupDevice.objects.filter(pk=pk).values_list('group__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -283,7 +312,8 @@ class GroupDeviceViewSet(viewsets.ModelViewSet):
 
         for topology_id in GroupDevice.objects.filter(pk=pk).values_list('group__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(GroupDeviceViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -314,7 +344,8 @@ class StreamViewSet(viewsets.ModelViewSet):
         print "sending to topologies", Stream.objects.filter(pk=pk).values_list('from_device__topology_id', flat=True)
         for topology_id in Stream.objects.filter(pk=pk).values_list('from_device__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -327,7 +358,8 @@ class StreamViewSet(viewsets.ModelViewSet):
 
         for topology_id in Stream.objects.filter(pk=pk).values_list('from_device__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(StreamViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -358,7 +390,8 @@ class ProcessViewSet(viewsets.ModelViewSet):
         print "sending to topologies", Process.objects.filter(pk=pk).values_list('device__topology_id', flat=True)
         for topology_id in Process.objects.filter(pk=pk).values_list('device__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -371,7 +404,8 @@ class ProcessViewSet(viewsets.ModelViewSet):
 
         for topology_id in Process.objects.filter(pk=pk).values_list('device__topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(ProcessViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -402,7 +436,8 @@ class ToolboxViewSet(viewsets.ModelViewSet):
         print "sending to all topologies"
         for topology_id in Topology.objects.all().values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -415,7 +450,8 @@ class ToolboxViewSet(viewsets.ModelViewSet):
 
         for topology_id in Topology.objects.all().values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(ToolboxViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -432,7 +468,8 @@ class ToolboxItemViewSet(viewsets.ModelViewSet):
     serializer_class = ToolboxItemSerializer
 
     def create(self, request, *args, **kwargs):
-        response = super(ToolboxItemViewSet, self).create(request, *args, **kwargs)
+        response = super(ToolboxItemViewSet, self).create(
+            request, *args, **kwargs)
         print response.data
         pk = response.data['toolbox_item_id']
         message = dict()
@@ -446,7 +483,8 @@ class ToolboxItemViewSet(viewsets.ModelViewSet):
         print "sending to all topologies"
         for topology_id in Topology.objects.all().values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -459,7 +497,8 @@ class ToolboxItemViewSet(viewsets.ModelViewSet):
 
         for topology_id in Topology.objects.all().values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(ToolboxItemViewSet, self).update(request, pk, *args, **kwargs)
 
@@ -476,7 +515,8 @@ class TopologyInventoryViewSet(viewsets.ModelViewSet):
     serializer_class = TopologyInventorySerializer
 
     def create(self, request, *args, **kwargs):
-        response = super(TopologyInventoryViewSet, self).create(request, *args, **kwargs)
+        response = super(TopologyInventoryViewSet, self).create(
+            request, *args, **kwargs)
         print response.data
         pk = response.data['topology_inventory_id']
         message = dict()
@@ -490,7 +530,8 @@ class TopologyInventoryViewSet(viewsets.ModelViewSet):
         print "sending to topologies", TopologyInventory.objects.filter(pk=pk).values_list('topology_id', flat=True)
         for topology_id in TopologyInventory.objects.filter(pk=pk).values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
             print "Sent message", message
         return response
 
@@ -503,7 +544,8 @@ class TopologyInventoryViewSet(viewsets.ModelViewSet):
 
         for topology_id in TopologyInventory.objects.filter(pk=pk).values_list('topology_id', flat=True):
 
-            channels.Group("topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
+            channels.Group(
+                "topology-%s" % topology_id).send({"text": json.dumps([message['msg_type'], message])})
 
         return super(TopologyInventoryViewSet, self).update(request, pk, *args, **kwargs)
 
