@@ -59,8 +59,9 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
                 ws: getWebSocketResource(type),
                 page: {
                     cache: PAGE_CACHE,
-                    limit: PAGE_LIMIT,
-                    size: PAGE_SIZE
+                    size: PAGE_SIZE,
+                    pageLimit: PAGE_LIMIT,
+                    resultLimit: PAGE_SIZE * PAGE_LIMIT
                 }
             };
         });

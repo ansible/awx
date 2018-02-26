@@ -106,33 +106,32 @@ function JobsIndexController (
 }
 
 function processWebSocketEvents (scope, data) {
-    vm.scroll.isActive = true;
-
     if (data.event === JOB_START) {
+        vm.scroll.isActive = true;
         vm.stream.isActive = true;
         vm.scroll.isLocked = true;
     } else if (data.event === JOB_END) {
         vm.stream.isActive = false;
     }
 
-    if (!vm.scroll.isLocked) {
-        vm.scroll.isActive = false;
-
-        return;
-    }
+    // TODO: Determine how to manage buffered events (store in page cache vs. separate)
+    //    Leaning towards keeping separate (same as they come in over WS). On resume of scroll,
+    // Clear/reset cache, append buffered events, then back to normal render cycle
 
     if (vm.stream.count % resource.page.size === 0) {
-        cache.push({
-            page: vm.stream.page
-        });
+        cache.push({ page: vm.stream.page });
 
         vm.stream.page++;
+
+        if (buffer.length > (resource.page.resultLimit - resource.page.size)) {
+            buffer.splice(0, (buffer.length - resource.page.resultLimit) + resource.page.size);
+        }
     }
 
     vm.stream.count++;
     buffer.push(data);
 
-    if (vm.stream.isRendering) {
+    if (vm.stream.isRendering || !vm.scroll.isLocked) {
         return;
     }
 
@@ -280,7 +279,7 @@ function prepend (events) {
 function pop () {
     // console.log('[3] popping old page');
     return $q(resolve => {
-        if (cache.length <= resource.page.limit) {
+        if (cache.length <= resource.page.pageLimit) {
             // console.log('[3.1] nothing to pop');
             return resolve();
         }
@@ -299,16 +298,16 @@ function pop () {
 }
 
 function shift () {
-    // console.log('[3] shifting old page');
+    console.log('[3] shifting old page', cache.length);
     return $q(resolve => {
-        if (cache.length <= resource.page.limit) {
+        if (cache.length <= resource.page.pageLimit) {
             // console.log('[3.1] nothing to shift');
             return resolve();
         }
 
         window.requestAnimationFrame(() => {
             const ejected = cache.shift();
-            // console.log('[3.1] shifting', ejected);
+            console.log('[3.1] shifting', ejected);
             const rows = $(ELEMENT_TBODY).children().slice(0, ejected.lines);
 
             rows.empty();
@@ -639,8 +638,16 @@ function scrollHome () {
 function scrollEnd () {
     if (vm.scroll.isLocked) {
         vm.scroll.isLocked = false;
+        vm.scroll.isActive = false;
 
         return;
+    } else if (!vm.scroll.isLocked && vm.stream.isActive) {
+        vm.scroll.isActive = true;
+
+        return clear()
+            .then(() => {
+                vm.scroll.isLocked = true;
+            });
     }
 
     const config = {
