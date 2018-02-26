@@ -6,5 +6,10 @@ module.exports = {
     },
     sections: {}, // TODO: Fill this out
     elements: {}, // TODO: Fill this out
-    commands: [], // TODO: Fill this out as needed
+    commands: [{
+        load () {
+            this.api.url('data:,'); // https://github.com/nightwatchjs/nightwatch/issues/1724
+            return this.navigate();
+        },
+    }],
 };

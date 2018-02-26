@@ -166,18 +166,6 @@ module.exports = {
 
         credentials.section.edit.expect.section('@details').visible;
     },
-    'credential is searchable after saving': client => {
-        const credentials = client.page.credentials();
-        const row = '#credentials_table tbody tr';
-
-        credentials.section.list.section.search
-            .waitForElementVisible('@input', AWX_E2E_TIMEOUT_LONG)
-            .setValue('@input', `name:${store.credential.name}`)
-            .click('@searchButton');
-
-        credentials.waitForElementNotPresent(`${row}:nth-of-type(2)`);
-        credentials.expect.element(row).text.contain(store.credential.name);
-    },
     'change the password after saving': client => {
         const credentials = client.page.credentials();
         const { edit } = credentials.section;
@@ -190,6 +178,7 @@ module.exports = {
         machine.expect.element('@password').not.enabled;
 
         machine.section.password.click('@replace');
+
         machine.section.password.expect.element('@replace').not.present;
         machine.section.password.expect.element('@revert').visible;
 
@@ -201,7 +190,19 @@ module.exports = {
         credentials
             .waitForElementVisible('div.spinny')
             .waitForElementNotVisible('div.spinny');
+    },
+    'credential is searchable after saving': client => {
+        const credentials = client.page.credentials();
+        const row = '#credentials_table tbody tr';
+
+        credentials.section.list.section.search
+            .waitForElementVisible('@input', AWX_E2E_TIMEOUT_LONG)
+            .setValue('@input', `name:${store.credential.name}`)
+            .click('@searchButton');
+
+        credentials.waitForElementNotPresent(`${row}:nth-of-type(2)`);
+        credentials.expect.element(row).text.contain(store.credential.name);
 
         client.end();
-    }
+    },
 };

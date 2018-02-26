@@ -5,10 +5,7 @@ module.exports = {
         client.login();
         client.waitForAngular();
 
-        credentialTypes
-            .navigate(`${credentialTypes.url()}/add/`)
-            .waitForElementVisible('div.spinny')
-            .waitForElementNotVisible('div.spinny');
+        credentialTypes.navigateTo(`${credentialTypes.url()}/add/`);
 
         credentialTypes.section.add
             .waitForElementVisible('@title', done);

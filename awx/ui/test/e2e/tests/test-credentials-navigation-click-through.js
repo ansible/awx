@@ -6,7 +6,7 @@ module.exports = {
         client.waitForAngular();
 
         credentials
-            .navigate()
+            .load()
             .waitForElementVisible('div.spinny')
             .waitForElementNotVisible('div.spinny', done);
     },

@@ -24,13 +24,6 @@ let users;
 let inventories;
 let teams;
 
-function navigateAndWaitForSpinner (client, url) {
-    client
-        .url(url)
-        .waitForElementVisible('div.spinny')
-        .waitForElementNotVisible('div.spinny');
-}
-
 module.exports = {
     before: (client, done) => {
         const promises = [
@@ -68,7 +61,9 @@ module.exports = {
             });
     },
     'verify an auditor\'s credentials inputs are read-only': client => {
-        navigateAndWaitForSpinner(client, `${credentials.url()}/${data.adminAWSCredential.id}/`);
+        const url = `${credentials.url()}/${data.adminAWSCredential.id}/`;
+
+        client.navigateTo(url);
 
         credentials.section.edit
             .expect.element('@title').text.contain(data.adminAWSCredential.name);
@@ -76,7 +71,9 @@ module.exports = {
         credentials.section.edit.section.details.checkAllFieldsDisabled();
     },
     'verify an auditor\'s inventory scripts inputs are read-only': client => {
-        navigateAndWaitForSpinner(client, `${inventoryScripts.url()}/${data.inventoryScript.id}/`);
+        const url = `${inventoryScripts.url()}/${data.inventoryScript.id}/`;
+
+        client.navigateTo(url);
 
         inventoryScripts.section.edit
             .expect.element('@title').text.contain(data.inventoryScript.name);
@@ -92,7 +89,7 @@ module.exports = {
     //
     // 'verify an auditor\'s job template inputs are read-only': function (client) {
     //     const url = `${templates.url()}/job_template/${data.jobTemplate.id}/`;
-    //     navigateAndWaitForSpinner(client, url);
+    //     client.navigateTo(url)''
     //
     //     templates.section.editJobTemplate
     //         .expect.element('@title').text.contain(data.jobTemplate.name);
@@ -103,7 +100,9 @@ module.exports = {
     //     templates.expect.element('@save').to.not.be.visible;
     // },
     'verify an auditor\'s notification templates inputs are read-only': client => {
-        navigateAndWaitForSpinner(client, `${notificationTemplates.url()}/${data.notificationTemplate.id}/`);
+        const url = `${notificationTemplates.url()}/${data.notificationTemplate.id}/`;
+
+        client.navigateTo(url);
 
         notificationTemplates.section.edit
             .expect.element('@title').text.contain(data.notificationTemplate.name);
@@ -114,7 +113,9 @@ module.exports = {
         notificationTemplates.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s organizations inputs are read-only': client => {
-        navigateAndWaitForSpinner(client, `${organizations.url()}/${data.organization.id}/`);
+        const url = `${organizations.url()}/${data.organization.id}/`;
+
+        client.navigateTo(url);
 
         organizations.section.edit
             .expect.element('@title').text.contain(data.organization.name);
@@ -125,7 +126,9 @@ module.exports = {
         organizations.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s smart inventory inputs are read-only': client => {
-        navigateAndWaitForSpinner(client, `${inventories.url()}/smart/${data.smartInventory.id}/`);
+        const url = `${inventories.url()}/smart/${data.smartInventory.id}/`;
+
+        client.navigateTo(url);
 
         inventories.section.editSmartInventory
             .expect.element('@title').text.contain(data.smartInventory.name);
@@ -136,7 +139,9 @@ module.exports = {
         inventories.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s project inputs are read-only': client => {
-        navigateAndWaitForSpinner(client, `${projects.url()}/${data.project.id}/`);
+        const url = `${projects.url()}/${data.project.id}/`;
+
+        client.navigateTo(url);
 
         projects.section.edit
             .expect.element('@title').text.contain(data.project.name);
@@ -147,7 +152,9 @@ module.exports = {
         projects.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s standard inventory inputs are read-only': client => {
-        navigateAndWaitForSpinner(client, `${inventories.url()}/inventory/${data.inventory.id}/`);
+        const url = `${inventories.url()}/inventory/${data.inventory.id}/`;
+
+        client.navigateTo(url);
 
         inventories.section.editStandardInventory
             .expect.element('@title').text.contain(data.inventory.name);
@@ -159,7 +166,9 @@ module.exports = {
         inventories.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s teams inputs are read-only': client => {
-        navigateAndWaitForSpinner(client, `${teams.url()}/${data.team.id}/`);
+        const url = `${teams.url()}/${data.team.id}/`;
+
+        client.navigateTo(url);
 
         teams.section.edit
             .expect.element('@title').text.contain(data.team.name);
@@ -170,7 +179,9 @@ module.exports = {
         teams.expect.element('@save').to.not.be.visible;
     },
     'verify an auditor\'s user inputs are read-only': client => {
-        navigateAndWaitForSpinner(client, `${users.url()}/${data.user.id}/`);
+        const url = `${users.url()}/${data.user.id}/`;
+
+        client.navigateTo(url);
 
         users.section.edit
             .expect.element('@title').text.contain(data.user.username);
