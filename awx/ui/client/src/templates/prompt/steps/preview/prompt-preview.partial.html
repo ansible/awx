@@ -6,9 +6,9 @@
             <span ng-if="promptData.prompts.jobType.value.value === 'check'">{{:: vm.strings.get('prompt.CHECK') }}</span>
         </div>
     </div>
-    <div class="Prompt-previewRow--flex">
+    <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.credentials.value && promptData.prompts.credentials.value.length > 0">
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.CREDENTIAL') }}</div>
-        <div class="Prompt-previewRowValue"  style="display: flex">
+        <div class="Prompt-previewRowValue">
             <div class="Prompt-previewTagContainer u-wordwrap" ng-repeat="credential in promptData.prompts.credentials.value">
                 <div class="Prompt-previewTag">
                     <span ng-switch="promptData.prompts.credentials.credentialTypes[credential.credential_type]">
@@ -28,7 +28,7 @@
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.INVENTORY') }}</div>
         <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.inventory.value.name"></div>
     </div>
-    <div class="Prompt-previewRow--flex">
+    <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.limit.value">
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.LIMIT') }}</div>
         <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.limit.value"></div>
     </div>
@@ -36,7 +36,7 @@
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.VERBOSITY') }}</div>
         <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.verbosity.value.label"></div>
     </div>
-    <div class="Prompt-previewRow--noflex">
+    <div class="Prompt-previewRow--noflex" ng-if="promptData.prompts.tags.value && promptData.prompts.tags.value.length > 0">
         <div class="Prompt-previewRowTitle">
             <span>{{:: vm.strings.get('prompt.JOB_TAGS') }}&nbsp;</span>
             <span ng-click="vm.showJobTags = !vm.showJobTags">
@@ -52,7 +52,7 @@
             </div>
         </div>
     </div>
-    <div class="Prompt-previewRow--noflex">
+    <div class="Prompt-previewRow--noflex" ng-if="promptData.prompts.skipTags.value && promptData.prompts.skipTags.value.length > 0">
         <div class="Prompt-previewRowTitle">
             <span>{{:: vm.strings.get('prompt.SKIP_TAGS') }}&nbsp;</span>
             <span ng-click="vm.showSkipTags = !vm.showSkipTags">
