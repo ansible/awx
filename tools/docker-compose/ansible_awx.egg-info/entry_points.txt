@@ -1,4 +1,0 @@
-[console_scripts]
-tower-manage = awx:manage
-awx-manage = awx:manage
-
