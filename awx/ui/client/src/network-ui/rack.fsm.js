@@ -3,7 +3,6 @@ var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
-var util = require('./util.js');
 var nunjucks = require('nunjucks');
 
 function _State () {
@@ -99,7 +98,6 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
     var c_messages = [];
     var rack_template_context = null;
     var device_template_context = null;
-    var template_variables = null;
     var promises = [];
     scope.hide_groups = false;
 
@@ -122,7 +120,7 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
     if (!controller.scope.template_building && message.group.template) {
         try {
             rack_template_context = {};
-            rack_template_context['id'] = group.id;
+            rack_template_context.id = group.id;
             controller.scope.create_template_sequences(controller.scope.sequences, group.name, rack_template_context);
             group.name = nunjucks.renderString(group.name, rack_template_context);
             promises.push(scope.create_inventory_group(group));
@@ -145,7 +143,7 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
 
     if (!controller.scope.template_building && message.group.template) {
         device_template_context = Object.assign({}, rack_template_context);
-        device_template_context['rack_id'] = group.id;
+        device_template_context.rack_id = group.id;
         for(i=0; i<message.group.devices.length;i++) {
             controller.scope.create_template_sequences(group.sequences, message.group.devices[i].name, device_template_context);
         }
@@ -166,7 +164,7 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
 
         if (!controller.scope.template_building && message.group.template) {
             try {
-                device_template_context['id'] = device.id;
+                device_template_context.id = device.id;
                 device.name = nunjucks.renderString(device.name, device_template_context);
                 promises.push(scope.create_inventory_host(device));
             } catch (err) {
@@ -229,7 +227,7 @@ _Ready.prototype.onPasteRack = function (controller, msg_type, message) {
     scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
 
     Promise.all(promises)
-           .then(function (res) {
+           .then(function () {
                 controller.scope.create_group_association(group, group.devices);
            })
            .catch(function(res) {

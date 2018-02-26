@@ -62,7 +62,7 @@ Device.prototype.describeArc = util.describeArc;
 
 Device.prototype.compile_variables = function () {
     var variables = JSON.parse(JSON.stringify(this.variables));
-    var awx_variables = {}
+    var awx_variables = {};
     variables.awx = awx_variables;
     awx_variables.name = this.name;
     awx_variables.type = this.type;
@@ -476,7 +476,7 @@ Group.prototype.compile_variables = function () {
 
     var variables = JSON.parse(JSON.stringify(this.variables));
     return variables;
-}
+};
 
 Group.prototype.toJSON = function () {
 
@@ -683,7 +683,7 @@ Group.prototype.update_membership = function (devices, groups) {
             this.devices.push(devices[i]);
             device_ids.push(devices[i].id);
             index = removed_devices.indexOf(devices[i]);
-            if (index != -1) {
+            if (index !== -1) {
                 removed_devices.splice(index, 1);
             } else {
                 new_devices.push(devices[i]);

@@ -15,7 +15,7 @@ function scale_animation (scope) {
     if(scope.data.distance > 0) {
         height = (x + a) * (x - d) * c + scope.data.end_height;
     } else {
-        height = (scope.data.end_height - initial_height) * (scope.frame_number / scope.steps) + initial_height
+        height = (scope.data.end_height - initial_height) * (scope.frame_number / scope.steps) + initial_height;
     }
     //console.log({x: x,
     //             c: c,

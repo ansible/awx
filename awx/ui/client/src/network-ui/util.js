@@ -33,7 +33,7 @@ function nunjucks_find_variables (text) {
     }
 
     return variables;
-};
+}
 exports.nunjucks_find_variables = nunjucks_find_variables;
 
 function parse_variables (variables) {

@@ -159,7 +159,6 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
     var i = 0;
     var c_messages = [];
     var template_context = null;
-    var template_variables = null;
 
     scope.pressedX = scope.mouseX;
     scope.pressedY = scope.mouseY;
@@ -175,7 +174,7 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
     if (!controller.scope.template_building && message.device.template) {
         try {
             template_context = {};
-            template_context['id'] = device.id;
+            template_context.id = device.id;
             controller.scope.create_template_sequences(controller.scope.sequences, device.name, template_context);
             device.name = nunjucks.renderString(device.name, template_context);
             scope.create_inventory_host(device);

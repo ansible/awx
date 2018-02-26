@@ -3,7 +3,6 @@ var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var models = require('./models.js');
 var messages = require('./messages.js');
-var util = require('./util.js');
 var nunjucks = require('nunjucks');
 
 function _State () {
@@ -250,7 +249,7 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
     if (!controller.scope.template_building && message.group.template) {
         try {
             site_template_context = {};
-            site_template_context['id'] = group.id;
+            site_template_context.id = group.id;
             controller.scope.create_template_sequences(controller.scope.sequences, group.name, site_template_context);
             group.name = nunjucks.renderString(group.name, site_template_context);
             promises.push(scope.create_inventory_group(group));
@@ -260,7 +259,7 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                                         group.name));
 
             rack_template_context = Object.assign({}, site_template_context);
-            rack_template_context['site_id'] = group.id;
+            rack_template_context.site_id = group.id;
 
             for (i = 0; i < group.groups.length; i++) {
                 controller.scope.create_template_sequences(group.sequences,
@@ -268,7 +267,7 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                                            rack_template_context);
             }
             for (i = 0; i < group.groups.length; i++) {
-                rack_template_context['id'] = group.groups[i].id;
+                rack_template_context.id = group.groups[i].id;
                 group.groups[i].name = nunjucks.renderString(group.groups[i].name, rack_template_context);
                 promises.push(scope.create_inventory_group(group.groups[i]));
                 c_messages.push(new messages.GroupLabelEdit(controller.scope.client_id,
@@ -277,17 +276,17 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
                                                             group.groups[i].name));
 
                 if (group.groups[i].type !== "rack") {
-                    continue
+                    continue;
                 }
                 device_template_context = Object.assign({}, rack_template_context);
-                device_template_context['rack_id'] = group.groups[i].id;
+                device_template_context.rack_id = group.groups[i].id;
                 for(j=0; j<group.groups[i].devices.length;j++) {
                     controller.scope.create_template_sequences(group.groups[i].sequences,
                                                                group.groups[i].devices[j].name,
                                                                device_template_context);
                 }
                 for (j=0; j < group.groups[i].devices.length; j++) {
-                    device_template_context['id'] = group.groups[i].devices[j].id;
+                    device_template_context.id = group.groups[i].devices[j].id;
                     group.groups[i].devices[j].name = nunjucks.renderString(group.groups[i].devices[j].name, device_template_context);
                     console.log(group.groups[i].devices[j].name);
                     promises.push(scope.create_inventory_host(group.groups[i].devices[j]));
@@ -305,7 +304,7 @@ _Ready.prototype.onPasteSite = function (controller, msg_type, message) {
     scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
 
     Promise.all(promises)
-           .then(function (res) {
+           .then(function () {
                 controller.scope.create_group_association(group, group.devices);
                 for (i = 0; i < group.groups.length; i++) {
                     controller.scope.create_group_association(group.groups[i], group.groups[i].devices);

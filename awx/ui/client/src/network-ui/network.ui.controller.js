@@ -777,7 +777,7 @@ var NetworkUIController = function($scope,
 
     };
 
-    $scope.onRenameContextButton = function (button) {
+    $scope.onRenameContextButton = function () {
         $scope.removeContextMenu();
         $scope.first_channel.send("LabelEdit", {});
     };
@@ -883,7 +883,7 @@ var NetworkUIController = function($scope,
         }
     };
 
-    $scope.onDeleteContextMenu = function($event){
+    $scope.onDeleteContextMenu = function(){
         $scope.removeContextMenu();
         if($scope.selected_devices.length === 1){
             $scope.deleteDevice();
@@ -894,7 +894,7 @@ var NetworkUIController = function($scope,
     };
 
     // Button Event Handlers
-    $scope.onToggleToolboxButtonLeft = function (button) {
+    $scope.onToggleToolboxButtonLeft = function () {
         $scope.first_channel.send("ToggleToolbox", {});
         $scope.action_icons[0].fsm.handle_message("Disable", {});
         $scope.action_icons[1].fsm.handle_message("Enable", {});
@@ -902,7 +902,7 @@ var NetworkUIController = function($scope,
         $scope.$emit('overall_toolbox_collapsed');
     };
 
-    $scope.onToggleToolboxButtonRight = function (button) {
+    $scope.onToggleToolboxButtonRight = function () {
         $scope.first_channel.send("ToggleToolbox", {});
         $scope.action_icons[0].fsm.handle_message("Enable", {});
         $scope.action_icons[1].fsm.handle_message("Disable", {});
@@ -924,7 +924,6 @@ var NetworkUIController = function($scope,
 
     $scope.$on('search', function(e, device){
 
-        var num_frames = 30;
         var searched;
         for(var i = 0; i < $scope.devices.length; i++){
             if(Number(device.id) === $scope.devices[i].id){
@@ -994,19 +993,19 @@ var NetworkUIController = function($scope,
 
     $scope.$on('zoom', (e, zoomPercent) => {
         let v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
-        let scale = Math.pow(10, (zoomPercent - 120) / 40)
+        let scale = Math.pow(10, (zoomPercent - 120) / 40);
         $scope.jump_to_animation(v_center.x, v_center.y, scale, false);
     });
 
-    $scope.onDeployButton = function (button) {
+    $scope.onDeployButton = function () {
         $scope.send_control_message(new messages.Deploy($scope.client_id));
     };
 
-    $scope.onDestroyButton = function (button) {
+    $scope.onDestroyButton = function () {
         $scope.send_control_message(new messages.Destroy($scope.client_id));
     };
 
-    $scope.onRecordButton = function (button) {
+    $scope.onRecordButton = function () {
         $scope.recording = ! $scope.recording;
         if ($scope.recording) {
             $scope.trace_id = $scope.trace_id_seq();
@@ -1037,7 +1036,7 @@ var NetworkUIController = function($scope,
         }
     };
 
-    $scope.onExportButton = function (button) {
+    $scope.onExportButton = function () {
         $scope.cursor.hidden = true;
         $scope.debug.hidden = true;
         $scope.hide_buttons = true;
@@ -1049,7 +1048,7 @@ var NetworkUIController = function($scope,
         }, 1000);
     };
 
-    $scope.onLayoutButton = function (button) {
+    $scope.onLayoutButton = function () {
         $scope.send_control_message(new messages.Layout($scope.client_id));
     };
 
@@ -1071,7 +1070,7 @@ var NetworkUIController = function($scope,
     };
 
 
-    $scope.onExportYamlButton = function (button) {
+    $scope.onExportYamlButton = function () {
         $window.open('/network_ui/topology.yaml?topology_id=' + $scope.topology_id , '_blank');
     };
 
@@ -1094,36 +1093,36 @@ var NetworkUIController = function($scope,
         new models.ActionIcon("chevron-right", 15, actionIconVerticalOffset, 16, $scope.onToggleToolboxButtonRight, false, $scope)
     ];
 
-    $scope.onDownloadTraceButton = function (button) {
+    $scope.onDownloadTraceButton = function () {
         window.open("/network_ui/download_trace?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
     };
 
-    $scope.onDownloadRecordingButton = function (button) {
+    $scope.onDownloadRecordingButton = function () {
         window.open("/network_ui/download_recording?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
     };
 
-    $scope.onUploadTestButton = function (button) {
+    $scope.onUploadTestButton = function () {
         window.open("/network_ui/upload_test", "_top");
     };
 
-    $scope.onRunTestsButton = function (button) {
+    $scope.onRunTestsButton = function () {
 
         $scope.test_results = [];
         $scope.current_tests = $scope.tests.slice();
         $scope.first_channel.send("EnableTest", new messages.EnableTest());
     };
 
-    $scope.onCompileVariablesButton = function (button) {
+    $scope.onCompileVariablesButton = function () {
 
 
         function noop (response) {
             console.log(response);
-        };
+        }
 
         function error_handler (response) {
 
             console.log(response);
-        };
+        }
 
         var i = 0;
         var variables = null;
@@ -1143,8 +1142,6 @@ var NetworkUIController = function($scope,
         }
     };
 
-    // Buttons
-    var button_offset = 200;
 
     $scope.buttons = [
       // new models.Button("DEPLOY", button_offset + 10, 48, 70, 30, $scope.onDeployButton, $scope),
@@ -1354,11 +1351,11 @@ var NetworkUIController = function($scope,
 
         function noop (response) {
             console.log(response);
-        };
+        }
 
         function error_handler (response) {
             console.log(response);
-        };
+        }
 
         var i = 0;
         for (i = 0; i < devices.length; i ++) {
@@ -1377,11 +1374,11 @@ var NetworkUIController = function($scope,
 
         function noop (response) {
             console.log(response);
-        };
+        }
 
         function error_handler (response) {
             console.log(response);
-        };
+        }
 
         var i = 0;
         for (i = 0; i < devices.length; i ++) {
