@@ -7,7 +7,7 @@ import sys
 import warnings
 
 from pkg_resources import get_distribution
-from .celery import app as celery_app
+from .celery import app as celery_app # noqa
 
 __version__ = get_distribution('awx').version
 

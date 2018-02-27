@@ -208,7 +208,7 @@ class Command(BaseCommand):
     help = 'Launch the job callback receiver'
 
     def handle(self, *arg, **options):
-        with Connection(settings.CELERY_BROKER_URL) as conn:
+        with Connection(settings.BROKER_URL) as conn:
             try:
                 worker = CallbackBrokerWorker(conn)
                 worker.run()

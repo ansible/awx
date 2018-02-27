@@ -33,7 +33,7 @@ spec:
             - name: DATABASE_HOST
               value: {{ pg_hostname|default('postgresql') }}
             - name: DATABASE_PORT
-              value: ({{ pg_port|default('5432') }})
+              value: "{{ pg_port|default('5432') }}"
             - name: DATABASE_PASSWORD
               value: {{ pg_password }}
             - name: MEMCACHED_HOST
@@ -45,7 +45,7 @@ spec:
             - name: AWX_ADMIN_PASSWORD
               value: {{ default_admin_password|default('password') }}
         - name: awx-rabbit
-          image: ansible/awx_rabbitmq:latest
+          image: ansible/awx_rabbitmq:{{ rabbitmq_version }}
           imagePullPolicy: Always
           env:
             # For consupmption by rabbitmq-env.conf
