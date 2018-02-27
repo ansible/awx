@@ -18,6 +18,7 @@ else
     echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'root@localhost', 'password')" | awx-manage shell
     awx-manage create_preload_data
 fi
+echo 'from django.conf import settings; x = settings.AWX_TASK_ENV; x["HOME"] = "/var/lib/awx"; settings.AWX_TASK_ENV = x' | awx-manage shell
 awx-manage provision_instance --hostname=$(hostname)
 awx-manage register_queue --queuename=tower --instance_percent=100
 supervisord -c /supervisor_task.conf
