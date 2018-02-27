@@ -596,9 +596,6 @@ class Host(CommonModelNameNotUnique):
 
     objects = HostManager()
 
-    def __unicode__(self):
-        return self.name
-
     def get_absolute_url(self, request=None):
         return reverse('api:host_detail', kwargs={'pk': self.pk}, request=request)
 
@@ -767,9 +764,6 @@ class Group(CommonModelNameNotUnique):
         editable=False,
         help_text=_('Inventory source(s) that created or modified this group.'),
     )
-
-    def __unicode__(self):
-        return self.name
 
     def get_absolute_url(self, request=None):
         return reverse('api:group_detail', kwargs={'pk': self.pk}, request=request)
