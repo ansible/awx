@@ -998,7 +998,7 @@ class OAuth2ApplicationSerializer(BaseSerializer):
     def to_representation(self, obj):
         ret = super(OAuth2ApplicationSerializer, self).to_representation(obj)
         if obj.client_type == 'public':
-            ret.pop('client_secret')
+            ret.pop('client_secret', None)
         return ret
         
         
