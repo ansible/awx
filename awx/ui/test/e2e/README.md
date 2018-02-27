@@ -20,7 +20,7 @@ Three inputs are required:
 *AWX_E2E_URL*
 
 > A valid url for a running AWX instance that is reachable by your machine. This can be your local
-development instance or other awx instance.
+development instance or other awx instance. Defaults to *https://localhost:8043*.
 
 *AWX_E2E_USERNAME*
 
