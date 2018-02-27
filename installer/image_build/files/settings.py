@@ -30,6 +30,8 @@ AWX_PROOT_ENABLED = False
 CLUSTER_HOST_ID = "awx"
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
+CSRF_COOKIE_SECURE = False
+
 
 ###############################################################################
 # EMAIL SETTINGS
