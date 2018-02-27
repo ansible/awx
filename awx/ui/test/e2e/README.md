@@ -1,5 +1,4 @@
 ## AWX E2E
-
 #### Introduction
 This is an automated functional test suite for the front end.
 
@@ -41,5 +40,6 @@ npm --prefix awx/ui run e2e
 # run a subset of the tests
 npm --prefix awx/ui run e2e -- --filter="test-credentials*"
 ```
-
-Use `npm --prefix awx/ui run e2e -- --help` to see additional usage information for the test runner.
+**Note:**
+- Use `npm --prefix awx/ui run e2e -- --help` to see additional usage information for the test runner.
+- All example commands in this document assume that you are working from the root directory of the awx project.
