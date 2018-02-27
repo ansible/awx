@@ -213,7 +213,7 @@ def handle_ha_toplogy_changes(self):
                     .format(instance.hostname, removed_queues, added_queues))
         updated_routes = update_celery_worker_routes(instance, settings)
         logger.info("Worker on tower node '{}' updated celery routes {} all routes are now {}"
-                    .format(instance.hostname, updated_routes, self.app.conf.CELERY_TASK_ROUTES))
+                    .format(instance.hostname, updated_routes, self.app.conf.CELERY_ROUTES))
 
 
 @worker_ready.connect
@@ -232,7 +232,7 @@ def handle_update_celery_routes(sender=None, conf=None, **kwargs):
     instance = Instance.objects.me()
     added_routes = update_celery_worker_routes(instance, conf)
     logger.info("Workers on tower node '{}' added routes {} all routes are now {}"
-                .format(instance.hostname, added_routes, conf.CELERY_TASK_ROUTES))
+                .format(instance.hostname, added_routes, conf.CELERY_ROUTES))
 
 
 @celeryd_after_setup.connect

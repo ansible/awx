@@ -453,7 +453,7 @@ CELERY_QUEUES = (
     Queue('tower', Exchange('tower'), routing_key='tower'),
     Broadcast('tower_broadcast_all')
 )
-CELERY_TASK_ROUTES = {}
+CELERY_ROUTES = {}
 
 CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
