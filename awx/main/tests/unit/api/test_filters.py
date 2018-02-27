@@ -4,7 +4,7 @@ import pytest
 
 from rest_framework.exceptions import PermissionDenied, ParseError
 from awx.api.filters import FieldLookupBackend
-from awx.main.models import (AdHocCommand, AuthToken, CustomInventoryScript,
+from awx.main.models import (AdHocCommand, CustomInventoryScript,
                              Credential, Job, JobTemplate, SystemJob,
                              UnifiedJob, User, WorkflowJob,
                              WorkflowJobTemplate, WorkflowJobOptions,
@@ -54,9 +54,7 @@ def test_filter_on_password_field(password_field, lookup_suffix):
 
 
 @pytest.mark.parametrize('model, query', [
-    (AuthToken, 'request_hash__icontains'),
     (User, 'password__icontains'),
-    (User, 'auth_tokens__key__icontains'),
     (User, 'settings__value__icontains'),
     (UnifiedJob, 'job_args__icontains'),
     (UnifiedJob, 'job_env__icontains'),
