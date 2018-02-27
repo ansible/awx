@@ -205,8 +205,6 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
             user = User.objects.create_superuser(username, "%s@example.com", password)
         else:
             user = User.objects.create_user(username, "%s@example.com", password)
-        # New user should have no auth tokens by default.
-        self.assertFalse(user.auth_tokens.count())
         self._user_passwords[user.username] = password
         return user
 

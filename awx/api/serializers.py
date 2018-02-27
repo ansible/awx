@@ -17,7 +17,6 @@ from oauth2_provider.settings import oauth2_settings
 
 # Django
 from django.conf import settings
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
@@ -4662,26 +4661,6 @@ class ActivityStreamSerializer(BaseSerializer):
             summary_fields['setting'] = [obj.setting]
         summary_fields['access_token'] = '*************'    
         return summary_fields
-
-
-class AuthTokenSerializer(serializers.Serializer):
-
-    username = serializers.CharField()
-    password = serializers.CharField()
-
-    def validate(self, attrs):
-        username = attrs.get('username')
-        password = attrs.get('password')
-
-        if username and password:
-            user = authenticate(username=username, password=password)
-            if user:
-                attrs['user'] = user
-                return attrs
-            else:
-                raise serializers.ValidationError(_('Unable to login with provided credentials.'))
-        else:
-            raise serializers.ValidationError(_('Must include "username" and "password".'))
 
 
 class FactVersionSerializer(BaseFactSerializer):
