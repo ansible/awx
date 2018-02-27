@@ -9,7 +9,7 @@ services:
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
-      CELERY_RDB_HOST: 0.0.0.0
+      SDB_HOST: 0.0.0.0
       AWX_GROUP_QUEUES: tower
     ports:
       - "8888:8888"

@@ -152,3 +152,8 @@ SERVICE_NAME_DICT = {
 # Used for sending commands in automatic restart
 UWSGI_FIFO_LOCATION = '/awxfifo'
 
+try:
+    socket.gethostbyname('docker.for.mac.internal')
+    os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.internal'
+except Exception:
+    os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]

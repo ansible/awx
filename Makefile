@@ -336,9 +336,6 @@ receiver:
 nginx:
 	nginx -g "daemon off;"
 
-rdb:
-	$(PYTHON) tools/rdb.py
-
 jupyter:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
