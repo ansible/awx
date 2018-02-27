@@ -5,6 +5,7 @@ let vm;
 let ansi;
 let model;
 let resource;
+let page;
 let container;
 let $timeout;
 let $sce;
@@ -41,7 +42,7 @@ const TIME_EVENTS = [
 
 function JobsIndexController (
     _resource_,
-    webSocketNamespace,
+    _page_,
     _$sce_,
     _$timeout_,
     _$scope_,
@@ -56,6 +57,7 @@ function JobsIndexController (
     $scope = _$scope_;
     $q = _$q_;
     resource = _resource_;
+    page = _page_;
     model = resource.model;
 
     ansi = new Ansi();
@@ -64,7 +66,9 @@ function JobsIndexController (
     const parsed = parseEvents(events);
     const html = $sce.trustAsHtml(parsed.html);
 
-    cache.push({ page: 1, lines: parsed.lines });
+    page.init(resource);
+
+    page.add({ number: 1, lines: parsed.lines });
 
     // Development helper(s)
     vm.clear = devClear;
@@ -86,10 +90,12 @@ function JobsIndexController (
     vm.isExpanded = true;
 
     // Real-time (active between JOB_START and JOB_END events only)
-    $scope.$on(webSocketNamespace, processWebSocketEvents);
+    $scope.$on(resource.ws.namespace, processWebSocketEvents);
     vm.stream = {
         isActive: false,
         isRendering: false,
+        isPaused: false,
+        buffered: 0,
         count: 0,
         page: 1
     };
@@ -105,7 +111,13 @@ function JobsIndexController (
     });
 }
 
+// TODO: Determine how to manage buffered events (store in page cache vs. separate)
+//    Leaning towards keeping separate (same as they come in over WS). On resume of scroll,
+// Clear/reset cache, append buffered events, then back to normal render cycle
+
 function processWebSocketEvents (scope, data) {
+    let done;
+
     if (data.event === JOB_START) {
         vm.scroll.isActive = true;
         vm.stream.isActive = true;
@@ -114,37 +126,28 @@ function processWebSocketEvents (scope, data) {
         vm.stream.isActive = false;
     }
 
-    // TODO: Determine how to manage buffered events (store in page cache vs. separate)
-    //    Leaning towards keeping separate (same as they come in over WS). On resume of scroll,
-    // Clear/reset cache, append buffered events, then back to normal render cycle
+    const pageAdded = page.addToBuffer(data);
 
-    if (vm.stream.count % resource.page.size === 0) {
-        cache.push({ page: vm.stream.page });
-
-        vm.stream.page++;
-
-        if (buffer.length > (resource.page.resultLimit - resource.page.size)) {
-            buffer.splice(0, (buffer.length - resource.page.resultLimit) + resource.page.size);
-        }
+    if (pageAdded && !vm.scroll.isLocked) {
+        vm.stream.isPaused = true;
     }
 
-    vm.stream.count++;
-    buffer.push(data);
+    if (vm.stream.isPaused && vm.scroll.isLocked) {
+        vm.stream.isPaused = false;
+    }
 
-    if (vm.stream.isRendering || !vm.scroll.isLocked) {
+    if (vm.stream.isRendering || vm.stream.isPaused) {
         return;
     }
 
-    vm.stream.isRendering = true;
-
-    const events = buffer.slice(0, buffer.length);
-
-    buffer = [];
+    const events = page.emptyBuffer();
 
     return render(events);
 }
 
 function render (events) {
+    vm.stream.isRendering = true;
+
     return shift()
         .then(() => append(events))
         .then(() => {
@@ -154,16 +157,15 @@ function render (events) {
             }
 
             if (!vm.stream.isActive) {
-                if (buffer.length) {
-                    events = buffer.slice(0, buffer.length);
-                    buffer = [];
+                const buffer = page.emptyBuffer();
 
-                    return render(events);
-                } else {
-                    vm.stream.isRendering = false;
-                    vm.scroll.isLocked = false;
-                    vm.scroll.isActive = false;
+                if (buffer.length) {
+                    return render(buffer);
                 }
+
+                vm.stream.isRendering = false;
+                vm.scroll.isLocked = false;
+                vm.scroll.isActive = false;
             } else {
                 vm.stream.isRendering = false;
             }
@@ -172,13 +174,14 @@ function render (events) {
 
 function devClear () {
     cache = [];
+    page.init(resource);
     clear();
 }
 
 function next () {
     const config = {
         related: resource.related,
-        page: cache[cache.length - 1].page + 1,
+        page: vm.scroll.lastPage + 1,
         params: {
             order_by: 'start_line'
         }
@@ -191,9 +194,9 @@ function next () {
                 return $q.resolve();
             }
 
-            cache.push({
-                page: data.page
-            });
+            cache.push({ page: data.page, events: [] });
+
+            vm.scroll.lastPage = data.page;
 
             return shift()
                 .then(() => append(data.results));
@@ -205,12 +208,13 @@ function prev () {
 
     const config = {
         related: resource.related,
-        page: cache[0].page - 1,
+        page: vm.scroll.firstPage - 1,
         params: {
             order_by: 'start_line'
         }
     };
 
+    console.log(cache);
     // console.log('[2] getting previous page', config.page, cache);
     return model.goToPage(config)
         .then(data => {
@@ -218,12 +222,13 @@ function prev () {
                 return $q.resolve();
             }
 
-            cache.unshift({
-                page: data.page
-            });
+            cache.unshift({ page: data.page, events: [] });
+
+            vm.scroll.firstPage = data.page;
 
             const previousHeight = container.scrollHeight;
 
+            console.log(cache);
             return pop()
                 .then(() => prepend(data.results))
                 .then(lines => {
@@ -241,13 +246,8 @@ function append (events) {
             const parsed = parseEvents(events);
             const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parsed.html)));
             const table = $(ELEMENT_TBODY);
-            const index = cache.length - 1;
 
-            if (cache[index].lines) {
-                cache[index].lines += parsed.lines;
-            } else {
-                cache[index].lines = parsed.lines;
-            }
+            page.updateLineCount('current', parsed.lines);
 
             table.append(rows);
             $compile(rows.contents())($scope);
@@ -289,6 +289,8 @@ function pop () {
             // console.log('[3.1] popping', ejected);
             const rows = $(ELEMENT_TBODY).children().slice(-ejected.lines);
 
+            vm.scroll.firstPage = cache[0].page;
+
             rows.empty();
             rows.remove();
 
@@ -298,17 +300,19 @@ function pop () {
 }
 
 function shift () {
-    console.log('[3] shifting old page', cache.length);
+    // console.log('[3] shifting old page', cache.length);
     return $q(resolve => {
-        if (cache.length <= resource.page.pageLimit) {
+        if (!page.isOverCapacity()) {
             // console.log('[3.1] nothing to shift');
             return resolve();
         }
 
         window.requestAnimationFrame(() => {
-            const ejected = cache.shift();
-            console.log('[3.1] shifting', ejected);
-            const rows = $(ELEMENT_TBODY).children().slice(0, ejected.lines);
+            const lines = page.trim();
+            //console.log('[3.1] shifting', lines);
+            const rows = $(ELEMENT_TBODY).children().slice(0, lines);
+
+            vm.scroll.firstPage = page.getPageNumber('first');
 
             rows.empty();
             rows.remove();
@@ -637,17 +641,20 @@ function scrollHome () {
 
 function scrollEnd () {
     if (vm.scroll.isLocked) {
+        // Make note of current page when unlocked -- keep buffered events for that page for
+        // continuity
+
+        vm.scroll.firstPage = cache[0].page;
+        vm.scroll.lastPage = cache[cache.length - 1].page;
         vm.scroll.isLocked = false;
         vm.scroll.isActive = false;
 
         return;
     } else if (!vm.scroll.isLocked && vm.stream.isActive) {
         vm.scroll.isActive = true;
+        vm.scroll.isLocked = true;
 
-        return clear()
-            .then(() => {
-                vm.scroll.isLocked = true;
-            });
+        return;
     }
 
     const config = {
@@ -698,7 +705,7 @@ function scrollPageDown () {
 
 JobsIndexController.$inject = [
     'resource',
-    'webSocketNamespace',
+    'JobPageService',
     '$sce',
     '$timeout',
     '$scope',
