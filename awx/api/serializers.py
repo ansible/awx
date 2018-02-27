@@ -985,23 +985,16 @@ class OAuth2ApplicationSerializer(BaseSerializer):
     class Meta:
         model = OAuth2Application
         fields = (
-            '*', '-description', 'user', 'client_id', 'client_secret', 'client_type',
+            '*', '-description', 'user', 'client_id', 'client_type',
             'redirect_uris',  'authorization_grant_type', 'skip_authorization',
         )
-        read_only_fields = ('client_id', 'client_secret')
+        read_only_fields = ('client_id',)
         read_only_on_update_fields = ('user', 'authorization_grant_type')
         extra_kwargs = {
             'user': {'allow_null': False, 'required': True},
             'authorization_grant_type': {'allow_null': False}
-        }        
-        
-    def to_representation(self, obj):
-        ret = super(OAuth2ApplicationSerializer, self).to_representation(obj)
-        if obj.client_type == 'public':
-            ret.pop('client_secret')
-        return ret
-        
-        
+        }
+
     def get_modified(self, obj):
         if obj is None:
             return None
