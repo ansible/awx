@@ -61,7 +61,6 @@ Before you can run a deployment, you'll need the following installed in your loc
 - [docker-py](https://github.com/docker/docker-py) Python module
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Git](https://git-scm.com/) Requires Version 1.8.4+
-- If you choose to use a external Postgresql database, the minimal version is 9.4
 
 ### System Requirements
 
@@ -165,7 +164,7 @@ AWX requires access to a PostgreSQL database, and by default, one will be create
 
     ansible-playbook ... -e pg_volume_capacity=n
 
-If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information. When setting `pg_hostname` the installer will assume you have configured the database in that location and will not launch the postgresql pod.
+If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information. When setting `pg_hostname` the installer will assume you have configured the database in that location and will not launch the postgresql pod. Please note that the minimal version for PostgreSQL is 9.4.
 
 ### Start the build
 
@@ -452,7 +451,7 @@ If you wish to tag and push built images to a Docker registry, set the following
 
 AWX requires access to a PostgreSQL database, and by default, one will be created and deployed in a container, and data will be persisted to a host volume. In this scenario, you must set the value of `postgres_data_dir` to a path that can be mounted to the container. When the container is stopped, the database files will still exist in the specified path.
 
-If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information.
+If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information.  Please note that the minimal version for PostgreSQL is 9.4.
 
 ### Start the build
 
