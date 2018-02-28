@@ -533,7 +533,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         res = super(ProjectUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
         if res and self.launch_type != 'sync':
             for inv_src in self.scm_inventory_updates.filter(status='running'):
-                inv_src.cancel(job_explanation='Source project update `{}` was canceled.'.format(self.name))
+                inv_src.cancel(job_explanation=six.text_type(
+                    'Source project update `{}` was canceled.').format(self.name))
         return res
 
     '''
