@@ -513,6 +513,11 @@ AWX_INCONSISTENT_TASK_INTERVAL = 60 * 3
 # property value of the original queue name.
 AWX_CELERY_QUEUES_STATIC = ['tower_broadcast_all',]
 
+ASGI_AMQP = {
+    'INIT_FUNC': 'awx.prepare_env',
+    'MODEL': 'awx.main.models.channels.ChannelGroup',
+}
+
 # Django Caching Configuration
 if is_testing():
     CACHES = {

@@ -9,7 +9,7 @@ amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 apache-libcloud==2.0.0
 appdirs==1.4.2
-asgi-amqp==1.0.3
+asgi-amqp==1.1.1
 asgiref==1.1.2
 asn1crypto==0.22.0        # via cryptography
 attrs==17.2.0             # via automat, service-identity
