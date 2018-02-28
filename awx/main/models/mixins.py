@@ -20,6 +20,7 @@ from awx.main.models.rbac import (
 )
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
+from awx.main.utils.rest import fetch_dynamic_options
 from awx.main.fields import JSONField, AskForField
 
 
@@ -244,20 +245,29 @@ class SurveyJobTemplateMixin(models.Model):
                 else:
                     choice_list = copy(survey_element['choices'])
                     if isinstance(choice_list, six.string_types):
-                        choice_list = choice_list.split('\n')
-                    for val in data[survey_element['variable']]:
-                        if val not in choice_list:
-                            errors.append("Value %s for '%s' expected to be one of %s." % (val, survey_element['variable'],
+                        if not str(choice_list).startswith('url:'):
+                            choice_list = choice_list.split('\n')
+                            for val in data[survey_element['variable']]:
+                                if val not in choice_list:
+                                    errors.append("Value %s for '%s' expected to be one of %s." % (val, survey_element['variable'],
                                                                                            choice_list))
+                        else:
+                            # this is a dynamic field
+                            pass
+
         elif survey_element['type'] == 'multiplechoice':
             choice_list = copy(survey_element['choices'])
             if isinstance(choice_list, six.string_types):
-                choice_list = choice_list.split('\n')
-            if survey_element['variable'] in data:
-                if data[survey_element['variable']] not in choice_list:
-                    errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']],
-                                                                                   survey_element['variable'],
-                                                                                   choice_list))
+                if not str(choice_list).startswith('url:'):
+                    choice_list = choice_list.split('\n')
+                    if survey_element['variable'] in data:
+                        if data[survey_element['variable']] not in choice_list:
+                            errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']],
+                                                                                           survey_element['variable'],
+                                                                                           choice_list))
+                else:
+                    # this is a dynamic field
+                    pass
         return errors
 
     def _accept_or_ignore_variables(self, data, errors=None, _exclude_errors=(), extra_passwords=None):
@@ -331,7 +341,7 @@ class SurveyJobTemplateMixin(models.Model):
             errors += self._survey_element_validation(survey_element, data)
         return errors
 
-    def display_survey_spec(self):
+    def display_survey_spec(self, is_launch):
         '''
         Hide encrypted default passwords in survey specs
         '''
@@ -340,6 +350,13 @@ class SurveyJobTemplateMixin(models.Model):
             if field.get('type') == 'password':
                 if 'default' in field and field['default']:
                     field['default'] = '$encrypted$'
+            elif field.get('type') in ['multiplechoice', 'multiselect']:
+                if isinstance(field['choices'], six.string_types):
+                    choices = str(field['choices'])
+                    if choices.startswith('url:') and is_launch:
+                        url = choices[len("url:"):].strip()
+                        field['choices'] = fetch_dynamic_options(url)
+
         return survey_spec
 
 

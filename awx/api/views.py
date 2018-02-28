@@ -3074,14 +3074,14 @@ class JobTemplateSurveySpec(GenericAPIView):
     model = JobTemplate
     obj_permission_type = 'admin'
     serializer_class = EmptySerializer
+    is_launch = False
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         if not feature_enabled('surveys'):
             raise LicenseForbids(_('Your license does not allow '
                                    'adding surveys.'))
-
-        return Response(obj.display_survey_spec())
+        return Response(obj.display_survey_spec(self.is_launch))
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
