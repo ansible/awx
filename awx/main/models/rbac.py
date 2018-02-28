@@ -153,6 +153,12 @@ class Role(models.Model):
     object_id = models.PositiveIntegerField(null=True, default=None)
     content_object = GenericForeignKey('content_type', 'object_id')
 
+    def __unicode__(self):
+        if 'role_field' in self.__dict__:
+            return u'%s-%s' % (self.name, self.pk)
+        else:
+            return u'%s-%s' % (self._meta.verbose_name, self.pk)
+
     def save(self, *args, **kwargs):
         super(Role, self).save(*args, **kwargs)
         self.rebuild_role_ancestor_list([self.id], [])

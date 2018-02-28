@@ -74,9 +74,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     def get_absolute_url(self, request=None):
         return reverse('api:organization_detail', kwargs={'pk': self.pk}, request=request)
 
-    def __unicode__(self):
-        return self.name
-
 
 class Team(CommonModelNameNotUnique, ResourceMixin):
     '''

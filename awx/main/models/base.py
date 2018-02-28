@@ -93,10 +93,10 @@ class BaseModel(models.Model):
         abstract = True
 
     def __unicode__(self):
-        if hasattr(self, 'name'):
-            return u'%s-%s' % (self.name, self.id)
+        if 'name' in self.__dict__:
+            return u'%s-%s' % (self.name, self.pk)
         else:
-            return u'%s-%s' % (self._meta.verbose_name, self.id)
+            return u'%s-%s' % (self._meta.verbose_name, self.pk)
 
     def clean_fields(self, exclude=None):
         '''
