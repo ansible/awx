@@ -85,7 +85,7 @@ DATABASES = {
     }
 }
 
-CELERY_BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
+BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
     os.getenv("RABBITMQ_USER", None),
     os.getenv("RABBITMQ_PASSWORD", None),
     os.getenv("RABBITMQ_HOST", None),
@@ -95,7 +95,7 @@ CELERY_BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
 CHANNEL_LAYERS = {
     'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
                 'ROUTING': 'awx.main.routing.channel_routing',
-                'CONFIG': {'url': CELERY_BROKER_URL}}
+                'CONFIG': {'url': BROKER_URL}}
 }
 
 
