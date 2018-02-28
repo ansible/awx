@@ -70,6 +70,7 @@ The system that runs the AWX service will need to satisfy the following requirem
 - At least 2 cpu cores
 - At least 20GB of space
 - Running Docker, Openshift, or Kubernetes
+- If you choose to use an external PostreSQL database, please note that the minimum version is 9.4.
 
 ### AWX Tunables
 
