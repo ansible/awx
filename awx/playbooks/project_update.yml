@@ -139,7 +139,7 @@
         register: doesRequirementsExist
 
       - name: fetch galaxy roles from requirements.yml
-        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ --force
+        command: alt-galaxy install --role-file=requirements.yml --roles-path={{project_path|quote}}/roles/ --force
         args:
           chdir: "{{project_path|quote}}/roles"
         when: doesRequirementsExist.stat.exists
