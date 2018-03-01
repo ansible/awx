@@ -13,7 +13,7 @@ function PromptService (Empty, $filter)  {
             diffMode: {}
         };
 
-        prompts.credentials.value = _.has(params, 'launchConf.defaults.credentials') ? params.launchConf.defaults.credentials : [];
+        prompts.credentials.value = _.has(params, 'launchConf.defaults.credentials') ? _.cloneDeep(params.launchConf.defaults.credentials) : [];
         prompts.inventory.value = _.has(params, 'currentValues.summary_fields.inventory') ? params.currentValues.summary_fields.inventory : (_.has(params, 'launchConf.defaults.inventory') ? params.launchConf.defaults.inventory : null);
 
         let skipTags = _.has(params, 'currentValues.skip_tags') && params.currentValues.skip_tags ? params.currentValues.skip_tags : (_.has(params, 'launchConf.defaults.skip_tags') ? params.launchConf.defaults.skip_tags : "");

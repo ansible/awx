@@ -1,36 +1,37 @@
 export default
-    function SchedulePost(Rest, ProcessErrors, RRuleToAPI, Wait, $q) {
+    function SchedulePost(Rest, ProcessErrors, RRuleToAPI, Wait, $q, Schedule) {
         return function(params) {
             var scope = params.scope,
                 url = params.url,
                 scheduler = params.scheduler,
                 mode = params.mode,
-                schedule = (params.schedule) ? params.schedule : {},
+                scheduleData = (params.schedule) ? params.schedule : {},
                 promptData = params.promptData,
+                priorCredentials = params.priorCredentials ? params.priorCredentials : [],
                 newSchedule, rrule, extra_vars;
             let deferred = $q.defer();
             if (scheduler.isValid()) {
                 Wait('start');
                 newSchedule = scheduler.getValue();
                 rrule = scheduler.getRRule();
-                schedule.name = newSchedule.name;
-                schedule.rrule = RRuleToAPI(rrule.toString(), scope);
-                schedule.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
+                scheduleData.name = newSchedule.name;
+                scheduleData.rrule = RRuleToAPI(rrule.toString(), scope);
+                scheduleData.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
 
                 if (scope.isFactCleanup) {
                     extra_vars = {
                         "older_than": scope.scheduler_form.keep_amount.$viewValue + scope.scheduler_form.keep_unit.$viewValue.value,
                         "granularity": scope.scheduler_form.granularity_keep_amount.$viewValue + scope.scheduler_form.granularity_keep_unit.$viewValue.value
                     };
-                    schedule.extra_data = JSON.stringify(extra_vars);
+                    scheduleData.extra_data = JSON.stringify(extra_vars);
                 } else if (scope.cleanupJob) {
                     extra_vars = {
                         "days" : scope.scheduler_form.schedulerPurgeDays.$viewValue
                     };
-                    schedule.extra_data = JSON.stringify(extra_vars);
+                    scheduleData.extra_data = JSON.stringify(extra_vars);
                 }
                 else if(scope.extraVars){
-                    schedule.extra_data = scope.parseType === 'yaml' ?
+                    scheduleData.extra_data = scope.parseType === 'yaml' ?
                         (scope.extraVars === '---' ? "" : jsyaml.safeLoad(scope.extraVars)) : scope.extraVars;
                 }
 
@@ -40,10 +41,10 @@ export default
                             var fld = promptData.surveyQuestions[i].variable;
                             // grab all survey questions that have answers
                             if(promptData.surveyQuestions[i].required || (promptData.surveyQuestions[i].required === false && promptData.surveyQuestions[i].model.toString()!=="")) {
-                                if(!schedule.extra_data) {
-                                    schedule.extra_data = {};
+                                if(!scheduleData.extra_data) {
+                                    scheduleData.extra_data = {};
                                 }
-                                schedule.extra_data[fld] = promptData.surveyQuestions[i].model;
+                                scheduleData.extra_data[fld] = promptData.surveyQuestions[i].model;
                             }
 
                             if(promptData.surveyQuestions[i].required === false && _.isEmpty(promptData.surveyQuestions[i].model)) {
@@ -55,7 +56,7 @@ export default
                                     case "text":
                                     case "textarea":
                                     if (promptData.surveyQuestions[i].min === 0) {
-                                        schedule.extra_data[fld] = "";
+                                        scheduleData.extra_data[fld] = "";
                                     }
                                     break;
                                 }
@@ -64,43 +65,65 @@ export default
                     }
 
                     if(_.has(promptData, 'prompts.jobType.value.value') && _.get(promptData, 'launchConf.ask_job_type_on_launch')) {
-                        schedule.job_type = promptData.prompts.jobType.templateDefault === promptData.prompts.jobType.value.value ? null : promptData.prompts.jobType.value.value;
+                        scheduleData.job_type = promptData.launchConf.defaults.job_type && promptData.launchConf.defaults.job_type === promptData.prompts.jobType.value.value ? null : promptData.prompts.jobType.value.value;
                     }
                     if(_.has(promptData, 'prompts.tags.value') && _.get(promptData, 'launchConf.ask_tags_on_launch')){
-                        let templateDefaultJobTags = promptData.prompts.tags.templateDefault.split(',');
-                        schedule.job_tags = (_.isEqual(templateDefaultJobTags.sort(), promptData.prompts.tags.value.map(a => a.value).sort())) ? null : promptData.prompts.tags.value.map(a => a.value).join();
+                        let templateDefaultJobTags = promptData.launchConf.defaults.job_tags.split(',');
+                        scheduleData.job_tags = (_.isEqual(templateDefaultJobTags.sort(), promptData.prompts.tags.value.map(a => a.value).sort())) ? null : promptData.prompts.tags.value.map(a => a.value).join();
                     }
                     if(_.has(promptData, 'prompts.skipTags.value') && _.get(promptData, 'launchConf.ask_skip_tags_on_launch')){
-                        let templateDefaultSkipTags = promptData.prompts.skipTags.templateDefault.split(',');
-                        schedule.skip_tags = (_.isEqual(templateDefaultSkipTags.sort(), promptData.prompts.skipTags.value.map(a => a.value).sort())) ? null : promptData.prompts.skipTags.value.map(a => a.value).join();
+                        let templateDefaultSkipTags = promptData.launchConf.defaults.skip_tags.split(',');
+                        scheduleData.skip_tags = (_.isEqual(templateDefaultSkipTags.sort(), promptData.prompts.skipTags.value.map(a => a.value).sort())) ? null : promptData.prompts.skipTags.value.map(a => a.value).join();
                     }
                     if(_.has(promptData, 'prompts.limit.value') && _.get(promptData, 'launchConf.ask_limit_on_launch')){
-                        schedule.limit = promptData.prompts.limit.templateDefault === promptData.prompts.limit.value ? null : promptData.prompts.limit.value;
+                        scheduleData.limit = promptData.launchConf.defaults.limit && promptData.launchConf.defaults.limit === promptData.prompts.limit.value ? null : promptData.prompts.limit.value;
                     }
                     if(_.has(promptData, 'prompts.verbosity.value.value') && _.get(promptData, 'launchConf.ask_verbosity_on_launch')){
-                        schedule.verbosity = promptData.prompts.verbosity.templateDefault === promptData.prompts.verbosity.value.value ? null : promptData.prompts.verbosity.value.value;
+                        scheduleData.verbosity = promptData.launchConf.defaults.verbosity && promptData.launchConf.defaults.verbosity === promptData.prompts.verbosity.value.value ? null : promptData.prompts.verbosity.value.value;
                     }
                     if(_.has(promptData, 'prompts.inventory.value') && _.get(promptData, 'launchConf.ask_inventory_on_launch')){
-                        schedule.inventory = promptData.prompts.inventory.templateDefault.id === promptData.prompts.inventory.value.id ? null : promptData.prompts.inventory.value.id;
+                        scheduleData.inventory = promptData.launchConf.defaults.inventory && promptData.launchConf.defaults.inventory.id === promptData.prompts.inventory.value.id ? null : promptData.prompts.inventory.value.id;
                     }
                     if(_.has(promptData, 'prompts.diffMode.value') && _.get(promptData, 'launchConf.ask_diff_mode_on_launch')){
-                        schedule.diff_mode = promptData.prompts.diffMode.templateDefault === promptData.prompts.diffMode.value ? null : promptData.prompts.diffMode.value;
+                        scheduleData.diff_mode = promptData.launchConf.defaults.diff_mode && promptData.launchConf.defaults.diff_mode === promptData.prompts.diffMode.value ? null : promptData.prompts.diffMode.value;
                     }
-                    // Credentials gets POST'd to a separate endpoint
-                    // if($scope.promptData.launchConf.ask_credential_on_launch){
-                    //     jobLaunchData.credentials = [];
-                    //     promptData.credentials.value.forEach((credential) => {
-                    //         jobLaunchData.credentials.push(credential.id);
-                    //     });
-                    // }
                 }
 
                 Rest.setUrl(url);
                 if (mode === 'add') {
-                    Rest.post(schedule)
-                        .then(() => {
-                            Wait('stop');
-                            deferred.resolve();
+                    Rest.post(scheduleData)
+                        .then(({data}) => {
+                            if(_.get(promptData, 'launchConf.ask_credential_on_launch')){
+                                // This finds the credentials that were selected in the prompt but don't occur
+                                // in the template defaults
+                                let credentialsToPost = promptData.prompts.credentials.value.filter(function(credFromPrompt) {
+                                    let defaultCreds = promptData.launchConf.defaults.credentials ? promptData.launchConf.defaults.credentials : [];
+                                    return !defaultCreds.some(function(defaultCred) {
+                                        return credFromPrompt.id === defaultCred.id;
+                                    });
+                                });
+
+                                let promises = [];
+                                let schedule = new Schedule();
+
+                                credentialsToPost.forEach((credentialToPost) => {
+                                    promises.push(schedule.postCredential({
+                                        id: data.id,
+                                        data: {
+                                            id: credentialToPost.id
+                                        }
+                                    }));
+                                });
+
+                                $q.all(promises)
+                                    .then(() => {
+                                        Wait('stop');
+                                        deferred.resolve();
+                                    });
+                            } else {
+                                Wait('stop');
+                                deferred.resolve();
+                            }
                         })
                         .catch(({data, status}) => {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -110,10 +133,62 @@ export default
                         });
                 }
                 else {
-                    Rest.put(schedule)
-                        .then(() => {
+                    Rest.put(scheduleData)
+                        .then(({data}) => {
+                            if(_.get(promptData, 'launchConf.ask_credential_on_launch')){
+                                let credentialsNotInPriorCredentials = promptData.prompts.credentials.value.filter(function(credFromPrompt) {
+                                    let defaultCreds = promptData.launchConf.defaults.credentials ? promptData.launchConf.defaults.credentials : [];
+                                    return !defaultCreds.some(function(defaultCred) {
+                                        return credFromPrompt.id === defaultCred.id;
+                                    });
+                                });
+
+                                let credentialsToAdd = credentialsNotInPriorCredentials.filter(function(credNotInPrior) {
+                                    return !priorCredentials.some(function(priorCred) {
+                                        return credNotInPrior.id === priorCred.id;
+                                    });
+                                });
+
+                                let credentialsToRemove = priorCredentials.filter(function(priorCred) {
+                                    return !credentialsNotInPriorCredentials.some(function(credNotInPrior) {
+                                        return priorCred.id === credNotInPrior.id;
+                                    });
+                                });
+
+                                let promises = [];
+                                let schedule = new Schedule();
+
+                                credentialsToAdd.forEach((credentialToAdd) => {
+                                    promises.push(schedule.postCredential({
+                                        id: data.id,
+                                        data: {
+                                            id: credentialToAdd.id
+                                        }
+                                    }));
+                                });
+
+                                credentialsToRemove.forEach((credentialToRemove) => {
+                                    promises.push(schedule.postCredential({
+                                        id: data.id,
+                                        data: {
+                                            id: credentialToRemove.id,
+                                            disassociate: true
+                                        }
+                                    }));
+                                });
+
+                                $q.all(promises)
+                                    .then(() => {
+                                        Wait('stop');
+                                        deferred.resolve();
+                                    });
+                            } else {
+                                Wait('stop');
+                                deferred.resolve();
+                            }
+
                             Wait('stop');
-                            deferred.resolve(schedule);
+                            deferred.resolve(scheduleData);
                         })
                         .catch(({data, status}) => {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -136,5 +211,6 @@ SchedulePost.$inject =
         'ProcessErrors',
         'RRuleToAPI',
         'Wait',
-        '$q'
+        '$q',
+        'ScheduleModel'
     ];
