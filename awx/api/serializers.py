@@ -2947,6 +2947,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             notification_templates_error = self.reverse('api:job_template_notification_templates_error_list', kwargs={'pk': obj.pk}),
             access_list = self.reverse('api:job_template_access_list',      kwargs={'pk': obj.pk}),
             survey_spec = self.reverse('api:job_template_survey_spec', kwargs={'pk': obj.pk}),
+            lanuch_survey_spec = self.reverse('api:job_template_launch_survey_spec', kwargs={'pk': obj.pk}),
             labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),

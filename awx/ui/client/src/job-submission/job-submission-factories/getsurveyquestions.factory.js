@@ -12,7 +12,7 @@ export default
                 survey_url;
 
                 if(submitJobType === 'job_template') {
-                    survey_url = GetBasePath('job_templates') + id + '/survey_spec/';
+                    survey_url = GetBasePath('job_templates') + id + '/launch_survey_spec/';
                 }
                 else if(submitJobType === 'workflow_job_template') {
                     survey_url = GetBasePath('workflow_job_templates') + id + '/survey_spec/';

@@ -41,7 +41,7 @@ function postLaunch (params) {
 function getSurveyQuestions (id) {
     const req = {
         method: 'GET',
-        url: `${this.path}${id}/survey_spec/`
+        url: `${this.path}${id}/launch_survey_spec/`
     };
 
     return $http(req);
