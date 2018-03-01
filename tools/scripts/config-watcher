@@ -25,6 +25,9 @@ def write_hash(f, h):
 
 
 def main():
+    settings_file = "/etc/tower/settings.py"
+    hash_file = "/var/lib/awx/.configsha"
+
     while 1:
         rpc = childutils.getRPCInterface(os.environ)
         headers, payload = childutils.listener.wait(sys.stdin, sys.stdout)
@@ -32,13 +35,13 @@ def main():
             childutils.listener.ok(sys.stdout)
             continue
         try:
-            current_hash = hash("/etc/tower/settings.py")
+            current_hash = hash(settings_file)
         except:
             sys.stderr.write("Could not open settings.py, skipping config watcher")
             childutils.listener.ok(sys.stdout)
             continue
         try:
-            if current_hash == last_hash("/var/lib/awx/.configsha"):
+            if current_hash == last_hash(hash_file):
                 childutils.listener.ok(sys.stdout)
                 continue
             else:
@@ -51,8 +54,11 @@ def main():
                         sys.stderr.write('Restarting %s\n' % program)
                         rpc.supervisor.stopProcess(program)
                         rpc.supervisor.startProcess(program)
-                    
         except:
             sys.stderr.write("No previous hash found")
-        write_hash("/var/lib/awx/.configsha")
+
+        write_hash(hash_file, current_hash)
         childutils.listener.ok(sys.stdout)
+
+if __name__ == '__main__':
+    main()
