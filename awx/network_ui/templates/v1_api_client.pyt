@@ -3,6 +3,14 @@ import requests
 
 import util
 import json
+from collections import namedtuple
+
+
+{%for model in models%}{%if model.api%}
+{{model.name}} = namedtuple('{{model.name}}',[{%for field in model.fields%}{%if field.pk%}'{{field.name}}'{%endif%}{%endfor%},
+                                              {%for field in model.fields%}{%if not field.pk%}'{{field.name}}',
+                                              {%endif%}{%endfor%}])
+{%endif%}{%endfor%}
 
 {%for model in models%}{%if model.api%}
 def list_{{model.name.lower()}}(**kwargs):

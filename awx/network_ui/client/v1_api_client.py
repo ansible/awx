@@ -3,6 +3,91 @@ import requests
 
 import util
 import json
+from collections import namedtuple
+
+
+Device = namedtuple('Device', ['device_id',
+                               'topology',
+                               'name',
+                               'x',
+                               'y',
+                               'id',
+                               'type',
+                               'interface_id_seq',
+                               'process_id_seq',
+                               'host_id',
+                               ])
+
+Link = namedtuple('Link', ['link_id',
+                           'from_device',
+                           'to_device',
+                           'from_interface',
+                           'to_interface',
+                           'id',
+                           'name',
+                           ])
+
+Topology = namedtuple('Topology', ['topology_id',
+                                   'name',
+                                   'scale',
+                                   'panX',
+                                   'panY',
+                                   'device_id_seq',
+                                   'link_id_seq',
+                                   'group_id_seq',
+                                   'stream_id_seq',
+                                   ])
+
+Interface = namedtuple('Interface', ['interface_id',
+                                     'device',
+                                     'name',
+                                     'id',
+                                     ])
+
+Group = namedtuple('Group', ['group_id',
+                             'id',
+                             'name',
+                             'x1',
+                             'y1',
+                             'x2',
+                             'y2',
+                             'topology',
+                             'type',
+                             'inventory_group_id',
+                             ])
+
+GroupDevice = namedtuple('GroupDevice', ['group_device_id',
+                                         'group',
+                                         'device',
+                                         ])
+
+Stream = namedtuple('Stream', ['stream_id',
+                               'from_device',
+                               'to_device',
+                               'label',
+                               'id',
+                               ])
+
+Process = namedtuple('Process', ['process_id',
+                                 'device',
+                                 'name',
+                                 'type',
+                                 'id',
+                                 ])
+
+Toolbox = namedtuple('Toolbox', ['toolbox_id',
+                                 'name',
+                                 ])
+
+ToolboxItem = namedtuple('ToolboxItem', ['toolbox_item_id',
+                                         'toolbox',
+                                         'data',
+                                         ])
+
+TopologyInventory = namedtuple('TopologyInventory', ['topology_inventory_id',
+                                                     'topology',
+                                                     'inventory_id',
+                                                     ])
 
 
 def list_device(**kwargs):
