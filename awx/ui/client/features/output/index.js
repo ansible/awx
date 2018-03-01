@@ -1,11 +1,10 @@
-import JobsStrings from '~features/output/jobs.strings';
-import IndexController from '~features/output/index.controller';
 import atLibModels from '~models';
 import atLibComponents from '~components';
 
 import Strings from '~features/output/jobs.strings';
 import Controller from '~features/output/index.controller';
 import PageService from '~features/output/page.service';
+import ScrollService from '~features/output/scroll.service';
 
 const Template = require('~features/output/index.view.html');
 
@@ -178,6 +177,7 @@ angular
     ])
     .service('JobStrings', Strings)
     .service('JobPageService', PageService)
+    .service('JobScrollService', ScrollService)
     .run(JobsRun);
 
 export default MODULE_NAME;

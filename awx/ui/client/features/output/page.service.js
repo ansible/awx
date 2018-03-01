@@ -1,16 +1,10 @@
 function JobPageService ($q) {
-    this.page = null;
-    this.resource = null;
-    this.result = null;
-    this.buffer = null;
-    this.cache = null;
-
     this.init = resource => {
         this.resource = resource;
 
         this.page = {
-            limit: resource.page.pageLimit,
-            size: resource.page.size,
+            limit: this.resource.page.pageLimit,
+            size: this.resource.page.size,
             current: 0,
             index: -1,
             count: 0,
@@ -153,13 +147,10 @@ function JobPageService ($q) {
     }
 
     this.bookmark = () => {
-        console.log('b,current', this.page.current);
         if (!this.page.bookmark.active) {
             this.page.bookmark.first = this.page.first;
             this.page.bookmark.last = this.page.last;
             this.page.bookmark.current = this.page.current;
-
-            console.log('b,bookmark', this.page.bookmark.current);
             this.page.bookmark.active = true;
         } else {
             this.page.bookmark.active = false;
