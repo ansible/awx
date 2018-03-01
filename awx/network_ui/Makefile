@@ -2,7 +2,11 @@
 
 .PHONY: all models admin v1_api_serializers v1_api_views v1_api_urls v2_api_serializers v2_api_views v1_api_client v2_api_urls v2_api_access v2_api_client
 
-all: models admin v1_api_serializers v1_api_views v1_api_urls v2_api_serializers v2_api_views v1_api_client action_plugins v2_api_urls v2_api_access v2_api_client
+all: tuples models admin v1_api_serializers v1_api_views v1_api_urls v2_api_serializers v2_api_views v1_api_client action_plugins v2_api_urls v2_api_access v2_api_client
+
+tuples:
+	jinja2 templates/tuples.pyt designs/models.yml > tuples.py
+	autopep8 -i tuples.py --ignore-local-config --max-line-length 160
 
 models:
 	jinja2 templates/models.pyt designs/models.yml > models.py
