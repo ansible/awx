@@ -22,7 +22,7 @@ class DeviceSerializer(BaseSerializer):
                   'x',
                   'y',
                   'id',
-                  'type',
+                  'device_type',
                   'interface_id_seq',
                   'process_id_seq',
                   'host_id')
@@ -74,7 +74,7 @@ class GroupSerializer(BaseSerializer):
                   'x2',
                   'y2',
                   'topology',
-                  'type',
+                  'group_type',
                   'inventory_group_id')
 
 
@@ -102,7 +102,7 @@ class ProcessSerializer(BaseSerializer):
         fields = ('process_id',
                   'device',
                   'name',
-                  'type',
+                  'process_type',
                   'id')
 
 

@@ -316,7 +316,7 @@ class _Persistence(object):
         device = transform_dict(dict(x='x',
                                      y='y',
                                      name='name',
-                                     type='type',
+                                     type='device_type',
                                      id='id',
                                      host_id='host_id'), device)
         logger.info("Device %s", device)
@@ -324,7 +324,7 @@ class _Persistence(object):
         d, _ = Device.objects.get_or_create(topology_id=topology_id, id=device['id'], defaults=device)
         d.x = device['x']
         d.y = device['y']
-        d.type = device['type']
+        d.device_type = device['device_type']
         d.host_id = device['host_id']
         d.save()
         (Topology.objects
@@ -416,7 +416,7 @@ class _Persistence(object):
         Process.objects.get_or_create(device_id=Device.objects.get(id=process['device_id'],
                                                                    topology_id=topology_id).pk,
                                       id=process['id'],
-                                      defaults=dict(name=process['name'], type=process['type']))
+                                      defaults=dict(name=process['name'], process_type=process['type']))
         (Device.objects
                .filter(id=process['device_id'],
                        topology_id=topology_id,
@@ -541,14 +541,14 @@ class _Persistence(object):
                                     y2='y2',
                                     name='name',
                                     id='id',
-                                    type='type',
+                                    type='group_type',
                                     group_id='inventory_group_id'), group)
         d, _ = DeviceGroup.objects.get_or_create(topology_id=topology_id, id=group['id'], defaults=group)
         d.x1 = group['x1']
         d.y1 = group['y1']
         d.x2 = group['x2']
         d.y2 = group['y2']
-        d.type = group['type']
+        d.group_type = group['group_type']
         d.save()
         (Topology.objects
                  .filter(topology_id=topology_id, group_id_seq__lt=group['id'])

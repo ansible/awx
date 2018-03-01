@@ -29,7 +29,7 @@ class ActionModule(ActionBase):
         x = self._task.args.get('x', None)
         y = self._task.args.get('y', None)
         id = self._task.args.get('id', None)
-        type = self._task.args.get('type', None)
+        device_type = self._task.args.get('device_type', None)
         interface_id_seq = self._task.args.get('interface_id_seq', None)
         process_id_seq = self._task.args.get('process_id_seq', None)
         host_id = self._task.args.get('host_id', None)
@@ -41,7 +41,7 @@ class ActionModule(ActionBase):
                     x=x,
                     y=y,
                     id=id,
-                    type=type,
+                    device_type=device_type,
                     interface_id_seq=interface_id_seq,
                     process_id_seq=process_id_seq,
                     host_id=host_id,

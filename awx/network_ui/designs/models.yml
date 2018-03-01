@@ -2,6 +2,16 @@ app: awx.network_ui
 external_models: []
 models:
 - api: true
+  create_transform:
+    device_type: type
+    host_id: host_id
+    id: id
+    interface_id_seq: interface_id_seq
+    name: name
+    process_id_seq: process_id_seq
+    topology_id: topology_id
+    x: x
+    y: y
   display: name
   end_point: /network_ui/api/v1/device/
   fields:
@@ -22,7 +32,7 @@ models:
   - name: id
     type: IntegerField
   - len: 200
-    name: type
+    name: device_type
     type: CharField
   - default: 0
     name: interface_id_seq
@@ -211,7 +221,7 @@ models:
     ref_field: topology_id
     type: ForeignKey
   - len: 200
-    name: type
+    name: group_type
     type: CharField
   - default: 0
     name: inventory_group_id
@@ -341,7 +351,7 @@ models:
     name: name
     type: CharField
   - len: 200
-    name: type
+    name: process_type
     type: CharField
   - default: 0
     name: id

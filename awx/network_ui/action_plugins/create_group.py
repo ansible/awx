@@ -32,7 +32,7 @@ class ActionModule(ActionBase):
         x2 = self._task.args.get('x2', None)
         y2 = self._task.args.get('y2', None)
         topology = self._task.args.get('topology', None)
-        type = self._task.args.get('type', None)
+        group_type = self._task.args.get('group_type', None)
 
         inventory_group_id = self._task.args.get('inventory_group_id', 0)
 
@@ -45,7 +45,7 @@ class ActionModule(ActionBase):
                                                            x2=x2,
                                                            y2=y2,
                                                            topology=topology,
-                                                           type=type,
+                                                           group_type=group_type,
                                                            inventory_group_id=inventory_group_id,
                                                            )),
                                  verify=False,

@@ -15,14 +15,14 @@ def get_device(device_id):
     return response.json()
 
 
-def create_device(topology, name, x, y, id, type, interface_id_seq=0, process_id_seq=0, host_id=0,):
+def create_device(topology, name, x, y, id, device_type, interface_id_seq=0, process_id_seq=0, host_id=0,):
     headers = {'content-type': 'application/json'}
     response = requests.post(util.get_url() + "/api/v2/canvas/device/", data=json.dumps(dict(topology=topology,
                                                                                              name=name,
                                                                                              x=x,
                                                                                              y=y,
                                                                                              id=id,
-                                                                                             type=type,
+                                                                                             device_type=device_type,
                                                                                              interface_id_seq=interface_id_seq,
                                                                                              process_id_seq=process_id_seq,
                                                                                              host_id=host_id,
@@ -33,14 +33,14 @@ def create_device(topology, name, x, y, id, type, interface_id_seq=0, process_id
     return response.json()
 
 
-def update_device(device_id, topology=None, name=None, x=None, y=None, id=None, type=None, interface_id_seq=None, process_id_seq=None, host_id=None,):
+def update_device(device_id, topology=None, name=None, x=None, y=None, id=None, device_type=None, interface_id_seq=None, process_id_seq=None, host_id=None,):
     headers = {'content-type': 'application/json'}
     data = dict(topology=topology,
                 name=name,
                 x=x,
                 y=y,
                 id=id,
-                type=type,
+                device_type=device_type,
                 interface_id_seq=interface_id_seq,
                 process_id_seq=process_id_seq,
                 host_id=host_id,
@@ -211,7 +211,7 @@ def get_group(group_id):
     return response.json()
 
 
-def create_group(id, name, x1, y1, x2, y2, topology, type, inventory_group_id=0,):
+def create_group(id, name, x1, y1, x2, y2, topology, group_type, inventory_group_id=0,):
     headers = {'content-type': 'application/json'}
     response = requests.post(util.get_url() + "/api/v2/canvas/group/", data=json.dumps(dict(id=id,
                                                                                             name=name,
@@ -220,7 +220,7 @@ def create_group(id, name, x1, y1, x2, y2, topology, type, inventory_group_id=0,
                                                                                             x2=x2,
                                                                                             y2=y2,
                                                                                             topology=topology,
-                                                                                            type=type,
+                                                                                            group_type=group_type,
                                                                                             inventory_group_id=inventory_group_id,
                                                                                             )),
                              verify=util.get_verify(),
@@ -229,7 +229,7 @@ def create_group(id, name, x1, y1, x2, y2, topology, type, inventory_group_id=0,
     return response.json()
 
 
-def update_group(group_id, id=None, name=None, x1=None, y1=None, x2=None, y2=None, topology=None, type=None, inventory_group_id=None,):
+def update_group(group_id, id=None, name=None, x1=None, y1=None, x2=None, y2=None, topology=None, group_type=None, inventory_group_id=None,):
     headers = {'content-type': 'application/json'}
     data = dict(id=id,
                 name=name,
@@ -238,7 +238,7 @@ def update_group(group_id, id=None, name=None, x1=None, y1=None, x2=None, y2=Non
                 x2=x2,
                 y2=y2,
                 topology=topology,
-                type=type,
+                group_type=group_type,
                 inventory_group_id=inventory_group_id,
                 )
     data = {x: y for x, y in data.iteritems() if y is not None}
@@ -349,11 +349,11 @@ def get_process(process_id):
     return response.json()
 
 
-def create_process(device, name, type, id=0,):
+def create_process(device, name, process_type, id=0,):
     headers = {'content-type': 'application/json'}
     response = requests.post(util.get_url() + "/api/v2/canvas/process/", data=json.dumps(dict(device=device,
                                                                                               name=name,
-                                                                                              type=type,
+                                                                                              process_type=process_type,
                                                                                               id=id,
                                                                                               )),
                              verify=util.get_verify(),
@@ -362,11 +362,11 @@ def create_process(device, name, type, id=0,):
     return response.json()
 
 
-def update_process(process_id, device=None, name=None, type=None, id=None,):
+def update_process(process_id, device=None, name=None, process_type=None, id=None,):
     headers = {'content-type': 'application/json'}
     data = dict(device=device,
                 name=name,
-                type=type,
+                process_type=process_type,
                 id=id,
                 )
     data = {x: y for x, y in data.iteritems() if y is not None}

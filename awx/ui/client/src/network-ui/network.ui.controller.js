@@ -1907,7 +1907,7 @@ var NetworkUIController = function($scope,
                                            device.name,
                                            device.x,
                                            device.y,
-                                           device.type,
+                                           device.device_type,
                                            device.host_id);
 
             for (j=0; j < $scope.inventory_toolbox.items.length; j++) {
@@ -1925,7 +1925,7 @@ var NetworkUIController = function($scope,
                 process = device.processes[j];
                 new_process = (new models.Process(process.id,
                                                   process.name,
-                                                  process.type,
+                                                  process.process_type,
                                                   0,
                                                   0));
                 new_process.device = new_device;
@@ -1982,7 +1982,7 @@ var NetworkUIController = function($scope,
             }
             new_group = new models.Group(group.id,
                                          group.name,
-                                         group.type,
+                                         group.group_type,
                                          group.x1,
                                          group.y1,
                                          group.x2,

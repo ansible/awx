@@ -9,7 +9,7 @@ class Device(models.Model):
     x = models.IntegerField()
     y = models.IntegerField()
     id = models.IntegerField()
-    type = models.CharField(max_length=200,)
+    device_type = models.CharField(max_length=200,)
     interface_id_seq = models.IntegerField(default=0)
     process_id_seq = models.IntegerField(default=0)
     host_id = models.IntegerField(default=0)
@@ -91,7 +91,7 @@ class Group(models.Model):
     x2 = models.IntegerField()
     y2 = models.IntegerField()
     topology = models.ForeignKey('Topology',)
-    type = models.CharField(max_length=200,)
+    group_type = models.CharField(max_length=200,)
     inventory_group_id = models.IntegerField(default=0)
 
 
@@ -142,7 +142,7 @@ class Process(models.Model):
     process_id = models.AutoField(primary_key=True,)
     device = models.ForeignKey('Device',)
     name = models.CharField(max_length=200,)
-    type = models.CharField(max_length=200,)
+    process_type = models.CharField(max_length=200,)
     id = models.IntegerField(default=0)
 
 

@@ -52,7 +52,7 @@ from awx.network_ui.models import TestResult
 
 
 class DeviceAdmin(admin.ModelAdmin):
-    fields = ('topology', 'name', 'x', 'y', 'id', 'type', 'interface_id_seq', 'process_id_seq', 'host_id',)
+    fields = ('topology', 'name', 'x', 'y', 'id', 'device_type', 'interface_id_seq', 'process_id_seq', 'host_id',)
     raw_id_fields = ('topology',)
 
 
@@ -108,7 +108,7 @@ admin.site.register(Interface, InterfaceAdmin)
 
 
 class GroupAdmin(admin.ModelAdmin):
-    fields = ('id', 'name', 'x1', 'y1', 'x2', 'y2', 'topology', 'type', 'inventory_group_id',)
+    fields = ('id', 'name', 'x1', 'y1', 'x2', 'y2', 'topology', 'group_type', 'inventory_group_id',)
     raw_id_fields = ('topology',)
 
 
@@ -156,7 +156,7 @@ admin.site.register(Stream, StreamAdmin)
 
 
 class ProcessAdmin(admin.ModelAdmin):
-    fields = ('device', 'name', 'type', 'id',)
+    fields = ('device', 'name', 'process_type', 'id',)
     raw_id_fields = ('device',)
 
 
