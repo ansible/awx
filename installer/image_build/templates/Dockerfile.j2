@@ -39,6 +39,7 @@ RUN yum -y install epel-release && \
     yum -y remove gcc postgresql-devel libxml2-devel libxslt-devel cyrus-sasl-devel openldap-devel xmlsec1-devel krb5-devel xmlsec1-openssl-devel libtool-ltdl-devel gcc-c++ python-devel && \
     yum -y clean all && \
     rm -rf /root/.cache
+RUN curl -L https://github.com/gantsign/alt-galaxy/releases/download/1.3.3/alt-galaxy_linux_amd64.tar.xz | tar xJ --directory /usr/local/bin
 
 RUN mkdir -p /var/log/tower
 RUN mkdir -p /etc/tower
