@@ -342,8 +342,6 @@ def cluster_node_heartbeat(self):
             stop_local_services(['uwsgi', 'celery', 'beat', 'callback'], communicate=False)
             raise RuntimeError("Shutting down.")
     for other_inst in lost_instances:
-        if other_inst.capacity == 0:
-            continue
         try:
             other_inst.capacity = 0
             other_inst.save(update_fields=['capacity'])
