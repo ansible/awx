@@ -4,188 +4,202 @@
 #
 #    pip-compile --output-file requirements/requirements.txt requirements/requirements.in
 #
-adal==0.4.5               # via msrestazure
+adal==0.5.0               # via azure-datalake-store, msrestazure
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
-apache-libcloud==2.0.0
+apache-libcloud==2.2.1
 appdirs==1.4.2
 asgi-amqp==1.1.1
 asgiref==1.1.2
-asn1crypto==0.22.0        # via cryptography
-attrs==17.2.0             # via automat, service-identity
-autobahn==17.10.1         # via daphne
+asn1crypto==0.24.0        # via cryptography
+attrs==17.4.0             # via automat, service-identity
+autobahn==18.3.1          # via daphne
 automat==0.6.0            # via twisted
-azure-batch==1.0.0        # via azure
-azure-common[autorest]==1.1.4  # via azure-batch, azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-keyvault, azure-mgmt-logic, azure-mgmt-network, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-storage, azure-servicebus, azure-servicemanagement-legacy, azure-storage
-azure-mgmt-batch==1.0.0   # via azure-mgmt
-azure-mgmt-compute==0.30.0rc6  # via azure-mgmt
-azure-mgmt-keyvault==0.30.0rc6  # via azure-mgmt
-azure-mgmt-logic==1.0.0   # via azure-mgmt
-azure-mgmt-network==0.30.0rc6  # via azure-mgmt
-azure-mgmt-nspkg==2.0.0   # via azure-batch, azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-keyvault, azure-mgmt-logic, azure-mgmt-network, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-storage
-azure-mgmt-redis==1.0.0   # via azure-mgmt
-azure-mgmt-resource==0.30.0rc6  # via azure-mgmt
-azure-mgmt-scheduler==1.0.0  # via azure-mgmt
-azure-mgmt-storage==0.30.0rc6  # via azure-mgmt
-azure-mgmt==0.30.0rc6     # via azure
-azure-nspkg==2.0.0        # via azure-common, azure-mgmt-nspkg, azure-storage
-azure-servicebus==0.20.3  # via azure
-azure-servicemanagement-legacy==0.20.4  # via azure
-azure-storage==0.33.0     # via azure
-azure==2.0.0rc6
-babel==2.3.4              # via osc-lib, oslo.i18n, python-cinderclient, python-glanceclient, python-neutronclient, python-novaclient, python-openstackclient
-backports.functools-lru-cache==1.4  # via jaraco.functools
+azure-batch==4.0.0        # via azure
+azure-common==1.1.8       # via azure-batch, azure-cosmosdb-table, azure-eventgrid, azure-graphrbac, azure-keyvault, azure-mgmt-advisor, azure-mgmt-applicationinsights, azure-mgmt-authorization, azure-mgmt-batch, azure-mgmt-batchai, azure-mgmt-billing, azure-mgmt-cdn, azure-mgmt-cognitiveservices, azure-mgmt-commerce, azure-mgmt-compute, azure-mgmt-consumption, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-datafactory, azure-mgmt-datalake-analytics, azure-mgmt-datalake-store, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-eventgrid, azure-mgmt-eventhub, azure-mgmt-hanaonazure, azure-mgmt-iothub, azure-mgmt-iothubprovisioningservices, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-logic, azure-mgmt-machinelearningcompute, azure-mgmt-managementpartner, azure-mgmt-marketplaceordering, azure-mgmt-media, azure-mgmt-monitor, azure-mgmt-msi, azure-mgmt-network, azure-mgmt-notificationhubs, azure-mgmt-powerbiembedded, azure-mgmt-rdbms, azure-mgmt-recoveryservices, azure-mgmt-recoveryservicesbackup, azure-mgmt-redis, azure-mgmt-relay, azure-mgmt-reservations, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-search, azure-mgmt-servermanager, azure-mgmt-servicebus, azure-mgmt-servicefabric, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-subscription, azure-mgmt-trafficmanager, azure-mgmt-web, azure-servicebus, azure-servicefabric, azure-servicemanagement-legacy, azure-storage-blob, azure-storage-common, azure-storage-file, azure-storage-queue
+azure-cosmosdb-nspkg==2.0.2  # via azure-cosmosdb-table
+azure-cosmosdb-table==1.0.2  # via azure
+azure-datalake-store==0.0.18  # via azure
+azure-eventgrid==0.1.0    # via azure
+azure-graphrbac==0.40.0   # via azure
+azure-keyvault==0.3.7     # via azure
+azure-mgmt-advisor==1.0.1  # via azure-mgmt
+azure-mgmt-applicationinsights==0.1.1  # via azure-mgmt
+azure-mgmt-authorization==0.30.0  # via azure-mgmt
+azure-mgmt-batch==5.0.0   # via azure-mgmt
+azure-mgmt-batchai==0.2.0  # via azure-mgmt
+azure-mgmt-billing==0.1.0  # via azure-mgmt
+azure-mgmt-cdn==2.0.0     # via azure-mgmt
+azure-mgmt-cognitiveservices==2.0.0  # via azure-mgmt
+azure-mgmt-commerce==1.0.1  # via azure-mgmt
+azure-mgmt-compute==3.0.1  # via azure-mgmt
+azure-mgmt-consumption==2.0.0  # via azure-mgmt
+azure-mgmt-containerinstance==0.3.1  # via azure-mgmt
+azure-mgmt-containerregistry==1.0.1  # via azure-mgmt
+azure-mgmt-containerservice==3.0.1  # via azure-mgmt
+azure-mgmt-cosmosdb==0.3.1  # via azure-mgmt
+azure-mgmt-datafactory==0.4.0  # via azure-mgmt
+azure-mgmt-datalake-analytics==0.3.0  # via azure-mgmt
+azure-mgmt-datalake-nspkg==2.0.0  # via azure-mgmt-datalake-analytics, azure-mgmt-datalake-store
+azure-mgmt-datalake-store==0.3.0  # via azure-mgmt
+azure-mgmt-devtestlabs==2.2.0  # via azure-mgmt
+azure-mgmt-dns==1.2.0     # via azure-mgmt
+azure-mgmt-eventgrid==0.4.0  # via azure-mgmt
+azure-mgmt-eventhub==1.2.0  # via azure-mgmt
+azure-mgmt-hanaonazure==0.1.0  # via azure-mgmt
+azure-mgmt-iothub==0.4.0  # via azure-mgmt
+azure-mgmt-iothubprovisioningservices==0.1.0  # via azure-mgmt
+azure-mgmt-keyvault==0.40.0  # via azure-mgmt
+azure-mgmt-loganalytics==0.1.0  # via azure-mgmt
+azure-mgmt-logic==2.1.0   # via azure-mgmt
+azure-mgmt-machinelearningcompute==0.4.0  # via azure-mgmt
+azure-mgmt-managementpartner==0.1.0  # via azure-mgmt
+azure-mgmt-marketplaceordering==0.1.0  # via azure-mgmt
+azure-mgmt-media==0.2.0   # via azure-mgmt
+azure-mgmt-monitor==0.4.0  # via azure-mgmt
+azure-mgmt-msi==0.1.0     # via azure-mgmt
+azure-mgmt-network==1.7.1  # via azure-mgmt
+azure-mgmt-notificationhubs==1.0.0  # via azure-mgmt
+azure-mgmt-nspkg==2.0.0   # via azure-mgmt-advisor, azure-mgmt-applicationinsights, azure-mgmt-authorization, azure-mgmt-batch, azure-mgmt-batchai, azure-mgmt-billing, azure-mgmt-cdn, azure-mgmt-cognitiveservices, azure-mgmt-commerce, azure-mgmt-compute, azure-mgmt-consumption, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-datafactory, azure-mgmt-datalake-nspkg, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-eventgrid, azure-mgmt-eventhub, azure-mgmt-hanaonazure, azure-mgmt-iothub, azure-mgmt-iothubprovisioningservices, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-logic, azure-mgmt-machinelearningcompute, azure-mgmt-managementpartner, azure-mgmt-marketplaceordering, azure-mgmt-media, azure-mgmt-monitor, azure-mgmt-msi, azure-mgmt-network, azure-mgmt-notificationhubs, azure-mgmt-powerbiembedded, azure-mgmt-rdbms, azure-mgmt-recoveryservices, azure-mgmt-recoveryservicesbackup, azure-mgmt-redis, azure-mgmt-relay, azure-mgmt-reservations, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-search, azure-mgmt-servermanager, azure-mgmt-servicebus, azure-mgmt-servicefabric, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-subscription, azure-mgmt-trafficmanager, azure-mgmt-web
+azure-mgmt-powerbiembedded==1.0.0  # via azure-mgmt
+azure-mgmt-rdbms==0.1.0   # via azure-mgmt
+azure-mgmt-recoveryservices==0.2.0  # via azure-mgmt
+azure-mgmt-recoveryservicesbackup==0.1.1  # via azure-mgmt
+azure-mgmt-redis==5.0.0   # via azure-mgmt
+azure-mgmt-relay==0.1.0   # via azure-mgmt
+azure-mgmt-reservations==0.1.0  # via azure-mgmt
+azure-mgmt-resource==1.2.2  # via azure-mgmt
+azure-mgmt-scheduler==1.1.3  # via azure-mgmt
+azure-mgmt-search==1.0.0  # via azure-mgmt
+azure-mgmt-servermanager==1.2.0  # via azure-mgmt
+azure-mgmt-servicebus==0.4.0  # via azure-mgmt
+azure-mgmt-servicefabric==0.1.0  # via azure-mgmt
+azure-mgmt-sql==0.8.5     # via azure-mgmt
+azure-mgmt-storage==1.5.0  # via azure-mgmt
+azure-mgmt-subscription==0.1.0  # via azure-mgmt
+azure-mgmt-trafficmanager==0.40.0  # via azure-mgmt
+azure-mgmt-web==0.34.1    # via azure-mgmt
+azure-mgmt==2.0.0         # via azure
+azure-nspkg==2.0.0        # via azure-batch, azure-common, azure-cosmosdb-nspkg, azure-eventgrid, azure-graphrbac, azure-keyvault, azure-mgmt-nspkg, azure-servicebus, azure-servicefabric, azure-servicemanagement-legacy, azure-storage-nspkg
+azure-servicebus==0.21.1  # via azure
+azure-servicefabric==6.1.2.9  # via azure
+azure-servicemanagement-legacy==0.20.6  # via azure
+azure-storage-blob==1.1.0  # via azure
+azure-storage-common==1.1.0  # via azure-cosmosdb-table, azure-storage-blob, azure-storage-file, azure-storage-queue
+azure-storage-file==1.1.0  # via azure
+azure-storage-nspkg==3.0.0  # via azure-storage-blob, azure-storage-common, azure-storage-file, azure-storage-queue
+azure-storage-queue==1.1.0  # via azure
+azure==3.0.0
+backports.functools-lru-cache==1.5  # via jaraco.functools
 backports.ssl-match-hostname==3.5.0.1
 baron==0.6.6              # via redbaron
 billiard==3.3.0.23        # via celery
-boto3==1.4.4
-boto==2.46.1
-botocore==1.5.72          # via boto3, s3transfer
+boto3==1.6.2
+boto==2.47.0
+botocore==1.9.3           # via boto3, s3transfer
 celery==3.1.25
-#certifi==2018.1.18        # via msrest
-cffi==1.10.0              # via cryptography
+certifi==2018.1.18        # via msrest
+cffi==1.11.5              # via azure-datalake-store, cryptography
 channels==1.1.8
-cliff==2.7.0              # via osc-lib, python-designateclient, python-neutronclient, python-openstackclient
-cmd2==0.7.2               # via cliff
 constantly==15.1.0        # via twisted
-cryptography==1.9         # via adal, azure-storage, pyopenssl, secretstorage, twilio
+cryptography==2.1.4       # via adal, azure-cosmosdb-table, azure-storage-common, pyopenssl, requests, secretstorage
 daphne==1.3.0
-debtcollector==1.15.0     # via oslo.config, oslo.utils, python-designateclient, python-keystoneclient, python-neutronclient
-decorator==4.0.11         # via shade
 defusedxml==0.4.1         # via python-saml
-deprecation==1.0.1        # via openstacksdk
 django-auth-ldap==1.2.8
 django-celery==3.2.2
-django-crum==0.7.1
-django-extensions==1.7.8
+django-crum==0.7.2
+django-extensions==2.0.0
 django-jsonfield==1.0.1
 django-oauth-toolkit==1.0.0
 django-pglocks==1.0.2
-django-polymorphic==1.3
-django-radius==1.1.0
-django-solo==1.1.2
-django-split-settings==0.2.5
-django-taggit==0.22.1
-django==1.11.7
+django-polymorphic==2.0.2
+django-radius==1.3.3
+django-solo==1.1.3
+django-split-settings==0.3.0
+django-taggit==0.22.2
+django==1.11.10
 djangorestframework-yaml==1.0.3
-djangorestframework==3.7.3
-#dm.xmlsec.binding==1.3.2  # via python-saml
-#docutils==0.14            # via botocore
-dogpile.cache==0.6.3      # via python-ironicclient, shade
+djangorestframework==3.7.7
 enum34==1.1.6             # via cryptography, msrest
-funcsigs==1.0.2           # via debtcollector, oslo.utils
 functools32==3.2.3.post2  # via jsonschema
-futures==3.1.1            # via azure-storage, requests-futures, s3transfer, shade
-gevent-websocket==0.9.5
-gevent==1.2.2             # via gevent-websocket
-greenlet==0.4.12          # via gevent
-hyperlink==17.3.1         # via twisted
-idna==2.5                 # via cryptography, twilio
+future==0.16.0            # via django-radius
+futures==3.2.0            # via azure-cosmosdb-table, azure-datalake-store, azure-storage-blob, azure-storage-file, requests-futures, s3transfer
+hyperlink==18.0.0         # via twisted
+idna==2.6                 # via cryptography, hyperlink, requests
 incremental==17.5.0       # via twisted
 inflect==0.2.5            # via jaraco.itertools
-ipaddress==1.0.18         # via cryptography, shade
-irc==15.1.1
-iso8601==0.1.11           # via keystoneauth1, oslo.utils, python-neutronclient, python-novaclient
-isodate==0.5.4            # via msrest, python-saml
-jaraco.classes==1.4.1     # via jaraco.collections
-jaraco.collections==1.5.1  # via irc, jaraco.text
-jaraco.functools==1.16    # via irc, jaraco.text
-jaraco.itertools==2.0.1   # via irc
-jaraco.logging==1.5       # via irc
+ipaddress==1.0.19         # via cryptography
+irc==16.2
+isodate==0.6.0            # via msrest, python-saml
+jaraco.classes==1.4.3     # via jaraco.collections
+jaraco.collections==1.5.2  # via irc, jaraco.text
+jaraco.functools==1.17    # via irc, jaraco.text
+jaraco.itertools==2.1.1   # via irc
+jaraco.logging==1.5.1     # via irc
 jaraco.stream==1.1.2      # via irc
 jaraco.text==1.9.2        # via irc, jaraco.collections
-jmespath==0.9.3           # via boto3, botocore, shade
-jsonpatch==1.16           # via openstacksdk, shade, warlock
-jsonpickle==0.9.5         # via asgi-amqp
-jsonpointer==1.10         # via jsonpatch
+jmespath==0.9.3           # via boto3, botocore
+jsonpickle==0.9.6         # via asgi-amqp
 jsonschema==2.6.0
-keyring==10.3.3           # via msrestazure
-keystoneauth1==2.21.0     # via openstacksdk, os-client-config, osc-lib, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, shade
+keyring==11.0.0           # via msrestazure
 kombu==3.0.37             # via asgi-amqp, celery
-lxml==3.8.0               # via dm.xmlsec.binding, pyvmomi
-m2crypto==0.25.1
-markdown==2.6.7
-monotonic==1.3            # via oslo.utils
-more-itertools==3.2.0     # via irc, jaraco.functools, jaraco.itertools
-msgpack-python==0.4.8     # via asgi-amqp, oslo.serialization
-msrest==0.4.10            # via azure-common, msrestazure
-msrestazure==0.4.9        # via azure-common
-munch==2.1.1              # via shade
-netaddr==0.7.19           # via oslo.config, oslo.utils, pyrad, python-neutronclient
-netifaces==0.10.6         # via oslo.utils, shade
-oauthlib==2.0.2           # via requests-oauthlib, social-auth-core
-openstacksdk==0.9.17      # via python-openstackclient
+lxml==4.1.1               # via pyvmomi
+m2crypto==0.29.0
+markdown==2.6.11
+more-itertools==4.1.0     # via irc, jaraco.functools, jaraco.itertools
+msgpack-python==0.5.5     # via asgi-amqp
+msrest==0.4.26            # via azure-datalake-store, azure-eventgrid, azure-servicefabric, msrestazure
+msrestazure==0.4.22       # via azure-batch, azure-graphrbac, azure-keyvault, azure-mgmt-advisor, azure-mgmt-applicationinsights, azure-mgmt-authorization, azure-mgmt-batch, azure-mgmt-batchai, azure-mgmt-billing, azure-mgmt-cdn, azure-mgmt-cognitiveservices, azure-mgmt-commerce, azure-mgmt-compute, azure-mgmt-consumption, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-datafactory, azure-mgmt-datalake-analytics, azure-mgmt-datalake-store, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-eventgrid, azure-mgmt-eventhub, azure-mgmt-hanaonazure, azure-mgmt-iothub, azure-mgmt-iothubprovisioningservices, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-logic, azure-mgmt-machinelearningcompute, azure-mgmt-managementpartner, azure-mgmt-marketplaceordering, azure-mgmt-media, azure-mgmt-monitor, azure-mgmt-msi, azure-mgmt-network, azure-mgmt-notificationhubs, azure-mgmt-powerbiembedded, azure-mgmt-rdbms, azure-mgmt-recoveryservices, azure-mgmt-recoveryservicesbackup, azure-mgmt-redis, azure-mgmt-relay, azure-mgmt-reservations, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-search, azure-mgmt-servermanager, azure-mgmt-servicebus, azure-mgmt-servicefabric, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-subscription, azure-mgmt-trafficmanager, azure-mgmt-web
+netaddr==0.7.19           # via pyrad
+oauthlib==2.0.6           # via django-oauth-toolkit, requests-oauthlib, social-auth-core
 ordereddict==1.1
-os-client-config==1.27.0  # via openstacksdk, osc-lib, python-neutronclient, shade
-osc-lib==1.6.0            # via python-designateclient, python-ironicclient, python-neutronclient, python-openstackclient
-oslo.config==4.6.0        # via python-keystoneclient
-oslo.i18n==3.15.3         # via osc-lib, oslo.config, oslo.utils, python-cinderclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
-oslo.serialization==2.18.0  # via python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient
-oslo.utils==3.26.0        # via osc-lib, oslo.serialization, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient
-pbr==3.1.1                # via cliff, debtcollector, keystoneauth1, openstacksdk, osc-lib, oslo.i18n, oslo.serialization, oslo.utils, positional, python-cinderclient, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, python-novaclient, python-openstackclient, requestsexceptions, shade, stevedore
+pathlib2==2.3.0           # via azure-datalake-store
 pexpect==4.4.0
-positional==1.1.1         # via keystoneauth1, python-keystoneclient
-prettytable==0.7.2        # via cliff, python-cinderclient, python-glanceclient, python-ironicclient, python-novaclient
 psphere==0.5.2
-psutil==5.2.2
+psutil==5.4.3
 psycopg2==2.7.3.2
 ptyprocess==0.5.2         # via pexpect
-pyasn1-modules==0.0.9     # via service-identity
-pyasn1==0.2.3             # via pyasn1-modules, service-identity
-pycparser==2.17           # via cffi
+pyasn1-modules==0.2.1     # via service-identity
+pyasn1==0.4.2             # via pyasn1-modules, service-identity
+pycparser==2.18           # via cffi
 pycrypto==2.6.1
-pygerduty==0.35.2
-pyjwt==1.5.0              # via adal, social-auth-core, twilio
-pyopenssl==17.0.0
+pygerduty==0.37.0
+pyjwt==1.6.0              # via adal, social-auth-core, twilio
+pyopenssl==17.5.0
 pyparsing==2.2.0
 pyrad==2.1                # via django-radius
-python-cinderclient==2.2.0  # via python-openstackclient, shade
-python-dateutil==2.6.0    # via adal, azure-storage, botocore
-python-designateclient==2.6.0  # via shade
-python-glanceclient==2.7.0  # via python-openstackclient
-python-ironicclient==1.13.0  # via shade
-python-keystoneclient==3.11.0  # via python-neutronclient, python-openstackclient, shade
-python-ldap==2.4.39       # via django-auth-ldap
+python-dateutil==2.6.1    # via adal, azure-cosmosdb-table, azure-storage-common, botocore
+python-ldap==2.5.2        # via django-auth-ldap
 python-logstash==0.4.6
-python-memcached==1.58
-python-neutronclient==6.3.0  # via shade
-python-novaclient==9.0.1  # via python-openstackclient, shade
+python-memcached==1.59
 python-openid==2.2.5      # via social-auth-core
-python-openstackclient==3.11.0  # via python-ironicclient
 python-radius==1.0
-python-saml==2.2.1
-pytz==2017.3              # via babel, celery, django, irc, oslo.serialization, oslo.utils, tempora, twilio
+python-saml==2.2.2
+pytz==2018.3              # via celery, django, irc, tempora, twilio
 pyvmomi==6.5
-pyyaml==3.12              # via cliff, djangorestframework-yaml, os-client-config, oslo.config, psphere, python-ironicclient
+pyyaml==3.12              # via djangorestframework-yaml, psphere
 redbaron==0.6.3
 requests-futures==0.9.7
 requests-oauthlib==0.8.0  # via msrest, social-auth-core
-requests==2.14.2          # via adal, apache-libcloud, azure-servicebus, azure-servicemanagement-legacy, azure-storage, keystoneauth1, msrest, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-neutronclient, pyvmomi, requests-futures, requests-oauthlib, slackclient, social-auth-core, twilio
-requestsexceptions==1.2.0  # via os-client-config, shade
-rfc3986==1.0.0            # via oslo.config
-rply==0.7.4               # via baron
-s3transfer==0.1.10        # via boto3
+requests[security]==2.15.1
+rply==0.7.5               # via baron
+s3transfer==0.1.13        # via boto3
+scandir==1.7              # via pathlib2
 secretstorage==2.3.1      # via keyring
-service-identity==16.0.0
-shade==1.20.0
-simplejson==3.11.1        # via osc-lib, python-cinderclient, python-neutronclient, python-novaclient
-six==1.10.0               # via asgi-amqp, asgiref, autobahn, automat, cliff, cmd2, cryptography, debtcollector, django-extensions, irc, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, keystoneauth1, more-itertools, munch, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, pygerduty, pyopenssl, pyrad, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-ironicclient, python-keystoneclient, python-memcached, python-neutronclient, python-novaclient, python-openstackclient, pyvmomi, shade, slackclient, social-auth-app-django, social-auth-core, stevedore, tacacs-plus, tempora, twilio, txaio, warlock, websocket-client
-slackclient==1.0.6
-social-auth-app-django==2.0.0
-social-auth-core==1.5.0
-stevedore==1.23.0         # via cliff, keystoneauth1, openstacksdk, osc-lib, oslo.config, python-designateclient, python-keystoneclient
+service-identity==17.0.0
+six==1.11.0               # via asgi-amqp, asgiref, autobahn, automat, cryptography, django-extensions, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, more-itertools, pathlib2, pygerduty, pyopenssl, pyrad, python-dateutil, python-memcached, pyvmomi, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, tempora, twilio, txaio, websocket-client
+slackclient==1.1.2
+social-auth-app-django==2.1.0
+social-auth-core==1.7.0
 suds==0.4                 # via psphere
 tacacs_plus==1.0
-tempora==1.7              # via irc, jaraco.logging
-twilio==6.1.0
-twisted==17.9.0
-txaio==2.8.2              # via autobahn
-typing==3.6.2             # via m2crypto
-unicodecsv==0.14.1        # via cliff
-uwsgi==2.0.14
-warlock==1.2.0            # via python-glanceclient
-websocket-client==0.44.0  # via slackclient
-wrapt==1.10.10            # via debtcollector, positional, python-glanceclient
+tempora==1.10             # via irc, jaraco.logging
+twilio==6.10.4
+twisted==17.9.0           # via daphne
+txaio==2.9.0              # via autobahn
+typing==3.6.4             # via django-extensions, m2crypto
+uwsgi==2.0.17
+websocket-client==0.47.0  # via slackclient
 xmltodict==0.11.0
 zope.interface==4.4.3     # via twisted
 
