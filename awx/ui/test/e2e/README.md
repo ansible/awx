@@ -3,7 +3,7 @@
 This is an automated functional test suite for the front end.
 
 #### Technology
-Tests are written in Node.js using the [Nightwatch](https://github.com/nightwatchjs/nightwatch) test runner.
+The tests are written in Node.js and use the [Nightwatch](https://github.com/nightwatchjs/nightwatch) test runner.
 
 #### Requirements
 - node.js 6.x LTS
@@ -11,7 +11,7 @@ Tests are written in Node.js using the [Nightwatch](https://github.com/nightwatc
 
 #### Installation
 A successful invocation of `make ui-devel` will prepare your environment with the software
-depdendencies required to run these tests.
+dependencies required to run these tests.
 
 #### Configuration
 Three inputs are required:
