@@ -16,11 +16,9 @@ let $q;
 const record = {};
 
 let parent = null;
-let cache = [];
-let buffer = [];
 
-const SCROLL_BUFFER = 250;
-const SCROLL_LOAD_DELAY = 50;
+const SCROLL_THRESHOLD = 0.1;
+const SCROLL_DELAY = 1000;
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
 const EVENT_STATS_PLAY = 'playbook_on_stats';
@@ -78,6 +76,8 @@ function JobsIndexController (
         isLocked: false,
         showBackToTop: false,
         isActive: false,
+        position: 0,
+        time: 0,
         home: scrollHome,
         end: scrollEnd,
         down: scrollPageDown,
@@ -110,10 +110,6 @@ function JobsIndexController (
         container.scroll(onScroll);
     });
 }
-
-// TODO: Determine how to manage buffered events (store in page cache vs. separate)
-//    Leaning towards keeping separate (same as they come in over WS). On resume of scroll,
-// Clear/reset cache, append buffered events, then back to normal render cycle
 
 function processWebSocketEvents (scope, data) {
     let done;
@@ -173,74 +169,47 @@ function render (events) {
 }
 
 function devClear () {
-    cache = [];
     page.init(resource);
     clear();
 }
 
 function next () {
-    const config = {
-        related: resource.related,
-        page: vm.scroll.lastPage + 1,
-        params: {
-            order_by: 'start_line'
-        }
-    };
-
-    // console.log('[2] getting next page', config.page, cache);
-    return model.goToPage(config)
-        .then(data => {
-            if (!data || !data.results) {
-                return $q.resolve();
+    return page.next()
+        .then(events => {
+            if (!events) {
+                return;
             }
-
-            cache.push({ page: data.page, events: [] });
-
-            vm.scroll.lastPage = data.page;
 
             return shift()
-                .then(() => append(data.results));
-        });
+                .then(() => append(events));
+        })
 }
 
-function prev () {
+function previous () {
     const container = $(ELEMENT_CONTAINER)[0];
 
-    const config = {
-        related: resource.related,
-        page: vm.scroll.firstPage - 1,
-        params: {
-            order_by: 'start_line'
-        }
-    };
+    let previousHeight;
 
-    console.log(cache);
-    // console.log('[2] getting previous page', config.page, cache);
-    return model.goToPage(config)
-        .then(data => {
-            if (!data || !data.results) {
-                return $q.resolve();
+    return page.previous()
+        .then(events => {
+            if (!events) {
+                return;
             }
 
-            cache.unshift({ page: data.page, events: [] });
-
-            vm.scroll.firstPage = data.page;
-
-            const previousHeight = container.scrollHeight;
-
-            console.log(cache);
             return pop()
-                .then(() => prepend(data.results))
-                .then(lines => {
-                    const currentHeight = container.scrollHeight;
+                .then(() => {
+                    previousHeight = container.scrollHeight;
 
+                    return prepend(events);
+                })
+                .then(()  => {
+                    const currentHeight = container.scrollHeight;
                     container.scrollTop = currentHeight - previousHeight;
                 });
         });
 }
 
 function append (events) {
-    // console.log('[4] appending next page');
     return $q(resolve => {
         window.requestAnimationFrame(() => {
             const parsed = parseEvents(events);
@@ -258,61 +227,51 @@ function append (events) {
 }
 
 function prepend (events) {
-    // console.log('[4] prepending next page');
-
     return $q(resolve => {
         window.requestAnimationFrame(() => {
             const parsed = parseEvents(events);
             const rows = $($sce.getTrustedHtml($sce.trustAsHtml(parsed.html)));
             const table = $(ELEMENT_TBODY);
 
-            cache[0].lines = parsed.lines;
+            page.updateLineCount('current', parsed.lines);
 
             table.prepend(rows);
             $compile(rows.contents())($scope);
 
-            return resolve(parsed.lines);
+            $scope.$apply(() => {
+                return resolve(parsed.lines);
+            });
         });
     });
 }
 
 function pop () {
-    // console.log('[3] popping old page');
     return $q(resolve => {
-        if (cache.length <= resource.page.pageLimit) {
-            // console.log('[3.1] nothing to pop');
+        if (!page.isOverCapacity()) {
             return resolve();
         }
 
         window.requestAnimationFrame(() => {
-            const ejected = cache.pop();
-            // console.log('[3.1] popping', ejected);
-            const rows = $(ELEMENT_TBODY).children().slice(-ejected.lines);
-
-            vm.scroll.firstPage = cache[0].page;
+            const lines = page.trim('right');
+            const rows = $(ELEMENT_TBODY).children().slice(-lines);
 
             rows.empty();
             rows.remove();
 
-            return resolve(ejected);
+            return resolve();
         });
     });
 }
 
 function shift () {
-    // console.log('[3] shifting old page', cache.length);
     return $q(resolve => {
         if (!page.isOverCapacity()) {
-            // console.log('[3.1] nothing to shift');
             return resolve();
         }
 
         window.requestAnimationFrame(() => {
-            const lines = page.trim();
-            //console.log('[3.1] shifting', lines);
+            const lines = page.trim('left');
             const rows = $(ELEMENT_TBODY).children().slice(0, lines);
-
-            vm.scroll.firstPage = page.getPageNumber('first');
 
             rows.empty();
             rows.remove();
@@ -323,7 +282,6 @@ function shift () {
 }
 
 function clear () {
-    // console.log('[3] clearing pages');
     return $q(resolve => {
         window.requestAnimationFrame(() => {
             const rows = $(ELEMENT_TBODY).children();
@@ -574,65 +532,71 @@ function onScroll () {
         return;
     }
 
+    if (vm.scroll.register) {
+        $timeout.cancel(vm.scroll.register);
+    }
+
+    vm.scroll.register = $timeout(registerScrollEvent, SCROLL_DELAY);
+}
+
+function registerScrollEvent () {
     vm.scroll.isActive = true;
 
-    $timeout(() => {
-        const top = container[0].scrollTop;
-        const bottom = top + SCROLL_BUFFER + container[0].offsetHeight;
+    const position = container[0].scrollTop;
+    const height = container[0].offsetHeight;
+    const downward = position > vm.scroll.position;
 
-        if (top <= SCROLL_BUFFER) {
-            // console.log('[1] scroll to top');
-            vm.scroll.showBackToTop = false;
+    let promise;
 
-            prev()
-                .then(() => {
-                    // console.log('[5] scroll reset');
-                    vm.scroll.isActive = false;
-                });
+    if (position !== 0 ) {
+        vm.scroll.showBackToTop = true;
+    } else {
+        vm.scroll.showBackToTop = false;
+    }
 
-            return;
-        } else {
-            vm.scroll.showBackToTop = true;
 
-            if (bottom >= container[0].scrollHeight) {
-                // console.log('[1] scroll to bottom');
-
-                next()
-                    .then(() => {
-                        // console.log('[5] scroll reset');
-                        vm.scroll.isActive = false;
-                    });
-            } else {
-                vm.scroll.isActive = false;
-            }
+    console.log('downward', downward);
+    if (downward) {
+        if (((height - position) / height) < SCROLL_THRESHOLD) {
+            promise = next;
         }
-    }, SCROLL_LOAD_DELAY);
+    } else {
+        if ((position / height) < SCROLL_THRESHOLD) {
+            console.log('previous');
+            promise = previous;
+        }
+    }
+
+    vm.scroll.position = position;
+
+    if (!promise) {
+        vm.scroll.isActive = false;
+
+        return $q.resolve();
+    }
+
+    return promise()
+        .then(() => {
+            console.log('done');
+            vm.scroll.isActive = false;
+            /*
+             *$timeout(() => {
+             *    vm.scroll.isActive = false;
+             *}, SCROLL_DELAY);
+             */
+        });
+
 }
 
 function scrollHome () {
-    const config = {
-        related: resource.related,
-        page: 'first',
-        params: {
-            order_by: 'start_line'
-        }
-    };
-
-    vm.scroll.isActive = true;
-
-    // console.log('[2] getting first page', config.page, cache);
-    return model.goToPage(config)
-        .then(data => {
-            if (!data || !data.results) {
-                return $q.resolve();
+    return page.first()
+        .then(events => {
+            if (!events) {
+                return;
             }
 
-            cache = [{
-                page: data.page
-            }]
-
             return clear()
-                .then(() => prepend(data.results))
+                .then(() => prepend(events))
                 .then(() => {
                     vm.scroll.isActive = false;
                 });
@@ -641,45 +605,31 @@ function scrollHome () {
 
 function scrollEnd () {
     if (vm.scroll.isLocked) {
-        // Make note of current page when unlocked -- keep buffered events for that page for
-        // continuity
+        page.bookmark();
 
-        vm.scroll.firstPage = cache[0].page;
-        vm.scroll.lastPage = cache[cache.length - 1].page;
         vm.scroll.isLocked = false;
         vm.scroll.isActive = false;
 
         return;
     } else if (!vm.scroll.isLocked && vm.stream.isActive) {
+        page.bookmark();
+
         vm.scroll.isActive = true;
         vm.scroll.isLocked = true;
 
         return;
     }
 
-    const config = {
-        related: resource.related,
-        page: 'last',
-        params: {
-            order_by: 'start_line'
-        }
-    };
-
     vm.scroll.isActive = true;
 
-    // console.log('[2] getting last page', config.page, cache);
-    return model.goToPage(config)
-        .then(data => {
-            if (!data || !data.results) {
-                return $q.resolve();
+    return page.last()
+        .then(events => {
+            if (!events) {
+                return;
             }
 
-            cache = [{
-                page: data.page
-            }]
-
             return clear()
-                .then(() => append(data.results))
+                .then(() => append(events))
                 .then(() => {
                     const container = $(ELEMENT_CONTAINER)[0];
 
