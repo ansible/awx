@@ -970,7 +970,7 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
         obj = super(OAuth2TokenSerializer, self).create(validated_data)
         obj.save()
         if obj.application is not None:
-            OAuth2RefreshToken.objects.create(
+            RefreshToken.objects.create(
                 user=self.context['request'].user,
                 token=generate_token(),
                 application=obj.application,
@@ -1097,7 +1097,7 @@ class OAuth2TokenSerializer(BaseSerializer):
             obj.user = obj.application.user
         obj.save()
         if obj.application is not None:
-            OAuth2RefreshToken.objects.create(
+            RefreshToken.objects.create(
                 user=obj.application.user if obj.application.user else None,
                 token=generate_token(),
                 application=obj.application,
@@ -1151,7 +1151,7 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
             obj.user = obj.application.user
         obj.save()
         if obj.application is not None:
-            OAuth2RefreshToken.objects.create(
+            RefreshToken.objects.create(
                 user=obj.application.user if obj.application.user else None,
                 token=generate_token(),
                 application=obj.application,

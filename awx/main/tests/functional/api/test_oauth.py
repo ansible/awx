@@ -1,11 +1,30 @@
 import pytest
+import base64
 
-from awx.api.versioning import reverse
+from awx.api.versioning import reverse, drf_reverse
 from awx.main.models.oauth import (OAuth2Application as Application, 
                                    OAuth2AccessToken as AccessToken, 
-                                   OAuth2RefreshToken as RefreshToken
                                    )
+from oauth2_provider.models import RefreshToken
 
+
+@pytest.mark.django_db
+def test_personal_access_token_creation(oauth_application, post, alice):
+    url = drf_reverse('api:oauth_authorization_root_view') + 'token/'
+    resp = post(
+        url,
+        data='grant_type=password&username=alice&password=alice&scope=read',
+        content_type='application/x-www-form-urlencoded',
+        HTTP_AUTHORIZATION='Basic ' + base64.b64encode(':'.join([
+            oauth_application.client_id, oauth_application.client_secret
+        ]))
+    )
+
+    resp_json = resp._container[0]
+    assert 'access_token' in resp_json
+    assert 'scope' in resp_json
+    assert 'refresh_token' in resp_json
+    
 
 @pytest.mark.django_db
 def test_oauth_application_create(admin, post):
@@ -48,7 +67,6 @@ def test_oauth_application_update(oauth_application, patch, admin, alice):
     assert updated_app.user == admin
 
 
-@pytest.mark.skip(reason="Needs Update - CA")
 @pytest.mark.django_db
 def test_oauth_token_create(oauth_application, get, post, admin):
     response = post(
@@ -76,7 +94,7 @@ def test_oauth_token_create(oauth_application, get, post, admin):
     )
     assert response.data['summary_fields']['tokens']['count'] == 1
     assert response.data['summary_fields']['tokens']['results'][0] == {
-        'id': token.pk, 'token': token.token
+        'id': token.pk, 'scope': token.scope, 'token': '**************'
     }
 
 

@@ -55,21 +55,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'access token',
             },
         ),
-        migrations.CreateModel(
-            name='OAuth2RefreshToken',
-            fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('token', models.CharField(max_length=255, unique=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('updated', models.DateTimeField(auto_now=True)),
-                ('access_token', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='refresh_token', to=settings.OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL)),
-                ('application', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.OAUTH2_PROVIDER_APPLICATION_MODEL)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='main_oauth2refreshtoken', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'refresh token',
-            },
-        ),
         migrations.AddField(
             model_name='activitystream',
             name='o_auth2_access_token',
