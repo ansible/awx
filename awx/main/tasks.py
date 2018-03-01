@@ -225,6 +225,10 @@ def handle_ha_toplogy_worker_ready(sender, **kwargs):
         logger.info("Workers on tower node '{}' unsubscribed from queues {} and subscribed to queues {}"
                     .format(instance.hostname, removed_queues, added_queues))
 
+    # Expedite the first hearbeat run so a node comes online quickly.
+    cluster_node_heartbeat.apply([])
+    apply_cluster_membership_policies.apply([])
+
 
 @celeryd_init.connect
 def handle_update_celery_routes(sender=None, conf=None, **kwargs):
