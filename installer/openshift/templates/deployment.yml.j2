@@ -55,10 +55,8 @@ spec:
                   fieldPath: status.podIP
             - name: RABBITMQ_USE_LONGNAME
               value: "true"
-            - name: ERLANG_COOKIE
-              value: "test"
             - name: RABBITMQ_ERLANG_COOKIE
-              value: "secretb"
+              value: "cookiemonster"
             - name: RABBITMQ_NODENAME
               value: "rabbit@$(MY_POD_IP)"
             - name: AUTOCLUSTER_TYPE
@@ -74,13 +72,13 @@ spec:
             - name: CLEANUP_INTERVAL
               value: "30"
             - name: RABBITMQ_DEFAULT_USER
-              value: awx
+              value: "awx"
             - name: RABBITMQ_DEFAULT_PASS
-              value: abcdefg
+              value: "abcdefg"
             - name: RABBITMQ_DEFAULT_VHOST
-              value: awx
+              value: "awx"
             - name: RABBITMQ_CONFIG_FILE
-              value: /etc/rabbitmq/rabbitmq
+              value: "/etc/rabbitmq/rabbitmq"
         - name: awx-memcached
           image: memcached
       volumes:
