@@ -211,7 +211,7 @@ class ApiRootView(APIView):
 class ApiOAuthAuthorizationRootView(APIView):
 
     permission_classes = (AllowAny,)
-    view_name = _("API OAuth Authorization Root")
+    view_name = _("API OAuth 2 Authorization Root")
     versioning_class = None
 
     def get(self, request, format=None):
@@ -1499,7 +1499,7 @@ class UserMeList(ListAPIView):
 
 class OAuth2ApplicationList(ListCreateAPIView):
 
-    view_name = _("OAuth Applications")
+    view_name = _("OAuth 2 Applications")
 
     model = OAuth2Application
     serializer_class = OAuth2ApplicationSerializer
@@ -1507,7 +1507,7 @@ class OAuth2ApplicationList(ListCreateAPIView):
 
 class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
 
-    view_name = _("OAuth Application Detail")
+    view_name = _("OAuth 2 Application Detail")
 
     model = OAuth2Application
     serializer_class = OAuth2ApplicationSerializer
@@ -1515,7 +1515,7 @@ class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
 
 class ApplicationOAuth2TokenList(SubListCreateAPIView):
 
-    view_name = _("OAuth Application Tokens")
+    view_name = _("OAuth 2 Application Tokens")
 
     model = OAuth2AccessToken
     serializer_class = OAuth2TokenSerializer
