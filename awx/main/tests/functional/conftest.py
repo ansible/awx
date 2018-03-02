@@ -531,7 +531,7 @@ def _request(verb):
             user = data_or_user
         elif 'data' not in kwargs:
             kwargs['data'] = data_or_user
-        if 'format' not in kwargs:
+        if 'format' not in kwargs and 'content_type' not in kwargs:
             kwargs['format'] = 'json'
 
         view, view_args, view_kwargs = resolve(urlparse(url)[2])

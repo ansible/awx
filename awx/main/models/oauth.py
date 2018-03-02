@@ -8,12 +8,12 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 # Django OAuth Toolkit
-from oauth2_provider.models import AbstractApplication, AbstractAccessToken, AbstractRefreshToken
+from oauth2_provider.models import AbstractApplication, AbstractAccessToken
 
 
 DATA_URI_RE = re.compile(r'.*')  # FIXME
 
-__all__ = ['OAuth2AccessToken', 'OAuth2Application', 'OAuth2RefreshToken']
+__all__ = ['OAuth2AccessToken', 'OAuth2Application']
 
 
 class OAuth2Application(AbstractApplication):
@@ -56,18 +56,4 @@ class OAuth2AccessToken(AbstractAccessToken):
             self.last_used = now()
             self.save(update_fields=['last_used'])
         return valid
-
-
-class OAuth2RefreshToken(AbstractRefreshToken):
-
-    class Meta:
-        app_label = 'main'
-        verbose_name = _('refresh token')
-        
-    application = models.ForeignKey(
-        OAuth2Application, 
-        on_delete=models.CASCADE, 
-        blank=True, 
-        null=True,
-    )
 
