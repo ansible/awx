@@ -4,6 +4,7 @@ import atLibComponents from '~components';
 import Strings from '~features/output/jobs.strings';
 import Controller from '~features/output/index.controller';
 import PageService from '~features/output/page.service';
+import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
 
 const Template = require('~features/output/index.view.html');
