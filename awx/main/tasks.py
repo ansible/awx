@@ -346,14 +346,20 @@ def cluster_node_heartbeat(self):
             stop_local_services(['uwsgi', 'celery', 'beat', 'callback'], communicate=False)
             raise RuntimeError("Shutting down.")
     for other_inst in lost_instances:
-        if other_inst.capacity == 0:
-            continue
         try:
-            other_inst.capacity = 0
-            other_inst.save(update_fields=['capacity'])
-            logger.error("Host {} last checked in at {}, marked as lost.".format(
-                other_inst.hostname, other_inst.modified))
-            if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+            # Capacity could already be 0 because:
+            #  * It's a new node and it never had a heartbeat
+            #  * It was set to 0 by another tower node running this method
+            #  * It was set to 0 by this node, but auto deprovisioning is off
+            #
+            # If auto deprovisining is on, don't bother setting the capacity to 0
+            # since we will delete the node anyway.
+            if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
+                other_inst.capacity = 0
+                other_inst.save(update_fields=['capacity'])
+                logger.error("Host {} last checked in at {}, marked as lost.".format(
+                    other_inst.hostname, other_inst.modified))
+            elif settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
                 other_inst.delete()
                 logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
