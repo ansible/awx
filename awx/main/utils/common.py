@@ -335,18 +335,18 @@ def update_scm_url(scm_type, url, username=True, password=True,
 
 
 def get_allowed_fields(obj, serializer_mapping):
-    from django.contrib.auth.models import User
 
     if serializer_mapping is not None and obj.__class__ in serializer_mapping:
         serializer_actual = serializer_mapping[obj.__class__]()
         allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
     else:
         allowed_fields = [x.name for x in obj._meta.fields]
-
-    if isinstance(obj, User):
+    if obj._meta.model_name == 'user':
         field_blacklist = ['last_login']
         allowed_fields = [f for f in allowed_fields if f not in field_blacklist]
-
+    if obj._meta.model_name == 'oauth2application':
+        field_blacklist = ['client_secret']
+        allowed_fields = [f for f in allowed_fields if f not in field_blacklist]
     return allowed_fields
 
 
