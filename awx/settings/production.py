@@ -89,8 +89,6 @@ settings_files = os.path.join(settings_dir, '*.py')
 settings_file = os.environ.get('AWX_SETTINGS_FILE',
                                '/etc/tower/settings.py')
 
-MIDDLEWARE_CLASSES = ('awx.main.middleware.MigrationRanCheckMiddleware',) + MIDDLEWARE_CLASSES
-
 # Attempt to load settings from /etc/tower/settings.py first, followed by
 # /etc/tower/conf.d/*.py.
 try:
