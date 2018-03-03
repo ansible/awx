@@ -35,8 +35,8 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                     $scope.projects.forEach(function(project, i) {
                         $scope.projects[i].statusIcon = GetProjectIcon(project.status);
                         $scope.projects[i].statusTip = GetProjectToolTip(project.status);
-                        $scope.projects[i].scm_update_tooltip = "Start an SCM update";
-                        $scope.projects[i].scm_schedule_tooltip = "Schedule future SCM updates";
+                        $scope.projects[i].scm_update_tooltip = "Get latest SCM revision";
+                        $scope.projects[i].scm_schedule_tooltip = "Schedule SCM revision updates";
                         $scope.projects[i].scm_type_class = "";
 
                         if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {

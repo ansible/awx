@@ -11,23 +11,23 @@ export default
                 case 'pending':
                 case 'waiting':
                 case 'new':
-                    result = i18n._('Queued. Click for details');
+                    result = i18n._('Update queued. Click for details');
                     break;
                 case 'updating':
                 case 'running':
-                    result = i18n._('Running! Click for details');
+                    result = i18n._('Update running. Click for details');
                     break;
                 case 'successful':
-                    result = i18n._('Success! Click for details');
+                    result = i18n._('Update succeeded. Click for details');
                     break;
                 case 'failed':
-                    result = i18n._('Failed. Click for details');
+                    result = i18n._('Update failed. Click for details');
                     break;
                 case 'missing':
-                    result = i18n._('Missing. Click for details');
+                    result = i18n._('Update missing. Click for details');
                     break;
                 case 'canceled':
-                    result = i18n._('Canceled. Click for details');
+                    result = i18n._('Update canceled. Click for details');
                     break;
             }
             return result;

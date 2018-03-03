@@ -73,8 +73,8 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
         function buildTooltips(project) {
             project.statusIcon = GetProjectIcon(project.status);
             project.statusTip = GetProjectToolTip(project.status);
-            project.scm_update_tooltip = i18n._("Start an SCM update");
-            project.scm_schedule_tooltip = i18n._("Schedule future SCM updates");
+            project.scm_update_tooltip = i18n._("Get latest SCM revision");
+            project.scm_schedule_tooltip = i18n._("Schedule SCM revision updates");
             project.scm_type_class = "";
 
             if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
