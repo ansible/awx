@@ -132,7 +132,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                     });
 
                     $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
-                    $scope.scm_update_tooltip = i18n._("Start an SCM update");
+                    $scope.scm_update_tooltip = i18n._("Get latest SCM revision");
                     $scope.scm_type_class = "";
                     if (data.status === 'running' || data.status === 'updating') {
                         $scope.scm_update_tooltip = i18n._("SCM update currently running");

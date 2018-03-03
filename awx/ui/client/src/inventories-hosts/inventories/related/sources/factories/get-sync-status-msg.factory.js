@@ -4,7 +4,7 @@ export default
             var status = params.status,
             launch_class = '',
             launch_tip = i18n._('Start sync process'),
-            schedule_tip = i18n._('Schedule future inventory syncs'),
+            schedule_tip = i18n._('Schedule inventory syncs'),
             stat, stat_class, status_tip;
 
             stat = status;

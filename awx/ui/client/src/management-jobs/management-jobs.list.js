@@ -35,7 +35,7 @@ export default function(){
                 label: 'Schedule',
                 mode: 'all',
                 ngClick: 'configureSchedule()',
-                awToolTip: 'Schedule future job template runs',
+                awToolTip: 'Schedule job template runs',
                 dataPlacement: 'top',
             }
         }

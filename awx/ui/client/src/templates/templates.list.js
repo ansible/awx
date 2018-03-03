@@ -88,7 +88,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Schedule'),
                 mode: 'all',
                 ngClick: 'scheduleJob(template)',
-                awToolTip: i18n._('Schedule future job template runs'),
+                awToolTip: i18n._('Schedule job template runs'),
                 dataPlacement: 'top',
             },
             copy: {

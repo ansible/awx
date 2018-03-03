@@ -186,7 +186,7 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                     ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }, {
                     name: 'scm_update_on_launch',
-                    label: i18n._('Update on Launch'),
+                    label: i18n._('Update Revision on Launch'),
                     type: 'checkbox',
                     awPopOver: '<p>' + i18n._('Each time a job runs using this project, update the revision of the project prior to starting the job.') + '</p>',
                     dataTitle: i18n._('SCM Update'),
