@@ -7,7 +7,6 @@ function SmartSearchController (
     GetBasePath,
     i18n,
     qs,
-    SmartSearchService
 ) {
     const searchKey = `${$scope.iterator}_search`;
     const optionsKey = `${$scope.list.iterator}_options`;
@@ -58,7 +57,7 @@ function SmartSearchController (
                 }
             });
 
-        function compareParams(a, b) {
+        function compareParams (a, b) {
             for (let key in a) {
                 if (!(key in b) || a[key].toString() !== b[key].toString()) {
                     return false;
@@ -106,22 +105,8 @@ function SmartSearchController (
     }
 
     function generateSearchTags () {
-        $scope.searchTags = [];
-
-        const querysetCopy = angular.copy(queryset);
-
-        if ($scope.singleSearchParam && querysetCopy[$scope.singleSearchParam]) {
-            const searchParam = querysetCopy[$scope.singleSearchParam].split('%20and%20');
-            delete querysetCopy[$scope.singleSearchParam];
-
-            $.each(searchParam, (index, param) => {
-                const paramParts = decodeURIComponent(param).split(/=(.+)/);
-                const reconstructedSearchString = qs.decodeParam(paramParts[1], paramParts[0]);
-                $scope.searchTags.push(reconstructedSearchString);
-            });
-        }
-
-        $scope.searchTags = $scope.searchTags.concat(qs.stripDefaultParams(querysetCopy, defaults));
+        const { singleSearchParam } = $scope;
+        $scope.searchTags = qs.createSearchTagsFromQueryset(queryset, defaults, singleSearchParam);
     }
 
     function revertSearch (queryToBeRestored) {
@@ -149,14 +134,7 @@ function SmartSearchController (
         $scope.showKeyPane = !$scope.showKeyPane;
     };
 
-    function searchWithoutKey (term, singleSearchParam = null) {
-        if (singleSearchParam) {
-            return { [singleSearchParam]: `search=${encodeURIComponent(term)}` };
-        }
-        return { search: encodeURIComponent(term) };
-    }
-
-    function isAnsibleFactSearchTerm (termParts) {
+    function isAnsibleFactField (termParts) {
         const rootField = termParts[0].split('.')[0].replace(/^-/, '');
         return rootField === 'ansible_facts';
     }
@@ -172,111 +150,21 @@ function SmartSearchController (
         return (isRelatedSearchTermField || isBaseModelRelatedSearchTermField);
     }
 
-    function getSearchInputQueryset ({ terms, singleSearchParam }) {
-        let params = {};
-
-        // remove leading/trailing whitespace
-        terms = (terms) ? terms.trim() : '';
-        let splitTerms;
-
-        if (singleSearchParam === 'host_filter') {
-            splitTerms = SmartSearchService.splitFilterIntoTerms(terms);
-        } else {
-            splitTerms = SmartSearchService.splitSearchIntoTerms(terms);
-        }
-
-        const combineSameSearches = (a, b) => {
-            if (!a) {
-                return undefined;
-            }
-
-            if (_.isArray(a)) {
-                return a.concat(b);
-            }
-
-            if (singleSearchParam) {
-                return `${a}%20and%20${b}`;
-            }
-
-            return [a, b];
-        };
-
-        _.each(splitTerms, term => {
-            const termParts = SmartSearchService.splitTermIntoParts(term);
-            let termParams;
-
-            if (termParts.length === 1) {
-                termParams = searchWithoutKey(term, singleSearchParam);
-            } else if (isAnsibleFactSearchTerm(termParts)) {
-                termParams = qs.encodeParam({ term, singleSearchParam });
-            } else if (isRelatedField(termParts)) {
-                termParams = qs.encodeParam({ term, singleSearchParam, related: true });
-            } else {
-                termParams = qs.encodeParam({ term, singleSearchParam });
-            }
-
-            params = _.merge(params, termParams, combineSameSearches);
-        });
-
-        return params;
-    }
-
-    function mergeQueryset (qset, additional, singleSearchParam) {
-        const merged = _.merge({}, qset, additional, (objectValue, sourceValue, key, object) => {
-            if (!(object[key] && object[key] !== sourceValue)) {
-                // // https://lodash.com/docs/3.10.1#each
-                // If this returns undefined merging is handled by default _.merge algorithm
-                return undefined;
-            }
-
-            if (_.isArray(object[key])) {
-                object[key].push(sourceValue);
-                return object[key];
-            }
-
-            if (singleSearchParam) {
-                if (!object[key]) {
-                    return sourceValue;
-                }
-
-                const singleSearchParamKeys = object[key].split('%20and%20');
-
-                if (_.includes(singleSearchParamKeys, sourceValue)) {
-                    return object[key];
-                }
-
-                return `${object[key]}%20and%20${sourceValue}`;
-            }
-
-            // Start the array of keys
-            return [object[key], sourceValue];
-        });
-
-        return merged;
-    }
-
     $scope.addTerms = terms => {
         const { singleSearchParam } = $scope;
-        const origQueryset = _.clone(queryset);
+        const unmodifiedQueryset = _.clone(queryset);
 
-        // Remove leading/trailing whitespace if there is any
-        terms = (terms) ? terms.trim() : '';
-
-        if (!(terms && terms !== '')) {
-            return;
-        }
-
-        const searchInputQueryset = getSearchInputQueryset({ terms, singleSearchParam });
-        queryset = mergeQueryset(queryset, searchInputQueryset, singleSearchParam);
+        const searchInputQueryset = qs.getSearchInputQueryset(terms, isRelatedField, isAnsibleFactField, singleSearchParam);
+        const modifiedQueryset = qs.mergeQueryset(queryset, searchInputQueryset, singleSearchParam);
 
         // Go back to the first page after a new search
-        delete queryset.page;
+        delete modifiedQueryset.page;
 
         // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
         // This transition will not reload controllers/resolves/views but will register new
         // $stateParams[searchKey] terms.
         if (!$scope.querySet) {
-            $state.go('.', { [searchKey]: queryset })
+            $state.go('.', { [searchKey]: modifiedQueryset })
                 .then(() => {
                     // same as above in $scope.remove.  For some reason deleting the page
                     // from the queryset works for all lists except lists in modals.
@@ -284,80 +172,26 @@ function SmartSearchController (
                 });
         }
 
-        qs.search(path, queryset)
+        qs.search(path, modifiedQueryset)
             .then(({ data }) => {
                 if ($scope.querySet) {
-                    $scope.querySet = queryset;
+                    $scope.querySet = modifiedQueryset;
                 }
                 $scope.dataset = data;
                 $scope.collection = data.results;
             })
-            .catch(() => revertSearch(origQueryset));
+            .catch(() => revertSearch(unmodifiedQueryset));
 
         $scope.searchTerm = null;
 
         generateSearchTags();
     };
-
-    function removeTermsFromQueryset(qset, term, singleSearchParam = null) {
-        const returnedQueryset = _.cloneDeep(qset);
-
-        const removeSingleTermFromQueryset = (value, key) => {
-            const space = '%20and%20';
-
-            if (Array.isArray(returnedQueryset[key])) {
-                returnedQueryset[key] = returnedQueryset[key].filter(item => item !== value);
-                if (returnedQueryset[key].length < 1) {
-                    delete returnedQueryset[key];
-                }
-            } else if (singleSearchParam && _.get(returnedQueryset, singleSearchParam, []).includes(space)) {
-                const searchParamParts = returnedQueryset[singleSearchParam].split(space);
-                // The value side of each paramPart might have been encoded in
-                // SmartSearch.splitFilterIntoTerms
-                _.each(searchParamParts, (paramPart, paramPartIndex) => {
-                    searchParamParts[paramPartIndex] = decodeURIComponent(paramPart);
-                });
-
-                const paramPartIndex = searchParamParts.indexOf(value);
-
-                if (paramPartIndex !== -1) {
-                    searchParamParts.splice(paramPartIndex, 1);
-                }
-
-                returnedQueryset[singleSearchParam] = searchParamParts.join(space);
-
-            } else {
-                delete returnedQueryset[key];
-            }
-        };
-
-        const termParts = SmartSearchService.splitTermIntoParts(term);
-
-        let removed;
-
-        if (termParts.length === 1) {
-            removed = searchWithoutKey(term, singleSearchParam);
-        } else if (isRelatedField(termParts)) {
-            removed = qs.encodeParam({ term, singleSearchParam, related: true });
-        } else {
-            removed = qs.encodeParam({ term, singleSearchParam });
-        }
-
-        if (!removed) {
-            removed = searchWithoutKey(termParts[termParts.length - 1], singleSearchParam);
-        }
-
-        _.each(removed, removeSingleTermFromQueryset);
-
-        return returnedQueryset;
-    }
-
     // remove tag, merge new queryset, $state.go
     $scope.removeTerm = index => {
         const { singleSearchParam } = $scope;
         const [term] = $scope.searchTags.splice(index, 1);
 
-        const modifiedQueryset = removeTermsFromQueryset(queryset, term, singleSearchParam);
+        const modifiedQueryset = qs.removeTermsFromQueryset(queryset, term, isRelatedField, singleSearchParam);
 
         if (!$scope.querySet) {
             $state.go('.', { [searchKey]: modifiedQueryset })
@@ -365,8 +199,7 @@ function SmartSearchController (
                     // for some reason deleting a tag from a list in a modal does not
                     // remove the param from $stateParams.  Here we'll manually check to make sure
                     // that that happened and remove it if it didn't.
-                    const clearedParams = removeTermsFromQueryset(
-                        $stateParams[searchKey], term, singleSearchParam);
+                    const clearedParams = qs.removeTermsFromQueryset($stateParams[searchKey], term, isRelatedField, singleSearchParam);
                     $stateParams[searchKey] = clearedParams;
                 });
         }
@@ -416,7 +249,6 @@ SmartSearchController.$inject = [
     'GetBasePath',
     'i18n',
     'QuerySet',
-    'SmartSearchService',
 ];
 
 export default SmartSearchController;
