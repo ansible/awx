@@ -1,0 +1,20 @@
+<!-- todo: styling, css etc. - disposition according to project lib conventions -->
+<div class="jobz-searchKeyPaneContainer">
+    <div class="jobz-searchKeyPane">
+        <div class="SmartSearch-keyRow">
+        <div class="SmartSearch-examples">
+            <div class="SmartSearch-examples--title"><b>EXAMPLES:</b></div>
+            <div class="SmartSearch-examples--search" ng-repeat="tag in vm.examples"> {{ tag }}</div>
+        </div>
+        </div>
+        <div class="SmartSearch-keyRow">
+            <b>FIELDS:</b>
+            <span ng-repeat="field in vm.fields">{{ field }}<span ng-if="!$last">, </span></span>
+        </div>
+        <div class="SmartSearch-keyRow">
+            <b>ADDITIONAL INFORMATION:</b>
+            For additional information on advanced search search syntax please see the Ansible Tower
+            <a ng-attr-href="undefined" target="_blank">documentation</a>.
+        </div>
+    </div>
+</div>

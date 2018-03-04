@@ -7,6 +7,51 @@
 
     <div class="col-md-8">
         <at-panel class="at-Stdout">
+            <!-- search ============================================================================================================= -->
+            <form ng-submit="vm.search()">
+            <div class="input-group">
+                <input type="text"
+                       class="form-control at-Input"
+                       ng-class="{ 'at-Input--rejected': vm.searchRejected }"
+                       ng-model="vm.searchValue"
+                       ng-attr-placeholder="SEARCH"
+                       ng-disabled="vm.searchDisabled">
+                <span class="input-group-btn">
+                    <button class="btn at-ButtonHollow--default at-Input-button"
+                            ng-click="vm.search()"
+                            ng-disabled="vm.searchDisabled"
+                            type="button">
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <button class="btn jobz-Button-searchKey"
+                            ng-if="vm.searchKey"
+                            ng-disabled="vm.searchDisabled"
+                            ng-click="vm.toggleSearchKey()"
+                            type="button"> key
+                    </button>
+                    <button class="btn at-ButtonHollow--default at-Input-button"
+                            ng-if="!vm.searchKey"
+                            ng-disabled="vm.searchDisabled"
+                            ng-click="vm.toggleSearchKey()"
+                            type="button"> key
+                    </button>
+                </span>
+            </div>
+            </form>
+
+            <div class="jobz-tagz">
+                <div class="LabelList-tagContainer" ng-repeat="tag in vm.searchTags track by $index">
+                    <div class="LabelList-tag LabelList-tag--deletable"><span class="LabelList-name">{{ tag }}</span></div>
+                    <div class="LabelList-deleteContainer" ng-click="vm.removeSearchTag($index)">
+                        <i class="fa fa-times LabelList-tagDelete"></i>
+                    </div>
+                </div>
+                <div><a href class="jobz-searchClearAll" ng-click="vm.clearSearch()" ng-show="!(vm.searchTags | isEmpty)">CLEAR ALL</a></div>
+            </div>
+
+            <at-search-key ng-show="vm.searchKey" fields="vm.searchKeyFields" examples="vm.searchKeyExamples"></at-search-key>
+
+            <!-- ==================================================================================================================== -->
             <div class="at-Stdout-menuTop">
                 <div class="pull-left" ng-click="vm.expand()">
                     <i class="at-Stdout-menuIcon fa"

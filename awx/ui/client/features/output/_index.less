@@ -150,3 +150,52 @@
     white-space: pre-wrap;
 
 }
+
+// Search ---------------------------------------------------------------------------------
+@at-jobz-top-search-key: @at-space-2x;
+@at-jobz-bottom-search-key: @at-space-3x;
+
+.jobz-searchKeyPaneContainer {
+    margin-top: @at-jobz-top-search-key;
+    margin-bottom: @at-jobz-bottom-search-key;
+}
+
+.jobz-searchKeyPane {
+    // background-color: @at-gray-f6;
+    background-color: @login-notice-bg;
+    color: @login-notice-text;
+    border-radius: @at-border-radius;
+    border: 1px solid @at-gray-b7;
+    // color: @at-gray-848992;
+    padding: 6px @at-padding-input 6px @at-padding-input;
+}
+
+.jobz-searchClearAll {
+    font-size: 10px;
+    padding-bottom: @at-space;
+}
+
+.jobz-Button-searchKey {
+    .at-mixin-Button();
+
+    background-color: @at-blue;
+    border-color: at-color-button-border-default;
+    color: @at-white;
+
+    &:hover, &:active {
+        color: @at-white;
+        background-color: @at-blue-hover;
+        box-shadow: none;
+    }
+
+    &:focus {
+        color: @at-white;
+    }
+}
+
+.jobz-tagz {
+    margin-top: @at-space;
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}

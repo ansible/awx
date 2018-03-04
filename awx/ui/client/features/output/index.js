@@ -6,6 +6,7 @@ import Controller from '~features/output/index.controller';
 import PageService from '~features/output/page.service';
 import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
+import SearchKeyDirective from '~features/output/search-key.directive';
 
 const Template = require('~features/output/index.view.html');
 
@@ -15,8 +16,8 @@ const PAGE_LIMIT = 3;
 const PAGE_SIZE = 100;
 const WS_PREFIX = 'ws';
 
-function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJob, $stateParams) {
-    const { id, type } = $stateParams;
+function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJob, $stateParams, qs, Wait) {
+    const { id, type, job_event_search } = $stateParams;
 
     let Resource;
     let related = 'events';
@@ -43,14 +44,20 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
             return null;
     }
 
+    const params = { page_size: PAGE_SIZE, order_by: 'start_line' };
+
+    if (job_event_search) {
+        const searchParams = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
+
+        Object.assign(params, searchParams);
+    }
+
+    Wait('start');
     return new Resource('get', id)
         .then(model => model.extend(related, {
             pageCache: PAGE_CACHE,
             pageLimit: PAGE_LIMIT,
-            params: {
-                page_size: PAGE_SIZE,
-                order_by: 'start_line'
-            }
+            params,
         }))
         .then(model => {
             return {
@@ -67,7 +74,9 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
                     pageLimit: PAGE_LIMIT
                 }
             };
-        });
+        })
+        .catch(({ data, status }) => qs.error(data, status))
+        .finally(() => Wait('stop'));
 }
 
 function resolveWebSocketConnection (SocketService, $stateParams) {
@@ -131,8 +140,8 @@ function getWebSocketResource (type) {
 function JobsRun ($stateRegistry) {
     const state = {
         name: 'jobz',
-        url: '/jobz/:type/:id',
-        route: '/jobz/:type/:id',
+        url: '/jobz/:type/:id?job_event_search',
+        route: '/jobz/:type/:id?job_event_search',
         data: {
             activityStream: true,
             activityStreamTarget: 'jobs'
@@ -152,6 +161,8 @@ function JobsRun ($stateRegistry) {
                 'SystemJobModel',
                 'WorkflowJobModel',
                 '$stateParams',
+                'QuerySet',
+                'Wait',
                 resolveResource
             ],
             ncyBreadcrumb: [
@@ -179,6 +190,7 @@ angular
     .service('JobStrings', Strings)
     .service('JobPageService', PageService)
     .service('JobScrollService', ScrollService)
+    .directive('atSearchKey', SearchKeyDirective)
     .run(JobsRun);
 
 export default MODULE_NAME;

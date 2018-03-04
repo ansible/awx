@@ -9,6 +9,8 @@ let page;
 let render;
 let scroll;
 let resource;
+let $state;
+let qs;
 
 let chain;
 
@@ -19,7 +21,9 @@ function JobsIndexController (
     _render_,
     _$scope_,
     _$compile_,
-    _$q_
+    _$q_,
+    _$state_,
+    _qs_,
 ) {
     vm = this || {};
 
@@ -59,6 +63,23 @@ function JobsIndexController (
     const stream = false; // TODO: Set in route
 
     chain = $q.resolve();
+
+    // search
+    $state = _$state_;
+    qs = _qs_;
+
+    vm.searchValue = '';
+    vm.searchRejected = null;
+    vm.searchKey = false;
+    vm.searchKeyExamples = searchKeyExamples;
+    vm.searchKeyFields = searchKeyFields;
+
+    vm.clearSearch = clearSearch;
+    vm.search = search;
+    vm.toggleSearchKey = toggleSearchKey;
+    vm.removeSearchTag = removeSearchTag;
+    vm.searchTags = getSearchTags(getCurrentQueryset());
+
     render.requestAnimationFrame(() => init());
 }
 
@@ -318,6 +339,62 @@ function toggle (uuid, menu) {
 
         lines.removeClass('hidden');
     }
+
+//
+// Search
+//
+
+const searchReloadOptions = { reload: true, inherit: false };
+const searchKeyExamples = ['id:>1', 'task:set', 'created:>=2000-01-01'];
+const searchKeyFields = ['changed', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
+
+function toggleSearchKey () {
+    vm.searchKey = !vm.searchKey;
+}
+
+function getCurrentQueryset() {
+    const { job_event_search } = $state.params;
+
+    return qs.decodeArr(job_event_search);
+}
+
+function getSearchTags (queryset) {
+    return qs.createSearchTagsFromQueryset(queryset)
+        .filter(tag => !tag.startsWith('event'))
+        .filter(tag => !tag.startsWith('-event'))
+        .filter(tag => !tag.startsWith('page_size'))
+        .filter(tag => !tag.startsWith('order_by'));
+}
+
+function removeSearchTag (index) {
+    const searchTerm = vm.searchTags[index];
+
+    const currentQueryset = getCurrentQueryset();
+    const modifiedQueryset = qs.removeTermsFromQueryset(currentQueryset, searchTerm);
+
+    vm.searchTags = getSearchTags(modifiedQueryset);
+
+    $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
+    $state.transitionTo($state.current, $state.params, searchReloadOptions);
+}
+
+function search () {
+    const searchInputQueryset = qs.getSearchInputQueryset(vm.searchValue);
+
+    const currentQueryset = getCurrentQueryset();
+    const modifiedQueryset = qs.mergeQueryset(currentQueryset, searchInputQueryset);
+
+    vm.searchTags = getSearchTags(modifiedQueryset);
+
+    $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
+    $state.transitionTo($state.current, $state.params, searchReloadOptions);
+}
+
+function clearSearch () {
+    vm.searchTags = [];
+
+    $state.params.job_event_search = '';
+    $state.transitionTo($state.current, $state.params, searchReloadOptions);
 }
 
 JobsIndexController.$inject = [
@@ -327,7 +404,9 @@ JobsIndexController.$inject = [
     'JobRenderService',
     '$scope',
     '$compile',
-    '$q'
+    '$q',
+    '$state',
+    'QuerySet',
 ];
 
 module.exports = JobsIndexController;
