@@ -44,19 +44,16 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 key = this.replaceDefaultFlags(key);
 
                 if (!Array.isArray(values)) {
-                    values = this.replaceEncodedTokens(values);
-
-                    return `${key}=${values}`;
+                    values = [values];
                 }
 
                 return values
                     .map(value => {
                         value = this.replaceDefaultFlags(value);
                         value = this.replaceEncodedTokens(value);
-
-                        return `${key}=${value}`;
+                        return [key, value]
                     })
-                    .join('&');
+
             },
             // encodes ui-router params from {operand__key__comparator: value} pairs to API-consumable URL
             encodeQueryset(params) {
@@ -69,15 +66,33 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                         result += '&';
                     }
 
-                    return result += this.encodeTerms(value, key);
+                    const encodedTermString = this.encodeTerms(value, key)
+                        .map(([key, value]) => `${key}=${value}`)
+                        .join('&');
+
+                    return result += encodedTermString;
                 }, '?');
+            },
+            // like encodeQueryset, but return an actual unstringified API-consumable http param object
+            encodeQuerysetObject(params) {
+                return _.reduce(params, (obj, value, key) => {
+                    const encodedTerms = this.encodeTerms(value, key);
+
+                    for (let encodedIndex in encodedTerms) {
+                        const [encodedKey, encodedValue] = encodedTerms[encodedIndex];
+                        obj[encodedKey] = obj[encodedKey] || [];
+                        obj[encodedKey].push(encodedValue)
+                    }
+
+                    return obj;
+                }, {});
             },
             // encodes a ui smart-search param to a django-friendly param
             // operand:key:comparator:value => {operand__key__comparator: value}
-            encodeParam(params){
+            encodeParam({ term, relatedSearchTerm, searchTerm, singleSearchParam }){
                 // Assumption here is that we have a key and a value so the length
                 // of the paramParts array will be 2.  [0] is the key and [1] the value
-                let paramParts = SmartSearchService.splitTermIntoParts(params.term);
+                let paramParts = SmartSearchService.splitTermIntoParts(term);
                 let keySplit = paramParts[0].split('.');
                 let exclude = false;
                 let lessThanGreaterThan = paramParts[1].match(/^(>|<).*$/) ? true : false;
@@ -88,16 +103,16 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 let paramString = exclude ? "not__" : "";
                 let valueString = paramParts[1];
                 if(keySplit.length === 1) {
-                    if(params.searchTerm && !lessThanGreaterThan) {
-                        if(params.singleSearchParam) {
+                    if(searchTerm && !lessThanGreaterThan) {
+                        if(singleSearchParam) {
                             paramString += keySplit[0] + '__icontains';
                         }
                         else {
                             paramString += keySplit[0] + '__icontains_DEFAULT';
                         }
                     }
-                    else if(params.relatedSearchTerm) {
-                        if(params.singleSearchParam) {
+                    else if(relatedSearchTerm) {
+                        if(singleSearchParam) {
                             paramString += keySplit[0];
                         }
                         else {
@@ -131,8 +146,8 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     }
                 }
 
-                if(params.singleSearchParam) {
-                    return {[params.singleSearchParam]: paramString + "=" + valueString};
+                if(singleSearchParam) {
+                    return {[singleSearchParam]: paramString + "=" + valueString};
                 }
                 else {
                     return {[paramString] : encodeURIComponent(valueString)};
@@ -189,7 +204,14 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     return decodeParamString(value);
                 }
             },
-
+            convertToSearchTags(obj) {
+                const tags = [];
+                for (let key in obj) {
+                    const value = obj[key];
+                    tags.push(this.decodeParam(value, key));
+                }
+                return tags;
+            },
             // encodes a django queryset for ui-router's URLMatcherFactory
             // {operand__key__comparator: value, } => 'operand:key:comparator:value;...'
             // value.isArray expands to:
