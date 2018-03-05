@@ -33,7 +33,7 @@ spec:
             - name: DATABASE_HOST
               value: {{ pg_hostname|default('postgresql') }}
             - name: DATABASE_PORT
-              value: ({{ pg_port|default('5432') }})
+              value: "{{ pg_port|default('5432') }}"
             - name: DATABASE_PASSWORD
               value: {{ pg_password }}
             - name: MEMCACHED_HOST
@@ -45,7 +45,7 @@ spec:
             - name: AWX_ADMIN_PASSWORD
               value: {{ default_admin_password|default('password') }}
         - name: awx-rabbit
-          image: ansible/awx_rabbitmq:latest
+          image: ansible/awx_rabbitmq:{{ rabbitmq_version }}
           imagePullPolicy: Always
           env:
             # For consupmption by rabbitmq-env.conf
@@ -58,7 +58,7 @@ spec:
             - name: ERLANG_COOKIE
               value: "test"
             - name: RABBITMQ_ERLANG_COOKIE
-              value: "secretb"
+              value: "cookiemonster"
             - name: RABBITMQ_NODENAME
               value: "rabbit@$(MY_POD_IP)"
             - name: AUTOCLUSTER_TYPE
@@ -74,13 +74,13 @@ spec:
             - name: CLEANUP_INTERVAL
               value: "30"
             - name: RABBITMQ_DEFAULT_USER
-              value: awx
+              value: "awx"
             - name: RABBITMQ_DEFAULT_PASS
-              value: abcdefg
+              value: "abcdefg"
             - name: RABBITMQ_DEFAULT_VHOST
-              value: awx
+              value: "awx"
             - name: RABBITMQ_CONFIG_FILE
-              value: /etc/rabbitmq/rabbitmq
+              value: "/etc/rabbitmq/rabbitmq"
         - name: awx-memcached
           image: memcached
       volumes:
