@@ -9,7 +9,6 @@ requirements/requirements_ansible_git.txt \
 requirements/requirements_dev.txt \
 requirements/requirements_ansible_uninstall.txt \
 requirements/requirements_tower_uninstall.txt \
-requirements/requirements_dev_uninstall.txt \
 /tmp/requirements/
 RUN yum -y update && yum -y install curl epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
 RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
