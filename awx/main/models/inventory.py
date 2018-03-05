@@ -1653,6 +1653,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
             organization_groups = []
         if self.inventory_source.inventory is not None:
             inventory_groups = [x for x in self.inventory_source.inventory.instance_groups.all()]
+        else:
+            inventory_groups = []
         selected_groups = inventory_groups + organization_groups
         if not selected_groups:
             return self.global_instance_groups
