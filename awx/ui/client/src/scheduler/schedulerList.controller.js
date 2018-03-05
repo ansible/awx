@@ -46,6 +46,20 @@ export default [
             // _.forEach($scope[list.name], buildTooltips);
         }
 
+        $scope.isValid = (schedule) => {
+            let type = schedule.summary_fields.unified_job_template.unified_job_type;
+            switch(type){
+                case 'job':
+                    return _.every(['project', 'inventory'], _.partial(_.has, schedule.related));
+                case 'project_update':
+                    return _.has(schedule, 'related.project');
+                case 'inventory_update':
+                    return _.has(schedule, 'related.inventory');
+                default:
+                    return true;
+            }
+        };
+
         $scope.$on(`${list.iterator}_options`, function(event, data){
             $scope.options = data.data.actions.GET;
             optionsRequestDataProcessing();

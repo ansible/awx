@@ -72,12 +72,36 @@
     justify-content: space-between;
     align-items: center;
     padding: @at-padding-list-row;
+    position: relative;
 }
 
 .at-Row--active {
     border-left: @at-border-style-list-active-indicator;
     border-top-left-radius: @at-border-radius;
     border-top-right-radius: @at-border-radius;
+}
+
+.at-Row--invalid {
+    align-items: center;
+    background: @at-color-error;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    width: @at-space-2x;
+
+    .at-Popover {
+        padding: 0;
+
+        &-icon i {
+            color: @at-white;
+        }
+
+        &-icon i:hover {
+            color: @at-white;
+        }
+    }
 }
 
 .at-Row ~ .at-Row {

@@ -72,10 +72,6 @@ table, tbody {
     border-left: 5px solid @list-row-select-bord;
 }
 
-.List-tableRow--selected > :first-child {
-    padding-left: 10px;
-}
-
 .List-tableRow--disabled {
     .List-tableCell, .List-tableCell * {
         color: @b7grey;
@@ -95,6 +91,25 @@ table, tbody {
         color: @default-err;
         font-size: 11px;
         text-transform: uppercase;
+    }
+}
+
+.List-tableRow--invalid {
+    height: 40px;
+}
+
+.List-tableRow--invalidBar {
+    align-items: center;
+    border-left: solid @at-space-2x @at-color-error;
+    color: @at-white;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    position: relative;
+
+    i {
+        position: absolute;
+        left: -7px;
     }
 }
 
@@ -385,6 +400,11 @@ table, tbody {
 
 .List-staticColumn--schedulerTime {
     max-width: 164px;
+}
+
+.List-staticColumn--invalidBar {
+    width: 10px;
+    padding-right: 0px!important;
 }
 
 .List-staticColumnAdjacent {
