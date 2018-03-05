@@ -12,7 +12,8 @@ data:
     
     # Container environments don't like chroots
     AWX_PROOT_ENABLED = False
-    
+
+    # Automatically deprovision pods that go offline
     AWX_AUTO_DEPROVISION_INSTANCES = True
 
     #Autoprovisioning should replace this
@@ -21,9 +22,6 @@ data:
 
     REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR']
     
-    CELERY_TASK_QUEUES += (Queue(CLUSTER_HOST_ID, Exchange(CLUSTER_HOST_ID), routing_key=CLUSTER_HOST_ID),)
-    CELERY_TASK_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
-    CELERY_TASK_ROUTES['awx.main.tasks.purge_old_stdout_files'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
     STATIC_ROOT = '/var/lib/awx/public/static'
     PROJECTS_ROOT = '/var/lib/awx/projects'
     JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
@@ -76,7 +74,7 @@ data:
             'PORT': "{{ pg_port }}",
         }
     }
-    CELERY_BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
+    BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
         "awx",
         "abcdefg",
         "localhost",
@@ -85,7 +83,7 @@ data:
     CHANNEL_LAYERS = {
         'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
                     'ROUTING': 'awx.main.routing.channel_routing',
-                    'CONFIG': {'url': CELERY_BROKER_URL}}
+                    'CONFIG': {'url': BROKER_URL}}
     }
     CACHES = {
         'default': {
