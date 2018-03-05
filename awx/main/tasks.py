@@ -1998,6 +1998,9 @@ class RunInventoryUpdate(BaseTask):
         inventory_source = inventory_update.inventory_source
         inventory = inventory_source.inventory
 
+        if inventory is None:
+            raise RuntimeError('Inventory Source is not associated with an Inventory.')
+
         # Piece together the initial command to run via. the shell.
         args = ['awx-manage', 'inventory_import']
         args.extend(['--inventory-id', str(inventory.pk)])
