@@ -38,6 +38,10 @@ function ListTemplatesController(
     $scope.canAddWorkflowJobTemplate = workflowTemplate.options('actions.POST')
     $scope.canAdd = ($scope.canAddJobTemplate || $scope.canAddWorkflowJobTemplate);
 
+    if($state.$current.name !== 'projects.edit.templates') {
+        $scope.standAlone = $state.$current.name !== 'projects.edit.templates';
+    }
+
     // smart-search
     const name = 'templates';
     const iterator = 'template';

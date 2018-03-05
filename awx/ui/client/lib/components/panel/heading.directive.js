@@ -7,7 +7,7 @@ function link (scope, el, attrs, panel) {
 
 function atPanelHeading () {
     return {
-        restrict: 'E',
+        restrict: 'EA',
         require: '^^atPanel',
         replace: true,
         transclude: true,

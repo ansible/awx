@@ -1,13 +1,22 @@
 <div ui-view="form"></div>
-<at-panel>
-    <at-panel-heading hide-dismiss="true">
+<div id="relatedList" conditional-attributes="{'at-panel' : standAlone}">
+    <div ng-if="standAlone" conditional-attributes="{ 'at-panel-heading' : standAlone }" hide-dismiss="true">
         {{:: vm.strings.get('list.PANEL_TITLE') }}
         <div class="at-Panel-headingTitleBadge" ng-show="template_dataset.count">
             {{ template_dataset.count }}
         </div>
-    </at-panel-heading>
+    </div>
 
-    <at-panel-body>
+    <div ng-if="!standAlone">
+        <h5>
+            {{:: vm.strings.get('list.PANEL_TITLE') }}
+            <div class="at-Panel-headingTitleBadge" ng-show="template_dataset.count">
+                {{ template_dataset.count }}
+            </div>
+        </h5>
+    </div>
+
+    <div conditional-attributes="{ 'at-panel-body': standAlone }">
         <div class="at-List-toolbar">
             <smart-search
                 class="at-List-search"
@@ -37,7 +46,7 @@
                             {{:: vm.strings.get('list.ADD_DD_JT_LABEL') }}
                         </a>
                     </li>
-                    <li>
+                    <li ng-if="standAlone">
                         <a ui-sref="templates.addWorkflowJobTemplate">
                             {{:: vm.strings.get('list.ADD_DD_WF_LABEL') }}
                         </a>
@@ -117,6 +126,6 @@
             base-path="unified_job_templates"
             query-set="querySet">
         </paginate>
-    </at-panel-body>
+    </div>
     <prompt prompt-data="promptData" open-modal="openModal" on-finish="launchJob()"></launch>
-</at-panel>
+    </div>
