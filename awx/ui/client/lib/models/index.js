@@ -1,5 +1,6 @@
 import atLibServices from '~services';
 
+import Application from '~models/Application';
 import Base from '~models/Base';
 import Config from '~models/Config';
 import Credential from '~models/Credential';
@@ -28,6 +29,7 @@ angular
     .module(MODULE_NAME, [
         atLibServices
     ])
+    .service('ApplicationModel', Application)
     .service('BaseModel', Base)
     .service('ConfigModel', Config)
     .service('CredentialModel', Credential)

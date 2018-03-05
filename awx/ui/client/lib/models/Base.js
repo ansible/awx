@@ -361,7 +361,11 @@ function normalizePath (resource) {
 }
 
 function isEditable () {
-    const canEdit = this.get('summary_fields.user_capabilities.edit');
+    let canEdit = this.get('summary_fields.user_capabilities.edit');
+
+    if (canEdit === undefined) {
+        canEdit = true;
+    }
 
     if (canEdit) {
         return true;
