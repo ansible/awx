@@ -53,12 +53,16 @@ if settings.MIDDLEWARE:
 
 class AWXWSGIHandler(WSGIHandler):
     def _legacy_get_response(self, request):
-        # short-circuit middleware
-        if getattr(resolve(request.path), 'url_name', '') == 'migrations_notran':
-            return self._get_response(request)
+        try:
+            # resolve can raise a 404, in that case, pass through to the
+            # "normal" middleware
+            if getattr(resolve(request.path), 'url_name', '') == 'migrations_notran':
+                # short-circuit middleware
+                return self._get_response(request)
+        except django.urls.Resolver404:
+            pass
         # fall through to middle-ware
-        else:
-            return super(AWXWSGIHandler, self)._legacy_get_response(request)
+        return super(AWXWSGIHandler, self)._legacy_get_response(request)
 
 
 # Return the default Django WSGI application.
