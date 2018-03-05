@@ -36,3 +36,11 @@ def test_project_invalid_custom_virtualenv(get, patch, project, admin):
     assert resp.data['custom_virtualenv'] == [
         '/foo/bar is not a valid virtualenv in {}'.format(settings.BASE_VENV_PATH)
     ]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('value', ["", None])
+def test_project_unset_custom_virtualenv(get, patch, project, admin, value):
+    url = reverse('api:project_detail', kwargs={'pk': project.id})
+    resp = patch(url, {'custom_virtualenv': value}, user=admin, expect=200)
+    assert resp.data['custom_virtualenv'] is None

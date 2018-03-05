@@ -602,3 +602,16 @@ def test_job_template_invalid_custom_virtualenv(get, patch, organization_factory
     assert resp.data['custom_virtualenv'] == [
         '/foo/bar is not a valid virtualenv in {}'.format(settings.BASE_VENV_PATH)
     ]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('value', ["", None])
+def test_job_template_unset_custom_virtualenv(get, patch, organization_factory,
+                                              job_template_factory, value):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+
+    url = reverse('api:job_template_detail', kwargs={'pk': jt.id})
+    resp = patch(url, {'custom_virtualenv': value}, user=objs.superusers.admin, expect=200)
+    assert resp.data['custom_virtualenv'] is None
