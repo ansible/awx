@@ -184,7 +184,6 @@ requirements_awx: virtualenv_awx
 
 requirements_awx_dev:
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt
-	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt
 
 requirements: requirements_ansible requirements_awx
 
