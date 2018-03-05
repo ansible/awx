@@ -207,3 +207,11 @@ def test_organization_invalid_custom_virtualenv(get, patch, organization, admin)
     assert resp.data['custom_virtualenv'] == [
         '/foo/bar is not a valid virtualenv in {}'.format(settings.BASE_VENV_PATH)
     ]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('value', ["", None])
+def test_organization_unset_custom_virtualenv(get, patch, organization, admin, value):
+    url = reverse('api:organization_detail', kwargs={'pk': organization.id})
+    resp = patch(url, {'custom_virtualenv': value}, user=admin, expect=200)
+    assert resp.data['custom_virtualenv'] is None

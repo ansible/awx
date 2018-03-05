@@ -441,4 +441,6 @@ class CustomVirtualEnvMixin(models.Model):
             raise ValidationError(
                 _('{} is not a valid virtualenv in {}').format(value, settings.BASE_VENV_PATH)
             )
-        return os.path.join(value or '', '')
+        if value:
+            return os.path.join(value, '')
+        return None
