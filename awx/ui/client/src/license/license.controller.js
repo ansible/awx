@@ -110,6 +110,8 @@ export default
                             if ($scope.newLicense.pendo) {
                                 pendoService.updatePendoTrackingState('detailed');
                                 pendoService.issuePendoIdentity();
+                            } else {
+                                pendoService.updatePendoTrackingState('off');
                             }
 
                             if ($rootScope.licenseMissing === true) {
