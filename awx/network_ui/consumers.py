@@ -5,7 +5,6 @@ from channels.sessions import channel_session
 from awx.network_ui.models import Topology, Device, Link, Client, Interface
 from awx.network_ui.models import TopologyInventory
 import urlparse
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from collections import defaultdict
 import logging

@@ -4,7 +4,6 @@ from awx.network_ui.models import Topology, Device, Link, Interface
 from django.db.models import Q
 import yaml
 import json
-from collections import defaultdict
 
 NetworkAnnotatedInterface = Interface.objects.values('name',
                                                      'id',
@@ -31,7 +30,6 @@ def topology_data(topology_id):
                                  Q(to_device__topology_id=topology_id)))
 
         interfaces = Interface.objects.filter(device__topology_id=topology_id)
-        processes = Process.objects.filter(device__topology_id=topology_id)
 
         for device in Device.objects.filter(topology_id=topology_id).order_by('name'):
             interfaces = list(NetworkAnnotatedInterface.filter(device_id=device.pk).order_by('name'))
@@ -41,7 +39,6 @@ def topology_data(topology_id):
                                remote_interface_name=x['from_link__to_interface__name'] or x['to_link__from_interface__name'],
                                id=x['id'],
                                ) for x in interfaces]
-            processes = list(Process.objects.filter(device_id=device.pk).values())
             data['devices'].append(dict(name=device.name,
                                         type=device.device_type,
                                         x=device.x,

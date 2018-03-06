@@ -193,8 +193,8 @@ def send_tests(channel):
 @channel_session
 def ws_message(message):
     Channel('test_persistence').send({"text": message['text'],
-                                 "topology": message.channel_session['topology_id'],
-                                 "client": message.channel_session['client_id']})
+                                      "topology": message.channel_session['topology_id'],
+                                      "client": message.channel_session['client_id']})
 
 
 @channel_session

@@ -1,11 +1,9 @@
 # Copyright (c) 2017 Red Hat, Inc
 from django.shortcuts import render
 from django import forms
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse, HttpResponseRedirect
-from django.core.exceptions import ObjectDoesNotExist
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
+from network_ui.models import Topology
 import yaml
-
-import json
 
 
 # Create your views here.
