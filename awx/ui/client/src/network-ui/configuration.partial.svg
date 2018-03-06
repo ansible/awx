@@ -1,4 +1,0 @@
-<!-- Copyright (c) 2017 Red Hat, Inc. -->
-<g ng-attr-transform="translate({{item.x}}, {{item.y}}">
-<path d="M100,100 h200 a20,20 0 0 1 20,20 v200 a20,20 0 0 1 -20,20 h-200 a20,20 0 0 1 -20,-20 v-200 a20,20 0 0 1 20,-20 z" fill="none" stroke="black" stroke-width="3" />
-</g>
