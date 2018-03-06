@@ -21,18 +21,18 @@ export default ['i18n', function(i18n) {
             ORG_ADMINS_CAN_SEE_ALL_USERS: {
                 type: 'toggleSwitch',
             },
-            AUTH_TOKEN_EXPIRATION: {
+            SESSION_COOKIE_AGE: {
                 type: 'number',
                 integer: true,
                 min: 60,
-                reset: 'AUTH_TOKEN_EXPIRATION',
+                reset: 'SESSION_COOKIE_AGE',
             },
-            AUTH_TOKEN_PER_USER: {
+            SESSIONS_PER_USER: {
                 type: 'number',
                 integer: true,
                 spinner: true,
                 min: -1,
-                reset: 'AUTH_TOKEN_PER_USER',
+                reset: 'SESSIONS_PER_USER',
             },
             AUTH_BASIC_ENABLED: {
                 type: 'toggleSwitch',

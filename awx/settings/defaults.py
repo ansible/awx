@@ -368,15 +368,6 @@ TACACSPLUS_SECRET = ''
 TACACSPLUS_SESSION_TIMEOUT = 5
 TACACSPLUS_AUTH_PROTOCOL = 'ascii'
 
-# Seconds before auth tokens expire.
-# Note: This setting may be overridden by database settings.
-AUTH_TOKEN_EXPIRATION = 1800
-
-# Maximum number of per-user valid, concurrent tokens.
-# -1 is unlimited
-# Note: This setting may be overridden by database settings.
-AUTH_TOKEN_PER_USER = -1
-
 # Enable / Disable HTTP Basic Authentication used in the API browser
 # Note: Session limits are not enforced when using HTTP Basic Authentication.
 # Note: This setting may be overridden by database settings.
