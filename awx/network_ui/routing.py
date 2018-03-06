@@ -1,6 +1,6 @@
 # Copyright (c) 2017 Red Hat, Inc
 from channels.routing import route
-from awx.network_ui.consumers import ws_connect, ws_message, ws_disconnect, console_printer, persistence, discovery
+from awx.network_ui.consumers import ws_connect, ws_message, ws_disconnect, persistence
 
 channel_routing = [
     route("websocket.connect", ws_connect, path=r"^/network_ui/topology"),
