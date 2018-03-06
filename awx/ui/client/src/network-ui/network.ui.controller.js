@@ -6,6 +6,7 @@ var hotkeys = require('./hotkeys.fsm.js');
 var toolbox_fsm = require('./toolbox.fsm.js');
 var view = require('./view.fsm.js');
 var move = require('./move.fsm.js');
+var buttons = require('./buttons.fsm.js');
 var time = require('./time.fsm.js');
 var test_fsm = require('./test.fsm.js');
 var util = require('./util.js');
@@ -220,6 +221,7 @@ var NetworkUIController = function($scope,
   $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
   $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope);
   $scope.details_panel_controller = new fsm.FSMController($scope, "details_panel_fsm", details_panel_fsm.Start, $scope);
+  $scope.buttons_controller = new fsm.FSMController($scope, "buttons_fsm", buttons.Start, $scope);
   $scope.time_controller = new fsm.FSMController($scope, "time_fsm", time.Start, $scope);
   $scope.test_controller = new fsm.FSMController($scope, "test_fsm", test_fsm.Start, $scope);
 
@@ -312,8 +314,11 @@ var NetworkUIController = function($scope,
   $scope.inventory_toolbox_controller.delegate_channel = new fsm.Channel($scope.inventory_toolbox_controller,
                                                             $scope.details_panel_controller,
                                                             $scope);
-  $scope.time_controller.delegate_channel = new fsm.Channel($scope.time_controller,
+  $scope.buttons_controller.delegate_channel = new fsm.Channel($scope.buttons_controller,
                                                             $scope.inventory_toolbox_controller,
+                                                            $scope);
+  $scope.time_controller.delegate_channel = new fsm.Channel($scope.time_controller,
+                                                            $scope.buttons_controller,
                                                             $scope);
   $scope.mode_controller.delegate_channel = new fsm.Channel($scope.mode_controller,
                                                             $scope.time_controller,
