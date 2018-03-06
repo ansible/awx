@@ -36,12 +36,8 @@
             </g> <!-- end ng-if current_scale -->
             </g> <!-- end hide_links -->
             <g ng-repeat="link in links">
-            <g ng-if="link.selected || link.to_interface.selected || link.from_interface.selected" link></g>
+                <g ng-if="link.selected || link.to_interface.selected || link.from_interface.selected" link></g>
             </g>
-            <g ng-if="current_scale > 0.5 && current_scale < 5">
-            </g> <!-- end ng-if current_scale -->
-             <g ng-if="current_scale < 5">
-
             <g ng-repeat="item in devices"
                ng-attr-transform="translate({{item.x}},{{item.y}})"
                ng-attr-class="{{item.type}}"
@@ -63,8 +59,6 @@
                     <g awx-net-default></g>
                </g> <!-- end default -->
             </g> <!-- end devices -->
-
-            </g>
             <g ng-attr-transform="translate({{scaledX}},{{scaledY}})" ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug-cursor" >
                 <line x1="-5" y1="0" x2="5" y2="0"/>
                 <line x1="0" y1="-5" x2="0" y2="5"/>

@@ -889,15 +889,15 @@ var NetworkUIController = function($scope,
     ];
 
     $scope.onDownloadTraceButton = function () {
-        window.open("/network_ui/download_trace?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.test_client_id);
+        window.open("/network_ui_test/download_trace?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.test_client_id);
     };
 
     $scope.onDownloadRecordingButton = function () {
-        window.open("/network_ui/download_recording?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.test_client_id);
+        window.open("/network_ui_test/download_recording?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.test_client_id);
     };
 
     $scope.onUploadTestButton = function () {
-        window.open("/network_ui/upload_test", "_top");
+        window.open("/network_ui_test/upload_test", "_top");
     };
 
     $scope.onRunTestsButton = function () {
