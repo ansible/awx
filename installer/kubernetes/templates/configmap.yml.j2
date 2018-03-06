@@ -21,7 +21,9 @@ data:
     SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
     REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR']
-    
+
+    CSRF_COOKIE_SECURE = False
+
     STATIC_ROOT = '/var/lib/awx/public/static'
     PROJECTS_ROOT = '/var/lib/awx/projects'
     JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
