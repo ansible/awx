@@ -1146,6 +1146,7 @@ class InventorySourceOptions(BaseModel):
             ('aws_account', _('Account')),
             ('instance_id', _('Instance ID')),
             ('instance_state', _('Instance State')),
+            ('platform', _('Platform')),
             ('instance_type', _('Instance Type')),
             ('key_pair', _('Key Name')),
             ('region', _('Region')),
