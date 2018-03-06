@@ -130,6 +130,13 @@ function JobScrollService ($q, $timeout) {
         this.isAtRest();
     };
 
+    this.resetScrollPosition = () => {
+        this.position.previous = 0;
+        this.position.current = 0;
+        this.el[0].scrollTop = 0;
+        this.isAtRest();
+    };
+
     this.isAtRest = () => {
         if (this.position.current === 0 && !this.state.top) {
             this.state.top = true;

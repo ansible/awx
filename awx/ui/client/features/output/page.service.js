@@ -5,12 +5,21 @@ function JobPageService ($q) {
         this.page = {
             limit: this.resource.page.pageLimit,
             size: this.resource.page.size,
-            current: 0,
-            index: -1,
-            count: 0,
-            first: 0,
-            last: 0,
-            bookmark: {
+            cache: [],
+            state: {
+                count: 0,
+                current: 0,
+                first: 0,
+                last: 0
+            }
+        };
+
+        this.bookmark = {
+            pending: false,
+            set: false,
+            cache: [],
+            state: {
+                count: 0,
                 first: 0,
                 last: 0,
                 current: 0
@@ -25,43 +34,45 @@ function JobPageService ($q) {
         this.buffer = {
             count: 0
         };
-
-        this.cache = [];
     };
 
-    this.add = (page, position, bookmark) => {
-        page.events = page.events || [];
-        page.lines = page.lines || 0;
+    this.addPage = (number, events, push, reference) => {
+        const page = { number, events, lines: 0 };
+        reference = reference || this.getActiveReference();
 
-        if (position === 'first') {
-            this.cache.unshift(page);
-            this.page.first = page.number;
-            this.page.last = this.cache[this.cache.length -1].number;
+        if (push) {
+            reference.cache.push(page);
+            reference.state.last = page.number;
+            reference.state.first = reference.cache[0].number;
         } else {
-            this.cache.push(page);
-            this.page.last = page.number;
-            this.page.first = this.cache[0].number;
+            reference.cache.unshift(page);
+            reference.state.first = page.number;
+            reference.state.last = reference.cache[reference.cache.length -1].number;
         }
 
-        if (bookmark) {
-            this.page.bookmark.current = page.number;
-        }
+        reference.state.current = page.number;
+        reference.state.count++;
+    };
 
-        this.page.current = page.number;
-        this.page.count++;
+    this.addToPageCache = (index, event, reference) => {
+        reference.cache[index].events.push(event);
     };
 
     this.addToBuffer = event => {
+        const reference = this.getReference();
         let pageAdded = false;
 
         if (this.result.count % this.page.size === 0) {
-            pageAdded = true;
+            this.addPage(reference.state.current + 1, [event], true, reference);
 
-            this.add({ number: this.page.count + 1, events: [event] });
+            if (this.isBookmarkPending()) {
+                this.setBookmark();
+            }
 
             this.trimBuffer();
+            pageAdded = true;
         } else {
-            this.cache[this.cache.length - 1].events.push(event);
+            this.addToPageCache(reference.cache.length - 1, event, reference);
         }
 
         this.buffer.count++;
@@ -71,104 +82,127 @@ function JobPageService ($q) {
     };
 
     this.trimBuffer = () => {
-        const diff = this.cache.length - this.page.limit;
+        const reference = this.getReference();
+        const diff = reference.cache.length - this.page.limit;
 
         if (diff <= 0) {
             return;
         }
 
         for (let i = 0; i < diff; i++) {
-            if (this.cache[i].events) {
-                this.buffer.count -= this.cache[i].events.length;
-                this.cache[i].events = [];
+            if (reference.cache[i].events) {
+                this.buffer.count -= reference.cache[i].events.length;
+                reference.cache[i].events.splice(0, reference.cache[i].events.length);
             }
         }
     };
 
     this.emptyBuffer = () => {
+        const reference = this.getReference();
         let data = [];
 
-        for (let i = 0; i < this.cache.length; i++) {
-            const events = this.cache[i].events;
+        for (let i = 0; i < reference.cache.length; i++) {
+            const count = reference.cache[i].events.length;
 
-            if (events.length > 0) {
-                this.buffer.count -= events.length;
-                data = data.concat(this.cache[i].events.splice(0, events.length));
+            if (count > 0) {
+                this.buffer.count -= count;
+                data = data.concat(reference.cache[i].events.splice(0, count));
             }
         }
 
         return data;
     };
 
-    this.emptyCache = () => {
-        this.page.first = this.page.current;
-        this.page.last = this.page.current;
-        this.cache = [];
+    this.emptyCache = number => {
+        const reference = this.getActiveReference();
+
+        number = number || reference.state.current;
+
+        reference.state.first = number;
+        reference.state.last = number;
+        reference.state.current = number;
+        reference.cache.splice(0, reference.cache.length);
     };
 
     this.isOverCapacity = () => {
-        return (this.cache.length - this.page.limit) > 0;
+        const reference = this.getActiveReference();
+
+        return (reference.cache.length - this.page.limit) > 0;
     };
 
-    this.trim = side => {
-        const count = this.cache.length - this.page.limit;
-
+    this.trim = left => {
+        let reference = this.getActiveReference();
+        let excess = reference.cache.length - this.page.limit;
         let ejected;
 
-        if (side === 'left') {
-            ejected = this.cache.splice(0, count);
-            this.page.first = this.cache[0].number;
+        if (left) {
+            ejected = reference.cache.splice(0, excess);
+            reference.state.first = reference.cache[0].number;
         } else {
-            ejected = this.cache.splice(-count);
-            this.page.last = this.cache[this.cache.length - 1].number;
+            ejected = reference.cache.splice(-excess);
+            reference.state.last = reference.cache[reference.cache.length - 1].number;
         }
 
         return ejected.reduce((total, page) => total + page.lines, 0);
     };
 
-    this.getPageNumber = page => {
-        let index;
-
-        if (page === 'first') {
-            index = 0;
-        }
-
-        return this.cache[index].number;
+    this.isPageBookmarked = number => {
+        return number >= this.page.bookmark.first && number <= this.page.bookmark.last;
     };
 
-    this.updateLineCount = (page, lines) => {
-        let index;
+    this.updateLineCount = (lines, stream) => {
+        let reference;
 
-        if (page === 'current') {
-            index = this.cache.findIndex(item => item.number === this.page.current);
+        if (stream) {
+            reference = this.getReference();
+        } else {
+            reference = this.getActiveReference();
         }
 
-        this.cache[index].lines += lines;
+        const index = reference.cache.findIndex(item => item.number === reference.state.current);
+
+        reference.cache[index].lines += lines;
     }
 
-    this.bookmark = () => {
-        if (!this.page.bookmark.active) {
-            this.page.bookmark.first = this.page.first;
-            this.page.bookmark.last = this.page.last;
-            this.page.bookmark.current = this.page.current;
-            this.page.bookmark.active = true;
-        } else {
-            this.page.bookmark.active = false;
+    this.isBookmarkPending = () => {
+        return this.bookmark.pending;
+    };
+
+    this.isBookmarkSet = () => {
+        return this.bookmark.set;
+    };
+
+    this.setBookmark = () => {
+        if (this.isBookmarkSet()) {
+            return;
         }
+
+        if (!this.isBookmarkPending()) {
+            this.bookmark.pending = true;
+
+            return;
+        }
+
+        this.bookmark.state.first = this.page.state.first;
+        this.bookmark.state.last = this.page.state.last;
+        this.bookmark.state.current = this.page.state.current;
+        this.bookmark.cache = JSON.parse(JSON.stringify(this.page.cache));
+        this.bookmark.set = true;
+        this.bookmark.pending = false;
+    };
+
+    this.removeBookmark = () => {
+        this.bookmark.set = false;
+        this.bookmark.pending = false;
+        this.bookmark.cache.splice(0, this.bookmark.cache.length);
+        this.bookmark.state.first = 0;
+        this.bookmark.state.last = 0;
+        this.bookmark.state.current = 0;
     };
 
     this.next = () => {
-        let page;
-        let bookmark;
-
-        if (this.page.bookmark.active) {
-            page = this.page.bookmark.current + 1;
-            bookmark = true;
-        } else {
-            page = this.page.last + 1;
-        }
-
-        const config = this.buildRequestConfig(page);
+        const reference = this.getActiveReference();
+        const config = this.buildRequestConfig(reference.state.last + 1);
 
         return this.resource.model.goToPage(config)
             .then(data => {
@@ -176,24 +210,15 @@ function JobPageService ($q) {
                     return $q.resolve();
                 }
 
-                this.add({ number: data.page, events: [], lines: 0 }, 'last', bookmark);
+                this.addPage(data.page, [], true);
 
                 return data.results;
             });
     };
 
     this.previous = () => {
-        let page;
-        let bookmark;
-
-        if (this.page.bookmark.active) {
-            page = this.page.bookmark.current - 1;
-            bookmark = true;
-        } else {
-            page = this.page.first - 1;
-        }
-
-        const config = this.buildRequestConfig(page);
+        const reference = this.getActiveReference();
+        const config = this.buildRequestConfig(reference.state.first - 1);
 
         return this.resource.model.goToPage(config)
             .then(data => {
@@ -201,7 +226,7 @@ function JobPageService ($q) {
                     return $q.resolve();
                 }
 
-                this.add({ number: data.page, events: [], lines: 0 }, 'first', bookmark);
+                this.addPage(data.page, [], false);
 
                 return data.results;
             });
@@ -210,15 +235,14 @@ function JobPageService ($q) {
     this.last = () => {
         const config = this.buildRequestConfig('last');
 
-        this.emptyCache();
-
         return this.resource.model.goToPage(config)
             .then(data => {
                 if (!data || !data.results) {
                     return $q.resolve();
                 }
 
-                this.add({ number: data.page, events: [], lines: 0 }, 'last');
+                this.emptyCache(data.page);
+                this.addPage(data.page, [], true);
 
                 return data.results;
             });
@@ -227,23 +251,22 @@ function JobPageService ($q) {
     this.first = () => {
         const config = this.buildRequestConfig('first');
 
-        this.emptyCache();
-
         return this.resource.model.goToPage(config)
             .then(data => {
                 if (!data || !data.results) {
                     return $q.resolve();
                 }
 
-                this.add({ number: data.page, events: [], lines: 0 }, 'first');
+                this.emptyCache(data.page);
+                this.addPage(data.page, [], false);
 
                 return data.results;
             });
     };
 
-    this.buildRequestConfig = (page) => {
+    this.buildRequestConfig = number => {
         return {
-            page,
+            page: number,
             related: this.resource.related,
             params: {
                 order_by: 'start_line'
@@ -251,8 +274,24 @@ function JobPageService ($q) {
         };
     };
 
-    this.current = () => {
-        return this.resource.model.get(`related.${this.resource.related}.results`);
+    this.getActiveReference = () => {
+        return this.isBookmarkSet() ? this.getReference(true) : this.getReference();
+    };
+
+    this.getReference = (bookmark) => {
+        if (bookmark) {
+            return {
+                bookmark: true,
+                cache: this.bookmark.cache,
+                state: this.bookmark.state
+            };
+        }
+
+        return {
+            bookmark: false,
+            cache: this.page.cache,
+            state: this.page.state
+        };
     };
 }
 

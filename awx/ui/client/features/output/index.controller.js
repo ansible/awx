@@ -10,6 +10,8 @@ let render;
 let scroll;
 let resource;
 
+let chain;
+
 function JobsIndexController (
     _resource_,
     _page_,
@@ -56,6 +58,7 @@ function JobsIndexController (
 
     const stream = false; // TODO: Set in route
 
+    chain = $q.resolve();
     render.requestAnimationFrame(() => init());
 }
 
@@ -81,37 +84,39 @@ function init (stream) {
 }
 
 function process (scope, data) {
-    if (data.event === JOB_START) {
-        vm.stream.active = true;
-        scroll.lock();
-    } else if (data.event === JOB_END) {
-        vm.stream.active = false;
-    }
+    chain = chain.then(() => {
+        if (data.event === JOB_START) {
+            vm.stream.active = true;
+            scroll.lock();
+        } else if (data.event === JOB_END) {
+            vm.stream.active = false;
+        }
 
-    const pageAdded = page.addToBuffer(data);
+        const pageAdded = page.addToBuffer(data);
 
-    if (pageAdded && !scroll.isLocked()) {
-        vm.stream.paused = true;
-    }
+        if (pageAdded && !scroll.isLocked()) {
+            vm.stream.paused = true;
+        }
 
-    if (vm.stream.paused && scroll.isLocked()) {
-        vm.stream.paused = false;
-    }
+        if (vm.stream.paused && scroll.isLocked()) {
+            vm.stream.paused = false;
+        }
 
-    if (vm.stream.rendering || vm.stream.paused) {
-        return;
-    }
+        if (vm.stream.rendering || vm.stream.paused) {
+            return;
+        }
 
-    const events = page.emptyBuffer();
+        const events = page.emptyBuffer();
 
-    return renderStream(events);
+        return renderStream(events);
+    })
 }
 
 function renderStream (events) {
     vm.stream.rendering = true;
 
     return shift()
-        .then(() => append(events))
+        .then(() => append(events, true))
         .then(() => {
             if (scroll.isLocked()) {
                 scroll.setScrollPosition(scroll.getScrollHeight());
@@ -135,6 +140,12 @@ function renderStream (events) {
 function devClear () {
     init(true);
     render.clear();
+
+    vm.stream = {
+        active: false,
+        rendering: false,
+        paused: false
+    };
 }
 
 function next () {
@@ -167,23 +178,22 @@ function previous () {
                 })
                 .then(()  => {
                     const currentHeight = scroll.getScrollHeight();
-
                     scroll.setScrollPosition(currentHeight - postPopHeight + initialPosition);
                 });
         });
 }
 
-function append (events) {
+function append (events, stream) {
     return render.append(events)
         .then(count => {
-            page.updateLineCount('current', count);
+            page.updateLineCount(count, stream);
         });
 }
 
 function prepend (events) {
     return render.prepend(events)
         .then(count => {
-            page.updateLineCount('current', count);
+            page.updateLineCount(count);
         });
 }
 
@@ -192,7 +202,7 @@ function pop () {
         return $q.resolve();
     }
 
-    const lines = page.trim('right');
+    const lines = page.trim();
 
     return render.pop(lines);
 }
@@ -202,9 +212,69 @@ function shift () {
         return $q.resolve();
     }
 
-    const lines = page.trim('left');
+    const lines = page.trim(true);
 
     return render.shift(lines);
+}
+
+function scrollHome () {
+    scroll.pause();
+
+    return page.first()
+        .then(events => {
+            if (!events) {
+                return;
+            }
+
+            return render.clear()
+                .then(() => prepend(events))
+                .then(() => {
+                    scroll.resetScrollPosition();
+                    scroll.resume();
+                });
+        });
+}
+
+function scrollEnd () {
+    if (scroll.isLocked()) {
+        page.setBookmark();
+        scroll.unlock();
+
+        return;
+    } else if (!scroll.isLocked() && vm.stream.active) {
+        page.removeBookmark();
+        scroll.lock();
+
+        return;
+    }
+
+    scroll.pause();
+
+    return page.last()
+        .then(events => {
+            if (!events) {
+                return;
+            }
+
+            return render.clear()
+                .then(() => append(events))
+                .then(() => {
+                    scroll.setScrollPosition(scroll.getScrollHeight());
+                    scroll.resume();
+                });
+        });
+}
+
+function scrollPageUp () {
+    scroll.pageUp();
+}
+
+function scrollPageDown () {
+    scroll.pageDown();
+}
+
+function scrollIsAtRest (isAtRest) {
+    vm.scroll.showBackToTop = !isAtRest;
 }
 
 function expand () {
@@ -248,66 +318,6 @@ function toggle (uuid, menu) {
 
         lines.removeClass('hidden');
     }
-}
-
-function scrollHome () {
-    scroll.pause();
-
-    return page.first()
-        .then(events => {
-            if (!events) {
-                return;
-            }
-
-            return render.clear()
-                .then(() => render.prepend(events))
-                .then(() => {
-                    scroll.setScrollPosition(0);
-                    scroll.resume();
-                });
-        });
-}
-
-function scrollEnd () {
-    if (scroll.isLocked()) {
-        page.bookmark();
-        scroll.unlock();
-
-        return;
-    } else if (!scroll.isLocked() && vm.stream.active) {
-        page.bookmark();
-        scroll.lock();
-
-        return;
-    }
-
-    scroll.pause();
-
-    return page.last()
-        .then(events => {
-            if (!events) {
-                return;
-            }
-
-            return render.clear()
-                .then(() => render.append(events))
-                .then(() => {
-                    scroll.setScrollPosition(scroll.getScrollHeight());
-                    scroll.resume();
-                });
-        });
-}
-
-function scrollPageUp () {
-    scroll.pageUp();
-}
-
-function scrollPageDown () {
-    scroll.pageDown();
-}
-
-function scrollIsAtRest (isAtRest) {
-    vm.scroll.showBackToTop = !isAtRest;
 }
 
 JobsIndexController.$inject = [
