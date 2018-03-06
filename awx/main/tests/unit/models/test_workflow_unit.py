@@ -211,6 +211,13 @@ class TestWorkflowJobNodeJobKWARGS:
         assert job_node_no_prompts.get_job_kwargs() == dict(
             extra_vars={'a': 84, 'b': 98}, **self.kwargs_base)
 
+    def test_reject_workflow_job_and_node_extra_vars(self, job_node_no_prompts):
+        job_node_no_prompts.unified_job_template.ask_variables_on_launch = False
+        job_node_no_prompts.extra_data = {"b": 98}
+        workflow_job = job_node_no_prompts.workflow_job
+        workflow_job.extra_vars = '{"a": 84}'
+        assert 'extra_vars' not in job_node_no_prompts.get_job_kwargs()
+
     def test_char_prompts_and_res_node_prompts(self, job_node_with_prompts):
         # TBD: properly handle multicred credential assignment
         expect_kwargs = dict(

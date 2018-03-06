@@ -130,7 +130,7 @@ class TestWorkflowJob:
         queued_node = WorkflowJobNode.objects.create(workflow_job=wfj)
         # Connect old job -> new job
         mocker.patch.object(queued_node, 'get_parent_nodes', lambda: [job_node])
-        assert queued_node.get_job_kwargs()['extra_vars'] == {'a': 42, 'b': 43}
+        assert 'extra_vars' not in queued_node.get_job_kwargs()
         assert queued_node.ancestor_artifacts == {'a': 42, 'b': 43}
 
     def test_inherit_ancestor_artifacts_from_project_update(self, project, mocker):
@@ -147,7 +147,7 @@ class TestWorkflowJob:
         queued_node = WorkflowJobNode.objects.create(workflow_job=wfj)
         # Connect project update -> new job
         mocker.patch.object(queued_node, 'get_parent_nodes', lambda: [project_node])
-        assert queued_node.get_job_kwargs()['extra_vars'] == {'a': 42, 'b': 43}
+        assert 'extra_vars' not in queued_node.get_job_kwargs()
         assert queued_node.ancestor_artifacts == {'a': 42, 'b': 43}
 
 
