@@ -54,6 +54,35 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices']
 
 
+class NaiveVault:
+    """
+    AWX does not manage vault content.
+    However, this equips AWX with the ability to naively store vaulted
+    values inside of variables.
+    This allows vaulted content from other sources to be passed through
+    into playbooks run ultimately, where attached vault credentials
+    can be used to decrypt them.
+    """
+    def __init__(self, data):
+        self.data = data
+
+    def __repr__(self):
+        return six.text_type(self.data)
+
+
+def vault_representer(dumper, data):
+    return dumper.represent_scalar(u'!vault', six.text_type(data), style='|')
+
+
+def vault_constructor(loader, node):
+    value = loader.construct_scalar(node)
+    return NaiveVault(value)
+
+
+yaml.add_representer(NaiveVault, vault_representer)
+yaml.add_constructor(u'!vault', vault_constructor)
+
+
 def get_object_or_400(klass, *args, **kwargs):
     '''
     Return a single object from the given model or queryset based on the query
@@ -620,6 +649,7 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
         validate_vars_type(vars_dict)
     except (ValueError, TypeError, AssertionError) as json_err:
         try:
+            yaml.SafeLoader.add_constructor(u'!vault', vault_constructor)
             vars_dict = yaml.safe_load(vars_str)
             # Can be None if '---'
             if vars_dict is None:

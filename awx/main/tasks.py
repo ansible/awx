@@ -795,10 +795,11 @@ class BaseTask(LogErrorsTask):
         return False
 
     def build_inventory(self, instance, **kwargs):
-        json_data = json.dumps(instance.inventory.get_script_data(hostvars=True))
+        # json_data = json.dumps(instance.inventory.get_script_data(hostvars=True))
+        yaml_data = yaml.dump(instance.inventory.get_script_data(hostvars=True), default_flow_style=False)
         handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
         f = os.fdopen(handle, 'w')
-        f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint %r\n' % json_data)
+        f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint %r\n' % yaml_data)
         f.close()
         os.chmod(path, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
         return path
