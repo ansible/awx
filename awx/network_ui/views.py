@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django import forms
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
-from network_ui.models import Topology
+from awx.network_ui.models import Topology
 import yaml
 
 

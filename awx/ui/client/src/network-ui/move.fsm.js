@@ -378,7 +378,6 @@ _Move.prototype.onMouseMove = function (controller) {
     var i = 0;
     var j = 0;
     var previous_x, previous_y;
-    var membership_old_new;
     for (i = 0; i < devices.length; i++) {
         previous_x = devices[i].x;
         previous_y = devices[i].y;
