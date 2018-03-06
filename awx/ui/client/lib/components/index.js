@@ -36,6 +36,7 @@ import relaunch from '~components/relaunchButton/relaunchButton.component';
 
 import BaseInputController from '~components/input/base.controller';
 import ComponentsStrings from '~components/components.strings';
+import conditionalAttributes from '~components/utility/conditional-attributes.directive';
 
 const MODULE_NAME = 'at.lib.components';
 
@@ -76,6 +77,7 @@ angular
     .directive('atTopNavItem', topNavItem)
     .directive('atTruncate', truncate)
     .component('atRelaunch', relaunch)
+    .directive('conditionalAttributes', conditionalAttributes)
     .service('BaseInputController', BaseInputController)
     .service('ComponentsStrings', ComponentsStrings);
 

@@ -2,7 +2,6 @@ const templateUrl = require('~components/panel/panel.partial.html');
 
 function atPanelLink (scope, el, attrs, controller) {
     const panelController = controller;
-
     panelController.init(scope);
 }
 
@@ -28,7 +27,7 @@ AtPanelController.$inject = ['$state'];
 
 function atPanel () {
     return {
-        restrict: 'E',
+        restrict: 'EA',
         replace: true,
         require: 'atPanel',
         transclude: true,

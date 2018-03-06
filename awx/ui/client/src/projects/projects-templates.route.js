@@ -1,4 +1,5 @@
 import { N_ } from '../i18n';
+const listTemplate = require('~features/templates/list.view.html');
 
 export default {
     url: "/templates",
@@ -16,24 +17,24 @@ export default {
         label: N_("JOB TEMPLATES")
     },
     views: {
-        // TODO: this controller was removed and replaced
-        // with the new features/templates controller
-        // this view should be updated with the new
-        // expanded list
         'related': {
-            templateProvider: function(FormDefinition, GenerateForm) {
-                let html = GenerateForm.buildCollection({
-                    mode: 'edit',
-                    related: 'templates',
-                    form: typeof(FormDefinition) === 'function' ?
-                        FormDefinition() : FormDefinition
-                });
-                return html;
-            },
-            controller: 'TemplatesListController'
+            controller: 'ProjectTemplatesListController',
+            templateUrl: listTemplate,
+            controllerAs: 'vm',
         }
     },
     resolve: {
+        resolvedModels: [
+            'JobTemplateModel',
+            'WorkflowJobTemplateModel',
+            (JobTemplate, WorkflowJobTemplate) => {
+                const models = [
+                    new JobTemplate(['options']),
+                    new WorkflowJobTemplate(['options']),
+                ];
+                return Promise.all(models);
+            },
+        ],
         ListDefinition: ['TemplateList', '$transition$', (TemplateList, $transition$) => {
             let id = $transition$.params().project_id;
             TemplateList.actions.add.ngClick = `$state.go('templates.addJobTemplate', {project_id: ${id}})`;

@@ -1,4 +1,3 @@
-import ListController from './list-templates.controller';
 const listTemplate = require('~features/templates/list.view.html');
 import { N_ } from '../../src/i18n';
 
@@ -33,7 +32,7 @@ export default {
     searchPrefix: 'template',
     views: {
         '@': {
-            controller: ListController,
+            controller: 'TemplatesListController',
             templateUrl: listTemplate,
             controllerAs: 'vm',
         }

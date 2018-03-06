@@ -66,16 +66,8 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
             if(!$scope.querySet) {
                 $state.go('.', {
                     [$scope.iterator + '_search']: queryset
-                }, {notify: false});
+                }, {notify: false, reload: true});
             }
-            qs.search(path, queryset).then((res) => {
-                if($scope.querySet) {
-                    // Update the query set
-                    $scope.querySet = queryset;
-                }
-                $scope.dataset = res.data;
-                $scope.collection = res.data.results;
-            });
         };
 
         function calcLast() {
