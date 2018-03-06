@@ -1,7 +1,6 @@
 # Copyright (c) 2017 Red Hat, Inc
 from channels.routing import route
 from awx.network_ui_test.consumers import ws_connect, ws_message, ws_disconnect, test_persistence
-import awx.main.routing
 
 
 channel_routing = [
@@ -11,4 +10,3 @@ channel_routing = [
     route("test_persistence", test_persistence.handle),
 ]
 
-awx.main.routing.channel_routing += channel_routing

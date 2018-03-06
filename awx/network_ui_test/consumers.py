@@ -3,9 +3,9 @@
 from channels import Group, Channel
 from channels.sessions import channel_session
 from awx.network_ui.models import Topology, Client
-from awx.network_ui.models import FSMTrace, EventTrace, Coverage, TopologySnapshot
 from awx.network_ui.models import TopologyInventory
-from awx.network_ui.models import TestCase, TestResult, CodeUnderTest, Result
+from awx.network_ui_test.models import FSMTrace, EventTrace, Coverage, TopologySnapshot
+from awx.network_ui_test.models import TestCase, TestResult, CodeUnderTest, Result
 import urlparse
 import logging
 from django.utils.dateparse import parse_datetime
@@ -25,7 +25,7 @@ HISTORY_MESSAGE_IGNORE_TYPES = ['DeviceSelected',
                                 'KeyEvent']
 
 
-logger = logging.getLogger("awx.network_ui.consumers")
+logger = logging.getLogger("awx.network_ui_test.consumers")
 
 
 class NetworkUIException(Exception):
@@ -177,7 +177,6 @@ def ws_connect(message):
         TopologyInventory(inventory_id=inventory_id, topology_id=topology.topology_id).save()
     topology_id = topology.topology_id
     message.channel_session['topology_id'] = topology_id
-    Group("topology-%s" % topology_id).add(message.reply_channel)
     client = Client()
     client.save()
     message.channel_session['client_id'] = client.pk
@@ -193,15 +192,13 @@ def send_tests(channel):
 
 @channel_session
 def ws_message(message):
-    # Send to persistence handler
-    Channel('persistence').send({"text": message['text'],
+    Channel('test_persistence').send({"text": message['text'],
                                  "topology": message.channel_session['topology_id'],
                                  "client": message.channel_session['client_id']})
 
 
 @channel_session
 def ws_disconnect(message):
-    if 'topology_id' in message.channel_session:
-        Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
+    pass
 
 
