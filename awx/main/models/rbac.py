@@ -484,13 +484,25 @@ def role_summary_fields_generator(content_object, role_field):
     global role_names
     summary = {}
     description = role_descriptions[role_field]
+
+    model_name = None
     content_type = ContentType.objects.get_for_model(content_object)
-    if '%s' in description and content_type:
+    if content_type:
         model = content_object.__class__
         model_name = re.sub(r'([a-z])([A-Z])', r'\1 \2', model.__name__).lower()
-        description = description % model_name
 
-    summary['description'] = description
+    value = description
+    if type(description) == dict:
+        value = None
+        if model_name:
+            value = description.get(model_name)
+        if value is None:
+            value = description.get('default')
+
+    if '%s' in value and model_name:
+        value = value % model_name
+
+    summary['description'] = value
     summary['name'] = role_names[role_field]
     summary['id'] = getattr(content_object, '{}_id'.format(role_field))
     return summary
