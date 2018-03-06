@@ -10,13 +10,10 @@ from awx.network_ui.models import Toolbox, ToolboxItem
 from awx.network_ui.models import FSMTrace, EventTrace, Coverage, TopologySnapshot
 from awx.network_ui.models import TopologyInventory
 from awx.network_ui.models import TestCase, TestResult, CodeUnderTest, Result
-from awx.network_ui.messages import MultipleMessage, InterfaceCreate, LinkCreate, to_dict
 import urlparse
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from collections import defaultdict
-import math
-import random
 import logging
 from django.utils.dateparse import parse_datetime
 
@@ -31,15 +28,10 @@ HISTORY_MESSAGE_IGNORE_TYPES = ['DeviceSelected',
                                 'DeviceUnSelected',
                                 'LinkSelected',
                                 'LinkUnSelected',
-                                'Undo',
-                                'Redo',
                                 'MouseEvent',
                                 'MouseWheelEvent',
                                 'KeyEvent']
 
-
-SPACING = 200
-RACK_SPACING = 50
 
 logger = logging.getLogger("awx.network_ui.consumers")
 
@@ -47,209 +39,6 @@ logger = logging.getLogger("awx.network_ui.consumers")
 class NetworkUIException(Exception):
 
     pass
-
-
-def circular_layout(topology_id):
-    n = Device.objects.filter(topology_id=topology_id).count()
-
-    r = 200
-    if n > 0:
-        arc_radians = 2 * math.pi / n
-    else:
-        arc_radians = 2 * math.pi
-
-    for i, device in enumerate(Device.objects.filter(topology_id=topology_id)):
-        device.x = math.cos(arc_radians * i + math.pi / 4) * r
-        device.y = math.sin(arc_radians * i + math.pi / 4) * r
-        device.save()
-
-    send_snapshot(Group("topology-%s" % topology_id), topology_id)
-
-
-def v_distance(graph, grid, device):
-
-    d = 0
-    for edge in graph['edges'][device]:
-        d += math.sqrt(math.pow(device.x - edge.x, 2) + math.pow(device.y - edge.y, 2))
-
-    return d
-
-
-def reduce_distance(graph, grid):
-
-    devices = graph['vertices']
-
-    def sum_distances():
-        distances = {x: v_distance(graph, grid, x) for x in grid.keys()}
-        return sum(distances.values())
-
-    total_distance = sum_distances()
-
-    for i in xrange(10000):
-        a = random.choice(devices)
-        b = random.choice(devices)
-        if a == b:
-            continue
-        else:
-            swap(grid, a, b)
-            place(grid, a)
-            place(grid, b)
-            new_total = sum_distances()
-            if new_total < total_distance:
-                print "New total", new_total
-                total_distance = new_total
-                a.save()
-                b.save()
-            else:
-                swap(grid, a, b)
-                place(grid, a)
-                place(grid, b)
-
-
-def place(grid, device):
-    device.x = grid[device][1] * SPACING
-    device.y = grid[device][0] * SPACING
-
-
-def swap(grid, a, b):
-    tmp = grid[a]
-    grid[a] = grid[b]
-    grid[b] = tmp
-
-
-def grid_layout(topology_id):
-    n = Device.objects.filter(topology_id=topology_id).count()
-
-    cols = rows = int(math.ceil(math.sqrt(n)))
-
-    def device_seq_generator():
-        for d in Device.objects.filter(topology_id=topology_id):
-            yield d
-
-    device_seq = device_seq_generator()
-
-    grid = {}
-    graph = dict(vertices=[], edges=defaultdict(list))
-
-    links = Link.objects.filter(Q(from_device__topology_id=topology_id) |
-                                Q(to_device__topology_id=topology_id))
-
-    for l in links:
-        graph['edges'][l.from_device].append(l.to_device)
-        graph['edges'][l.to_device].append(l.from_device)
-
-    for i in xrange(rows):
-        for j in xrange(cols):
-            try:
-                device = next(device_seq)
-                graph['vertices'].append(device)
-                grid[device] = (i, j)
-                place(grid, device)
-                device.save()
-            except StopIteration:
-                pass
-
-    reduce_distance(graph, grid)
-
-    send_snapshot(Group("topology-%s" % topology_id), topology_id)
-
-
-def tier_layout(topology_id):
-
-    devices = list(Device.objects.filter(topology_id=topology_id))
-    device_map = {x.pk: x for x in devices}
-    links = Link.objects.filter(Q(from_device__topology_id=topology_id) |
-                                Q(to_device__topology_id=topology_id))
-
-    def guess_role(devices):
-
-        for device in devices:
-            if getattr(device, "role", None):
-                continue
-            if device.type == "host":
-                device.role = "host"
-                continue
-            if device.type == "switch":
-                if 'leaf' in device.name.lower():
-                    device.role = "leaf"
-                    continue
-                if 'spine' in device.name.lower():
-                    device.role = "spine"
-                    continue
-            device.role = "unknown"
-
-    guess_role(devices)
-
-    edges = defaultdict(set)
-    racks = []
-
-    for l in links:
-        edges[device_map[l.from_device.pk]].add(device_map[l.to_device.pk])
-        edges[device_map[l.to_device.pk]].add(device_map[l.from_device.pk])
-
-
-    similar_connections = defaultdict(list)
-
-    for device, connections in edges.iteritems():
-        similar_connections[tuple(connections)].append(device)
-
-
-    for connections, from_devices in similar_connections.iteritems():
-        if len(from_devices) > 0 and from_devices[0].role == "host":
-            racks.append(from_devices)
-
-    tiers = defaultdict(list)
-
-    for device in devices:
-        if getattr(device, 'tier', None):
-            pass
-        elif device.role == "leaf":
-            device.tier = 1
-        elif device.role == "spine":
-            device.tier = 2
-        elif device.role == "host":
-            device.tier = 0
-        else:
-            device.tier = 3
-        tiers[device.tier].append(device)
-
-    for rack in racks:
-        rack.sort(key=lambda x: x.name)
-
-    racks.sort(key=lambda x: x[0].name)
-
-    for tier in tiers.values():
-        tier.sort(key=lambda x: x.name)
-
-    for device in devices:
-        print device, getattr(device, 'tier', None)
-        if getattr(device, 'tier', None) is None:
-            device.y = 0
-            device.x = 0
-        else:
-            device.y = SPACING * 3 - device.tier * SPACING
-            device.x = 0 - (len(tiers[device.tier]) * SPACING) / 2 + tiers[device.tier].index(device) * SPACING
-        device.save()
-
-    for j, rack in enumerate(racks):
-        x = 0 - (len(racks) * SPACING) / 2 + j * SPACING
-        for i, device in enumerate(rack):
-            device.x = x
-            device.y = SPACING * 3 + i * RACK_SPACING
-            device.save()
-
-    send_snapshot(Group("topology-%s" % topology_id), topology_id)
-
-
-def parse_topology_id(data):
-    topology_id = data.get('topology_id', ['null'])
-    try:
-        topology_id = int(topology_id[0])
-    except ValueError:
-        topology_id = None
-    if not topology_id:
-        topology_id = None
-    return topology_id
 
 
 def parse_inventory_id(data):
@@ -274,7 +63,7 @@ class _Persistence(object):
         assert client_id is not None, "No client_id"
         data = json.loads(message['text'])
         if isinstance(data[1], list):
-            print "no sender"
+            logger.error("Message has no sender")
             return
         if isinstance(data[1], dict) and client_id != data[1].get('sender'):
             logger.error("client_id mismatch expected: %s actual %s", client_id, data[1].get('sender'))
@@ -319,7 +108,6 @@ class _Persistence(object):
                                      id='id',
                                      host_id='host_id'), device)
         logger.info("Device %s", device)
-        print ("Device %s" % device)
         d, _ = Device.objects.get_or_create(topology_id=topology_id, id=device['id'], defaults=device)
         d.x = device['x']
         d.y = device['y']
@@ -438,12 +226,6 @@ class _Persistence(object):
         'Ignore LinkSelected messages'
         pass
 
-    def onUndo(self, message_value, topology_id, client_id):
-        undo_persistence.handle(message_value['original_message'], topology_id, client_id)
-
-    def onRedo(self, message_value, topology_id, client_id):
-        redo_persistence.handle(message_value['original_message'], topology_id, client_id)
-
     def onMultipleMessage(self, message_value, topology_id, client_id):
         for message in message_value['messages']:
             handler = self.get_handler(message['msg_type'])
@@ -452,12 +234,6 @@ class _Persistence(object):
             else:
                 logger.warning("Unsupported message %s", message['msg_type'])
 
-    def onLayout(self, message_value, topology_id, client_id):
-        # circular_layout(topology_id)
-        # grid_layout(topology_id)
-        tier_layout(topology_id)
-
-
     def onCoverageRequest(self, coverage, topology_id, client_id):
         pass
 
@@ -465,22 +241,14 @@ class _Persistence(object):
         xyz, _, rest = test_result['code_under_test'].partition('-')
         commits_since, _, commit_hash = rest.partition('-')
         commit_hash = commit_hash.strip('g')
-        
-        print (xyz)
-        print (commits_since)
-        print (commit_hash)
 
         x, y, z = [int(i) for i in xyz.split('.')]
-
-        print (x, y, z)
 
         code_under_test, _ = CodeUnderTest.objects.get_or_create(version_x=x,
                                                                  version_y=y,
                                                                  version_z=z,
                                                                  commits_since=int(commits_since),
                                                                  commit_hash=commit_hash)
-
-        print (code_under_test)
 
         tr = TestResult(id=test_result['id'],
                         result_id=Result.objects.get(name=test_result['result']).pk,
@@ -489,7 +257,6 @@ class _Persistence(object):
                         client_id=client_id,
                         time=parse_datetime(test_result['date']))
         tr.save()
-        print (tr.pk)
 
 
     def onCoverage(self, coverage, topology_id, client_id):
@@ -586,249 +353,6 @@ class _Persistence(object):
 persistence = _Persistence()
 
 
-class _UndoPersistence(object):
-
-    def handle(self, message, topology_id, client_id):
-        message_type = message[0]
-        message_value = message[1]
-        TopologyHistory.objects.filter(topology_id=topology_id,
-                                       client_id=message_value['sender'],
-                                       message_id=message_value['message_id']).update(undone=True)
-        handler = getattr(self, "on{0}".format(message_type), None)
-        if handler is not None:
-            handler(message_value, topology_id, client_id)
-        else:
-            logger.warning("Unsupported undo message %s", message_type)
-
-    def onSnapshot(self, snapshot, topology_id, client_id):
-        pass
-
-    def onDeviceCreate(self, device, topology_id, client_id):
-        persistence.onDeviceDestroy(device, topology_id, client_id)
-
-    def onDeviceDestroy(self, device, topology_id, client_id):
-        inverted = device.copy()
-        inverted['type'] = device['previous_type']
-        inverted['name'] = device['previous_name']
-        inverted['x'] = device['previous_x']
-        inverted['y'] = device['previous_y']
-        persistence.onDeviceCreate(inverted, topology_id, client_id)
-
-    def onDeviceMove(self, device, topology_id, client_id):
-        inverted = device.copy()
-        inverted['x'] = device['previous_x']
-        inverted['y'] = device['previous_y']
-        persistence.onDeviceMove(inverted, topology_id, client_id)
-
-    def onDeviceLabelEdit(self, device, topology_id, client_id):
-        inverted = device.copy()
-        inverted['name'] = device['previous_name']
-        persistence.onDeviceLabelEdit(inverted, topology_id, client_id)
-
-    def onLinkCreate(self, link, topology_id, client_id):
-        persistence.onLinkDestroy(link, topology_id, client_id)
-
-    def onLinkDestroy(self, link, topology_id, client_id):
-        persistence.onLinkCreate(link, topology_id, client_id)
-
-    def onDeviceSelected(self, message_value, topology_id, client_id):
-        'Ignore DeviceSelected messages'
-        pass
-
-    def onDeviceUnSelected(self, message_value, topology_id, client_id):
-        'Ignore DeviceSelected messages'
-        pass
-
-    def onUndo(self, message_value, topology_id, client_id):
-        pass
-
-
-undo_persistence = _UndoPersistence()
-
-
-class _RedoPersistence(object):
-
-    def handle(self, message, topology_id, client_id):
-        message_type = message[0]
-        message_value = message[1]
-        TopologyHistory.objects.filter(topology_id=topology_id,
-                                       client_id=message_value['sender'],
-                                       message_id=message_value['message_id']).update(undone=False)
-        handler_name = "on{0}".format(message_type)
-        handler = getattr(self, handler_name, getattr(persistence, handler_name, None))
-        if handler is not None:
-            handler(message_value, topology_id, client_id)
-        else:
-            logger.warning("Unsupported redo message %s", message_type)
-
-    def onDeviceSelected(self, message_value, topology_id, client_id):
-        'Ignore DeviceSelected messages'
-        pass
-
-    def onDeviceUnSelected(self, message_value, topology_id, client_id):
-        'Ignore DeviceSelected messages'
-        pass
-
-    def onUndo(self, message_value, topology_id, client_id):
-        'Ignore Undo messages'
-        pass
-
-    def onRedo(self, message_value, topology_id, client_id):
-        'Ignore Redo messages'
-        pass
-
-
-redo_persistence = _RedoPersistence()
-
-
-class _Discovery(object):
-
-    def handle(self, message):
-        topology_id = message.get('topology')
-        data = json.loads(message['text'])
-        message_type = data[0]
-        message_value = data[1]
-        handler = self.get_handler(message_type)
-        if handler is not None:
-            handler(message_value, topology_id)
-        else:
-            logger.warning("Unsupported discovery message %s", message_type)
-
-    def get_handler(self, message_type):
-        return getattr(self, "on{0}".format(message_type), None)
-
-    def onFacts(self, message, topology_id):
-        send_updates = False
-        logger.info("onFacts message key %s", message['key'])
-        #logger.info("onFacts message %s", pformat(message))
-        device_name = message['key']
-        updates = MultipleMessage('MultipleMessage', [])
-        try:
-            device = Device.objects.get(topology_id=topology_id, name=device_name)
-        except ObjectDoesNotExist:
-            logger.info("onFacts Could not find %s in topology %s", device_name, topology_id)
-            return
-
-        try:
-            interfaces = message.get('value', {}).get('ansible_net_neighbors', {})
-            logger.info(pformat(interfaces))
-        except KeyError:
-            interfaces = {}
-        logger.info("onFacts %s: ", pformat(interfaces))
-        """
-        ansible_net_neighbors example:
-         {u'eth1': [{u'host': u'Spine1', u'port': u'eth3'}],
-         u'eth2': [{u'host': u'Spine2', u'port': u'eth3'}],
-         u'eth3': [{u'host': u'Host2', u'port': u'eth1'}]}
-            """
-        for interface_name, neighbors in interfaces.iteritems():
-            logger.info("interface_name %s neighbors %s", interface_name, neighbors)
-            interface, created = Interface.objects.get_or_create(device_id=device.pk,
-                                                                 name=interface_name,
-                                                                 defaults=dict(id=0))
-            if created:
-                interface.id = interface.pk
-                interface.save()
-                updates.messages.append(InterfaceCreate('InterfaceCreate',
-                                                        0,
-                                                        interface.device.id,
-                                                        interface.id,
-                                                        interface.name))
-                send_updates = True
-                logger.info("Created interface %s", interface)
-
-
-            for neighbor in neighbors:
-                logger.info("neighbor %s", neighbor)
-                connected_interface = None
-                connected_device = None
-                neighbor_name = neighbor.get('host')
-                if not neighbor_name:
-                    continue
-                try:
-                    connected_device = Device.objects.get(topology_id=topology_id, name=neighbor_name)
-                except ObjectDoesNotExist:
-                    continue
-
-                logger.info("neighbor %s %s", neighbor_name, connected_device.pk)
-
-                remote_interface_name = neighbor.get('port')
-
-                connected_interface, created = Interface.objects.get_or_create(device_id=connected_device.pk,
-                                                                               name=remote_interface_name,
-                                                                               defaults=dict(id=0))
-                if created:
-                    connected_interface.id = connected_interface.pk
-                    connected_interface.save()
-                    updates.messages.append(InterfaceCreate('InterfaceCreate',
-                                                            0,
-                                                            connected_interface.device.id,
-                                                            connected_interface.id,
-                                                            connected_interface.name))
-                    logger.info("Created interface %s", connected_interface)
-                    send_updates = True
-
-                if connected_device and connected_interface:
-                    exists = Link.objects.filter(Q(from_device_id=device.pk,
-                                                   to_device_id=connected_device.pk,
-                                                   from_interface_id=interface.pk,
-                                                   to_interface_id=connected_interface.pk) |
-                                                 Q(from_device_id=connected_device.pk,
-                                                   to_device_id=device.pk,
-                                                   from_interface_id=connected_interface.pk,
-                                                   to_interface_id=interface.pk)).count() > 0
-                    if not exists:
-                        link = Link(from_device_id=device.pk,
-                                    to_device_id=connected_device.pk,
-                                    from_interface_id=interface.pk,
-                                    to_interface_id=connected_interface.pk,
-                                    id=0)
-
-                        link.save()
-                        link.id = link.pk
-                        link.save()
-                        updates.messages.append(LinkCreate('LinkCreate',
-                                                           0,
-                                                           link.id,
-                                                           link.name,
-                                                           link.from_device.id,
-                                                           link.to_device.id,
-                                                           link.from_interface.id,
-                                                           link.to_interface.id))
-                        logger.info("Created link %s", link)
-                        send_updates = True
-
-        if send_updates:
-            logger.info("onFacts send_updates")
-            channel = Group("topology-%s" % topology_id)
-            channel.send({"text": json.dumps([updates.msg_type, to_dict(updates)])})
-
-
-discovery = _Discovery()
-
-# Ansible Connection Events
-
-
-@channel_session
-def ansible_connect(message):
-    data = urlparse.parse_qs(message.content['query_string'])
-    topology_id = parse_topology_id(data)
-    message.channel_session['topology_id'] = topology_id
-
-
-@channel_session
-def ansible_message(message):
-    # Channel('console_printer').send({"text": message['text']})
-    Group("topology-%s" % message.channel_session['topology_id']).send({"text": message['text']})
-    Channel('discovery').send({"text": message['text'],
-                               "topology": message.channel_session['topology_id']})
-
-
-@channel_session
-def ansible_disconnect(message):
-    pass
-
-
 # UI Channel Events
 
 @channel_session
@@ -837,11 +361,9 @@ def ws_connect(message):
     data = urlparse.parse_qs(message.content['query_string'])
     inventory_id = parse_inventory_id(data)
     topology_ids = list(TopologyInventory.objects.filter(inventory_id=inventory_id).values_list('topology_id', flat=True))
-    print ("topology_ids", topology_ids)
     topology_id = 0
     if len(topology_ids) > 0:
         topology_id = topology_ids[0]
-    print ("topology_id", topology_id)
     if topology_id:
         topology = Topology.objects.get(topology_id=topology_id)
     else:
@@ -958,8 +480,6 @@ def send_history(channel, topology_id):
 
 @channel_session
 def ws_message(message):
-    # Send to debug printer
-    # Channel('console_printer').send({"text": message['text']})
     # Send to all clients editing the topology
     Group("topology-%s" % message.channel_session['topology_id']).send({"text": message['text']})
     # Send to persistence handler
@@ -973,34 +493,3 @@ def ws_disconnect(message):
     if 'topology_id' in message.channel_session:
         Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
 
-
-def console_printer(message):
-    print message['text']  # pragma: no cover
-
-# Tester channel events
-
-
-@channel_session
-def tester_connect(message):
-    data = urlparse.parse_qs(message.content['query_string'])
-    topology_id = parse_topology_id(data)
-    message.channel_session['topology_id'] = topology_id
-    client = Client()
-    client.save()
-    message.channel_session['client_id'] = client.pk
-    message.reply_channel.send({"text": json.dumps(["id", client.pk])})
-    message.reply_channel.send({"text": json.dumps(["topology_id", topology_id])})
-
-
-@channel_session
-def tester_message(message):
-    # Channel('console_printer').send({"text": message['text']})
-    Group("topology-%s" % message.channel_session['topology_id']).send({"text": message['text']})
-    Channel('persistence').send({"text": message['text'],
-                                 "topology": message.channel_session['topology_id'],
-                                 "client": message.channel_session['client_id']})
-
-
-@channel_session
-def tester_disconnect(message):
-    pass
