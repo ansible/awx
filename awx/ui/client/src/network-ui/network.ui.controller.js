@@ -94,7 +94,6 @@ var NetworkUIController = function($scope,
   $scope.selected_items = [];
   $scope.new_link = null;
   $scope.new_stream = null;
-  $scope.new_group_type = null;
   $scope.last_key = "";
   $scope.last_key_code = null;
   $scope.last_event = null;
@@ -111,9 +110,7 @@ var NetworkUIController = function($scope,
   $scope.MIN_ZOOM = 0.1;
   $scope.device_id_seq = util.natural_numbers(0);
   $scope.link_id_seq = util.natural_numbers(0);
-  $scope.group_id_seq = util.natural_numbers(0);
   $scope.message_id_seq = util.natural_numbers(0);
-  $scope.stream_id_seq = util.natural_numbers(0);
   $scope.test_result_id_seq = util.natural_numbers(0);
   $scope.animation_id_seq = util.natural_numbers(0);
   $scope.overall_toolbox_collapsed = false;
@@ -959,35 +956,6 @@ var NetworkUIController = function($scope,
         $scope.devices.push(device);
     };
 
-    $scope.onGroupCreate = function(data) {
-        $scope.create_group(data);
-    };
-
-    $scope.create_group = function(data) {
-        var group = new models.Group(data.id,
-                                     data.name,
-                                     data.type,
-                                     data.x1,
-                                     data.y1,
-                                     data.x2,
-                                     data.y2,
-                                     false);
-        $scope.group_id_seq = util.natural_numbers(data.id);
-        $scope.groups.push(group);
-    };
-
-    $scope.breadcrumbGroups = function(){
-        let breadcrumbGroups = [];
-        for(var i = 0; i < $scope.groups.length; i++){
-            let group = $scope.groups[i];
-            if(group.is_in_breadcrumb($scope.view_port)){
-                group.distance = util.distance(group.x1, group.y1, group.x2, group.y2);
-                breadcrumbGroups.push(group);
-            }
-        }
-        return breadcrumbGroups;
-    };
-
     $scope.forDevice = function(device_id, data, fn) {
         var i = 0;
         for (i = 0; i < $scope.devices.length; i++) {
@@ -1019,16 +987,6 @@ var NetworkUIController = function($scope,
                         break;
                     }
                 }
-            }
-        }
-    };
-
-    $scope.forGroup = function(group_id, data, fn) {
-        var i = 0;
-        for (i = 0; i < $scope.groups.length; i++) {
-            if ($scope.groups[i].id === group_id) {
-                fn($scope.groups[i], data);
-                break;
             }
         }
     };
@@ -1199,88 +1157,6 @@ var NetworkUIController = function($scope,
         }
     };
 
-    $scope.onGroupLabelEdit = function(data) {
-        $scope.edit_group_label(data);
-    };
-
-    $scope.edit_group_label = function(data) {
-        $scope.forGroup(data.id, data, function(group, data) {
-            group.name = data.name;
-        });
-    };
-
-    $scope.redo = function(type_data) {
-        var type = type_data[0];
-        var data = type_data[1];
-
-        if (type === "DeviceMove") {
-            $scope.move_device(data);
-        }
-
-        if (type === "DeviceCreate") {
-            $scope.create_device(data);
-        }
-
-        if (type === "DeviceDestroy") {
-            $scope.destroy_device(data);
-        }
-
-        if (type === "DeviceLabelEdit") {
-            $scope.edit_device_label(data);
-        }
-
-        if (type === "LinkCreate") {
-            $scope.create_link(data);
-        }
-
-        if (type === "LinkDestroy") {
-            $scope.destroy_link(data);
-        }
-    };
-
-
-    $scope.undo = function(type_data) {
-        var type = type_data[0];
-        var data = type_data[1];
-        var inverted_data;
-
-        if (type === "DeviceMove") {
-            inverted_data = angular.copy(data);
-            inverted_data.x = data.previous_x;
-            inverted_data.y = data.previous_y;
-            $scope.move_device(inverted_data);
-        }
-
-        if (type === "DeviceCreate") {
-            $scope.destroy_device(data);
-        }
-
-        if (type === "DeviceDestroy") {
-            inverted_data = new messages.DeviceCreate(data.sender,
-                                                      data.id,
-                                                      data.previous_x,
-                                                      data.previous_y,
-                                                      data.previous_name,
-                                                      data.previous_type,
-                                                      data.previous_host_id);
-            $scope.create_device(inverted_data);
-        }
-
-        if (type === "DeviceLabelEdit") {
-            inverted_data = angular.copy(data);
-            inverted_data.name = data.previous_name;
-            $scope.edit_device_label(inverted_data);
-        }
-
-        if (type === "LinkCreate") {
-            $scope.destroy_link(data);
-        }
-
-        if (type === "LinkDestroy") {
-            $scope.create_link(data);
-        }
-    };
-
     $scope.onClientId = function(data) {
         $scope.client_id = data;
         $scope.send_initial_messages();
@@ -1293,7 +1169,6 @@ var NetworkUIController = function($scope,
         $scope.current_scale = data.scale;
         $scope.$emit('awxNet-UpdateZoomWidget', $scope.current_scale, true);
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
-        $scope.group_id_seq = util.natural_numbers(data.group_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
     };
 
@@ -1321,92 +1196,6 @@ var NetworkUIController = function($scope,
         var i = 0;
         for (i = 0; i < data.length; i++) {
             $scope.history.push(data[i]);
-        }
-    };
-
-    $scope.onToolboxItem = function (data) {
-        if (data.toolbox_name === "Site") {
-            var site = util.parse_variables(data.data);
-            var i = 0;
-            var j = 0;
-            var site_copy = new models.Group(site.id,
-                                             site.name,
-                                             site.type,
-                                             site.x1,
-                                             site.y1,
-                                             site.x2,
-                                             site.y2,
-                                             false);
-            var device, device_copy;
-            var process, process_copy;
-            var intf, intf_copy;
-            var device_map = {};
-            for (i = 0; i < site.devices.length; i++) {
-                device = site.devices[i];
-                device_copy = new models.Device(device.id,
-                                                device.name,
-                                                device.x,
-                                                device.y,
-                                                device.type);
-                device_map[device.id] = device_copy;
-                device_copy.interface_map = {};
-                site_copy.devices.push(device_copy);
-                for(j=0; j < device.interfaces.length; j++) {
-                    intf = device.interfaces[j];
-                    intf_copy = new models.Interface(intf.id, intf.name);
-                    intf_copy.device = device_copy;
-                    device_copy.interfaces.push(intf_copy);
-                    device_copy.interface_map[intf.id] = intf_copy;
-                }
-                for(j=0; j < device.processes.length; j++) {
-                    process = device.processes[j];
-                    process_copy = new models.Process(process.id,
-                                                      process.name,
-                                                      process.type,
-                                                      process.x,
-                                                      process.y);
-                    process_copy.device = device;
-                    device_copy.processes.push(process_copy);
-                }
-            }
-            var group, group_copy;
-            for (i = 0; i < site.groups.length; i++) {
-                group = site.groups[i];
-                group_copy = new models.Group(group.id,
-                                              group.name,
-                                              group.type,
-                                              group.x1,
-                                              group.y1,
-                                              group.x2,
-                                              group.y2,
-                                              false);
-                site_copy.groups.push(group_copy);
-            }
-            var link, link_copy;
-            for (i = 0; i < site.links.length; i++) {
-                link = site.links[i];
-                link_copy = new models.Link(link.id,
-                                            device_map[link.from_device_id],
-                                            device_map[link.to_device_id],
-                                            device_map[link.from_device_id].interface_map[link.from_interface_id],
-                                            device_map[link.to_device_id].interface_map[link.to_interface_id]);
-                link_copy.name = link.name;
-                device_map[link.from_device_id].interface_map[link.from_interface_id].link = link_copy;
-                device_map[link.to_device_id].interface_map[link.to_interface_id].link = link_copy;
-                site_copy.links.push(link_copy);
-            }
-
-            var stream, stream_copy;
-
-            for(i = 0; i < site.streams.length;i++) {
-                stream = site.streams[i];
-                stream_copy = new models.Stream(stream.id,
-                                                device_map[stream.from_device],
-                                                device_map[stream.to_device],
-                                                stream.label);
-                site_copy.streams.push(stream_copy);
-            }
-            $scope.site_toolbox.items.push(site_copy);
         }
     };
 
@@ -1531,7 +1320,6 @@ var NetworkUIController = function($scope,
 
         $scope.updateInterfaceDots();
         $scope.$emit('instatiateSelect', $scope.devices);
-        $scope.$emit('awxNet-breadcrumbGroups', $scope.breadcrumbGroups());
         $scope.update_device_variables();
     };
 
@@ -1767,7 +1555,6 @@ var NetworkUIController = function($scope,
       $scope.hide_buttons = false;
       $scope.hide_links = false;
       $scope.hide_interfaces = false;
-      $scope.hide_groups = false;
     };
 
 
