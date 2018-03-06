@@ -94,4 +94,4 @@ pg_port=5432
 
 # AWX project data folder. If you need access to the location where AWX stores the projects
 # it manages from the docker host, you can set this to turn it into a volume for the container.
-#project_data_dir=/var/lib/awx/projects
+project_data_dir=/opt/awx_projects

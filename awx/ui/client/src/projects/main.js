@@ -15,12 +15,14 @@ import GetProjectIcon from './factories/get-project-icon.factory';
 import GetProjectToolTip from './factories/get-project-tool-tip.factory';
 import ProjectsTemplatesRoute from './projects-templates.route';
 import ProjectsStrings from './projects.strings';
+import ProjectTemplatesListController from '~features/templates/list-templates.controller';
 
 export default
 angular.module('Projects', [])
     .controller('ProjectsList', ProjectsList)
     .controller('ProjectsAdd', ProjectsAdd)
     .controller('ProjectsEdit', ProjectsEdit)
+    .controller('ProjectTemplatesListController', ProjectTemplatesListController)
     .factory('GetProjectPath', GetProjectPath)
     .factory('GetProjectIcon', GetProjectIcon)
     .factory('GetProjectToolTip', GetProjectToolTip)
