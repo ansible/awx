@@ -340,7 +340,10 @@ AUTHENTICATION_BACKENDS = (
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'main.OAuth2Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'main.OAuth2AccessToken'
 
-OAUTH2_PROVIDER = {}
+OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 
+                   'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 
+                   'REFRESH_TOKEN_EXPIRE_SECONDS': 31536000000
+                   }
 
 # LDAP server (default to None to skip using LDAP authentication).
 # Note: This setting may be overridden by database settings.
