@@ -1,7 +1,6 @@
 /* Copyright (c) 2017 Red Hat, Inc. */
 var angular = require('angular');
 var fsm = require('./fsm.js');
-var null_fsm = require('./null.fsm.js');
 var mode_fsm = require('./mode.fsm.js');
 var hotkeys = require('./hotkeys.fsm.js');
 var toolbox_fsm = require('./toolbox.fsm.js');
@@ -57,6 +56,9 @@ var NetworkUIController = function($scope,
       $scope.control_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
                                                          null,
                                                          {debug: false, reconnectInterval: 300});
+      $scope.test_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/test?inventory_id=" + $scope.inventory_id,
+                                                         null,
+                                                         {debug: false, reconnectInterval: 300});
   } else {
       $scope.control_socket = {
           on_message: util.noop
@@ -65,6 +67,7 @@ var NetworkUIController = function($scope,
   $scope.my_location = $location.protocol() + "://" + $location.host() + ':' + $location.port();
   $scope.history = [];
   $scope.client_id = 0;
+  $scope.test_client_id = 0;
   $scope.onMouseDownResult = "";
   $scope.onMouseUpResult = "";
   $scope.onMouseEnterResult = "";
@@ -180,13 +183,13 @@ var NetworkUIController = function($scope,
         if (!$scope.recording) {
             return;
         }
-        message.sender = $scope.client_id;
+        message.sender = $scope.test_client_id;
         message.trace_id = $scope.trace_id;
         message.message_id = $scope.message_id_seq();
         var data = messages.serialize(message);
         if (!$scope.disconnected) {
             try {
-                $scope.control_socket.send(data);
+                $scope.test_socket.send(data);
             }
             catch(err) {
                 $scope.initial_messages.push(message);
@@ -196,15 +199,15 @@ var NetworkUIController = function($scope,
 
     $scope.onKeyDown = function ($event) {
         if ($scope.recording) {
-            $scope.send_control_message(new messages.KeyEvent($scope.client_id,
-                                                              $event.key,
-                                                              $event.keyCode,
-                                                              $event.type,
-                                                              $event.altKey,
-                                                              $event.shiftKey,
-                                                              $event.ctrlKey,
-                                                              $event.metaKey,
-                                                              $scope.trace_id));
+            $scope.send_test_message(new messages.KeyEvent($scope.test_client_id,
+                                                           $event.key,
+                                                           $event.keyCode,
+                                                           $event.type,
+                                                           $event.altKey,
+                                                           $event.shiftKey,
+                                                           $event.ctrlKey,
+                                                           $event.metaKey,
+                                                           $scope.trace_id));
         }
         $scope.last_event = $event;
         $scope.last_key = $event.key;
@@ -215,7 +218,6 @@ var NetworkUIController = function($scope,
     };
 
   //Define the FSMs
-  $scope.null_controller = new fsm.FSMController($scope, "null_fsm", null_fsm.Start, $scope);
   $scope.hotkeys_controller = new fsm.FSMController($scope, "hotkeys_fsm", hotkeys.Start, $scope);
   $scope.keybindings_controller = new fsm.FSMController($scope, "keybindings_fsm", keybindings.Start, $scope);
   $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
@@ -325,8 +327,12 @@ var NetworkUIController = function($scope,
 
 
   $scope.first_channel = new fsm.Channel(null,
-                                         $scope.test_controller,
+                                         $scope.mode_controller,
                                          $scope);
+
+  $scope.test_channel = new fsm.Channel(null,
+                                        $scope.test_controller,
+                                        $scope);
 
     var getMouseEventResult = function (mouseEvent) {
       return "(" + mouseEvent.x + ", " + mouseEvent.y + ")";
@@ -508,7 +514,7 @@ var NetworkUIController = function($scope,
     $scope.onMouseDown = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
+          $scope.send_test_message(new messages.MouseEvent($scope.test_client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.last_event = $event;
       $scope.first_channel.send('MouseDown', $event);
@@ -519,7 +525,7 @@ var NetworkUIController = function($scope,
     $scope.onMouseUp = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
+          $scope.send_test_message(new messages.MouseEvent($scope.test_client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.last_event = $event;
       $scope.first_channel.send('MouseUp', $event);
@@ -530,7 +536,7 @@ var NetworkUIController = function($scope,
     $scope.onMouseLeave = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
+          $scope.send_test_message(new messages.MouseEvent($scope.test_client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.onMouseLeaveResult = getMouseEventResult($event);
       $scope.cursor.hidden = true;
@@ -540,7 +546,7 @@ var NetworkUIController = function($scope,
     $scope.onMouseMove = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
+          $scope.send_test_message(new messages.MouseEvent($scope.test_client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       //var coords = getCrossBrowserElementCoords($event);
       $scope.cursor.hidden = false;
@@ -557,7 +563,7 @@ var NetworkUIController = function($scope,
     $scope.onMouseOver = function ($event) {
       $scope.normalize_mouse_event($event);
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseEvent($scope.client_id, $event.x, $event.y, $event.type, $scope.trace_id));
+          $scope.send_test_message(new messages.MouseEvent($scope.test_client_id, $event.x, $event.y, $event.type, $scope.trace_id));
       }
       $scope.onMouseOverResult = getMouseEventResult($event);
       $scope.cursor.hidden = false;
@@ -572,7 +578,7 @@ var NetworkUIController = function($scope,
       var deltaX = $event.deltaX;
       var deltaY = $event.deltaY;
       if ($scope.recording) {
-          $scope.send_control_message(new messages.MouseWheelEvent($scope.client_id, delta, deltaX, deltaY, $event.type, $event.originalEvent.metaKey, $scope.trace_id));
+          $scope.send_test_message(new messages.MouseWheelEvent($scope.test_client_id, delta, deltaX, deltaY, $event.type, $event.originalEvent.metaKey, $scope.trace_id));
       }
       $scope.last_event = $event;
       $scope.first_channel.send('MouseWheel', [$event, delta, deltaX, deltaY]);
@@ -679,12 +685,12 @@ var NetworkUIController = function($scope,
                 links[i].remote_selected = false;
                 $scope.links.splice(index, 1);
                 $scope.send_control_message(new messages.LinkDestroy($scope.client_id,
-                                                                               links[i].id,
-                                                                               links[i].from_device.id,
-                                                                               links[i].to_device.id,
-                                                                               links[i].from_interface.id,
-                                                                               links[i].to_interface.id,
-                                                                               links[i].name));
+                                                                     links[i].id,
+                                                                     links[i].from_device.id,
+                                                                     links[i].to_device.id,
+                                                                     links[i].from_interface.id,
+                                                                     links[i].to_interface.id,
+                                                                     links[i].name));
             }
         }
         for (i = 0; i < devices.length; i++) {
@@ -693,12 +699,12 @@ var NetworkUIController = function($scope,
                 $scope.devices.splice(index, 1);
                 $scope.$emit('removeSearchOption', devices[i]);
                 $scope.send_control_message(new messages.DeviceDestroy($scope.client_id,
-                                                                                 devices[i].id,
-                                                                                 devices[i].x,
-                                                                                 devices[i].y,
-                                                                                 devices[i].name,
-                                                                                 devices[i].type,
-                                                                                 devices[i].host_id));
+                                                                       devices[i].id,
+                                                                       devices[i].x,
+                                                                       devices[i].y,
+                                                                       devices[i].name,
+                                                                       devices[i].type,
+                                                                       devices[i].host_id));
             }
             for (j = 0; j < all_links.length; j++) {
                 if (all_links[j].to_device === devices[i] ||
@@ -823,38 +829,30 @@ var NetworkUIController = function($scope,
         $scope.jump_to_animation(v_center.x, v_center.y, scale, false);
     });
 
-    $scope.onDeployButton = function () {
-        $scope.send_control_message(new messages.Deploy($scope.client_id));
-    };
-
-    $scope.onDestroyButton = function () {
-        $scope.send_control_message(new messages.Destroy($scope.client_id));
-    };
-
     $scope.onRecordButton = function () {
         $scope.recording = ! $scope.recording;
         if ($scope.recording) {
             $scope.trace_id = $scope.trace_id_seq();
-            $scope.send_control_message(new messages.MultipleMessage($scope.client_id,
-                                                                     [new messages.StartRecording($scope.client_id, $scope.trace_id),
-                                                                      new messages.ViewPort($scope.client_id,
-                                                                                            $scope.current_scale,
-                                                                                            $scope.panX,
-                                                                                            $scope.panY,
-                                                                                            $scope.trace_id),
-                                                                      new messages.Snapshot($scope.client_id,
-                                                                                            $scope.devices,
-                                                                                            $scope.links,
-                                                                                            0,
-                                                                                            $scope.trace_id)]));
+            $scope.send_test_message(new messages.MultipleMessage($scope.test_client_id,
+                                                                  [new messages.StartRecording($scope.test_client_id, $scope.trace_id),
+                                                                   new messages.ViewPort($scope.test_client_id,
+                                                                                         $scope.current_scale,
+                                                                                         $scope.panX,
+                                                                                         $scope.panY,
+                                                                                         $scope.trace_id),
+                                                                   new messages.Snapshot($scope.test_client_id,
+                                                                                         $scope.devices,
+                                                                                         $scope.links,
+                                                                                         0,
+                                                                                         $scope.trace_id)]));
         } else {
-            $scope.send_control_message(new messages.MultipleMessage($scope.client_id,
-                                                                     [new messages.Snapshot($scope.client_id,
-                                                                                            $scope.devices,
-                                                                                            $scope.links,
-                                                                                            1,
-                                                                                            $scope.trace_id),
-                                                                      new messages.StopRecording($scope.client_id, $scope.trace_id)]));
+            $scope.send_test_message(new messages.MultipleMessage($scope.test_client_id,
+                                                                  [new messages.Snapshot($scope.test_client_id,
+                                                                                         $scope.devices,
+                                                                                         $scope.links,
+                                                                                         1,
+                                                                                         $scope.trace_id),
+                                                                   new messages.StopRecording($scope.test_client_id, $scope.trace_id)]));
         }
     };
 
@@ -894,11 +892,11 @@ var NetworkUIController = function($scope,
     ];
 
     $scope.onDownloadTraceButton = function () {
-        window.open("/network_ui/download_trace?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
+        window.open("/network_ui/download_trace?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.test_client_id);
     };
 
     $scope.onDownloadRecordingButton = function () {
-        window.open("/network_ui/download_recording?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.client_id);
+        window.open("/network_ui/download_recording?topology_id=" + $scope.topology_id + "&trace_id=" + $scope.trace_id + "&client_id=" + $scope.test_client_id);
     };
 
     $scope.onUploadTestButton = function () {
@@ -1417,8 +1415,6 @@ var NetworkUIController = function($scope,
         //Erase the existing state
         $scope.devices = [];
         $scope.links = [];
-        $scope.groups = [];
-        $scope.streams = [];
 
         var device_map = {};
         var device_interface_map = {};
@@ -1430,17 +1426,11 @@ var NetworkUIController = function($scope,
         var new_intf = null;
         var max_device_id = null;
         var max_link_id = null;
-        var max_group_id = null;
-        var max_stream_id = null;
         var min_x = null;
         var min_y = null;
         var max_x = null;
         var max_y = null;
         var new_link = null;
-        var new_group = null;
-        var process = null;
-        var new_process = null;
-        var new_stream = null;
 
         //Build the devices
         for (i = 0; i < data.devices.length; i++) {
@@ -1478,16 +1468,6 @@ var NetworkUIController = function($scope,
             $scope.devices.push(new_device);
             device_map[device.id] = new_device;
             device_interface_map[device.id] = {};
-            for (j = 0; j < device.processes.length; j++) {
-                process = device.processes[j];
-                new_process = (new models.Process(process.id,
-                                                  process.name,
-                                                  process.process_type,
-                                                  0,
-                                                  0));
-                new_process.device = new_device;
-                new_device.processes.push(new_process);
-            }
             for (j = 0; j < device.interfaces.length; j++) {
                 intf = device.interfaces[j];
                 new_intf = (new models.Interface(intf.id,
@@ -1514,50 +1494,6 @@ var NetworkUIController = function($scope,
             $scope.links.push(new_link);
             device_interface_map[link.from_device_id][link.from_interface_id].link = new_link;
             device_interface_map[link.to_device_id][link.to_interface_id].link = new_link;
-        }
-
-        //Build the streams
-        var stream = null;
-        for (i = 0; i < data.streams.length; i++) {
-            stream = data.streams[i];
-            if (max_stream_id === null || stream.id > max_stream_id) {
-                max_stream_id = stream.id;
-            }
-            new_stream = new models.Stream(stream.id,
-                                           device_map[stream.from_id],
-                                           device_map[stream.to_id],
-                                           stream.label);
-            $scope.streams.push(new_stream);
-        }
-
-        //Build the groups
-        var group = null;
-        for (i = 0; i < data.groups.length; i++) {
-            group = data.groups[i];
-            if (max_group_id === null || group.id > max_group_id) {
-                max_group_id = group.id;
-            }
-            new_group = new models.Group(group.id,
-                                         group.name,
-                                         group.group_type,
-                                         group.x1,
-                                         group.y1,
-                                         group.x2,
-                                         group.y2,
-                                         false);
-            new_group.group_id = group.inventory_group_id;
-            if (group.members !== undefined) {
-                for (j=0; j < group.members.length; j++) {
-                    new_group.devices.push(device_map[group.members[j]]);
-                }
-            }
-            $scope.groups.push(new_group);
-        }
-
-        //Update group membership
-
-        for (i = 0; i < $scope.groups.length; i++) {
-            $scope.groups[i].update_membership($scope.devices, $scope.groups);
         }
 
         var diff_x;
@@ -1591,14 +1527,6 @@ var NetworkUIController = function($scope,
         //Update the link_id_seq to be greater than all link ids to prevent duplicate ids.
         if (max_link_id !== null) {
             $scope.link_id_seq = util.natural_numbers(max_link_id);
-        }
-        //Update the stream_id_seq to be greater than all stream ids to prevent duplicate ids.
-        if (max_stream_id !== null) {
-            $scope.stream_id_seq = util.natural_numbers(max_stream_id);
-        }
-        //Update the group_id_seq to be greater than all group ids to prevent duplicate ids.
-        if (max_group_id !== null) {
-            $scope.group_id_seq = util.natural_numbers(max_group_id);
         }
 
         $scope.updateInterfaceDots();
@@ -1656,6 +1584,15 @@ var NetworkUIController = function($scope,
         //ignore
     };
 
+    $scope.test_socket.onmessage = function(message) {
+        $scope.test_channel.send('Message', message);
+        $scope.$apply();
+    };
+
+    $scope.test_socket.onopen = function() {
+        //ignore
+    };
+
     $scope.send_initial_messages = function() {
         var i = 0;
         var messages_to_send = $scope.initial_messages;
@@ -1664,9 +1601,9 @@ var NetworkUIController = function($scope,
         $scope.initial_messages = [];
         for(i = 0; i < messages_to_send.length; i++) {
             message = messages_to_send[i];
-            message.sender = $scope.client_id;
+            message.sender = $scope.test_client_id;
             data = messages.serialize(message);
-            $scope.control_socket.send(data);
+            $scope.test_socket.send(data);
         }
     };
 
@@ -1674,6 +1611,25 @@ var NetworkUIController = function($scope,
     if ($scope.control_socket.readyState === WebSocket.OPEN) {
         $scope.control_socket.onopen();
     }
+    // Call onopen directly if $scope.test_socket is already open
+    if ($scope.test_socket.readyState === WebSocket.OPEN) {
+        $scope.test_socket.onopen();
+    }
+
+    $scope.send_test_message = function (message) {
+        var i = 0;
+        message.sender = $scope.test_client_id;
+        message.message_id = $scope.message_id_seq();
+        if (message.constructor.name === "MultipleMessage") {
+            for (i=0; i < message.messages.length; i++) {
+                message.messages[i].message_id = $scope.message_id_seq();
+            }
+        }
+        var data = messages.serialize(message);
+        if (!$scope.disconnected) {
+            $scope.test_socket.send(data);
+        }
+    };
 
     $scope.send_control_message = function (message) {
         var i = 0;
@@ -1816,8 +1772,6 @@ var NetworkUIController = function($scope,
 
 
     $scope.reset_fsm_state = function () {
-        $scope.null_controller.state = null_fsm.Start;
-        $scope.null_controller.state.start($scope.null_controller);
         $scope.hotkeys_controller.state = hotkeys.Start;
         $scope.hotkeys_controller.state.start($scope.hotkeys_controller);
         $scope.keybindings_controller.state = keybindings.Start;
