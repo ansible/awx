@@ -5,3 +5,21 @@
 
 - import_tasks: compose.yml
   when: use_docker_compose | default(False) | bool
+
+- name: Activate AWX Web Container
+  docker_container:
+    name: awx_web
+    state: started
+    restart_policy: unless-stopped
+    image: "{{ awx_web_docker_actual_image }}"
+    volumes:
+      - "{{ project_data_dir }}:/var/lib/awx/projects:rw"
+
+- name: Activate AWX Task Container
+  docker_container:
+    name: awx_task
+    state: started
+    restart_policy: unless-stopped
+    image: "{{ awx_task_docker_actual_image }}"
+    volumes:
+      - "{{ project_data_dir }}:/var/lib/awx/projects:rw"
