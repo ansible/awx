@@ -36,9 +36,7 @@ register(
     'OAUTH2_PROVIDER',
     field_class=OAuth2ProviderField,
     default={'ACCESS_TOKEN_EXPIRE_SECONDS': 315360000000, 
-             'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600, 
-             'REFRESH_TOKEN_EXPIRE_SECONDS': 315360000000
-             },
+             'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600},
     label=_('OAuth 2 Timeout Settings'),
     help_text=_('Dictionary for customizing OAuth 2 timeouts, available items are '
                 '`ACCESS_TOKEN_EXPIRE_SECONDS`, the duration of access tokens in the number '
