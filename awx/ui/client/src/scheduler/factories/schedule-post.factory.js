@@ -9,7 +9,7 @@ export default
                 promptData = params.promptData,
                 priorCredentials = params.priorCredentials ? params.priorCredentials : [],
                 newSchedule, rrule, extra_vars;
-            let deferred = $q.defer();
+            const deferred = $q.defer();
             if (scheduler.isValid()) {
                 Wait('start');
                 newSchedule = scheduler.getValue();
@@ -68,11 +68,11 @@ export default
                         scheduleData.job_type = promptData.launchConf.defaults.job_type && promptData.launchConf.defaults.job_type === promptData.prompts.jobType.value.value ? null : promptData.prompts.jobType.value.value;
                     }
                     if(_.has(promptData, 'prompts.tags.value') && _.get(promptData, 'launchConf.ask_tags_on_launch')){
-                        let templateDefaultJobTags = promptData.launchConf.defaults.job_tags.split(',');
+                        const templateDefaultJobTags = promptData.launchConf.defaults.job_tags.split(',');
                         scheduleData.job_tags = (_.isEqual(templateDefaultJobTags.sort(), promptData.prompts.tags.value.map(a => a.value).sort())) ? null : promptData.prompts.tags.value.map(a => a.value).join();
                     }
                     if(_.has(promptData, 'prompts.skipTags.value') && _.get(promptData, 'launchConf.ask_skip_tags_on_launch')){
-                        let templateDefaultSkipTags = promptData.launchConf.defaults.skip_tags.split(',');
+                        const templateDefaultSkipTags = promptData.launchConf.defaults.skip_tags.split(',');
                         scheduleData.skip_tags = (_.isEqual(templateDefaultSkipTags.sort(), promptData.prompts.skipTags.value.map(a => a.value).sort())) ? null : promptData.prompts.skipTags.value.map(a => a.value).join();
                     }
                     if(_.has(promptData, 'prompts.limit.value') && _.get(promptData, 'launchConf.ask_limit_on_launch')){
@@ -96,15 +96,15 @@ export default
                             if(_.get(promptData, 'launchConf.ask_credential_on_launch')){
                                 // This finds the credentials that were selected in the prompt but don't occur
                                 // in the template defaults
-                                let credentialsToPost = promptData.prompts.credentials.value.filter(function(credFromPrompt) {
-                                    let defaultCreds = promptData.launchConf.defaults.credentials ? promptData.launchConf.defaults.credentials : [];
+                                const credentialsToPost = promptData.prompts.credentials.value.filter(function(credFromPrompt) {
+                                    const defaultCreds = promptData.launchConf.defaults.credentials ? promptData.launchConf.defaults.credentials : [];
                                     return !defaultCreds.some(function(defaultCred) {
                                         return credFromPrompt.id === defaultCred.id;
                                     });
                                 });
 
-                                let promises = [];
-                                let schedule = new Schedule();
+                                const promises = [];
+                                const schedule = new Schedule();
 
                                 credentialsToPost.forEach((credentialToPost) => {
                                     promises.push(schedule.postCredential({
@@ -136,27 +136,27 @@ export default
                     Rest.put(scheduleData)
                         .then(({data}) => {
                             if(_.get(promptData, 'launchConf.ask_credential_on_launch')){
-                                let credentialsNotInPriorCredentials = promptData.prompts.credentials.value.filter(function(credFromPrompt) {
-                                    let defaultCreds = promptData.launchConf.defaults.credentials ? promptData.launchConf.defaults.credentials : [];
+                                const credentialsNotInPriorCredentials = promptData.prompts.credentials.value.filter(function(credFromPrompt) {
+                                    const defaultCreds = promptData.launchConf.defaults.credentials ? promptData.launchConf.defaults.credentials : [];
                                     return !defaultCreds.some(function(defaultCred) {
                                         return credFromPrompt.id === defaultCred.id;
                                     });
                                 });
 
-                                let credentialsToAdd = credentialsNotInPriorCredentials.filter(function(credNotInPrior) {
+                                const credentialsToAdd = credentialsNotInPriorCredentials.filter(function(credNotInPrior) {
                                     return !priorCredentials.some(function(priorCred) {
                                         return credNotInPrior.id === priorCred.id;
                                     });
                                 });
 
-                                let credentialsToRemove = priorCredentials.filter(function(priorCred) {
+                                const credentialsToRemove = priorCredentials.filter(function(priorCred) {
                                     return !credentialsNotInPriorCredentials.some(function(credNotInPrior) {
                                         return priorCred.id === credNotInPrior.id;
                                     });
                                 });
 
-                                let promises = [];
-                                let schedule = new Schedule();
+                                const promises = [];
+                                const schedule = new Schedule();
 
                                 credentialsToAdd.forEach((credentialToAdd) => {
                                     promises.push(schedule.postCredential({

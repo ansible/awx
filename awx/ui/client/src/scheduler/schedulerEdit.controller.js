@@ -286,21 +286,31 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
                         let defaultCredsWithoutOverrides = [];
 
-                        prompts.credentials.value.forEach((defaultCred) => {
-                            let typeMatches = false;
+                        const credentialHasScheduleOverride = (templateDefaultCred) => {
+                            let credentialHasOverride = false;
                             scheduleCredentials.forEach((scheduleCred) => {
-                                if(defaultCred.credential_type === scheduleCred.credential_type) {
-                                    if((!defaultCred.vault_id && !scheduleCred.inputs.vault_id) || (defaultCred.vault_id && scheduleCred.inputs.vault_id && defaultCred.vault_id === scheduleCred.inputs.vault_id)) {
-                                        typeMatches = true;
+                                if(templateDefaultCred.credential_type === scheduleCred.credential_type) {
+                                    if(
+                                        (!templateDefaultCred.vault_id && !scheduleCred.inputs.vault_id) ||
+                                        (templateDefaultCred.vault_id && scheduleCred.inputs.vault_id && templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
+                                    ) {
+                                        credentialHasOverride = true;
                                     }
                                 }
                             });
-                            if(!typeMatches) {
-                                defaultCredsWithoutOverrides.push(defaultCred);
-                            }
-                        });
 
-                        prompts.credentials.value = scheduleCredentials.concat(defaultCredsWithoutOverrides);
+                            return credentialHasOverride;
+                        };
+
+                        if(_.has(launchConf, 'defaults.credentials')) {
+                            launchConf.defaults.credentials.forEach((defaultCred) => {
+                                if(!credentialHasScheduleOverride(defaultCred)) {
+                                    defaultCredsWithoutOverrides.push(defaultCred);
+                                }
+                            });
+                        }
+
+                        prompts.credentials.value = defaultCredsWithoutOverrides.concat(scheduleCredentials);
 
                         if(!launchConf.ask_variables_on_launch) {
                             $scope.noVars = true;

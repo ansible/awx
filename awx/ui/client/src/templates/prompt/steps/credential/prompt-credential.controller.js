@@ -183,14 +183,13 @@ export default
                     if(!uncheck) {
                         scope.promptData.prompts.credentials.value.push(cred);
                         updateNeededPasswords(cred);
-                        for (let i = scope.promptData.credentialTypeMissing.length - 1; i >= 0; i--) {
-                            if(scope.promptData.credentialTypeMissing[i].credential_type === cred.credential_type) {
-                                if(_.get(cred, 'inputs.vault_id') === _.get(scope.promptData.credentialTypeMissing[i], 'vault_id')) {
-                                    scope.promptData.credentialTypeMissing.splice(i,1);
-                                    i = -1;
-                                }
-                            }
-                        }
+
+                        _.remove(scope.promptData.credentialTypeMissing, (missingCredType) => {
+                            return (
+                                missingCredType.credential_type === cred.credential_type &&
+                                _.get(cred, 'inputs.vault_id') === _.get(missingCredType, 'vault_id')
+                            );
+                        });
                     } else {
                         if(scope.promptData.launchConf.defaults.credentials && scope.promptData.launchConf.defaults.credentials.length > 0) {
                             checkMissingCredType(cred);
