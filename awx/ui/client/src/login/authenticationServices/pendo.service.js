@@ -38,12 +38,18 @@ export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$q', 'Con
                 return options;
             },
 
+            // Detailed mode sends:
+            // VisitorId: userid+hash of license_key
+            // AccountId: hash of license_key from license
             setDetailed: function(options, config) {
                 // config.deployment_id is a hash of the tower license_key
                 options.visitor.id = $rootScope.current_user.id + '@' + config.deployment_id;
                 options.account.id = config.deployment_id;
             },
 
+            // Anonymous mode sends:
+            // VisitorId: <hardcoded id that is the same across all anonymous>
+            // AccountId: <hardcoded id that is the same across all anonymous>
             setAnonymous: function (options) {
                 options.visitor.id = 0;
                 options.account.id = "tower.ansible.com";
