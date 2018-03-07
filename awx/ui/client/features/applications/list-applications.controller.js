@@ -87,8 +87,6 @@ function ListApplicationsController (
 
         if (parseInt($state.params.application_id, 0) === app.id) {
             $state.go('applications', reloadListStateParams, { reload: true });
-        } else if (parseInt($state.params.application_id, 0) === application.id) {
-            $state.go('applications', reloadListStateParams, { reload: true });
         } else {
             $state.go('.', reloadListStateParams, { reload: true });
         }
