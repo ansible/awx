@@ -8,12 +8,12 @@ function ApplicationsStrings (BaseString) {
         LIST_BREADCRUMB_LABEL: t.s('APPLICATIONS'),
         ADD_BREADCRUMB_LABEL: t.s('CREATE APPLICATION'),
         EDIT_BREADCRUMB_LABEL: t.s('EDIT APPLICATION'),
-        USER_LIST_BREADCRUMB_LABEL: t.s('USERS')
+        USER_LIST_BREADCRUMB_LABEL: t.s('TOKENS')
     };
 
     ns.tab = {
         DETAILS: t.s('Details'),
-        USERS: t.s('Users')
+        USERS: t.s('Tokens')
     };
 
     ns.add = {
