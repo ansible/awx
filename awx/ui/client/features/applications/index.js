@@ -204,6 +204,59 @@ function ApplicationsRun ($stateExtender, strings) {
     });
 
     $stateExtender.addState({
+        name: 'applications.edit.organization',
+        url: '/organization?selected',
+        searchPrefix: 'organization',
+        params: {
+            organization_search: {
+                value: {
+                    page_size: 5,
+                    order_by: 'name',
+                    role_level: 'admin_role'
+                },
+                dynamic: true,
+                squash: ''
+            }
+        },
+        data: {
+            basePath: 'organizations',
+            formChildState: true
+        },
+        ncyBreadcrumb: {
+            skip: true
+        },
+        views: {
+            'organization@applications.edit': {
+                templateProvider: (ListDefinition, generateList) => {
+                    const html = generateList.build({
+                        mode: 'lookup',
+                        list: ListDefinition,
+                        input_type: 'radio'
+                    });
+
+                    return `<lookup-modal>${html}</lookup-modal>`;
+                }
+            }
+        },
+        resolve: {
+            ListDefinition: ['OrganizationList', list => list],
+            Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
+                (list, qs, $stateParams, GetBasePath) => qs.search(
+                    GetBasePath('organizations'),
+                    $stateParams[`${list.iterator}_search`]
+                )
+            ]
+        },
+        onExit ($state) {
+            if ($state.transition) {
+                $('#form-modal').modal('hide');
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+            }
+        }
+    });
+
+    $stateExtender.addState({
         name: 'applications.edit.permissions',
         route: '/permissions?{permission_search:queryset}',
         ncyBreadcrumb: {

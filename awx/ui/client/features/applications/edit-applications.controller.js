@@ -83,7 +83,7 @@ function EditApplicationsController (models, $state, strings, $scope) {
     };
 
     vm.form.organization._resource = 'organization';
-    vm.form.organization._route = 'applications.add.organization';
+    vm.form.organization._route = 'applications.edit.organization';
     vm.form.organization._model = organization;
     vm.form.organization._placeholder = strings.get('SELECT AN ORGANIZATION');
 
