@@ -23,7 +23,6 @@ function AddApplicationsController (models, $state, strings) {
 
     vm.tab = {
         details: { _active: true },
-        permissions: { _disabled: true },
         users: { _disabled: true }
     };
 

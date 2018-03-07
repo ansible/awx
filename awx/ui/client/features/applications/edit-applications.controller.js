@@ -29,10 +29,6 @@ function EditApplicationsController (models, $state, strings, $scope) {
             _go: 'applications.edit',
             _params: { application_id: application.get('id') }
         },
-        permissions: {
-            _go: 'applications.edit.permissions',
-            _params: { application_id: application.get('id') }
-        },
         users: {
             _go: 'applications.edit.users',
             _params: { application_id: application.get('id') }
@@ -42,21 +38,12 @@ function EditApplicationsController (models, $state, strings, $scope) {
     $scope.$watch('$state.current.name', (value) => {
         if (/applications.edit.users/.test(value)) {
             vm.tab.details._active = false;
-            vm.tab.permissions._active = false;
             vm.tab.users._active = true;
-        } else if (/applications.edit($|\.organization$)/.test(value)) {
-            vm.tab.details._active = true;
-            vm.tab.permissions._active = false;
-            vm.tab.users._active = false;
         } else {
-            vm.tab.details._active = false;
-            vm.tab.permissions._active = true;
+            vm.tab.details._active = true;
             vm.tab.users._active = false;
         }
     });
-
-    // Only exists for permissions compatibility
-    $scope.application_obj = application.get();
 
     if (isEditable) {
         vm.form = application.createFormSchema('put', { omit });
