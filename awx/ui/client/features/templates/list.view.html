@@ -50,6 +50,9 @@
             <at-row ng-repeat="template in templates"
                 ng-class="{'at-Row--active': (template.id === vm.activeId)}"
                 template-id="{{ template.id }}">
+                <div class="at-Row--invalid" ng-show="vm.isInvalid(template)">
+                    <at-popover state="vm.invalidTooltip"></at-popover>
+                </div>
                 <div class="at-Row-items">
                     <at-row-item
                         header-value="{{ template.name }}"

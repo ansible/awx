@@ -55,7 +55,7 @@ function TemplatesStrings (BaseString) {
         VALID_DECIMAL: t.s('Please enter an answer that is a decimal number.'),
         PLAYBOOK_RUN: t.s('Playbook Run'),
         CHECK: t.s('Check'),
-        NO_CREDS_MATCHING_TYPE: t.s('No Credentials Matching This Type Have Been Created'), 
+        NO_CREDS_MATCHING_TYPE: t.s('No Credentials Matching This Type Have Been Created'),
     };
 
     ns.alert  = {
@@ -81,6 +81,7 @@ function TemplatesStrings (BaseString) {
         UNKNOWN: t.s('Unable to determine template type.'),
         SCHEDULE: t.s('Unable to schedule job.'),
         COPY: t.s('Unable to copy template.'),
+        INVALID: t.s('Resources are missing from this template.')
     };
 
     ns.warnings = {
