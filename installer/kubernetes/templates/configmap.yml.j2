@@ -20,6 +20,9 @@ data:
     CLUSTER_HOST_ID = socket.gethostname()
     SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False 
+
     REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR']
     
     STATIC_ROOT = '/var/lib/awx/public/static'
