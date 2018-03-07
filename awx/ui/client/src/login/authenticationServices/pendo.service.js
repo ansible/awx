@@ -50,7 +50,7 @@ export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$q', 'Con
             },
 
             setRole: function(options) {
-                var deferred = $q.defer();
+                const deferred = $q.defer();
 
                 if ($rootScope.current_user.is_superuser === true) {
                     options.visitor.role = 'admin';
@@ -91,9 +91,10 @@ export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$q', 'Con
             },
 
             issuePendoIdentity: function () {
-                var options,
-                    c = ConfigService.get(),
-                    config = c.license_info;
+                const c = ConfigService.get();
+
+                let options;
+                let config = c.license_info;
 
                 config.analytics_status = c.analytics_status;
                 config.version = c.version;

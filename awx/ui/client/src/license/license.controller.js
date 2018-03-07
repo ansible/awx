@@ -13,9 +13,9 @@ export default
     function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment,
     $window, ConfigService, FeaturesService, pendoService, i18n, config) {
 
-        var calcDaysRemaining = function(seconds) {
+        const calcDaysRemaining = function(seconds) {
       	 		// calculate the number of days remaining on the license
-      			var duration = moment.duration(seconds, 'seconds').asDays();
+      			let duration = moment.duration(seconds, 'seconds').asDays();
 
       			duration = Math.floor(duration);
                 if(duration < 0){
@@ -27,16 +27,16 @@ export default
     			      return duration;
     	 	};
 
-        var calcExpiresOn = function(seconds) {
+        const calcExpiresOn = function(seconds) {
             // calculate the expiration date of the license
             return moment.unix(seconds).calendar();
         };
 
-        var reset = function() {
+        const reset = function() {
             document.getElementById('License-form').reset();
         };
 
-        var init = function(config) {
+        const init = function(config) {
             // license/license.partial.html compares fileName
             $scope.fileName = N_("No file selected.");
 
@@ -64,7 +64,7 @@ export default
             // Mimic HTML5 spec, show filename
             $scope.fileName = event.target.files[0].name;
             // Grab the key from the raw license file
-            var raw = new FileReader();
+            const raw = new FileReader();
             // readAsFoo runs async
             raw.onload = function() {
                 try {
@@ -116,18 +116,18 @@ export default
 
                             if ($rootScope.licenseMissing === true) {
                                 $state.go('dashboard', {
-            							          licenseMissing: false
-            						        });
-            					      } else {
+                        	          licenseMissing: false
+                                });
+                            } else {
                                 init(config);
-            						        $scope.success = true;
-            						        $rootScope.licenseMissing = false;
-            						        // for animation purposes
-            						        var successTimeout = setTimeout(function() {
-            							          $scope.success = false;
-            							          clearTimeout(successTimeout);
-            						        }, 4000);
-            					      }
+                                $scope.success = true;
+                                $rootScope.licenseMissing = false;
+                                // for animation purposes
+                                const successTimeout = setTimeout(function() {
+                        	          $scope.success = false;
+                        	          clearTimeout(successTimeout);
+                                }, 4000);
+                            }
                         });
       			    });
     		};
