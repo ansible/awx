@@ -96,7 +96,7 @@ baron==0.6.6              # via redbaron
 billiard==3.3.0.23        # via celery
 boto3==1.6.2
 boto==2.47.0
-botocore==1.9.3           # via boto3, s3transfer
+botocore==1.9.5           # via boto3, s3transfer
 celery==3.1.25
 certifi==2018.1.18        # via msrest
 cffi==1.11.5              # via azure-datalake-store, cryptography
@@ -104,7 +104,9 @@ channels==1.1.8
 constantly==15.1.0        # via twisted
 cryptography==2.1.4       # via adal, azure-cosmosdb-table, azure-storage-common, pyopenssl, requests, secretstorage
 daphne==1.3.0
+decorator==4.2.1
 defusedxml==0.4.1         # via python-saml
+deprecation==2.0          # via openstacksdk
 django-auth-ldap==1.2.8
 django-celery==3.2.2
 django-crum==0.7.2
@@ -117,43 +119,55 @@ django-radius==1.3.3
 django-solo==1.1.3
 django-split-settings==0.3.0
 django-taggit==0.22.2
-django==1.11.10
+django==1.11.11
 djangorestframework-yaml==1.0.3
 djangorestframework==3.7.7
+dogpile.cache==0.6.5      # via openstacksdk
 enum34==1.1.6             # via cryptography, msrest
 functools32==3.2.3.post2  # via jsonschema
 future==0.16.0            # via django-radius
-futures==3.2.0            # via azure-cosmosdb-table, azure-datalake-store, azure-storage-blob, azure-storage-file, requests-futures, s3transfer
+futures==3.2.0            # via azure-cosmosdb-table, azure-datalake-store, azure-storage-blob, azure-storage-file, openstacksdk, requests-futures, s3transfer
 hyperlink==18.0.0         # via twisted
 idna==2.6                 # via cryptography, hyperlink, requests
 incremental==17.5.0       # via twisted
 inflect==0.2.5            # via jaraco.itertools
-ipaddress==1.0.19         # via cryptography
+ipaddress==1.0.19         # via cryptography, openstacksdk
 irc==16.2
+iso8601==0.1.12           # via keystoneauth1, openstacksdk
 isodate==0.6.0            # via msrest, python-saml
 jaraco.classes==1.4.3     # via jaraco.collections
-jaraco.collections==1.5.2  # via irc, jaraco.text
+jaraco.collections==1.5.3  # via irc, jaraco.text
 jaraco.functools==1.17    # via irc, jaraco.text
 jaraco.itertools==2.1.1   # via irc
 jaraco.logging==1.5.1     # via irc
 jaraco.stream==1.1.2      # via irc
-jaraco.text==1.9.2        # via irc, jaraco.collections
-jmespath==0.9.3           # via boto3, botocore
+jaraco.text==1.10         # via irc, jaraco.collections
+jmespath==0.9.3           # via boto3, botocore, openstacksdk
+jsonpatch==1.21           # via openstacksdk
 jsonpickle==0.9.6         # via asgi-amqp
+jsonpointer==2.0          # via jsonpatch
 jsonschema==2.6.0
 keyring==11.0.0           # via msrestazure
+keystoneauth1==3.4.0      # via openstacksdk, os-client-config
 kombu==3.0.37             # via asgi-amqp, celery
 lxml==4.1.1               # via pyvmomi
 m2crypto==0.29.0
 markdown==2.6.11
 more-itertools==4.1.0     # via irc, jaraco.functools, jaraco.itertools
 msgpack-python==0.5.5     # via asgi-amqp
-msrest==0.4.26            # via azure-datalake-store, azure-eventgrid, azure-servicefabric, msrestazure
+msrest==0.4.27            # via azure-datalake-store, azure-eventgrid, azure-servicefabric, msrestazure
 msrestazure==0.4.22       # via azure-batch, azure-graphrbac, azure-keyvault, azure-mgmt-advisor, azure-mgmt-applicationinsights, azure-mgmt-authorization, azure-mgmt-batch, azure-mgmt-batchai, azure-mgmt-billing, azure-mgmt-cdn, azure-mgmt-cognitiveservices, azure-mgmt-commerce, azure-mgmt-compute, azure-mgmt-consumption, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-datafactory, azure-mgmt-datalake-analytics, azure-mgmt-datalake-store, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-eventgrid, azure-mgmt-eventhub, azure-mgmt-hanaonazure, azure-mgmt-iothub, azure-mgmt-iothubprovisioningservices, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-logic, azure-mgmt-machinelearningcompute, azure-mgmt-managementpartner, azure-mgmt-marketplaceordering, azure-mgmt-media, azure-mgmt-monitor, azure-mgmt-msi, azure-mgmt-network, azure-mgmt-notificationhubs, azure-mgmt-powerbiembedded, azure-mgmt-rdbms, azure-mgmt-recoveryservices, azure-mgmt-recoveryservicesbackup, azure-mgmt-redis, azure-mgmt-relay, azure-mgmt-reservations, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-search, azure-mgmt-servermanager, azure-mgmt-servicebus, azure-mgmt-servicefabric, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-subscription, azure-mgmt-trafficmanager, azure-mgmt-web
+munch==2.2.0              # via openstacksdk
 netaddr==0.7.19           # via pyrad
+netifaces==0.10.6         # via openstacksdk
 oauthlib==2.0.6           # via django-oauth-toolkit, requests-oauthlib, social-auth-core
+openstacksdk==0.12.0      # via shade
 ordereddict==1.1
+os-client-config==1.29.0  # via shade
+os-service-types==1.2.0   # via openstacksdk
+packaging==17.1           # via deprecation
 pathlib2==2.3.0           # via azure-datalake-store
+pbr==3.1.1                # via keystoneauth1, openstacksdk, os-service-types, shade, stevedore
 pexpect==4.4.0
 psphere==0.5.2
 psutil==5.4.3
@@ -177,20 +191,23 @@ python-radius==1.0
 python-saml==2.2.2
 pytz==2018.3              # via celery, django, irc, tempora, twilio
 pyvmomi==6.5
-pyyaml==3.12              # via djangorestframework-yaml, psphere
+pyyaml==3.12              # via djangorestframework-yaml, openstacksdk, os-client-config, psphere
 redbaron==0.6.3
 requests-futures==0.9.7
 requests-oauthlib==0.8.0  # via msrest, social-auth-core
 requests[security]==2.15.1
+requestsexceptions==1.4.0  # via openstacksdk, os-client-config
 rply==0.7.5               # via baron
 s3transfer==0.1.13        # via boto3
 scandir==1.7              # via pathlib2
 secretstorage==2.3.1      # via keyring
 service-identity==17.0.0
-six==1.11.0               # via asgi-amqp, asgiref, autobahn, automat, cryptography, django-extensions, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, more-itertools, pathlib2, pygerduty, pyopenssl, pyrad, python-dateutil, python-memcached, pyvmomi, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, tempora, twilio, txaio, websocket-client
+shade==1.27.0
+six==1.11.0               # via asgi-amqp, asgiref, autobahn, automat, cryptography, django-extensions, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, keystoneauth1, more-itertools, munch, openstacksdk, packaging, pathlib2, pygerduty, pyopenssl, pyrad, python-dateutil, python-memcached, pyvmomi, slackclient, social-auth-app-django, social-auth-core, stevedore, tacacs-plus, tempora, twilio, txaio, websocket-client
 slackclient==1.1.2
 social-auth-app-django==2.1.0
 social-auth-core==1.7.0
+stevedore==1.28.0         # via keystoneauth1
 suds==0.4                 # via psphere
 tacacs_plus==1.0
 tempora==1.10             # via irc, jaraco.logging
