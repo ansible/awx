@@ -1,29 +1,34 @@
-apache-libcloud==2.0.0
+apache-libcloud==2.2.1
 # azure deps from https://github.com/ansible/ansible/blob/fe1153c0afa1ffd648147af97454e900560b3532/packaging/requirements/requirements-azure.txt
-azure-mgmt-compute>=2.0.0,<3
+azure-mgmt-compute>=2.0.0,<3    # Taken from Ansible core module requirements
 azure-mgmt-network>=1.3.0,<2
-azure-mgmt-storage>=1.2.0,<2
+azure-mgmt-storage>=1.5.0,<2
 azure-mgmt-resource>=1.1.0,<2
 azure-storage>=0.35.1,<0.36
 azure-cli-core>=2.0.12,<3
+msrest!=0.4.15
 msrestazure>=0.4.11,<0.5
 azure-mgmt-dns>=1.0.1,<2
 azure-mgmt-keyvault>=0.40.0,<0.41
 azure-mgmt-batch>=4.1.0,<5
 azure-mgmt-sql>=0.7.1,<0.8
 azure-mgmt-web>=0.32.0,<0.33
-azure-mgmt-containerservice>=1.0.0
+azure-mgmt-containerservice>=2.0.0,<3.0.0
+azure-mgmt-containerregistry>=1.0.1
+azure-mgmt-rdbms>=0.2.0rc1,<0.3.0
+azure-mgmt-containerinstance>=0.3.1
 backports.ssl-match-hostname==3.5.0.1
-kombu==3.0.37
-boto==2.46.1
-boto3==1.4.4
-ovirt-engine-sdk-python==4.1.6
-python-memcached==1.58
+boto==2.47.0    # last which does not break ec2 scripts
+boto3==1.6.2
+ovirt-engine-sdk-python==4.2.4    # minimum set inside Ansible facts module requirements
+python-memcached==1.59    # same as AWX requirement
 psphere==0.5.2
-psutil==5.2.2
+psutil==5.4.3    # same as AWX requirement
 pyvmomi==6.5
-pywinrm[kerberos]==0.2.2
+pywinrm[kerberos]==0.3.0
+requests<2.16  # Older versions rely on certify
+requests-credssp==0.1.0   # For windows authentication awx/issues/1144
 secretstorage==2.3.1
-shade==1.20.0
+shade==1.27.0
 setuptools==36.0.1
 pip==9.0.1
