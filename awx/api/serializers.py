@@ -938,7 +938,7 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
             '*', '-name', 'description', 'user', 'token', 'refresh_token',
             'expires', 'scope', 'application',
         )
-        read_only_fields = ('user', 'token', 'expires', 'application')
+        read_only_fields = ('user', 'token', 'expires')
         
     def get_token(self, obj):
         request = self.context.get('request', None)
@@ -1045,7 +1045,7 @@ class OAuth2TokenSerializer(BaseSerializer):
             '*', '-name', 'description', 'user', 'token', 'refresh_token',
             'application', 'expires', 'scope',
         )
-        read_only_fields = ('user', 'token', 'expires', 'application')
+        read_only_fields = ('user', 'token', 'expires')
 
     def get_modified(self, obj):
         if obj is None:
@@ -1104,6 +1104,20 @@ class OAuth2TokenSerializer(BaseSerializer):
             )
         return obj
         
+        
+class OAuth2TokenDetailSerializer(OAuth2TokenSerializer):
+
+    refresh_token = serializers.SerializerMethodField()
+    token = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OAuth2AccessToken
+        fields = (
+            '*', '-name', 'description', 'user', 'token', 'refresh_token',
+            'application', 'expires', 'scope',
+        )
+        read_only_fields = ('user', 'token', 'expires', 'application')       
+
 
 class OAuth2AuthorizedTokenSerializer(BaseSerializer):
     
@@ -1116,7 +1130,7 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
             '*', '-name', 'description', 'user', 'token', 'refresh_token',
             'expires', 'scope', 'application',
         )
-        read_only_fields = ('user', 'token', 'expires', 'application',)
+        read_only_fields = ('user', 'token', 'expires')
         
     def get_token(self, obj):
         request = self.context.get('request', None)
