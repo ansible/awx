@@ -1107,16 +1107,8 @@ class OAuth2TokenSerializer(BaseSerializer):
         
 class OAuth2TokenDetailSerializer(OAuth2TokenSerializer):
 
-    refresh_token = serializers.SerializerMethodField()
-    token = serializers.SerializerMethodField()
-
     class Meta:
-        model = OAuth2AccessToken
-        fields = (
-            '*', '-name', 'description', 'user', 'token', 'refresh_token',
-            'application', 'expires', 'scope',
-        )
-        read_only_fields = ('user', 'token', 'expires', 'application')       
+        read_only_fields = ('*', 'user', 'application')       
 
 
 class OAuth2AuthorizedTokenSerializer(BaseSerializer):
