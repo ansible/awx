@@ -4,7 +4,6 @@ import EditController from './edit-applications.controller';
 import ListController from './list-applications.controller';
 import UserListController from './list-applications-users.controller';
 import ApplicationsStrings from './applications.strings';
-import { N_ } from '../../src/i18n';
 
 const MODULE_NAME = 'at.features.applications';
 
