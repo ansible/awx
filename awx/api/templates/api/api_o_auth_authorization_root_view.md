@@ -51,7 +51,7 @@ Vary:Accept-Language, Cookie
 By inspecting the fragment part of redirect URL given by `Location` header, we can get access token
 (given by `access_token` key) as well as other standard fields specified in OAuth spec. Internally
 an OAuth token is created under the given application. Verify by
-`GET /api/v2/me/oauth/tokens/?token=0lVJJkolFTwYawHyGkk7NTmSKdzBen`
+`GET /api/v2/tokens/?token=0lVJJkolFTwYawHyGkk7NTmSKdzBen`
 ```text
 HTTP 200 OK
 Allow: GET, POST, HEAD, OPTIONS
@@ -176,7 +176,7 @@ Internally, the refresh operation deletes the existing token and a new token is 
 after, with information like scope and related application identical to the original one. We can
 verify by checking the new token is present
 ```text
-GET /api/v2/me/oauth/tokens/?token=NDInWxGJI4iZgqpsreujjbvzCfJqgR
+GET /api/v2/tokens/?token=NDInWxGJI4iZgqpsreujjbvzCfJqgR
 
 HTTP 200 OK
 Allow: GET, POST, HEAD, OPTIONS
@@ -208,7 +208,7 @@ X-API-Time: 0.021s
 ```
 and the old token is deleted.
 ```text
-GET /api/v2/me/oauth/tokens/?token=omMFLk7UKpB36WN2Qma9H3gbwEBSOc
+GET /api/v2/tokens/?token=omMFLk7UKpB36WN2Qma9H3gbwEBSOc
 
 HTTP 200 OK
 Allow: GET, POST, HEAD, OPTIONS
@@ -234,7 +234,7 @@ an existing token to revoke:
 {
     "id": 30,
     "type": "access_token",
-    "url": "/api/v2/me/oauth/tokens/30/",
+    "url": "/api/v2/tokens/30/",
     ...
     "user": null,
     "token": "rQONsve372fQwuc2pn76k3IHDCYpi7",
@@ -265,7 +265,7 @@ Strict-Transport-Security: max-age=15768000
 ```
 We can verify the effect by checking if the token is no longer present.
 ```text
-GET /api/v2/me/oauth/tokens/?token=rQONsve372fQwuc2pn76k3IHDCYpi7
+GET /api/v2//tokens/?token=rQONsve372fQwuc2pn76k3IHDCYpi7
 
 HTTP 200 OK
 Allow: GET, POST, HEAD, OPTIONS

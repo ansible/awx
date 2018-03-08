@@ -6,14 +6,17 @@ will be replaced by OAuth 2 tokens.
 
 Session authentication is a safer way of utilizing HTTP(S) cookies:
 
-Theoretically, user can provide authentication information, like username and password, as part of the
+Theoretically, the user can provide authentication information, like username and password, as part of the
 `Cookie` header, but this method is vulnerable to cookie hijacks, where crackers can see and steal user
 information from cookie payload.
 
 Session authentication, on the other hand, sets a single `session_id` cookie. The session_id
 is *a random string which will be mapped to user authentication informations by server*. Crackers who
-hijacks cookie will only get the session_id itself, which does not imply any critical user info, is valid only for
+hijack cookies will only get the session_id itself, which does not imply any critical user info, is valid only for
 a limited time, and can be revoked at any time.
+
+> Note: The CSRF token will by default allow HTTP.  To increase security, the `CSRF_COOKIE_SECURE` setting should 
+be set to False.  
 
 ## Usage
 
@@ -39,7 +42,7 @@ The session_id is provided as a return `Set-Cookie` header. Here is a typical on
 Set-Cookie: sessionid=lwan8l5ynhrqvps280rg5upp7n3yp6ds; expires=Tue, 21-Nov-2017 16:33:13 GMT; httponly; Max-Age=1209600; Path=/
 ```
 Any client should follow the standard rules of [cookie protocol](https://tools.ietf.org/html/rfc6265) to
-parse that header to obtain information about the session, such as session cookie name (`sessionid`),
+parse that header to obtain information about the session, such as session cookie name (`session_id`),
 session cookie value, expiration date, duration, etc.
 
 The duration of the cookie is configurable by Tower Configuration setting `SESSION_COOKIE_AGE` under
