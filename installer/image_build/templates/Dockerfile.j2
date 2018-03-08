@@ -55,6 +55,9 @@ RUN chmod +rx /usr/bin/launch_awx.sh && chmod +rx /usr/bin/launch_awx_task.sh &&
 ADD settings.py /etc/tower/settings.py
 RUN chmod g+w /etc/passwd
 RUN chmod -R 777 /var/log/nginx && chmod -R 777 /var/lib/nginx
+VOLUME /var/lib/nginx
+RUN ln -sf /dev/stdout /var/log/nginx/access.log \
+    && ln -sf /dev/stderr /var/log/nginx/error.log
 USER 1000
 EXPOSE 8052
 WORKDIR /var/lib/awx
