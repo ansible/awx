@@ -35,10 +35,10 @@ if MODE == 'production':
         raise Exception("Missing or incorrect metadata for Tower version.  Ensure Tower was installed using the setup playbook.")
 
 
-if django.__version__ != '1.11.10':
-    raise RuntimeError("Django version other than 1.11.10 detected {}. \
-            Inherit from WSGIHandler to support short-circuit Django Middelware. \
-            This is known to work for Django 1.11.10 and may not work with other, \
+if django.__version__ != '1.11.11':
+    raise RuntimeError("Django version other than 1.11.11 detected {}. \
+            Inherit from WSGIHandler to support short-circuit Django Middleware. \
+            This is known to work for Django 1.11.11 and may not work with other, \
             even minor, versions.".format(django.__version__))
 
 
