@@ -34,6 +34,15 @@ function ListTemplatesController(
     vm.strings = strings;
     vm.templateTypes = mapChoices(choices);
     vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_template_id);
+    vm.invalidTooltip = {
+        popover: {
+            text: strings.get('error.INVALID'),
+            on: 'mouseenter',
+            icon: 'fa-exclamation',
+            position: 'right',
+            arrowHeight: 15
+        }
+    }
 
     $scope.canAddJobTemplate = jobTemplate.options('actions.POST');
     $scope.canAddWorkflowJobTemplate = workflowTemplate.options('actions.POST');
@@ -52,6 +61,14 @@ function ListTemplatesController(
         $scope[key] = dataset;
         $scope[name] = dataset.results;
     });
+
+    vm.isInvalid = (template) => {
+        if(isJobTemplate(template)) {
+            return (template.inventory === null || template.project == null)
+        } else {
+            return false;
+        }
+    };
 
     vm.runTemplate = template => {
         if (!template) {

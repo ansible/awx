@@ -549,6 +549,11 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html += "ng-show='!" + list.iterator + "." ;
                 html += (field.flag) ? field.flag : "enabled";
                 html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>" + i18n._("OFF") + "</button></div></td>";
+            } else if (field.type === 'invalid') {
+                html += `<td class='List-tableRow--invalid'><div class='List-tableRow--invalidBar' ng-show="${field.ngShow}"`;
+                html += `aw-tool-tip="${field.awToolTip}" data-placement=${field.dataPlacement}>`;
+                html += "<i class='fa fa-exclamation'></i>";
+                html += "</div></td>";
             } else {
                 html += "<td class=\"List-tableCell " + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";

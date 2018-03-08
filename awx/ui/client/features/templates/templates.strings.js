@@ -82,6 +82,7 @@ function TemplatesStrings (BaseString) {
         UNKNOWN: t.s('Unable to determine template type.'),
         SCHEDULE: t.s('Unable to schedule job.'),
         COPY: t.s('Unable to copy template.'),
+        INVALID: t.s('Resources are missing from this template.')
     };
 
     ns.warnings = {

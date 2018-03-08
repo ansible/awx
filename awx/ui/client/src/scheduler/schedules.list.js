@@ -4,7 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
-
 export default ['i18n', function(i18n) {
     return {
 
@@ -17,6 +16,15 @@ export default ['i18n', function(i18n) {
         hover: true,
 
         fields: {
+            invalid: {
+                columnClass: "List-staticColumn--invalidBar",
+                label: '',
+                type: 'invalid',
+                nosort: true,
+                awToolTip: i18n._("Resources are missing from this template."),
+                dataPlacement: 'right',
+                ngShow: '!isValid(schedule)'
+            },
             toggleSchedule: {
                 ngDisabled: "!schedule.summary_fields.user_capabilities.edit",
                 label: '',
