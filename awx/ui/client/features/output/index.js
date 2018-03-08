@@ -7,6 +7,7 @@ import PageService from '~features/output/page.service';
 import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
 import SearchKeyDirective from '~features/output/search-key.directive';
+import StreamService from '~features/output/stream.service';
 
 const Template = require('~features/output/index.view.html');
 
@@ -190,6 +191,7 @@ angular
     .service('JobStrings', Strings)
     .service('JobPageService', PageService)
     .service('JobScrollService', ScrollService)
+    .service('JobStreamService', StreamService)
     .directive('atSearchKey', SearchKeyDirective)
     .run(JobsRun);
 

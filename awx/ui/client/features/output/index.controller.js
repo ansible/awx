@@ -1,6 +1,3 @@
-const JOB_START = 'playbook_on_start';
-const JOB_END = 'playbook_on_stats';
-
 let vm;
 let $compile;
 let $scope;
@@ -8,17 +5,20 @@ let $q;
 let page;
 let render;
 let scroll;
+let stream;
 let resource;
 let $state;
 let qs;
 
 let chain;
+let chainLength;
 
 function JobsIndexController (
     _resource_,
     _page_,
     _scroll_,
     _render_,
+    _stream_,
     _$scope_,
     _$compile_,
     _$q_,
@@ -35,6 +35,7 @@ function JobsIndexController (
     page = _page_;
     scroll = _scroll_;
     render = _render_;
+    stream = _stream_;
 
     // Development helper(s)
     vm.clear = devClear;
@@ -52,17 +53,6 @@ function JobsIndexController (
     vm.toggle = toggle;
     vm.expand = expand;
     vm.isExpanded = true;
-
-    // Real-time (active between JOB_START and JOB_END events only)
-    vm.stream = {
-        active: false,
-        rendering: false,
-        paused: false
-    };
-
-    const stream = false; // TODO: Set in route
-
-    chain = $q.resolve();
 
     // search
     $state = _$state_;
@@ -83,8 +73,10 @@ function JobsIndexController (
     render.requestAnimationFrame(() => init());
 }
 
-function init (stream) {
-    page.init(resource);
+function init (pageMode) {
+    page.init({
+        resource
+    });
 
     render.init({
         get: () => resource.model.get(`related.${resource.related}.results`),
@@ -97,76 +89,24 @@ function init (stream) {
         next
     });
 
-    if (stream) {
-        $scope.$on(resource.ws.namespace, process);
-    } else {
+    stream.init({
+        page,
+        scroll,
+        resource,
+        render: events => shift().then(() => append(events, true)),
+        listen: (namespace, listener) => {
+            $scope.$on(namespace, (scope, data) => listener(data));
+        }
+    });
+
+    if (pageMode) {
         next();
     }
 }
 
-function process (scope, data) {
-    chain = chain.then(() => {
-        if (data.event === JOB_START) {
-            vm.stream.active = true;
-            scroll.lock();
-        } else if (data.event === JOB_END) {
-            vm.stream.active = false;
-        }
-
-        const pageAdded = page.addToBuffer(data);
-
-        if (pageAdded && !scroll.isLocked()) {
-            vm.stream.paused = true;
-        }
-
-        if (vm.stream.paused && scroll.isLocked()) {
-            vm.stream.paused = false;
-        }
-
-        if (vm.stream.rendering || vm.stream.paused) {
-            return;
-        }
-
-        const events = page.emptyBuffer();
-
-        return renderStream(events);
-    })
-}
-
-function renderStream (events) {
-    vm.stream.rendering = true;
-
-    return shift()
-        .then(() => append(events, true))
-        .then(() => {
-            if (scroll.isLocked()) {
-                scroll.setScrollPosition(scroll.getScrollHeight());
-            }
-
-            if (!vm.stream.active) {
-                const buffer = page.emptyBuffer();
-
-                if (buffer.length) {
-                    return renderStream(buffer);
-                } else {
-                    vm.stream.rendering = false;
-                    scroll.unlock();
-                }
-            } else {
-                vm.stream.rendering = false;
-            }
-        });
-}
-
-function devClear () {
-    init(true);
+function devClear (pageMode) {
+    init(pageMode);
     render.clear();
-
-    vm.stream = {
-        active: false,
-        rendering: false,
-        paused: false
-    };
 }
 
 function next () {
@@ -257,14 +197,12 @@ function scrollHome () {
 }
 
 function scrollEnd () {
-    if (scroll.isLocked()) {
-        page.setBookmark();
-        scroll.unlock();
-
-        return;
-    } else if (!scroll.isLocked() && vm.stream.active) {
-        page.removeBookmark();
-        scroll.lock();
+    if (stream.isActive()) {
+        if (stream.isPaused()) {
+            stream.resume();
+        } else {
+            stream.pause();
+        }
 
         return;
     }
@@ -339,6 +277,7 @@ function toggle (uuid, menu) {
 
         lines.removeClass('hidden');
     }
+}
 
 //
 // Search
@@ -402,6 +341,7 @@ JobsIndexController.$inject = [
     'JobPageService',
     'JobScrollService',
     'JobRenderService',
+    'JobStreamService',
     '$scope',
     '$compile',
     '$q',

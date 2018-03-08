@@ -1,5 +1,5 @@
 function JobPageService ($q) {
-    this.init = resource => {
+    this.init = ({ resource }) => {
         this.resource = resource;
 
         this.page = {
@@ -54,12 +54,9 @@ function JobPageService ($q) {
         reference.state.count++;
     };
 
-    this.addToPageCache = (index, event, reference) => {
-        reference.cache[index].events.push(event);
-    };
-
     this.addToBuffer = event => {
         const reference = this.getReference();
+        const index = reference.cache.length - 1;
         let pageAdded = false;
 
         if (this.result.count % this.page.size === 0) {
@@ -70,9 +67,10 @@ function JobPageService ($q) {
             }
 
             this.trimBuffer();
+
             pageAdded = true;
         } else {
-            this.addToPageCache(reference.cache.length - 1, event, reference);
+            reference.cache[index].events.push(event);
         }
 
         this.buffer.count++;
@@ -96,6 +94,14 @@ function JobPageService ($q) {
             }
         }
     };
+
+    this.isBufferFull = () => {
+        if (this.buffer.count === 2) {
+            return true;
+        }
+
+        return false;
+    }
 
     this.emptyBuffer = () => {
         const reference = this.getReference();
@@ -183,9 +189,9 @@ function JobPageService ($q) {
             return;
         }
 
-        this.bookmark.state.first = this.page.state.first;
-        this.bookmark.state.last = this.page.state.last;
-        this.bookmark.state.current = this.page.state.current;
+        this.bookmark.state.first = this.page.state.first - 1;
+        this.bookmark.state.last = this.page.state.last  - 1;
+        this.bookmark.state.current = this.page.state.current - 1;
         this.bookmark.cache = JSON.parse(JSON.stringify(this.page.cache));
         this.bookmark.set = true;
         this.bookmark.pending = false;
