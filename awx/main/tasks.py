@@ -578,10 +578,10 @@ def delete_inventory(self, inventory_id, user_id):
             )
             logger.debug('Deleted inventory %s as user %s.' % (inventory_id, user_id))
         except Inventory.DoesNotExist:
-            logger.error("Delete Inventory failed due to missing inventory: " + str(inventory_id))
+            logger.exception("Delete Inventory failed due to missing inventory: " + str(inventory_id))
             return
         except DatabaseError:
-            logger.warning('Database error deleting inventory {}, but will retry.'.format(inventory_id))
+            logger.exception('Database error deleting inventory {}, but will retry.'.format(inventory_id))
             self.retry(countdown=10)
 
 
