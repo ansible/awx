@@ -81,11 +81,11 @@ On RBAC side:
 Tokens, on the other hand, are resources used to actually authenticate incoming requests and mask the
 permissions of the underlying user. Tokens can be created by POSTing to `/api/v2/tokens/`
 endpoint by providing `application` and `scope` fields to point to related application and specify
-token scope; or POSTing to `/api/applications/<pk>/tokens/` by providing only `scope`, while
+token scope; or POSTing to `/api/v2/applications/<pk>/tokens/` by providing only `scope`, while
 the parent application will be automatically linked.
 
 Individual tokens will be accessible via their primary keys:
-`/api/<version>/me/oauth/tokens/<primary key of a token>/`. Here is a typical token:
+`/api/<version>/tokens/<primary key of a token>/`. Here is a typical token:
 ```
 {
     "id": 4,
@@ -120,13 +120,14 @@ Individual tokens will be accessible via their primary keys:
     "scope": "read"
 },
 ```
-For an OAuth 2 token, the only fully mutable field is `scope`. The `application` field is *immutable
-on update*, and all other fields are totally immutable, and will be auto-populated during creation:
-`user` field will be the `user` field of related application; `expires` will be generated according
-to Tower configuration setting `OAUTH2_PROVIDER`; `token` and `refresh_token` will be auto-generated 
-to be non-crashing random strings.  Both application tokens and personal access tokens will be shown
-at the `/api/v2/tokens/` endpoint.  Personal access tokens can be identified by the applications field 
-being `null`.  
+For an OAuth 2 token, the only fully mutable fields are `scope` and `description`. The `application` 
+field is *immutable on update*, and all other fields are totally immutable, and will be auto-populated 
+during creation
+* `user` field will be the `user` field of related application
+* `expires` will be generated according to Tower configuration setting `OAUTH2_PROVIDER`
+* `token` and `refresh_token` will be auto-generated to be non-clashing random strings.  
+Both application tokens and personal access tokens will be shown at the `/api/v2/tokens/` 
+endpoint.  Personal access tokens can be identified by the `application` field being `null`.  
 
 On RBAC side:
 - A user will be able to create a token if they are able to see the related application;
@@ -139,8 +140,12 @@ On RBAC side:
 #### Using OAuth 2 token system as a Personal Access Token (PAT)
 The most common usage of OAuth 2 is authenticating users. The `token` field of a token is used
 as part of the HTTP authentication header, in the format `Authorization: Bearer <token field value>`.  This _Bearer_
-token can be obtained by doing a curl to the `/api/o/token/` endpoint as shown in `api_o_auth_authorization_root_view.md`.  
-
+token can be obtained by doing a curl to the `/api/o/token/` endpoint. For example:  
+```
+curl -ku root:reverse -H "Content-Type: application/json" -X POST \
+-d '{"description":"Tower CLI","application":null,"scope":"read"}' \
+https://localhost:8043/api/v2/users/1/personal_tokens/ | python -m json.tool
+```
 Here is an example of using that PAT to access an API endpoint using `curl`:
 ```
 curl -H "Authorization: Bearer kqHqxfpHGRRBXLNCOXxT5Zt3tpJogn" http://localhost:8013/api/v2/credentials/
@@ -150,7 +155,7 @@ According to OAuth 2 specification, users should be able to acquire, revoke and 
 token. In AWX the equivalent, and the easiest, way of doing that is creating a token, deleting
 a token, and deleting a token quickly followed by creating a new one.
 
-The specification also provides standard ways of doing this though. RFC 6749 elaborates
+The specification also provides standard ways of doing this. RFC 6749 elaborates
 on those topics, but in summary, an OAuth 2 token is officially acquired via authorization using
 authorization information provided by applications (special application fields mentioned above).
 There are dedicated endpoints for authorization and acquiring tokens. The `token` endpoint
