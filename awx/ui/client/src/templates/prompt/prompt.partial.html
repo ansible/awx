@@ -1,5 +1,5 @@
 <div class="Prompt">
-    <at-modal>
+    <at-modal ng-if="vm.promptData">
         <at-tab-group>
             <at-tab ng-if="vm.steps.inventory.tab" state="vm.steps.inventory.tab">{{:: vm.strings.get('prompt.INVENTORY') }}</at-tab>
             <at-tab ng-if="vm.steps.credential.tab" state="vm.steps.credential.tab">{{:: vm.strings.get('prompt.CREDENTIAL') }}</at-tab>

@@ -37,7 +37,7 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,
-                workflowMaker, inventoryLookup, credentialLookup,
+                workflowMaker,
                 stateDefinitions = stateDefinitionsProvider.$get(),
                 stateExtender = $stateExtenderProvider.$get();
 
@@ -401,8 +401,7 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                         job_template_search: {
                             value: {
                                 page_size: '5',
-                                order_by: 'name',
-                                inventory__isnull: false
+                                order_by: 'name'
                             },
                             squash: false,
                             dynamic: true
@@ -474,29 +473,28 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                     name: row.name
                                                 };
 
-                                                $scope.templateSelected(row);
+                                                $scope.templateManuallySelected(row);
                                             }
                                         });
 
                                     };
 
-                                    $scope.$on('templateSelected', function(e, options) {
-                                        if(options.activeTab !== 'jobs') {
+                                    $scope.$watch('selectedTemplate', () => {
+                                        $scope.job_templates.forEach(function(row, i) {
+                                            if(_.has($scope, 'selectedTemplate.id') && row.id === $scope.selectedTemplate.id) {
+                                                $scope.job_templates[i].checked = 1;
+                                            }
+                                            else {
+                                                $scope.job_templates[i].checked = 0;
+                                            }
+                                        });
+                                    });
+
+                                    $scope.$watch('activeTab', () => {
+                                        if(!$scope.activeTab || $scope.activeTab !== "jobs") {
                                             $scope.job_templates.forEach(function(row, i) {
                                                 $scope.job_templates[i].checked = 0;
                                             });
-                                        }
-                                        else {
-                                            if($scope.selectedTemplate){
-                                                $scope.job_templates.forEach(function(row, i) {
-                                                    if(row.id === $scope.selectedTemplate.id) {
-                                                        $scope.job_templates[i].checked = 1;
-                                                    }
-                                                    else {
-                                                        $scope.job_templates[i].checked = 0;
-                                                    }
-                                                });
-                                            }
                                         }
                                     });
 
@@ -552,29 +550,28 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                     name: row.name
                                                 };
 
-                                                $scope.templateSelected(row);
+                                                $scope.templateManuallySelected(row);
                                             }
                                         });
 
                                     };
 
-                                    $scope.$on('templateSelected', function(e, options) {
-                                        if(options.activeTab !== 'inventory_sync') {
+                                    $scope.$watch('selectedTemplate', () => {
+                                        $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                            if(_.has($scope, 'selectedTemplate.id') && row.id === $scope.selectedTemplate.id) {
+                                                $scope.workflow_inventory_sources[i].checked = 1;
+                                            }
+                                            else {
+                                                $scope.workflow_inventory_sources[i].checked = 0;
+                                            }
+                                        });
+                                    });
+
+                                    $scope.$watch('activeTab', () => {
+                                        if(!$scope.activeTab || $scope.activeTab !== "inventory_sync") {
                                             $scope.workflow_inventory_sources.forEach(function(row, i) {
                                                 $scope.workflow_inventory_sources[i].checked = 0;
                                             });
-                                        }
-                                        else {
-                                            if($scope.selectedTemplate){
-                                                $scope.workflow_inventory_sources.forEach(function(row, i) {
-                                                    if(row.id === $scope.selectedTemplate.id) {
-                                                        $scope.workflow_inventory_sources[i].checked = 1;
-                                                    }
-                                                    else {
-                                                        $scope.workflow_inventory_sources[i].checked = 0;
-                                                    }
-                                                });
-                                            }
                                         }
                                     });
 
@@ -630,29 +627,28 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                     name: row.name
                                                 };
 
-                                                $scope.templateSelected(row);
+                                                $scope.templateManuallySelected(row);
                                             }
                                         });
 
                                     };
 
-                                    $scope.$on('templateSelected', function(e, options) {
-                                        if(options.activeTab !== 'project_sync') {
+                                    $scope.$watch('selectedTemplate', () => {
+                                        $scope.projects.forEach(function(row, i) {
+                                            if(_.has($scope, 'selectedTemplate.id') && row.id === $scope.selectedTemplate.id) {
+                                                $scope.projects[i].checked = 1;
+                                            }
+                                            else {
+                                                $scope.projects[i].checked = 0;
+                                            }
+                                        });
+                                    });
+
+                                    $scope.$watch('activeTab', () => {
+                                        if(!$scope.activeTab || $scope.activeTab !== "project_sync") {
                                             $scope.projects.forEach(function(row, i) {
                                                 $scope.projects[i].checked = 0;
                                             });
-                                        }
-                                        else {
-                                            if($scope.selectedTemplate){
-                                                $scope.projects.forEach(function(row, i) {
-                                                    if(row.id === $scope.selectedTemplate.id) {
-                                                        $scope.projects[i].checked = 1;
-                                                    }
-                                                    else {
-                                                        $scope.projects[i].checked = 0;
-                                                    }
-                                                });
-                                            }
                                         }
                                     });
 
@@ -660,69 +656,6 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                         $scope.projects.forEach(function(row, i) {
                                             $scope.projects[i].checked = 0;
                                         });
-                                    });
-                                }
-                            ]
-                        },
-                        'workflowForm@templates.editWorkflowJobTemplate.workflowMaker': {
-                            templateProvider: function(WorkflowMakerForm, GenerateForm) {
-                                let form = WorkflowMakerForm();
-                                let html = GenerateForm.buildHTML(form, {
-                                    mode: 'add',
-                                    related: false,
-                                    noPanel: true
-                                });
-                                return html;
-                            },
-                            controller: ['$scope', '$timeout', 'CreateSelect2',
-                                function($scope, $timeout, CreateSelect2) {
-                                    function resetPromptFields() {
-                                        $scope.credential = null;
-                                        $scope.credential_name = null;
-                                        $scope.inventory = null;
-                                        $scope.inventory_name = null;
-                                        $scope.job_type = null;
-                                        $scope.limit = null;
-                                        $scope.job_tags = null;
-                                        $scope.skip_tags = null;
-                                    }
-
-                                    $scope.saveNodeForm = function(){
-                                        // Gather up all of our form data - then let the main scope know what
-                                        // the new data is
-
-                                        $scope.confirmNodeForm({
-                                            skip_tags: $scope.skip_tags,
-                                            job_tags: $scope.job_tags,
-                                            limit: $scope.limit,
-                                            credential: $scope.credential,
-                                            credential_name: $scope.credential_name,
-                                            inventory: $scope.inventory,
-                                            inventory_name: $scope.inventory_name,
-                                            edgeType: $scope.edgeType,
-                                            job_type: $scope.job_type
-                                        });
-                                    };
-
-                                    $scope.$on('templateSelected', function(e, options) {
-
-                                        resetPromptFields();
-                                        // Loop across the preset values and attach them to scope
-                                        _.forOwn(options.presetValues, function(value, key) {
-                                            $scope[key] = value;
-                                        });
-
-                                        // The default needs to be in place before we can select2-ify the dropdown
-                                        $timeout(function() {
-                                            CreateSelect2({
-                                                element: '#workflow_maker_job_type',
-                                                multiple: false
-                                            });
-                                        });
-                                    });
-
-                                    $scope.$on('setEdgeType', function(e, edgeType) {
-                                        $scope.edgeType = edgeType;
                                     });
                                 }
                             ]
@@ -798,114 +731,114 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                     }
                 };
 
-                inventoryLookup = {
-                    searchPrefix: 'inventory',
-                    name: 'templates.editWorkflowJobTemplate.workflowMaker.inventory',
-                    url: '/inventory',
-                    data: {
-                        formChildState: true
-                    },
-                    params: {
-                        inventory_search: {
-                            value: {
-                                page_size: '5'
-                            },
-                            squash: true,
-                            dynamic: true
-                        }
-                    },
-                    ncyBreadcrumb: {
-                        skip: true
-                    },
-                    views: {
-                        'related': {
-                            templateProvider: function(ListDefinition, generateList) {
-                                let list_html = generateList.build({
-                                    mode: 'lookup',
-                                    list: ListDefinition,
-                                    input_type: 'radio'
-                                });
-                                return `<lookup-modal>${list_html}</lookup-modal>`;
-
-                            }
-                        }
-                    },
-                    resolve: {
-                        ListDefinition: ['InventoryList', function(InventoryList) {
-                            // mutate the provided list definition here
-                            let list = _.cloneDeep(InventoryList);
-                            list.lookupConfirmText = 'SELECT';
-                            return list;
-                        }],
-                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
-                            (list, qs, $stateParams, GetBasePath) => {
-                                let path = GetBasePath(list.name) || GetBasePath(list.basePath);
-                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                            }
-                        ]
-                    },
-                    onExit: function($state) {
-                        if ($state.transition) {
-                            $('#form-modal').modal('hide');
-                            $('.modal-backdrop').remove();
-                            $('body').removeClass('modal-open');
-                        }
-                    },
-                };
-
-                credentialLookup = {
-                    searchPrefix: 'credential',
-                    name: 'templates.editWorkflowJobTemplate.workflowMaker.credential',
-                    url: '/credential',
-                    data: {
-                        formChildState: true
-                    },
-                    params: {
-                        credential_search: {
-                            value: {
-                                page_size: '5'
-                            },
-                            squash: true,
-                            dynamic: true
-                        }
-                    },
-                    ncyBreadcrumb: {
-                        skip: true
-                    },
-                    views: {
-                        'related': {
-                            templateProvider: function(ListDefinition, generateList) {
-                                let list_html = generateList.build({
-                                    mode: 'lookup',
-                                    list: ListDefinition,
-                                    input_type: 'radio'
-                                });
-                                return `<lookup-modal>${list_html}</lookup-modal>`;
-
-                            }
-                        }
-                    },
-                    resolve: {
-                        ListDefinition: ['CredentialList', function(CredentialList) {
-                            let list = _.cloneDeep(CredentialList);
-                            list.lookupConfirmText = 'SELECT';
-                            return list;
-                        }],
-                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
-                            (list, qs, $stateParams, GetBasePath) => {
-                                let path = GetBasePath(list.name) || GetBasePath(list.basePath);
-                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                            }
-                        ]
-                    },
-                    onExit: function($state) {
-                        if ($state.transition) {
-                            $('#form-modal').modal('hide');
-                            $('.modal-backdrop').remove();
-                            $('body').removeClass('modal-open');
-                        }
-                    },
-                };
+                // inventoryLookup = {
+                //     searchPrefix: 'inventory',
+                //     name: 'templates.editWorkflowJobTemplate.workflowMaker.inventory',
+                //     url: '/inventory',
+                //     data: {
+                //         formChildState: true
+                //     },
+                //     params: {
+                //         inventory_search: {
+                //             value: {
+                //                 page_size: '5'
+                //             },
+                //             squash: true,
+                //             dynamic: true
+                //         }
+                //     },
+                //     ncyBreadcrumb: {
+                //         skip: true
+                //     },
+                //     views: {
+                //         'related': {
+                //             templateProvider: function(ListDefinition, generateList) {
+                //                 let list_html = generateList.build({
+                //                     mode: 'lookup',
+                //                     list: ListDefinition,
+                //                     input_type: 'radio'
+                //                 });
+                //                 return `<lookup-modal>${list_html}</lookup-modal>`;
+                //
+                //             }
+                //         }
+                //     },
+                //     resolve: {
+                //         ListDefinition: ['InventoryList', function(InventoryList) {
+                //             // mutate the provided list definition here
+                //             let list = _.cloneDeep(InventoryList);
+                //             list.lookupConfirmText = 'SELECT';
+                //             return list;
+                //         }],
+                //         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
+                //             (list, qs, $stateParams, GetBasePath) => {
+                //                 let path = GetBasePath(list.name) || GetBasePath(list.basePath);
+                //                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                //             }
+                //         ]
+                //     },
+                //     onExit: function($state) {
+                //         if ($state.transition) {
+                //             $('#form-modal').modal('hide');
+                //             $('.modal-backdrop').remove();
+                //             $('body').removeClass('modal-open');
+                //         }
+                //     },
+                // };
+                //
+                // credentialLookup = {
+                //     searchPrefix: 'credential',
+                //     name: 'templates.editWorkflowJobTemplate.workflowMaker.credential',
+                //     url: '/credential',
+                //     data: {
+                //         formChildState: true
+                //     },
+                //     params: {
+                //         credential_search: {
+                //             value: {
+                //                 page_size: '5'
+                //             },
+                //             squash: true,
+                //             dynamic: true
+                //         }
+                //     },
+                //     ncyBreadcrumb: {
+                //         skip: true
+                //     },
+                //     views: {
+                //         'related': {
+                //             templateProvider: function(ListDefinition, generateList) {
+                //                 let list_html = generateList.build({
+                //                     mode: 'lookup',
+                //                     list: ListDefinition,
+                //                     input_type: 'radio'
+                //                 });
+                //                 return `<lookup-modal>${list_html}</lookup-modal>`;
+                //
+                //             }
+                //         }
+                //     },
+                //     resolve: {
+                //         ListDefinition: ['CredentialList', function(CredentialList) {
+                //             let list = _.cloneDeep(CredentialList);
+                //             list.lookupConfirmText = 'SELECT';
+                //             return list;
+                //         }],
+                //         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
+                //             (list, qs, $stateParams, GetBasePath) => {
+                //                 let path = GetBasePath(list.name) || GetBasePath(list.basePath);
+                //                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                //             }
+                //         ]
+                //     },
+                //     onExit: function($state) {
+                //         if ($state.transition) {
+                //             $('#form-modal').modal('hide');
+                //             $('.modal-backdrop').remove();
+                //             $('body').removeClass('modal-open');
+                //         }
+                //     },
+                // };
 
 
                 return Promise.all([
@@ -920,8 +853,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                         }, [
                             stateExtender.buildDefinition(listRoute),
                             stateExtender.buildDefinition(workflowMaker),
-                            stateExtender.buildDefinition(inventoryLookup),
-                            stateExtender.buildDefinition(credentialLookup)
+                            // stateExtender.buildDefinition(inventoryLookup),
+                            // stateExtender.buildDefinition(credentialLookup)
                         ])
                     };
                 });

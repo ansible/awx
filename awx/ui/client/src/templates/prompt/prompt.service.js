@@ -19,7 +19,7 @@ function PromptService (Empty, $filter)  {
         let skipTags = _.has(params, 'currentValues.skip_tags') && params.currentValues.skip_tags ? params.currentValues.skip_tags : (_.has(params, 'launchConf.defaults.skip_tags') ? params.launchConf.defaults.skip_tags : "");
         let jobTags = _.has(params, 'currentValues.job_tags') && params.currentValues.job_tags ? params.currentValues.job_tags : (_.has(params, 'launchConf.defaults.job_tags') ? params.launchConf.defaults.job_tags : "");
 
-        prompts.variables.value = _.has(params, 'launchConf.defaults.extra_vars') ? params.launchConf.defaults.extra_vars : "---";
+        prompts.variables.value = _.has(params, 'launchConf.defaults.extra_vars') && params.launchConf.defaults.extra_vars !== "" ? params.launchConf.defaults.extra_vars : "---";
         prompts.verbosity.choices = _.get(params, 'launchOptions.actions.POST.verbosity.choices', []).map(c => ({label: c[1], value: c[0]}));
         prompts.verbosity.value = _.has(params, 'currentValues.verbosity') && params.currentValues.verbosity ? _.find(prompts.verbosity.choices, item => item.value === params.currentValues.verbosity) : _.find(prompts.verbosity.choices, item => item.value === params.launchConf.defaults.verbosity);
         prompts.jobType.choices = _.get(params, 'launchOptions.actions.POST.job_type.choices', []).map(c => ({label: c[1], value: c[0]}));
