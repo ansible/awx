@@ -27,7 +27,7 @@
         <div class="Prompt-footer">
             <button class="Prompt-defaultButton" ng-click="vm.cancel()">{{:: vm.strings.get('CANCEL') }}</button>
             <button class="Prompt-actionButton" ng-show="vm.steps.inventory.tab._active" ng-click="vm.next(vm.steps.inventory.tab)" ng-disabled="!vm.promptData.prompts.inventory.value.id">{{:: vm.strings.get('NEXT') }}</button>
-            <button class="Prompt-actionButton" ng-show="vm.steps.credential.tab._active" ng-click="vm.next(vm.steps.credential.tab)" ng-disabled="!vm.forms.credentialPasswords.$valid">{{:: vm.strings.get('NEXT') }}</button>
+            <button class="Prompt-actionButton" ng-show="vm.steps.credential.tab._active" ng-click="vm.next(vm.steps.credential.tab)" ng-disabled="!vm.forms.credentialPasswords.$valid || (vm.promptData.credentialTypeMissing && vm.promptData.credentialTypeMissing.length > 0)">{{:: vm.strings.get('NEXT') }}</button>
             <button class="Prompt-actionButton" ng-show="vm.steps.other_prompts.tab._active" ng-click="vm.next(vm.steps.other_prompts.tab)" ng-disabled="!vm.forms.otherPrompts.$valid">{{:: vm.strings.get('NEXT') }}</button>
             <button class="Prompt-actionButton" ng-show="vm.steps.survey.tab._active" ng-click="vm.next(vm.steps.survey.tab)" ng-disabled="!vm.forms.survey.$valid">{{:: vm.strings.get('NEXT') }}</button>
             <button class="Prompt-actionButton" ng-show="vm.steps.preview.tab._active" ng-click="vm.finish()" ng-bind="vm.actionText"></button>

@@ -65,8 +65,6 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                             }
                         }));
 
-                        vm.promptData.prompts.inventory.templateDefault = _.has(vm, 'promptData.launchConf.defaults.inventory') ? vm.promptData.launchConf.defaults.inventory : null;
-                        vm.promptData.prompts.credentials.templateDefault = _.has(vm, 'promptData.launchConf.defaults.credentials') ? angular.copy(vm.promptData.launchConf.defaults.credentials) : [];
                         vm.promptData.prompts.credentials.passwordsNeededToStart = vm.promptData.launchConf.passwords_needed_to_start;
                         vm.promptData.prompts.credentials.passwords = {};
 
@@ -99,17 +97,12 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                                         vm.promptData.prompts.credentials.passwords.vault.push(credPassObj);
                                     }
                                 });
-
                             }
                         });
 
+                        vm.promptData.credentialTypeMissing = [];
+
                         vm.promptData.prompts.variables.ignore = vm.promptData.launchConf.ignore_ask_variables;
-                        vm.promptData.prompts.verbosity.templateDefault = vm.promptData.launchConf.defaults.verbosity;
-                        vm.promptData.prompts.jobType.templateDefault = vm.promptData.launchConf.defaults.job_type;
-                        vm.promptData.prompts.limit.templateDefault = vm.promptData.launchConf.defaults.limit;
-                        vm.promptData.prompts.tags.templateDefault = vm.promptData.launchConf.defaults.job_tags;
-                        vm.promptData.prompts.skipTags.templateDefault = vm.promptData.launchConf.defaults.skip_tags;
-                        vm.promptData.prompts.diffMode.templateDefault = vm.promptData.launchConf.defaults.diff_mode;
 
                         if(vm.promptData.launchConf.ask_inventory_on_launch) {
                             vm.steps.inventory.includeStep = true;

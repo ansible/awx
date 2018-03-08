@@ -88,11 +88,41 @@ export default
                 }
             };
 
+            let checkMissingCredType = (cred) => {
+                scope.promptData.launchConf.defaults.credentials.forEach((defaultCred) => {
+                    if(cred.credential_type === defaultCred.credential_type) {
+                        let credTypeLabel = "";
+                        scope.promptData.prompts.credentials.credentialTypeOptions.forEach((credTypeOption) => {
+                            if(credTypeOption.value === defaultCred.credential_type) {
+                                credTypeLabel = credTypeOption.name;
+                            }
+                        });
+
+                        if(scope.promptData.prompts.credentials.credentialTypes[cred.credential_type] === "vault") {
+                            if((_.get(cred, 'inputs.vault_id') ? _.get(cred, 'inputs.vault_id') : _.get(cred, 'vault_id')) === _.get(defaultCred, 'vault_id')) {
+                                scope.promptData.credentialTypeMissing.push({
+                                    credential_type: defaultCred.credential_type,
+                                    vault_id: defaultCred.vault_id,
+                                    label: defaultCred.vault_id ? `${credTypeLabel} (id: ${defaultCred.vault_id})` : credTypeLabel
+                                });
+                            }
+                        } else {
+                            scope.promptData.credentialTypeMissing.push({
+                                credential_type: defaultCred.credential_type,
+                                label: credTypeLabel
+                            });
+                        }
+                    }
+                });
+            };
+
             vm.init = (_scope_, _launch_) => {
                 scope = _scope_;
                 launch = _launch_;
 
                 scope.toggle_row = (selectedRow) => {
+                    let selectedCred = _.cloneDeep(selectedRow);
+
                     for (let i = scope.promptData.prompts.credentials.value.length - 1; i >= 0; i--) {
                         if(scope.promptData.prompts.credentials.value[i].credential_type === parseInt(scope.promptData.prompts.credentials.credentialKind)) {
                             wipePasswords(scope.promptData.prompts.credentials.value[i]);
@@ -100,8 +130,15 @@ export default
                         }
                     }
 
-                    scope.promptData.prompts.credentials.value.push(_.cloneDeep(selectedRow));
+                    scope.promptData.prompts.credentials.value.push(selectedCred);
                     updateNeededPasswords(selectedRow);
+
+                    for (let i = scope.promptData.credentialTypeMissing.length - 1; i >= 0; i--) {
+                        if(scope.promptData.credentialTypeMissing[i].credential_type === selectedRow.credential_type) {
+                            scope.promptData.credentialTypeMissing.splice(i,1);
+                            i = -1;
+                        }
+                    }
                 };
 
                 scope.toggle_credential = (cred) => {
@@ -146,6 +183,17 @@ export default
                     if(!uncheck) {
                         scope.promptData.prompts.credentials.value.push(cred);
                         updateNeededPasswords(cred);
+
+                        _.remove(scope.promptData.credentialTypeMissing, (missingCredType) => {
+                            return (
+                                missingCredType.credential_type === cred.credential_type &&
+                                _.get(cred, 'inputs.vault_id') === _.get(missingCredType, 'vault_id')
+                            );
+                        });
+                    } else {
+                        if(scope.promptData.launchConf.defaults.credentials && scope.promptData.launchConf.defaults.credentials.length > 0) {
+                            checkMissingCredType(cred);
+                        }
                     }
                 };
 
@@ -200,6 +248,9 @@ export default
             vm.deleteSelectedCredential = (credentialToDelete) => {
                 for (let i = scope.promptData.prompts.credentials.value.length - 1; i >= 0; i--) {
                     if(scope.promptData.prompts.credentials.value[i].id === credentialToDelete.id) {
+                        if(scope.promptData.launchConf.defaults.credentials && scope.promptData.launchConf.defaults.credentials.length > 0) {
+                            checkMissingCredType(credentialToDelete);
+                        }
                         wipePasswords(credentialToDelete);
                         scope.promptData.prompts.credentials.value.splice(i, 1);
                     }
@@ -213,7 +264,7 @@ export default
             };
 
             vm.revert = () => {
-                scope.promptData.prompts.credentials.value = scope.promptData.prompts.credentials.templateDefault;
+                scope.promptData.prompts.credentials.value = _.has(scope, 'promptData.launchConf.defaults.credentials') ? _.cloneDeep(scope.promptData.launchConf.defaults.credentials) : [];
                 scope.promptData.prompts.credentials.passwords = {
                     vault: []
                 };
@@ -242,13 +293,15 @@ export default
 
                     }
                 });
+
+                scope.promptData.credentialTypeMissing = [];
             };
 
             vm.showRevertCredentials = () => {
                 if(scope.promptData.launchConf.ask_credential_on_launch) {
-                    if(scope.promptData.prompts.credentials.value && scope.promptData.prompts.credentials.templateDefault && (scope.promptData.prompts.credentials.value.length === scope.promptData.prompts.credentials.templateDefault.length)) {
+                    if(scope.promptData.prompts.credentials.value && _.has(scope, 'promptData.launchConf.defaults.credentials') && (scope.promptData.prompts.credentials.value.length === scope.promptData.launchConf.defaults.credentials.length)) {
                         let selectedIds = scope.promptData.prompts.credentials.value.map((x) => { return x.id; }).sort();
-                        let defaultIds = scope.promptData.prompts.credentials.templateDefault.map((x) => { return x.id; }).sort();
+                        let defaultIds = _.has(scope, 'promptData.launchConf.defaults.credentials') ? scope.promptData.launchConf.defaults.credentials.map((x) => { return x.id; }).sort() : [];
                         return !selectedIds.every((e, i) => { return defaultIds.indexOf(e) === i; });
                     } else {
                         return true;

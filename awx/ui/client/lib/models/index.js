@@ -16,6 +16,7 @@ import ModelsStrings from '~models/models.strings';
 import NotificationTemplate from '~models/NotificationTemplate';
 import Organization from '~models/Organization';
 import Project from '~models/Project';
+import Schedule from '~models/Schedule';
 import UnifiedJobTemplate from '~models/UnifiedJobTemplate';
 import WorkflowJob from '~models/WorkflowJob';
 import WorkflowJobTemplate from '~models/WorkflowJobTemplate';
@@ -43,6 +44,7 @@ angular
     .service('NotificationTemplate', NotificationTemplate)
     .service('OrganizationModel', Organization)
     .service('ProjectModel', Project)
+    .service('ScheduleModel', Schedule)
     .service('UnifiedJobTemplateModel', UnifiedJobTemplate)
     .service('WorkflowJobModel', WorkflowJob)
     .service('WorkflowJobTemplateModel', WorkflowJobTemplate)

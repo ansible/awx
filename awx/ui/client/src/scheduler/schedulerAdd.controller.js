@@ -104,6 +104,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                 let watchForPromptChanges = () => {
                     let promptValuesToWatch = [
                         'promptData.prompts.inventory.value',
+                        'promptData.prompts.jobType.value',
                         'promptData.prompts.verbosity.value',
                         'missingSurveyValue'
                     ];

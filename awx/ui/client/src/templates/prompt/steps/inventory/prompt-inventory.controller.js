@@ -31,7 +31,7 @@ export default
             };
 
             vm.revert = () => {
-                scope.promptData.prompts.inventory.value = scope.promptData.prompts.inventory.templateDefault;
+                scope.promptData.prompts.inventory.value = scope.promptData.launchConf.defaults.inventory;
             };
         }
     ];

@@ -5,7 +5,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
     $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
     GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI) {
 
-    let schedule, scheduler;
+    let schedule, scheduler, scheduleCredentials = [];
 
     // initial end @ midnight values
     $scope.schedulerEndHour = "00";
@@ -63,7 +63,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             scheduler: scheduler,
             mode: 'edit',
             schedule: schedule,
-            promptData: $scope.promptData
+            promptData: $scope.promptData,
+            priorCredentials: scheduleCredentials
         }).then(() => {
             Wait('stop');
             $state.go("^", null, {reload: true});
@@ -254,14 +255,14 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                 $q.all([jobTemplate.optionsLaunch(ParentObject.id), jobTemplate.getLaunch(ParentObject.id), Rest.get()])
                     .then((responses) => {
                         let launchOptions = responses[0].data,
-                            launchConf = responses[1].data,
-                            scheduleCredentials = responses[2].data;
+                            launchConf = responses[1].data;
 
+                        scheduleCredentials = responses[2].data.results;
 
                         let watchForPromptChanges = () => {
                             let promptValuesToWatch = [
-                                // credential passwords...?
                                 'promptData.prompts.inventory.value',
+                                'promptData.prompts.jobType.value',
                                 'promptData.prompts.verbosity.value',
                                 'missingSurveyValue'
                             ];
@@ -283,7 +284,33 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                             currentValues: data
                         });
 
-                        prompts.credentials.value = scheduleCredentials.results.length > 0 ? scheduleCredentials.results : prompts.credentials.value;
+                        let defaultCredsWithoutOverrides = [];
+
+                        const credentialHasScheduleOverride = (templateDefaultCred) => {
+                            let credentialHasOverride = false;
+                            scheduleCredentials.forEach((scheduleCred) => {
+                                if(templateDefaultCred.credential_type === scheduleCred.credential_type) {
+                                    if(
+                                        (!templateDefaultCred.vault_id && !scheduleCred.inputs.vault_id) ||
+                                        (templateDefaultCred.vault_id && scheduleCred.inputs.vault_id && templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
+                                    ) {
+                                        credentialHasOverride = true;
+                                    }
+                                }
+                            });
+
+                            return credentialHasOverride;
+                        };
+
+                        if(_.has(launchConf, 'defaults.credentials')) {
+                            launchConf.defaults.credentials.forEach((defaultCred) => {
+                                if(!credentialHasScheduleOverride(defaultCred)) {
+                                    defaultCredsWithoutOverrides.push(defaultCred);
+                                }
+                            });
+                        }
+
+                        prompts.credentials.value = defaultCredsWithoutOverrides.concat(scheduleCredentials);
 
                         if(!launchConf.ask_variables_on_launch) {
                             $scope.noVars = true;
