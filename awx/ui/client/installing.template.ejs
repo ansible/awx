@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>var $basePath = '{{ STATIC_URL }}'</script>
     <link rel="shortcut icon" href="{{ STATIC_URL }}assets/favicon.ico?v={{version}}" />
     <title ng-bind="tabTitle"></title>
     <% htmlWebpackPlugin.files.css.forEach(file => {%>
@@ -20,16 +21,14 @@
     </script>
   </head>
   <body>
-    <div class="jumbotron">
-      <div class="container-fluid" id="content-container">
-        <div class="span4">
-          <img style="float:left" src="{% static 'assets/logo-header.svg' %}" width="200"/>
-          <div class="content-heading"><h1>AWX is Upgrading</h1></div>
-          <p>
-            AWX is currently upgrading or installing, this page will refresh when done.
-          </p>
-        </div>
-      </div>
+    <div class="at-Upgrade--panel">
+      <img src="{% static 'assets/logo-header.svg' %}" width="200"/>
+      <span class="at-Upgrade--header at-Upgrade--loading"><span class="at-Upgrade--brand" ng-bind="BRAND_NAME"></span> is Upgrading</span>
+      <span class="fa-4x at-Upgrade--icon"><i class="fa fa-refresh fa-spin"></i></span>
+      <span class="at-Upgrade--text">
+        <p><span class="at-Upgrade--brand" ng-bind="BRAND_NAME"></span>is currently upgrading.</p>
+        <p>This page will refresh when complete.</p>
+      </span>
     </div>
   </body>
 </html>
