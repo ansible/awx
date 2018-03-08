@@ -15,6 +15,7 @@ spec:
       containers:
         - name: awx-web
           image: {{ awx_web_kubernetes_image }}
+          imagePullPolicy: Always
           ports:
             - containerPort: 8052
           volumeMounts:
@@ -22,6 +23,7 @@ spec:
               name: awx-application-config
         - name: awx-celery
           image: {{ awx_task_kubernetes_image }}
+          imagePullPolicy: Always
           volumeMounts:
             - mountPath: /etc/tower
               name: awx-application-config
