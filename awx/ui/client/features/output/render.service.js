@@ -1,5 +1,6 @@
 import Ansi from 'ansi-to-html';
 import hasAnsi from 'has-ansi';
+import Entities from 'html-entities';
 
 const ELEMENT_TBODY = '#atStdoutResultTable';
 const EVENT_START_TASK = 'playbook_on_task_start';
@@ -18,6 +19,7 @@ const TIME_EVENTS = [
 ];
 
 const ansi = new Ansi();
+const entities = new Entities.AllHtmlEntities();
 
 function JobRenderService ($q, $sce, $window) {
     this.init = ({ compile, apply, get }) => {
@@ -60,7 +62,7 @@ function JobRenderService ($q, $sce, $window) {
             return { html: '', count: 0 };
         }
 
-        const { stdout } = event;
+        const stdout = this.sanitize(event.stdout);
         const lines = stdout.split('\r\n');
 
         let count = lines.length;
@@ -72,6 +74,7 @@ function JobRenderService ($q, $sce, $window) {
             ln++;
 
             const isLastLine = i === lines.length - 1;
+
             let row = this.createRow(current, ln, line);
 
             if (current && current.isTruncated && isLastLine) {
@@ -218,7 +221,7 @@ function JobRenderService ($q, $sce, $window) {
 
     this.insert = (events, insert) => {
         const result = this.transformEventGroup(events);
-        const html = this.sanitize(result.html);
+        const html = this.trustHtml(result.html);
 
         return this.requestAnimationFrame(() => insert(html))
             .then(() => this.compile(html))
@@ -264,14 +267,12 @@ function JobRenderService ($q, $sce, $window) {
     };
 
     this.prepend = events => this.insert(events, html => this.el.prepend(html));
+
     this.append = events => this.insert(events, html => this.el.append(html));
 
-    // TODO: stdout from the API should not be trusted.
-    this.sanitize = html => {
-        html = $sce.trustAsHtml(html);
+    this.trustHtml = html => $sce.getTrustedHtml($sce.trustAsHtml(html));
 
-        return $sce.getTrustedHtml(html);
-    };
+    this.sanitize = html => entities.encode(html);
 }
 
 JobRenderService.$inject = ['$q', '$sce', '$window'];

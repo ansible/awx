@@ -115,6 +115,7 @@
     "components-font-awesome": "^4.6.1",
     "d3": "~3.3.13",
     "has-ansi": "^3.0.0",
+    "html-entities": "^1.2.1",
     "javascript-detect-element-resize": "^0.5.3",
     "jquery": "~2.2.4",
     "jquery-ui": "^1.12.1",
