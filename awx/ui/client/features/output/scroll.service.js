@@ -137,6 +137,10 @@ function JobScrollService ($q, $timeout) {
         this.isAtRest();
     };
 
+    this.scrollToBottom = () => {
+        this.setScrollPosition(this.getScrollHeight());
+    };
+
     this.isAtRest = () => {
         if (this.position.current === 0 && !this.state.top) {
             this.state.top = true;
@@ -161,12 +165,10 @@ function JobScrollService ($q, $timeout) {
 
     this.lock = () => {
         this.state.locked = true;
-        this.state.paused = true;
     };
 
     this.unlock = () => {
         this.state.locked = false;
-        this.state.paused = false;
     };
 
     this.isLocked = () => {

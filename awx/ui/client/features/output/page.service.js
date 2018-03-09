@@ -189,12 +189,13 @@ function JobPageService ($q) {
             return;
         }
 
-        this.bookmark.state.first = this.page.state.first - 1;
+        this.bookmark.state.first = this.page.state.first;
         this.bookmark.state.last = this.page.state.last  - 1;
         this.bookmark.state.current = this.page.state.current - 1;
         this.bookmark.cache = JSON.parse(JSON.stringify(this.page.cache));
         this.bookmark.set = true;
         this.bookmark.pending = false;
+        console.log('applied', JSON.stringify(this.bookmark.state, 0, 2));
     };
 
     this.removeBookmark = () => {

@@ -106,7 +106,7 @@ function JobStreamService ($q) {
         return this.hooks.render(events)
             .then(() => {
                 if (this.scroll.isLocked()) {
-                    this.scroll.setScrollPosition(this.scroll.getScrollHeight());
+                    this.scroll.scrollToBottom();
                 }
 
                 if (this.isEnding()) {
@@ -127,13 +127,13 @@ function JobStreamService ($q) {
         if (done) {
             this.state.resuming = false;
             this.state.paused = false;
-
-            return;
+        } else if (!this.isTransitioning()) {
+            this.scroll.pause();
+            this.scroll.lock();
+            this.scroll.scrollToBottom();
+            this.state.resuming = true;
+            this.page.removeBookmark();
         }
-
-        this.scroll.lock();
-        this.state.resuming = true;
-        this.page.removeBookmark();
     };
 
     this.pause = done => {
@@ -141,18 +141,17 @@ function JobStreamService ($q) {
             this.state.pausing = false;
             this.state.paused = true;
             this.scroll.resume();
-
-            return;
+        } else if (!this.isTransitioning()) {
+            this.scroll.pause();
+            this.scroll.unlock();
+            this.state.pausing = true;
+            this.page.setBookmark();
         }
-
-        this.scroll.unlock();
-        this.scroll.pause();
-        this.state.pausing = true;
-        this.page.setBookmark();
     };
 
     this.start = () => {
         this.state.started = true;
+        this.scroll.pause();
         this.scroll.lock();
     };
 
@@ -161,6 +160,7 @@ function JobStreamService ($q) {
             this.state.ending = false;
             this.state.ended = true;
             this.scroll.unlock();
+            this.scroll.resume();
 
             return;
         }
@@ -172,6 +172,7 @@ function JobStreamService ($q) {
     this.isPaused = () => this.state.paused;
     this.isPausing = () => this.state.pausing;
     this.isResuming = () => this.state.resuming;
+    this.isTransitioning = () => this.isActive() && (this.state.pausing || this.state.resuming);
     this.isActive = () => this.state.started && !this.state.ended;
     this.isEnding = () => this.state.ending;
     this.isDone = () => this.state.ended;

@@ -87,7 +87,7 @@ function JobRenderService ($q, $sce, $window) {
         return { html, count };
     };
 
-    this.createRecord = event => {
+    this.createRecord = (ln, lines, event) => {
         if (!event.uuid) {
             return null;
         }
@@ -104,7 +104,7 @@ function JobRenderService ($q, $sce, $window) {
         };
 
         if (event.parent_uuid) {
-            info.parents = getParentEvents(event.parent_uuid);
+            info.parents = this.getParentEvents(event.parent_uuid);
         }
 
         if (info.isTruncated) {
@@ -209,7 +209,7 @@ function JobRenderService ($q, $sce, $window) {
             list.push(uuid);
 
             if (this.record[uuid].parents) {
-                list = list.concat(record[uuid].parents);
+                list = list.concat(this.record[uuid].parents);
             }
         }
 
@@ -231,7 +231,6 @@ function JobRenderService ($q, $sce, $window) {
 
     this.remove = elements => {
         return this.requestAnimationFrame(() => {
-            elements.empty();
             elements.remove();
         });
     };
@@ -252,10 +251,6 @@ function JobRenderService ($q, $sce, $window) {
         this.hooks.compile(html);
 
         return this.requestAnimationFrame();
-    };
-
-    this.build = () => {
-
     };
 
     this.clear = () => {

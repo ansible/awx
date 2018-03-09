@@ -10,9 +10,6 @@ let resource;
 let $state;
 let qs;
 
-let chain;
-let chainLength;
-
 function JobsIndexController (
     _resource_,
     _page_,
@@ -179,6 +176,10 @@ function shift () {
 }
 
 function scrollHome () {
+    if (scroll.isPaused()) {
+        return;
+    }
+
     scroll.pause();
 
     return page.first()
@@ -198,12 +199,18 @@ function scrollHome () {
 
 function scrollEnd () {
     if (stream.isActive()) {
+        if (stream.isTransitioning()) {
+            return;
+        }
+
         if (stream.isPaused()) {
             stream.resume();
         } else {
             stream.pause();
         }
 
+        return;
+    } else if (scroll.isPaused()) {
         return;
     }
 
@@ -225,10 +232,18 @@ function scrollEnd () {
 }
 
 function scrollPageUp () {
+    if (scroll.isPaused()) {
+        return;
+    }
+
     scroll.pageUp();
 }
 
 function scrollPageDown () {
+    if (scroll.isPaused()) {
+        return;
+    }
+
     scroll.pageDown();
 }
 
