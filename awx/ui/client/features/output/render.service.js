@@ -5,8 +5,6 @@ const ELEMENT_TBODY = '#atStdoutResultTable';
 const EVENT_START_TASK = 'playbook_on_task_start';
 const EVENT_START_PLAY = 'playbook_on_play_start';
 const EVENT_STATS_PLAY = 'playbook_on_stats';
-const JOB_START = 'playbook_on_start';
-const JOB_END = 'playbook_on_stats';
 
 const EVENT_GROUPS = [
     EVENT_START_TASK,
@@ -70,7 +68,7 @@ function JobRenderService ($q, $sce, $window) {
 
         const current = this.createRecord(ln, lines, event);
 
-        const html = lines.reduce((html, line, i) => {
+        const html = lines.reduce((concat, line, i) => {
             ln++;
 
             const isLastLine = i === lines.length - 1;
@@ -81,7 +79,7 @@ function JobRenderService ($q, $sce, $window) {
                 count++;
             }
 
-            return `${html}${row}`;
+            return `${concat}${row}`;
         }, '');
 
         return { html, count };
@@ -191,16 +189,16 @@ function JobRenderService ($q, $sce, $window) {
                 ${tdEvent}
                 <td class="at-Stdout-time">${timestamp}</td>
             </tr>`;
-    }
+    };
 
-    this.getTimestamp = (created) => {
+    this.getTimestamp = created => {
         const date = new Date(created);
         const hour = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours();
         const minute = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
         const second = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds();
 
         return `${hour}:${minute}:${second}`;
-    }
+    };
 
     this.getParentEvents = (uuid, list) => {
         list = list || [];
@@ -216,9 +214,7 @@ function JobRenderService ($q, $sce, $window) {
         return list;
     };
 
-    this.getEvents = () => {
-        return this.hooks.get();
-    };
+    this.getEvents = () => this.hooks.get();
 
     this.insert = (events, insert) => {
         const result = this.transformEventGroup(events);
@@ -229,23 +225,19 @@ function JobRenderService ($q, $sce, $window) {
             .then(() => result.lines);
     };
 
-    this.remove = elements => {
-        return this.requestAnimationFrame(() => {
-            elements.remove();
-        });
-    };
+    this.remove = elements => this.requestAnimationFrame(() => {
+        elements.remove();
+    });
 
-    this.requestAnimationFrame = fn => {
-        return $q(resolve => {
-            $window.requestAnimationFrame(() => {
-                if (fn) {
-                    fn();
-                }
+    this.requestAnimationFrame = fn => $q(resolve => {
+        $window.requestAnimationFrame(() => {
+            if (fn) {
+                fn();
+            }
 
-                return resolve();
-            });
+            return resolve();
         });
-    };
+    });
 
     this.compile = html => {
         this.hooks.compile(html);
@@ -271,13 +263,8 @@ function JobRenderService ($q, $sce, $window) {
         return this.remove(elements);
     };
 
-    this.prepend = events => {
-        return this.insert(events, html => this.el.prepend(html))
-    };
-
-    this.append = events => {
-        return this.insert(events, html => this.el.append(html))
-    };
+    this.prepend = events => this.insert(events, html => this.el.prepend(html));
+    this.append = events => this.insert(events, html => this.el.append(html));
 
     // TODO: stdout from the API should not be trusted.
     this.sanitize = html => {

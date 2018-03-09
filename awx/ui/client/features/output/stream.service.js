@@ -102,26 +102,24 @@ function JobStreamService ($q) {
             .then(() => --this.lag);
     };
 
-    this.renderFrame = events => {
-        return this.hooks.render(events)
-            .then(() => {
-                if (this.scroll.isLocked()) {
-                    this.scroll.scrollToBottom();
+    this.renderFrame = events => this.hooks.render(events)
+        .then(() => {
+            if (this.scroll.isLocked()) {
+                this.scroll.scrollToBottom();
+            }
+
+            if (this.isEnding()) {
+                const lastEvents = this.page.emptyBuffer();
+
+                if (lastEvents.length) {
+                    return this.renderFrame(lastEvents);
                 }
 
-                if (this.isEnding()) {
-                    const lastEvents = this.page.emptyBuffer();
+                this.end(true);
+            }
 
-                    if (lastEvents.length) {
-                        return this.renderFrame(lastEvents);
-                    }
-
-                    this.end(true);
-                }
-
-                return $q.resolve();
-            });
-    };
+            return $q.resolve();
+        });
 
     this.resume = done => {
         if (done) {

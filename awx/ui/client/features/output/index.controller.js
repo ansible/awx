@@ -110,7 +110,7 @@ function next () {
     return page.next()
         .then(events => {
             if (!events) {
-                return;
+                return $q.resolve();
             }
 
             return shift()
@@ -119,13 +119,13 @@ function next () {
 }
 
 function previous () {
-    let initialPosition = scroll.getScrollPosition();
+    const initialPosition = scroll.getScrollPosition();
     let postPopHeight;
 
     return page.previous()
         .then(events => {
             if (!events) {
-                return;
+                return $q.resolve();
             }
 
             return pop()
@@ -134,7 +134,7 @@ function previous () {
 
                     return prepend(events);
                 })
-                .then(()  => {
+                .then(() => {
                     const currentHeight = scroll.getScrollHeight();
                     scroll.setScrollPosition(currentHeight - postPopHeight + initialPosition);
                 });
@@ -177,7 +177,7 @@ function shift () {
 
 function scrollHome () {
     if (scroll.isPaused()) {
-        return;
+        return $q.resolve();
     }
 
     scroll.pause();
@@ -185,7 +185,7 @@ function scrollHome () {
     return page.first()
         .then(events => {
             if (!events) {
-                return;
+                return $q.resolve();
             }
 
             return render.clear()
@@ -200,7 +200,7 @@ function scrollHome () {
 function scrollEnd () {
     if (stream.isActive()) {
         if (stream.isTransitioning()) {
-            return;
+            return $q.resolve();
         }
 
         if (stream.isPaused()) {
@@ -209,9 +209,9 @@ function scrollEnd () {
             stream.pause();
         }
 
-        return;
+        return $q.resolve();
     } else if (scroll.isPaused()) {
-        return;
+        return $q.resolve();
     }
 
     scroll.pause();
@@ -219,7 +219,7 @@ function scrollEnd () {
     return page.last()
         .then(events => {
             if (!events) {
-                return;
+                return $q.resolve();
             }
 
             return render.clear()
@@ -306,7 +306,7 @@ function toggleSearchKey () {
     vm.searchKey = !vm.searchKey;
 }
 
-function getCurrentQueryset() {
+function getCurrentQueryset () {
     const { job_event_search } = $state.params;
 
     return qs.decodeArr(job_event_search);

@@ -17,7 +17,16 @@ const PAGE_LIMIT = 3;
 const PAGE_SIZE = 100;
 const WS_PREFIX = 'ws';
 
-function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJob, $stateParams, qs, Wait) {
+function resolveResource (
+    Job,
+    ProjectUpdate,
+    AdHocCommand,
+    SystemJob,
+    WorkflowJob,
+    $stateParams,
+    qs,
+    Wait
+) {
     const { id, type, job_event_search } = $stateParams;
 
     let Resource;
@@ -60,22 +69,20 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
             pageLimit: PAGE_LIMIT,
             params,
         }))
-        .then(model => {
-            return {
-                id,
-                type,
-                model,
-                related,
-                ws: {
-                    namespace: `${WS_PREFIX}-${getWebSocketResource(type).key}-${id}`
-                },
-                page: {
-                    cache: PAGE_CACHE,
-                    size: PAGE_SIZE,
-                    pageLimit: PAGE_LIMIT
-                }
-            };
-        })
+        .then(model => ({
+            id,
+            type,
+            model,
+            related,
+            ws: {
+                namespace: `${WS_PREFIX}-${getWebSocketResource(type).key}-${id}`
+            },
+            page: {
+                cache: PAGE_CACHE,
+                size: PAGE_SIZE,
+                pageLimit: PAGE_LIMIT
+            }
+        }))
         .catch(({ data, status }) => qs.error(data, status))
         .finally(() => Wait('stop'));
 }
@@ -83,9 +90,6 @@ function resolveResource (Job, ProjectUpdate, AdHocCommand, SystemJob, WorkflowJ
 function resolveWebSocketConnection (SocketService, $stateParams) {
     const { type, id } = $stateParams;
     const resource = getWebSocketResource(type);
-
-    let name;
-    let events;
 
     const state = {
         data: {
@@ -132,11 +136,12 @@ function getWebSocketResource (type) {
             name = 'jobs';
             key = 'job_events';
             break;
+        default:
+            throw new Error('Unsupported WebSocket type');
     }
 
     return { name, key };
 }
-
 
 function JobsRun ($stateRegistry) {
     const state = {

@@ -400,7 +400,7 @@ function extend (related, config) {
 
 function goToPage (config) {
     const params = config.params || {};
-    const page = config.page;
+    const { page } = config;
 
     let url;
     let key;
@@ -473,7 +473,7 @@ function goToPage (config) {
             return {
                 results: data.results,
                 page: pageNumber
-            }
+            };
         });
 }
 

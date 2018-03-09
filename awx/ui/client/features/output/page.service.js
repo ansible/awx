@@ -47,7 +47,7 @@ function JobPageService ($q) {
         } else {
             reference.cache.unshift(page);
             reference.state.first = page.number;
-            reference.state.last = reference.cache[reference.cache.length -1].number;
+            reference.state.last = reference.cache[reference.cache.length - 1].number;
         }
 
         reference.state.current = page.number;
@@ -101,7 +101,7 @@ function JobPageService ($q) {
         }
 
         return false;
-    }
+    };
 
     this.emptyBuffer = () => {
         const reference = this.getReference();
@@ -137,8 +137,9 @@ function JobPageService ($q) {
     };
 
     this.trim = left => {
-        let reference = this.getActiveReference();
-        let excess = reference.cache.length - this.page.limit;
+        const reference = this.getActiveReference();
+        const excess = reference.cache.length - this.page.limit;
+
         let ejected;
 
         if (left) {
@@ -152,9 +153,8 @@ function JobPageService ($q) {
         return ejected.reduce((total, page) => total + page.lines, 0);
     };
 
-    this.isPageBookmarked = number => {
-        return number >= this.page.bookmark.first && number <= this.page.bookmark.last;
-    };
+    this.isPageBookmarked = number => number >= this.page.bookmark.first &&
+        number <= this.page.bookmark.last;
 
     this.updateLineCount = (lines, stream) => {
         let reference;
@@ -168,15 +168,10 @@ function JobPageService ($q) {
         const index = reference.cache.findIndex(item => item.number === reference.state.current);
 
         reference.cache[index].lines += lines;
-    }
-
-    this.isBookmarkPending = () => {
-        return this.bookmark.pending;
     };
 
-    this.isBookmarkSet = () => {
-        return this.bookmark.set;
-    };
+    this.isBookmarkPending = () => this.bookmark.pending;
+    this.isBookmarkSet = () => this.bookmark.set;
 
     this.setBookmark = () => {
         if (this.isBookmarkSet()) {
@@ -190,12 +185,11 @@ function JobPageService ($q) {
         }
 
         this.bookmark.state.first = this.page.state.first;
-        this.bookmark.state.last = this.page.state.last  - 1;
+        this.bookmark.state.last = this.page.state.last - 1;
         this.bookmark.state.current = this.page.state.current - 1;
         this.bookmark.cache = JSON.parse(JSON.stringify(this.page.cache));
         this.bookmark.set = true;
         this.bookmark.pending = false;
-        console.log('applied', JSON.stringify(this.bookmark.state, 0, 2));
     };
 
     this.removeBookmark = () => {
@@ -271,19 +265,16 @@ function JobPageService ($q) {
             });
     };
 
-    this.buildRequestConfig = number => {
-        return {
-            page: number,
-            related: this.resource.related,
-            params: {
-                order_by: 'start_line'
-            }
-        };
-    };
+    this.buildRequestConfig = number => ({
+        page: number,
+        related: this.resource.related,
+        params: {
+            order_by: 'start_line'
+        }
+    });
 
-    this.getActiveReference = () => {
-        return this.isBookmarkSet() ? this.getReference(true) : this.getReference();
-    };
+    this.getActiveReference = () => (this.isBookmarkSet() ?
+        this.getReference(true) : this.getReference());
 
     this.getReference = (bookmark) => {
         if (bookmark) {

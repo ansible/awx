@@ -13,11 +13,10 @@ function AtSearchKeyController () {
         vm.examples = scope.examples || [];
         vm.fields = scope.fields || [];
         vm.relatedFields = scope.relatedFields || [];
-    }
+    };
 }
 
 AtSearchKeyController.$inject = ['$scope'];
-
 
 function atSearchKey () {
     return {

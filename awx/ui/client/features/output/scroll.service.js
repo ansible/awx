@@ -42,7 +42,6 @@ function JobScrollService ($q, $timeout) {
     this.register = () => {
         this.pause();
 
-        const height = this.getScrollHeight();
         const current = this.getScrollPosition();
         const downward = current > this.position.previous;
 
@@ -71,19 +70,16 @@ function JobScrollService ($q, $timeout) {
     };
 
     this.isBeyondThreshold = (downward, current) => {
-         const previous = this.position.previous;
-         const height = this.getScrollHeight();
+        const height = this.getScrollHeight();
 
-         if (downward) {
+        if (downward) {
             current += this.getViewableHeight();
 
             if (current >= height || ((height - current) / height) < THRESHOLD) {
                 return true;
             }
-        } else {
-            if (current <= 0 || (current / height) < THRESHOLD) {
-                return true;
-            }
+        } else if (current <= 0 || (current / height) < THRESHOLD) {
+            return true;
         }
 
         return false;
@@ -111,17 +107,9 @@ function JobScrollService ($q, $timeout) {
         this.setScrollPosition(top + height);
     };
 
-    this.getScrollHeight = () => {
-        return this.el[0].scrollHeight;
-    };
-
-    this.getViewableHeight = () => {
-        return this.el[0].offsetHeight;
-    };
-
-    this.getScrollPosition = () => {
-        return this.el[0].scrollTop;
-    };
+    this.getScrollHeight = () => this.el[0].scrollHeight;
+    this.getViewableHeight = () => this.el[0].offsetHeight;
+    this.getScrollPosition = () => this.el[0].scrollTop;
 
     this.setScrollPosition = position => {
         this.position.previous = this.position.current;
@@ -159,9 +147,7 @@ function JobScrollService ($q, $timeout) {
         this.state.paused = true;
     };
 
-    this.isPaused = () => {
-        return this.state.paused;
-    };
+    this.isPaused = () => this.state.paused;
 
     this.lock = () => {
         this.state.locked = true;
@@ -171,9 +157,7 @@ function JobScrollService ($q, $timeout) {
         this.state.locked = false;
     };
 
-    this.isLocked = () => {
-        return this.state.locked;
-    };
+    this.isLocked = () => this.state.locked;
 }
 
 JobScrollService.$inject = ['$q', '$timeout'];
