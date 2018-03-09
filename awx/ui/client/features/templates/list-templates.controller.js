@@ -64,7 +64,7 @@ function ListTemplatesController(
 
     vm.isInvalid = (template) => {
         if(isJobTemplate(template)) {
-            return (template.inventory === null || template.project == null)
+            return template.project === null || (template.inventory === null && template.ask_inventory_on_launch === false);
         } else {
             return false;
         }
