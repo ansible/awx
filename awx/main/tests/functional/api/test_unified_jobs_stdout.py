@@ -169,7 +169,7 @@ def test_text_stdout_with_max_stdout(sqlite_copy_expert, get, admin):
     response = get(url, user=admin, expect=200)
     assert response.data['result_stdout'] == (
         'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes'.format(
+        'supported for sizes over {max} bytes.'.format(
             actual=total_bytes,
             max=settings.STDOUT_MAX_BYTES_DISPLAY
         )
@@ -195,7 +195,7 @@ def test_max_bytes_display(sqlite_copy_expert, Parent, Child, relation, view, fm
     response = get(url + '?format={}'.format(fmt), user=admin, expect=200)
     assert response.content == (
         'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes'.format(
+        'supported for sizes over {max} bytes.'.format(
             actual=total_bytes,
             max=settings.STDOUT_MAX_BYTES_DISPLAY
         )
@@ -243,7 +243,7 @@ def test_legacy_result_stdout_with_max_bytes(Cls, view, fmt, get, admin):
     response = get(url + '?format={}'.format(fmt), user=admin, expect=200)
     assert response.content == (
         'Standard Output too large to display ({actual} bytes), only download '
-        'supported for sizes over {max} bytes'.format(
+        'supported for sizes over {max} bytes.'.format(
             actual=total_bytes,
             max=settings.STDOUT_MAX_BYTES_DISPLAY
         )
