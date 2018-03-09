@@ -42,6 +42,7 @@ class LDAPSettings(BaseLDAPSettings):
     defaults = dict(BaseLDAPSettings.defaults.items() + {
         'ORGANIZATION_MAP': {},
         'TEAM_MAP': {},
+        'GROUP_TYPE_PARAMS': {},
     }.items())
 
     def __init__(self, prefix='AUTH_LDAP_', defaults={}):
