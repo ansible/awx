@@ -3376,7 +3376,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
         except StdoutMaxBytesExceeded as e:
             return _(
                 "Standard Output too large to display ({text_size} bytes), "
-                "only download supported for sizes over {supported_size} bytes").format(
+                "only download supported for sizes over {supported_size} bytes.").format(
                     text_size=e.total, supported_size=e.supported
             )
 
