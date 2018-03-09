@@ -19,7 +19,7 @@ function NullChannel(from_controller, tracer) {
     this.trace = false;
 }
 
-NullChannel.prototype.send = function(msg_type) {
+NullChannel.prototype.send = function() {
 };
 
 function FSMController (scope, name, initial_state, tracer) {

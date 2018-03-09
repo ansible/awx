@@ -16,19 +16,13 @@ function Device(id, name, x, y, type, host_id) {
     this.type = type;
     this.selected = false;
     this.remote_selected = false;
-    this.edit_label = false;
-    this.status = null;
-    this.working = false;
     this.moving = false;
     this.icon = false;
     this.tasks = [];
     this.shape = type === "router" ? "circular" : "rectangular";
     this.interface_seq = util.natural_numbers(0);
     this.interfaces = [];
-    this.process_id_seq = util.natural_numbers(0);
-    this.processes = [];
-    this.in_group = false;
-    this.template = false;
+    this.interfaces_by_name = {};
     this.variables = {};
 }
 exports.Device = Device;
@@ -42,9 +36,8 @@ Device.prototype.toJSON = function () {
             interfaces: this.interfaces.map(function (x) {
                 return x.toJSON();
             }),
-            processes: this.processes.map(function (x) {
-                return x.toJSON();
-            })};
+            variables: this.variables
+            };
 };
 
 Device.prototype.is_selected = function (x, y) {
@@ -74,18 +67,6 @@ Interface.prototype.toJSON = function () {
 
     return {id: this.id,
             name: this.name};
-};
-
-Interface.prototype.remote_interface = function () {
-
-    if (this.link === null) {
-        return null;
-    }
-    if (this.link.to_interface === this) {
-        return this.link.from_interface;
-    } else {
-        return this.link.to_interface;
-    }
 };
 
 Interface.prototype.is_selected = function (x, y) {
