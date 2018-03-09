@@ -1587,7 +1587,7 @@ class OAuth2TokenDetail(RetrieveUpdateDestroyAPIView):
     view_name = _("OAuth Token Detail")
 
     model = OAuth2AccessToken
-    serializer_class = OAuth2TokenSerializer
+    serializer_class = OAuth2TokenDetailSerializer
 
 
 class OAuth2TokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
