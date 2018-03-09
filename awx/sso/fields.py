@@ -1,5 +1,6 @@
 # Python LDAP
 import ldap
+import awx
 
 # Django
 from django.utils.translation import ugettext_lazy as _
@@ -8,6 +9,10 @@ from django.core.exceptions import ValidationError
 # Django Auth LDAP
 import django_auth_ldap.config
 from django_auth_ldap.config import LDAPSearch, LDAPSearchUnion
+from django.conf import settings
+
+# This must be imported so get_subclasses picks it up
+from awx.sso.ldap_group_types import PosixUIDGroupType  # noqa
 
 # Tower
 from awx.conf import fields
@@ -335,19 +340,48 @@ class LDAPGroupTypeField(fields.ChoiceField):
 
     def to_representation(self, value):
         if not value:
-            return ''
+            return 'MemberDNGroupType'
         if not isinstance(value, django_auth_ldap.config.LDAPGroupType):
             self.fail('type_error', input_type=type(value))
         return value.__class__.__name__
 
     def to_internal_value(self, data):
+        def find_class_in_modules(class_name):
+            module_search_space = [django_auth_ldap.config, awx.sso.ldap_group_types]
+            for m in module_search_space:
+                cls = getattr(m, class_name, None)
+                if cls:
+                    return cls
+            return None
+
         data = super(LDAPGroupTypeField, self).to_internal_value(data)
         if not data:
             return None
+
+        from django.conf import settings
+        params = getattr(settings, iter(self.depends_on).next(), None) or {}
+        cls = find_class_in_modules(data)
+        if not cls:
+            return None
+
+        # Per-group type parameter validation and handling here
+
+        # Backwords compatability. Before AUTH_LDAP_GROUP_TYPE_PARAMS existed
+        # MemberDNGroupType was the only group type, of the underlying lib, that
+        # took a parameter.
+        params_sanitized = dict()
         if data.endswith('MemberDNGroupType'):
-            return getattr(django_auth_ldap.config, data)(member_attr='member')
-        else:
-            return getattr(django_auth_ldap.config, data)()
+            params.setdefault('member_attr', 'member')
+            params_sanitized['member_attr'] = params['member_attr']
+        elif data.endswith('PosixUIDGroupType'):
+            params.setdefault('ldap_group_user_attr', 'uid')
+            params_sanitized['ldap_group_user_attr'] = params['ldap_group_user_attr']
+
+        return cls(**params_sanitized)
+
+
+class LDAPGroupTypeParamsField(fields.DictField):
+    pass
 
 
 class LDAPUserFlagsField(fields.DictField):
