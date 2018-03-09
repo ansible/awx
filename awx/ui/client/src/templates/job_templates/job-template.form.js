@@ -103,17 +103,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || !canGetAllRelatedResources',
                     awLookupWhen: 'canGetAllRelatedResources'
                 },
-                custom_virtualenv: {
-                    label: i18n._('Ansible Environment'),
-                    type: 'select',
-                    defaultText: i18n._('Select Ansible Environment'),
-                    ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
-                    awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this job template to run on.") + "</p>",
-                    dataTitle: i18n._('Ansible Environment'),
-                    dataContainer: 'body',
-                    dataPlacement: 'right',
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
-                },
                 playbook: {
                     label: i18n._('Playbook'),
                     type:'select',
@@ -197,15 +186,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
                 },
-                instance_groups: {
-                    label: i18n._('Instance Groups'),
-                    type: 'custom',
-                    awPopOver: "<p>" + i18n._("Select the Instance Groups for this Job Template to run on.") + "</p>",
-                    dataTitle: i18n._('Instance Groups'),
-                    dataContainer: 'body',
-                    dataPlacement: 'right',
-                    control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)"></instance-groups-multiselect>',
-                },
                 job_tags: {
                     label: i18n._('Job Tags'),
                     type: 'select',
@@ -250,6 +230,26 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     awPopOver: "<p>" + i18n._("Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.") + "</p>",
                     dataContainer: 'body',
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                },
+                custom_virtualenv: {
+                    label: i18n._('Ansible Environment'),
+                    type: 'select',
+                    defaultText: i18n._('Select Ansible Environment'),
+                    ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
+                    awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this job template to run on.") + "</p>",
+                    dataTitle: i18n._('Ansible Environment'),
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                instance_groups: {
+                    label: i18n._('Instance Groups'),
+                    type: 'custom',
+                    awPopOver: "<p>" + i18n._("Select the Instance Groups for this Job Template to run on.") + "</p>",
+                    dataTitle: i18n._('Instance Groups'),
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)"></instance-groups-multiselect>',
                 },
                 diff_mode: {
                     label: i18n._('Show Changes'),
