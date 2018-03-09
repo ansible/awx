@@ -23,15 +23,9 @@ var Rack = new _Rack();
 exports.Rack = Rack;
 
 
-_State.prototype.start = function (controller) {
-    controller.scope.current_mode = controller.state.name;
-};
-
-
 _Start.prototype.start = function (controller) {
 
     controller.scope.inventory_toolbox_controller.handle_message('Disable', {});
-
     controller.changeState(Rack);
 };
 _Start.prototype.start.transitions = ['MultiSite'];
@@ -42,10 +36,3 @@ _Rack.prototype.start = function (controller) {
     controller.scope.inventory_toolbox_controller.handle_message('Enable', {});
     controller.scope.move_controller.changeState(move.Ready);
 };
-
-_Rack.prototype.end = function (controller) {
-
-    controller.scope.inventory_toolbox_controller.handle_message('Disable', {});
-    controller.scope.move_controller.changeState(move.Disable);
-};
-
