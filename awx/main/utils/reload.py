@@ -26,7 +26,7 @@ def _reset_celery_thread_pool():
     # Do not use current_app because of this outstanding issue:
     # https://github.com/celery/celery/issues/4410
     app = Celery('awx')
-    app.config_from_object('django.conf:settings', namespace='CELERY')
+    app.config_from_object('django.conf:settings')
     app.control.broadcast('pool_restart', arguments={'reload': True},
                           destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
 
