@@ -15,12 +15,24 @@ services:
     hostname: awxweb
     user: root
     restart: unless-stopped
-    {% if awx_container_search_domains is defined %}
+    {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) -%}
+    {% set awx_container_search_domains_list = awx_container_search_domains.split(',') %}
+    dns_search:
+    {% for awx_container_search_domain in awx_container_search_domains_list %}
+      - {{ awx_container_search_domain }}
+    {% endfor %}
+    {% elif awx_container_search_domains is defined -%}
     dns_search: "{{ awx_container_search_domains }}"
-    {% endif %}
-    {% if awx_container_search_domains is defined %}
+    {%- endif %}
+    {% if (awx_alternate_dns_servers is defined) and (',' in awx_alternate_dns_servers) -%}
+    {% set awx_alternate_dns_servers_list = awx_alternate_dns_servers.split(',') %}
+    dns:
+    {% for awx_alternate_dns_server in awx_alternate_dns_servers_list %}
+      - {{ awx_alternate_dns_server }}
+    {% endfor %}
+    {% elif awx_alternate_dns_servers is defined -%}
     dns: "{{ awx_alternate_dns_servers }}"
-    {% endif %}
+    {%- endif %}
     environment:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
@@ -53,12 +65,24 @@ services:
     hostname: awx
     user: root
     restart: unless-stopped
-    {% if awx_container_search_domains is defined %}
+    {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) -%}    
+    {% set awx_container_search_domains_list = awx_container_search_domains.split(',') %}
+    dns_search:
+    {% for awx_container_search_domain in awx_container_search_domains_list %}
+      - {{ awx_container_search_domain }}
+    {% endfor %}
+    {% elif awx_container_search_domains is defined -%}
     dns_search: "{{ awx_container_search_domains }}"
-    {% endif %}
-    {% if awx_container_search_domains is defined %}
+    {%- endif %}
+    {% if (awx_alternate_dns_servers is defined) and (',' in awx_alternate_dns_servers) -%}
+    {% set awx_alternate_dns_servers_list = awx_alternate_dns_servers.split(',') %}
+    dns:
+    {% for awx_alternate_dns_server in awx_alternate_dns_servers_list %}
+      - {{ awx_alternate_dns_server }}
+    {% endfor %}
+    {% elif awx_alternate_dns_servers is defined -%}
     dns: "{{ awx_alternate_dns_servers }}"
-    {% endif %}
+    {%- endif %}
     environment:
       http_proxy: {{ http_proxy | default('') }}
       https_proxy: {{ https_proxy | default('') }}
