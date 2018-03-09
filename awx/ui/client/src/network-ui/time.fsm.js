@@ -180,7 +180,7 @@ _Present.prototype.onDownloadRecordingButton = function(controller) {
     controller.scope.onDownloadRecordingButton();
 };
 
-_Present.prototype.onNoop = function(controller, msg_type, message) {
+_Present.prototype.onNoop = function() {
 
 };
 

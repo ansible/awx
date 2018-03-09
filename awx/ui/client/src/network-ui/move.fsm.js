@@ -84,7 +84,10 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
 
 	var scope = controller.scope;
     var device = null;
+    var remote_device = null;
     var intf = null;
+    var link = null;
+    var new_link = null;
     var i = 0;
     var c_messages = [];
 
@@ -99,7 +102,10 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
                                scope.scaledY,
                                message.device.type,
                                message.device.host_id);
+    device.variables = message.device.variables;
+    scope.update_links_in_vars_by_device(device.name, device.variables);
     scope.devices.push(device);
+    scope.devices_by_name[message.device.name] = device;
     c_messages.push(new messages.DeviceCreate(scope.client_id,
                                               device.id,
                                               device.x,
@@ -110,13 +116,65 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
     for (i=0; i < message.device.interfaces.length; i++) {
         intf = new models.Interface(message.device.interfaces[i].id, message.device.interfaces[i].name);
         device.interfaces.push(intf);
+        device.interfaces_by_name[message.device.interfaces[i].name] = intf;
+        intf.device = device;
         c_messages.push(new messages.InterfaceCreate(controller.scope.client_id,
                                                      device.id,
                                                      intf.id,
                                                      intf.name));
     }
+    if (scope.links_in_vars_by_device[device.name] !== undefined) {
+        for (i=0; i < scope.links_in_vars_by_device[device.name].length; i++) {
+            link = scope.links_in_vars_by_device[device.name][i];
+            if (device.interfaces_by_name[link.from_interface] === undefined) {
+                intf = new models.Interface(device.interface_seq(), link.from_interface);
+                device.interfaces.push(intf);
+                device.interfaces_by_name[link.from_interface] = intf;
+                intf.device = device;
+                c_messages.push(new messages.InterfaceCreate(controller.scope.client_id,
+                                                             device.id,
+                                                             intf.id,
+                                                             intf.name));
+            }
+            if (scope.devices_by_name[link.to_device] !== undefined) {
+                remote_device = scope.devices_by_name[link.to_device];
+                if (remote_device.interfaces_by_name[link.to_interface] === undefined) {
+                    intf = new models.Interface(remote_device.interface_seq(), link.to_interface);
+                    remote_device.interfaces.push(intf);
+                    remote_device.interfaces_by_name[link.to_interface] = intf;
+                    intf.device = remote_device;
+                    c_messages.push(new messages.InterfaceCreate(controller.scope.client_id,
+                                                                 remote_device.id,
+                                                                 intf.id,
+                                                                 intf.name));
+                }
+            }
+            if (scope.devices_by_name[link.to_device] === undefined) {
+                continue;
+            }
+            if (scope.devices_by_name[link.to_device].interfaces_by_name[link.to_interface] === undefined) {
+                continue;
+            }
+            new_link = new models.Link(scope.link_id_seq(),
+                                       device,
+                                       scope.devices_by_name[link.to_device],
+                                       device.interfaces_by_name[link.from_interface],
+                                       scope.devices_by_name[link.to_device].interfaces_by_name[link.to_interface]);
+            c_messages.push(new messages.LinkCreate(controller.scope.client_id,
+                                                    new_link.id,
+                                                    new_link.from_device.id,
+                                                    new_link.to_device.id,
+                                                    new_link.from_interface.id,
+                                                    new_link.to_interface.id));
+            device.interfaces_by_name[link.from_interface].link = new_link;
+            scope.devices_by_name[link.to_device].interfaces_by_name[link.to_interface].link = new_link;
+            scope.links.push(new_link);
+            scope.updateInterfaceDots();
+        }
+    }
     scope.selected_devices.push(device);
     device.selected = true;
+    console.log(c_messages);
     scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
     controller.changeState(Selected2);
 };
