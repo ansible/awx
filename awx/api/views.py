@@ -77,8 +77,14 @@ from awx.main.utils import (
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.insights import filter_insights_api_response
-
-from awx.api.permissions import * # noqa
+from awx.api.permissions import (
+    JobTemplateCallbackPermission,
+    TaskPermission,
+    ProjectUpdatePermission,
+    InventoryInventorySourcesUpdatePermission,
+    UserPermission,
+    InstanceGroupTowerPermission,
+)
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata, JobTypeMetadata
@@ -651,6 +657,7 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     view_name = _("Instance Group Detail")
     model = InstanceGroup
     serializer_class = InstanceGroupSerializer
+    permission_classes = (InstanceGroupTowerPermission,)
 
 
 class InstanceGroupUnifiedJobsList(SubListAPIView):

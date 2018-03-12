@@ -15,6 +15,13 @@ def instance_group(job_factory):
 
 
 @pytest.fixture
+def tower_instance_group():
+    ig = InstanceGroup(name='tower')
+    ig.save()
+    return ig
+
+
+@pytest.fixture
 def create_job_factory(job_factory, instance_group):
     def fn(status='running'):
         j = job_factory()
@@ -71,3 +78,13 @@ def test_delete_instance_group_jobs_running(delete, instance_group_jobs_running,
     assert response.data['error'] == u"Resource is being used by running jobs."
     assert response_sorted == expect_sorted
 
+
+@pytest.mark.django_db
+def test_delete_tower_instance_group_prevented(delete, options, tower_instance_group, admin):
+    url = reverse("api:instance_group_detail", kwargs={'pk': tower_instance_group.pk})
+    delete(url, None, admin, expect=403)
+    resp = options(url, None, admin, expect=200)
+    actions = ['DELETE', 'PATCH', 'PUT']
+    for action in actions:
+        assert action not in resp.data['actions']
+    assert 'GET' in resp.data['actions']
