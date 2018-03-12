@@ -131,6 +131,8 @@ class FieldLookupBackend(BaseFilterBackend):
                     new_parts.append(name_alt)
                 else:
                     field = model._meta.get_field(name)
+                if 'auth' in name or 'token' in name:
+                    raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
                 if isinstance(field, ForeignObjectRel) and getattr(field.field, '__prevent_search__', False):
                     raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
                 elif getattr(field, '__prevent_search__', False):
