@@ -21,7 +21,6 @@ logger = logging.getLogger('coverage_report')
 TESTS_API = '/network_ui_test/tests'
 
 
-
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
@@ -33,10 +32,7 @@ def main(args=None):
     else:
         logging.basicConfig(level=logging.WARNING)
 
-
-    print (parsed_args['<server>'])
     server = parsed_args['<server>']
-
     tests = requests.get(server + TESTS_API, verify=False).json()
 
     for test in tests['tests']:
@@ -45,17 +41,11 @@ def main(args=None):
         with open(test['name'] + "/coverage.json", 'w') as f:
             f.write(requests.get(server + test['coverage'], verify=False).text)
 
-
-    #for test in tests['tests']:
-    #    subprocess.Popen('istanbul report html', shell=True, cwd=test['name']).wait()
-
-
+    for test in tests['tests']:
+        subprocess.Popen('istanbul report html', shell=True, cwd=test['name']).wait()
     subprocess.Popen('istanbul report html', shell=True).wait()
-
-
     return 0
 
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
-
