@@ -67,6 +67,13 @@ function JobsIndexController (
     vm.removeSearchTag = removeSearchTag;
     vm.searchTags = getSearchTags(getCurrentQueryset());
 
+    // details
+    vm.details = {
+        job: resource.model.model.GET,
+        status: resource.model.model.GET.status,
+        resource,
+    };
+
     render.requestAnimationFrame(() => init());
 }
 

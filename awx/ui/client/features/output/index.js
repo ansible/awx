@@ -8,6 +8,7 @@ import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
 import SearchKeyDirective from '~features/output/search-key.directive';
 import StreamService from '~features/output/stream.service';
+import DetailsDirective from '~features/output/details.directive.js';
 
 const Template = require('~features/output/index.view.html');
 
@@ -55,21 +56,21 @@ function resolveResource (
     }
 
     const params = { page_size: PAGE_SIZE, order_by: 'start_line' };
+    const config = { pageCache: PAGE_CACHE, pageLimit: PAGE_LIMIT, params };
 
     if (job_event_search) {
-        const searchParams = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
+        const queryParams = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
 
-        Object.assign(params, searchParams);
+        Object.assign(config.params, queryParams);
     }
 
     Wait('start');
-    return new Resource('get', id)
-        .then(model => model.extend(related, {
-            pageCache: PAGE_CACHE,
-            pageLimit: PAGE_LIMIT,
-            params,
-        }))
-        .then(model => ({
+    return new Resource(['get', 'options'], [id, id])
+        .then(model => Promise.all([
+            model.extend('labels'),
+            model.extend(related, config)
+        ]))
+        .then(([ model ]) => ({
             id,
             type,
             model,
@@ -197,6 +198,7 @@ angular
     .service('JobPageService', PageService)
     .service('JobScrollService', ScrollService)
     .service('JobStreamService', StreamService)
+    .directive('atDetails', DetailsDirective)
     .directive('atSearchKey', SearchKeyDirective)
     .run(JobsRun);
 

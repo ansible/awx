@@ -353,10 +353,11 @@ function has (method, keys) {
     return value !== undefined && value !== null;
 }
 
-function extend (related, config) {
+function extend (related, config = {}) {
+
     const req = this.parseRequestConfig('GET', config);
 
-    if (config.params.page_size) {
+    if (_.get(config, 'params.page_size')) {
         this.page.size = config.params.page_size;
         this.page.current = 1;
 

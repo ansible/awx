@@ -1,0 +1,236 @@
+
+<!-- LEFT PANE HEADER -->
+<div class="JobResults-panelHeader">
+    <div class="JobResults-panelHeaderText" translate> DETAILS</div>
+    <!-- LEFT PANE HEADER ACTIONS -->
+    <div class="JobResults-panelHeaderButtonActions">
+        <!-- RELAUNCH ACTION -->
+        <at-relaunch state="vm.job"></at-relaunch>
+
+        <!-- CANCEL ACTION -->
+        <button class="List-actionButton List-actionButton--delete"
+            data-placement="top"
+            ng-click="vm.cancelJob()"
+            ng-show="vm.status == 'running' || vm.status =='pending' "
+            aw-tool-tip="{{'Cancel' | translate}}"
+            data-original-title="" title="">
+            <i class="fa fa-minus-circle"></i>
+        </button>
+
+        <!-- DELETE ACTION -->
+        <button class="List-actionButton List-actionButton--delete"
+            data-placement="top"
+            ng-click="vm.deleteJob()"
+            ng-hide="vm.status == 'running' || vm.status == 'pending' || !job.summary_fields.user_capabilities.delete"
+            aw-tool-tip="{{'Delete' | translate}}"
+            data-original-title=""
+            title="">
+            <i class="fa fa-trash-o"></i>
+        </button>
+    </div>
+</div>
+
+<!-- LEFT PANE DETAILS GROUP -->
+<div>
+    <!-- STATUS DETAIL -->
+    <div class="JobResults-resultRow">
+        <label class="JobResults-resultRowLabel">{{ vm.status.label}}</label>
+         <div class="JobResults-resultRowText">
+             <i class="JobResults-statusResultIcon fa icon-job-{{ vm.status.value }}"></i>
+             {{ vm.status.displayValue | translate }}
+         </div>
+     </div>
+
+
+    <!-- START TIME DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.startTime">
+        <label class="JobResults-resultRowLabel">{{ vm.startTime.label }}</label>
+        <div class="JobResults-resultRowText">
+            {{ vm.startTime.displayValue }}
+        </div>
+    </div>
+
+    <!-- FINISHED TIME DETAIL -->
+    <div class="JobResults-resultRow" ng-show="vm.startTime">
+        <label class="JobResults-resultRowLabel">{{ vm.finishTime.label }}</label>
+        <div class="JobResults-resultRowText">
+            {{ vm.finishTime.displayValue }}
+        </div>
+    </div>
+
+    <!-- RESULTS TRACEBACK DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.resultTraceback">
+        <label class="JobResults-resultRowLabel">{{ vm.resultTraceback.label }}</label>
+        <div class="JobResults-resultRowText" ng-bind-html="vm.resultTraceback.value"></div>
+    </div>
+
+    <!-- TEMPLATE DETAIL -->
+    <div class="JobResults-resultRow" ng-show="vm.jobTemplate">
+        <label class="JobResults-resultRowLabel">{{ vm.jobTemplate.label }}</label>
+        <div class="JobResults-resultRowText">
+            <a href="{{ vm.jobTemplate.link }}" aw-tool-tip="{{'Edit the job template' | translate}}" data-placement="top">
+                {{ vm.jobTemplate.value }}
+            </a>
+
+            <a href="{{ vm.sourceWorkflowJob.link }}" ng-if="vm.sourceWorkflowJob" aw-tool-tip="{{'View workflow results' | translate}}" data-placement="top" data-original-title="" title="">
+                <i class="WorkflowBadge"> W</i>
+            </a>
+        </div>
+    </div>
+
+    <!-- JOB TYPE DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.jobType">
+        <label class="JobResults-resultRowLabel">{{ vm.jobType.label }}</label>
+        <div class="JobResults-resultRowText">{{ vm.jobType.displayValue }}</div>
+    </div>
+
+    <!-- LAUNCHED BY DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.launchedBy">
+        <label class="JobResults-resultRowLabel">{{ vm.launchedBy.label }}</label>
+        <div ng-if="vm.launchedBy.link" class="JobResults-resultRowText">
+            <a href="{{ vm.launchedBy.link }}" aw-tool-tip="{{ vm.launchedBy.tooltip }}" data-placement="top">
+                {{ vm.launchedBy.value }}
+            </a>
+        </div>
+        <div ng-if="!vm.launchedBy.link" class="jobResults-resultRowText">
+            {{ vm.launchedBy.value }}
+        </div>
+    </div>
+
+    <!-- INVENTORY DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.inventory">
+        <label class="JobResults-resultRowLabel">{{ vm.inventory.label }}</label>
+        <div class="JobResults-resultRowText">
+            <a href="{{ vm.inventory.link }}" aw-tool-tip="{{ vm.inventory.tooltip }}" data-placement="top">
+                {{ vm.inventory.value }}
+            </a>
+        </div>
+    </div>
+
+    <!-- PROJECT DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.project">
+        <label class="JobResults-resultRowLabel">{{ vm.project.label }}</label>
+        <div class="JobResults-resultRowText">
+            <a href="{{ vm.project.update.link }}"
+                ng-if="vm.project.update"
+                aw-tool-tip="{{ vm.project.update.tooltip }}"
+                data-placement="top">
+                <i class="JobResults-statusResultIcon fa icon-job-{{ vm.project.update.status }}"></i>
+            </a>
+            <a href="{{ vm.project.link }}"
+                aw-tool-tip="{{ vm.project.tooltip }}"
+                data-placement="top">
+                {{ vm.project.value }}
+            </a>
+        </div>
+    </div>
+
+    <!-- REVISION DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.scmRevision">
+        <label class="JobResults-resultRowLabel">{{ vm.scmRevision.label }}</label>
+        <at-truncate string="{{ vm.scmRevision.value }}" maxLength="7" class="JobResults-resultRowText"></at-truncate>
+    </div>
+
+    <!-- PLAYBOOK DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.playbook">
+        <label class="JobResults-resultRowLabel">{{ vm.playbook.label }}</label>
+        <div class="JobResults-resultRowText">{{ vm.playbook.value }}</div>
+    </div>
+
+    <!-- MACHINE CREDENTIAL DETAIL -->
+    <div class="JobResults-resultRow" ng-show="vm.machineCredential">
+        <label class="JobResults-resultRowLabel">{{ vm.machineCredential.label }}</label>
+        <div class="JobResults-resultRowText">
+            <a href="{{ vm.machineCredential.link }}"
+                aw-tool-tip="{{ vm.machineCredential.tooltip }}"
+                data-placement="top">
+                {{ vm.machineCredential.value }}
+            </a>
+        </div>
+    </div>
+
+    <!-- FORKS DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.forks">
+        <label class="JobResults-resultRowLabel">{{ vm.forks.label }}</label>
+        <div class="JobResults-resultRowText">{{ vm.forks.value }}</div>
+    </div>
+
+    <!-- LIMIT DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.limit">
+        <label class="JobResults-resultRowLabel">{{ vm.limit.label }}</label>
+        <div class="JobResults-resultRowText">{{ vm.limit.value }}</div>
+    </div>
+
+    <!-- VERBOSITY DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.verbosity">
+        <label class="JobResults-resultRowLabel">{{ vm.verbosity.label }}</label>
+        <div class="JobResults-resultRowText">{{ vm.verbosity.displayValue }}</div>
+    </div>
+
+    <!-- IG DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.instanceGroup">
+        <label class="JobResults-resultRowLabel">{{ vm.instanceGroup.label }}</label>
+        <div class="JobResults-resultRowText JobResults-resultRowText--instanceGroup">
+            {{ vm.instanceGroup.value }}
+            <span class="JobResults-isolatedBadge" ng-if="vm.instanceGroup.isolated">
+                {{ vm.instanceGroup.isolated }}
+            </span>
+        </div>
+    </div>
+
+    <!-- TAGS DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.jobTags">
+        <label class="JobResults-resultRowLabel">{{ vm.jobTags.label }}</label>
+        <div class="JobResults-resultRowText">{{ vm.jobTags.value }}</div>
+    </div>
+
+    <!-- SKIP TAGS DETAIL -->
+    <div class="JobResults-resultRow" ng-if="vm.skipTags">
+        <label class="JobResults-resultRowLabel">{{ vm.skipTags.label }}</label>
+        <div class="JobResults-resultRowText"> {{ vm.skipTags.value }}</div>
+    </div>
+
+    <!-- EXTRA VARIABLES DETAIL -->
+    <div class="JobResults-resultRow JobResults-resultRow--variables" ng-show="vm.extraVars">
+        <label class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth">
+            <span>{{ vm.extraVars.label }}</span>
+            <i class="JobResults-extraVarsHelp fa fa-question-circle"
+                aw-tool-tip="{{ vm.extraVars.tooltip }}"
+                data-placement="top">
+            </i>
+        </label>
+        <textarea
+            disabled="disabled"
+            rows="6"
+            ng-model="vm.extraVars.value"
+            name="variables"
+            class="form-control Form-textArea Form-textAreaLabel Form-formGroup--fullWidth"
+            id="cm-extra-vars">
+        </textarea>
+    </div>
+
+    <!-- LABELS DETAIL -->
+    <div class="JobResults-resultRow" ng-show="vm.labels">
+        <div class="JobResults-resultRow">
+            <a class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth"
+                ng-show="vm.labels.more"
+                href=""
+                ng-click="vm.toggleLabels()">
+                <span translate>Labels</span>
+                <i class="JobResults-expandArrow fa fa-caret-right"></i>
+            </a>
+            <a class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth"
+                ng-show="!vm.labels.more"
+                href=""
+                ng-click="vm.toggleLabels()">
+                <span translate>Labels</span>
+                <i class="JobResults-expandArrow fa fa-caret-down"></i>
+            </a>
+        </div>
+        <div id="job-results-labels" class="LabelList JobResults-resultRowText JobResults-resultRowText--fullWidth">
+            <div ng-repeat="label in vm.labels.value" class="LabelList-tagContainer">
+                <div class="LabelList-tag"><div class="LabelList-name">{{ label }}</div></div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -7,6 +7,11 @@ function JobsStrings (BaseString) {
     ns.state = {
         TITLE: t.s('JOBZ')
     };
+
+    ns.warnings = {
+        CANCEL_BODY: t.s('Are you sure you want to cancel this job?'),
+        CANCEL_HEADER: t.s('Cancel Job'),
+    };
 }
 
 JobsStrings.$inject = ['BaseStringService'];
