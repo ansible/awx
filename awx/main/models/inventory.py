@@ -33,7 +33,12 @@ from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.events import InventoryUpdateEvent
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.mixins import ResourceMixin, TaskManagerInventoryUpdateMixin
+from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.models.mixins import (
+    ResourceMixin,
+    TaskManagerInventoryUpdateMixin,
+    RelatedJobsMixin,
+)
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
@@ -47,7 +52,7 @@ __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate',
 logger = logging.getLogger('awx.main.models.inventory')
 
 
-class Inventory(CommonModelNameNotUnique, ResourceMixin):
+class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     '''
     an inventory source contains lists and hosts.
     '''
@@ -489,6 +494,19 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         self._update_host_smart_inventory_memeberships()
         super(Inventory, self).delete(*args, **kwargs)
 
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_active_jobs(self):
+        return UnifiedJob.objects.non_polymorphic().filter(
+            Q(status__in=ACTIVE_STATES) &
+            (
+                Q(Job___inventory=self) |
+                Q(InventoryUpdate___inventory_source__inventory=self) |
+                Q(AdHocCommand___inventory=self)
+            )
+        )
+
 
 class SmartInventoryMembership(BaseModel):
     '''
@@ -690,7 +708,7 @@ class Host(CommonModelNameNotUnique):
         super(Host, self).delete(*args, **kwargs)
 
 
-class Group(CommonModelNameNotUnique):
+class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     '''
     A group containing managed hosts.  A group or host may belong to multiple
     groups.
@@ -941,6 +959,13 @@ class Group(CommonModelNameNotUnique):
     def ad_hoc_commands(self):
         from awx.main.models.ad_hoc_commands import AdHocCommand
         return AdHocCommand.objects.filter(hosts__in=self.all_hosts)
+
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_active_jobs(self):
+        return InventoryUpdate.objects.filter(status__in=ACTIVE_STATES,
+                                              inventory_source__in=self.inventory_sources.all())
 
 
 class InventorySourceOptions(BaseModel):
@@ -1328,7 +1353,7 @@ class InventorySourceOptions(BaseModel):
             return ''
 
 
-class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
+class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMixin):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'inventory')]
 
@@ -1546,6 +1571,13 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         if self.source != 'scm' and self.source_path:
             raise ValidationError(_("Cannot set source_path if not SCM type."))
         return self.source_path
+
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_active_jobs(self):
+        return InventoryUpdate.objects.filter(status__in=ACTIVE_STATES,
+                                              inventory_source=self)
 
 
 class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin):

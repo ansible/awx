@@ -26,7 +26,12 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.mixins import ResourceMixin, TaskManagerProjectUpdateMixin, CustomVirtualEnvMixin
+from awx.main.models.mixins import (
+    ResourceMixin,
+    TaskManagerProjectUpdateMixin,
+    CustomVirtualEnvMixin,
+    RelatedJobsMixin
+)
 from awx.main.utils import update_scm_url
 from awx.main.utils.ansible import skip_directory, could_be_inventory, could_be_playbook
 from awx.main.fields import ImplicitRoleField
@@ -443,7 +448,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
         return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)
 
 
-class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectUpdateMixin):
+class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectUpdateMixin, RelatedJobsMixin):
     '''
     Internal job for tracking project updates from SCM.
     '''
@@ -557,3 +562,16 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         if not selected_groups:
             return self.global_instance_groups
         return selected_groups
+
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_active_jobs(self):
+        return UnifiedJob.objects.non_polymorphic().filter(
+            Q(status__in=ACTIVE_STATES) &
+            (
+                Q(Job___project=self) |
+                Q(ProjectUpdate___project=self)
+            )
+        )
+

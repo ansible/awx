@@ -14,6 +14,40 @@ from awx.main.models import * # noqa
 from awx.api.versioning import reverse
 
 
+@pytest.fixture
+def create_job_factory(job_factory, project):
+    def fn(status='running'):
+        j = job_factory()
+        j.status = status
+        j.project = project
+        j.save()
+        return j
+    return fn
+
+
+@pytest.fixture
+def create_project_update_factory(organization, project):
+    def fn(status='running'):
+        pu = ProjectUpdate(project=project)
+        pu.status = status
+        pu.organization = organization
+        pu.save()
+        return pu
+    return fn
+
+
+@pytest.fixture
+def organization_jobs_successful(create_job_factory, create_project_update_factory):
+    return [create_job_factory(status='successful') for i in xrange(0, 2)] + \
+        [create_project_update_factory(status='successful') for i in xrange(0, 2)]
+
+
+@pytest.fixture
+def organization_jobs_running(create_job_factory, create_project_update_factory):
+    return [create_job_factory(status='running') for i in xrange(0, 2)] + \
+        [create_project_update_factory(status='running') for i in xrange(0, 2)]
+
+
 @pytest.mark.django_db
 def test_organization_list_access_tests(options, head, get, admin, alice):
     options(reverse('api:organization_list'), user=admin, expect=200)
@@ -215,3 +249,27 @@ def test_organization_unset_custom_virtualenv(get, patch, organization, admin, v
     url = reverse('api:organization_detail', kwargs={'pk': organization.id})
     resp = patch(url, {'custom_virtualenv': value}, user=admin, expect=200)
     assert resp.data['custom_virtualenv'] is None
+
+
+@pytest.mark.django_db
+def test_organization_delete(delete, admin, organization, organization_jobs_successful):
+    url = reverse('api:organization_detail', kwargs={'pk': organization.id})
+    delete(url, None, user=admin, expect=204)
+
+
+@pytest.mark.django_db
+def test_organization_delete_with_active_jobs(delete, admin, organization, organization_jobs_running):
+    def sort_keys(x):
+        return (x['type'], x['id'])
+
+    url = reverse('api:organization_detail', kwargs={'pk': organization.id})
+    resp = delete(url, None, user=admin, expect=409)
+
+    expect_transformed = [dict(id=str(j.id), type=j.model_to_str()) for j in organization_jobs_running]
+    resp_sorted = sorted(resp.data['active_jobs'], key=sort_keys)
+    expect_sorted = sorted(expect_transformed, key=sort_keys)
+
+    assert resp.data['error'] == u"Resource is being used by running jobs."
+    assert resp_sorted == expect_sorted
+
+

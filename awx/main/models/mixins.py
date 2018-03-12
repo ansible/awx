@@ -6,12 +6,14 @@ from copy import copy, deepcopy
 import six
 
 # Django
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
+from django.db.models.query import QuerySet
 
 # AWX
 from awx.main.models.base import prevent_search
@@ -20,6 +22,7 @@ from awx.main.models.rbac import (
 )
 from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
+from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import JSONField, AskForField
 
 
@@ -444,3 +447,28 @@ class CustomVirtualEnvMixin(models.Model):
         if value:
             return os.path.join(value, '')
         return None
+
+
+class RelatedJobsMixin(object):
+
+    '''
+    This method is intended to be overwritten.
+    Called by get_active_jobs()
+    Returns a list of active jobs (i.e. running) associated with the calling
+    resource (self). Expected to return a QuerySet
+    '''
+    def _get_active_jobs(self):
+        return []
+
+    '''
+    Returns [{'id': '1', 'type': 'job'}, {'id': 2, 'type': 'project_update'}, ...]
+    '''
+    def get_active_jobs(self):
+        UnifiedJob = apps.get_model('main', 'UnifiedJob')
+        mapping = build_polymorphic_ctypes_map(UnifiedJob)
+        jobs = self._get_active_jobs()
+        if not isinstance(jobs, QuerySet):
+            raise RuntimeError("Programmer error. Expected _get_active_jobs() to return a QuerySet.")
+
+        return [dict(id=str(t[0]), type=mapping[t[1]]) for t in jobs.values_list('id', 'polymorphic_ctype_id')]
+
