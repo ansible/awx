@@ -268,7 +268,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 checkbox_group: {
                     label: i18n._('Options'),
                     type: 'checkbox_group',
-                    class: 'Form-formGroup--fullWidth',
                     fields: [{
                         name: 'become_enabled',
                         label: i18n._('Enable Privilege Escalation'),
