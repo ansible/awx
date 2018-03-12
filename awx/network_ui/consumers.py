@@ -11,26 +11,11 @@ import logging
 
 
 from awx.network_ui.utils import transform_dict
-from pprint import pformat
 
 import json
 # Connected to websocket.connect
 
-HISTORY_MESSAGE_IGNORE_TYPES = ['DeviceSelected',
-                                'DeviceUnSelected',
-                                'LinkSelected',
-                                'LinkUnSelected',
-                                'MouseEvent',
-                                'MouseWheelEvent',
-                                'KeyEvent']
-
-
 logger = logging.getLogger("awx.network_ui.consumers")
-
-
-class NetworkUIException(Exception):
-
-    pass
 
 
 def parse_inventory_id(data):
@@ -43,37 +28,38 @@ def parse_inventory_id(data):
         inventory_id = None
     return inventory_id
 
-# Persistence
 
+class Persistence(object):
 
-class _Persistence(object):
+    def parse_message_text(self, message_text, client_id):
+        data = json.loads(message_text)
+        if len(data) == 2:
+            message_type = data.pop(0)
+            message_value = data.pop(0)
+            if isinstance(message_value, list):
+                logger.error("Message has no sender")
+                return None, None
+            if isinstance(message_value, dict) and client_id != message_value.get('sender'):
+                logger.error("client_id mismatch expected: %s actual %s", client_id, message_value.get('sender'))
+                return None, None
+            return message_type, message_value
+        else:
+            logger.error("Invalid message text")
+            return None, None
 
     def handle(self, message):
         topology_id = message.get('topology')
         assert topology_id is not None, "No topology_id"
         client_id = message.get('client')
         assert client_id is not None, "No client_id"
-        data = json.loads(message['text'])
-        if isinstance(data[1], list):
-            logger.error("Message has no sender")
+        message_type, message_value = self.parse_message_text(message['text'], client_id)
+        if message_type is None:
             return
-        if isinstance(data[1], dict) and client_id != data[1].get('sender'):
-            logger.error("client_id mismatch expected: %s actual %s", client_id, data[1].get('sender'))
-            logger.error(pformat(data))
-            return
-        message_type = data[0]
-        message_value = data[1]
         handler = self.get_handler(message_type)
         if handler is not None:
             try:
                 handler(message_value, topology_id, client_id)
-            except NetworkUIException, e:
-                Group("client-%s" % client_id).send({"text": json.dumps(["Error", str(e)])})
-                raise
-            except Exception, e:
-                Group("client-%s" % client_id).send({"text": json.dumps(["Error", "Server Error"])})
-                raise
-            except BaseException, e:
+            except Exception:
                 Group("client-%s" % client_id).send({"text": json.dumps(["Error", "Server Error"])})
                 raise
         else:
@@ -153,6 +139,10 @@ class _Persistence(object):
         device_map = dict(Device.objects
                                 .filter(topology_id=topology_id, id__in=[link['from_device_id'], link['to_device_id']])
                                 .values_list('id', 'pk'))
+        if link['from_device_id'] not in device_map:
+            return
+        if link['to_device_id'] not in device_map:
+            return
         Link.objects.filter(id=link['id'],
                             from_device_id=device_map[link['from_device_id']],
                             to_device_id=device_map[link['to_device_id']],
@@ -186,21 +176,16 @@ class _Persistence(object):
                 logger.warning("Unsupported message %s", message['msg_type'])
 
 
-persistence = _Persistence()
-
-
-# UI Channel Events
-
 @channel_session
 def ws_connect(message):
     # Accept connection
     data = urlparse.parse_qs(message.content['query_string'])
     inventory_id = parse_inventory_id(data)
     topology_ids = list(TopologyInventory.objects.filter(inventory_id=inventory_id).values_list('topology_id', flat=True))
-    topology_id = 0
+    topology_id = None
     if len(topology_ids) > 0:
         topology_id = topology_ids[0]
-    if topology_id:
+    if topology_id is not None:
         topology = Topology.objects.get(topology_id=topology_id)
     else:
         topology = Topology(name="topology", scale=1.0, panX=0, panY=0)
@@ -234,8 +219,7 @@ def send_snapshot(channel, topology_id):
               .filter(device__topology_id=topology_id)
               .values()):
         interfaces[i['device_id']].append(i)
-    devices = list(Device.objects
-                         .filter(topology_id=topology_id).values())
+    devices = list(Device.objects.filter(topology_id=topology_id).values())
     for device in devices:
         device['interfaces'] = interfaces[device['device_id']]
 

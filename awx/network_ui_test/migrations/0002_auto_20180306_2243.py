@@ -5,13 +5,8 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 
-results = ['passed',
-           'failed',
-           'errored',
-           'skipped',
-           'aborted',
-           'not run',
-           'blocked']
+results = ['passed', 'failed', 'errored', 'skipped',
+           'aborted', 'not run', 'blocked']
 
 
 def populate_result_types(apps, schema_editor):
