@@ -65,6 +65,7 @@ def test_valid_survey_answer(post, admin_user, project, inventory, survey_spec_f
     ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYYEARDAY=100", "BYYEARDAY not supported"),  # noqa
     ("DTSTART:20300308T050000Z RRULE:FREQ=YEARLY;INTERVAL=1;BYWEEKNO=20", "BYWEEKNO not supported"),
     ("DTSTART:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2000", "COUNT > 999 is unsupported"),  # noqa
+    ("DTSTART;TZID=US-Eastern:19961105T090000 RRULE:FREQ=MINUTELY;INTERVAL=10;COUNT=5", "A valid TZID must be provided"),  # noqa
     ("DTSTART:20300308T050000Z RRULE:FREQ=REGULARLY;INTERVAL=1", "rrule parsing failed validation: invalid 'FREQ': REGULARLY"),  # noqa
     ("DTSTART:20030925T104941Z RRULE:FREQ=DAILY;INTERVAL=10;COUNT=500;UNTIL=20040925T104941Z", "RRULE may not contain both COUNT and UNTIL"),  # noqa
     ("DTSTART;TZID=America/New_York:20300308T050000Z RRULE:FREQ=DAILY;INTERVAL=1", "rrule parsing failed validation"),

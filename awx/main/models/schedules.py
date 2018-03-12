@@ -1,11 +1,10 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import re
 import logging
 import datetime
 import dateutil.rrule
-from dateutil.tz import gettz, datetime_exists
+from dateutil.tz import datetime_exists
 
 # Django
 from django.db import models
@@ -57,10 +56,6 @@ class ScheduleManager(ScheduleFilterMethods, models.Manager):
 
 class Schedule(CommonModel, LaunchTimeConfig):
 
-    TZID_REGEX = re.compile(
-        "^(DTSTART;TZID=(?P<tzid>[^:]+)(?P<stamp>\:[0-9]+T[0-9]+))(?P<rrule> .*)$"
-    )
-
     class Meta:
         app_label = 'main'
         ordering = ['-next_run']
@@ -103,51 +98,23 @@ class Schedule(CommonModel, LaunchTimeConfig):
     def rrulestr(cls, rrule, **kwargs):
         """
         Apply our own custom rrule parsing logic to support TZID=
-
-        python-dateutil doesn't _natively_ support `DTSTART;TZID=`; this
-        function parses out the TZID= component and uses it to produce the
-        `tzinfos` keyword argument to `dateutil.rrule.rrulestr()`. In this
-        way, we translate:
-
-        DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1
-
-        ...into...
-
-        DTSTART:20180601T120000TZID RRULE:FREQ=DAILY;INTERVAL=1
-
-        ...and we pass a hint about the local timezone to dateutil's parser:
-        `dateutil.rrule.rrulestr(rrule, {
-            'tzinfos': {
-                'TZID': dateutil.tz.gettz('America/New_York')
-              }
-         })`
-
-        it's likely that we can remove the custom code that performs this
-        parsing if TZID= gains support in upstream dateutil:
-        https://github.com/dateutil/dateutil/pull/619
         """
         kwargs['forceset'] = True
-        kwargs['tzinfos'] = {x: dateutil.tz.tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
-        match = cls.TZID_REGEX.match(rrule)
-        if match is not None:
-            rrule = cls.TZID_REGEX.sub("DTSTART\g<stamp>TZI\g<rrule>", rrule)
-            timezone = gettz(match.group('tzid'))
-            kwargs['tzinfos']['TZI'] = timezone
         x = dateutil.rrule.rrulestr(rrule, **kwargs)
 
         for r in x._rrule:
+            if r._dtstart and r._dtstart.tzinfo is None:
+                raise ValueError(
+                    'A valid TZID must be provided (e.g., America/New_York)'
+                )
+
             if r._dtstart and r._until:
+                # If https://github.com/dateutil/dateutil/pull/634 ever makes
+                # it into a python-dateutil release, we could remove this block.
                 if all((
                     r._dtstart.tzinfo != dateutil.tz.tzlocal(),
                     r._until.tzinfo != dateutil.tz.tzutc(),
                 )):
-                    # According to RFC5545 Section 3.3.10:
-                    # https://tools.ietf.org/html/rfc5545#section-3.3.10
-                    #
-                    # > If the "DTSTART" property is specified as a date with UTC
-                    # > time or a date with local time and time zone reference,
-                    # > then the UNTIL rule part MUST be specified as a date with
-                    # > UTC time.
                     raise ValueError('RRULE UNTIL values must be specified in UTC')
 
         if 'MINUTELY' in rrule or 'HOURLY' in rrule:
