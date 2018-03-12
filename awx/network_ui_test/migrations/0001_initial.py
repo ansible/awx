@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('network_ui', '0005_auto_20180306_1837'),
+        ('network_ui', '0001_initial'),
     ]
 
     operations = [
