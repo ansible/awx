@@ -15,6 +15,10 @@ services:
     hostname: awxweb
     user: root
     restart: unless-stopped
+    {% if project_data_dir is defined %}
+    volumes:
+      - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
+    {% endif %}
     {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) -%}
     {% set awx_container_search_domains_list = awx_container_search_domains.split(',') %}
     dns_search:
@@ -65,6 +69,10 @@ services:
     hostname: awx
     user: root
     restart: unless-stopped
+    {% if project_data_dir is defined %}
+    volumes:
+      - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
+    {% endif %}
     {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) -%}    
     {% set awx_container_search_domains_list = awx_container_search_domains.split(',') %}
     dns_search:
