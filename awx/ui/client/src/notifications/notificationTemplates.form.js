@@ -435,6 +435,15 @@ export default ['i18n', function(i18n) {
                     ngShow: "notification_type.value == 'email'",
                     labelClass: 'NotificationsForm-radioButtons'
                 }]
+            },
+            hex_color: {
+                label: i18n._('Notification Color'),
+                dataTitle: i18n._('Notification Color'),
+                type: 'text',
+                subForm: 'typeSubForm',
+                ngShow: "notification_type.value == 'slack' ",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+                awPopOver: i18n._('Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc) .')
             }
         },
 
