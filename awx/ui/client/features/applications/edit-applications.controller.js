@@ -97,7 +97,11 @@ function EditApplicationsController (models, $state, strings, $scope) {
 
         const payload = _.merge(data, hiddenData);
 
-        return application.request('post', { data: payload });
+        return application.request('put', { data: payload });
+    };
+
+    vm.form.onSaveSuccess = () => {
+        $state.go('applications.edit', { application_id: application.get('id') }, { reload: true });
     };
 }
 
