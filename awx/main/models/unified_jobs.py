@@ -547,6 +547,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default=None,
         editable=False,
     )
+    emitted_events = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
     unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
         null=True, # Some jobs can be run without a template.
@@ -905,6 +909,29 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         related.result_stdout_text = value
         related.save()
 
+    @property
+    def event_parent_key(self):
+        tablename = self._meta.db_table
+        return {
+            'main_job': 'job_id',
+            'main_adhoccommand': 'ad_hoc_command_id',
+            'main_projectupdate': 'project_update_id',
+            'main_inventoryupdate': 'inventory_update_id',
+            'main_systemjob': 'system_job_id',
+        }[tablename]
+
+    def get_event_queryset(self):
+        return self.event_class.objects.filter(**{self.event_parent_key: self.id})
+
+    @property
+    def events_processed(self):
+        '''
+        Returns True / False, whether all events from job have been saved
+        '''
+        if self.status in ACTIVE_STATES:
+            return False  # tally of events is only available at end of run
+        return self.emitted_events == self.get_event_queryset().count()
+
     def result_stdout_raw_handle(self, enforce_max_bytes=True):
         """
         This method returns a file-like object ready to be read which contains
@@ -960,20 +987,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             # (`stdout`) directly to a file
 
             with connection.cursor() as cursor:
-                tablename = self._meta.db_table
-                related_name = {
-                    'main_job': 'job_id',
-                    'main_adhoccommand': 'ad_hoc_command_id',
-                    'main_projectupdate': 'project_update_id',
-                    'main_inventoryupdate': 'inventory_update_id',
-                    'main_systemjob': 'system_job_id',
-                }[tablename]
 
                 if enforce_max_bytes:
                     # detect the length of all stdout for this UnifiedJob, and
                     # if it exceeds settings.STDOUT_MAX_BYTES_DISPLAY bytes,
                     # don't bother actually fetching the data
-                    total = self.event_class.objects.filter(**{related_name: self.id}).aggregate(
+                    total = self.get_event_queryset().aggregate(
                         total=models.Sum(models.Func(models.F('stdout'), function='LENGTH'))
                     )['total']
                     if total > max_supported:
@@ -981,8 +1000,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
                 cursor.copy_expert(
                     "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
-                        tablename + 'event',
-                        related_name,
+                        self._meta.db_table + 'event',
+                        self.event_parent_key,
                         self.id
                     ),
                     fd

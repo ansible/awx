@@ -145,6 +145,16 @@ class UnifiedJobDeletionMixin(object):
         # Still allow deletion of new status, because these can be manually created
         if obj.status in ACTIVE_STATES and obj.status != 'new':
             raise PermissionDenied(detail=_("Cannot delete running job resource."))
+        elif not obj.events_processed:
+            # Prohibit deletion if job events are still coming in
+            if obj.finished and now() < obj.finished + dateutil.relativedelta.relativedelta(minutes=1):
+                # less than 1 minute has passed since job finished and events are not in
+                return Response({"error": _("Job has not finished processing events.")},
+                                status=status.HTTP_400_BAD_REQUEST)
+            else:
+                # if it has been > 1 minute, events are probably lost
+                logger.warning('Allowing deletion of {} through the API without all events '
+                               'processed.'.format(obj.log_format))
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
