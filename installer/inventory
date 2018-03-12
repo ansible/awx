@@ -32,7 +32,6 @@ awx_secret_key=awxsecret
 # awx_kubernetes_namespace=awx
 
 # Common Docker parameters
-ansible_custom_modules_dir=/var/opt/ansible/modules
 postgres_data_dir=/tmp/pgdocker
 host_port=80
 
