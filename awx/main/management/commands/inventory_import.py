@@ -155,7 +155,7 @@ class AnsibleInventoryLoader(object):
 
         if self.tmp_private_dir:
             shutil.rmtree(self.tmp_private_dir, True)
-        if proc.returncode != 0 or 'file not found' in stderr:
+        if proc.returncode != 0:
             raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % (
                 self.method, proc.returncode, stdout, stderr))
 
