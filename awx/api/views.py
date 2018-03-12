@@ -213,6 +213,7 @@ class ApiOAuthAuthorizationRootView(APIView):
     permission_classes = (AllowAny,)
     view_name = _("API OAuth 2 Authorization Root")
     versioning_class = None
+    swagger_topic = 'Authentication'
 
     def get(self, request, format=None):
         data = OrderedDict()
@@ -1503,6 +1504,7 @@ class OAuth2ApplicationList(ListCreateAPIView):
 
     model = OAuth2Application
     serializer_class = OAuth2ApplicationSerializer
+    swagger_topic = 'Authentication'
 
 
 class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
@@ -1511,6 +1513,7 @@ class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
 
     model = OAuth2Application
     serializer_class = OAuth2ApplicationSerializer
+    swagger_topic = 'Authentication'
 
 
 class ApplicationOAuth2TokenList(SubListCreateAPIView):
@@ -1522,6 +1525,7 @@ class ApplicationOAuth2TokenList(SubListCreateAPIView):
     parent_model = OAuth2Application
     relationship = 'oauth2accesstoken_set'
     parent_key = 'application'
+    swagger_topic = 'Authentication'
 
 
 class OAuth2ApplicationActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
@@ -1530,6 +1534,7 @@ class OAuth2ApplicationActivityStreamList(ActivityStreamEnforcementMixin, SubLis
     serializer_class = ActivityStreamSerializer
     parent_model = OAuth2Application
     relationship = 'activitystream_set'
+    swagger_topic = 'Authentication'
 
 
 class OAuth2TokenList(ListCreateAPIView):
@@ -1538,6 +1543,7 @@ class OAuth2TokenList(ListCreateAPIView):
 
     model = OAuth2AccessToken
     serializer_class = OAuth2TokenSerializer
+    swagger_topic = 'Authentication'
     
     
 class OAuth2AuthorizedTokenList(SubListCreateAPIView):
@@ -1549,6 +1555,7 @@ class OAuth2AuthorizedTokenList(SubListCreateAPIView):
     parent_model = OAuth2Application
     relationship = 'oauth2accesstoken_set'
     parent_key = 'application'
+    swagger_topic = 'Authentication'
 
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
@@ -1563,6 +1570,7 @@ class UserAuthorizedTokenList(SubListCreateAPIView):
     parent_model = User
     relationship = 'oauth2accesstoken_set'
     parent_key = 'user'
+    swagger_topic = 'Authentication'
 
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
@@ -1577,6 +1585,7 @@ class OAuth2PersonalTokenList(SubListCreateAPIView):
     parent_model = User
     relationship = 'main_oauth2accesstoken'
     parent_key = 'user'
+    swagger_topic = 'Authentication'
     
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=True, user=self.request.user)
@@ -1587,7 +1596,8 @@ class OAuth2TokenDetail(RetrieveUpdateDestroyAPIView):
     view_name = _("OAuth Token Detail")
 
     model = OAuth2AccessToken
-    serializer_class = OAuth2TokenSerializer
+    serializer_class = OAuth2TokenDetailSerializer
+    swagger_topic = 'Authentication'
 
 
 class OAuth2TokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
@@ -1596,6 +1606,7 @@ class OAuth2TokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIVi
     serializer_class = ActivityStreamSerializer
     parent_model = OAuth2AccessToken
     relationship = 'activitystream_set'
+    swagger_topic = 'Authentication'
 
 
 class UserTeamsList(ListAPIView):
