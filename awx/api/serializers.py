@@ -979,11 +979,13 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
         
 
 class OAuth2ApplicationSerializer(BaseSerializer):
-
+    
+    show_capabilities = ['edit', 'delete']
+    
     class Meta:
         model = OAuth2Application
         fields = (
-            '*', '-description', 'user', 'client_id', 'client_secret', 'client_type',
+            '*', 'description', 'user', 'client_id', 'client_secret', 'client_type',
             'redirect_uris',  'authorization_grant_type', 'skip_authorization',
         )
         read_only_fields = ('client_id', 'client_secret')
