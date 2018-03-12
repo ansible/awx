@@ -349,7 +349,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
                                         let processed = PromptService.processSurveyQuestions({
                                             surveyQuestions: surveyQuestionRes.data.spec,
-                                            extra_data: data.extra_data
+                                            extra_data: _.cloneDeep(data.extra_data)
                                         });
 
                                         $scope.missingSurveyValue = processed.missingSurveyValue;

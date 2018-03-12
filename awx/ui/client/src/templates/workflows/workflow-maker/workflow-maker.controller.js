@@ -12,7 +12,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
     Empty, PromptService, Rest) {
 
         let form = WorkflowMakerForm();
-        let promptWatcher;
+        let promptWatcher, surveyQuestionWatcher;
 
         $scope.workflowMakerFormConfig = {
             nodeMode: "idle",
@@ -549,6 +549,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 promptWatcher();
             }
 
+            if(surveyQuestionWatcher) {
+                surveyQuestionWatcher();
+            }
+
             $scope.promptData = null;
 
             // Reset the edgeConflict flag
@@ -570,6 +574,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
             if(promptWatcher) {
                 promptWatcher();
+            }
+
+            if(surveyQuestionWatcher) {
+                surveyQuestionWatcher();
             }
 
             $scope.promptData = null;
@@ -692,7 +700,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                                                 let processed = PromptService.processSurveyQuestions({
                                                     surveyQuestions: surveyQuestionRes.data.spec,
-                                                    extra_data: $scope.nodeBeingEdited.originalNodeObj.extra_data
+                                                    extra_data: _.cloneDeep($scope.nodeBeingEdited.originalNodeObj.extra_data)
                                                 });
 
                                                 $scope.missingSurveyValue = processed.missingSurveyValue;
@@ -707,7 +715,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                                     template: $scope.nodeBeingEdited.unifiedJobTemplate.id
                                                 };
 
-                                                $scope.$watch('promptData.surveyQuestions', () => {
+                                                surveyQuestionWatcher = $scope.$watch('promptData.surveyQuestions', () => {
                                                     let missingSurveyValue = false;
                                                     _.each($scope.promptData.surveyQuestions, (question) => {
                                                         if(question.required && (Empty(question.model) || question.model === [])) {
@@ -778,19 +786,19 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                      switch($scope.nodeBeingEdited.edgeType) {
                         case "always":
                             $scope.edgeType = {label: "Always", value: "always"};
-                            if(siblingConnectionTypes.length === 0 || (siblingConnectionTypes.length === 1 && _.includes(siblingConnectionTypes, "always"))) {
+                            if(siblingConnectionTypes.length === 1 && _.includes(siblingConnectionTypes, "always")) {
                                 edgeDropdownOptions = ["always"];
                             }
                             break;
                         case "success":
                             $scope.edgeType = {label: "On Success", value: "success"};
-                            if(siblingConnectionTypes.length === 0 || (!_.includes(siblingConnectionTypes, "always"))) {
+                            if(siblingConnectionTypes.length !== 0 && (!_.includes(siblingConnectionTypes, "always"))) {
                                 edgeDropdownOptions = ["success", "failure"];
                             }
                             break;
                         case "failure":
                             $scope.edgeType = {label: "On Failure", value: "failure"};
-                            if(siblingConnectionTypes.length === 0 || (!_.includes(siblingConnectionTypes, "always"))) {
+                            if(siblingConnectionTypes.length !== 0 && (!_.includes(siblingConnectionTypes, "always"))) {
                                 edgeDropdownOptions = ["success", "failure"];
                             }
                             break;
@@ -869,9 +877,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 $scope.$broadcast("refreshWorkflowChart");
 
                 if($scope.placeholderNode) {
-                    let edgeType = "success";
+                    let edgeType = {label: "On Success", value: "success"};
                     if($scope.placeholderNode.isRoot) {
-                        edgeType = "always";
+                        updateEdgeDropdownOptions(["always"]);
+                        edgeType = {label: "Always", value: "always"};
                     }
                     else {
                         // we need to update the possible edges based on any new siblings
@@ -881,18 +890,24 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             childId: $scope.placeholderNode.id
                         });
 
-                        if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
+                        if (
+                            (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) &&
+                            !_.includes(siblingConnectionTypes, "always")
+                        ) {
                             updateEdgeDropdownOptions(["success", "failure"]);
-                        } else if (_.includes(siblingConnectionTypes, "always")) {
+                        } else if (
+                            _.includes(siblingConnectionTypes, "always") &&
+                            !_.includes(siblingConnectionTypes, "success") &&
+                            !_.includes(siblingConnectionTypes, "failure")
+                        ) {
                             updateEdgeDropdownOptions(["always"]);
-                            edgeType = "always";
+                            edgeType = {label: "Always", value: "always"};
                         } else {
                             updateEdgeDropdownOptions();
                         }
 
                     }
                     $scope.edgeType = edgeType;
-                    // $scope.$broadcast("setEdgeType", edgeType);
                 }
                 else if($scope.nodeBeingEdited) {
                     let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({
@@ -912,12 +927,37 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                     switch($scope.nodeBeingEdited.edgeType) {
                        case "always":
                            $scope.edgeType = {label: "Always", value: "always"};
+                           if (
+                               _.includes(siblingConnectionTypes, "always") &&
+                               !_.includes(siblingConnectionTypes, "success") &&
+                               !_.includes(siblingConnectionTypes, "failure")
+                           ) {
+                               updateEdgeDropdownOptions(["always"]);
+                           } else {
+                               updateEdgeDropdownOptions();
+                           }
                            break;
                        case "success":
                            $scope.edgeType = {label: "On Success", value: "success"};
+                           if (
+                               (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) &&
+                               !_.includes(siblingConnectionTypes, "always")
+                           ) {
+                               updateEdgeDropdownOptions(["success", "failure"]);
+                           } else {
+                               updateEdgeDropdownOptions();
+                           }
                            break;
                        case "failure":
                            $scope.edgeType = {label: "On Failure", value: "failure"};
+                           if (
+                               (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) &&
+                               !_.includes(siblingConnectionTypes, "always")
+                           ) {
+                               updateEdgeDropdownOptions(["success", "failure"]);
+                           } else {
+                               updateEdgeDropdownOptions();
+                           }
                            break;
                    }
                 }
