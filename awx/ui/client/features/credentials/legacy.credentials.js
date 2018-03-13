@@ -238,7 +238,7 @@ function LegacyCredentialsService () {
                 value: {
                     page_size: 5,
                     order_by: 'name',
-                    role_level: 'admin_role'
+                    role_level: 'credential_admin_role'
                 },
                 dynamic: true,
                 squash: ''

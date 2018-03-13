@@ -20,6 +20,7 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
         hover: false,
         emptyListText: i18n.sprintf(i18n._("This list is populated by notification templates added from the %sNotifications%s section"), "&nbsp;<a ui-sref='notifications.add'>", "</a>&nbsp;"),
         basePath: 'notification_templates',
+        ngIf: 'current_user.is_superuser || isOrgAdmin',
         fields: {
             name: {
                 key: true,

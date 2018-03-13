@@ -43,10 +43,11 @@ function EditCredentialsController (models, $state, $scope, strings, componentsS
     }
 
     const isOrgAdmin = _.some(me.get('related.admin_of_organizations.results'), (org) => org.id === organization.get('id'));
+    const isOrgCredentialAdmin = organization.search({ role_level: 'credential_admin_role' }).then((data) => data);
     const isSuperuser = me.get('is_superuser');
     const isCurrentAuthor = Boolean(credential.get('summary_fields.created_by.id') === me.get('id'));
     vm.form.organization._disabled = true;
-    if (isSuperuser || isOrgAdmin || (credential.get('organization') === null && isCurrentAuthor)) {
+    if (isSuperuser || isOrgAdmin || isOrgCredentialAdmin || (credential.get('organization') === null && isCurrentAuthor)) {
         vm.form.organization._disabled = false;
     }
 
