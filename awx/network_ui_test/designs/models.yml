@@ -1,0 +1,168 @@
+app: awx.network_ui_test
+external_models: []
+models:
+- fields:
+  - name: client_id
+    pk: true
+    type: AutoField
+  name: Client
+  x: -518
+  y: 138
+- fields:
+  - name: fsm_trace_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: fsm_name
+    type: CharField
+  - len: 200
+    name: from_state
+    type: CharField
+  - len: 200
+    name: to_state
+    type: CharField
+  - len: 200
+    name: message_type
+    type: CharField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - default: 0
+    name: trace_session_id
+    type: IntegerField
+  - default: 0
+    name: order
+    type: IntegerField
+  name: FSMTrace
+  x: -872
+  y: 507
+- fields:
+  - name: event_trace_id
+    pk: true
+    type: AutoField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - default: 0
+    name: trace_session_id
+    type: IntegerField
+  - name: event_data
+    type: TextField
+  - name: message_id
+    type: IntegerField
+  name: EventTrace
+  x: -1087
+  y: 202
+- fields:
+  - name: coverage_id
+    pk: true
+    type: AutoField
+  - name: coverage_data
+    type: TextField
+  - name: test_result
+    ref: TestResult
+    ref_field: test_result_id
+    type: ForeignKey
+  name: Coverage
+  x: -1068
+  y: -4
+- fields:
+  - name: topology_snapshot_id
+    pk: true
+    type: AutoField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  - name: topology_id
+    type: IntegerField
+  - name: trace_session_id
+    type: IntegerField
+  - name: snapshot_data
+    ref: TopologySnapshot
+    ref_field: snapshot_data
+    type: TextField
+  - name: order
+    type: IntegerField
+  name: TopologySnapshot
+  x: -1123
+  y: -277
+- fields:
+  - name: test_case_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: name
+    ref: TestCase
+    ref_field: name
+    type: CharField
+  - name: test_case_data
+    type: TextField
+  name: TestCase
+  x: -1642
+  y: -38
+- fields:
+  - name: result_id
+    pk: true
+    type: AutoField
+  - len: 20
+    name: name
+    type: CharField
+  name: Result
+  x: -1610
+  y: 120
+- fields:
+  - name: code_under_test_id
+    pk: true
+    ref: CodeUnderTest
+    ref_field: code_under_test_id
+    type: AutoField
+  - name: version_x
+    type: IntegerField
+  - name: version_y
+    type: IntegerField
+  - name: version_z
+    type: IntegerField
+  - name: commits_since
+    type: IntegerField
+  - len: 40
+    name: commit_hash
+    type: CharField
+  name: CodeUnderTest
+  x: -1612
+  y: 259
+- fields:
+  - name: test_result_id
+    pk: true
+    type: AutoField
+  - name: test_case
+    ref: TestCase
+    ref_field: test_case_id
+    type: ForeignKey
+  - name: result
+    ref: Result
+    ref_field: result_id
+    type: ForeignKey
+  - name: code_under_test
+    ref: CodeUnderTest
+    ref_field: code_under_test_id
+    type: ForeignKey
+  - name: time
+    type: DateTimeField
+  - default: 0
+    name: id
+    type: IntegerField
+  - name: client
+    ref: Client
+    ref_field: client_id
+    type: ForeignKey
+  name: TestResult
+  x: -1336
+  y: -49
+modules: []
+view:
+  panX: 213.729555519212
+  panY: 189.446959094643
+  scaleXY: 0.69
