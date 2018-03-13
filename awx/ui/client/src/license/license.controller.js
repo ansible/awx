@@ -9,9 +9,9 @@ import {N_} from "../i18n";
 export default
     ['Wait', '$state', '$scope', '$rootScope',
     'ProcessErrors', 'CheckLicense', 'moment','$window',
-    'ConfigService', 'FeaturesService', 'pendoService', 'i18n', 'config',
+    'ConfigService', 'FeaturesService', 'pendoService', 'i18n', 'config', 'Rest', 'GetBasePath',
     function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment,
-    $window, ConfigService, FeaturesService, pendoService, i18n, config) {
+    $window, ConfigService, FeaturesService, pendoService, i18n, config, Rest, GetBasePath) {
 
         const calcDaysRemaining = function(seconds) {
       	 		// calculate the number of days remaining on the license
@@ -43,7 +43,7 @@ export default
             if ($rootScope.licenseMissing) {
                 $scope.title = $rootScope.BRAND_NAME + i18n._(" License");
             } else {
-                $scope.title = i18n._("License Management")
+                $scope.title = i18n._("License Management");
             }
 
             $scope.license = config;
@@ -55,7 +55,19 @@ export default
             $scope.compliant = $scope.license.license_info.compliant;
             $scope.newLicense = {};
 
-            $scope.newLicense.pendo = true;
+            Rest.setUrl(`${GetBasePath('settings')}ui`);
+            Rest.get()
+                .then(({data}) => {
+                    if (data.PENDO_TRACKING_STATE === 'off' && !$rootScope.licenseMissing) {
+                        $scope.newLicense.pendo = false;
+                    } else {
+                        $scope.newLicense.pendo = true;
+                    }
+                })
+                .catch(() => {
+                    // default pendo tracking to true when settings is not accessible
+                    $scope.newLicense.pendo = true;
+                });
         };
 
         init(config);
