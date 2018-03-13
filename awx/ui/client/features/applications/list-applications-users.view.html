@@ -1,0 +1,40 @@
+<div class="at-List-toolbar">
+    <smart-search
+        class="at-List-search"
+        django-model="users"
+        base-path="users"
+        iterator="user"
+        list="list"
+        dataset="user_dataset"
+        collection="collection"
+        search-tags="searchTags">
+    </smart-search>
+</div>
+
+<at-list results="users">
+    <at-row ng-repeat="user in users">
+        <div class="at-Row-items">
+            <at-row-item
+                header-value="{{ user.summary_fields.user.username }}"
+                header-link="/#/users/{{ user.summary_fields.user.id }}">
+            </at-row-item>
+            <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION') }}"
+                value="{{ user.description }}">
+            </at-row-item>
+            <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION') }}"
+                value="{{ user.summary_fields.organization.name }}"
+                value-link="/#/organizations/{{ user.summary_fields.organization.id }}">
+            </at-row-item>
+            <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_EXPIRED') }}"
+                value="{{ user.expriation | longDate }}">
+            </at-row-item>
+            <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
+                value="{{ vm.getLastUsed(user) }}">
+            </at-row-item>
+        </div>
+    </at-row>
+</at-list>

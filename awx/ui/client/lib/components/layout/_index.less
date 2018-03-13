@@ -110,6 +110,10 @@
                     padding: @at-padding-side-nav-item-icon;
                 }
 
+                i.fa-cubes {
+                    margin-left: -4px;
+                }
+
                 &:hover,
                 &.is-active {
                     background: @at-color-side-nav-item-background-hover;
@@ -119,12 +123,16 @@
                         color: @at-color-side-nav-content;
                         margin-left: @at-highlight-left-border-margin-makeup;
                     }
+
+                    i.fa-cubes {
+                        margin-left: -9px;
+                    }
                 }
         }
 
         .at-Layout-sideNavSpacer {
             background: inherit;
-            height: @at-height-side-nav-spacer;
+            height: 5px;
         }
 
         &--expanded {

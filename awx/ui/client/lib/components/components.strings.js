@@ -73,6 +73,7 @@ function ComponentsStrings (BaseString) {
         MANAGEMENT_JOBS: t.s('Management Jobs'),
         INSTANCES: t.s('Instances'),
         INSTANCE_GROUPS: t.s('Instance Groups'),
+        APPLICATIONS: t.s('Applications'),
         SETTINGS: t.s('Settings'),
         FOOTER_ABOUT: t.s('About'),
         FOOTER_COPYRIGHT: t.s('Copyright © 2017 Red Hat, Inc.')

@@ -1,0 +1,29 @@
+<at-panel>
+    <at-panel-heading>
+        {{ vm.panelTitle }}
+    </at-panel-heading>
+
+    <at-tab-group>
+        <at-tab state="vm.tab.details">{{:: vm.strings.get('tab.DETAILS') }}</at-tab>
+        <at-tab state="vm.tab.users">{{:: vm.strings.get('tab.USERS') }}</at-tab>
+    </at-tab-group>
+
+    <at-panel-body ng-if="!$state.current.name.includes('users')">
+        <at-form state="vm.form" autocomplete="off">
+            <at-input-text col="4" tab="1" state="vm.form.name"></at-input-text>
+            <at-input-text col="4" tab="2" state="vm.form.description"></at-input-text>
+            <at-input-lookup col="4" tab="3" state="vm.form.organization"></at-input-lookup>
+            <at-divider></at-divider>
+            <at-input-text col="4" tab="4" state="vm.form.redirect_uris"></at-input-text>
+
+            <at-action-group col="12" pos="right">
+                <at-form-action type="cancel" to="applications"></at-form-action>
+                <at-form-action type="save"></at-form-action>
+            </at-action-group>
+        </at-form>
+    </at-panel-body>
+
+    <at-panel-body ng-if="$state.current.name.includes('users')">
+        <div ui-view="userList"></div>
+    </at-panel-body>
+</at-panel>

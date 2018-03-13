@@ -1,0 +1,69 @@
+<at-panel>
+    <at-panel-heading hide-dismiss="true">
+        APPLICATIONS
+        <span class="badge List-titleBadge">
+            {{ vm.applicationsCount }}
+        </span>
+    </at-panel-heading>
+
+    <at-panel-body>
+        <div class="at-List-toolbar">
+            <smart-search
+                class="at-List-search"
+                django-model="applications"
+                base-path="applications"
+                iterator="application"
+                list="list"
+                dataset="application_dataset"
+                collection="collection"
+                search-tags="searchTags">
+            </smart-search>
+            <div class="at-List-toolbarAction">
+                <button
+                    type="button"
+                    ui-sref="applications.add"
+                    class="at-Button--add"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                </button>
+            </div>
+        </div>
+
+        <at-list results="applications">
+            <at-row ng-repeat="application in applications"
+                ng-class="{'at-Row--active': (application.id === vm.activeId)}">
+                <div class="at-Row-items">
+                    <at-row-item
+                        header-value="{{ application.name }}"
+                        header-link="/#/applications/{{ application.id }}">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION') }}"
+                        value="{{ application.summary_fields.organization.name }}"
+                        value-link="/#/organizations/{{ application.summary_fields.organization.id }}">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
+                        value="{{ vm.getModified(application) }}">
+                    </at-row-item>
+                </div>
+                <div class="at-Row-actions">
+                    <!-- TODO: delete application should be based on user capabilities but that's not
+                    implemented in the api yet -->
+                    <at-row-action icon="fa-trash" ng-click="vm.deleteApplication(application)">
+                    </at-row-action>
+                    <!-- <at-row-action icon="fa-trash" ng-click="vm.deleteApplication(application)"
+                        ng-show="application.summary_fields.user_capabilities.delete">
+                    </at-row-action> -->
+                </div>
+            </at-row>
+        </at-list>
+    </at-panel-body>
+    <paginate
+        base-path="applications"
+        iterator="application"
+        dataset="application_dataset"
+        collection="applications"
+        query-set="application_queryset">
+    </paginate>
+</at-panel>
