@@ -181,12 +181,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             return super(UnifiedJobTemplate, self).unique_error_message(model_class, unique_check)
 
     @classmethod
-    def invalid_user_capabilities_prefetch_models(cls):
-        if cls != UnifiedJobTemplate:
-            return []
-        return ['project', 'inventorysource', 'systemjobtemplate']
-
-    @classmethod
     def _submodels_with_roles(cls):
         ujt_classes = [c for c in cls.__subclasses__()
                        if c._meta.model_name not in ['inventorysource', 'systemjobtemplate']]
