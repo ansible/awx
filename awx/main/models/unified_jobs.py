@@ -1364,6 +1364,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             for name in ('awx', 'tower'):
                 r['{}_user_id'.format(name)] = self.created_by.pk
                 r['{}_user_name'.format(name)] = self.created_by.username
+                r['{}_user_email'.format(name)] = self.created_by.email
+                r['{}_user_first_name'.format(name)] = self.created_by.first_name
+                r['{}_user_last_name'.format(name)] = self.created_by.last_name
         else:
             wj = self.get_workflow_job()
             if wj:
