@@ -1,4 +1,5 @@
 const ELEMENT_CONTAINER = '.at-Stdout-container';
+const ELEMENT_TBODY = '#atStdoutResultTable';
 const DELAY = 100;
 const THRESHOLD = 0.1;
 
@@ -158,6 +159,7 @@ function JobScrollService ($q, $timeout) {
     };
 
     this.isLocked = () => this.state.locked;
+    this.isMissing = () => $(ELEMENT_TBODY)[0].clientHeight < this.getViewableHeight();
 }
 
 JobScrollService.$inject = ['$q', '$timeout'];

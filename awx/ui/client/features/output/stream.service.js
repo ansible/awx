@@ -27,6 +27,14 @@ function JobStreamService ($q) {
             listen
         };
 
+        this.lines = {
+            used: [],
+            missing: [],
+            ready: false,
+            min: 0,
+            max: 0
+        };
+
         this.hooks.listen(resource.ws.namespace, this.listen);
     };
 
@@ -72,6 +80,31 @@ function JobStreamService ($q) {
         }
     };
 
+    this.checkLines = data => {
+        for (let i = data.start_line; i < data.end_line; i++) {
+            if (i > this.lines.max) {
+                this.lines.max = i;
+            }
+
+            this.lines.used.push(i);
+        }
+
+        let missing = [];
+        for (let i = this.lines.min; i < this.lines.max; i++) {
+            if (this.lines.used.indexOf(i) === -1) {
+                missing.push(i);
+            }
+        }
+
+        if (missing.length === 0) {
+            this.lines.ready = true;
+            this.lines.min = this.lines.max + 1;
+            this.lines.used = [];
+        } else {
+            this.lines.ready = false;
+        }
+    };
+
     this.listen = data => {
         this.lag++;
 
@@ -87,10 +120,11 @@ function JobStreamService ($q) {
                     }
                 }
 
+                this.checkLines(data);
                 this.buffer(data);
                 this.count++;
 
-                if (this.isPaused() || !this.isBatchFull()) {
+                if (!this.isReadyToRender()) {
                     return $q.resolve();
                 }
 
@@ -166,6 +200,9 @@ function JobStreamService ($q) {
         this.state.ending = true;
     };
 
+    this.isReadyToRender = () => this.isEnding() ||
+        (!this.isPaused() && this.hasAllLines() && this.isBatchFull());
+    this.hasAllLines = () => this.lines.ready;
     this.isBatchFull = () => this.count % this.framesPerRender === 0;
     this.isPaused = () => this.state.paused;
     this.isPausing = () => this.state.pausing;

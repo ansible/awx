@@ -13,8 +13,8 @@ const Template = require('~features/output/index.view.html');
 
 const MODULE_NAME = 'at.features.output';
 const PAGE_CACHE = true;
-const PAGE_LIMIT = 3;
-const PAGE_SIZE = 100;
+const PAGE_LIMIT = 5;
+const PAGE_SIZE = 50;
 const WS_PREFIX = 'ws';
 
 function resolveResource (

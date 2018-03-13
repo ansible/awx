@@ -114,7 +114,12 @@ function next () {
             }
 
             return shift()
-                .then(() => append(events));
+                .then(() => append(events))
+                .then(() => {
+                    if(scroll.isMissing()) {
+                        return next();
+                    }
+                });
         });
 }
 
@@ -193,6 +198,11 @@ function scrollHome () {
                 .then(() => {
                     scroll.resetScrollPosition();
                     scroll.resume();
+                })
+                .then(() => {
+                    if(scroll.isMissing()) {
+                        return next();
+                    }
                 });
         });
 }
