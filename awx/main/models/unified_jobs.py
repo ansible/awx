@@ -924,7 +924,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return self.event_class.objects.filter(**{self.event_parent_key: self.id})
 
     @property
-    def events_processed(self):
+    def event_processing_finished(self):
         '''
         Returns True / False, whether all events from job have been saved
         '''
