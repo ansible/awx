@@ -23,6 +23,7 @@ This document provides a guide for installing AWX.
 - [Kubernetes](#kubernetes)
   - [Prerequisites](#prerequisites-2)
   - [Pre-build steps](#pre-build-steps-1)
+  - [Configuring Helm](#configuring-helm)
   - [Start the build](#start-the-build-1)
   - [Accessing AWX](#accessing-awx-1)
   - [SSL Termination](#ssl-termination)
@@ -303,6 +304,12 @@ Before starting the build process, review the [inventory](./installer/inventory)
 *docker_registry_*
 
 > These settings should be used if building your own base images. You'll need access to an external registry and are responsible for making sure your kube cluster can talk to it and use it. If these are undefined and the dockerhub_ configuration settings are uncommented then the images will be pulled from dockerhub instead
+
+### Configuring Helm
+
+If you want the AWX installer to manage creating the database pod (rather than installing and configuring postgres on your own). Then you will need to have a working `helm` installation, you can find details here: [https://docs.helm.sh/using_helm/#quickstart-guide](https://docs.helm.sh/using_helm/#quickstart-guide).
+
+Newer Kubernetes clusters with RBAC enabled will need to make sure a service account is created, make sure to follow the instructions here [https://docs.helm.sh/using_helm/#role-based-access-control](https://docs.helm.sh/using_helm/#role-based-access-control)
 
 ### Start the build
 
