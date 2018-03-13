@@ -258,6 +258,24 @@ Key events are captured by the following code:
     $document.bind("keydown", $scope.onKeyDown);
 ```
 
+**Event Processing**
+
+This code works as an event processing pipeline where the source of the events
+may be mouse clicks, keystrokes, or messages from the server over the
+websocket.  This allows the appropriate processor to handle each event in turn
+or delegate the message to another processor.
+
+The following diagram documents the pipeline processors that handle the events.
+Events are injected into to the pipeline at `Start` and travel through the
+pipeline along the arrows. Events may be handled at a node in the pipeline,
+passed along to the next node, discarded, or transformed into another message
+and sent along the pipeline.  For instance `hotkeys_fsm` generates new and
+different type of events based on key presses that are injected at the
+beginning of the pipeline.
+
+![Event Pipeline](designs/pipeline.png)
+
+
 **Describing Behavior with Finite State Machines**
 
 To implement complex UI interactions predictably and correctly is a tough
@@ -555,35 +573,6 @@ The messages defined are [messages.js](messages.js):
 * StreamLabelEdit - The label of a stream was changed
 * StreamSelected - A stream was selected
 * StreamUnSelected - A stream was unselected
-
-**Message Passing**
-
-Messages are passed along channels between FSMs and over the websocket to and
-from the server. Messages from the server over the web socket and user input
-events from the web browser are passed to the `first_channel` where they are
-passed along the chain of FSMControllers until they reach the end with
-`NullChannel` or they are handled and the models are updated.
-
-* See: [network.ui.controller.js](network.ui.controller.js#L115)
-
-The order (from first to last) of message handling is:
-
-* Mode FSM
-* Site Toolbox FSM
-* Rack Toolbox FSM
-* Inventory Toolbox FSM
-* App Toolbox FSM
-* Time FSM
-* Buttons FSM
-* Site FSM
-* Rack FSM
-* Group FSM
-* Stream FSM
-* Link FSM
-* Move FSM
-* Device Detail FSM
-* View FSM
-* Null FSM
 
 
 Widget Development
