@@ -1,0 +1,18 @@
+messages:
+    - {msg_type: MultipleMessage, fields: [msg_type, sender, messages]}
+    - {msg_type: MouseEvent, fields: [msg_type, sender, x, y, type, trace_id]}
+    - {msg_type: MouseWheelEvent, fields: [msg_type, sender, delta, deltaX, deltaY, type, originalEvent, trace_id]}
+    - {msg_type: KeyEvent, fields: [msg_type, sender, key, keyCode, type, altKey, shiftKey, ctrlKey, metaKey, trace_id]}
+    - {msg_type: StartRecording, fields: [msg_type, sender, trace_id]}
+    - {msg_type: StopRecording, fields: [msg_type, sender, trace_id]}
+    - {msg_type: ViewPort, fields: [msg_type, sender, scale, panX, panY, trace_id]}
+    - {msg_type: FSMTrace, fields: [msg_type, order, sender, trace_id, fsm_name, from_state, to_state, recv_message_type]}
+    - {msg_type: ChannelTrace, fields: [msg_type, sender, trace_id, from_fsm, to_fsm, sent_message_type]}
+    - {msg_type: Snapshot, fields: [msg_type, sender, devices, links, groups, streams, order, trace_id]}
+    - {msg_type: EnableTest, fields: [msg_type]}
+    - {msg_type: DisableTest, fields: [msg_type]}
+    - {msg_type: StartTest, fields: [msg_type]}
+    - {msg_type: TestCompleted, fields: [msg_type]}
+    - {msg_type: TestResult, fields: [msg_type, sender, id, name, result, date, code_under_test]}
+    - {msg_type: Coverage, fields: [msg_type, sender, coverage, result_id]}
+
