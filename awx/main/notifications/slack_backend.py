@@ -16,12 +16,11 @@ WEBSOCKET_TIMEOUT = 30
 class SlackBackend(AWXBaseEmailBackend):
 
     init_parameters = {"token": {"label": "Token", "type": "password"},
-                       "hex_color": {"label": "Notification Color", "type": "string"},
                        "channels": {"label": "Destination Channels", "type": "list"}}
     recipient_parameter = "channels"
     sender_parameter = None
 
-    def __init__(self, token, hex_color, fail_silently=False, **kwargs):
+    def __init__(self, token, hex_color="", fail_silently=False, **kwargs):
         super(SlackBackend, self).__init__(fail_silently=fail_silently)
         self.token = token
         self.color = None
