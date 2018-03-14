@@ -44,7 +44,7 @@ logger = logging.getLogger('awx.main.utils')
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize', 'memoize_delete',
            'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_version', 'update_scm_url',
-           'get_type_for_model', 'get_model_for_type', 'copy_model_by_class',
+           'get_type_for_model', 'get_model_for_type', 'copy_model_by_class', 'region_sorting',
            'copy_m2m_relationships', 'prefetch_page_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
@@ -95,6 +95,14 @@ def to_python_boolean(value, allow_none=False):
         return None
     else:
         raise ValueError(_(u'Unable to convert "%s" to boolean') % six.text_type(value))
+
+
+def region_sorting(region):
+        if region[1].lower() == 'all':
+            return -1
+        elif region[1].lower().startswith('us'):
+            return 0
+        return region[1]
 
 
 def camelcase_to_underscore(s):

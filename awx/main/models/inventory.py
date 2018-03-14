@@ -38,7 +38,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import _inventory_updates, get_ansible_version
+from awx.main.utils import _inventory_updates, get_ansible_version, region_sorting
 
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate',
@@ -1136,7 +1136,7 @@ class InventorySourceOptions(BaseModel):
                     label_parts.append(part)
                 label = ' '.join(label_parts)
             regions.append((region.name, label))
-        return regions
+        return sorted(regions, key=region_sorting)
 
     @classmethod
     def get_ec2_group_by_choices(cls):
@@ -1165,7 +1165,7 @@ class InventorySourceOptions(BaseModel):
         # authenticating first.  Therefore, use a list from settings.
         regions = list(getattr(settings, 'GCE_REGION_CHOICES', []))
         regions.insert(0, ('all', 'All'))
-        return regions
+        return sorted(regions, key=region_sorting)
 
     @classmethod
     def get_azure_rm_region_choices(self):
@@ -1178,7 +1178,7 @@ class InventorySourceOptions(BaseModel):
         # settings.
         regions = list(getattr(settings, 'AZURE_RM_REGION_CHOICES', []))
         regions.insert(0, ('all', 'All'))
-        return regions
+        return sorted(regions, key=region_sorting)
 
     @classmethod
     def get_vmware_region_choices(self):
