@@ -93,6 +93,12 @@ class TestMetaVars:
             'awx_job_launch_type': 'manual',
             'awx_user_name': 'joe',
             'tower_user_name': 'joe',
+            'awx_user_email': '',
+            'tower_user_email': '',
+            'awx_user_first_name': '',
+            'tower_user_first_name': '',
+            'awx_user_last_name': '',
+            'tower_user_last_name': '',
             'awx_user_id': 47,
             'tower_user_id': 47
         }
