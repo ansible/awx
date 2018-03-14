@@ -42,7 +42,7 @@ python-dateutil==2.7.0  # contains support for TZINFO= parsing
 python-logstash==0.4.6
 python-memcached==1.59
 python-radius==1.0
-python-saml==2.2.2      # pinned due to open issue awx/issues/1421
+python-saml==2.4.0
 social-auth-core==1.7.0
 social-auth-app-django==2.1.0
 pyvmomi==6.5
