@@ -54,14 +54,14 @@ of on-screen elements.
 
 AngularJS directives are used in the networking UI application using the element
 matching style and the `templateUrl` option to include a template. A majority of
-the directives are defined in `src/network.ui.app.js`.
+the directives are defined in `network.ui.app.js`.
 
-* See: [src/network.ui.app.js](src/network.ui.app.js)
+* See: [network.ui.app.js](network.ui.app.js)
 ```
     .directive('awxNetDeviceDetail', deviceDetail.deviceDetail)
 ```
 
-* See: [src/device.detail.directive.js](src/device.detail.directive.js)
+* See: [device.detail.directive.js](device.detail.directive.js)
 ```
 function deviceDetail () {
   return { restrict: 'A', templateUrl: '/static/network_ui/widgets/device_detail.html' };
@@ -77,19 +77,19 @@ The templates can be found in `/widgets`. Child
 scopes are created for sub-templates using the `ng-repeat` directive.
 
 In this example the `awx-net-link` directive expects a Link model to be
-passed to it.  The Link model is defined in the `src/models.js` file.
+passed to it.  The Link model is defined in the `models.js` file.
 
-* See: [src/link.directive.js](src/link.directive.js)
-* See: [widgets/link.html](widgets/link.html)
+* See: [link.directive.js](link.directive.js)
+* See: [link.partial.svg](link.partial.svg)
 
-* See: [widgets/network_ui.html](widgets/network_ui.html)
+* See: [network_ui.html](network_ui.partial.svg)
 ```
     <g ng-repeat="link in links">
     <g awx-net-link></g>
     </g>
 ```
 
-* See: [src/models.js](src/models.js)
+* See: [models.js](models.js)
 ```
 function Link(id, from_device, to_device, from_interface, to_interface) {
     this.id = id;
@@ -108,7 +108,7 @@ function Link(id, from_device, to_device, from_interface, to_interface) {
 The following example sets the toolbox.selected_item value to the variable 
 item which the directives used in the child scope expect to be set.
 
-* See: [widgets/inventory_toolbox.html](widgets/inventory_toolbox.html)
+* See: [inventory_toolbox.html](inventory_toolbox.partial.svg)
 ```
 <g ng-repeat="item in [toolbox.selected_item]">
 ```
@@ -133,7 +133,7 @@ positioned within the outer most SVG element.  The browser is not involved with
 layout of the elements within the SVG.   Each "widget" in the network UI needs
 to track or calculate its own position on the SVG canvas. The z-level of the
 elements are determined by the draw order on the canvas which is defined
-in `widgets/network_ui.html`.  Elements drawn first will be hidden behind
+in `network_ui.partial.svg`.  Elements drawn first will be hidden behind
 elements drawn later.
 
 
@@ -212,7 +212,7 @@ to define the width of lines and curves. The attributes `font-family` and `font-
 are used to set the font for text elements in SVG.  The network UI uses the Less
 CSS compiler and BEM naming conventions to simplify and organize CSS.
 
-* See: [src/style.less](src/style.less)
+* See: [style.less](style.less)
 * See: <http://lesscss.org/>
 * See: <http://getbem.com/introduction/>
 
@@ -230,7 +230,7 @@ to the appropriate object.
 The following code captures all the mouse movements, mouse clicks, mouse wheel,
 and touch events and sends them to the corresponding network UI controller functions.
 
-* See: [widgets/network_ui.html](widgets/network_ui.html#L3)
+* See: [network_ui.partial.svg](network_ui.partial.svg#L3)
 
 ```
     <svg id="frame" class="NetworkUI"
@@ -252,7 +252,7 @@ and touch events and sends them to the corresponding network UI controller funct
 
 Key events are captured by the following code:
 
-* See: [src/network.ui.controller.js](src/network.ui.controller.js)
+* See: [network.ui.controller.js](network.ui.controller.js)
 
 ```
     $document.bind("keydown", $scope.onKeyDown);
@@ -305,10 +305,10 @@ the connecting operation.   Finally in the `Connected` state the FSM changes to 
 for free using the `start` event so that the user can connect another set of devices.
 
 * See: [designs/link.yml](designs/link.yml)
-* See: [src/link.js](src/link.js)
+* See: [link.js](link.js)
 
 The link FSM diagram has an equivalent machine readable representation in `designs/link.yml`. This
-representation is useful for comparing the current implementation in `src/link.js` to the design to see if they
+representation is useful for comparing the current implementation in `link.js` to the design to see if they
 are out-of-sync.  If they are out-of-sync either the design or the implementation can be updated depending
 on if you are changing the design or implementation first.
 
@@ -327,7 +327,7 @@ the system and what that event handler should do.
 Use `tools/fsm_generate_diffs.py` to generate the new skeleton code:
 
 ```
-    ./tools/fsm_generate_diffs.py designs/link.yml ./src/link.js
+    ./tools/fsm_generate_diffs.py designs/link.yml ./link.js
 ```
 
 This will print out code for additional states or transitions needed in the implementation.
@@ -350,7 +350,7 @@ Use `./extract.js` and `tools/fsm-diff` to compare the implementation to the des
 and add any additional transitions to the FSM design.
 
 ```
-    ./extract.js ./src/link.js > ./extracted/link.yml
+    ./extract.js link.js > ./extracted/link.yml
     ./tools/fsm-diff designs/link.yml extracted/link.yml
 ```
 
@@ -383,10 +383,10 @@ flyweight and singleton patterns. This means that the state objects store no
 information on themselves and that there is only one instance of each state
 class.  All states should provide a `start` and `end` function which will be
 called when a FSM state is entered and exited respectively. Subclassing
-[fsm.State](src/fsm.js#L36) will provide empty `start` and `end` functions that
+[fsm.State](fsm.js#L36) will provide empty `start` and `end` functions that
 can be overridden as necessary.
 
-* See: [src/fsm.js](src/fsm.js#L2)
+* See: [fsm.js](fsm.js#L2)
 
 The state variable is stored on another object called an FSMController (which
 should not be confused with an AngularJS controller). The FSMController holds
@@ -400,7 +400,7 @@ in the event handlers. In the network UI often the `scope` is a reference
 to the network UI AngularJS controller's scope. In the case of a button
 the scope is a reference to the `Button` model.
 
-* See: [src/models.js](src/models.js#302)
+* See: [models.js](models.js#302)
 
 The following code creates a new instance of `FSMController` using the
 `Button` model as the scope and the `button.Start` state as the initial
@@ -410,7 +410,7 @@ state.
     this.fsm = new fsm.FSMController(this, button.Start, null);
 ```
 
-* See: [src/link.js](src/link.js#L40)
+* See: [link.js](link.js#L40)
 
 This code block defines the `_Selecting` class in ES5 style and uses the
 `inherits` NPM module to define that the class is a subclass of `_State`.  We
@@ -430,7 +430,7 @@ also create a single instance (a singleton) of this class named `Selecting`.
 After all the states are defined the event handlers for those state classes can be defined.
 We do this to prevent forward references in the file.
 
-* See: [src/link.js](src/link.js#L134)
+* See: [link.js](link.js#L134)
 
 In this code we define an event handler for the `MouseUp` event on the `Selecting` state. This
 code should select a single device if the mouse is over that device.  It should store
@@ -478,9 +478,9 @@ the system to another.  Models may be unpacked or serialized into messages that
 are sent to other FSMControllers in the client or sent over a websocket to the
 server.
 
-* See: [src/models.js](src/models.js)
+* See: [models.js](models.js)
 
-The models defined in [src/models.js](src/models.js) are:
+The models defined in [models.js](models.js) are:
 
 * Device - a networking device i.e. a router, a switch, or a host
 * Interface - a networking interface
@@ -501,9 +501,9 @@ Message types define the structure of the data that is passed between the server
 and the client and between different parts of the client. This provides a known and
 well defined data structure that can be counted up on the code.
 
-* See: [src/messages.js](src/messages.js)
+* See: [messages.js](messages.js)
 
-The messages defined are [src/messages.js](src/messages.js):
+The messages defined are [messages.js](messages.js):
 
 * DeviceMove - Device has changed x,y position
 * DeviceCreate - A device was created
@@ -564,7 +564,7 @@ events from the web browser are passed to the `first_channel` where they are
 passed along the chain of FSMControllers until they reach the end with
 `NullChannel` or they are handled and the models are updated.
 
-* See: [src/network.ui.controller.js](src/network.ui.controller.js#L115)
+* See: [network.ui.controller.js](network.ui.controller.js#L115)
 
 The order (from first to last) of message handling is:
 
@@ -616,7 +616,7 @@ For a widget named `new widget` do this:
 
 This example follows development of the inventory toolbox widget.
 
-* Add a template in `widgets` for the new widget with name [widgets/inventory_toolbox.html](widgets/inventory_toolbox.html)
+* Add a template in `widgets` for the new widget with name [inventory_toolbox.partial.svg](inventory_toolbox.partial.svg)
 
 ```
     <!-- Copyright (c) 2017 Red Hat, Inc. -->
@@ -632,7 +632,7 @@ This example follows development of the inventory toolbox widget.
     </g> <!-- ng-if toolbox.enabled -->
 ```
 
-* Add a directive that loads that template in `src` with name [src/inventory.toolbox.directive.js](src/inventory.toolbox.directive.js)
+* Add a directive that loads that template in `src/network-ui` with name [inventory.toolbox.directive.js](inventory.toolbox.directive.js)
 
 ```
     /* Copyright (c) 2017 Red Hat, Inc. */
@@ -644,7 +644,7 @@ This example follows development of the inventory toolbox widget.
 ```
 
 
-* Register the directive with the network UI application in [src/network.ui.app.js](src/network.ui.app.js#L61) using name `awxNetInventoryToolbox`
+* Register the directive with the network UI application in [network.ui.app.js](network.ui.app.js#L61) using name `awxNetInventoryToolbox`
 
 ```
 ...
@@ -654,7 +654,7 @@ This example follows development of the inventory toolbox widget.
 ...
 ```
 
-* Add a tag that loads the directive into an existing template in `widgets` in [widgets/network_ui.html](widgets/network_ui.html#L94)
+* Add a tag that loads the directive into an existing template in `src/network-ui` in [network_ui.partial.svg](network_ui.partial.svg#L94)
 
 ```
         <g awx-net-inventory-toolbox></g>
@@ -733,10 +733,10 @@ This example follows development of the inventory toolbox widget.
       to_state: Dropping
 ```
 
-* Create a new empty FSM implementation file in `src` named `src/toolbox.fsm.js`
+* Create a new empty FSM implementation file in `src/network-ui` named `toolbox.fsm.js`
 
 ```
-    touch src/toolbox.fsm.js
+    touch toolbox.fsm.js
 ```
 
 * Use the `./tools/fsm_generate_diffs.py` tool to generate the skeleton for the new FSM implementation
@@ -938,7 +938,7 @@ This example follows development of the inventory toolbox widget.
 ```
 
 * Decide if you need any new messages to communicate between the UI and the server or between pieces of the UI.
-  If so, add them to [src/messages.js](src/messages.js#L251)
+  If so, add them to [messages.js](messages.js#L251)
 
 ```
     function PasteDevice(device) {
@@ -949,9 +949,9 @@ This example follows development of the inventory toolbox widget.
 
 * Write the logic in the event handlers to update the models, send any messages, and change states according to the design.
 
-See: [src/toolbox.fsm.js](src/toolbox.fsm.js)
+See: [toolbox.fsm.js](toolbox.fsm.js)
 
-* Add the FSM implementation to a FSMController in [src/network.ui.controller.js](src/network.ui.controller.js#L145)
+* Add the FSM implementation to a FSMController in [network.ui.controller.js](network.ui.controller.js#L145)
 
 ```
     $scope.inventory_toolbox_controller = new fsm.FSMController($scope, toolbox_fsm.Start, $scope.app_toolbox_controller);
