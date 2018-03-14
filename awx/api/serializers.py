@@ -428,7 +428,7 @@ class BaseSerializer(serializers.ModelSerializer):
                 if 'capability_map' not in self.context:
                     if hasattr(self, 'polymorphic_base'):
                         model = self.polymorphic_base.Meta.model
-                        prefetch_list = self.polymorphic_base.capabilities_prefetch
+                        prefetch_list = self.polymorphic_base._capabilities_prefetch
                     else:
                         model = self.Meta.model
                         prefetch_list = self.capabilities_prefetch
@@ -629,7 +629,8 @@ class BaseFactSerializer(BaseSerializer):
 
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
-    capabilities_prefetch = [
+    # As a base serializer, the capabilities prefetch is not used directly
+    _capabilities_prefetch = [
         'admin', 'execute',
         {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use',
                   'workflowjobtemplate.organization.workflow_admin']}
@@ -676,7 +677,9 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer.parent = self.parent
                 serializer.polymorphic_base = self
                 # capabilities prefetch is only valid for these models
-                if not isinstance(obj, (JobTemplate, WorkflowJobTemplate)):
+                if isinstance(obj, (JobTemplate, WorkflowJobTemplate)):
+                    serializer.capabilities_prefetch = self._capabilities_prefetch
+                else:
                     serializer.capabilities_prefetch = None
             return serializer.to_representation(obj)
         else:
@@ -1989,6 +1992,10 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
     show_capabilities = ['start', 'schedule', 'edit', 'delete']
+    capabilities_prefetch = [
+        {'admin': 'inventory.admin'},
+        {'start': 'inventory.update'}
+    ]
     group = serializers.SerializerMethodField(
         help_text=_('Automatic group relationship, will be removed in 3.3'))
 
