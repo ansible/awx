@@ -72,12 +72,13 @@ function JobsIndexController (
 
 function init (pageMode) {
     page.init({
-        resource
+        resource,
     });
 
     render.init({
         get: () => resource.model.get(`related.${resource.related}.results`),
-        compile: html => $compile(html)($scope)
+        compile: html => $compile(html)($scope),
+        isStreamActive: stream.isActive
     });
 
     scroll.init({

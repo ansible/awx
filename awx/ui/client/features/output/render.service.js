@@ -22,11 +22,11 @@ const ansi = new Ansi();
 const entities = new Entities.AllHtmlEntities();
 
 function JobRenderService ($q, $sce, $window) {
-    this.init = ({ compile, apply, get }) => {
+    this.init = ({ compile, apply, isStreamActive }) => {
         this.parent = null;
         this.record = {};
         this.el = $(ELEMENT_TBODY);
-        this.hooks = { get, compile, apply };
+        this.hooks = { isStreamActive, compile, apply };
     };
 
     this.sortByLineNumber = (a, b) => {
@@ -155,7 +155,7 @@ function JobRenderService ($q, $sce, $window) {
         }
 
         if (current) {
-            if (current.isParent && current.line === ln) {
+            if (!this.hooks.isStreamActive() && current.isParent && current.line === ln) {
                 id = current.uuid;
                 tdToggle = `<td class="at-Stdout-toggle" ng-click="vm.toggle('${id}')"><i class="fa fa-angle-down can-toggle"></i></td>`;
             }

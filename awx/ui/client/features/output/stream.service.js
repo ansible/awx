@@ -110,7 +110,7 @@ function JobStreamService ($q) {
 
         this.chain = this.chain
             .then(() => {
-                if (data.event === JOB_START) {
+                if (!this.isActive()) {
                     this.start();
                 } else if (data.event === JOB_END) {
                     if (this.isPaused()) {
