@@ -21,7 +21,6 @@ services:
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
-    {% endif %}
     {% if ca_trust_dir is defined %}
       - "{{ ca_trust_dir +':/etc/pki/ca-trust:ro' }}"
     {% endif %}
@@ -80,7 +79,6 @@ services:
     {% endif %}
     {% if project_data_dir is defined %}
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
-    {% endif %}
     {% endif %}
     {% if ca_trust_dir is defined %}
       - "{{ ca_trust_dir +':/etc/pki/ca-trust:ro' }}"
