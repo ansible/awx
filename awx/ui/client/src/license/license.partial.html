@@ -122,6 +122,19 @@
 							</label>
 						</div>
 					</div>
+					<div class="form-group License-detailsGroup License-detailsGroup--withSeparator">
+						<div class="checkbox">
+							<label class="License-details--label">
+								<input type="checkbox" ng-model="newLicense.pendo" ng-disabled="!user_is_superuser" required>
+								<translate>By default, Tower collects and transmits analytics data on Tower usage to Red Hat. This data is used to enhance future releases of the Tower Software and help streamline customer experience and success. For more information, see
+										<a target="_blank"
+												href="http://docs.ansible.com/ansible-tower/latest/html/installandreference/user-data.html#index-0">
+												this Tower documentation page
+										</a>.  Uncheck this box to disable this feature.
+								</translate>
+							</label>
+						</div>
+					</div>
 					<div>
 						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null || !user_is_superuser" translate>Submit</button>
 						<span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>

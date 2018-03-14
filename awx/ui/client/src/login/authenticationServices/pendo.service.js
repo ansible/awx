@@ -5,87 +5,84 @@
 *************************************************/
 
 
-export default
-   [ '$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$q',
-        'ConfigService', '$log', 'AppStrings',
-   function ($rootScope, Rest, GetBasePath, ProcessErrors, $q,
-        ConfigService, $log, AppStrings) {
-       return {
+export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$q', 'ConfigService', '$log',
+    'AppStrings',
+    function ($rootScope, Rest, GetBasePath, ProcessErrors, $q, ConfigService, $log, AppStrings) {
+        return {
             setPendoOptions: function (config) {
-                var tower_version = config.version.split('-')[0],
-                trial = (config.trial) ? config.trial : false,
-                options = {
+                const tower_version = config.version.split('-')[0];
+                const trial = (config.trial) ? config.trial : false;
+                let options = {
                     apiKey: AppStrings.get('PENDO_API_KEY'),
                     visitor: {
-                      id: null,
-                      role: null,
+                        id: null,
+                        role: null,
                     },
                     account: {
-                      id: null,
-                      planLevel: config.license_type,
-                      planPrice: config.instance_count,
-                      creationDate: config.license_date,
-                      trial: trial,
-                      tower_version: tower_version,
-                      ansible_version: config.ansible_version
+                        id: null,
+                        planLevel: config.license_type,
+                        planPrice: config.instance_count,
+                        creationDate: config.license_date,
+                        trial: trial,
+                        tower_version: tower_version,
+                        ansible_version: config.ansible_version
                     }
                 };
-                if(config.analytics_status === 'detailed'){
+
+                if (config.analytics_status === 'detailed') {
                     this.setDetailed(options, config);
-                }
-                else if(config.analytics_status === 'anonymous'){
+                } else if (config.analytics_status === 'anonymous') {
                     this.setAnonymous(options);
                 }
-                return options;
 
+                return options;
             },
 
+            // Detailed mode sends:
+            // VisitorId: userid+hash of license_key
+            // AccountId: hash of license_key from license
             setDetailed: function(options, config) {
-                // Detailed mode
-                    // VisitorId: userid+hash of license_key
-                    // AccountId: hash of license_key from license
-
+                // config.deployment_id is a hash of the tower license_key
                 options.visitor.id = $rootScope.current_user.id + '@' + config.deployment_id;
                 options.account.id = config.deployment_id;
             },
 
+            // Anonymous mode sends:
+            // VisitorId: <hardcoded id that is the same across all anonymous>
+            // AccountId: <hardcoded id that is the same across all anonymous>
             setAnonymous: function (options) {
-                //Anonymous mode
-                    // VisitorId: <some hardcoded id that is the same across all anonymous>
-                    // AccountId: <some hardcoded id that is the same across all anonymous>
-
                 options.visitor.id = 0;
                 options.account.id = "tower.ansible.com";
             },
 
             setRole: function(options) {
-                var deferred = $q.defer();
-                if($rootScope.current_user.is_superuser === true){
+                const deferred = $q.defer();
+
+                if ($rootScope.current_user.is_superuser === true) {
                     options.visitor.role = 'admin';
                     deferred.resolve(options);
+                } else {
+                    Rest.setUrl(GetBasePath('users') + $rootScope.current_user.id +
+                        '/admin_of_organizations/');
+                    Rest.get()
+                        .then(function (response) {
+                            if (response.data.count > 0) {
+                                options.visitor.role = "orgadmin";
+                                deferred.resolve(options);
+                            } else {
+                                options.visitor.role = "user";
+                                deferred.resolve(options);
+                            }
+                        })
+                        .catch(function (response) {
+                            ProcessErrors($rootScope, response.data, response.status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get admin of org user list. GET returned status: ' +
+                                    response.status });
+                            deferred.reject('Could not resolve pendo role.');
+                        });
                 }
-                else{
-                    var url = GetBasePath('users') + $rootScope.current_user.id + '/admin_of_organizations/';
-                    Rest.setUrl(url);
-                    var promise = Rest.get();
-                    promise.then(function (response) {
-                        if(response.data.count > 0 ) {
-                            options.visitor.role = "orgadmin";
-                            deferred.resolve(options);
-                        }
-                        else {
-                            options.visitor.role = "user";
-                            deferred.resolve(options);
-                        }
-                    });
-                    promise.catch(function (response) {
-                        ProcessErrors($rootScope, response.data, response.status, null, {
-                            hdr: 'Error!',
-                            msg: 'Failed to get inventory name. GET returned status: ' +
-                            response.status });
-                        deferred.reject('Could not resolve pendo role.');
-                    });
-                }
+
                 return deferred.promise;
             },
 
@@ -100,31 +97,52 @@ export default
             },
 
             issuePendoIdentity: function () {
-                var options,
-                    c = ConfigService.get(),
-                    config = c.license_info;
+                const c = ConfigService.get();
+
+                let options;
+                let config = c.license_info;
 
                 config.analytics_status = c.analytics_status;
                 config.version = c.version;
                 config.ansible_version = c.ansible_version;
-                if(config.analytics_status === 'detailed' || config.analytics_status === 'anonymous'){
-                    this.bootstrap();
-                    options = this.setPendoOptions(config);
-                    this.setRole(options).then(function(options){
-                        $log.debug('Pendo status is '+ config.analytics_status + '. Object below:');
-                        $log.debug(options);
-                        /* jshint ignore:start */
-                        pendo.initialize(options);
-                        /* jshint ignore:end */
-                    }, function(reason){
-                        // reject function for setRole
-                        $log.debug(reason);
-                    });
-                }
-                else {
+
+                if (config.analytics_status === 'detailed' ||
+                    config.analytics_status === 'anonymous') {
+                        this.bootstrap();
+                        options = this.setPendoOptions(config);
+                        this.setRole(options)
+                            .then(function(options){
+                                $log.debug('Pendo status is '+ config.analytics_status +
+                                    '. Object below:');
+                                $log.debug(options);
+
+                                /* jshint ignore:start */
+                                pendo.initialize(options);
+                                /* jshint ignore:end */
+                            }, function(reason){
+                                // reject function for setRole
+                                $log.debug(reason);
+                            });
+                } else {
                     $log.debug('Pendo is turned off.');
                 }
-             }
+            },
+
+            updatePendoTrackingState: function(tracking_type) {
+                if (tracking_type === 'off' || tracking_type === 'anonymous' ||
+                    tracking_type === 'detailed') {
+                        Rest.setUrl(`${GetBasePath('settings')}ui`);
+                        Rest.patch({ PENDO_TRACKING_STATE: tracking_type })
+                            .catch(function ({data, status}) {
+                                ProcessErrors($rootScope, data, status, null, {
+                                    hdr: 'Error!',
+                                    msg: 'Failed to patch PENDO_TRACKING_STATE in settings: ' +
+                                        status });
+                            });
+                } else {
+                    throw new Error(`Can't update pendo tracking state in settings to
+                        "${tracking_type}"`);
+                }
+          }
         };
-   }
-];
+    }];
