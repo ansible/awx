@@ -910,7 +910,8 @@ class InventorySourceAccess(BaseAccess):
 
     model = InventorySource
     select_related = ('created_by', 'modified_by', 'inventory')
-    prefetch_related = ('credentials',)
+    prefetch_related = ('credentials__credential_type', 'last_job',
+                        'source_script', 'source_project')
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
