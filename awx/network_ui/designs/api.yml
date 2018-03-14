@@ -1,7 +1,6 @@
 models:
 - name: Device
   api: true
-  v1_end_point: /network_ui/api/v1/device/
   v2_end_point: /api/v2/canvas/device/
   topology_id_query: topology_id
   v2_lookup_field: host_id
@@ -17,7 +16,6 @@ models:
       topology_id: topology_id
 - name: Link
   api: true
-  v1_end_point: /network_ui/api/v1/link/
   v2_end_point: /api/v2/canvas/link/
   topology_id_query: from_device__topology_id
   create_transform:
@@ -29,7 +27,6 @@ models:
       to_interface__id: to_interface_id
 - name: Interface
   api: true
-  v1_end_point: /network_ui/api/v1/interface/
   v2_end_point: /api/v2/canvas/interface/
   topology_id_query: device__topology_id
   create_transform:
@@ -38,39 +35,31 @@ models:
       device__id: device_id
 - name: Group
   api: true
-  v1_end_point: /network_ui/api/v1/group/
   v2_end_point: /api/v2/canvas/group/
   topology_id_query: topology_id
 - name: GroupDevice
   api: true
-  v1_end_point: /network_ui/api/v1/groupdevice/
   v2_end_point: /api/v2/canvas/groupdevice/
   topology_id_query: group__topology_id
 - name: Topology
   api: true
-  v1_end_point: /network_ui/api/v1/topology/
   v2_end_point: /api/v2/canvas/topology/
   topology_id_query: topology_id
 - name: TopologyInventory
   api: true
-  v1_end_point: /network_ui/api/v1/topologyinventory/
   v2_end_point: /api/v2/canvas/topologyinventory/
   topology_id_query: topology_id
 - name: Toolbox
   api: true
-  v1_end_point: /network_ui/api/v1/toolbox/
   v2_end_point: /api/v2/canvas/toolbox/
 - name: ToolboxItem
   api: true
-  v1_end_point: /network_ui/api/v1/toolboxitem/
   v2_end_point: /api/v2/canvas/toolboxitem/
 - name: Stream
   api: true
-  v1_end_point: /network_ui/api/v1/stream/
   v2_end_point: /api/v2/canvas/stream/
   topology_id_query: from_device__topology_id
 - name: Process
   api: true
-  v1_end_point: /network_ui/api/v1/process/
   v2_end_point: /api/v2/canvas/process/
   topology_id_query: device__topology_id
