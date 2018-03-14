@@ -35,7 +35,7 @@ from awx.main.models import (
 
 from awx.main import tasks
 from awx.main.queue import CallbackQueueDispatcher
-from awx.main.utils import encrypt_field, encrypt_value
+from awx.main.utils import encrypt_field, encrypt_value, OutputEventFilter
 
 
 
@@ -304,6 +304,15 @@ class TestGenericRun(TestJobExecution):
             mock.call(self.pk, status='canceled')
         ]:
             assert c in self.task.update_model.call_args_list
+
+    def test_event_count(self):
+        with mock.patch.object(self.task, 'get_stdout_handle') as mock_stdout:
+            handle = OutputEventFilter(lambda event_data: None)
+            handle._event_ct = 334
+            mock_stdout.return_value = handle
+            self.task.run(self.pk)
+
+        assert self.task.update_model.call_args[-1]['emitted_events'] == 334
 
     def test_artifact_cleanup(self):
         path = tempfile.NamedTemporaryFile(delete=False).name

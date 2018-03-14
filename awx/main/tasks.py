@@ -883,6 +883,7 @@ class BaseTask(LogErrorsTask):
         status, rc, tb = 'error', None, ''
         output_replacements = []
         extra_update_fields = {}
+        event_ct = 0
         try:
             kwargs['isolated'] = isolated_host is not None
             self.pre_run_hook(instance, **kwargs)
@@ -1001,14 +1002,11 @@ class BaseTask(LogErrorsTask):
             try:
                 stdout_handle.flush()
                 stdout_handle.close()
-                # If stdout_handle was wrapped with event filter, log data
-                if hasattr(stdout_handle, '_event_ct'):
-                    logger.info('%s finished running, producing %s events.',
-                                instance.log_format, stdout_handle._event_ct)
-                else:
-                    logger.info('%s finished running', instance.log_format)
+                event_ct = getattr(stdout_handle, '_event_ct', 0)
+                logger.info('%s finished running, producing %s events.',
+                            instance.log_format, event_ct)
             except Exception:
-                pass
+                logger.exception('Error flushing job stdout and saving event count.')
 
         try:
             self.post_run_hook(instance, status, **kwargs)
@@ -1020,6 +1018,7 @@ class BaseTask(LogErrorsTask):
 
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements,
+                                     emitted_events=event_ct,
                                      **extra_update_fields)
         try:
             self.final_run_hook(instance, status, **kwargs)

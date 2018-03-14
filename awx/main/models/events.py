@@ -570,6 +570,12 @@ class BaseCommandEvent(CreatedModifiedModel):
 
         return self.objects.create(**kwargs)
 
+    def get_event_display(self):
+        '''
+        Needed for __unicode__
+        '''
+        return self.event
+
 
 class AdHocCommandEvent(BaseCommandEvent):
 
