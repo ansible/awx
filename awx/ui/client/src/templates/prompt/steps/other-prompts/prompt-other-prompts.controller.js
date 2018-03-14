@@ -5,7 +5,7 @@
  *************************************************/
 
 export default
-    ['ParseTypeChange', 'CreateSelect2', 'TemplatesStrings', function(ParseTypeChange, CreateSelect2, strings) {
+    ['ParseTypeChange', 'CreateSelect2', 'TemplatesStrings', '$timeout', function(ParseTypeChange, CreateSelect2, strings, $timeout) {
             const vm = this;
 
             vm.strings = strings;
@@ -30,10 +30,12 @@ export default
 
                 let codemirrorExtraVars = () => {
                     if(scope.promptData.launchConf.ask_variables_on_launch && !scope.promptData.prompts.variables.ignore) {
-                        ParseTypeChange({
-                            scope: scope,
-                            variable: 'extraVariables',
-                            field_id: 'job_launch_variables'
+                        $timeout(() => {
+                            ParseTypeChange({
+                                scope: scope,
+                                variable: 'extraVariables',
+                                field_id: 'job_launch_variables'
+                            });
                         });
                     }
                 };

@@ -54,17 +54,17 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
                     $('#prompt-inventory').append($compile(html)(scope));
 
                     scope.$watch('promptData.prompts.inventory.value', () => {
-                        if(scope.promptData.prompts.inventory.value && scope.promptData.prompts.inventory.value.id) {
-                            // Loop across the inventories and see if one of them should be "checked"
-                            scope.inventories.forEach((row, i) => {
-                                if (row.id === scope.promptData.prompts.inventory.value.id) {
-                                    scope.inventories[i].checked = 1;
-                                }
-                                else {
-                                    scope.inventories[i].checked = 0;
-                                }
-                            });
-                        }
+                        scope.inventories.forEach((row, i) => {
+                            if (
+                                _.has(scope, 'promptData.prompts.inventory.value.id') &&
+                                row.id === scope.promptData.prompts.inventory.value.id
+                            ) {
+                                scope.inventories[i].checked = 1;
+                            }
+                            else {
+                                scope.inventories[i].checked = 0;
+                            }
+                        });
                     });
                 });
         }

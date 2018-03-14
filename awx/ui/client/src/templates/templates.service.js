@@ -281,6 +281,15 @@ export default ['Rest', 'GetBasePath', '$q', 'NextPage', function(Rest, GetBaseP
               });
 
           return deferred.promise;
+      },
+      postWorkflowNodeCredential: function(params) {
+          // params.id
+          // params.data
+
+          var url = GetBasePath('workflow_job_template_nodes') + params.id + '/credentials';
+
+          Rest.setUrl(url);
+          return Rest.post(params.data);
       }
     };
 }];

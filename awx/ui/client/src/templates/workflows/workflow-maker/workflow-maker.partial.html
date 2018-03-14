@@ -93,7 +93,31 @@
                     <div id="workflow-project-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'project_sync'" ui-view="projectSyncList"></div>
                     <div id="workflow-inventory-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'inventory_sync'" ui-view="inventorySyncList"></div>
                 </div>
-                <div id="workflow-maker-form" ui-view="workflowForm"></div>
+                <div ng-show="selectedTemplate">
+                    <div class="form-group Form-formGroup Form-formGroup--singleColumn">
+                        <label for="verbosity" class="Form-inputLabelContainer">
+                            <span class="Form-requiredAsterisk">*</span>
+                            <span class="Form-inputLabel">RUN</span>
+                        </label>
+                        <div>
+                            <select
+                                id="workflow_node_edge"
+                                ng-options="v as v.label for v in edgeTypeOptions track by v.value"
+                                ng-model="edgeType"
+                                class="form-control Form-dropDown"
+                                name="edgeType"
+                                tabindex="-1"
+                                aria-hidden="true">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="buttons Form-buttons" id="workflow_maker_controls">
+                        <button type="button" class="btn btn-sm Form-primaryButton Form-primaryButton--noMargin" id="workflow_maker_prompt_btn" ng-show="showPromptButton" ng-click="openPromptModal()"> Prompt</button>
+                        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_btn" ng-show="(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)" ng-click="cancelNodeForm()"> Cancel</button>
+                        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_close_btn" ng-show="!(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)" ng-click="cancelNodeForm()"> Close</button>
+                        <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_btn" ng-show="(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)" ng-click="confirmNodeForm()" ng-disabled="workflow_maker_form.$invalid || !selectedTemplate || promptModalMissingReqFields" disabled="disabled"> Select</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -101,4 +125,5 @@
         <button type="button" class="btn btn-sm WorkflowMaker-cancelButton" ng-click="closeWorkflowMaker()"> Close</button>
         <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate" ng-disabled="edgeFlags.conflict || workflowMakerFormConfig.nodeMode === 'add'"> Save</button>
     </div>
+    <prompt prompt-data="promptData" action-text="CONFIRM"></launch>
 </div>
