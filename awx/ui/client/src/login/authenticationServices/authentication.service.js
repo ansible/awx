@@ -49,11 +49,10 @@ export default
 
                 return getCSRFToken.then(function({data}) {
                     var csrfmiddlewaretoken = /name='csrfmiddlewaretoken' value='([0-9a-zA-Z]+)' \//.exec(data)[1];
-                    // TODO: data needs to be encoded
                     return $http({
                         method: 'POST',
                         url: `/api/login/`,
-                        data: `username=${username}&password=${password}&csrfmiddlewaretoken=${csrfmiddlewaretoken}&next=%2fapi%2f`,
+                        data: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&csrfmiddlewaretoken=${csrfmiddlewaretoken}&next=%2fapi%2f`,
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
                         }
