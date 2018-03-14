@@ -1158,6 +1158,8 @@ class RunJob(BaseTask):
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
+        env['ANSIBLE_INVENTORY_ENABLED'] = 'script'
+        env['ANSIBLE_INVENTORY_UNPARSED_FAILED'] = 'True'
         env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         if not kwargs.get('isolated'):
             env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
@@ -1940,6 +1942,9 @@ class RunInventoryUpdate(BaseTask):
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
         # Always use the --export option for ansible-inventory
         env['ANSIBLE_INVENTORY_EXPORT'] = str(True)
+        plugin_name = inventory_update.get_inventory_plugin_name()
+        if plugin_name is not None:
+            env['ANSIBLE_INVENTORY_ENABLED'] = plugin_name
 
         # Set environment variables specific to each source.
         #

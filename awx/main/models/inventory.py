@@ -1235,6 +1235,14 @@ class InventorySourceOptions(BaseModel):
             )
         return None
 
+    def get_inventory_plugin_name(self):
+        if self.source in CLOUD_PROVIDERS or self.source == 'custom':
+            # TODO: today, all vendored sources are scripts
+            # in future release inventory plugins will replace these
+            return 'script'
+        # in other cases we do not specify which plugin to use
+        return None
+
     def get_deprecated_credential(self, kind):
         for cred in self.credentials.all():
             if cred.credential_type.kind == kind:
