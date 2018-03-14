@@ -21,6 +21,10 @@ spec:
           volumeMounts:
             - mountPath: /etc/tower
               name: awx-application-config
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
         - name: awx-celery
           image: {{ awx_task_kubernetes_image }}
           imagePullPolicy: Always
@@ -46,6 +50,13 @@ spec:
               value: {{ default_admin_user|default('admin') }}
             - name: AWX_ADMIN_PASSWORD
               value: {{ default_admin_password|default('password') }}
+          resources:
+            requests:
+              memory: "{{ awx_task_cpu_request|default('2') }}Gi"
+              cpu: "{{ awx_task_mem_request|default('1500') }}m"
+            limit:
+              memory: "{{ awx_task_cpu_request|default('2') }}Gi"
+              cpu: "{{ awx_task_mem_request|default('1500') }}m"
         - name: awx-rabbit
           image: ansible/awx_rabbitmq:{{ rabbitmq_version }}
           imagePullPolicy: Always
@@ -83,8 +94,16 @@ spec:
               value: "awx"
             - name: RABBITMQ_CONFIG_FILE
               value: "/etc/rabbitmq/rabbitmq"
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
         - name: awx-memcached
           image: memcached
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
       volumes:
         - name: awx-application-config
           configMap:
