@@ -156,4 +156,7 @@ try:
     socket.gethostbyname('docker.for.mac.internal')
     os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.internal'
 except Exception:
-    os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
+    ip_route = os.popen('ip route').read()
+    if ip_route:
+        os.environ['SDB_NOTIFY_HOST'] = ip_route.split(' ')[2]
+    del ip_route
