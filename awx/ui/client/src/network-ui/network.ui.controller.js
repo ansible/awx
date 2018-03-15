@@ -38,9 +38,17 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
   $scope.inventory_id = $state.params.inventory_id;
 
+  var protocol = null;
+
+  if ($location.protocol() === 'http') {
+    protocol = 'ws';
+  } else if ($location.protocol() === 'https') {
+    protocol = 'wss';
+  }
+
   $scope.initial_messages = [];
   if (!$scope.disconnected) {
-      $scope.control_socket = new ReconnectingWebSocket("wss://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
+      $scope.control_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
                                                          null,
                                                          {debug: false, reconnectInterval: 300});
   } else {
@@ -159,8 +167,12 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   $scope.app_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
 
   //App Toolbox Setup
-  $scope.app_toolbox = new models.ToolBox(0, 'Process', 'app', 0, 40, 200, $scope.graph.height - 40);
-  $scope.app_toolbox.title_coordinates = {x: 70, y: 70};
+  // const toolboxTopMargin = 115;
+  var toolboxTopMargin = $('.Networking-top').height();
+  var toolboxTitleMargin = toolboxTopMargin + 35;
+  var toolboxHeight = $scope.graph.height - $('.Networking-top').height();
+  $scope.app_toolbox = new models.ToolBox(0, 'Process', 'app', 0, toolboxTopMargin, 200, toolboxHeight);
+  $scope.app_toolbox.title_coordinates = {x: 70, y: toolboxTitleMargin};
   $scope.app_toolbox.spacing = 150;
   $scope.app_toolbox.enabled = false;
   $scope.app_toolbox_controller.toolbox = $scope.app_toolbox;
@@ -182,7 +194,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
 
 
   //Inventory Toolbox Setup
-  $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, 40, 200, $scope.graph.height - 40);
+  $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, toolboxTopMargin, 200, toolboxHeight);
   if (!$scope.disconnected) {
       console.log($location.protocol() + "://" + $location.host() + ':' + $location.port());
       console.log($scope.my_location);
@@ -210,7 +222,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   }
   $scope.inventory_toolbox.spacing = 150;
   $scope.inventory_toolbox.enabled = true;
-  $scope.inventory_toolbox.title_coordinates = {x: 60, y: 70};
+  $scope.inventory_toolbox.title_coordinates = {x: 60, y: toolboxTitleMargin};
   $scope.inventory_toolbox_controller.toolbox = $scope.inventory_toolbox;
   $scope.inventory_toolbox_controller.remove_on_drop = true;
   $scope.inventory_toolbox_controller.debug = true;
@@ -221,8 +233,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   //End Inventory Toolbox Setup
   $scope.rack_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
   //Rack Toolbox Setup
-  $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 0, 40, 200, $scope.graph.height - 40);
-  $scope.rack_toolbox.title_coordinates = {x: 80, y: 70};
+  $scope.rack_toolbox = new models.ToolBox(0, 'Rack', 'rack', 0, toolboxTopMargin, 200, toolboxHeight);
+  $scope.rack_toolbox.title_coordinates = {x: 80, y: toolboxTitleMargin};
   $scope.rack_toolbox.spacing = 200;
   $scope.rack_toolbox.enabled = false;
   $scope.rack_toolbox_controller.remove_on_drop = false;
@@ -238,8 +250,8 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
   //End Rack Toolbox Setup
   $scope.site_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
   //Site Toolbox Setup
-  $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 0, 40, 200, $scope.graph.height - 40);
-  $scope.site_toolbox.title_coordinates = {x: 80, y: 70};
+  $scope.site_toolbox = new models.ToolBox(0, 'Sites', 'sites', 0, toolboxTopMargin, 200, toolboxHeight);
+  $scope.site_toolbox.title_coordinates = {x: 80, y: toolboxTitleMargin};
   $scope.site_toolbox.spacing = 200;
   $scope.site_toolbox.enabled = false;
   $scope.site_toolbox_controller.remove_on_drop = false;
@@ -576,32 +588,185 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     $document.bind("keydown", $scope.onKeyDown);
 
     // Conext Menu Button Handlers
+
+    $scope.removeContextMenu = function(){
+        let context_menu = $scope.context_menus[0];
+        context_menu.enabled = false;
+        context_menu.x = -100000;
+        context_menu.y = -100000;
+        context_menu.buttons.forEach(function(button, index){
+            button.enabled = false;
+            button.x = -100000;
+            button.y = -100000;
+        });
+    }
+
     $scope.onDetailsContextButton = function (panelBoolean) {
         if (!$scope.disconnected) {
-            if ($scope.selected_items.length === 1){
-                if ($scope.selected_items[0].host_id === 0){
-                    $scope.$emit('retrievedHostData', {}, panelBoolean !== null ? panelBoolean: true);
+            $scope.removeContextMenu();
+            // show details for devices
+            if ($scope.selected_devices.length === 1){
+
+                // following block is intended for devices added in the network UI but not in Tower
+                if ($scope.selected_devices[0].host_id === 0){
+                    let host = $scope.selected_devices[0];
+                    $scope.update_toolbox_heights();
+                    $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
                 }
-                if ($scope.selected_items[0].host_id !== 0){
-                    let host_id = $scope.selected_items[0].host_id;
+
+                // following block is intended for devices that are saved in the API
+                if ($scope.selected_devices[0].host_id !== 0){
+                    let host_id = $scope.selected_devices[0].host_id;
                     let url = `/api/v2/hosts/${host_id}/`;
                     $http.get(url)
                          .then(function(response) {
                              let host = response.data;
-                             $scope.$emit('retrievedHostData', host, panelBoolean !== null ? panelBoolean: true);
-                             $scope.context_menus[0].enabled = false;
+                             host.host_id = host.id;
+                             $scope.update_toolbox_heights();
+                             $scope.$emit('showDetails', host, panelBoolean !== null ? panelBoolean: true);
+
                          })
                          .catch(({data, status}) => {
                              ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
                          });
                 }
             }
+
+            // show details for interfaces
+            else if($scope.selected_interfaces.length === 1){
+                let selected_interface  = $scope.selected_interfaces[0];
+                $scope.update_toolbox_heights();
+                $scope.$emit('showDetails', selected_interface, panelBoolean !== null ? panelBoolean: true);
+            }
+
+            // show details for links
+            else if($scope.selected_links.length === 1){
+                let link  = $scope.selected_links[0];
+                $scope.update_toolbox_heights();
+                $scope.$emit('showDetails', link, panelBoolean !== null ? panelBoolean: true);
+            }
+
+            //show details for groups, racks, and sites
+            else if ($scope.selected_groups.length === 1){
+                let group = $scope.selected_groups[0];
+                $scope.update_toolbox_heights();
+                $scope.$emit('showDetails', group, panelBoolean !== null ? panelBoolean: true);
+            }
          }
     };
 
     $scope.onRenameContextButton = function (button) {
-        $scope.context_menus[0].enabled = false;
+        $scope.removeContextMenu();
         $scope.first_channel.send("LabelEdit", {});
+    };
+
+    $scope.deleteDevice = function(){
+        var i = 0;
+        var j = 0;
+        var index = -1;
+        var devices = $scope.selected_devices;
+        var links = $scope.selected_links;
+        var all_links = $scope.links.slice();
+        $scope.selected_devices = [];
+        $scope.selected_links = [];
+        $scope.move_controller.changeState(move.Ready);
+        for (i = 0; i < links.length; i++) {
+            index = $scope.links.indexOf(links[i]);
+            if (index !== -1) {
+                links[i].selected = false;
+                links[i].remote_selected = false;
+                $scope.links.splice(index, 1);
+                $scope.send_control_message(new messages.LinkDestroy($scope.client_id,
+                                                                               links[i].id,
+                                                                               links[i].from_device.id,
+                                                                               links[i].to_device.id,
+                                                                               links[i].from_interface.id,
+                                                                               links[i].to_interface.id,
+                                                                               links[i].name));
+            }
+        }
+        for (i = 0; i < devices.length; i++) {
+            index = $scope.devices.indexOf(devices[i]);
+            if (index !== -1) {
+                $scope.devices.splice(index, 1);
+                $scope.send_control_message(new messages.DeviceDestroy($scope.client_id,
+                                                                                 devices[i].id,
+                                                                                 devices[i].x,
+                                                                                 devices[i].y,
+                                                                                 devices[i].name,
+                                                                                 devices[i].type,
+                                                                                 devices[i].host_id));
+            }
+            for (j = 0; j < all_links.length; j++) {
+                if (all_links[j].to_device === devices[i] ||
+                    all_links[j].from_device === devices[i]) {
+                    index = $scope.links.indexOf(all_links[j]);
+                    if (index !== -1) {
+                        $scope.links.splice(index, 1);
+                    }
+                }
+            }
+        }
+    };
+
+    $scope.deleteGroup = function(){
+        var i = 0;
+        var index = -1;
+        var selected_groups = $scope.selected_groups;
+        $scope.selected_groups = [];
+        $scope.group_controller.changeState(group.Ready);
+
+        function removeSingleGroup(group){
+            index = $scope.groups.indexOf(group);
+            if (index !== -1) {
+                group.selected = false;
+                group.remote_selected = false;
+                $scope.groups.splice(index, 1);
+            }
+            $scope.send_control_message(new messages.GroupDestroy($scope.client_id,
+                                                                            group.id,
+                                                                            group.x1,
+                                                                            group.y1,
+                                                                            group.x2,
+                                                                            group.y2,
+                                                                            group.name));
+        }
+
+        if($scope.current_scale <= 0.5){
+            // current scale is in racks mode or sites mode
+            for (i = 0; i < selected_groups.length; i++) {
+                let group = selected_groups[i];
+                if(group.groups.length > 0){
+                    for(var k = 0; k < group.groups.length; k++){
+                        let nested_group = group.groups[k];
+                        removeSingleGroup(nested_group);
+                    }
+                }
+                // remove all the nested devices and links
+                $scope.selected_devices = group.devices;
+                $scope.selected_links = group.links;
+                $scope.deleteDevice();
+
+                removeSingleGroup(group);
+            }
+        }
+        if($scope.current_scale > 0.5){
+            // current scale is in devices mode
+            for (i = 0; i < selected_groups.length; i++) {
+                let group = selected_groups[i];
+                removeSingleGroup(group);
+            }
+        }
+    };
+
+    $scope.onDeleteContextMenu = function($event){
+        $scope.removeContextMenu();
+        if($scope.selected_devices.length === 1){
+            $scope.deleteDevice();
+        }
+        else if($scope.selected_groups.length === 1){
+            $scope.deleteGroup();
+        }
     };
 
     // Button Event Handlers
@@ -610,6 +775,7 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.action_icons[0].fsm.handle_message("Disable", {});
         $scope.action_icons[1].fsm.handle_message("Enable", {});
         $scope.overall_toolbox_collapsed = !$scope.overall_toolbox_collapsed;
+        $scope.$emit('overall_toolbox_collapsed');
     };
 
     $scope.onToggleToolboxButtonRight = function (button) {
@@ -617,8 +783,37 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $scope.action_icons[0].fsm.handle_message("Enable", {});
         $scope.action_icons[1].fsm.handle_message("Disable", {});
         $scope.overall_toolbox_collapsed = !$scope.overall_toolbox_collapsed;
+        $scope.$emit('overall_toolbox_collapsed');
     };
 
+    $scope.$on('toolbarButtonEvent', function(e, functionName){
+        $scope[`on${functionName}Button`]();
+    });
+
+    $scope.$on('jumpTo', function(e, zoomLevel){
+        switch (zoomLevel){
+            case 'site':
+                $scope.current_scale = 0.051;
+                break;
+            case 'rack':
+                $scope.current_scale = 0.11;
+                break;
+            case 'inventory':
+                $scope.current_scale = 0.51;
+                break;
+            case 'process':
+                $scope.current_scale = 1.1;
+                break;
+        }
+        // var new_panX = controller.scope.{{somethinghere}} - new_scale * ((controller.scope.mouseX - controller.scope.panX) / controller.scope.current_scale);
+        // var new_panY = controller.scope.mouseY - new_scale * ((controller.scope.mouseY - controller.scope.panY) / controller.scope.current_scale);
+        // // controller.scope.updateScaledXY();
+        // // controller.scope.current_scale = new_scale;
+        // controller.scope.panX = new_panX;
+        // controller.scope.panY = new_panY;
+        $scope.updateScaledXY();
+        $scope.updatePanAndScale();
+    });
 
     $scope.onDeployButton = function (button) {
         $scope.send_control_message(new messages.Deploy($scope.client_id));
@@ -724,18 +919,20 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     // Context Menu Buttons
     $scope.context_menu_buttons = [
         new models.ContextMenuButton("Rename", 210, 200, 160, 26, $scope.onRenameContextButton, $scope),
-        new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope)
+        new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope),
+        new models.ContextMenuButton("Delete", 256, 231, 160, 26, $scope.onDeleteContextMenu, $scope)
     ];
 
     // Context Menus
     $scope.context_menus = [
-        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
+        new models.ContextMenu('HOST', 210, 200, 160, 90, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
     ];
 
     // Icons
+    var actionIconVerticalOffset = toolboxTopMargin + (toolboxHeight/2);
     $scope.action_icons = [
-        new models.ActionIcon("chevron-left", 170, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonLeft, true, $scope),
-        new models.ActionIcon("chevron-right", 15, $scope.graph.height/2, 16, $scope.onToggleToolboxButtonRight, false, $scope)
+        new models.ActionIcon("chevron-left", 170, actionIconVerticalOffset, 16, $scope.onToggleToolboxButtonLeft, true, $scope),
+        new models.ActionIcon("chevron-right", 15, actionIconVerticalOffset, 16, $scope.onToggleToolboxButtonRight, false, $scope)
     ];
 
     $scope.onDownloadTraceButton = function (button) {
@@ -761,18 +958,18 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
     var button_offset = 200;
 
     $scope.buttons = [
-      new models.Button("DEPLOY", button_offset + 10, 48, 70, 30, $scope.onDeployButton, $scope),
-      new models.Button("DESTROY", button_offset + 90, 48, 80, 30, $scope.onDestroyButton, $scope),
-      new models.Button("RECORD", button_offset + 180, 48, 80, 30, $scope.onRecordButton, $scope),
-      new models.Button("EXPORT", button_offset + 270, 48, 70, 30, $scope.onExportButton, $scope),
-      new models.Button("DISCOVER", button_offset + 350, 48, 80, 30, $scope.onDiscoverButton, $scope),
-      new models.Button("LAYOUT", button_offset + 440, 48, 70, 30, $scope.onLayoutButton, $scope),
-      new models.Button("CONFIGURE", button_offset + 520, 48, 90, 30, $scope.onConfigureButton, $scope),
-      new models.Button("EXPORT YAML", button_offset + 620, 48, 120, 30, $scope.onExportYamlButton, $scope),
-      new models.Button("DOWNLOAD TRACE", button_offset + 750, 48, 150, 30, $scope.onDownloadTraceButton, $scope),
-      new models.Button("DOWNLOAD RECORDING", button_offset + 910, 48, 170, 30, $scope.onDownloadRecordingButton, $scope),
-      new models.Button("UPLOAD TEST", button_offset + 10, 88, 100, 30, $scope.onUploadTestButton, $scope),
-      new models.Button("RUN TESTS", button_offset + 120, 88, 100, 30, $scope.onRunTestsButton, $scope),
+      // new models.Button("DEPLOY", button_offset + 10, 48, 70, 30, $scope.onDeployButton, $scope),
+      // new models.Button("DESTROY", button_offset + 90, 48, 80, 30, $scope.onDestroyButton, $scope),
+      // new models.Button("RECORD", button_offset + 180, 48, 80, 30, $scope.onRecordButton, $scope),
+      // new models.Button("EXPORT", button_offset + 270, 48, 70, 30, $scope.onExportButton, $scope),
+      // new models.Button("DISCOVER", button_offset + 350, 48, 80, 30, $scope.onDiscoverButton, $scope),
+      // new models.Button("LAYOUT", button_offset + 440, 48, 70, 30, $scope.onLayoutButton, $scope),
+      // new models.Button("CONFIGURE", button_offset + 520, 48, 90, 30, $scope.onConfigureButton, $scope),
+      // new models.Button("EXPORT YAML", button_offset + 620, 48, 120, 30, $scope.onExportYamlButton, $scope),
+      // new models.Button("DOWNLOAD TRACE", button_offset + 750, 48, 150, 30, $scope.onDownloadTraceButton, $scope),
+      // new models.Button("DOWNLOAD RECORDING", button_offset + 910, 48, 170, 30, $scope.onDownloadRecordingButton, $scope),
+      // new models.Button("UPLOAD TEST", button_offset + 10, 88, 100, 30, $scope.onUploadTestButton, $scope),
+      // new models.Button("RUN TESTS", button_offset + 120, 88, 100, 30, $scope.onRunTestsButton, $scope),
     ];
 
     $scope.all_buttons = [];
@@ -1580,7 +1777,29 @@ var NetworkUIController = function($scope, $document, $location, $window, $http,
         $document.unbind('keydown', $scope.onKeyDown);
     });
 
+    $scope.update_toolbox_heights = function(){
+        toolboxTopMargin = $('.Networking-top').height();
+        toolboxTitleMargin = toolboxTopMargin + 35;
+        toolboxHeight = $scope.graph.height - toolboxTopMargin;
+
+        let toolboxes = ['site_toolbox', 'rack_toolbox', 'inventory_toolbox', 'app_toolbox'];
+        toolboxes.forEach((toolbox) => {
+            $scope[toolbox].y = toolboxTopMargin;
+            $scope[toolbox].height = toolboxHeight;
+            $scope[toolbox].title_coordinates.y = toolboxTitleMargin;
+        });
+
+        $scope.action_icons.forEach((icon) => {
+            actionIconVerticalOffset = toolboxTopMargin + (toolboxHeight/2);
+            icon.y = actionIconVerticalOffset;
+        });
+
+        $('.Networking-detailPanel').height(toolboxHeight);
+        $('.Networking-detailPanel').css('top', toolboxTopMargin);
+    };
+
     $scope.update_size = function () {
+        $scope.update_toolbox_heights();
     };
 
     $scope.update_offsets = function () {
