@@ -31,12 +31,9 @@
 @button-body-pressed: #848992;
 @button-text-pressed: #ffffff;
 @green: #5CB85C;
-@host-green: #449D44;
 @red:  #D9534F;
 @blue: #337AB7;
 @light-toolbox-background: #f6f6f6;
-@rack-orange: #F0AD4E;
-@site-orange: #EC971F;
 @icon-background-hover:@blue;
 
 .NetworkUI {
@@ -118,7 +115,7 @@
 }
 
 .NetworkUI__router {
-    fill: @green;
+    fill: @blue;
 }
 
 .NetworkUI__router--background{
@@ -197,7 +194,7 @@
 }
 
 .NetworkUI__rack {
-    fill: @rack-orange;
+    fill: @blue;
 }
 
 .NetworkUI__rack--background {
@@ -243,13 +240,13 @@
 }
 
 .NetworkUI__site {
-    fill: @widget-body;
+    fill: @blue;
     stroke: @dark-widget-detail;
     stroke-width: 2;
 }
 
 .NetworkUI__site--fill0{
-    fill:@site-orange;
+    fill:@blue;
 }
 
 .NetworkUI__site--fill1{
@@ -348,7 +345,7 @@
 }
 
 .NetworkUI__host {
-    fill: @host-green;
+    fill: @blue;
 }
 
 .NetworkUI__host--background {
@@ -470,7 +467,7 @@
 
 
 .NetworkUI__interface {
-    fill: @dark-widget-detail;
+    fill: @button-outline;
 }
 
 .NetworkUI__interface--selected {
@@ -551,7 +548,7 @@
     stroke: @button-outline;
     stroke-width: 1;
     rx: 0;
-    stroke-dasharray: calc(~"100vh - 40px");
+    stroke-dasharray: calc(~"100vh - 115px");
     stroke-dashoffset: -45;
 }
 
@@ -560,7 +557,7 @@
     stroke-width: 1;
     fill: none;
     rx: 0;
-    stroke-dasharray: calc(~"100vh - 40px");
+    stroke-dasharray: calc(~"100vh - 115px");
     stroke-dashoffset: -200;
 }
 
@@ -636,22 +633,26 @@
     font-family: 'Open Sans';
 }
 
-.NetworkUI_chevron{
+.NetworkUI__chevron{
     fill: @button-body-pressed;
 }
 
-.NetworkUI_chevron--hover{
+.NetworkUI__chevron--hover,
+.NetworkUI__chevron--pressed{
     cursor: pointer;
     fill: white;
 }
 
-.NetworkUI_iconBackground{
+.NetworkUI__iconBackground{
     fill:@button-body;
+    cursor: pointer;
 }
 
-.NetworkUI_iconBackground--hover{
-    fill:@icon-background-hover;
+.NetworkUI__iconBackground--hover,
+.NetworkUI__iconBackground--pressed{
+    fill: @icon-background-hover;
 }
+
 
 .NetworkUI__toolbox--title{
     fill: @dark-widget-detail;
