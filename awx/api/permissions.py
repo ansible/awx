@@ -17,7 +17,7 @@ logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
            'TaskPermission', 'ProjectUpdatePermission', 'InventoryInventorySourcesUpdatePermission',
-           'UserPermission', 'IsSuperUser']
+           'UserPermission', 'IsSuperUser', 'InstanceGroupTowerPermission',]
 
 
 class ModelAccessPermission(permissions.BasePermission):
@@ -227,3 +227,12 @@ class IsSuperUser(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.user and request.user.is_superuser
+
+
+class InstanceGroupTowerPermission(ModelAccessPermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method not in permissions.SAFE_METHODS:
+            if obj.name == "tower":
+                return False
+        return super(InstanceGroupTowerPermission, self).has_object_permission(request, view, obj)
+
