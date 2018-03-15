@@ -124,11 +124,11 @@
                       translate(0, {{stream.flip_text_offset()}})
                       ">
 <text ng-attr-class="{{stream.selected && ! stream.edit_label ? 'NetworkUI__stream-text--selected' : 'NetworkUI--hidden'}}"
-      filter="url(#selected)"
+      filter="url(#background)"
       text-anchor="middle"
       x="0"
       y="0"> {{stream.label}}</text>
-<text class="NetworkUI__stream-text"  text-anchor="middle" x="0" y="0">{{stream.label}}{{stream.edit_label?'_':''}}</text>
+<text class="NetworkUI__stream-text" filter="url(#background)" text-anchor="middle" x="0" y="0">{{stream.label}}{{stream.edit_label?'_':''}}</text>
 </g>
 </g>
 <!-- End Text -->
