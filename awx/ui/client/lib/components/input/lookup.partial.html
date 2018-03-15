@@ -23,12 +23,13 @@
             <span class="form-control Form-textInput Form-textInput--variableHeight LabelList-lookupTags"
                 ng-if="state._lookupTags">
                 <div class="LabelList-tagContainer" ng-repeat="tag in state._value track by $index">
-                <div class="LabelList-deleteContainer" ng-click="vm.removeTag(tag)">
-                    <i class="fa fa-times LabelList-tagDelete"></i>
-                </div>
-                <div class="LabelList-tag LabelList-tag--deletable">
-                    <span ng-if="tag.hostname" class="LabelList-name">{{ tag.hostname }}</span>
-                    <span ng-if="!tag.hostname" class="LabelList-name">{{ tag }}</span>
+                    <div class="LabelList-tag LabelList-tag--deletable">
+                        <span ng-if="tag.hostname" class="LabelList-name">{{ tag.hostname }}</span>
+                        <span ng-if="!tag.hostname" class="LabelList-name">{{ tag }}</span>
+                    </div>
+                    <div class="LabelList-deleteContainer" ng-click="vm.removeTag(tag)">
+                        <i class="fa fa-times LabelList-tagDelete"></i>
+                    </div>
                 </div>
             </span>
         </div>

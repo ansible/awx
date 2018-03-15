@@ -75,12 +75,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities'])
         require: 'ngModel',
         restrict: 'A',
         link: function(scope, element, attrs, ngModel) {
-            ngModel.$parsers.push(function(value) {
-                return '' + value;
-            });
-            ngModel.$formatters.push(function(value) {
-                return parseFloat(value);
-            });
+            ngModel.$parsers.push(value => value.toFixed(2));
+            ngModel.$formatters.push(value => parseFloat(value));
         }
     };
 })
