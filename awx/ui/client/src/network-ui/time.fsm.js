@@ -2,7 +2,6 @@
 var inherits = require('inherits');
 var fsm = require('./fsm.js');
 var util = require('./util.js');
-var models = require('./models.js');
 
 function _State () {
 }
@@ -176,6 +175,13 @@ _Present.prototype.onViewPort = function(controller, msg_type, message) {
         controller.scope.current_scale = message.scale;
         controller.scope.panX = message.panX;
         controller.scope.panY = message.panY;
+        if (message.graph_width !== undefined) {
+            controller.scope.graph.width = message.graph_width;
+        }
+        if (message.graph_height !== undefined) {
+            controller.scope.graph.height = message.graph_height;
+        }
+        controller.scope.update_toolbox_heights();
         controller.scope.updateScaledXY();
         controller.scope.updatePanAndScale();
 };
@@ -224,18 +230,35 @@ _Present.prototype.onMouseWheelEvent = function(controller, msg_type, message) {
         }
 };
 
-_Present.prototype.onTestCase = function(controller, msg_type, message) {
-    if ('runnable' in message[1]) {
-        if (!message[1].runnable) {
-            return;
-        }
-    }
-    controller.scope.tests.push(new models.Test(message[0],
-                                                message[1].event_trace,
-                                                [],
-                                                message[1].snapshots[0],
-                                                message[1].snapshots[1]));
+_Present.prototype.onRecordButton = function(controller) {
+    controller.scope.onRecordButton();
 };
+
+_Present.prototype.onExportButton = function(controller) {
+    controller.scope.onExportButton();
+};
+
+_Present.prototype.onExportYamlButton = function(controller) {
+    controller.scope.onExportYamlButton();
+};
+
+_Present.prototype.onDownloadTraceButton = function(controller) {
+    controller.scope.onDownloadTraceButton();
+};
+
+_Present.prototype.onDownloadRecordingButton = function(controller) {
+    controller.scope.onDownloadRecordingButton();
+};
+
+_Present.prototype.onNoop = function(controller, msg_type, message) {
+
+};
+
+_Present.prototype.onTestCompleted = function(controller, msg_type, message) {
+
+    controller.scope.test_channel.send(msg_type, message);
+}
+
 
 _Present.prototype.onError = function(controller, msg_type, message) {
     throw new Error("ServerError: " + message);

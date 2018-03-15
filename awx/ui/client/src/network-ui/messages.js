@@ -196,12 +196,14 @@ function StopRecording(sender, trace_id) {
 }
 exports.StopRecording = StopRecording;
 
-function ViewPort(sender, scale, panX, panY, trace_id) {
+function ViewPort(sender, scale, panX, panY, graph_width, graph_height, trace_id) {
     this.msg_type = "ViewPort";
     this.sender = sender;
     this.scale = scale;
     this.panX = panX;
     this.panY = panY;
+    this.graph_width = graph_width;
+    this.graph_height = graph_height;
     this.trace_id = trace_id;
 }
 exports.ViewPort = ViewPort;
