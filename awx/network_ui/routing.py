@@ -3,6 +3,7 @@ from awx.network_ui.consumers import ws_connect, ws_message, ws_disconnect, cons
 from awx.network_ui.consumers import ansible_connect, ansible_message, ansible_disconnect
 from awx.network_ui.consumers import worker_connect, worker_message, worker_disconnect
 from awx.network_ui.consumers import tester_connect, tester_message, tester_disconnect
+from awx.network_ui.consumers import tables_connect, tables_message, tables_disconnect
 
 channel_routing = [
     route("websocket.connect", ws_connect, path=r"^/network_ui/topology"),
@@ -17,6 +18,9 @@ channel_routing = [
     route("websocket.connect", tester_connect, path=r"^/network_ui/tester"),
     route("websocket.receive", tester_message, path=r"^/network_ui/tester"),
     route("websocket.disconnect", tester_disconnect, path=r"^/network_ui/tester"),
+    route("websocket.connect", tables_connect, path=r"^/network_ui/tables"),
+    route("websocket.receive", tables_message, path=r"^/network_ui/tables"),
+    route("websocket.disconnect", tables_disconnect, path=r"^/network_ui/tables"),
     route("console_printer", console_printer),
     route("persistence", persistence.handle),
     route("discovery", discovery.handle),
