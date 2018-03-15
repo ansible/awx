@@ -950,7 +950,17 @@ class JobLaunchConfig(LaunchTimeConfig):
         launching with those prompts
         '''
         prompts = self.prompts_dict()
-        for field_name, ask_field_name in template.get_ask_mapping().items():
+        ask_mapping = template.get_ask_mapping()
+        if template.survey_enabled and (not template.ask_variables_on_launch):
+            ask_mapping.pop('extra_vars')
+            provided_vars = set(prompts['extra_vars'].keys())
+            survey_vars = set(
+                element.get('variable') for element in
+                template.survey_spec.get('spec', {}) if 'variable' in element
+            )
+            if provided_vars - survey_vars:
+                return True
+        for field_name, ask_field_name in ask_mapping.items():
             if field_name in prompts and not getattr(template, ask_field_name):
                 return True
         else:
