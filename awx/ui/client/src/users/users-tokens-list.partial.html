@@ -1,0 +1,47 @@
+<div class="at-List-toolbar">
+    <smart-search
+        class="at-List-search"
+        django-model="tokens"
+        base-path="tokens"
+        iterator="token"
+        list="list"
+        dataset="token_dataset"
+        collection="collection"
+        search-tags="searchTags">
+    </smart-search>
+    <div class="at-List-toolbarAction">
+        <button
+            type="button"
+            ui-sref=".add"
+            class="at-Button--add"
+            aria-haspopup="true"
+            aria-expanded="false">
+        </button>
+    </div>
+</div>
+
+<at-list results="tokens">
+    <at-row ng-repeat="token in tokens">
+        <div class="at-Row-items">
+            <at-row-item
+                header-value="{{ token.summary_fields.application.name }}">
+            </at-row-item>
+            <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION') }}"
+                value="{{ token.description }}">
+            </at-row-item>
+            <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_EXPIRED') }}"
+                value="{{ token.expriation | longDate }}">
+            </at-row-item>
+            <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED') }}"
+                value="{{ vm.getLastUsed(token) }}">
+            </at-row-item>
+        </div>
+        <div class="at-Row-actions">
+            <at-row-action icon="fa-trash" ng-click="vm.deleteToken(token)">
+            </at-row-action>
+        </div>
+    </at-row>
+</at-list>

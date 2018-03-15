@@ -227,6 +227,11 @@ export default ['i18n', function(i18n) {
                         }
                     },
                     //hideOnSuperuser: true // RBAC defunct
+                },
+                tokens: {
+                    ngIf: 'isCurrentlyLoggedInUser',
+                    title: i18n._('Tokens'),
+                    skipGenerator: true,
                 }
             }
 

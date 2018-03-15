@@ -583,7 +583,8 @@ export default ['$compile', 'Attr', 'Icon',
             },
 
             wrapPanel: function(html){
-                return `<div class="Panel">${html}</div>`;
+                return `
+                <div class="Panel">${html}</div>`;
             },
 
             insertFormView: function(){

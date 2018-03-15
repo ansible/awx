@@ -166,14 +166,18 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
             // Also wraps mess of generated HTML in a .Panel
             wrapPanel(html, ignorePanel){
                 if(ignorePanel) {
-                    return `<div>
+                    return `
+                    <div ui-view="preFormView"></div>
+                    <div>
                     ${html}
                     <div ui-view="related"></div>
                     <div ui-view="modal"></div>
                     </div>`;
                 }
                 else {
-                    return `<div class="Panel">
+                    return `
+                    <div ui-view="preFormView"></div>
+                    <div class="Panel">
                     ${html}
                     <div ui-view="related"></div>
                     <div ui-view="modal"></div>

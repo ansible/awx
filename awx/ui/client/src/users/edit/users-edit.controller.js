@@ -30,6 +30,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
         init();
 
         function init() {
+            $scope.isCurrentlyLoggedInUser = (parseInt(id) === $rootScope.current_user.id);
             $scope.hidePagination = false;
             $scope.hideSmartSearch = false;
             $scope.user_type_options = user_type_options;
