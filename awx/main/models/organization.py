@@ -6,6 +6,7 @@
 # Django
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
@@ -19,12 +20,16 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
-from awx.main.models.mixins import ResourceMixin, CustomVirtualEnvMixin
+from awx.main.models.unified_jobs import (
+    UnifiedJob,
+    ACTIVE_STATES,
+)
+from awx.main.models.mixins import ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin
 
 __all__ = ['Organization', 'Team', 'Profile', 'UserSessionMembership']
 
 
-class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVirtualEnvMixin):
+class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
     '''
     An organization is the basic unit of multi-tenancy divisions
     '''
@@ -73,6 +78,20 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
 
     def get_absolute_url(self, request=None):
         return reverse('api:organization_detail', kwargs={'pk': self.pk}, request=request)
+
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_active_jobs(self):
+        project_ids = self.projects.all().values_list('id')
+        return UnifiedJob.objects.non_polymorphic().filter(
+            Q(status__in=ACTIVE_STATES) &
+            (
+                Q(Job___project__in=project_ids) |
+                Q(ProjectUpdate___project__in=project_ids) |
+                Q(InventoryUpdate___inventory_source__inventory__organization=self)
+            )
+        )
 
 
 class Team(CommonModelNameNotUnique, ResourceMixin):

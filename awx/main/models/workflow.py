@@ -24,7 +24,13 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR
 )
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
+from awx.main.models.mixins import (
+    ResourceMixin,
+    SurveyJobTemplateMixin,
+    SurveyJobMixin,
+    RelatedJobsMixin,
+)
+from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
@@ -287,7 +293,7 @@ class WorkflowJobOptions(BaseModel):
         return new_workflow_job
 
 
-class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
+class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin, RelatedJobsMixin):
 
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
     FIELDS_TO_PRESERVE_AT_COPY = [
@@ -404,6 +410,12 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
             if prompts_errors:
                 node_list.append(node.pk)
         return node_list
+
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_active_jobs(self):
+        return WorkflowJob.objects.filter(status__in=ACTIVE_STATES)
 
 
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):

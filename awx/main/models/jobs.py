@@ -29,13 +29,21 @@ from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
 from awx.main.models.events import JobEvent, SystemJobEvent
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
 from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin, TaskManagerJobMixin, CustomVirtualEnvMixin
+from awx.main.models.mixins import (
+    ResourceMixin,
+    SurveyJobTemplateMixin,
+    SurveyJobMixin,
+    TaskManagerJobMixin,
+    CustomVirtualEnvMixin,
+    RelatedJobsMixin,
+)
 from awx.main.fields import JSONField, AskForField
 
 
@@ -216,7 +224,7 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -443,6 +451,12 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(
                 organization_notification_templates_for_any=self.project.organization)))
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
+
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_active_jobs(self):
+        return Job.objects.filter(status__in=ACTIVE_STATES)
 
 
 class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin):

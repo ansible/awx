@@ -84,6 +84,7 @@ from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata, JobTypeMetadata
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.scheduler.tasks import run_job_complete
+from awx.api.exceptions import ActiveJobConflict
 
 logger = logging.getLogger('awx.api.views')
 
@@ -192,6 +193,14 @@ class InstanceGroupMembershipMixin(object):
                 ig_obj.policy_instance_list.pop(ig_obj.policy_instance_list.index(inst_name))
                 ig_obj.save()
         return response
+
+
+class RelatedJobsPreventDeleteMixin(object):
+    def perform_destroy(self, obj):
+        active_jobs = obj.get_active_jobs()
+        if len(active_jobs) > 0:
+            raise ActiveJobConflict(active_jobs)
+        return super(RelatedJobsPreventDeleteMixin, self).perform_destroy(obj)
 
 
 class ApiRootView(APIView):
@@ -637,7 +646,7 @@ class InstanceGroupList(ListCreateAPIView):
     serializer_class = InstanceGroupSerializer
 
 
-class InstanceGroupDetail(RetrieveUpdateDestroyAPIView):
+class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     view_name = _("Instance Group Detail")
     model = InstanceGroup
@@ -922,7 +931,7 @@ class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
         return super(OrganizationList, self).create(request, *args, **kwargs)
 
 
-class OrganizationDetail(RetrieveUpdateDestroyAPIView):
+class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
@@ -1230,19 +1239,10 @@ class ProjectList(ListCreateAPIView):
         return projects_qs
 
 
-class ProjectDetail(RetrieveUpdateDestroyAPIView):
+class ProjectDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        can_delete = request.user.can_access(Project, 'delete', obj)
-        if not can_delete:
-            raise PermissionDenied(_("Cannot delete project."))
-        for pu in obj.project_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
-            pu.cancel()
-        return super(ProjectDetail, self).destroy(request, *args, **kwargs)
 
 
 class ProjectPlaybooks(RetrieveAPIView):
@@ -2038,7 +2038,7 @@ class ControlledByScmMixin(object):
         return obj
 
 
-class InventoryDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
 
     model = Inventory
     serializer_class = InventoryDetailSerializer
@@ -2493,7 +2493,7 @@ class GroupActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
         return qs.filter(Q(group=parent) | Q(host__in=parent.hosts.all()))
 
 
-class GroupDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class GroupDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
 
     model = Group
     serializer_class = GroupSerializer
@@ -2693,19 +2693,10 @@ class InventorySourceList(ListCreateAPIView):
         return methods
 
 
-class InventorySourceDetail(RetrieveUpdateDestroyAPIView):
+class InventorySourceDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = InventorySource
     serializer_class = InventorySourceSerializer
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        can_delete = request.user.can_access(InventorySource, 'delete', obj)
-        if not can_delete:
-            raise PermissionDenied(_("Cannot delete inventory source."))
-        for pu in obj.inventory_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
-            pu.cancel()
-        return super(InventorySourceDetail, self).destroy(request, *args, **kwargs)
 
 
 class InventorySourceSchedulesList(SubListCreateAPIView):
@@ -2881,7 +2872,7 @@ class JobTemplateList(ListCreateAPIView):
         return ret
 
 
-class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
+class JobTemplateDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
     metadata_class = JobTypeMetadata
@@ -3628,7 +3619,7 @@ class WorkflowJobTemplateList(WorkflowsEnforcementMixin, ListCreateAPIView):
     always_allow_superuser = False
 
 
-class WorkflowJobTemplateDetail(WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
+class WorkflowJobTemplateDetail(RelatedJobsPreventDeleteMixin, WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
 
     model = WorkflowJobTemplate
     serializer_class = WorkflowJobTemplateSerializer

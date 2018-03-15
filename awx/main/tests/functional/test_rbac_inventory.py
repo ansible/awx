@@ -4,7 +4,6 @@ from awx.main.models import (
     Host,
     CustomInventoryScript,
     Schedule,
-    AdHocCommand
 )
 from awx.main.access import (
     InventoryAccess,
@@ -13,16 +12,7 @@ from awx.main.access import (
     InventoryUpdateAccess,
     CustomInventoryScriptAccess,
     ScheduleAccess,
-    ActiveJobConflict
 )
-
-
-@pytest.mark.django_db
-def test_running_job_protection(inventory, admin_user):
-    AdHocCommand.objects.create(inventory=inventory, status='running')
-    access = InventoryAccess(admin_user)
-    with pytest.raises(ActiveJobConflict):
-        access.can_delete(inventory)
 
 
 @pytest.mark.django_db
