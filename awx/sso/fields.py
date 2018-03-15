@@ -369,6 +369,10 @@ class LDAPGroupTypeField(fields.ChoiceField):
         # MemberDNGroupType was the only group type, of the underlying lib, that
         # took a parameter.
         params_sanitized = dict()
+        if isinstance(cls, LDAPGroupType):
+            if 'name_attr' in params:
+                params_sanitized['name_attr'] = params['name_attr']
+
         if data.endswith('MemberDNGroupType'):
             params.setdefault('member_attr', 'member')
             params_sanitized['member_attr'] = params['member_attr']
