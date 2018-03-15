@@ -207,10 +207,13 @@ _Ready.prototype.onMouseDown = function (controller, msg_type, $event) {
 
     if (last_selected.last_selected_device !== null) {
         controller.changeState(Selected1);
+        controller.scope.onDetailsContextButton();
     } else if (last_selected.last_selected_link !== null) {
         controller.changeState(Selected1);
+        controller.scope.onDetailsContextButton();
     } else if (last_selected.last_selected_interface !== null) {
         controller.changeState(Selected1);
+        controller.scope.onDetailsContextButton();
     } else {
         controller.delegate_channel.send(msg_type, $event);
     }
@@ -295,53 +298,7 @@ _Selected2.prototype.onKeyDown = function (controller, msg_type, $event) {
 
     if ($event.keyCode === 8) {
         //Delete
-        controller.changeState(Ready);
-
-        var i = 0;
-        var j = 0;
-        var index = -1;
-        var devices = controller.scope.selected_devices;
-        var links = controller.scope.selected_links;
-        var all_links = controller.scope.links.slice();
-        controller.scope.selected_devices = [];
-        controller.scope.selected_links = [];
-        for (i = 0; i < links.length; i++) {
-            index = controller.scope.links.indexOf(links[i]);
-            if (index !== -1) {
-                links[i].selected = false;
-                links[i].remote_selected = false;
-                controller.scope.links.splice(index, 1);
-                controller.scope.send_control_message(new messages.LinkDestroy(controller.scope.client_id,
-                                                                               links[i].id,
-                                                                               links[i].from_device.id,
-                                                                               links[i].to_device.id,
-                                                                               links[i].from_interface.id,
-                                                                               links[i].to_interface.id,
-                                                                               links[i].name));
-            }
-        }
-        for (i = 0; i < devices.length; i++) {
-            index = controller.scope.devices.indexOf(devices[i]);
-            if (index !== -1) {
-                controller.scope.devices.splice(index, 1);
-                controller.scope.send_control_message(new messages.DeviceDestroy(controller.scope.client_id,
-                                                                                 devices[i].id,
-                                                                                 devices[i].x,
-                                                                                 devices[i].y,
-                                                                                 devices[i].name,
-                                                                                 devices[i].type,
-                                                                                 devices[i].host_id));
-            }
-            for (j = 0; j < all_links.length; j++) {
-                if (all_links[j].to_device === devices[i] ||
-                    all_links[j].from_device === devices[i]) {
-                    index = controller.scope.links.indexOf(all_links[j]);
-                    if (index !== -1) {
-                        controller.scope.links.splice(index, 1);
-                    }
-                }
-            }
-        }
+        controller.scope.deleteDevice();
     }
 
     controller.delegate_channel.send(msg_type, $event);
@@ -534,8 +491,10 @@ _Placing.prototype.onMouseMove = function (controller) {
 _Placing.prototype.onMouseMove.transitions = ['Move'];
 
 
+_ContextMenu.prototype.end = function (controller) {
 
-
+    controller.scope.removeContextMenu();
+};
 
 _ContextMenu.prototype.onLabelEdit = function (controller) {
 
@@ -546,8 +505,6 @@ _ContextMenu.prototype.onLabelEdit.transitions = ['EditLabel'];
 
 _ContextMenu.prototype.onMouseDown = function (controller) {
 
-    var item = controller.scope.context_menus[0];
-    item.enabled = false;
     controller.changeState(Ready);
 
 };
