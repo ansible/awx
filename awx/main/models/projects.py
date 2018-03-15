@@ -454,15 +454,11 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     '''
     RelatedJobsMixin
     '''
-    def _get_active_jobs(self):
+    def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            models.Q(status__in=ACTIVE_STATES) &
-            (
-                models.Q(Job___project=self) |
-                models.Q(ProjectUpdate___project=self)
-            )
+            models.Q(Job___project=self) |
+            models.Q(ProjectUpdate___project=self)
         )
-
 
 
 class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectUpdateMixin):

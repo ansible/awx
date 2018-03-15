@@ -206,6 +206,13 @@ class RelatedJobsPreventDeleteMixin(object):
         active_jobs = obj.get_active_jobs()
         if len(active_jobs) > 0:
             raise ActiveJobConflict(active_jobs)
+        time_cutoff = now() - dateutil.relativedelta.relativedelta(minutes=1)
+        recent_jobs = obj._get_related_jobs().filter(finished__gte = time_cutoff)
+        for unified_job in recent_jobs.get_real_instances():
+            if not unified_job.event_processing_finished:
+                raise PermissionDenied(_(
+                    'Related job {} is still processing events.'
+                ).format(unified_job.log_format))
         return super(RelatedJobsPreventDeleteMixin, self).perform_destroy(obj)
 
 

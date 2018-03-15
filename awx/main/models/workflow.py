@@ -30,7 +30,6 @@ from awx.main.models.mixins import (
     SurveyJobMixin,
     RelatedJobsMixin,
 )
-from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.jobs import LaunchTimeConfig
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
@@ -414,8 +413,8 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     '''
     RelatedJobsMixin
     '''
-    def _get_active_jobs(self):
-        return WorkflowJob.objects.filter(status__in=ACTIVE_STATES, workflow_job_template=self)
+    def _get_related_jobs(self):
+        return WorkflowJob.objects.filter(workflow_job_template=self)
 
 
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):

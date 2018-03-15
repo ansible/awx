@@ -457,8 +457,11 @@ class RelatedJobsMixin(object):
     Returns a list of active jobs (i.e. running) associated with the calling
     resource (self). Expected to return a QuerySet
     '''
+    def _get_related_jobs(self):
+        return self.objects.none()
+
     def _get_active_jobs(self):
-        return []
+        return self._get_related_jobs().filter(status__in=('new', 'pending', 'waiting', 'running'))
 
     '''
     Returns [{'id': '1', 'type': 'job'}, {'id': 2, 'type': 'project_update'}, ...]
