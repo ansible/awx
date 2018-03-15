@@ -23,8 +23,8 @@ spec:
               name: awx-application-config
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: "{{ awx_web_mem_request }}Gi"
+              cpu: "{{ awx_web_cpu_request }}m"
         - name: awx-celery
           image: {{ awx_task_kubernetes_image }}
           imagePullPolicy: Always
@@ -52,11 +52,8 @@ spec:
               value: {{ default_admin_password|default('password') }}
           resources:
             requests:
-              memory: "{{ awx_task_cpu_request|default('2') }}Gi"
-              cpu: "{{ awx_task_mem_request|default('1500') }}m"
-            limit:
-              memory: "{{ awx_task_cpu_request|default('2') }}Gi"
-              cpu: "{{ awx_task_mem_request|default('1500') }}m"
+              memory: "{{ awx_task_mem_request }}Gi"
+              cpu: "{{ awx_task_cpu_request }}m"
         - name: awx-rabbit
           image: ansible/awx_rabbitmq:{{ rabbitmq_version }}
           imagePullPolicy: Always
@@ -96,14 +93,14 @@ spec:
               value: "/etc/rabbitmq/rabbitmq"
           resources:
             requests:
-              memory: "2Gi"
-              cpu: "500m"
+              memory: "{{ awx_rabbitmq_mem_request }}Gi"
+              cpu: "{{ awx_rabbitmq_cpu_request }}m"
         - name: awx-memcached
           image: memcached
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: "{{ awx_memcached_mem_request }}Gi"
+              cpu: "{{ awx_memcached_cpu_request }}m"
       volumes:
         - name: awx-application-config
           configMap:
