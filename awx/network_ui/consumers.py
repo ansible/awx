@@ -4,6 +4,7 @@ from channels.sessions import channel_session
 from awx.network_ui.models import Topology, Device, Link, Client, TopologyHistory, MessageType, Interface
 from awx.network_ui.models import Group as DeviceGroup
 from awx.network_ui.models import GroupDevice as GroupDeviceMap
+from awx.network_ui.models import DataSheet, DataBinding, DataType
 from awx.network_ui.serializers import yaml_serialize_topology
 import urlparse
 from django.db.models import Q
@@ -270,7 +271,7 @@ class _Persistence(object):
         if handler is not None:
             handler(message_value, topology_id, client_id)
         else:
-            print "Unsupported message ", message_type
+            logger.warning("Unsupported message %s", message_type)
 
     def get_handler(self, message_type):
         return getattr(self, "on{0}".format(message_type), None)
@@ -298,6 +299,23 @@ class _Persistence(object):
 
     def onDeviceLabelEdit(self, device, topology_id, client_id):
         Device.objects.filter(topology_id=topology_id, id=device['id']).update(name=device['name'])
+        for pk in Device.objects.filter(topology_id=topology_id, id=device['id']).values_list('pk', flat=True):
+            for db in DataBinding.objects.filter(primary_key_id=pk,
+                                                 table="Device",
+                                                 field="name").values('sheet__client_id',
+                                                                      'sheet__name',
+                                                                      'column',
+                                                                      'row'):
+                message = ['TableCellEdit', dict(sender=0,
+                                                 msg_type="TableCellEdit",
+                                                 sheet=db['sheet__name'],
+                                                 col=db['column'] + 1, 
+                                                 row=db['row'] + 2, 
+                                                 new_value=device['name'],
+                                                 old_value=device['previous_name'])]
+                logger.info("Sending message %r", message)
+                Group("topology-%s-client-%s" % (topology_id, db['sheet__client_id'])).send({"text": json.dumps(message)})
+
 
     def onInterfaceLabelEdit(self, interface, topology_id, client_id):
         (Interface.objects
@@ -376,7 +394,7 @@ class _Persistence(object):
             if handler is not None:
                 handler(message, topology_id, client_id)
             else:
-                print "Unsupported message ", message['msg_type']
+                logger.warning("Unsupported message %s", message['msg_type'])
 
     def onDeploy(self, message_value, topology_id, client_id):
         DeviceGroup("workers").send({"text": json.dumps(["Deploy", topology_id, yaml_serialize_topology(topology_id)])})
@@ -480,7 +498,7 @@ class _UndoPersistence(object):
         if handler is not None:
             handler(message_value, topology_id, client_id)
         else:
-            print "Unsupported undo message ", message_type
+            logger.warnding("Unsupported undo message %s", message_type)
 
     def onSnapshot(self, snapshot, topology_id, client_id):
         pass
@@ -541,7 +559,7 @@ class _RedoPersistence(object):
         if handler is not None:
             handler(message_value, topology_id, client_id)
         else:
-            print "Unsupported redo message ", message_type
+            logger.warning("Unsupported redo message %s", message_type)
 
     def onDeviceSelected(self, message_value, topology_id, client_id):
         'Ignore DeviceSelected messages'
@@ -574,7 +592,7 @@ class _Discovery(object):
         if handler is not None:
             handler(message_value, topology_id)
         else:
-            print "Unsupported message ", message_type
+            logger.warning("Unsupported message %s", message_type)
 
     def get_handler(self, message_type):
         return getattr(self, "on{0}".format(message_type), None)
@@ -850,4 +868,175 @@ def tester_message(message):
 
 @channel_session
 def tester_disconnect(message):
+    pass
+
+# Tables UI channel events
+
+
+def make_sheet(data, column_headers=[]):
+
+    sheet = []
+
+    n_columns = max([len(x) for x in data]) - 1
+
+    row_i = 0
+    sheet.append([dict(value=x, editable=False) for x in list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")[0:n_columns]])
+    row_i += 1
+    if column_headers:
+        sheet.append([dict(value=row_i, editable=False)] + [dict(value=x, editable=False) for x in column_headers])
+        row_i += 1
+    for row in data:
+        sheet_row = [dict(value=row_i, editable=False)]
+        row_i += 1
+        sheet_row.extend([dict(value=x, editable=True, col=i, row=row_i) for i, x in enumerate(row[1:])])
+        sheet.append(sheet_row)
+    return sheet
+
+
+
+def make_bindings(sheet_id, klass, filter_q, values_list, order_by):
+
+    values_list = ['pk'] + values_list
+    data = list(klass.objects.filter(**filter_q).values_list(*values_list).order_by(*order_by))
+
+    data_types = set()
+
+    for row in data:
+        for cell in row:
+            data_types.add(type(cell).__name__)
+
+    data_type_map = dict()
+
+    logger.info(repr(data_types))
+
+    for dt in list(data_types):
+        data_type_map[dt] = DataType.objects.get_or_create(type_name=dt)[0].pk
+
+    logger.info(repr(data_type_map))
+
+    bindings = []
+
+    for row_i, row in enumerate(data):
+        pk = row[0]
+        for col_i, cell in enumerate(row[1:]):
+            field = values_list[col_i + 1]
+            if '__' in field:
+                continue
+            logger.info("make_bindings %s %s %s %s %s %s %s", sheet_id, klass.__name__, pk, col_i, row_i, field, data_type_map[type(cell).__name__])
+            bindings.append(DataBinding.objects.get_or_create(sheet_id=sheet_id,
+                                                              column=col_i,
+                                                              row=row_i,
+                                                              table=klass.__name__,
+                                                              primary_key_id=pk,
+                                                              field=field,
+                                                              data_type_id=data_type_map[type(cell).__name__])[0])
+    return data
+
+
+
+@channel_session
+def tables_connect(message):
+    data = urlparse.parse_qs(message.content['query_string'])
+    topology_id = parse_topology_id(data)
+    message.channel_session['topology_id'] = topology_id
+    client = Client()
+    client.save()
+    Group("topology-%s-client-%s" % (topology_id, client.pk)).add(message.reply_channel)
+    message.channel_session['client_id'] = client.pk
+    message.reply_channel.send({"text": json.dumps(["id", client.pk])})
+    message.reply_channel.send({"text": json.dumps(["topology_id", topology_id])})
+
+    device_sheet, _ = DataSheet.objects.get_or_create(topology_id=topology_id, client_id=client.pk, name="Devices")
+    data = make_bindings(device_sheet.pk, Device, dict(topology_id=topology_id), ['name'], ['name'])
+    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Devices", data=make_sheet(data, ['Device Name']))])})
+
+    interface_sheet, _ = DataSheet.objects.get_or_create(topology_id=topology_id, client_id=client.pk, name="Interfaces")
+    data = make_bindings(interface_sheet.pk, Interface, dict(device__topology_id=topology_id), ['device__name', 'name'], ['device__name', 'name'])
+    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Interfaces", data=make_sheet(data, ['Device Name', 'Interface Name']))])})
+
+    group_sheet, _ = DataSheet.objects.get_or_create(topology_id=topology_id, client_id=client.pk, name="Groups")
+    data = make_bindings(group_sheet.pk, DeviceGroup, dict(topology_id=topology_id), ['name'], ['name'])
+    message.reply_channel.send({"text": json.dumps(["sheet", dict(name="Groups", data=make_sheet(data, ['Group Name']))])})
+
+
+def device_label_edit(o):
+    d = transform_dict(dict(name='name',
+                            id='id',
+                            old_value='previous_name'), o.__dict__)
+    d['msg_type'] = 'DeviceLabelEdit'
+    return ['DeviceLabelEdit', d]
+
+
+def group_label_edit(o):
+    d = transform_dict(dict(name='name',
+                            id='id',
+                            old_value='previous_name'), o.__dict__)
+    d['msg_type'] = 'GroupLabelEdit'
+    return ['GroupLabelEdit', d]
+
+
+def interface_label_edit(o):
+    d = o.__dict__
+    d['device_id'] = o.device.id
+    d = transform_dict(dict(name='name',
+                            id='id',
+                            device_id='device_id',
+                            old_value='previous_name'), o.__dict__)
+    d['msg_type'] = 'InterfaceLabelEdit'
+    return ['InterfaceLabelEdit', d]
+
+
+@channel_session
+def tables_message(message):
+    data = json.loads(message['text'])
+    logger.info(data[0])
+    logger.info(data[1])
+
+    data_type_mapping = {'unicode': unicode,
+                         'int': int}
+
+
+    table_mapping = {'Device': Device,
+                     'Interface': Interface,
+                     'Group': DeviceGroup}
+
+
+    transformation_mapping = {('Device', 'name'): device_label_edit,
+                              ('Interface', 'name'): interface_label_edit,
+                              ('Group', 'name'): group_label_edit}
+
+
+    if data[0] == "TableCellEdit":
+
+        topology_id = message.channel_session['topology_id']
+        group_channel = Group("topology-%s" % topology_id)
+        client_id = message.channel_session['client_id']
+        data_sheet = DataSheet.objects.get(topology_id=topology_id, client_id=client_id, name=data[1]['sheet']).pk
+        logger.info("DataSheet %s", data_sheet)
+
+        data_bindings = DataBinding.objects.filter(sheet_id=data_sheet,
+                                                   column=data[1]['col'] - 1,
+                                                   row=data[1]['row'] - 2)
+
+        logger.info("Found %s bindings", data_bindings.count())
+        logger.info(repr(data_bindings.values('table', 'data_type__type_name', 'field', 'primary_key_id')))
+
+        for table, data_type, field, pk in data_bindings.values_list('table', 'data_type__type_name', 'field', 'primary_key_id'):
+            new_value = data_type_mapping[data_type](data[1]['new_value'])
+            old_value = data_type_mapping[data_type](data[1]['old_value'])
+            logger.info("Updating %s", table_mapping[table].objects.filter(pk=pk).values())
+            table_mapping[table].objects.filter(pk=pk).update(**{field: new_value})
+            logger.info("Updated %s", table_mapping[table].objects.filter(pk=pk).count())
+
+            for o in table_mapping[table].objects.filter(pk=pk):
+                o.old_value = old_value
+                message = transformation_mapping[(table, field)](o)
+                message[1]['sender'] = 0
+                logger.info("Sending %r", message)
+                group_channel.send({"text": json.dumps(message)})
+
+
+
+@channel_session
+def tables_disconnect(message):
     pass
