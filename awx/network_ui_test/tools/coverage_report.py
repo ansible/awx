@@ -18,7 +18,7 @@ import subprocess
 
 logger = logging.getLogger('coverage_report')
 
-TESTS_API = '/network_ui/tests'
+TESTS_API = '/network_ui_test/tests'
 
 
 

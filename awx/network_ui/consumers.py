@@ -2,20 +2,12 @@
 # In consumers.py
 from channels import Group, Channel
 from channels.sessions import channel_session
-from awx.network_ui.models import Topology, Device, Link, Client, TopologyHistory, MessageType, Interface
-from awx.network_ui.models import Group as DeviceGroup
-from awx.network_ui.models import GroupDevice as GroupDeviceMap
-from awx.network_ui.models import Process, Stream
-from awx.network_ui.models import Toolbox, ToolboxItem
-from awx.network_ui.models import FSMTrace, EventTrace, Coverage, TopologySnapshot
+from awx.network_ui.models import Topology, Device, Link, Client, Interface
 from awx.network_ui.models import TopologyInventory
-from awx.network_ui.models import TestCase, TestResult, CodeUnderTest, Result
 import urlparse
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from collections import defaultdict
 import logging
-from django.utils.dateparse import parse_datetime
 
 
 from awx.network_ui.utils import transform_dict
@@ -71,16 +63,6 @@ class _Persistence(object):
             return
         message_type = data[0]
         message_value = data[1]
-        try:
-            message_type_id = MessageType.objects.get(name=message_type).pk
-        except ObjectDoesNotExist:
-            logger.warning("Unsupported message %s: no message type", message_type)
-            return
-        TopologyHistory(topology_id=topology_id,
-                        client_id=client_id,
-                        message_type_id=message_type_id,
-                        message_id=data[1].get('message_id', 0),
-                        message_data=message['text']).save()
         handler = self.get_handler(message_type)
         if handler is not None:
             try:
@@ -126,9 +108,6 @@ class _Persistence(object):
 
     def onDeviceInventoryUpdate(self, device, topology_id, client_id):
         Device.objects.filter(topology_id=topology_id, id=device['id']).update(host_id=device['host_id'])
-
-    def onGroupInventoryUpdate(self, group, topology_id, client_id):
-        DeviceGroup.objects.filter(topology_id=topology_id, id=group['id']).update(inventory_group_id=group['group_id'])
 
     def onDeviceLabelEdit(self, device, topology_id, client_id):
         Device.objects.filter(topology_id=topology_id, id=device['id']).update(name=device['name'])
@@ -182,34 +161,6 @@ class _Persistence(object):
                             to_interface_id=Interface.objects.get(device_id=device_map[link['to_device_id']],
                                                                   id=link['to_interface_id']).pk).delete()
 
-    def onProcessCreate(self, process, topology_id, client_id):
-        Process.objects.get_or_create(device_id=Device.objects.get(id=process['device_id'],
-                                                                   topology_id=topology_id).pk,
-                                      id=process['id'],
-                                      defaults=dict(name=process['name'], process_type=process['type']))
-        (Device.objects
-               .filter(id=process['device_id'],
-                       topology_id=topology_id,
-                       interface_id_seq__lt=process['id'])
-               .update(interface_id_seq=process['id']))
-
-    def onStreamCreate(self, stream, topology_id, client_id):
-        device_map = dict(Device.objects
-                                .filter(topology_id=topology_id, id__in=[stream['from_id'], stream['to_id']])
-                                .values_list('id', 'pk'))
-        logger.info("onStreamCreate %s", stream)
-        Stream.objects.get_or_create(id=stream['id'],
-                                     label='',
-                                     from_device_id=device_map[stream['from_id']],
-                                     to_device_id=device_map[stream['to_id']])
-        (Topology.objects
-                 .filter(topology_id=topology_id, stream_id_seq__lt=stream['id'])
-                 .update(stream_id_seq=stream['id']))
-
-    def onCopySite(self, site, topology_id, client_id):
-        site_toolbox, _ = Toolbox.objects.get_or_create(name="Site")
-        ToolboxItem(toolbox=site_toolbox, data=json.dumps(site['site'])).save()
-
     def onDeviceSelected(self, message_value, topology_id, client_id):
         'Ignore DeviceSelected messages'
         pass
@@ -233,121 +184,6 @@ class _Persistence(object):
                 handler(message, topology_id, client_id)
             else:
                 logger.warning("Unsupported message %s", message['msg_type'])
-
-    def onCoverageRequest(self, coverage, topology_id, client_id):
-        pass
-
-    def onTestResult(self, test_result, topology_id, client_id):
-        xyz, _, rest = test_result['code_under_test'].partition('-')
-        commits_since, _, commit_hash = rest.partition('-')
-        commit_hash = commit_hash.strip('g')
-
-        x, y, z = [int(i) for i in xyz.split('.')]
-
-        code_under_test, _ = CodeUnderTest.objects.get_or_create(version_x=x,
-                                                                 version_y=y,
-                                                                 version_z=z,
-                                                                 commits_since=int(commits_since),
-                                                                 commit_hash=commit_hash)
-
-        tr = TestResult(id=test_result['id'],
-                        result_id=Result.objects.get(name=test_result['result']).pk,
-                        test_case_id=TestCase.objects.get(name=test_result['name']).pk,
-                        code_under_test_id=code_under_test.pk,
-                        client_id=client_id,
-                        time=parse_datetime(test_result['date']))
-        tr.save()
-
-
-    def onCoverage(self, coverage, topology_id, client_id):
-        Coverage(test_result_id=TestResult.objects.get(id=coverage['result_id'], client_id=client_id).pk,
-                 coverage_data=json.dumps(coverage['coverage'])).save()
-
-    def onStartRecording(self, recording, topology_id, client_id):
-        pass
-
-    def onStopRecording(self, recording, topology_id, client_id):
-        pass
-
-    def write_event(self, event, topology_id, client_id):
-        if event.get('save', True):
-            EventTrace(trace_session_id=event['trace_id'],
-                       event_data=json.dumps(event),
-                       message_id=event['message_id'],
-                       client_id=client_id).save()
-
-    onViewPort = write_event
-    onMouseEvent = write_event
-    onTouchEvent = write_event
-    onMouseWheelEvent = write_event
-    onKeyEvent = write_event
-
-    def onGroupCreate(self, group, topology_id, client_id):
-        logger.info("GroupCreate %s %s %s", group['id'], group['name'], group['type'])
-        group = transform_dict(dict(x1='x1',
-                                    y1='y1',
-                                    x2='x2',
-                                    y2='y2',
-                                    name='name',
-                                    id='id',
-                                    type='group_type',
-                                    group_id='inventory_group_id'), group)
-        d, _ = DeviceGroup.objects.get_or_create(topology_id=topology_id, id=group['id'], defaults=group)
-        d.x1 = group['x1']
-        d.y1 = group['y1']
-        d.x2 = group['x2']
-        d.y2 = group['y2']
-        d.group_type = group['group_type']
-        d.save()
-        (Topology.objects
-                 .filter(topology_id=topology_id, group_id_seq__lt=group['id'])
-                 .update(group_id_seq=group['id']))
-
-    def onGroupDestroy(self, group, topology_id, client_id):
-        DeviceGroup.objects.filter(topology_id=topology_id, id=group['id']).delete()
-
-    def onGroupLabelEdit(self, group, topology_id, client_id):
-        DeviceGroup.objects.filter(topology_id=topology_id, id=group['id']).update(name=group['name'])
-
-    def onGroupMove(self, group, topology_id, client_id):
-        DeviceGroup.objects.filter(topology_id=topology_id, id=group['id']).update(x1=group['x1'],
-                                                                                   y1=group['y1'],
-                                                                                   x2=group['x2'],
-                                                                                   y2=group['y2'])
-
-    def onGroupMembership(self, group_membership, topology_id, client_id):
-        members = set(group_membership['members'])
-        group = DeviceGroup.objects.get(topology_id=topology_id, id=group_membership['id'])
-        existing = set(GroupDeviceMap.objects.filter(group=group).values_list('device__id', flat=True))
-        new = members - existing
-        removed = existing - members
-
-        GroupDeviceMap.objects.filter(group__group_id=group.group_id,
-                                      device__id__in=list(removed)).delete()
-
-        device_map = dict(Device.objects.filter(topology_id=topology_id, id__in=list(new)).values_list('id', 'device_id'))
-        new_entries = []
-        for i in new:
-            new_entries.append(GroupDeviceMap(group=group,
-                                              device_id=device_map[i]))
-        if new_entries:
-            GroupDeviceMap.objects.bulk_create(new_entries)
-
-    def onFSMTrace(self, message_value, diagram_id, client_id):
-        FSMTrace(trace_session_id=message_value['trace_id'],
-                 fsm_name=message_value['fsm_name'],
-                 from_state=message_value['from_state'],
-                 to_state=message_value['to_state'],
-                 order=message_value['order'],
-                 client_id=client_id,
-                 message_type=message_value['recv_message_type'] or "none").save()
-
-    def onSnapshot(self, snapshot, topology_id, client_id):
-        TopologySnapshot(trace_session_id=snapshot['trace_id'],
-                         snapshot_data=json.dumps(snapshot),
-                         order=snapshot['order'],
-                         client_id=client_id,
-                         topology_id=topology_id).save()
 
 
 persistence = _Persistence()
@@ -385,45 +221,23 @@ def ws_connect(message):
                                         panY='panY',
                                         scale='scale',
                                         link_id_seq='link_id_seq',
-                                        device_id_seq='device_id_seq',
-                                        group_id_seq='group_id_seq'), topology.__dict__)
+                                        device_id_seq='device_id_seq'), topology.__dict__)
 
     message.reply_channel.send({"text": json.dumps(["Topology", topology_data])})
     send_snapshot(message.reply_channel, topology_id)
-    send_history(message.reply_channel, topology_id)
-    send_toolboxes(message.reply_channel)
-    send_tests(message.reply_channel)
-
-
-def send_toolboxes(channel):
-    for toolbox_item in ToolboxItem.objects.filter(toolbox__name__in=['Process', 'Device', 'Rack', 'Site']).values('toolbox__name', 'data'):
-        item = dict(toolbox_name=toolbox_item['toolbox__name'],
-                    data=toolbox_item['data'])
-        channel.send({"text": json.dumps(["ToolboxItem", item])})
-
-
-def send_tests(channel):
-    for name, test_case_data in TestCase.objects.all().values_list('name', 'test_case_data'):
-        channel.send({"text": json.dumps(["TestCase", [name, json.loads(test_case_data)]])})
 
 
 def send_snapshot(channel, topology_id):
     interfaces = defaultdict(list)
-    processes = defaultdict(list)
 
     for i in (Interface.objects
               .filter(device__topology_id=topology_id)
               .values()):
         interfaces[i['device_id']].append(i)
-    for i in (Process.objects
-              .filter(device__topology_id=topology_id)
-              .values()):
-        processes[i['device_id']].append(i)
     devices = list(Device.objects
                          .filter(topology_id=topology_id).values())
     for device in devices:
         device['interfaces'] = interfaces[device['device_id']]
-        device['processes'] = processes[device['device_id']]
 
     links = [dict(id=x['id'],
                   name=x['name'],
@@ -440,42 +254,10 @@ def send_snapshot(channel, topology_id):
                                        'to_device__id',
                                        'from_interface__id',
                                        'to_interface__id'))]
-    groups = list(DeviceGroup.objects
-                             .filter(topology_id=topology_id).values())
-    group_map = {g['id']: g for g in groups}
-    for group_id, device_id in GroupDeviceMap.objects.filter(group__topology_id=topology_id).values_list('group__id', 'device__id'):
-        if 'members' not in group_map[group_id]:
-            group_map[group_id]['members'] = [device_id]
-        else:
-            group_map[group_id]['members'].append(device_id)
-
-    streams = [dict(id=x['id'],
-                    label=x['label'],
-                    from_id=x['from_device__id'],
-                    to_id=x['to_device__id'])
-               for x in list(Stream.objects
-                                   .filter(Q(from_device__topology_id=topology_id) |
-                                           Q(to_device__topology_id=topology_id)).values('id',
-                                                                                         'label',
-                                                                                         'from_device__id',
-                                                                                         'to_device__id'))]
-
     snapshot = dict(sender=0,
                     devices=devices,
-                    links=links,
-                    groups=groups,
-                    streams=streams)
+                    links=links)
     channel.send({"text": json.dumps(["Snapshot", snapshot])})
-
-
-def send_history(channel, topology_id):
-    history = list(TopologyHistory.objects
-                                  .filter(topology_id=topology_id)
-                                  .exclude(message_type__name__in=HISTORY_MESSAGE_IGNORE_TYPES)
-                                  .exclude(undone=True)
-                                  .order_by('pk')
-                                  .values_list('message_data', flat=True)[:1000])
-    channel.send({"text": json.dumps(["History", history])})
 
 
 @channel_session
