@@ -1,4 +1,6 @@
 from channels.routing import route
+from awx.network_ui.routing import channel_routing as network_ui_routing
+from awx.network_ui_test.routing import channel_routing as network_ui_test_routing
 
 
 channel_routing = [
@@ -7,6 +9,6 @@ channel_routing = [
     route("websocket.receive", "awx.main.consumers.ws_receive", path=r'^/websocket/$'),
 ]
 
-from awx.network_ui.routing import channel_routing as network_routing
 
-channel_routing += network_routing
+channel_routing += network_ui_routing
+channel_routing += network_ui_test_routing

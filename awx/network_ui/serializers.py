@@ -1,10 +1,9 @@
 # Copyright (c) 2017 Red Hat, Inc
 
-from awx.network_ui.models import Topology, Device, Link, Interface, Group, GroupDevice, Process, Stream
+from awx.network_ui.models import Topology, Device, Link, Interface
 from django.db.models import Q
 import yaml
 import json
-from collections import defaultdict
 
 NetworkAnnotatedInterface = Interface.objects.values('name',
                                                      'id',
@@ -19,36 +18,18 @@ NetworkAnnotatedInterface = Interface.objects.values('name',
 def topology_data(topology_id):
 
         data = dict(devices=[],
-                    links=[],
-                    groups=[],
-                    streams=[])
+                    links=[])
 
         topology = Topology.objects.get(pk=topology_id)
 
         data['name'] = topology.name
         data['topology_id'] = topology_id
 
-        groups = list(Group.objects.filter(topology_id=topology_id).values())
-        group_devices = GroupDevice.objects.filter(group__topology_id=topology_id).values('group_id', 'device_id', 'device__name', 'group__name')
-        group_device_map = defaultdict(list)
-
-        for group_device in group_devices:
-            group_device_map[group_device['group_id']].append(group_device)
-
-        device_group_map = defaultdict(list)
-        for group_device in group_devices:
-            device_group_map[group_device['device_id']].append(group_device)
-
-        for group in groups:
-            group['members'] = [x['device__name'] for x in group_device_map[group['group_id']]]
-        data['groups'] = groups
-
         links = list(Link.objects
                          .filter(Q(from_device__topology_id=topology_id) |
                                  Q(to_device__topology_id=topology_id)))
 
         interfaces = Interface.objects.filter(device__topology_id=topology_id)
-        processes = Process.objects.filter(device__topology_id=topology_id)
 
         for device in Device.objects.filter(topology_id=topology_id).order_by('name'):
             interfaces = list(NetworkAnnotatedInterface.filter(device_id=device.pk).order_by('name'))
@@ -58,15 +39,12 @@ def topology_data(topology_id):
                                remote_interface_name=x['from_link__to_interface__name'] or x['to_link__from_interface__name'],
                                id=x['id'],
                                ) for x in interfaces]
-            processes = list(Process.objects.filter(device_id=device.pk).values())
             data['devices'].append(dict(name=device.name,
                                         type=device.device_type,
                                         x=device.x,
                                         y=device.y,
                                         id=device.id,
-                                        interfaces=interfaces,
-                                        processes=processes,
-                                        groups=[x['group__name'] for x in device_group_map[device.device_id]]))
+                                        interfaces=interfaces))
 
         for link in links:
             data['links'].append(dict(from_device=link.from_device.name,
@@ -79,18 +57,6 @@ def topology_data(topology_id):
                                       to_interface_id=link.to_interface.id,
                                       name=link.name,
                                       network=link.pk))
-
-        streams = list(Stream.objects
-                       .filter(Q(from_device__topology_id=topology_id) |
-                               Q(to_device__topology_id=topology_id)))
-
-        for stream in streams:
-            data['streams'].append(dict(from_id=stream.from_device.id,
-                                        to_id=stream.to_device.id,
-                                        from_device=stream.from_device.name,
-                                        to_device=stream.to_device.name,
-                                        label=stream.label,
-                                        id=stream.id))
 
         return data
 
