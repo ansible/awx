@@ -12,8 +12,7 @@ angular.module(MODULE_NAME, [
     atLibComponents,
     atLibModels,
     atFeaturesApplications,
-    atFeaturesCredentials,
-    atFeaturesNetworking
+    atFeaturesCredentials
 ]);
 
 export default MODULE_NAME;
