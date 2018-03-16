@@ -9,10 +9,10 @@ import UsersAdd from './add/users-add.controller';
 import UsersEdit from './edit/users-edit.controller';
 import UserForm from './users.form';
 import UserList from './users.list';
-import UserTokensListRoute from './users-tokens-list.route';
-import UserTokensAddRoute from './users-tokens-add.route';
-import UserTokensAddApplicationRoute from './users-tokens-add-application.route';
-import TokensStrings from './tokens.strings';
+
+import UserTokensListRoute from '../../features/users/tokens/users-tokens-list.route';
+import UserTokensAddRoute from '../../features/users/tokens/users-tokens-add.route';
+import UserTokensAddApplicationRoute from '../../features/users/tokens/users-tokens-add-application.route';
 
 import { N_ } from '../i18n';
 
@@ -23,8 +23,6 @@ angular.module('Users', [])
     .controller('UsersEdit', UsersEdit)
     .factory('UserForm', UserForm)
     .factory('UserList', UserList)
-    .service('TokensStrings', TokensStrings)
-
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();

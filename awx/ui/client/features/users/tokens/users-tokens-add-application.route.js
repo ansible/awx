@@ -33,27 +33,25 @@ export default {
         }
     },
     resolve: {
-        ListDefinition: [() => {
-            return {
-                name: 'applications',
-                iterator: 'application',
-                hover: true,
-                index: false,
-                fields: {
-                    name: {
-                        key: true,
-                        label: 'Name',
-                        columnClass: 'col-lg-4 col-md-6 col-sm-8 col-xs-8',
-                        awToolTip: '{{application.description | sanitize}}',
-                        dataPlacement: 'top'
-                    },
+        ListDefinition: [() => ({
+            name: 'applications',
+            iterator: 'application',
+            hover: true,
+            index: false,
+            fields: {
+                name: {
+                    key: true,
+                    label: 'Name',
+                    columnClass: 'col-lg-4 col-md-6 col-sm-8 col-xs-8',
+                    awToolTip: '{{application.description | sanitize}}',
+                    dataPlacement: 'top'
                 },
-                actions: {
-                },
-                fieldActions: {
-                }
+            },
+            actions: {
+            },
+            fieldActions: {
             }
-        }],
+        })],
         Dataset: ['QuerySet', 'GetBasePath', '$stateParams', 'ListDefinition',
             (qs, GetBasePath, $stateParams, list) => qs.search(
                 GetBasePath('applications'),
@@ -68,4 +66,4 @@ export default {
             $('body').removeClass('modal-open');
         }
     }
-}
+};

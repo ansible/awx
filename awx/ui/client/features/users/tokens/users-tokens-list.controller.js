@@ -47,7 +47,7 @@ function ListTokensController (
 
         let html = $filter('longDate')(lastUsed);
 
-        const { username, id } = _.get(user, 'summary_fields.last_used', {});
+        const { username, id } = _.get(token, 'summary_fields.last_used', {});
 
         if (username && id) {
             html += ` ${strings.get('add.LAST_USED_LABEL')} <a href="/#/users/${id}">${$filter('sanitize')(username)}</a>`;

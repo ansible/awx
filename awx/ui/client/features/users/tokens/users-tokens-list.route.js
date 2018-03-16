@@ -1,19 +1,17 @@
-import { N_ } from '../i18n';
+import { N_ } from '../../../src/i18n';
 
 import ListController from './users-tokens-list.controller';
 
-const listTemplate = require('~src/users/users-tokens-list.partial.html');
+const listTemplate = require('~features/users/tokens/users-tokens-list.partial.html');
 
 export default {
-    url: "/tokens",
+    url: '/tokens',
     name: 'users.edit.tokens',
-    params: {
-    },
     ncyBreadcrumb: {
-        label: N_("TOKENS")
+        label: N_('TOKENS')
     },
     views: {
-        'related': {
+        related: {
             templateUrl: listTemplate,
             controller: ListController,
             controllerAs: 'vm'
@@ -36,7 +34,7 @@ export default {
             'QuerySet',
             ($stateParams, Wait, GetBasePath, qs) => {
                 const searchParam = $stateParams.token_search;
-                const searchPath = GetBasePath('users') + $stateParams.user_id + '/tokens';
+                const searchPath = `${GetBasePath('users')}${$stateParams.user_id}/tokens`;
                 Wait('start');
                 return qs.search(searchPath, searchParam)
                     .finally(() => {

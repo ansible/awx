@@ -25,7 +25,10 @@ function TokensStrings (BaseString) {
         ERROR_HEADER: t.s('COULD NOT CREATE TOKEN'),
         ERROR_BODY_LABEL: t.s('Returned status:'),
         LAST_USED_LABEL: t.s('by'),
-        DELETE_ACTION_LABEL: t.s('DELETE')
+        DELETE_ACTION_LABEL: t.s('DELETE'),
+        SCOPE_PLACEHOLDER: t.s('Select a scope'),
+        SCOPE_READ_LABEL: t.s('Read'),
+        SCOPE_WRITE_LABEL: t.s('Write')
     };
 
     ns.list = {

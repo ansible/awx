@@ -1,10 +1,9 @@
-import { N_ } from '../i18n';
+import { N_ } from '../../../src/i18n';
 import AddController from './users-tokens-add.controller';
 
-const addTemplate = require('~src/users/users-tokens-add.partial.html');
+const addTemplate = require('~features/users/tokens/users-tokens-add.partial.html');
 
 function TokensDetailResolve ($q, Application) {
-
     const promises = {};
 
     promises.application = new Application('options');
@@ -18,12 +17,12 @@ TokensDetailResolve.$inject = [
 ];
 
 export default {
-    url: "/add-token",
+    url: '/add-token',
     name: 'users.edit.tokens.add',
     params: {
     },
     ncyBreadcrumb: {
-        label: N_("CREATE TOKEN")
+        label: N_('CREATE TOKEN')
     },
     views: {
         'preFormView@users.edit': {

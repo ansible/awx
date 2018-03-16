@@ -1,4 +1,7 @@
-function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBasePath, $filter) {
+function AddTokensController (
+    models, $state, strings, Rest, Alert, Wait, GetBasePath,
+    $filter, ProcessErrors
+) {
     const vm = this || {};
     const { application } = models;
 
@@ -28,21 +31,29 @@ function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBas
     vm.form.description.required = false;
 
     vm.form.scope = {
-        choices: ['', 'read', 'write'],
+        choices: [
+            '',
+            'read',
+            'write'
+        ],
         help_text: strings.get('add.SCOPE_HELP_TEXT'),
         id: 'scope',
         label: 'Scope',
         required: true,
         _component: 'at-input-select',
-        _data: ['', 'read', 'write'],
+        _data: [
+            strings.get('add.SCOPE_PLACEHOLDER'),
+            strings.get('add.SCOPE_READ_LABEL'),
+            strings.get('add.SCOPE_WRITE_LABEL')
+        ],
         _exp: 'choice for (index, choice) in state._data',
         _format: 'array'
-    }
+    };
 
-    vm.form.save = data => {
-        Rest.setUrl(GetBasePath('users') + $state.params.user_id + '/authorized_tokens');
-        return Rest.post(data)
-            .then(({data}) => {
+    vm.form.save = payload => {
+        Rest.setUrl(`${GetBasePath('users')}${$state.params.user_id}/authorized_tokens`);
+        return Rest.post(payload)
+            .then(({ data }) => {
                 Alert(strings.get('add.TOKEN_MODAL_HEADER'), `
                   <div class="TokenModal">
                       <div class="TokenModal-label">
@@ -71,8 +82,8 @@ function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBas
                 `, null, null, null, null, null, true);
                 Wait('stop');
             })
-            .catch(({data, status}) => {
-                ProcessErrors($scope, data, status, null, {
+            .catch(({ data, status }) => {
+                ProcessErrors(null, data, status, null, {
                     hdr: strings.get('add.ERROR_HEADER'),
                     msg: `${strings.get('add.ERROR_BODY_LABEL')} ${status}`
                 });
@@ -80,7 +91,7 @@ function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBas
             });
     };
 
-    vm.form.onSaveSuccess = res => {
+    vm.form.onSaveSuccess = () => {
         $state.go('^', { user_id: $state.params.user_id }, { reload: true });
     };
 }
@@ -88,12 +99,13 @@ function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBas
 AddTokensController.$inject = [
     'resolvedModels',
     '$state',
-    'ApplicationsStrings',
+    'TokensStrings',
     'Rest',
     'Alert',
     'Wait',
     'GetBasePath',
-    '$filter'
+    '$filter',
+    'ProcessErrors'
 ];
 
 export default AddTokensController;
