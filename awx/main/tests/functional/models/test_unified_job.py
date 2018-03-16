@@ -141,3 +141,16 @@ class TestMetaVars:
         )
         data = job.awx_meta_vars()
         assert data['awx_schedule_id'] == schedule.pk
+
+
+@pytest.mark.django_db
+def test_event_processing_not_finished():
+    job = Job.objects.create(emitted_events=2, status='finished')
+    job.event_class.objects.create(job=job)
+    assert not job.event_processing_finished
+
+
+@pytest.mark.django_db
+def test_event_model_undefined():
+    wj = WorkflowJob.objects.create(name='foobar', status='finished')
+    assert wj.event_processing_finished
