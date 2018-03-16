@@ -254,7 +254,7 @@ def test_project_unique_together_with_org(organization):
 
 
 @pytest.mark.django_db
-def test_project_delete(delete, organization, admin):
+def test_project_delete(delete, organization, admin_user):
     proj = Project(name='foo', organization=organization)
     proj.save()
-    delete(reverse('api:project_detail', kwargs={'pk':proj.id,}), admin)
+    delete(reverse('api:project_detail', kwargs={'pk':proj.id,}), admin_user)
