@@ -22,14 +22,14 @@ function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBas
     vm.form.application._resource = 'application';
     vm.form.application._route = 'users.edit.tokens.add.application';
     vm.form.application._model = application;
-    vm.form.application._placeholder = strings.get('SELECT AN APPLICATION');
+    vm.form.application._placeholder = strings.get('add.APP_PLACEHOLDER');
     vm.form.application.required = true;
 
     vm.form.description.required = false;
 
     vm.form.scope = {
         choices: ['', 'read', 'write'],
-        help_text: 'Specify a scope for the token\'s access',
+        help_text: strings.get('add.SCOPE_HELP_TEXT'),
         id: 'scope',
         label: 'Scope',
         required: true,
@@ -43,10 +43,10 @@ function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBas
         Rest.setUrl(GetBasePath('users') + $state.params.user_id + '/authorized_tokens');
         return Rest.post(data)
             .then(({data}) => {
-                Alert('TOKEN INFORMATION', `
+                Alert(strings.get('add.TOKEN_MODAL_HEADER'), `
                   <div class="TokenModal">
                       <div class="TokenModal-label">
-                          TOKEN
+                          ${strings.get('add.TOKEN_LABEL')}
                       </div>
                       <div class="TokenModal-value">
                           ${data.token}
@@ -54,7 +54,7 @@ function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBas
                   </div>
                   <div class="TokenModal">
                       <div class="TokenModal-label">
-                          REFRESH TOKEN
+                          ${strings.get('add.REFRESH_TOKEN_LABEL')}
                       </div>
                       <div class="TokenModal-value">
                           ${data.refresh_token}
@@ -62,7 +62,7 @@ function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBas
                   </div>
                   <div class="TokenModal">
                       <div class="TokenModal-label">
-                          EXPIRES
+                          ${strings.get('add.TOKEN_EXPIRES_LABEL')}
                       </div>
                       <div class="TokenModal-value">
                           ${$filter('longDate')(data.expires)}
@@ -73,8 +73,8 @@ function AddTokensController (models, $state, strings, Rest, Alert, Wait, GetBas
             })
             .catch(({data, status}) => {
                 ProcessErrors($scope, data, status, null, {
-                    hdr: 'COULD NOT CREATE TOKEN',
-                    msg: `Returned status: ${status}`
+                    hdr: strings.get('add.ERROR_HEADER'),
+                    msg: `${strings.get('add.ERROR_BODY_LABEL')} ${status}`
                 });
                 Wait('stop');
             });

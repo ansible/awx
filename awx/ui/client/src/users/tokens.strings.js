@@ -15,11 +15,21 @@ function TokensStrings (BaseString) {
     };
 
     ns.add = {
-        PANEL_TITLE: t.s('CREATE TOKEN')
+        PANEL_TITLE: t.s('CREATE TOKEN'),
+        APP_PLACEHOLDER: t.s('SELECT AN APPLICATION'),
+        SCOPE_HELP_TEXT: t.s('Specify a scope for the token\'s access'),
+        TOKEN_MODAL_HEADER: t.s('TOKEN INFORMATION'),
+        TOKEN_LABEL: t.s('TOKEN'),
+        REFRESH_TOKEN_LABEL: t.s('REFRESH TOKEN'),
+        TOKEN_EXPIRES_LABEL: t.s('EXPIRES'),
+        ERROR_HEADER: t.s('COULD NOT CREATE TOKEN'),
+        ERROR_BODY_LABEL: t.s('Returned status:'),
+        LAST_USED_LABEL: t.s('by'),
+        DELETE_ACTION_LABEL: t.s('DELETE')
     };
 
     ns.list = {
-        ROW_ITEM_LABEL_EXPIRED: t.s('DESCRIPTION'),
+        ROW_ITEM_LABEL_DESCRIPTION: t.s('DESCRIPTION'),
         ROW_ITEM_LABEL_EXPIRED: t.s('EXPIRATION'),
         ROW_ITEM_LABEL_USED: t.s('LAST USED')
     };

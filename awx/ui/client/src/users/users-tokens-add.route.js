@@ -23,7 +23,7 @@ export default {
     params: {
     },
     ncyBreadcrumb: {
-        label: N_("ADD TOKEN")
+        label: N_("CREATE TOKEN")
     },
     views: {
         'preFormView@users.edit': {

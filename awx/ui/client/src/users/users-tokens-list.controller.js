@@ -50,7 +50,7 @@ function ListTokensController (
         const { username, id } = _.get(user, 'summary_fields.last_used', {});
 
         if (username && id) {
-            html += ` by <a href="/#/users/${id}">${$filter('sanitize')(username)}</a>`;
+            html += ` ${strings.get('add.LAST_USED_LABEL')} <a href="/#/users/${id}">${$filter('sanitize')(username)}</a>`;
         }
 
         return html;
@@ -98,7 +98,7 @@ function ListTokensController (
             resourceName: 'token',
             body: deleteModalBody,
             action,
-            actionText: 'DELETE'
+            actionText: strings.get('add.DELETE_ACTION_LABEL')
         });
     };
 }
