@@ -415,7 +415,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     RelatedJobsMixin
     '''
     def _get_active_jobs(self):
-        return WorkflowJob.objects.filter(status__in=ACTIVE_STATES)
+        return WorkflowJob.objects.filter(status__in=ACTIVE_STATES, workflow_job_template=self)
 
 
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):
