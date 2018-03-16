@@ -3,7 +3,7 @@ import pytest
 from awx.api.versioning import reverse
 from awx.main.models import UnifiedJob, ProjectUpdate, InventoryUpdate
 from awx.main.tests.base import URI
-from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES
 
 
 TEST_STATES = list(ACTIVE_STATES)

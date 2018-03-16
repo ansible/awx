@@ -28,7 +28,6 @@ from awx.main.models.notifications import (
 from awx.main.models.unified_jobs import (
     UnifiedJob,
     UnifiedJobTemplate,
-    ACTIVE_STATES,
 )
 from awx.main.models.mixins import (
     ResourceMixin,

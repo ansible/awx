@@ -38,6 +38,7 @@ from awx.main.utils import (
     copy_model_by_class, copy_m2m_relationships,
     get_type_for_model, parse_yaml_or_json
 )
+from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import JSONField, AskForField
@@ -46,8 +47,7 @@ __all__ = ['UnifiedJobTemplate', 'UnifiedJob', 'StdoutMaxBytesExceeded']
 
 logger = logging.getLogger('awx.main.models.unified_jobs')
 
-CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
-ACTIVE_STATES = CAN_CANCEL
+# NOTE: ACTIVE_STATES moved to constants because it is used by parent modules
 
 
 class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, NotificationFieldsModel):

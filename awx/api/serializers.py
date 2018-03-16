@@ -40,7 +40,7 @@ from polymorphic.models import PolymorphicModel
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN
 from awx.main.models import * # noqa
-from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES
 from awx.main.models.base import NEW_JOB_TYPE_CHOICES
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField

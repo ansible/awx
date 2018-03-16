@@ -49,7 +49,7 @@ from crum import impersonate
 from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import * # noqa
-from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.expect import run, isolated_manager

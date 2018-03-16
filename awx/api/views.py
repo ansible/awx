@@ -88,7 +88,7 @@ from awx.api.permissions import (
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata, JobTypeMetadata
-from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES
 from awx.main.scheduler.tasks import run_job_complete
 from awx.api.exceptions import ActiveJobConflict
 

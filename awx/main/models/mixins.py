@@ -24,6 +24,7 @@ from awx.main.utils import parse_yaml_or_json, get_custom_venv_choices
 from awx.main.utils.encryption import decrypt_value, get_encryption_key, is_encrypted
 from awx.main.utils.polymorphic import build_polymorphic_ctypes_map
 from awx.main.fields import JSONField, AskForField
+from awx.main.constants import ACTIVE_STATES
 
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin',
@@ -461,7 +462,7 @@ class RelatedJobsMixin(object):
         return self.objects.none()
 
     def _get_active_jobs(self):
-        return self._get_related_jobs().filter(status__in=('new', 'pending', 'waiting', 'running'))
+        return self._get_related_jobs().filter(status__in=ACTIVE_STATES)
 
     '''
     Returns [{'id': '1', 'type': 'job'}, {'id': 2, 'type': 'project_update'}, ...]
