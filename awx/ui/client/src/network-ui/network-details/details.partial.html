@@ -34,8 +34,8 @@
             <awx-net-extra-vars item="item"></awx-net-extra-vars>
         </div>
     </form>
-    <div class="buttons Form-buttons" id="host_controls" ng-show="item.host_id">
-        <button type="button" class="btn btn-sm Form-cancelButton" id="host_cancel_btn" ng-show="(item.summary_fields.user_capabilities.edit || canAdd)" ng-click="formCancel()"> Cancel</button>
+    <div class="buttons Form-buttons" id="host_controls">
+        <button type="button" class="btn btn-sm Form-cancelButton" id="host_cancel_btn" ng-click="formCancel()"> Cancel</button>
     </div>
     <div class="Networking-saveConfirmation" ng-show="saveConfirmed">
         Save Complete <i class="fa fa-check-circle"></i>
