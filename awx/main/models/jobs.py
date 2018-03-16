@@ -456,7 +456,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     RelatedJobsMixin
     '''
     def _get_active_jobs(self):
-        return Job.objects.filter(status__in=ACTIVE_STATES)
+        return Job.objects.filter(status__in=ACTIVE_STATES, job_template=self)
 
 
 class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin):

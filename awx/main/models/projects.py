@@ -25,7 +25,11 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.unified_jobs import (
+    UnifiedJob,
+    UnifiedJobTemplate,
+    ACTIVE_STATES,
+)
 from awx.main.models.mixins import (
     ResourceMixin,
     TaskManagerProjectUpdateMixin,
@@ -230,7 +234,7 @@ class ProjectOptions(models.Model):
         return proj_path + '.lock'
 
 
-class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEnvMixin):
+class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
     '''
     A project represents a playbook git repo that can access a set of inventories
     '''
@@ -447,8 +451,21 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     def get_absolute_url(self, request=None):
         return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)
 
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_active_jobs(self):
+        return UnifiedJob.objects.non_polymorphic().filter(
+            models.Q(status__in=ACTIVE_STATES) &
+            (
+                models.Q(Job___project=self) |
+                models.Q(ProjectUpdate___project=self)
+            )
+        )
 
-class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectUpdateMixin, RelatedJobsMixin):
+
+
+class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectUpdateMixin):
     '''
     Internal job for tracking project updates from SCM.
     '''
@@ -563,15 +580,4 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
             return self.global_instance_groups
         return selected_groups
 
-    '''
-    RelatedJobsMixin
-    '''
-    def _get_active_jobs(self):
-        return UnifiedJob.objects.non_polymorphic().filter(
-            Q(status__in=ACTIVE_STATES) &
-            (
-                Q(Job___project=self) |
-                Q(ProjectUpdate___project=self)
-            )
-        )
 
