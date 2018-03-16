@@ -84,11 +84,9 @@ function InventoriesList($scope,
             })
             .finally(() => Wait('stop'));
     };
-    
+
     $scope.goToGraph = function(inventory){
          $state.go('inventories.edit.networking', {inventory_id: inventory.id, inventory_name: inventory.name});
-        // let url = $state.href('inventories.edit.networking', {inventory_id: inventory.id, inventory_name: inventory.name});
-        // window.open(url, '_blank');
     };
 
     $scope.editInventory = function (inventory) {

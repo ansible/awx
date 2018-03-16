@@ -98,7 +98,7 @@ export default ['i18n', function(i18n) {
                 ngClick: 'goToGraph(inventory)',
                 awToolTip: i18n._('Network Visualization'),
                 dataPlacement: 'top',
-                ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.edit'
+                ngShow: '!inventory.pending_deletion'
             },
             edit: {
                 label: i18n._('Edit'),
