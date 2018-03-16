@@ -69,7 +69,7 @@ admin.site.register(Link, LinkAdmin)
 
 class TopologyAdmin(admin.ModelAdmin):
     fields = ('name', 'scale', 'panX', 'panY', 'device_id_seq', 'link_id_seq', 'group_id_seq', 'stream_id_seq',)
-    raw_id_fields = ('group_id_seq',)
+    raw_id_fields = ()
 
 
 admin.site.register(Topology, TopologyAdmin)
