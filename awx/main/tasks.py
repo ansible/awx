@@ -1173,7 +1173,7 @@ class RunJob(BaseTask):
         cp_dir = os.path.join(kwargs['private_data_dir'], 'cp')
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0o700)
-        env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, '%%h%%p%%r')
+        env['ANSIBLE_SSH_CONTROL_PATH_DIR'] = cp_dir
 
         # Allow the inventory script to include host variables inline via ['_meta']['hostvars'].
         env['INVENTORY_HOSTVARS'] = str(True)
