@@ -33,7 +33,6 @@ from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.events import InventoryUpdateEvent
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.mixins import (
     ResourceMixin,
     TaskManagerInventoryUpdateMixin,
@@ -497,14 +496,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     '''
     RelatedJobsMixin
     '''
-    def _get_active_jobs(self):
+    def _get_related_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            Q(status__in=ACTIVE_STATES) &
-            (
-                Q(Job___inventory=self) |
-                Q(InventoryUpdate___inventory_source__inventory=self) |
-                Q(AdHocCommand___inventory=self)
-            )
+            Q(Job___inventory=self) |
+            Q(InventoryUpdate___inventory_source__inventory=self) |
+            Q(AdHocCommand___inventory=self)
         )
 
 
@@ -963,9 +959,8 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     '''
     RelatedJobsMixin
     '''
-    def _get_active_jobs(self):
-        return InventoryUpdate.objects.filter(status__in=ACTIVE_STATES,
-                                              inventory_source__in=self.inventory_sources.all())
+    def _get_related_jobs(self):
+        return InventoryUpdate.objects.filter(inventory_source__in=self.inventory_sources.all())
 
 
 class InventorySourceOptions(BaseModel):
@@ -1583,9 +1578,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMix
     '''
     RelatedJobsMixin
     '''
-    def _get_active_jobs(self):
-        return InventoryUpdate.objects.filter(status__in=ACTIVE_STATES,
-                                              inventory_source=self)
+    def _get_related_jobs(self):
+        return InventoryUpdate.objects.filter(inventory_source=self)
 
 
 class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin):

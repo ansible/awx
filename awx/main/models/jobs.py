@@ -29,7 +29,6 @@ from awx.api.versioning import reverse
 from awx.main.models.base import * # noqa
 from awx.main.models.events import JobEvent, SystemJobEvent
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
@@ -455,8 +454,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     '''
     RelatedJobsMixin
     '''
-    def _get_active_jobs(self):
-        return Job.objects.filter(status__in=ACTIVE_STATES, job_template=self)
+    def _get_related_jobs(self):
+        return Job.objects.filter(job_template=self)
 
 
 class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin):

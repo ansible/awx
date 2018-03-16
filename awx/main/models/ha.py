@@ -19,10 +19,7 @@ from awx.main.fields import JSONField
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
-from awx.main.models.unified_jobs import (
-    UnifiedJob,
-    ACTIVE_STATES
-)
+from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_capacity
 from awx.main.models.mixins import RelatedJobsMixin
 
@@ -159,9 +156,8 @@ class InstanceGroup(models.Model, RelatedJobsMixin):
     '''
     RelatedJobsMixin
     '''
-    def _get_active_jobs(self):
-        return UnifiedJob.objects.filter(instance_group=self,
-                                         status__in=ACTIVE_STATES)
+    def _get_related_jobs(self):
+        return UnifiedJob.objects.filter(instance_group=self)
 
 
     class Meta:

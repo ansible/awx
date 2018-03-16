@@ -20,10 +20,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
-from awx.main.models.unified_jobs import (
-    UnifiedJob,
-    ACTIVE_STATES,
-)
+from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.mixins import ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin
 
 __all__ = ['Organization', 'Team', 'Profile', 'UserSessionMembership']
@@ -82,15 +79,12 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
     '''
     RelatedJobsMixin
     '''
-    def _get_active_jobs(self):
+    def _get_related_jobs(self):
         project_ids = self.projects.all().values_list('id')
         return UnifiedJob.objects.non_polymorphic().filter(
-            Q(status__in=ACTIVE_STATES) &
-            (
-                Q(Job___project__in=project_ids) |
-                Q(ProjectUpdate___project__in=project_ids) |
-                Q(InventoryUpdate___inventory_source__inventory__organization=self)
-            )
+            Q(Job___project__in=project_ids) |
+            Q(ProjectUpdate___project__in=project_ids) |
+            Q(InventoryUpdate___inventory_source__inventory__organization=self)
         )
 
 

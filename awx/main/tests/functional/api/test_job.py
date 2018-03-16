@@ -1,8 +1,15 @@
 import pytest
+import mock
+
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
+
+from rest_framework.exceptions import PermissionDenied
 
 from awx.api.versioning import reverse
+from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
 
-from awx.main.models import JobTemplate, User
+from awx.main.models import JobTemplate, User, Job
 
 
 @pytest.mark.django_db
@@ -81,3 +88,48 @@ def test_job_relaunch_on_failed_hosts(post, inventory, project, machine_credenti
         expect=201
     )
     assert r.data.get('limit') == hosts
+
+
+@pytest.mark.django_db
+def test_block_unprocessed_events(delete, admin_user, mocker):
+    time_of_finish = parse("Thu Feb 28 09:10:20 2013 -0500")
+    job = Job.objects.create(
+        emitted_events=1,
+        status='finished',
+        finished=time_of_finish
+    )
+    request = mock.MagicMock()
+
+    class MockView(UnifiedJobDeletionMixin):
+        model = Job
+
+        def get_object(self):
+            return job
+
+    view = MockView()
+
+    time_of_request = time_of_finish + relativedelta(seconds=2)
+    with mock.patch('awx.api.views.now', lambda: time_of_request):
+        r = view.destroy(request)
+        assert r.status_code == 400
+
+
+@pytest.mark.django_db
+def test_block_related_unprocessed_events(mocker, organization, project, delete, admin_user):
+    job_template = JobTemplate.objects.create(
+        project=project,
+        playbook='helloworld.yml'
+    )
+    time_of_finish = parse("Thu Feb 23 14:17:24 2012 -0500")
+    Job.objects.create(
+        emitted_events=1,
+        status='finished',
+        finished=time_of_finish,
+        job_template=job_template,
+        project=project
+    )
+    view = RelatedJobsPreventDeleteMixin()
+    time_of_request = time_of_finish + relativedelta(seconds=2)
+    with mock.patch('awx.api.views.now', lambda: time_of_request):
+        with pytest.raises(PermissionDenied):
+            view.perform_destroy(organization)
