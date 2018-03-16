@@ -873,7 +873,7 @@ var NetworkUIController = function($scope,
     // Context Menu Buttons
     $scope.context_menu_buttons = [
         new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope),
-        new models.ContextMenuButton("Delete", 256, 231, 160, 26, $scope.onDeleteContextMenu, $scope)
+        new models.ContextMenuButton("Remove", 256, 231, 160, 26, $scope.onDeleteContextMenu, $scope)
     ];
 
     // Context Menus

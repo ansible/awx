@@ -1,21 +1,4 @@
 <!-- Copyright (c) 2017 Red Hat, Inc. -->
-
-<g ng-if="!hide_menus">
-<!-- begin collapsed toolbox -->
-<g ng-if="overall_toolbox_collapsed">
-<rect class="NetworkUI__toolbox-collapsed"
-      x=0
-      ng-attr-y={{toolbox.y}}
-      width=45
-      ng-attr-height={{toolbox.height}}>
-</rect>
-<g awx-net-chevron-right-icon
-    action-icon="action_icons[1]"
-    ng-if="overall_toolbox_collapsed"
-    ng-attr-transform="translate({{action_icons[1].x}}, {{action_icons[1].y}})"></g>
-</g>
-<!-- end collapsed toolbox -->
-
 <g ng-if="toolbox.enabled">
 <rect class="NetworkUI__toolbox"
       ng-attr-x="{{toolbox.x}}"
