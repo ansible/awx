@@ -25,7 +25,11 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.unified_jobs import (
+    UnifiedJob,
+    UnifiedJobTemplate,
+    ACTIVE_STATES,
+)
 from awx.main.models.mixins import (
     ResourceMixin,
     TaskManagerProjectUpdateMixin,
@@ -578,8 +582,8 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         return UnifiedJob.objects.non_polymorphic().filter(
             models.Q(status__in=ACTIVE_STATES) &
             (
-                models.Q(Job___project=self) |
-                models.Q(ProjectUpdate___project=self)
+                models.Q(Job___project=self.project) |
+                models.Q(ProjectUpdate___project=self.project)
             )
         )
 
