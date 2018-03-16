@@ -447,6 +447,14 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     def get_absolute_url(self, request=None):
         return reverse('api:project_detail', kwargs={'pk': self.pk}, request=request)
 
+    def get_active_jobs(self):
+        for project_update in self.project_updates.all():
+            active_jobs = project_update.get_active_jobs()
+            if active_jobs is None:
+                continue
+            return active_jobs
+        return []
+
 
 class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectUpdateMixin, RelatedJobsMixin):
     '''
@@ -568,10 +576,10 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     '''
     def _get_active_jobs(self):
         return UnifiedJob.objects.non_polymorphic().filter(
-            Q(status__in=ACTIVE_STATES) &
+            models.Q(status__in=ACTIVE_STATES) &
             (
-                Q(Job___project=self) |
-                Q(ProjectUpdate___project=self)
+                models.Q(Job___project=self) |
+                models.Q(ProjectUpdate___project=self)
             )
         )
 
