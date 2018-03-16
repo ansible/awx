@@ -96,7 +96,7 @@ baron==0.6.6              # via redbaron
 billiard==3.3.0.23        # via celery
 boto3==1.6.2
 boto==2.47.0
-botocore==1.9.5           # via boto3, s3transfer
+botocore==1.9.7
 celery==3.1.25
 certifi==2018.1.18        # via msrest
 cffi==1.11.5              # via azure-datalake-store, cryptography
