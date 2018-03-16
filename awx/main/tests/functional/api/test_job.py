@@ -103,17 +103,15 @@ def test_block_unprocessed_events(delete, admin_user, mocker):
     class MockView(UnifiedJobDeletionMixin):
         model = Job
 
-        def get_object():
+        def get_object(self):
             return job
 
     view = MockView()
 
     time_of_request = time_of_finish + relativedelta(seconds=2)
     with mock.patch('awx.api.views.now', lambda: time_of_request):
-        with mock.patch.object(view, 'get_object') as get_obj:
-            get_obj.return_value = job
-            r = view.destroy(request)
-            assert r.status_code == 400
+        r = view.destroy(request)
+        assert r.status_code == 400
 
 
 @pytest.mark.django_db
