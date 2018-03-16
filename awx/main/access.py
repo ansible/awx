@@ -581,10 +581,7 @@ class OAuth2ApplicationAccess(BaseAccess):
     select_related = ('user',)
 
     def filtered_queryset(self):
-        accessible_users = User.objects.filter(
-            pk__in=self.user.admin_of_organizations.values('member_role__members')
-        ) | User.objects.filter(pk=self.user.pk)
-        return self.model.objects.filter(user__in=accessible_users)
+        return self.model.objects.filter(organization__in=self.user.organizations)
 
     def can_change(self, obj, data):
         return self.can_read(obj)

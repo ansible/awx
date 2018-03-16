@@ -942,7 +942,6 @@ class UserSerializer(BaseSerializer):
             roles                  = self.reverse('api:user_roles_list',                  kwargs={'pk': obj.pk}),
             activity_stream        = self.reverse('api:user_activity_stream_list',        kwargs={'pk': obj.pk}),
             access_list            = self.reverse('api:user_access_list',                 kwargs={'pk': obj.pk}),
-            applications           = self.reverse('api:o_auth2_application_list',   kwargs={'pk': obj.pk}),
             tokens                 = self.reverse('api:o_auth2_token_list',         kwargs={'pk': obj.pk}),
             authorized_tokens      = self.reverse('api:user_authorized_token_list', kwargs={'pk': obj.pk}),
             personal_tokens        = self.reverse('api:o_auth2_personal_token_list',   kwargs={'pk': obj.pk}),
@@ -990,8 +989,8 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
     class Meta:
         model = OAuth2AccessToken
         fields = (
-            '*', '-name', 'description', 'user', 'token', 'refresh_token',
-            'expires', 'scope', 'application',
+            '*', '-name', 'description', '-user', 'token', 'refresh_token',
+            'expires', 'scope', 'application'
         )
         read_only_fields = ('user', 'token', 'expires')
         
@@ -1041,12 +1040,13 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         model = OAuth2Application
         fields = (
             '*', 'description', 'user', 'client_id', 'client_secret', 'client_type',
-            'redirect_uris',  'authorization_grant_type', 'skip_authorization',
+            'redirect_uris',  'authorization_grant_type', 'skip_authorization', 'organization'
         )
         read_only_fields = ('client_id', 'client_secret')
         read_only_on_update_fields = ('user', 'authorization_grant_type')
         extra_kwargs = {
-            'user': {'allow_null': False, 'required': True},
+            'user': {'allow_null': True, 'required': False},
+            'organization': {'allow_null': False},
             'authorization_grant_type': {'allow_null': False}
         }        
         
@@ -1176,7 +1176,7 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
     class Meta:
         model = OAuth2AccessToken
         fields = (
-            '*', '-name', 'description', 'user', 'token', 'refresh_token',
+            '*', '-name', 'description', '-user', 'token', 'refresh_token',
             'expires', 'scope', 'application',
         )
         read_only_fields = ('user', 'token', 'expires')
@@ -1293,6 +1293,7 @@ class OrganizationSerializer(BaseSerializer):
             admins      = self.reverse('api:organization_admins_list',         kwargs={'pk': obj.pk}),
             teams       = self.reverse('api:organization_teams_list',          kwargs={'pk': obj.pk}),
             credentials = self.reverse('api:organization_credential_list',     kwargs={'pk': obj.pk}),
+            applications           = self.reverse('api:o_auth2_application_list',   kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:organization_activity_stream_list', kwargs={'pk': obj.pk}),
             notification_templates = self.reverse('api:organization_notification_templates_list', kwargs={'pk': obj.pk}),
             notification_templates_any = self.reverse('api:organization_notification_templates_any_list', kwargs={'pk': obj.pk}),
