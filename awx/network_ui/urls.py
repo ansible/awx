@@ -1,9 +1,13 @@
 # Copyright (c) 2017 Red Hat, Inc
-from django.conf.urls import include, url
-import sys
+from django.conf.urls import url, include
 
-from . import views
-import awx.network_ui.routing
+import awx.api.urls
+
+from awx.network_ui import views
+from awx.network_ui import v1_api_urls
+from awx.network_ui import v2_api_urls
+
+import awx.network_ui.v2_api_access
 
 app_name = 'network_ui'
 urlpatterns = [
@@ -14,6 +18,13 @@ urlpatterns = [
     url(r'^download_recording$', views.download_recording, name='download_recording'),
     url(r'^topology.json$', views.json_topology_data, name='json_topology_data'),
     url(r'^topology.yaml$', views.yaml_topology_data, name='json_topology_data'),
-    url(r'^$', views.index, name='index'),
+    url(r'^api/v1/', include(v1_api_urls.router.urls)),
+]
+
+urlpatterns += [
+    url(r'^api/(?P<version>(v2))/canvas/', include(v2_api_urls.urls))
+]
+awx.api.urls.urlpatterns += [
+    url(r'^(?P<version>(v2))/canvas/', include(v2_api_urls.urls))
 ]
 

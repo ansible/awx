@@ -38,7 +38,7 @@ class Topology(models.Model):
     panY = models.FloatField()
     device_id_seq = models.IntegerField(default=0)
     link_id_seq = models.IntegerField(default=0)
-    group_id_seq = models.IntegerField('Topology', default=0)
+    group_id_seq = models.IntegerField(default=0)
     stream_id_seq = models.IntegerField(default=0)
 
     def __unicode__(self):
