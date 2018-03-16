@@ -505,7 +505,9 @@ class UserAccess(BaseAccess):
                 return False
         if self.user.is_superuser:
             return True
-        return Organization.accessible_objects(self.user, 'admin_role').exists()
+        if settings.ORGS_CAN_CREATE_USERS:
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
+        return False
 
     def can_change(self, obj, data):
         if data is not None and ('is_superuser' in data or 'is_system_auditor' in data):
@@ -1078,7 +1080,9 @@ class TeamAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'admin_role').exists()
-        return self.check_related('organization', Organization, data)
+        if settings.ORGS_CAN_ASSIGN_USERS_TEAM:
+            return self.check_related('organization', Organization, data)
+        return False
 
     def can_change(self, obj, data):
         # Prevent moving a team to a different organization.
@@ -1105,8 +1109,13 @@ class TeamAccess(BaseAccess):
                 role_access = RoleAccess(self.user)
                 return role_access.can_attach(sub_obj, obj, 'member_role.parents',
                                               *args, **kwargs)
-        return super(TeamAccess, self).can_attach(obj, sub_obj, relationship,
-                                                  *args, **kwargs)
+        if self.user.is_superuser:
+            return True
+
+        if settings.ORGS_CAN_ASSIGN_USERS_TEAM:
+            return super(TeamAccess, self).can_attach(obj, sub_obj, relationship,
+                                                      *args, **kwargs)
+        return False
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         if isinstance(sub_obj, Role):
@@ -1114,8 +1123,10 @@ class TeamAccess(BaseAccess):
                 role_access = RoleAccess(self.user)
                 return role_access.can_unattach(sub_obj, obj, 'member_role.parents',
                                                 *args, **kwargs)
-        return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
-                                                    *args, **kwargs)
+        if settings.ORGS_CAN_ASSIGN_USERS_TEAM:
+            return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
+                                                        *args, **kwargs)
+        return False
 
 
 class ProjectAccess(BaseAccess):
