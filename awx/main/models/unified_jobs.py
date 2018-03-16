@@ -930,7 +930,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         '''
         if self.status in ACTIVE_STATES:
             return False  # tally of events is only available at end of run
-        return self.emitted_events == self.get_event_queryset().count()
+        try:
+            event_qs = self.get_event_queryset()
+        except NotImplementedError:
+            return True  # Model without events, such as WFJT
+        return self.emitted_events == event_qs.count()
 
     def result_stdout_raw_handle(self, enforce_max_bytes=True):
         """
