@@ -35,6 +35,7 @@ var NetworkUIController = function($scope,
 
   $scope.api_token = '';
   $scope.disconnected = false;
+  $scope.tests_enabled = false;
 
   $scope.topology_id = 0;
   // Create a web socket to connect to the backend server
@@ -54,9 +55,17 @@ var NetworkUIController = function($scope,
       $scope.control_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
                                                          null,
                                                          {debug: false, reconnectInterval: 300});
-      $scope.test_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/test?inventory_id=" + $scope.inventory_id,
-                                                         null,
-                                                         {debug: false, reconnectInterval: 300});
+      if ($scope.tests_enabled) {
+          $scope.test_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/test?inventory_id=" + $scope.inventory_id,
+                                                             null,
+                                                             {debug: false, reconnectInterval: 300});
+      } else {
+          $scope.test_socket = {
+              on_message: util.noop,
+              send: util.noop
+          };
+      }
+
   } else {
       $scope.control_socket = {
           on_message: util.noop
