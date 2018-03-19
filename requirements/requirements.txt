@@ -9,6 +9,7 @@ amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 apache-libcloud==2.2.1
 appdirs==1.4.2
+argparse==1.4.0           # via uwsgitop
 asgi-amqp==1.1.1
 asgiref==1.1.2
 asn1crypto==0.24.0        # via cryptography
@@ -203,6 +204,7 @@ scandir==1.7              # via pathlib2
 secretstorage==2.3.1      # via keyring
 service-identity==17.0.0
 shade==1.27.0
+simplejson==3.13.2        # via uwsgitop
 six==1.11.0               # via asgi-amqp, asgiref, autobahn, automat, cryptography, django-extensions, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, keystoneauth1, more-itertools, munch, openstacksdk, packaging, pathlib2, pygerduty, pyopenssl, pyrad, python-dateutil, python-memcached, pyvmomi, slackclient, social-auth-app-django, social-auth-core, stevedore, tacacs-plus, tempora, twilio, txaio, websocket-client
 slackclient==1.1.2
 social-auth-app-django==2.1.0
@@ -216,6 +218,7 @@ twisted==17.9.0           # via daphne
 txaio==2.9.0              # via autobahn
 typing==3.6.4             # via django-extensions, m2crypto
 uwsgi==2.0.17
+uwsgitop==0.10.0
 websocket-client==0.47.0  # via slackclient
 xmltodict==0.11.0
 zope.interface==4.4.3     # via twisted
