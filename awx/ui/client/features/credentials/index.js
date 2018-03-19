@@ -33,11 +33,13 @@ function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, O
                 credentialType: new CredentialType('get', typeId),
                 organization: new Organization('get', orgId)
             };
+            dependents.isOrgCredAdmin = dependents.organization.then((org) => org.search({ role_level: 'credential_admin_role' }));
 
             return $q.all(dependents)
                 .then(related => {
                     models.credentialType = related.credentialType;
                     models.organization = related.organization;
+                    models.isOrgCredAdmin = related.isOrgCredAdmin;
 
                     return models;
                 });
