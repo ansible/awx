@@ -626,12 +626,3 @@ def create_access_token_user_if_missing(sender, **kwargs):
         post_save.connect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
 
 
-# @receiver(post_save, sender=User)
-# def create_default_oauth_app(sender, **kwargs):
-#     if kwargs.get('created', False):
-#         user = kwargs['instance']
-#         OAuth2Application.objects.create(
-#             name='Default application for {}'.format(user.username),
-#             user=user, client_type='confidential', redirect_uris='',
-#             authorization_grant_type='password'
-#         )

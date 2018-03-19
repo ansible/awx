@@ -11,7 +11,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0026_v330_emitted_events'),
+        ('main', '0027_v330_add_tower_verify'),
     ]
 
     operations = [
