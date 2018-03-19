@@ -44,24 +44,11 @@ register(
 )
 
 register(
-    'ORGS_CAN_CREATE_USERS',
+    'MANAGE_ORGANIZATION_AUTH',
     field_class=fields.BooleanField,
-    label=_('Organization Admins can create users.'),
-    help_text=_('Enable Organizations to create users. You may want to '
-                'disable this if you populate your users from some external source '
-                'like LDAP or SAML.'),
-    category=_('System'),
-    category_slug='system',
-)
-
-register(
-    'ORGS_CAN_ASSIGN_USERS_TEAM',
-    field_class=fields.BooleanField,
-    label=_('Organization Admins can assign users to teams.'),
-    help_text=_('Enable Organizations to assign users to teams. You may want to '
-                'disable this if you populate your users from some external source '
-                'like LDAP or SAML. This will prevent team assignments for '
-                'Organization and Team admins.'),
+    label=_('Organizations Can Manage Users and Teams'),
+    help_text=_('Controls whether Orgainzations have the privileges to create and manage users and teams. '
+                'You may want to disable this ability if you are using an LDAP or SAML integration.'),
     category=_('System'),
     category_slug='system',
 )
@@ -113,6 +100,7 @@ register(
     category_slug='system',
 )
 
+
 def _load_default_license_from_file():
     try:
         license_file = os.environ.get('AWX_LICENSE_FILE', '/etc/tower/license')
@@ -123,6 +111,7 @@ def _load_default_license_from_file():
     except Exception:
         logger.warning('Could not read license from "%s".', license_file, exc_info=True)
     return {}
+
 
 register(
     'LICENSE',
@@ -504,6 +493,7 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+
 
 def logging_validate(serializer, attrs):
     if not serializer.instance or \

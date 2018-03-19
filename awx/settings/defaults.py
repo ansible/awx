@@ -945,8 +945,7 @@ FACT_CACHE_PORT = 6564
 
 # Note: This setting may be overridden by database settings.
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
-ORGS_CAN_CREATE_USERS = True
-ORGS_CAN_ASSIGN_USERS_TEAM = True
+MANAGE_ORGANIZATION_AUTH = True
 
 # Note: This setting may be overridden by database settings.
 TOWER_ADMIN_ALERTS = True

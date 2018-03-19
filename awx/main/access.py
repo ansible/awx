@@ -352,6 +352,9 @@ class BaseAccess(object):
                 # Connot copy manual project without errors
                 user_capabilities[display_method] = False
                 continue
+            elif display_method == 'copy' and (isinstance(obj, Team) or isinstance(obj, User)):
+                user_capabilities[display_method] = False
+                continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, Group):  # TODO: remove in 3.3
                 try:
                     if obj.deprecated_inventory_source and not obj.deprecated_inventory_source._can_update():
@@ -505,9 +508,9 @@ class UserAccess(BaseAccess):
                 return False
         if self.user.is_superuser:
             return True
-        if settings.ORGS_CAN_CREATE_USERS:
-            return Organization.accessible_objects(self.user, 'admin_role').exists()
-        return False
+        if not settings.MANAGE_ORGANIZATION_AUTH:
+            return False
+        return Organization.accessible_objects(self.user, 'admin_role').exists()
 
     def can_change(self, obj, data):
         if data is not None and ('is_superuser' in data or 'is_system_auditor' in data):
@@ -519,10 +522,14 @@ class UserAccess(BaseAccess):
         # A user can be changed if they are themselves, or by org admins or
         # superusers.  Change permission implies changing only certain fields
         # that a user should be able to edit for themselves.
+        if not settings.MANAGE_ORGANIZATION_AUTH:
+            return False
         return bool(self.user == obj or self.can_admin(obj, data))
 
     @check_superuser
     def can_admin(self, obj, data):
+        if not settings.MANAGE_ORGANIZTION_AUTH:
+            return False
         return Organization.objects.filter(Q(member_role__members=obj) | Q(admin_role__members=obj),
                                            Q(admin_role__members=self.user)).exists()
 
@@ -539,13 +546,19 @@ class UserAccess(BaseAccess):
         return False
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
-        "Reverse obj and sub_obj, defer to RoleAccess if this is a role assignment."
+        if not settings.MANAGE_ORGANIZTION_AUTH:
+            return False
+
+        # Reverse obj and sub_obj, defer to RoleAccess if this is a role assignment.
         if relationship == 'roles':
             role_access = RoleAccess(self.user)
             return role_access.can_attach(sub_obj, obj, 'members', *args, **kwargs)
         return super(UserAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if not settings.MANAGE_ORGANIZTION_AUTH:
+            return False
+
         if relationship == 'roles':
             role_access = RoleAccess(self.user)
             return role_access.can_unattach(sub_obj, obj, 'members', *args, **kwargs)
@@ -1080,9 +1093,9 @@ class TeamAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'admin_role').exists()
-        if settings.ORGS_CAN_ASSIGN_USERS_TEAM:
-            return self.check_related('organization', Organization, data)
-        return False
+        if not settings.MANAGE_ORGANIZATION_AUTH:
+            return False
+        return self.check_related('organization', Organization, data)
 
     def can_change(self, obj, data):
         # Prevent moving a team to a different organization.
@@ -1091,6 +1104,8 @@ class TeamAccess(BaseAccess):
             raise PermissionDenied(_('Unable to change organization on a team.'))
         if self.user.is_superuser:
             return True
+        if not settings.MANAGE_ORGANIZATION_AUTH:
+            return False
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
@@ -1099,6 +1114,8 @@ class TeamAccess(BaseAccess):
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         """Reverse obj and sub_obj, defer to RoleAccess if this is an assignment
         of a resource role to the team."""
+        if not settings.MANAGE_ORGANIZATION_AUTH:
+            return False
         if isinstance(sub_obj, Role):
             if sub_obj.content_object is None:
                 raise PermissionDenied(_("The {} role cannot be assigned to a team").format(sub_obj.name))
@@ -1111,22 +1128,20 @@ class TeamAccess(BaseAccess):
                                               *args, **kwargs)
         if self.user.is_superuser:
             return True
-
-        if settings.ORGS_CAN_ASSIGN_USERS_TEAM:
-            return super(TeamAccess, self).can_attach(obj, sub_obj, relationship,
-                                                      *args, **kwargs)
-        return False
+        return super(TeamAccess, self).can_attach(obj, sub_obj, relationship,
+                                                  *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        if not settings.MANAGE_ORGANIZATION_AUTH:
+            return False
+
         if isinstance(sub_obj, Role):
             if isinstance(sub_obj.content_object, ResourceMixin):
                 role_access = RoleAccess(self.user)
                 return role_access.can_unattach(sub_obj, obj, 'member_role.parents',
                                                 *args, **kwargs)
-        if settings.ORGS_CAN_ASSIGN_USERS_TEAM:
-            return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
-                                                        *args, **kwargs)
-        return False
+        return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
+                                                    *args, **kwargs)
 
 
 class ProjectAccess(BaseAccess):
@@ -2484,7 +2499,7 @@ class RoleAccess(BaseAccess):
     @check_superuser
     def can_unattach(self, obj, sub_obj, relationship, data=None, skip_sub_obj_read_check=False):
         if isinstance(obj.content_object, Team):
-            if not settings.ORGS_CAN_ASSIGN_USERS_TEAM:
+            if not settings.MANAGE_ORGANIZATION_AUTH:
                 return False
 
         if not skip_sub_obj_read_check and relationship in ['members', 'member_role.parents', 'parents']:

@@ -21,10 +21,7 @@ export default ['i18n', function(i18n) {
             ORG_ADMINS_CAN_SEE_ALL_USERS: {
                 type: 'toggleSwitch',
             },
-            ORGS_CAN_CREATE_USERS: {
-                type: 'toggleSwitch',
-            },
-            ORGS_CAN_ASSIGN_USERS_TEAM: {
+            MANAGE_ORGANIZATION_AUTH: {
                 type: 'toggleSwitch',
             },
             SESSION_COOKIE_AGE: {
