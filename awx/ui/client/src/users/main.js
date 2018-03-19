@@ -9,6 +9,11 @@ import UsersAdd from './add/users-add.controller';
 import UsersEdit from './edit/users-edit.controller';
 import UserForm from './users.form';
 import UserList from './users.list';
+
+import UserTokensListRoute from '../../features/users/tokens/users-tokens-list.route';
+import UserTokensAddRoute from '../../features/users/tokens/users-tokens-add.route';
+import UserTokensAddApplicationRoute from '../../features/users/tokens/users-tokens-add-application.route';
+
 import { N_ } from '../i18n';
 
 export default
@@ -18,16 +23,13 @@ angular.module('Users', [])
     .controller('UsersEdit', UsersEdit)
     .factory('UserForm', UserForm)
     .factory('UserList', UserList)
-    .config(['$stateProvider', 'stateDefinitionsProvider',
-        function($stateProvider, stateDefinitionsProvider) {
+    .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
+        function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();
+            let stateExtender = $stateExtenderProvider.$get();
 
-            // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
-            // see: stateDefinition.factory for usage documentation
-            $stateProvider.state({
-                name: 'users.**',
-                url: '/users',
-                lazyLoad: () => stateDefinitions.generateTree({
+            function generateStateTree() {
+                let userTree = stateDefinitions.generateTree({
                     parent: 'users',
                     modes: ['add', 'edit'],
                     list: 'UserList',
@@ -44,7 +46,28 @@ angular.module('Users', [])
                     ncyBreadcrumb: {
                         label: N_('USERS')
                     }
-                })
+                });
+
+                return Promise.all([
+                    userTree
+                ]).then((generated) => {
+                    return {
+                        states: _.reduce(generated, (result, definition) => {
+                            return result.concat(definition.states);
+                        }, [
+                            stateExtender.buildDefinition(UserTokensListRoute),
+                            stateExtender.buildDefinition(UserTokensAddRoute),
+                            stateExtender.buildDefinition(UserTokensAddApplicationRoute)
+                        ])
+                    };
+                });
+            }
+
+            $stateProvider.state({
+                name: 'users.**',
+                url: '/users',
+                lazyLoad: () => generateStateTree()
             });
+
         }
     ]);

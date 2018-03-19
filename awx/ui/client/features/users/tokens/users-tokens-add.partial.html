@@ -1,0 +1,18 @@
+<at-panel>
+    <at-panel-heading>
+        {{ vm.panelTitle }}
+    </at-panel-heading>
+
+    <at-panel-body>
+        <at-form state="vm.form" autocomplete="off">
+            <at-input-lookup col="4" tab="1" state="vm.form.application"></at-input-lookup>
+            <at-input-text col="4" tab="2" state="vm.form.description"></at-input-text>
+            <at-input-select col="4" tab="3" state="vm.form.scope"></at-input-select>
+
+            <at-action-group col="12" pos="right">
+                <at-form-action type="cancel" to="tokens"></at-form-action>
+                <at-form-action type="save"></at-form-action>
+            </at-action-group>
+        </at-form>
+    </at-panel-body>
+</at-panel>
