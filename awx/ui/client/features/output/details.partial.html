@@ -36,25 +36,25 @@
     <div class="JobResults-resultRow">
         <label class="JobResults-resultRowLabel">{{ vm.status.label}}</label>
          <div class="JobResults-resultRowText">
-             <i class="JobResults-statusResultIcon fa icon-job-{{ vm.status.value }}"></i>
-             {{ vm.status.displayValue | translate }}
+             <i class="JobResults-statusResultIcon {{ vm.status.icon }}"></i>
+             {{ vm.status.value }}
          </div>
      </div>
 
 
     <!-- START TIME DETAIL -->
-    <div class="JobResults-resultRow" ng-if="vm.startTime">
-        <label class="JobResults-resultRowLabel">{{ vm.startTime.label }}</label>
+    <div class="JobResults-resultRow" ng-if="vm.started">
+        <label class="JobResults-resultRowLabel">{{ vm.started.label }}</label>
         <div class="JobResults-resultRowText">
-            {{ vm.startTime.displayValue }}
+            {{ vm.started.value }}
         </div>
     </div>
 
     <!-- FINISHED TIME DETAIL -->
-    <div class="JobResults-resultRow" ng-show="vm.startTime">
-        <label class="JobResults-resultRowLabel">{{ vm.finishTime.label }}</label>
+    <div class="JobResults-resultRow" ng-show="vm.started">
+        <label class="JobResults-resultRowLabel">{{ vm.finished.label }}</label>
         <div class="JobResults-resultRowText">
-            {{ vm.finishTime.displayValue }}
+            {{ vm.finished.value }}
         </div>
     </div>
 
@@ -81,7 +81,7 @@
     <!-- JOB TYPE DETAIL -->
     <div class="JobResults-resultRow" ng-if="vm.jobType">
         <label class="JobResults-resultRowLabel">{{ vm.jobType.label }}</label>
-        <div class="JobResults-resultRowText">{{ vm.jobType.displayValue }}</div>
+        <div class="JobResults-resultRowText">{{ vm.jobType.value }}</div>
     </div>
 
     <!-- LAUNCHED BY DETAIL -->
@@ -164,7 +164,7 @@
     <!-- VERBOSITY DETAIL -->
     <div class="JobResults-resultRow" ng-if="vm.verbosity">
         <label class="JobResults-resultRowLabel">{{ vm.verbosity.label }}</label>
-        <div class="JobResults-resultRowText">{{ vm.verbosity.displayValue }}</div>
+        <div class="JobResults-resultRowText">{{ vm.verbosity.value }}</div>
     </div>
 
     <!-- IG DETAIL -->

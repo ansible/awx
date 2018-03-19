@@ -199,3 +199,85 @@
     width: 100%;
     flex-wrap: wrap;
 }
+
+
+// Status Bar -----------------------------------------------------------------------------
+.HostStatusBar {
+    display: flex;
+    flex: 0 0 auto;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.HostStatusBar-ok,
+.HostStatusBar-changed,
+.HostStatusBar-unreachable,
+.HostStatusBar-failed,
+.HostStatusBar-skipped,
+.HostStatusBar-noData {
+    height: 15px;
+    border-top: 5px solid @default-bg;
+    border-bottom: 5px solid @default-bg;
+}
+
+.HostStatusBar-ok {
+    background-color: @default-succ;
+    display: flex;
+    flex: 0 0 auto;
+}
+
+.HostStatusBar-changed {
+    background-color: @default-warning;
+    flex: 0 0 auto;
+}
+
+.HostStatusBar-unreachable {
+    background-color: @default-unreachable;
+    flex: 0 0 auto;
+}
+
+.HostStatusBar-failed {
+    background-color: @default-err;
+    flex: 0 0 auto;
+}
+
+.HostStatusBar-skipped {
+    background-color: @default-link;
+    flex: 0 0 auto;
+}
+
+.HostStatusBar-noData {
+    background-color: @default-icon-hov;
+    flex: 1 0 auto;
+}
+
+.HostStatusBar-tooltipLabel {
+    text-transform: uppercase;
+    margin-right: 15px;
+}
+
+.HostStatusBar-tooltipBadge {
+    border-radius: 5px;
+    border: 1px solid @default-bg;
+}
+
+.HostStatusBar-tooltipBadge--ok {
+    background-color: @default-succ;
+}
+
+.HostStatusBar-tooltipBadge--unreachable {
+    background-color: @default-unreachable;
+}
+
+.HostStatusBar-tooltipBadge--skipped {
+    background-color: @default-link;
+}
+
+.HostStatusBar-tooltipBadge--changed {
+    background-color: @default-warning;
+}
+
+.HostStatusBar-tooltipBadge--failed {
+    background-color: @default-err;
+
+}

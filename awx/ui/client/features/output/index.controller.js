@@ -10,6 +10,8 @@ let resource;
 let $state;
 let qs;
 
+let hack;
+
 function JobsIndexController (
     _resource_,
     _page_,
@@ -51,7 +53,7 @@ function JobsIndexController (
     vm.expand = expand;
     vm.isExpanded = true;
 
-    // search
+    // Search
     $state = _$state_;
     qs = _qs_;
 
@@ -67,17 +69,47 @@ function JobsIndexController (
     vm.removeSearchTag = removeSearchTag;
     vm.searchTags = getSearchTags(getCurrentQueryset());
 
-    // details
+    // Host Status Bar
+    vm.status = {
+        running: Boolean(resource.model.get('started')) && !resource.model.get('finished'),
+        stats: resource.stats,
+    }
+
+    // Details
     vm.details = {
-        job: resource.model.model.GET,
-        status: resource.model.model.GET.status,
         resource,
+        started: resource.model.get('started'),
+        finished: resource.model.get('finished'),
+        status: resource.model.get('status'),
     };
 
     render.requestAnimationFrame(() => init());
 }
 
+function onStreamStart (data) {
+    const status = _.get(data, 'summary_fields.job.status');
+
+    if (!hack) {
+        hack = true;
+        vm.details.status = status;
+        vm.details.started = data.created;
+
+        vm.status.running = true;
+    }
+}
+
+function onStreamFinish (data) {
+    const failed = _.get(data, 'summary_fields.job.failed');
+
+    vm.details.status = failed ? 'failed' : 'successful';
+    vm.details.finished = data.created;
+
+    vm.status = { stats: data, running: false };
+};
+
 function init (pageMode) {
+    hack = false;
+
     page.init({
         resource,
     });
@@ -98,10 +130,12 @@ function init (pageMode) {
         page,
         scroll,
         resource,
+        onStreamStart,
+        onStreamFinish,
         render: events => shift().then(() => append(events, true)),
         listen: (namespace, listener) => {
             $scope.$on(namespace, (scope, data) => listener(data));
-        }
+        },
     });
 
     if (pageMode) {

@@ -2,6 +2,7 @@ const templateUrl = require('~features/output/details.partial.html');
 
 let $http;
 let $filter;
+let $scope;
 let $state;
 
 let error;
@@ -12,68 +13,86 @@ let strings;
 let wait;
 
 function mapChoices (choices) {
-    return Object.assign(...choices.map(([k, v]) => ({[k]: v})));
+    if (!choices) return {};
+    return Object.assign(...choices.map(([k, v]) => ({ [k]: v })));
 }
 
 function getStatusDetails (status) {
-    const value = status || resource.model.get('status');
-    const label = 'Status';
+    const unmapped = status || resource.model.get('status');
+
+    if (!unmapped) {
+        return null;
+    }
+
     const choices = mapChoices(resource.model.options('actions.GET.status.choices'));
 
-    const displayValue = choices[value];
+    const label = 'Status';
+    const icon = `fa icon-job-${unmapped}`;
+    const value = choices[unmapped];
 
-    return { displayValue, label, value };
+    return { label, icon, value };
 }
 
 function getStartTimeDetails (started) {
-    const value = started || resource.model.get('started');
+    const unfiltered = started || resource.model.get('started');
+
     const label = 'Started';
 
-    let displayValue;
+    let value;
 
-    if (value) {
-        displayValue = $filter('longDate')(value);
+    if (unfiltered) {
+        value = $filter('longDate')(unfiltered);
     } else {
-        displayValue = 'Not Started';
+        value = 'Not Started';
     }
 
-    return { displayValue, label, value };
+    return { label, value };
 }
 
 function getFinishTimeDetails (finished) {
-    const value = finished || resource.model.get('finished');
+    const unfiltered = finished || resource.model.get('finished');
+
     const label = 'Finished';
 
-    let displayValue;
+    let value;
 
-    if (value) {
-        displayValue = $filter('longDate')(value);
+    if (unfiltered) {
+        value = $filter('longDate')(unfiltered);
     } else {
-        displayValue = 'Not Finished';
+        value = 'Not Finished';
     }
 
-    return { displayValue, label, value };
+    return { label, value };
 }
 
 function getJobTypeDetails () {
-    const value = resource.model.get('job_type');
-    const label = 'Job Type';
+    const unmapped = resource.model.get('job_type');
+
+    if (!unmapped) {
+        return null;
+    }
+
     const choices = mapChoices(resource.model.options('actions.GET.job_type.choices'));
 
-    const displayValue = choices[value];
+    const label = 'Job Type';
+    const value = choices[unmapped];
 
-    return { displayValue, label, value };
+    return { label, value };
 }
 
-
 function getVerbosityDetails () {
-    const value = resource.model.get('verbosity');
+    const verbosity = resource.model.get('verbosity');
+
+    if (!verbosity) {
+        return null;
+    }
+
     const choices = mapChoices(resource.model.options('actions.GET.verbosity.choices'));
 
-    const displayValue = choices[value];
     const label = 'Verbosity';
+    const value = choices[value];
 
-    return { displayValue, label, value };
+    return { label, value };
 }
 
 function getSourceWorkflowJobDetails () {
@@ -273,7 +292,6 @@ function getLimitDetails () {
 }
 
 function getInstanceGroupDetails () {
-
     const instanceGroup = resource.model.get('summary_fields.instance_group');
 
     if (!instanceGroup) {
@@ -336,9 +354,9 @@ function getLabelDetails () {
     }
 
     const label = 'Labels';
-    const value = jobLabels.map(({ name }) => name).map($filter('sanitize'));
+    const more = false;
 
-    let more = false;
+    const value = jobLabels.map(({ name }) => name).map($filter('sanitize'));
 
     return { label, more, value };
 }
@@ -396,9 +414,7 @@ function cancelJob () {
     prompt({ hdr, resourceName, body, actionText, action });
 }
 
-function deleteJob () {
-    return;
-}
+function deleteJob () {}
 
 function AtDetailsController (
     _$http_,
@@ -418,21 +434,18 @@ function AtDetailsController (
     $state = _$state_;
 
     error = _error_;
-    // resource = _resource_;
     parse = ParseVariableString;
     prompt = _prompt_;
     strings = _strings_;
     wait = _wait_;
 
-    // statusChoices = mapChoices(resource.options('status.choices'));
+    vm.init = _$scope_ => {
+        $scope = _$scope_;
+        resource = $scope.resource;
 
-    vm.init = scope => {
-        vm.job = scope.job || {};
-        resource = scope.resource;
-
-        vm.status = getStatusDetails(scope.status);
-        vm.startTime = getStartTimeDetails();
-        vm.finishTime = getFinishTimeDetails();
+        vm.status = getStatusDetails();
+        vm.started = getStartTimeDetails();
+        vm.finished = getFinishTimeDetails();
         vm.jobType = getJobTypeDetails();
         vm.jobTemplate = getJobTemplateDetails();
         vm.sourceWorkflowJob = getSourceWorkflowJobDetails();
@@ -457,12 +470,24 @@ function AtDetailsController (
         vm.deleteJob = deleteJob;
         vm.toggleLabels = toggleLabels;
 
-        // codemirror
-        const cm = { parseType: 'yaml', variables: vm.extraVars.value, $apply: scope.$apply };
-        ParseTypeChange({ scope: cm, field_id: 'cm-extra-vars', readOnly: true });
+        const observe = (key, transform) => {
+            $scope.$watch(key, value => { this[key] = transform(value); });
+        };
 
-        scope.$watch('status', value => { vm.status = getStatusDetails(value); });
-    }
+        observe('status', getStatusDetails);
+        observe('started', getStartTimeDetails);
+        observe('finished', getFinishTimeDetails);
+
+        // relaunch component
+        $scope.job = _.get(resource.model, 'model.GET', {});
+        this.job = $scope.job;
+
+        // codemirror
+        if (this.extraVars) {
+            const cm = { parseType: 'yaml', variables: this.extraVars.value, $apply: $scope.$apply };
+            ParseTypeChange({ scope: cm, field_id: 'cm-extra-vars', readOnly: true });
+        }
+    };
 }
 
 AtDetailsController.$inject = [
@@ -492,9 +517,10 @@ function atDetails () {
         link: atDetailsLink,
         controller: AtDetailsController,
         scope: {
-            job: '=',
-            status: '=',
             resource: '=',
+            status: '=',
+            started: '=',
+            finished: '=',
         },
     };
 }

@@ -1,14 +1,20 @@
 <div class="container-fluid">
     <div class="col-md-4">
         <at-panel>
-            <at-details job="vm.details.job" status="vm.details.status" resource="vm.details.resource"></at-details>
-            <p><button class="btn" ng-click="vm.clear(true)">Page Mode</button></p>
+            <at-details
+                resource="vm.details.resource"
+                status="vm.details.status"
+                started="vm.details.started"
+                finished="vm.details.finished">
+            </at-details>
+            <!-- --><p><button class="btn" ng-click="vm.clear(true)">Page Mode</button></p>
         </at-panel>
     </div>
 
     <div class="col-md-8">
         <at-panel class="at-Stdout">
-            <!-- search ============================================================================================================= -->
+            <at-status running="vm.status.running" stats="vm.status.stats"></at-status>
+            <!-- search ===================================================================================== -->
             <form ng-submit="vm.search()">
             <div class="input-group">
                 <input type="text"
@@ -52,7 +58,7 @@
 
             <at-search-key ng-show="vm.searchKey" fields="vm.searchKeyFields" examples="vm.searchKeyExamples"></at-search-key>
 
-            <!-- ==================================================================================================================== -->
+            <!-- ============================================================================================ -->
             <div class="at-Stdout-menuTop">
                 <div class="pull-left" ng-click="vm.expand()">
                     <i class="at-Stdout-menuIcon fa"

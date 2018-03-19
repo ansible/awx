@@ -1,0 +1,37 @@
+<div class="HostStatusBar">
+    <div class="HostStatusBar-ok"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.ok }}"
+        data-tip-watch="vm.tooltips.ok">
+    </div>
+    <div class="HostStatusBar-skipped"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.skipped }}"
+        data-tip-watch="vm.tooltips.skipped">
+    </div>
+    <div class="HostStatusBar-changed"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.changed }}"
+        data-tip-watch="vm.tooltips.changed">
+    </div>
+    <div class="HostStatusBar-failures"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.failures }}"
+        data-tip-watch="vm.tooltips.failures">
+    </div>
+    <div class="HostStatusBar-unreachable"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.unreachable }}"
+        data-tip-watch="vm.tooltips.unreachable">
+    </div>
+    <div class="HostStatusBar-noData"
+        ng-show="vm.running"
+        data-placement="top"
+        aw-tool-tip="{{:: vm.tooltips.running }}">
+    </div>
+    <div class="HostStatusBar-noData"
+        ng-show="!vm.running && !vm.statsAreAvailable"
+        data-placement="top"
+        aw-tool-tip="{{:: vm.tooltips.unavailable }}">
+    </div>
+</div>
