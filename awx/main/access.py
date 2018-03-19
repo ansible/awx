@@ -335,6 +335,10 @@ class BaseAccess(object):
             if display_method not in method_list:
                 continue
 
+            if not settings.MANAGE_ORGANIZATION_AUTH and isinstance(obj, (Team, User)):
+                user_capabilities[display_method] = self.user.is_superuser
+                continue
+
             # Actions not possible for reason unrelated to RBAC
             # Cannot copy with validation errors, or update a manual group/project
             if display_method == 'copy' and isinstance(obj, JobTemplate):
@@ -350,9 +354,6 @@ class BaseAccess(object):
                 continue
             elif display_method == 'copy' and isinstance(obj, Project) and obj.scm_type == '':
                 # Connot copy manual project without errors
-                user_capabilities[display_method] = False
-                continue
-            elif display_method == 'copy' and (isinstance(obj, Team) or isinstance(obj, User)):
                 user_capabilities[display_method] = False
                 continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, Group):  # TODO: remove in 3.3
@@ -528,7 +529,7 @@ class UserAccess(BaseAccess):
 
     @check_superuser
     def can_admin(self, obj, data):
-        if not settings.MANAGE_ORGANIZTION_AUTH:
+        if not settings.MANAGE_ORGANIZATION_AUTH:
             return False
         return Organization.objects.filter(Q(member_role__members=obj) | Q(admin_role__members=obj),
                                            Q(admin_role__members=self.user)).exists()
@@ -546,7 +547,7 @@ class UserAccess(BaseAccess):
         return False
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
-        if not settings.MANAGE_ORGANIZTION_AUTH:
+        if not settings.MANAGE_ORGANIZTAION_AUTH:
             return False
 
         # Reverse obj and sub_obj, defer to RoleAccess if this is a role assignment.
@@ -556,7 +557,7 @@ class UserAccess(BaseAccess):
         return super(UserAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
-        if not settings.MANAGE_ORGANIZTION_AUTH:
+        if not settings.MANAGE_ORGANIZATION_AUTH:
             return False
 
         if relationship == 'roles':
