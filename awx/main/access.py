@@ -547,7 +547,7 @@ class UserAccess(BaseAccess):
         return False
 
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
-        if not settings.MANAGE_ORGANIZTAION_AUTH:
+        if not settings.MANAGE_ORGANIZATION_AUTH:
             return False
 
         # Reverse obj and sub_obj, defer to RoleAccess if this is a role assignment.
