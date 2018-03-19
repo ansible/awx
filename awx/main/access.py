@@ -2483,6 +2483,10 @@ class RoleAccess(BaseAccess):
 
     @check_superuser
     def can_unattach(self, obj, sub_obj, relationship, data=None, skip_sub_obj_read_check=False):
+        if isinstance(obj.content_object, Team):
+            if not settings.ORGS_CAN_ASSIGN_USERS_TEAM:
+                return False
+
         if not skip_sub_obj_read_check and relationship in ['members', 'member_role.parents', 'parents']:
             # If we are unattaching a team Role, check the Team read access
             if relationship == 'parents':
