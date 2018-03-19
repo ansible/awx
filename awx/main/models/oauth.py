@@ -39,6 +39,7 @@ class OAuth2Application(AbstractApplication):
         null=True,
     )
 
+
 class OAuth2AccessToken(AbstractAccessToken):
 
     class Meta:

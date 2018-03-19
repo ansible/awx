@@ -21,6 +21,7 @@ from awx.api.views import (
     OrganizationInstanceGroupsList,
     OrganizationObjectRolesList,
     OrganizationAccessList,
+    OrganizationApplicationList,
 )
 
 
@@ -45,6 +46,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/instance_groups/$', OrganizationInstanceGroupsList.as_view(), name='organization_instance_groups_list'),
     url(r'^(?P<pk>[0-9]+)/object_roles/$', OrganizationObjectRolesList.as_view(), name='organization_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/access_list/$', OrganizationAccessList.as_view(), name='organization_access_list'),
+    url(r'^(?P<pk>[0-9]+)/applications/$', OrganizationApplicationList.as_view(), name='organization_applications_list'),
 ]
 
 __all__ = ['urls']

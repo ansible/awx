@@ -1597,6 +1597,18 @@ class UserAuthorizedTokenList(SubListCreateAPIView):
 
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
+        
+
+class OrganizationApplicationList(SubListCreateAPIView):
+
+    view_name = _("Organization OAuth2 Applications")
+    
+    model = OAuth2Application
+    serializer_class = OAuth2ApplicationSerializer
+    parent_model = Organization
+    relationship = 'applications'
+    parent_key = 'organization'
+    swagger_topic = 'Authentication'
 
 
 class OAuth2PersonalTokenList(SubListCreateAPIView):

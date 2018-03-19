@@ -131,7 +131,7 @@ def test_organization_inventory_list(organization, inventory_factory, get, alice
     assert get(reverse('api:organization_inventories_list', kwargs={'pk': organization.id}), user=alice).data['count'] == 2
     assert get(reverse('api:organization_inventories_list', kwargs={'pk': organization.id}), user=bob).data['count'] == 1
     get(reverse('api:organization_inventories_list', kwargs={'pk': organization.id}), user=rando, expect=403)
-
+    
 
 @pytest.mark.django_db
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
