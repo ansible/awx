@@ -333,18 +333,18 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         group_depths = {} # pk: max_depth
         root_group_pks = set(self.root_groups.values_list('pk', flat=True))
 
-        def update_group_depths(group_pk, group_depths, group_children_map, current_depth=0):
-            max_depth = group_depths.get(group_pk, -1)
-            # Arbitrarily limit depth to avoid hitting Python recursion limit (which defaults to 1000).
-            if current_depth > 100:
-                return
-            if current_depth > max_depth:
-                group_depths[group_pk] = current_depth
-            for child_pk in group_children_map.get(group_pk, set()):
-                update_group_depths(child_pk, group_depths, group_children_map, current_depth + 1)
+        depth = 0
+        unprocessed = root_group_pks.copy()
+        while unprocessed:
+            next_set = set([])
+            for pk in unprocessed:
+                if pk not in group_depths or group_depths[pk] < depth:
+                    group_depths[pk] = depth
+                    if pk in group_children_map:
+                        next_set.update(group_children_map[pk])
+            unprocessed = next_set
+            depth += 1
 
-        for group_pk in root_group_pks:
-            update_group_depths(group_pk, group_depths, group_children_map)
         return group_depths
 
     def update_group_computed_fields(self):
