@@ -137,7 +137,7 @@ On RBAC side:
 - Other normal users will only be able to see and manipulate their own tokens.
 > Note: Users can only see the token or refresh-token _value_ at the time of creation ONLY.  
 
-#### Using OAuth 2 token system as a Personal Access Token (PAT)
+#### Using OAuth 2 token system for Personal Access Tokens (PAT)
 The most common usage of OAuth 2 is authenticating users. The `token` field of a token is used
 as part of the HTTP authentication header, in the format `Authorization: Bearer <token field value>`.  This _Bearer_
 token can be obtained by doing a curl to the `/api/o/token/` endpoint. For example:  
@@ -165,7 +165,7 @@ In AWX, our OAuth 2 system is built on top of
 [Django Oauth Toolkit](https://django-oauth-toolkit.readthedocs.io/en/latest/), which provides full
 support on standard authorization, token revoke and refresh. AWX implements them and puts related
 endpoints under `/api/o/` endpoint. Detailed examples on the most typical usage of those endpoints
-are available as description text of `/api/o/`.
+are available as description text of `/api/o/`. See below for information on Application Access Token usage.  
 
 #### Token scope mask over RBAC system
 The scope of an OAuth 2 token is a space-separated string composed of keywords like 'read' and 'write'.
@@ -183,6 +183,235 @@ is authenticated using OAuth 2 token, and the related token scope is 'read', the
 not manipulate or launch the job template, despite being an admin. If the token scope is
 'write' or 'read write', she can take full advantage of the job template as its admin.  Note, that 'write'
 implies 'read' as well.  
+
+
+## Application Functions
+
+This page lists OAuth utility endpoints used for authorization, token refresh and revoke.
+Note endpoints other than `/api/o/authorize/` are not meant to be used in browsers and do not
+support HTTP GET. The endpoints here strictly follow
+[RFC specs for OAuth2](https://tools.ietf.org/html/rfc6749), so please use that for detailed
+reference. The `implicit` grant type can only be used to acquire a access token if the user is already logged in via session authentication, as that confirms that the user is authorized to create an access token. Here we give some examples to demonstrate the typical usage of these endpoints in
+AWX context (Note AWX net location default to `http://localhost:8013` in examples):
+
+
+#### Application using `authorization code` grant type
+This application grant type is intended to be used when the application is executing on the server.  To create
+an application named `AuthCodeApp` with the `authorization-code` grant type, 
+Make a POST to the `/api/v2/applications/` endpoint.
+```text
+{
+    "name": "AuthCodeApp",
+    "user": 1,
+    "client_type": "confidential",
+    "redirect_uris": "http://localhost:8013/api/v2",
+    "authorization_grant_type": "authorization-code",
+    "skip_authorization": false
+}
+```
+You can test the authorization flow out with this new application by copying the client_id and URI link into the 
+homepage [here](http://django-oauth-toolkit.herokuapp.com/consumer/) and click submit. This is just a simple test 
+application Django-oauth-toolkit provides. 
+
+From the client app, the user makes a GET to the Authorize endpoint with the `response_type`, 
+`client_id`, `redirect_uris`, and `scope`.  AWX will respond with the authorization `code` and `state`
+to the redirect_uri specified in the application. The client application will then make a POST to the
+`api/o/token/` endpoint on AWX with the `code`, `client_id`, `client_secret`, `grant_type`, and `redirect_uri`. 
+AWX will respond with the `access_token`, `token_type`, `refresh_token`, and `expires_in`. For more
+information on testing this flow, refer to [django-oauth-toolkit](http://django-oauth-toolkit.readthedocs.io/en/latest/tutorial/tutorial_01.html#test-your-authorization-server).
+
+
+
+#### Application using `implicit` grant type
+The use case: single page web apps that can't keep a client_secret as secure.  This method with skips the 
+authorization code part of the flow and just returns an access token.  
+Suppose we have an application `admin's app` of grant type `implicit`:
+```text
+{
+    "id": 1,
+    "type": "application",
+    "related": {
+    ...
+    "name": "admin's app",
+    "user": 1,
+    "client_id": "L0uQQWW8pKX51hoqIRQGsuqmIdPi2AcXZ9EJRGmj",
+    "client_secret": "9Wp4dUrUsigI8J15fQYJ3jn0MJHLkAjyw7ikBsABeWTNJbZwy7eB2Xro9ykYuuygerTPQ2gIF2DCTtN3kurkt0Me3AhanEw6peRNvNLs1NNfI4f53mhX8zo5JQX0BKy5",
+    "client_type": "confidential",
+    "redirect_uris": "http://localhost:8013/api/",
+    "authorization_grant_type": "implicit",
+    "skip_authorization": false
+}
+```
+
+In API browser, first make sure the user is logged in via session auth, then visit authorization
+endpoint with given parameters:
+```text
+http://localhost:8013/api/o/authorize/?response_type=token&client_id=L0uQQWW8pKX51hoqIRQGsuqmIdPi2AcXZ9EJRGmj&scope=read
+```
+Here the value of `client_id` should be the same as that of `client_id` field of underlying application.
+On success, an authorization page should be displayed asking the logged in user to grant/deny the access token.
+Once the user clicks on 'grant', the API browser will try POSTing to the same endpoint with the same parameters in POST body, on success a 302 redirect will be returned:
+```text
+HTTP/1.1 302 Found
+Connection:keep-alive
+Content-Language:en
+Content-Length:0
+Content-Type:text/html; charset=utf-8
+Date:Tue, 05 Dec 2017 20:36:19 GMT
+Location:http://localhost:8013/api/#access_token=0lVJJkolFTwYawHyGkk7NTmSKdzBen&token_type=Bearer&state=&expires_in=315360000000&scope=read
+Server:nginx/1.12.2
+Strict-Transport-Security:max-age=15768000
+Vary:Accept-Language, Cookie
+
+```
+
+
+#### Application using `password` grant type
+This is also called the `resource owner credentials grant`. This is for use by users who have
+native access to the web app. This should be used when the client is the Resource owner.  Suppose 
+we have an application `Default Application` with grant type `password`:
+```text
+{
+    "id": 6,
+    "type": "application",
+    ...
+    "name": "Default Application",
+    "user": 1,
+    "client_id": "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l",
+    "client_secret": "fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo",
+    "client_type": "confidential",
+    "redirect_uris": "",
+    "authorization_grant_type": "password",
+    "skip_authorization": false
+}
+```
+
+Log in is not required for `password` grant type, so we can simply use `curl` to acquire a personal access token
+via `/api/o/token/`:
+```bash
+curl -X POST \
+  -d "grant_type=password&username=<username>&password=<password>&scope=read" \
+  -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569e
+IaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
+  http://localhost:8013/api/o/token/ -i
+```
+In the above post request, parameters `username` and `password` are username and password of the related
+AWX user of the underlying application, and the authentication information is of format
+`<client_id>:<client_secret>`, where `client_id` and `client_secret` are the corresponding fields of
+underlying application.
+
+Upon success, access token, refresh token and other information are given in the response body in JSON
+format:
+```text
+HTTP/1.1 200 OK
+Server: nginx/1.12.2
+Date: Tue, 05 Dec 2017 16:48:09 GMT
+Content-Type: application/json
+Content-Length: 163
+Connection: keep-alive
+Content-Language: en
+Vary: Accept-Language, Cookie
+Pragma: no-cache
+Cache-Control: no-store
+Strict-Transport-Security: max-age=15768000
+
+{"access_token": "9epHOqHhnXUcgYK8QanOmUQPSgX92g", "token_type": "Bearer", "expires_in": 315360000000, "refresh_token": "jMRX6QvzOTf046KHee3TU5mT3nyXsz", "scope": "read"}
+```
+
+## Token Functions
+
+#### Refresh an existing access token
+Suppose we have an existing access token with refresh token provided:
+```text
+{
+    "id": 35,
+    "type": "access_token",
+    ...
+    "user": 1,
+    "token": "omMFLk7UKpB36WN2Qma9H3gbwEBSOc",
+    "refresh_token": "AL0NK9TTpv0qp54dGbC4VUZtsZ9r8z",
+    "application": 6,
+    "expires": "2017-12-06T03:46:17.087022Z",
+    "scope": "read write"
+}
+```
+The `/api/o/token/` endpoint is used for refreshing access token:
+```bash
+curl -X POST \
+  -d "grant_type=refresh_token&refresh_token=AL0NK9TTpv0qp54dGbC4VUZtsZ9r8z" \
+  -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
+  http://localhost:8013/api/o/token/ -i
+```
+In the above post request, `refresh_token` is provided by `refresh_token` field of the access token
+above. The authentication information is of format `<client_id>:<client_secret>`, where `client_id`
+and `client_secret` are the corresponding fields of underlying related application of the access token.
+
+Upon success, the new (refreshed) access token with the same scope information as the previous one is
+given in the response body in JSON format:
+```text
+HTTP/1.1 200 OK
+Server: nginx/1.12.2
+Date: Tue, 05 Dec 2017 17:54:06 GMT
+Content-Type: application/json
+Content-Length: 169
+Connection: keep-alive
+Content-Language: en
+Vary: Accept-Language, Cookie
+Pragma: no-cache
+Cache-Control: no-store
+Strict-Transport-Security: max-age=15768000
+
+{"access_token": "NDInWxGJI4iZgqpsreujjbvzCfJqgR", "token_type": "Bearer", "expires_in": 315360000000, "refresh_token": "DqOrmz8bx3srlHkZNKmDpqA86bnQkT", "scope": "read write"}
+```
+Internally, the refresh operation deletes the existing token and a new token is created immediately
+after, with information like scope and related application identical to the original one. We can
+verify by checking the new token is present and the old token is deleted at the /api/v2/tokens/ endpoint.
+
+#### Revoke an access token
+Revoking an access token is the same as deleting the token resource object. Suppose we have
+an existing token to revoke:
+```text
+{
+    "id": 30,
+    "type": "access_token",
+    "url": "/api/v2/tokens/30/",
+    ...
+    "user": null,
+    "token": "rQONsve372fQwuc2pn76k3IHDCYpi7",
+    "refresh_token": "",
+    "application": 6,
+    "expires": "2017-12-06T03:24:25.614523Z",
+    "scope": "read"
+}
+```
+Revoking is conducted by POSTing to `/api/o/revoke_token/` with the token to revoke as parameter:
+```bash
+curl -X POST -d "token=rQONsve372fQwuc2pn76k3IHDCYpi7" \
+  -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
+  http://localhost:8013/api/o/revoke_token/ -i
+```
+`200 OK` means a successful delete.
+```text
+HTTP/1.1 200 OK
+Server: nginx/1.12.2
+Date: Tue, 05 Dec 2017 18:05:18 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 0
+Connection: keep-alive
+Vary: Accept-Language, Cookie
+Content-Language: en
+Strict-Transport-Security: max-age=15768000
+
+```
+We can verify the effect by checking if the token is no longer present 
+at /api/v2/tokens/.
+
+
+
+
+
+
+
 
 ## Acceptance Criteria
 * All CRUD operations for OAuth 2 applications and tokens should function as described.
