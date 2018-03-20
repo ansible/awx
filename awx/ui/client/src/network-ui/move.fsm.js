@@ -383,10 +383,10 @@ _ContextMenu.prototype.end = function (controller) {
 
 _ContextMenu.prototype.onMouseDown = function (controller) {
 
-    controller.changeState(Ready);
+    controller.changeState(Selected2);
 
 };
-_ContextMenu.prototype.onMouseDown.transitions = ['Ready'];
+_ContextMenu.prototype.onMouseDown.transitions = ['Selected2'];
 
 _ContextMenu.prototype.onDetailsPanel = function (controller, msg_type, $event) {
 
