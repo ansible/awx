@@ -7,6 +7,7 @@ from awx.main.tasks import RunJob
 from awx.main.models import (
     Job,
     JobTemplate,
+    JobLaunchConfig,
     WorkflowJobTemplate
 )
 
@@ -135,6 +136,27 @@ def test_job_args_unredacted_passwords(job, tmpdir_factory):
     extra_vars = json.load(extra_var_file)
     extra_var_file.close()
     assert extra_vars['secret_key'] == 'my_password'
+
+
+def test_launch_config_has_unprompted_vars(survey_spec_factory):
+    jt = JobTemplate(
+        survey_enabled = True,
+        survey_spec = survey_spec_factory(['question1', 'question2'])
+    )
+    unprompted_config = JobLaunchConfig(
+        extra_data = {
+            'question1': 'foobar',
+            'question4': 'foobar'
+        }
+    )
+    assert unprompted_config.has_unprompted(jt)
+    allowed_config = JobLaunchConfig(
+        extra_data = {
+            'question1': 'foobar',
+            'question2': 'foobar'
+        }
+    )
+    assert not allowed_config.has_unprompted(jt)
 
 
 @pytest.mark.survey
