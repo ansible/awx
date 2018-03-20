@@ -327,6 +327,26 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                     setattr(host, field, value)
                 host.save(update_fields=host_updates.keys())
 
+    def get_group_depths(self, group_children_map=None):
+        if group_children_map is None:
+            group_children_map = self.get_group_children_map()
+        group_depths = {} # pk: max_depth
+        root_group_pks = set(self.root_groups.values_list('pk', flat=True))
+
+        def update_group_depths(group_pk, group_depths, group_children_map, current_depth=0):
+            max_depth = group_depths.get(group_pk, -1)
+            # Arbitrarily limit depth to avoid hitting Python recursion limit (which defaults to 1000).
+            if current_depth > 100:
+                return
+            if current_depth > max_depth:
+                group_depths[group_pk] = current_depth
+            for child_pk in group_children_map.get(group_pk, set()):
+                update_group_depths(child_pk, group_depths, group_children_map, current_depth + 1)
+
+        for group_pk in root_group_pks:
+            update_group_depths(group_pk, group_depths, group_children_map)
+        return group_depths
+
     def update_group_computed_fields(self):
         '''
         Update computed fields for all active groups in this inventory.
@@ -342,20 +362,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
         # Build list of group pks to check, starting with the groups at the
         # deepest level within the tree.
-        root_group_pks = set(self.root_groups.values_list('pk', flat=True))
-        group_depths = {} # pk: max_depth
+        group_depths = self.get_group_depths(group_children_map)
 
-        def update_group_depths(group_pk, current_depth=0):
-            max_depth = group_depths.get(group_pk, -1)
-            # Arbitrarily limit depth to avoid hitting Python recursion limit (which defaults to 1000).
-            if current_depth > 100:
-                return
-            if current_depth > max_depth:
-                group_depths[group_pk] = current_depth
-            for child_pk in group_children_map.get(group_pk, set()):
-                update_group_depths(child_pk, current_depth + 1)
-        for group_pk in root_group_pks:
-            update_group_depths(group_pk)
         group_pks_to_check = [x[1] for x in sorted([(v,k) for k,v in group_depths.items()], reverse=True)]
 
         for group_pk in group_pks_to_check:
@@ -420,14 +428,16 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         else:
             active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
+        failed_host_ct = failed_hosts.count()
+        inv_src_ct = active_inventory_sources.count()
         computed_fields = {
-            'has_active_failures': bool(failed_hosts.count()),
+            'has_active_failures': bool(failed_host_ct),
             'total_hosts': active_hosts.count(),
-            'hosts_with_active_failures': failed_hosts.count(),
+            'hosts_with_active_failures': failed_host_ct,
             'total_groups': active_groups.count(),
             'groups_with_active_failures': failed_groups.count(),
-            'has_inventory_sources': bool(active_inventory_sources.count()),
-            'total_inventory_sources': active_inventory_sources.count(),
+            'has_inventory_sources': bool(inv_src_ct),
+            'total_inventory_sources': inv_src_ct,
             'inventory_sources_with_failures': failed_inventory_sources.count(),
         }
         # CentOS python seems to have issues clobbering the inventory on poor timing during certain operations
@@ -451,8 +461,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
     @property
     def root_groups(self):
-        group_pks = self.groups.values_list('pk', flat=True)
-        return self.groups.exclude(parents__pk__in=group_pks).distinct()
+        return self.groups.filter(parents__isnull=True)
 
     def clean_insights_credential(self):
         if self.kind == 'smart' and self.insights_credential:

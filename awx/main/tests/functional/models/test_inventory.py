@@ -177,6 +177,13 @@ def test_inventory_update_excessively_long_name(inventory, inventory_source):
 
 
 @pytest.mark.django_db
+def test_root_groups(inventory):
+    parent_group = inventory.groups.create(name='parent')
+    parent_group.children.create(name='child', inventory=inventory)
+    assert set(inventory.root_groups) == set([parent_group])
+
+
+@pytest.mark.django_db
 class TestHostManager:
     def test_host_filter_not_smart(self, setup_ec2_gce, organization):
         smart_inventory = Inventory(name='smart',
