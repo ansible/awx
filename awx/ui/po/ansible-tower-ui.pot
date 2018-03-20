@@ -2832,6 +2832,8 @@ msgstr ""
 
 #: client/src/notifications/notificationTemplates.form.js:288
 #: client/src/notifications/notificationTemplates.form.js:289
+#: client/src/notifications/notificationTemplates.form.js:440
+#: client/src/notifications/notificationTemplates.form.js:441
 msgid "Notification Color"
 msgstr ""
 
@@ -5419,4 +5421,8 @@ msgstr ""
 
 #: client/src/shared/paginate/paginate.partial.html:55
 msgid "{{pageSize}}"
+msgstr ""
+
+#: client/src/notifications/notificationTemplates.form.js:445
+msgid "Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc) ."
 msgstr ""
