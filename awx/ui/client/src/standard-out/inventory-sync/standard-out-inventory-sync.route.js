@@ -25,5 +25,14 @@ export default {
             }
         },
         jobType: 'inventory_updates'
+    },
+    resolve: {
+        jobData: ['Rest', 'GetBasePath', '$stateParams', function(Rest, GetBasePath, $stateParams) {
+            Rest.setUrl(GetBasePath('base') + 'inventory_updates/' + $stateParams.id + '/');
+            return Rest.get()
+                .then(({data}) => {
+                    return data;
+                });
+        }]
     }
 };

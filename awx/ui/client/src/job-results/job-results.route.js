@@ -47,7 +47,7 @@ export default {
             return [preScope, eventOn];
         }],
         // the GET for the particular job
-        jobData: ['Rest', 'GetBasePath', '$stateParams', '$q', '$state', 'Alert', 'jobResultsService', function(Rest, GetBasePath, $stateParams, $q, $state, Alert, jobResultsService) {
+        jobData: ['jobResultsService', '$stateParams', function(jobResultsService, $stateParams) {
             return jobResultsService.getJobData($stateParams.id);
         }],
         Dataset: ['QuerySet', '$stateParams', 'jobData',

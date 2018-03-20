@@ -16,14 +16,12 @@ function ListTemplatesController(
     $state,
     Alert,
     Dataset,
-    InitiatePlaybookRun,
     ProcessErrors,
     Prompt,
     PromptService,
     resolvedModels,
     strings,
-    Wait,
-    Empty
+    Wait
 ) {
     const vm = this || {};
     const [jobTemplate, workflowTemplate] = resolvedModels;
@@ -42,7 +40,7 @@ function ListTemplatesController(
             position: 'right',
             arrowHeight: 15
         }
-    }
+    };
 
     $scope.canAddJobTemplate = jobTemplate.options('actions.POST');
     $scope.canAddWorkflowJobTemplate = workflowTemplate.options('actions.POST');
@@ -347,6 +345,7 @@ function ListTemplatesController(
                     launchConf: launchData.data,
                     launchOptions: launchOptions.data,
                     template: template.id,
+                    templateType: template.type,
                     prompts: PromptService.processPromptValues({
                         launchConf: launchData.data,
                         launchOptions: launchOptions.data
@@ -368,79 +367,75 @@ function ListTemplatesController(
     }
 
     function runWorkflowTemplate(template) {
-        InitiatePlaybookRun({ scope: $scope, id: template.id, job_type: 'workflow_job_template' });
+        const selectedWorkflowJobTemplate = workflowTemplate.create();
+        const preLaunchPromises = [
+            selectedWorkflowJobTemplate.getLaunch(template.id),
+            selectedWorkflowJobTemplate.optionsLaunch(template.id),
+        ];
+
+        Promise.all(preLaunchPromises)
+            .then(([launchData, launchOptions]) => {
+                if (selectedWorkflowJobTemplate.canLaunchWithoutPrompt()) {
+                    return selectedWorkflowJobTemplate
+                        .postLaunch({ id: template.id })
+                        .then(({ data }) => {
+                            $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
+                        });
+                }
+
+                const promptData = {
+                    launchConf: launchData.data,
+                    launchOptions: launchOptions.data,
+                    template: template.id,
+                    templateType: template.type,
+                    prompts: PromptService.processPromptValues({
+                        launchConf: launchData.data,
+                        launchOptions: launchOptions.data
+                    }),
+                    triggerModalOpen: true,
+                };
+
+                if (launchData.data.survey_enabled) {
+                   selectedWorkflowJobTemplate.getSurveyQuestions(template.id)
+                        .then(({ data }) => {
+                            const processed = PromptService.processSurveyQuestions({ surveyQuestions: data.spec });
+                            promptData.surveyQuestions = processed.surveyQuestions;
+                            $scope.promptData = promptData;
+                        });
+                } else {
+                    $scope.promptData = promptData;
+                }
+            });
     }
 
     $scope.launchJob = () => {
-        const jobLaunchData = {
-            extra_vars: $scope.promptData.extraVars
-        };
-
-        if ($scope.promptData.launchConf.ask_tags_on_launch){
-            jobLaunchData.job_tags = $scope.promptData.prompts.tags.value.map(a => a.value).join();
-        }
-
-        if ($scope.promptData.launchConf.ask_skip_tags_on_launch){
-            jobLaunchData.skip_tags = $scope.promptData.prompts.skipTags.value.map(a => a.value).join();
-        }
-
-        if ($scope.promptData.launchConf.ask_limit_on_launch && _.has($scope, 'promptData.prompts.limit.value')){
-            jobLaunchData.limit = $scope.promptData.prompts.limit.value;
-        }
-
-        if ($scope.promptData.launchConf.ask_job_type_on_launch && _.has($scope, 'promptData.prompts.jobType.value.value')) {
-            jobLaunchData.job_type = $scope.promptData.prompts.jobType.value.value;
-        }
-
-        if ($scope.promptData.launchConf.ask_verbosity_on_launch && _.has($scope, 'promptData.prompts.verbosity.value.value')) {
-            jobLaunchData.verbosity = $scope.promptData.prompts.verbosity.value.value;
-        }
-
-        if ($scope.promptData.launchConf.ask_inventory_on_launch && !Empty($scope.promptData.prompts.inventory.value.id)){
-            jobLaunchData.inventory_id = $scope.promptData.prompts.inventory.value.id;
-        }
-
-        if ($scope.promptData.launchConf.ask_credential_on_launch){
-            jobLaunchData.credentials = [];
-            $scope.promptData.prompts.credentials.value.forEach((credential) => {
-                jobLaunchData.credentials.push(credential.id);
-            });
-        }
-
-        if ($scope.promptData.launchConf.ask_diff_mode_on_launch && _.has($scope, 'promptData.prompts.diffMode.value')) {
-            jobLaunchData.diff_mode = $scope.promptData.prompts.diffMode.value;
-        }
-
-        if ($scope.promptData.prompts.credentials.passwords) {
-            _.forOwn($scope.promptData.prompts.credentials.passwords, (val, key) => {
-                if (!jobLaunchData.credential_passwords) {
-                    jobLaunchData.credential_passwords = {};
-                }
-                if (key === "ssh_key_unlock") {
-                    jobLaunchData.credential_passwords.ssh_key_unlock = val.value;
-                } else if (key !== "vault") {
-                    jobLaunchData.credential_passwords[`${key}_password`] = val.value;
-                } else {
-                    _.each(val, (vaultCred) => {
-                        jobLaunchData.credential_passwords[vaultCred.vault_id ? `${key}_password.${vaultCred.vault_id}` : `${key}_password`] = vaultCred.value;
-                    });
-                }
-            });
-        }
+        const jobLaunchData = PromptService.bundlePromptDataForLaunch($scope.promptData);
 
         // If the extra_vars dict is empty, we don't want to include it if we didn't prompt for anything.
         if(_.isEmpty(jobLaunchData.extra_vars) && !($scope.promptData.launchConf.ask_variables_on_launch && $scope.promptData.launchConf.survey_enabled && $scope.promptData.surveyQuestions.length > 0)){
             delete jobLaunchData.extra_vars;
         }
 
-        jobTemplate.create().postLaunch({
-            id: $scope.promptData.template,
-            launchData: jobLaunchData
-        })
-        .then((launchRes) => {
-            $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
-        })
-        .catch(createErrorHandler('launch job template', 'POST'));
+        if($scope.promptData.templateType === 'job_template') {
+            jobTemplate.create().postLaunch({
+                id: $scope.promptData.template,
+                launchData: jobLaunchData
+            })
+            .then((launchRes) => {
+                $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
+            })
+            .catch(createErrorHandler('launch job template', 'POST'));
+        } else if($scope.promptData.templateType === 'workflow_job_template') {
+            workflowTemplate.create().postLaunch({
+                id: $scope.promptData.template,
+                launchData: jobLaunchData
+            })
+            .then((launchRes) => {
+                $state.go('workflowResults', { id: launchRes.data.workflow_job }, { reload: true });
+            })
+            .catch(createErrorHandler('launch workflow job template', 'POST'));
+        }
+
     };
 }
 
@@ -450,14 +445,12 @@ ListTemplatesController.$inject = [
     '$state',
     'Alert',
     'Dataset',
-    'InitiatePlaybookRun',
     'ProcessErrors',
     'Prompt',
     'PromptService',
     'resolvedModels',
     'TemplatesStrings',
-    'Wait',
-    'Empty'
+    'Wait'
 ];
 
 export default ListTemplatesController;

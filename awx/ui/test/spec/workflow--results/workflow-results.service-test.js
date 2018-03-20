@@ -6,7 +6,7 @@ describe('workflowResultsService', () => {
     let $interval;
 
     beforeEach(angular.mock.module('workflowResults', ($provide) => {
-        ['PromptDialog', 'Prompt', 'Wait', 'Rest', 'ProcessErrors', 'InitiatePlaybookRun', '$state'].forEach(function(item) {
+        ['PromptDialog', 'Prompt', 'Wait', 'Rest', 'ProcessErrors', '$state'].forEach(function(item) {
             $provide.value(item, {});
         });
         $provide.value('$stateExtender', { addState: jasmine.createSpy('addState'), });

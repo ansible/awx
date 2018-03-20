@@ -8,7 +8,7 @@
                         RESULTS
                     </div>
                     <div class="StandardOut-actions">
-                        <button id="relaunch-job-button" class="List-actionButton jobResult-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="{{'Relaunch using the same parameters'|translate}}" data-original-title="" title=""><i class="icon-launch"></i> </button>
+                        <at-relaunch></at-relaunch>
                         <button id="cancel-job-button" class="List-actionButton List-actionButton--delete jobResult-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job.status === 'waiting' || job.status === 'running' || job.status === 'pending'" aw-tool-tip="{{'Cancel'|translate}}" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
                         <button id="delete-job-button" class="List-actionButton List-actionButton--delete jobResult-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job.status === 'waiting' || job.status === 'running' || job.status === 'pending' " aw-tool-tip="{{'Delete'|translate}}" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
                     </div>

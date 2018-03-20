@@ -77,61 +77,36 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                     unified_job_template: params.node.unifiedJobTemplate.id
                 };
 
+                if(_.has(params, 'node.promptData.extraVars')) {
+                    if(_.get(params, 'node.promptData.launchConf.defaults.extra_vars')) {
+                        if(!sendableNodeData.extra_data) {
+                            sendableNodeData.extra_data = {};
+                        }
+
+                        const defaultVars = jsyaml.safeLoad(params.node.promptData.launchConf.defaults.extra_vars);
+
+                        // Only include extra vars that differ from the template default vars
+                        _.forOwn(params.node.promptData.extraVars, (value, key) => {
+                            if(!defaultVars[key] || defaultVars[key] !== value) {
+                                sendableNodeData.extra_data[key] = value;
+                            }
+                        });
+                        if(sendableNodeData.extra_data === {}) {
+                            delete sendableNodeData.extra_data;
+                        }
+                    } else {
+                        sendableNodeData.extra_data = params.node.promptData.extraVars;
+                    }
+                }
+
                 // Check to see if the user has provided any prompt values that are different
                 // from the defaults in the job template
 
                 if(params.node.unifiedJobTemplate.type === "job_template" && params.node.promptData) {
-                    if(params.node.promptData.launchConf.survey_enabled){
-                        for (var i=0; i < params.node.promptData.surveyQuestions.length; i++){
-                            var fld = params.node.promptData.surveyQuestions[i].variable;
-                            // grab all survey questions that have answers
-                            if(params.node.promptData.surveyQuestions[i].required || (params.node.promptData.surveyQuestions[i].required === false && params.node.promptData.surveyQuestions[i].model.toString()!=="")) {
-                                if(!sendableNodeData.extra_data) {
-                                    sendableNodeData.extra_data = {};
-                                }
-                                sendableNodeData.extra_data[fld] = params.node.promptData.surveyQuestions[i].model;
-                            }
-
-                            if(params.node.promptData.surveyQuestions[i].required === false && _.isEmpty(params.node.promptData.surveyQuestions[i].model)) {
-                                switch (params.node.promptData.surveyQuestions[i].type) {
-                                    // for optional text and text-areas, submit a blank string if min length is 0
-                                    // -- this is confusing, for an explanation see:
-                                    //    http://docs.ansible.com/ansible-tower/latest/html/userguide/job_templates.html#optional-survey-questions
-                                    //
-                                    case "text":
-                                    case "textarea":
-                                    if (params.node.promptData.surveyQuestions[i].min === 0) {
-                                        sendableNodeData.extra_data[fld] = "";
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if(_.has(params, 'node.promptData.prompts.jobType.value.value') && _.get(params, 'node.promptData.launchConf.ask_job_type_on_launch')) {
-                        sendableNodeData.job_type = params.node.promptData.prompts.jobType.templateDefault === params.node.promptData.prompts.jobType.value.value ? null : params.node.promptData.prompts.jobType.value.value;
-                    }
-                    if(_.has(params, 'node.promptData.prompts.tags.value') && _.get(params, 'node.promptData.launchConf.ask_tags_on_launch')){
-                        let templateDefaultJobTags = params.node.promptData.prompts.tags.templateDefault.split(',');
-                        sendableNodeData.job_tags = (_.isEqual(templateDefaultJobTags.sort(), params.node.promptData.prompts.tags.value.map(a => a.value).sort())) ? null : params.node.promptData.prompts.tags.value.map(a => a.value).join();
-                    }
-                    if(_.has(params, 'node.promptData.prompts.skipTags.value') && _.get(params, 'node.promptData.launchConf.ask_skip_tags_on_launch')){
-                        let templateDefaultSkipTags = params.node.promptData.prompts.skipTags.templateDefault.split(',');
-                        sendableNodeData.skip_tags = (_.isEqual(templateDefaultSkipTags.sort(), params.node.promptData.prompts.skipTags.value.map(a => a.value).sort())) ? null : params.node.promptData.prompts.skipTags.value.map(a => a.value).join();
-                    }
-                    if(_.has(params, 'node.promptData.prompts.limit.value') && _.get(params, 'node.promptData.launchConf.ask_limit_on_launch')){
-                        sendableNodeData.limit = params.node.promptData.prompts.limit.templateDefault === params.node.promptData.prompts.limit.value ? null : params.node.promptData.prompts.limit.value;
-                    }
-                    if(_.has(params, 'node.promptData.prompts.verbosity.value.value') && _.get(params, 'node.promptData.launchConf.ask_verbosity_on_launch')){
-                        sendableNodeData.verbosity = params.node.promptData.prompts.verbosity.templateDefault === params.node.promptData.prompts.verbosity.value.value ? null : params.node.promptData.prompts.verbosity.value.value;
-                    }
-                    if(_.has(params, 'node.promptData.prompts.inventory.value') && _.get(params, 'node.promptData.launchConf.ask_inventory_on_launch')){
-                        sendableNodeData.inventory = _.has(params, 'node.promptData.prompts.inventory.templateDefault.id') && params.node.promptData.prompts.inventory.templateDefault.id === params.node.promptData.prompts.inventory.value.id ? null : params.node.promptData.prompts.inventory.value.id;
-                    }
-                    if(_.has(params, 'node.promptData.prompts.diffMode.value') && _.get(params, 'node.promptData.launchConf.ask_diff_mode_on_launch')){
-                        sendableNodeData.diff_mode = params.node.promptData.prompts.diffMode.templateDefault === params.node.promptData.prompts.diffMode.value ? null : params.node.promptData.prompts.diffMode.value;
-                    }
+                    sendableNodeData = PromptService.bundlePromptDataForSaving({
+                        promptData: params.node.promptData,
+                        dataToSave: sendableNodeData
+                    });
                 }
 
                 return sendableNodeData;
@@ -1028,7 +1003,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                             }),
                                         };
 
-                                        $scope.$watch('promptData.surveyQuestions', () => {
+                                        surveyQuestionWatcher = $scope.$watch('promptData.surveyQuestions', () => {
                                             let missingSurveyValue = false;
                                             _.each($scope.promptData.surveyQuestions, (question) => {
                                                 if(question.required && (Empty(question.model) || question.model === [])) {

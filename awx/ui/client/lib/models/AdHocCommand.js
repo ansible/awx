@@ -16,33 +16,29 @@ function postRelaunch (params) {
         url: `${this.path}${params.id}/relaunch/`
     };
 
-    if (params.relaunchData) {
-        req.data = params.relaunchData;
-    }
-
     return $http(req);
 }
 
-function JobModel (method, resource, config) {
-    Base.call(this, 'jobs');
+function AdHocCommandModel (method, resource, config) {
+    Base.call(this, 'ad_hoc_commands');
 
-    this.Constructor = JobModel;
+    this.Constructor = AdHocCommandModel;
     this.postRelaunch = postRelaunch.bind(this);
     this.getRelaunch = getRelaunch.bind(this);
 
     return this.create(method, resource, config);
 }
 
-function JobModelLoader (BaseModel, _$http_) {
+function AdHocCommandModelLoader (BaseModel, _$http_) {
     Base = BaseModel;
     $http = _$http_;
 
-    return JobModel;
+    return AdHocCommandModel;
 }
 
-JobModelLoader.$inject = [
+AdHocCommandModelLoader.$inject = [
     'BaseModel',
     '$http'
 ];
 
-export default JobModelLoader;
+export default AdHocCommandModelLoader;

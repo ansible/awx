@@ -5,7 +5,7 @@
 *************************************************/
 
 
-export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', '$interval', 'moment', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun, $interval, moment) {
+export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'WorkflowJobModel', '$interval', 'moment', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, WorkflowJob, $interval, moment) {
     var val = {
         getCounts: function(workflowNodes){
             var nodeArr = [];
@@ -107,8 +107,13 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
             });
         },
         relaunchJob: function(scope) {
-            InitiatePlaybookRun({ scope: scope, id: scope.workflow.id,
-                relaunch: true, job_type: 'workflow_job' });
+            const workflowJob = new WorkflowJob();
+
+            workflowJob.postRelaunch({
+                id: scope.workflow.id
+            }).then((launchRes) => {
+                $state.go('workflowResults', { id: launchRes.data.id }, { reload: true });
+            });
         },
         createOneSecondTimer: function(startTime, fn) {
             return $interval(function(){

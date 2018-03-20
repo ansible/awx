@@ -5,8 +5,8 @@
 *************************************************/
 
 
-export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', 'GetBasePath', 'Alert', '$rootScope', 'i18n',
-function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun, GetBasePath, Alert, $rootScope, i18n) {
+export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'GetBasePath', 'Alert', '$rootScope', 'i18n',
+function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, GetBasePath, Alert, $rootScope, i18n) {
     var val = {
         // the playbook_on_stats event returns the count data in a weird format.
         // format to what we need!
@@ -161,10 +161,6 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                 },
                 actionText: i18n._('PROCEED')
             });
-        },
-        relaunchJob: function(scope) {
-            InitiatePlaybookRun({ scope: scope, id: scope.job.id,
-                relaunch: true });
         },
         getJobData: function(id){
             var val = $q.defer();

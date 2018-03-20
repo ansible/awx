@@ -1,7 +1,7 @@
 function PromptService (Empty, $filter)  {
 
     this.processPromptValues = (params) => {
-        let prompts = {
+        const prompts = {
             credentials: {},
             inventory: {},
             variables: {},
@@ -16,10 +16,23 @@ function PromptService (Empty, $filter)  {
         prompts.credentials.value = _.has(params, 'launchConf.defaults.credentials') ? _.cloneDeep(params.launchConf.defaults.credentials) : [];
         prompts.inventory.value = _.has(params, 'currentValues.summary_fields.inventory') ? params.currentValues.summary_fields.inventory : (_.has(params, 'launchConf.defaults.inventory') ? params.launchConf.defaults.inventory : null);
 
-        let skipTags = _.has(params, 'currentValues.skip_tags') && params.currentValues.skip_tags ? params.currentValues.skip_tags : (_.has(params, 'launchConf.defaults.skip_tags') ? params.launchConf.defaults.skip_tags : "");
-        let jobTags = _.has(params, 'currentValues.job_tags') && params.currentValues.job_tags ? params.currentValues.job_tags : (_.has(params, 'launchConf.defaults.job_tags') ? params.launchConf.defaults.job_tags : "");
+        const skipTags = _.has(params, 'currentValues.skip_tags') && params.currentValues.skip_tags ? params.currentValues.skip_tags : (_.has(params, 'launchConf.defaults.skip_tags') ? params.launchConf.defaults.skip_tags : "");
+        const jobTags = _.has(params, 'currentValues.job_tags') && params.currentValues.job_tags ? params.currentValues.job_tags : (_.has(params, 'launchConf.defaults.job_tags') ? params.launchConf.defaults.job_tags : "");
 
-        prompts.variables.value = _.has(params, 'launchConf.defaults.extra_vars') && params.launchConf.defaults.extra_vars !== "" ? params.launchConf.defaults.extra_vars : "---";
+        let extraVars = '';
+
+        const hasCurrentExtraVars = _.get(params, 'currentValues.extra_data'),
+              hasDefaultExtraVars = _.get(params, 'launchConf.defaults.extra_vars');
+
+        if(hasCurrentExtraVars && hasDefaultExtraVars) {
+            extraVars = _.merge(jsyaml.safeLoad(params.launchConf.defaults.extra_vars), params.currentValues.extra_data);
+        } else if(hasCurrentExtraVars) {
+            extraVars = params.currentValues.extra_data;
+        } else if(hasDefaultExtraVars) {
+            extraVars = jsyaml.safeLoad(params.launchConf.defaults.extra_vars);
+        }
+
+        prompts.variables.value = extraVars && extraVars !== '' ? '---\n' + jsyaml.safeDump(extraVars) : '---\n';
         prompts.verbosity.choices = _.get(params, 'launchOptions.actions.POST.verbosity.choices', []).map(c => ({label: c[1], value: c[0]}));
         prompts.verbosity.value = _.has(params, 'currentValues.verbosity') && params.currentValues.verbosity ? _.find(prompts.verbosity.choices, item => item.value === params.currentValues.verbosity) : _.find(prompts.verbosity.choices, item => item.value === params.launchConf.defaults.verbosity);
         prompts.jobType.choices = _.get(params, 'launchOptions.actions.POST.job_type.choices', []).map(c => ({label: c[1], value: c[0]}));
@@ -27,7 +40,7 @@ function PromptService (Empty, $filter)  {
         prompts.limit.value = _.has(params, 'currentValues.limit') && params.currentValues.limit ? params.currentValues.limit : (_.has(params, 'launchConf.defaults.limit') ? params.launchConf.defaults.limit : "");
         prompts.tags.options = prompts.tags.value = (jobTags && jobTags !== "") ? jobTags.split(',').map((i) => ({name: i, label: i, value: i})) : [];
         prompts.skipTags.options = prompts.skipTags.value = (skipTags && skipTags !== "") ? skipTags.split(',').map((i) => ({name: i, label: i, value: i})) : [];
-        prompts.diffMode.value = _.has(params, 'currentValues.diff_mode') && typeof params.currentValues.diff_mode === 'boolean' ? params.currentValues.diff_mode : (_.has(params, 'launchConf.defaults.diff_mode') ? params.launchConf.defaults.diff_mode : false);
+        prompts.diffMode.value = _.has(params, 'currentValues.diff_mode') && typeof params.currentValues.diff_mode === 'boolean' ? params.currentValues.diff_mode : (_.has(params, 'launchConf.defaults.diff_mode') ? params.launchConf.defaults.diff_mode : null);
 
         return prompts;
     };
@@ -116,6 +129,144 @@ function PromptService (Empty, $filter)  {
             extra_data: params.extra_data,
             missingSurveyValue: missingSurveyValue
         };
+    };
+
+    this.bundlePromptDataForLaunch = (promptData) => {
+        const launchData = {
+            extra_vars: promptData.extraVars
+        };
+
+        if (promptData.launchConf.ask_tags_on_launch){
+            launchData.job_tags = promptData.prompts.tags.value.map(a => a.value).join();
+        }
+        if (promptData.launchConf.ask_skip_tags_on_launch){
+            launchData.skip_tags = promptData.prompts.skipTags.value.map(a => a.value).join();
+        }
+        if (promptData.launchConf.ask_limit_on_launch && _.has(promptData, 'prompts.limit.value')){
+            launchData.limit = promptData.prompts.limit.value;
+        }
+        if (promptData.launchConf.ask_job_type_on_launch && _.has(promptData, 'prompts.jobType.value.value')) {
+            launchData.job_type = promptData.prompts.jobType.value.value;
+        }
+        if (promptData.launchConf.ask_verbosity_on_launch && _.has(promptData, 'prompts.verbosity.value.value')) {
+            launchData.verbosity = promptData.prompts.verbosity.value.value;
+        }
+        if (promptData.launchConf.ask_inventory_on_launch && !Empty(promptData.prompts.inventory.value.id)){
+            launchData.inventory_id = promptData.prompts.inventory.value.id;
+        }
+        if (promptData.launchConf.ask_credential_on_launch){
+            launchData.credentials = [];
+            promptData.prompts.credentials.value.forEach((credential) => {
+                launchData.credentials.push(credential.id);
+            });
+        }
+        if (promptData.launchConf.ask_diff_mode_on_launch && _.has(promptData, 'prompts.diffMode.value')) {
+            launchData.diff_mode = promptData.prompts.diffMode.value;
+        }
+        if (promptData.prompts.credentials.passwords) {
+            _.forOwn(promptData.prompts.credentials.passwords, (val, key) => {
+                if (!launchData.credential_passwords) {
+                    launchData.credential_passwords = {};
+                }
+                if (key === "ssh_key_unlock") {
+                    launchData.credential_passwords.ssh_key_unlock = val.value;
+                } else if (key !== "vault") {
+                    launchData.credential_passwords[`${key}_password`] = val.value;
+                } else {
+                    _.each(val, (vaultCred) => {
+                        launchData.credential_passwords[vaultCred.vault_id ? `${key}_password.${vaultCred.vault_id}` : `${key}_password`] = vaultCred.value;
+                    });
+                }
+            });
+        }
+
+        return launchData;
+    };
+
+    this.bundlePromptDataForRelaunch = (promptData) => {
+        const launchData = {};
+
+        if(promptData.relaunchHostType) {
+            launchData.hosts = promptData.relaunchHostType;
+        }
+
+        if (promptData.prompts.credentials.passwords) {
+            _.forOwn(promptData.prompts.credentials.passwords, (val, key) => {
+                if (!launchData.credential_passwords) {
+                    launchData.credential_passwords = {};
+                }
+                if (key === "ssh_key_unlock") {
+                    launchData.credential_passwords.ssh_key_unlock = val.value;
+                } else if (key !== "vault") {
+                    launchData.credential_passwords[`${key}_password`] = val.value;
+                } else {
+                    _.each(val, (vaultCred) => {
+                        launchData.credential_passwords[vaultCred.vault_id ? `${key}_password.${vaultCred.vault_id}` : `${key}_password`] = vaultCred.value;
+                    });
+                }
+            });
+        }
+
+        return launchData;
+    };
+
+    this.bundlePromptDataForSaving = (params) => {
+
+        const promptDataToSave = params.dataToSave ? params.dataToSave : {};
+
+        if(params.promptData.launchConf.survey_enabled){
+            for (var i=0; i < params.promptData.surveyQuestions.length; i++){
+                var fld = params.promptData.surveyQuestions[i].variable;
+                // grab all survey questions that have answers
+                if(params.promptData.surveyQuestions[i].required || (params.promptData.surveyQuestions[i].required === false && params.promptData.surveyQuestions[i].model.toString()!=="")) {
+                    if(!promptDataToSave.extra_data) {
+                        promptDataToSave.extra_data = {};
+                    }
+                    promptDataToSave.extra_data[fld] = params.promptData.surveyQuestions[i].model;
+                }
+
+                if(params.promptData.surveyQuestions[i].required === false && _.isEmpty(params.promptData.surveyQuestions[i].model)) {
+                    switch (params.promptData.surveyQuestions[i].type) {
+                        // for optional text and text-areas, submit a blank string if min length is 0
+                        // -- this is confusing, for an explanation see:
+                        //    http://docs.ansible.com/ansible-tower/latest/html/userguide/job_templates.html#optional-survey-questions
+                        //
+                        case "text":
+                        case "textarea":
+                        if (params.promptData.surveyQuestions[i].min === 0) {
+                            promptDataToSave.extra_data[fld] = "";
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        if(_.has(params, 'promptData.prompts.jobType.value.value') && _.get(params, 'promptData.launchConf.ask_job_type_on_launch')) {
+            promptDataToSave.job_type = params.promptData.launchConf.defaults.job_type && params.promptData.launchConf.defaults.job_type === params.promptData.prompts.jobType.value.value ? null : params.promptData.prompts.jobType.value.value;
+        }
+        if(_.has(params, 'promptData.prompts.tags.value') && _.get(params, 'promptData.launchConf.ask_tags_on_launch')){
+            const templateDefaultJobTags = params.promptData.launchConf.defaults.job_tags.split(',');
+            promptDataToSave.job_tags = (_.isEqual(templateDefaultJobTags.sort(), params.promptData.prompts.tags.value.map(a => a.value).sort())) ? null : params.promptData.prompts.tags.value.map(a => a.value).join();
+        }
+        if(_.has(params, 'promptData.prompts.skipTags.value') && _.get(params, 'promptData.launchConf.ask_skip_tags_on_launch')){
+            const templateDefaultSkipTags = params.promptData.launchConf.defaults.skip_tags.split(',');
+            promptDataToSave.skip_tags = (_.isEqual(templateDefaultSkipTags.sort(), params.promptData.prompts.skipTags.value.map(a => a.value).sort())) ? null : params.promptData.prompts.skipTags.value.map(a => a.value).join();
+        }
+        if(_.has(params, 'promptData.prompts.limit.value') && _.get(params, 'promptData.launchConf.ask_limit_on_launch')){
+            promptDataToSave.limit = params.promptData.launchConf.defaults.limit && params.promptData.launchConf.defaults.limit === params.promptData.prompts.limit.value ? null : params.promptData.prompts.limit.value;
+        }
+        if(_.has(params, 'promptData.prompts.verbosity.value.value') && _.get(params, 'promptData.launchConf.ask_verbosity_on_launch')){
+            promptDataToSave.verbosity = params.promptData.launchConf.defaults.verbosity && params.promptData.launchConf.defaults.verbosity === params.promptData.prompts.verbosity.value.value ? null : params.promptData.prompts.verbosity.value.value;
+        }
+        if(_.has(params, 'promptData.prompts.inventory.value') && _.get(params, 'promptData.launchConf.ask_inventory_on_launch')){
+            promptDataToSave.inventory = params.promptData.launchConf.defaults.inventory && params.promptData.launchConf.defaults.inventory.id === params.promptData.prompts.inventory.value.id ? null : params.promptData.prompts.inventory.value.id;
+        }
+        if(_.has(params, 'promptData.prompts.diffMode.value') && _.get(params, 'promptData.launchConf.ask_diff_mode_on_launch')){
+            promptDataToSave.diff_mode = params.promptData.launchConf.defaults.diff_mode && params.promptData.launchConf.defaults.diff_mode === params.promptData.prompts.diffMode.value ? null : params.promptData.prompts.diffMode.value;
+        }
+
+        return promptDataToSave;
     };
 }
 
