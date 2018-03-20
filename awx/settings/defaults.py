@@ -340,7 +340,7 @@ AUTHENTICATION_BACKENDS = (
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'main.OAuth2Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'main.OAuth2AccessToken'
 
-OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000, 
+OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000,
                    'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600}
 
 # LDAP server (default to None to skip using LDAP authentication).
@@ -945,6 +945,7 @@ FACT_CACHE_PORT = 6564
 
 # Note: This setting may be overridden by database settings.
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
+MANAGE_ORGANIZATION_AUTH = True
 
 # Note: This setting may be overridden by database settings.
 TOWER_ADMIN_ALERTS = True
