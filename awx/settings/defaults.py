@@ -458,6 +458,7 @@ CELERY_TRACK_STARTED = True
 CELERYD_TASK_TIME_LIMIT = None
 CELERYD_TASK_SOFT_TIME_LIMIT = None
 CELERYD_POOL_RESTARTS = True
+CELERYD_AUTOSCALER = 'awx.main.utils.autoscale:DynamicAutoScaler'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
 CELERY_QUEUES = (
