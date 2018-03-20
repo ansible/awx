@@ -67,7 +67,7 @@
             </g>
         </g> <!-- end frame_g -->
         <g ng-repeat="toolbox in [inventory_toolbox]">
-        <g awx-net-inventory-toolbox></g>
+        <g awx-net-inventory-toolbox ng-if="canEdit"></g>
         </g>
         <g awx-net-context-menu
                 context_menu="context_menus[0]"

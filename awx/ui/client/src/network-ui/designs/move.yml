@@ -1,70 +1,63 @@
-diagram_id: 64
-finite_state_machine_id: 3
+diagram_id: 87
 name: move
 states:
-- id: 1
-  label: Disable
-  x: 743
-  y: 108
-- id: 2
-  label: Start
-  x: 533
-  y: 121
-- id: 3
-  label: Ready
-  x: 531
-  y: 320
-- id: 4
-  label: Selected1
-  x: 226
-  y: 325
-- id: 6
-  label: Move
-  x: -54
-  y: 587
 - id: 8
-  label: Placing
-  x: 92
-  y: 82
-- id: 9
-  label: EditLabel
-  x: 594
-  y: 677
-- id: 5
-  label: Selected2
-  x: 275
-  y: 682
-- id: 10
   label: ContextMenu
-  x: 901
-  y: 990
+  x: 826
+  y: 1008
+- id: 0
+  label: Disable
+  x: 914
+  y: 115
+- id: 6
+  label: EditLabel
+  x: 765
+  y: 684
+- id: 4
+  label: Move
+  x: 118
+  y: 594
+- id: 5
+  label: Placing
+  x: 263
+  y: 89
+- id: 2
+  label: Ready
+  x: 702
+  y: 327
+- id: 3
+  label: Selected1
+  x: 397
+  y: 332
 - id: 7
+  label: Selected2
+  x: 268
+  y: 735
+- id: 9
   label: Selected3
-  x: 190
-  y: 954
+  x: 361
+  y: 961
+- id: 1
+  label: Start
+  x: 704
+  y: 128
 transitions:
 - from_state: ContextMenu
   label: onDetailsPanel
   to_state: Selected2
 - from_state: ContextMenu
+  label: onLabelEdit
+  to_state: EditLabel
+- from_state: ContextMenu
   label: onMouseDown
-  to_state: Ready
-- from_state: Start
-  label: start
-  to_state: Ready
-- from_state: Selected2
-  label: onMouseDown
-  to_state: Ready
+  to_state: Selected2
+- from_state: EditLabel
+  label: onKeyDown
+  to_state: Selected2
 - from_state: EditLabel
   label: onMouseDown
   to_state: Ready
-- from_state: Selected2
-  label: onNewDevice
-  to_state: Ready
-- from_state: Selected2
-  label: onKeyDown
-  to_state: Ready
-- from_state: Ready
+- from_state: Move
   label: onMouseDown
   to_state: Selected1
 - from_state: Move
@@ -73,36 +66,42 @@ transitions:
 - from_state: Placing
   label: onMouseDown
   to_state: Selected1
-- from_state: Move
+- from_state: Placing
+  label: onMouseMove
+  to_state: Move
+- from_state: Ready
   label: onMouseDown
   to_state: Selected1
-- from_state: Selected1
-  label: onMouseUp
-  to_state: Selected2
-- from_state: EditLabel
-  label: onKeyDown
-  to_state: Selected2
+- from_state: Ready
+  label: onNewDevice
+  to_state: Placing
 - from_state: Ready
   label: onPasteDevice
   to_state: Selected2
 - from_state: Selected1
   label: onMouseMove
   to_state: Move
-- from_state: Selected3
-  label: onMouseMove
-  to_state: Move
-- from_state: Placing
-  label: onMouseMove
-  to_state: Move
+- from_state: Selected1
+  label: onMouseUp
+  to_state: Selected2
+- from_state: Selected2
+  label: onKeyDown
+  to_state: Ready
 - from_state: Selected2
   label: onMouseDown
   to_state: Selected3
-- from_state: Ready
+- from_state: Selected2
+  label: onMouseDown
+  to_state: Ready
+- from_state: Selected2
   label: onNewDevice
-  to_state: Placing
-- from_state: ContextMenu
-  label: onLabelEdit
-  to_state: EditLabel
+  to_state: Ready
+- from_state: Selected3
+  label: onMouseMove
+  to_state: Move
 - from_state: Selected3
   label: onMouseUp
   to_state: ContextMenu
+- from_state: Start
+  label: start
+  to_state: Ready
