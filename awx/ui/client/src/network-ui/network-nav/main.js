@@ -10,7 +10,8 @@ function NetworkingResolve ($stateParams, resourceData) {
         inventory: {
             id: $stateParams.inventory_id,
             name: $stateParams.inventory_name
-        }
+        },
+        canEdit: resourceData.data.summary_fields.user_capabilities.edit
     };
     if (!resolve.inventory.name) {
         resolve.inventory.name = resourceData.data.name;

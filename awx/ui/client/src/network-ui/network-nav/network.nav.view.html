@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="Networking-toolbarRightSide">
-                <div class="">
+                <div ng-if="vm.canEdit">
                     <button ng-click="vm.hideToolbox()" type="button" class="Networking-toolbarIcon" ng-class="{'Networking-toolbarIcon--selected Networking-toolboxPanelToolbarIcon--selected' : vm.leftPanelIsExpanded}">
                         <i class="fa fa-wrench"></i>
                     </button>

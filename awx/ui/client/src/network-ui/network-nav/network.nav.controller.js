@@ -9,7 +9,7 @@ function NetworkingController (models, $state, $scope, strings) {
     vm.strings = strings;
     vm.panelTitle = `${strings.get('state.BREADCRUMB_LABEL')} | ${inventory.name}`;
     vm.hostDetail = {};
-
+    vm.canEdit = models.canEdit;
     vm.rightPanelIsExpanded = false;
     vm.leftPanelIsExpanded = true;
     vm.keyPanelExpanded = false;

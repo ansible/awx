@@ -6,6 +6,7 @@ var hotkeys = require('./hotkeys.fsm.js');
 var toolbox_fsm = require('./toolbox.fsm.js');
 var view = require('./view.fsm.js');
 var move = require('./move.fsm.js');
+var move_readonly = require('./move.readonly.fsm.js');
 var buttons = require('./buttons.fsm.js');
 var time = require('./time.fsm.js');
 var test_fsm = require('./test.fsm.js');
@@ -151,8 +152,8 @@ var NetworkUIController = function($scope,
                  from_y: 0,
                  to_x: 0,
                  to_y: 0};
-
-    $scope.send_trace_message = function (message) {
+  $scope.canEdit = $scope.$parent.$resolve.resolvedModels.canEdit;
+  $scope.send_trace_message = function (message) {
         if (!$scope.recording) {
             return;
         }
@@ -194,13 +195,14 @@ var NetworkUIController = function($scope,
   $scope.hotkeys_controller = new fsm.FSMController($scope, "hotkeys_fsm", hotkeys.Start, $scope);
   $scope.keybindings_controller = new fsm.FSMController($scope, "keybindings_fsm", keybindings.Start, $scope);
   $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
-  $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope);
+  $scope.move_controller = new fsm.FSMController($scope, "move_fsm", !$scope.canEdit ? move.Disable : move.Start, $scope);
+  $scope.move_readonly_controller = new fsm.FSMController($scope, "move_readonly_fsm", !$scope.canEdit? move_readonly.Start : move_readonly.Disable, $scope);
   $scope.details_panel_controller = new fsm.FSMController($scope, "details_panel_fsm", details_panel_fsm.Start, $scope);
   $scope.buttons_controller = new fsm.FSMController($scope, "buttons_fsm", buttons.Start, $scope);
   $scope.time_controller = new fsm.FSMController($scope, "time_fsm", time.Start, $scope);
   $scope.test_controller = new fsm.FSMController($scope, "test_fsm", test_fsm.Start, $scope);
 
-  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
+  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", !$scope.canEdit ? toolbox_fsm.Disabled : toolbox_fsm.Start, $scope);
 
   var toolboxTopMargin = $('.Networking-top').height();
   var toolboxTitleMargin = toolboxTopMargin + 35;
@@ -321,8 +323,11 @@ var NetworkUIController = function($scope,
   $scope.move_controller.delegate_channel = new fsm.Channel($scope.move_controller,
                                                             $scope.view_controller,
                                                             $scope);
-  $scope.details_panel_controller.delegate_channel = new fsm.Channel($scope.details_panel_controller,
+  $scope.move_readonly_controller.delegate_channel = new fsm.Channel($scope.move_readonly_controller,
                                                             $scope.move_controller,
+                                                            $scope);
+  $scope.details_panel_controller.delegate_channel = new fsm.Channel($scope.details_panel_controller,
+                                                            $scope.move_readonly_controller,
                                                             $scope);
   $scope.inventory_toolbox_controller.delegate_channel = new fsm.Channel($scope.inventory_toolbox_controller,
                                                             $scope.details_panel_controller,
@@ -880,14 +885,19 @@ var NetworkUIController = function($scope,
     };
 
     // Context Menu Buttons
+    const contextMenuButtonHeight = 26;
+    let contextMenuHeight = 64;
     $scope.context_menu_buttons = [
-        new models.ContextMenuButton("Details", 236, 231, 160, 26, $scope.onDetailsContextButton, $scope),
-        new models.ContextMenuButton("Remove", 256, 231, 160, 26, $scope.onDeleteContextMenu, $scope)
+        new models.ContextMenuButton("Details", 236, 231, 160, contextMenuButtonHeight, $scope.onDetailsContextButton, $scope),
+        new models.ContextMenuButton("Remove", 256, 231, 160, contextMenuButtonHeight, $scope.onDeleteContextMenu, $scope)
     ];
-
+    if(!$scope.canEdit){
+        $scope.context_menu_buttons.pop();
+        contextMenuHeight = $scope.context_menu_buttons.length * contextMenuButtonHeight + 12;
+    }
     // Context Menus
     $scope.context_menus = [
-        new models.ContextMenu('HOST', 210, 200, 160, 64, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
+        new models.ContextMenu('HOST', 210, 200, 160, contextMenuHeight, $scope.contextMenuCallback, false, $scope.context_menu_buttons, $scope)
     ];
 
     $scope.onDownloadTraceButton = function () {
@@ -1397,6 +1407,8 @@ var NetworkUIController = function($scope,
         $scope.view_controller.state.start($scope.view_controller);
         $scope.move_controller.state = move.Start;
         $scope.move_controller.state.start($scope.move_controller);
+        $scope.move_readonly_controller.state = move_readonly.Start;
+        $scope.move_readonly_controller.state.start($scope.move_readonly_controller);
         $scope.details_panel_controller.state = details_panel_fsm.Start;
         $scope.details_panel_controller.state.start($scope.details_panel_controller);
         $scope.time_controller.state = time.Start;
