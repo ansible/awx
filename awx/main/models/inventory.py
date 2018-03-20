@@ -330,11 +330,10 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     def get_group_depths(self, group_children_map=None):
         if group_children_map is None:
             group_children_map = self.get_group_children_map()
-        group_depths = {} # pk: max_depth
-        root_group_pks = set(self.root_groups.values_list('pk', flat=True))
 
+        group_depths = {} # pk: max_depth
+        unprocessed = set(self.root_groups.values_list('pk', flat=True))
         depth = 0
-        unprocessed = root_group_pks.copy()
         while unprocessed:
             next_set = set([])
             for pk in unprocessed:
@@ -347,59 +346,103 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
         return group_depths
 
+    def get_group_decedents(self, group_pk, group_children_map=None, group_hosts_map=None):
+        if group_children_map is None:
+            group_children_map = self.get_group_children_map()
+        if group_hosts_map is None:
+            group_hosts_map = self.get_group_hosts_map()
+        # Get all children and host pks for this group.
+        parent_pks_to_check = set([group_pk])
+        parent_pks_checked = set()
+        child_pks = set()
+        host_pks = set()
+        while parent_pks_to_check:
+            for parent_pk in list(parent_pks_to_check):
+                c_ids = group_children_map.get(parent_pk, set())
+                child_pks.update(c_ids)
+                parent_pks_to_check.remove(parent_pk)
+                parent_pks_checked.add(parent_pk)
+                parent_pks_to_check.update(c_ids - parent_pks_checked)
+                h_ids = group_hosts_map.get(parent_pk, set())
+                host_pks.update(h_ids)
+        return (child_pks, host_pks)
+
+    def get_existing_group_computed_fields(self):
+        fields = (
+            'total_hosts',
+            'has_active_failures',
+            'hosts_with_active_failures',
+            'total_groups',
+            'groups_with_active_failures',
+            'has_inventory_sources',
+            'has_active_failures'
+        )
+        group_old_data = {}
+        args = fields + ('id',)
+        for group_data in self.groups.values_list(*args):
+            group_id = group_data[-1]
+            pivoted_data = {}
+            for i, value in enumerate(group_data):
+                if i >= len(fields):
+                    continue
+                field_name = fields[i]
+                pivoted_data[field_name] = value
+            group_old_data[group_id] = pivoted_data
+        return group_old_data
+
     def update_group_computed_fields(self):
         '''
         Update computed fields for all active groups in this inventory.
         '''
         group_children_map = self.get_group_children_map()
         group_hosts_map = self.get_group_hosts_map()
-        active_host_pks = set(self.hosts.values_list('pk', flat=True))
         failed_host_pks = set(self.hosts.filter(last_job_host_summary__failed=True).values_list('pk', flat=True))
-        # active_group_pks = set(self.groups.values_list('pk', flat=True))
         failed_group_pks = set() # Update below as we check each group.
         groups_with_cloud_pks = set(self.groups.filter(inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True))
-        groups_to_update = {}
+        group_new_data = {}
+        group_old_data = self.get_existing_group_computed_fields()
+        groups_to_update = set([])
 
-        # Build list of group pks to check, starting with the groups at the
-        # deepest level within the tree.
-        group_depths = self.get_group_depths(group_children_map)
+        for group_pk, old_data in group_old_data.items():
+            child_pks, host_pks = self.get_group_decedents(group_pk, group_children_map, group_hosts_map)
 
-        group_pks_to_check = [x[1] for x in sorted([(v,k) for k,v in group_depths.items()], reverse=True)]
-
-        for group_pk in group_pks_to_check:
-            # Get all children and host pks for this group.
-            parent_pks_to_check = set([group_pk])
-            parent_pks_checked = set()
-            child_pks = set()
-            host_pks = set()
-            while parent_pks_to_check:
-                for parent_pk in list(parent_pks_to_check):
-                    c_ids = group_children_map.get(parent_pk, set())
-                    child_pks.update(c_ids)
-                    parent_pks_to_check.remove(parent_pk)
-                    parent_pks_checked.add(parent_pk)
-                    parent_pks_to_check.update(c_ids - parent_pks_checked)
-                    h_ids = group_hosts_map.get(parent_pk, set())
-                    host_pks.update(h_ids)
-            # Define updates needed for this group.
-            group_updates = groups_to_update.setdefault(group_pk, {})
-            group_updates.update({
-                'total_hosts': len(active_host_pks & host_pks),
+            current_values = {
+                'total_hosts': len(host_pks),
                 'has_active_failures': bool(failed_host_pks & host_pks),
                 'hosts_with_active_failures': len(failed_host_pks & host_pks),
                 'total_groups': len(child_pks),
-                'groups_with_active_failures': len(failed_group_pks & child_pks),
                 'has_inventory_sources': bool(group_pk in groups_with_cloud_pks),
-            })
-            if group_updates['has_active_failures']:
+            }
+
+            group_updates = {}
+            for field in current_values.keys():
+                if current_values[field] != old_data[field]:
+                    group_updates[field] = current_values[field]
+
+            if group_updates:
+                group_new_data[group_pk] = group_updates
+
+            if current_values['has_active_failures']:
                 failed_group_pks.add(group_pk)
 
+        # Process groups with active failures in 2nd loop as they were
+        # filled in within the prior loop
+        for group_pk, old_data in group_old_data.items():
+            group_updates = group_new_data.get(group_pk, {})
+
+            active_failures = len(failed_group_pks & child_pks)
+            if active_failures != old_data['groups_with_active_failures']:
+                group_updates['groups_with_active_failures'] = active_failures
+
+            if group_updates:
+                group_new_data[group_pk] = group_updates
+
         # Now apply updates to each group as needed (in batches).
-        all_update_pks = groups_to_update.keys()
+        all_update_pks = group_new_data.keys()
         for offset in xrange(0, len(all_update_pks), 500):
             update_pks = all_update_pks[offset:(offset + 500)]
             for group in self.groups.filter(pk__in=update_pks):
-                group_updates = groups_to_update[group.pk]
+                group_updates = group_new_data[group.pk]
                 for field, value in group_updates.items():
                     if getattr(group, field) != value:
                         setattr(group, field, value)

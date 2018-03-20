@@ -104,9 +104,29 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         group_depths = inv.get_group_depths()
         for group in inv.groups.all():
             print (group.pk, group.name)
-        assert group_depths[inv.groups.get(name='g2').pk] == 0  # bottom
+        assert group_depths[inv.groups.get(name='g2').pk] == 0  # top
         assert group_depths[inv.groups.get(name='g1').pk] == 1
-        assert group_depths[inv.groups.get(name='g0').pk] == 2  # top
+        assert group_depths[inv.groups.get(name='g0').pk] == 2  # bottom
+
+    def test_group_decedents_map(self):
+        inv = self.linear_inventory()
+        top_group = inv.groups.get(name='g2')
+        child_pks, host_pks = inv.get_group_decedents(top_group.pk)
+        assert len(child_pks) == 2
+        assert len(host_pks) == 3
+
+    def test_existing_group_computed_fields(self):
+        inv = self.linear_inventory()
+        old_group_data = inv.get_existing_group_computed_fields()
+        top_group = inv.groups.get(name='g2')
+        assert old_group_data[top_group.pk] == {
+            'total_hosts': 3,
+            'groups_with_active_failures': 0,
+            'has_active_failures': False,
+            'has_inventory_sources': False,
+            'hosts_with_active_failures': 0,
+            'total_groups': 2
+        }
 
     def test_no_activity_stream(self):
         inv = self.dense_inventory(initial_compute=False)
@@ -116,7 +136,7 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
 
     def test_computed_fields_query_number(self):
         inv = self.dense_inventory()
-        # self.print_computed_fields(inv)
+        self.print_computed_fields(inv)
         with self.assertNumQueries(4):
             inv.update_computed_fields()
 
