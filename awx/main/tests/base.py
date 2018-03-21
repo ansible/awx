@@ -658,6 +658,13 @@ class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
 
 
+class BaseTransactionTest(BaseTestMixin, django.test.TransactionTestCase):
+    '''
+    Base class for tests requiring transactions (or where the test database
+    needs to be accessed by subprocesses).
+    '''
+
+
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    ANSIBLE_TRANSPORT='local')

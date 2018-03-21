@@ -330,26 +330,34 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
     @staticmethod
     def _walk_group_relationship(group_map, unprocessed):
+        '''
+        Given a directed acyclic graph `group_map`, return all nodes
+        connected to the set of nodes `unprocessed`
+        '''
         seen = set([])
 
         while unprocessed:
             seen.update(unprocessed)
             unprocessed = set(chain.from_iterable(
-                group_map[group_pk] for group_pk in unprocessed
+                group_map.get(group_pk, set([])) for group_pk in unprocessed
             ))
             unprocessed.difference_update(seen)
 
         return seen
 
     def get_group_decedents(self, group_pk):
+        '''
+        Return tuple of sets (groups, hosts) pks that descend from `group_pk`
+        '''
         group_children_map = self.get_group_children_map()
         group_hosts_map = self.get_group_hosts_map()
-        # Get all children and host pks for this group.
+
         child_pks = self._walk_group_relationship(group_children_map, set([group_pk]))
         host_pks = set(chain.from_iterable(
-            group_hosts_map[group_pk] for group_pk in child_pks
+            group_hosts_map.get(group_pk, set([])) for group_pk in child_pks
         ))
         child_pks.remove(group_pk)  # remove self from list
+
         return (child_pks, host_pks)
 
     def get_existing_group_computed_fields(self):
@@ -380,12 +388,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         Update computed fields for all active groups in this inventory.
         '''
         failed_host_pks = set(self.hosts.filter(last_job_host_summary__failed=True).values_list('pk', flat=True))
-        failed_group_pks = set() # Update below as we check each group.
         groups_with_cloud_pks = set(self.groups.filter(inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True))
 
         group_new_data = {}
         group_old_data = self.get_existing_group_computed_fields()
 
+        failed_group_pks = set() # Update as we check each group.
         for group_pk, old_data in group_old_data.items():
             child_pks, host_pks = self.get_group_decedents(group_pk)
 
@@ -410,6 +418,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
         # Process groups with active failures in 2nd loop as they were
         # filled in within the prior loop
+        # TODO: hopefully remove as groups_with_active_failures is deprecated
         for group_pk, old_data in group_old_data.items():
             group_updates = group_new_data.get(group_pk, {})
 
@@ -874,14 +883,15 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         return self.inventory._walk_group_relationship(
             group_parents_map, starting_set)
 
-    def update_computed_fields(self, add=True, parent=None):
+    def update_computed_fields(self, crud=None, associate=None, parent=None):
         '''
         Differential update of computed fields for all other resources
         impacted by this action. Action is specified by kwargs:
-         - add=True, parent=None: Created new group
-         - add=True, parent=group: Added existing group to group children
-         - add=False, parent=None: Deleted group
-         - add=False, parent=group: Removed group from group children
+         - crud="create"/"delete"/None specifies whether
+            this is a creation of deletion action
+         - associate="associate"/"disassociate"/None specifies whether this
+            sets the group parentage (create-associate is possible)
+         - parent=group: the parent group of the association
         '''
         from awx.main.signals import disable_activity_stream
         from awx.main.utils import ignore_inventory_computed_fields
@@ -889,23 +899,29 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         with disable_activity_stream(), ignore_inventory_computed_fields():
             ancestor_kwargs = {}
             inv_update_fields = []
-            ancestor_pks = self.get_ancestors()
-            if parent is None:
+            if parent:
+                ancestor_pks = parent.get_ancestors()
+                ancestor_pks.add(parent.pk)
+            else:
+                ancestor_pks = self.get_ancestors()
+
+            if crud=='create':
                 inv_update_fields.append('total_groups')
-                if add:
-                    self.inventory.total_groups += 1
-                else:
-                    self.inventory.total_groups -= 1
-            if add:
+                self.inventory.total_groups += 1
+            elif crud=='delete':
+                inv_update_fields.append('total_groups')
+                self.inventory.total_groups -= 1
+            if associate=='associate':
                 ancestor_kwargs['total_hosts'] = models.F('total_hosts') + 1
                 if self.has_active_failures:
                     ancestor_kwargs['groups_with_active_failures'] = models.F(
                         'groups_with_active_failures') + 1
-            else:
+            elif associate=='disassociate' or crud=='delete':
                 ancestor_kwargs['total_hosts'] = models.F('total_hosts') - 1
                 if self.has_active_failures:
                     ancestor_kwargs['groups_with_active_failures'] = models.F(
                         'groups_with_active_failures') - 1
+
             if inv_update_fields:
                 self.inventory.save(update_fields=inv_update_fields)
             if ancestor_kwargs and ancestor_pks:

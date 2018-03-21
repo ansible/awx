@@ -216,6 +216,33 @@ class RelatedJobsPreventDeleteMixin(object):
         return super(RelatedJobsPreventDeleteMixin, self).perform_destroy(obj)
 
 
+class ComputedFieldsDetailMixin(object):
+     def perform_destroy(self, obj):
+         obj.update_computed_fields(crud='delete')
+         return super(ComputedFieldsDetailMixin, self).perform_destroy(obj)
+
+     def perform_create(self, serializer):
+         r = super(ComputedFieldsDetailMixin, self).perform_create(serializer)
+         serializer.instance.update_computed_fields(crud='create')
+         return r
+
+
+class ComputedFieldsChildrenMixin(object):
+    def perform_attach(self, parent, sub, created=False):
+        sub.update_computed_fields(
+            crud='create' if created else None,
+            associate='associate', parent=parent
+        )
+        return super(ComputedFieldsChildrenMixin, self).perform_attach(parent, sub, created=created)
+
+    def unattach_by_id(self, request, sub_id):
+        parent = self.get_parent_object()
+        sub.update_computed_fields(
+            crud=None, associate='disassociate', parent=parent
+        )
+        return super(ComputedFieldsChildrenMixin, self).unattach_by_id(request, sub_id)
+
+
 class ApiRootView(APIView):
 
     permission_classes = (AllowAny,)
@@ -2395,7 +2422,8 @@ class EnforceParentRelationshipMixin(object):
         return super(EnforceParentRelationshipMixin, self).create(request, *args, **kwargs)
 
 
-class GroupChildrenList(ControlledByScmMixin, EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
+class GroupChildrenList(ControlledByScmMixin, EnforceParentRelationshipMixin,
+                        ComputedFieldsChildrenMixin, SubListCreateAttachDetachAPIView):
 
     model = Group
     serializer_class = GroupSerializer

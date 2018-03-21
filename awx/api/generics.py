@@ -589,7 +589,6 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     def attach(self, request, *args, **kwargs):
         created = False
         parent = self.get_parent_object()
-        relationship = getattrd(parent, self.relationship)
         data = request.data
 
         sub_id, res = self.attach_validate(request)
@@ -625,9 +624,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
                 sub.delete()
             return Response(attach_errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Attach the object to the collection.
-        if sub not in relationship.all():
-            relationship.add(sub)
+        self.perform_attach(parent, sub, created=created)
 
         if created:
             headers = {}
@@ -636,6 +633,12 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
         else:
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_attach(self, parent, sub, created=False):
+        relationship = getattrd(parent, self.relationship)
+        # Attach the object to the collection.
+        if sub not in relationship.all():
+            relationship.add(sub)
 
     def unattach_validate(self, request):
         sub_id = request.data.get('id', None)

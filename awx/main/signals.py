@@ -226,10 +226,7 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
 def connect_computed_field_signals():
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
     post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
-    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
-    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
     m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
-    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
     m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
     m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
@@ -371,10 +368,7 @@ def disable_activity_stream():
 def disable_computed_fields():
     post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host)
     post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host)
-    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
-    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
     m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
-    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.parents.through)
     m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
     m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
     post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
