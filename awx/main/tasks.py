@@ -47,6 +47,7 @@ from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.access import access_registry
 from awx.main.models import * # noqa
+from awx.main.models.tasks import TowerScheduleState, lazy_task
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError
 from awx.main.queue import CallbackQueueDispatcher
@@ -59,7 +60,6 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager)
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
-from awx.main.utils.pglock import advisory_lock
 from awx.main.consumers import emit_channel_notification
 from awx.conf import settings_registry
 
@@ -130,114 +130,110 @@ def inform_cluster_of_shutdown():
         logger.exception('Encountered problem with normal shutdown signal.')
 
 
-@task()
+@lazy_task()
 def apply_cluster_membership_policies():
-    started_waiting = time.time()
-    with advisory_lock('cluster_policy_lock', wait=True):
-        lock_time = time.time() - started_waiting
-        if lock_time > 1.0:
-            to_log = logger.info
+    started_compute = time.time()
+    all_instances = list(Instance.objects.order_by('id'))
+    all_groups = list(InstanceGroup.objects.prefetch_related('instances'))
+    iso_hostnames = set([])
+    for ig in all_groups:
+        if ig.controller_id is not None:
+            iso_hostnames.update(ig.policy_instance_list)
+
+    considered_instances = [inst for inst in all_instances if inst.hostname not in iso_hostnames]
+    total_instances = len(considered_instances)
+    actual_groups = []
+    actual_instances = []
+    Group = namedtuple('Group', ['obj', 'instances', 'prior_instances'])
+    Node = namedtuple('Instance', ['obj', 'groups'])
+
+    # Process policy instance list first, these will represent manually managed memberships
+    instance_hostnames_map = {inst.hostname: inst for inst in all_instances}
+    for ig in all_groups:
+        group_actual = Group(obj=ig, instances=[], prior_instances=[
+            instance.pk for instance in ig.instances.all()  # obtained in prefetch
+        ])
+        for hostname in ig.policy_instance_list:
+            if hostname not in instance_hostnames_map:
+                logger.info(six.text_type("Unknown instance {} in {} policy list").format(hostname, ig.name))
+                continue
+            inst = instance_hostnames_map[hostname]
+            group_actual.instances.append(inst.id)
+            # NOTE: arguable behavior: policy-list-group is not added to
+            # instance's group count for consideration in minimum-policy rules
+        if group_actual.instances:
+            logger.info(six.text_type("Policy List, adding Instances {} to Group {}").format(group_actual.instances, ig.name))
+
+        if ig.controller_id is None:
+            actual_groups.append(group_actual)
         else:
-            to_log = logger.debug
-        to_log('Waited {} seconds to obtain lock name: cluster_policy_lock'.format(lock_time))
-        started_compute = time.time()
-        all_instances = list(Instance.objects.order_by('id'))
-        all_groups = list(InstanceGroup.objects.prefetch_related('instances'))
-        iso_hostnames = set([])
-        for ig in all_groups:
-            if ig.controller_id is not None:
-                iso_hostnames.update(ig.policy_instance_list)
+            # For isolated groups, _only_ apply the policy_instance_list
+            # do not add to in-memory list, so minimum rules not applied
+            logger.info('Committing instances to isolated group {}'.format(ig.name))
+            ig.instances.set(group_actual.instances)
 
-        considered_instances = [inst for inst in all_instances if inst.hostname not in iso_hostnames]
-        total_instances = len(considered_instances)
-        actual_groups = []
-        actual_instances = []
-        Group = namedtuple('Group', ['obj', 'instances', 'prior_instances'])
-        Node = namedtuple('Instance', ['obj', 'groups'])
-
-        # Process policy instance list first, these will represent manually managed memberships
-        instance_hostnames_map = {inst.hostname: inst for inst in all_instances}
-        for ig in all_groups:
-            group_actual = Group(obj=ig, instances=[], prior_instances=[
-                instance.pk for instance in ig.instances.all()  # obtained in prefetch
-            ])
-            for hostname in ig.policy_instance_list:
-                if hostname not in instance_hostnames_map:
-                    logger.info(six.text_type("Unknown instance {} in {} policy list").format(hostname, ig.name))
-                    continue
-                inst = instance_hostnames_map[hostname]
-                group_actual.instances.append(inst.id)
-                # NOTE: arguable behavior: policy-list-group is not added to
-                # instance's group count for consideration in minimum-policy rules
-            if group_actual.instances:
-                logger.info(six.text_type("Policy List, adding Instances {} to Group {}").format(group_actual.instances, ig.name))
-
-            if ig.controller_id is None:
-                actual_groups.append(group_actual)
-            else:
-                # For isolated groups, _only_ apply the policy_instance_list
-                # do not add to in-memory list, so minimum rules not applied
-                logger.info('Committing instances to isolated group {}'.format(ig.name))
-                ig.instances.set(group_actual.instances)
-
-        # Process Instance minimum policies next, since it represents a concrete lower bound to the
-        # number of instances to make available to instance groups
-        actual_instances = [Node(obj=i, groups=[]) for i in considered_instances if i.managed_by_policy]
-        logger.info("Total non-isolated instances:{} available for policy: {}".format(
-            total_instances, len(actual_instances)))
-        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
-            policy_min_added = []
-            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
-                if len(g.instances) >= g.obj.policy_instance_minimum:
-                    break
-                if i.obj.id in g.instances:
-                    # If the instance is already _in_ the group, it was
-                    # applied earlier via the policy list
-                    continue
-                g.instances.append(i.obj.id)
-                i.groups.append(g.obj.id)
-                policy_min_added.append(i.obj.id)
-            if policy_min_added:
-                logger.info(six.text_type("Policy minimum, adding Instances {} to Group {}").format(policy_min_added, g.obj.name))
-
-        # Finally, process instance policy percentages
-        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
-            policy_per_added = []
-            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
-                if i.obj.id in g.instances:
-                    # If the instance is already _in_ the group, it was
-                    # applied earlier via a minimum policy or policy list
-                    continue
-                if 100 * float(len(g.instances)) / len(actual_instances) >= g.obj.policy_instance_percentage:
-                    break
-                g.instances.append(i.obj.id)
-                i.groups.append(g.obj.id)
-                policy_per_added.append(i.obj.id)
-            if policy_per_added:
-                logger.info(six.text_type("Policy percentage, adding Instances {} to Group {}").format(policy_per_added, g.obj.name))
-
-        # Determine if any changes need to be made
-        needs_change = False
-        for g in actual_groups:
-            if set(g.instances) != set(g.prior_instances):
-                needs_change = True
+    # Process Instance minimum policies next, since it represents a concrete lower bound to the
+    # number of instances to make available to instance groups
+    actual_instances = [Node(obj=i, groups=[]) for i in considered_instances if i.managed_by_policy]
+    logger.info("Total non-isolated instances:{} available for policy: {}".format(
+        total_instances, len(actual_instances)))
+    for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+        policy_min_added = []
+        for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+            if len(g.instances) >= g.obj.policy_instance_minimum:
                 break
-        if not needs_change:
-            logger.info('Cluster policy no-op finished in {} seconds'.format(time.time() - started_compute))
-            return
+            if i.obj.id in g.instances:
+                # If the instance is already _in_ the group, it was
+                # applied earlier via the policy list
+                continue
+            g.instances.append(i.obj.id)
+            i.groups.append(g.obj.id)
+            policy_min_added.append(i.obj.id)
+        if policy_min_added:
+            logger.info(six.text_type("Policy minimum, adding Instances {} to Group {}").format(policy_min_added, g.obj.name))
 
-        # On a differential basis, apply instances to non-isolated groups
-        with transaction.atomic():
-            for g in actual_groups:
-                instances_to_add = set(g.instances) - set(g.prior_instances)
-                instances_to_remove = set(g.prior_instances) - set(g.instances)
-                if instances_to_add:
-                    logger.info('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
-                    g.obj.instances.add(*instances_to_add)
-                if instances_to_remove:
-                    logger.info('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
-                    g.obj.instances.remove(*instances_to_remove)
-        logger.info('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
+    # Finally, process instance policy percentages
+    for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+        policy_per_added = []
+        for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+            if i.obj.id in g.instances:
+                # If the instance is already _in_ the group, it was
+                # applied earlier via a minimum policy or policy list
+                continue
+            if 100 * float(len(g.instances)) / len(actual_instances) >= g.obj.policy_instance_percentage:
+                break
+            g.instances.append(i.obj.id)
+            i.groups.append(g.obj.id)
+            policy_per_added.append(i.obj.id)
+        if policy_per_added:
+            logger.info(six.text_type("Policy percentage, adding Instances {} to Group {}").format(policy_per_added, g.obj.name))
+
+    # Determine if any changes need to be made
+    needs_change = False
+    for g in actual_groups:
+        if set(g.instances) != set(g.prior_instances):
+            needs_change = True
+            break
+    if not needs_change:
+        logger.info('Cluster policy no-op finished in {} seconds'.format(time.time() - started_compute))
+        return
+
+    # On a differential basis, apply instances to non-isolated groups
+    with transaction.atomic():
+        for g in actual_groups:
+            instances_to_add = set(g.instances) - set(g.prior_instances)
+            instances_to_remove = set(g.prior_instances) - set(g.instances)
+            if instances_to_add:
+                logger.info('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
+                g.obj.instances.add(*instances_to_add)
+            if instances_to_remove:
+                logger.info('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
+                g.obj.instances.remove(*instances_to_remove)
+
+    # This was not a no-op, meaning that some jobs may no go from pending to running
+    schedule_task_manager()
+
+    logger.info('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
 @task(queue='tower_broadcast_all', exchange_type='fanout')
@@ -536,7 +532,7 @@ def handle_work_error(task_id, *args, **kwargs):
         pass
 
 
-@task()
+@lazy_task()
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     '''
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -1437,7 +1433,7 @@ class RunJob(BaseTask):
         except Inventory.DoesNotExist:
             pass
         else:
-            update_inventory_computed_fields.delay(inventory.id, True)
+            update_inventory_computed_fields.delay(inventory.id)
 
 
 @task()
@@ -2438,4 +2434,4 @@ def deep_copy_model_obj(
             ), permission_check_func[2])
             permission_check_func(creater, copy_mapping.values())
     if isinstance(new_obj, Inventory):
-        update_inventory_computed_fields.delay(new_obj.id, True)
+        update_inventory_computed_fields.delay(new_obj.id)

@@ -11,6 +11,7 @@ import sys
 
 # Django
 from django.conf import settings
+from django.db import connection
 from django.db.models.signals import (
     pre_save,
     post_save,
@@ -131,7 +132,7 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     except Inventory.DoesNotExist:
         pass
     else:
-        update_inventory_computed_fields.delay(inventory.id, True)
+        connection.on_commit(lambda: update_inventory_computed_fields.delay(inventory.id))
 
 
 def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
@@ -152,7 +153,7 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         pass
     else:
         if inventory is not None:
-            update_inventory_computed_fields.delay(inventory.id, True)
+            connection.on_commit(lambda: update_inventory_computed_fields.delay(inventory.id))
 
 
 def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):

@@ -14,8 +14,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 
-from solo.models import SingletonModel
-
 from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager
@@ -28,7 +26,7 @@ from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_capacity
 from awx.main.models.mixins import RelatedJobsMixin
 
-__all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
+__all__ = ('Instance', 'InstanceGroup', 'JobOrigin',)
 
 
 def validate_queuename(v):
@@ -264,10 +262,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
                                       .instances
                                       .filter(capacity__gt=0)
                                       .values_list('hostname', flat=True)))
-
-
-class TowerScheduleState(SingletonModel):
-    schedule_last_run = models.DateTimeField(auto_now_add=True)
 
 
 class JobOrigin(models.Model):

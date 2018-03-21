@@ -870,7 +870,7 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
                 marked_groups.append(group)
             Group.objects.filter(id__in=marked_groups).delete()
             Host.objects.filter(id__in=marked_hosts).delete()
-            update_inventory_computed_fields.delay(self.inventory.id)
+            connection.on_commit(lambda: update_inventory_computed_fields.delay(self.inventory.id))
         with ignore_inventory_computed_fields():
             with disable_activity_stream():
                 mark_actual()

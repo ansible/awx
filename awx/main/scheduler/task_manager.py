@@ -29,7 +29,6 @@ from awx.main.models import (
     WorkflowJobTemplate
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
-from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import get_type_for_model, task_manager_bulk_reschedule, schedule_task_manager
 from awx.main.signals import disable_activity_stream
 from awx.main.scheduler.dependency_graph import DependencyGraph
@@ -221,6 +220,7 @@ class TaskManager():
                 task.job_explanation += ' '
             task.job_explanation += 'Task failed pre-start check.'
             task.save()
+            schedule_task_manager()
             # TODO: run error handler to fail sub-tasks and send notifications
         else:
             if type(task) is WorkflowJob:
@@ -554,17 +554,12 @@ class TaskManager():
         return finished_wfjs
 
     def schedule(self):
-        # Lock
-        with advisory_lock('task_manager_lock', wait=False) as acquired:
-            with transaction.atomic():
-                if acquired is False:
-                    logger.debug("Not running scheduler, another task holds lock")
-                    return
-                logger.debug("Starting Scheduler")
+        # Lock expected to be handled by lazy_task
+        with transaction.atomic():
 
-                with task_manager_bulk_reschedule():
-                    finished_wfjs = self._schedule()
+            with task_manager_bulk_reschedule():
+                finished_wfjs = self._schedule()
 
-                # Operations whose queries rely on modifications made during the atomic scheduling session
-                for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
-                    wfj.send_notification_templates('succeeded' if wfj.status == 'successful' else 'failed')
+            # Operations whose queries rely on modifications made during the atomic scheduling session
+            for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
+                wfj.send_notification_templates('succeeded' if wfj.status == 'successful' else 'failed')

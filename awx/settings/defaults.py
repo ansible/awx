@@ -482,7 +482,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'task_manager': {
         'task': 'awx.main.scheduler.tasks.run_task_manager',
-        'schedule': timedelta(seconds=20),
+        'schedule': timedelta(seconds=120),  # only needed as backup
         'options': {'expires': 20}
     },
     'isolated_heartbeat': {
