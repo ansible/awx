@@ -41,7 +41,6 @@ export default
             let defaultUrl = GetBasePath('job_templates'),
                 generator = GenerateForm,
                 form = JobTemplateForm(),
-                base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {},
                 id = $stateParams.job_template_id,
                 callback,

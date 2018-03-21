@@ -10,16 +10,10 @@
  * @description This controller's for the jobs page
  */
 
- export default ['$state', '$rootScope', '$scope', '$stateParams',
-     'Find', 'DeleteJob',
+ export default ['$state', '$rootScope', '$scope', '$stateParams', 'Find', 'DeleteJob',
      'GetBasePath', 'Dataset', 'QuerySet', 'ListDefinition', '$interpolate',
-     'WorkflowJobModel', 'ProjectModel', 'Alert', 'InventorySourceModel',
-     'AdHocCommandModel', 'JobModel',
-     function($state, $rootScope, $scope, $stateParams,
-         Find, DeleteJob,
-         GetBasePath, Dataset, qs, ListDefinition, $interpolate,
-         WorkflowJob, Project, Alert, InventorySource,
-         AdHocCommand, Job) {
+     function($state, $rootScope, $scope, $stateParams, Find, DeleteJob,
+         GetBasePath, Dataset, qs, ListDefinition, $interpolate) {
 
     var list = ListDefinition;
 
