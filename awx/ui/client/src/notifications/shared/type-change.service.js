@@ -18,6 +18,7 @@ function (i18n) {
             obj.twilio_required = false;
             obj.webhook_required = false;
             obj.mattermost_required = false;
+            obj.rocketchat_required = false;
             obj.token_required = false;
             obj.port_required = false;
             obj.password_required = false;
@@ -51,6 +52,9 @@ function (i18n) {
                     break;
                 case 'mattermost':
                     obj.mattermost_required = true;
+                    break;
+                case 'rocketchat':
+                    obj.rocketchat_required = true;
                     break;
                 case 'pagerduty':
                     obj.tokenLabel = ' ' + i18n._('API Token');

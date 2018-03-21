@@ -36,6 +36,7 @@ The currently defined Notification Types are:
 * Slack
 * Hipchat
 * Mattermost
+* Rocket.Chat
 * Pagerduty
 * Twilio
 * IRC
@@ -125,6 +126,26 @@ In order to enable these settings in Mattermost:
 
 * Utilize an existing Mattermost installation or use their docker container here: `docker run --name mattermost-preview -d --publish 8065:8065 mattermost/mattermost-preview`
 * Turn on Incoming Webhooks and optionally allow Integrations to override usernames and icons in the System Console. 
+
+## Rocket.Chat
+
+The Rocket.Chat notification integration uses Incoming Webhooks. A password is not required because the webhook URL itself is the secret. An integration must be created in the Administration section of the Rocket.Chat settings.
+
+The following fields are available for the Rocket.Chat notification type:
+* `url`: The incoming webhook URL that was configured in Rocket.Chat. Notifications will use this URL to POST.
+* `username`: Optional. Change the displayed username from Rocket Cat to specified username
+* `icon_url`: Optional. A URL pointing to an icon to use for the notification.
+
+### Testing considerations
+
+* Make sure that all options behave as expected
+* Test that all notification options are obeyed
+
+### Test Service
+
+* Utilize an existing Rocket.Chat installation or use their docker containers from https://rocket.chat/docs/installation/docker-containers/
+* Create an Incoming Webhook in the Integrations section of the Administration settings
+
 
 ## Pagerduty
 
