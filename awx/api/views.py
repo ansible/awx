@@ -2195,7 +2195,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
             return Response(dict(error=_(six.text_type(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
-class HostDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class HostDetail(ControlledByScmMixin, ComputedFieldsDetailMixin, RetrieveUpdateDestroyAPIView):
 
     always_allow_superuser = False
     model = Host
@@ -2471,6 +2471,7 @@ class GroupPotentialChildrenList(SubListAPIView):
 
 class GroupHostsList(HostRelatedSearchMixin,
                      ControlledByScmMixin,
+                     ComputedFieldsChildrenMixin,
                      SubListCreateAttachDetachAPIView):
     ''' the list of hosts directly below a group '''
 
@@ -2535,7 +2536,8 @@ class GroupActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
         return qs.filter(Q(group=parent) | Q(host__in=parent.hosts.all()))
 
 
-class GroupDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class GroupDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin,
+                  ComputedFieldsDetailMixin, RetrieveUpdateDestroyAPIView):
 
     model = Group
     serializer_class = GroupSerializer

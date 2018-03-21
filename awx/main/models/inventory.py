@@ -657,17 +657,65 @@ class Host(CommonModelNameNotUnique):
     def get_absolute_url(self, request=None):
         return reverse('api:host_detail', kwargs={'pk': self.pk}, request=request)
 
-    variables_dict = VarsDictProperty('variables')
-
     def get_ancestors(self):
         '''
         Return groups that are ancestors of this host
         '''
+        starting_set = set(self.groups.values_list('pk', flat=True))
+        if not starting_set:
+            return starting_set
         group_parents_map = self.inventory.get_group_parents_map()
         return self.inventory._walk_group_relationship(
-            group_parents_map,
-            set(self.groups.values_list('pk', flat=True))
-        )
+            group_parents_map, starting_set)
+
+    def update_computed_fields(self, crud=None, associate=None, parent=None):
+        '''
+        Differential update of computed fields for all other resources
+        impacted by this action. Action is specified by kwargs:
+         - crud="create"/"delete"/None specifies whether
+            this is a creation of deletion action
+         - associate="associate"/"disassociate"/None specifies whether this
+            sets the group parentage (create-associate is possible)
+         - parent=group: the parent group of the association
+        '''
+        from awx.main.signals import disable_activity_stream
+        from awx.main.utils import ignore_inventory_computed_fields
+
+        with disable_activity_stream(), ignore_inventory_computed_fields():
+            ancestor_kwargs = {}
+            inv_update_fields = []
+            if parent:
+                ancestor_pks = parent.get_ancestors()
+                ancestor_pks.add(parent.pk)
+            else:
+                ancestor_pks = self.get_ancestors()
+
+            if crud=='create':
+                inv_update_fields.append('total_hosts')
+                self.inventory.total_hosts += 1
+            elif crud=='delete':
+                inv_update_fields.append('total_hosts')
+                self.inventory.total_hosts -= 1
+                if self.has_active_failures:
+                    self.inventory.hosts_with_active_failures -= 1
+                    inv_update_fields.append('hosts_with_active_failures')
+            if associate=='associate':
+                ancestor_kwargs['total_hosts'] = models.F('total_hosts') + 1
+                if self.has_active_failures:
+                    ancestor_kwargs['hosts_with_active_failures'] = models.F(
+                        'hosts_with_active_failures') + 1
+            elif associate=='disassociate' or crud=='delete':
+                ancestor_kwargs['total_hosts'] = models.F('total_hosts') - 1
+                if self.has_active_failures:
+                    ancestor_kwargs['hosts_with_active_failures'] = models.F(
+                        'hosts_with_active_failures') - 1
+
+            if inv_update_fields:
+                self.inventory.save(update_fields=inv_update_fields)
+            if ancestor_kwargs and ancestor_pks:
+                Group.objects.filter(pk__in=ancestor_pks).update(**ancestor_kwargs)
+
+    variables_dict = VarsDictProperty('variables')
 
     @property
     def all_groups(self):
@@ -895,7 +943,9 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         '''
         from awx.main.signals import disable_activity_stream
         from awx.main.utils import ignore_inventory_computed_fields
+        from awx.main.tasks import update_inventory_computed_fields
 
+        use_task = False  # too complex cases still need to spawn task
         with disable_activity_stream(), ignore_inventory_computed_fields():
             ancestor_kwargs = {}
             inv_update_fields = []
@@ -912,16 +962,23 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
                 inv_update_fields.append('total_groups')
                 self.inventory.total_groups -= 1
             if associate=='associate':
-                ancestor_kwargs['total_hosts'] = models.F('total_hosts') + 1
+                ancestor_kwargs['total_groups'] = models.F('total_groups') + 1
+                if self.total_hosts or self.total_groups:
+                    use_task = True
                 if self.has_active_failures:
                     ancestor_kwargs['groups_with_active_failures'] = models.F(
                         'groups_with_active_failures') + 1
             elif associate=='disassociate' or crud=='delete':
                 ancestor_kwargs['total_hosts'] = models.F('total_hosts') - 1
+                if self.total_hosts or self.total_groups:
+                    use_task = True
                 if self.has_active_failures:
                     ancestor_kwargs['groups_with_active_failures'] = models.F(
                         'groups_with_active_failures') - 1
 
+            if use_task:
+                update_inventory_computed_fields.delay(self.inventory_id, should_update_hosts=False)
+                return
             if inv_update_fields:
                 self.inventory.save(update_fields=inv_update_fields)
             if ancestor_kwargs and ancestor_pks:
