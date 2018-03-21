@@ -421,7 +421,7 @@ register(
     field_class=fields.BooleanField,
     default=False,
     label=_('Log System Tracking Facts Individually'),
-    help_text=_('If set, system tracking facts will be sent for each package, service, or'
+    help_text=_('If set, system tracking facts will be sent for each package, service, or '
                 'other item found in a scan, allowing for greater search query granularity. '
                 'If unset, facts will be sent as a single dictionary, allowing for greater '
                 'efficiency in fact processing.'),
