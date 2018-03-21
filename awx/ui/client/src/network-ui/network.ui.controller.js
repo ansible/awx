@@ -244,19 +244,34 @@ var NetworkUIController = function($scope,
        }
   };
 
+  $scope.for_each_page = function(url, callback, limit) {
+
+      function rec(url, rec_limit) {
+          if (rec_limit <= 0) {
+              return;
+          }
+          $http.get(url)
+               .then(function(response) {
+                   callback(response.data.results);
+                   if (response.data.next) {
+                        rec(response.data.next, rec_limit-1);
+                   }
+               })
+               .catch(({data, status}) => {
+                   ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
+               });
+      }
+      rec(url, limit);
+  };
+
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, toolboxTopMargin, 200, toolboxHeight);
   if (!$scope.disconnected) {
-      $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/')
-           .then(function(response) {
-               var devices_by_name = {};
-               var i = 0;
-               for (i = 0; i < $scope.devices.length; i++) {
-                   devices_by_name[$scope.devices[i].name] = $scope.devices[i];
-               }
-               let hosts = response.data.results;
+      $scope.for_each_page('/api/v2/inventories/' + $scope.inventory_id + '/hosts/',
+           function(all_results) {
+               let hosts = all_results;
                console.log(hosts.length);
-               for(i = 0; i<hosts.length; i++) {
+               for(var i = 0; i<hosts.length; i++) {
                    console.log(i);
                    try {
                        let device_type = null;
@@ -282,7 +297,7 @@ var NetworkUIController = function($scope,
 
                            $scope.update_links_in_vars_by_device(device_name, host.data);
                        }
-                       if (devices_by_name[device_name] === undefined) {
+                       if ($scope.devices_by_name[device_name] === undefined) {
                            console.log(['adding', device_name]);
                            device = new models.Device(0, device_name, 0, 0, device_type, host.id);
                            device.icon = true;
@@ -293,10 +308,7 @@ var NetworkUIController = function($scope,
                        console.log(error);
                    }
                }
-           })
-           .catch(({data, status}) => {
-               ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
-           });
+           }, 100);
   }
   $scope.inventory_toolbox.spacing = 150;
   $scope.inventory_toolbox.enabled = true;
@@ -919,8 +931,7 @@ var NetworkUIController = function($scope,
         $scope.test_channel.send("EnableTest", new messages.EnableTest());
     };
 
-    $scope.all_buttons = [];
-    $scope.all_buttons.extend($scope.context_menu_buttons);
+    $scope.all_buttons = $scope.context_menu_buttons;
 
     $scope.onDeviceCreate = function(data) {
         $scope.create_device(data);
