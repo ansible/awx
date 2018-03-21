@@ -161,14 +161,35 @@ class CallbackBrokerWorker(ConsumerMixin):
                         break
 
                 if body.get('event') == 'EOF':
-                    # EOF events are sent when stdout for the running task is
-                    # closed. don't actually persist them to the database; we
-                    # just use them to report `summary` websocket events as an
-                    # approximation for when a job is "done"
-                    emit_channel_notification(
-                        'jobs-summary',
-                        dict(group_name='jobs', unified_job_id=job_identifier)
-                    )
+                    try:
+                        logger.info('Event processing is finished for Job {}, sending notifications'.format(job_identifier))
+                        # EOF events are sent when stdout for the running task is
+                        # closed. don't actually persist them to the database; we
+                        # just use them to report `summary` websocket events as an
+                        # approximation for when a job is "done"
+                        emit_channel_notification(
+                            'jobs-summary',
+                            dict(group_name='jobs', unified_job_id=job_identifier)
+                        )
+                        # Additionally, when we've processed all events, we should
+                        # have all the data we need to send out success/failure
+                        # notification templates
+                        uj = UnifiedJob.objects.get(pk=job_identifier)
+                        if hasattr(uj, 'send_notification_templates'):
+                            retries = 0
+                            while retries < 5:
+                                if uj.finished:
+                                    uj.send_notification_templates('succeeded' if uj.status == 'successful' else 'failed')
+                                    break
+                                else:
+                                    # wait a few seconds to avoid a race where the
+                                    # events are persisted _before_ the UJ.status
+                                    # changes from running -> successful
+                                    retries += 1
+                                    time.sleep(1)
+                                    uj = UnifiedJob.objects.get(pk=job_identifier)
+                    except Exception:
+                        logger.exception('Worker failed to emit notifications: Job {}'.format(job_identifier))
                     continue
 
                 retries = 0
