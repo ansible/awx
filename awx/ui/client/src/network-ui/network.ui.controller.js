@@ -637,6 +637,8 @@ var NetworkUIController = function($scope,
         $scope.first_channel.send('DetailsPanelClose', {});
     };
 
+    $scope.$on('awxNet-closeDetailsPanel', $scope.closeDetailsPanel);
+
     $scope.onDetailsContextButton = function () {
         function emitCallback(item, canAdd){
             $scope.first_channel.send('DetailsPanel', {});
