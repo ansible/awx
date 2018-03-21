@@ -51,30 +51,39 @@ function atRelaunchCtrl (
                             'data.actions.POST.verbosity.choices',
                             []
                         ).map(c => ({ label: c[1], value: c[0] }));
+                        const verbosity = _.find(
+                            verbosityChoices,
+                            item => item.value === populatedJob.verbosity
+                        );
+                        const jobType = _.find(
+                            jobTypeChoices,
+                            item => item.value === populatedJob.job_type
+                        );
 
                         vm.promptData = {
                             launchConf: {
-                                passwords_needed_to_start: getRelaunchRes.data.passwords_needed_to_start
+                                passwords_needed_to_start:
+                                    getRelaunchRes.data.passwords_needed_to_start
                             },
                             launchOptions: launchOptions.data,
                             job: job.id,
                             relaunchHostType: option ? (option.name).toLowerCase() : null,
                             prompts: {
                                 credentials: {
-                                    value: populatedJob.summary_fields.credentials ? populatedJob.summary_fields.credentials : []
+                                    value: populatedJob.summary_fields.credentials || []
                                 },
                                 variables: {
                                     value: populatedJob.extra_vars
                                 },
                                 inventory: {
-                                    value: populatedJob.summary_fields.inventory ? populatedJob.summary_fields.inventory : null
+                                    value: populatedJob.summary_fields.inventory || null
                                 },
                                 verbosity: {
-                                    value: _.find(verbosityChoices, item => item.value === populatedJob.verbosity),
+                                    value: verbosity,
                                     choices: verbosityChoices
                                 },
                                 jobType: {
-                                    value: _.find(jobTypeChoices, item => item.value === populatedJob.job_type),
+                                    value: jobType,
                                     choices: jobTypeChoices
                                 },
                                 limit: {
