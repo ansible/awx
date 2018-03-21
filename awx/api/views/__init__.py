@@ -339,6 +339,7 @@ class InstanceDetail(RetrieveUpdateAPIView):
             obj = self.get_object()
             if obj.enabled:
                 obj.refresh_capacity()
+                schedule_task_manager()
             else:
                 obj.capacity = 0
             obj.save()

@@ -245,6 +245,10 @@ def apply_cluster_membership_policies():
                 if instances_to_remove:
                     logger.info('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
                     g.obj.instances.remove(*instances_to_remove)
+
+        # This was not a no-op, meaning that some jobs may go from pending to waiting
+        schedule_task_manager()
+
         logger.info('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 

@@ -1,11 +1,13 @@
 import pytest
 
+# Django
+from django.db import connection
+
 # AWX context managers for testing
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.signals import (
     disable_activity_stream,
-    disable_computed_fields,
-    update_inventory_computed_fields
+    disable_computed_fields
 )
 
 # AWX models
@@ -34,14 +36,14 @@ class TestComputedFields:
 
     def test_computed_fields_normal_use(self, mocker, inventory):
         job = Job.objects.create(name='fake-job', inventory=inventory)
-        with mocker.patch.object(update_inventory_computed_fields, 'delay'):
+        with mocker.patch.object(connection, 'on_commit'):
             job.delete()
-            update_inventory_computed_fields.delay.assert_called_once_with(inventory.id, True)
+            connection.on_commit.assert_called_once()
 
     def test_disable_computed_fields(self, mocker, inventory):
         job = Job.objects.create(name='fake-job', inventory=inventory)
         with disable_computed_fields():
-            with mocker.patch.object(update_inventory_computed_fields, 'delay'):
+            with mocker.patch.object(connection, 'on_commit'):
                 job.delete()
-                update_inventory_computed_fields.delay.assert_not_called()
+                connection.on_commit.assert_not_called()
 

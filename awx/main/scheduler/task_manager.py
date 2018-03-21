@@ -151,6 +151,7 @@ class TaskManager():
                     job.status = 'failed'
                     job.save(update_fields=['status', 'job_explanation'])
                     job.websocket_emit_status('failed')
+                    schedule_task_manager()
 
                 # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
                 #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
@@ -229,6 +230,7 @@ class TaskManager():
                 task.job_explanation += ' '
             task.job_explanation += 'Task failed pre-start check.'
             task.save()
+            schedule_task_manager()
             # TODO: run error handler to fail sub-tasks and send notifications
         else:
             if type(task) is WorkflowJob:
