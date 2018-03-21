@@ -58,7 +58,8 @@ function NetworkingController (models, $state, $scope, strings) {
                 value: device.id,
                 text: device.name,
                 label: device.name,
-                id: device.id
+                id: device.id,
+                type: device.type
             });
     });
 

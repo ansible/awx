@@ -35,7 +35,7 @@ export default [
                 if(scale && updateBoolean){
                     // scale is included, meaning this was triggered by
                     // the view FSM's onMouseWheel transition
-                    let sliderPercent = 40 * (Math.log10(scale) + 3);
+                    let sliderPercent = 120 * (Math.log10(scale) + 1);
                     scope.zoom = Math.round(sliderPercent / 10) * 10;
                 }
                 $("#networking-slider").slider('value', scope.zoom);

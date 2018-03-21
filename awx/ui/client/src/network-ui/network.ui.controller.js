@@ -195,14 +195,14 @@ var NetworkUIController = function($scope,
   $scope.hotkeys_controller = new fsm.FSMController($scope, "hotkeys_fsm", hotkeys.Start, $scope);
   $scope.keybindings_controller = new fsm.FSMController($scope, "keybindings_fsm", keybindings.Start, $scope);
   $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
-  $scope.move_controller = new fsm.FSMController($scope, "move_fsm", $scope.canEdit ? move.Start : move.Disable, $scope);
-  $scope.move_readonly_controller = new fsm.FSMController($scope, "move_readonly_fsm", !$scope.canEdit? move_readonly.Start : move_readonly.Disable, $scope);
+  $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope);
+  $scope.move_readonly_controller = new fsm.FSMController($scope, "move_readonly_fsm", move_readonly.Start, $scope);
   $scope.details_panel_controller = new fsm.FSMController($scope, "details_panel_fsm", details_panel_fsm.Start, $scope);
   $scope.buttons_controller = new fsm.FSMController($scope, "buttons_fsm", buttons.Start, $scope);
   $scope.time_controller = new fsm.FSMController($scope, "time_fsm", time.Start, $scope);
   $scope.test_controller = new fsm.FSMController($scope, "test_fsm", test_fsm.Start, $scope);
 
-  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", !$scope.canEdit ? toolbox_fsm.Disabled : toolbox_fsm.Start, $scope);
+  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
 
   var toolboxTopMargin = $('.Networking-top').height();
   var toolboxTitleMargin = toolboxTopMargin + 35;
@@ -332,21 +332,33 @@ var NetworkUIController = function($scope,
   $scope.view_controller.delegate_channel = new fsm.Channel($scope.view_controller,
                                                             $scope.keybindings_controller,
                                                             $scope);
-  $scope.move_controller.delegate_channel = new fsm.Channel($scope.move_controller,
-                                                            $scope.view_controller,
-                                                            $scope);
-  $scope.move_readonly_controller.delegate_channel = new fsm.Channel($scope.move_readonly_controller,
+  if ($scope.canEdit) {
+      $scope.move_controller.delegate_channel = new fsm.Channel($scope.move_controller,
+                                                                $scope.view_controller,
+                                                                $scope);
+      $scope.details_panel_controller.delegate_channel = new fsm.Channel($scope.details_panel_controller,
                                                             $scope.move_controller,
                                                             $scope);
-  $scope.details_panel_controller.delegate_channel = new fsm.Channel($scope.details_panel_controller,
-                                                            $scope.move_readonly_controller,
-                                                            $scope);
-  $scope.inventory_toolbox_controller.delegate_channel = new fsm.Channel($scope.inventory_toolbox_controller,
-                                                            $scope.details_panel_controller,
-                                                            $scope);
-  $scope.buttons_controller.delegate_channel = new fsm.Channel($scope.buttons_controller,
-                                                            $scope.inventory_toolbox_controller,
-                                                            $scope);
+  } else {
+      $scope.move_readonly_controller.delegate_channel = new fsm.Channel($scope.move_readonly_controller,
+                                                                $scope.view_controller,
+                                                                $scope);
+      $scope.details_panel_controller.delegate_channel = new fsm.Channel($scope.details_panel_controller,
+                                                                $scope.move_readonly_controller,
+                                                                $scope);
+  }
+  if ($scope.canEdit) {
+      $scope.inventory_toolbox_controller.delegate_channel = new fsm.Channel($scope.inventory_toolbox_controller,
+                                                                $scope.details_panel_controller,
+                                                                $scope);
+      $scope.buttons_controller.delegate_channel = new fsm.Channel($scope.buttons_controller,
+                                                                $scope.inventory_toolbox_controller,
+                                                                $scope);
+  } else {
+      $scope.buttons_controller.delegate_channel = new fsm.Channel($scope.buttons_controller,
+                                                                $scope.details_panel_controller,
+                                                                $scope);
+  }
   $scope.time_controller.delegate_channel = new fsm.Channel($scope.time_controller,
                                                             $scope.buttons_controller,
                                                             $scope);
@@ -614,7 +626,6 @@ var NetworkUIController = function($scope,
 
     // Conext Menu Button Handlers
     $scope.removeContextMenu = function(){
-        $scope.move_controller.handle_message("Ready", {});
         let context_menu = $scope.context_menus[0];
         context_menu.enabled = false;
         context_menu.x = -100000;
@@ -629,6 +640,8 @@ var NetworkUIController = function($scope,
     $scope.closeDetailsPanel = function () {
         $scope.first_channel.send('DetailsPanelClose', {});
     };
+
+    $scope.$on('awxNet-closeDetailsPanel', $scope.closeDetailsPanel);
 
     $scope.onDetailsContextButton = function () {
         function emitCallback(item, canAdd){
@@ -843,7 +856,7 @@ var NetworkUIController = function($scope,
 
     $scope.$on('awxNet-zoom', (e, zoomPercent) => {
         let v_center = $scope.to_virtual_coordinates($scope.graph.width/2, $scope.graph.height/2);
-        let scale = Math.pow(10, (zoomPercent - 120) / 40);
+        let scale = Math.pow(10, (zoomPercent - 120) / 120);
         $scope.jump_to_animation(v_center.x, v_center.y, scale, false);
     });
 

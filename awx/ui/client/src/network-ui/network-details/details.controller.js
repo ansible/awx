@@ -10,7 +10,7 @@
 
         $scope.parseType = 'yaml';
  		$scope.formCancel = function(){
-            $scope.$parent.$$childTail.closeDetailsPanel();
+            $scope.$parent.$broadcast('awxNet-closeDetailsPanel');
  		};
 
  		$scope.formSave = function(){
