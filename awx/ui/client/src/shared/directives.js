@@ -1252,26 +1252,27 @@ function(ConfigurationUtils, i18n, $rootScope) {
         require: 'ngModel',
         link: function postLink(scope, element, attrs, ngModel) {
             // Watch for changes to the required attribute
-            attrs.$observe('required', function(value) {
-                if(value) {
-                    ngModel.$validators.required = function (value) {
-                        if(angular.isArray(value)) {
-                            if(value.length === 0) {
-                                return false;
-                            }
-                            else {
-                                return (!value[0] || value[0] === "") ? false : true;
-                            }
+            attrs.$observe('required', function() {
+                ngModel.$validate();
+            });
+
+            ngModel.$validators.required = function (value) {
+                if(attrs.required) {
+                    if(angular.isArray(value)) {
+                        if(value.length === 0) {
+                            return false;
                         }
                         else {
-                            return (!value || value === "") ? false : true;
+                            return (!value[0] || value[0] === "") ? false : true;
                         }
-                    };
+                    }
+                    else {
+                        return (!value || value === "") ? false : true;
+                    }
+                } else {
+                    return true;
                 }
-                else {
-                    delete ngModel.$validators.required;
-                }
-            });
+            };
         }
     };
 }]);
