@@ -466,6 +466,15 @@ class InstanceGroupAccess(BaseAccess):
     def can_change(self, obj, data):
         return self.user.is_superuser
 
+    def can_delete(self, obj):
+        return self.user.is_superuser
+
+    def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
+        return self.user.is_superuser
+
+    def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
+        return self.user.is_superuser
+
 
 class UserAccess(BaseAccess):
     '''

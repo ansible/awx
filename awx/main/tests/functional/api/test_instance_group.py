@@ -80,11 +80,12 @@ def test_delete_instance_group_jobs_running(delete, instance_group_jobs_running,
 
 
 @pytest.mark.django_db
-def test_delete_tower_instance_group_prevented(delete, options, tower_instance_group, admin):
+def test_delete_tower_instance_group_prevented(delete, options, tower_instance_group, user):
     url = reverse("api:instance_group_detail", kwargs={'pk': tower_instance_group.pk})
-    delete(url, None, admin, expect=403)
-    resp = options(url, None, admin, expect=200)
-    actions = ['DELETE', 'PATCH', 'PUT']
+    super_user = user('bob', True)
+    delete(url, None, super_user, expect=403)
+    resp = options(url, None, super_user, expect=200)
+    actions = ['GET', 'PUT',]
+    assert 'DELETE' not in resp.data['actions']
     for action in actions:
-        assert action not in resp.data['actions']
-    assert 'GET' in resp.data['actions']
+        assert action in resp.data['actions']
