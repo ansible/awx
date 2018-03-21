@@ -520,18 +520,47 @@ def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     Signal handler and wrapper around inventory.update_computed_fields to
     prevent unnecessary recursive calls.
     '''
-    i = Inventory.objects.filter(id=inventory_id)
-    if not i.exists():
-        logger.error("Update Inventory Computed Fields failed due to missing inventory: " + str(inventory_id))
-        return
-    i = i[0]
-    try:
-        i.update_computed_fields(update_hosts=should_update_hosts)
-    except DatabaseError as e:
-        if 'did not affect any rows' in str(e):
-            logger.debug('Exiting duplicate update_inventory_computed_fields task.')
+    def _perform_update(inventory_id, should_update_hosts=True):
+        i = Inventory.objects.filter(id=inventory_id)
+        if not i.exists():
+            logger.error("Update Inventory Computed Fields failed due to missing inventory: " + str(inventory_id))
             return
-        raise
+        i = i[0]
+        try:
+            i.update_computed_fields(update_hosts=should_update_hosts)
+        except DatabaseError as e:
+            if 'did not affect any rows' in str(e):
+                logger.debug('Exiting duplicate update_inventory_computed_fields task.')
+                return
+            raise
+
+    compute_key = 'inventory_compute_{}'.format(inventory_id)
+    wait_key = 'inventory_wait_{}'.format(inventory_id)
+    with advisory_lock(compute_key, wait=False) as compute_lock:
+        if compute_lock:
+            _perform_update(inventory_id, should_update_hosts=True)
+        else:
+            with advisory_lock(wait_key, wait=False) as wait_lock:
+                if wait_lock:
+                    logger.debug('Obtained wait lock for inventory {}.'.format(inventory_id))
+                    with advisory_lock(compute_key, wait=True):
+                        _perform_update(inventory_id, should_update_hosts=True)
+                else:
+                    logger.debug('Both locks for inventory {} are held, doing nothing.'.format(inventory_id))
+
+
+def schedule_inventory_computed_fields_update(inventory_id, **kwargs):
+    '''
+    Wrapper around update_inventory_computed_fields which will not submit
+    the task into the queue if a waiting task exists.
+    '''
+    wait_key = 'inventory_wait_{}'.format(inventory_id)
+    with advisory_lock(wait_key, wait=False) as wait_lock:
+        if wait_lock:
+            update_inventory_computed_fields.delay(inventory_id, **kwargs)
+        else:
+            logger.debug('Inventory computed fields update for {} already'
+                         ' in progress.'.format(inventory_id))
 
 
 @shared_task(queue='tower', base=LogErrorsTask)
@@ -1381,7 +1410,7 @@ class RunJob(BaseTask):
         except Inventory.DoesNotExist:
             pass
         else:
-            update_inventory_computed_fields.delay(inventory.id, True)
+            schedule_inventory_computed_fields_update(inventory.id)
 
 
 class RunProjectUpdate(BaseTask):

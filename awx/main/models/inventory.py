@@ -10,6 +10,7 @@ from urlparse import urljoin
 import os.path
 import six
 from distutils.version import LooseVersion
+import time
 
 # Django
 from django.conf import settings
@@ -405,6 +406,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         Update model fields that are computed from database relationships.
         '''
         logger.debug("Going to update inventory computed fields")
+        start_time = time.time()
         if update_hosts:
             self.update_host_computed_fields()
         if update_groups:
@@ -441,7 +443,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                 computed_fields.pop(field)
         if computed_fields:
             iobj.save(update_fields=computed_fields.keys())
-        logger.debug("Finished updating inventory computed fields")
+        logger.debug("Finished updating inventory computed fields in "
+                     "{0:.3f} seconds".format(time.time() - start_time))
 
     def websocket_emit_status(self, status):
         connection.on_commit(lambda: emit_channel_notification(
@@ -785,7 +788,7 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     @transaction.atomic
     def delete_recursive(self):
         from awx.main.utils import ignore_inventory_computed_fields
-        from awx.main.tasks import update_inventory_computed_fields
+        from awx.main.tasks import schedule_inventory_computed_fields_update
         from awx.main.signals import disable_activity_stream, activity_stream_delete
 
 
@@ -840,7 +843,7 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
                 marked_groups.append(group)
             Group.objects.filter(id__in=marked_groups).delete()
             Host.objects.filter(id__in=marked_hosts).delete()
-            update_inventory_computed_fields.delay(self.inventory.id)
+            schedule_inventory_computed_fields_update(self.inventory.id)
         with ignore_inventory_computed_fields():
             with disable_activity_stream():
                 mark_actual()
