@@ -1525,6 +1525,15 @@ class InventorySerializer(BaseSerializerWithVariables):
         'admin', 'adhoc',
         {'copy': 'organization.inventory_admin'}
     ]
+    # Used to be computed fields, now a computed property
+    has_active_failures = serializers.BooleanField(
+        help_text=_('Flag indicating whether any hosts in this inventory have failed.'),
+        read_only=True
+    )
+    has_inventory_sources = serializers.BooleanField(
+        help_text=_('Flag indicating whether this inventory has any external inventory sources.'),
+        read_only=True
+    )
 
     class Meta:
         model = Inventory
@@ -1745,6 +1754,11 @@ class AnsibleFactsSerializer(BaseSerializer):
 
 class GroupSerializer(BaseSerializerWithVariables):
     capabilities_prefetch = ['inventory.admin', 'inventory.adhoc']
+    # Used to be computed fields, now a computed property
+    has_active_failures = serializers.BooleanField(
+        help_text=_('Flag indicating whether any hosts in this inventory have failed.'),
+        read_only=True
+    )
 
     class Meta:
         model = Group
