@@ -848,7 +848,13 @@ function($injector, $stateExtender, $log, i18n) {
                                 // Need to change the role_level here b/c organizations and inventory scripts
                                 // don't have a "use_role", only "admin_role" and "read_role"
                                 if(list.iterator === "organization"){
-                                    $stateParams[`${list.iterator}_search`].role_level = "admin_role";
+                                    if ($state.current.name.includes('inventories')) {
+                                        $stateParams[`${list.iterator}_search`].role_level = "inventory_admin_role";
+                                    } else if ($state.current.name.includes('projects')) {
+                                        $stateParams[`${list.iterator}_search`].role_level = "project_admin_role";
+                                    } else if ($state.current.name.includes('templates.addWorkflowJobTemplate') || $state.current.name.includes('templates.editWorkflowJobTemplate')) {
+                                        $stateParams[`${list.iterator}_search`].role_level = "workflow_admin_role";
+                                    }
                                 }
                                 if(list.iterator === "inventory_script"){
                                     $stateParams[`${list.iterator}_search`].role_level = "admin_role";

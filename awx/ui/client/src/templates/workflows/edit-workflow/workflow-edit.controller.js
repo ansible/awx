@@ -99,7 +99,7 @@ export default [
             }
 
             if(workflowJobTemplateData.organization) {
-                OrgAdminLookup.checkForAdminAccess({organization: workflowJobTemplateData.organization})
+                OrgAdminLookup.checkForRoleLevelAdminAccess(workflowJobTemplateData.organization, 'workflow_admin_role')
                 .then(function(canEditOrg){
                     $scope.canEditOrg = canEditOrg;
                 });

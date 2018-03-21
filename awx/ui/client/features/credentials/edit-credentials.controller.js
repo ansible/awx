@@ -1,7 +1,7 @@
 function EditCredentialsController (models, $state, $scope, strings, componentsStrings) {
     const vm = this || {};
 
-    const { me, credential, credentialType, organization } = models;
+    const { me, credential, credentialType, organization, isOrgCredAdmin } = models;
 
     const omit = ['user', 'team', 'inputs'];
     const isEditable = credential.isEditable();
@@ -46,7 +46,8 @@ function EditCredentialsController (models, $state, $scope, strings, componentsS
     const isSuperuser = me.get('is_superuser');
     const isCurrentAuthor = Boolean(credential.get('summary_fields.created_by.id') === me.get('id'));
     vm.form.organization._disabled = true;
-    if (isSuperuser || isOrgAdmin || (credential.get('organization') === null && isCurrentAuthor)) {
+
+    if (isSuperuser || isOrgAdmin || isOrgCredAdmin || (credential.get('organization') === null && isCurrentAuthor)) {
         vm.form.organization._disabled = false;
     }
 

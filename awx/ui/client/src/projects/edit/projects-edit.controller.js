@@ -143,7 +143,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                         $scope.scm_type_class = "btn-disabled";
                     }
 
-                    OrgAdminLookup.checkForAdminAccess({organization: data.organization})
+                    OrgAdminLookup.checkForRoleLevelAdminAccess(data.organization, 'project_admin_role')
                     .then(function(canEditOrg){
                         $scope.canEditOrg = canEditOrg;
                     });

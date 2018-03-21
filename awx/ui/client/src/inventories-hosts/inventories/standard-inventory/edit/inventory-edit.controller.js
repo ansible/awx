@@ -47,10 +47,10 @@ function InventoriesEdit($scope, $location,
             field_id: 'inventory_inventory_variables'
         });
 
-        OrgAdminLookup.checkForAdminAccess({organization: inventoryData.organization})
-        .then(function(canEditOrg){
-            $scope.canEditOrg = canEditOrg;
-        });
+        OrgAdminLookup.checkForRoleLevelAdminAccess(inventoryData.organization, 'inventory_admin_role')
+            .then(function(canEditOrg){
+                $scope.canEditOrg = canEditOrg;
+            });
 
         $scope.inventory_obj = inventoryData;
         $scope.inventory_name = inventoryData.name;

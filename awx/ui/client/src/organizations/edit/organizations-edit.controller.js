@@ -4,10 +4,10 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$location', '$stateParams',
+export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
     'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt',
     'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', 'ConfigData',
-    function($scope, $location, $stateParams,
+    function($scope, $location, $stateParams, OrgAdminLookup,
         OrganizationForm, Rest, ProcessErrors, Prompt,
         GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData, ConfigData) {
 
@@ -21,6 +21,11 @@ export default ['$scope', '$location', '$stateParams',
         init();
 
         function init() {
+            OrgAdminLookup.checkForAdminAccess({organization: id})
+                .then(function(isOrgAdmin){
+                    $scope.isOrgAdmin = isOrgAdmin;
+                });
+
             $scope.$watch('organization_obj.summary_fields.user_capabilities.edit', function(val) {
                 if (val === false) {
                     $scope.canAdd = false;

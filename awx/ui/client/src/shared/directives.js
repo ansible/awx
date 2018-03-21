@@ -497,7 +497,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
 }])
 
 // lookup   Validate lookup value against API
-.directive('awlookup', ['Rest', 'GetBasePath', '$q', function(Rest, GetBasePath, $q) {
+.directive('awlookup', ['Rest', 'GetBasePath', '$q', '$state', function(Rest, GetBasePath, $q, $state) {
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, fieldCtrl) {
@@ -664,7 +664,15 @@ function(ConfigurationUtils, i18n, $rootScope) {
                                 query += '&cloud=true&role_level=use_role';
                                 break;
                             case 'organization':
-                                query += '&role_level=admin_role';
+                                if ($state.current.name.includes('inventories')) {
+                                    query += '&role_level=inventory_admin_role';
+                                } else if ($state.current.name.includes('templates.editWorkflowJobTemplate')) {
+                                    query += '&role_level=workflow_admin_role';
+                                } else if ($state.current.name.includes('projects')) {
+                                    query += '&role_level=project_admin_role';
+                                } else {
+                                    query += '&role_level=admin_role';
+                                }
                                 break;
                             case 'inventory_script':
                                 query += '&role_level=admin_role&organization=' + scope.$resolve.inventoryData.summary_fields.organization.id;
