@@ -10,6 +10,7 @@ from urlparse import urljoin
 import os.path
 import six
 from distutils.version import LooseVersion
+from itertools import chain
 
 # Django
 from django.conf import settings
@@ -327,44 +328,28 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                     setattr(host, field, value)
                 host.save(update_fields=host_updates.keys())
 
-    def get_group_depths(self, group_children_map=None):
-        if group_children_map is None:
-            group_children_map = self.get_group_children_map()
+    @staticmethod
+    def _walk_group_relationship(group_map, unprocessed):
+        seen = set([])
 
-        group_depths = {} # pk: max_depth
-        unprocessed = set(self.root_groups.values_list('pk', flat=True))
-        depth = 0
         while unprocessed:
-            next_set = set([])
-            for pk in unprocessed:
-                if pk not in group_depths or group_depths[pk] < depth:
-                    group_depths[pk] = depth
-                    if pk in group_children_map:
-                        next_set.update(group_children_map[pk])
-            unprocessed = next_set
-            depth += 1
+            seen.update(unprocessed)
+            unprocessed = set(chain.from_iterable(
+                group_map[group_pk] for group_pk in unprocessed
+            ))
+            unprocessed.difference_update(seen)
 
-        return group_depths
+        return seen
 
-    def get_group_decedents(self, group_pk, group_children_map=None, group_hosts_map=None):
-        if group_children_map is None:
-            group_children_map = self.get_group_children_map()
-        if group_hosts_map is None:
-            group_hosts_map = self.get_group_hosts_map()
+    def get_group_decedents(self, group_pk):
+        group_children_map = self.get_group_children_map()
+        group_hosts_map = self.get_group_hosts_map()
         # Get all children and host pks for this group.
-        parent_pks_to_check = set([group_pk])
-        parent_pks_checked = set()
-        child_pks = set()
-        host_pks = set()
-        while parent_pks_to_check:
-            for parent_pk in list(parent_pks_to_check):
-                c_ids = group_children_map.get(parent_pk, set())
-                child_pks.update(c_ids)
-                parent_pks_to_check.remove(parent_pk)
-                parent_pks_checked.add(parent_pk)
-                parent_pks_to_check.update(c_ids - parent_pks_checked)
-                h_ids = group_hosts_map.get(parent_pk, set())
-                host_pks.update(h_ids)
+        child_pks = self._walk_group_relationship(group_children_map, set([group_pk]))
+        host_pks = set(chain.from_iterable(
+            group_hosts_map[group_pk] for group_pk in child_pks
+        ))
+        child_pks.remove(group_pk)  # remove self from list
         return (child_pks, host_pks)
 
     def get_existing_group_computed_fields(self):
@@ -394,17 +379,15 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         '''
         Update computed fields for all active groups in this inventory.
         '''
-        group_children_map = self.get_group_children_map()
-        group_hosts_map = self.get_group_hosts_map()
         failed_host_pks = set(self.hosts.filter(last_job_host_summary__failed=True).values_list('pk', flat=True))
         failed_group_pks = set() # Update below as we check each group.
         groups_with_cloud_pks = set(self.groups.filter(inventory_sources__source__in=CLOUD_INVENTORY_SOURCES).values_list('pk', flat=True))
+
         group_new_data = {}
         group_old_data = self.get_existing_group_computed_fields()
-        groups_to_update = set([])
 
         for group_pk, old_data in group_old_data.items():
-            child_pks, host_pks = self.get_group_decedents(group_pk, group_children_map, group_hosts_map)
+            child_pks, host_pks = self.get_group_decedents(group_pk)
 
             current_values = {
                 'total_hosts': len(host_pks),
@@ -665,35 +648,17 @@ class Host(CommonModelNameNotUnique):
     def get_absolute_url(self, request=None):
         return reverse('api:host_detail', kwargs={'pk': self.pk}, request=request)
 
-    def update_computed_fields(self, update_inventory=True, update_groups=True):
-        '''
-        Update model fields that are computed from database relationships.
-        '''
-        has_active_failures = bool(self.last_job_host_summary and
-                                   self.last_job_host_summary.failed)
-        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
-        computed_fields = {
-            'has_active_failures': has_active_failures,
-            'has_inventory_sources': bool(active_inventory_sources.count()),
-        }
-        for field, value in computed_fields.items():
-            if getattr(self, field) != value:
-                setattr(self, field, value)
-            else:
-                computed_fields.pop(field)
-        if computed_fields:
-            self.save(update_fields=computed_fields.keys())
-        # Groups and inventory may also need to be updated when host fields
-        # change.
-        # NOTE: I think this is no longer needed
-        # if update_groups:
-        #     for group in self.all_groups:
-        #         group.update_computed_fields()
-        # if update_inventory:
-        #     self.inventory.update_computed_fields(update_groups=False,
-        #                                           update_hosts=False)
-        # Rebuild summary fields cache
     variables_dict = VarsDictProperty('variables')
+
+    def get_ancestors(self):
+        '''
+        Return groups that are ancestors of this host
+        '''
+        group_parents_map = self.inventory.get_group_parents_map()
+        return self.inventory._walk_group_relationship(
+            group_parents_map,
+            set(self.groups.values_list('pk', flat=True))
+        )
 
     @property
     def all_groups(self):
@@ -898,31 +863,53 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
                 mark_actual()
             activity_stream_delete(None, self)
 
-    def update_computed_fields(self):
+    def get_ancestors(self):
         '''
-        Update model fields that are computed from database relationships.
+        Return groups that are ancestors of this group
         '''
-        active_hosts = self.all_hosts
-        failed_hosts = active_hosts.filter(last_job_host_summary__failed=True)
-        active_groups = self.all_children
-        # FIXME: May not be accurate unless we always update groups depth-first.
-        failed_groups = active_groups.filter(has_active_failures=True)
-        active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
-        computed_fields = {
-            'total_hosts': active_hosts.count(),
-            'has_active_failures': bool(failed_hosts.count()),
-            'hosts_with_active_failures': failed_hosts.count(),
-            'total_groups': active_groups.count(),
-            'groups_with_active_failures': failed_groups.count(),
-            'has_inventory_sources': bool(active_inventory_sources.count()),
-        }
-        for field, value in computed_fields.items():
-            if getattr(self, field) != value:
-                setattr(self, field, value)
+        starting_set = set(self.parents.values_list('pk', flat=True))
+        if not starting_set:
+            return starting_set  # optimization to avoid producing mapping
+        group_parents_map = self.inventory.get_group_parents_map()
+        return self.inventory._walk_group_relationship(
+            group_parents_map, starting_set)
+
+    def update_computed_fields(self, add=True, parent=None):
+        '''
+        Differential update of computed fields for all other resources
+        impacted by this action. Action is specified by kwargs:
+         - add=True, parent=None: Created new group
+         - add=True, parent=group: Added existing group to group children
+         - add=False, parent=None: Deleted group
+         - add=False, parent=group: Removed group from group children
+        '''
+        from awx.main.signals import disable_activity_stream
+        from awx.main.utils import ignore_inventory_computed_fields
+
+        with disable_activity_stream(), ignore_inventory_computed_fields():
+            ancestor_kwargs = {}
+            inv_update_fields = []
+            ancestor_pks = self.get_ancestors()
+            if parent is None:
+                inv_update_fields.append('total_groups')
+                if add:
+                    self.inventory.total_groups += 1
+                else:
+                    self.inventory.total_groups -= 1
+            if add:
+                ancestor_kwargs['total_hosts'] = models.F('total_hosts') + 1
+                if self.has_active_failures:
+                    ancestor_kwargs['groups_with_active_failures'] = models.F(
+                        'groups_with_active_failures') + 1
             else:
-                computed_fields.pop(field)
-        if computed_fields:
-            self.save(update_fields=computed_fields.keys())
+                ancestor_kwargs['total_hosts'] = models.F('total_hosts') - 1
+                if self.has_active_failures:
+                    ancestor_kwargs['groups_with_active_failures'] = models.F(
+                        'groups_with_active_failures') - 1
+            if inv_update_fields:
+                self.inventory.save(update_fields=inv_update_fields)
+            if ancestor_kwargs and ancestor_pks:
+                Group.objects.filter(pk__in=ancestor_pks).update(**ancestor_kwargs)
 
     variables_dict = VarsDictProperty('variables')
 

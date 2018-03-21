@@ -99,15 +99,6 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         assert bottom.pk not in gc_map
         assert gc_map[top.pk] == set([Group.objects.get(name='g1').pk])
 
-    def test_group_children_map(self):
-        inv = self.linear_inventory()
-        group_depths = inv.get_group_depths()
-        for group in inv.groups.all():
-            print (group.pk, group.name)
-        assert group_depths[inv.groups.get(name='g2').pk] == 0  # top
-        assert group_depths[inv.groups.get(name='g1').pk] == 1
-        assert group_depths[inv.groups.get(name='g0').pk] == 2  # bottom
-
     def test_group_decedents_map(self):
         inv = self.linear_inventory()
         top_group = inv.groups.get(name='g2')
@@ -127,6 +118,18 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
             'hosts_with_active_failures': 0,
             'total_groups': 2
         }
+
+    def test_group_differential_update(self):
+        inv = self.linear_inventory()
+        top_group = inv.groups.get(name='g2')
+        assert top_group.total_groups == 3
+        assert inv.total_groups == 3
+        new_group = top_group.children.create(name='another-group', inventory=inv)
+        new_group.update_computed_fields(add=True, parent=top_group)
+        top_group.refresh_from_db()
+        inv.refresh_from_db()
+        assert top_group.total_groups == 4
+        assert inv.total_groups == 4
 
     def test_no_activity_stream(self):
         inv = self.dense_inventory(initial_compute=False)
