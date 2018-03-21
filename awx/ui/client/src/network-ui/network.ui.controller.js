@@ -244,17 +244,39 @@ var NetworkUIController = function($scope,
        }
   };
 
+  $scope.unpaginate = function(url, callback) {
+
+      var all_results = [];
+      var rec = null;
+      rec = function(url) {
+          $http.get(url)
+               .then(function(response) {
+                   console.log(response);
+                   all_results.extend(response.data.results);
+                   if (response.data.next) {
+                        rec(response.data.next);
+                   } else{
+                       callback(all_results);
+                   }
+               })
+               .catch(({data, status}) => {
+                   ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
+               });
+      };
+      rec(url);
+  };
+
   //Inventory Toolbox Setup
   $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, toolboxTopMargin, 200, toolboxHeight);
   if (!$scope.disconnected) {
-      $http.get('/api/v2/inventories/' + $scope.inventory_id + '/hosts/')
-           .then(function(response) {
+      $scope.unpaginate('/api/v2/inventories/' + $scope.inventory_id + '/hosts/',
+           function(all_results) {
                var devices_by_name = {};
                var i = 0;
                for (i = 0; i < $scope.devices.length; i++) {
                    devices_by_name[$scope.devices[i].name] = $scope.devices[i];
                }
-               let hosts = response.data.results;
+               let hosts = all_results;
                console.log(hosts.length);
                for(i = 0; i<hosts.length; i++) {
                    console.log(i);
@@ -293,9 +315,6 @@ var NetworkUIController = function($scope,
                        console.log(error);
                    }
                }
-           })
-           .catch(({data, status}) => {
-               ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get host data: ' + status });
            });
   }
   $scope.inventory_toolbox.spacing = 150;

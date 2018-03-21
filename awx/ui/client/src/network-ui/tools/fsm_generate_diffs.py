@@ -49,7 +49,7 @@ def main(args=None):
     with open(parsed_args['<design>']) as f:
         a = yaml.load(f.read())
 
-    data = fsm_diff.cli.fsm_diff(a, b)
+    data = fsm_diff.cli.fsm_diff(parsed_args['<design>'], parsed_args['<implementation>'],  a, b)
     data = transform_fsm.transform_fsm(data)
 
     env = Environment(loader=FileSystemLoader("templates"))
