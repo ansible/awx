@@ -40,6 +40,7 @@ colorama==0.3.9           # via azure-cli-core, knack
 cryptography==2.1.4       # via adal, azure-storage, paramiko, pyopenssl, requests-kerberos, requests-ntlm, secretstorage
 decorator==4.2.1          # via openstacksdk
 deprecation==2.0          # via openstacksdk
+dnspython==1.15.0         # via dig
 dogpile.cache==0.6.5      # via openstacksdk
 enum34==1.1.6             # via cryptography, knack, msrest, ovirt-engine-sdk-python
 futures==3.2.0            # via openstacksdk, s3transfer
