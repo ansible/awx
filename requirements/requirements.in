@@ -40,7 +40,7 @@ pyparsing==2.2.0
 python-logstash==0.4.6
 python-memcached==1.58
 python-radius==1.0
-python-saml==2.2.1
+python-saml==2.2.4
 python-social-auth==0.2.21
 pyvmomi==6.5
 redbaron==0.6.3
