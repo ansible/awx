@@ -23,6 +23,7 @@ import UnifiedJobTemplate from '~models/UnifiedJobTemplate';
 import WorkflowJob from '~models/WorkflowJob';
 import WorkflowJobTemplate from '~models/WorkflowJobTemplate';
 import WorkflowJobTemplateNode from '~models/WorkflowJobTemplateNode';
+import UnifiedJob from '~models/UnifiedJob';
 
 const MODULE_NAME = 'at.lib.models';
 
@@ -49,6 +50,7 @@ angular
     .service('OrganizationModel', Organization)
     .service('ProjectModel', Project)
     .service('ScheduleModel', Schedule)
+    .service('UnifiedJobModel', UnifiedJob)
     .service('UnifiedJobTemplateModel', UnifiedJobTemplate)
     .service('WorkflowJobModel', WorkflowJob)
     .service('WorkflowJobTemplateModel', WorkflowJobTemplate)

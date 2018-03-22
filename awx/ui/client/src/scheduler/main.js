@@ -349,7 +349,7 @@ export default
                         }]
                 },
                 views: {
-                    'list@jobs': {
+                    'schedulesList@jobs': {
                         templateProvider: function(ScheduleList, generateList){
                             let html = generateList.build({
                                 list: ScheduleList,

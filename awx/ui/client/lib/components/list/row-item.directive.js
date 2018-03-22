@@ -7,10 +7,13 @@ function atRowItem () {
         transclude: true,
         templateUrl,
         scope: {
+            inline: '@',
             badge: '@',
             headerValue: '@',
             headerLink: '@',
             headerTag: '@',
+            status: '@',
+            statusTip: '@',
             labelValue: '@',
             labelLink: '@',
             labelState: '@',

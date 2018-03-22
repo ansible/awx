@@ -1,5 +1,13 @@
-<div class="at-RowItem" ng-class="{'at-RowItem--isHeader': headerValue}"
-    ng-show="headerValue || value || (smartStatus && smartStatus.summary_fields.recent_jobs.length) || (tagValues && tagValues.length)">
+<div class="at-RowItem" ng-class="{'at-RowItem--isHeader': headerValue, 'at-RowItem--inline': inline}"
+    ng-show="status || headerValue || value || (smartStatus && smartStatus.summary_fields.recent_jobs.length) || (tagValues && tagValues.length)">
+        <div class="at-RowItem-status" ng-if="status">
+            <a ng-if="headerLink" ng-href="{{ headerLink }}"
+                aw-tool-tip="{{ statusTip }}" aw-tip-watch="statusTip"
+                data-placement="top">
+                    <i class="fa icon-job-{{ status }}"></i>
+            </a>
+            <i ng-if="!headerLink" class="fa icon-job-{{ status }}"></i>
+        </div>
         <div class="at-RowItem-header" ng-if="headerValue && headerLink">
             <a ng-href="{{ headerLink }}">{{ headerValue }}</a>
         </div>
