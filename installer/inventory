@@ -111,3 +111,9 @@ awx_secret_key=awxsecret
 # /etc/pki/ca-trust in the awx_task and awx_web containers.
 # NOTE: only obeyed in local_docker install
 #ca_trust_dir=/etc/pki/ca-trust
+
+# Docker container volumes. If you need to mount custom volumes in your awx_task and awx_web containers.
+# This example causes /etc/tower/settings.py directory on the host to be bind mounted over
+# /etc/tower/settings.py in the awx_task and awx_web containers on read only mode.
+# NOTE: only obeyed in local_docker install
+custom_volumes=['/etc/tower/settings.py:/etc/tower/settings.py:ro','/etc/tower/nginx.conf:/etc/nginx/nginx.conf:rw']
