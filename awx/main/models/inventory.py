@@ -346,12 +346,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
         return seen
 
-    def get_group_decedents(self, group_pk):
+    def get_group_decedents(self, group_pk, group_children_map=None, group_hosts_map=None):
         '''
         Return tuple of sets (groups, hosts) pks that descend from `group_pk`
         '''
-        group_children_map = self.get_group_children_map()
-        group_hosts_map = self.get_group_hosts_map()
+        if group_children_map is None:
+            group_children_map = self.get_group_children_map()
+        if group_hosts_map is None:
+            group_hosts_map = self.get_group_hosts_map()
 
         child_pks = self._walk_group_relationship(group_children_map, set([group_pk]))
         host_pks = set(chain.from_iterable(
@@ -395,8 +397,15 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         group_old_data = self.get_existing_group_computed_fields()
 
         failed_group_pks = set() # Update as we check each group.
+        # produce the maps before the loop so they are no re-computed
+        group_children_map = self.get_group_children_map()
+        group_hosts_map = self.get_group_hosts_map()
         for group_pk, old_data in group_old_data.items():
-            child_pks, host_pks = self.get_group_decedents(group_pk)
+            child_pks, host_pks = self.get_group_decedents(
+                group_pk,
+                group_children_map=group_children_map,
+                group_hosts_map=group_hosts_map
+            )
 
             current_values = {
                 'total_hosts': len(host_pks),
