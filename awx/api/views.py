@@ -661,6 +661,7 @@ class InstanceGroupList(ListCreateAPIView):
 
 class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
 
+    always_allow_superuser = False
     view_name = _("Instance Group Detail")
     model = InstanceGroup
     serializer_class = InstanceGroupSerializer
