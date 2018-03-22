@@ -3,12 +3,12 @@ import templateUrl from './relaunchButton.partial.html';
 const atRelaunch = {
     templateUrl,
     bindings: {
-        state: '<'
+        job: '<'
     },
     controller: ['ProcessErrors', 'AdhocRun', 'ComponentsStrings',
         'ProjectModel', 'InventorySourceModel', 'WorkflowJobModel', 'Alert',
         'AdHocCommandModel', 'JobModel', 'JobTemplateModel', 'PromptService',
-        'GetBasePath', '$state', '$q', '$scope', atRelaunchCtrl
+        '$state', '$q', '$scope', atRelaunchCtrl
     ],
     controllerAs: 'vm'
 };
@@ -17,25 +17,23 @@ function atRelaunchCtrl (
     ProcessErrors, AdhocRun, strings,
     Project, InventorySource, WorkflowJob, Alert,
     AdHocCommand, Job, JobTemplate, PromptService,
-    GetBasePath, $state, $q, $scope
+    $state, $q, $scope
 ) {
     const vm = this;
-    const scope = $scope.$parent;
-    const job = _.get(scope, 'job') || _.get(scope, 'completed_job');
     const jobObj = new Job();
     const jobTemplate = new JobTemplate();
 
     const checkRelaunchPlaybook = (option) => {
         jobObj.getRelaunch({
-            id: job.id
+            id: vm.job.id
         }).then((getRelaunchRes) => {
             if (
                 getRelaunchRes.data.passwords_needed_to_start &&
                 getRelaunchRes.data.passwords_needed_to_start.length > 0
             ) {
                 const jobPromises = [
-                    jobObj.request('get', job.id),
-                    jobTemplate.optionsLaunch(job.unified_job_template)
+                    jobObj.request('get', vm.job.id),
+                    jobTemplate.optionsLaunch(vm.job.unified_job_template)
                 ];
 
                 $q.all(jobPromises)
@@ -66,7 +64,7 @@ function atRelaunchCtrl (
                                     getRelaunchRes.data.passwords_needed_to_start
                             },
                             launchOptions: launchOptions.data,
-                            job: job.id,
+                            job: vm.job.id,
                             relaunchHostType: option ? (option.name).toLowerCase() : null,
                             prompts: {
                                 credentials: {
@@ -104,7 +102,7 @@ function atRelaunchCtrl (
                     });
             } else {
                 jobObj.postRelaunch({
-                    id: job.id
+                    id: vm.job.id
                 }).then((launchRes) => {
                     if (!$state.includes('jobs')) {
                         $state.go('jobResult', { id: launchRes.data.id }, { reload: true });
@@ -115,8 +113,8 @@ function atRelaunchCtrl (
     };
 
     vm.$onInit = () => {
-        vm.showRelaunch = job.type !== 'system_job' && job.summary_fields.user_capabilities.start;
-        vm.showDropdown = job.type === 'job' && job.failed === true;
+        vm.showRelaunch = vm.job.type !== 'system_job' && vm.job.summary_fields.user_capabilities.start;
+        vm.showDropdown = vm.job.type === 'job' && vm.job.failed === true;
 
         vm.createDropdown();
         vm.createTooltips();
@@ -146,13 +144,13 @@ function atRelaunchCtrl (
     };
 
     vm.relaunchJob = () => {
-        if (job.type === 'inventory_update') {
+        if (vm.job.type === 'inventory_update') {
             const inventorySource = new InventorySource();
 
-            inventorySource.getUpdate(job.inventory_source)
+            inventorySource.getUpdate(vm.job.inventory_source)
                 .then((getUpdateRes) => {
                     if (getUpdateRes.data.can_update) {
-                        inventorySource.postUpdate(job.inventory_source)
+                        inventorySource.postUpdate(vm.job.inventory_source)
                             .then((postUpdateRes) => {
                                 if (!$state.includes('jobs')) {
                                     $state.go('inventorySyncStdout', { id: postUpdateRes.data.id }, { reload: true });
@@ -165,13 +163,13 @@ function atRelaunchCtrl (
                         );
                     }
                 });
-        } else if (job.type === 'project_update') {
+        } else if (vm.job.type === 'project_update') {
             const project = new Project();
 
-            project.getUpdate(job.project)
+            project.getUpdate(vm.job.project)
                 .then((getUpdateRes) => {
                     if (getUpdateRes.data.can_update) {
-                        project.postUpdate(job.project)
+                        project.postUpdate(vm.job.project)
                             .then((postUpdateRes) => {
                                 if (!$state.includes('jobs')) {
                                     $state.go('scmUpdateStdout', { id: postUpdateRes.data.id }, { reload: true });
@@ -184,30 +182,30 @@ function atRelaunchCtrl (
                         );
                     }
                 });
-        } else if (job.type === 'workflow_job') {
+        } else if (vm.job.type === 'workflow_job') {
             const workflowJob = new WorkflowJob();
 
             workflowJob.postRelaunch({
-                id: job.id
+                id: vm.job.id
             }).then((launchRes) => {
                 if (!$state.includes('jobs')) {
                     $state.go('workflowResults', { id: launchRes.data.id }, { reload: true });
                 }
             });
-        } else if (job.type === 'ad_hoc_command') {
+        } else if (vm.job.type === 'ad_hoc_command') {
             const adHocCommand = new AdHocCommand();
 
             adHocCommand.getRelaunch({
-                id: job.id
+                id: vm.job.id
             }).then((getRelaunchRes) => {
                 if (
                     getRelaunchRes.data.passwords_needed_to_start &&
                     getRelaunchRes.data.passwords_needed_to_start.length > 0
                 ) {
-                    AdhocRun({ scope, project_id: job.id, relaunch: true });
+                    AdhocRun({ scope: $scope, project_id: vm.job.id, relaunch: true });
                 } else {
                     adHocCommand.postRelaunch({
-                        id: job.id
+                        id: vm.job.id
                     }).then((launchRes) => {
                         if (!$state.includes('jobs')) {
                             $state.go('adHocJobStdout', { id: launchRes.data.id }, { reload: true });
@@ -215,7 +213,7 @@ function atRelaunchCtrl (
                     });
                 }
             });
-        } else if (job.type === 'job') {
+        } else if (vm.job.type === 'job') {
             checkRelaunchPlaybook();
         }
     };

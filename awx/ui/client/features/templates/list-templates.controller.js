@@ -18,7 +18,6 @@ function ListTemplatesController(
     Dataset,
     ProcessErrors,
     Prompt,
-    PromptService,
     resolvedModels,
     strings,
     Wait
@@ -65,21 +64,6 @@ function ListTemplatesController(
             return template.project === null || (template.inventory === null && template.ask_inventory_on_launch === false);
         } else {
             return false;
-        }
-    };
-
-    vm.runTemplate = template => {
-        if (!template) {
-            Alert(strings.get('error.LAUNCH'), strings.get('alert.MISSING_PARAMETER'));
-            return;
-        }
-
-        if (isJobTemplate(template)) {
-            runJobTemplate(template);
-        } else if (isWorkflowTemplate(template)) {
-            runWorkflowTemplate(template);
-        } else {
-            Alert(strings.get('error.UNKNOWN'), strings.get('alert.UNKNOWN_LAUNCH'));
         }
     };
 
@@ -323,120 +307,6 @@ function ListTemplatesController(
 
         return html;
     }
-
-    function runJobTemplate(template) {
-        const selectedJobTemplate = jobTemplate.create();
-        const preLaunchPromises = [
-            selectedJobTemplate.getLaunch(template.id),
-            selectedJobTemplate.optionsLaunch(template.id),
-        ];
-
-        Promise.all(preLaunchPromises)
-            .then(([launchData, launchOptions]) => {
-                if (selectedJobTemplate.canLaunchWithoutPrompt()) {
-                    return selectedJobTemplate
-                        .postLaunch({ id: template.id })
-                        .then(({ data }) => {
-                            $state.go('jobResult', { id: data.job }, { reload: true });
-                        });
-                }
-
-                const promptData = {
-                    launchConf: launchData.data,
-                    launchOptions: launchOptions.data,
-                    template: template.id,
-                    templateType: template.type,
-                    prompts: PromptService.processPromptValues({
-                        launchConf: launchData.data,
-                        launchOptions: launchOptions.data
-                    }),
-                    triggerModalOpen: true,
-                };
-
-                if (launchData.data.survey_enabled) {
-                   selectedJobTemplate.getSurveyQuestions(template.id)
-                        .then(({ data }) => {
-                            const processed = PromptService.processSurveyQuestions({ surveyQuestions: data.spec });
-                            promptData.surveyQuestions = processed.surveyQuestions;
-                            $scope.promptData = promptData;
-                        });
-                } else {
-                    $scope.promptData = promptData;
-                }
-            });
-    }
-
-    function runWorkflowTemplate(template) {
-        const selectedWorkflowJobTemplate = workflowTemplate.create();
-        const preLaunchPromises = [
-            selectedWorkflowJobTemplate.getLaunch(template.id),
-            selectedWorkflowJobTemplate.optionsLaunch(template.id),
-        ];
-
-        Promise.all(preLaunchPromises)
-            .then(([launchData, launchOptions]) => {
-                if (selectedWorkflowJobTemplate.canLaunchWithoutPrompt()) {
-                    return selectedWorkflowJobTemplate
-                        .postLaunch({ id: template.id })
-                        .then(({ data }) => {
-                            $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
-                        });
-                }
-
-                const promptData = {
-                    launchConf: launchData.data,
-                    launchOptions: launchOptions.data,
-                    template: template.id,
-                    templateType: template.type,
-                    prompts: PromptService.processPromptValues({
-                        launchConf: launchData.data,
-                        launchOptions: launchOptions.data
-                    }),
-                    triggerModalOpen: true,
-                };
-
-                if (launchData.data.survey_enabled) {
-                   selectedWorkflowJobTemplate.getSurveyQuestions(template.id)
-                        .then(({ data }) => {
-                            const processed = PromptService.processSurveyQuestions({ surveyQuestions: data.spec });
-                            promptData.surveyQuestions = processed.surveyQuestions;
-                            $scope.promptData = promptData;
-                        });
-                } else {
-                    $scope.promptData = promptData;
-                }
-            });
-    }
-
-    $scope.launchJob = () => {
-        const jobLaunchData = PromptService.bundlePromptDataForLaunch($scope.promptData);
-
-        // If the extra_vars dict is empty, we don't want to include it if we didn't prompt for anything.
-        if(_.isEmpty(jobLaunchData.extra_vars) && !($scope.promptData.launchConf.ask_variables_on_launch && $scope.promptData.launchConf.survey_enabled && $scope.promptData.surveyQuestions.length > 0)){
-            delete jobLaunchData.extra_vars;
-        }
-
-        if($scope.promptData.templateType === 'job_template') {
-            jobTemplate.create().postLaunch({
-                id: $scope.promptData.template,
-                launchData: jobLaunchData
-            })
-            .then((launchRes) => {
-                $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
-            })
-            .catch(createErrorHandler('launch job template', 'POST'));
-        } else if($scope.promptData.templateType === 'workflow_job_template') {
-            workflowTemplate.create().postLaunch({
-                id: $scope.promptData.template,
-                launchData: jobLaunchData
-            })
-            .then((launchRes) => {
-                $state.go('workflowResults', { id: launchRes.data.workflow_job }, { reload: true });
-            })
-            .catch(createErrorHandler('launch workflow job template', 'POST'));
-        }
-
-    };
 }
 
 ListTemplatesController.$inject = [
@@ -447,7 +317,6 @@ ListTemplatesController.$inject = [
     'Dataset',
     'ProcessErrors',
     'Prompt',
-    'PromptService',
     'resolvedModels',
     'TemplatesStrings',
     'Wait'

@@ -98,9 +98,9 @@
                     </labels-list>
                 </div>
                 <div class="at-Row-actions">
-                    <at-row-action icon="icon-launch" ng-click="vm.runTemplate(template)"
+                    <at-launch-template template="template"
                         ng-show="template.summary_fields.user_capabilities.start">
-                    </at-row-action>
+                    </at-launch-template>
                     <at-row-action icon="fa-calendar" ng-click="vm.scheduleTemplate(template)"
                         ng-show="template.summary_fields.user_capabilities.schedule">
                     </at-row-action>
@@ -121,5 +121,4 @@
             query-set="querySet">
         </paginate>
     </at-panel-body>
-    <prompt prompt-data="promptData" on-finish="launchJob()"></launch>
 </at-panel>

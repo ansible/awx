@@ -398,7 +398,9 @@ export default ['$compile', 'Attr', 'Icon',
                             }
                             // Plug in Dropdown Component
                             if (field_action === 'submit' && list.fieldActions[field_action].relaunch === true) {
-                                innerTable += `<at-relaunch></at-relaunch>`;
+                                innerTable += `<at-relaunch job="${list.iterator}"></at-relaunch>`;
+                            } else if (field_action === 'submit' && list.fieldActions[field_action].launch === true) {
+                                innerTable += `<at-launch-template template="${list.iterator}" ng-if="${list.iterator}.summary_fields.user_capabilities.start"></at-launch-template>`;
                             } else {
                                 fAction = list.fieldActions[field_action];
                                 innerTable += "<button id=\"";

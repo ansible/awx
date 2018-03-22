@@ -9,7 +9,7 @@
                     </div>
                     <div class="StandardOut-actions">
                         <div>
-                            <at-relaunch></at-relaunch>
+                            <at-relaunch job="job"></at-relaunch>
                         </div>
                         <button id="cancel-job-button" class="List-actionButton List-actionButton--delete jobResult-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job.status === 'waiting' || job.status === 'running' || job.status === 'pending'" aw-tool-tip="Cancel" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
                         <button id="delete-job-button" class="List-actionButton List-actionButton--delete jobResult-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job.status === 'waiting' || job.status === 'running' || job.status === 'pending' " aw-tool-tip="Delete" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>

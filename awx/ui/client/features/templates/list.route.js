@@ -27,7 +27,7 @@ export default {
             dynamic: true,
             value: {
                 type: 'workflow_job_template,job_template',
-            }, 
+            },
         }
     },
     searchPrefix: 'template',
@@ -61,7 +61,7 @@ export default {
 
                 Wait('start');
                 return qs.search(searchPath, searchParam)
-                    .finally(() => Wait('stop'))
+                    .finally(() => Wait('stop'));
             }
         ],
     }
