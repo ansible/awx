@@ -151,7 +151,7 @@ python-novaclient==9.0.1  # via python-openstackclient, shade
 python-openid==2.2.5      # via python-social-auth
 python-openstackclient==3.11.0  # via python-ironicclient
 python-radius==1.0
-python-saml==2.2.4
+python-saml==2.4.0
 python-social-auth==0.2.21
 pytz==2017.2              # via babel, celery, irc, oslo.serialization, oslo.utils, tempora, twilio
 pyvmomi==6.5
