@@ -36,6 +36,8 @@ from .events import event_context
 from .minimal import CallbackModule as MinimalCallbackModule
 
 CENSORED = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"  # noqa
+OMIT = "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER"
+
 
 
 class BaseCallbackModule(CallbackBase):
@@ -68,6 +70,7 @@ class BaseCallbackModule(CallbackBase):
 
     @contextlib.contextmanager
     def capture_event_data(self, event, **event_data):
+        censored_task_args = []
         event_data.setdefault('uuid', str(uuid.uuid4()))
 
         if event not in self.EVENTS_WITHOUT_TASK:
@@ -76,6 +79,14 @@ class BaseCallbackModule(CallbackBase):
             task = None
 
         if event_data.get('res'):
+            invocation = event_data['res'].get('invocation')
+            if invocation:
+                module_args = invocation.get('module_args')
+                sensitive_module_args = set([
+                    k for k, v in module_args.items()
+                    if v == OMIT
+                ])
+                censored_task_args = sensitive_module_args.intersection(task.args.keys())
             if event_data['res'].get('_ansible_no_log', False):
                 event_data['res'] = {'censored': CENSORED}
             if event_data['res'].get('results', []):
@@ -88,7 +99,7 @@ class BaseCallbackModule(CallbackBase):
             try:
                 event_context.add_local(event=event, **event_data)
                 if task:
-                    self.set_task(task, local=True)
+                    self.set_task(task, local=True, censored_task_args=censored_task_args)
                 event_context.dump_begin(sys.stdout)
                 yield
             finally:
@@ -120,7 +131,8 @@ class BaseCallbackModule(CallbackBase):
         event_context.remove_global(play=None, play_uuid=None, play_pattern=None)
         self.clear_task()
 
-    def set_task(self, task, local=False):
+    def set_task(self, task, local=False, censored_task_args=None):
+        censored_task_args = censored_task_args or []
         # FIXME: Task is "global" unless using free strategy!
         task_ctx = dict(
             task=(task.name or task.action),
@@ -134,7 +146,10 @@ class BaseCallbackModule(CallbackBase):
         if task.no_log:
             task_ctx['task_args'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
         else:
-            task_args = ', '.join(('%s=%s' % a for a in task.args.items()))
+            task_args = ', '.join((
+                '%s=%s' % (k, CENSORED if k in censored_task_args else v)
+                for k, v in task.args.items()
+            ))
             task_ctx['task_args'] = task_args
         if getattr(task, '_role', None):
             task_role = task._role._role_name

@@ -279,3 +279,28 @@ def test_callback_plugin_saves_custom_stats(executor, cache, playbook):
                 assert json.load(f) == {'foo': 'bar'}
     finally:
         shutil.rmtree(os.path.join(private_data_dir))
+
+
+@pytest.mark.parametrize('playbook', [
+{'no_log_module_with_var.yml': '''
+- name: ensure that module-level secrets are redacted
+  connection: local
+  hosts: all
+  vars:
+    - pw: SENSITIVE
+  tasks:
+    - uri:
+        url: https://example.org
+        user: john-jacob-jingleheimer-schmidt
+        password: "{{ pw }}"
+'''},  # noqa
+])
+def test_module_level_no_log(executor, cache, playbook):
+    # https://github.com/ansible/tower/issues/1101
+    # It's possible for `no_log=True` to be defined at the _module_ level,
+    # e.g., for the URI module password parameter
+    # This test ensures that we properly redact those
+    executor.run()
+    assert len(cache)
+    assert 'john-jacob-jingleheimer-schmidt' in json.dumps(cache.items())
+    assert 'SENSITIVE' not in json.dumps(cache.items())
