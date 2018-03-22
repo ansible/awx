@@ -36,7 +36,8 @@ export default
                         isRequired: '=ngRequired',
                         selectedValue: '=ngModel',
                         isDisabled: '=ngDisabled',
-                        preview: '='
+                        preview: '=',
+                        formElementName: '@'
                     },
                     templateUrl: templateUrl('templates/survey-maker/render/multiple-choice'),
                     link: _.partial(link, $timeout, CreateSelect2)

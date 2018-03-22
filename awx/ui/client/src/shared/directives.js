@@ -1247,7 +1247,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
     };
 }])
 
-.directive('awRequireMultiple', [function() {
+.directive('awRequireMultiple', ['Empty', function(Empty) {
     return {
         require: 'ngModel',
         link: function postLink(scope, element, attrs, ngModel) {
@@ -1256,18 +1256,15 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 ngModel.$validate();
             });
 
-            ngModel.$validators.required = function (value) {
+            ngModel.$validators.multipleSelect = function (modelValue) {
                 if(attrs.required) {
-                    if(angular.isArray(value)) {
-                        if(value.length === 0) {
-                            return false;
-                        }
-                        else {
-                            return (!value[0] || value[0] === "") ? false : true;
-                        }
-                    }
-                    else {
-                        return (!value || value === "") ? false : true;
+                    if(angular.isArray(modelValue)) {
+                        // Checks to make sure at least one value in the array
+                        return _.some(modelValue, function(arrayVal) {
+                            return !Empty(arrayVal);
+                        });
+                    } else {
+                        return !Empty(modelValue);
                     }
                 } else {
                     return true;
