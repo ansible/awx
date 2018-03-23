@@ -10,13 +10,13 @@
         </div>
         <div ng-if="question.type === 'text'">
             <input type="text" id="survey_question_{{$index}}" ng-model="question.model" name="survey_question_{{$index}}" ng-minlength="question.minlength" ng-maxlength="question.maxlength" class="form-control Form-textInput" ng-required="question.required">
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.minlength || forms.survey.survey_question_{{$index}}.$error.maxlength"><span translate>Please enter an answer between</span> {{question.minlength}} <span translate>to</span> {{question.maxlength}} <span translate>characters long.</span></div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$dirty && surveyForm.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$error.minlength || surveyForm.survey_question_{{$index}}.$error.maxlength"><span translate>Please enter an answer between</span> {{question.minlength}} <span translate>to</span> {{question.maxlength}} <span translate>characters long.</span></div>
         </div>
         <div ng-if="question.type === 'textarea'">
             <textarea id="survey_question_{{$index}}" name="survey_question_{{$index}}" ng-model="question.model" ng-minlength="question.minlength" ng-maxlength="question.maxlength" class="form-control final Form-textArea" ng-required="question.required" rows="3"></textarea>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.minlength || forms.survey.survey_question_{{$index}}.$error.maxlength"><span translate>Please enter an answer between</span> {{question.minlength}} <span translate>to</span> {{question.maxlength}} <span translate>characters long.</span></div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$dirty && surveyForm.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$error.minlength || surveyForm.survey_question_{{$index}}.$error.maxlength"><span translate>Please enter an answer between</span> {{question.minlength}} <span translate>to</span> {{question.maxlength}} <span translate>characters long.</span></div>
         </div>
         <div ng-if="question.type === 'password'">
             <div class="input-group">
@@ -26,20 +26,20 @@
                 <input id="survey_question_{{$index}}" ng-if="!question.default" type="password" ng-model="question.model" name="survey_question_{{$index}}" ng-required="question.required" ng-minlength="question.minlength" ng-maxlength="question.maxlength" class="form-control Form-textInput" autocomplete="false">
                 <input id="survey_question_{{$index}}" ng-if="question.default" type="password" ng-model="question.model" name="survey_question_{{$index}}" ng-required="question.required" aw-password-min="question.minlength" aw-password-max="question.maxlength" class="form-control Form-textInput" autocomplete="false">
             </div>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.awPasswordMin || forms.survey.survey_question_{{$index}}.$error.awPasswordMax || forms.survey.survey_question_{{$index}}.$error.minlength || forms.survey.survey_question_{{$index}}.$error.maxlength"><span translate>Please enter an answer between</span> {{question.minlength}} <span translate>to</span> {{question.maxlength}} <span translate>characters long.</span></div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$dirty && surveyForm.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$error.awPasswordMin || surveyForm.survey_question_{{$index}}.$error.awPasswordMax || surveyForm.survey_question_{{$index}}.$error.minlength || surveyForm.survey_question_{{$index}}.$error.maxlength"><span translate>Please enter an answer between</span> {{question.minlength}} <span translate>to</span> {{question.maxlength}} <span translate>characters long.</span></div>
         </div>
         <div ng-if="question.type === 'integer'">
             <input type="number" id="survey_question_{{$index}}" ng-model="question.model" class="form-control Form-textInput" name="survey_question_{{$index}}" ng-required="question.required" integer aw-min="question.minValue" aw-max="question.maxValue"/>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.number || forms.survey.survey_question_{{$index}}.$error.integer">{{:: vm.strings.get('prompt.VALID_INTEGER') }}</div>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.awMin || forms.survey.survey_question_{{$index}}.$error.awMax"><span translate>Please enter an answer between</span> {{question.minValue}} <span>and</span> {{question.maxValue}}.</div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$dirty && surveyForm.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$error.number || surveyForm.survey_question_{{$index}}.$error.integer">{{:: vm.strings.get('prompt.VALID_INTEGER') }}</div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$error.awMin || surveyForm.survey_question_{{$index}}.$error.awMax"><span translate>Please enter an answer between</span> {{question.minValue}} <span>and</span> {{question.maxValue}}.</div>
         </div>
         <div ng-if="question.type === 'float'">
             <input type="number" id="survey_question_{{$index}}" ng-model="question.model" class="form-control Form-textInput" name="survey_question_{{$index}}" ng-required="question.required" smart-float aw-min="question.minValue" aw-max="question.maxValue"/>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$dirty && forms.survey.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.number || forms.survey.survey_question_{{$index}}.$error.float">{{:: vm.strings.get('prompt.VALID_DECIMAL') }}</div>
-            <div class="error survey_error" ng-show="forms.survey.survey_question_{{$index}}.$error.awMin || forms.survey.survey_question_{{$index}}.$error.awMax"><span translate>Please enter an answer between</span> {{question.minValue}} <span translate>and</span> {{question.maxValue}}.</div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$dirty && surveyForm.survey_question_{{$index}}.$error.required">{{:: vm.strings.get('prompt.PLEASE_ENTER_ANSWER') }}</div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$error.number || surveyForm.survey_question_{{$index}}.$error.float">{{:: vm.strings.get('prompt.VALID_DECIMAL') }}</div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$error.awMin || surveyForm.survey_question_{{$index}}.$error.awMax"><span translate>Please enter an answer between</span> {{question.minValue}} <span translate>and</span> {{question.maxValue}}.</div>
         </div>
         <div ng-if="question.type === 'multiplechoice'">
             <div class="survey_taker_input">
@@ -48,9 +48,11 @@
                     question="question"
                     choices="question.choices"
                     ng-required="question.required"
-                    ng-model="question.model">
+                    ng-model="question.model"
+                    form-element-name="survey_question_{{$index}}">
                 </multiple-choice>
             </div>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$dirty && surveyForm.survey_question_{{$index}}.$error.multipleSelect">{{:: vm.strings.get('prompt.PLEASE_SELECT_VALUE') }}</div>
         </div>
         <div ng-if="question.type === 'multiselect'">
             <multiple-choice
@@ -58,8 +60,10 @@
                 question="question"
                 choices="question.choices"
                 ng-required="question.required"
-                ng-model="question.model">
+                ng-model="question.model"
+                form-element-name="survey_question_{{$index}}">
             </multiple-choice>
+            <div class="error survey_error" ng-show="surveyForm.survey_question_{{$index}}.$dirty && surveyForm.survey_question_{{$index}}.$error.multipleSelect">{{:: vm.strings.get('prompt.PLEASE_SELECT_VALUE') }}</div>
         </div>
     </div>
 </form>

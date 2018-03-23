@@ -51,6 +51,7 @@ function TemplatesStrings (BaseString) {
         CHOOSE_VERBOSITY: t.s('Choose a verbosity'),
         EXTRA_VARIABLES: t.s('Extra Variables'),
         PLEASE_ENTER_ANSWER: t.s('Please enter an answer.'),
+        PLEASE_SELECT_VALUE: t.s('Please select a value'),
         VALID_INTEGER: t.s('Please enter an answer that is a valid integer.'),
         VALID_DECIMAL: t.s('Please enter an answer that is a decimal number.'),
         PLAYBOOK_RUN: t.s('Playbook Run'),
