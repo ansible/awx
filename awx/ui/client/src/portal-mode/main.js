@@ -5,17 +5,15 @@
  *************************************************/
 
 import route from './portal-mode.route';
-import myJobsRoute from './jobs/portal-mode-my-jobs.route';
-import allJobsRoute from './jobs/portal-mode-all-jobs.route';
-import PortalJobsList from './portal-jobs.list';
+import myJobsRoute from '~features/jobs/routes/portalModeMyJobs.route.js';
+import allJobsRoute from '~features/jobs/routes/portalModeAllJobs.route.js';
 import PortalJobTemplateList from './portal-job-templates.list';
 
 export default
  	angular.module('portalMode', [])
-    .factory('PortalJobsList', PortalJobsList)
     .factory('PortalJobTemplateList', PortalJobTemplateList)
  		.run(['$stateExtender', function($stateExtender){
- 			$stateExtender.addState(route);
-            $stateExtender.addState(myJobsRoute);
-            $stateExtender.addState(allJobsRoute);
+ 			  $stateExtender.addState(route);
+        $stateExtender.addState(myJobsRoute);
+        $stateExtender.addState(allJobsRoute);
  		}]);

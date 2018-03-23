@@ -16,11 +16,11 @@ import workflowMaker from './workflows/workflow-maker/main';
 import workflowControls from './workflows/workflow-controls/main';
 import workflowService from './workflows/workflow.service';
 import WorkflowForm from './workflows.form';
-import CompletedJobsList from './completed-jobs.list';
 import InventorySourcesList from './inventory-sources.list';
 import TemplateList from './templates.list';
 import TemplatesStrings from './templates.strings';
 import listRoute from '~features/templates/list.route.js';
+import templateCompletedJobsRoute from '~features/jobs/routes/templateCompletedJobs.route.js';
 
 export default
 angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, prompt.name, workflowAdd.name, workflowEdit.name,
@@ -29,7 +29,6 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
     .service('TemplatesService', templatesService)
     .service('WorkflowService', workflowService)
     .factory('WorkflowForm', WorkflowForm)
-    .factory('CompletedJobsList', CompletedJobsList)
     // TODO: currently being kept arround for rbac selection, templates within projects and orgs, etc.
     .factory('TemplateList', TemplateList)
     .value('InventorySourcesList', InventorySourcesList)
@@ -151,10 +150,7 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                     modes: ['edit'],
                     form: 'JobTemplateForm',
                     controllers: {
-                        edit: 'JobTemplateEdit',
-                        related: {
-                            completed_jobs: 'JobsList'
-                        }
+                        edit: 'JobTemplateEdit'
                     },
                     data: {
                         activityStream: true,
@@ -742,6 +738,7 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                             return result.concat(definition.states);
                         }, [
                             stateExtender.buildDefinition(listRoute),
+                            stateExtender.buildDefinition(templateCompletedJobsRoute),
                             stateExtender.buildDefinition(workflowMaker)
                         ])
                     };

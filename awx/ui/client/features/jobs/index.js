@@ -1,5 +1,5 @@
 import JobsStrings from './jobs.strings';
-import jobsRoute from './jobs.route';
+import jobsRoute from './routes/jobs.route';
 
 const MODULE_NAME = 'at.features.jobs';
 

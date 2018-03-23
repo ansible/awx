@@ -4,25 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCompletedJobsList) {
-
-        var completed_jobs_object = {
-            name: 'completed_jobs',
-            index: false,
-            basePath: "unified_jobs",
-            title: i18n._('Completed Jobs'),
-            iterator: 'completed_job',
-            generateList: true,
-            skipGenerator: true,
-            search: {
-                "or__job__inventory": ''
-            },
-            ngClick: "$state.go('inventories.editSmartInventory.completed_jobs')"
-        };
-
-        let clone = _.clone(InventoryCompletedJobsList);
-        completed_jobs_object = angular.extend(clone, completed_jobs_object);
-
+export default ['i18n', function(i18n) {
         return {
 
             addTitle: i18n._('NEW SMART INVENTORY'),
@@ -169,7 +151,11 @@ export default ['i18n', 'InventoryCompletedJobsList', function(i18n, InventoryCo
                     ngClick: "$state.go('inventories.editSmartInventory.hosts');",
                     skipGenerator: true
                 },
-                completed_jobs: completed_jobs_object
+                completed_jobs: {
+                    title: i18n._('Completed Jobs'),
+                    skipGenerator: true,
+                    ngClick: "$state.go('inventories.editSmartInventory.completed_jobs')"
+                }
             }
 
         };
