@@ -1,5 +1,5 @@
 # Copyright (c) 2017 Red Hat, Inc
-from channels import Group, Channel
+from channels import Group
 from channels.sessions import channel_session
 from awx.network_ui.models import Topology, Device, Link, Client, Interface
 from awx.network_ui.models import TopologyInventory
@@ -27,10 +27,10 @@ def parse_inventory_id(data):
     return inventory_id
 
 
-class Persistence(object):
+class NetworkingEvents(object):
 
     '''
-    Provides database persistence for the topology canvas.
+    Provides handlers for the networking events for the topology canvas.
     '''
 
     def parse_message_text(self, message_text, client_id):
@@ -66,11 +66,7 @@ class Persistence(object):
             return
         handler = self.get_handler(message_type)
         if handler is not None:
-            try:
-                handler(message_value, topology_id, client_id)
-            except Exception:
-                Group("client-%s" % client_id).send({"text": json.dumps(["Error", "Server Error"])})
-                raise
+            handler(message_value, topology_id, client_id)
         else:
             logger.warning("Unsupported message %s: no handler", message_type)
 
@@ -185,6 +181,9 @@ class Persistence(object):
                 logger.warning("Unsupported message %s", message['msg_type'])
 
 
+networking_events_dispatcher = NetworkingEvents()
+
+
 @channel_session
 def ws_connect(message):
     data = urlparse.parse_qs(message.content['query_string'])
@@ -268,10 +267,10 @@ def send_snapshot(channel, topology_id):
 def ws_message(message):
     # Send to all clients editing the topology
     Group("topology-%s" % message.channel_session['topology_id']).send({"text": message['text']})
-    # Send to persistence handler
-    Channel('persistence').send({"text": message['text'],
-                                 "topology": message.channel_session['topology_id'],
-                                 "client": message.channel_session['client_id']})
+    # Send to networking_events handler
+    networking_events_dispatcher.handle({"text": message['text'],
+                                         "topology": message.channel_session['topology_id'],
+                                         "client": message.channel_session['client_id']})
 
 
 @channel_session
