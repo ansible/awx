@@ -20,7 +20,7 @@ class DynamicAutoScaler(Autoscaler):
             total_memory_gb = (psutil.virtual_memory().total >> 30) + 1  # noqa: round up
 
         # 5 workers per GB of total memory
-        self.max_concurrency = min(max_concurrency, (total_memory_gb * 5))
+        self.max_concurrency = (total_memory_gb * 5)
         logger.warn('celery worker dynamic --autoscale={},{}'.format(
             self.max_concurrency,
             self.min_concurrency
