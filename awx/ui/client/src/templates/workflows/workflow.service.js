@@ -73,15 +73,16 @@ export default ['$q', function($q){
                 placeholder: true,
                 isNew: true,
                 edited: false,
-                isRoot: params.parent.isStartNode ? true : false
+                isRoot: params.parent.source.isStartNode ? true : false
             };
 
             let parentNode = (params.betweenTwoNodes) ? this.searchTree({element: params.tree, matchingId: params.parent.source.id}) : this.searchTree({element: params.tree, matchingId: params.parent.id});
             let placeholderRef;
 
-            if(params.betweenTwoNodes) {
+            if (params.betweenTwoNodes) {
                 _.forEach(parentNode.children, function(child, index) {
-                    if(child.id === params.parent.target.id) {
+                    if (child.id === params.parent.target.id) {
+                        child.isRoot = false;
                         placeholder.children.push(child);
                         parentNode.children[index] = placeholder;
                         placeholderRef = parentNode.children[index];
@@ -89,9 +90,8 @@ export default ['$q', function($q){
                         return false;
                     }
                 });
-            }
-            else {
-                if(parentNode.children) {
+            } else {
+                if (parentNode.children) {
                     parentNode.children.push(placeholder);
                     placeholderRef = parentNode.children[parentNode.children.length - 1];
                 } else {
