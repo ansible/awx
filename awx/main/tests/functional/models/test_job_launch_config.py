@@ -48,6 +48,12 @@ class TestConfigCreation:
         config = job.launch_config
         assert set(config.credentials.all()) == set([credential])
 
+    def test_survey_passwords_ignored(self, inventory_source):
+        iu = inventory_source.create_unified_job(
+            survey_passwords={'foo': '$encrypted$'}
+        )
+        assert iu.launch_config.prompts_dict() == {}
+
 
 @pytest.mark.django_db
 class TestConfigReversibility:
