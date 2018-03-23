@@ -355,40 +355,6 @@ AUTH_LDAP_CONNECTION_OPTIONS = {
     ldap.OPT_NETWORK_TIMEOUT: 30
 }
 
-# LDAP Backend settings
-_AUTH_LDAP_SETTINGS_BASE = {
-    "AUTH_LDAP_SERVER_URI": "",
-    "AUTH_LDAP_BIND_DN": "",
-    "AUTH_LDAP_BIND_PASSWORD": "",
-    "AUTH_LDAP_START_TLS": False,
-    "AUTH_LDAP_USER_SEARCH": [],
-    "AUTH_LDAP_USER_DN_TEMPLATE": None,
-    "AUTH_LDAP_USER_ATTR_MAP": {},
-    "AUTH_LDAP_GROUP_SEARCH": [],
-    "AUTH_LDAP_GROUP_TYPE": None,
-    "AUTH_LDAP_GROUP_TYPE_PARAMS": {},
-    "AUTH_LDAP_REQUIRE_GROUP": None,
-    "AUTH_LDAP_DENY_GROUP": None,
-    "AUTH_LDAP_USER_FLAGS_BY_GROUP": {},
-    "AUTH_LDAP_ORGANIZATION_MAP": {},
-    "AUTH_LDAP_TEAM_MAP": {},
-}
-
-
-def generate_ldap_backend(kv, count=None):
-    num = ''
-    if count is not None:
-        num = '{}_'.format(count)
-    for k,v in kv.iteritems():
-        new_k = k.replace('AUTH_LDAP_', 'AUTH_LDAP_{}'.format(num))
-        setattr(sys.modules[__name__], new_k, v)
-
-
-generate_ldap_backend(_AUTH_LDAP_SETTINGS_BASE)
-for i in xrange(1, 5):
-    generate_ldap_backend(_AUTH_LDAP_SETTINGS_BASE, i)
-
-
 # Radius server settings (default to empty string to skip using Radius auth).
 # Note: These settings may be overridden by database settings.
 RADIUS_SERVER = ''
