@@ -53,7 +53,7 @@
       http_proxy: "{{ http_proxy | default('') }}"
       https_proxy: "{{ https_proxy | default('') }}"
       no_proxy: "{{ no_proxy | default('') }}"
-    path: "image_build/files"
+    path: "{{ role_path }}/files"
     dockerfile: Dockerfile.sdist
     name: awx_sdist_builder
     tag: "{{ awx_version }}"
