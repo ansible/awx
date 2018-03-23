@@ -1,9 +1,9 @@
-import listContainerController from '~src/instance-groups/jobs/jobsListContainer.controller';
+import listContainerController from '~src/instance-groups/jobs/instanceGroupsJobsListContainer.controller';
 import { N_ } from '../../../src/i18n';
 import jobsListController from '../jobsList.controller';
 
 const jobsListTemplate = require('~features/jobs/jobsList.view.html');
-const listContainerTemplate = require('~src/instance-groups/jobs/jobsListContainer.partial.html');
+const listContainerTemplate = require('~src/instance-groups/jobs/instanceGroupsJobsListContainer.partial.html');
 
 export default {
     name: 'instanceGroups.jobs',
@@ -22,12 +22,12 @@ export default {
         }
     },
     views: {
-        'jobsContainer@instanceGroups': {
+        'instanceGroupsJobsContainer@instanceGroups': {
             templateUrl: listContainerTemplate,
             controller: listContainerController,
             controllerAs: 'vm'
         },
-        'jobsList@instanceGroups': {
+        'jobsList@instanceGroups.jobs': {
             templateUrl: jobsListTemplate,
             controller: jobsListController,
             controllerAs: 'vm'

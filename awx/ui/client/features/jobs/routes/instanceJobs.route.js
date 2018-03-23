@@ -1,24 +1,24 @@
-import listContainerController from '~src/instance-groups/jobs/jobsListContainer.controller';
+import listContainerController from '~src/instance-groups/jobs/instanceJobsListContainer.controller';
 import { N_ } from '../../../src/i18n';
 import jobsListController from '../jobsList.controller';
 
 const jobsListTemplate = require('~features/jobs/jobsList.view.html');
-const listContainerTemplate = require('~src/instance-groups/jobs/jobsListContainer.partial.html');
+const listContainerTemplate = require('~src/instance-groups/jobs/instanceJobsListContainer.partial.html');
 
 export default {
     name: 'instanceGroups.instanceJobs',
     url: '/:instance_group_id/instances/:instance_id/jobs',
     ncyBreadcrumb: {
-        parent: 'instanceGroups.instances',
+        parent: 'instanceGroups.edit',
         label: N_('JOBS')
     },
     views: {
-        'jobsContainer@instances': {
+        'instanceJobsContainer@instanceGroups': {
             templateUrl: listContainerTemplate,
             controller: listContainerController,
             controllerAs: 'vm'
         },
-        'jobsList@instances': {
+        'jobsList@instanceGroups.instanceJobs': {
             templateUrl: jobsListTemplate,
             controller: jobsListController,
             controllerAs: 'vm'

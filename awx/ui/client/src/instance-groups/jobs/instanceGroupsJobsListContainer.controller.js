@@ -7,20 +7,22 @@ function InstanceGroupJobsContainerController (strings, $state) {
         const instanceGroupId = $state.params.instance_group_id;
 
         vm.panelTitle = 'Jobs'
+        vm.strings = strings;
 
         vm.tab = {
             details: {
                 _go: 'instanceGroups.edit',
-                _params: { instanceGroupId },
+                _params: { instance_group_id: instanceGroupId },
                 _label: strings.get('tab.DETAILS')
             },
             instances: {
                 _go: 'instanceGroups.instances',
-                _params: { instanceGroupId },
+                _params: { instance_group_id: instanceGroupId },
                 _label: strings.get('tab.INSTANCES')
             },
             jobs: {
                 _active: true,
+                _params: { instance_group_id: instanceGroupId },
                 _label: strings.get('tab.JOBS')
             }
         };
