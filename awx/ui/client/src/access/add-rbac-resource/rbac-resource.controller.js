@@ -82,6 +82,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
     scope.removeObject = function(obj){
         let resourceType = scope.currentTab();
         delete scope.allSelected[resourceType][obj.id];
+        obj.isSelected = false;
     };
 
     scope.toggleKeyPane = function() {
