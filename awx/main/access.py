@@ -928,7 +928,6 @@ class InventorySourceAccess(BaseAccess):
         if obj and obj.inventory:
             return (
                 self.user.can_access(Inventory, 'change', obj.inventory, None) and
-                self.check_related('credential', Credential, data, obj=obj, role_field='use_role') and
                 self.check_related('source_project', Project, data, obj=obj, role_field='use_role')
             )
         # Can't change inventory sources attached to only the inventory, since
