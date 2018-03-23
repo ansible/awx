@@ -206,12 +206,11 @@
     display: flex;
     flex: 0 0 auto;
     width: 100%;
-    margin-top: 10px;
 }
 
 .HostStatusBar-ok,
 .HostStatusBar-changed,
-.HostStatusBar-unreachable,
+.HostStatusBar-dark,
 .HostStatusBar-failed,
 .HostStatusBar-skipped,
 .HostStatusBar-noData {
@@ -231,7 +230,7 @@
     flex: 0 0 auto;
 }
 
-.HostStatusBar-unreachable {
+.HostStatusBar-dark {
     background-color: @default-unreachable;
     flex: 0 0 auto;
 }
@@ -265,7 +264,7 @@
     background-color: @default-succ;
 }
 
-.HostStatusBar-tooltipBadge--unreachable {
+.HostStatusBar-tooltipBadge--dark {
     background-color: @default-unreachable;
 }
 

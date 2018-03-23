@@ -2,7 +2,6 @@
     display: flex;
     flex: 0 0 auto;
     width: 100%;
-    margin-top: 10px;
 }
 
 .HostStatusBar-ok,
@@ -28,6 +27,11 @@
 }
 
 .HostStatusBar-unreachable {
+    background-color: @default-unreachable;
+    flex: 0 0 auto;
+}
+
+.HostStatusBar-dark {
     background-color: @default-unreachable;
     flex: 0 0 auto;
 }
@@ -62,6 +66,10 @@
 }
 
 .HostStatusBar-tooltipBadge--unreachable {
+    background-color: @default-unreachable;
+}
+
+.HostStatusBar-tooltipBadge--dark {
     background-color: @default-unreachable;
 }
 

@@ -1,4 +1,4 @@
-const templateUrl = require('~features/output/status.partial.html');
+const templateUrl = require('~features/output/stats.partial.html');
 
 const HOST_STATUS_KEYS = ['dark', 'failures', 'changed', 'ok', 'skipped'];
 
@@ -21,23 +21,25 @@ function getHostStatusCounts (statsEvent) {
         });
     });
 
+    counts.hosts = countedHostNames.length;
+
     return counts;
 }
 
-function createStatusBarTooltip (key, count) {
+function createStatsBarTooltip (key, count) {
     const label = `<span class='HostStatusBar-tooltipLabel'>${key}</span>`;
     const badge = `<span class='badge HostStatusBar-tooltipBadge HostStatusBar-tooltipBadge--${key}'>${count}</span>`;
 
     return `${label}${badge}`;
 }
 
-function atStatusLink (scope, el, attrs, controllers) {
-    const [atStatusController] = controllers;
+function atStatsLink (scope, el, attrs, controllers) {
+    const [atStatsController] = controllers;
 
-    atStatusController.init(scope);
+    atStatsController.init(scope);
 }
 
-function AtStatusController (strings) {
+function AtStatsController (strings) {
     const vm = this || {};
 
     vm.tooltips = {
@@ -46,12 +48,22 @@ function AtStatusController (strings) {
     };
 
     vm.init = scope => {
-        const { running, stats } = scope;
+        const { elapsed, running, stats, title, plays, tasks } = scope;
 
+        vm.title = title;
+
+        vm.plays = plays;
+        vm.tasks = tasks;
+        vm.elapsed = elapsed;
         vm.running = running || false;
+
         vm.setStats(stats);
 
+        scope.$watch('elapsed', value => { vm.elapsed = value; });
         scope.$watch('running', value => { vm.running = value; });
+        scope.$watch('plays', value => { vm.plays = value; });
+        scope.$watch('tasks', value => { vm.tasks = value; });
+
         scope.$watch('stats', vm.setStats);
     };
 
@@ -64,29 +76,34 @@ function AtStatusController (strings) {
 
             statusBarElement.css('flex', `${count} 0 auto`);
 
-            vm.tooltips[key] = createStatusBarTooltip(key, count);
+            vm.tooltips[key] = createStatsBarTooltip(key, count);
         });
 
+        vm.hosts = counts.hosts;
         vm.statsAreAvailable = Boolean(stats);
     };
 }
 
-function atStatus () {
+function atStats () {
     return {
         templateUrl,
         restrict: 'E',
-        require: ['atStatus'],
+        require: ['atStats'],
         controllerAs: 'vm',
-        link: atStatusLink,
+        link: atStatsLink,
         controller: [
             'JobStrings',
-            AtStatusController
+            AtStatsController
         ],
         scope: {
+            elapsed: '=',
             running: '=',
             stats: '=',
+            title: '=',
+            plays: '=',
+            tasks: '=',
         },
     };
 }
 
-export default atStatus;
+export default atStats;

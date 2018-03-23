@@ -13,7 +13,14 @@
 
     <div class="col-md-8">
         <at-panel class="at-Stdout">
-            <at-status running="vm.status.running" stats="vm.status.stats"></at-status>
+            <at-stats
+                elapsed="vm.status.elapsed"
+                running="vm.status.running"
+                stats="vm.status.stats"
+                title="vm.status.title"
+                plays="vm.status.plays"
+                tasks="vm.status.tasks">
+            </at-stats>
             <!-- search ===================================================================================== -->
             <form ng-submit="vm.search()">
             <div class="input-group">

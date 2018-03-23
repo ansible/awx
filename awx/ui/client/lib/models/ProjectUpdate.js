@@ -10,8 +10,6 @@ function getStats () {
         return Promise.reject(new Error('No related property, events, exists'));
     }
 
-
-
     const req = {
         method: 'GET',
         url: `${this.path}${this.get('id')}/events/`,
@@ -20,19 +18,18 @@ function getStats () {
 
     return $http(req)
         .then(({ data }) => {
-		console.log(data);
             if (data.results.length > 0) {
                 return data.results[0];
             }
 
             return null;
-        })
+        });
 }
 
 function ProjectUpdateModel (method, resource, config) {
     BaseModel.call(this, 'project_updates');
 
-    this.getStats = getStats;
+    this.getStats = getStats.bind(this);
 
     this.Constructor = ProjectUpdateModel;
 
@@ -40,7 +37,7 @@ function ProjectUpdateModel (method, resource, config) {
 }
 
 function ProjectUpdateModelLoader (_$http_, _BaseModel_) {
-	$http = _$http_;
+    $http = _$http_;
     BaseModel = _BaseModel_;
 
     return ProjectUpdateModel;

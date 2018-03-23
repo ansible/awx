@@ -250,7 +250,6 @@ function JobRenderService ($q, $sce, $window) {
 
     this.clear = () => {
         const elements = this.el.children();
-
         return this.remove(elements);
     };
 

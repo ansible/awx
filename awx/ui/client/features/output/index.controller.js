@@ -1,16 +1,24 @@
-let vm;
+const JOB_START = 'playbook_on_start';
+const JOB_END = 'playbook_on_stats';
+const PLAY_START = 'playbook_on_play_start';
+const TASK_START = 'playbook_on_task_start';
+
 let $compile;
-let $scope;
 let $q;
+let $scope;
+let $state;
+let moment;
 let page;
+let qs;
 let render;
+let resource;
 let scroll;
 let stream;
-let resource;
-let $state;
-let qs;
 
-let hack;
+let vm;
+
+let eventCounter;
+let statsEvent;
 
 function JobsIndexController (
     _resource_,
@@ -23,6 +31,7 @@ function JobsIndexController (
     _$q_,
     _$state_,
     _qs_,
+    _moment_,
 ) {
     vm = this || {};
 
@@ -35,6 +44,8 @@ function JobsIndexController (
     scroll = _scroll_;
     render = _render_;
     stream = _stream_;
+
+    moment = _moment_;
 
     // Development helper(s)
     vm.clear = devClear;
@@ -69,11 +80,19 @@ function JobsIndexController (
     vm.removeSearchTag = removeSearchTag;
     vm.searchTags = getSearchTags(getCurrentQueryset());
 
-    // Host Status Bar
+    // Events
+    eventCounter = null;
+    statsEvent = resource.stats;
+
+    // Status Bar
     vm.status = {
+        stats: statsEvent,
+        elapsed: resource.model.get('elapsed'),
         running: Boolean(resource.model.get('started')) && !resource.model.get('finished'),
-        stats: resource.stats,
-    }
+        title: resource.model.get('name'),
+        plays: null,
+        tasks: null,
+    };
 
     // Details
     vm.details = {
@@ -83,33 +102,10 @@ function JobsIndexController (
         status: resource.model.get('status'),
     };
 
-    render.requestAnimationFrame(() => init());
+    render.requestAnimationFrame(() => init(!vm.status.running));
 }
-
-function onStreamStart (data) {
-    const status = _.get(data, 'summary_fields.job.status');
-
-    if (!hack) {
-        hack = true;
-        vm.details.status = status;
-        vm.details.started = data.created;
-
-        vm.status.running = true;
-    }
-}
-
-function onStreamFinish (data) {
-    const failed = _.get(data, 'summary_fields.job.failed');
-
-    vm.details.status = failed ? 'failed' : 'successful';
-    vm.details.finished = data.created;
-
-    vm.status = { stats: data, running: false };
-};
 
 function init (pageMode) {
-    hack = false;
-
     page.init({
         resource,
     });
@@ -123,24 +119,66 @@ function init (pageMode) {
     scroll.init({
         isAtRest: scrollIsAtRest,
         previous,
-        next
+        next,
     });
 
     stream.init({
         page,
         scroll,
         resource,
-        onStreamStart,
-        onStreamFinish,
-        render: events => shift().then(() => append(events, true)),
-        listen: (namespace, listener) => {
-            $scope.$on(namespace, (scope, data) => listener(data));
+        onEventFrame (events) {
+            return shift().then(() => append(events, true));
         },
+        onStart () {
+            vm.status.plays = 0;
+            vm.status.tasks = 0;
+            vm.status.running = true;
+        },
+        onStop () {
+            vm.status.stats = statsEvent;
+            vm.status.running = false;
+
+            vm.details.status = statsEvent.failed ? 'failed' : 'successful';
+            vm.details.finished = statsEvent.created;
+        }
     });
+
+    $scope.$on(resource.ws.namespace, handleSocketEvent);
 
     if (pageMode) {
         next();
     }
+}
+
+function handleSocketEvent (scope, data) {
+    const isLatest = ((!eventCounter) || (data.counter > eventCounter));
+
+    if (isLatest) {
+        eventCounter = data.counter;
+
+        vm.details.status = _.get(data, 'summary_fields.job.status');
+
+        vm.status.elapsed = moment(data.created)
+            .diff(resource.model.get('created'), 'seconds');
+    }
+
+    if (data.event === JOB_START) {
+        vm.details.started = data.created;
+    }
+
+    if (data.event === PLAY_START) {
+        vm.status.plays++;
+    }
+
+    if (data.event === TASK_START) {
+        vm.status.tasks++;
+    }
+
+    if (data.event === JOB_END) {
+        statsEvent = data;
+    }
+
+    stream.pushEventData(data);
 }
 
 function devClear (pageMode) {
@@ -158,9 +196,11 @@ function next () {
             return shift()
                 .then(() => append(events))
                 .then(() => {
-                    if(scroll.isMissing()) {
+                    if (scroll.isMissing()) {
                         return next();
                     }
+
+                    return $q.resolve();
                 });
         });
 }
@@ -242,9 +282,11 @@ function scrollHome () {
                     scroll.resume();
                 })
                 .then(() => {
-                    if(scroll.isMissing()) {
+                    if (scroll.isMissing()) {
                         return next();
                     }
+
+                    return $q.resolve();
                 });
         });
 }
@@ -359,7 +401,7 @@ function toggleSearchKey () {
 }
 
 function getCurrentQueryset () {
-    const { job_event_search } = $state.params;
+    const { job_event_search } = $state.params; // eslint-disable-line camelcase
 
     return qs.decodeArr(job_event_search);
 }
@@ -414,6 +456,7 @@ JobsIndexController.$inject = [
     '$q',
     '$state',
     'QuerySet',
+    'moment',
 ];
 
 module.exports = JobsIndexController;

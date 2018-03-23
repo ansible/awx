@@ -48,7 +48,6 @@ function getStats () {
         });
 }
 
-
 function JobModel (method, resource, config) {
     BaseModel.call(this, 'jobs');
 

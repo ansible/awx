@@ -441,7 +441,7 @@ function AtDetailsController (
 
     vm.init = _$scope_ => {
         $scope = _$scope_;
-        resource = $scope.resource;
+        resource = $scope.resource; // eslint-disable-line prefer-destructuring
 
         vm.status = getStatusDetails();
         vm.started = getStartTimeDetails();
@@ -466,27 +466,35 @@ function AtDetailsController (
         vm.extraVars = getExtraVarsDetails();
         vm.labels = getLabelDetails();
 
+        // Relaunch Component
+        vm.job = _.get(resource.model, 'model.GET', {});
+
+        // XX - Codemirror
+        if (vm.extraVars) {
+            const cm = {
+                parseType: 'yaml',
+                $apply: $scope.$apply,
+                variables: vm.extraVars.value,
+            };
+
+            ParseTypeChange({
+                field_id: 'cm-extra-vars',
+                readOnly: true,
+                scope: cm,
+            });
+        }
+
         vm.cancelJob = cancelJob;
         vm.deleteJob = deleteJob;
         vm.toggleLabels = toggleLabels;
 
         const observe = (key, transform) => {
-            $scope.$watch(key, value => { this[key] = transform(value); });
+            $scope.$watch(key, value => { vm[key] = transform(value); });
         };
 
+        observe('finished', getFinishTimeDetails);
         observe('status', getStatusDetails);
         observe('started', getStartTimeDetails);
-        observe('finished', getFinishTimeDetails);
-
-        // relaunch component
-        $scope.job = _.get(resource.model, 'model.GET', {});
-        this.job = $scope.job;
-
-        // codemirror
-        if (this.extraVars) {
-            const cm = { parseType: 'yaml', variables: this.extraVars.value, $apply: $scope.$apply };
-            ParseTypeChange({ scope: cm, field_id: 'cm-extra-vars', readOnly: true });
-        }
     };
 }
 

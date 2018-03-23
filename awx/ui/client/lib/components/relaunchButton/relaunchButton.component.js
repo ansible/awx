@@ -114,7 +114,8 @@ function atRelaunchCtrl (
                 jobObj.postRelaunch(launchParams)
                     .then((launchRes) => {
                         if (!$state.includes('jobs')) {
-                            $state.go('jobResult', { id: launchRes.data.id }, { reload: true });
+                            const relaunchType = launchRes.data.type === 'job' ? 'playbook' : launchRes.data.type;
+                            $state.go('jobz', { id: launchRes.data.id, type: relaunchType }, { reload: true });
                         }
                     });
             }

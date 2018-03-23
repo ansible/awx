@@ -354,7 +354,6 @@ function has (method, keys) {
 }
 
 function extend (related, config = {}) {
-
     const req = this.parseRequestConfig('GET', config);
 
     if (_.get(config, 'params.page_size')) {
@@ -614,7 +613,11 @@ function create (method, resource, config) {
 }
 
 function setEndpoint (resource) {
-    this.endpoint = `${this.path}${resource}/`;
+    if (Array.isArray(resource)) {
+        this.endpoint = `${this.path}${resource[0]}/`;
+    } else {
+        this.endpoint = `${this.path}${resource}/`;
+    }
 }
 
 function parseRequestConfig (method, resource, config) {

@@ -1,9 +1,8 @@
-const JOB_START = 'playbook_on_start';
 const JOB_END = 'playbook_on_stats';
 const MAX_LAG = 120;
 
 function JobStreamService ($q) {
-    this.init = ({ resource, scroll, page, onStreamStart, onStreamFinish, render, listen }) => {
+    this.init = ({ resource, scroll, page, onEventFrame, onStart, onStop }) => {
         this.resource = resource;
         this.scroll = scroll;
         this.page = page;
@@ -13,20 +12,21 @@ function JobStreamService ($q) {
         this.pageCount = 0;
         this.chain = $q.resolve();
         this.factors = this.getBatchFactors(this.resource.page.size);
+
         this.state = {
             started: false,
             paused: false,
             pausing: false,
             resuming: false,
             ending: false,
-            ended: false
+            ended: false,
+            counting: false,
         };
 
         this.hooks = {
-            onStreamStart,
-            onStreamFinish,
-            render,
-            listen,
+            onEventFrame,
+            onStart,
+            onStop,
         };
 
         this.lines = {
@@ -36,8 +36,6 @@ function JobStreamService ($q) {
             min: 0,
             max: 0
         };
-
-        this.hooks.listen(resource.ws.namespace, this.listener);
     };
 
     this.getBatchFactors = size => {
@@ -91,7 +89,7 @@ function JobStreamService ($q) {
             this.lines.used.push(i);
         }
 
-        let missing = [];
+        const missing = [];
         for (let i = this.lines.min; i < this.lines.max; i++) {
             if (this.lines.used.indexOf(i) === -1) {
                 missing.push(i);
@@ -107,25 +105,19 @@ function JobStreamService ($q) {
         }
     };
 
-    this.listener = data => {
+    this.pushEventData = data => {
         this.lag++;
 
         this.chain = this.chain
             .then(() => {
-                // console.log(data);
                 if (!this.isActive()) {
                     this.start();
-                    if (!this.isEnding()) {
-                        this.hooks.onStreamStart(data);
-                    }
                 } else if (data.event === JOB_END) {
                     if (this.isPaused()) {
                         this.end(true);
                     } else {
                         this.end();
                     }
-
-                    this.hooks.onStreamFinish(data);
                 }
 
                 this.checkLines(data);
@@ -142,9 +134,11 @@ function JobStreamService ($q) {
                 return this.renderFrame(events);
             })
             .then(() => --this.lag);
+
+        return this.chain;
     };
 
-    this.renderFrame = events => this.hooks.render(events)
+    this.renderFrame = events => this.hooks.onEventFrame(events)
         .then(() => {
             if (this.scroll.isLocked()) {
                 this.scroll.scrollToBottom();
@@ -190,9 +184,13 @@ function JobStreamService ($q) {
     };
 
     this.start = () => {
-        this.state.started = true;
-        this.scroll.pause();
-        this.scroll.lock();
+        if (!this.state.ending && !this.state.ended) {
+            this.state.started = true;
+            this.scroll.pause();
+            this.scroll.lock();
+
+            this.hooks.onStart();
+        }
     };
 
     this.end = done => {
@@ -202,13 +200,15 @@ function JobStreamService ($q) {
             this.scroll.unlock();
             this.scroll.resume();
 
+            this.hooks.onStop();
+
             return;
         }
 
         this.state.ending = true;
     };
 
-    this.isReadyToRender = () => this.isEnding() ||
+    this.isReadyToRender = () => this.isDone() ||
         (!this.isPaused() && this.hasAllLines() && this.isBatchFull());
     this.hasAllLines = () => this.lines.ready;
     this.isBatchFull = () => this.count % this.framesPerRender === 0;
