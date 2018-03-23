@@ -41,6 +41,17 @@ angular.module('Teams', [])
                         activityStream: true,
                         activityStreamTarget: 'team'
                     },
+                    resolve: {
+                        list: {
+                            resolvedModels: ['MeModel', '$q', function(Me, $q) {
+                                const promises = {
+                                    me: new Me('get')
+                                };
+
+                                return $q.all(promises);
+                            }]
+                        }
+                    },
                     ncyBreadcrumb: {
                         label: N_('TEAMS')
                     }

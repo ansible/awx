@@ -30,6 +30,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
         init();
 
         function init() {
+            $scope.canAdd = true;
             $scope.isCurrentlyLoggedInUser = (parseInt(id) === $rootScope.current_user.id);
             $scope.hidePagination = false;
             $scope.hideSmartSearch = false;
@@ -68,9 +69,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
                     });
 
                     $scope.$watch('user_obj.summary_fields.user_capabilities.edit', function(val) {
-                        if (val === false) {
-                            $scope.canAdd = false;
-                        }
+                        $scope.canAdd = (val === false) ? false : true;
                     });
 
                     setScopeFields(data);

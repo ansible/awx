@@ -142,10 +142,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 .factory('GenerateForm', ['$rootScope', '$compile', 'generateList',
     'Attr', 'Icon', 'Column',
     'NavigationLink', 'HelpCollapse', 'Empty', 'SelectIcon',
-    'ActionButton', '$log', 'i18n',
+    'ActionButton', 'MessageBar', '$log', 'i18n',
     function ($rootScope, $compile, GenerateList,
         Attr, Icon, Column, NavigationLink, HelpCollapse,
-        Empty, SelectIcon, ActionButton, $log, i18n) {
+        Empty, SelectIcon, ActionButton, MessageBar, $log, i18n) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -177,6 +177,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 else {
                     return `
                     <div ui-view="preFormView"></div>
+                    ${MessageBar(this.form)}
                     <div class="Panel">
                     ${html}
                     <div ui-view="related"></div>

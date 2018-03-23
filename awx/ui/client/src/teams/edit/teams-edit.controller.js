@@ -33,9 +33,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
             });
 
             $scope.$watch('team_obj.summary_fields.user_capabilities.edit', function(val) {
-                if (val === false) {
-                    $scope.canAdd = false;
-                }
+                $scope.canAdd = (val === false) ? false : true;
             });
 
 

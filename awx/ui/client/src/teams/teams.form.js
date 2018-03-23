@@ -19,7 +19,10 @@ export default ['i18n', function(i18n) {
             // the top-most node of generated state tree
             stateTree: 'teams',
             tabs: true,
-
+            messageBar: {
+                ngShow: '!user_is_system_auditor && !canAdd',
+                message: i18n._("Contact your System Administrator to grant you the appropriate permissions to add and edit Users and Teams.")
+            },
             fields: {
                 name: {
                     label: i18n._('Name'),

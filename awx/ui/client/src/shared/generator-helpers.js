@@ -766,4 +766,18 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         return html;
 
     };
+})
+
+.factory('MessageBar', function() {
+    return function(options) {
+        let html = '';
+        if (_.has(options, 'messageBar')) {
+            let { messageBar } = options;
+            html += `<div class="Section-messageBar" ng-show="${messageBar.ngShow}">
+                <i class="Section-messageBar-warning fa fa-warning"></i>
+                <span class="Section-messageBar-text">${messageBar.message}</span>
+            </div>`;
+        }
+        return html;
+    };
 });
