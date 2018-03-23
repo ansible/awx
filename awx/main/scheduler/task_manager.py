@@ -38,7 +38,6 @@ from awx.main.utils import get_type_for_model
 from awx.main.signals import disable_activity_stream
 
 from awx.main.scheduler.dependency_graph import DependencyGraph
-from awx.main import tasks as awx_tasks
 from awx.main.utils import decrypt_field
 
 # Celery
@@ -499,7 +498,8 @@ class TaskManager():
                 except DatabaseError:
                     logger.error("Task {} DB error in marking failed. Job possibly deleted.".format(task.log_format))
                     continue
-                awx_tasks._send_notification_templates(task, 'failed')
+                if hasattr(task, 'send_notification_templates'):
+                    task.send_notification_templates('failed')
                 task.websocket_emit_status(new_status)
                 logger.error("{}Task {} has no record in celery. Marking as failed".format(
                     'Isolated ' if isolated else '', task.log_format))
@@ -630,4 +630,4 @@ class TaskManager():
 
                 # Operations whose queries rely on modifications made during the atomic scheduling session
                 for wfj in WorkflowJob.objects.filter(id__in=finished_wfjs):
-                    awx_tasks._send_notification_templates(wfj, 'succeeded' if wfj.status == 'successful' else 'failed')
+                    wfj.send_notification_templates('succeeded' if wfj.status == 'successful' else 'failed')

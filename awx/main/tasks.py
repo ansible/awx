@@ -430,30 +430,6 @@ def awx_periodic_scheduler(self):
     state.save()
 
 
-def _send_notification_templates(instance, status_str):
-    if status_str not in ['succeeded', 'failed']:
-        raise ValueError(_("status_str must be either succeeded or failed"))
-    try:
-        notification_templates = instance.get_notification_templates()
-    except Exception:
-        logger.warn("No notification template defined for emitting notification")
-        notification_templates = None
-    if notification_templates:
-        if status_str == 'succeeded':
-            notification_template_type = 'success'
-        else:
-            notification_template_type = 'error'
-        all_notification_templates = set(notification_templates.get(notification_template_type, []) + notification_templates.get('any', []))
-        if len(all_notification_templates):
-            try:
-                (notification_subject, notification_body) = getattr(instance, 'build_notification_%s_message' % status_str)()
-            except AttributeError:
-                raise NotImplementedError("build_notification_%s_message() does not exist" % status_str)
-            send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                      for n in all_notification_templates],
-                                     job_id=instance.id)
-
-
 @shared_task(bind=True, queue='tower', base=LogErrorsTask)
 def handle_work_success(self, result, task_actual):
     try:
@@ -463,8 +439,6 @@ def handle_work_success(self, result, task_actual):
         return
     if not instance:
         return
-
-    _send_notification_templates(instance, 'succeeded')
 
     from awx.main.scheduler.tasks import run_job_complete
     run_job_complete.delay(instance.id)
@@ -500,9 +474,6 @@ def handle_work_error(task_id, *args, **kwargs):
                                                (first_instance_type, first_instance.name, first_instance.id)
                 instance.save()
                 instance.websocket_emit_status("failed")
-
-        if first_instance:
-            _send_notification_templates(first_instance, 'failed')
 
     # We only send 1 job complete message since all the job completion message
     # handling does is trigger the scheduler. If we extend the functionality of

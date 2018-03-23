@@ -13,6 +13,7 @@ from awx.main.models import (
     Instance,
     WorkflowJob,
 )
+from awx.main.models.notifications import JobNotificationMixin
 
 
 @pytest.mark.django_db
@@ -323,7 +324,7 @@ class TestReaper():
         })
 
     @pytest.mark.django_db
-    @mock.patch('awx.main.tasks._send_notification_templates')
+    @mock.patch.object(JobNotificationMixin, 'send_notification_templates')
     @mock.patch.object(TaskManager, 'get_active_tasks', lambda self: ([], []))
     def test_cleanup_inconsistent_task(self, notify, active_tasks, considered_jobs, reapable_jobs, running_tasks, waiting_tasks, mocker):
         tm = TaskManager()
@@ -338,7 +339,7 @@ class TestReaper():
                 j.save.assert_not_called()
 
         assert notify.call_count == 4
-        notify.assert_has_calls([mock.call(j, 'failed') for j in reapable_jobs], any_order=True)
+        notify.assert_has_calls([mock.call('failed') for j in reapable_jobs], any_order=True)
 
         for j in reapable_jobs:
             j.websocket_emit_status.assert_called_once_with('failed')
