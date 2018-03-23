@@ -3230,17 +3230,20 @@ class JobRelaunchSerializer(BaseSerializer):
         ],
         write_only=True
     )
+    credential_passwords = VerbatimField(required=True, write_only=True)
 
     class Meta:
         model = Job
-        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts',)
+        fields = ('passwords_needed_to_start', 'retry_counts', 'hosts', 'credential_passwords',)
 
-    def to_internal_value(self, data):
-        obj = self.context.get('obj')
-        all_data = self.to_representation(obj)
-        all_data.update(data)
-        ret = super(JobRelaunchSerializer, self).to_internal_value(all_data)
-        return ret
+    def validate_credential_passwords(self, value):
+        pnts = self.instance.passwords_needed_to_start
+        missing = set(pnts) - set(key for key in value if value[key])
+        if missing:
+            raise serializers.ValidationError(_(
+                'Missing passwords needed to start: {}'.format(', '.join(missing))
+            ))
+        return value
 
     def to_representation(self, obj):
         res = super(JobRelaunchSerializer, self).to_representation(obj)
@@ -3263,24 +3266,17 @@ class JobRelaunchSerializer(BaseSerializer):
             data[status] = obj.retry_qs(status).count()
         return data
 
-    def validate_passwords_needed_to_start(self, value):
-        obj = self.context.get('obj')
-        data = self.context.get('data')
-
-        # Check for passwords needed
-        needed = self.get_passwords_needed_to_start(obj)
-        provided = dict([(field, data.get(field, '')) for field in needed])
-        if not all(provided.values()):
-            raise serializers.ValidationError(needed)
-        return value
+    def get_validation_exclusions(self, *args, **kwargs):
+        r = super(JobRelaunchSerializer, self).get_validation_exclusions(*args, **kwargs)
+        r.append('credential_passwords')
+        return r
 
     def validate(self, attrs):
-        obj = self.context.get('obj')
+        obj = self.instance
         if obj.project is None:
             raise serializers.ValidationError(dict(errors=[_("Job Template Project is missing or undefined.")]))
         if obj.inventory is None or obj.inventory.pending_deletion:
             raise serializers.ValidationError(dict(errors=[_("Job Template Inventory is missing or undefined.")]))
-        attrs.pop('hosts', None)
         attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
 
