@@ -168,6 +168,10 @@ STDOUT_MAX_BYTES_DISPLAY = 1048576
 # on how many events to display before truncating/hiding
 MAX_UI_JOB_EVENTS = 4000
 
+# Returned in index.html, tells the UI if it should make requests
+# to update job data in response to status changes websocket events
+UI_LIVE_UPDATES_ENABLED = True
+
 # The maximum size of the ansible callback event's res data structure
 # beyond this limit and the value will be removed
 MAX_EVENT_RES_DATA = 700000

@@ -63,3 +63,13 @@ register(
     category=_('UI'),
     category_slug='ui',
 )
+
+register(
+    'UI_LIVE_UPDATES_ENABLED',
+    field_class=fields.BooleanField,
+    label=_('Enable Live Updates in the UI'),
+    help_text=_('If disabled, the page will not refresh when events are received. '
+                'Reloading the page will be required to get the latest details.'),
+    category=_('UI'),
+    category_slug='ui',
+)
