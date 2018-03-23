@@ -71,12 +71,8 @@ export default ['i18n', function(i18n) {
             columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-4',
 
             submit: {
-                icon: 'icon-rocket',
-                mode: 'all',
-                ngClick: 'relaunchJob($event, completed_job.id)',
-                awToolTip: i18n._('Relaunch using the same parameters'),
-                dataPlacement: 'top',
                 ngShow: "!completed_job.type == 'system_job' || completed_job.summary_fields.user_capabilities.start",
+                // uses the at-relaunch directive
                 relaunch: true
             },
             "delete": {

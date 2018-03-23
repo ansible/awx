@@ -16,7 +16,7 @@ export default
         'Rest', 'Alert',  'ProcessErrors', 'GetBasePath', 'md5Setup',
         'ParseTypeChange', 'Wait', 'selectedLabels', 'i18n',
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
-        'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
+        'initSurvey', '$state', 'CreateSelect2',
         'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData',
         'MultiCredentialService', 'availableLabels', 'projectGetPermissionDenied',
         'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString', 'ConfigData',
@@ -26,7 +26,7 @@ export default
             ProcessErrors, GetBasePath, md5Setup,
             ParseTypeChange, Wait, selectedLabels, i18n,
             Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit,
-            InitiatePlaybookRun, SurveyControllerInit, $state, CreateSelect2,
+            SurveyControllerInit, $state, CreateSelect2,
             ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData,
             MultiCredentialService, availableLabels, projectGetPermissionDenied,
             inventoryGetPermissionDenied, jobTemplateData, ParseVariableString, ConfigData
@@ -41,7 +41,6 @@ export default
             let defaultUrl = GetBasePath('job_templates'),
                 generator = GenerateForm,
                 form = JobTemplateForm(),
-                base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {},
                 id = $stateParams.job_template_id,
                 callback,
@@ -717,51 +716,6 @@ export default
 
             $scope.formCancel = function () {
                 $state.go('templates');
-            };
-
-            // Related set: Add button
-            $scope.add = function (set) {
-                $rootScope.flashMessage = null;
-                $location.path('/' + base + '/' + $stateParams.job_template_id + '/' + set);
-            };
-
-            // Related set: Edit button
-            $scope.edit = function (set, id) {
-                $rootScope.flashMessage = null;
-                $location.path('/' + set + '/' + id);
-            };
-
-            // Launch a job using the selected template
-            $scope.launch = function() {
-
-                if ($scope.removePromptForSurvey) {
-                    $scope.removePromptForSurvey();
-                }
-                $scope.removePromptForSurvey = $scope.$on('PromptForSurvey', function() {
-                    var action = function () {
-                            // $scope.$emit("GatherFormFields");
-                            Wait('start');
-                            $('#prompt-modal').modal('hide');
-                            $scope.addSurvey();
-
-                        };
-                    Prompt({
-                        hdr: 'Incomplete Survey',
-                        body: '<div class="Prompt-bodyQuery">Do you want to create a survey before proceeding?</div>',
-                        action: action
-                    });
-                });
-                if($scope.survey_enabled === true && $scope.survey_exists!==true){
-                    $scope.$emit("PromptForSurvey");
-                }
-                else {
-
-                    InitiatePlaybookRun({
-                        scope: $scope,
-                        id: id,
-                        job_type: 'job_template'
-                    });
-                }
             };
         }
     ];

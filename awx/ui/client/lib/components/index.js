@@ -16,23 +16,24 @@ import inputSlider from '~components/input/slider.directive';
 import inputText from '~components/input/text.directive';
 import inputTextarea from '~components/input/textarea.directive';
 import inputTextareaSecret from '~components/input/textarea-secret.directive';
+import launchTemplate from '~components/launchTemplateButton/launchTemplateButton.component';
 import layout from '~components/layout/layout.directive';
 import list from '~components/list/list.directive';
-import row from '~components/list/row.directive';
-import rowItem from '~components/list/row-item.directive';
-import rowAction from '~components/list/row-action.directive';
 import modal from '~components/modal/modal.directive';
 import panel from '~components/panel/panel.directive';
 import panelBody from '~components/panel/body.directive';
 import panelHeading from '~components/panel/heading.directive';
 import popover from '~components/popover/popover.directive';
+import relaunch from '~components/relaunchButton/relaunchButton.component';
+import row from '~components/list/row.directive';
+import rowItem from '~components/list/row-item.directive';
+import rowAction from '~components/list/row-action.directive';
 import sideNav from '~components/layout/side-nav.directive';
 import sideNavItem from '~components/layout/side-nav-item.directive';
 import tab from '~components/tabs/tab.directive';
 import tabGroup from '~components/tabs/group.directive';
 import topNavItem from '~components/layout/top-nav-item.directive';
 import truncate from '~components/truncate/truncate.directive';
-import relaunch from '~components/relaunchButton/relaunchButton.component';
 
 import BaseInputController from '~components/input/base.controller';
 import ComponentsStrings from '~components/components.strings';
@@ -59,8 +60,10 @@ angular
     .directive('atInputText', inputText)
     .directive('atInputTextarea', inputTextarea)
     .directive('atInputTextareaSecret', inputTextareaSecret)
+    .component('atLaunchTemplate', launchTemplate)
     .directive('atLayout', layout)
     .directive('atList', list)
+    .component('atRelaunch', relaunch)
     .directive('atRow', row)
     .directive('atRowItem', rowItem)
     .directive('atRowAction', rowAction)
@@ -75,7 +78,6 @@ angular
     .directive('atTabGroup', tabGroup)
     .directive('atTopNavItem', topNavItem)
     .directive('atTruncate', truncate)
-    .component('atRelaunch', relaunch)
     .service('BaseInputController', BaseInputController)
     .service('ComponentsStrings', ComponentsStrings);
 

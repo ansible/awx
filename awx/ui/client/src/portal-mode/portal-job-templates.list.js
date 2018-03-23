@@ -33,11 +33,8 @@ export default ['i18n', function(i18n) {
 
         fieldActions: {
             submit: {
-                label: i18n._('Launch'),
-                mode: 'all',
-                ngClick: 'submitJob(job_template.id)',
-                awToolTip: i18n._('Start a job using this template'),
-                dataPlacement: 'top'
+                // uses the at-launch-template directive
+                launch: true
             }
         }
     };}];

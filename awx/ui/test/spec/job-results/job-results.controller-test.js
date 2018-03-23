@@ -393,19 +393,6 @@ describe('Controller: jobResultsController', () => {
         });
     });
 
-    describe('$scope.relaunchJob', () => {
-        beforeEach(() => {
-            bootstrapTest();
-        });
-
-        it('should relaunch the job', () => {
-            let scope = $scope;
-            $scope.relaunchJob();
-            expect(jobResultsService.relaunchJob)
-                .toHaveBeenCalledWith(scope);
-        });
-    });
-
     describe('count stuff', () => {
         beforeEach(() => {
             count = {

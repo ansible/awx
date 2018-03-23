@@ -23,5 +23,14 @@ export default {
                 "system_job_events": [],
             }
         }
+    },
+    resolve: {
+        jobData: ['Rest', 'GetBasePath', '$stateParams', function(Rest, GetBasePath, $stateParams) {
+            Rest.setUrl(GetBasePath('base') + 'system_jobs/' + $stateParams.id + '/');
+            return Rest.get()
+                .then(({data}) => {
+                    return data;
+                });
+        }]
     }
 };

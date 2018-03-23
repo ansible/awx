@@ -6,9 +6,10 @@ describe('workflowResultsService', () => {
     let $interval;
 
     beforeEach(angular.mock.module('workflowResults', ($provide) => {
-        ['PromptDialog', 'Prompt', 'Wait', 'Rest', 'ProcessErrors', 'InitiatePlaybookRun', '$state'].forEach(function(item) {
-            $provide.value(item, {});
-        });
+        ['PromptDialog', 'Prompt', 'Wait', 'Rest', 'ProcessErrors', '$state', 'WorkflowJobModel']
+            .forEach(function(item) {
+                $provide.value(item, {});
+            });
         $provide.value('$stateExtender', { addState: jasmine.createSpy('addState'), });
         $provide.value('moment', moment);
     }));

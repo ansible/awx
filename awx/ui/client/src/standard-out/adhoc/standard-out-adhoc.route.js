@@ -23,5 +23,14 @@ export default {
                 "ad_hoc_command_events": []
             }
         }
+    },
+    resolve: {
+        jobData: ['Rest', 'GetBasePath', '$stateParams', function(Rest, GetBasePath, $stateParams) {
+            Rest.setUrl(GetBasePath('base') + 'ad_hoc_commands/' + $stateParams.id + '/');
+            return Rest.get()
+                .then(({data}) => {
+                    return data;
+                });
+        }]
     }
 };

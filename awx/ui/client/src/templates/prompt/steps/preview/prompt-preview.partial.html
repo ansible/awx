@@ -1,5 +1,5 @@
 <div>
-    <div class="Prompt-previewRow--flex">
+    <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.jobType.value">
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.JOB_TYPE') }}</div>
         <div class="Prompt-previewRowValue">
             <span ng-if="promptData.prompts.jobType.value.value === 'run'">{{:: vm.strings.get('prompt.PLAYBOOK_RUN') }}</span>
@@ -24,7 +24,7 @@
             </div>
         </div>
     </div>
-    <div class="Prompt-previewRow--flex">
+    <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.inventory.value.id">
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.INVENTORY') }}</div>
         <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.inventory.value.name"></div>
     </div>
@@ -32,7 +32,7 @@
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.LIMIT') }}</div>
         <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.limit.value"></div>
     </div>
-    <div class="Prompt-previewRow--flex">
+    <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.inventory.value.label">
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.VERBOSITY') }}</div>
         <div class="Prompt-previewRowValue" ng-bind="promptData.prompts.verbosity.value.label"></div>
     </div>
@@ -68,7 +68,7 @@
             </div>
         </div>
     </div>
-    <div class="Prompt-previewRow--flex">
+    <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.diffMode.value !== null">
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.SHOW_CHANGES') }}</div>
         <div class="Prompt-previewRowValue">
             <span ng-if="promptData.prompts.diffMode.value">{{:: vm.strings.get('ON') }}</span>

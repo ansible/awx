@@ -230,25 +230,25 @@ function adhocController($q, $scope, $stateParams,
           $scope.removeStartAdhocRun();
         }
         $scope.removeStartAdhocRun = $scope.$on('StartAdhocRun', function() {
-                var password;
-                for (password in $scope.passwords) {
-                    data[$scope.passwords[password]] = $scope[
-                        $scope.passwords[password]
-                    ];
-                }
-                // Launch the adhoc job
-                Rest.setUrl(GetBasePath('inventory') + id + '/ad_hoc_commands/');
-                Rest.post(data)
-                    .then(({data}) => {
-                         Wait('stop');
-                         $state.go('adHocJobStdout', {id: data.id});
-                    })
-                    .catch(({data, status}) => {
-                        ProcessErrors($scope, data, status, adhocForm, {
-                            hdr: 'Error!',
-                            msg: 'Failed to launch adhoc command. POST ' +
-                                'returned status: ' + status });
-                    });
+            var password;
+            for (password in $scope.passwords) {
+                data[$scope.passwords[password]] = $scope[
+                    $scope.passwords[password]
+                ];
+            }
+            // Launch the adhoc job
+            Rest.setUrl(GetBasePath('inventory') + id + '/ad_hoc_commands/');
+            Rest.post(data)
+                .then(({data}) => {
+                     Wait('stop');
+                     $state.go('adHocJobStdout', {id: data.id});
+                })
+                .catch(({data, status}) => {
+                    ProcessErrors($scope, data, status, adhocForm, {
+                        hdr: 'Error!',
+                        msg: 'Failed to launch adhoc command. POST ' +
+                            'returned status: ' + status });
+                });
         });
 
         if ($scope.removeCreateLaunchDialog) {

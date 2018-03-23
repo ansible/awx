@@ -1,5 +1,5 @@
 export default
-    function SchedulePost(Rest, ProcessErrors, RRuleToAPI, Wait, $q, Schedule) {
+    function SchedulePost(Rest, ProcessErrors, RRuleToAPI, Wait, $q, Schedule, PromptService) {
         return function(params) {
             var scope = params.scope,
                 url = params.url,
@@ -36,57 +36,10 @@ export default
                 }
 
                 if(promptData) {
-                    if(promptData.launchConf.survey_enabled){
-                        for (var i=0; i < promptData.surveyQuestions.length; i++){
-                            var fld = promptData.surveyQuestions[i].variable;
-                            // grab all survey questions that have answers
-                            if(promptData.surveyQuestions[i].required || (promptData.surveyQuestions[i].required === false && promptData.surveyQuestions[i].model.toString()!=="")) {
-                                if(!scheduleData.extra_data) {
-                                    scheduleData.extra_data = {};
-                                }
-                                scheduleData.extra_data[fld] = promptData.surveyQuestions[i].model;
-                            }
-
-                            if(promptData.surveyQuestions[i].required === false && _.isEmpty(promptData.surveyQuestions[i].model)) {
-                                switch (promptData.surveyQuestions[i].type) {
-                                    // for optional text and text-areas, submit a blank string if min length is 0
-                                    // -- this is confusing, for an explanation see:
-                                    //    http://docs.ansible.com/ansible-tower/latest/html/userguide/job_templates.html#optional-survey-questions
-                                    //
-                                    case "text":
-                                    case "textarea":
-                                    if (promptData.surveyQuestions[i].min === 0) {
-                                        scheduleData.extra_data[fld] = "";
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if(_.has(promptData, 'prompts.jobType.value.value') && _.get(promptData, 'launchConf.ask_job_type_on_launch')) {
-                        scheduleData.job_type = promptData.launchConf.defaults.job_type && promptData.launchConf.defaults.job_type === promptData.prompts.jobType.value.value ? null : promptData.prompts.jobType.value.value;
-                    }
-                    if(_.has(promptData, 'prompts.tags.value') && _.get(promptData, 'launchConf.ask_tags_on_launch')){
-                        const templateDefaultJobTags = promptData.launchConf.defaults.job_tags.split(',');
-                        scheduleData.job_tags = (_.isEqual(templateDefaultJobTags.sort(), promptData.prompts.tags.value.map(a => a.value).sort())) ? null : promptData.prompts.tags.value.map(a => a.value).join();
-                    }
-                    if(_.has(promptData, 'prompts.skipTags.value') && _.get(promptData, 'launchConf.ask_skip_tags_on_launch')){
-                        const templateDefaultSkipTags = promptData.launchConf.defaults.skip_tags.split(',');
-                        scheduleData.skip_tags = (_.isEqual(templateDefaultSkipTags.sort(), promptData.prompts.skipTags.value.map(a => a.value).sort())) ? null : promptData.prompts.skipTags.value.map(a => a.value).join();
-                    }
-                    if(_.has(promptData, 'prompts.limit.value') && _.get(promptData, 'launchConf.ask_limit_on_launch')){
-                        scheduleData.limit = promptData.launchConf.defaults.limit && promptData.launchConf.defaults.limit === promptData.prompts.limit.value ? null : promptData.prompts.limit.value;
-                    }
-                    if(_.has(promptData, 'prompts.verbosity.value.value') && _.get(promptData, 'launchConf.ask_verbosity_on_launch')){
-                        scheduleData.verbosity = promptData.launchConf.defaults.verbosity && promptData.launchConf.defaults.verbosity === promptData.prompts.verbosity.value.value ? null : promptData.prompts.verbosity.value.value;
-                    }
-                    if(_.has(promptData, 'prompts.inventory.value') && _.get(promptData, 'launchConf.ask_inventory_on_launch')){
-                        scheduleData.inventory = promptData.launchConf.defaults.inventory && promptData.launchConf.defaults.inventory.id === promptData.prompts.inventory.value.id ? null : promptData.prompts.inventory.value.id;
-                    }
-                    if(_.has(promptData, 'prompts.diffMode.value') && _.get(promptData, 'launchConf.ask_diff_mode_on_launch')){
-                        scheduleData.diff_mode = promptData.launchConf.defaults.diff_mode && promptData.launchConf.defaults.diff_mode === promptData.prompts.diffMode.value ? null : promptData.prompts.diffMode.value;
-                    }
+                    scheduleData = PromptService.bundlePromptDataForSaving({
+                        promptData: promptData,
+                        dataToSave: scheduleData
+                    });
                 }
 
                 Rest.setUrl(url);
@@ -212,5 +165,6 @@ SchedulePost.$inject =
         'RRuleToAPI',
         'Wait',
         '$q',
-        'ScheduleModel'
+        'ScheduleModel',
+        'PromptService'
     ];

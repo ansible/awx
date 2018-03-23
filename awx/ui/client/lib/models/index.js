@@ -1,6 +1,7 @@
 import atLibServices from '~services';
 
 import Application from '~models/Application';
+import AdHocCommand from '~models/AdHocCommand';
 import Base from '~models/Base';
 import Config from '~models/Config';
 import Credential from '~models/Credential';
@@ -30,6 +31,7 @@ angular
         atLibServices
     ])
     .service('ApplicationModel', Application)
+    .service('AdHocCommandModel', AdHocCommand)
     .service('BaseModel', Base)
     .service('ConfigModel', Config)
     .service('CredentialModel', Credential)

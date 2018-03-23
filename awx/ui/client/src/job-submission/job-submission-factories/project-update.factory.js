@@ -25,13 +25,6 @@ export default
                 }
             });
 
-            if (scope.removePromptForPasswords) {
-                scope.removePromptForPasswords();
-            }
-            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function() {
-                PromptForPasswords({ scope: scope, passwords: project.passwords_needed_to_update, callback: 'StartTheUpdate' });
-            });
-
             if (scope.removeStartTheUpdate) {
                 scope.removeStartTheUpdate();
             }
@@ -46,13 +39,7 @@ export default
             .then(({data}) => {
                 project = data;
                 if (project.can_update) {
-                    if (project.passwords_needed_to_updated) {
-                        Wait('stop');
-                        scope.$emit('PromptForPasswords');
-                    }
-                    else {
-                        scope.$emit('StartTheUpdate', {});
-                    }
+                    scope.$emit('StartTheUpdate', {});
                 }
                 else {
                     Alert('Permission Denied', 'You do not have access to update this project. Please contact your system administrator.',

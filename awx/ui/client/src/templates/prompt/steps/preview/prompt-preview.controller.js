@@ -72,7 +72,7 @@ export default
                     });
                 }
 
-                scope.promptExtraVars = $.isEmptyObject(scope.promptData.extraVars) ? '---' : jsyaml.safeDump(scope.promptData.extraVars);
+                scope.promptExtraVars = $.isEmptyObject(scope.promptData.extraVars) ? '---' : '---\n' + jsyaml.safeDump(scope.promptData.extraVars);
 
                 ParseTypeChange({
                     scope: scope,

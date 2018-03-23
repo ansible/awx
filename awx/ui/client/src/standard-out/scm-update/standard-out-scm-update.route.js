@@ -25,5 +25,14 @@ export default {
                 "project_update_events": [],
             }
         },
+    },
+    resolve: {
+        jobData: ['Rest', 'GetBasePath', '$stateParams', function(Rest, GetBasePath, $stateParams) {
+            Rest.setUrl(GetBasePath('base') + 'project_updates/' + $stateParams.id + '/');
+            return Rest.get()
+                .then(({data}) => {
+                    return data;
+                });
+        }]
     }
 };

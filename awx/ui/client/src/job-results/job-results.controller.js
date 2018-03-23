@@ -237,10 +237,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         jobResultsService.cancelJob($scope.job);
     };
 
-    $scope.relaunchJob = function() {
-        jobResultsService.relaunchJob($scope);
-    };
-
     $scope.lessLabels = false;
     $scope.toggleLessLabels = function() {
         if (!$scope.lessLabels) {

@@ -10,11 +10,9 @@
  * @description This controller's for the jobs page
  */
 
- export default ['$state', '$rootScope', '$scope', '$stateParams',
-     'Find', 'DeleteJob', 'RelaunchJob',
+ export default ['$state', '$rootScope', '$scope', '$stateParams', 'Find', 'DeleteJob',
      'GetBasePath', 'Dataset', 'QuerySet', 'ListDefinition', '$interpolate',
-     function($state, $rootScope, $scope, $stateParams,
-         Find, DeleteJob, RelaunchJob,
+     function($state, $rootScope, $scope, $stateParams, Find, DeleteJob,
          GetBasePath, Dataset, qs, ListDefinition, $interpolate) {
 
     var list = ListDefinition;
@@ -93,42 +91,6 @@
 
     $scope.deleteJob = function(id) {
         DeleteJob({ scope: $scope, id: id });
-    };
-
-    $scope.relaunchJob = function(event, id) {
-        let job, typeId, jobs;
-        try {
-            $(event.target).tooltip('hide');
-        } catch (e) {
-            //ignore
-        }
-
-        if ($scope.completed_jobs) {
-            jobs = $scope.completed_jobs;
-        }
-        else if ($scope.running_jobs) {
-            jobs = $scope.running_jobs;
-        }
-        else if ($scope.queued_jobs) {
-            jobs = $scope.queued_jobs;
-        }
-        else if ($scope.all_jobs) {
-            jobs = $scope.all_jobs;
-        }
-        else if ($scope.jobs) {
-            jobs = $scope.jobs;
-        }
-
-        job = Find({list: jobs, key: 'id', val: id });
-
-        if (job.type === 'inventory_update') {
-            typeId = job.inventory_source;
-        } else if (job.type === 'project_update') {
-            typeId = job.project;
-        } else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command' || job.type === 'workflow_job') {
-            typeId = job.id;
-        }
-        RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
     };
 
     $scope.viewjobResults = function(job) {

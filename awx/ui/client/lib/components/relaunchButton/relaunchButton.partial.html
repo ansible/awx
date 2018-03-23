@@ -30,4 +30,5 @@
             ng-if="!vm.showDropdown">
             <i class="{{ vm.icon }}"></i>
     </button>
+    <prompt prompt-data="vm.promptData" on-finish="vm.relaunchJobWithPassword()"></launch>
 </div>

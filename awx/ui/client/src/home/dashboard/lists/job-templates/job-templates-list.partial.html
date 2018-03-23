@@ -32,9 +32,9 @@
               </td>
               <td class="List-actionsContainer">
                   <div class="List-actionButtonCell">
-                      <button class="List-actionButton" ng-click="launchTemplate(template)">
-                          <i class="icon-launch"></i>
-                      </button>
+                      <at-launch-template template="template"
+                          ng-show="template.can_start">
+                      </at-launch-template>
                       <button class="List-actionButton" ng-click="editTemplate(template)">
                           <i class="fa fa-pencil"></i>
                       </button>
@@ -56,3 +56,4 @@
         <translate>You can create a job template <a href="#/templates/add_job_template">here</a>.</translate></p>
     </div>
 </div>
+<prompt prompt-data="promptData" on-finish="launchJob()"></launch>
