@@ -1,0 +1,43 @@
+<div class="Networking-panelHeader">
+    <div class="JobResults-panelHeaderText" translate="">
+        DETAILS <span ng-if="!item.host_id && item.name">| {{item.name}}</span>
+    </div>
+</div>
+
+ <div class="List-noItems Networking-noItems" ng-if="!item.host_id">
+     {{item.type}} DETAILS NOT AVAILABLE
+ </div>
+
+<div ng-show="item.host_id">
+    <form class="Form Networking-form ng-pristine ng-valid ng-valid-required" name="host_form" id="host_form" autocomplete="off" novalidate="">
+        <div class="form-group Form-formGroup Form-formGroup--fullWidth">
+            <label class="Form-inputLabelContainer" for="name">
+                <span class="Form-requiredAsterisk">*</span>
+                <span class="Form-inputLabel" translate="">Host Name</span><a id="awp-name" href="" aw-pop-over="<p>Provide a host name, ip address, or ip address:port. Examples include:</p><blockquote>myserver.domain.com<br/>127.0.0.1<br />10.1.0.140:25<br />server.example.com:25</blockquote>" data-placement="right" data-container="body" over-title="Host Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a>
+            </label>
+            <div>
+                <input readonly type="text" ng-model="item.name" name="name" id="host_name" class="form-control Form-textInput Networking-input ng-pristine ng-untouched ng-valid ng-not-empty ng-valid-required" required="" ng-disabled="!(item.summary_fields.user_capabilities.edit || canAdd)">
+                <div class="error ng-hide" id="host-name-required-error" ng-show="host_form.name.$dirty &amp;&amp; host_form.name.$error.required">Please enter a value.</div>
+                <div class="error api-error ng-binding" id="host-name-api-error" ng-bind="name_api_error"></div>
+            </div>
+        </div>
+        <div class="form-group Form-formGroup Form-formGroup--fullWidth">
+            <label class="Form-inputLabelContainer" for="description">
+                <span class="Form-inputLabel" translate="">Description</span>
+            </label>
+            <div>
+                <input readonly type="text" ng-model="item.description" name="description" id="host_description" class="form-control Form-textInput Networking-input" ng-disabled="!(item.summary_fields.user_capabilities.edit || canAdd)">
+                <div class="error api-error ng-binding" id="host-description-api-error" ng-bind="description_api_error"></div>
+            </div>
+        </div>
+        <div class="form-group Form-formGroup Form-formGroup--fullWidth">
+            <awx-net-extra-vars item="item"></awx-net-extra-vars>
+        </div>
+    </form>
+    <div class="buttons Form-buttons" id="host_controls">
+        <button type="button" class="btn btn-sm Form-cancelButton" id="host_cancel_btn" ng-click="formCancel()"> Cancel</button>
+    </div>
+    <div class="Networking-saveConfirmation" ng-show="saveConfirmed">
+        Save Complete <i class="fa fa-check-circle"></i>
+    </div>
+</div>

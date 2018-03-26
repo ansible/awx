@@ -1,0 +1,26 @@
+var inherits = require('inherits');
+var fsm = require('./fsm.js');
+
+function _State () {
+}
+inherits(_State, fsm._State);
+
+{%for state in states%}
+function _{{state.label}} () {
+    this.name = '{{state.label}}';
+}
+inherits(_{{state.label}}, _State);
+var {{state.label}} = new _{{state.label}}();
+exports.{{state.label}} = {{state.label}};
+{%endfor%}
+
+{%for state in states%}
+{%for fn, transitions in state.functions%}
+_{{state.label}}.prototype.{{fn}} = function (controller) {
+{%for tn in transitions %}
+    controller.changeState({{tn.to_state}});
+{%endfor%}
+};
+_{{state.label}}.prototype.{{fn}}.transitions = [{%for t in transitions%}'{{t.to_state}}'{% if not loop.last%}, {%endif%}{%endfor%}];
+{%endfor%}
+{%endfor%}

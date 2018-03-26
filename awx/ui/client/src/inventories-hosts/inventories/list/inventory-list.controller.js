@@ -85,6 +85,10 @@ function InventoriesList($scope,
             .finally(() => Wait('stop'));
     };
 
+    $scope.goToGraph = function(inventory){
+         $state.go('inventories.edit.networking', {inventory_id: inventory.id, inventory_name: inventory.name});
+    };
+
     $scope.editInventory = function (inventory) {
         if(inventory.kind && inventory.kind === 'smart') {
             $state.go('inventories.editSmartInventory', {smartinventory_id: inventory.id});

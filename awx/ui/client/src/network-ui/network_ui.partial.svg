@@ -1,0 +1,81 @@
+<!-- Copyright (c) 2017 Red Hat, Inc. -->
+    <div ng-controller="NetworkUIController">
+    <svg id="frame" class="NetworkUI"
+         ng-attr-height="{{graph.height}}"
+         ng-attr-width="{{graph.width}}"
+         ng-mousedown="onMouseDown($event)"
+         ng-mouseup="onMouseUp($event)"
+         ng-mouseenter="onMouseEnter($event)"
+         ng-mouseleave="onMouseLeave($event)"
+         ng-mousemove="onMouseMove($event)"
+         ng-mouseover="onMouseOver($event)"
+         msd-wheel="onMouseWheel($event, $delta, $deltaX, $deltaY)">
+        <defs>
+		<filter x="0" y="0" width="1" height="1" id="selected">
+		  <feFlood flood-color="#b3d8fd"/>
+		  <feComposite in="SourceGraphic" operator="xor"/>
+		</filter>
+		<filter x="0" y="0" width="1" height="1" id="background">
+		  <feFlood flood-color="#ffffff"/>
+		  <feComposite in="SourceGraphic"/>
+		</filter>
+		<clipPath id="inventory-toolbox-clip-path">
+        <rect ng-attr-x="{{inventory_toolbox.x}}"
+              ng-attr-y="{{inventory_toolbox.y}}"
+              ng-attr-width="{{inventory_toolbox.width}}"
+              ng-attr-height="{{inventory_toolbox.height}}"
+              rx=5></rect>
+		</clipPath>
+		</defs>
+         <g transform="scale(1.0)" id="frame_g">
+            <g ng-if="!hide_links">
+            <g ng-if="current_scale > 0.5">
+            <g ng-repeat="link in links">
+            <g awx-net-link></g>
+            </g> <!-- end ng-repeat link in links-->
+            </g> <!-- end ng-if current_scale -->
+            </g> <!-- end hide_links -->
+            <g ng-repeat="link in links">
+                <g ng-if="link.selected || link.to_interface.selected || link.from_interface.selected" link></g>
+            </g>
+            <g ng-repeat="item in devices"
+               ng-attr-transform="translate({{item.x}},{{item.y}})"
+               ng-attr-class="{{item.type}}"
+               ng-switch on="item.type">
+               <g ng-switch-when="router"><!-- begin router -->
+                   <g awx-net-router name="{{item.type + '_' + item.id + '_' + item.name}}"></g>
+               </g> <!-- end router -->
+
+               <g ng-switch-when="switch"> <!-- begin switch -->
+                   <g awx-net-switch name="{{item.type + '_' + item.id + '_' + item.name}}"> </g>
+               </g> <!-- end switch -->
+
+               <g ng-switch-when="host"> <!-- begin host -->
+                    <g awx-net-host name="{{item.type + '_' + item.id + '_' + item.name}}"> </g>
+
+               </g> <!-- end host -->
+
+               <g ng-switch-default> <!-- begin default -->
+                    <g awx-net-default></g>
+               </g> <!-- end default -->
+            </g> <!-- end devices -->
+            <g ng-attr-transform="translate({{scaledX}},{{scaledY}})" ng-attr-class="{{debug.hidden && 'hidden' || ''}} debug-cursor" >
+                <line x1="-5" y1="0" x2="5" y2="0"/>
+                <line x1="0" y1="-5" x2="0" y2="5"/>
+            </g>
+            <g awx-net-quadrants>
+            </g>
+        </g> <!-- end frame_g -->
+        <g ng-repeat="toolbox in [inventory_toolbox]">
+        <g awx-net-inventory-toolbox ng-if="canEdit"></g>
+        </g>
+        <g awx-net-context-menu
+                context_menu="context_menus[0]"
+                ng-if="context_menus[0].enabled"
+                ng-attr-transform="translate({{context_menus[0].x}}, {{context_menus[0].y}})">
+        </g>
+        <g awx-net-debug></g>
+        <g awx-net-test-results></g>
+        <g awx-net-cursor></g>
+    </svg>
+    </div>

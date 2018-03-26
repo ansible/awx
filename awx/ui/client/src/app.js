@@ -10,7 +10,6 @@ if ($basePath) {
 }
 
 import start from './app.start';
-
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventoriesHosts from './inventories-hosts/main';
@@ -45,6 +44,8 @@ import atFeatures from '~features';
 import atLibComponents from '~components';
 import atLibModels from '~models';
 import atLibServices from '~services';
+
+import networkUI from '~network-ui/main';
 
 start.bootstrap(() => {
     angular.bootstrap(document.body, ['awApp']);
@@ -95,6 +96,7 @@ angular
         users.name,
         projects.name,
         scheduler.name,
+        networkUI.tower.name,
 
         'Utilities',
         'templates',

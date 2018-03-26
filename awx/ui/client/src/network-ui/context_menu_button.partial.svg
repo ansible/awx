@@ -1,0 +1,19 @@
+<!-- Copyright (c) 2017 Red Hat, Inc. -->
+<rect ng-attr-class="{{contextMenuButton.is_pressed ? 'NetworkUI__contextMenuButton-pressed' : contextMenuButton.mouse_over ? 'NetworkUI__contextMenuButton-hover' : 'NetworkUI__contextMenuButton'}}"
+    x= 1
+    ng-attr-y="{{(contextMenuButton.height * $parent.$index) + 5}}"
+    ng-attr-width={{contextMenuButton.width-2}}
+    ng-attr-height={{contextMenuButton.height}}>
+</rect>
+<text ng-show="contextMenuButton.name !=='Remove'" ng-attr-class="{{contextMenuButton.is_pressed ? 'NetworkUI__contextMenuButtonText-pressed' : contextMenuButton.mouse_over ? 'NetworkUI__contextMenuButtonText-hover' : 'NetworkUI__contextMenuButtonText'}}"
+    x=15
+    ng-attr-y="{{(contextMenuButton.height * $parent.$index) + 18}}"
+    dy=".3em"
+    text-anchor="left">{{contextMenuButton.name}}
+</text>
+<text ng-show="contextMenuButton.name ==='Remove'" ng-attr-class="{{contextMenuButton.is_pressed ? 'NetworkUI__contextMenuRemoveButtonText-pressed' : contextMenuButton.mouse_over ? 'NetworkUI__contextMenuRemoveButtonText-hover' : 'NetworkUI__contextMenuRemoveButtonText'}}"
+    x=15
+    ng-attr-y="{{(contextMenuButton.height * $parent.$index) + 18}}"
+    dy=".3em"
+    text-anchor="left">{{contextMenuButton.name}}
+</text>

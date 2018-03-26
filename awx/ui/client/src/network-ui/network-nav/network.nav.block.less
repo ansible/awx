@@ -1,0 +1,203 @@
+.Networking-shell{
+    display:flex;
+    flex-direction: column;
+    width:100%;
+    align-items: flex-end;
+    position:absolute;
+}
+
+.Networking-top{
+    width:100%;
+}
+
+.Networking-header{
+    border-top: 1px solid @at-color-panel-border;
+    border-bottom: 1px solid @at-color-panel-border;
+    display:flex;
+    height: 40px;
+    width:100%;
+    background-color: @default-bg;
+}
+
+.Networking-headerTitle{
+    color: @default-interface-txt;
+    flex: 1 0 auto;
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 20px;
+    align-items: center;
+    display: flex;
+}
+
+.Netowrking-headerActions{
+    align-items: center;
+    display: flex;
+    flex: 1 0 auto;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.Networking-headerActionItem{
+    justify-content: flex-end;
+    display: flex;
+    padding-right: 20px;
+    font-size: 20px;
+}
+
+.Networking-toolbarIcon{
+    font-size: 16px;
+    height: 30px;
+    min-width: 30px;
+    color: @default-icon;
+    background-color: inherit;
+    border: none;
+    border-radius: 5px;
+    margin-left: 5px;
+}
+
+.Networking-toolbarIcon:hover{
+    background-color:@default-link;
+    color: @default-bg;
+}
+
+.Networking-toolbarIcon--selected{
+    background-color:@default-link;
+    color: @default-bg;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
+.Networking-canvasPanel{
+    width:100%
+}
+
+.Networking-detailPanel{
+    border-left: 1px solid @at-color-panel-border;
+    border-bottom: 1px solid @at-color-panel-border;
+    width:400px;
+    height: calc(~"100vh - 115px");
+    padding: 20px;
+    color: @default-interface-txt;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: @default-bg;
+    position: absolute;
+    top:115px;
+    right:0px;
+}
+
+.Networking-toolbar{
+    min-height: 40px;
+    width:100%;
+    background-color: @ebgrey;
+    display:flex;
+    flex: 1 0 auto;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    border-bottom: 1px solid @at-color-panel-border;
+}
+
+.Networking-toolbarLeftSide{
+    display: flex;
+    flex-wrap: wrap;
+    min-width: 400px;
+    padding-left: 20px;
+    height: 40px;
+    align-items: center;
+}
+
+.Networking-toolbarRightSide{
+    align-items: center;
+    flex-wrap: wrap;
+    display: flex;
+    min-width: 500px;
+    padding-right: 20px;
+    height: 40px;
+    justify-content: flex-end;
+}
+
+.Networking-actionsDropDownContainer{
+    height: 30px;
+    flex: 1 0 auto;
+    display: flex;
+    margin-top:-5px;
+    margin-left: -2px;
+}
+
+.Networking-searchBarContainer{
+    height: 30px;
+    display: flex;
+    margin-top:-5px;
+    margin-left: 5px;
+}
+
+.Networking-dropDown{
+    left:-2px!important;
+}
+
+.Networking-searchButton{
+    padding: 4px 10px;
+}
+
+.Networking-searchButton i{
+    color:@default-icon;
+}
+
+
+.Networking-dropdownPanelTitle{
+    color: @default-stdout-txt;
+    padding-left:15px;
+    min-height: 30px;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.Networking-keyContainer{
+    display: inline-block;
+    position: relative;
+}
+
+.Networking-keyDropDownPanel{
+    width: 180px;
+    padding: 10px 0px 10px 0px;
+    border: 1px solid @btn-bord;
+    background-color: white;
+    position: absolute;
+    right:0px;
+    z-index: 100;
+}
+
+.Networking-keyPanelOption{
+    color: @default-stdout-txt;
+    padding-left:15px;
+    min-height: 30px;
+    font-size: 12px;
+    display:flex;
+    align-items: center;
+}
+
+.Networking-keySymbol{
+    background-color: @default-icon;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Networking-keySymbolLabel{
+    font-size: 12px;
+    padding-left: 15px;
+    color: @default-stdout-txt
+}
+
+.Networking-toolboxPanelToolbarIcon--selected{
+    border-radius: 5px;
+}
