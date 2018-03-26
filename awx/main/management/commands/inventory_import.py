@@ -15,12 +15,20 @@ import shutil
 # Django
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, transaction
 from django.utils.encoding import smart_text
 
-# AWX
-from awx.main.models import * # noqa
+# AWX inventory imports
+from awx.main.models.inventory import (
+    Inventory,
+    InventorySource,
+    InventoryUpdate,
+    Host
+)
+from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
+
+# other AWX imports
+from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import (
     ignore_inventory_computed_fields,
     check_proot_installed,
@@ -28,7 +36,6 @@ from awx.main.utils import (
     build_proot_temp_dir,
     get_licenser
 )
-from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
@@ -63,21 +70,14 @@ class AnsibleInventoryLoader(object):
     use the ansible-inventory CLI utility to convert it into in-memory
     representational objects. Example:
         /usr/bin/ansible/ansible-inventory -i hosts --list
-    If it fails to find this, it uses the backported script instead
     '''
 
-    def __init__(self, source, group_filter_re=None, host_filter_re=None, is_custom=False):
+    def __init__(self, source, is_custom=False):
         self.source = source
         self.source_dir = functioning_dir(self.source)
         self.is_custom = is_custom
         self.tmp_private_dir = None
         self.method = 'ansible-inventory'
-        self.group_filter_re = group_filter_re
-        self.host_filter_re = host_filter_re
-
-        self.is_vendored_source = False
-        if self.source_dir == os.path.join(settings.BASE_DIR, 'plugins', 'inventory'):
-            self.is_vendored_source = True
 
     def build_env(self):
         env = dict(os.environ.items())
@@ -95,28 +95,10 @@ class AnsibleInventoryLoader(object):
 
     def get_base_args(self):
         # get ansible-inventory absolute path for running in bubblewrap/proot, in Popen
-        for path in os.environ["PATH"].split(os.pathsep):
-            potential_path = os.path.join(path.strip('"'), 'ansible-inventory')
-            if os.path.isfile(potential_path) and os.access(potential_path, os.X_OK):
-                logger.debug('Using system install of ansible-inventory CLI: {}'.format(potential_path))
-                return [potential_path, '-i', self.source]
-
-        # Stopgap solution for group_vars, do not use backported module for official
-        # vendored cloud modules or custom scripts TODO: remove after Ansible 2.3 deprecation
-        if self.is_vendored_source or self.is_custom:
-            self.method = 'inventory script invocation'
-            return [self.source]
-
-        # ansible-inventory was not found, look for backported module TODO: remove after Ansible 2.3 deprecation
-        abs_module_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..', '..', 'plugins',
-            'ansible_inventory', 'backport.py'))
-        self.method = 'ansible-inventory backport'
-
-        if not os.path.exists(abs_module_path):
-            raise ImproperlyConfigured('Cannot find inventory module')
-        logger.debug('Using backported ansible-inventory module: {}'.format(abs_module_path))
-        return [abs_module_path, '-i', self.source]
+        abs_ansible_inventory = shutil.which('ansible-inventory')
+        bargs= [abs_ansible_inventory, '-i', self.source]
+        logger.debug('Using base command: {}'.format(' '.join(bargs)))
+        return bargs
 
     def get_proot_args(self, cmd, env):
         cwd = os.getcwd()
@@ -179,80 +161,7 @@ class AnsibleInventoryLoader(object):
         base_args = self.get_base_args()
         logger.info('Reading Ansible inventory source: %s', self.source)
 
-        data = self.command_to_json(base_args + ['--list'])
-
-        # TODO: remove after we run custom scripts through ansible-inventory
-        if self.is_custom and '_meta' not in data or 'hostvars' not in data['_meta']:
-            # Invoke the executable once for each host name we've built up
-            # to set their variables
-            data.setdefault('_meta', {})
-            data['_meta'].setdefault('hostvars', {})
-            logger.warning('Re-calling script for hostvars individually.')
-            for group_name, group_data in list(data.items()):
-                if group_name == '_meta':
-                    continue
-
-                if isinstance(group_data, dict):
-                    group_host_list = group_data.get('hosts', [])
-                elif isinstance(group_data, list):
-                    group_host_list = group_data
-                else:
-                    logger.warning('Group data for "%s" is not a dict or list',
-                                   group_name)
-                    group_host_list = []
-
-                for hostname in group_host_list:
-                    logger.debug('Obtaining hostvars for %s' % hostname.encode('utf-8'))
-                    hostdata = self.command_to_json(
-                        base_args + ['--host', hostname.encode("utf-8")]
-                    )
-                    if isinstance(hostdata, dict):
-                        data['_meta']['hostvars'][hostname] = hostdata
-                    else:
-                        logger.warning(
-                            'Expected dict of vars for host "%s" when '
-                            'calling with `--host`, got %s instead',
-                            k, str(type(data))
-                        )
-
-        logger.info('Processing JSON output...')
-        inventory = MemInventory(
-            group_filter_re=self.group_filter_re, host_filter_re=self.host_filter_re)
-        inventory = dict_to_mem_data(data, inventory=inventory)
-
-        return inventory
-
-
-def load_inventory_source(source, group_filter_re=None,
-                          host_filter_re=None, exclude_empty_groups=False,
-                          is_custom=False):
-    '''
-    Load inventory from given source directory or file.
-    '''
-    # Sanity check: We sanitize these module names for our API but Ansible proper doesn't follow
-    # good naming conventions
-    source = source.replace('rhv.py', 'ovirt4.py')
-    source = source.replace('satellite6.py', 'foreman.py')
-    source = source.replace('vmware.py', 'vmware_inventory.py')
-    if not os.path.exists(source):
-        raise IOError('Source does not exist: %s' % source)
-    source = os.path.join(os.getcwd(), os.path.dirname(source),
-                          os.path.basename(source))
-    source = os.path.normpath(os.path.abspath(source))
-
-    inventory = AnsibleInventoryLoader(
-        source=source,
-        group_filter_re=group_filter_re,
-        host_filter_re=host_filter_re,
-        is_custom=is_custom).load()
-
-    logger.debug('Finished loading from source: %s', source)
-    # Exclude groups that are completely empty.
-    if exclude_empty_groups:
-        inventory.delete_empty_groups()
-    logger.info('Loaded %d groups, %d hosts', len(inventory.all_group.all_groups),
-                len(inventory.all_group.all_hosts))
-    return inventory.all_group
+        return self.command_to_json(base_args + ['--list'])
 
 
 class Command(BaseCommand):
@@ -358,6 +267,19 @@ class Command(BaseCommand):
             return enabled
         else:
             raise NotImplementedError('Value of enabled {} not understood.'.format(enabled))
+
+    def get_source_absolute_path(self, source):
+        # Sanity check: We sanitize these module names for our API but Ansible proper doesn't follow
+        # good naming conventions
+        source = source.replace('rhv.py', 'ovirt4.py')
+        source = source.replace('satellite6.py', 'foreman.py')
+        source = source.replace('vmware.py', 'vmware_inventory.py')
+        if not os.path.exists(source):
+            raise IOError('Source does not exist: %s' % source)
+        source = os.path.join(os.getcwd(), os.path.dirname(source),
+                              os.path.basename(source))
+        source = os.path.normpath(os.path.abspath(source))
+        return source
 
     def load_inventory_from_database(self):
         '''
@@ -988,12 +910,26 @@ class Command(BaseCommand):
                         self.inventory_update.status = 'running'
                         self.inventory_update.save()
 
-            # Load inventory from source.
-            self.all_group = load_inventory_source(self.source,
-                                                   self.group_filter_re,
-                                                   self.host_filter_re,
-                                                   self.exclude_empty_groups,
-                                                   self.is_custom)
+            source = self.get_source_absolute_path(self.source)
+
+            data = AnsibleInventoryLoader(source=source, is_custom=self.is_custom).load()
+
+            logger.debug('Finished loading from source: %s', source)
+            logger.info('Processing JSON output...')
+            inventory = MemInventory(
+                group_filter_re=self.group_filter_re, host_filter_re=self.host_filter_re)
+            inventory = dict_to_mem_data(data, inventory=inventory)
+
+            del data  # forget dict from import, could be large
+
+            logger.info('Loaded %d groups, %d hosts', len(inventory.all_group.all_groups),
+                        len(inventory.all_group.all_hosts))
+
+            if self.exclude_empty_groups:
+                inventory.delete_empty_groups()
+
+            self.all_group = inventory.all_group
+
             if settings.DEBUG:
                 # depending on inventory source, this output can be
                 # *exceedingly* verbose - crawling a deeply nested
