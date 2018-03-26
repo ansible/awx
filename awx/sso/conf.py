@@ -295,6 +295,26 @@ def _register_ldap(append=None):
         category_slug='ldap',
         feature_required='ldap',
         default='MemberDNGroupType',
+        depends_on=['AUTH_LDAP{}_GROUP_TYPE_PARAMS'.format(append_str)],
+    )
+
+    register(
+        'AUTH_LDAP{}_GROUP_TYPE_PARAMS'.format(append_str),
+        field_class=fields.LDAPGroupTypeParamsField,
+        label=_('LDAP Group Type'),
+        help_text=_('Parameters to send the chosen group type.'),
+        category=_('LDAP'),
+        category_slug='ldap',
+        default=collections.OrderedDict([
+            ('name_attr', 'cn'),
+        ]),
+        placeholder=collections.OrderedDict([
+            ('ldap_group_user_attr', 'legacyuid'),
+            ('member_attr', 'member'),
+            ('name_attr', 'cn'),
+        ]),
+        feature_required='ldap',
+        depends_on=['AUTH_LDAP{}_GROUP_TYPE'.format(append_str)],
     )
 
     register(

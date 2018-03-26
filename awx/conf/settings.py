@@ -305,7 +305,7 @@ class SettingsWrapper(UserSettingsHolder):
         settings_to_cache['_awx_conf_preload_expires'] = self._awx_conf_preload_expires
         self.cache.set_many(settings_to_cache, timeout=SETTING_CACHE_TIMEOUT)
 
-    def _get_local(self, name):
+    def _get_local(self, name, validate=True):
         self._preload_cache()
         cache_key = Setting.get_cache_key(name)
         try:
@@ -368,7 +368,10 @@ class SettingsWrapper(UserSettingsHolder):
                     field.run_validators(internal_value)
                     return internal_value
                 else:
-                    return field.run_validation(value)
+                    if validate:
+                        return field.run_validation(value)
+                    else:
+                        return value
             except Exception:
                 logger.warning(
                     'The current value "%r" for setting "%s" is invalid.',

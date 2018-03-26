@@ -1,11 +1,13 @@
 
 import pytest
+import mock
 
 from rest_framework.exceptions import ValidationError
 
 from awx.sso.fields import (
     SAMLOrgAttrField,
     SAMLTeamAttrField,
+    LDAPGroupTypeParamsField,
 )
 
 
@@ -80,3 +82,22 @@ class TestSAMLTeamAttrField():
             field.to_internal_value(data)
         assert str(e.value) == str(expected)
 
+
+class TestLDAPGroupTypeParamsField():
+
+    @pytest.mark.parametrize("group_type, data, expected", [
+        ('LDAPGroupType', {'name_attr': 'user', 'bob': ['a', 'b'], 'scooter': 'hello'},
+         ValidationError('Invalid key(s): "bob", "scooter".')),
+        ('MemberDNGroupType', {'name_attr': 'user', 'member_attr': 'west', 'bob': ['a', 'b'], 'scooter': 'hello'},
+         ValidationError('Invalid key(s): "bob", "scooter".')),
+        ('PosixUIDGroupType', {'name_attr': 'user', 'member_attr': 'west', 'ldap_group_user_attr': 'legacyThing',
+         'bob': ['a', 'b'], 'scooter': 'hello'},
+         ValidationError('Invalid key(s): "bob", "member_attr", "scooter".')),
+    ])
+    def test_internal_value_invalid(self, group_type, data, expected):
+        field = LDAPGroupTypeParamsField()
+        field.get_depends_on = mock.MagicMock(return_value=group_type)
+
+        with pytest.raises(type(expected)) as e:
+            field.to_internal_value(data)
+        assert str(e.value) == str(expected)

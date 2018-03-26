@@ -1,5 +1,6 @@
 # Python LDAP
 import ldap
+import awx
 
 # Django
 from django.utils.translation import ugettext_lazy as _
@@ -7,7 +8,13 @@ from django.core.exceptions import ValidationError
 
 # Django Auth LDAP
 import django_auth_ldap.config
-from django_auth_ldap.config import LDAPSearch, LDAPSearchUnion
+from django_auth_ldap.config import (
+    LDAPSearch,
+    LDAPSearchUnion,
+)
+
+# This must be imported so get_subclasses picks it up
+from awx.sso.ldap_group_types import PosixUIDGroupType  # noqa
 
 # Tower
 from awx.conf import fields
@@ -22,6 +29,37 @@ def get_subclasses(cls):
         for subsubclass in get_subclasses(subclass):
             yield subsubclass
         yield subclass
+
+
+def find_class_in_modules(class_name):
+    '''
+    Used to find ldap subclasses by string
+    '''
+    module_search_space = [django_auth_ldap.config, awx.sso.ldap_group_types]
+    for m in module_search_space:
+        cls = getattr(m, class_name, None)
+        if cls:
+            return cls
+    return None
+
+
+class DependsOnMixin():
+    def get_depends_on(self):
+        """
+        Get the value of the dependent field.
+        First try to find the value in the request.
+        Then fall back to the raw value from the setting in the DB.
+        """
+        from django.conf import settings
+        dependent_key = iter(self.depends_on).next()
+
+        if self.context:
+            request = self.context.get('request', None)
+            if request and request.data and \
+                    request.data.get(dependent_key, None):
+                return request.data.get(dependent_key)
+        res = settings._get_local(dependent_key, validate=False)
+        return res
 
 
 class AuthenticationBackendsField(fields.StringListField):
@@ -322,7 +360,7 @@ class LDAPUserAttrMapField(fields.DictField):
         return data
 
 
-class LDAPGroupTypeField(fields.ChoiceField):
+class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
 
     default_error_messages = {
         'type_error': _('Expected an instance of LDAPGroupType but got {input_type} instead.'),
@@ -335,7 +373,7 @@ class LDAPGroupTypeField(fields.ChoiceField):
 
     def to_representation(self, value):
         if not value:
-            return ''
+            return 'MemberDNGroupType'
         if not isinstance(value, django_auth_ldap.config.LDAPGroupType):
             self.fail('type_error', input_type=type(value))
         return value.__class__.__name__
@@ -344,10 +382,47 @@ class LDAPGroupTypeField(fields.ChoiceField):
         data = super(LDAPGroupTypeField, self).to_internal_value(data)
         if not data:
             return None
-        if data.endswith('MemberDNGroupType'):
-            return getattr(django_auth_ldap.config, data)(member_attr='member')
-        else:
-            return getattr(django_auth_ldap.config, data)()
+
+        params = self.get_depends_on() or {}
+        cls = find_class_in_modules(data)
+        if not cls:
+            return None
+
+        # Per-group type parameter validation and handling here
+
+        # Backwords compatability. Before AUTH_LDAP_GROUP_TYPE_PARAMS existed
+        # MemberDNGroupType was the only group type, of the underlying lib, that
+        # took a parameter.
+        params_sanitized = dict()
+        for attr in inspect.getargspec(cls.__init__).args[1:]:
+            if attr in params:
+                params_sanitized[attr] = params[attr]
+
+        return cls(**params_sanitized)
+
+
+class LDAPGroupTypeParamsField(fields.DictField, DependsOnMixin):
+    default_error_messages = {
+        'invalid_keys': _('Invalid key(s): {invalid_keys}.'),
+    }
+
+    def to_internal_value(self, value):
+        value = super(LDAPGroupTypeParamsField, self).to_internal_value(value)
+        if not value:
+            return value
+        group_type_str = self.get_depends_on()
+        group_type_str = group_type_str or ''
+
+        group_type_cls = find_class_in_modules(group_type_str)
+        if not group_type_cls:
+            # Fail safe
+            return {}
+
+        invalid_keys = set(value.keys()) - set(inspect.getargspec(group_type_cls.__init__).args[1:])
+        if invalid_keys:
+            keys_display = json.dumps(list(invalid_keys)).lstrip('[').rstrip(']')
+            self.fail('invalid_keys', invalid_keys=keys_display)
+        return value
 
 
 class LDAPUserFlagsField(fields.DictField):
