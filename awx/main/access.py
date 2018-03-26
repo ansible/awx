@@ -1174,7 +1174,10 @@ class ProjectAccess(BaseAccess):
     '''
 
     model = Project
-    select_related = ('modified_by', 'credential', 'current_job', 'last_job',)
+    select_related = ('credential', 'organization')
+    # polymorphic related fields last_job only fetch part of the model
+    # if used in select_related
+    prefetch_related = ('modified_by', 'created_by', 'last_job')
 
     def filtered_queryset(self):
         return self.model.accessible_objects(self.user, 'read_role')
@@ -2373,6 +2376,9 @@ class ActivityStreamAccess(BaseAccess):
     '''
 
     model = ActivityStream
+    # FIXME: prefetch_related to polymorphic subclasses, JT, project, etc.
+    # will attach items to wrong activity stream object
+    # known django-polymorphic bug, do not add them to this list
     prefetch_related = ('organization', 'user', 'inventory', 'host', 'group',
                         'inventory_update', 'credential', 'credential_type', 'team',
                         'ad_hoc_command',
@@ -2490,6 +2496,7 @@ class RoleAccess(BaseAccess):
     '''
 
     model = Role
+    prefetch_related = ('content_type', 'content_object')
 
     def can_read(self, obj):
         if not obj:

@@ -633,7 +633,7 @@ class InstanceUnifiedJobsList(SubListAPIView):
 
     view_name = _("Instance Running Jobs")
     model = UnifiedJob
-    serializer_class = UnifiedJobSerializer
+    serializer_class = UnifiedJobListSerializer
     parent_model = Instance
 
     def get_queryset(self):
@@ -672,7 +672,7 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
 
     view_name = _("Instance Group Running Jobs")
     model = UnifiedJob
-    serializer_class = UnifiedJobSerializer
+    serializer_class = UnifiedJobListSerializer
     parent_model = InstanceGroup
     relationship = "unifiedjob_set"
 
@@ -781,7 +781,7 @@ class ScheduleCredentialsList(LaunchConfigCredentialsBase):
 class ScheduleUnifiedJobsList(SubListAPIView):
 
     model = UnifiedJob
-    serializer_class = UnifiedJobSerializer
+    serializer_class = UnifiedJobListSerializer
     parent_model = Schedule
     relationship = 'unifiedjob_set'
     view_name = _('Schedule Jobs List')
@@ -920,12 +920,6 @@ class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
-
-    def get_queryset(self):
-        qs = Organization.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'auditor_role', 'member_role', 'read_role')
-        qs = qs.prefetch_related('created_by', 'modified_by')
-        return qs
 
     def create(self, request, *args, **kwargs):
         """Create a new organzation.
@@ -1107,16 +1101,23 @@ class OrganizationAccessList(ResourceAccessList):
     parent_model = Organization
 
 
-class OrganizationObjectRolesList(SubListAPIView):
+class ObjectRolesBase(SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
-    parent_model = Organization
+    # subclasses must define parent_model
 
     def get_queryset(self):
         po = self.get_parent_object()
         content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
+        return Role.objects.filter(
+            content_type=content_type, object_id=po.pk
+        ).prefetch_related('content_type', 'content_object')
+
+
+class OrganizationObjectRolesList(ObjectRolesBase):
+
+    parent_model = Organization
 
 
 class TeamList(ListCreateAPIView):
@@ -1183,16 +1184,9 @@ class TeamRolesList(SubListAttachDetachAPIView):
         return super(TeamRolesList, self).post(request, *args, **kwargs)
 
 
-class TeamObjectRolesList(SubListAPIView):
+class TeamObjectRolesList(ObjectRolesBase):
 
-    model = Role
-    serializer_class = RoleSerializer
     parent_model = Team
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class TeamProjectsList(SubListAPIView):
@@ -1240,18 +1234,6 @@ class ProjectList(ListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
-
-    def get_queryset(self):
-        projects_qs = Project.accessible_objects(self.request.user, 'read_role')
-        projects_qs = projects_qs.select_related(
-            'organization',
-            'admin_role',
-            'use_role',
-            'update_role',
-            'read_role',
-        )
-        projects_qs = projects_qs.prefetch_related('last_job', 'created_by')
-        return projects_qs
 
 
 class ProjectDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPIView):
@@ -1472,16 +1454,9 @@ class ProjectAccessList(ResourceAccessList):
     parent_model = Project
 
 
-class ProjectObjectRolesList(SubListAPIView):
+class ProjectObjectRolesList(ObjectRolesBase):
 
-    model = Role
-    serializer_class = RoleSerializer
     parent_model = Project
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class ProjectCopy(CopyAPIView):
@@ -1953,16 +1928,9 @@ class CredentialAccessList(ResourceAccessList):
     parent_model = Credential
 
 
-class CredentialObjectRolesList(SubListAPIView):
+class CredentialObjectRolesList(ObjectRolesBase):
 
-    model = Role
-    serializer_class = RoleSerializer
     parent_model = Credential
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class CredentialCopy(CopyAPIView):
@@ -1993,16 +1961,9 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
         return super(InventoryScriptDetail, self).destroy(request, *args, **kwargs)
 
 
-class InventoryScriptObjectRolesList(SubListAPIView):
+class InventoryScriptObjectRolesList(ObjectRolesBase):
 
-    model = Role
-    serializer_class = RoleSerializer
     parent_model = CustomInventoryScript
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class InventoryScriptCopy(CopyAPIView):
@@ -2015,12 +1976,6 @@ class InventoryList(ListCreateAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
-
-    def get_queryset(self):
-        qs = Inventory.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'read_role', 'update_role', 'use_role', 'adhoc_role')
-        qs = qs.prefetch_related('created_by', 'modified_by', 'organization')
-        return qs
 
 
 class ControlledByScmMixin(object):
@@ -2106,16 +2061,9 @@ class InventoryAccessList(ResourceAccessList):
     parent_model = Inventory
 
 
-class InventoryObjectRolesList(SubListAPIView):
+class InventoryObjectRolesList(ObjectRolesBase):
 
-    model = Role
-    serializer_class = RoleSerializer
     parent_model = Inventory
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class InventoryJobTemplateList(SubListAPIView):
@@ -3473,16 +3421,9 @@ class JobTemplateAccessList(ResourceAccessList):
     parent_model = JobTemplate
 
 
-class JobTemplateObjectRolesList(SubListAPIView):
+class JobTemplateObjectRolesList(ObjectRolesBase):
 
-    model = Role
-    serializer_class = RoleSerializer
     parent_model = JobTemplate
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class JobTemplateCopy(CopyAPIView):
@@ -3809,16 +3750,9 @@ class WorkflowJobTemplateAccessList(WorkflowsEnforcementMixin, ResourceAccessLis
     parent_model = WorkflowJobTemplate
 
 
-class WorkflowJobTemplateObjectRolesList(WorkflowsEnforcementMixin, SubListAPIView):
+class WorkflowJobTemplateObjectRolesList(WorkflowsEnforcementMixin, ObjectRolesBase):
 
-    model = Role
-    serializer_class = RoleSerializer
     parent_model = WorkflowJobTemplate
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityStreamEnforcementMixin, SubListAPIView):
@@ -4853,7 +4787,7 @@ class RoleList(ListAPIView):
             mandatories = ('system_administrator', 'system_auditor')
             super_qs = Role.objects.filter(singleton_name__in=mandatories)
             result = result | super_qs
-        return result
+        return result.prefetch_related('content_type', 'content_object')
 
 
 class RoleDetail(RetrieveAPIView):
