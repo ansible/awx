@@ -11,7 +11,6 @@ import django_auth_ldap.config
 from django_auth_ldap.config import (
     LDAPSearch,
     LDAPSearchUnion,
-    LDAPGroupType,
 )
 
 # This must be imported so get_subclasses picks it up
@@ -30,6 +29,18 @@ def get_subclasses(cls):
         for subsubclass in get_subclasses(subclass):
             yield subsubclass
         yield subclass
+
+
+def find_class_in_modules(class_name):
+    '''
+    Used to find ldap subclasses by string
+    '''
+    module_search_space = [django_auth_ldap.config, awx.sso.ldap_group_types]
+    for m in module_search_space:
+        cls = getattr(m, class_name, None)
+        if cls:
+            return cls
+    return None
 
 
 class DependsOnMixin():
@@ -349,14 +360,6 @@ class LDAPUserAttrMapField(fields.DictField):
         return data
 
 
-VALID_GROUP_TYPE_PARAMS_MAP = {
-    'LDAPGroupType': ['name_attr'],
-    'MemberDNGroupType': ['name_attr', 'member_attr'],
-    'PosixUIDGroupType': ['name_attr', 'ldap_group_user_attr'],
-}
-
-
-
 class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
 
     default_error_messages = {
@@ -376,14 +379,6 @@ class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
         return value.__class__.__name__
 
     def to_internal_value(self, data):
-        def find_class_in_modules(class_name):
-            module_search_space = [django_auth_ldap.config, awx.sso.ldap_group_types]
-            for m in module_search_space:
-                cls = getattr(m, class_name, None)
-                if cls:
-                    return cls
-            return None
-
         data = super(LDAPGroupTypeField, self).to_internal_value(data)
         if not data:
             return None
@@ -399,17 +394,9 @@ class LDAPGroupTypeField(fields.ChoiceField, DependsOnMixin):
         # MemberDNGroupType was the only group type, of the underlying lib, that
         # took a parameter.
         params_sanitized = dict()
-        if isinstance(cls, LDAPGroupType):
-            for k in VALID_GROUP_TYPE_PARAMS_MAP['LDAPGroupType']:
-                if k in params:
-                    params_sanitized['name_attr'] = params['name_attr']
-
-        if data.endswith('MemberDNGroupType'):
-            params.setdefault('member_attr', 'member')
-            params_sanitized['member_attr'] = params['member_attr']
-        elif data.endswith('PosixUIDGroupType'):
-            params.setdefault('ldap_group_user_attr', 'uid')
-            params_sanitized['ldap_group_user_attr'] = params['ldap_group_user_attr']
+        for attr in inspect.getargspec(cls.__init__).args[1:]:
+            if attr in params:
+                params_sanitized[attr] = params[attr]
 
         return cls(**params_sanitized)
 
@@ -425,7 +412,13 @@ class LDAPGroupTypeParamsField(fields.DictField, DependsOnMixin):
             return value
         group_type_str = self.get_depends_on()
         group_type_str = group_type_str or ''
-        invalid_keys = (set(value.keys()) - set(VALID_GROUP_TYPE_PARAMS_MAP.get(group_type_str, 'LDAPGroupType')))
+
+        group_type_cls = find_class_in_modules(group_type_str)
+        if not group_type_cls:
+            # Fail safe
+            return {}
+
+        invalid_keys = set(value.keys()) - set(inspect.getargspec(group_type_cls.__init__).args[1:])
         if invalid_keys:
             keys_display = json.dumps(list(invalid_keys)).lstrip('[').rstrip(']')
             self.fail('invalid_keys', invalid_keys=keys_display)

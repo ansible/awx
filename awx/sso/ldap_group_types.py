@@ -13,10 +13,9 @@ from django_auth_ldap.config import LDAPGroupType
 
 class PosixUIDGroupType(LDAPGroupType):
 
-    def __init__(self, ldap_group_user_attr, *args, **kwargs):
-        super(PosixUIDGroupType, self).__init__(*args, **kwargs)
-
+    def __init__(self, name_attr='cn', ldap_group_user_attr='uid'):
         self.ldap_group_user_attr = ldap_group_user_attr
+        super(PosixUIDGroupType, self).__init__(name_attr)
 
     """
     An LDAPGroupType subclass that handles non-standard DS.
