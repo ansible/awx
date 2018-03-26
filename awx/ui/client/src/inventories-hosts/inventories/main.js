@@ -8,12 +8,11 @@ import adhoc from './adhoc/main';
 import group from './related/groups/main';
 import sources from './related/sources/main';
 import relatedHost from './related/hosts/main';
-import inventoryCompletedJobs from './related/completed-jobs/main';
 import inventoryList from './list/main';
 import InventoryList from './inventory.list';
 import adHocRoute from './adhoc/adhoc.route';
 import insights from './insights/main';
-import completedJobsRoute from './related/completed-jobs/completed-jobs.route';
+import completedJobsRoute from '~features/jobs/routes/inventoryCompletedJobs.route.js';
 import inventorySourceEditRoute from './related/sources/edit/sources-edit.route';
 import inventorySourceEditNotificationsRoute from './related/sources/edit/sources-notifications.route';
 import inventorySourceAddRoute from './related/sources/add/sources-add.route';
@@ -53,7 +52,6 @@ angular.module('inventory', [
         group.name,
         sources.name,
         relatedHost.name,
-        inventoryCompletedJobs.name,
         inventoryList.name,
         insights.name,
         SmartInventory.name,

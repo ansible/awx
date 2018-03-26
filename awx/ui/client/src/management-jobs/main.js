@@ -6,7 +6,6 @@
 
 import managementJobsCard from './card/main';
 import managementJobsScheduler from './scheduler/main';
-import list from './management-jobs.list';
 import managementJobsNotifications from './notifications/main';
 
 export default
@@ -14,5 +13,4 @@ export default
         managementJobsCard.name,
         managementJobsScheduler.name,
         managementJobsNotifications.name
-    ])
-    .factory('managementJobsListObject', list);
+    ]);

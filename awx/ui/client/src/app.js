@@ -33,7 +33,6 @@ import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import Templates from './templates/main';
-import jobs from './jobs/main';
 import teams from './teams/main';
 import users from './users/main';
 import projects from './projects/main';
@@ -92,7 +91,6 @@ angular
         standardOut.name,
         Templates.name,
         portalMode.name,
-        jobs.name,
         teams.name,
         users.name,
         projects.name,

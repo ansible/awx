@@ -23,6 +23,10 @@ function InstanceGroupsStrings (BaseString) {
         IS_OFFLINE: t.s('Unavailable to run jobs.'),
         IS_OFFLINE_LABEL: t.s('Unavailable')
     };
+
+    ns.jobs = {
+        PANEL_TITLE: t.s('Jobs')
+    };
 }
 
 InstanceGroupsStrings.$inject = ['BaseStringService'];

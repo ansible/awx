@@ -15,10 +15,6 @@ import InstanceGroupsListController from './list/instance-groups-list.controller
 import InstancesTemplate from './instances/instances-list.partial.html';
 import InstanceListController from './instances/instances.controller';
 
-import JobsTemplate from './jobs/jobs-list.partial.html';
-import InstanceGroupJobsListController from './jobs/jobs.controller';
-import InstanceJobsListController from './instances/instance-jobs/instance-jobs.controller';
-
 import InstanceModalTemplate from './instances/instance-modal.partial.html';
 import InstanceModalController from './instances/instance-modal.controller.js';
 
@@ -26,7 +22,9 @@ import list from './instance-groups.list';
 import service from './instance-groups.service';
 
 import InstanceGroupsStrings from './instance-groups.strings';
-import JobStrings from './jobs/jobs.strings';
+
+import instanceGroupJobsRoute from '~features/jobs/routes/instanceGroupJobs.route.js';
+import instanceJobsRoute from '~features/jobs/routes/instanceJobs.route.js';
 
 const MODULE_NAME = 'instanceGroups';
 
@@ -255,73 +253,8 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         resolvedModels: InstanceGroupsResolve
     });
 
-    $stateExtender.addState({
-        name: 'instanceGroups.instanceJobs',
-        url: '/:instance_group_id/instances/:instance_id/jobs',
-        ncyBreadcrumb: {
-            parent: 'instanceGroups.instances',
-            label: ComponentsStrings.get('layout.JOBS')
-        },
-        views: {
-            'instanceJobs@instanceGroups': {
-                templateUrl: JobsTemplate,
-                controller: 'InstanceJobsListController',
-                controllerAs: 'vm'
-            },
-        },
-        params: {
-            job_search: {
-                value: {
-                    page_size: '10',
-                    order_by: '-finished'
-                },
-                dynamic: true
-            },
-        },
-        data: {
-            socket: {
-                "groups": {
-                    "jobs": ["status_changed"],
-                }
-            }
-        },
-        resolvedModels: InstanceGroupsResolve
-    });
-
-    $stateExtender.addState({
-        name: 'instanceGroups.jobs',
-        url: '/:instance_group_id/jobs',
-        ncyBreadcrumb: {
-            parent: 'instanceGroups.edit',
-            label: ComponentsStrings.get('layout.JOBS')
-        },
-        params: {
-            job_search: {
-                value: {
-                    page_size: '10',
-                    order_by: '-finished'
-                },
-                dynamic: true
-            }
-        },
-        data: {
-            socket: {
-                "groups": {
-                    "jobs": ["status_changed"],
-                }
-            }
-        },
-        views: {
-            'jobs@instanceGroups': {
-                templateUrl: JobsTemplate,
-                controller: 'InstanceGroupJobsListController',
-                controllerAs: 'vm'
-            },
-        },
-        resolve: {
-            resolvedModels: InstanceGroupsResolve
-        }
-    });
+    $stateExtender.addState(instanceJobsRoute);
+    $stateExtender.addState(instanceGroupJobsRoute);
 }
 
 InstanceGroupsRun.$inject = [
@@ -334,16 +267,13 @@ angular.module(MODULE_NAME, [])
     .service('InstanceGroupsService', service)
     .factory('InstanceGroupList', list)
     .controller('InstanceGroupsListController', InstanceGroupsListController)
-    .controller('InstanceGroupJobsListController', InstanceGroupJobsListController)
     .controller('InstanceListController', InstanceListController)
-    .controller('InstanceJobsListController', InstanceJobsListController)
     .directive('instanceListPolicy', InstanceListPolicy)
     .directive('instanceGroupsMultiselect', instanceGroupsMultiselect)
     .directive('instanceGroupsModal', instanceGroupsModal)
     .directive('capacityAdjuster', CapacityAdjuster)
     .directive('capacityBar', CapacityBar)
     .service('InstanceGroupsStrings', InstanceGroupsStrings)
-    .service('JobStrings', JobStrings)
     .run(InstanceGroupsRun);
 
 export default MODULE_NAME;

@@ -11,8 +11,8 @@
 */
 
 
-export default ['NotificationsList', 'CompletedJobsList', 'i18n',
-function(NotificationsList, CompletedJobsList, i18n) {
+export default ['NotificationsList', 'i18n',
+function(NotificationsList, i18n) {
     return function() {
         var JobTemplateFormObject = {
 
@@ -433,7 +433,9 @@ function(NotificationsList, CompletedJobsList, i18n) {
                     include: "NotificationsList"
                 },
                 "completed_jobs": {
-                    include: "CompletedJobsList"
+                    title: i18n._('Completed Jobs'),
+                    skipGenerator: true,
+                    ngClick: "$state.go('templates.editJobTemplate.completed_jobs')"
                 }
             },
 
@@ -472,11 +474,6 @@ function(NotificationsList, CompletedJobsList, i18n) {
                 JobTemplateFormObject.related[itm] = _.clone(NotificationsList);
                 JobTemplateFormObject.related[itm].ngClick = "$state.go('templates.editJobTemplate.notifications')";
                 JobTemplateFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
-            }
-            if (JobTemplateFormObject.related[itm].include === "CompletedJobsList") {
-                JobTemplateFormObject.related[itm] = CompletedJobsList;
-                JobTemplateFormObject.related[itm].ngClick = "$state.go('templates.editJobTemplate.completed_jobs')";
-                JobTemplateFormObject.related[itm].generateList = true;
             }
         }
 
