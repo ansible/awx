@@ -12,6 +12,7 @@ from awx.main.models import (
     Inventory,
     InventorySource,
     InventoryUpdate,
+    Job
 )
 from awx.main.utils.filters import SmartFilter
 
@@ -97,6 +98,29 @@ class TestSCMUpdateFeatures:
             scm_inventory_source.description = "I'm testing this!"
             scm_inventory_source.save()
             assert not mck_update.called
+
+
+@pytest.mark.django_db
+class TestRelatedJobs:
+
+    def test_inventory_related(self, inventory):
+        job = Job.objects.create(
+            inventory=inventory
+        )
+        assert job.id in [jerb.id for jerb in inventory._get_related_jobs()]
+
+    def test_related_group_jobs(self, group):
+        job = Job.objects.create(
+            inventory=group.inventory
+        )
+        assert job.id in [jerb.id for jerb in group._get_related_jobs()]
+
+    def test_related_group_update(self, group):
+        src = group.inventory_sources.create(name='foo')
+        job = InventoryUpdate.objects.create(
+            inventory_source=src
+        )
+        assert job.id in [jerb.id for jerb in group._get_related_jobs()]
 
 
 @pytest.mark.django_db

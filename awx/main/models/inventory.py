@@ -960,7 +960,10 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     RelatedJobsMixin
     '''
     def _get_related_jobs(self):
-        return InventoryUpdate.objects.filter(inventory_source__in=self.inventory_sources.all())
+        return UnifiedJob.objects.non_polymorphic().filter(
+            Q(Job___inventory=self.inventory) |
+            Q(InventoryUpdate___inventory_source__groups=self)
+        )
 
 
 class InventorySourceOptions(BaseModel):
