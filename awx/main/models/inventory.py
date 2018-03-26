@@ -80,11 +80,6 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         default='',
         help_text=_('Inventory variables in JSON or YAML format.'),
     )
-    has_active_failures = models.BooleanField(
-        default=False,
-        editable=False,
-        help_text=_('Flag indicating whether any hosts in this inventory have failed.'),
-    )
     total_hosts = models.PositiveIntegerField(
         default=0,
         editable=False,
@@ -103,12 +98,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
     groups_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Number of groups in this inventory with active failures.'),
-    )
-    has_inventory_sources = models.BooleanField(
-        default=False,
-        editable=False,
-        help_text=_('Flag indicating whether this inventory has any external inventory sources.'),
+        help_text=_('DEPRECATED: Number of groups in this inventory with active failures. '
+                    'This field will be removed in a future release.'),
     )
     total_inventory_sources = models.PositiveIntegerField(
         default=0,
@@ -175,6 +166,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         return reverse('api:inventory_detail', kwargs={'pk': self.pk}, request=request)
 
     variables_dict = VarsDictProperty('variables')
+
+    @property
+    def has_active_failures(self):
+        return bool(self.hosts_with_active_failures)
+
+    @property
+    def has_inventory_sources(self):
+        return bool(self.total_inventory_sources)
 
     def get_group_hosts_map(self):
         '''
@@ -377,13 +376,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             group_updates = groups_to_update.setdefault(group_pk, {})
             group_updates.update({
                 'total_hosts': len(active_host_pks & host_pks),
-                'has_active_failures': bool(failed_host_pks & host_pks),
                 'hosts_with_active_failures': len(failed_host_pks & host_pks),
                 'total_groups': len(child_pks),
                 'groups_with_active_failures': len(failed_group_pks & child_pks),
                 'has_inventory_sources': bool(group_pk in groups_with_cloud_pks),
             })
-            if group_updates['has_active_failures']:
+            if group_updates['hosts_with_active_failures']:
                 failed_group_pks.add(group_pk)
 
         # Now apply updates to each group as needed (in batches).
@@ -414,19 +412,17 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         active_groups = self.groups
         if self.kind == 'smart':
             active_groups = active_groups.none()
-        failed_groups = active_groups.filter(has_active_failures=True)
+        failed_groups = active_groups.filter(hosts_with_active_failures__gt=0)
         if self.kind == 'smart':
             active_inventory_sources = self.inventory_sources.none()
         else:
             active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         computed_fields = {
-            'has_active_failures': bool(failed_hosts.count()),
             'total_hosts': active_hosts.count(),
             'hosts_with_active_failures': failed_hosts.count(),
             'total_groups': active_groups.count(),
             'groups_with_active_failures': failed_groups.count(),
-            'has_inventory_sources': bool(active_inventory_sources.count()),
             'total_inventory_sources': active_inventory_sources.count(),
             'inventory_sources_with_failures': failed_inventory_sources.count(),
         }
@@ -747,11 +743,6 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         editable=False,
         help_text=_('Total number of hosts directly or indirectly in this group.'),
     )
-    has_active_failures = models.BooleanField(
-        default=False,
-        editable=False,
-        help_text=_('Flag indicating whether this group has any hosts with active failures.'),
-    )
     hosts_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
@@ -765,7 +756,8 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
     groups_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
-        help_text=_('Number of child groups within this group that have active failures.'),
+        help_text=_('DEPRECATED: Number of child groups within this group that have active failures. '
+                    'This field will be removed in a future release.'),
     )
     has_inventory_sources = models.BooleanField(
         default=False,
@@ -781,6 +773,10 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
 
     def get_absolute_url(self, request=None):
         return reverse('api:group_detail', kwargs={'pk': self.pk}, request=request)
+
+    @property
+    def has_active_failures(self):
+        return bool(self.hosts_with_active_failures)
 
     @transaction.atomic
     def delete_recursive(self):
@@ -854,11 +850,10 @@ class Group(CommonModelNameNotUnique, RelatedJobsMixin):
         failed_hosts = active_hosts.filter(last_job_host_summary__failed=True)
         active_groups = self.all_children
         # FIXME: May not be accurate unless we always update groups depth-first.
-        failed_groups = active_groups.filter(has_active_failures=True)
+        failed_groups = active_groups.filter(hosts_with_active_failures__gt=0)
         active_inventory_sources = self.inventory_sources.filter(source__in=CLOUD_INVENTORY_SOURCES)
         computed_fields = {
             'total_hosts': active_hosts.count(),
-            'has_active_failures': bool(failed_hosts.count()),
             'hosts_with_active_failures': failed_hosts.count(),
             'total_groups': active_groups.count(),
             'groups_with_active_failures': failed_groups.count(),
