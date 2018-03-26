@@ -155,7 +155,7 @@ def test_host_access(organization, inventory, group, user, group_factory):
 def test_inventory_source_credential_check(rando, inventory_source, credential):
     inventory_source.inventory.admin_role.members.add(rando)
     access = InventorySourceAccess(rando)
-    assert not access.can_change(inventory_source, {'credential': credential})
+    assert not access.can_attach(inventory_source, credential, 'credentials', {'id': credential.pk})
 
 
 @pytest.mark.django_db
