@@ -20,6 +20,7 @@ azure-mgmt-containerinstance>=0.3.1
 backports.ssl-match-hostname==3.5.0.1
 boto==2.47.0    # last which does not break ec2 scripts
 boto3==1.6.2
+dnspython==1.15.0    # via dig
 ovirt-engine-sdk-python==4.2.4    # minimum set inside Ansible facts module requirements
 python-memcached==1.59    # same as AWX requirement
 psphere==0.5.2
