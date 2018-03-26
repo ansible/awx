@@ -1181,6 +1181,11 @@ def tower(cls):
                 'label': 'Password',
                 'type': 'string',
                 'secret': True,
+            }, {
+                'id': 'verify_ssl',
+                'label': 'Verify SSL',
+                'type': 'boolean',
+                'secret': False
             }],
             'required': ['host', 'username', 'password'],
         },
@@ -1189,6 +1194,7 @@ def tower(cls):
                 'TOWER_HOST': '{{host}}',
                 'TOWER_USERNAME': '{{username}}',
                 'TOWER_PASSWORD': '{{password}}',
+                'TOWER_VERIFY_SSL': '{{verify_ssl}}'
             }
         },
     )
