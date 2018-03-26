@@ -580,37 +580,41 @@ class UserAccess(BaseAccess):
 
 class OAuth2ApplicationAccess(BaseAccess):
     '''
-    I can read, change or delete OAuth applications when:
+    I can read, change or delete OAuth 2 applications when:
      - I am a superuser.
      - I am the admin of the organization of the user of the application.
-     - I am the user of the application.
-    I can create OAuth applications when:
+     - I am a user in the organization of the application.
+    I can create OAuth 2 applications when:
      - I am a superuser.
-     - I am the admin of the organization of the user of the application.
+     - I am the admin of the organization of the organization of the application.
     '''
 
     model = OAuth2Application
     select_related = ('user',)
 
     def filtered_queryset(self):
-        accessible_users = User.objects.filter(
-            pk__in=self.user.admin_of_organizations.values('member_role__members')
-        ) | User.objects.filter(pk=self.user.pk)
-        return self.model.objects.filter(user__in=accessible_users)
+        return self.model.objects.filter(organization__in=self.user.organizations)
 
     def can_change(self, obj, data):
-        return self.can_read(obj)
-
+        if obj.organization in self.user.admin_of_organizations or self.user.is_superuser:
+            if not self.check_related('organization', Organization, data, role_field='admin_role'):
+                return False
+            return True
+        else: 
+            return False
+    
     def can_delete(self, obj):
-        return self.can_read(obj)
+        if obj.organization in self.user.admin_of_organizations or self.user.is_superuser:
+            return True
+        else: 
+            return False
 
     def can_add(self, data):
         if self.user.is_superuser:
-            return True
-        user = get_object_from_data('user', User, data)
-        if not user:
-            return False
-        return set(self.user.admin_of_organizations.all()) & set(user.organizations.all())
+            return True    
+        if not data:
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
+        return self.check_related('organization', Organization, data, role_field='admin_role')
 
 
 class OAuth2TokenAccess(BaseAccess):
@@ -624,25 +628,32 @@ class OAuth2TokenAccess(BaseAccess):
     '''
 
     model = OAuth2AccessToken
+    
     select_related = ('user', 'application')
 
     def filtered_queryset(self):
-        accessible_users = User.objects.filter(
-            pk__in=self.user.admin_of_organizations.values('member_role__members')
-        ) | User.objects.filter(pk=self.user.pk)
-        return self.model.objects.filter(user__in=accessible_users)
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return self.model.objects.all()
+        apps = OAuth2Application.objects.filter(organization__in=self.user.admin_of_organizations)
+        return self.model.objects.filter(application__in=apps) | self.model.objects.filter(user__id=self.user.pk)
 
     def can_change(self, obj, data):
+        if self.user.is_system_auditor:
+            return False
         return self.can_read(obj)
 
     def can_delete(self, obj):
+        if self.user.is_system_auditor:
+            return False
         return self.can_read(obj)
 
     def can_add(self, data):
-        app = get_object_from_data('application', OAuth2Application, data)
-        if not app:
-            return True
-        return OAuth2ApplicationAccess(self.user).can_read(app)
+        if 'application' in data:
+            app = get_object_from_data('application', OAuth2Application, data)
+            if app is None:
+                return True
+            return OAuth2ApplicationAccess(self.user).can_read(app)
+        return True
 
 
 class OrganizationAccess(BaseAccess):
