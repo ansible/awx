@@ -372,6 +372,38 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
+            rocketchat_url: {
+                label: i18n._('Target URL'),
+                type: 'text',
+                awRequiredWhen: {
+                    reqExpression: "rocketchat_required",
+                    init: "false"
+                },
+                ngShow: "notification_type.value == 'rocketchat' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            rocketchat_username: {
+                label: i18n._('Username'),
+                type: 'text',
+                ngShow: "notification_type.value == 'rocketchat' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            rocketchat_icon_url: {
+                label: i18n._('Icon URL'),
+                type: 'text',
+                ngShow: "notification_type.value == 'rocketchat' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            rocketchat_no_verify_ssl: {
+                label: i18n._('Disable SSL Verification'),
+                type: 'checkbox',
+                ngShow: "notification_type.value == 'rocketchat' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
             server: {
                 label: i18n._('IRC Server Address'),
                 type: 'text',
