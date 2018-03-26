@@ -73,7 +73,7 @@ export default ['$q', function($q){
                 placeholder: true,
                 isNew: true,
                 edited: false,
-                isRoot: params.parent.source.isStartNode ? true : false
+                isRoot: _.get(params, 'parent.isStartNode') ? true : _.get(params, 'parent.source.isStartNode', false)
             };
 
             let parentNode = (params.betweenTwoNodes) ? this.searchTree({element: params.tree, matchingId: params.parent.source.id}) : this.searchTree({element: params.tree, matchingId: params.parent.id});
