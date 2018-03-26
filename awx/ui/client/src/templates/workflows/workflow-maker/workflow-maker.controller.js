@@ -91,11 +91,13 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                 sendableNodeData.extra_data[key] = value;
                             }
                         });
-                        if(sendableNodeData.extra_data === {}) {
+                        if(_.isEmpty(sendableNodeData.extra_data)) {
                             delete sendableNodeData.extra_data;
                         }
                     } else {
-                        sendableNodeData.extra_data = params.node.promptData.extraVars;
+                        if(_.has(params, 'node.promptData.extraVars') && !_.isEmpty(params.node.promptData.extraVars)) {
+                            sendableNodeData.extra_data = params.node.promptData.extraVars;
+                        }
                     }
                 }
 
@@ -599,16 +601,21 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                     let jobTemplate = new JobTemplate();
 
-                    Rest.setUrl($scope.nodeBeingEdited.originalNodeObj.related.credentials);
-
-                    if($scope.nodeBeingEdited.promptData) {
+                    if(!_.isEmpty($scope.nodeBeingEdited.promptData)) {
                         $scope.promptData = _.cloneDeep($scope.nodeBeingEdited.promptData);
-                    }else if($scope.nodeBeingEdited.unifiedJobTemplate){
-                        $q.all([jobTemplate.optionsLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id), jobTemplate.getLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id), Rest.get()])
+                    } else if($scope.nodeBeingEdited.unifiedJobTemplate){
+                        let promises = [jobTemplate.optionsLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id), jobTemplate.getLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id)];
+
+                        if(_.has($scope, 'nodeBeingEdited.originalNodeObj.related.credentials')) {
+                            Rest.setUrl($scope.nodeBeingEdited.originalNodeObj.related.credentials);
+                            promises.push(Rest.get());
+                        }
+
+                        $q.all(promises)
                             .then((responses) => {
                                 let launchOptions = responses[0].data,
                                     launchConf = responses[1].data,
-                                    workflowNodeCredentials = responses[2].data.results;
+                                    workflowNodeCredentials = responses[2] ? responses[2].data.results : [];
 
                                 let prompts = PromptService.processPromptValues({
                                     launchConf: responses[1].data,
@@ -682,7 +689,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                                                 $scope.extraVars = (processed.extra_data === '' || _.isEmpty(processed.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(processed.extra_data);
 
-                                                $scope.promptData = {
+                                                $scope.nodeBeingEdited.promptData = $scope.promptData = {
                                                     launchConf: launchConf,
                                                     launchOptions: launchOptions,
                                                     prompts: prompts,
@@ -704,7 +711,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                             });
                                     }
                                     else {
-                                        $scope.promptData = {
+                                        $scope.nodeBeingEdited.promptData = $scope.promptData = {
                                             launchConf: launchConf,
                                             launchOptions: launchOptions,
                                             prompts: prompts,
@@ -714,40 +721,39 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                     }
                                 }
                         });
+                    }
 
-                        if ($scope.nodeBeingEdited.unifiedJobTemplate.type === "job_template") {
-                            $scope.workflowMakerFormConfig.activeTab = "jobs";
+                    if ($scope.nodeBeingEdited.unifiedJobTemplate.type === "job_template") {
+                        $scope.workflowMakerFormConfig.activeTab = "jobs";
+                    }
+
+                    $scope.selectedTemplate = $scope.nodeBeingEdited.unifiedJobTemplate;
+
+                    if($scope.selectedTemplate.unified_job_type) {
+                        switch ($scope.selectedTemplate.unified_job_type) {
+                            case "job":
+                                $scope.workflowMakerFormConfig.activeTab = "jobs";
+                                break;
+                            case "project_update":
+                                $scope.workflowMakerFormConfig.activeTab = "project_sync";
+                                break;
+                            case "inventory_update":
+                                $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
+                                break;
                         }
-
-                        $scope.selectedTemplate = $scope.nodeBeingEdited.unifiedJobTemplate;
-
-                        if($scope.selectedTemplate.unified_job_type) {
-                            switch ($scope.selectedTemplate.unified_job_type) {
-                                case "job":
-                                    $scope.workflowMakerFormConfig.activeTab = "jobs";
-                                    break;
-                                case "project_update":
-                                    $scope.workflowMakerFormConfig.activeTab = "project_sync";
-                                    break;
-                                case "inventory_update":
-                                    $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
-                                    break;
-                            }
+                    }
+                    else if($scope.selectedTemplate.type) {
+                        switch ($scope.selectedTemplate.type) {
+                            case "job_template":
+                                $scope.workflowMakerFormConfig.activeTab = "jobs";
+                                break;
+                            case "project":
+                                $scope.workflowMakerFormConfig.activeTab = "project_sync";
+                                break;
+                            case "inventory_source":
+                                $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
+                                break;
                         }
-                        else if($scope.selectedTemplate.type) {
-                            switch ($scope.selectedTemplate.type) {
-                                case "job_template":
-                                    $scope.workflowMakerFormConfig.activeTab = "jobs";
-                                    break;
-                                case "project":
-                                    $scope.workflowMakerFormConfig.activeTab = "project_sync";
-                                    break;
-                                case "inventory_source":
-                                    $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
-                                    break;
-                            }
-                        }
-
                     }
 
                     let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({
