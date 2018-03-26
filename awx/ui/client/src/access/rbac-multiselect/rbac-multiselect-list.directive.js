@@ -146,10 +146,6 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             scope[`${list.iterator}_dataset`] = scope.dataset.data;
             scope[`${list.name}`] = scope[`${list.iterator}_dataset`].results;
 
-            scope.$watch(`allSelected.${list.name}`, function(){
-                _.forEach(scope[`${list.name}`], isSelected);
-            }, true);
-
             scope.$watch(list.name, function(){
                 _.forEach(scope[`${list.name}`], isSelected);
                 optionsRequestDataProcessing();
@@ -198,7 +194,6 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             }
 
             function isSelected(item){
-                item.isSelected = false;
                 _.forEach(scope.allSelected[list.name], (selectedRow) => {
                     if(selectedRow.id === item.id) {
                         item.isSelected = true;
