@@ -6,7 +6,7 @@ function InstanceGroupJobsContainerController (strings, $state) {
     function init() {
         const instanceGroupId = $state.params.instance_group_id;
 
-        vm.panelTitle = 'Jobs'
+        vm.panelTitle = strings.get('jobs.PANEL_TITLE');
         vm.strings = strings;
 
         vm.tab = {

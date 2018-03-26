@@ -13,4 +13,4 @@ export default
         managementJobsCard.name,
         managementJobsScheduler.name,
         managementJobsNotifications.name
-    ])
+    ]);

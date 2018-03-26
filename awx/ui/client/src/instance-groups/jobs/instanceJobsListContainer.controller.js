@@ -1,20 +1,17 @@
 
-function InstanceGroupJobsContainerController (strings, $state) {
+function InstanceGroupJobsContainerController (strings) {
     const vm = this || {};
 
     init();
     function init() {
-        const instanceGroupId = $state.params.instance_group_id;
-
-        vm.panelTitle = 'Jobs'
+        vm.panelTitle = strings.get('jobs.PANEL_TITLE');
         vm.strings = strings;
     }
 
 }
 
 InstanceGroupJobsContainerController.$inject = [
-    'InstanceGroupsStrings',
-    '$state'
+    'InstanceGroupsStrings'
 ];
 
 export default InstanceGroupJobsContainerController;
