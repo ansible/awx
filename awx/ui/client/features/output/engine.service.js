@@ -1,7 +1,7 @@
 const JOB_END = 'playbook_on_stats';
 const MAX_LAG = 120;
 
-function JobStreamService ($q) {
+function JobEventEngine ($q) {
     this.init = ({ resource, scroll, page, onEventFrame, onStart, onStop }) => {
         this.resource = resource;
         this.scroll = scroll;
@@ -105,7 +105,7 @@ function JobStreamService ($q) {
         }
     };
 
-    this.pushEventData = data => {
+    this.pushEvent = data => {
         this.lag++;
 
         this.chain = this.chain
@@ -221,6 +221,6 @@ function JobStreamService ($q) {
     this.isDone = () => this.state.ended;
 }
 
-JobStreamService.$inject = ['$q'];
+JobEventEngine.$inject = ['$q'];
 
-export default JobStreamService;
+export default JobEventEngine;

@@ -6,7 +6,7 @@ import Controller from '~features/output/index.controller';
 import PageService from '~features/output/page.service';
 import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
-import StreamService from '~features/output/stream.service';
+import EngineService from '~features/output/engine.service';
 
 import DetailsDirective from '~features/output/details.directive';
 import SearchKeyDirective from '~features/output/search-key.directive';
@@ -208,7 +208,7 @@ angular
     .service('JobStrings', Strings)
     .service('JobPageService', PageService)
     .service('JobScrollService', ScrollService)
-    .service('JobStreamService', StreamService)
+    .service('JobEventEngine', EngineService)
     .directive('atDetails', DetailsDirective)
     .directive('atSearchKey', SearchKeyDirective)
     .directive('atStats', StatsDirective)

@@ -13,7 +13,7 @@ let qs;
 let render;
 let resource;
 let scroll;
-let stream;
+let engine;
 
 let vm;
 
@@ -25,7 +25,7 @@ function JobsIndexController (
     _page_,
     _scroll_,
     _render_,
-    _stream_,
+    _engine_,
     _$scope_,
     _$compile_,
     _$q_,
@@ -43,7 +43,7 @@ function JobsIndexController (
     page = _page_;
     scroll = _scroll_;
     render = _render_;
-    stream = _stream_;
+    engine = _engine_;
 
     moment = _moment_;
 
@@ -113,7 +113,7 @@ function init (pageMode) {
     render.init({
         get: () => resource.model.get(`related.${resource.related}.results`),
         compile: html => $compile(html)($scope),
-        isStreamActive: stream.isActive
+        isStreamActive: engine.isActive
     });
 
     scroll.init({
@@ -122,7 +122,7 @@ function init (pageMode) {
         next,
     });
 
-    stream.init({
+    engine.init({
         page,
         scroll,
         resource,
@@ -178,7 +178,7 @@ function handleSocketEvent (scope, data) {
         statsEvent = data;
     }
 
-    stream.pushEventData(data);
+    engine.pushEvent(data);
 }
 
 function devClear (pageMode) {
@@ -228,10 +228,10 @@ function previous () {
         });
 }
 
-function append (events, stream) {
+function append (events, engine) {
     return render.append(events)
         .then(count => {
-            page.updateLineCount(count, stream);
+            page.updateLineCount(count, engine);
         });
 }
 
@@ -292,15 +292,15 @@ function scrollHome () {
 }
 
 function scrollEnd () {
-    if (stream.isActive()) {
-        if (stream.isTransitioning()) {
+    if (engine.isActive()) {
+        if (engine.isTransitioning()) {
             return $q.resolve();
         }
 
-        if (stream.isPaused()) {
-            stream.resume();
+        if (engine.isPaused()) {
+            engine.resume();
         } else {
-            stream.pause();
+            engine.pause();
         }
 
         return $q.resolve();
@@ -450,7 +450,7 @@ JobsIndexController.$inject = [
     'JobPageService',
     'JobScrollService',
     'JobRenderService',
-    'JobStreamService',
+    'JobEventEngine',
     '$scope',
     '$compile',
     '$q',
