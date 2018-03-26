@@ -184,7 +184,7 @@ pyjwt==1.6.0              # via adal, social-auth-core, twilio
 pyopenssl==17.5.0
 pyparsing==2.2.0
 pyrad==2.1                # via django-radius
-python-dateutil==2.7.0
+python-dateutil==2.7.2
 python-ldap==2.5.2        # via django-auth-ldap
 python-logstash==0.4.6
 python-memcached==1.59

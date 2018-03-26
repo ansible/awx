@@ -39,7 +39,7 @@ pycrypto==2.6.1
 pygerduty==0.37.0
 pyOpenSSL==17.5.0
 pyparsing==2.2.0
-python-dateutil==2.7.0  # contains support for TZINFO= parsing
+python-dateutil==2.7.2  # contains support for TZINFO= parsing
 python-logstash==0.4.6
 python-memcached==1.59
 python-radius==1.0
