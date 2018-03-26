@@ -602,7 +602,7 @@ def save_user_session_membership(sender, **kwargs):
         return
     UserSessionMembership.objects.create(user=user, session=session, created=timezone.now())
     for membership in UserSessionMembership.get_memberships_over_limit(user):
-        emit_channel_notification(
+        consumers.emit_channel_notification(
             'control-limit_reached',
             dict(group_name='control',
                  reason=unicode(_('limit_reached')),
