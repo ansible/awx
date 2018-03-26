@@ -97,7 +97,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
     @classmethod
     def rrulestr(cls, rrule, **kwargs):
         """
-        Apply our own custom rrule parsing logic to support TZID=
+        Apply our own custom rrule parsing requirements
         """
         kwargs['forceset'] = True
         x = dateutil.rrule.rrulestr(rrule, **kwargs)
@@ -107,15 +107,6 @@ class Schedule(CommonModel, LaunchTimeConfig):
                 raise ValueError(
                     'A valid TZID must be provided (e.g., America/New_York)'
                 )
-
-            if r._dtstart and r._until:
-                # If https://github.com/dateutil/dateutil/pull/634 ever makes
-                # it into a python-dateutil release, we could remove this block.
-                if all((
-                    r._dtstart.tzinfo != dateutil.tz.tzlocal(),
-                    r._until.tzinfo != dateutil.tz.tzutc(),
-                )):
-                    raise ValueError('RRULE UNTIL values must be specified in UTC')
 
         if 'MINUTELY' in rrule or 'HOURLY' in rrule:
             try:
