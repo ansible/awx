@@ -78,10 +78,10 @@ class TestOAuth2Application:
                     })
 
 
-# @pytest.mark.skip(reason="Needs Update - CA")
 @pytest.mark.django_db
 class TestOAuth2Token:
 
+    @pytest.mark.skip(reason="Needs Update - CA")
     @pytest.mark.parametrize("user_for_access, can_access_list", [
         (0, [True, True, True, True]),
         (1, [False, True, True, False]),

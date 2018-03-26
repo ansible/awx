@@ -616,18 +616,23 @@ class OAuth2TokenAccess(BaseAccess):
     '''
 
     model = OAuth2AccessToken
+    
     select_related = ('user', 'application')
 
     def filtered_queryset(self):
-        accessible_users = User.objects.filter(
-            pk__in=self.user.admin_of_organizations.values('member_role__members')
-        ) | User.objects.filter(pk=self.user.pk)
-        return self.model.objects.filter(user__in=accessible_users)
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return self.model.objects.all()
+        apps = OAuth2Application.objects.filter(organization__in=self.user.admin_of_organizations)
+        return self.model.objects.filter(application__in=apps) | self.model.objects.filter(user__id=self.user.pk)
 
     def can_change(self, obj, data):
+        if self.user.is_system_auditor:
+            return False
         return self.can_read(obj)
 
     def can_delete(self, obj):
+        if self.user.is_system_auditor:
+            return False
         return self.can_read(obj)
 
     def can_add(self, data):
