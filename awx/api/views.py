@@ -3442,6 +3442,7 @@ class JobTemplateCallback(GenericAPIView):
         result = job.signal_start(inventory_sources_already_updated=inventory_sources_already_updated)
         if not result:
             data = dict(msg=_('Error starting job!'))
+            job.delete()
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Return the location of the new job.
@@ -4108,6 +4109,22 @@ class JobRelaunch(RetrieveAPIView):
     obj_permission_type = 'start'
     serializer_class = JobRelaunchSerializer
 
+    def update_raw_data(self, data):
+        data = super(JobRelaunch, self).update_raw_data(data)
+        try:
+            obj = self.get_object()
+        except PermissionDenied:
+            return data
+        if obj:
+            needed_passwords = obj.passwords_needed_to_start
+            if needed_passwords:
+                data['credential_passwords'] = {}
+                for p in needed_passwords:
+                    data['credential_passwords'][p] = u''
+            else:
+                data.pop('credential_passwords')
+        return data
+
     @csrf_exempt
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
@@ -4122,15 +4139,22 @@ class JobRelaunch(RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        context = self.get_serializer_context()
+
+        modified_data = request.data.copy()
+        modified_data.setdefault('credential_passwords', {})
+        for password in obj.passwords_needed_to_start:
+            if password in modified_data:
+                modified_data['credential_passwords'][password] = modified_data[password]
 
         # Note: is_valid() may modify request.data
         # It will remove any key/value pair who's key is not in the 'passwords_needed_to_start' list
-        serializer = self.serializer_class(data=request.data, context={'obj': obj, 'data': request.data})
+        serializer = self.serializer_class(data=modified_data, context=context, instance=obj)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         copy_kwargs = {}
-        retry_hosts = request.data.get('hosts', None)
+        retry_hosts = serializer.validated_data.get('hosts', None)
         if retry_hosts and retry_hosts != 'all':
             if obj.status in ACTIVE_STATES:
                 return Response({'hosts': _(
@@ -4149,12 +4173,13 @@ class JobRelaunch(RetrieveAPIView):
             copy_kwargs['limit'] = ','.join(retry_host_list)
 
         new_job = obj.copy_unified_job(**copy_kwargs)
-        result = new_job.signal_start(**request.data)
+        result = new_job.signal_start(**serializer.validated_data['credential_passwords'])
         if not result:
-            data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
+            data = dict(msg=_('Error starting job!'))
+            new_job.delete()
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = JobSerializer(new_job, context=self.get_serializer_context()).data
+            data = JobSerializer(new_job, context=context).data
             # Add job key to match what old relaunch returned.
             data['job'] = new_job.id
             headers = {'Location': new_job.get_absolute_url(request=request)}
@@ -4387,6 +4412,7 @@ class AdHocCommandList(ListCreateAPIView):
         result = ad_hoc_command.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=ad_hoc_command.passwords_needed_to_start)
+            ad_hoc_command.delete()
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         return response
 
@@ -4479,6 +4505,7 @@ class AdHocCommandRelaunch(GenericAPIView):
         result = new_ad_hoc_command.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=new_ad_hoc_command.passwords_needed_to_start)
+            new_ad_hoc_command.delete()
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             data = AdHocCommandSerializer(new_ad_hoc_command, context=self.get_serializer_context()).data
