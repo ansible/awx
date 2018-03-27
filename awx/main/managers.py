@@ -8,6 +8,7 @@ from django.db import models
 from django.conf import settings
 
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.pglock import advisory_lock
 
 ___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager']
 
@@ -85,6 +86,20 @@ class InstanceManager(models.Manager):
         if node.exists():
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
+
+    def register(self, uuid=settings.SYSTEM_UUID, hostname=settings.CLUSTER_HOST_ID):
+        with advisory_lock('instance_registration_%s' % hostname):
+            instance = self.filter(hostname=hostname)
+            if instance.exists():
+                return (False, instance[0])
+            instance = self.create(uuid=uuid, hostname=hostname)
+        return (True, instance)
+
+    def get_or_register(self):
+        if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+            return self.register()
+        else:
+            return (False, self.me())
 
     def active_count(self):
         """Return count of active Tower nodes for licensing."""

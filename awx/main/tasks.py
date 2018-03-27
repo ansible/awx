@@ -204,7 +204,9 @@ def handle_setting_changes(self, setting_keys):
 
 @shared_task(bind=True, queue='tower_broadcast_all', base=LogErrorsTask)
 def handle_ha_toplogy_changes(self):
-    instance = Instance.objects.me()
+    (changed, instance) = Instance.objects.get_or_register()
+    if changed:
+        logger.info(six.text_type("Registered tower node '{}'").format(instance.hostname))
     logger.debug(six.text_type("Reconfigure celeryd queues task on host {}").format(self.request.hostname))
     awx_app = Celery('awx')
     awx_app.config_from_object('django.conf:settings')
@@ -234,7 +236,9 @@ def handle_ha_toplogy_worker_ready(sender, **kwargs):
 def handle_update_celery_routes(sender=None, conf=None, **kwargs):
     conf = conf if conf else sender.app.conf
     logger.debug(six.text_type("Registering celery routes for {}").format(sender))
-    instance = Instance.objects.me()
+    (changed, instance) = Instance.objects.get_or_register()
+    if changed:
+        logger.info(six.text_type("Registered tower node '{}'").format(instance.hostname))
     added_routes = update_celery_worker_routes(instance, conf)
     logger.info(six.text_type("Workers on tower node '{}' added routes {} all routes are now {}")
                 .format(instance.hostname, added_routes, conf.CELERY_ROUTES))
@@ -242,7 +246,9 @@ def handle_update_celery_routes(sender=None, conf=None, **kwargs):
 
 @celeryd_after_setup.connect
 def handle_update_celery_hostname(sender, instance, **kwargs):
-    tower_instance = Instance.objects.me()
+    (changed, tower_instance) = Instance.objects.get_or_register()
+    if changed:
+        logger.info(six.text_type("Registered tower node '{}'").format(tower_instance.hostname))
     instance.hostname = 'celery@{}'.format(tower_instance.hostname)
     logger.warn(six.text_type("Set hostname to {}").format(instance.hostname))
 
@@ -309,6 +315,10 @@ def cluster_node_heartbeat(self):
     instance_list = list(Instance.objects.filter(rampart_groups__controller__isnull=True).distinct())
     this_inst = None
     lost_instances = []
+
+    (changed, instance) = Instance.objects.get_or_register()
+    if changed:
+        logger.info(six.text_type("Registered tower node '{}'").format(instance.hostname))
 
     for inst in list(instance_list):
         if inst.hostname == settings.CLUSTER_HOST_ID:
