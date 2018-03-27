@@ -1,0 +1,50 @@
+diagram_id: 69
+finite_state_machine_id: 23
+name: diagram
+states:
+- id: 1
+  label: Disabled
+  x: 895
+  y: 344
+- id: 4
+  label: Loading
+  x: 524
+  y: 710
+- id: 5
+  label: Ready
+  x: 722
+  y: 509
+- id: 6
+  label: Reporting
+  x: 926
+  y: 721
+- id: 3
+  label: Running
+  x: 720
+  y: 922
+- id: 2
+  label: Start
+  x: 702
+  y: 186
+transitions:
+- from_state: Disabled
+  label: onEnableTest
+  to_state: Ready
+- from_state: Loading
+  label: start
+  to_state: Running
+- from_state: Ready
+  label: onDisableTest
+  to_state: Disabled
+- from_state: Ready
+  label: start
+  to_state: Loading
+- from_state: Reporting
+  label: start
+  to_state: Loading
+- from_state: Running
+  label: onTestCompleted
+  to_state: Reporting
+- from_state: Start
+  label: start
+  to_state: Disabled

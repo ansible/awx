@@ -1,0 +1,28 @@
+app: buttons_fsm
+finite_state_machine_id: 7
+panX: 133
+panY: 41
+scaleXY: 1
+states:
+- label: Start
+  size: 100
+  x: 392
+  y: 88
+- label: Ready
+  size: 100
+  x: 392
+  y: 281
+- label: ButtonPressed
+  size: 100
+  x: 394
+  y: 491
+transitions:
+- from_state: Start
+  label: start
+  to_state: Ready
+- from_state: Ready
+  label: onMouseDown
+  to_state: ButtonPressed
+- from_state: ButtonPressed
+  label: onMouseUp
+  to_state: Ready

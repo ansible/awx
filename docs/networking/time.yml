@@ -1,0 +1,37 @@
+finite_state_machine_id: 8
+name: time_fsm
+states:
+- id: 1
+  label: Present
+  x: 256
+  y: 123
+- id: 2
+  label: Start
+  x: 245
+  y: -161
+- id: 3
+  label: Past
+  x: -115
+  y: 129
+transitions:
+- from_state: Past
+  label: onRedo
+  to_state: Present
+- from_state: Past
+  label: onMouseWheel
+  to_state: Present
+- from_state: Past
+  label: onKeyDown
+  to_state: Present
+- from_state: Start
+  label: start
+  to_state: Present
+- from_state: Present
+  label: onUndo
+  to_state: Past
+- from_state: Present
+  label: onMouseWheel
+  to_state: Past
+- from_state: Present
+  label: onKeyDown
+  to_state: Past

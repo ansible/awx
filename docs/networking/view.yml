@@ -1,0 +1,45 @@
+finite_state_machine_id: 2
+name: view_fsm
+states:
+- id: 1
+  label: Start
+  x: 498
+  y: 175
+- id: 2
+  label: Ready
+  x: 506
+  y: 395
+- id: 3
+  label: Scale
+  x: 310
+  y: 626
+- id: 4
+  label: Pan
+  x: 741
+  y: 631
+- id: 5
+  label: Pressed
+  x: 739
+  y: 392
+transitions:
+- from_state: Scale
+  label: onMouseWheel
+  to_state: Ready
+- from_state: Start
+  label: start
+  to_state: Ready
+- from_state: Ready
+  label: onMouseWheel
+  to_state: Scale
+- from_state: Ready
+  label: onMouseDown
+  to_state: Pressed
+- from_state: Pressed
+  label: onMouseMove
+  to_state: Pan
+- from_state: Pressed
+  label: onMouseUp
+  to_state: Ready
+- from_state: Pan
+  label: onMouseUp
+  to_state: Ready
