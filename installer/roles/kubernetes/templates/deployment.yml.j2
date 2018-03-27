@@ -127,6 +127,23 @@ spec:
   selector:
     name: awx-web-deploy
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: awx-rmq-mgmt
+  namespace: {{ awx_kubernetes_namespace }}
+  labels:
+    name: awx-rmq-mgmt
+spec:
+  type: ClusterIP
+  ports:
+    - name: rmqmgmt
+      port: 15672
+      targetPort: 15672
+  selector:
+    name: awx-web-deploy
+{% if kubernetes_context is defined %}
+---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -136,3 +153,23 @@ spec:
   backend:
     serviceName: awx-web-svc
     servicePort: 80
+{% endif %}
+{% if openshift_host is defined %}
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: awx-web-svc
+  namespace: {{ awx_kubernetes_namespace }}
+spec:
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Allow
+    termination: edge
+  to:
+    kind: Service
+    name: awx-web-svc
+    weight: 100
+  wildcardPolicy: None
+{% endif %}

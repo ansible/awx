@@ -1,0 +1,44 @@
+---
+- include_vars: openshift.yml
+
+- name: Ensure workspace directories exist
+  file:
+    path: "{{ item  }}"
+    state: directory
+  with_items:
+    - "{{ kubernetes_base_path }}"
+    - "{{ openshift_oc_config_file | dirname }}"
+
+- name: Authenticate with OpenShift via user and password
+  shell: |
+    {{ openshift_oc_bin }} login {{ openshift_host }} \
+      -u {{ openshift_user }} \
+      -p {{ openshift_password }} \
+      --insecure-skip-tls-verify={{ openshift_skip_tls_verify | default(false) | bool }}
+  when:
+    - openshift_user is defined
+    - openshift_password is defined
+    - openshift_token is not defined
+  no_log: true
+
+- name: Authenticate with OpenShift via token
+  shell: |
+    {{ openshift_oc_bin }} login {{ openshift_host }} \
+      --token {{ openshift_token }} \
+      --insecure-skip-tls-verify={{ openshift_skip_tls_verify | default(false) | bool }}
+  when: openshift_token is defined
+  no_log: true
+
+- name: Set postgresql service name
+  set_fact:
+    postgresql_service_name: "postgresql"
+  when: "pg_hostname is not defined or pg_hostname == ''"
+
+- name: Get Project Detail
+  shell: "{{ openshift_oc_bin }} get project {{ awx_openshift_project }}"
+  register: project_details
+  ignore_errors: yes
+
+- name: Create AWX Openshift Project
+  shell: "{{ openshift_oc_bin }} new-project {{ awx_openshift_project }}"
+  when: project_details.rc != 0
