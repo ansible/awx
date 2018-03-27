@@ -12,6 +12,8 @@ let resource;
 let strings;
 let wait;
 
+let vm;
+
 function mapChoices (choices) {
     if (!choices) return {};
     return Object.assign(...choices.map(([k, v]) => ({ [k]: v })));
@@ -33,7 +35,7 @@ function getStatusDetails (status) {
     return { label, icon, value };
 }
 
-function getStartTimeDetails (started) {
+function getStartDetails (started) {
     const unfiltered = started || resource.model.get('started');
 
     const label = 'Started';
@@ -49,7 +51,7 @@ function getStartTimeDetails (started) {
     return { label, value };
 }
 
-function getFinishTimeDetails (finished) {
+function getFinishDetails (finished) {
     const unfiltered = finished || resource.model.get('finished');
 
     const label = 'Finished';
@@ -416,6 +418,17 @@ function cancelJob () {
 
 function deleteJob () {}
 
+function handleSocketEvent (data) {
+    const project = resource.model.get('project');
+
+    if (resource.model.get('id') === data.unified_job_id) {
+        vm.status = getStatusDetails(data.status);
+    } else if (project && (project === data.project_id)) {
+        vm.project.update = vm.project.update || {};
+        vm.project.update.status = data.status;
+    }
+};
+
 function AtDetailsController (
     _$http_,
     _$filter_,
@@ -427,7 +440,7 @@ function AtDetailsController (
     ParseTypeChange,
     ParseVariableString,
 ) {
-    const vm = this || {};
+    vm = this || {};
 
     $http = _$http_;
     $filter = _$filter_;
@@ -444,8 +457,8 @@ function AtDetailsController (
         resource = $scope.resource; // eslint-disable-line prefer-destructuring
 
         vm.status = getStatusDetails();
-        vm.started = getStartTimeDetails();
-        vm.finished = getFinishTimeDetails();
+        vm.started = getStartDetails();
+        vm.finished = getFinishDetails();
         vm.jobType = getJobTypeDetails();
         vm.jobTemplate = getJobTemplateDetails();
         vm.sourceWorkflowJob = getSourceWorkflowJobDetails();
@@ -488,13 +501,10 @@ function AtDetailsController (
         vm.deleteJob = deleteJob;
         vm.toggleLabels = toggleLabels;
 
-        const observe = (key, transform) => {
-            $scope.$watch(key, value => { vm[key] = transform(value); });
-        };
+        $scope.$watch('started', value => { vm.started = getStartDetails(value); });
+        $scope.$watch('finished', value => { vm.finished = getFinishDetails(value); });
 
-        observe('finished', getFinishTimeDetails);
-        observe('status', getStatusDetails);
-        observe('started', getStartTimeDetails);
+        $scope.$on(resource.ws.status, (e, data) => handleSocketEvent(data));
     };
 }
 
@@ -525,10 +535,9 @@ function atDetails () {
         link: atDetailsLink,
         controller: AtDetailsController,
         scope: {
-            resource: '=',
-            status: '=',
-            started: '=',
             finished: '=',
+            started: '=',
+            resource: '=',
         },
     };
 }

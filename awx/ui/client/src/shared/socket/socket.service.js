@@ -216,7 +216,7 @@ export default
                 // socket-enabled AND socket-disabled, and whether the $state
                 // requires a subscribe or an unsubscribe
                 var self = this;
-                socketPromise.promise.then(function(){
+                return socketPromise.promise.then(function(){
                     if(!state.data || !state.data.socket){
                         _.merge(state.data, {socket: {groups: {}}});
                         self.unsubscribe(state);

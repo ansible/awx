@@ -23,6 +23,8 @@ function atRelaunchCtrl (
     const jobObj = new Job();
     const jobTemplate = new JobTemplate();
 
+
+
     const checkRelaunchPlaybook = (option) => {
         jobObj.getRelaunch({
             id: vm.job.id
@@ -182,7 +184,7 @@ function atRelaunchCtrl (
                         project.postUpdate(vm.job.project)
                             .then((postUpdateRes) => {
                                 if (!$state.includes('jobs')) {
-                                    $state.go('scmUpdateStdout', { id: postUpdateRes.data.id }, { reload: true });
+                                    $state.go('jobz', { id: postUpdateRes.data.id, type: 'project' }, { reload: true });
                                 }
                             });
                     } else {
@@ -218,7 +220,7 @@ function atRelaunchCtrl (
                         id: vm.job.id
                     }).then((launchRes) => {
                         if (!$state.includes('jobs')) {
-                            $state.go('adHocJobStdout', { id: launchRes.data.id }, { reload: true });
+                            $state.go('jobz', { id: launchRes.data.id, type: 'command' }, { reload: true });
                         }
                     });
                 }

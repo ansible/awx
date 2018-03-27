@@ -3,7 +3,6 @@
         <at-panel>
             <at-details
                 resource="vm.details.resource"
-                status="vm.details.status"
                 started="vm.details.started"
                 finished="vm.details.finished">
             </at-details>
@@ -13,6 +12,7 @@
 
     <div class="col-md-8">
         <at-panel class="at-Stdout">
+            <div class="at-Panel-headingTitle">{{ vm.title }}</div>
             <at-stats
                 elapsed="vm.status.elapsed"
                 running="vm.status.running"

@@ -84,12 +84,14 @@ function JobsIndexController (
     eventCounter = null;
     statsEvent = resource.stats;
 
+    // Panel Title
+    vm.title = resource.model.get('name');
+
     // Status Bar
     vm.status = {
         stats: statsEvent,
         elapsed: resource.model.get('elapsed'),
         running: Boolean(resource.model.get('started')) && !resource.model.get('finished'),
-        title: resource.model.get('name'),
         plays: null,
         tasks: null,
     };
@@ -99,7 +101,6 @@ function JobsIndexController (
         resource,
         started: resource.model.get('started'),
         finished: resource.model.get('finished'),
-        status: resource.model.get('status'),
     };
 
     render.requestAnimationFrame(() => init(!vm.status.running));
@@ -143,7 +144,7 @@ function init (pageMode) {
         }
     });
 
-    $scope.$on(resource.ws.namespace, handleSocketEvent);
+    $scope.$on(resource.ws.events, handleSocketEvent);
 
     if (pageMode) {
         next();

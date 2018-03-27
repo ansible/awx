@@ -32,6 +32,7 @@ function resolveResource (
     Wait
 ) {
     const { id, type, job_event_search } = $stateParams; // eslint-disable-line camelcase
+    const { name, key } = getWebSocketResource(type);
 
     let Resource;
     let related = 'events';
@@ -50,9 +51,9 @@ function resolveResource (
         case 'system':
             Resource = SystemJob;
             break;
-        case 'workflow':
-            Resource = WorkflowJob;
-            break;
+        // case 'workflow':
+            // todo: integrate workflow chart components into this view
+            // break;
         default:
             // Redirect
             return null;
@@ -87,7 +88,8 @@ function resolveResource (
             model,
             related,
             ws: {
-                namespace: `${WS_PREFIX}-${getWebSocketResource(type).key}-${id}`
+                events: `${WS_PREFIX}-${key}-${id}`,
+                status: `${WS_PREFIX}-${name}`,
             },
             page: {
                 cache: PAGE_CACHE,
@@ -99,22 +101,23 @@ function resolveResource (
         .finally(() => Wait('stop'));
 }
 
-function resolveWebSocketConnection (SocketService, $stateParams) {
+function resolveWebSocketConnection ($stateParams, SocketService) {
     const { type, id } = $stateParams;
-    const resource = getWebSocketResource(type);
+    const { name, key } = getWebSocketResource(type);
 
     const state = {
         data: {
             socket: {
                 groups: {
-                    [resource.name]: ['status_changed', 'summary'],
-                    [resource.key]: []
+                    [name]: ['status_changed', 'summary'],
+                    [key]: []
                 }
             }
         }
     };
 
-    SocketService.addStateResolve(state, id);
+    return SocketService.addStateResolve(state, id);
+
 }
 
 function resolveBreadcrumb (strings) {
@@ -129,19 +132,19 @@ function getWebSocketResource (type) {
 
     switch (type) {
         case 'system':
-            name = 'system_jobs';
+            name = 'jobs';
             key = 'system_job_events';
             break;
         case 'project':
-            name = 'project_updates';
+            name = 'jobs';
             key = 'project_update_events';
             break;
         case 'command':
-            name = 'ad_hoc_commands';
+            name = 'jobs';
             key = 'ad_hoc_command_events';
             break;
         case 'inventory':
-            name = 'inventory_updates';
+            name = 'jobs';
             key = 'inventory_update_events';
             break;
         case 'playbook':
@@ -188,10 +191,10 @@ function JobsRun ($stateRegistry) {
                 resolveBreadcrumb
             ],
             webSocketConnection: [
-                'SocketService',
                 '$stateParams',
+                'SocketService',
                 resolveWebSocketConnection
-            ]
+            ],
         },
     };
 
@@ -208,6 +211,7 @@ angular
     .service('JobStrings', Strings)
     .service('JobPageService', PageService)
     .service('JobScrollService', ScrollService)
+    .service('JobRenderService', RenderService)
     .service('JobEventEngine', EngineService)
     .directive('atDetails', DetailsDirective)
     .directive('atSearchKey', SearchKeyDirective)
