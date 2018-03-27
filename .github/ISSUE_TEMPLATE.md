@@ -1,3 +1,10 @@
+<!---
+The Ansible community is highly committed to the security of our open source
+projects.  Security concerns can be reported directly by email to
+security@ansible.com.  For more information, see
+https://www.ansible.com/security
+-->
+
 ##### ISSUE TYPE
 <!--- Pick one below and delete the rest: -->
  - Bug Report
