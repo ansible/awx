@@ -395,63 +395,64 @@ export default ['$compile', 'Attr', 'Icon',
                             }
                             if (field_action === 'pending_deletion') {
                                 innerTable += `<a ng-if='${list.iterator}.pending_deletion'>Pending Delete</a>`;
-                            }
-                            // Plug in Dropdown Component
-                            if (field_action === 'submit' && list.fieldActions[field_action].relaunch === true) {
-                                innerTable += `<at-relaunch job="${list.iterator}"></at-relaunch>`;
-                            } else if (field_action === 'submit' && list.fieldActions[field_action].launch === true) {
-                                innerTable += `<at-launch-template template="${list.iterator}" ng-if="${list.iterator}.summary_fields.user_capabilities.start"></at-launch-template>`;
                             } else {
-                                fAction = list.fieldActions[field_action];
-                                innerTable += "<button id=\"";
-                                innerTable += (fAction.id) ? fAction.id : field_action + "-action";
-                                innerTable += "\" ";
-                                innerTable += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
-                                innerTable += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
-                                innerTable += "class=\"List-actionButton ";
-                                innerTable += (field_action === 'delete' || field_action === 'cancel') ? "List-actionButton--delete" : "";
-                                innerTable += "\" ";
-                                if(field_action === 'edit') {
-                                    // editStateParams allows us to handle cases where a list might have different types of resources in it.  As a result the edit
-                                    // icon might now always point to the same state and differing states may have differing stateParams.  Specifically this occurs
-                                    // on the Templates list where editing a workflow job template takes you to a state where the param is workflow_job_template_id.
-                                    // You can also edit a Job Template from this list so the stateParam there would be job_template_id.
-                                    if(list.fieldActions[field_action].editStateParams) {
-                                        let matchingConditions = handleEditStateParams(list.fieldActions[field_action].editStateParams);
-                                        innerTable += `ng-class="{'List-editButton--selected' : ${matchingConditions.join(' || ')}}"`;
-                                    }
-                                    else if (list.iterator === 'inventory') {
-                                        innerTable += `ng-class="{'List-editButton--selected': ($stateParams['${list.iterator}_id'] == ${list.iterator}.id) || ($stateParams['smartinventory_id'] == ${list.iterator}.id)}"`;
-                                    }
-                                    else if (list.iterator === 'host') {
-                                        innerTable += `ng-class="{'List-editButton--selected': $stateParams['${list.iterator}_id'] == ${list.iterator}.id && $state.is('inventories.edit.hosts.edit') }"`;
-                                    }
-                                    else {
-                                        innerTable += `ng-class="{'List-editButton--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}"`;
-                                    }
-                                }
-                                innerTable += (fAction.ngDisabled) ? "ng-disabled=\"" + fAction.ngDisabled + "\"" : "";
-                                innerTable += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
-                                innerTable += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
-                                innerTable += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";
-                                for (itm in fAction) {
-                                    if (itm !== 'ngHref' && itm !== 'href' && itm !== 'label' && itm !== 'icon' && itm !== 'class' &&
-                                        itm !== 'iconClass' && itm !== "dataPlacement" && itm !== "awPopOver" &&
-                                        itm !== "dataTitle") {
-                                        innerTable += Attr(fAction, itm);
-                                    }
-                                }
-                                innerTable += ">";
-                                if (fAction.iconClass) {
-                                    innerTable += "<i class=\"" + fAction.iconClass + "\"></i>";
+                                // Plug in Dropdown Component
+                                if (field_action === 'submit' && list.fieldActions[field_action].relaunch === true) {
+                                    innerTable += `<at-relaunch job="${list.iterator}"></at-relaunch>`;
+                                } else if (field_action === 'submit' && list.fieldActions[field_action].launch === true) {
+                                    innerTable += `<at-launch-template template="${list.iterator}" ng-if="${list.iterator}.summary_fields.user_capabilities.start"></at-launch-template>`;
                                 } else {
-                                    innerTable += SelectIcon({
-                                        action: field_action
-                                    });
+                                    fAction = list.fieldActions[field_action];
+                                    innerTable += "<button id=\"";
+                                    innerTable += (fAction.id) ? fAction.id : field_action + "-action";
+                                    innerTable += "\" ";
+                                    innerTable += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
+                                    innerTable += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
+                                    innerTable += "class=\"List-actionButton ";
+                                    innerTable += (field_action === 'delete' || field_action === 'cancel') ? "List-actionButton--delete" : "";
+                                    innerTable += "\" ";
+                                    if(field_action === 'edit') {
+                                        // editStateParams allows us to handle cases where a list might have different types of resources in it.  As a result the edit
+                                        // icon might now always point to the same state and differing states may have differing stateParams.  Specifically this occurs
+                                        // on the Templates list where editing a workflow job template takes you to a state where the param is workflow_job_template_id.
+                                        // You can also edit a Job Template from this list so the stateParam there would be job_template_id.
+                                        if(list.fieldActions[field_action].editStateParams) {
+                                            let matchingConditions = handleEditStateParams(list.fieldActions[field_action].editStateParams);
+                                            innerTable += `ng-class="{'List-editButton--selected' : ${matchingConditions.join(' || ')}}"`;
+                                        }
+                                        else if (list.iterator === 'inventory') {
+                                            innerTable += `ng-class="{'List-editButton--selected': ($stateParams['${list.iterator}_id'] == ${list.iterator}.id) || ($stateParams['smartinventory_id'] == ${list.iterator}.id)}"`;
+                                        }
+                                        else if (list.iterator === 'host') {
+                                            innerTable += `ng-class="{'List-editButton--selected': $stateParams['${list.iterator}_id'] == ${list.iterator}.id && $state.is('inventories.edit.hosts.edit') }"`;
+                                        }
+                                        else {
+                                            innerTable += `ng-class="{'List-editButton--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}"`;
+                                        }
+                                    }
+                                    innerTable += (fAction.ngDisabled) ? "ng-disabled=\"" + fAction.ngDisabled + "\"" : "";
+                                    innerTable += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
+                                    innerTable += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
+                                    innerTable += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";
+                                    for (itm in fAction) {
+                                        if (itm !== 'ngHref' && itm !== 'href' && itm !== 'label' && itm !== 'icon' && itm !== 'class' &&
+                                            itm !== 'iconClass' && itm !== "dataPlacement" && itm !== "awPopOver" &&
+                                            itm !== "dataTitle") {
+                                            innerTable += Attr(fAction, itm);
+                                        }
+                                    }
+                                    innerTable += ">";
+                                    if (fAction.iconClass) {
+                                        innerTable += "<i class=\"" + fAction.iconClass + "\"></i>";
+                                    } else {
+                                        innerTable += SelectIcon({
+                                            action: field_action
+                                        });
+                                    }
+                                    //html += (fAction.label) ? "<span class=\"list-action-label\"> " + list.fieldActions[field_action].label +
+                                    //    "</span>" : "";
+                                    innerTable += "</button>";
                                 }
-                                //html += (fAction.label) ? "<span class=\"list-action-label\"> " + list.fieldActions[field_action].label +
-                                //    "</span>" : "";
-                                innerTable += "</button>";
                             }
                         }
                     }
