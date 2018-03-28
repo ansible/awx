@@ -1,0 +1,1 @@
+rabbitmq_image: "ansible/awx_rabbitmq:{{rabbitmq_version}}"

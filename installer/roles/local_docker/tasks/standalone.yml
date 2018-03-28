@@ -20,9 +20,10 @@
     name: rabbitmq
     state: started
     restart_policy: unless-stopped
-    image: rabbitmq:3
+    image: "{{ rabbitmq_image }}"
     env:
       RABBITMQ_DEFAULT_VHOST: "awx"
+      RABBITMQ_ERLANG_COOKIE: "cookiemonster"
   register: rabbitmq_container_activate
 
 - name: Activate memcached container

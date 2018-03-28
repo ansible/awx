@@ -122,10 +122,11 @@ services:
       AWX_ADMIN_PASSWORD: {{ default_admin_password|default('password') }}
 
   rabbitmq:
-    image: rabbitmq:3
+    image: {{ rabbitmq_image }}
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_VHOST: awx
+      RABBITMQ_ERLANG_COOKIE: cookiemonster
 
   memcached:
     image: memcached:alpine

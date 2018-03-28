@@ -8,7 +8,7 @@ localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env pyth
 # by default the base will be used to search for ansible/awx_web and ansible/awx_task
 dockerhub_base=ansible
 dockerhub_version=latest
-rabbitmq_version=3.6.14
+rabbitmq_version=3.7.4
 
 # Openshift Install
 # Will need to set -e openshift_password=developer -e docker_registry_password=$(oc whoami -t)
