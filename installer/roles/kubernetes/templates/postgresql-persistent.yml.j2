@@ -1,0 +1,191 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: postgresql-persistent-template
+message: |-
+  The following service(s) have been created in your project: ${DATABASE_SERVICE_NAME}.
+
+         Username: ${POSTGRESQL_USER}
+         Password: ${POSTGRESQL_PASSWORD}
+    Database Name: ${POSTGRESQL_DATABASE}
+   Connection URL: postgresql://${DATABASE_SERVICE_NAME}:5432/
+
+  For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/postgresql-container/blob/master/9.5.
+metadata:
+  annotations:
+    description: |-
+      PostgreSQL database service, with persistent storage. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/postgresql-container/blob/master/9.5.
+
+      NOTE: Scaling to more than one replica is not supported. You must have persistent volumes available in your cluster to use this template.
+    iconClass: icon-postgresql
+    openshift.io/display-name: PostgreSQL (Persistent)
+    tags: database,postgresql
+    template.openshift.io/documentation-url: https://docs.openshift.org/latest/using_images/db_images/postgresql.html
+    template.openshift.io/long-description: This template provides a standalone
+      PostgreSQL server with a database created.  The database is stored on persistent
+      storage.  The database name, username, and password are chosen via parameters
+      when provisioning this service.
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    template.openshift.io/support-url: https://access.redhat.com
+  name: postgresql-persistent
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    annotations:
+      template.openshift.io/expose-database_name: '{.data[''database-name'']}'
+      template.openshift.io/expose-password: '{.data[''database-password'']}'
+      template.openshift.io/expose-username: '{.data[''database-user'']}'
+    name: ${DATABASE_SERVICE_NAME}
+  stringData:
+    database-name: ${POSTGRESQL_DATABASE}
+    database-password: ${POSTGRESQL_PASSWORD}
+    database-user: ${POSTGRESQL_USER}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      template.openshift.io/expose-uri: postgres://{.spec.clusterIP}:{.spec.ports[?(.name=="postgresql")].port}
+    name: ${DATABASE_SERVICE_NAME}
+  spec:
+    ports:
+    - name: postgresql
+      nodePort: 0
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+    selector:
+      name: ${DATABASE_SERVICE_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: ${DATABASE_SERVICE_NAME}
+  spec:
+    replicas: 1
+    selector:
+      name: ${DATABASE_SERVICE_NAME}
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          name: ${DATABASE_SERVICE_NAME}
+      spec:
+        containers:
+        - capabilities: {}
+          env:
+          - name: POSTGRESQL_USER
+            valueFrom:
+              secretKeyRef:
+                key: database-user
+                name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database-password
+                name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                key: database-name
+                name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_MAX_CONNECTIONS
+            value: ${POSTGRESQL_MAX_CONNECTIONS}
+          image: ' '
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            initialDelaySeconds: 30
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          name: postgresql
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -i
+              - -c
+              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE
+                -c 'SELECT 1'
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: ${DATABASE_SERVICE_NAME}-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        volumes:
+        - name: ${DATABASE_SERVICE_NAME}-data
+{% if openshift_pg_emptydir | bool %}
+          emptyDir: {}
+{% else %}
+          persistentVolumeClaim:
+            claimName: {{ openshift_pg_pvc_name }}
+{% endif %}
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:${POSTGRESQL_VERSION}
+          namespace: ${NAMESPACE}
+        lastTriggeredImage: ""
+      type: ImageChange
+    - type: ConfigChange
+  status: {}
+parameters:
+- description: Maximum amount of memory the container can use.
+  displayName: Memory Limit
+  name: MEMORY_LIMIT
+  required: true
+  value: 512Mi
+- description: The OpenShift Namespace where the ImageStream resides.
+  displayName: Namespace
+  name: NAMESPACE
+  value: openshift
+- description: The name of the OpenShift Service exposed for the database.
+  displayName: Database Service Name
+  name: DATABASE_SERVICE_NAME
+  required: true
+  value: postgresql
+- description: Username for PostgreSQL user that will be used for accessing the
+    database.
+  displayName: PostgreSQL Connection Username
+  from: user[A-Z0-9]{3}
+  generate: expression
+  name: POSTGRESQL_USER
+  required: true
+- description: Password for the PostgreSQL connection user.
+  displayName: PostgreSQL Connection Password
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+  name: POSTGRESQL_PASSWORD
+  required: true
+- description: Name of the PostgreSQL database accessed.
+  displayName: PostgreSQL Database Name
+  name: POSTGRESQL_DATABASE
+  required: true
+  value: sampledb
+- description: Version of PostgreSQL image to be used (9.2, 9.4, 9.5 or latest).
+  displayName: Version of PostgreSQL Image
+  name: POSTGRESQL_VERSION
+  required: true
+  value: "9.5"

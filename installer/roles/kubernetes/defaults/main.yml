@@ -1,6 +1,4 @@
 ---
-rabbitmq_version: "3.7.4"
-
 awx_web_mem_request: 1
 awx_web_cpu_request: 500
 
@@ -12,3 +10,8 @@ awx_rabbitmq_cpu_request: 500
 
 awx_memcached_mem_request: 1
 awx_memcached_cpu_request: 500
+
+rabbitmq_version: "3.7.4"
+
+openshift_pg_emptydir: no
+openshift_pg_pvc_name: postgresql

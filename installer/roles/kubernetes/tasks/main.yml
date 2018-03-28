@@ -51,19 +51,44 @@
     awx_task_kubernetes_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
   when: dockerhub_base is defined
 
-- name: Deploy and Activate Postgres (Kubernetes)
-  shell: "helm install --name awx --namespace {{ awx_kubernetes_namespace }} --set postgresUser={{ pg_username }},postgresPassword={{ pg_password }},postgresDatabase={{ pg_database }},persistence.size={{ pg_volume_capacity|default('5')}}Gi stable/postgresql"
+- name: Deploy PostgreSQL (OpenShift)
+  block:
+    - name: Template PostgreSQL Deployment
+      template:
+        src: postgresql-persistent.yml.j2
+        dest: "{{ kubernetes_base_path }}/postgresql-persistent.yml"
+        mode: '0600'
+
+    - name: Deploy and Activate Postgres
+      shell: |
+        {{ openshift_oc_bin }} new-app --file={{ kubernetes_base_path }}/postgresql-persistent.yml \
+          -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi \
+          -e DATABASE_SERVICE_NAME=postgresql  \
+          -e POSTGRESQL_MAX_CONNECTIONS={{ pg_max_connections|default(1024) }} \
+          -e POSTGRESQL_USER={{ pg_username }} \
+          -e POSTGRESQL_PASSWORD={{ pg_password }} \
+          -e POSTGRESQL_DATABASE={{ pg_database }} \
+          -e POSTGRESQL_VERSION=9.5 \
+          -n {{ awx_kubernetes_namespace }}
+      register: openshift_pg_activate
   when:
-    - (pg_hostname is not defined or pg_hostname == '') and (postgres_svc_details is defined and postgres_svc_details.rc != 0)
+    - pg_hostname is not defined or pg_hostname == ''
+    - postgres_svc_details is defined and postgres_svc_details.rc != 0
+    - openshift_host is defined
+
+- name: Deploy and Activate Postgres (Kubernetes)
+  shell: |
+    helm install --name awx --namespace {{ awx_kubernetes_namespace }} \
+      --set postgresUser={{ pg_username }} \
+      --set postgresPassword={{ pg_password }} \
+      --set postgresDatabase={{ pg_database }} \
+      --set persistence.size={{ pg_volume_capacity|default('5')}}Gi \
+      stable/postgresql
+  when:
+    - pg_hostname is not defined or pg_hostname == ''
+    - postgres_svc_details is defined and postgres_svc_details.rc != 0
     - kubernetes_context is defined
   register: kubernetes_pg_activate
-
-- name: Deploy and Activate Postgres (OpenShift)
-  shell: "{{ openshift_oc_bin }} new-app --template=postgresql-persistent -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql  -e POSTGRESQL_USER={{ pg_username }} -e POSTGRESQL_PASSWORD={{ pg_password }} -e POSTGRESQL_DATABASE={{ pg_database }} -e VOLUME_CAPACITY={{ pg_volume_capacity|default('5')}}Gi -e POSTGRESQL_VERSION=9.5 -n {{ awx_openshift_project }}"
-  when:
-    - (pg_hostname is not defined or pg_hostname == '') and (postgres_svc_details is defined and postgres_svc_details.rc != 0)
-    - openshift_host is defined
-  register: openshift_pg_activate
 
 - name: Set postgresql hostname to helm package service
   set_fact:
@@ -75,7 +100,7 @@
 - name: Wait for Postgres to activate
   pause:
     seconds: 60
-  when: kubernetes_pg_activate|changed
+  when: openshift_pg_activate.changed or kubernetes_pg_activate.changed
 
 - name: Ensure directory exists
   file:
