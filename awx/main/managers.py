@@ -87,7 +87,11 @@ class InstanceManager(models.Manager):
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
-    def register(self, uuid=settings.SYSTEM_UUID, hostname=settings.CLUSTER_HOST_ID):
+    def register(self, uuid=None, hostname=None):
+        if not uuid:
+            uuid = settings.SYSTEM_UUID
+        if not hostname:
+            hostname = settings.CLUSTER_HOST_ID
         with advisory_lock('instance_registration_%s' % hostname):
             instance = self.filter(hostname=hostname)
             if instance.exists():
