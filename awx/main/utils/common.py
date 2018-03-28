@@ -350,11 +350,14 @@ def get_allowed_fields(obj, serializer_mapping):
         allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
     else:
         allowed_fields = [x.name for x in obj._meta.fields]
-    if obj._meta.model_name == 'user':
-        field_blacklist = ['last_login']
-        allowed_fields = [f for f in allowed_fields if f not in field_blacklist]
-    if obj._meta.model_name == 'oauth2application':
-        field_blacklist = ['client_secret']
+
+    ACTIVITY_STREAM_FIELD_EXCLUSIONS = {
+        'user': ['last_login'],
+        'oauth2accesstoken': ['last_used'],
+        'oauth2application': ['client_secret']
+    }
+    field_blacklist = ACTIVITY_STREAM_FIELD_EXCLUSIONS.get(obj._meta.model_name, [])
+    if field_blacklist:
         allowed_fields = [f for f in allowed_fields if f not in field_blacklist]
     return allowed_fields
 
