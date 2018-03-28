@@ -4689,7 +4689,6 @@ class ActivityStreamSerializer(BaseSerializer):
                 'api:setting_singleton_detail',
                 kwargs={'category_slug': obj.setting['category']}
             )
-        rel['access_token'] = '*************'
         return rel
 
     def _get_rel(self, obj, fk):
@@ -4743,7 +4742,6 @@ class ActivityStreamSerializer(BaseSerializer):
                                            last_name = obj.actor.last_name)
         if obj.setting:
             summary_fields['setting'] = [obj.setting]
-        summary_fields['access_token'] = '*************'    
         return summary_fields
 
 
