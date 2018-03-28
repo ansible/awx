@@ -1,4 +1,6 @@
 ---
+rabbitmq_version: "3.7.4"
+
 awx_web_mem_request: 1
 awx_web_cpu_request: 500
 
