@@ -4505,7 +4505,12 @@ class InstanceSerializer(BaseSerializer):
 
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
-    jobs_running = serializers.SerializerMethodField()
+    jobs_running = serializers.IntegerField(
+        help_text=_('Count of jobs in the running or waiting state that '
+                    'are targeted for this instance'),
+        read_only=True
+    )
+
 
     class Meta:
         model = Instance
@@ -4528,9 +4533,6 @@ class InstanceSerializer(BaseSerializer):
             return 0.0
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
-
-    def get_jobs_running(self, obj):
-        return UnifiedJob.objects.filter(execution_node=obj.hostname, status__in=('running', 'waiting',)).count()
 
 
 class InstanceGroupSerializer(BaseSerializer):
