@@ -4505,7 +4505,6 @@ class InstanceSerializer(BaseSerializer):
 
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
-    jobs_running = serializers.SerializerMethodField()
     jobs_running = serializers.IntegerField(
         help_text=_('Count of jobs in the running or waiting state that '
                     'are targeted for this instance'),

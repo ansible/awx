@@ -631,7 +631,7 @@ class InstanceDetail(RetrieveUpdateAPIView):
 
 class InstanceUnifiedJobsList(SubListAPIView):
 
-    view_name = _("Instance Running Jobs")
+    view_name = _("Instance Jobs")
     model = UnifiedJob
     serializer_class = UnifiedJobSerializer
     parent_model = Instance
