@@ -85,6 +85,10 @@ class Instance(models.Model):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "awx"
 
+    @property
+    def jobs_running(self):
+        return UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting',)).count()
+
     def is_lost(self, ref_time=None, isolated=False):
         if ref_time is None:
             ref_time = now()
