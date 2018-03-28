@@ -48,7 +48,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'copy_m2m_relationships', 'prefetch_page_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
-           'get_current_apps', 'set_current_apps', 'OutputEventFilter',
+           'get_current_apps', 'set_current_apps', 'OutputEventFilter', 'OutputVerboseFilter',
            'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity', 'get_cpu_capacity', 'get_mem_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
@@ -1007,6 +1007,32 @@ class OutputEventFilter(object):
             self._current_event_data = next_event_data
         else:
             self._current_event_data = None
+
+
+class OutputVerboseFilter(OutputEventFilter):
+    '''
+    File-like object that dispatches stdout data.
+    Does not search for encoded job event data.
+    Use for unified job types that do not encode job event data.
+    '''
+    def write(self, data):
+        self._buffer.write(data)
+
+        # if the current chunk contains a line break
+        if data and '\n' in data:
+            # emit events for all complete lines we know about
+            lines = self._buffer.getvalue().splitlines(True)  # keep ends
+            remainder = None
+            # if last line is not a complete line, then exclude it
+            if '\n' not in lines[-1]:
+                remainder = lines.pop()
+            # emit all complete lines
+            for line in lines:
+                self._emit_event(line)
+            self._buffer = StringIO()
+            # put final partial line back on buffer
+            if remainder:
+                self._buffer.write(remainder)
 
 
 def is_ansible_variable(key):

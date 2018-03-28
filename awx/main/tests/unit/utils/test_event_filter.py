@@ -5,7 +5,7 @@ from StringIO import StringIO
 
 from six.moves import xrange
 
-from awx.main.utils import OutputEventFilter
+from awx.main.utils import OutputEventFilter, OutputVerboseFilter
 
 MAX_WIDTH = 78
 EXAMPLE_UUID = '890773f5-fe6d-4091-8faf-bdc8021d65dd'
@@ -145,3 +145,55 @@ def test_large_stdout_blob():
     f = OutputEventFilter(_callback)
     for x in range(1024 * 10):
         f.write('x' * 1024)
+
+
+def test_verbose_line_buffering():
+    events = []
+
+    def _callback(event_data):
+        events.append(event_data)
+
+    f = OutputVerboseFilter(_callback)
+    f.write('one two\r\n\r\n')
+
+    assert len(events) == 2
+    assert events[0]['start_line'] == 0
+    assert events[0]['end_line'] == 1
+    assert events[0]['stdout'] == 'one two'
+
+    assert events[1]['start_line'] == 1
+    assert events[1]['end_line'] == 2
+    assert events[1]['stdout'] == ''
+
+    f.write('three')
+    assert len(events) == 2
+    f.write('\r\nfou')
+
+    # three is not pushed to buffer until its line completes
+    assert len(events) == 3
+    assert events[2]['start_line'] == 2
+    assert events[2]['end_line'] == 3
+    assert events[2]['stdout'] == 'three'
+
+    f.write('r\r')
+    f.write('\nfi')
+
+    assert events[3]['start_line'] == 3
+    assert events[3]['end_line'] == 4
+    assert events[3]['stdout'] == 'four'
+
+    f.write('ve')
+    f.write('\r\n')
+
+    assert len(events) == 5
+    assert events[4]['start_line'] == 4
+    assert events[4]['end_line'] == 5
+    assert events[4]['stdout'] == 'five'
+
+    f.close()
+
+    from pprint import pprint
+    pprint(events)
+    assert len(events) == 6
+
+    assert events[5]['event'] == 'EOF'

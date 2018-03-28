@@ -55,7 +55,7 @@ from awx.main.queue import CallbackQueueDispatcher
 from awx.main.expect import run, isolated_manager
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
-                            wrap_args_with_proot, OutputEventFilter, ignore_inventory_computed_fields,
+                            wrap_args_with_proot, OutputEventFilter, OutputVerboseFilter, ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, get_type_for_model, extract_ansible_vars)
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.pglock import advisory_lock
@@ -821,19 +821,26 @@ class BaseTask(LogErrorsTask):
 
     def get_stdout_handle(self, instance):
         '''
-        Return an virtual file object for capturing stdout and events.
+        Return an virtual file object for capturing stdout and/or events.
         '''
         dispatcher = CallbackQueueDispatcher()
 
-        def event_callback(event_data):
-            event_data.setdefault(self.event_data_key, instance.id)
-            if 'uuid' in event_data:
-                cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
-                if cache_event is not None:
-                    event_data.update(cache_event)
-            dispatcher.dispatch(event_data)
+        if isinstance(instance, (Job, AdHocCommand, ProjectUpdate)):
+            def event_callback(event_data):
+                event_data.setdefault(self.event_data_key, instance.id)
+                if 'uuid' in event_data:
+                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
+                    if cache_event is not None:
+                        event_data.update(cache_event)
+                dispatcher.dispatch(event_data)
 
-        return OutputEventFilter(event_callback)
+            return OutputEventFilter(event_callback)
+        else:
+            def event_callback(event_data):
+                event_data.setdefault(self.event_data_key, instance.id)
+                dispatcher.dispatch(event_data)
+
+            return OutputVerboseFilter(event_callback)
 
     def pre_run_hook(self, instance, **kwargs):
         '''

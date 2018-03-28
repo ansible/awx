@@ -240,7 +240,8 @@ function(NotificationsList, i18n) {
                     dataTitle: i18n._('Ansible Environment'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngShow: 'custom_virtualenvs_options.length > 0'
                 },
                 instance_groups: {
                     label: i18n._('Instance Groups'),

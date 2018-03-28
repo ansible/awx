@@ -113,7 +113,7 @@ export default ['i18n', function(i18n) {
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Copy inventory'),
                 dataPlacement: 'top',
-                ngShow: 'inventory.summary_fields.user_capabilities.edit'
+                ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.edit'
             },
             view: {
                 label: i18n._('View'),

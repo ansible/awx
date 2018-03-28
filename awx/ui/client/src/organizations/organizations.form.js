@@ -52,7 +52,8 @@ export default ['NotificationsList', 'i18n',
                     dataTitle: i18n._('Ansible Environment'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngShow: 'custom_virtualenvs_options.length > 0'
                 }
             },
 
