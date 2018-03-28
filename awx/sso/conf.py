@@ -301,8 +301,8 @@ def _register_ldap(append=None):
     register(
         'AUTH_LDAP{}_GROUP_TYPE_PARAMS'.format(append_str),
         field_class=fields.LDAPGroupTypeParamsField,
-        label=_('LDAP Group Type'),
-        help_text=_('Parameters to send the chosen group type.'),
+        label=_('LDAP Group Type Parameters'),
+        help_text=_('Key value parameters to send the chosen group type init method.'),
         category=_('LDAP'),
         category_slug='ldap',
         default=collections.OrderedDict([
