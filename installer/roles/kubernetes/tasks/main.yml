@@ -1,59 +1,38 @@
 ---
-- name: Set the Kubernetes Context
-  shell: "kubectl config set-context {{ kubernetes_context }}"
+- fail:
+    msg: "Only set one of kubernetes_context or openshift_host"
+  when: openshift_host is defined and kubernetes_context is defined
 
-- name: Get Namespace Detail
-  shell: "kubectl get namespace {{ awx_kubernetes_namespace }}"
-  register: namespace_details
-  ignore_errors: yes
+- name: Set kubernetes base path
+  set_fact:
+    kubernetes_base_path: "{{ awx_local_base_config_path|default('/tmp') }}/awx-config"
+
+- include_tasks: openshift.yml
+  when: openshift_host is defined
+
+- include_tasks: kubernetes.yml
+  when: kubernetes_context is defined
+
+- name: Use kubectl or oc
+  set_fact:
+    kubectl_or_oc: "{{ openshift_oc_bin if openshift_oc_bin is defined else 'kubectl' }}"
 
 - name: Get Postgres Service Detail
-  shell: "kubectl describe svc awx-postgresql -n {{ awx_kubernetes_namespace }}"
+  shell: "{{ kubectl_or_oc }} describe svc {{ postgresql_service_name }} -n {{ awx_kubernetes_namespace }}"
   register: postgres_svc_details
   ignore_errors: yes
   when: "pg_hostname is not defined or pg_hostname == ''"
 
-- name: Create AWX Kubernetes Project
-  shell: "kubectl create namespace {{ awx_kubernetes_namespace }}"
-  when: namespace_details.rc != 0
-
-# TODO: This is duplicated in the openshift role, probably needs to be moved to the image_build role
 - name: Manage AWX Container Images
+  include_role:
+    name: image_push
+  when: dockerhub_base is not defined
+
+- name: Set image names
   block:
-    - name: Authenticate with Docker registry
-      docker_login:
-        registry: "{{ docker_registry }}"
-        username: "{{ docker_registry_username }}"
-        password: "{{ docker_registry_password }}"
-        reauthorize: yes
-      when: docker_registry is defined and docker_registry_password is defined
-      delegate_to: localhost
-
-    - name: Wait for Openshift
-      pause:
-        seconds: 30
-
-    - name: Tag and push web image to registry
-      docker_image:
-        name: "{{ awx_web_image }}"
-        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
-        tag: "{{ awx_version }}"
-        push: yes
-      when: docker_registry is defined
-      delegate_to: localhost
-
-    - name: Wait for the registry to settle
-      pause:
-        seconds: 10
-
-    - name: Tag and push task image to registry
-      docker_image:
-        name: "{{ awx_task_image }}"
-        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
-        tag: "{{ awx_version }}"
-        push: yes
-      when: docker_registry is defined
-      delegate_to: localhost
+    - name: Enable image stream lookups for awx images
+      shell: "{{ openshift_oc_bin }} set image-lookup --all -n {{ awx_kubernetes_namespace }}"
+      when: openshift_host is defined
 
     - name: Set full web image path
       set_fact:
@@ -72,24 +51,31 @@
     awx_task_kubernetes_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
   when: dockerhub_base is defined
 
-- name: Deploy and Activate Postgres
+- name: Deploy and Activate Postgres (Kubernetes)
   shell: "helm install --name awx --namespace {{ awx_kubernetes_namespace }} --set postgresUser={{ pg_username }},postgresPassword={{ pg_password }},postgresDatabase={{ pg_database }},persistence.size={{ pg_volume_capacity|default('5')}}Gi stable/postgresql"
-  when: (pg_hostname is not defined or pg_hostname == '') and (postgres_svc_details is defined and postgres_svc_details.rc != 0)
+  when:
+    - (pg_hostname is not defined or pg_hostname == '') and (postgres_svc_details is defined and postgres_svc_details.rc != 0)
+    - kubernetes_context is defined
   register: kubernetes_pg_activate
+
+- name: Deploy and Activate Postgres (OpenShift)
+  shell: "{{ openshift_oc_bin }} new-app --template=postgresql-persistent -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql  -e POSTGRESQL_USER={{ pg_username }} -e POSTGRESQL_PASSWORD={{ pg_password }} -e POSTGRESQL_DATABASE={{ pg_database }} -e VOLUME_CAPACITY={{ pg_volume_capacity|default('5')}}Gi -e POSTGRESQL_VERSION=9.5 -n {{ awx_openshift_project }}"
+  when:
+    - (pg_hostname is not defined or pg_hostname == '') and (postgres_svc_details is defined and postgres_svc_details.rc != 0)
+    - openshift_host is defined
+  register: openshift_pg_activate
 
 - name: Set postgresql hostname to helm package service
   set_fact:
     pg_hostname: awx-postgresql
-  when: pg_hostname is not defined or pg_hostname == ''
+  when:
+    - pg_hostname is not defined or pg_hostname == ''
+    - kubernetes_context is defined
 
 - name: Wait for Postgres to activate
   pause:
     seconds: 60
   when: kubernetes_pg_activate|changed
-
-- name: Set kubernetes base path
-  set_fact:
-    kubernetes_base_path: "{{ awx_local_base_config_path|default('/tmp') }}/awx-config"
 
 - name: Ensure directory exists
   file:
@@ -115,10 +101,10 @@
     mode: '0600'
 
 - name: Apply etcd deployment
-  shell: "kubectl apply -f {{ kubernetes_base_path }}/etcd.yml"
-  
+  shell: "{{ kubectl_or_oc }} apply -f {{ kubernetes_base_path }}/etcd.yml"
+
 - name: Apply Configmap
-  shell: "kubectl apply -f {{ kubernetes_base_path }}/configmap.yml"
+  shell: "{{ kubectl_or_oc }} apply -f {{ kubernetes_base_path }}/configmap.yml"
 
 - name: Apply Deployment
-  shell: "kubectl apply -f {{ kubernetes_base_path }}/deployment.yml"
+  shell: "{{ kubectl_or_oc }} apply -f {{ kubernetes_base_path }}/deployment.yml"
