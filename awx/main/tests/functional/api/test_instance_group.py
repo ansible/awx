@@ -80,12 +80,20 @@ def test_delete_instance_group_jobs_running(delete, instance_group_jobs_running,
 
 
 @pytest.mark.django_db
-def test_delete_tower_instance_group_prevented(delete, options, tower_instance_group, user):
+def test_modify_delete_tower_instance_group_prevented(delete, options, tower_instance_group, user, patch, put):
     url = reverse("api:instance_group_detail", kwargs={'pk': tower_instance_group.pk})
     super_user = user('bob', True)
+
+    # DELETE tower group not allowed
     delete(url, None, super_user, expect=403)
+
+    # OPTIONS should just be "GET"
     resp = options(url, None, super_user, expect=200)
-    actions = ['GET', 'PUT',]
-    assert 'DELETE' not in resp.data['actions']
-    for action in actions:
-        assert action in resp.data['actions']
+    assert len(resp.data['actions'].keys()) == 1
+    assert 'GET' in resp.data['actions']
+
+    # Updating tower group fields not allowed
+    patch(url, {'name': 'foobar'}, super_user, expect=403)
+    patch(url, {'policy_instance_percentage': 40}, super_user, expect=403)
+    put(url, {'name': 'foobar'}, super_user, expect=403)
+
