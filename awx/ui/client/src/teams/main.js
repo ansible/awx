@@ -42,6 +42,15 @@ angular.module('Teams', [])
                         activityStreamTarget: 'team'
                     },
                     resolve: {
+                        edit: {
+                            resolvedModels: ['MeModel', '$q', function(Me, $q) {
+                                const promises = {
+                                    me: new Me('get').then((me) => me.extend('get', 'admin_of_organizations'))
+                                };
+
+                                return $q.all(promises);
+                            }]
+                        },
                         list: {
                             resolvedModels: ['MeModel', '$q', function(Me, $q) {
                                 const promises = {

@@ -14,14 +14,15 @@ const user_type_options = [
 
 export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
     'ProcessErrors', 'GetBasePath', 'Wait', 'CreateSelect2',
-    '$state', 'i18n',
+    '$state', 'i18n', 'resolvedModels',
     function($scope, $rootScope, $stateParams, UserForm, Rest, ProcessErrors,
-    GetBasePath, Wait, CreateSelect2, $state, i18n) {
+    GetBasePath, Wait, CreateSelect2, $state, i18n, models) {
 
         for (var i = 0; i < user_type_options.length; i++) {
             user_type_options[i].label = i18n._(user_type_options[i].label);
         }
 
+        const { me } = models;
         var form = UserForm,
             master = {},
             id = $stateParams.user_id,
@@ -30,7 +31,8 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
         init();
 
         function init() {
-            $scope.canAdd = true;
+            $scope.canEdit = me.get('summary_fields.user_capabilities.edit');
+            $scope.isOrgAdmin = me.get('related.admin_of_organizations.count') > 0;
             $scope.isCurrentlyLoggedInUser = (parseInt(id) === $rootScope.current_user.id);
             $scope.hidePagination = false;
             $scope.hideSmartSearch = false;

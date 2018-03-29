@@ -21,7 +21,7 @@ export default ['i18n', function(i18n) {
             forceListeners: true,
             tabs: true,
             messageBar: {
-                ngShow: '!user_is_system_auditor && !canAdd',
+                ngShow: 'isOrgAdmin && !canEdit',
                 message: i18n._("Contact your System Administrator to grant you the appropriate permissions to add and edit Users and Teams.")
             },
             fields: {

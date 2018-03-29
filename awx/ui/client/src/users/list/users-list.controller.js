@@ -30,12 +30,12 @@ export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
         init();
 
         function init() {
-            const canEdit = me.get('summary_fields.user_capabilities.edit');
+            $scope.canEdit = me.get('summary_fields.user_capabilities.edit');
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd('users')
                 .then(function(params) {
-                    $scope.canAdd = params.canAdd && canEdit;
+                    $scope.canAdd = params.canAdd;
                 });
 
             // search init
