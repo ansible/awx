@@ -238,7 +238,7 @@ function atRelaunchCtrl (
             relaunchData: PromptService.bundlePromptDataForRelaunch(vm.promptData)
         }).then((launchRes) => {
             if (!$state.includes('jobs')) {
-                $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
+                $state.go('jobz', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
             }
         }).catch(({ data, status }) => {
             ProcessErrors($scope, data, status, null, {

@@ -241,7 +241,7 @@ function adhocController($q, $scope, $stateParams,
             Rest.post(data)
                 .then(({data}) => {
                      Wait('stop');
-                     $state.go('adHocJobStdout', {id: data.id});
+                     $state.go('jobz', {id: data.id, type: 'command'});
                 })
                 .catch(({data, status}) => {
                     ProcessErrors($scope, data, status, adhocForm, {

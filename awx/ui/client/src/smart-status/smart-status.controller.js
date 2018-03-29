@@ -27,7 +27,7 @@ export default ['$scope', '$filter',
             if (typeof $scope.templateType !== 'undefined' && $scope.templateType === 'workflow_job_template') {
                 detailsBaseUrl = '/#/workflows/';
             } else {
-                detailsBaseUrl = '/#/jobs/';
+                detailsBaseUrl = '/#/jobz/playbook/';
             }
 
             var sparkData =

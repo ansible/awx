@@ -132,7 +132,7 @@ export default
                                             Wait('stop');
                                             $("#prompt-for-days-facts").dialog("close");
                                             $("#configure-dialog").dialog('close');
-                                            $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
+                                            $state.go('jobz', { id: data.system_job, type: 'system' }, { reload: true });
                                         })
                                         .catch(({data, status}) => {
                                             let template_id = scope.job_template_id;
@@ -222,7 +222,7 @@ export default
                                             Wait('stop');
                                             $("#prompt-for-days").dialog("close");
                                             // $("#configure-dialog").dialog('close');
-                                            $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
+                                            $state.go('jobz', { id: data.system_job, type: 'system' }, { reload: true });
                                         })
                                         .catch(({data, status}) => {
                                             let template_id = scope.job_template_id;

@@ -52,19 +52,19 @@ function ListJobsController (
 
         switch (type) {
             case 'job':
-                link = `/#/jobs/${id}`;
+                link = `/#/jobz/playbook/${id}`;
                 break;
             case 'ad_hoc_command':
-                link = `/#/ad_hoc_commands/${id}`;
+                link = `/#/jobz/command/${id}`;
                 break;
             case 'system_job':
-                link = `/#/management_jobs/${id}`;
+                link = `/#/jobz/system/${id}`;
                 break;
             case 'project_update':
-                link = `/#/scm_update/${id}`;
+                link = `/#/jobz/project/${id}`;
                 break;
             case 'inventory_update':
-                link = `/#/inventory_sync/${id}`;
+                link = `/#/jobz/inventory/${id}`;
                 break;
             case 'workflow_job':
                 link = `/#/workflows/${id}`;
