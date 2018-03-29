@@ -9,8 +9,11 @@ function JobsStrings (BaseString) {
     };
 
     ns.warnings = {
+        CANCEL_ACTION: t.s('PROCEED'),
         CANCEL_BODY: t.s('Are you sure you want to cancel this job?'),
         CANCEL_HEADER: t.s('Cancel Job'),
+        DELETE_BODY: t.s('Are you sure you want to delete this job?'),
+        DELETE_HEADER: t.s('Delete Job'),
     };
 
     ns.status = {

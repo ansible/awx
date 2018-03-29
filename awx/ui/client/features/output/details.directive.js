@@ -396,7 +396,7 @@ function toggleLabels () {
 }
 
 function cancelJob () {
-    const actionText = strings.get('CANCEL');
+    const actionText = strings.get('warnings.CANCEL_ACTION');
     const hdr = strings.get('warnings.CANCEL_HEADER');
     const warning = strings.get('warnings.CANCEL_BODY');
 
@@ -414,7 +414,6 @@ function cancelJob () {
     const action = () => {
         wait('start');
         $http({ method, url })
-            .then(() => $state.go('jobs'))
             .catch(errorHandler)
             .finally(() => {
                 $(ELEMENT_PROMPT_MODAL).modal('hide');
@@ -425,7 +424,35 @@ function cancelJob () {
     prompt({ hdr, resourceName, body, actionText, action });
 }
 
-function deleteJob () {}
+function deleteJob () {
+    const actionText = strings.get('DELETE');
+    const hdr = strings.get('warnings.DELETE_HEADER');
+    const warning = strings.get('warnings.DELETE_BODY');
+
+    const id = resource.model.get('id');
+    const name = $filter('sanitize')(resource.model.get('name'));
+
+    const body = `<div class="Prompt-bodyQuery">${warning}</div>`;
+    const resourceName = `#${id} ${name}`;
+
+    const method = 'DELETE';
+    const url = `${resource.model.path}/${id}/`;
+
+    const errorHandler = createErrorHandler('delete job', method);
+
+    const action = () => {
+        wait('start');
+        $http({ method, url })
+            .then(() => $state.go('jobs'))
+            .catch(errorHandler)
+            .finally(() => {
+                $(ELEMENT_PROMPT_MODAL).modal('hide');
+                wait('stop');
+            });
+    };
+
+    prompt({ hdr, resourceName, body, actionText, action });
+}
 
 function handleSocketEvent (data) {
     const project = resource.model.get('project');
@@ -488,8 +515,9 @@ function AtDetailsController (
         vm.extraVars = getExtraVarsDetails();
         vm.labels = getLabelDetails();
 
-        // Relaunch Component
+        // Relaunch and Delete Components
         vm.job = _.get(resource.model, 'model.GET', {});
+        vm.canDelete = resource.model.get('summary_fields.user_capabilities.delete');
 
         // XX - Codemirror
         if (vm.extraVars) {

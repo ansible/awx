@@ -7,21 +7,26 @@
         <at-relaunch job="vm.job"></at-relaunch>
 
         <!-- CANCEL ACTION -->
-        <button class="List-actionButton List-actionButton--delete"
+        <button
+            class="List-actionButton List-actionButton--delete"
             data-placement="top"
             ng-click="vm.cancelJob()"
-            ng-show="vm.status == 'running' || vm.status =='pending' "
-            aw-tool-tip="{{'Cancel' | translate}}"
-            data-original-title="" title="">
+            ng-show="vm.status.value === 'Running'|| vm.status.value ==='Pending'"
+            aw-tool-tip="{{'Cancel' | translate }}"
+            data-original-title=""
+            title="">
             <i class="fa fa-minus-circle"></i>
         </button>
 
         <!-- DELETE ACTION -->
-        <button class="List-actionButton List-actionButton--delete"
+        <button
+            class="List-actionButton List-actionButton--delete"
             data-placement="top"
             ng-click="vm.deleteJob()"
-            ng-hide="vm.status == 'running' || vm.status == 'pending' || !job.summary_fields.user_capabilities.delete"
-            aw-tool-tip="{{'Delete' | translate}}"
+            ng-hide="!vm.canDelete
+                || vm.status.value === 'Running'
+                || vm.status.value === 'Pending'"
+            aw-tool-tip="{{ 'Delete' | translate }}"
             data-original-title=""
             title="">
             <i class="fa fa-trash-o"></i>
