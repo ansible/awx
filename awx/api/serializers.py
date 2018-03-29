@@ -2261,6 +2261,7 @@ class RoleSerializer(BaseSerializer):
 
     class Meta:
         model = Role
+        fields = ('*', '-created', '-modified')
         read_only_fields = ('id', 'role_field', 'description', 'name')
 
     def to_representation(self, obj):
@@ -2276,8 +2277,6 @@ class RoleSerializer(BaseSerializer):
             ret['summary_fields']['resource_type'] = get_type_for_model(content_model)
             ret['summary_fields']['resource_type_display_name'] = content_model._meta.verbose_name.title()
 
-        ret.pop('created')
-        ret.pop('modified')
         return ret
 
     def get_related(self, obj):
