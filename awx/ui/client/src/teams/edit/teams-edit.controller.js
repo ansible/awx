@@ -5,17 +5,20 @@
  *************************************************/
 
 export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
-    'ProcessErrors', 'GetBasePath', 'Wait', '$state', 'OrgAdminLookup',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state', 'OrgAdminLookup', 'resolvedModels',
     function($scope, $rootScope, $stateParams, TeamForm, Rest, ProcessErrors,
-    GetBasePath, Wait, $state, OrgAdminLookup) {
+    GetBasePath, Wait, $state, OrgAdminLookup, models) {
 
+        const { me } = models;
         var form = TeamForm,
-            id = $stateParams.team_id,
-            defaultUrl = GetBasePath('teams') + id;
+        id = $stateParams.team_id,
+        defaultUrl = GetBasePath('teams') + id;
 
         init();
 
         function init() {
+            $scope.canEdit = me.get('summary_fields.user_capabilities.edit');
+            $scope.isOrgAdmin = me.get('related.admin_of_organizations.count') > 0;
             $scope.team_id = id;
             Rest.setUrl(defaultUrl);
             Wait('start');
@@ -33,9 +36,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
             });
 
             $scope.$watch('team_obj.summary_fields.user_capabilities.edit', function(val) {
-                if (val === false) {
-                    $scope.canAdd = false;
-                }
+                $scope.canAdd = (val === false) ? false : true;
             });
 
 

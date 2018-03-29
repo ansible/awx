@@ -48,7 +48,7 @@ export default ['i18n', function(i18n) {
                 awToolTip: i18n._('Create a new user'),
                 actionClass: 'btn List-buttonSubmit',
                 buttonContent: '&#43; ' + i18n._('ADD'),
-                ngShow: 'canAdd'
+                ngShow: 'canAdd && canEdit'
             }
         },
 
