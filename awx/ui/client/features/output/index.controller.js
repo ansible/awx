@@ -62,9 +62,9 @@ function JobsIndexController (
     // Panel
     vm.title = resource.model.get('name');
 
-    // Status Bar
-    vm.status = {
-        stats: statsEvent,
+    // Stats
+    vm.stats = {
+        event: statsEvent,
         elapsed: resource.model.get('elapsed'),
         download: resource.model.get('related.stdout'),
         running: Boolean(resource.model.get('started')) && !resource.model.get('finished'),
@@ -75,6 +75,7 @@ function JobsIndexController (
     // Details
     vm.details = {
         resource,
+        status: resource.model.get('status'),
         started: resource.model.get('started'),
         finished: resource.model.get('finished'),
     };
@@ -106,7 +107,7 @@ function JobsIndexController (
         up: scrollPageUp
     };
 
-    render.requestAnimationFrame(() => init(!vm.status.running));
+    render.requestAnimationFrame(() => init(!vm.stats.running));
 }
 
 function init (pageMode) {
@@ -134,15 +135,16 @@ function init (pageMode) {
             return shift().then(() => append(events, true));
         },
         onStart () {
-            vm.status.plays = 0;
-            vm.status.tasks = 0;
-            vm.status.running = true;
+            vm.stats.plays = 0;
+            vm.stats.tasks = 0;
+            vm.stats.running = true;
 
             vm.search.disabled = true;
+            vm.details.status = 'running';
         },
         onStop () {
-            vm.status.stats = statsEvent;
-            vm.status.running = false;
+            vm.stats.event = statsEvent;
+            vm.stats.running = false;
 
             vm.search.disabled = false;
 
@@ -166,7 +168,7 @@ function handleSocketEvent (scope, data) {
 
         vm.details.status = _.get(data, 'summary_fields.job.status');
 
-        vm.status.elapsed = moment(data.created)
+        vm.stats.elapsed = moment(data.created)
             .diff(resource.model.get('created'), 'seconds');
     }
 
@@ -175,11 +177,11 @@ function handleSocketEvent (scope, data) {
     }
 
     if (data.event === PLAY_START) {
-        vm.status.plays++;
+        vm.stats.plays++;
     }
 
     if (data.event === TASK_START) {
-        vm.status.tasks++;
+        vm.stats.tasks++;
     }
 
     if (data.event === JOB_END) {

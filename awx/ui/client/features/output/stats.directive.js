@@ -48,7 +48,7 @@ function AtStatsController (strings) {
     };
 
     vm.init = scope => {
-        const { download, elapsed, running, stats, plays, tasks } = scope;
+        const { download, elapsed, running, event, plays, tasks } = scope;
 
         vm.download = download;
         vm.plays = plays;
@@ -56,18 +56,18 @@ function AtStatsController (strings) {
         vm.elapsed = elapsed;
         vm.running = running || false;
 
-        vm.setStats(stats);
+        vm.setStats(event);
 
         scope.$watch('elapsed', value => { vm.elapsed = value; });
         scope.$watch('running', value => { vm.running = value; });
         scope.$watch('plays', value => { vm.plays = value; });
         scope.$watch('tasks', value => { vm.tasks = value; });
 
-        scope.$watch('stats', vm.setStats);
+        scope.$watch('event', vm.setStats);
     };
 
-    vm.setStats = stats => {
-        const counts = getHostStatusCounts(stats);
+    vm.setStats = statsEvent => {
+        const counts = getHostStatusCounts(statsEvent);
 
         HOST_STATUS_KEYS.forEach(key => {
             const count = counts[key];
@@ -79,7 +79,7 @@ function AtStatsController (strings) {
         });
 
         vm.hosts = counts.hosts;
-        vm.statsAreAvailable = Boolean(stats);
+        vm.statsAreAvailable = Boolean(statsEvent);
     };
 }
 
@@ -98,7 +98,7 @@ function atStats () {
             download: '=',
             elapsed: '=',
             running: '=',
-            stats: '=',
+            event: '=',
             plays: '=',
             tasks: '=',
         },

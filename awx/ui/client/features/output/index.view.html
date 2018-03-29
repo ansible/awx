@@ -4,7 +4,8 @@
             <at-details
                 resource="vm.details.resource"
                 started="vm.details.started"
-                finished="vm.details.finished">
+                finished="vm.details.finished"
+                status="vm.details.status">
             </at-details>
             <!-- <p><button class="btn" ng-click="vm.clear(true)">Page Mode</button></p> -->
         </at-panel>
@@ -14,13 +15,13 @@
         <at-panel class="at-Stdout">
             <div class="at-Panel-headingTitle">{{ vm.title }}</div>
             <at-stats
-                download="vm.status.download"
-                elapsed="vm.status.elapsed"
-                running="vm.status.running"
-                stats="vm.status.stats"
-                title="vm.status.title"
-                plays="vm.status.plays"
-                tasks="vm.status.tasks">
+                download="vm.stats.download"
+                elapsed="vm.stats.elapsed"
+                running="vm.stats.running"
+                event="vm.stats.event"
+                title="vm.stats.title"
+                plays="vm.stats.plays"
+                tasks="vm.stats.tasks">
             </at-stats>
             <!-- search ===================================================================================== -->
             <form ng-submit="vm.search.submitSearch()">

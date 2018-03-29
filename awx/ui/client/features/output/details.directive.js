@@ -539,6 +539,7 @@ function AtDetailsController (
         vm.toggleLabels = toggleLabels;
 
         $scope.$watch('started', value => { vm.started = getStartDetails(value); });
+        $scope.$watch('status', value => { vm.status = getStatusDetails(value); });
         $scope.$watch('finished', value => { vm.finished = getFinishDetails(value); });
 
         $scope.$on(resource.ws.status, (e, data) => handleSocketEvent(data));
@@ -575,6 +576,7 @@ function atDetails () {
             finished: '=',
             started: '=',
             resource: '=',
+            status: '=',
         },
     };
 }
