@@ -84,7 +84,7 @@ function JobsIndexController (
     eventCounter = null;
     statsEvent = resource.stats;
 
-    // Panel Title
+    // Panel
     vm.title = resource.model.get('name');
 
     // Status Bar

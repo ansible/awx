@@ -23,8 +23,6 @@ function atRelaunchCtrl (
     const jobObj = new Job();
     const jobTemplate = new JobTemplate();
 
-
-
     const checkRelaunchPlaybook = (option) => {
         jobObj.getRelaunch({
             id: vm.job.id
@@ -165,7 +163,7 @@ function atRelaunchCtrl (
                         inventorySource.postUpdate(vm.job.inventory_source)
                             .then((postUpdateRes) => {
                                 if (!$state.includes('jobs')) {
-                                    $state.go('inventorySyncStdout', { id: postUpdateRes.data.id }, { reload: true });
+                                    $state.go('jobz', { id: postUpdateRes.data.id, type: 'inventory' }, { reload: true });
                                 }
                             });
                     } else {

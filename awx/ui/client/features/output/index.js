@@ -27,6 +27,7 @@ function resolveResource (
     AdHocCommand,
     SystemJob,
     WorkflowJob,
+    InventoryUpdate,
     $stateParams,
     qs,
     Wait
@@ -50,6 +51,9 @@ function resolveResource (
             break;
         case 'system':
             Resource = SystemJob;
+            break;
+        case 'inventory':
+            Resource = InventoryUpdate;
             break;
         // case 'workflow':
             // todo: integrate workflow chart components into this view
@@ -117,7 +121,6 @@ function resolveWebSocketConnection ($stateParams, SocketService) {
     };
 
     return SocketService.addStateResolve(state, id);
-
 }
 
 function resolveBreadcrumb (strings) {
@@ -181,6 +184,7 @@ function JobsRun ($stateRegistry) {
                 'AdHocCommandModel',
                 'SystemJobModel',
                 'WorkflowJobModel',
+                'InventoryUpdateModel',
                 '$stateParams',
                 'QuerySet',
                 'Wait',

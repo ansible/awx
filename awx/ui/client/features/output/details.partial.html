@@ -136,14 +136,14 @@
         <div class="JobResults-resultRowText">{{ vm.playbook.value }}</div>
     </div>
 
-    <!-- MACHINE CREDENTIAL DETAIL -->
-    <div class="JobResults-resultRow" ng-show="vm.machineCredential">
-        <label class="JobResults-resultRowLabel">{{ vm.machineCredential.label }}</label>
+    <!-- CREDENTIAL DETAIL -->
+    <div class="JobResults-resultRow" ng-show="vm.credential">
+        <label class="JobResults-resultRowLabel">{{ vm.credential.label }}</label>
         <div class="JobResults-resultRowText">
-            <a href="{{ vm.machineCredential.link }}"
-                aw-tool-tip="{{ vm.machineCredential.tooltip }}"
+            <a href="{{ vm.credential.link }}"
+                aw-tool-tip="{{ vm.credential.tooltip }}"
                 data-placement="top">
-                {{ vm.machineCredential.value }}
+                {{ vm.credential.value }}
             </a>
         </div>
     </div>

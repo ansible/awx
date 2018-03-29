@@ -92,7 +92,7 @@ function getVerbosityDetails () {
     const choices = mapChoices(resource.model.options('actions.GET.verbosity.choices'));
 
     const label = 'Verbosity';
-    const value = choices[value];
+    const value = choices[verbosity];
 
     return { label, value };
 }
@@ -256,17 +256,26 @@ function getResultTracebackDetails () {
     return { label, value };
 }
 
-function getMachineCredentialDetails () {
-    const machineCredential = resource.model.get('summary_fields.credential');
+function getCredentialDetails () {
+    const credential = resource.model.get('summary_fields.credential');
 
-    if (!machineCredential) {
+    if (!credential) {
         return null;
     }
 
-    const label = 'Machine Credential';
-    const link = `/#/credentials/${machineCredential.id}`;
+    let label = 'Credential';
+
+    if (resource.type === 'playbook') {
+        label = 'Machine Credential';
+    }
+
+    if (resource.type === 'inventory') {
+        label = 'Source Credential';
+    }
+
+    const link = `/#/credentials/${credential.id}`;
     const tooltip = 'Edit the Credential';
-    const value = $filter('sanitize')(machineCredential.name);
+    const value = $filter('sanitize')(credential.name);
 
     return { label, link, tooltip, value };
 }
@@ -427,7 +436,7 @@ function handleSocketEvent (data) {
         vm.project.update = vm.project.update || {};
         vm.project.update.status = data.status;
     }
-};
+}
 
 function AtDetailsController (
     _$http_,
@@ -470,7 +479,7 @@ function AtDetailsController (
         vm.launchedBy = getLaunchedByDetails();
         vm.jobExplanation = getJobExplanationDetails();
         vm.verbosity = getVerbosityDetails();
-        vm.machineCredential = getMachineCredentialDetails();
+        vm.credential = getCredentialDetails();
         vm.forks = getForkDetails();
         vm.limit = getLimitDetails();
         vm.instanceGroup = getInstanceGroupDetails();

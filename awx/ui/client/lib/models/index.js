@@ -11,6 +11,7 @@ import InstanceGroup from '~models/InstanceGroup';
 import Inventory from '~models/Inventory';
 import InventoryScript from '~models/InventoryScript';
 import InventorySource from '~models/InventorySource';
+import InventoryUpdate from '~models/InventoryUpdate';
 import Job from '~models/Job';
 import JobEvent from '~models/JobEvent';
 import JobTemplate from '~models/JobTemplate';
@@ -46,6 +47,7 @@ angular
     .service('InventoryModel', Inventory)
     .service('InventoryScriptModel', InventoryScript)
     .service('InventorySourceModel', InventorySource)
+    .service('InventoryUpdateModel', InventoryUpdate)
     .service('JobEventModel', JobEvent)
     .service('JobModel', Job)
     .service('JobTemplateModel', JobTemplate)
