@@ -27,7 +27,8 @@
         <i class="fa fa-arrows-alt"></i>
     </button>
 
-    <a ng-show="true" href="/api/v2/jobs/{{ job.id }}/stdout?format=txt_download">
+    <a ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
+
         <button class="btn at-Input-button at-u-noBorder"
             aw-tool-tip="{{ standardOutTooltip }}"
             data-tip-watch="standardOutTooltip"

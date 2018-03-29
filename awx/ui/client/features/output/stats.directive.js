@@ -48,8 +48,9 @@ function AtStatsController (strings) {
     };
 
     vm.init = scope => {
-        const { elapsed, running, stats, plays, tasks } = scope;
+        const { download, elapsed, running, stats, plays, tasks } = scope;
 
+        vm.download = download;
         vm.plays = plays;
         vm.tasks = tasks;
         vm.elapsed = elapsed;
@@ -94,6 +95,7 @@ function atStats () {
             AtStatsController
         ],
         scope: {
+            download: '=',
             elapsed: '=',
             running: '=',
             stats: '=',

@@ -66,6 +66,7 @@ function JobsIndexController (
     vm.status = {
         stats: statsEvent,
         elapsed: resource.model.get('elapsed'),
+        download: resource.model.get('related.stdout'),
         running: Boolean(resource.model.get('started')) && !resource.model.get('finished'),
         plays: null,
         tasks: null,
