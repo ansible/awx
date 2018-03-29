@@ -400,6 +400,12 @@ model_serializer_mapping = {
     AdHocCommand: AdHocCommandSerializer,
     NotificationTemplate: NotificationTemplateSerializer,
     Notification: NotificationSerializer,
+    CredentialType: CredentialTypeSerializer,
+    Schedule: ScheduleSerializer,
+    Label: LabelSerializer,
+    WorkflowJobTemplate: WorkflowJobTemplateSerializer,
+    WorkflowJobTemplateNode: WorkflowJobTemplateNodeSerializer,
+    WorkflowJob: WorkflowJobSerializer,
 }
 
 
