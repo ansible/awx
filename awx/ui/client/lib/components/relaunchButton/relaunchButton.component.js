@@ -101,8 +101,7 @@ function atRelaunchCtrl (
                         };
                     });
             } else {
-
-                let launchParams = {
+                const launchParams = {
                     id: vm.job.id,
                 };
 
@@ -113,11 +112,11 @@ function atRelaunchCtrl (
                 }
 
                 jobObj.postRelaunch(launchParams)
-                .then((launchRes) => {
-                    if (!$state.includes('jobs')) {
-                        $state.go('jobResult', { id: launchRes.data.id }, { reload: true });
-                    }
-                });
+                    .then((launchRes) => {
+                        if (!$state.includes('jobs')) {
+                            $state.go('jobResult', { id: launchRes.data.id }, { reload: true });
+                        }
+                    });
             }
         });
     };
