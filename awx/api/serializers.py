@@ -4616,7 +4616,8 @@ class ActivityStreamSerializer(BaseSerializer):
             ('workflow_job_template_node', ('id', 'unified_job_template_id')),
             ('label', ('id', 'name', 'organization_id')),
             ('notification', ('id', 'status', 'notification_type', 'notification_template_id')),
-            ('access_token', ('id', 'token'))
+            ('access_token', ('id', 'token')),
+            ('credential_type', ('id', 'name', 'description', 'kind', 'managed_by_tower'))
         ]
         return field_list
 
