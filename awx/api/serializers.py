@@ -1345,7 +1345,7 @@ class ProjectOptionsSerializer(BaseSerializer):
         if scm_type:
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
-            errors['local_path'] = 'Invalid path choice.'
+            errors['local_path'] = _('This path is already being used by another manual project.')
 
         if errors:
             raise serializers.ValidationError(errors)
