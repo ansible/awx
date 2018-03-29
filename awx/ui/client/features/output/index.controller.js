@@ -50,35 +50,10 @@ function JobsIndexController (
     // Development helper(s)
     vm.clear = devClear;
 
-    // Stdout Navigation
-    vm.scroll = {
-        showBackToTop: false,
-        home: scrollHome,
-        end: scrollEnd,
-        down: scrollPageDown,
-        up: scrollPageUp
-    };
-
     // Expand/collapse
     vm.toggle = toggle;
     vm.expand = expand;
     vm.isExpanded = true;
-
-    // Search
-    $state = _$state_;
-    qs = _qs_;
-
-    vm.searchValue = '';
-    vm.searchRejected = null;
-    vm.searchKey = false;
-    vm.searchKeyExamples = searchKeyExamples;
-    vm.searchKeyFields = searchKeyFields;
-
-    vm.clearSearch = clearSearch;
-    vm.search = search;
-    vm.toggleSearchKey = toggleSearchKey;
-    vm.removeSearchTag = removeSearchTag;
-    vm.searchTags = getSearchTags(getCurrentQueryset());
 
     // Events
     eventCounter = null;
@@ -101,6 +76,33 @@ function JobsIndexController (
         resource,
         started: resource.model.get('started'),
         finished: resource.model.get('finished'),
+    };
+
+    // Search
+    $state = _$state_;
+    qs = _qs_;
+
+    vm.search = {
+        clearSearch,
+        searchKeyExamples,
+        searchKeyFields,
+        toggleSearchKey,
+        removeSearchTag,
+        submitSearch,
+        value: '',
+        key: false,
+        rejected: false,
+        disabled: !resource.model.get('finished'),
+        tags: getSearchTags(getCurrentQueryset()),
+    };
+
+    // Stdout Navigation
+    vm.scroll = {
+        showBackToTop: false,
+        home: scrollHome,
+        end: scrollEnd,
+        down: scrollPageDown,
+        up: scrollPageUp
     };
 
     render.requestAnimationFrame(() => init(!vm.status.running));
@@ -134,10 +136,14 @@ function init (pageMode) {
             vm.status.plays = 0;
             vm.status.tasks = 0;
             vm.status.running = true;
+
+            vm.search.disabled = true;
         },
         onStop () {
             vm.status.stats = statsEvent;
             vm.status.running = false;
+
+            vm.search.disabled = false;
 
             vm.details.status = statsEvent.failed ? 'failed' : 'successful';
             vm.details.finished = statsEvent.created;
@@ -398,7 +404,7 @@ const searchKeyExamples = ['id:>1', 'task:set', 'created:>=2000-01-01'];
 const searchKeyFields = ['changed', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
 
 function toggleSearchKey () {
-    vm.searchKey = !vm.searchKey;
+    vm.search.key = !vm.search.key;
 }
 
 function getCurrentQueryset () {
@@ -416,31 +422,31 @@ function getSearchTags (queryset) {
 }
 
 function removeSearchTag (index) {
-    const searchTerm = vm.searchTags[index];
+    const searchTerm = vm.search.tags[index];
 
     const currentQueryset = getCurrentQueryset();
     const modifiedQueryset = qs.removeTermsFromQueryset(currentQueryset, searchTerm);
 
-    vm.searchTags = getSearchTags(modifiedQueryset);
+    vm.search.tags = getSearchTags(modifiedQueryset);
 
     $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
     $state.transitionTo($state.current, $state.params, searchReloadOptions);
 }
 
-function search () {
-    const searchInputQueryset = qs.getSearchInputQueryset(vm.searchValue);
+function submitSearch () {
+    const searchInputQueryset = qs.getSearchInputQueryset(vm.search.value);
 
     const currentQueryset = getCurrentQueryset();
     const modifiedQueryset = qs.mergeQueryset(currentQueryset, searchInputQueryset);
 
-    vm.searchTags = getSearchTags(modifiedQueryset);
+    vm.search.tags = getSearchTags(modifiedQueryset);
 
     $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
     $state.transitionTo($state.current, $state.params, searchReloadOptions);
 }
 
 function clearSearch () {
-    vm.searchTags = [];
+    vm.search.tags = [];
 
     $state.params.job_event_search = '';
     $state.transitionTo($state.current, $state.params, searchReloadOptions);

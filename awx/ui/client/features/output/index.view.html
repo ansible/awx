@@ -22,31 +22,31 @@
                 tasks="vm.status.tasks">
             </at-stats>
             <!-- search ===================================================================================== -->
-            <form ng-submit="vm.search()">
+            <form ng-submit="vm.search.submitSearch()">
             <div class="input-group">
                 <input type="text"
                        class="form-control at-Input"
-                       ng-class="{ 'at-Input--rejected': vm.searchRejected }"
-                       ng-model="vm.searchValue"
-                       ng-attr-placeholder="SEARCH"
-                       ng-disabled="vm.searchDisabled">
+                       ng-class="{ 'at-Input--rejected': vm.search.rejected }"
+                       ng-model="vm.search.value"
+                       ng-attr-placeholder="{{ vm.search.disabled ? 'CANNOT SEARCH RUNNING JOB' : 'SEARCH' }}"
+                       ng-disabled="vm.search.disabled">
                 <span class="input-group-btn">
                     <button class="btn at-ButtonHollow--default at-Input-button"
-                            ng-click="vm.search()"
-                            ng-disabled="vm.searchDisabled"
+                            ng-click="vm.search.submitSearch()"
+                            ng-disabled="vm.search.disabled"
                             type="button">
                         <i class="fa fa-search"></i>
                     </button>
                     <button class="btn jobz-Button-searchKey"
-                            ng-if="vm.searchKey"
-                            ng-disabled="vm.searchDisabled"
-                            ng-click="vm.toggleSearchKey()"
+                            ng-if="vm.search.key"
+                            ng-disabled="vm.search.disabled"
+                            ng-click="vm.search.toggleSearchKey()"
                             type="button"> key
                     </button>
                     <button class="btn at-ButtonHollow--default at-Input-button"
-                            ng-if="!vm.searchKey"
-                            ng-disabled="vm.searchDisabled"
-                            ng-click="vm.toggleSearchKey()"
+                            ng-if="!vm.search.key"
+                            ng-disabled="vm.search.disabled"
+                            ng-click="vm.search.toggleSearchKey()"
                             type="button"> key
                     </button>
                 </span>
@@ -54,16 +54,20 @@
             </form>
 
             <div class="jobz-tagz">
-                <div class="LabelList-tagContainer" ng-repeat="tag in vm.searchTags track by $index">
+                <div class="LabelList-tagContainer" ng-repeat="tag in vm.search.tags track by $index">
                     <div class="LabelList-tag LabelList-tag--deletable"><span class="LabelList-name">{{ tag }}</span></div>
-                    <div class="LabelList-deleteContainer" ng-click="vm.removeSearchTag($index)">
+                    <div class="LabelList-deleteContainer" ng-click="vm.search.removeSearchTag($index)">
                         <i class="fa fa-times LabelList-tagDelete"></i>
                     </div>
                 </div>
-                <div><a href class="jobz-searchClearAll" ng-click="vm.clearSearch()" ng-show="!(vm.searchTags | isEmpty)">CLEAR ALL</a></div>
+                <div><a href class="jobz-searchClearAll" ng-click="vm.search.clearSearch()" ng-show="!(vm.search.tags | isEmpty)">CLEAR ALL</a></div>
             </div>
 
-            <at-search-key ng-show="vm.searchKey" fields="vm.searchKeyFields" examples="vm.searchKeyExamples"></at-search-key>
+            <at-search-key
+                ng-show="vm.search.key"
+                fields="vm.search.searchKeyFields"
+                examples="vm.search.searchKeyExamples">
+            </at-search-key>
 
             <!-- ============================================================================================ -->
             <div class="at-Stdout-menuTop">
