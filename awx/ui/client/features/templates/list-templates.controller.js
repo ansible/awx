@@ -46,17 +46,19 @@ function ListTemplatesController(
     $scope.canAdd = ($scope.canAddJobTemplate || $scope.canAddWorkflowJobTemplate);
 
     // smart-search
-    const name = 'templates';
-    const iterator = 'template';
-    const key = 'template_dataset';
-
-    $scope.list = { iterator, name };
-    $scope.collection = { iterator, basePath: 'unified_job_templates' };
-    $scope[key] = Dataset.data;
-    $scope[name] = Dataset.data.results;
+    $scope.list = { 
+        iterator: 'template',
+        name: 'templates'
+    };
+    $scope.collection = {
+        iterator: 'template',
+        basePath: 'unified_job_templates'
+    };
+    $scope.template_dataset = Dataset.data;
+    $scope.templates = Dataset.data.results;
     $scope.$on('updateDataset', (e, dataset) => {
-        $scope[key] = dataset;
-        $scope[name] = dataset.results;
+        $scope.template_dataset = dataset;
+        $scope.templates = dataset.results;
     });
 
     vm.isInvalid = (template) => {
