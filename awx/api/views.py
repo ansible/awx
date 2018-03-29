@@ -2408,7 +2408,7 @@ class InventoryScriptView(RetrieveAPIView):
                     return Response({})
                 else:
                     all_group = data.setdefault('all', dict())
-                    smart_hosts_qs = obj.hosts.all()
+                    smart_hosts_qs = obj.hosts.filter(**hosts_q).all()
                     smart_hosts = list(smart_hosts_qs.values_list('name', flat=True))
                     all_group['hosts'] = smart_hosts
             else:
