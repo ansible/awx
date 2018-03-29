@@ -338,7 +338,6 @@ export default [
             Wait('start');
             var payload = {};
             payload[key] = $scope.configDataResolve[key].default;
-
             ConfigurationService.patchConfiguration(payload)
                 .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
@@ -361,10 +360,13 @@ export default [
                     else if($scope[key + '_field'].hasOwnProperty('codeMirror')){
                         const isLdap = (key.indexOf("AUTH_LDAP") !== -1);
 
+                        const isLdapGroupTypeParams = isLdap && (key.indexOf("GROUP_TYPE_PARAMS") !== -1);
                         const isLdapUserSearch = isLdap && (key.indexOf("USER_SEARCH") !== -1);
                         const isLdapGroupSearch = isLdap && (key.indexOf("GROUP_SEARCH") !== -1);
 
-                        if (isLdapUserSearch || isLdapGroupSearch) {
+                        if (isLdapGroupTypeParams) {
+                            $scope[key] = JSON.stringify($scope.configDataResolve[key].default);
+                        } else if (isLdapUserSearch || isLdapGroupSearch) {
                             $scope[key] = '[]';
                         } else {
                             $scope[key] = '{}';
@@ -456,7 +458,6 @@ export default [
                     }
                 }
             });
-
             return payload;
         };
 
