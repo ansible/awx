@@ -67,7 +67,7 @@ new "custom" ``Credential Types``:
                 "id": "api_token",
                 "label": "API Token",
                 "type": "string",
-                "secret": True,
+                "secret": true
             }]
         },
         "injectors": {
