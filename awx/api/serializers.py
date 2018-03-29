@@ -1095,6 +1095,7 @@ class OAuth2TokenSerializer(BaseSerializer):
 
     refresh_token = serializers.SerializerMethodField()
     token = serializers.SerializerMethodField()
+    ALLOWED_SCOPES = ['read', 'write']
 
     class Meta:
         model = OAuth2AccessToken
@@ -1141,6 +1142,24 @@ class OAuth2TokenSerializer(BaseSerializer):
                 return '**************'
         except ObjectDoesNotExist:
             return ''
+
+    def _is_valid_scope(self, value):
+        if not value or (not isinstance(value, six.string_types)):
+            return False
+        words = value.split()
+        for word in words:
+            if words.count(word) > 1:
+                return False  # do not allow duplicates
+            if word not in self.ALLOWED_SCOPES:
+                return False
+        return True
+
+    def validate_scope(self, value):
+        if not self._is_valid_scope(value):
+            raise serializers.ValidationError(_(
+                'Must be a simple space-separated string with allowed scopes {}.'
+            ).format(self.ALLOWED_SCOPES))
+        return value
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
