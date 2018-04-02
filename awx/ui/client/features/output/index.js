@@ -12,6 +12,7 @@ import StatusService from '~features/output/status.service';
 import DetailsDirective from '~features/output/details.directive';
 import SearchDirective from '~features/output/search.directive';
 import StatsDirective from '~features/output/stats.directive';
+import HostEvent from './host-event/index';
 
 const Template = require('~features/output/index.view.html');
 
@@ -211,7 +212,8 @@ JobsRun.$inject = ['$stateRegistry'];
 angular
     .module(MODULE_NAME, [
         atLibModels,
-        atLibComponents
+        atLibComponents,
+        HostEvent
     ])
     .service('JobStrings', Strings)
     .service('JobPageService', PageService)
