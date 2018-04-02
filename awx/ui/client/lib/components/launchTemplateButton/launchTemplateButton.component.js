@@ -6,22 +6,24 @@ const atLaunchTemplate = {
         template: '<'
     },
     controller: ['JobTemplateModel', 'WorkflowJobTemplateModel', 'PromptService', '$state',
-        'ProcessErrors', '$scope', 'TemplatesStrings', 'Alert', atLaunchTemplateCtrl],
+        'ComponentsStrings', 'ProcessErrors', '$scope', 'TemplatesStrings', 'Alert',
+        atLaunchTemplateCtrl],
     controllerAs: 'vm'
 };
 
 function atLaunchTemplateCtrl (
     JobTemplate, WorkflowTemplate, PromptService, $state,
-    ProcessErrors, $scope, strings, Alert
+    componentsStrings, ProcessErrors, $scope, templatesStrings, Alert
 ) {
     const vm = this;
     const jobTemplate = new JobTemplate();
     const workflowTemplate = new WorkflowTemplate();
+    vm.strings = componentsStrings;
 
     const createErrorHandler = (path, action) =>
         ({ data, status }) => {
-            const hdr = strings.get('error.HEADER');
-            const msg = strings.get('error.CALL', { path, action, status });
+            const hdr = templatesStrings.get('error.HEADER');
+            const msg = templatesStrings.get('error.CALL', { path, action, status });
             ProcessErrors($scope, data, status, null, { hdr, msg });
         };
 
@@ -111,7 +113,7 @@ function atLaunchTemplateCtrl (
                     }
                 });
         } else {
-            Alert(strings.get('error.UNKNOWN'), strings.get('alert.UNKNOWN_LAUNCH'));
+            Alert(templatesStrings.get('error.UNKNOWN'), templatesStrings.get('alert.UNKNOWN_LAUNCH'));
         }
     };
 

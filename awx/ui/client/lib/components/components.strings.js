@@ -87,6 +87,10 @@ function ComponentsStrings (BaseString) {
         FAILED: t.s('Failed')
     };
 
+    ns.launchTemplate = {
+        DEFAULT: t.s('Start a job using this template')
+    };
+
     ns.list = {
         DEFAULT_EMPTY_LIST: t.s('Please add items to this list.')
     };

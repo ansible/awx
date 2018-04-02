@@ -272,7 +272,6 @@ export default [{
             list.basePath = "job_templates";
             list.fields.smart_status.ngInclude = "'/static/partials/organizations-job-template-smart-status.html'";
             list.fields.name.ngHref = '#/templates/job_template/{{template.id}}';
-            list.fieldActions.submit.ngClick = 'submitJob(template.id)';
             list.fieldActions.schedule.ngClick = 'scheduleJob(template.id)';
             list.fieldActions.copy.ngClick = 'copyTemplate(template.id)';
             list.fieldActions.edit.ngClick = "editJobTemplate(template.id)";
