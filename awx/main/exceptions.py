@@ -1,6 +1,9 @@
 # Copyright (c) 2018 Ansible by Red Hat
 # All Rights Reserved.
 
+import six
+
+
 # Celery does not respect exception type when using a serializer different than pickle;
 # and awx uses the json serializer
 # https://github.com/celery/celery/issues/3586
@@ -9,7 +12,7 @@
 class _AwxTaskError():
     def build_exception(self, task, message=None):
         if message is None:
-            message = "Execution error running {}".format(task.log_format)
+            message = six.text_type("Execution error running {}").format(task.log_format)
         e = Exception(message)
         e.task = task
         e.is_awx_task_error = True
@@ -17,7 +20,7 @@ class _AwxTaskError():
 
     def TaskCancel(self, task, rc):
         """Canceled flag caused run_pexpect to kill the job run"""
-        message="{} was canceled (rc={})".format(task.log_format, rc)
+        message=six.text_type("{} was canceled (rc={})").format(task.log_format, rc)
         e = self.build_exception(task, message)
         e.rc = rc
         e.awx_task_error_type = "TaskCancel"
@@ -25,7 +28,7 @@ class _AwxTaskError():
 
     def TaskError(self, task, rc):
         """Userspace error (non-zero exit code) in run_pexpect subprocess"""
-        message = "{} encountered an error (rc={}), please see task stdout for details.".format(task.log_format, rc)
+        message = six.text_type("{} encountered an error (rc={}), please see task stdout for details.").format(task.log_format, rc)
         e = self.build_exception(task, message)
         e.rc = rc
         e.awx_task_error_type = "TaskError"
