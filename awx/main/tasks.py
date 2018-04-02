@@ -143,9 +143,13 @@ def apply_cluster_membership_policies(self):
         actual_instances = []
         Group = namedtuple('Group', ['obj', 'instances'])
         Node = namedtuple('Instance', ['obj', 'groups'])
+
+        # Add every instnace to the special 'tower' group
+        InstanceGroup.objects.get(name='tower').add_all_non_iso_instances()
+
         # Process policy instance list first, these will represent manually managed instances
         # that will not go through automatic policy determination
-        for ig in InstanceGroup.objects.all():
+        for ig in InstanceGroup.objects.exclude(name='tower'):
             logger.info(six.text_type("Considering group {}").format(ig.name))
             ig.instances.clear()
             group_actual = Group(obj=ig, instances=[])
@@ -312,7 +316,7 @@ def purge_old_stdout_files(self):
 def cluster_node_heartbeat(self):
     logger.debug("Cluster node heartbeat task.")
     nowtime = now()
-    instance_list = list(Instance.objects.filter(rampart_groups__controller__isnull=True).distinct())
+    instance_list = list(Instance.objects.all_non_isolated())
     this_inst = None
     lost_instances = []
 

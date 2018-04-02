@@ -113,6 +113,9 @@ class InstanceManager(models.Manager):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
 
+    def all_non_isolated(self):
+        return self.filter(rampart_groups__controller__isnull=True).distinct()
+
 
 class InstanceGroupManager(models.Manager):
     """A custom manager class for the Instance model.

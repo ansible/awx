@@ -163,6 +163,10 @@ class InstanceGroup(models.Model, RelatedJobsMixin):
     def _get_related_jobs(self):
         return UnifiedJob.objects.filter(instance_group=self)
 
+    def add_all_non_iso_instances(self):
+        self.instances = Instance.objects.all_non_isolated()
+        self.save()
+
 
     class Meta:
         app_label = 'main'
