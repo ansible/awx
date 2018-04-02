@@ -20,7 +20,9 @@ function ListTemplatesController(
     Prompt,
     resolvedModels,
     strings,
-    Wait
+    Wait,
+    qs,
+    GetBasePath
 ) {
     const vm = this || {};
     const [jobTemplate, workflowTemplate] = resolvedModels;
@@ -59,6 +61,15 @@ function ListTemplatesController(
     $scope.$on('updateDataset', (e, dataset) => {
         $scope.template_dataset = dataset;
         $scope.templates = dataset.results;
+    });
+
+    $scope.$on(`ws-jobs`, () => {
+        let path = GetBasePath('unified_job_templates');
+        qs.search(path, $state.params.template_search)
+            .then(function(searchResponse) {
+                $scope.template_dataset = searchResponse.data;
+                $scope.templates = $scope.template_dataset.results;
+            });
     });
 
     vm.isInvalid = (template) => {
@@ -321,7 +332,9 @@ ListTemplatesController.$inject = [
     'Prompt',
     'resolvedModels',
     'TemplatesStrings',
-    'Wait'
+    'Wait',
+    'QuerySet',
+    'GetBasePath'
 ];
 
 export default ListTemplatesController;
