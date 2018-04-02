@@ -4615,7 +4615,10 @@ class ActivityStreamSerializer(BaseSerializer):
             ('workflow_job_template_node', ('id', 'unified_job_template_id')),
             ('label', ('id', 'name', 'organization_id')),
             ('notification', ('id', 'status', 'notification_type', 'notification_template_id')),
-            ('access_token', ('id', 'token'))
+            ('o_auth2_access_token', ('id', 'user_id', 'description', 'application', 'scope')),
+            ('o_auth2_application', ('id', 'name', 'description')),
+            ('credential_type', ('id', 'name', 'description', 'kind', 'managed_by_tower')),
+            ('ad_hoc_command', ('id', 'name', 'status', 'limit'))
         ]
         return field_list
 
@@ -4657,6 +4660,10 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_related(self, obj):
         rel = {}
+        VIEW_NAME_EXCEPTIONS = {
+            'custom_inventory_script': 'inventory_script_detail',
+            'o_auth2_access_token': 'o_auth2_token_detail'
+        }
         if obj.actor is not None:
             rel['actor'] = self.reverse('api:user_detail', kwargs={'pk': obj.actor.pk})
         for fk, __ in self._local_summarizable_fk_fields:
@@ -4670,18 +4677,11 @@ class ActivityStreamSerializer(BaseSerializer):
                     if getattr(thisItem, 'id', None) in id_list:
                         continue
                     id_list.append(getattr(thisItem, 'id', None))
-                    if fk == 'custom_inventory_script':
-                        rel[fk].append(self.reverse('api:inventory_script_detail', kwargs={'pk': thisItem.id}))
-                    elif fk == 'application':
-                        rel[fk].append(self.reverse(
-                            'api:o_auth2_application_detail', kwargs={'pk': thisItem.pk}
-                        ))
-                    elif fk == 'access_token':
-                        rel[fk].append(self.reverse(
-                            'api:o_auth2_token_detail', kwargs={'pk': thisItem.pk}
-                        ))
+                    if fk in VIEW_NAME_EXCEPTIONS:
+                        view_name = VIEW_NAME_EXCEPTIONS[fk]
                     else:
-                        rel[fk].append(self.reverse('api:' + fk + '_detail', kwargs={'pk': thisItem.id}))
+                        view_name = fk + '_detail'
+                    rel[fk].append(self.reverse('api:' + view_name, kwargs={'pk': thisItem.id}))
 
                     if fk == 'schedule':
                         rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url(self.context.get('request'))
