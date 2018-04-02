@@ -324,12 +324,11 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                     if (Array.isArray(set[key])){
                         _.remove(set[key], (item) => item === value);
                         // If the array is now empty, remove that key
-                        if(set[key].length === 0) {
+                        if (set[key].length === 0) {
                             delete set[key];
                         }
-                    }
-                    else {
-                        if($scope.singleSearchParam && set[$scope.singleSearchParam] && set[$scope.singleSearchParam].includes("%20and%20")) {
+                    } else {
+                        if ($scope.singleSearchParam && set[$scope.singleSearchParam] && set[$scope.singleSearchParam].includes("%20and%20")) {
                             let searchParamParts = set[$scope.singleSearchParam].split("%20and%20");
                             // The value side of each paramPart might have been encoded in SmartSearch.splitFilterIntoTerms
                             _.each(searchParamParts, (paramPart, paramPartIndex) => {
@@ -340,8 +339,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                                 searchParamParts.splice(index, 1);
                             }
                             set[$scope.singleSearchParam] = searchParamParts.join("%20and%20");
-                        }
-                        else {
+                        } else {
                             delete set[key];
                         }
                     }
@@ -350,8 +348,7 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
 
             if (termParts.length === 1) {
                 removed = searchWithoutKey(tagToRemove);
-            }
-            else {
+            } else {
                 let root = termParts[0].split(".")[0].replace(/^-/, '');
                 let encodeParams = {
                     term: tagToRemove,
@@ -382,11 +379,10 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                     removed = searchWithoutKey(termParts[termParts.length-1]);
                 }
             }
-            let cleared = _.cloneDeep(queryset);
-            removeFromQuerySet(cleared);
-            if(!$scope.querySet) {
+            removeFromQuerySet(queryset);
+            if (!$scope.querySet) {
                 $state.go('.', {
-                    [$scope.iterator + '_search']: cleared }).then(function(){
+                    [$scope.iterator + '_search']: queryset }).then(function(){
                         // ISSUE: for some reason deleting a tag from a list in a modal does not
                         // remove the param from $stateParams.  Here we'll manually check to make sure
                         // that that happened and remove it if it didn't.
@@ -398,11 +394,12 @@ export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', '
                 if($scope.querySet) {
                     $scope.querySet = queryset;
                 }
+
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
-            });
 
-            generateSearchTags();
+                generateSearchTags();
+            });
         };
 
         $scope.clearAllTerms = function(){
