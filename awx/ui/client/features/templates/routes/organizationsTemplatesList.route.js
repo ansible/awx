@@ -1,11 +1,13 @@
 import { N_ } from '../../../src/i18n';
 import templatesListController from '../templatesList.controller';
+import indexController from '../index.controller';
 
+const indexTemplate = require('~features/templates/index.view.html');
 const templatesListTemplate = require('~features/templates/templatesList.view.html');
 
 export default {
-    url: "/templates",
-    name: 'projects.edit.templates',
+    url: "/:organization_id/job_templates",
+    name: 'organizations.job_templates',
     params: {
         template_search: {
             dynamic: true,
@@ -18,10 +20,15 @@ export default {
         label: N_("JOB TEMPLATES")
     },
     views: {
-        'related': {
+        'form': {
+            templateUrl: indexTemplate,
+            controller: indexController,
+            controllerAs: 'vm'
+        },
+        'templatesList@organizations.job_templates': {
             controller: templatesListController,
             templateUrl: templatesListTemplate,
-            controllerAs: 'vm'
+            controllerAs: 'vm',
         }
     },
     resolve: {
@@ -45,7 +52,9 @@ export default {
                 const searchPath = GetBasePath('unified_job_templates');
 
                 const searchParam = _.assign($stateParams.template_search, {
-                    jobtemplate__project: $stateParams.project_id });
+                    or__project__organization: $stateParams.organization_id,
+                    or__jobtemplate__inventory__organization: $stateParams.organization_id,
+                });
 
                 Wait('start');
                 return qs.search(searchPath, searchParam)
