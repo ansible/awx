@@ -32,3 +32,15 @@ def test_role_access_attach(rando, inventory):
     inventory.read_role.members.add(rando)
     access = RoleAccess(rando)
     assert not access.can_attach(inventory.admin_role, rando, 'members', None)
+
+
+@pytest.mark.django_db
+def test_org_user_role_attach(user, organization):
+    admin = user('admin')
+    nonmember = user('nonmember')
+
+    organization.admin_role.members.add(admin)
+
+    access = RoleAccess(admin)
+    assert not access.can_attach(organization.member_role, nonmember, 'members', None)
+    assert not access.can_attach(organization.admin_role, nonmember, 'members', None)
