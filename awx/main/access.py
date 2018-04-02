@@ -344,7 +344,7 @@ class BaseAccess(object):
             if 'write' not in getattr(self.user, 'oauth_scopes', ['write']):
                 user_capabilities[display_method] = False  # Read tokens cannot take any actions
                 continue
-            elif display_method == 'copy' and isinstance(obj, JobTemplate):
+            elif display_method in ['copy', 'start', 'schedule'] and isinstance(obj, JobTemplate):
                 if obj.validation_errors:
                     user_capabilities[display_method] = False
                     continue
