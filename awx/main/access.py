@@ -2523,8 +2523,12 @@ class RoleAccess(BaseAccess):
             if not check_user_access(self.user, sub_obj_resource.__class__, 'read', sub_obj_resource):
                 return False
 
-        if isinstance(obj.content_object, Organization) and obj.role_field == 'member_role':
-            if not UserAccess(self.user).can_admin(sub_obj, data):
+        # Being a user in the member_role or admin_role of an organization grants
+        # administrators of that Organization the ability to edit that user. To prevent
+        # unwanted escalations lets ensure that the Organization administartor has the abilty
+        # to admin the user being added to the role.
+        if isinstance(obj.content_object, Organization) and obj.role_field in ['member_role', 'admin_role']:
+            if not UserAccess(self.user).can_admin(sub_obj, None):
                 return False
 
         if isinstance(obj.content_object, ResourceMixin) and \

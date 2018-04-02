@@ -61,3 +61,4 @@ def test_org_user_role_attach(user, organization):
 
     access = RoleAccess(admin)
     assert not access.can_attach(organization.member_role, nonmember, 'members', None)
+    assert not access.can_attach(organization.admin_role, nonmember, 'members', None)
