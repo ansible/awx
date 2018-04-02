@@ -50,3 +50,15 @@ def test_visible_roles(admin_user, system_auditor, rando, organization, project)
     assert rando not in project.admin_role
     assert access.can_read(project.admin_role)
     assert project.admin_role in Role.visible_roles(rando)
+
+
+@pytest.mark.django_db
+def test_org_user_role_attach(user, organization):
+    admin = user('admin')
+    nonmember = user('nonmember')
+
+    organization.admin_role.members.add(admin)
+
+    access = RoleAccess(admin)
+    assert not access.can_attach(organization.member_role, nonmember, 'members', None)
+    assert not access.can_attach(organization.admin_role, nonmember, 'members', None)
