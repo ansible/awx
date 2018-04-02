@@ -101,13 +101,22 @@ function atRelaunchCtrl (
                         };
                     });
             } else {
-                jobObj.postRelaunch({
-                    id: vm.job.id
-                }).then((launchRes) => {
-                    if (!$state.includes('jobs')) {
-                        $state.go('jobResult', { id: launchRes.data.id }, { reload: true });
-                    }
-                });
+                const launchParams = {
+                    id: vm.job.id,
+                };
+
+                if (_.has(option, 'name')) {
+                    launchParams.relaunchData = {
+                        hosts: (option.name).toLowerCase()
+                    };
+                }
+
+                jobObj.postRelaunch(launchParams)
+                    .then((launchRes) => {
+                        if (!$state.includes('jobs')) {
+                            $state.go('jobResult', { id: launchRes.data.id }, { reload: true });
+                        }
+                    });
             }
         });
     };
