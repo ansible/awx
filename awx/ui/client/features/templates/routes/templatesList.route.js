@@ -1,16 +1,14 @@
-import ListController from './list-templates.controller';
-const listTemplate = require('~features/templates/list.view.html');
-import { N_ } from '../../src/i18n';
+import { N_ } from '../../../src/i18n';
+import templatesListController from '../templatesList.controller';
+import indexController from '../index.controller';
+
+const indexTemplate = require('~features/templates/index.view.html');
+const templatesListTemplate = require('~features/templates/templatesList.view.html');
 
 export default {
     name: 'templates',
     route: '/templates',
     ncyBreadcrumb: {
-        // TODO: this would be best done with our
-        // strings file pattern, but it's not possible to
-        // get a handle on this route within a DI based
-        // on the state tree generation as present in
-        // src/templates currently
         label: N_("TEMPLATES")
     },
     data: {
@@ -33,8 +31,13 @@ export default {
     searchPrefix: 'template',
     views: {
         '@': {
-            controller: ListController,
-            templateUrl: listTemplate,
+            templateUrl: indexTemplate,
+            controller: indexController,
+            controllerAs: 'vm'
+        },
+        'templatesList@templates': {
+            controller: templatesListController,
+            templateUrl: templatesListTemplate,
             controllerAs: 'vm',
         }
     },

@@ -1,0 +1,114 @@
+<at-panel-body>
+    <div class="at-List-toolbar">
+        <smart-search
+            class="at-List-search"
+            django-model="templates"
+            base-path="unified_job_templates"
+            iterator="template"
+            list="list"
+            dataset="template_dataset"
+            collection="collection"
+            search-tags="searchTags"
+            query-set="querySet">
+        </smart-search>
+        <div class="at-List-toolbarAction" ng-show="canAdd">
+            <button
+                type="button"
+                class="at-List-toolbarActionButton at-Button--success"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+                    &#43; {{:: vm.strings.get('list.ADD_BUTTON_LABEL') }}
+                    <span class="at-List-toolbarDropdownCarat"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu at-List-toolbarActionDropdownMenu">
+                <li>
+                    <a ui-sref="templates.addJobTemplate">
+                        {{:: vm.strings.get('list.ADD_DD_JT_LABEL') }}
+                    </a>
+                </li>
+                <li>
+                    <a ui-sref="templates.addWorkflowJobTemplate">
+                        {{:: vm.strings.get('list.ADD_DD_WF_LABEL') }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <at-list results="templates">
+        <!-- TODO: implement resources are missing red indicator as present in mockup -->
+        <at-row ng-repeat="template in templates"
+            ng-class="{'at-Row--active': (template.id === vm.activeId)}"
+            template-id="{{ template.id }}">
+            <div class="at-Row--invalid" ng-show="vm.isInvalid(template)">
+                <at-popover state="vm.invalidTooltip"></at-popover>
+            </div>
+            <div class="at-Row-items">
+                <at-row-item
+                    header-value="{{ template.name }}"
+                    header-link="/#/templates/job_template/{{ template.id }}"
+                    header-tag="{{ vm.templateTypes[template.type] }}"
+                    ng-if="template.type === 'job_template'">
+                </at-row-item>
+                <at-row-item
+                    header-value="{{ template.name }}"
+                    header-link="/#/templates/workflow_job_template/{{ template.id }}"
+                    header-tag="{{ vm.templateTypes[template.type] }}"
+                    ng-if="template.type === 'workflow_job_template'">
+                </at-row-item>
+                <at-row-item
+                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ACTIVITY') }}"
+                    smart-status="template">
+                </at-row-item>
+                <at-row-item
+                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INVENTORY') }}"
+                    value="{{ template.summary_fields.inventory.name }}"
+                    value-link="/#/inventories/inventory/{{ template.summary_fields.inventory.id }}">
+                </at-row-item>
+                <at-row-item
+                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_PROJECT') }}"
+                    value="{{ template.summary_fields.project.name }}"
+                    value-link="/#/projects/{{ template.summary_fields.project.id }}">
+                </at-row-item>
+                <!-- TODO: add see more for creds -->
+                <at-row-item
+                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_CREDENTIALS') }}"
+                    tag-values="template.summary_fields.credentials"
+                    tags-are-creds="true">
+                </at-row-item>
+                <at-row-item
+                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
+                    value="{{ vm.getModified(template) }}">
+                </at-row-item>
+                <at-row-item
+                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RAN') }}"
+                    value="{{ vm.getLastRan(template) }}">
+                </at-row-item>
+                <labels-list class="LabelList" show-delete="false" is-row-item="true">
+                </labels-list>
+            </div>
+            <div class="at-Row-actions">
+                <at-launch-template template="template"
+                    ng-show="template.summary_fields.user_capabilities.start">
+                </at-launch-template>
+                <at-row-action icon="fa-calendar" ng-click="vm.scheduleTemplate(template)"
+                    ng-show="template.summary_fields.user_capabilities.schedule">
+                </at-row-action>
+                <at-row-action icon="fa-copy" ng-click="vm.copyTemplate(template)"
+                    ng-show="template.summary_fields.user_capabilities.copy">
+                </at-row-action>
+                <at-row-action icon="fa-trash" ng-click="vm.deleteTemplate(template)"
+                    ng-show="template.summary_fields.user_capabilities.delete">
+                </at-row-action>
+            </div>
+        </at-row>
+    </at-list>
+    <paginate
+        collection="collection"
+        dataset="template_dataset"
+        iterator="template"
+        base-path="unified_job_templates"
+        query-set="querySet">
+    </paginate>
+</at-panel-body>

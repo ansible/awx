@@ -93,8 +93,10 @@ export default
                     };
 
                     if (scope.$parent.$parent.template) {
-                        scope.labels = scope.$parent.$parent.template.summary_fields.labels.results.slice(0, 5);
-                        scope.count = scope.$parent.$parent.template.summary_fields.labels.count;
+                        if (_.has(scope, '$parent.$parent.template.summary_fields.labels.results')) {
+                            scope.labels = scope.$parent.$parent.template.summary_fields.labels.results.slice(0, 5);
+                            scope.count = scope.$parent.$parent.template.summary_fields.labels.count;
+                        }
                     } else if (scope.$parent.$parent.job) {
                         if (_.has(scope, '$parent.$parent.job.summary_fields.labels.results')) {
                             scope.labels = scope.$parent.$parent.job.summary_fields.labels.results.slice(0, 5);

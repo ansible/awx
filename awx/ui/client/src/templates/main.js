@@ -19,7 +19,7 @@ import WorkflowForm from './workflows.form';
 import InventorySourcesList from './inventory-sources.list';
 import TemplateList from './templates.list';
 import TemplatesStrings from './templates.strings';
-import listRoute from '~features/templates/list.route.js';
+import listRoute from '~features/templates/routes/templatesList.route.js';
 import templateCompletedJobsRoute from '~features/jobs/routes/templateCompletedJobs.route.js';
 
 export default
