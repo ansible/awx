@@ -40,7 +40,7 @@ class TestOAuth2Application:
             (2, [False, False]),
             (3, [False, False]),
         ])
-        def test_can_edit_delete(
+        def test_can_edit_delete_app(
             self, admin, org_admin, org_member, alice, user_for_access, can_access_list, organization
         ):
             organization.admin_role.members.add(org_admin)
@@ -101,6 +101,54 @@ class TestOAuth2Token:
             assert access.can_read(token) is can_access
             assert access.can_change(token, {}) is can_access
             assert access.can_delete(token) is can_access
+
+
+    def test_auditor_can_read(
+        self, post, admin, org_admin, org_member, alice, system_auditor, organization
+    ):
+        user_list = [admin, org_admin, org_member]
+        can_access_list = [True, True, True]
+        cannot_access_list = [False, False, False]
+        app = Application.objects.create(
+            name='test app for {}'.format(admin.username), user=admin,
+            client_type='confidential', authorization_grant_type='password',
+            organization=organization
+        )
+        for user, can_access, cannot_access in zip(user_list, can_access_list, cannot_access_list):
+            response = post(
+                reverse('api:o_auth2_application_token_list', kwargs={'pk': app.pk}),
+                {'scope': 'read'}, user, expect=201
+            )
+            token = AccessToken.objects.get(token=response.data['token'])
+            access = OAuth2TokenAccess(system_auditor)
+            assert access.can_read(token) is can_access
+            assert access.can_change(token, {}) is cannot_access
+            assert access.can_delete(token) is cannot_access
+            
+    def test_user_auditor_can_change(
+        self, post, org_member, org_admin, system_auditor, organization
+    ):    
+        app = Application.objects.create(
+            name='test app for {}'.format(org_admin.username), user=org_admin,
+            client_type='confidential', authorization_grant_type='password',
+            organization=organization
+        )
+        response = post(
+            reverse('api:o_auth2_application_token_list', kwargs={'pk': app.pk}),
+            {'scope': 'read'}, org_member, expect=201
+        )
+        token = AccessToken.objects.get(token=response.data['token'])
+        access = OAuth2TokenAccess(system_auditor)
+        assert access.can_read(token) is True
+        assert access.can_change(token, {}) is False
+        assert access.can_delete(token) is False
+        dual_user = system_auditor
+        organization.admin_role.members.add(dual_user)
+        access = OAuth2TokenAccess(dual_user)
+        assert access.can_read(token) is True
+        assert access.can_change(token, {}) is True
+        assert access.can_delete(token) is True
+        
             
             
     def test_can_read_change_delete_personal_token_org_member(
@@ -131,7 +179,7 @@ class TestOAuth2Token:
         for user, can_access in zip(user_list, can_access_list):
             response = post(
                 reverse('api:o_auth2_personal_token_list', kwargs={'pk': user.pk}),
-                {'scope': 'read', 'organization':None}, user, expect=201
+                {'scope': 'read', 'application':None}, user, expect=201
             )
             token = AccessToken.objects.get(token=response.data['token'])
             access = OAuth2TokenAccess(user)
@@ -159,4 +207,4 @@ class TestOAuth2Token:
                 reverse('api:o_auth2_application_token_list', kwargs={'pk': app.pk}),
                 {'scope': 'read'}, user_list[user_for_access], expect=201 if can_access else 403
             )
-            
+

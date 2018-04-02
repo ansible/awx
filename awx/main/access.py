@@ -604,17 +604,14 @@ class OAuth2ApplicationAccess(BaseAccess):
             return False
     
     def can_delete(self, obj):
-        if obj.organization in self.user.admin_of_organizations or self.user.is_superuser:
-            return True
-        else: 
-            return False
+        return obj.organization in self.user.admin_of_organizations or self.user.is_superuser
 
     def can_add(self, data):
         if self.user.is_superuser:
             return True    
         if not data:
             return Organization.accessible_objects(self.user, 'admin_role').exists()
-        return self.check_related('organization', Organization, data, role_field='admin_role')
+        return self.check_related('organization', Organization, data, role_field='admin_role', mandatory=True)
 
 
 class OAuth2TokenAccess(BaseAccess):
@@ -625,9 +622,9 @@ class OAuth2TokenAccess(BaseAccess):
      - I am the user of the token.
     I can create an OAuth2 app token when:
      - I have the read permission of the related application.
-     
     I can read, change or delete a personal token when: 
-     - 
+     - I am the user of the token
+     - I am the superuser
     I can create an OAuth2 Personal Access Token when:
      - I am a user.  But I can only create a PAT for myself.  
     '''
@@ -641,31 +638,20 @@ class OAuth2TokenAccess(BaseAccess):
             Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
         return self.model.objects.filter(application__organization__in=org_access_qs)  | self.model.objects.filter(user__id=self.user.pk)
         
-    def can_change(self, obj, data):
-        print 'obj user:', obj.user, '\nself.user:', self.user
-        if (self.user.is_superuser) | (obj.user == self.user):
-            return True
-        elif self.user.is_system_auditor:
-            return False
-        elif not obj.application:
-            return False
-        return self.user in obj.application.organization.admin_role
-
     def can_delete(self, obj):
         if (self.user.is_superuser) | (obj.user == self.user):
             return True
-        elif self.user.is_system_auditor:
-            return False
         elif not obj.application:
             return False
         return self.user in obj.application.organization.admin_role
+        
+    def can_change(self, obj, data):
+        return self.can_delete(obj)
 
     def can_add(self, data):
         if 'application' in data:
             app = get_object_from_data('application', OAuth2Application, data)
-            if self.user.is_system_auditor:
-                return False
-            elif app is None:
+            if app is None:
                 return True
             return OAuth2ApplicationAccess(self.user).can_read(app)
         return True
