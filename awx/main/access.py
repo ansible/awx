@@ -2523,6 +2523,10 @@ class RoleAccess(BaseAccess):
             if not check_user_access(self.user, sub_obj_resource.__class__, 'read', sub_obj_resource):
                 return False
 
+        if isinstance(obj.content_object, Organization) and obj.role_field == 'member_role':
+            if not UserAccess(self.user).can_admin(sub_obj, data):
+                return False
+
         if isinstance(obj.content_object, ResourceMixin) and \
            self.user in obj.content_object.admin_role:
             return True
