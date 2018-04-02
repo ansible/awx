@@ -7,6 +7,7 @@ function JobsStrings (BaseString) {
     ns.list = {
         ROW_ITEM_LABEL_STARTED: t.s('Started'),
         ROW_ITEM_LABEL_FINISHED: t.s('Finished'),
+        ROW_ITEM_LABEL_WORKFLOW_JOB: t.s('Workflow Job'),
         ROW_ITEM_LABEL_LAUNCHED_BY: t.s('Launched By'),
         ROW_ITEM_LABEL_JOB_TEMPLATE: t.s('Job Template'),
         ROW_ITEM_LABEL_INVENTORY: t.s('Inventory'),

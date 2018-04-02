@@ -35,6 +35,11 @@
                     inline="true">
                 </at-row-item>
                 <at-row-item
+                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_WORKFLOW_JOB') }}"
+                    value="{{ job.summary_fields.source_workflow_job.name }}"
+                    value-link="/#/workflows/{{ job.summary_fields.source_workflow_job.id }}">
+                </at-row-item>
+                <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_LAUNCHED_BY') }}"
                     value="{{ job.summary_fields.created_by.username }}"
                     value-link="/#/users/{{ job.summary_fields.created_by.id }}">
