@@ -1,0 +1,61 @@
+<!-- todo: styling, css etc. - disposition according to project lib conventions -->
+<form ng-submit="vm.submitSearch()">
+<div class="input-group">
+    <input type="text"
+           class="form-control at-Input"
+           ng-class="{ 'at-Input--rejected': vm.rejected }"
+           ng-model="vm.value"
+           ng-attr-placeholder="{{ vm.disabled ? 'CANNOT SEARCH RUNNING JOB' : 'SEARCH' }}"
+           ng-disabled="vm.disabled">
+    <span class="input-group-btn">
+        <button class="btn at-ButtonHollow--default at-Input-button"
+                ng-click="vm.submitSearch()"
+                ng-disabled="vm.disabled"
+                type="button">
+            <i class="fa fa-search"></i>
+        </button>
+        <button class="btn jobz-Button-searchKey"
+                ng-if="vm.key"
+                ng-disabled="vm.disabled"
+                ng-click="vm.toggleSearchKey()"
+                type="button"> key
+        </button>
+        <button class="btn at-ButtonHollow--default at-Input-button"
+                ng-if="!vm.key"
+                ng-disabled="vm.disabled"
+                ng-click="vm.toggleSearchKey()"
+                type="button"> key
+        </button>
+    </span>
+</div>
+</form>
+
+<div class="jobz-tagz">
+    <div class="LabelList-tagContainer" ng-repeat="tag in vm.tags track by $index">
+        <div class="LabelList-tag LabelList-tag--deletable"><span class="LabelList-name">{{ tag }}</span></div>
+        <div class="LabelList-deleteContainer" ng-click="vm.removeSearchTag($index)">
+            <i class="fa fa-times LabelList-tagDelete"></i>
+        </div>
+    </div>
+    <div><a href class="jobz-searchClearAll" ng-click="vm.clearSearch()" ng-show="!(vm.tags | isEmpty)">CLEAR ALL</a></div>
+</div>
+
+<div class="jobz-searchKeyPaneContainer" ng-show="vm.key">
+    <div class="jobz-searchKeyPane">
+        <div class="SmartSearch-keyRow">
+        <div class="SmartSearch-examples">
+            <div class="SmartSearch-examples--title"><b>EXAMPLES:</b></div>
+            <div class="SmartSearch-examples--search" ng-repeat="tag in vm.examples"> {{ tag }}</div>
+        </div>
+        </div>
+        <div class="SmartSearch-keyRow">
+            <b>FIELDS:</b>
+            <span ng-repeat="field in vm.fields">{{ field }}<span ng-if="!$last">, </span></span>
+        </div>
+        <div class="SmartSearch-keyRow">
+            <b>ADDITIONAL INFORMATION:</b>
+            For additional information on advanced search search syntax please see the Ansible Tower
+            <a ng-attr-href="undefined" target="_blank">documentation</a>.
+        </div>
+    </div>
+</div>

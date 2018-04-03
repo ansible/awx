@@ -1,9 +1,7 @@
 let $compile;
 let $q;
 let $scope;
-let $state;
 let page;
-let qs;
 let render;
 let resource;
 let scroll;
@@ -21,8 +19,6 @@ function JobsIndexController (
     _$scope_,
     _$compile_,
     _$q_,
-    _$state_,
-    _qs_,
     _status_,
 ) {
     vm = this || {};
@@ -49,24 +45,6 @@ function JobsIndexController (
     // Panel
     vm.resource = resource;
     vm.title = resource.model.get('name');
-
-    // Search
-    $state = _$state_;
-    qs = _qs_;
-
-    vm.search = {
-        clearSearch,
-        searchKeyExamples,
-        searchKeyFields,
-        toggleSearchKey,
-        removeSearchTag,
-        submitSearch,
-        value: '',
-        key: false,
-        rejected: false,
-        disabled: !resource.model.get('finished'),
-        tags: getSearchTags(getCurrentQueryset()),
-    };
 
     // Stdout Navigation
     vm.scroll = {
@@ -111,13 +89,9 @@ function init () {
         onStart () {
             status.resetCounts();
             status.setJobStatus('running');
-
-            vm.search.disabled = true;
         },
         onStop () {
             status.updateStats();
-
-            vm.search.disabled = false;
         }
     });
 
@@ -346,63 +320,6 @@ function toggle (uuid, menu) {
     }
 }
 
-//
-// Search
-//
-
-const searchReloadOptions = { reload: true, inherit: false };
-const searchKeyExamples = ['id:>1', 'task:set', 'created:>=2000-01-01'];
-const searchKeyFields = ['changed', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
-
-function toggleSearchKey () {
-    vm.search.key = !vm.search.key;
-}
-
-function getCurrentQueryset () {
-    const { job_event_search } = $state.params; // eslint-disable-line camelcase
-
-    return qs.decodeArr(job_event_search);
-}
-
-function getSearchTags (queryset) {
-    return qs.createSearchTagsFromQueryset(queryset)
-        .filter(tag => !tag.startsWith('event'))
-        .filter(tag => !tag.startsWith('-event'))
-        .filter(tag => !tag.startsWith('page_size'))
-        .filter(tag => !tag.startsWith('order_by'));
-}
-
-function removeSearchTag (index) {
-    const searchTerm = vm.search.tags[index];
-
-    const currentQueryset = getCurrentQueryset();
-    const modifiedQueryset = qs.removeTermsFromQueryset(currentQueryset, searchTerm);
-
-    vm.search.tags = getSearchTags(modifiedQueryset);
-
-    $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
-    $state.transitionTo($state.current, $state.params, searchReloadOptions);
-}
-
-function submitSearch () {
-    const searchInputQueryset = qs.getSearchInputQueryset(vm.search.value);
-
-    const currentQueryset = getCurrentQueryset();
-    const modifiedQueryset = qs.mergeQueryset(currentQueryset, searchInputQueryset);
-
-    vm.search.tags = getSearchTags(modifiedQueryset);
-
-    $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
-    $state.transitionTo($state.current, $state.params, searchReloadOptions);
-}
-
-function clearSearch () {
-    vm.search.tags = [];
-
-    $state.params.job_event_search = '';
-    $state.transitionTo($state.current, $state.params, searchReloadOptions);
-}
-
 JobsIndexController.$inject = [
     'resource',
     'JobPageService',
@@ -412,8 +329,6 @@ JobsIndexController.$inject = [
     '$scope',
     '$compile',
     '$q',
-    '$state',
-    'QuerySet',
     'JobStatusService',
 ];
 

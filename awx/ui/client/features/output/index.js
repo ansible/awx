@@ -10,7 +10,7 @@ import EngineService from '~features/output/engine.service';
 import StatusService from '~features/output/status.service';
 
 import DetailsDirective from '~features/output/details.directive';
-import SearchKeyDirective from '~features/output/search-key.directive';
+import SearchDirective from '~features/output/search.directive';
 import StatsDirective from '~features/output/stats.directive';
 
 const Template = require('~features/output/index.view.html');
@@ -220,7 +220,7 @@ angular
     .service('JobEventEngine', EngineService)
     .service('JobStatusService', StatusService)
     .directive('atJobDetails', DetailsDirective)
-    .directive('atSearchKey', SearchKeyDirective)
+    .directive('atJobSearch', SearchDirective)
     .directive('atJobStats', StatsDirective)
     .run(JobsRun);
 
