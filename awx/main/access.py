@@ -586,7 +586,7 @@ class OAuth2ApplicationAccess(BaseAccess):
      - I am a user in the organization of the application.
     I can create OAuth 2 applications when:
      - I am a superuser.
-     - I am the admin of the organization of the organization of the application.
+     - I am the admin of the organization of the application.
     '''
 
     model = OAuth2Application
@@ -596,15 +596,11 @@ class OAuth2ApplicationAccess(BaseAccess):
         return self.model.objects.filter(organization__in=self.user.organizations)
 
     def can_change(self, obj, data):
-        if obj.organization in self.user.admin_of_organizations or self.user.is_superuser:
-            if not self.check_related('organization', Organization, data, role_field='admin_role'):
-                return False
-            return True
-        else: 
-            return False
-    
+        return self.user.is_superuser or self.check_related('organization', Organization, data, obj=obj, 
+                                                            role_field='admin_role', mandatory=True)
+
     def can_delete(self, obj):
-        return obj.organization in self.user.admin_of_organizations or self.user.is_superuser
+        return self.user.is_superuser or obj.organization in self.user.admin_of_organizations
 
     def can_add(self, data):
         if self.user.is_superuser:

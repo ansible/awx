@@ -9,7 +9,7 @@ from oauth2_provider.models import RefreshToken
 
 
 @pytest.mark.django_db
-def test_personal_access_token_creation(oauth_application, post, alice):            # TODO: Update this test
+def test_personal_access_token_creation(oauth_application, post, alice):
     url = drf_reverse('api:oauth_authorization_root_view') + 'token/'
     resp = post(
         url,

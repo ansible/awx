@@ -289,8 +289,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'awx.api.authentication.LoggedOAuth2Authentication',
         'awx.api.authentication.SessionAuthentication',
+        'awx.api.authentication.LoggedOAuth2Authentication',
+        # 'awx.api.authentication.SessionAuthentication',
         'awx.api.authentication.LoggedBasicAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (

@@ -34,30 +34,34 @@ class TestOAuth2Application:
                 assert access.can_read(app) is can_access    
     
     
-        @pytest.mark.parametrize("user_for_access, can_access_list", [
-            (0, [True, True]),
-            (1, [True, True]),
-            (2, [False, False]),
-            (3, [False, False]),
-        ])
-        def test_can_edit_delete_app(
-            self, admin, org_admin, org_member, alice, user_for_access, can_access_list, organization
+        def test_can_edit_delete_app_org_admin(
+            self, admin, org_admin, org_member, alice, organization
         ):
-            organization.admin_role.members.add(org_admin)
-            organization.member_role.members.add(org_member)
             user_list = [admin, org_admin, org_member, alice]
-            access = OAuth2ApplicationAccess(user_list[user_for_access])
-            app_creation_user_list = [admin, org_admin]
-            for user, can_access in zip(app_creation_user_list, can_access_list):
+            can_access_list = [True, True, False, False]
+            for user, can_access in zip(user_list, can_access_list):
                 app = Application.objects.create(
-                    name='test app for {}'.format(user.username), user=user,
+                    name='test app for {}'.format(org_admin.username), user=org_admin,
                     client_type='confidential', authorization_grant_type='password', organization=organization
                 )
+                access = OAuth2ApplicationAccess(user)
                 assert access.can_change(app, {}) is can_access
                 assert access.can_delete(app) is can_access
-    
-    
-    
+                
+                
+        def test_can_edit_delete_app_admin(
+            self, admin, org_admin, org_member, alice, organization
+        ):
+            user_list = [admin, org_admin, org_member, alice]
+            can_access_list = [True, True, False, False]
+            for user, can_access in zip(user_list, can_access_list):
+                app = Application.objects.create(
+                    name='test app for {}'.format(admin.username), user=admin,
+                    client_type='confidential', authorization_grant_type='password', organization=organization
+                )
+                access = OAuth2ApplicationAccess(user)
+                assert access.can_change(app, {}) is can_access
+                assert access.can_delete(app) is can_access
     
 
         def test_superuser_can_always_create(self, admin, org_admin, org_member, alice):
