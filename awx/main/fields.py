@@ -391,7 +391,15 @@ class JSONSchemaField(JSONBField):
             error.message = re.sub(r'\bu(\'|")', r'\1', error.message)
 
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = error.schema['error'] % error.instance
+                error.message = error.schema['error'].format(instance=error.instance)
+            elif error.validator == 'type':
+                expected_type = error.validator_value
+                if expected_type == 'object':
+                    expected_type = 'dict'
+                error.message = _(
+                    '{type} provided in relative path {path}, expected {expected_type}'
+                ).format(path=list(error.path), type=type(error.instance).__name__,
+                         expected_type=expected_type)
             errors.append(error)
 
         if errors:
@@ -523,7 +531,7 @@ class CredentialInputField(JSONSchemaField):
             format_checker=self.format_checker
         ).iter_errors(decrypted_values):
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = error.schema['error'] % error.instance
+                error.message = error.schema['error'].format(instance=error.instance)
             if error.validator == 'dependencies':
                 # replace the default error messaging w/ a better i18n string
                 # I wish there was a better way to determine the parameters of
@@ -628,7 +636,7 @@ class CredentialTypeInputField(JSONSchemaField):
                             'id': {
                                 'type': 'string',
                                 'pattern': '^[a-zA-Z_]+[a-zA-Z0-9_]*$',
-                                'error': '%s is an invalid variable name',
+                                'error': '{instance} is an invalid variable name',
                             },
                             'label': {'type': 'string'},
                             'help_text': {'type': 'string'},
