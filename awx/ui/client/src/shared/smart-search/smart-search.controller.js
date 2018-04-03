@@ -6,7 +6,7 @@ function SmartSearchController (
     configService,
     GetBasePath,
     i18n,
-    qs,
+    qs
 ) {
     const searchKey = `${$scope.iterator}_search`;
     const optionsKey = `${$scope.list.iterator}_options`;

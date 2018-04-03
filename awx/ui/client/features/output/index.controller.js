@@ -38,8 +38,8 @@ function JobsIndexController (
     vm.clear = devClear;
 
     // Expand/collapse
-    vm.toggle = toggle;
-    vm.expand = expand;
+    // vm.toggle = toggle;
+    // vm.expand = expand;
     vm.isExpanded = true;
 
     // Panel
@@ -160,10 +160,10 @@ function previous () {
         });
 }
 
-function append (events, engine) {
+function append (events, eng) {
     return render.append(events)
         .then(count => {
-            page.updateLineCount(count, engine);
+            page.updateLineCount(count, eng);
         });
 }
 
@@ -277,48 +277,49 @@ function scrollIsAtRest (isAtRest) {
     vm.scroll.showBackToTop = !isAtRest;
 }
 
-function expand () {
-    vm.toggle(parent, true);
-}
+// function expand () {
+//     vm.toggle(parent, true);
+// }
 
-function showHostDetails (id) {
-    jobEvent.request('get', id)
-        .then(() => {
-            const title = jobEvent.get('host_name');
+// function showHostDetails (id) {
+//     jobEvent.request('get', id)
+//         .then(() => {
+//             const title = jobEvent.get('host_name');
 
-            vm.host = {
-                menu: true,
-                stdout: jobEvent.get('stdout')
-            };
+//             vm.host = {
+//                 menu: true,
+//                 stdout: jobEvent.get('stdout')
+//             };
 
-            $scope.jobs.modal.show(title);
-        });
-}
+//             $scope.jobs.modal.show(title);
+//         });
+// }
 
-function toggle (uuid, menu) {
-    const lines = $(`.child-of-${uuid}`);
-    let icon = $(`#${uuid} .at-Stdout-toggle > i`);
+// function toggle (uuid, menu) {
+//     const lines = $(`.child-of-${uuid}`);
+//     let icon = $(`#${uuid} .at-Stdout-toggle > i`);
 
-    if (menu || record[uuid].level === 1) {
-        vm.isExpanded = !vm.isExpanded;
-    }
+//     if (menu || record[uuid].level === 1) {
+//         vm.isExpanded = !vm.isExpanded;
+//     }
 
-    if (record[uuid].children) {
-        icon = icon.add($(`#${record[uuid].children.join(', #')}`).find('.at-Stdout-toggle > i'));
-    }
+//     if (record[uuid].children) {
+//         icon = icon.add($(`#${record[uuid].children.join(', #')}`)
+//             .find('.at-Stdout-toggle > i'));
+//     }
 
-    if (icon.hasClass('fa-angle-down')) {
-        icon.addClass('fa-angle-right');
-        icon.removeClass('fa-angle-down');
+//     if (icon.hasClass('fa-angle-down')) {
+//         icon.addClass('fa-angle-right');
+//         icon.removeClass('fa-angle-down');
 
-        lines.addClass('hidden');
-    } else {
-        icon.addClass('fa-angle-down');
-        icon.removeClass('fa-angle-right');
+//         lines.addClass('hidden');
+//     } else {
+//         icon.addClass('fa-angle-down');
+//         icon.removeClass('fa-angle-right');
 
-        lines.removeClass('hidden');
-    }
-}
+//         lines.removeClass('hidden');
+//     }
+// }
 
 JobsIndexController.$inject = [
     'resource',

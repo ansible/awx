@@ -156,10 +156,10 @@ function JobPageService ($q) {
     this.isPageBookmarked = number => number >= this.page.bookmark.first &&
         number <= this.page.bookmark.last;
 
-    this.updateLineCount = (lines, stream) => {
+    this.updateLineCount = (lines, engine) => {
         let reference;
 
-        if (stream) {
+        if (engine) {
             reference = this.getReference();
         } else {
             reference = this.getActiveReference();

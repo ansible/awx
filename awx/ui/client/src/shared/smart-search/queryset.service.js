@@ -53,8 +53,8 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                 .map(value => {
                     value = this.replaceDefaultFlags(value);
                     value = this.replaceEncodedTokens(value);
-                    return [key, value]
-                })
+                    return [key, value];
+                });
 
         },
         // encodes ui-router params from {operand__key__comparator: value} pairs to API-consumable URL
@@ -83,7 +83,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                 for (let encodedIndex in encodedTerms) {
                     const [encodedKey, encodedValue] = encodedTerms[encodedIndex];
                     obj[encodedKey] = obj[encodedKey] || [];
-                    obj[encodedKey].push(encodedValue)
+                    obj[encodedKey].push(encodedValue);
                 }
 
                 return obj;
