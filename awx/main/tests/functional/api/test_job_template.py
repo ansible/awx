@@ -13,6 +13,9 @@ from awx.main.migrations import _save_password_keys as save_password_keys
 from django.conf import settings
 from django.apps import apps
 
+# DRF
+from rest_framework.exceptions import ValidationError
+
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
@@ -615,3 +618,16 @@ def test_job_template_unset_custom_virtualenv(get, patch, organization_factory,
     url = reverse('api:job_template_detail', kwargs={'pk': jt.id})
     resp = patch(url, {'custom_virtualenv': value}, user=objs.superusers.admin, expect=200)
     assert resp.data['custom_virtualenv'] is None
+
+
+@pytest.mark.django_db
+def test_callback_disallowed_null_inventory(project):
+    jt = JobTemplate.objects.create(
+        name='test-jt', inventory=None,
+        ask_inventory_on_launch=True,
+        project=project, playbook='helloworld.yml')
+    serializer = JobTemplateSerializer(jt)
+    assert serializer.instance == jt
+    with pytest.raises(ValidationError) as exc:
+        serializer.validate({'host_config_key': 'asdfbasecfeee'})
+    assert 'Cannot enable provisioning callback without an inventory set' in str(exc)
