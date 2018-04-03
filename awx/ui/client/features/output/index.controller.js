@@ -1,24 +1,16 @@
-const JOB_START = 'playbook_on_start';
-const JOB_END = 'playbook_on_stats';
-const PLAY_START = 'playbook_on_play_start';
-const TASK_START = 'playbook_on_task_start';
-
 let $compile;
 let $q;
 let $scope;
 let $state;
-let moment;
 let page;
 let qs;
 let render;
 let resource;
 let scroll;
 let engine;
+let status;
 
 let vm;
-
-let eventCounter;
-let statsEvent;
 
 function JobsIndexController (
     _resource_,
@@ -31,7 +23,7 @@ function JobsIndexController (
     _$q_,
     _$state_,
     _qs_,
-    _moment_,
+    _status_,
 ) {
     vm = this || {};
 
@@ -44,8 +36,7 @@ function JobsIndexController (
     scroll = _scroll_;
     render = _render_;
     engine = _engine_;
-
-    moment = _moment_;
+    status = _status_;
 
     // Development helper(s)
     vm.clear = devClear;
@@ -55,30 +46,9 @@ function JobsIndexController (
     vm.expand = expand;
     vm.isExpanded = true;
 
-    // Events
-    eventCounter = null;
-    statsEvent = resource.stats;
-
     // Panel
+    vm.resource = resource;
     vm.title = resource.model.get('name');
-
-    // Stats
-    vm.stats = {
-        event: statsEvent,
-        elapsed: resource.model.get('elapsed'),
-        download: resource.model.get('related.stdout'),
-        running: Boolean(resource.model.get('started')) && !resource.model.get('finished'),
-        plays: null,
-        tasks: null,
-    };
-
-    // Details
-    vm.details = {
-        resource,
-        status: resource.model.get('status'),
-        started: resource.model.get('started'),
-        finished: resource.model.get('finished'),
-    };
 
     // Search
     $state = _$state_;
@@ -107,10 +77,14 @@ function JobsIndexController (
         up: scrollPageUp
     };
 
-    render.requestAnimationFrame(() => init(!vm.stats.running));
+    render.requestAnimationFrame(() => init());
 }
 
-function init (pageMode) {
+function init () {
+    status.init({
+        resource,
+    });
+
     page.init({
         resource,
     });
@@ -118,7 +92,7 @@ function init (pageMode) {
     render.init({
         get: () => resource.model.get(`related.${resource.related}.results`),
         compile: html => $compile(html)($scope),
-        isStreamActive: engine.isActive
+        isStreamActive: engine.isActive,
     });
 
     scroll.init({
@@ -135,60 +109,34 @@ function init (pageMode) {
             return shift().then(() => append(events, true));
         },
         onStart () {
-            vm.stats.plays = 0;
-            vm.stats.tasks = 0;
-            vm.stats.running = true;
+            status.resetCounts();
+            status.setJobStatus('running');
 
             vm.search.disabled = true;
-            vm.details.status = 'running';
         },
         onStop () {
-            vm.stats.event = statsEvent;
-            vm.stats.running = false;
+            status.updateStats();
 
             vm.search.disabled = false;
-
-            vm.details.status = statsEvent.failed ? 'failed' : 'successful';
-            vm.details.finished = statsEvent.created;
         }
     });
 
     $scope.$on(resource.ws.events, handleSocketEvent);
+    $scope.$on(resource.ws.status, handleStatusEvent);
 
-    if (pageMode) {
+    if (!status.isRunning()) {
         next();
     }
 }
 
+function handleStatusEvent (scope, data) {
+    status.pushStatusEvent(data);
+}
+
 function handleSocketEvent (scope, data) {
-    const isLatest = ((!eventCounter) || (data.counter > eventCounter));
+    engine.pushJobEvent(data);
 
-    if (isLatest) {
-        eventCounter = data.counter;
-
-        vm.details.status = _.get(data, 'summary_fields.job.status');
-
-        vm.stats.elapsed = moment(data.created)
-            .diff(resource.model.get('created'), 'seconds');
-    }
-
-    if (data.event === JOB_START) {
-        vm.details.started = data.created;
-    }
-
-    if (data.event === PLAY_START) {
-        vm.stats.plays++;
-    }
-
-    if (data.event === TASK_START) {
-        vm.stats.tasks++;
-    }
-
-    if (data.event === JOB_END) {
-        statsEvent = data;
-    }
-
-    engine.pushEvent(data);
+    status.pushJobEvent(data);
 }
 
 function devClear (pageMode) {
@@ -466,7 +414,7 @@ JobsIndexController.$inject = [
     '$q',
     '$state',
     'QuerySet',
-    'moment',
+    'JobStatusService',
 ];
 
 module.exports = JobsIndexController;

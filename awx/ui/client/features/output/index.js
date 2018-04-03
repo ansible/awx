@@ -7,6 +7,7 @@ import PageService from '~features/output/page.service';
 import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
 import EngineService from '~features/output/engine.service';
+import StatusService from '~features/output/status.service';
 
 import DetailsDirective from '~features/output/details.directive';
 import SearchKeyDirective from '~features/output/search-key.directive';
@@ -217,9 +218,10 @@ angular
     .service('JobScrollService', ScrollService)
     .service('JobRenderService', RenderService)
     .service('JobEventEngine', EngineService)
-    .directive('atDetails', DetailsDirective)
+    .service('JobStatusService', StatusService)
+    .directive('atJobDetails', DetailsDirective)
     .directive('atSearchKey', SearchKeyDirective)
-    .directive('atStats', StatsDirective)
+    .directive('atJobStats', StatsDirective)
     .run(JobsRun);
 
 export default MODULE_NAME;

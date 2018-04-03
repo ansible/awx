@@ -40,26 +40,31 @@
 
 <div class="HostStatusBar">
     <div class="HostStatusBar-ok"
+        ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.ok }}"
         data-tip-watch="vm.tooltips.ok">
     </div>
     <div class="HostStatusBar-skipped"
+        ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.skipped }}"
         data-tip-watch="vm.tooltips.skipped">
     </div>
     <div class="HostStatusBar-changed"
+        ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.changed }}"
         data-tip-watch="vm.tooltips.changed">
     </div>
     <div class="HostStatusBar-failures"
+        ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.failures }}"
         data-tip-watch="vm.tooltips.failures">
     </div>
     <div class="HostStatusBar-dark"
+        ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.dark }}"
         data-tip-watch="vm.tooltips.dark">

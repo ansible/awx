@@ -1,28 +1,14 @@
 <div class="container-fluid">
     <div class="col-md-4">
         <at-panel>
-            <at-details
-                resource="vm.details.resource"
-                started="vm.details.started"
-                finished="vm.details.finished"
-                status="vm.details.status">
-            </at-details>
-            <!-- <p><button class="btn" ng-click="vm.clear(true)">Page Mode</button></p> -->
+            <at-job-details resource="vm.resource"></at-job-details>
         </at-panel>
     </div>
 
     <div class="col-md-8">
         <at-panel class="at-Stdout">
             <div class="at-Panel-headingTitle">{{ vm.title }}</div>
-            <at-stats
-                download="vm.stats.download"
-                elapsed="vm.stats.elapsed"
-                running="vm.stats.running"
-                event="vm.stats.event"
-                title="vm.stats.title"
-                plays="vm.stats.plays"
-                tasks="vm.stats.tasks">
-            </at-stats>
+            <at-job-stats resource="vm.resource"></at-job-stats>
             <!-- search ===================================================================================== -->
             <form ng-submit="vm.search.submitSearch()">
             <div class="input-group">

@@ -10,6 +10,7 @@ let parse;
 let prompt;
 let resource;
 let strings;
+let status;
 let wait;
 
 let vm;
@@ -19,8 +20,8 @@ function mapChoices (choices) {
     return Object.assign(...choices.map(([k, v]) => ({ [k]: v })));
 }
 
-function getStatusDetails (status) {
-    const unmapped = status || resource.model.get('status');
+function getStatusDetails (jobStatus) {
+    const unmapped = jobStatus || resource.model.get('status');
 
     if (!unmapped) {
         return null;
@@ -373,11 +374,11 @@ function getLabelDetails () {
 }
 
 function createErrorHandler (path, action) {
-    return ({ data, status }) => {
+    return res => {
         const hdr = strings.get('error.HEADER');
-        const msg = strings.get('error.CALL', { path, action, status });
+        const msg = strings.get('error.CALL', { path, action, status: res.status });
 
-        error($scope, data, status, null, { hdr, msg });
+        error($scope, res.data, res.status, null, { hdr, msg });
     };
 }
 
@@ -454,24 +455,14 @@ function deleteJob () {
     prompt({ hdr, resourceName, body, actionText, action });
 }
 
-function handleSocketEvent (data) {
-    const project = resource.model.get('project');
-
-    if (resource.model.get('id') === data.unified_job_id) {
-        vm.status = getStatusDetails(data.status);
-    } else if (project && (project === data.project_id)) {
-        vm.project.update = vm.project.update || {};
-        vm.project.update.status = data.status;
-    }
-}
-
-function AtDetailsController (
+function AtJobDetailsController (
     _$http_,
     _$filter_,
     _$state_,
     _error_,
     _prompt_,
     _strings_,
+    _status_,
     _wait_,
     ParseTypeChange,
     ParseVariableString,
@@ -486,6 +477,7 @@ function AtDetailsController (
     parse = ParseVariableString;
     prompt = _prompt_;
     strings = _strings_;
+    status = _status_;
     wait = _wait_;
 
     vm.init = _$scope_ => {
@@ -538,47 +530,48 @@ function AtDetailsController (
         vm.deleteJob = deleteJob;
         vm.toggleLabels = toggleLabels;
 
-        $scope.$watch('started', value => { vm.started = getStartDetails(value); });
-        $scope.$watch('status', value => { vm.status = getStatusDetails(value); });
-        $scope.$watch('finished', value => { vm.finished = getFinishDetails(value); });
+        $scope.$watch(status.getStarted, value => { vm.started = getStartDetails(value); });
+        $scope.$watch(status.getJobStatus, value => { vm.status = getStatusDetails(value); });
+        $scope.$watch(status.getFinished, value => { vm.finished = getFinishDetails(value); });
 
-        $scope.$on(resource.ws.status, (e, data) => handleSocketEvent(data));
+        $scope.$watch(status.getProjectStatus, value => {
+            if (!value) return;
+
+            vm.project.update = vm.project.update || {};
+            vm.project.update.status = value;
+        });
     };
 }
 
-AtDetailsController.$inject = [
+AtJobDetailsController.$inject = [
     '$http',
     '$filter',
     '$state',
     'ProcessErrors',
     'Prompt',
     'JobStrings',
+    'JobStatusService',
     'Wait',
     'ParseTypeChange',
     'ParseVariableString',
 ];
 
-function atDetailsLink (scope, el, attrs, controllers) {
+function atJobDetailsLink (scope, el, attrs, controllers) {
     const [atDetailsController] = controllers;
 
     atDetailsController.init(scope);
 }
 
-function atDetails () {
+function atJobDetails () {
     return {
         templateUrl,
         restrict: 'E',
-        require: ['atDetails'],
+        require: ['atJobDetails'],
         controllerAs: 'vm',
-        link: atDetailsLink,
-        controller: AtDetailsController,
-        scope: {
-            finished: '=',
-            started: '=',
-            resource: '=',
-            status: '=',
-        },
+        link: atJobDetailsLink,
+        controller: AtJobDetailsController,
+        scope: { resource: '=', },
     };
 }
 
-export default atDetails;
+export default atJobDetails;

@@ -1,30 +1,7 @@
 const templateUrl = require('~features/output/stats.partial.html');
 
-const HOST_STATUS_KEYS = ['dark', 'failures', 'changed', 'ok', 'skipped'];
-
-function getHostStatusCounts (statsEvent) {
-    const countedHostNames = [];
-
-    const counts = Object.assign(...HOST_STATUS_KEYS.map(key => ({ [key]: 0 })));
-
-    HOST_STATUS_KEYS.forEach(key => {
-        const hostData = _.get(statsEvent, ['event_data', key], {});
-
-        Object.keys(hostData).forEach(hostName => {
-            const isAlreadyCounted = (countedHostNames.indexOf(hostName) > -1);
-            const shouldBeCounted = ((!isAlreadyCounted) && hostData[hostName] > 0);
-
-            if (shouldBeCounted) {
-                countedHostNames.push(hostName);
-                counts[key]++;
-            }
-        });
-    });
-
-    counts.hosts = countedHostNames.length;
-
-    return counts;
-}
+let status;
+let strings;
 
 function createStatsBarTooltip (key, count) {
     const label = `<span class='HostStatusBar-tooltipLabel'>${key}</span>`;
@@ -33,13 +10,16 @@ function createStatsBarTooltip (key, count) {
     return `${label}${badge}`;
 }
 
-function atStatsLink (scope, el, attrs, controllers) {
-    const [atStatsController] = controllers;
+function atJobStatsLink (scope, el, attrs, controllers) {
+    const [atJobStatsController] = controllers;
 
-    atStatsController.init(scope);
+    atJobStatsController.init(scope);
 }
 
-function AtStatsController (strings) {
+function AtJobStatsController (_strings_, _status_) {
+    status = _status_;
+    strings = _strings_;
+
     const vm = this || {};
 
     vm.tooltips = {
@@ -48,28 +28,23 @@ function AtStatsController (strings) {
     };
 
     vm.init = scope => {
-        const { download, elapsed, running, event, plays, tasks } = scope;
+        const { resource } = scope;
 
-        vm.download = download;
-        vm.plays = plays;
-        vm.tasks = tasks;
-        vm.elapsed = elapsed;
-        vm.running = running || false;
+        vm.download = resource.model.get('related.stdout');
 
-        vm.setStats(event);
+        vm.setHostStatusCounts(status.getHostStatusCounts());
 
-        scope.$watch('elapsed', value => { vm.elapsed = value; });
-        scope.$watch('running', value => { vm.running = value; });
-        scope.$watch('plays', value => { vm.plays = value; });
-        scope.$watch('tasks', value => { vm.tasks = value; });
+        scope.$watch(status.getPlayCount, value => { vm.plays = value; });
+        scope.$watch(status.getTaskCount, value => { vm.tasks = value; });
+        scope.$watch(status.getElapsed, value => { vm.elapsed = value; });
+        scope.$watch(status.getHostCount, value => { vm.hosts = value; });
+        scope.$watch(status.isRunning, value => { vm.running = value; });
 
-        scope.$watch('event', vm.setStats);
+        scope.$watchCollection(status.getHostStatusCounts, vm.setHostStatusCounts);
     };
 
-    vm.setStats = statsEvent => {
-        const counts = getHostStatusCounts(statsEvent);
-
-        HOST_STATUS_KEYS.forEach(key => {
+    vm.setHostStatusCounts = counts => {
+        Object.keys(counts).forEach(key => {
             const count = counts[key];
             const statusBarElement = $(`.HostStatusBar-${key}`);
 
@@ -78,31 +53,24 @@ function AtStatsController (strings) {
             vm.tooltips[key] = createStatsBarTooltip(key, count);
         });
 
-        vm.hosts = counts.hosts;
-        vm.statsAreAvailable = Boolean(statsEvent);
+        vm.statsAreAvailable = Boolean(status.getStatsEvent());
     };
 }
 
-function atStats () {
+function atJobStats () {
     return {
         templateUrl,
         restrict: 'E',
-        require: ['atStats'],
+        require: ['atJobStats'],
         controllerAs: 'vm',
-        link: atStatsLink,
+        link: atJobStatsLink,
         controller: [
             'JobStrings',
-            AtStatsController
+            'JobStatusService',
+            AtJobStatsController
         ],
-        scope: {
-            download: '=',
-            elapsed: '=',
-            running: '=',
-            event: '=',
-            plays: '=',
-            tasks: '=',
-        },
+        scope: { resource: '=', },
     };
 }
 
-export default atStats;
+export default atJobStats;

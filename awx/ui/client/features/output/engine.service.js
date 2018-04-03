@@ -105,7 +105,7 @@ function JobEventEngine ($q) {
         }
     };
 
-    this.pushEvent = data => {
+    this.pushJobEvent = data => {
         this.lag++;
 
         this.chain = this.chain
