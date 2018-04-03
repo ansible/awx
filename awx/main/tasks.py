@@ -148,7 +148,7 @@ def apply_cluster_membership_policies(self):
         tower_q = InstanceGroup.objects.filter(name='tower')
         if tower_q.exists():
             tower_inst = tower_q[0]
-            tower_inst.instances = Instance.objects.all_non_isolated()
+            tower_inst.instances.set(Instance.objects.all_non_isolated())
             instances_hostnames = [i.hostname for i in tower_inst.instances.all()]
             logger.info(six.text_type("Setting 'tower' group instances to {}").format(instances_hostnames))
             tower_inst.save()
