@@ -106,7 +106,7 @@
     "angular-moment": "^0.10.1",
     "angular-sanitize": "~1.6.6",
     "angular-scheduler": "git+https://git@github.com/ansible/angular-scheduler#v0.3.2",
-    "angular-tz-extensions": "git+https://git@github.com/ansible/angular-tz-extensions#v0.5.1",
+    "angular-tz-extensions": "git+https://git@github.com/ansible/angular-tz-extensions#v0.5.2",
     "babel-polyfill": "^6.26.0",
     "bootstrap": "^3.3.7",
     "bootstrap-datepicker": "^1.7.1",

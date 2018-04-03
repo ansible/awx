@@ -293,6 +293,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         scheduler.scope.schedulerTimeZone = _.find(data, (zone) => {
             return zone.name === scheduler.scope.current_timezone.name;
         });
+        $scope.scheduleTimeChange();
     });
     if($scope.schedulerUTCTime) {
         // The UTC time is already set
