@@ -5,7 +5,7 @@
 </div>
 
 <div class="tab-pane" id="configuration-panel">
-    <div ng-cloak id="htmlTemplate" class="Panel">
+    <div ng-cloak id="htmlTemplate" class="Panel" ng-class="{'Panel--noBottomPadding': vm.activeTab === 'license' }">
         <div class="Form-header">
             <div class="Form-title" translate>CONFIGURE {{BRAND_NAME}}</div>
         </div>
@@ -16,6 +16,7 @@
                     <div class="Form-tab" ng-click="vm.activeTabCheck('jobs')" ng-class="{'is-selected': vm.activeTab === 'jobs' }" translate>Jobs</div>
                     <div class="Form-tab" ng-click="vm.activeTabCheck('system')" ng-class="{'is-selected': vm.activeTab === 'system' }" translate>System</div>
                     <div class="Form-tab" ng-click="vm.activeTabCheck('ui')" ng-class="{'is-selected': vm.activeTab === 'ui' }" translate>User Interface</div>
+                    <div class="Form-tab" ng-show="vm.product === 'Tower'" ng-click="vm.activeTabCheck('license')" ng-class="{'is-selected': vm.activeTab === 'license' }" translate>License</div>
                 </div>
             </div>
         </div>
@@ -26,3 +27,5 @@
         <div id="FormModal-dialog"></div>
     </div>
 </div>
+
+<div ui-view="license" ng-show="vm.product === 'Tower' && vm.activeTab === 'license'"></div>

@@ -3,16 +3,15 @@
  *
  * All Rights Reserved
  *************************************************/
-
- import {templateUrl} from '../shared/template-url/template-url.factory';
- import ConfigurationController from './configuration.controller';
- import { N_ } from '../i18n';
+import {templateUrl} from '../shared/template-url/template-url.factory';
+import ConfigurationController from './configuration.controller';
+import { N_ } from '../i18n';
 
 // Import form controllers
- import ConfigurationAuthController from './auth-form/configuration-auth.controller';
- import ConfigurationJobsController from './jobs-form/configuration-jobs.controller';
- import ConfigurationSystemController from './system-form/configuration-system.controller';
- import ConfigurationUiController from './ui-form/configuration-ui.controller';
+import ConfigurationAuthController from './auth-form/configuration-auth.controller';
+import ConfigurationJobsController from './jobs-form/configuration-jobs.controller';
+import ConfigurationSystemController from './system-form/configuration-system.controller';
+import ConfigurationUiController from './ui-form/configuration-ui.controller';
 
  export default {
      name: 'configuration',
@@ -58,6 +57,6 @@
              templateUrl: templateUrl('configuration/ui-form/configuration-ui'),
              controller: ConfigurationUiController,
              controllerAs: 'uiVm'
-         }
+         },
      },
  };
