@@ -9,6 +9,9 @@ from django.utils.translation import ugettext_lazy as _
 
 # Django OAuth Toolkit
 from oauth2_provider.models import AbstractApplication, AbstractAccessToken
+from oauth2_provider.generators import generate_client_secret
+
+from awx.main.fields import OAuth2ClientSecretField
 
 
 DATA_URI_RE = re.compile(r'.*')  # FIXME
@@ -37,6 +40,10 @@ class OAuth2Application(AbstractApplication):
         help_text=_('Organization containing this application.'),
         on_delete=models.CASCADE,
         null=True,
+    )
+
+    client_secret = OAuth2ClientSecretField(
+        max_length=1024, blank=True, default=generate_client_secret, db_index=True
     )
 
 

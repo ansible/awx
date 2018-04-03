@@ -1,6 +1,9 @@
 import pytest
 import base64
 
+from django.db import connection
+
+from awx.main.utils.encryption import decrypt_value, get_encryption_key
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.models.oauth import (OAuth2Application as Application, 
                                    OAuth2AccessToken as AccessToken, 
@@ -63,6 +66,26 @@ def test_oauth_application_update(oauth_application, organization, patch, admin,
     assert updated_app.skip_authorization is True
     assert updated_app.authorization_grant_type == 'password'
     assert updated_app.organization == organization
+
+
+@pytest.mark.django_db
+def test_oauth_application_encryption(admin, organization, post):
+    response = post(
+        reverse('api:o_auth2_application_list'), {
+            'name': 'test app',
+            'organization': organization.pk,
+            'client_type': 'confidential',
+            'authorization_grant_type': 'password',
+        }, admin, expect=201
+    )
+    pk = response.data.get('id')
+    secret = response.data.get('client_secret')
+    with connection.cursor() as cursor:
+        encrypted = cursor.execute(
+            'SELECT client_secret FROM main_oauth2application WHERE id={}'.format(pk)
+        ).fetchone()[0]
+        assert encrypted.startswith('$encrypted$')
+        assert decrypt_value(get_encryption_key('value', pk=None), encrypted) == secret
 
 
 @pytest.mark.django_db
