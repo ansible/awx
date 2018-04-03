@@ -9,6 +9,7 @@ import os
 import re
 import stat
 import tempfile
+import six
 
 # Jinja2
 from jinja2 import Template
@@ -415,9 +416,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             type_alias = self.credential_type_id
         if self.kind == 'vault' and self.inputs.get('vault_id', None):
             if display:
-                fmt_str = '{} (id={})'
+                fmt_str = six.text_type('{} (id={})')
             else:
-                fmt_str = '{}_{}'
+                fmt_str = six.text_type('{}_{}')
             return fmt_str.format(type_alias, self.inputs.get('vault_id'))
         return str(type_alias)
 
