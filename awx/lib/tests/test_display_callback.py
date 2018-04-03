@@ -28,6 +28,7 @@ CALLBACK = os.path.splitext(os.path.basename(__file__))[0]
 PLUGINS = os.path.dirname(__file__)
 with mock.patch.dict(os.environ, {'ANSIBLE_STDOUT_CALLBACK': CALLBACK,
                                   'ANSIBLE_CALLBACK_PLUGINS': PLUGINS}):
+    from ansible import __version__ as ANSIBLE_VERSION
     from ansible.cli.playbook import PlaybookCLI
     from ansible.executor.playbook_executor import PlaybookExecutor
     from ansible.inventory.manager import InventoryManager
@@ -284,3 +285,29 @@ def test_callback_plugin_saves_custom_stats(executor, cache, playbook):
                 assert json.load(f) == {'foo': 'bar'}
     finally:
         shutil.rmtree(os.path.join(private_data_dir))
+
+
+@pytest.mark.parametrize('playbook', [
+{'handle_playbook_on_notify.yml': '''
+- name: handle playbook_on_notify events properly
+  connection: local
+  hosts: all
+  handlers:
+    - name: my_handler
+      debug: msg="My Handler"
+  tasks:
+    - debug: msg="My Task"
+      changed_when: true
+      notify:
+        - my_handler
+'''},  # noqa
+])
+@pytest.mark.skipif(ANSIBLE_VERSION < '2.5', reason="v2_playbook_on_notify doesn't work before ansible 2.5")
+def test_callback_plugin_records_notify_events(executor, cache, playbook):
+    executor.run()
+    assert len(cache)
+    notify_events = [x[1] for x in cache.items() if x[1]['event'] == 'playbook_on_notify']
+    assert len(notify_events) == 1
+    assert notify_events[0]['event_data']['handler'] == 'my_handler'
+    assert notify_events[0]['event_data']['host'] == 'localhost'
+    assert notify_events[0]['event_data']['task'] == 'debug'

@@ -278,15 +278,14 @@ class BaseCallbackModule(CallbackBase):
         with self.capture_event_data('playbook_on_no_hosts_remaining'):
             super(BaseCallbackModule, self).v2_playbook_on_no_hosts_remaining()
 
-    def v2_playbook_on_notify(self, result, handler):
-        # NOTE: Not used by Ansible 2.x.
+    def v2_playbook_on_notify(self, handler, host):
+        # NOTE: Not used by Ansible < 2.5.
         event_data = dict(
-            host=result._host.get_name(),
-            task=result._task,
-            handler=handler,
+            host=host.get_name(),
+            handler=handler.get_name(),
         )
         with self.capture_event_data('playbook_on_notify', **event_data):
-            super(BaseCallbackModule, self).v2_playbook_on_notify(result, handler)
+            super(BaseCallbackModule, self).v2_playbook_on_notify(handler, host)
 
     '''
     ansible_stats is, retoractively, added in 2.2
