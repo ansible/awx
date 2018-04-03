@@ -144,8 +144,16 @@ def apply_cluster_membership_policies(self):
         Group = namedtuple('Group', ['obj', 'instances'])
         Node = namedtuple('Instance', ['obj', 'groups'])
 
-        # Add every instnace to the special 'tower' group
-        InstanceGroup.objects.get(name='tower').add_all_non_iso_instances()
+        # Add every instance to the special 'tower' group
+        tower_q = InstanceGroup.objects.filter(name='tower')
+        if tower_q.exists():
+            tower_inst = tower_q[0]
+            tower_inst.instances = Instance.objects.all_non_isolated()
+            instances_hostnames = [i.hostname for i in tower_inst.instances.all()]
+            logger.info(six.text_type("Setting 'tower' group instances to {}").format(instances_hostnames))
+            tower_inst.save()
+        else:
+            logger.warn(six.text_type("Special 'tower' Instance Group not found."))
 
         # Process policy instance list first, these will represent manually managed instances
         # that will not go through automatic policy determination

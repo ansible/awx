@@ -114,7 +114,7 @@ class InstanceManager(models.Manager):
         return "tower"
 
     def all_non_isolated(self):
-        return self.filter(rampart_groups__controller__isnull=True).distinct()
+        return self.exclude(rampart_groups__controller__isnull=False)
 
 
 class InstanceGroupManager(models.Manager):
