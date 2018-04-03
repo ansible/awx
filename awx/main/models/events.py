@@ -235,12 +235,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
             if res.get('changed', False):
                 self.changed = True
                 updated_fields.add('changed')
-            # If we're not in verbose mode, wipe out any module arguments.
-            invocation = res.get('invocation', None)
-            if isinstance(invocation, dict) and self.job_verbosity == 0 and 'module_args' in invocation:
-                event_data['res']['invocation']['module_args'] = ''
-                self.event_data = event_data
-                updated_fields.add('event_data')
         if self.event == 'playbook_on_stats':
             try:
                 failures_dict = event_data.get('failures', {})

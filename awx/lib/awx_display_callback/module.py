@@ -28,6 +28,7 @@ import uuid
 from copy import copy
 
 # Ansible
+from ansible import constants as C
 from ansible.plugins.callback import CallbackBase
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule
 
@@ -126,16 +127,19 @@ class BaseCallbackModule(CallbackBase):
             task=(task.name or task.action),
             task_uuid=str(task._uuid),
             task_action=task.action,
+            task_args='',
         )
         try:
             task_ctx['task_path'] = task.get_path()
         except AttributeError:
             pass
-        if task.no_log:
-            task_ctx['task_args'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
-        else:
-            task_args = ', '.join(('%s=%s' % a for a in task.args.items()))
-            task_ctx['task_args'] = task_args
+
+        if C.DISPLAY_ARGS_TO_STDOUT:
+            if task.no_log:
+                task_ctx['task_args'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+            else:
+                task_args = ', '.join(('%s=%s' % a for a in task.args.items()))
+                task_ctx['task_args'] = task_args
         if getattr(task, '_role', None):
             task_role = task._role._role_name
         else:
