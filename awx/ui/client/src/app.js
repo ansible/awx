@@ -221,7 +221,7 @@ angular
             if ($rootScope.removeConfigReady) {
                 $rootScope.removeConfigReady();
             }
-            $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
+            $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function(evt) {
                 var list, id;
                 // initially set row edit indicator for crud pages
                 if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
@@ -309,30 +309,14 @@ angular
                         if (trans.to().name && (trans.to().name !== "signIn"  && trans.to().name !== "signOut" && trans.to().name !== "license")) {
                             ConfigService.getConfig().then(function() {
                                 // if not headed to /login or /logout, then check the license
-                                CheckLicense.test(event);
+                                CheckLicense.test(evt);
                             });
                         }
                     }
                     activateTab();
                 });
 
-                $transitions.onCreate({}, function(trans) {
-                    console.log('$onCreate ' +trans.to().name);
-                });
-
-                $transitions.onBefore({}, function(trans) {
-                    console.log('$onBefore ' +trans.to().name);
-                });
-                $transitions.onError({}, function(trans) {
-
-                    console.log('$onError ' +trans.to().name);
-                });
-                $transitions.onExit({}, function(trans) {
-                    console.log('$onExit ' +trans.to().name);
-                });
-
                 $transitions.onSuccess({}, function(trans) {
-                    console.log('$onSuccess ' +trans.to().name);
                     if(trans.to() === trans.from()) {
                         // check to see if something other than a search param has changed
                         let toParamsWithoutSearchKeys = {};
