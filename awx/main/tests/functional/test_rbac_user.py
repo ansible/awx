@@ -1,9 +1,10 @@
 import pytest
 
 from django.test import TransactionTestCase
+from django.contrib.contenttypes.models import ContentType
 
 from awx.main.access import UserAccess
-from awx.main.models import User, Organization, Inventory
+from awx.main.models import User, Organization, Inventory, Role
 
 
 @pytest.mark.django_db
@@ -100,6 +101,27 @@ def test_org_user_removed(user, organization):
 
     organization.member_role.members.remove(member)
     assert admin not in member.admin_role
+
+
+@pytest.mark.django_db
+def test_create_user_role(rando):
+    assert Role.objects.filter(
+        role_field='admin_role',
+        content_type=ContentType.objects.get_for_model(User),
+        object_id=rando.id
+    ).count() == 1
+    assert rando in rando.admin_role
+
+
+@pytest.mark.django_db
+def test_user_role_deleted(rando):
+    rando_id = rando.id
+    rando.delete()
+    assert not Role.objects.filter(
+        role_field='admin_role',
+        content_type=ContentType.objects.get_for_model(User),
+        object_id=rando_id
+    )
 
 
 @pytest.mark.django_db
