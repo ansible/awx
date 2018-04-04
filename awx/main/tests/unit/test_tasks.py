@@ -13,6 +13,7 @@ import fcntl
 import mock
 import pytest
 import yaml
+
 from django.conf import settings
 
 
@@ -294,6 +295,15 @@ class TestJobExecution:
 
 
 class TestGenericRun(TestJobExecution):
+
+    def test_generic_failure(self):
+        self.task.build_private_data_files = mock.Mock(side_effect=IOError())
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+        update_model_call = self.task.update_model.call_args[1]
+        assert 'IOError' in update_model_call['result_traceback']
+        assert update_model_call['status'] == 'error'
+        assert update_model_call['emitted_events'] == 0
 
     def test_cancel_flag(self):
         self.instance.cancel_flag = True

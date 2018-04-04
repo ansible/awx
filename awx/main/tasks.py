@@ -885,6 +885,7 @@ class BaseTask(LogErrorsTask):
         output_replacements = []
         extra_update_fields = {}
         event_ct = 0
+        stdout_handle = None
         try:
             kwargs['isolated'] = isolated_host is not None
             self.pre_run_hook(instance, **kwargs)
