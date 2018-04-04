@@ -2,8 +2,6 @@ import { range } from 'lodash';
 
 import { getAdminMachineCredential } from '../fixtures';
 
-// AWX_E2E_URL='https://localhost:3000' npm --prefix awx/ui run e2e -- --filter="*jobz*"
-
 const spinny = 'div.spinny';
 const searchInput = 'smart-search input';
 const searchSubmit = 'smart-search i[class*="search"]';
