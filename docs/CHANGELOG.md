@@ -62,3 +62,6 @@
 * Saved Launch-time configurations feature - added WFJT node promptable fields to schedules,
   added `extra_data` to WFJT nodes, added "schedule this job" endpoint.
   [[#169](https://github.com/ansible/awx/issues/169)]
+* Removed `TOWER_HOST` as a default environment variable in job running environment
+  due to conflict with tower credential type. Playbook authors should replace their
+  use with `AWX_HOST`. [[#1727](https://github.com/ansible/awx/issues/1727)]
