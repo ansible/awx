@@ -1157,7 +1157,6 @@ class RunJob(BaseTask):
         if not kwargs.get('isolated'):
             env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
             env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
-            env['TOWER_HOST'] = settings.TOWER_URL_BASE
             env['AWX_HOST'] = settings.TOWER_URL_BASE
         env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
 
