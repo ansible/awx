@@ -42,6 +42,7 @@ from rest_framework import serializers
 
 # AWX
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
 from awx.main import utils
@@ -821,3 +822,16 @@ class AskForField(models.BooleanField):
                 # self.name will be set by the model metaclass, not this field
                 raise Exception('Corresponding allows_field cannot be accessed until model is initialized.')
         return self._allows_field
+
+
+class OAuth2ClientSecretField(models.CharField):
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        return super(OAuth2ClientSecretField, self).get_db_prep_value(
+            encrypt_value(value), connection, prepared
+        )
+
+    def from_db_value(self, value, expression, connection, context):
+        if value.startswith('$encrypted$'):
+            return decrypt_value(get_encryption_key('value', pk=None), value)
+        return value
