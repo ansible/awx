@@ -396,10 +396,16 @@ class JSONSchemaField(JSONBField):
                 expected_type = error.validator_value
                 if expected_type == 'object':
                     expected_type = 'dict'
-                error.message = _(
-                    '{type} provided in relative path {path}, expected {expected_type}'
-                ).format(path=list(error.path), type=type(error.instance).__name__,
-                         expected_type=expected_type)
+                if error.path:
+                    error.message = _(
+                        '{type} provided in relative path {path}, expected {expected_type}'
+                    ).format(path=list(error.path), type=type(error.instance).__name__,
+                             expected_type=expected_type)
+                else:
+                    error.message = _(
+                        '{type} provided, expected {expected_type}'
+                    ).format(path=list(error.path), type=type(error.instance).__name__,
+                             expected_type=expected_type)
             errors.append(error)
 
         if errors:
