@@ -31,6 +31,13 @@ class OAuth2Application(AbstractApplication):
         editable=False,
         validators=[RegexValidator(DATA_URI_RE)],
     )
+    organization = models.ForeignKey(
+        'Organization',
+        related_name='applications',
+        help_text=_('Organization containing this application.'),
+        on_delete=models.CASCADE,
+        null=True,
+    )
 
 
 class OAuth2AccessToken(AbstractAccessToken):

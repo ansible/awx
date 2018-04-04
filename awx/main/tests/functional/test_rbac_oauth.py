@@ -12,105 +12,203 @@ from awx.api.versioning import reverse
 
 
 @pytest.mark.django_db
-class TestOAuthApplication:
+class TestOAuth2Application:
+        
+        @pytest.mark.parametrize("user_for_access, can_access_list", [
+            (0, [True, True]),
+            (1, [True, True]),
+            (2, [True, True]),
+            (3, [False, False]),
+        ])
+        def test_can_read(
+            self, admin, org_admin, org_member, alice, user_for_access, can_access_list, organization
+        ):
+            user_list = [admin, org_admin, org_member, alice]
+            access = OAuth2ApplicationAccess(user_list[user_for_access])
+            app_creation_user_list = [admin, org_admin]
+            for user, can_access in zip(app_creation_user_list, can_access_list):
+                app = Application.objects.create(
+                    name='test app for {}'.format(user.username), user=user,
+                    client_type='confidential', authorization_grant_type='password', organization=organization
+                )
+                assert access.can_read(app) is can_access    
+    
+    
+        def test_can_edit_delete_app_org_admin(
+            self, admin, org_admin, org_member, alice, organization
+        ):
+            user_list = [admin, org_admin, org_member, alice]
+            can_access_list = [True, True, False, False]
+            for user, can_access in zip(user_list, can_access_list):
+                app = Application.objects.create(
+                    name='test app for {}'.format(org_admin.username), user=org_admin,
+                    client_type='confidential', authorization_grant_type='password', organization=organization
+                )
+                access = OAuth2ApplicationAccess(user)
+                assert access.can_change(app, {}) is can_access
+                assert access.can_delete(app) is can_access
+                
+                
+        def test_can_edit_delete_app_admin(
+            self, admin, org_admin, org_member, alice, organization
+        ):
+            user_list = [admin, org_admin, org_member, alice]
+            can_access_list = [True, True, False, False]
+            for user, can_access in zip(user_list, can_access_list):
+                app = Application.objects.create(
+                    name='test app for {}'.format(admin.username), user=admin,
+                    client_type='confidential', authorization_grant_type='password', organization=organization
+                )
+                access = OAuth2ApplicationAccess(user)
+                assert access.can_change(app, {}) is can_access
+                assert access.can_delete(app) is can_access
+    
 
-    @pytest.mark.parametrize("user_for_access, can_access_list", [
-        (0, [True, True, True, True]),
-        (1, [False, True, True, False]),
-        (2, [False, False, True, False]),
-        (3, [False, False, False, True]),
-    ])
-    def test_can_read_change_delete(
-        self, admin, org_admin, org_member, alice, user_for_access, can_access_list
-    ):
-        user_list = [admin, org_admin, org_member, alice]
-        access = OAuth2ApplicationAccess(user_list[user_for_access])
-        for user, can_access in zip(user_list, can_access_list):
-            app = Application.objects.create(
-                name='test app for {}'.format(user.username), user=user,
-                client_type='confidential', authorization_grant_type='password'
-            )
-            assert access.can_read(app) is can_access
-            assert access.can_change(app, {}) is can_access
-            assert access.can_delete(app) is can_access
-
-    def test_superuser_can_always_create(self, admin, org_admin, org_member, alice):
-        access = OAuth2ApplicationAccess(admin)
-        for user in [admin, org_admin, org_member, alice]:
-            assert access.can_add({
-                'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
-                'authorization_grant_type': 'password'
-            })
-
-    def test_normal_user_cannot_create(self, admin, org_admin, org_member, alice):
-        for access_user in [org_member, alice]:
-            access = OAuth2ApplicationAccess(access_user)
+        def test_superuser_can_always_create(self, admin, org_admin, org_member, alice):
+            access = OAuth2ApplicationAccess(admin)
             for user in [admin, org_admin, org_member, alice]:
-                assert not access.can_add({
+                assert access.can_add({
                     'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
-                    'authorization_grant_type': 'password'
+                    'authorization_grant_type': 'password', 'organization': 1
                 })
-
-    def test_org_admin_can_create_in_org(self, admin, org_admin, org_member, alice):
-        access = OAuth2ApplicationAccess(org_admin)
-        for user in [admin, alice]:
-            assert not access.can_add({
-                'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
-                'authorization_grant_type': 'password'
-            })
-        for user in [org_admin, org_member]:
-            assert access.can_add({
-                'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
-                'authorization_grant_type': 'password'
-            })
+        
+        def test_normal_user_cannot_create(self, admin, org_admin, org_member, alice):
+            for access_user in [org_member, alice]:
+                access = OAuth2ApplicationAccess(access_user)
+                for user in [admin, org_admin, org_member, alice]:
+                    assert not access.can_add({
+                        'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
+                        'authorization_grant_type': 'password', 'organization': 1
+                    })
 
 
-@pytest.mark.skip(reason="Needs Update - CA")
 @pytest.mark.django_db
-class TestOAuthToken:
-
-    @pytest.mark.parametrize("user_for_access, can_access_list", [
-        (0, [True, True, True, True]),
-        (1, [False, True, True, False]),
-        (2, [False, False, True, False]),
-        (3, [False, False, False, True]),
-    ])
-    def test_can_read_change_delete(
-        self, post, admin, org_admin, org_member, alice, user_for_access, can_access_list
+class TestOAuth2Token:
+        
+    def test_can_read_change_delete_app_token(
+        self, post, admin, org_admin, org_member, alice, organization
     ):
         user_list = [admin, org_admin, org_member, alice]
-        access = OAuth2TokenAccess(user_list[user_for_access])
+        can_access_list = [True, True, False, False]
+        app = Application.objects.create(
+            name='test app for {}'.format(admin.username), user=admin,
+            client_type='confidential', authorization_grant_type='password',
+            organization=organization
+        )
+        response = post(
+            reverse('api:o_auth2_application_token_list', kwargs={'pk': app.pk}),
+            {'scope': 'read'}, admin, expect=201
+        )
         for user, can_access in zip(user_list, can_access_list):
-            app = Application.objects.create(
-                name='test app for {}'.format(user.username), user=user,
-                client_type='confidential', authorization_grant_type='password'
-            )
-            response = post(
-                reverse('api:o_auth2_application_token_list', kwargs={'pk': app.pk}),
-                {'scope': 'read'}, admin, expect=201
-            )
             token = AccessToken.objects.get(token=response.data['token'])
-            
-            assert access.can_read(token) is can_access                       # TODO: fix this test
+            access = OAuth2TokenAccess(user)
+            assert access.can_read(token) is can_access
             assert access.can_change(token, {}) is can_access
             assert access.can_delete(token) is can_access
 
+
+    def test_auditor_can_read(
+        self, post, admin, org_admin, org_member, alice, system_auditor, organization
+    ):
+        user_list = [admin, org_admin, org_member]
+        can_access_list = [True, True, True]
+        cannot_access_list = [False, False, False]
+        app = Application.objects.create(
+            name='test app for {}'.format(admin.username), user=admin,
+            client_type='confidential', authorization_grant_type='password',
+            organization=organization
+        )
+        for user, can_access, cannot_access in zip(user_list, can_access_list, cannot_access_list):
+            response = post(
+                reverse('api:o_auth2_application_token_list', kwargs={'pk': app.pk}),
+                {'scope': 'read'}, user, expect=201
+            )
+            token = AccessToken.objects.get(token=response.data['token'])
+            access = OAuth2TokenAccess(system_auditor)
+            assert access.can_read(token) is can_access
+            assert access.can_change(token, {}) is cannot_access
+            assert access.can_delete(token) is cannot_access
+            
+    def test_user_auditor_can_change(
+        self, post, org_member, org_admin, system_auditor, organization
+    ):    
+        app = Application.objects.create(
+            name='test app for {}'.format(org_admin.username), user=org_admin,
+            client_type='confidential', authorization_grant_type='password',
+            organization=organization
+        )
+        response = post(
+            reverse('api:o_auth2_application_token_list', kwargs={'pk': app.pk}),
+            {'scope': 'read'}, org_member, expect=201
+        )
+        token = AccessToken.objects.get(token=response.data['token'])
+        access = OAuth2TokenAccess(system_auditor)
+        assert access.can_read(token) is True
+        assert access.can_change(token, {}) is False
+        assert access.can_delete(token) is False
+        dual_user = system_auditor
+        organization.admin_role.members.add(dual_user)
+        access = OAuth2TokenAccess(dual_user)
+        assert access.can_read(token) is True
+        assert access.can_change(token, {}) is True
+        assert access.can_delete(token) is True
+        
+            
+            
+    def test_can_read_change_delete_personal_token_org_member(
+        self, post, admin, org_admin, org_member, alice
+    ):
+        # Tests who can read a token created by an org-member
+        user_list = [admin, org_admin, org_member, alice]
+        can_access_list = [True, False, True, False]
+        response = post(
+            reverse('api:o_auth2_personal_token_list', kwargs={'pk': org_member.pk}),
+            {'scope': 'read'}, org_member, expect=201
+        )
+        token = AccessToken.objects.get(token=response.data['token'])
+        for user, can_access in zip(user_list, can_access_list):
+            access = OAuth2TokenAccess(user)
+            assert access.can_read(token) is can_access
+            assert access.can_change(token, {}) is can_access
+            assert access.can_delete(token) is can_access
+    
+            
+    def test_can_read_personal_token_creator(
+        self, post, admin, org_admin, org_member, alice
+    ):
+        # Tests the token's creator can read their tokens
+        user_list = [admin, org_admin, org_member, alice]
+        can_access_list = [True, True, True, True]
+
+        for user, can_access in zip(user_list, can_access_list):
+            response = post(
+                reverse('api:o_auth2_personal_token_list', kwargs={'pk': user.pk}),
+                {'scope': 'read', 'application':None}, user, expect=201
+            )
+            token = AccessToken.objects.get(token=response.data['token'])
+            access = OAuth2TokenAccess(user)
+            assert access.can_read(token) is can_access
+            assert access.can_change(token, {}) is can_access
+            assert access.can_delete(token) is can_access
+    
+
     @pytest.mark.parametrize("user_for_access, can_access_list", [
-        (0, [True, True, True, True]),
-        (1, [False, True, True, False]),
-        (2, [False, False, True, False]),
-        (3, [False, False, False, True]),
+        (0, [True, True]),
+        (1, [True, True]),
+        (2, [True, True]),
+        (3, [False, False]),
     ])
     def test_can_create(
-        self, post, admin, org_admin, org_member, alice, user_for_access, can_access_list
+        self, post, admin, org_admin, org_member, alice, user_for_access, can_access_list, organization
     ):
         user_list = [admin, org_admin, org_member, alice]
         for user, can_access in zip(user_list, can_access_list):
             app = Application.objects.create(
                 name='test app for {}'.format(user.username), user=user,
-                client_type='confidential', authorization_grant_type='password'
+                client_type='confidential', authorization_grant_type='password', organization=organization
             )
             post(
                 reverse('api:o_auth2_application_token_list', kwargs={'pk': app.pk}),
                 {'scope': 'read'}, user_list[user_for_access], expect=201 if can_access else 403
             )
+
