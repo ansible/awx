@@ -179,6 +179,13 @@ def create_user_role(instance, **kwargs):
         role.members.add(instance)
 
 
+def delete_user_role(instance, **kwargs):
+    if instance and instance.admin_role:
+        instance.admin_role.delete()
+    else:
+        logger.info(six.text_type("Could not delete the admin role for user {}").format(instance))
+
+
 def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
     content_type = ContentType.objects.get_for_model(Organization)
 
@@ -252,6 +259,7 @@ m2m_changed.connect(rbac_activity_stream, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
 post_save.connect(create_user_role, sender=User)
+pre_delete.connect(delete_user_role, sender=User)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobTemplate)
 
