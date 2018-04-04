@@ -1,10 +1,6 @@
 import atLibServices from '~services';
 
 import actionGroup from '~components/action/action-group.directive';
-import codeMenuBottom from '~components/code/menu-bottom.directive';
-import codeMenuTop from '~components/code/menu-top.directive';
-import codeEvents from '~components/code/events.directive';
-import codeStdout from '~components/code/stdout.directive';
 import divider from '~components/utility/divider.directive';
 import form from '~components/form/form.directive';
 import formAction from '~components/form/action.directive';
@@ -49,10 +45,6 @@ angular
         atLibServices
     ])
     .directive('atActionGroup', actionGroup)
-    .directive('atCodeEvents', codeEvents)
-    .directive('atCodeMenuBottom', codeMenuBottom)
-    .directive('atCodeMenuTop', codeMenuTop)
-    .directive('atCodeStdout', codeStdout)
     .directive('atDivider', divider)
     .directive('atForm', form)
     .directive('atFormAction', formAction)
