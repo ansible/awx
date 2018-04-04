@@ -3,6 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
+import defaultStrings from '~assets/default.strings.json';
 
 export default [
     '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert',
@@ -54,6 +55,8 @@ export default [
         ConfigurationUiForm
     ) {
         var vm = this;
+
+        vm.product = defaultStrings.BRAND_NAME;
 
         var formDefs = {
             'azure': configurationAzureForm,
@@ -219,7 +222,7 @@ export default [
         };
 
         function activeTabCheck(setForm) {
-            if(!$scope[formTracker.currentFormName()].$dirty) {
+            if(!$scope[formTracker.currentFormName()] || !$scope[formTracker.currentFormName()].$dirty) {
                 active(setForm);
             } else {
                     var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
@@ -268,18 +271,30 @@ export default [
                     formTracker.setCurrentSystem(formTracker.currentSystem);
                 }
             }
-            else {
-                formTracker.setCurrent(setForm);
-            }
+
             vm.activeTab = setForm;
-            $state.go('configuration', {
-                currentTab: setForm
-            }, {
-                location: true,
-                inherit: false,
-                notify: false,
-                reload: false
-            });
+
+            if (setForm !== 'license') {
+                formTracker.setCurrent(setForm);
+
+                $state.go('configuration', {
+                    currentTab: setForm
+                }, {
+                    location: true,
+                    inherit: false,
+                    notify: false,
+                    reload: false
+                });
+            } else {
+                $state.go('configuration.license', {
+                    currentTab: setForm
+                }, {
+                    location: true,
+                    inherit: false,
+                    notify: false,
+                    reload: false
+                });
+            }
         }
 
         var formCancel = function() {
