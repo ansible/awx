@@ -296,7 +296,7 @@ module.exports = {
         client.waitForElementVisible('div.spinny');
         client.waitForElementNotVisible('div.spinny');
 
-        client.waitForElementVisible('.JobResults-detailsPanel');
+        client.waitForElementVisible('at-job-details');
         client.waitForElementNotPresent(running, 60000);
         client.waitForElementVisible(success, 60000);
 
