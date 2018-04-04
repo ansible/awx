@@ -3128,16 +3128,22 @@ class JobTemplateSurveySpec(GenericAPIView):
         return Response()
 
     def _validate_spec_data(self, new_spec, old_spec):
-        if "name" not in new_spec:
-            return Response(dict(error=_("'name' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if "description" not in new_spec:
-            return Response(dict(error=_("'description' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if "spec" not in new_spec:
-            return Response(dict(error=_("'spec' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(new_spec["spec"], list):
-            return Response(dict(error=_("'spec' must be a list of items.")), status=status.HTTP_400_BAD_REQUEST)
-        if len(new_spec["spec"]) < 1:
-            return Response(dict(error=_("'spec' doesn't contain any items.")), status=status.HTTP_400_BAD_REQUEST)
+        schema_errors = {}
+        for field, expect_type, type_label in [
+                ('name', six.string_types, 'string'),
+                ('description', six.string_types, 'string'),
+                ('spec', list, 'list of items')]:
+            if field not in new_spec:
+                schema_errors['error'] = _("Field '{}' is missing from survey spec.").format(field)
+            elif not isinstance(new_spec[field], expect_type):
+                schema_errors['error'] = _("Expected {} for field '{}', received {} type.").format(
+                    type_label, field, type(new_spec[field]).__name__)
+
+        if isinstance(new_spec.get('spec', None), list) and len(new_spec["spec"]) < 1:
+            schema_errors['error'] = _("'spec' doesn't contain any items.")
+
+        if schema_errors:
+            return Response(schema_errors, status=status.HTTP_400_BAD_REQUEST)
 
         variable_set = set()
         old_spec_dict = JobTemplate.pivot_spec(old_spec)
