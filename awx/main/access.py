@@ -395,7 +395,7 @@ class BaseAccess(object):
             elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob, CustomInventoryScript)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
-            elif display_method == 'copy' and isinstance(obj, (Group, Host, CustomInventoryScript)):
+            elif display_method == 'copy' and isinstance(obj, (Group, Host)):
                 user_capabilities['copy'] = user_capabilities['edit']
                 continue
 
