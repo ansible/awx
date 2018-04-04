@@ -315,6 +315,7 @@ class ImplicitRoleField(models.ForeignKey):
                 if cur_role.implicit_parents != new_parents_json:
                     cur_role.implicit_parents = new_parents_json
                     cur_role.save()
+            instance.refresh_from_db()
 
 
     def _resolve_parent_roles(self, instance):
