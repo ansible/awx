@@ -221,7 +221,7 @@ angular
             if ($rootScope.removeConfigReady) {
                 $rootScope.removeConfigReady();
             }
-            $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
+            $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function(evt) {
                 var list, id;
                 // initially set row edit indicator for crud pages
                 if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
@@ -309,7 +309,7 @@ angular
                         if (trans.to().name && (trans.to().name !== "signIn"  && trans.to().name !== "signOut" && trans.to().name !== "license")) {
                             ConfigService.getConfig().then(function() {
                                 // if not headed to /login or /logout, then check the license
-                                CheckLicense.test(event);
+                                CheckLicense.test(evt);
                             });
                         }
                     }
