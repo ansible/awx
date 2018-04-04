@@ -5,7 +5,7 @@
            class="form-control at-Input"
            ng-class="{ 'at-Input--rejected': vm.rejected }"
            ng-model="vm.value"
-           ng-attr-placeholder="{{ vm.disabled ? 'CANNOT SEARCH RUNNING JOB' : 'SEARCH' }}"
+           ng-attr-placeholder="{{ vm.placeholder }}"
            ng-disabled="vm.disabled">
     <span class="input-group-btn">
         <button class="btn at-ButtonHollow--default at-Input-button"

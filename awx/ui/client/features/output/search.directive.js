@@ -4,6 +4,9 @@ const searchReloadOptions = { reload: true, inherit: false };
 const searchKeyExamples = ['id:>1', 'task:set', 'created:>=2000-01-01'];
 const searchKeyFields = ['changed', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
 
+const PLACEHOLDER_RUNNING = 'CANNOT SEARCH RUNNING JOB';
+const PLACEHOLDER_DEFAULT = 'SEARCH';
+
 let $state;
 let status;
 let qs;
@@ -35,6 +38,7 @@ function removeSearchTag (index) {
     const modifiedQueryset = qs.removeTermsFromQueryset(currentQueryset, searchTerm);
 
     vm.tags = getSearchTags(modifiedQueryset);
+    vm.disabled = true;
 
     $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
     $state.transitionTo($state.current, $state.params, searchReloadOptions);
@@ -47,6 +51,7 @@ function submitSearch () {
     const modifiedQueryset = qs.mergeQueryset(currentQueryset, searchInputQueryset);
 
     vm.tags = getSearchTags(modifiedQueryset);
+    vm.disabled = true;
 
     $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
     $state.transitionTo($state.current, $state.params, searchReloadOptions);
@@ -54,6 +59,7 @@ function submitSearch () {
 
 function clearSearch () {
     vm.tags = [];
+    vm.disabled = true;
 
     $state.params.job_event_search = '';
     $state.transitionTo($state.current, $state.params, searchReloadOptions);
@@ -88,9 +94,13 @@ function AtJobSearchController (_$state_, _status_, _qs_) {
     vm.init = scope => {
         vm.examples = scope.examples || searchKeyExamples;
         vm.fields = scope.fields || searchKeyFields;
+        vm.placeholder = PLACEHOLDER_DEFAULT;
         vm.relatedFields = scope.relatedFields || [];
 
-        scope.$watch(status.isRunning, value => { vm.disabled = value; });
+        scope.$watch(status.isRunning, value => {
+            vm.disabled = value;
+            vm.placeholder = value ? PLACEHOLDER_RUNNING : PLACEHOLDER_DEFAULT;
+        });
     };
 }
 
