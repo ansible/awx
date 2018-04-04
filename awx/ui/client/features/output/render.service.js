@@ -1,5 +1,4 @@
 import Ansi from 'ansi-to-html';
-import hasAnsi from 'has-ansi';
 import Entities from 'html-entities';
 
 const ELEMENT_TBODY = '#atStdoutResultTable';
@@ -20,6 +19,15 @@ const TIME_EVENTS = [
 
 const ansi = new Ansi();
 const entities = new Entities.AllHtmlEntities();
+
+// https://github.com/chalk/ansi-regex
+const pattern = [
+    '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\\u0007)',
+    '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))'
+].join('|');
+
+const re = new RegExp(pattern);
+const hasAnsi = input => re.test(input);
 
 function JobRenderService ($q, $sce, $window) {
     this.init = ({ compile, apply, isStreamActive }) => {
