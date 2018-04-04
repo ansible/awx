@@ -18,6 +18,15 @@
         {{ vm.elapsed * 1000 | duration: "hh:mm:ss" }}
     </span>
 
+    <a ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
+    <button class="btn at-Input-button at-u-noBorder"
+        aw-tool-tip="{{ standardOutTooltip }}"
+        data-tip-watch="standardOutTooltip"
+        data-placement="top">
+        <i class="fa fa-download"></i>
+    </button>
+    </a>
+
     <button class="btn at-Input-button at-u-noBorder"
         aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}"
         data-tip-watch="toggleStdoutFullscreenTooltip"
@@ -26,16 +35,6 @@
         ng-click="toggleStdoutFullscreen()">
         <i class="fa fa-arrows-alt"></i>
     </button>
-
-    <a ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
-
-        <button class="btn at-Input-button at-u-noBorder"
-            aw-tool-tip="{{ standardOutTooltip }}"
-            data-tip-watch="standardOutTooltip"
-            data-placement="top">
-            <i class="fa fa-download"></i>
-        </button>
-    </a>
 </div>
 
 <div class="HostStatusBar">
