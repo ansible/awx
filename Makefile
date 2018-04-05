@@ -234,7 +234,7 @@ migrate:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(MANAGEMENT_COMMAND) migrate --noinput --fake-initial
+	$(MANAGEMENT_COMMAND) migrate --noinput
 
 # Run after making changes to the models to create a new migration.
 dbchange:
