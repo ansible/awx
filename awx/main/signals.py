@@ -250,16 +250,14 @@ def save_related_job_templates(sender, instance, **kwargs):
     Organization updated. This triggers the rebuilding of the RBAC hierarchy
     and ensures the proper access restrictions.
     '''
+    if sender not in (Project, Inventory):
+        raise ValueError('This signal callback is only intended for use with Project or Inventory')
+
     if instance.__original_org != instance.organization:
         instance.__original_org = instance.organization
-        jtq = None
-        if sender == Project:
-            jtq = JobTemplate.objects.filter(project=instance)
-        elif sender == Inventory:
-            jtq = JobTemplate.objects.filter(inventory=instance)
-        if jtq:
-            for jt in jtq.all():
-                jt.save()
+        jtq = JobTemplate.objects.filter(**{sender.__name__.lower(): instance})
+        for jt in jtq.all():
+            jt.save()
 
 
 def connect_computed_field_signals():
