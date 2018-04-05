@@ -3248,11 +3248,12 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         return summary_fields
 
 
-class JobCancelSerializer(JobSerializer):
+class JobCancelSerializer(BaseSerializer):
 
     can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
+        model = Job
         fields = ('can_cancel',)
 
 
