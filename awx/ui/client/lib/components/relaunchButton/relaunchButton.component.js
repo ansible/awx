@@ -114,7 +114,8 @@ function atRelaunchCtrl (
                 jobObj.postRelaunch(launchParams)
                     .then((launchRes) => {
                         if (!$state.includes('jobs')) {
-                            $state.go('jobResult', { id: launchRes.data.id }, { reload: true });
+                            const relaunchType = launchRes.data.type === 'job' ? 'playbook' : launchRes.data.type;
+                            $state.go('jobz', { id: launchRes.data.id, type: relaunchType }, { reload: true });
                         }
                     });
             }
@@ -162,7 +163,7 @@ function atRelaunchCtrl (
                         inventorySource.postUpdate(vm.job.inventory_source)
                             .then((postUpdateRes) => {
                                 if (!$state.includes('jobs')) {
-                                    $state.go('inventorySyncStdout', { id: postUpdateRes.data.id }, { reload: true });
+                                    $state.go('jobz', { id: postUpdateRes.data.id, type: 'inventory' }, { reload: true });
                                 }
                             });
                     } else {
@@ -181,7 +182,7 @@ function atRelaunchCtrl (
                         project.postUpdate(vm.job.project)
                             .then((postUpdateRes) => {
                                 if (!$state.includes('jobs')) {
-                                    $state.go('scmUpdateStdout', { id: postUpdateRes.data.id }, { reload: true });
+                                    $state.go('jobz', { id: postUpdateRes.data.id, type: 'project' }, { reload: true });
                                 }
                             });
                     } else {
@@ -217,7 +218,7 @@ function atRelaunchCtrl (
                         id: vm.job.id
                     }).then((launchRes) => {
                         if (!$state.includes('jobs')) {
-                            $state.go('adHocJobStdout', { id: launchRes.data.id }, { reload: true });
+                            $state.go('jobz', { id: launchRes.data.id, type: 'command' }, { reload: true });
                         }
                     });
                 }
@@ -237,7 +238,7 @@ function atRelaunchCtrl (
             relaunchData: PromptService.bundlePromptDataForRelaunch(vm.promptData)
         }).then((launchRes) => {
             if (!$state.includes('jobs')) {
-                $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
+                $state.go('jobz', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
             }
         }).catch(({ data, status }) => {
             ProcessErrors($scope, data, status, null, {

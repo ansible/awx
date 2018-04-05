@@ -19,7 +19,6 @@ import credentialTypes from './credential-types/main';
 import organizations from './organizations/main';
 import managementJobs from './management-jobs/main';
 import workflowResults from './workflow-results/main';
-import jobResults from './job-results/main';
 import jobSubmission from './job-submission/main';
 import notifications from './notifications/main';
 import about from './about/main';
@@ -30,7 +29,6 @@ import configuration from './configuration/main';
 import home from './home/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
-import standardOut from './standard-out/main';
 import Templates from './templates/main';
 import teams from './teams/main';
 import users from './users/main';
@@ -67,7 +65,6 @@ angular
         'gettext',
         'Timezones',
         'lrInfiniteScroll',
-
         about.name,
         access.name,
         license.name,
@@ -86,10 +83,8 @@ angular
         login.name,
         activityStream.name,
         workflowResults.name,
-        jobResults.name,
         jobSubmission.name,
         notifications.name,
-        standardOut.name,
         Templates.name,
         portalMode.name,
         teams.name,
@@ -242,23 +237,6 @@ angular
                 $rootScope.crumbCache = [];
 
                 $transitions.onStart({}, function(trans) {
-                    // Remove any lingering intervals
-                    // except on jobResults.* states
-                    var jobResultStates = [
-                        'jobResult',
-                        'jobResult.host-summary',
-                        'jobResult.host-event.details',
-                        'jobResult.host-event.json',
-                        'jobResult.host-events',
-                        'jobResult.host-event.stdout'
-                    ];
-                    if ($rootScope.jobResultInterval && !_.includes(jobResultStates, trans.to().name) ) {
-                        window.clearInterval($rootScope.jobResultInterval);
-                    }
-                    if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, trans.to().name) ) {
-                        window.clearInterval($rootScope.jobStdOutInterval);
-                    }
-
                     $rootScope.flashMessage = null;
 
                     $('#form-modal2 .modal-body').empty();

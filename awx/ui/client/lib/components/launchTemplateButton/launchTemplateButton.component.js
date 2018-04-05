@@ -41,7 +41,7 @@ function atLaunchTemplateCtrl (
                         selectedJobTemplate
                             .postLaunch({ id: vm.template.id })
                             .then(({ data }) => {
-                                $state.go('jobResult', { id: data.job }, { reload: true });
+                                $state.go('jobz', { id: data.job, type: 'playbook' }, { reload: true });
                             });
                     } else {
                         const promptData = {
@@ -138,7 +138,7 @@ function atLaunchTemplateCtrl (
                 id: vm.promptData.template,
                 launchData: jobLaunchData
             }).then((launchRes) => {
-                $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
+                $state.go('jobz', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
             }).catch(createErrorHandler('launch job template', 'POST'));
         } else if (vm.promptData.templateType === 'workflow_job_template') {
             workflowTemplate.create().postLaunch({

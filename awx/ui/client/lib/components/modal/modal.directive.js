@@ -12,7 +12,7 @@ function atModalLink (scope, el, attrs, controllers) {
     });
 }
 
-function AtModalController (eventService, strings) {
+function AtModalController ($timeout, eventService, strings) {
     const vm = this;
 
     let overlay;
@@ -58,6 +58,7 @@ function AtModalController (eventService, strings) {
 }
 
 AtModalController.$inject = [
+    '$timeout',
     'EventService',
     'ComponentsStrings'
 ];
