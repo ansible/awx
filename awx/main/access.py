@@ -348,10 +348,9 @@ class BaseAccess(object):
                 if obj.validation_errors:
                     user_capabilities[display_method] = False
                     continue
-            elif isinstance(obj, (WorkflowJobTemplate, WorkflowJob)):
-                if not feature_enabled('workflows'):
-                    user_capabilities[display_method] = (display_method == 'delete')
-                    continue
+            elif isinstance(obj, (WorkflowJobTemplate, WorkflowJob)) and (not feature_enabled('workflows')):
+                user_capabilities[display_method] = (display_method == 'delete')
+                continue
             elif display_method == 'copy' and isinstance(obj, WorkflowJobTemplate) and obj.organization_id is None:
                 user_capabilities[display_method] = self.user.is_superuser
                 continue
