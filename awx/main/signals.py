@@ -235,12 +235,14 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
         if l.is_candidate_for_detach():
             l.delete()
 
+
 def set_original_organization(sender, instance, **kwargs):
     '''set_original_organization is used to set the original, or
     pre-save organization, so we can later determine if the organization
     field is dirty.
     '''
     instance.__original_org = instance.organization
+
 
 def save_related_job_templates(sender, instance, **kwargs):
     '''save_related_job_templates loops through all of the
