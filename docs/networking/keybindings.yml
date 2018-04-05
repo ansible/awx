@@ -1,0 +1,38 @@
+diagram_id: 68
+finite_state_machine_id: 18
+name: diagram
+states:
+- id: 1
+  label: Enabled
+  x: 842
+  y: 533
+- id: 2
+  label: Start
+  x: 839
+  y: 270
+- id: 3
+  label: Disabled
+  x: 1412
+  y: 522
+transitions:
+- from_state: Start
+  label: start
+  to_state: Enabled
+- from_state: Disabled
+  label: onBindDocument
+  to_state: Enabled
+- from_state: Enabled
+  label: onUnbindDocument
+  to_state: Disabled
+- from_state: Disabled
+  label: onDetailsPanelClose
+  to_state: Enabled
+- from_state: Enabled
+  label: onDetailsPanel
+  to_state: Disabled
+- from_state: Enabled
+  label: onSearchDropdown
+  to_state: Disabled
+- from_state: Disabled
+  label: onSearchDropdownClose
+  to_state: Enabled

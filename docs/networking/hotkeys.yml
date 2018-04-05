@@ -1,0 +1,25 @@
+finite_state_machine_id: 1
+name: hotkeys_fsm
+states:
+- id: 2
+  label: Enabled
+  x: 585
+  y: 396
+- id: 1
+  label: Start
+  x: 585
+  y: 160
+- id: 3
+  label: Disabled
+  x: 331
+  y: 408
+transitions:
+- from_state: Enabled
+  label: onDisable
+  to_state: Disabled
+- from_state: Disabled
+  label: onEnable
+  to_state: Enabled
+- from_state: Start
+  label: start
+  to_state: Enabled

@@ -1,0 +1,42 @@
+finite_state_machine_id: 4
+name: link_fsm
+states:
+- id: 5
+  label: Selecting
+  x: -429
+  y: 63
+- id: 2
+  label: Start
+  x: 15
+  y: -221
+- id: 4
+  label: Connecting
+  x: -429
+  y: 466
+- id: 3
+  label: Connected
+  x: 47
+  y: 453
+- id: 1
+  label: Ready
+  x: 26
+  y: 61
+transitions:
+- from_state: Ready
+  label: onNewLink
+  to_state: Selecting
+- from_state: Selecting
+  label: onMouseUp
+  to_state: Connecting
+- from_state: Connecting
+  label: onMouseUp
+  to_state: Connected
+- from_state: Connecting
+  label: onMouseUp
+  to_state: Ready
+- from_state: Connected
+  label: start
+  to_state: Ready
+- from_state: Start
+  label: start
+  to_state: Ready

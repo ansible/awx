@@ -1,0 +1,15 @@
+finite_state_machine_id: 17
+name: null_fsm
+states:
+- id: 1
+  label: Start
+  x: 391
+  y: 132
+- id: 2
+  label: Ready
+  x: 402
+  y: 346
+transitions:
+- from_state: Start
+  label: start
+  to_state: Ready
