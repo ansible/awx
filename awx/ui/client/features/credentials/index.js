@@ -11,7 +11,7 @@ function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, O
     const id = $stateParams.credential_id;
 
     const promises = {
-        me: new Me('get').then((me) => me.extend('admin_of_organizations'))
+        me: new Me('get').then((me) => me.extend('get', 'admin_of_organizations'))
     };
 
     if (!id) {

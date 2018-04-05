@@ -80,10 +80,10 @@ function resolveResource (
             const promises = [model.getStats()];
 
             if (model.has('related.labels')) {
-                promises.push(model.extend('labels'));
+                promises.push(model.extend('get', 'labels'));
             }
 
-            promises.push(model.extend(related, config));
+            promises.push(model.extend('get', related, config));
 
             return Promise.all(promises);
         })

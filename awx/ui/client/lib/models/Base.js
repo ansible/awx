@@ -353,8 +353,8 @@ function has (method, keys) {
     return value !== undefined && value !== null;
 }
 
-function extend (related, config = {}) {
-    const req = this.parseRequestConfig('GET', config);
+function extend (method, related, config = {}) {
+    const req = this.parseRequestConfig(method.toUpperCase(), config);
 
     if (_.get(config, 'params.page_size')) {
         this.page.size = config.params.page_size;
