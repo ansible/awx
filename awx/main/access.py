@@ -491,10 +491,35 @@ class UserAccess(BaseAccess):
         # that a user should be able to edit for themselves.
         return bool(self.user == obj or self.can_admin(obj, data))
 
+    def user_membership_roles(self, u):
+        return Role.objects.filter(
+            content_type=ContentType.objects.get_for_model(Organization),
+            role_field__in=['admin_role', 'member_role'],
+            members=u
+        )
+
+    def is_all_org_admin(self, u):
+        return not self.user_membership_roles(u).exclude(
+            ancestors__in=self.user.roles.filter(role_field='admin_role')
+        ).exists()
+
+    def user_is_orphaned(self, u):
+        return not self.user_membership_roles(u).exists()
+
     @check_superuser
-    def can_admin(self, obj, data):
-        return Organization.objects.filter(Q(member_role__members=obj) | Q(admin_role__members=obj),
-                                           Q(admin_role__members=self.user)).exists()
+    def can_admin(self, obj, data, allow_orphans=False):
+        if obj.is_superuser or obj.is_system_auditor:
+            # must be superuser to admin users with system roles
+            return False
+        if self.user_is_orphaned(obj):
+            if not allow_orphans:
+                # in these cases only superusers can modify orphan users
+                return False
+            return not obj.roles.all().exclude(
+                content_type=ContentType.objects.get_for_model(User)
+            ).filter(ancestors__in=self.user.roles.all()).exists()
+        else:
+            return self.is_all_org_admin(obj)
 
     def can_delete(self, obj):
         if obj == self.user:
@@ -2401,7 +2426,7 @@ class RoleAccess(BaseAccess):
         # unwanted escalations lets ensure that the Organization administartor has the abilty
         # to admin the user being added to the role.
         if isinstance(obj.content_object, Organization) and obj.role_field in ['member_role', 'admin_role']:
-            if not UserAccess(self.user).can_admin(sub_obj, None):
+            if not UserAccess(self.user).can_admin(sub_obj, None, allow_orphans=True):
                 return False
 
         if isinstance(obj.content_object, ResourceMixin) and \
