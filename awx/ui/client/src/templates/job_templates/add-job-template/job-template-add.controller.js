@@ -10,14 +10,14 @@
         'ProcessErrors', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state', 'availableLabels',
         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService',
-        'MultiCredentialService', 'ConfigData',
+        'MultiCredentialService', 'ConfigData', 'resolvedModels',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
              $state, availableLabels, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService,
-             MultiCredentialService, ConfigData
+             MultiCredentialService, ConfigData, resolvedModels
          ) {
 
             // Inject dynamic view
@@ -28,37 +28,38 @@
                 selectPlaybook, checkSCMStatus,
                 callback;
 
-            init();
-            function init(){
-                // apply form definition's default field values
-                GenerateForm.applyDefaults(form, $scope);
+            const jobTemplate = resolvedModels[0];
 
-                $scope.can_edit = true;
-                $scope.allow_callbacks = false;
-                $scope.playbook_options = [];
-                $scope.mode = "add";
-                $scope.parseType = 'yaml';
-                $scope.credentialNotPresent = false;
-                $scope.canGetAllRelatedResources = true;
+            $scope.canAddJobTemplate = jobTemplate.options('actions.POST');
 
-                md5Setup({
-                    scope: $scope,
-                    master: master,
-                    check_field: 'allow_callbacks',
-                    default_val: false
-                });
-                CallbackHelpInit({ scope: $scope });
+            // apply form definition's default field values
+            GenerateForm.applyDefaults(form, $scope);
 
-                $scope.surveyTooltip = i18n._('Please save before adding a survey to this job template.');
+            $scope.can_edit = true;
+            $scope.allow_callbacks = false;
+            $scope.playbook_options = [];
+            $scope.mode = "add";
+            $scope.parseType = 'yaml';
+            $scope.credentialNotPresent = false;
+            $scope.canGetAllRelatedResources = true;
 
-                MultiCredentialService.getCredentialTypes()
-                .then(({ data }) => {
-                    $scope.multiCredential = {
-                        credentialTypes: data.results,
-                        selectedCredentials: []
-                    };
-                });
-            }
+            md5Setup({
+                scope: $scope,
+                master: master,
+                check_field: 'allow_callbacks',
+                default_val: false
+            });
+            CallbackHelpInit({ scope: $scope });
+
+            $scope.surveyTooltip = i18n._('Please save before adding a survey to this job template.');
+
+            MultiCredentialService.getCredentialTypes()
+            .then(({ data }) => {
+                $scope.multiCredential = {
+                    credentialTypes: data.results,
+                    selectedCredentials: []
+                };
+            });
 
             callback = function() {
                 // Make sure the form controller knows there was a change

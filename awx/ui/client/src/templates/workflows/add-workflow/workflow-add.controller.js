@@ -8,43 +8,47 @@ export default [
     '$scope', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
     'Wait', '$state', 'CreateSelect2', 'TemplatesService',
     'ToJSON', 'ParseTypeChange', '$q', 'Rest', 'GetBasePath', 'availableLabels', 'i18n',
+    'resolvedModels',
     function($scope, WorkflowForm, GenerateForm, Alert, ProcessErrors,
     Wait, $state, CreateSelect2, TemplatesService, ToJSON,
-    ParseTypeChange, $q, Rest, GetBasePath, availableLabels, i18n) {
+    ParseTypeChange, $q, Rest, GetBasePath, availableLabels, i18n,
+    resolvedModels) {
 
          // Inject dynamic view
          let form = WorkflowForm(),
              generator = GenerateForm;
 
-         function init() {
-             $scope.canEditOrg = true;
-             $scope.parseType = 'yaml';
-             $scope.can_edit = true;
-             // apply form definition's default field values
-             GenerateForm.applyDefaults(form, $scope);
+         const workflowTemplate = resolvedModels[1];
 
-             // Make the variables textarea look pretty
-             ParseTypeChange({
-                 scope: $scope,
-                 field_id: 'workflow_job_template_variables',
-                 onChange: function() {
-                     // Make sure the form controller knows there was a change
-                     $scope[form.name + '_form'].$setDirty();
-                 }
-             });
+         $scope.canAddWorkflowJobTemplate = workflowTemplate.options('actions.POST');
 
-             $scope.labelOptions = availableLabels
-                 .map((i) => ({label: i.name, value: i.id}));
+         $scope.canEditOrg = true;
+         $scope.parseType = 'yaml';
+         $scope.can_edit = true;
+         // apply form definition's default field values
+         GenerateForm.applyDefaults(form, $scope);
 
-             CreateSelect2({
-                 element:'#workflow_job_template_labels',
-                 multiple: true,
-                 addNew: true
-             });
+         // Make the variables textarea look pretty
+         ParseTypeChange({
+             scope: $scope,
+             field_id: 'workflow_job_template_variables',
+             onChange: function() {
+                 // Make sure the form controller knows there was a change
+                 $scope[form.name + '_form'].$setDirty();
+             }
+         });
 
-             $scope.workflowEditorTooltip = i18n._("Please save before defining the workflow graph.");
-             $scope.surveyTooltip = i18n._('Please save before adding a survey to this workflow.');
-         }
+         $scope.labelOptions = availableLabels
+             .map((i) => ({label: i.name, value: i.id}));
+
+         CreateSelect2({
+             element:'#workflow_job_template_labels',
+             multiple: true,
+             addNew: true
+         });
+
+         $scope.workflowEditorTooltip = i18n._("Please save before defining the workflow graph.");
+         $scope.surveyTooltip = i18n._('Please save before adding a survey to this workflow.');
 
          $scope.formSave = function () {
              let fld, data = {};
@@ -167,7 +171,5 @@ export default [
          $scope.formCancel = function () {
              $state.transitionTo('templates');
          };
-
-         init();
      }
     ];
