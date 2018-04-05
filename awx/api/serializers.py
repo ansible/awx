@@ -3201,7 +3201,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                 data.setdefault('project', job_template.project.pk)
                 data.setdefault('playbook', job_template.playbook)
             if job_template.credential:
-                data.setdefault('credential', job_template.credential.pk)
+                data.setdefault('credential', job_template.credential)
             data.setdefault('forks', job_template.forks)
             data.setdefault('limit', job_template.limit)
             data.setdefault('verbosity', job_template.verbosity)
