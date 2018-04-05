@@ -61,7 +61,7 @@ export default ['i18n', function(i18n){
                 label: i18n._('Copy'),
                 ngClick: 'copyCustomInv(inventory_script)',
                 "class": 'btn-danger btn-xs',
-                awToolTip: i18n._('Copy inventory scruot'),
+                awToolTip: i18n._('Copy inventory script'),
                 dataPlacement: 'top',
                 ngShow: 'inventory_script.summary_fields.user_capabilities.edit'
             },
