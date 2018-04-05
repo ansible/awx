@@ -3,8 +3,8 @@ import pytest
 from awx.api.versioning import reverse
 from django.test.client import RequestFactory
 
-from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate
-from awx.main.access import access_registry
+from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate, WorkflowJobTemplate
+from awx.main.access import access_registry, WorkflowJobTemplateAccess
 from awx.main.utils import prefetch_page_capabilities
 from awx.api.serializers import JobTemplateSerializer, UnifiedJobTemplateSerializer
 
@@ -320,6 +320,17 @@ def test_prefetch_jt_copy_capability(job_template, project, inventory, rando):
         'project.use', 'inventory.use',
     ]}], rando)
     assert mapping[job_template.id] == {'copy': True}
+
+
+@pytest.mark.django_db
+def test_workflow_orphaned_capabilities(rando):
+    wfjt = WorkflowJobTemplate.objects.create(name='test', organization=None)
+    wfjt.admin_role.members.add(rando)
+    access = WorkflowJobTemplateAccess(rando)
+    assert not access.get_user_capabilities(
+        wfjt, method_list=['edit', 'copy'],
+        capabilities_cache={'copy': True}
+    )['copy']
 
 
 @pytest.mark.django_db
