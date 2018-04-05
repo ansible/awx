@@ -38,6 +38,7 @@ const checkTags = (client, tags) => {
 module.exports = {
     before: (client, done) => {
         const resources = range(25).map(n => getAdminMachineCredential(`test-search-${n}`));
+
         Promise.all(resources).then(done);
     },
     'add and remove search tags': client => {
