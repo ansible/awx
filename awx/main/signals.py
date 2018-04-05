@@ -9,7 +9,13 @@ import json
 
 # Django
 from django.conf import settings
-from django.db.models.signals import post_save, pre_delete, post_delete, m2m_changed
+from django.db.models.signals import (
+    post_init,
+    post_save,
+    pre_delete,
+    post_delete,
+    m2m_changed,
+)
 from django.dispatch import receiver
 from django.contrib.auth import SESSION_KEY
 from django.utils import timezone
@@ -229,6 +235,30 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
         if l.is_candidate_for_detach():
             l.delete()
 
+def set_original_organization(sender, instance, **kwargs):
+    '''set_original_organization is used to set the original, or
+    pre-save organization, so we can later determine if the organization
+    field is dirty.
+    '''
+    instance.__original_org = instance.organization
+
+def save_related_job_templates(sender, instance, **kwargs):
+    '''save_related_job_templates loops through all of the
+    job templates that use an Inventory or Project that have had their
+    Organization updated. This triggers the rebuilding of the RBAC hierarchy
+    and ensures the proper access restrictions.
+    '''
+    if instance.__original_org != instance.organization:
+        instance.__original_org = instance.organization
+        jtq = None
+        if sender == Project:
+            jtq = JobTemplate.objects.filter(project=instance)
+        elif sender == Inventory:
+            jtq = JobTemplate.objects.filter(inventory=instance)
+        if jtq:
+            for jt in jtq.all():
+                jt.save()
+
 
 def connect_computed_field_signals():
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -247,7 +277,10 @@ def connect_computed_field_signals():
 
 connect_computed_field_signals()
 
-
+post_init.connect(set_original_organization, sender=Project)
+post_init.connect(set_original_organization, sender=Inventory)
+post_save.connect(save_related_job_templates, sender=Project)
+post_save.connect(save_related_job_templates, sender=Inventory)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 post_save.connect(emit_project_update_event_detail, sender=ProjectUpdateEvent)
