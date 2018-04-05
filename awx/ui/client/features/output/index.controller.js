@@ -95,7 +95,7 @@ function init () {
         }
     });
 
-    $scope.$on(resource.ws.events, handleSocketEvent);
+    $scope.$on(resource.ws.events, handleJobEvent);
     $scope.$on(resource.ws.status, handleStatusEvent);
 
     if (!status.isRunning()) {
@@ -107,7 +107,7 @@ function handleStatusEvent (scope, data) {
     status.pushStatusEvent(data);
 }
 
-function handleSocketEvent (scope, data) {
+function handleJobEvent (scope, data) {
     engine.pushJobEvent(data);
 
     status.pushJobEvent(data);
