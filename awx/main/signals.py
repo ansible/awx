@@ -254,10 +254,22 @@ def save_related_job_templates(sender, instance, **kwargs):
         raise ValueError('This signal callback is only intended for use with Project or Inventory')
 
     if instance.__original_org != instance.organization:
-        instance.__original_org = instance.organization
         jtq = JobTemplate.objects.filter(**{sender.__name__.lower(): instance})
-        for jt in jtq.all():
-            jt.save()
+        for jt in jtq:
+            for implicit_role_field in getattr(JobTemplate, '__implicit_role_fields'):
+                role = getattr(jt, implicit_role_field.name)
+                original_parents = set(json.loads(role.implicit_parents))
+                new_parents = implicit_role_field._resolve_parent_roles(instance)
+
+                role.parents.remove(*list(original_parents - new_parents))
+                role.parents.add(*list(new_parents - original_parents))
+
+                new_parents_list = list(new_parents)
+                new_parents_list.sort()
+                new_parents_json = json.dumps(new_parents_list)
+                if role.implicit_parents != new_parents_json:
+                    role.implicit_parents = new_parents_json
+                    role.save()
 
 
 def connect_computed_field_signals():
