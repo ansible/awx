@@ -106,8 +106,9 @@ function getSourceWorkflowJobDetails () {
     }
 
     const link = `/#/workflows/${sourceWorkflowJob.id}`;
+    const tooltip = strings.get('resourceTooltips.SOURCE_WORKFLOW_JOB');
 
-    return { link };
+    return { link, tooltip };
 }
 
 function getJobTemplateDetails () {
@@ -120,8 +121,9 @@ function getJobTemplateDetails () {
     const label = 'Job Template';
     const link = `/#/templates/job_template/${jobTemplate.id}`;
     const value = $filter('sanitize')(jobTemplate.name);
+    const tooltip = strings.get('resourceTooltips.JOB_TEMPLATE');
 
-    return { label, link, value };
+    return { label, link, value, tooltip };
 }
 
 function getLaunchedByDetails () {
@@ -142,11 +144,11 @@ function getLaunchedByDetails () {
     let value;
 
     if (createdBy) {
-        tooltip = 'Edit the User';
+        tooltip = strings.get('resourceTooltips.USER');
         link = `/#/users/${createdBy.id}`;
         value = $filter('sanitize')(createdBy.username);
     } else if (relatedSchedule && jobTemplate) {
-        tooltip = 'Edit the Schedule';
+        tooltip = strings.get('resourceTooltips.SCHEDULE');
         link = `/#/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
         value = $filter('sanitize')(schedule.name);
     } else {
@@ -166,7 +168,7 @@ function getInventoryDetails () {
     }
 
     const label = 'Inventory';
-    const tooltip = 'Edit the inventory';
+    const tooltip = strings.get('resourceTooltips.INVENTORY');
     const value = $filter('sanitize')(inventory.name);
 
     let link;
@@ -191,18 +193,19 @@ function getProjectDetails () {
     const label = 'Project';
     const link = `/#/projects/${project.id}`;
     const value = $filter('sanitize')(project.name);
+    const tooltip = strings.get('resourceTooltips.PROJECT');
 
     if (projectUpdate) {
         const update = {
             link: `/#/jobz/project/${projectUpdate.id}`,
-            tooltip: 'View project checkout results',
+            tooltip: strings.get('resourceTooltips.PROJECT_UPDATE'),
             status: projectUpdate.status,
         };
 
-        return { label, link, value, update };
+        return { label, link, value, tooltip, update };
     }
 
-    return { label, link, value };
+    return { label, link, value, tooltip };
 }
 
 function getSCMRevisionDetails () {
@@ -275,7 +278,7 @@ function getCredentialDetails () {
     }
 
     const link = `/#/credentials/${credential.id}`;
-    const tooltip = 'Edit the Credential';
+    const tooltip = strings.get('resourceTooltips.CREDENTIAL');
     const value = $filter('sanitize')(credential.name);
 
     return { label, link, tooltip, value };
