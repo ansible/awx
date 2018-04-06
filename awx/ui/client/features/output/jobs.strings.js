@@ -20,6 +20,17 @@ function JobsStrings (BaseString) {
         RUNNING: t.s('The host status bar will update when the job is complete.'),
         UNAVAILABLE: t.s('Host status information for this job unavailable.'),
     };
+
+    ns.resourceTooltips = {
+        USER: t.s('View the User'),
+        SCHEDULE: t.s('View the Schedule'),
+        INVENTORY: t.s('View the Inventory'),
+        CREDENTIAL: t.s('View the Credential'),
+        JOB_TEMPLATE: t.s('View the Job Template'),
+        SOURCE_WORKFLOW_JOB: t.s('View the source Workflow Job'),
+        PROJECT: t.s('View the Project'),
+        PROJECT_UPDATE: t.s('View Project checkout results')
+    };
 }
 
 JobsStrings.$inject = ['BaseStringService'];

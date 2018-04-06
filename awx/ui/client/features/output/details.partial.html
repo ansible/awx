@@ -70,14 +70,17 @@
     </div>
 
     <!-- TEMPLATE DETAIL -->
-    <div class="JobResults-resultRow" ng-show="vm.jobTemplate">
+    <div class="JobResults-resultRow" if="vm.jobTemplate">
         <label class="JobResults-resultRowLabel">{{ vm.jobTemplate.label }}</label>
         <div class="JobResults-resultRowText">
-            <a href="{{ vm.jobTemplate.link }}" aw-tool-tip="{{'Edit the job template' | translate}}" data-placement="top">
+            <a href="{{ vm.jobTemplate.link }}"
+               aw-tool-tip="{{ vm.jobTemplate.tooltip }}"
+               data-placement="top"
+               data-tip-watch="vm.jobTemplate.tooltip">
                 {{ vm.jobTemplate.value }}
             </a>
 
-            <a href="{{ vm.sourceWorkflowJob.link }}" ng-if="vm.sourceWorkflowJob" aw-tool-tip="{{'View workflow results' | translate}}" data-placement="top" data-original-title="" title="">
+            <a href="{{ vm.sourceWorkflowJob.link }}" ng-if="vm.sourceWorkflowJob" aw-tool-tip="{{ vm.sourceWorkflowJob.tooltip }}" data-placement="top">
                 <i class="WorkflowBadge"> W</i>
             </a>
         </div>
@@ -143,12 +146,13 @@
     </div>
 
     <!-- CREDENTIAL DETAIL -->
-    <div class="JobResults-resultRow" ng-show="vm.credential">
+    <div class="JobResults-resultRow" if="vm.credential">
         <label class="JobResults-resultRowLabel">{{ vm.credential.label }}</label>
         <div class="JobResults-resultRowText">
             <a href="{{ vm.credential.link }}"
                 aw-tool-tip="{{ vm.credential.tooltip }}"
-                data-placement="top">
+                data-placement="top"
+                data-tip-watch="vm.credential.tooltip">
                 {{ vm.credential.value }}
             </a>
         </div>
