@@ -468,6 +468,16 @@ CELERY_QUEUES = (
 )
 CELERY_ROUTES = {}
 
+
+def log_celery_failure(*args):
+    # Import annotations lazily to avoid polluting the `awx.settings` namespace
+    # and causing circular imports
+    from awx.main.tasks import log_celery_failure
+    return log_celery_failure(*args)
+
+
+CELERY_ANNOTATIONS = {'*': {'on_failure': log_celery_failure}}
+
 CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 CELERYBEAT_SCHEDULE = {
