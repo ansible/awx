@@ -541,7 +541,12 @@ class UserAccess(BaseAccess):
     def user_membership_roles(self, u):
         return Role.objects.filter(
             content_type=ContentType.objects.get_for_model(Organization),
-            role_field__in=['admin_role', 'member_role'],
+            role_field__in=[
+                'admin_role', 'member_role',
+                'execute_role', 'project_admin_role', 'inventory_admin_role',
+                'credential_admin_role', 'workflow_admin_role',
+                'notification_admin_role'
+            ],
             members=u
         )
 
