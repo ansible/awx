@@ -23,6 +23,7 @@ function JobStatusService (_moment_) {
         this.finished = resource.model.get('finished');
         this.jobStatus = resource.model.get('status');
         this.projectStatus = resource.model.get('summary_fields.project_update.status');
+        this.projectUpdateId = resource.model.get('summary_fields.project_update.id');
 
         this.latestTime = null;
         this.playCount = null;
@@ -43,6 +44,7 @@ function JobStatusService (_moment_) {
             this.setJobStatus(data.status);
         } else if (isProjectEvent) {
             this.setProjectStatus(data.status);
+            this.setProjectUpdateId(data.unified_job_id);
         }
 
         if (this.isCommand()) {
@@ -130,6 +132,7 @@ function JobStatusService (_moment_) {
     this.getHostStatusCounts = () => this.hostStatusCounts || {};
     this.getJobStatus = () => this.jobStatus;
     this.getProjectStatus = () => this.projectStatus;
+    this.getProjectUpdateId = () => this.projectUpdateId;
     this.getElapsed = () => this.elapsed;
     this.getStatsEvent = () => this.statsEvent;
     this.getStarted = () => this.started;
@@ -151,6 +154,10 @@ function JobStatusService (_moment_) {
 
     this.setProjectStatus = status => {
         this.projectStatus = status;
+    };
+
+    this.setProjectUpdateId = id => {
+        this.projectUpdateId = id;
     };
 
     this.setFinished = time => {

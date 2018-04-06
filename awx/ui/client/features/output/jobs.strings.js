@@ -18,7 +18,7 @@ function JobsStrings (BaseString) {
 
     ns.status = {
         RUNNING: t.s('The host status bar will update when the job is complete.'),
-        UNAVAILABLE: t.s('Host status information for this job unavailable.'),
+        UNAVAILABLE: t.s('Host status information for this job is unavailable.'),
     };
 
     ns.resourceTooltips = {
