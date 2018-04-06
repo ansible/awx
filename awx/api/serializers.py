@@ -4581,6 +4581,8 @@ class InstanceGroupSerializer(BaseSerializer):
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.SerializerMethodField()
     instances = serializers.SerializerMethodField()
+    policy_instance_percentage = serializers.IntegerField(min_value=0, max_value=100)
+    policy_instance_minimum = serializers.IntegerField(min_value=0)
 
     class Meta:
         model = InstanceGroup
