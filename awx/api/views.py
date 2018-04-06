@@ -3476,6 +3476,13 @@ class JobTemplateJobsList(SubListCreateAPIView):
     relationship = 'jobs'
     parent_key = 'job_template'
 
+    @property
+    def allowed_methods(self):
+        methods = super(JobTemplateJobsList, self).allowed_methods
+        if get_request_version(getattr(self, 'request', None)) > 1:
+            methods.remove('POST')
+        return methods
+
 
 class JobTemplateInstanceGroupsList(SubListAttachDetachAPIView):
 
