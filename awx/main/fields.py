@@ -48,7 +48,9 @@ from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
 from awx.main import utils
 
 
-__all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField', 'SmartFilterField']
+__all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField',
+           'SmartFilterField', 'update_role_parentage_for_instance',
+           'is_implicit_parent']
 
 
 # Provide a (better) custom error message for enum jsonschema validation
@@ -181,6 +183,23 @@ def is_implicit_parent(parent_role, child_role):
     return False
 
 
+def update_role_parentage_for_instance(instance):
+    '''update_role_parentage_for_instance
+    updates the parents listing for all the roles
+    of a given instance if they have changed
+    '''
+    for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
+        cur_role = getattr(instance, implicit_role_field.name)
+        new_parents = implicit_role_field._resolve_parent_roles(instance)
+        cur_role.parents.set(new_parents)
+        new_parents_list = list(new_parents)
+        new_parents_list.sort()
+        new_parents_json = json.dumps(new_parents_list)
+        if cur_role.implicit_parents != new_parents_json:
+            cur_role.implicit_parents = new_parents_json
+            cur_role.save()
+
+
 class ImplicitRoleDescriptor(ForwardManyToOneDescriptor):
     pass
 
@@ -303,19 +322,7 @@ class ImplicitRoleField(models.ForeignKey):
                 type(latest_instance).objects.filter(pk=latest_instance.pk).update(**updates)
                 Role.rebuild_role_ancestor_list(role_ids, [])
 
-            # Update parentage if necessary
-            for implicit_role_field in getattr(latest_instance.__class__, '__implicit_role_fields'):
-                cur_role = getattr(latest_instance, implicit_role_field.name)
-                original_parents = set(json.loads(cur_role.implicit_parents))
-                new_parents = implicit_role_field._resolve_parent_roles(latest_instance)
-                cur_role.parents.remove(*list(original_parents - new_parents))
-                cur_role.parents.add(*list(new_parents - original_parents))
-                new_parents_list = list(new_parents)
-                new_parents_list.sort()
-                new_parents_json = json.dumps(new_parents_list)
-                if cur_role.implicit_parents != new_parents_json:
-                    cur_role.implicit_parents = new_parents_json
-                    cur_role.save()
+            update_role_parentage_for_instance(latest_instance)
             instance.refresh_from_db()
 
 

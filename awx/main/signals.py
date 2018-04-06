@@ -34,7 +34,10 @@ from awx.api.serializers import * # noqa
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
-from awx.main.fields import is_implicit_parent
+from awx.main.fields import (
+    is_implicit_parent,
+    update_role_parentage_for_instance,
+)
 
 from awx.main import consumers
 
@@ -256,20 +259,7 @@ def save_related_job_templates(sender, instance, **kwargs):
     if instance.__original_org != instance.organization:
         jtq = JobTemplate.objects.filter(**{sender.__name__.lower(): instance})
         for jt in jtq:
-            for implicit_role_field in getattr(JobTemplate, '__implicit_role_fields'):
-                role = getattr(jt, implicit_role_field.name)
-                original_parents = set(json.loads(role.implicit_parents))
-                new_parents = implicit_role_field._resolve_parent_roles(instance)
-
-                role.parents.remove(*list(original_parents - new_parents))
-                role.parents.add(*list(new_parents - original_parents))
-
-                new_parents_list = list(new_parents)
-                new_parents_list.sort()
-                new_parents_json = json.dumps(new_parents_list)
-                if role.implicit_parents != new_parents_json:
-                    role.implicit_parents = new_parents_json
-                    role.save()
+            update_role_parentage_for_instance(jt)
 
 
 def connect_computed_field_signals():
