@@ -222,14 +222,14 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             } else if (typeof data === 'object' && data !== null) {
                 if (Object.keys(data).length > 0) {
                     keys = Object.keys(data);
-                    if (Array.isArray(data[keys[0]])) {
-                        msg = data[keys[0]][0];
-                    } else {
-                        msg = "";
-                        _.forOwn(data, function(value, key) {
+                    msg = "";
+                    _.forOwn(data, function(value, key) {
+                        if (Array.isArray(data[key])) {
+                            msg += `${key}: ${data[key][0]}`;
+                        } else {
                             msg += `${key} : ${value} `;
-                        });
-                    }
+                        }
+                    });
                     Alert(defaultMsg.hdr, msg);
                 } else {
                     Alert(defaultMsg.hdr, defaultMsg.msg);
