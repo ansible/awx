@@ -56,11 +56,10 @@ from awx.main.validators import vars_validate_or_raise
 
 from awx.conf.license import feature_enabled
 from awx.api.versioning import reverse, get_request_version
-from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, VerbatimField
+from awx.api.fields import (BooleanNullField, CharNullField, ChoiceNullField,
+                            VerbatimField, DeprecatedCredentialField)
 
 logger = logging.getLogger('awx.api.serializers')
-
-DEPRECATED = 'This resource has been deprecated and will be removed in a future release'
 
 # Fields that should be summarized regardless of object type.
 DEFAULT_SUMMARY_FIELDS = ('id', 'name', 'description')# , 'created_by', 'modified_by')#, 'type')
@@ -1957,9 +1956,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
 
 
 class InventorySourceOptionsSerializer(BaseSerializer):
-    credential = models.PositiveIntegerField(
-        blank=True, null=True, default=None,
-        help_text='This resource has been deprecated and will be removed in a future release')
+    credential = DeprecatedCredentialField()
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
@@ -2818,15 +2815,11 @@ class V1JobOptionsSerializer(BaseSerializer):
         model = Credential
         fields = ('*', 'cloud_credential', 'network_credential')
 
-    V1_FIELDS = {
-        'cloud_credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
-        'network_credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
-    }
+    V1_FIELDS = ('cloud_credential', 'network_credential',)
 
     def build_field(self, field_name, info, model_class, nested_depth):
         if field_name in self.V1_FIELDS:
-            return self.build_standard_field(field_name,
-                                             self.V1_FIELDS[field_name])
+            return (DeprecatedCredentialField, {})
         return super(V1JobOptionsSerializer, self).build_field(field_name, info, model_class, nested_depth)
 
 
@@ -2837,15 +2830,11 @@ class LegacyCredentialFields(BaseSerializer):
         model = Credential
         fields = ('*', 'credential', 'vault_credential')
 
-    LEGACY_FIELDS = {
-        'credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
-        'vault_credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
-    }
+    LEGACY_FIELDS = ('credential', 'vault_credential',)
 
     def build_field(self, field_name, info, model_class, nested_depth):
         if field_name in self.LEGACY_FIELDS:
-            return self.build_standard_field(field_name,
-                                             self.LEGACY_FIELDS[field_name])
+            return (DeprecatedCredentialField, {})
         return super(LegacyCredentialFields, self).build_field(field_name, info, model_class, nested_depth)
 
 
@@ -3718,9 +3707,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
 
 
 class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
-    credential = models.PositiveIntegerField(
-        blank=True, null=True, default=None,
-        help_text='This resource has been deprecated and will be removed in a future release')
+    credential = DeprecatedCredentialField()
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -3811,9 +3798,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
 
 
 class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
-    credential = models.PositiveIntegerField(
-        blank=True, null=True, default=None,
-        help_text='This resource has been deprecated and will be removed in a future release')
+    credential = DeprecatedCredentialField()
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)

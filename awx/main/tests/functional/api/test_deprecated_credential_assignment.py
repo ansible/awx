@@ -1,8 +1,17 @@
+import json
 import mock
 import pytest
 
 from awx.main.models import Credential, Job
 from awx.api.versioning import reverse
+
+
+@pytest.fixture
+def ec2_source(inventory, project):
+    with mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.update'):
+        return inventory.inventory_sources.create(
+            name='some_source', update_on_project_update=True, source='ec2',
+            source_project=project, scm_last_revision=project.scm_revision)
 
 
 @pytest.fixture
@@ -32,6 +41,14 @@ def test_ssh_credential_access(get, job_template, admin, machine_credential):
     assert resp.data['credential'] == machine_credential.pk
     assert resp.data['summary_fields']['credential']['credential_type_id'] == machine_credential.pk
     assert resp.data['summary_fields']['credential']['kind'] == 'ssh'
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('key', ('credential', 'vault_credential', 'cloud_credential', 'network_credential'))
+def test_invalid_credential_update(get, patch, job_template, admin, key):
+    url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk, 'version': 'v1'})
+    resp = patch(url, {key: 999999}, admin, expect=400)
+    assert 'Credential 999999 does not exist' in json.loads(resp.content)[key]
 
 
 @pytest.mark.django_db
@@ -362,3 +379,18 @@ def test_rbac_default_credential_usage(get, post, job_template, alice, machine_c
     new_cred.use_role.members.add(alice)
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     post(url, {'credential': new_cred.pk}, alice, expect=201)
+
+
+@pytest.mark.django_db
+def test_inventory_source_deprecated_credential(get, patch, admin, ec2_source, credential):
+    url = reverse('api:inventory_source_detail', kwargs={'pk': ec2_source.pk})
+    patch(url, {'credential': credential.pk}, admin, expect=200)
+    resp = get(url, admin, expect=200)
+    assert json.loads(resp.content)['credential'] == credential.pk
+
+
+@pytest.mark.django_db
+def test_inventory_source_invalid_deprecated_credential(patch, admin, ec2_source, credential):
+    url = reverse('api:inventory_source_detail', kwargs={'pk': ec2_source.pk})
+    resp = patch(url, {'credential': 999999}, admin, expect=400)
+    assert 'Credential 999999 does not exist' in resp.content
