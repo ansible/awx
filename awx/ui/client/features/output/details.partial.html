@@ -119,11 +119,11 @@
     <div class="JobResults-resultRow" ng-if="vm.project">
         <label class="JobResults-resultRowLabel">{{ vm.project.label }}</label>
         <div class="JobResults-resultRowText">
-            <a href="{{ vm.project.update.link }}"
-                ng-if="vm.project.update"
-                aw-tool-tip="{{ vm.project.update.tooltip }}"
+            <a href="{{ vm.projectUpdate.link }}"
+                ng-if="vm.projectUpdate"
+                aw-tool-tip="{{ vm.projectUpdate.tooltip }}"
                 data-placement="top">
-                <i class="JobResults-statusResultIcon fa icon-job-{{ vm.project.update.status }}"></i>
+                <i ng-if="vm.projectStatus" class="JobResults-statusResultIcon fa icon-job-{{ vm.projectStatus }}"></i>
             </a>
             <a href="{{ vm.project.link }}"
                 aw-tool-tip="{{ vm.project.tooltip }}"
