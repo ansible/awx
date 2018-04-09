@@ -171,46 +171,6 @@ def sync_superuser_status_to_rbac(instance, **kwargs):
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
 
 
-def create_user_role(instance, **kwargs):
-    if not kwargs.get('created', True):
-        return
-    try:
-        Role.objects.get(
-            content_type=ContentType.objects.get_for_model(instance),
-            object_id=instance.id,
-            role_field='admin_role'
-        )
-    except Role.DoesNotExist:
-        role = Role.objects.create(
-            role_field='admin_role',
-            content_object = instance,
-        )
-        role.members.add(instance)
-
-
-def delete_user_role(instance, **kwargs):
-    if instance and instance.admin_role:
-        instance.admin_role.delete()
-    else:
-        logger.info(six.text_type("Could not delete the admin role for user {}").format(instance))
-
-
-def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
-    content_type = ContentType.objects.get_for_model(Organization)
-
-    if reverse:
-        return
-    else:
-        if instance.content_type == content_type and \
-           instance.content_object.member_role.id == instance.id:
-            items = model.objects.filter(pk__in=pk_set).all()
-            for user in items:
-                if action == 'post_add':
-                    instance.content_object.admin_role.children.add(user.admin_role)
-                if action == 'pre_remove':
-                    instance.content_object.admin_role.children.remove(user.admin_role)
-
-
 def rbac_activity_stream(instance, sender, **kwargs):
     user_type = ContentType.objects.get_for_model(User)
     # Only if we are associating/disassociating
@@ -289,12 +249,9 @@ post_save.connect(emit_project_update_event_detail, sender=ProjectUpdateEvent)
 post_save.connect(emit_inventory_update_event_detail, sender=InventoryUpdateEvent)
 post_save.connect(emit_system_job_event_detail, sender=SystemJobEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
-m2m_changed.connect(org_admin_edit_members, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
-post_save.connect(create_user_role, sender=User)
-pre_delete.connect(delete_user_role, sender=User)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobTemplate)
 

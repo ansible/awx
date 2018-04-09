@@ -56,7 +56,6 @@ User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
 User.add_to_class('accessible_objects', user_accessible_objects)
-User.add_to_class('admin_role', user_admin_role)
 
 
 @property

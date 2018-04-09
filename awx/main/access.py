@@ -33,8 +33,7 @@ from awx.main.models.mixins import ResourceMixin
 from awx.conf.license import LicenseForbids, feature_enabled
 
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
-           'user_accessible_objects', 'consumer_access',
-           'user_admin_role',]
+           'user_accessible_objects', 'consumer_access',]
 
 logger = logging.getLogger('awx.main.access')
 
@@ -76,18 +75,6 @@ def get_object_from_data(field, Model, data, obj=None):
 
 def register_access(model_class, access_class):
     access_registry[model_class] = access_class
-
-
-@property
-def user_admin_role(self):
-    role = Role.objects.get(
-        content_type=ContentType.objects.get_for_model(User),
-        object_id=self.id,
-        role_field='admin_role'
-    )
-    # Trick the user.admin_role so that the signal filtering for RBAC activity stream works as intended.
-    role.parents = [org.admin_role.pk for org in self.organizations]
-    return role
 
 
 def user_accessible_objects(user, role_name):

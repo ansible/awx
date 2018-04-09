@@ -500,3 +500,12 @@ def infer_credential_org_from_team(apps, schema_editor):
                 _update_credential_parents(cred.deprecated_team.organization, cred)
         except IntegrityError:
             logger.info("Organization<{}> credential for old Team<{}> credential already created".format(cred.deprecated_team.organization.pk, cred.pk))
+
+
+def delete_all_user_roles(apps, schema_editor):
+    ContentType = apps.get_model('contenttypes', "ContentType")
+    Role = apps.get_model('main', "Role")
+    User = apps.get_model('auth', "User")
+    user_content_type = ContentType.objects.get_for_model(User)
+    for role in Role.objects.filter(content_type=user_content_type).iterator():
+        role.delete()
