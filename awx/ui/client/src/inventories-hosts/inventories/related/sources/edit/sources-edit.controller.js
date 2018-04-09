@@ -54,12 +54,94 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
         });
 
         $scope.$on('sourceTypeOptionsReady', function() {
-            initSourceSelect();
+            $scope.source = _.find($scope.source_type_options, { value: inventorySourceData.source });
+            var source = $scope.source && $scope.source.value ? $scope.source.value : null;
+            $scope.cloudCredentialRequired = source !== '' && source !== 'scm' && source !== 'custom' && source !== 'ec2' ? true : false;
+            CreateSelect2({
+                element: '#inventory_source_source',
+                multiple: false
+            });
+
+            if (source === 'ec2' || source === 'custom' ||
+                source === 'vmware' || source === 'openstack' ||
+                source === 'scm' || source === 'cloudforms'  ||
+                source === 'satellite6') {
+
+                var varName;
+                if (source === 'scm') {
+                    varName = 'custom_variables';
+                } else {
+                    varName = source + '_variables';
+                }
+
+                $scope[varName] = ParseVariableString(inventorySourceData
+                    .source_vars);
+
+                ParseTypeChange({
+                    scope: $scope,
+                    field_id: varName,
+                    variable: varName,
+                    parse_variable: 'envParseType',
+                });
+            }
         });
 
         $scope.envParseType = 'yaml';
 
-        initSources();
+        GetSourceTypeOptions({
+            scope: $scope,
+            variable: 'source_type_options'
+        });
+        GetChoices({
+            scope: $scope,
+            field: 'source_regions',
+            variable: 'rax_regions',
+            choice_name: 'rax_region_choices',
+            options: inventorySourcesOptions
+        });
+        GetChoices({
+            scope: $scope,
+            field: 'source_regions',
+            variable: 'ec2_regions',
+            choice_name: 'ec2_region_choices',
+            options: inventorySourcesOptions
+        });
+        GetChoices({
+            scope: $scope,
+            field: 'source_regions',
+            variable: 'gce_regions',
+            choice_name: 'gce_region_choices',
+            options: inventorySourcesOptions
+        });
+        GetChoices({
+            scope: $scope,
+            field: 'source_regions',
+            variable: 'azure_regions',
+            choice_name: 'azure_rm_region_choices',
+            options: inventorySourcesOptions
+        });
+        GetChoices({
+            scope: $scope,
+            field: 'group_by',
+            variable: 'ec2_group_by',
+            choice_name: 'ec2_group_by_choices',
+            options: inventorySourcesOptions
+        });
+
+        var source = $scope.source === 'azure_rm' ? 'azure' : $scope.source;
+        var regions = inventorySourceData.source_regions.split(',');
+        // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
+        $scope.source_region_choices = $scope[source + '_regions'];
+
+        // the API stores azure regions as all-lowercase strings - but the azure regions received from OPTIONS are Snake_Cased
+        if (source === 'azure') {
+            $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value.toLowerCase() === region));
+        }
+        // all other regions are 1-1
+        else {
+            $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value === region));
+        }
+        initRegionSelect();
 
         GetChoices({
             scope: $scope,
@@ -140,110 +222,12 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             }
         }
 
-        function initSourceSelect() {
-            $scope.source = _.find($scope.source_type_options, { value: inventorySourceData.source });
-            var source = $scope.source && $scope.source.value ? $scope.source.value : null;
-            $scope.cloudCredentialRequired = source !== '' && source !== 'scm' && source !== 'custom' && source !== 'ec2' ? true : false;
-            CreateSelect2({
-                element: '#inventory_source_source',
-                multiple: false
-            });
-
-            if (source === 'ec2' || source === 'custom' ||
-                source === 'vmware' || source === 'openstack' ||
-                source === 'scm' || source === 'cloudforms'  ||
-                source === 'satellite6') {
-
-                var varName;
-                if (source === 'scm') {
-                    varName = 'custom_variables';
-                } else {
-                    varName = source + '_variables';
-                }
-
-                $scope[varName] = ParseVariableString(inventorySourceData
-                    .source_vars);
-
-                ParseTypeChange({
-                    scope: $scope,
-                    field_id: varName,
-                    variable: varName,
-                    parse_variable: 'envParseType',
-                });
-            }
-        }
-
-        function initRegionData() {
-            var source = $scope.source === 'azure_rm' ? 'azure' : $scope.source;
-            var regions = inventorySourceData.source_regions.split(',');
-            // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
-            $scope.source_region_choices = $scope[source + '_regions'];
-
-            // the API stores azure regions as all-lowercase strings - but the azure regions received from OPTIONS are Snake_Cased
-            if (source === 'azure') {
-                $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value.toLowerCase() === region));
-            }
-            // all other regions are 1-1
-            else {
-                $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value === region));
-            }
-            initRegionSelect();
-        }
-
-        function initSources() {
-            GetSourceTypeOptions({
-                scope: $scope,
-                variable: 'source_type_options'
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'source_regions',
-                variable: 'rax_regions',
-                choice_name: 'rax_region_choices',
-                options: inventorySourcesOptions
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'source_regions',
-                variable: 'ec2_regions',
-                choice_name: 'ec2_region_choices',
-                options: inventorySourcesOptions
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'source_regions',
-                variable: 'gce_regions',
-                choice_name: 'gce_region_choices',
-                options: inventorySourcesOptions
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'source_regions',
-                variable: 'azure_regions',
-                choice_name: 'azure_rm_region_choices',
-                options: inventorySourcesOptions
-            });
-            GetChoices({
-                scope: $scope,
-                field: 'group_by',
-                variable: 'ec2_group_by',
-                choice_name: 'ec2_group_by_choices',
-                options: inventorySourcesOptions
-            });
-
-            initRegionData();
-        }
-
         function initRegionSelect() {
             CreateSelect2({
                 element: '#inventory_source_source_regions',
                 multiple: true
             });
 
-            initGroupBySelect();
-        }
-
-        function initGroupBySelect(){
             let add_new = false;
             if( _.get($scope, 'source') === 'ec2' || _.get($scope.source, 'value') === 'ec2') {
                 $scope.group_by_choices = $scope.ec2_group_by;

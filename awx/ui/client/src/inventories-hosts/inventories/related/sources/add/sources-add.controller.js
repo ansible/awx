@@ -73,7 +73,12 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             options: inventorySourcesOptions
         });
 
-        initVerbositySelect();
+        CreateSelect2({
+            element: '#inventory_source_verbosity',
+            multiple: false
+        });
+
+        $scope.verbosity = $scope.verbosity_options[1];
 
         GetSourceTypeOptions({
             scope: $scope,
@@ -93,7 +98,14 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                     .then(({data}) => {
                         $scope.inventory_files = data;
                         $scope.inventory_files.push("/ (project root)");
-                        sync_inventory_file_select2();
+                        CreateSelect2({
+                            element:'#inventory-file-select',
+                            addNew: true,
+                            multiple: false,
+                            scope: $scope,
+                            options: 'inventory_files',
+                            model: 'inventory_file'
+                        });
                         Wait('stop');
                     })
                     .catch(() => {
@@ -112,17 +124,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 getInventoryFiles(newValue);
             }
         });
-
-        function sync_inventory_file_select2() {
-            CreateSelect2({
-                element:'#inventory-file-select',
-                addNew: true,
-                multiple: false,
-                scope: $scope,
-                options: 'inventory_files',
-                model: 'inventory_file'
-            });
-        }
 
         $scope.lookupCredential = function(){
             if($scope.source.value !== "scm" && $scope.source.value !== "custom") {
@@ -205,7 +206,10 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
         // region / source options callback
 
         $scope.$on('sourceTypeOptionsReady', function() {
-            initSourceSelect();
+            CreateSelect2({
+                element: '#inventory_source_source',
+                multiple: false
+            });
         });
 
         function initRegionSelect(){
@@ -214,10 +218,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 multiple: true
             });
 
-            initGroupBySelect();
-        }
-
-        function initGroupBySelect(){
             let add_new = false;
             if( _.get($scope, 'source') === 'ec2' || _.get($scope.source, 'value') === 'ec2') {
                 $scope.group_by_choices = $scope.ec2_group_by;
@@ -261,22 +261,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
                 multiple: true,
                 addNew: add_new
             });
-        }
-
-        function initSourceSelect(){
-            CreateSelect2({
-                element: '#inventory_source_source',
-                multiple: false
-            });
-        }
-
-        function initVerbositySelect(){
-            CreateSelect2({
-                element: '#inventory_source_verbosity',
-                multiple: false
-            });
-
-            $scope.verbosity = $scope.verbosity_options[1];
         }
 
         $scope.formCancel = function() {
