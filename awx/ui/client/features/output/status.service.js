@@ -4,7 +4,7 @@ const PLAY_START = 'playbook_on_play_start';
 const TASK_START = 'playbook_on_task_start';
 
 const HOST_STATUS_KEYS = ['dark', 'failures', 'changed', 'ok', 'skipped'];
-const FINISHED = ['running', 'successful', 'failed', 'error'];
+const FINISHED = ['successful', 'failed', 'error'];
 
 let moment;
 
@@ -46,15 +46,6 @@ function JobStatusService (_moment_) {
             this.setProjectStatus(data.status);
             this.setProjectUpdateId(data.unified_job_id);
         }
-
-        if (this.isCommand()) {
-            if (_.includes(FINISHED, data.status)) {
-                if (!this.started && this.latestJobEventTime) {
-                    this.started = moment(this.latestJobEventTime)
-                        .subtract(this.elapsed, 'seconds');
-                }
-            }
-        }
     };
 
     this.pushJobEvent = data => {
@@ -72,7 +63,7 @@ function JobStatusService (_moment_) {
         }
 
         if (data.event === JOB_START) {
-            this.started = data.created;
+            this.started = this.started || data.created;
         }
 
         if (data.event === PLAY_START) {
@@ -125,7 +116,9 @@ function JobStatusService (_moment_) {
         (this.jobStatus === 'pending') ||
         (this.jobStatus === 'waiting');
 
-    this.isCommand = () => (this.jobType === 'ad_hoc_command');
+    this.isExpectingStatsEvent = () => (this.jobType === 'job') ||
+        (this.jobType === 'project_update');
+
     this.getPlayCount = () => this.playCount;
     this.getTaskCount = () => this.taskCount;
     this.getHostCount = () => this.hostCount;
@@ -141,11 +134,11 @@ function JobStatusService (_moment_) {
     this.setJobStatus = status => {
         this.jobStatus = status;
 
-        if (this.isCommand() && _.includes(FINISHED, status)) {
+        if (!this.isExpectingStatsEvent() && _.includes(FINISHED, status)) {
             if (this.latestTime) {
-                this.finished = this.latestTime;
+                this.setFinished(this.latestTime);
 
-                if (!this.started) {
+                if (!this.started && this.elapsed) {
                     this.started = moment(this.latestTime).subtract(this.elapsed, 'seconds');
                 }
             }
