@@ -41,7 +41,8 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 queryset = _.merge(origQuerySet, { page: page });
 
             } else {
-                queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page: page });
+                let origStateParams = _.cloneDeep($stateParams[`${$scope.iterator}_search`]);
+                queryset = _.merge(origStateParams, { page: page });
             }
             if (!$scope.querySet) {
                 $state.go('.', {
