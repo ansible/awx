@@ -116,6 +116,51 @@ def test_create_v1_rbac_check(get, post, project, credential, net_credential, ra
     post(reverse('api:job_template_list', kwargs={'version': 'v1'}), base_kwargs, rando, expect=403)
 
 
+# TODO: remove as each field tested has support removed
+@pytest.mark.django_db
+def test_jt_deprecated_summary_fields(
+        project, inventory,
+        machine_credential, net_credential, vault_credential,
+        mocker):
+    jt = JobTemplate.objects.create(
+        project=project,
+        inventory=inventory,
+        playbook='helloworld.yml'
+    )
+
+    class MockView:
+        kwargs = {}
+        request = None
+
+    class MockRequest:
+        version = 'v1'
+        user = None
+
+    view = MockView()
+    request = MockRequest()
+    view.request = request
+    serializer = JobTemplateSerializer(instance=jt, context={'view': view, 'request': request})
+
+    for kwargs in [{}, {'pk': 1}]:  # detail vs. list view
+        for version in ['v1', 'v2']:
+            view.kwargs = kwargs
+            request.version = version
+            sf = serializer.get_summary_fields(jt)
+            assert 'credential' not in sf
+            assert 'vault_credential' not in sf
+
+    jt.credentials.add(machine_credential, net_credential, vault_credential)
+
+    view.kwargs = {'pk': 1}
+    for version in ['v1', 'v2']:
+        request.version = version
+        sf = serializer.get_summary_fields(jt)
+        assert 'credential' in sf
+        assert sf['credential']  # not empty dict
+        assert 'vault_credential' in sf
+        assert sf['vault_credential']
+
+
 @pytest.mark.django_db
 def test_extra_credential_creation(get, post, organization_factory, job_template_factory, credentialtype_aws):
     objs = organization_factory("org", superusers=['admin'])
