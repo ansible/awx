@@ -7,7 +7,9 @@ function atRow () {
         transclude: true,
         templateUrl,
         scope: {
-            templateId: '@'
+            templateId: '@',
+            invalid: '=',
+            invalidTooltip: '='
         }
     };
 }
