@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from contextlib import contextmanager
 from datetime import datetime
 from functools import partial
@@ -12,6 +14,7 @@ from backports.tempfile import TemporaryDirectory
 import fcntl
 import mock
 import pytest
+import six
 import yaml
 
 from django.conf import settings
@@ -1314,6 +1317,33 @@ class TestJobCredentials(TestJobExecution):
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
             assert open(env['MY_CLOUD_INI_FILE'], 'rb').read() == '[mycloud]\nABC123'
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_custom_environment_injectors_with_unicode_content(self):
+        value = six.u('Iñtërnâtiônàlizætiøn')
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={'fields': []},
+            injectors={
+                'file': {'template': value},
+                'env': {'MY_CLOUD_INI_FILE': '{{tower.filename}}'}
+            }
+        )
+        credential = Credential(
+            pk=1,
+            credential_type=some_cloud,
+        )
+        self.instance.credentials.add(credential)
+        self.task.run(self.pk)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert open(env['MY_CLOUD_INI_FILE'], 'rb').read() == value.encode('utf-8')
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
