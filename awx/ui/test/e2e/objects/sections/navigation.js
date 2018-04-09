@@ -17,7 +17,8 @@ const navigation = {
         inventoryScripts: 'i[class$="fa-code"]',
         notifications: 'i[class$="fa-bell"]',
         managementJobs: 'i[class$="fa-wrench"]',
-        instanceGroups: 'i[class$="fa-server"]'
+        instanceGroups: 'i[class$="fa-server"]',
+        settings: 'i[class$="fa-cog"]',
     }
 };
 
