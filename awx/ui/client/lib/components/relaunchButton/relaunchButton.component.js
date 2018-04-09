@@ -117,6 +117,11 @@ function atRelaunchCtrl (
                             const relaunchType = launchRes.data.type === 'job' ? 'playbook' : launchRes.data.type;
                             $state.go('jobz', { id: launchRes.data.id, type: relaunchType }, { reload: true });
                         }
+                    }).catch(({ data, status, config }) => {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: strings.get('error.HEADER'),
+                            msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                        });
                     });
             }
         });
@@ -165,6 +170,11 @@ function atRelaunchCtrl (
                                 if (!$state.includes('jobs')) {
                                     $state.go('jobz', { id: postUpdateRes.data.id, type: 'inventory' }, { reload: true });
                                 }
+                            }).catch(({ data, status, config }) => {
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: strings.get('error.HEADER'),
+                                    msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                                });
                             });
                     } else {
                         Alert(
@@ -184,6 +194,11 @@ function atRelaunchCtrl (
                                 if (!$state.includes('jobs')) {
                                     $state.go('jobz', { id: postUpdateRes.data.id, type: 'project' }, { reload: true });
                                 }
+                            }).catch(({ data, status, config }) => {
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: strings.get('error.HEADER'),
+                                    msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                                });
                             });
                     } else {
                         Alert(
@@ -201,6 +216,11 @@ function atRelaunchCtrl (
                 if (!$state.includes('jobs')) {
                     $state.go('workflowResults', { id: launchRes.data.id }, { reload: true });
                 }
+            }).catch(({ data, status, config }) => {
+                ProcessErrors($scope, data, status, null, {
+                    hdr: strings.get('error.HEADER'),
+                    msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                });
             });
         } else if (vm.job.type === 'ad_hoc_command') {
             const adHocCommand = new AdHocCommand();
@@ -220,6 +240,11 @@ function atRelaunchCtrl (
                         if (!$state.includes('jobs')) {
                             $state.go('jobz', { id: launchRes.data.id, type: 'command' }, { reload: true });
                         }
+                    }).catch(({ data, status, config }) => {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: strings.get('error.HEADER'),
+                            msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                        });
                     });
                 }
             });
