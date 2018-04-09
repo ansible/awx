@@ -82,7 +82,7 @@ export default [
         };
 
         var activeForm = function() {
-            if(!$scope.$parent[formTracker.currentFormName()].$dirty) {
+            if(!_.get($scope.$parent, [formTracker.currentFormName(), '$dirty'])) {
                 authVm.activeAuthForm = getActiveAuthForm();
                 formTracker.setCurrentAuth(authVm.activeAuthForm);
                 startCodeMirrors();
