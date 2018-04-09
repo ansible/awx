@@ -7,85 +7,87 @@
 export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
     'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GroupsService',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
-    'inventorySourceData', 'SourcesService', 'inventoryData', 'inventorySourcesOptions', 'Empty',
-    'Wait', 'Rest', 'Alert', '$rootScope', 'i18n',
+    'SourcesService', 'inventoryData', 'inventorySourcesOptions', 'Empty',
+    'Wait', 'Rest', 'Alert', '$rootScope', 'i18n', 'InventoryHostsStrings',
+    'ProcessErrors', 'inventorySource',
     function($state, $stateParams, $scope, ParseVariableString,
         rbacUiControlService, ToJSON,ParseTypeChange, GroupsService,
         GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
-        inventorySourceData, SourcesService, inventoryData, inventorySourcesOptions, Empty,
-        Wait, Rest, Alert, $rootScope, i18n) {
+        SourcesService, inventoryData, inventorySourcesOptions, Empty,
+        Wait, Rest, Alert, $rootScope, i18n, InventoryHostsStrings,
+        ProcessErrors, inventorySource) {
 
-        function init() {
-            $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
-            $scope.canAdd = inventorySourcesOptions.actions.POST;
-            // instantiate expected $scope values from inventorySourceData
-            _.assign($scope,
-                {credential: inventorySourceData.credential},
-                {overwrite: inventorySourceData.overwrite},
-                {overwrite_vars: inventorySourceData.overwrite_vars},
-                {update_on_launch: inventorySourceData.update_on_launch},
-                {update_cache_timeout: inventorySourceData.update_cache_timeout},
-                {instance_filters: inventorySourceData.instance_filters},
-                {inventory_script: inventorySourceData.source_script},
-                {verbosity: inventorySourceData.verbosity});
+        const inventorySourceData = inventorySource.get();
 
-            $scope.inventory_source_obj = inventorySourceData;
-            if (inventorySourceData.credential) {
-                $scope.credential_name = inventorySourceData.summary_fields.credential.name;
+        $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
+        $scope.canAdd = inventorySourcesOptions.actions.POST;
+        // instantiate expected $scope values from inventorySourceData
+        _.assign($scope,
+            {credential: inventorySourceData.credential},
+            {overwrite: inventorySourceData.overwrite},
+            {overwrite_vars: inventorySourceData.overwrite_vars},
+            {update_on_launch: inventorySourceData.update_on_launch},
+            {update_cache_timeout: inventorySourceData.update_cache_timeout},
+            {instance_filters: inventorySourceData.instance_filters},
+            {inventory_script: inventorySourceData.source_script},
+            {verbosity: inventorySourceData.verbosity});
+
+        $scope.inventory_source_obj = inventorySourceData;
+        if (inventorySourceData.credential) {
+            $scope.credential_name = inventorySourceData.summary_fields.credential.name;
+        }
+
+        if(inventorySourceData.source === 'scm') {
+            $scope.project = inventorySourceData.source_project;
+            $scope.project_name = inventorySourceData.summary_fields.source_project.name;
+            updateSCMProject();
+        }
+
+        // display custom inventory_script name
+        if (inventorySourceData.source === 'custom' && inventorySourceData.summary_fields.source_script) {
+            $scope.inventory_script_name = inventorySourceData.summary_fields.source_script.name;
+        }
+        $scope = angular.extend($scope, inventorySourceData);
+
+        $scope.$watch('summary_fields.user_capabilities.edit', function(val) {
+            $scope.canAdd = val;
+        });
+
+        $scope.$on('sourceTypeOptionsReady', function() {
+            initSourceSelect();
+        });
+
+        $scope.envParseType = 'yaml';
+
+        initSources();
+
+        GetChoices({
+            scope: $scope,
+            field: 'verbosity',
+            variable: 'verbosity_options',
+            options: inventorySourcesOptions
+        });
+
+        var i;
+        for (i = 0; i < $scope.verbosity_options.length; i++) {
+            if ($scope.verbosity_options[i].value === $scope.verbosity) {
+                $scope.verbosity = $scope.verbosity_options[i];
             }
+        }
 
-            if(inventorySourceData.source === 'scm') {
-                $scope.project = inventorySourceData.source_project;
-                $scope.project_name = inventorySourceData.summary_fields.source_project.name;
+        initVerbositySelect();
+
+        $scope.$watch('verbosity', initVerbositySelect);
+
+        // Register a watcher on project_name
+        if ($scope.getInventoryFilesUnregister) {
+            $scope.getInventoryFilesUnregister();
+        }
+        $scope.getInventoryFilesUnregister = $scope.$watch('project', function (newValue, oldValue) {
+            if (newValue !== oldValue) {
                 updateSCMProject();
             }
-
-            // display custom inventory_script name
-            if (inventorySourceData.source === 'custom' && inventorySourceData.summary_fields.source_script) {
-                $scope.inventory_script_name = inventorySourceData.summary_fields.source_script.name;
-            }
-            $scope = angular.extend($scope, inventorySourceData);
-
-            $scope.$watch('summary_fields.user_capabilities.edit', function(val) {
-                $scope.canAdd = val;
-            });
-
-            $scope.$on('sourceTypeOptionsReady', function() {
-                initSourceSelect();
-            });
-
-            $scope.envParseType = 'yaml';
-
-            initSources();
-
-            GetChoices({
-                scope: $scope,
-                field: 'verbosity',
-                variable: 'verbosity_options',
-                options: inventorySourcesOptions
-            });
-
-            var i;
-            for (i = 0; i < $scope.verbosity_options.length; i++) {
-                if ($scope.verbosity_options[i].value === $scope.verbosity) {
-                    $scope.verbosity = $scope.verbosity_options[i];
-                }
-            }
-
-            initVerbositySelect();
-
-            $scope.$watch('verbosity', initVerbositySelect);
-
-            // Register a watcher on project_name
-            if ($scope.getInventoryFilesUnregister) {
-                $scope.getInventoryFilesUnregister();
-            }
-            $scope.getInventoryFilesUnregister = $scope.$watch('project', function (newValue, oldValue) {
-                if (newValue !== oldValue) {
-                    updateSCMProject();
-                }
-            });
-        }
+        });
 
         function initVerbositySelect(){
             CreateSelect2({
@@ -366,9 +368,16 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 params.source = null;
             }
 
-            SourcesService
-              .put(params)
-              .then(() => $state.go('.', null, { reload: true }));
+            inventorySource.request('put', {
+                data: params
+            }).then(() => {
+                $state.go('.', null, { reload: true });
+            }).catch(({ data, status, config }) => {
+                ProcessErrors($scope, data, status, null, {
+                    hdr: 'Error!',
+                    msg: InventoryHostsStrings.get('error.CALL', { path: `${config.url}`, status })
+                });
+            });
         };
 
         $scope.sourceChange = function(source) {
@@ -419,7 +428,5 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             initRegionSelect();
 
         };
-
-        init();
     }
 ];
