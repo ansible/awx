@@ -63,6 +63,12 @@
         </div>
     </div>
 
+    <!-- module args -->
+    <div class="JobResults-resultRow" ng-if="vm.moduleArgs">
+        <label class="JobResults-resultRowLabel">{{ vm.moduleArgs.label }}</label>
+        <div class="JobResults-resultRowText">{{ vm.moduleArgs.value }}</div>
+    </div>
+
     <!-- RESULTS TRACEBACK DETAIL -->
     <div class="JobResults-resultRow" ng-if="vm.resultTraceback">
         <label class="JobResults-resultRowLabel">{{ vm.resultTraceback.label }}</label>
@@ -70,7 +76,7 @@
     </div>
 
     <!-- TEMPLATE DETAIL -->
-    <div class="JobResults-resultRow" if="vm.jobTemplate">
+    <div class="JobResults-resultRow" ng-if="vm.jobTemplate">
         <label class="JobResults-resultRowLabel">{{ vm.jobTemplate.label }}</label>
         <div class="JobResults-resultRowText">
             <a href="{{ vm.jobTemplate.link }}"

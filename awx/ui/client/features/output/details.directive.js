@@ -68,6 +68,17 @@ function getFinishDetails (finished) {
     return { label, value };
 }
 
+function getModuleArgDetails () {
+    const value = resource.model.get('module_args');
+    const label = 'Module Args';
+
+    if (!value) {
+        return null;
+    }
+
+    return { label, value };
+}
+
 function getJobTypeDetails () {
     const unmapped = resource.model.get('job_type');
 
@@ -504,6 +515,7 @@ function AtJobDetailsController (
         vm.status = getStatusDetails();
         vm.started = getStartDetails();
         vm.finished = getFinishDetails();
+        vm.moduleArgs = getModuleArgDetails();
         vm.jobType = getJobTypeDetails();
         vm.jobTemplate = getJobTemplateDetails();
         vm.sourceWorkflowJob = getSourceWorkflowJobDetails();
