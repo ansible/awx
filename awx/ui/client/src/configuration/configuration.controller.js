@@ -169,7 +169,7 @@ export default [
             setCurrentSystem: function(form) {
                 this.currentSystem = form;
                 this.setCurrent(this.currentSystem);
-            }
+            },
         };
 
         // Default to auth form and tab
@@ -275,7 +275,13 @@ export default [
             vm.activeTab = setForm;
 
             if (setForm !== 'license') {
-                formTracker.setCurrent(setForm);
+                if (setForm === 'auth') {
+                    formTracker.setCurrentAuth(formTracker.currentAuth);
+                } else if (setForm === 'system') {
+                    formTracker.setCurrentSystem(formTracker.currenSystem);
+                } else {
+                    formTracker.setCurrent(setForm);
+                }
 
                 $state.go('configuration', {
                     currentTab: setForm
