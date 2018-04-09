@@ -995,6 +995,8 @@ class OrganizationInventoriesList(SubListAPIView):
 class BaseUsersList(SubListCreateAttachDetachAPIView):
     def post(self, request, *args, **kwargs):
         ret = super(BaseUsersList, self).post( request, *args, **kwargs)
+        if ret.status_code != 201:
+            return ret
         try:
             if ret.data is not None and request.data.get('is_system_auditor', False):
                 # This is a faux-field that just maps to checking the system
