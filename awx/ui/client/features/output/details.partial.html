@@ -12,7 +12,10 @@
             class="List-actionButton List-actionButton--delete"
             data-placement="top"
             ng-click="vm.cancelJob()"
-            ng-show="vm.status.value === 'Running'|| vm.status.value ==='Pending'"
+            ng-show="vm.status.value === 'New' ||
+                     vm.status.value === 'Pending' ||
+                     vm.status.value === 'Waiting' ||
+                     vm.status.value === 'Running'"
             aw-tool-tip="{{'Cancel' | translate }}"
             data-original-title=""
             title="">
@@ -24,9 +27,11 @@
             class="List-actionButton List-actionButton--delete"
             data-placement="top"
             ng-click="vm.deleteJob()"
-            ng-hide="!vm.canDelete
-                || vm.status.value === 'Running'
-                || vm.status.value === 'Pending'"
+            ng-show="vm.canDelete && (
+                   vm.status.value === 'Successful' ||
+                   vm.status.value === 'Failed' ||
+                   vm.status.value === 'Error' ||
+                   vm.status.value === 'Canceled')"
             aw-tool-tip="{{ 'Delete' | translate }}"
             data-original-title=""
             title="">
