@@ -102,7 +102,7 @@ export default
                                     }
                                 })
                                 .catch( (error) => {
-                                    if (error.status_code === 403) {
+                                    if (error.status === 403) {
                                         /* user doesn't have access to see the project, no big deal. */
                                         $scope.disablePlaybookBecausePermissionDenied = true;
                                     } else {
