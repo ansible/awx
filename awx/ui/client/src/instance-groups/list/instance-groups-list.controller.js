@@ -1,10 +1,9 @@
-export default ['$scope', 'resolvedModels', 'Dataset', '$state', 'ComponentsStrings', 'ProcessErrors', 'Wait',
-    function($scope, resolvedModels, Dataset, $state, strings, ProcessErrors, Wait) {
+export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Dataset', 'InstanceGroupsStrings','ProcessErrors', 'Prompt', 'Wait',
+    function($scope, $filter, $state, Alert, resolvedModels, Dataset, strings, ProcessErrors, Prompt, Wait) {
         const vm = this;
         const { instanceGroup } = resolvedModels;
 
         vm.strings = strings;
-        $scope.selection = {};
 
         init();
 
@@ -33,31 +32,43 @@ export default ['$scope', 'resolvedModels', 'Dataset', '$state', 'ComponentsStri
             vm.activeId = parseInt($state.params.instance_group_id);
         });
 
-        vm.delete = () => {
-            Wait('start');
-            let deletables = $scope.selection;
-            deletables = Object.keys(deletables).filter((n) => deletables[n]);
+        vm.deleteInstanceGroup = instance_group => {
+            if (!instance_group) {
+                Alert(strings.get('error.DELETE'), strings.get('alert.MISSING_PARAMETER'));
+                return;
+            }
 
-            deletables.forEach((data) => {
-                let promise = instanceGroup.http.delete({resource: data});
-                Promise.resolve(promise).then(vm.onSaveSuccess)
-                    .catch(({data, status}) => {
-                        ProcessErrors($scope, data, status, null, {
-                            hdr: 'Error!',
-                            msg: 'Call failed. Return status: ' + status
-                        });
-                    })
-                    .finally(() => {
-                        Wait('stop');
-                    });
+            Prompt({
+                action() {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+                    instanceGroup
+                        .request('delete', instance_group.id)
+                        .then(() => handleSuccessfulDelete(instance_group))
+                        .catch(createErrorHandler('delete instance group', 'DELETE'))
+                        .finally(() => Wait('stop'));
+                },
+                hdr: strings.get('DELETE'),
+                resourceName: $filter('sanitize')(instance_group.name),
+                body: `${strings.get('deleteResource.CONFIRM', 'instance group')}`
             });
         };
 
-        vm.onSaveSuccess = () => {
-            $state.transitionTo($state.current, $state.params, {
-                reload: true, location: true, inherit: false, notify: true
-            });
-        };
+        function handleSuccessfulDelete(instance_group) {
+            if (parseInt($state.params.instance_group_id, 0) === instance_group.id) {
+                $state.go('instanceGroups', $state.params, { reload: true });
+            } else {
+                $state.go('.', $state.params, { reload: true });
+            }
+        }
+
+        function createErrorHandler(path, action) {
+            return ({ data, status }) => {
+                const hdr = strings.get('error.HEADER');
+                const msg = strings.get('error.CALL', { path, action, status });
+                ProcessErrors($scope, data, status, null, { hdr, msg });
+            };
+        }
 
         $scope.createInstanceGroup = () => {
             $state.go('instanceGroups.add');
