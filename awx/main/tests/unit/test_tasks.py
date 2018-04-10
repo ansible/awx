@@ -222,7 +222,7 @@ class TestJobExecution:
         self.run_pexpect.return_value = ['successful', 0]
 
         self.patches = [
-            mock.patch.object(CallbackQueueDispatcher, 'dispatch', lambda obj: None),
+            mock.patch.object(CallbackQueueDispatcher, 'dispatch', lambda self, obj: None),
             mock.patch.object(Project, 'get_project_path', lambda *a, **kw: self.project_path),
             # don't emit websocket statuses; they use the DB and complicate testing
             mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
