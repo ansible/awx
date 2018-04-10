@@ -75,7 +75,7 @@ export default ['i18n', function(i18n) {
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Copy credential'),
                 dataPlacement: 'top',
-                ngShow: 'credential.summary_fields.user_capabilities.edit'
+                ngShow: 'credential.summary_fields.user_capabilities.copy'
             },
             view: {
                 ngClick: "editCredential(credential.id)",
