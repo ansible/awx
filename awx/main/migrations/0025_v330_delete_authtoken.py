@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
+# TODO: Squash all of these migrations with '0024_v330_add_oauth_activity_stream_registrar'
 
 class Migration(migrations.Migration):
 
