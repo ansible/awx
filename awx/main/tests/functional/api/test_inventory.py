@@ -126,9 +126,8 @@ def test_list_cannot_order_by_unsearchable_field(get, organization, alice, order
         )
         custom_script.admin_role.members.add(alice)
 
-    response = get(reverse('api:inventory_script_list'), alice,
-                   QUERY_STRING='order_by=%s' % order_by, status=400)
-    assert response.status_code == 400
+    get(reverse('api:inventory_script_list'), alice,
+        QUERY_STRING='order_by=%s' % order_by, expect=403)
 
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
