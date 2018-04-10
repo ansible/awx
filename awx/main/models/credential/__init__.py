@@ -632,7 +632,7 @@ class CredentialType(CommonModelNameNotUnique):
             data = Template(file_tmpl).render(**namespace)
             _, path = tempfile.mkstemp(dir=private_data_dir)
             with open(path, 'w') as f:
-                f.write(data)
+                f.write(data.encode('utf-8'))
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
 
             # determine if filename indicates single file or many
