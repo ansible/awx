@@ -41,7 +41,7 @@ Individual applications will be accessible via their primary keys:
             "results": [
                 {
                     "scope": "read",
-                    "token": "**************",
+                    "token": "*************",
                     "id": 2
                 }
             ]
@@ -114,7 +114,7 @@ Individual tokens will be accessible via their primary keys:
     "description": "App Token Test",
     "user": 1,
     "token": "*************",
-    "refresh_token": "**************",
+    "refresh_token": "*************",
     "application": 1,
     "expires": "2018-02-24T00:39:32.618279Z",
     "scope": "read"

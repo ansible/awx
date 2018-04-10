@@ -19,3 +19,4 @@ PRIVILEGE_ESCALATION_METHODS = [
 ANSI_SGR_PATTERN = re.compile(r'\x1b\[[0-9;]*m')
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
+TOKEN_CENSOR = '************'

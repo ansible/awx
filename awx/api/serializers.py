@@ -40,7 +40,7 @@ from polymorphic.models import PolymorphicModel
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN
 from awx.main.models import * # noqa
-from awx.main.constants import ACTIVE_STATES
+from awx.main.constants import ACTIVE_STATES, TOKEN_CENSOR
 from awx.main.models.base import NEW_JOB_TYPE_CHOICES
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
@@ -999,7 +999,7 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return obj.token
             else:
-                return '*************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''    
         
@@ -1009,7 +1009,7 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return getattr(obj.refresh_token, 'token', '')
             else:
-                return '**************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
 
@@ -1075,7 +1075,7 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         return ret
 
     def _summary_field_tokens(self, obj):
-        token_list = [{'id': x.pk, 'token': '**************', 'scope': x.scope} for x in obj.oauth2accesstoken_set.all()[:10]]
+        token_list = [{'id': x.pk, 'token': TOKEN_CENSOR, 'scope': x.scope} for x in obj.oauth2accesstoken_set.all()[:10]]
         if has_model_field_prefetched(obj, 'oauth2accesstoken_set'):
             token_count = len(obj.oauth2accesstoken_set.all())
         else:
@@ -1133,7 +1133,7 @@ class OAuth2TokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return obj.token
             else:
-                return '*************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
 
@@ -1143,7 +1143,7 @@ class OAuth2TokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return getattr(obj.refresh_token, 'token', '')
             else:
-                return '**************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
 
@@ -1214,7 +1214,7 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return obj.token
             else:
-                return '*************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''    
         
@@ -1224,7 +1224,7 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return getattr(obj.refresh_token, 'token', '')
             else:
-                return '**************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
             
@@ -1289,7 +1289,7 @@ class OAuth2PersonalTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return obj.token
             else:
-                return '*************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
 
