@@ -1,4 +1,4 @@
-export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Dataset', 'ComponentsStrings', 'ProcessErrors', 'Prompt', 'Wait',
+export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Dataset', 'InstanceGroupsStrings','ProcessErrors', 'Prompt', 'Wait',
     function($scope, $filter, $state, Alert, resolvedModels, Dataset, strings, ProcessErrors, Prompt, Wait) {
         const vm = this;
         const { instanceGroup } = resolvedModels;

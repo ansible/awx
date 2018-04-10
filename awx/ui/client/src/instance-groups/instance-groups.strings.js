@@ -9,6 +9,10 @@ function InstanceGroupsStrings (BaseString) {
         EDIT_BREADCRUMB_LABEL: t.s('EDIT INSTANCE GROUP')
     };
 
+    ns.list = {
+        PANEL_TITLE: t.s('INSTANCE GROUPS')
+    };
+
     ns.tab = {
         DETAILS: t.s('DETAILS'),
         INSTANCES: t.s('INSTANCES'),
@@ -27,6 +31,17 @@ function InstanceGroupsStrings (BaseString) {
     ns.jobs = {
         PANEL_TITLE: t.s('Jobs')
     };
+
+    ns.error = {
+        HEADER: this.error.HEADER,
+        CALL: this.error.CALL,
+        DELETE: t.s('Unable to delete instance group.'),
+    };
+
+    ns.alert  = {
+        MISSING_PARAMETER: t.s('Instance Group parameter is missing.'),
+    };
+
 }
 
 InstanceGroupsStrings.$inject = ['BaseStringService'];
