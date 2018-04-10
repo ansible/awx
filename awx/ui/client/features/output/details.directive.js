@@ -436,7 +436,7 @@ function cancelJob () {
     const resourceName = `#${id} ${name}`;
 
     const method = 'POST';
-    const url = `${resource.model.path}/${id}/cancel/`;
+    const url = `${resource.model.path}${id}/cancel/`;
 
     const errorHandler = createErrorHandler('cancel job', method);
 
@@ -465,7 +465,7 @@ function deleteJob () {
     const resourceName = `#${id} ${name}`;
 
     const method = 'DELETE';
-    const url = `${resource.model.path}/${id}/`;
+    const url = `${resource.model.path}${id}/`;
 
     const errorHandler = createErrorHandler('delete job', method);
 
