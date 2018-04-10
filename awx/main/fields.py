@@ -839,6 +839,6 @@ class OAuth2ClientSecretField(models.CharField):
         )
 
     def from_db_value(self, value, expression, connection, context):
-        if value.startswith('$encrypted$'):
+        if value and value.startswith('$encrypted$'):
             return decrypt_value(get_encryption_key('value', pk=None), value)
         return value
