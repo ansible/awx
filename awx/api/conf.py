@@ -10,6 +10,7 @@ register(
     'SESSION_COOKIE_AGE',
     field_class=fields.IntegerField,
     min_value=60,
+    max_value=30000000000,  # approx 1,000 years, higher values give OverflowError
     label=_('Idle Time Force Log Out'),
     help_text=_('Number of seconds that a user is inactive before they will need to login again.'),
     category=_('Authentication'),
