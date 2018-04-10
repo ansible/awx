@@ -37,13 +37,11 @@
         </div>
     </div>
     <at-list results="templates">
-        <!-- TODO: implement resources are missing red indicator as present in mockup -->
         <at-row ng-repeat="template in templates"
             ng-class="{'at-Row--active': (template.id === vm.activeId)}"
-            template-id="{{ template.id }}">
-            <div class="at-Row--invalid" ng-show="vm.isInvalid(template)">
-                <at-popover state="vm.invalidTooltip"></at-popover>
-            </div>
+            template-id="{{ template.id }}"
+            invalid="vm.isInvalid(template)"
+            invalid-tooltip="vm.invalidTooltip">
             <div class="at-Row-items">
                 <at-row-item
                     header-value="{{ template.name }}"
