@@ -5,10 +5,9 @@
  *************************************************/
 
  export default
- 	['$scope', '$state', '$stateParams', 'GenerateForm', 'ParseTypeChange', 'HostsService',
- 	function($scope, $state, $stateParams, GenerateForm, ParseTypeChange, HostsService){
+ 	['$scope', 'HostsService',
+ 	function($scope, HostsService){
 
-        $scope.parseType = 'yaml';
  		$scope.formCancel = function(){
             $scope.$parent.$broadcast('awxNet-closeDetailsPanel');
  		};
@@ -30,7 +29,6 @@
                     $scope.saveConfirmed = false;
                 }, 3000);
  			});
-
  		};
 
         $scope.$parent.$on('awxNet-showDetails', (e, data, canAdd) => {
@@ -40,5 +38,6 @@
             } else {
                 $scope.item = data;
             }
+            $scope.$broadcast('CodeMirror-init', $scope.item.variables);
         });
  	}];

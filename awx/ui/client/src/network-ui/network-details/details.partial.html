@@ -31,7 +31,11 @@
             </div>
         </div>
         <div class="form-group Form-formGroup Form-formGroup--fullWidth">
-            <awx-net-extra-vars item="item"></awx-net-extra-vars>
+            <at-code-mirror
+                disabled="true"
+                variables="{{ item.variables }}"
+                tooltip-placement="left">
+            </at-code-mirror>
         </div>
     </form>
     <div class="buttons Form-buttons" id="host_controls">

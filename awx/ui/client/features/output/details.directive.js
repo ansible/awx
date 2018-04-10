@@ -398,8 +398,9 @@ function getExtraVarsDetails () {
     const label = 'Extra Variables';
     const tooltip = 'Read-only view of extra variables added to the job template.';
     const value = parse(extraVars);
+    const disabled = true;
 
-    return { label, tooltip, value };
+    return { label, tooltip, value, disabled };
 }
 
 function getLabelDetails () {
@@ -557,21 +558,6 @@ function AtJobDetailsController (
         // Relaunch and Delete Components
         vm.job = _.get(resource.model, 'model.GET', {});
         vm.canDelete = resource.model.get('summary_fields.user_capabilities.delete');
-
-        // XX - Codemirror
-        if (vm.extraVars) {
-            const cm = {
-                parseType: 'yaml',
-                $apply: $scope.$apply,
-                variables: vm.extraVars.value,
-            };
-
-            ParseTypeChange({
-                field_id: 'cm-extra-vars',
-                readOnly: true,
-                scope: cm,
-            });
-        }
 
         vm.cancelJob = cancelJob;
         vm.deleteJob = deleteJob;
