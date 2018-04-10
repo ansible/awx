@@ -306,6 +306,7 @@ def _register_ldap(append=None):
         category=_('LDAP'),
         category_slug='ldap',
         default=collections.OrderedDict([
+            ('member_attr', 'member'),
             ('name_attr', 'cn'),
         ]),
         placeholder=collections.OrderedDict([
