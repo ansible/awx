@@ -19,10 +19,6 @@
                 search-tags="searchTags">
             </smart-search>
             <div class="at-List-toolbarAction">
-                <div ng-click="vm.delete()"
-                    class="at-RowAction at-RowAction--danger">
-                    <i class="fa fa-trash"></i>
-                </div>
                 <button
                     type="button"
                     ui-sref="instanceGroups.add"
@@ -36,10 +32,6 @@
         <at-list results="instance_groups">
             <at-row ng-repeat="instance_group in instance_groups"
                 ng-class="{'at-Row--active': (instance_group.id === vm.activeId)}">
-
-                <input type="checkbox"
-                class="at-Row-checkbox"
-                ng-model="selection[instance_group.id]"/>
 
                 <div class="at-Row-items">
                     <at-row-item
@@ -67,6 +59,8 @@
 
                 <div class="at-Row-actions">
                     <capacity-bar label-value="Used Capacity" capacity="instance_group.consumed_capacity" total-capacity="instance_group.capacity"></capacity-bar>
+                    <at-row-action icon="fa-trash" ng-click="vm.deleteInstanceGroup(instance_group)">
+                    </at-row-action>
                 </div>
             </at-row>
         </at-list>
