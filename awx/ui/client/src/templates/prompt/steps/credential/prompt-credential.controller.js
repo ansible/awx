@@ -74,11 +74,14 @@ export default
                     };
                     if(cred.inputs.password && cred.inputs.password === "ASK") {
                         scope.promptData.prompts.credentials.passwords.ssh = credPassObj;
-                    } else if(cred.inputs.become_password && cred.inputs.become_password === "ASK") {
+                    }
+                    if(cred.inputs.become_password && cred.inputs.become_password === "ASK") {
                         scope.promptData.prompts.credentials.passwords.become = credPassObj;
-                    } else if(cred.inputs.ssh_key_unlock && cred.inputs.ssh_key_unlock === "ASK") {
+                    }
+                    if(cred.inputs.ssh_key_unlock && cred.inputs.ssh_key_unlock === "ASK") {
                         scope.promptData.prompts.credentials.passwords.ssh_key_unlock = credPassObj;
-                    } else if(cred.inputs.vault_password && cred.inputs.vault_password === "ASK") {
+                    }
+                    if(cred.inputs.vault_password && cred.inputs.vault_password === "ASK") {
                         credPassObj.vault_id = cred.inputs.vault_id;
                         if(!scope.promptData.prompts.credentials.passwords.vault) {
                             scope.promptData.prompts.credentials.passwords.vault = [];
