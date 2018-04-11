@@ -44,9 +44,9 @@ class Metadata(metadata.SimpleMetadata):
         if placeholder is not serializers.empty:
             field_info['placeholder'] = placeholder
 
-        # Update help text for common fields.
         serializer = getattr(field, 'parent', None)
-        if serializer:
+        if serializer and hasattr(serializer, 'Meta') and hasattr(serializer.Meta, 'model'):
+            # Update help text for common fields.
             field_help_text = {
                 'id': _('Database ID for this {}.'),
                 'name': _('Name of this {}.'),
@@ -59,10 +59,18 @@ class Metadata(metadata.SimpleMetadata):
                 'modified': _('Timestamp when this {} was last modified.'),
             }
             if field.field_name in field_help_text:
-                if hasattr(serializer, 'Meta') and hasattr(serializer.Meta, 'model'):
-                    opts = serializer.Meta.model._meta.concrete_model._meta
-                    verbose_name = smart_text(opts.verbose_name)
-                    field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
+                opts = serializer.Meta.model._meta.concrete_model._meta
+                verbose_name = smart_text(opts.verbose_name)
+                field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
+            # If field is not part of the model, then show it as non-filterable
+            else:
+                is_model_field = False
+                for model_field in serializer.Meta.model._meta.fields:
+                    if field.field_name == model_field.name:
+                        is_model_field = True
+                        break
+                if not is_model_field:
+                    field_info['filterable'] = False
 
         # Indicate if a field has a default value.
         # FIXME: Still isn't showing all default values?
