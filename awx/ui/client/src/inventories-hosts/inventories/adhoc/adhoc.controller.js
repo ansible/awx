@@ -12,7 +12,7 @@
 function adhocController($q, $scope, $stateParams,
     $state, CheckPasswords, PromptForPasswords, CreateLaunchDialog, CreateSelect2, adhocForm,
     GenerateForm, Rest, ProcessErrors, GetBasePath, GetChoices,
-    KindChange, Wait, ParseTypeChange) {
+    KindChange, Wait, ParseTypeChange, credentialTypes) {
 
     // this is done so that we can access private functions for testing, but
     // we don't want to populate the "public" scope with these internal
@@ -301,11 +301,23 @@ function adhocController($q, $scope, $stateParams,
         });
     };
 
+    $scope.lookupCredential = function(){
+        let credType = _.filter(credentialTypes, function(credType){
+            return credType.kind === "ssh";
+        });
+        $state.go('.credential', {
+            credential_search: {
+                credential_type: credType[0].id,
+                page_size: '5',
+                page: '1'
+            }
+        });
+    };
 
 }
 
 export default ['$q', '$scope', '$stateParams',
     '$state', 'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'CreateSelect2',
      'adhocForm', 'GenerateForm', 'Rest', 'ProcessErrors', 'GetBasePath',
-    'GetChoices', 'KindChange', 'Wait', 'ParseTypeChange',
+    'GetChoices', 'KindChange', 'Wait', 'ParseTypeChange', 'credentialTypes',
     adhocController];
