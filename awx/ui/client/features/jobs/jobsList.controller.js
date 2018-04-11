@@ -118,6 +118,48 @@ function ListJobsController (
             actionText: 'DELETE'
         });
     };
+
+    vm.cancelJob = (job) => {
+        const action = () => {
+            $('#prompt-modal').modal('hide');
+            Wait('start');
+            Rest.setUrl(job.related.cancel);
+            Rest.post()
+                .then(() => {
+                    let reloadListStateParams = null;
+
+                    if ($scope.jobs.length === 1 && $state.params.job_search &&
+                    !_.isEmpty($state.params.job_search.page) &&
+                    $state.params.job_search.page !== '1') {
+                        const page = `${(parseInt(reloadListStateParams
+                            .job_search.page, 10) - 1)}`;
+                        reloadListStateParams = _.cloneDeep($state.params);
+                        reloadListStateParams.job_search.page = page;
+                    }
+
+                    $state.go('.', reloadListStateParams, { reload: true });
+                })
+                .catch(({ data, status }) => {
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: strings.get('error.HEADER'),
+                        msg: strings.get('error.CALL', { path: `${job.url}`, status })
+                    });
+                })
+                .finally(() => {
+                    Wait('stop');
+                });
+        };
+
+        const deleteModalBody = `<div class="Prompt-bodyQuery">${strings.get('cancelJob.SUBMIT_REQUEST')}</div>`;
+
+        Prompt({
+            hdr: strings.get('cancelJob.HEADER'),
+            resourceName: $filter('sanitize')(job.name),
+            body: deleteModalBody,
+            action,
+            actionText: strings.get('CANCEL')
+        });
+    };
 }
 
 ListJobsController.$inject = [

@@ -76,6 +76,11 @@ function BaseStringService (namespace) {
         CONFIRM: resourceType => t.s('Are you sure you want to delete this {{ resourceType }}?', { resourceType })
     };
 
+    this.cancelJob = {
+        HEADER: t.s('Cancel'),
+        SUBMIT_REQUEST: t.s('Are you sure you want to submit the request to cancel this job?')
+    };
+
     this.error = {
         HEADER: t.s('Error!'),
         CALL: ({ path, action, status }) => t.s('Call to {{ path }} failed. {{ action }} returned status: {{ status }}.', { path, action, status }),
