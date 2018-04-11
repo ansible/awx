@@ -203,6 +203,10 @@ class InstanceGroupMembershipMixin(object):
 
 class RelatedJobsPreventDeleteMixin(object):
     def perform_destroy(self, obj):
+        self.check_related_active_jobs(obj)
+        return super(RelatedJobsPreventDeleteMixin, self).perform_destroy(obj)
+
+    def check_related_active_jobs(self, obj):
         active_jobs = obj.get_active_jobs()
         if len(active_jobs) > 0:
             raise ActiveJobConflict(active_jobs)
@@ -213,7 +217,6 @@ class RelatedJobsPreventDeleteMixin(object):
                 raise PermissionDenied(_(
                     'Related job {} is still processing events.'
                 ).format(unified_job.log_format))
-        return super(RelatedJobsPreventDeleteMixin, self).perform_destroy(obj)
 
 
 class ApiRootView(APIView):
@@ -2085,6 +2088,7 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, Retri
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
+        self.check_related_active_jobs(obj)  # related jobs mixin
         try:
             obj.schedule_deletion(getattr(request.user, 'id', None))
             return Response(status=status.HTTP_202_ACCEPTED)
