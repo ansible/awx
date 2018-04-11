@@ -39,8 +39,8 @@ services:
     {% for awx_alternate_dns_server in awx_alternate_dns_servers_list %}
       - {{ awx_alternate_dns_server }}
     {% endfor %}
-    {% elif awx_alternate_dns_servers is defined -%}
-      dns: "{{ awx_alternate_dns_servers }}"
+    {% elif awx_alternate_dns_servers is defined %}
+    dns: "{{ awx_alternate_dns_servers }}"
     {% endif %}
     environment:
       http_proxy: {{ http_proxy | default('') }}
@@ -98,7 +98,7 @@ services:
     {% for awx_alternate_dns_server in awx_alternate_dns_servers_list %}
       - {{ awx_alternate_dns_server }}
     {% endfor %}
-    {% elif awx_alternate_dns_servers is defined -%}
+    {% elif awx_alternate_dns_servers is defined %}
     dns: "{{ awx_alternate_dns_servers }}"
     {% endif %}
     environment:
