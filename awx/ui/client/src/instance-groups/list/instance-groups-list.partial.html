@@ -59,7 +59,7 @@
 
                 <div class="at-Row-actions">
                     <capacity-bar label-value="Used Capacity" capacity="instance_group.consumed_capacity" total-capacity="instance_group.capacity"></capacity-bar>
-                    <at-row-action icon="fa-trash" ng-click="vm.deleteInstanceGroup(instance_group)">
+                    <at-row-action icon="fa-trash" ng-click="vm.deleteInstanceGroup(instance_group)" ng-if="instance_group.name !== 'tower'">
                     </at-row-action>
                 </div>
             </at-row>

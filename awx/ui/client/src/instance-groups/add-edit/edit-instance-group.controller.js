@@ -26,6 +26,8 @@ function EditController ($rootScope, $state, models, strings) {
 
     vm.form = instanceGroup.createFormSchema('put');
 
+    vm.form.disabled = !instanceGroup.has('options', 'actions.PUT');
+
     vm.form.policy_instance_list._lookupTags = true;
     vm.form.policy_instance_list._model = instance;
     vm.form.policy_instance_list._placeholder = "Policy Instance List";
