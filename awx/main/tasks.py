@@ -1000,10 +1000,10 @@ class BaseTask(Task):
                 )
 
         except Exception:
-            if status != 'canceled':
-                tb = traceback.format_exc()
-                if settings.DEBUG:
-                    logger.exception('%s Exception occurred while running task', instance.log_format)
+            # run_pexpect does not throw exceptions for cancel or timeout
+            # this could catch programming or file system errors
+            tb = traceback.format_exc()
+            logger.exception('%s Exception occurred while running task', instance.log_format)
         finally:
             try:
                 if stdout_handle:
