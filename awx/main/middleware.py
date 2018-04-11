@@ -96,7 +96,8 @@ class ActivityStreamMiddleware(threading.local):
                     analytics_logger.info('Activity Stream update entry for %s' % str(instance.object1),
                                           extra=dict(changes=instance.changes, relationship=instance.object_relationship_type,
                                           actor=drf_user.username, operation=instance.operation,
-                                          object1=instance.object1, object2=instance.object2))
+                                          object1=instance.object1, object2=instance.object2,
+                                          setting=instance.setting))
                 except IntegrityError:
                     logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance.id))
             # else:
