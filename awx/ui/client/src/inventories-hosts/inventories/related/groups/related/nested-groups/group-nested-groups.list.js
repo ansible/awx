@@ -31,7 +31,7 @@
             name: {
                 label: i18n._('Groups'),
                 key: true,
-                uiSref: "inventories.edit.groups.edit.nested_groups({group_id:nested_group.id)}",
+                uiSref: "inventories.edit.groups.edit({group_id:nested_group.id})",
                 columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
                 class: 'InventoryManage-breakWord',
             }
