@@ -58,6 +58,7 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
                             parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal,
                             get_type_for_model, extract_ansible_vars)
+from awx.main.utils.safe_yaml import safe_dump
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
@@ -625,7 +626,7 @@ class BaseTask(LogErrorsTask):
     def build_extra_vars_file(self, vars, **kwargs):
         handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
         f = os.fdopen(handle, 'w')
-        f.write(json.dumps(vars))
+        f.write(safe_dump(vars, kwargs.get('safe_dict', {}) or None))
         f.close()
         os.chmod(path, stat.S_IRUSR)
         return path
@@ -1213,7 +1214,20 @@ class RunJob(BaseTask):
                 extra_vars.update(json.loads(job.display_extra_vars()))
             else:
                 extra_vars.update(json.loads(job.decrypted_extra_vars()))
-        extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
+
+        # By default, all extra vars disallow Jinja2 template usage for
+        # security reasons; top level key-values defined in JT.extra_vars, however,
+        # are whitelisted as "safe" (because they can only be set by users with
+        # higher levels of privilege - those that have the ability create and
+        # edit Job Templates)
+        safe_dict = {}
+        if job.job_template and settings.ALLOW_JINJA_IN_JOB_TEMPLATE_EXTRA_VARS is True:
+            safe_dict = job.job_template.extra_vars_dict
+        extra_vars_path = self.build_extra_vars_file(
+            vars=extra_vars,
+            safe_dict=safe_dict,
+            **kwargs
+        )
         args.extend(['-e', '@%s' % (extra_vars_path)])
 
         # Add path to playbook (relative to project.local_path).

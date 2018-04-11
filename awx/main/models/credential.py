@@ -2,7 +2,6 @@
 # All Rights Reserved.
 from collections import OrderedDict
 import functools
-import json
 import logging
 import operator
 import os
@@ -25,6 +24,7 @@ from awx.main.fields import (ImplicitRoleField, CredentialInputField,
                              CredentialTypeInputField,
                              CredentialTypeInjectorField)
 from awx.main.utils import decrypt_field
+from awx.main.utils.safe_yaml import safe_dump
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import * # noqa
 from awx.main.models.mixins import ResourceMixin
@@ -589,7 +589,7 @@ class CredentialType(CommonModelNameNotUnique):
         def build_extra_vars_file(vars, private_dir):
             handle, path = tempfile.mkstemp(dir = private_dir)
             f = os.fdopen(handle, 'w')
-            f.write(json.dumps(vars))
+            f.write(safe_dump(vars))
             f.close()
             os.chmod(path, stat.S_IRUSR)
             return path

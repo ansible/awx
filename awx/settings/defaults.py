@@ -585,6 +585,9 @@ CAPTURE_JOB_EVENT_HOSTS = False
 # Rebuild Host Smart Inventory memberships.
 AWX_REBUILD_SMART_MEMBERSHIP = False
 
+# By default, allow arbitrary Jinja templating in extra_vars defined on a Job Template
+ALLOW_JINJA_IN_JOB_TEMPLATE_EXTRA_VARS = True
+
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True

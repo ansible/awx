@@ -133,6 +133,15 @@ register(
 )
 
 register(
+    'ALLOW_JINJA_IN_JOB_TEMPLATE_EXTRA_VARS',
+    field_class=fields.BooleanField,
+    label=_('Allow Jinja template execution in Job Template extra vars'),
+    help_text=_('Ansible allows variable substitution and templating via the Jinja2 templating language for a variety of arguments (such as --extra-vars); enabling this flag allows arbitrary Jinja templates to be used on extra vars defined in Job Templates.'),  # noqa
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'AWX_PROOT_ENABLED',
     field_class=fields.BooleanField,
     label=_('Enable job isolation'),

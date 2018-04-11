@@ -1,6 +1,7 @@
 import tempfile
 import pytest
 import json
+import yaml
 
 from awx.main.utils.encryption import encrypt_value
 from awx.main.tasks import RunJob
@@ -9,6 +10,7 @@ from awx.main.models import (
     JobTemplate,
     WorkflowJobTemplate
 )
+from awx.main.utils.safe_yaml import SafeLoader
 
 ENCRYPTED_SECRET = encrypt_value('secret')
 
@@ -72,7 +74,7 @@ def test_job_safe_args_redacted_passwords(job):
     safe_args = run_job.build_safe_args(job, **kwargs)
     ev_index = safe_args.index('-e') + 1
     extra_var_file = open(safe_args[ev_index][1:], 'r')
-    extra_vars = json.load(extra_var_file)
+    extra_vars = yaml.load(extra_var_file, SafeLoader)
     extra_var_file.close()
     assert extra_vars['secret_key'] == '$encrypted$'
 
@@ -83,7 +85,7 @@ def test_job_args_unredacted_passwords(job, tmpdir_factory):
     args = run_job.build_args(job, **kwargs)
     ev_index = args.index('-e') + 1
     extra_var_file = open(args[ev_index][1:], 'r')
-    extra_vars = json.load(extra_var_file)
+    extra_vars = yaml.load(extra_var_file, SafeLoader)
     extra_var_file.close()
     assert extra_vars['secret_key'] == 'my_password'
 

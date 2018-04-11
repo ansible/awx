@@ -23,6 +23,7 @@ from awx.main.models import (
     InventorySource,
     InventoryUpdate,
     Job,
+    JobTemplate,
     Notification,
     Project,
     ProjectUpdate,
@@ -32,7 +33,7 @@ from awx.main.models import (
 
 from awx.main import tasks
 from awx.main.utils import encrypt_field, encrypt_value
-
+from awx.main.utils.safe_yaml import SafeLoader
 
 
 @contextmanager
@@ -177,7 +178,7 @@ def parse_extra_vars(args):
     for chunk in args:
         if chunk.startswith('@/tmp/'):
             with open(chunk.strip('@'), 'r') as f:
-                extra_vars.update(json.load(f))
+                extra_vars.update(yaml.load(f, SafeLoader))
     return extra_vars
 
 
@@ -243,7 +244,8 @@ class TestJobExecution:
             cancel_flag=False,
             project=Project(),
             playbook='helloworld.yml',
-            verbosity=3
+            verbosity=3,
+            job_template=JobTemplate(extra_vars='')
         )
 
         # mock the job.extra_credentials M2M relation so we can avoid DB access
@@ -261,6 +263,131 @@ class TestJobExecution:
     @property
     def pk(self):
         return self.instance.pk
+
+
+class TestExtraVarSanitation(TestJobExecution):
+    # By default, extra vars are marked as `!unsafe` in the generated yaml
+    # _unless_ they've been specified on the JobTemplate's extra_vars (which
+    # are deemed trustable, because they can only be added by users w/ enough
+    # privilege to add/modify a Job Template)
+
+    UNSAFE = '{{ lookup(''pipe'',''ls -la'') }}'
+
+    def test_vars_unsafe_by_default(self):
+        self.instance.created_by = User(pk=123, username='angry-spud')
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+
+            # ensure that strings are marked as unsafe
+            for unsafe in ['awx_job_template_name', 'tower_job_template_name',
+                           'awx_user_name', 'tower_job_launch_type',
+                           'awx_project_revision',
+                           'tower_project_revision', 'tower_user_name',
+                           'awx_job_launch_type']:
+                assert hasattr(extra_vars[unsafe], '__UNSAFE__')
+
+            # ensure that non-strings are marked as safe
+            for safe in ['awx_job_template_id', 'awx_job_id', 'awx_user_id',
+                         'tower_user_id', 'tower_job_template_id',
+                         'tower_job_id']:
+                assert not hasattr(extra_vars[safe], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_launchtime_vars_unsafe(self):
+        self.instance.extra_vars = json.dumps({'msg': self.UNSAFE})
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == self.UNSAFE
+            assert hasattr(extra_vars['msg'], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_nested_launchtime_vars_unsafe(self):
+        self.instance.extra_vars = json.dumps({'msg': {'a': [self.UNSAFE]}})
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == {'a': [self.UNSAFE]}
+            assert hasattr(extra_vars['msg']['a'][0], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_whitelisted_jt_extra_vars(self):
+        self.instance.job_template.extra_vars = self.instance.extra_vars = json.dumps({'msg': self.UNSAFE})
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == self.UNSAFE
+            assert not hasattr(extra_vars['msg'], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_nested_whitelisted_vars(self):
+        self.instance.extra_vars = json.dumps({'msg': {'a': {'b': [self.UNSAFE]}}})
+        self.instance.job_template.extra_vars = self.instance.extra_vars
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == {'a': {'b': [self.UNSAFE]}}
+            assert not hasattr(extra_vars['msg']['a']['b'][0], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_sensitive_values_dont_leak(self):
+        # JT defines `msg=SENSITIVE`, the job *should not* be able to do
+        # `other_var=SENSITIVE`
+        self.instance.job_template.extra_vars = json.dumps({'msg': self.UNSAFE})
+        self.instance.extra_vars = json.dumps({
+            'msg': 'other-value',
+            'other_var': self.UNSAFE
+        })
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+
+            assert extra_vars['msg'] == 'other-value'
+            assert hasattr(extra_vars['msg'], '__UNSAFE__')
+
+            assert extra_vars['other_var'] == self.UNSAFE
+            assert hasattr(extra_vars['other_var'], '__UNSAFE__')
+
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_overwritten_jt_extra_vars(self):
+        self.instance.job_template.extra_vars = json.dumps({'msg': 'SAFE'})
+        self.instance.extra_vars = json.dumps({'msg': self.UNSAFE})
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == self.UNSAFE
+            assert hasattr(extra_vars['msg'], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
 
 
 class TestGenericRun(TestJobExecution):
@@ -1009,6 +1136,7 @@ class TestJobCredentials(TestJobExecution):
             args, cwd, env, stdout = args
             extra_vars = parse_extra_vars(args)
             assert extra_vars["api_token"] == "ABC123"
+            assert hasattr(extra_vars["api_token"], '__UNSAFE__')
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
