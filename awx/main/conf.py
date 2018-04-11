@@ -341,7 +341,8 @@ register(
     label=_('Per-Host Ansible Fact Cache Timeout'),
     help_text=_('Maximum time, in seconds, that stored Ansible facts are considered valid since '
                 'the last time they were modified. Only valid, non-stale, facts will be accessible by '
-                'a playbook. Note, this does not influence the deletion of ansible_facts from the database.'),
+                'a playbook. Note, this does not influence the deletion of ansible_facts from the database. '
+                'Use a value of 0 to indicate that no timeout should be imposed.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
