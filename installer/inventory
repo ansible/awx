@@ -14,7 +14,6 @@ dockerhub_version=latest
 # openshift_host=127.0.0.1:8443
 # awx_openshift_project=awx
 # openshift_user=developer
-# awx_node_port=30083
 
 # Kubernetes Install
 # kubernetes_context=test-cluster
