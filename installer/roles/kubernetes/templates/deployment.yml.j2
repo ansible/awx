@@ -117,8 +117,8 @@ apiVersion: extensions/v1beta1
 kind: DeploymentConfig
 {% endif %}
 metadata:
-  name: awx
-  namespace: {{ awx_kubernetes_namespace }}
+  name: {{ kubernetes_deployment_name }}
+  namespace: {{ kubernetes_namespace }}
 spec:
   replicas: 1
   template:
