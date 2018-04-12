@@ -96,6 +96,11 @@ export default [
                     $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                     workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                 }
+                if (form.fields[fld].type === 'checkbox_group') {
+                    for(var j=0; j<form.fields[fld].fields.length; j++) {
+                        $scope[form.fields[fld].fields[j].name] = workflowJobTemplateData[form.fields[fld].fields[j].name];
+                    }
+                }
             }
 
             if(workflowJobTemplateData.organization) {
@@ -139,7 +144,14 @@ export default [
 
         try {
                 for (fld in form.fields) {
-                    data[fld] = $scope[fld];
+                    if(form.fields[fld].type === 'checkbox_group') {
+                        // Loop across the checkboxes
+                        for(var i=0; i<form.fields[fld].fields.length; i++) {
+                            data[form.fields[fld].fields[i].name] = $scope[form.fields[fld].fields[i].name];
+                        }
+                    } else {
+                        data[fld] = $scope[fld];
+                    }
                 }
 
                 data.extra_vars = ToJSON($scope.parseType,
