@@ -52,7 +52,7 @@
         msg: "Ensure a PVC named '{{ openshift_pg_pvc_name }}' is created and bound in the '{{ awx_openshift_project }}' namespace."
   when:
     - pg_hostname is not defined or pg_hostname == ''
-    - openshift_pg_emptydir is defined and openshift_pg_emptydir != true
+    - openshift_pg_emptydir is defined and (openshift_pg_emptydir | bool) != true
 
 - name: Set postgresql service name
   set_fact:
