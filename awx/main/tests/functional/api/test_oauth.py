@@ -115,7 +115,7 @@ def test_oauth_token_create(oauth_application, get, post, admin):
     )
     assert response.data['summary_fields']['tokens']['count'] == 1
     assert response.data['summary_fields']['tokens']['results'][0] == {
-        'id': token.pk, 'scope': token.scope, 'token': '**************'
+        'id': token.pk, 'scope': token.scope, 'token': '************'
     }
 
 
