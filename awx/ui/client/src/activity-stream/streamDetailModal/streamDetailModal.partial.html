@@ -16,6 +16,14 @@
                     <div class="StreamDetail-rowTitle StreamDetail-inlineRowTitle" translate>ACTION</div>
                     <div class="StreamDetail-inlineRowData StreamDetail-actions" ng-bind-html="operation"></div>
                 </div>
+                <div ng-show="settingCategory" class="StreamDetail-inlineRow">
+                    <div class="StreamDetail-rowTitle StreamDetail-inlineRowTitle" translate>SETTING CATEGORY</div>
+                    <div class="StreamDetail-inlineRowData StreamDetail-actions" ng-bind-html="settingCategory"></div>
+                </div>
+                <div ng-show="settingName" class="StreamDetail-inlineRow">
+                    <div class="StreamDetail-rowTitle StreamDetail-inlineRowTitle" translate>SETTING NAME</div>
+                    <div class="StreamDetail-inlineRowData StreamDetail-actions" ng-bind-html="settingName"></div>
+                </div>
                 <div ng-show="changes">
                     <div class="StreamDetail-rowTitle StreamDetail-changesRowTitle" translate>CHANGES</div>
                     <textarea

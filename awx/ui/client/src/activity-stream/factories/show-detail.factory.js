@@ -18,6 +18,8 @@ export default
                  scope.user = ((activity.summary_fields.actor) ? activity.summary_fields.actor.username : 'system') +
                       ' on ' + $filter('longDate')(activity.timestamp);
                  scope.operation = activity.description;
+                 scope.settingCategory = _.get(activity, 'summary_fields.setting[0].category');
+                 scope.settingName = _.get(activity, 'summary_fields.setting[0].name');
                  scope.header = "Event " + activity.id;
 
                  scope.variables = ParseVariableString(scope.changes);
