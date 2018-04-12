@@ -84,13 +84,6 @@ class TestControlledBySCM():
 
         inv_src.clean_overwrite_vars()
 
-    def test_clean_overwrite_vars_invalid(self):
-        inv_src = InventorySource(overwrite_vars=False,
-                                  source='scm')
-
-        with pytest.raises(ValidationError):
-            inv_src.clean_overwrite_vars()
-
     def test_clean_source_path_valid(self):
         inv_src = InventorySource(source_path='/not_real/',
                                   source='scm')

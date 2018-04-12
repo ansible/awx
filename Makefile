@@ -369,7 +369,7 @@ check: flake8 pep8 # pyflakes pylint
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 # Run all API unit tests.
-test: test_ansible
+test:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
