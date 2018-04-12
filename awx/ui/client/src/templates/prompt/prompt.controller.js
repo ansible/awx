@@ -16,6 +16,7 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
             ({ modal } = scope[scope.ns]);
 
             scope.$watch('vm.promptData.triggerModalOpen', () => {
+                vm.actionButtonClicked = false;
                 if(vm.promptData && vm.promptData.triggerModalOpen) {
 
                     vm.steps = {
@@ -160,6 +161,8 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
         };
 
         vm.finish = () => {
+            // Disable the action button to prevent double clicking
+            vm.actionButtonClicked = true;
             vm.promptData.triggerModalOpen = false;
             if(vm.onFinish) {
                 vm.onFinish();
