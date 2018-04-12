@@ -1,6 +1,10 @@
 ---
 - include_vars: openshift.yml
 
+- name: Set kubernetes_namespace
+  set_fact:
+    kubernetes_namespace: "{{ awx_openshift_project }}"
+
 - name: Ensure workspace directories exist
   file:
     path: "{{ item  }}"
