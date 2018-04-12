@@ -111,8 +111,13 @@ userNames:
 {% endif %}
 
 ---
+{% if openshift_host is defined %}
+apiVersion: v1
+kind: DeploymentConfig
+{% else %}
 apiVersion: extensions/v1beta1
-kind: Deployment
+kind: DeploymentConfig
+{% endif %}
 metadata:
   name: awx
   namespace: {{ awx_kubernetes_namespace }}
