@@ -5,7 +5,7 @@
 
 - name: Set kubernetes base path
   set_fact:
-    kubernetes_base_path: "{{ awx_local_base_config_path|default('/tmp') }}/awx-config"
+    kubernetes_base_path: "{{ local_base_config_path|default('/tmp') }}/{{ kubernetes_deployment_name }}-config"
 
 - include_tasks: openshift.yml
   when: openshift_host is defined
@@ -18,7 +18,7 @@
     kubectl_or_oc: "{{ openshift_oc_bin if openshift_oc_bin is defined else 'kubectl' }}"
 
 - name: Get Postgres Service Detail
-  shell: "{{ kubectl_or_oc }} describe svc {{ postgresql_service_name }} -n {{ awx_kubernetes_namespace }}"
+  shell: "{{ kubectl_or_oc }} describe svc {{ postgresql_service_name }} -n {{ kubernetes_namespace }}"
   register: postgres_svc_details
   ignore_errors: yes
   when: "pg_hostname is not defined or pg_hostname == ''"
@@ -31,24 +31,24 @@
 - name: Set image names
   block:
     - name: Enable image stream lookups for awx images
-      shell: "{{ openshift_oc_bin }} set image-lookup --all -n {{ awx_kubernetes_namespace }}"
+      shell: "{{ openshift_oc_bin }} set image-lookup --all -n {{ kubernetes_namespace }}"
       when: openshift_host is defined
 
     - name: Set full web image path
       set_fact:
-        awx_web_kubernetes_image: "{{ awx_web_image }}:{{ awx_version }}"
-      when: awx_web_kubernetes_image is not defined
+        web_kubernetes_image: "{{ web_image }}:{{ version }}"
+      when: web_kubernetes_image is not defined
 
     - name: Set full task image path
       set_fact:
-        awx_task_kubernetes_image: "{{ awx_task_image }}:{{ awx_version }}"
-      when: awx_task_kubernetes_image is not defined
+        task_kubernetes_image: "{{ task_image }}:{{ version }}"
+      when: task_kubernetes_image is not defined
   when: dockerhub_base is not defined
 
 - name: Set DockerHub Image Paths
   set_fact:
-    awx_web_kubernetes_image: "{{ dockerhub_base }}/awx_web:{{ dockerhub_version }}"
-    awx_task_kubernetes_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
+    web_kubernetes_image: "{{ dockerhub_base }}/awx_web:{{ dockerhub_version }}"
+    task_kubernetes_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
   when: dockerhub_base is defined
 
 - name: Deploy PostgreSQL (OpenShift)
@@ -69,7 +69,7 @@
           -e POSTGRESQL_PASSWORD={{ pg_password }} \
           -e POSTGRESQL_DATABASE={{ pg_database }} \
           -e POSTGRESQL_VERSION=9.5 \
-          -n {{ awx_kubernetes_namespace }}
+          -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
   when:
     - pg_hostname is not defined or pg_hostname == ''
@@ -78,7 +78,7 @@
 
 - name: Deploy and Activate Postgres (Kubernetes)
   shell: |
-    helm install --name awx --namespace {{ awx_kubernetes_namespace }} \
+    helm install --name awx --namespace {{ kubernetes_namespace }} \
       --set postgresUser={{ pg_username }} \
       --set postgresPassword={{ pg_password }} \
       --set postgresDatabase={{ pg_database }} \
@@ -92,7 +92,7 @@
 
 - name: Set postgresql hostname to helm package service
   set_fact:
-    pg_hostname: awx-postgresql
+    pg_hostname: "{{ kubernetes_deployment_name }}-postgresql"
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - kubernetes_context is defined
@@ -106,7 +106,6 @@
   file:
     path: "{{ kubernetes_base_path }}"
     state: directory
-
 
 - name: Template Kubernetes AWX Config
   template:

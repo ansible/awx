@@ -1,15 +1,15 @@
 ---
-awx_web_mem_request: 1
-awx_web_cpu_request: 500
+web_mem_request: 1
+web_cpu_request: 500
 
-awx_task_mem_request: 2
-awx_task_cpu_request: 1500
+task_mem_request: 2
+task_cpu_request: 1500
 
-awx_rabbitmq_mem_request: 2
-awx_rabbitmq_cpu_request: 500
+rabbitmq_mem_request: 2
+rabbitmq_cpu_request: 500
 
-awx_memcached_mem_request: 1
-awx_memcached_cpu_request: 500
+memcached_mem_request: 1
+memcached_cpu_request: 500
 
 rabbitmq_version: "3.7.4"
 

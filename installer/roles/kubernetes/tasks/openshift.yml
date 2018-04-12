@@ -3,7 +3,7 @@
 
 - name: Set kubernetes_namespace
   set_fact:
-    kubernetes_namespace: "{{ awx_openshift_project }}"
+    kubernetes_namespace: "{{ openshift_project }}"
 
 - name: Ensure workspace directories exist
   file:
@@ -34,18 +34,18 @@
   no_log: true
 
 - name: Get Project Detail
-  shell: "{{ openshift_oc_bin }} get project {{ awx_openshift_project }}"
+  shell: "{{ openshift_oc_bin }} get project {{ openshift_project }}"
   register: project_details
   ignore_errors: yes
 
 - name: Create AWX Openshift Project
-  shell: "{{ openshift_oc_bin }} new-project {{ awx_openshift_project }}"
+  shell: "{{ openshift_oc_bin }} new-project {{ openshift_project }}"
   when: project_details.rc != 0
 
 - name: Ensure PostgreSQL PVC is available
   block:
     - name: Check PVC status
-      command: "{{ openshift_oc_bin }} get pvc {{ openshift_pg_pvc_name }} -n {{ awx_openshift_project }} -o=jsonpath='{.status.phase}'"
+      command: "{{ openshift_oc_bin }} get pvc {{ openshift_pg_pvc_name }} -n {{ openshift_project }} -o=jsonpath='{.status.phase}'"
       register: pg_pvc_status
       ignore_errors: yes
 
@@ -53,7 +53,7 @@
       assert:
         that:
           - pg_pvc_status.stdout == "Bound"
-        msg: "Ensure a PVC named '{{ openshift_pg_pvc_name }}' is created and bound in the '{{ awx_openshift_project }}' namespace."
+        msg: "Ensure a PVC named '{{ openshift_pg_pvc_name }}' is created and bound in the '{{ openshift_project }}' namespace."
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - openshift_pg_emptydir is defined and (openshift_pg_emptydir | bool) != true

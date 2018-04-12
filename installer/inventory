@@ -12,12 +12,12 @@ dockerhub_version=latest
 # Openshift Install
 # Will need to set -e openshift_password=developer -e docker_registry_password=$(oc whoami -t)
 # openshift_host=127.0.0.1:8443
-# awx_openshift_project=awx
+# openshift_project=awx
 # openshift_user=developer
 
 # Kubernetes Install
 # kubernetes_context=test-cluster
-# awx_kubernetes_namespace=awx
+# kubernetes_namespace=awx
 
 # Kubernetes and Openshift Install Resource Requests
 # This is the request value for a pod's "task" container, which is the container
@@ -26,8 +26,8 @@ dockerhub_version=latest
 # in the pod
 # A cpu_request of 1500 is 1.5 cores for the task container
 # A mem_request of 2 is for 2 gigabytes of memory for the task container
-# awx_task_cpu_request=1500
-# awx_task_mem_request=2
+# task_cpu_request=1500
+# task_mem_request=2
 
 # Common Docker parameters
 postgres_data_dir=/tmp/pgdocker
@@ -82,7 +82,7 @@ pg_port=5432
 # AWX Secret key
 # It's *very* important that this stay the same between upgrades or you will lose the ability to decrypt
 # your credentials
-awx_secret_key=awxsecret
+secret_key=awxsecret
 
 # Build AWX with official logos
 # Requires cloning awx-logos repo into the project root.
