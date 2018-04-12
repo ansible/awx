@@ -172,7 +172,7 @@ spec:
               memory: "{{ task_mem_request }}Gi"
               cpu: "{{ task_cpu_request }}m"
         - name: {{ kubernetes_deployment_name }}-rabbit
-          image: ansible/awx_rabbitmq:{{ rabbitmq_version }}
+          image: {{ rabbitmq_image }}
           imagePullPolicy: Always
           ports:
             - name: http
@@ -212,7 +212,7 @@ spec:
               memory: "{{ rabbitmq_mem_request }}Gi"
               cpu: "{{ rabbitmq_cpu_request }}m"
         - name: {{ kubernetes_deployment_name }}-memcached
-          image: memcached
+          image: {{ memcached_image }}
           resources:
             requests:
               memory: "{{ memcached_mem_request }}Gi"

@@ -12,6 +12,10 @@ memcached_mem_request: 1
 memcached_cpu_request: 500
 
 rabbitmq_version: "3.7.4"
+rabbitmq_image: "ansible/awx_rabbitmq:{{ rabbitmq_version }}"
+
+memcached_version: "latest"
+memcached_image: "memcached:{{ memcached_version }}"
 
 openshift_pg_emptydir: no
 openshift_pg_pvc_name: postgresql
