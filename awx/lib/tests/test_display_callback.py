@@ -177,6 +177,19 @@ def test_callback_plugin_receives_events(executor, cache, event, playbook):
         when: item != "SENSITIVE-SKIPPED"
         failed_when: item == "SENSITIVE-FAILED"
         ignore_errors: yes
+'''},  # noqa, NOTE: with_items will be deprecated in 2.9
+{'loop.yml': '''
+- name: loop tasks should be suppressed with no_log
+  connection: local
+  hosts: all
+  gather_facts: no
+  tasks:
+      - shell: echo {{ item }}
+        no_log: true
+        loop: [ "SENSITIVE", "SENSITIVE-SKIPPED", "SENSITIVE-FAILED" ]
+        when: item != "SENSITIVE-SKIPPED"
+        failed_when: item == "SENSITIVE-FAILED"
+        ignore_errors: yes
 '''},  # noqa
 ])
 def test_callback_plugin_no_log_filters(executor, cache, playbook):
