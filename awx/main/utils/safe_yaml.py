@@ -1,3 +1,4 @@
+import re
 import six
 import yaml
 
@@ -64,3 +65,19 @@ def safe_dump(x, safe_dict=None):
             default_flow_style=False,
         ))
     return ''.join(yamls)
+
+
+def sanitize_jinja(arg):
+    """
+    For some string, prevent usage of Jinja-like flags
+    """
+    if isinstance(arg, six.string_types):
+        # If the argument looks like it contains Jinja expressions
+        # {{ x }} ...
+        if re.search('\{\{[^}]+}}', arg) is not None:
+            raise ValueError('Inline Jinja variables are not allowed.')
+        # If the argument looks like it contains Jinja statements/control flow...
+        # {% if x.foo() %} ...
+        if re.search('\{%[^%]+%}', arg) is not None:
+            raise ValueError('Inline Jinja variables are not allowed.')
+    return arg

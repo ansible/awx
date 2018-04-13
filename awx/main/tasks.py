@@ -58,7 +58,7 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
                             parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal,
                             get_type_for_model, extract_ansible_vars)
-from awx.main.utils.safe_yaml import safe_dump
+from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
@@ -1151,7 +1151,7 @@ class RunJob(BaseTask):
         args = ['ansible-playbook', '-i', self.build_inventory(job, **kwargs)]
         if job.job_type == 'check':
             args.append('--check')
-        args.extend(['-u', ssh_username])
+        args.extend(['-u', sanitize_jinja(ssh_username)])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
         if job.become_enabled:
@@ -1159,9 +1159,9 @@ class RunJob(BaseTask):
         if job.diff_mode:
             args.append('--diff')
         if become_method:
-            args.extend(['--become-method', become_method])
+            args.extend(['--become-method', sanitize_jinja(become_method)])
         if become_username:
-            args.extend(['--become-user', become_username])
+            args.extend(['--become-user', sanitize_jinja(become_username)])
         if 'become_password' in kwargs.get('passwords', {}):
             args.append('--ask-become-pass')
         # Support prompting for a vault password.
@@ -2203,7 +2203,7 @@ class RunAdHocCommand(BaseTask):
         args = ['ansible', '-i', self.build_inventory(ad_hoc_command, **kwargs)]
         if ad_hoc_command.job_type == 'check':
             args.append('--check')
-        args.extend(['-u', ssh_username])
+        args.extend(['-u', sanitize_jinja(ssh_username)])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
         # We only specify sudo/su user and password if explicitly given by the
@@ -2211,9 +2211,9 @@ class RunAdHocCommand(BaseTask):
         if ad_hoc_command.become_enabled:
             args.append('--become')
         if become_method:
-            args.extend(['--become-method', become_method])
+            args.extend(['--become-method', sanitize_jinja(become_method)])
         if become_username:
-            args.extend(['--become-user', become_username])
+            args.extend(['--become-user', sanitize_jinja(become_username)])
         if 'become_password' in kwargs.get('passwords', {}):
             args.append('--ask-become-pass')
 
@@ -2248,7 +2248,7 @@ class RunAdHocCommand(BaseTask):
         args.extend(['-e', '@%s' % (extra_vars_path)])
 
         args.extend(['-m', ad_hoc_command.module_name])
-        args.extend(['-a', ad_hoc_command.module_args])
+        args.extend(['-a', sanitize_jinja(ad_hoc_command.module_args)])
 
         if ad_hoc_command.limit:
             args.append(ad_hoc_command.limit)

@@ -525,6 +525,13 @@ class TestAdhocRun(TestJobExecution):
             extra_vars={'awx_foo': 'awx-bar'}
         )
 
+    def test_options_jinja_usage(self):
+        self.instance.module_args = '{{ ansible_ssh_pass }}'
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+        update_model_call = self.task.update_model.call_args[1]
+        assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
+
     def test_created_by_extra_vars(self):
         self.instance.created_by = User(pk=123, username='angry-spud')
 
@@ -646,6 +653,33 @@ class TestJobCredentials(TestJobExecution):
             dict(field='become_password', password_name='become_password', expected_flag='--ask-become-pass'),
         ]
     }
+
+    def test_username_jinja_usage(self):
+        ssh = CredentialType.defaults['ssh']()
+        credential = Credential(
+            pk=1,
+            credential_type=ssh,
+            inputs = {'username': '{{ ansible_ssh_pass }}'}
+        )
+        self.instance.credential = credential
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+        update_model_call = self.task.update_model.call_args[1]
+        assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
+
+    @pytest.mark.parametrize("flag", ['become_username', 'become_method'])
+    def test_become_jinja_usage(self, flag):
+        ssh = CredentialType.defaults['ssh']()
+        credential = Credential(
+            pk=1,
+            credential_type=ssh,
+            inputs = {'username': 'joe', flag: '{{ ansible_ssh_pass }}'}
+        )
+        self.instance.credential = credential
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+        update_model_call = self.task.update_model.call_args[1]
+        assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
 
     def test_ssh_passwords(self, field, password_name, expected_flag):
         ssh = CredentialType.defaults['ssh']()
