@@ -31,6 +31,7 @@ import six
 from awx.main.models import * # noqa
 from django.contrib.sessions.models import Session
 from awx.api.serializers import * # noqa
+from awx.main.constants import TOKEN_CENSOR
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
@@ -449,6 +450,8 @@ model_serializer_mapping = {
     WorkflowJobTemplate: WorkflowJobTemplateSerializer,
     WorkflowJobTemplateNode: WorkflowJobTemplateNodeSerializer,
     WorkflowJob: WorkflowJobSerializer,
+    OAuth2AccessToken: OAuth2TokenSerializer,
+    OAuth2Application: OAuth2ApplicationSerializer,
 }
 
 
@@ -468,7 +471,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
         if type(instance) == OAuth2AccessToken:
-            changes['token'] = '*************'
+            changes['token'] = TOKEN_CENSOR
         activity_entry = ActivityStream(
             operation='create',
             object1=object1,
