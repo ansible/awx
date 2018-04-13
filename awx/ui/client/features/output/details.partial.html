@@ -44,13 +44,35 @@
 <div>
     <!-- STATUS DETAIL -->
     <div class="JobResults-resultRow">
-        <label class="JobResults-resultRowLabel">{{ vm.status.label}}</label>
-         <div class="JobResults-resultRowText">
-             <i class="JobResults-statusResultIcon {{ vm.status.icon }}"></i>
-             {{ vm.status.value }}
-         </div>
-     </div>
+        <label class="JobResults-resultRowLabel">{{ vm.status.label }}</label>
+        <div class="JobResults-resultRowText">
+            <i class="JobResults-statusResultIcon {{ vm.status.icon }}"></i>
+            {{ vm.status.value }}
+        </div>
+    </div>
 
+    <!-- EXPLANATION DETAIL -->
+    <div class="JobResults-resultRow" ng-show="vm.jobExplanation">
+        <label class="JobResults-resultRowLabel">{{ vm.jobExplanation.label }}</label>
+        <div class="JobResults-resultRowText"
+             ng-show="!vm.jobExplanation.showMore">
+            {{ vm.jobExplanation.less }}
+            <span ng-show="vm.jobExplanation.hasMoreToShow">...</span>
+            <span ng-show="vm.jobExplanation.hasMoreToShow"
+                  class="JobResults-seeMoreLess"
+                  ng-click="vm.jobExplanation.showMore = true">
+                Show More
+            </span>
+        </div>
+        <div class="JobResults-resultRowText"
+             ng-show="vm.jobExplanation.showMore">
+            {{ vm.jobExplanation.more }}
+            <span class="JobResults-seeMoreLess"
+                  ng-click="vm.jobExplanation.showMore = false">
+                Show Less
+            </span>
+        </div>
+    </div>
 
     <!-- START TIME DETAIL -->
     <div class="JobResults-resultRow" ng-if="vm.started">
@@ -75,9 +97,26 @@
     </div>
 
     <!-- RESULTS TRACEBACK DETAIL -->
-    <div class="JobResults-resultRow" ng-if="vm.resultTraceback">
+    <div class="JobResults-resultRow" ng-show="vm.resultTraceback">
         <label class="JobResults-resultRowLabel">{{ vm.resultTraceback.label }}</label>
-        <div class="JobResults-resultRowText" ng-bind-html="vm.resultTraceback.value"></div>
+        <div class="JobResults-resultRowText"
+             ng-show="!vm.resultTraceback.showMore">
+            {{ vm.resultTraceback.less }}
+            <span ng-show="vm.resultTraceback.hasMoreToShow">...</span>
+            <span ng-show="vm.resultTraceback.hasMoreToShow"
+                  class="JobResults-seeMoreLess"
+                  ng-click="vm.resultTraceback.showMore = true">
+                Show More
+            </span>
+        </div>
+        <div class="JobResults-resultRowText"
+             ng-show="vm.resultTraceback.showMore">
+            {{ vm.resultTraceback.more }}
+            <span class="JobResults-seeMoreLess"
+                  ng-click="vm.resultTraceback.showMore = false">
+                Show Less
+            </span>
+        </div>
     </div>
 
     <!-- TEMPLATE DETAIL -->
@@ -91,7 +130,9 @@
                 {{ vm.jobTemplate.value }}
             </a>
 
-            <a href="{{ vm.sourceWorkflowJob.link }}" ng-if="vm.sourceWorkflowJob" aw-tool-tip="{{ vm.sourceWorkflowJob.tooltip }}" data-placement="top">
+            <a href="{{ vm.sourceWorkflowJob.link }}" 
+               ng-if="vm.sourceWorkflowJob"
+               aw-tool-tip="{{ vm.sourceWorkflowJob.tooltip }}" data-placement="top">
                 <i class="WorkflowBadge"> W</i>
             </a>
         </div>
@@ -157,7 +198,7 @@
     </div>
 
     <!-- CREDENTIAL DETAIL -->
-    <div class="JobResults-resultRow" if="vm.credential">
+    <div class="JobResults-resultRow" ng-if="vm.credential">
         <label class="JobResults-resultRowLabel">{{ vm.credential.label }}</label>
         <div class="JobResults-resultRowText">
             <a href="{{ vm.credential.link }}"
