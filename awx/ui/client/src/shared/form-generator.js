@@ -599,6 +599,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         label = (includeLabel !== undefined && includeLabel === false) ? false : true;
 
                     if (label) {
+                        html += "<span class=\"Form-checkboxRow\">";
                         html += "<label class=\"";
                         html += (field.inline === undefined || field.inline === true) ? "checkbox-inline" : "";
                         html += (field.labelClass) ? " " + field.labelClass : "";
@@ -628,6 +629,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += field.label + " ";
                         html += (field.awPopOver) ? Attr(field, 'awPopOver', fld) : "";
                         html += "</label>\n";
+                        html += "</span>";
                     }
 
                     return html;
