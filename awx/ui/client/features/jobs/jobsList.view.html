@@ -71,8 +71,17 @@
                 <at-relaunch job="job"
                     ng-show="job.summary_fields.user_capabilities.start">
                 </at-relaunch>
+                <at-row-action icon="fa-minus-circle" ng-click="vm.cancelJob(job)"
+                    ng-show="job.summary_fields.user_capabilities.start &&
+                             (job.status === 'pending' ||
+                             job.status === 'waiting' ||
+                             job.status === 'running')">
+                </at-row-action>
                 <at-row-action icon="fa-trash" ng-click="vm.deleteJob(job)"
-                    ng-show="job.summary_fields.user_capabilities.delete">
+                    ng-show="job.summary_fields.user_capabilities.delete &&
+                             !(job.status === 'pending' ||
+                             job.status === 'waiting' ||
+                             job.status === 'running')">
                 </at-row-action>
             </div>
         </at-row>
