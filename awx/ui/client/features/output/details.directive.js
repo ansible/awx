@@ -256,33 +256,49 @@ function getPlaybookDetails () {
 }
 
 function getJobExplanationDetails () {
-    const jobExplanation = resource.model.get('job_explanation');
+    const explanation = resource.model.get('job_explanation');
 
-    if (!jobExplanation) {
+    if (!explanation) {
         return null;
     }
 
-    const value = null;
+    const limit = 150;
+    const label = 'Explanation';
 
-    return { value };
+    let more = explanation;
+
+    if (explanation.split(':')[0] === 'Previous Task Failed') {
+        const taskStringIndex = explanation.split(':')[0].length + 1;
+        const task = JSON.parse(explanation.substring(taskStringIndex));
+
+        more = `${task.job_type} failed for ${task.job_name} with ID ${task.job_id}`;
+    }
+
+    const less = $filter('limitTo')(more, limit);
+
+    const showMore = false;
+    const hasMoreToShow = more.length > limit;
+
+    return { label, less, more, showMore, hasMoreToShow };
 }
 
 function getResultTracebackDetails () {
-    const previousTaskFailed = false;
-    const resultTraceback = resource.model.get('result_traceback');
+    const traceback = resource.model.get('result_traceback');
 
-    if (!resultTraceback) {
+    if (!traceback) {
         return null;
     }
 
-    if (!previousTaskFailed) {
-        return null;
-    }
-
+    const limit = 150;
     const label = 'Results Traceback';
-    const value = null;
 
-    return { label, value };
+    const more = traceback;
+    const less = $filter('limitTo')(more, limit);
+
+    const showMore = false;
+    const hasMoreToShow = more.length > limit;
+
+    return { label, less, more, showMore, hasMoreToShow };
 }
 
 function getCredentialDetails () {

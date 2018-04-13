@@ -20,13 +20,11 @@ module.exports = {
 
         configuration.waitForElementVisible(systemTab);
         configuration.click(systemTab);
-
         configuration.waitForElementNotVisible(authView);
         configuration.waitForElementVisible(systemView);
 
         configuration.waitForElementVisible(authTab);
         configuration.click(authTab);
-
         configuration.waitForElementNotVisible(systemView);
         configuration.waitForElementVisible(authView);
 
