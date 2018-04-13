@@ -36,7 +36,7 @@ with mock.patch.dict(os.environ, {'ANSIBLE_STDOUT_CALLBACK': CALLBACK,
     from ansible.vars.manager import VariableManager
 
     # Add awx/lib to sys.path so we can use the plugin
-    path = os.path.abspath(os.path.join(PLUGINS, '..', '..'))
+    path = os.path.abspath(os.path.join(PLUGINS, '..', '..', 'lib'))
     if path not in sys.path:
         sys.path.insert(0, path)
 
