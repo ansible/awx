@@ -77,6 +77,7 @@ from awx.main.utils import (
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.insights import filter_insights_api_response
+from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission,
     TaskPermission,
@@ -4645,9 +4646,17 @@ class UnifiedJobList(ListAPIView):
     serializer_class = UnifiedJobListSerializer
 
 
-class StdoutANSIFilter(object):
+def redact_ansi(line):
+    # Remove ANSI escape sequences used to embed event data.
+    line = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', line)
+    # Remove ANSI color escape sequences.
+    return re.sub(r'\x1b[^m]*m', '', line)
+
+
+class StdoutFilter(object):
 
     def __init__(self, fileobj):
+        self._functions = []
         self.fileobj = fileobj
         self.extra_data = ''
         if hasattr(fileobj, 'close'):
@@ -4659,10 +4668,7 @@ class StdoutANSIFilter(object):
             line = self.fileobj.readline(size)
             if not line:
                 break
-            # Remove ANSI escape sequences used to embed event data.
-            line = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', line)
-            # Remove ANSI color escape sequences.
-            line = re.sub(r'\x1b[^m]*m', '', line)
+            line = self.process_line(line)
             data += line
         if size > 0 and len(data) > size:
             self.extra_data = data[size:]
@@ -4670,6 +4676,14 @@ class StdoutANSIFilter(object):
         else:
             self.extra_data = ''
         return data
+
+    def register(self, func):
+        self._functions.append(func)
+
+    def process_line(self, line):
+        for func in self._functions:
+            line = func(line)
+        return line
 
 
 class UnifiedJobStdout(RetrieveAPIView):
@@ -4728,9 +4742,12 @@ class UnifiedJobStdout(RetrieveAPIView):
                     suffix='.ansi' if target_format == 'ansi_download' else ''
                 )
                 content_fd = unified_job.result_stdout_raw_handle(enforce_max_bytes=False)
+                redactor = StdoutFilter(content_fd)
                 if target_format == 'txt_download':
-                    content_fd = StdoutANSIFilter(content_fd)
-                response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
+                    redactor.register(redact_ansi)
+                if type(unified_job) == ProjectUpdate:
+                    redactor.register(UriCleaner.remove_sensitive)
+                response = HttpResponse(FileWrapper(redactor), content_type='text/plain')
                 response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
                 return response
             else:

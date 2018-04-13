@@ -79,19 +79,21 @@ TEST_CLEARTEXT.append({
 })
 
 
-@pytest.mark.parametrize('username, password, not_uri', [
-    ('', '', 'www.famfamfam.com](http://www.famfamfam.com/fijdlfd'),
-    ('', '', 'https://www.famfamfam.com](http://www.famfamfam.com/fijdlfd'),
-    ('root', 'gigity', 'https://root@gigity@www.famfamfam.com](http://www.famfamfam.com/fijdlfd'),
-    ('root', 'gigity@', 'https://root:gigity@@@www.famfamfam.com](http://www.famfamfam.com/fijdlfd'),
+@pytest.mark.parametrize('username, password, not_uri, expected', [
+    ('', '', 'www.famfamfam.com](http://www.famfamfam.com/fijdlfd', 'www.famfamfam.com](http://www.famfamfam.com/fijdlfd'),
+    ('', '', 'https://www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
+    ('root', 'gigity', 'https://root@gigity@www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
+    ('root', 'gigity@', 'https://root:gigity@@@www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
 ])
 # should redact sensitive usernames and passwords
-def test_non_uri_redact(username, password, not_uri):
+def test_non_uri_redact(username, password, not_uri, expected):
     redacted_str = UriCleaner.remove_sensitive(not_uri)
     if username:
         assert username not in redacted_str
     if password:
         assert password not in redacted_str
+
+    assert redacted_str == expected
 
 
 def test_multiple_non_uri_redact():
