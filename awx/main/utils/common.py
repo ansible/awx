@@ -383,7 +383,7 @@ def _convert_model_field_for_display(obj, field_name, password_fields=None):
             field_val = json.dumps(field_val, ensure_ascii=False)
         except Exception:
             pass
-    if type(field_val) not in (bool, int, type(None)):
+    if type(field_val) not in (bool, int, type(None), long):
         field_val = smart_str(field_val)
     return field_val
 
@@ -416,10 +416,8 @@ def model_instance_diff(old, new, serializer_mapping=None):
                 _convert_model_field_for_display(old, field, password_fields=old_password_fields),
                 _convert_model_field_for_display(new, field, password_fields=new_password_fields),
             )
-
     if len(diff) == 0:
         diff = None
-
     return diff
 
 
@@ -438,7 +436,6 @@ def model_to_dict(obj, serializer_mapping=None):
         if field.name not in allowed_fields:
             continue
         attr_d[field.name] = _convert_model_field_for_display(obj, field.name, password_fields=password_fields)
-
     return attr_d
 
 
