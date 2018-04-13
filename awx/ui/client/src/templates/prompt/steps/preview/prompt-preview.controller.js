@@ -82,7 +82,7 @@ export default
                 // password $encrypted$ strings so we clone it
                 const extraVarsClone = _.cloneDeep(scope.promptData.extraVars);
                 // Replace the survey passwords with $encrypted$ to display to the user
-                const cleansedExtraVars = Object.assign(extraVarsClone, surveyPasswords);
+                const cleansedExtraVars = extraVarsClone ? Object.assign(extraVarsClone, surveyPasswords) : {};
 
                 scope.promptExtraVars = $.isEmptyObject(scope.promptData.extraVars) ? '---' : '---\n' + jsyaml.safeDump(cleansedExtraVars);
 
