@@ -208,8 +208,8 @@ def test_callback_plugin_no_log_filters(executor, cache, playbook):
     - shell: echo "PUBLIC"
     - shell: echo "PRIVATE"
       no_log: true
-    - uri: uri=https://example.org username="PUBLIC" password="PRIVATE"
-    - copy: content="PRIVATE" destination="/tmp/tmp_no_log"
+    - uri: url=https://example.org username="PUBLIC" password="PRIVATE"
+    - copy: content="PRIVATE" dest="/tmp/tmp_no_log"
 '''},  # noqa
 ])
 def test_callback_plugin_task_args_leak(executor, cache, playbook):
@@ -227,6 +227,8 @@ def test_callback_plugin_task_args_leak(executor, cache, playbook):
     assert events[5]['event'] == 'runner_on_ok'
     assert 'PUBLIC' in json.dumps(cache.items())
     assert 'PRIVATE' not in json.dumps(cache.items())
+    # make sure playbook was successful, so all tasks were hit
+    assert not events[-1]['event_data']['failures'], 'Unexpected playbook execution failure'
 
 
 @pytest.mark.parametrize('playbook', [
