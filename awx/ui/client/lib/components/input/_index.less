@@ -261,4 +261,12 @@
             width: 16px;
         }
     }
+
+    input[type=range][disabled] {
+        &::-webkit-slider-thumb {
+            background: @at-color-disabled;
+            border: solid 1px @at-color-disabled;
+            cursor: not-allowed;
+        }
+    }
 }

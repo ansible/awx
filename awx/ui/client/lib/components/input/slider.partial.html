@@ -6,7 +6,8 @@
                     ng-model="state._value"
                     min="0"
                     max="100"
-                    ng-change="vm.slide(state._value)"/>
+                    ng-change="vm.slide(state._value)"
+                    ng-disabled="state._disabled || form.disabled"/>
             <p>{{ state._value }}%</p>
         </div>
     </div>
