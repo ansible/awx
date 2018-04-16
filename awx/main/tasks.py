@@ -1032,7 +1032,7 @@ class BaseTask(Task):
         except Exception:
             logger.exception(six.text_type('{} Final run hook errored.').format(instance.log_format))
         instance.websocket_emit_status(status)
-        if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
+        if status != 'successful':
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
             if status == 'canceled':
