@@ -32,6 +32,8 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         $scope.$parent.schedulerEndDt = month + '/' + day + '/' + dt.getFullYear();
     };
 
+    $scope.preventCredsWithPasswords = true;
+
     /*
      * This is a workaround for the angular-scheduler library inserting `ll` into fields after an
      * invalid entry and never unsetting them. Presumably null is being truncated down to 2 chars

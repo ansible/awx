@@ -14,6 +14,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
         let promptWatcher, surveyQuestionWatcher;
 
         $scope.strings = TemplatesStrings;
+        $scope.preventCredsWithPasswords = true;
 
         $scope.workflowMakerFormConfig = {
             nodeMode: "idle",

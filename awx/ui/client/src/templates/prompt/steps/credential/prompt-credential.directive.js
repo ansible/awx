@@ -11,7 +11,8 @@ export default [ 'templateUrl', '$compile', 'generateList',
     return {
         scope: {
           promptData: '=',
-          credentialPasswordsForm: '='
+          credentialPasswordsForm: '=',
+          preventCredsWithPasswords: '<'
         },
         templateUrl: templateUrl('templates/prompt/steps/credential/prompt-credential'),
         controller: promptCredentialController,
