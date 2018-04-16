@@ -1,4 +1,13 @@
 ---
+- name: Authenticate with Docker registry if registry password given
+  docker_login:
+    registry: "{{ docker_registry }}"
+    username: "{{ docker_registry_username }}"
+    password: "{{ docker_registry_password }}"
+    reauthorize: yes
+  when: docker_registry is defined and docker_registry_password is defined
+  delegate_to: localhost
+
 - name: Remove local images to ensure proper push behavior
   # TODO: this code will not be necessary if and when docker_image can be configured to push if the image
   # Already exists locally
@@ -6,13 +15,13 @@
   block:
     - name: Remove web image
       docker_image:
-        name: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
+        name: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ web_image }}"
         tag: "{{ awx_version }}"
         state: absent
 
     - name: Remove task image
       docker_image:
-        name: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
+        name: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ task_image }}"
         tag: "{{ awx_version }}"
         state: absent
   delegate_to: localhost
@@ -22,22 +31,28 @@
   block:
     - name: Tag and push web image to registry
       docker_image:
-        name: "{{ awx_web_image }}"
-        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}"
-        tag: "{{ awx_version }}"
+        name: "{{ web_image }}"
+        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ web_image }}"
+        tag: "{{ item }}"
         push: yes
+      with_items:
+        - "latest"
+        - "{{ awx_version }}"
 
     - name: Tag and push task image to registry
       docker_image:
-        name: "{{ awx_task_image }}"
-        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}"
-        tag: "{{ awx_version }}"
+        name: "{{ task_image }}"
+        repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ task_image }}"
+        tag: "{{ item }}"
         push: yes
+      with_items:
+        - "latest"
+        - "{{ awx_version }}"
   delegate_to: localhost
 
 - name: Set full image path for Registry
   set_fact:
     awx_web_docker_actual_image: >-
-      {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_web_image }}:{{ awx_version }}
+      {{ docker_registry }}/{{ docker_registry_repository }}/{{ web_image }}:{{ awx_version }}
     awx_task_docker_actual_image: >-
-      {{ docker_registry }}/{{ docker_registry_repository }}/{{ awx_task_image }}:{{ awx_version }}
+      {{ docker_registry }}/{{ docker_registry_repository }}/{{ task_image }}:{{ awx_version }}

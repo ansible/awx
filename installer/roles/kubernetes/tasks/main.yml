@@ -23,34 +23,6 @@
   ignore_errors: yes
   when: "pg_hostname is not defined or pg_hostname == ''"
 
-- name: Manage AWX Container Images
-  include_role:
-    name: image_push
-  when: dockerhub_base is not defined
-
-- name: Set image names
-  block:
-    - name: Enable image stream lookups for awx images
-      shell: "{{ openshift_oc_bin }} set image-lookup --all -n {{ kubernetes_namespace }}"
-      when: openshift_host is defined
-
-    - name: Set full web image path
-      set_fact:
-        web_kubernetes_image: "{{ web_image }}:{{ version }}"
-      when: web_kubernetes_image is not defined
-
-    - name: Set full task image path
-      set_fact:
-        task_kubernetes_image: "{{ task_image }}:{{ version }}"
-      when: task_kubernetes_image is not defined
-  when: dockerhub_base is not defined
-
-- name: Set DockerHub Image Paths
-  set_fact:
-    web_kubernetes_image: "{{ dockerhub_base }}/awx_web:{{ dockerhub_version }}"
-    task_kubernetes_image: "{{ dockerhub_base }}/awx_task:{{ dockerhub_version }}"
-  when: dockerhub_base is defined
-
 - name: Deploy PostgreSQL (OpenShift)
   block:
     - name: Template PostgreSQL Deployment
@@ -112,6 +84,19 @@
     src: configmap.yml.j2
     dest: "{{ kubernetes_base_path }}/configmap.yml"
     mode: '0600'
+
+- name: Set image names if using custom registry
+  block:
+    - name: Set task image name
+      set_fact:
+        kubernetes_task_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ task_image }}"
+      when: kubernetes_task_image is not defined
+
+    - name: Set web image name
+      set_fact:
+        kubernetes_web_image: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ web_image }}"
+      when: kubernetes_web_image is not defined
+  when: docker_registry is defined
 
 - name: Template Kubernetes AWX Deployment
   template:

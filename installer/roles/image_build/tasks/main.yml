@@ -89,11 +89,11 @@
 
 - name: Set awx_web image name
   set_fact:
-    awx_web_image: "{{ awx_web_image|default('awx_web') }}"
+    web_image: "{{ web_image|default('awx_web') }}"
 
 - name: Set awx_task image name
   set_fact:
-    awx_task_image: "{{ awx_task_image|default('awx_task') }}"
+    task_image: "{{ task_image|default('awx_task') }}"
 
 - name: Ensure directory exists
   file:
@@ -195,7 +195,7 @@
       no_proxy: "{{ no_proxy | default('') }}"
     path: "{{ docker_base_path }}"
     dockerfile: Dockerfile
-    name: "{{ awx_web_image }}"
+    name: "{{ web_image }}"
     tag: "{{ awx_version }}"
   delegate_to: localhost
 
@@ -207,10 +207,16 @@
       no_proxy: "{{ no_proxy | default('') }}"
     path: "{{ docker_base_path }}"
     dockerfile: Dockerfile.task
-    name: "{{ awx_task_image }}"
+    name: "{{ task_image }}"
     tag: "{{ awx_version }}"
     pull: no
   delegate_to: localhost
+
+- name: Tag task and web images as latest
+  command: "docker tag {{ item }}:{{ awx_version }} {{ item }}:latest"
+  with_items:
+    - "{{ task_image }}"
+    - "{{ web_image }}"
 
 - name: Clean docker base directory
   file:

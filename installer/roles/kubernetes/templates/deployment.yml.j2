@@ -131,7 +131,7 @@ spec:
       serviceAccountName: rabbitmq
       containers:
         - name: {{ kubernetes_deployment_name }}-web
-          image: {{ web_kubernetes_image }}
+          image: {{ kubernetes_web_image | default(dockerhub_web_image) }}
           imagePullPolicy: Always
           ports:
             - containerPort: 8052
@@ -143,7 +143,7 @@ spec:
               memory: "{{ web_mem_request }}Gi"
               cpu: "{{ web_cpu_request }}m"
         - name: {{ kubernetes_deployment_name }}-celery
-          image: {{ task_kubernetes_image }}
+          image: {{ kubernetes_task_image | default(dockerhub_task_image) }}
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /etc/tower
@@ -172,7 +172,7 @@ spec:
               memory: "{{ task_mem_request }}Gi"
               cpu: "{{ task_cpu_request }}m"
         - name: {{ kubernetes_deployment_name }}-rabbit
-          image: {{ rabbitmq_image }}
+          image: "{{ kubernetes_rabbitmq_image }}:{{ kubernetes_rabbitmq_version }}"
           imagePullPolicy: Always
           ports:
             - name: http
@@ -212,7 +212,7 @@ spec:
               memory: "{{ rabbitmq_mem_request }}Gi"
               cpu: "{{ rabbitmq_cpu_request }}m"
         - name: {{ kubernetes_deployment_name }}-memcached
-          image: {{ memcached_image }}
+          image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           resources:
             requests:
               memory: "{{ memcached_mem_request }}Gi"

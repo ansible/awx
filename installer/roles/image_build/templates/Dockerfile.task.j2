@@ -1,4 +1,4 @@
-FROM {{ awx_web_image }}:{{ awx_version }}
+FROM {{ web_image }}:{{ awx_version }}
 USER 0
 RUN sudo yum -y remove nginx
 USER 1000
