@@ -1683,14 +1683,8 @@ class UserRolesList(SubListAttachDetachAPIView):
         if not sub_id:
             return super(UserRolesList, self).post(request)
 
-        if sub_id == self.request.user.admin_role.pk:
-            raise PermissionDenied(_('You may not perform any action with your own admin_role.'))
-
         user = get_object_or_400(User, pk=self.kwargs['pk'])
         role = get_object_or_400(Role, pk=sub_id)
-        user_content_type = ContentType.objects.get_for_model(User)
-        if role.content_type == user_content_type:
-            raise PermissionDenied(_('You may not change the membership of a users admin_role'))
 
         credential_content_type = ContentType.objects.get_for_model(Credential)
         if role.content_type == credential_content_type:
@@ -4909,12 +4903,6 @@ class RoleUsersList(SubListAttachDetachAPIView):
 
         user = get_object_or_400(User, pk=sub_id)
         role = self.get_parent_object()
-        if role == self.request.user.admin_role:
-            raise PermissionDenied(_('You may not perform any action with your own admin_role.'))
-
-        user_content_type = ContentType.objects.get_for_model(User)
-        if role.content_type == user_content_type:
-            raise PermissionDenied(_('You may not change the membership of a users admin_role'))
 
         credential_content_type = ContentType.objects.get_for_model(Credential)
         if role.content_type == credential_content_type:
