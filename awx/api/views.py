@@ -4143,7 +4143,7 @@ class JobRelaunch(RetrieveAPIView):
                 for p in needed_passwords:
                     data['credential_passwords'][p] = u''
             else:
-                data.pop('credential_passwords')
+                data.pop('credential_passwords', None)
         return data
 
     @csrf_exempt
