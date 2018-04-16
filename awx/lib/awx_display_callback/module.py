@@ -330,6 +330,14 @@ class BaseCallbackModule(CallbackBase):
         with self.capture_event_data('playbook_on_stats', **event_data):
             super(BaseCallbackModule, self).v2_playbook_on_stats(stats)
 
+    @staticmethod
+    def _get_event_loop(task):
+        if hasattr(task, 'loop_with'):  # Ansible >=2.5
+            return task.loop_with
+        elif hasattr(task, 'loop'):  # Ansible <2.4
+            return task.loop
+        return None
+
     def v2_runner_on_ok(self, result):
         # FIXME: Display detailed results or not based on verbosity.
 
@@ -343,7 +351,7 @@ class BaseCallbackModule(CallbackBase):
             remote_addr=result._host.address,
             task=result._task,
             res=result._result,
-            event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
+            event_loop=self._get_event_loop(result._task),
         )
         with self.capture_event_data('runner_on_ok', **event_data):
             super(BaseCallbackModule, self).v2_runner_on_ok(result)
@@ -356,7 +364,7 @@ class BaseCallbackModule(CallbackBase):
             res=result._result,
             task=result._task,
             ignore_errors=ignore_errors,
-            event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
+            event_loop=self._get_event_loop(result._task),
         )
         with self.capture_event_data('runner_on_failed', **event_data):
             super(BaseCallbackModule, self).v2_runner_on_failed(result, ignore_errors)
@@ -366,7 +374,7 @@ class BaseCallbackModule(CallbackBase):
             host=result._host.get_name(),
             remote_addr=result._host.address,
             task=result._task,
-            event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
+            event_loop=self._get_event_loop(result._task),
         )
         with self.capture_event_data('runner_on_skipped', **event_data):
             super(BaseCallbackModule, self).v2_runner_on_skipped(result)
