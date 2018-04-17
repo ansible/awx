@@ -9,6 +9,8 @@ SOSREPORT_TOWER_COMMANDS = [
     "awx-manage --version", # tower version
     "awx-manage list_instances", # tower cluster configuration
     "supervisorctl status",   # tower process status
+    "rabbitmqctl status",
+    "rabbitmqctl cluster_status",
     "/var/lib/awx/venv/awx/bin/pip freeze",             # pip package list
     "/var/lib/awx/venv/ansible/bin/pip freeze",             # pip package list
     "tree -d /var/lib/awx",   # show me the dirs
