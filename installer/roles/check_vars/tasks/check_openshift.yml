@@ -1,10 +1,10 @@
 # check_openshift.yml
 ---
-- name: awx_openshift_project should be defined
+- name: openshift_project should be defined
   assert:
     that:
-    - awx_openshift_project is defined and awx_openshift_project != ''
-    msg: "Set the value of 'awx_openshift_project' in the inventory file."
+    - openshift_project is defined and openshift_project != ''
+    msg: "Set the value of 'openshift_project' in the inventory file."
 
 - name: openshift_user should be defined
   assert:

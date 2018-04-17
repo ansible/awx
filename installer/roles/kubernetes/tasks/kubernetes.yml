@@ -2,15 +2,15 @@
   shell: "kubectl config set-context {{ kubernetes_context }}"
 
 - name: Get Namespace Detail
-  shell: "kubectl get namespace {{ awx_kubernetes_namespace }}"
+  shell: "kubectl get namespace {{ kubernetes_namespace }}"
   register: namespace_details
   ignore_errors: yes
 
 - name: Create AWX Kubernetes Project
-  shell: "kubectl create namespace {{ awx_kubernetes_namespace }}"
+  shell: "kubectl create namespace {{ kubernetes_namespace }}"
   when: namespace_details.rc != 0
 
 - name: Set postgresql service name
   set_fact:
-    postgresql_service_name: "{{ awx_kubernetes_namespace }}-postgresql"
+    postgresql_service_name: "{{ kubernetes_namespace }}-postgresql"
   when: "pg_hostname is not defined or pg_hostname == ''"

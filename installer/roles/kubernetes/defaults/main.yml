@@ -1,17 +1,26 @@
 ---
-awx_web_mem_request: 1
-awx_web_cpu_request: 500
+dockerhub_web_image: "{{ dockerhub_base | default('ansible') }}/awx_web:{{ dockerhub_version | default('latest') }}"
+dockerhub_task_image: "{{ dockerhub_base | default('ansible') }}/awx_task:{{ dockerhub_version | default('latest') }}"
 
-awx_task_mem_request: 2
-awx_task_cpu_request: 1500
+web_mem_request: 1
+web_cpu_request: 500
 
-awx_rabbitmq_mem_request: 2
-awx_rabbitmq_cpu_request: 500
+task_mem_request: 2
+task_cpu_request: 1500
 
-awx_memcached_mem_request: 1
-awx_memcached_cpu_request: 500
+rabbitmq_mem_request: 2
+rabbitmq_cpu_request: 500
 
-rabbitmq_version: "3.7.4"
+memcached_mem_request: 1
+memcached_cpu_request: 500
+
+kubernetes_rabbitmq_version: "3.7.4"
+kubernetes_rabbitmq_image: "ansible/awx_rabbitmq"
+
+kubernetes_memcached_version: "latest"
+kubernetes_memcached_image: "memcached"
 
 openshift_pg_emptydir: no
 openshift_pg_pvc_name: postgresql
+
+kubernetes_deployment_name: awx

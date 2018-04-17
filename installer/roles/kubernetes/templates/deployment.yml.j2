@@ -2,7 +2,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  namespace: {{ awx_kubernetes_namespace }}
+  namespace: {{ kubernetes_namespace }}
   name: rabbitmq
   labels:
     app: rabbitmq
@@ -14,12 +14,10 @@ spec:
      protocol: TCP
      port: 15672
      targetPort: 15672
-     nodePort: 31672
    - name: amqp
      protocol: TCP
      port: 5672
      targetPort: 5672
-     nodePort: 30672
   selector:
     app: rabbitmq
 
@@ -28,7 +26,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: rabbitmq-config
-  namespace: {{ awx_kubernetes_namespace }}
+  namespace: {{ kubernetes_namespace }}
 data:
   enabled_plugins: |
       [rabbitmq_management,rabbitmq_peer_discovery_k8s].
@@ -54,7 +52,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: rabbitmq
-  namespace: {{ awx_kubernetes_namespace }}
+  namespace: {{ kubernetes_namespace }}
 
 {% if kubernetes_context is defined %}
 ---
@@ -62,7 +60,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: endpoint-reader
-  namespace: {{ awx_kubernetes_namespace }}
+  namespace: {{ kubernetes_namespace }}
 rules:
 - apiGroups: [""]
   resources: ["endpoints"]
@@ -72,7 +70,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: endpoint-reader
-  namespace: {{ awx_kubernetes_namespace }}
+  namespace: {{ kubernetes_namespace }}
 subjects:
 - kind: ServiceAccount
   name: rabbitmq
@@ -88,7 +86,7 @@ kind: Role
 apiVersion: v1
 metadata:
   name: endpoint-reader
-  namespace: {{ awx_kubernetes_namespace }}
+  namespace: {{ kubernetes_namespace }}
 rules:
   - apiGroups: [""]
     resources: ["endpoints"]
@@ -98,53 +96,58 @@ kind: RoleBinding
 apiVersion: v1
 metadata:
   name: endpoint-reader
-  namespace: {{ awx_kubernetes_namespace }}
+  namespace: {{ kubernetes_namespace }}
 roleRef:
   name: endpoint-reader
-  namespace: {{ awx_kubernetes_namespace }}
+  namespace: {{ kubernetes_namespace }}
 subjects:
   - kind: ServiceAccount
     name: rabbitmq
-    namespace: {{ awx_kubernetes_namespace }}
+    namespace: {{ kubernetes_namespace }}
 userNames:
-  - system:serviceaccount:{{ awx_kubernetes_namespace }}:rabbitmq
+  - system:serviceaccount:{{ kubernetes_namespace }}:rabbitmq
 {% endif %}
 
 ---
+{% if openshift_host is defined %}
+apiVersion: v1
+kind: DeploymentConfig
+{% else %}
 apiVersion: extensions/v1beta1
-kind: Deployment
+kind: DeploymentConfig
+{% endif %}
 metadata:
-  name: awx
-  namespace: {{ awx_kubernetes_namespace }}
+  name: {{ kubernetes_deployment_name }}
+  namespace: {{ kubernetes_namespace }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        name: awx-web-deploy
+        name: {{ kubernetes_deployment_name }}-web-deploy
         service: django
         app: rabbitmq
     spec:
       serviceAccountName: rabbitmq
       containers:
-        - name: awx-web
-          image: {{ awx_web_kubernetes_image }}
+        - name: {{ kubernetes_deployment_name }}-web
+          image: {{ kubernetes_web_image | default(dockerhub_web_image) }}
           imagePullPolicy: Always
           ports:
             - containerPort: 8052
           volumeMounts:
             - mountPath: /etc/tower
-              name: awx-application-config
+              name: {{ kubernetes_deployment_name }}-application-config
           resources:
             requests:
-              memory: "{{ awx_web_mem_request }}Gi"
-              cpu: "{{ awx_web_cpu_request }}m"
-        - name: awx-celery
-          image: {{ awx_task_kubernetes_image }}
+              memory: "{{ web_mem_request }}Gi"
+              cpu: "{{ web_cpu_request }}m"
+        - name: {{ kubernetes_deployment_name }}-celery
+          image: {{ kubernetes_task_image | default(dockerhub_task_image) }}
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /etc/tower
-              name: awx-application-config
+              name: {{ kubernetes_deployment_name }}-application-config
           env:
             - name: DATABASE_USER
               value: {{ pg_username }}
@@ -166,10 +169,10 @@ spec:
               value: {{ default_admin_password|default('password') }}
           resources:
             requests:
-              memory: "{{ awx_task_mem_request }}Gi"
-              cpu: "{{ awx_task_cpu_request }}m"
-        - name: awx-rabbit
-          image: ansible/awx_rabbitmq:{{ rabbitmq_version }}
+              memory: "{{ task_mem_request }}Gi"
+              cpu: "{{ task_cpu_request }}m"
+        - name: {{ kubernetes_deployment_name }}-rabbit
+          image: "{{ kubernetes_rabbitmq_image }}:{{ kubernetes_rabbitmq_version }}"
           imagePullPolicy: Always
           ports:
             - name: http
@@ -206,20 +209,20 @@ spec:
               mountPath: /etc/rabbitmq
           resources:
             requests:
-              memory: "{{ awx_rabbitmq_mem_request }}Gi"
-              cpu: "{{ awx_rabbitmq_cpu_request }}m"
-        - name: awx-memcached
-          image: memcached
+              memory: "{{ rabbitmq_mem_request }}Gi"
+              cpu: "{{ rabbitmq_cpu_request }}m"
+        - name: {{ kubernetes_deployment_name }}-memcached
+          image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           resources:
             requests:
-              memory: "{{ awx_memcached_mem_request }}Gi"
-              cpu: "{{ awx_memcached_cpu_request }}m"
+              memory: "{{ memcached_mem_request }}Gi"
+              cpu: "{{ memcached_cpu_request }}m"
       volumes:
-        - name: awx-application-config
+        - name: {{ kubernetes_deployment_name }}-application-config
           configMap:
-            name: awx-config
+            name: {{ kubernetes_deployment_name }}-config
             items:
-              - key: awx_settings
+              - key: {{ kubernetes_deployment_name }}_settings
                 path: settings.py
               - key: secret_key
                 path: SECRET_KEY
@@ -235,10 +238,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: awx-web-svc
-  namespace: {{ awx_kubernetes_namespace }}
+  name: {{ kubernetes_deployment_name }}-web-svc
+  namespace: {{ kubernetes_namespace }}
   labels:
-    name: awx-web-svc
+    name: {{ kubernetes_deployment_name }}-web-svc
 spec:
   type: "NodePort"
   ports:
@@ -246,15 +249,15 @@ spec:
       port: 80
       targetPort: 8052
   selector:
-    name: awx-web-deploy
+    name: {{ kubernetes_deployment_name }}-web-deploy
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: awx-rmq-mgmt
-  namespace: {{ awx_kubernetes_namespace }}
+  name: {{ kubernetes_deployment_name }}-rmq-mgmt
+  namespace: {{ kubernetes_namespace }}
   labels:
-    name: awx-rmq-mgmt
+    name: {{ kubernetes_deployment_name }}-rmq-mgmt
 spec:
   type: ClusterIP
   ports:
@@ -262,17 +265,17 @@ spec:
       port: 15672
       targetPort: 15672
   selector:
-    name: awx-web-deploy
+    name: {{ kubernetes_deployment_name }}-web-deploy
 {% if kubernetes_context is defined %}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: awx-web-svc
-  namespace: {{ awx_kubernetes_namespace }}
+  name: {{ kubernetes_deployment_name }}-web-svc
+  namespace: {{ kubernetes_namespace }}
 spec:
   backend:
-    serviceName: awx-web-svc
+    serviceName: {{ kubernetes_deployment_name }}-web-svc
     servicePort: 80
 {% endif %}
 {% if openshift_host is defined %}
@@ -280,8 +283,8 @@ spec:
 apiVersion: v1
 kind: Route
 metadata:
-  name: awx-web-svc
-  namespace: {{ awx_kubernetes_namespace }}
+  name: {{ kubernetes_deployment_name }}-web-svc
+  namespace: {{ kubernetes_namespace }}
 spec:
   port:
     targetPort: http
@@ -290,7 +293,7 @@ spec:
     termination: edge
   to:
     kind: Service
-    name: awx-web-svc
+    name: {{ kubernetes_deployment_name }}-web-svc
     weight: 100
   wildcardPolicy: None
 {% endif %}

@@ -1,33 +1,33 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: awx-config
-  namespace: {{ awx_kubernetes_namespace }}
+  name: {{ kubernetes_deployment_name }}-config
+  namespace: {{ kubernetes_namespace }}
 data:
-  secret_key: {{ awx_secret_key }}
-  awx_settings: |
+  secret_key: {{ secret_key }}
+  {{ kubernetes_deployment_name }}_settings: |
     import os
     import socket
     ADMINS = ()
-    
+
     # Container environments don't like chroots
     AWX_PROOT_ENABLED = False
 
     # Automatically deprovision pods that go offline
     AWX_AUTO_DEPROVISION_INSTANCES = True
 
-    SYSTEM_TASK_ABS_CPU = {{ ((awx_task_cpu_request|int / 1000) * 4)|int }}
-    SYSTEM_TASK_ABS_MEM = {{ ((awx_task_mem_request|int * 1024) / 100)|int }}
+    SYSTEM_TASK_ABS_CPU = {{ ((task_cpu_request|int / 1000) * 4)|int }}
+    SYSTEM_TASK_ABS_MEM = {{ ((task_mem_request|int * 1024) / 100)|int }}
 
     #Autoprovisioning should replace this
     CLUSTER_HOST_ID = socket.gethostname()
     SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
     SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False 
+    CSRF_COOKIE_SECURE = False
 
     REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR']
-    
+
     STATIC_ROOT = '/var/lib/awx/public/static'
     PROJECTS_ROOT = '/var/lib/awx/projects'
     JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
@@ -42,13 +42,13 @@ data:
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
     EMAIL_USE_TLS = False
-    
+
     LOGGING['handlers']['console'] = {
         '()': 'logging.StreamHandler',
         'level': 'DEBUG',
         'formatter': 'simple',
     }
-    
+
     LOGGING['loggers']['django.request']['handlers'] = ['console']
     LOGGING['loggers']['rest_framework.request']['handlers'] = ['console']
     LOGGING['loggers']['awx']['handlers'] = ['console']
@@ -68,7 +68,7 @@ data:
     LOGGING['handlers']['rbac_migrations'] = {'class': 'logging.NullHandler'}
     LOGGING['handlers']['system_tracking_migrations'] = {'class': 'logging.NullHandler'}
     LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
-    
+
     DATABASES = {
         'default': {
             'ATOMIC_REQUESTS': True,
