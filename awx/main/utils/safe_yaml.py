@@ -50,21 +50,25 @@ def safe_dump(x, safe_dict=None):
     a: b
     !unsafe 'c': !unsafe 'd'
     """
-    yamls = []
-    safe_dict = safe_dict or {}
-    # Compare the top level keys so that we can find values that have
-    # equality matches (and consider those branches safe)
-    for k, v in x.items():
-        dumper = yaml.SafeDumper
-        if safe_dict.get(k) != v:
-            dumper = SafeStringDumper
-        yamls.append(yaml.dump_all(
-            [{k: v}],
-            None,
-            Dumper=dumper,
-            default_flow_style=False,
-        ))
-    return ''.join(yamls)
+    if isinstance(x, dict):
+        yamls = []
+        safe_dict = safe_dict or {}
+
+        # Compare the top level keys so that we can find values that have
+        # equality matches (and consider those branches safe)
+        for k, v in x.items():
+            dumper = yaml.SafeDumper
+            if safe_dict.get(k) != v:
+                dumper = SafeStringDumper
+            yamls.append(yaml.dump_all(
+                [{k: v}],
+                None,
+                Dumper=dumper,
+                default_flow_style=False,
+            ))
+        return ''.join(yamls)
+    else:
+        return yaml.dump_all([x], None, Dumper=SafeStringDumper, default_flow_style=False)
 
 
 def sanitize_jinja(arg):
