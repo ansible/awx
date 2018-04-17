@@ -630,8 +630,16 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
             vars_dict = yaml.safe_load(vars_str)
             # Can be None if '---'
             if vars_dict is None:
-                return {}
+                vars_dict = {}
             validate_vars_type(vars_dict)
+            if not silent_failure:
+                # is valid YAML, check that it is compatible with JSON
+                try:
+                    json.dumps(vars_dict)
+                except (ValueError, TypeError, AssertionError) as json_err2:
+                    raise ParseError(_(
+                        'Variables not compatible with JSON standard (error: {json_error})').format(
+                            json_error=str(json_err2)))
         except (yaml.YAMLError, TypeError, AttributeError, AssertionError) as yaml_err:
             if silent_failure:
                 return {}
