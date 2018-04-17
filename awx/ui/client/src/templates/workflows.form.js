@@ -27,6 +27,16 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
             detailsClick: "$state.go('templates.editWorkflowJobTemplate')",
             include: ['/static/partials/survey-maker-modal.html'],
 
+            headerFields: {
+                missingTemplates: {
+                    type: 'html',
+                    html: `<div ng-show="missingTemplates" class="Workflow-warning">
+                            <span class="Workflow-warningIcon fa fa-warning"></span>` +
+                            i18n._("Missing Job Templates found in the <span class='Workflow-warningLink' ng-click='openWorkflowMaker()'>Workflow Editor</span>") +
+                            `</div>`
+                }
+            },
+
             fields: {
                 name: {
                     label: i18n._('Name'),

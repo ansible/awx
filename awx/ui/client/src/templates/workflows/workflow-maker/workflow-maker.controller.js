@@ -76,15 +76,19 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 // Create the node
                 let sendableNodeData = {
                     unified_job_template: params.node.unifiedJobTemplate.id,
-                    credential: _.get(params, 'node.originalNodeObj.credential') || null
+                    extra_data: {},
+                    inventory: null,
+                    job_type: null,
+                    job_tags: null,
+                    skip_tags: null,
+                    limit: null,
+                    diff_mode: null,
+                    verbosity: null,
+                    credential: null
                 };
 
                 if (_.has(params, 'node.promptData.extraVars')) {
                     if (_.get(params, 'node.promptData.launchConf.defaults.extra_vars')) {
-                        if (!sendableNodeData.extra_data) {
-                            sendableNodeData.extra_data = {};
-                        }
-
                         const defaultVars = jsyaml.safeLoad(params.node.promptData.launchConf.defaults.extra_vars);
 
                         // Only include extra vars that differ from the template default vars
@@ -674,11 +678,14 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                     launchConf.passwords_needed_to_start.length === 0 &&
                                     launchConf.variables_needed_to_start.length === 0) {
                                         $scope.showPromptButton = false;
+                                        $scope.promptModalMissingReqFields = false;
                                 } else {
                                     $scope.showPromptButton = true;
 
                                     if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeBeingEdited.originalNodeObj.summary_fields.inventory')) {
                                         $scope.promptModalMissingReqFields = true;
+                                    } else {
+                                        $scope.promptModalMissingReqFields = false;
                                     }
 
                                     if (responses[1].data.survey_enabled) {
@@ -728,36 +735,40 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                         });
                     }
 
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.type === "job_template") {
+                    if (_.get($scope, 'nodeBeingEdited.unifiedJobTemplate')) {
+                        if (_.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === "job_template") {
+                            $scope.workflowMakerFormConfig.activeTab = "jobs";
+                        }
+
+                        $scope.selectedTemplate = $scope.nodeBeingEdited.unifiedJobTemplate;
+
+                        if ($scope.selectedTemplate.unified_job_type) {
+                            switch ($scope.selectedTemplate.unified_job_type) {
+                                case "job":
+                                    $scope.workflowMakerFormConfig.activeTab = "jobs";
+                                    break;
+                                case "project_update":
+                                    $scope.workflowMakerFormConfig.activeTab = "project_sync";
+                                    break;
+                                case "inventory_update":
+                                    $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
+                                    break;
+                            }
+                        } else if ($scope.selectedTemplate.type) {
+                            switch ($scope.selectedTemplate.type) {
+                                case "job_template":
+                                    $scope.workflowMakerFormConfig.activeTab = "jobs";
+                                    break;
+                                case "project":
+                                    $scope.workflowMakerFormConfig.activeTab = "project_sync";
+                                    break;
+                                case "inventory_source":
+                                    $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
+                                    break;
+                            }
+                        }
+                    } else {
                         $scope.workflowMakerFormConfig.activeTab = "jobs";
-                    }
-
-                    $scope.selectedTemplate = $scope.nodeBeingEdited.unifiedJobTemplate;
-
-                    if ($scope.selectedTemplate.unified_job_type) {
-                        switch ($scope.selectedTemplate.unified_job_type) {
-                            case "job":
-                                $scope.workflowMakerFormConfig.activeTab = "jobs";
-                                break;
-                            case "project_update":
-                                $scope.workflowMakerFormConfig.activeTab = "project_sync";
-                                break;
-                            case "inventory_update":
-                                $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
-                                break;
-                        }
-                    } else if ($scope.selectedTemplate.type) {
-                        switch ($scope.selectedTemplate.type) {
-                            case "job_template":
-                                $scope.workflowMakerFormConfig.activeTab = "jobs";
-                                break;
-                            case "project":
-                                $scope.workflowMakerFormConfig.activeTab = "project_sync";
-                                break;
-                            case "inventory_source":
-                                $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
-                                break;
-                        }
                     }
 
                     let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({
@@ -771,7 +782,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                      switch($scope.nodeBeingEdited.edgeType) {
                         case "always":
                             $scope.edgeType = {label: "Always", value: "always"};
-                            if (siblingConnectionTypes.length === 1 && _.includes(siblingConnectionTypes, "always")) {
+                            if (siblingConnectionTypes.length === 1 && _.includes(siblingConnectionTypes, "always") || $scope.nodeBeingEdited.isRoot) {
                                 edgeDropdownOptions = ["always"];
                             }
                             break;
@@ -987,11 +998,14 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             launchConf.passwords_needed_to_start.length === 0 &&
                             launchConf.variables_needed_to_start.length === 0) {
                                 $scope.showPromptButton = false;
+                                $scope.promptModalMissingReqFields = false;
                         } else {
                             $scope.showPromptButton = true;
 
                             if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory')) {
                                 $scope.promptModalMissingReqFields = true;
+                            } else {
+                                $scope.promptModalMissingReqFields = false;
                             }
 
                             if (launchConf.survey_enabled) {
@@ -1048,6 +1062,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 $scope.selectedTemplate = angular.copy(selectedTemplate);
                 $scope.selectedTemplateInvalid = false;
                 $scope.showPromptButton = false;
+                $scope.promptModalMissingReqFields = false;
             }
         };
 
