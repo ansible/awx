@@ -133,10 +133,22 @@ register(
 )
 
 register(
-    'ALLOW_JINJA_IN_JOB_TEMPLATE_EXTRA_VARS',
-    field_class=fields.BooleanField,
-    label=_('Allow Jinja template execution in Job Template extra vars'),
-    help_text=_('Ansible allows variable substitution and templating via the Jinja2 templating language for a variety of arguments (such as --extra-vars); enabling this flag allows arbitrary Jinja templates to be used on extra vars defined in Job Templates.'),  # noqa
+    'ALLOW_JINJA_IN_EXTRA_VARS',
+    field_class=fields.ChoiceField,
+    choices=[
+        ('always', _('Always')),
+        ('never', _('Never')),
+        ('template', _('Only On Job Template Definitions')),
+    ],
+    required=True,
+    label=_('When can extra variables contain Jinja templates?'),
+    help_text=_(
+        'Ansible allows variable substitution via the Jinja2 templating '
+        'language for --extra-vars. This poses a potential security '
+        'risk where Tower users with the ability to specify extra vars at job '
+        'launch time can use Jinja2 templates to run arbitrary Python.  It is '
+        'recommended that this value be set to "template" or "never".'
+    ),
     category=_('Jobs'),
     category_slug='jobs',
 )

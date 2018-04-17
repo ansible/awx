@@ -626,7 +626,10 @@ class BaseTask(LogErrorsTask):
     def build_extra_vars_file(self, vars, **kwargs):
         handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
         f = os.fdopen(handle, 'w')
-        f.write(safe_dump(vars, kwargs.get('safe_dict', {}) or None))
+        if settings.ALLOW_JINJA_IN_EXTRA_VARS == 'always':
+            f.write(yaml.safe_dump(vars))
+        else:
+            f.write(safe_dump(vars, kwargs.get('safe_dict', {}) or None))
         f.close()
         os.chmod(path, stat.S_IRUSR)
         return path
@@ -909,8 +912,7 @@ class BaseTask(LogErrorsTask):
         except Exception:
             if status != 'canceled':
                 tb = traceback.format_exc()
-                if settings.DEBUG:
-                    logger.exception('%s Exception occurred while running task', instance.log_format)
+                logger.exception('%s Exception occurred while running task', instance.log_format)
         finally:
             try:
                 stdout_handle.flush()
@@ -1221,7 +1223,7 @@ class RunJob(BaseTask):
         # higher levels of privilege - those that have the ability create and
         # edit Job Templates)
         safe_dict = {}
-        if job.job_template and settings.ALLOW_JINJA_IN_JOB_TEMPLATE_EXTRA_VARS is True:
+        if job.job_template and settings.ALLOW_JINJA_IN_EXTRA_VARS == 'template':
             safe_dict = job.job_template.extra_vars_dict
         extra_vars_path = self.build_extra_vars_file(
             vars=extra_vars,
