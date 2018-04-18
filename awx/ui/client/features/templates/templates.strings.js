@@ -89,6 +89,10 @@ function TemplatesStrings (BaseString) {
     ns.warnings = {
         WORKFLOW_RESTRICTED_COPY: t.s('You do not have access to all resources used by this workflow. Resources that you don\'t have access to will not be copied and will result in an incomplete workflow.')
     };
+
+    ns.workflows = {
+        INVALID_JOB_TEMPLATE: t.s('This Job Template is missing a default inventory or project. This must be addressed in the Job Template form before this node can be saved.')
+    };
 }
 
 TemplatesStrings.$inject = ['BaseStringService'];

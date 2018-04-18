@@ -18,7 +18,6 @@ import workflowService from './workflows/workflow.service';
 import WorkflowForm from './workflows.form';
 import InventorySourcesList from './inventory-sources.list';
 import TemplateList from './templates.list';
-import TemplatesStrings from './templates.strings';
 import listRoute from '~features/templates/routes/templatesList.route.js';
 import templateCompletedJobsRoute from '~features/jobs/routes/templateCompletedJobs.route.js';
 
@@ -32,7 +31,6 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
     // TODO: currently being kept arround for rbac selection, templates within projects and orgs, etc.
     .factory('TemplateList', TemplateList)
     .value('InventorySourcesList', InventorySourcesList)
-    .service('TemplatesStrings', TemplatesStrings)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,
