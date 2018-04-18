@@ -4562,7 +4562,7 @@ class InstanceSerializer(BaseSerializer):
         return obj.consumed_capacity
 
     def get_percent_capacity_remaining(self, obj):
-        if not obj.capacity or obj.consumed_capacity == obj.capacity:
+        if not obj.capacity or obj.consumed_capacity >= obj.capacity:
             return 0.0
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
@@ -4619,9 +4619,12 @@ class InstanceGroupSerializer(BaseSerializer):
     def get_percent_capacity_remaining(self, obj):
         if not obj.capacity:
             return 0.0
+        consumed = self.get_consumed_capacity(obj)
+        if consumed >= obj.capacity:
+            return 0.0
         else:
             return float("{0:.2f}".format(
-                ((float(obj.capacity) - float(self.get_consumed_capacity(obj))) / (float(obj.capacity))) * 100)
+                ((float(obj.capacity) - float(consumed)) / (float(obj.capacity))) * 100)
             )
 
     def get_jobs_running(self, obj):
