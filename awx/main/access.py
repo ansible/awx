@@ -2399,7 +2399,7 @@ class ActivityStreamAccess(BaseAccess):
     model = ActivityStream
     prefetch_related = ('organization', 'user', 'inventory', 'host', 'group',
                         'inventory_update', 'credential', 'credential_type', 'team',
-                        'ad_hoc_command',
+                        'ad_hoc_command', 'o_auth2_application', 'o_auth2_access_token', 
                         'notification_template', 'notification', 'label', 'role', 'actor',
                         'schedule', 'custom_inventory_script', 'unified_job_template',
                         'workflow_job_template_node',)
@@ -2442,9 +2442,13 @@ class ActivityStreamAccess(BaseAccess):
         jt_set = JobTemplate.accessible_objects(self.user, 'read_role')
         team_set = Team.accessible_objects(self.user, 'read_role')
         wfjt_set = WorkflowJobTemplate.accessible_objects(self.user, 'read_role')
+        app_set = OAuth2ApplicationAccess(self.user).filtered_queryset()
+        token_set = OAuth2TokenAccess(self.user).filtered_queryset()
 
         return qs.filter(
             Q(ad_hoc_command__inventory__in=inventory_set) |
+            Q(o_auth2_application__in=app_set) |
+            Q(o_auth2_access_token__in=token_set) |
             Q(user__in=auditing_orgs.values('member_role__members')) |
             Q(user=self.user) |
             Q(organization__in=auditing_orgs) |
