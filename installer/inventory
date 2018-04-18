@@ -109,3 +109,13 @@ secret_key=awxsecret
 # /etc/pki/ca-trust in the awx_task and awx_web containers.
 # NOTE: only obeyed in local_docker install
 #ca_trust_dir=/etc/pki/ca-trust
+
+# traefik/SSL Configuration
+# This will setup a traefik container in front of the awx_web container to handle ssl
+# The traefik container is is enabled if the ssl_cert variable is set.
+# awx_fqdn refers to the fqdn that traefik will use for your awx instance
+# ssl_cert and ssl_key should be full-paths to ssl cert/key on the host machine.
+# This will not put them in place automatically. They must already exist on the host
+awx_fqdn=awx.local
+ssl_cert=/etc/pki/tls/cert.pem
+ssl_key=/etc/pki/tls/key.key

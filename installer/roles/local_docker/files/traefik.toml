@@ -1,0 +1,27 @@
+debug = true
+
+defaultEntryPoints = ["http", "https"]
+
+[api]
+address = ":8080"
+
+[docker]
+endpoint = "unix:///tmp/docker.sock"
+
+# Can be overridden by setting the "traefik.domain" label on a container.
+domain = "awx.local"
+
+# Enable watch docker changes.
+watch = true
+
+[entrypoints]
+  [entryPoints.http]
+    address = ":80"
+    [entryPoints.http.redirect]
+      entryPoint = "https"
+  [entryPoints.https]
+    address = ":443"
+      [entryPoints.https.tls]
+        [[entryPoints.https.tls.certificates]]
+        certFile = "/certs/cert.pem"
+        keyFile = "/certs/key.key"
