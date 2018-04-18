@@ -2177,7 +2177,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
             return Response(dict(error=_(six.text_type(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
-class HostDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class HostDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
 
     always_allow_superuser = False
     model = Host
