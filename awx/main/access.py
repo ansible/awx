@@ -1474,24 +1474,7 @@ class JobAccess(BaseAccess):
 
         if not data:  # So the browseable API will work
             return True
-        if not self.user.is_superuser:
-            return False
-
-
-        add_data = dict(data.items())
-
-        # If a job template is provided, the user should have read access to it.
-        if data and data.get('job_template', None):
-            job_template = get_object_from_data('job_template', JobTemplate, data)
-            add_data.setdefault('inventory', job_template.inventory.pk)
-            add_data.setdefault('project', job_template.project.pk)
-            add_data.setdefault('job_type', job_template.job_type)
-            if job_template.credential:
-                add_data.setdefault('credential', job_template.credential.pk)
-        else:
-            job_template = None
-
-        return True
+        return self.user.is_superuser
 
     def can_change(self, obj, data):
         return (obj.status == 'new' and
