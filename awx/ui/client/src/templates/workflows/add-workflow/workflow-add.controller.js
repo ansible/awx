@@ -59,7 +59,14 @@ export default [
 
              try {
                  for (fld in form.fields) {
-                     data[fld] = $scope[fld];
+                     if(form.fields[fld].type === 'checkbox_group') {
+                         // Loop across the checkboxes
+                         for(var i=0; i<form.fields[fld].fields.length; i++) {
+                             data[form.fields[fld].fields[i].name] = $scope[form.fields[fld].fields[i].name];
+                         }
+                     } else {
+                         data[fld] = $scope[fld];
+                     }
                  }
 
                  data.extra_vars = ToJSON($scope.parseType,
