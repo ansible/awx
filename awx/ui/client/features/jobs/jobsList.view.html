@@ -12,7 +12,7 @@
             query-set="querySet">
         </smart-search>
     </div>
-    <at-list results="jobs">
+    <at-list results="jobs" empty-list-reason="{{ vm.emptyListReason }}">
         <!-- TODO: implement resources are missing red indicator as present in mockup -->
         <at-row ng-repeat="job in jobs" job-id="{{ job.id }}">
             <div class="at-Row-items">
