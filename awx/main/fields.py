@@ -9,7 +9,7 @@ import six
 import urllib
 
 from jinja2 import Environment, StrictUndefined
-from jinja2.exceptions import UndefinedError
+from jinja2.exceptions import UndefinedError, TemplateSyntaxError
 
 # Django
 from django.core import exceptions as django_exceptions
@@ -807,6 +807,12 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 except UndefinedError as e:
                     raise django_exceptions.ValidationError(
                         _('%s uses an undefined field (%s)') % (key, e),
+                        code='invalid',
+                        params={'value': value},
+                    )
+                except TemplateSyntaxError as e:
+                    raise django_exceptions.ValidationError(
+                        _('Syntax error rendering template for %s inside of %s (%s)') % (key, type_, e),
                         code='invalid',
                         params={'value': value},
                     )
