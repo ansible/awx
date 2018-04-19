@@ -420,6 +420,10 @@ class JSONSchemaField(JSONBField):
                         '{type} provided, expected {expected_type}'
                     ).format(path=list(error.path), type=type(error.instance).__name__,
                              expected_type=expected_type)
+            elif error.validator == 'additionalProperties' and hasattr(error, 'path'):
+                error.message = _(
+                    'Schema validation error in relative path {path} ({error})'
+                ).format(path=list(error.path), error=error.message)
             errors.append(error)
 
         if errors:
