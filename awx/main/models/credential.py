@@ -2,7 +2,6 @@
 # All Rights Reserved.
 from collections import OrderedDict
 import functools
-import json
 import logging
 import operator
 import os
@@ -25,6 +24,7 @@ from awx.main.fields import (ImplicitRoleField, CredentialInputField,
                              CredentialTypeInputField,
                              CredentialTypeInjectorField)
 from awx.main.utils import decrypt_field
+from awx.main.utils.safe_yaml import safe_dump
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import * # noqa
 from awx.main.models.mixins import ResourceMixin
@@ -581,16 +581,21 @@ class CredentialType(CommonModelNameNotUnique):
             safe_env[env_var] = Template(tmpl).render(**safe_namespace)
 
         extra_vars = {}
-        safe_extra_vars = {}
         for var_name, tmpl in self.injectors.get('extra_vars', {}).items():
             extra_vars[var_name] = Template(tmpl).render(**namespace)
-            safe_extra_vars[var_name] = Template(tmpl).render(**safe_namespace)
 
+        def build_extra_vars_file(vars, private_dir):
+            handle, path = tempfile.mkstemp(dir = private_dir)
+            f = os.fdopen(handle, 'w')
+            f.write(safe_dump(vars))
+            f.close()
+            os.chmod(path, stat.S_IRUSR)
+            return path
+
+        path = build_extra_vars_file(extra_vars, private_data_dir)
         if extra_vars:
-            args.extend(['-e', json.dumps(extra_vars)])
-
-        if safe_extra_vars:
-            safe_args.extend(['-e', json.dumps(safe_extra_vars)])
+            args.extend(['-e', '@%s' % path])
+            safe_args.extend(['-e', '@%s' % path])
 
 
 @CredentialType.default

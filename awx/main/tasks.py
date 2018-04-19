@@ -58,6 +58,7 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             wrap_args_with_proot, get_system_task_capacity, OutputEventFilter,
                             parse_yaml_or_json, ignore_inventory_computed_fields, ignore_inventory_group_removal,
                             get_type_for_model, extract_ansible_vars)
+from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import restart_local_services, stop_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
@@ -622,6 +623,17 @@ class BaseTask(LogErrorsTask):
             '': '',
         }
 
+    def build_extra_vars_file(self, vars, **kwargs):
+        handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
+        f = os.fdopen(handle, 'w')
+        if settings.ALLOW_JINJA_IN_EXTRA_VARS == 'always':
+            f.write(yaml.safe_dump(vars))
+        else:
+            f.write(safe_dump(vars, kwargs.get('safe_dict', {}) or None))
+        f.close()
+        os.chmod(path, stat.S_IRUSR)
+        return path
+
     def add_ansible_venv(self, env, add_awx_lib=True):
         env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
         env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
@@ -900,8 +912,7 @@ class BaseTask(LogErrorsTask):
         except Exception:
             if status != 'canceled':
                 tb = traceback.format_exc()
-                if settings.DEBUG:
-                    logger.exception('%s Exception occurred while running task', instance.log_format)
+                logger.exception('%s Exception occurred while running task', instance.log_format)
         finally:
             try:
                 stdout_handle.flush()
@@ -1142,7 +1153,7 @@ class RunJob(BaseTask):
         args = ['ansible-playbook', '-i', self.build_inventory(job, **kwargs)]
         if job.job_type == 'check':
             args.append('--check')
-        args.extend(['-u', ssh_username])
+        args.extend(['-u', sanitize_jinja(ssh_username)])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
         if job.become_enabled:
@@ -1150,9 +1161,9 @@ class RunJob(BaseTask):
         if job.diff_mode:
             args.append('--diff')
         if become_method:
-            args.extend(['--become-method', become_method])
+            args.extend(['--become-method', sanitize_jinja(become_method)])
         if become_username:
-            args.extend(['--become-user', become_username])
+            args.extend(['--become-user', sanitize_jinja(become_username)])
         if 'become_password' in kwargs.get('passwords', {}):
             args.append('--ask-become-pass')
         # Support prompting for a vault password.
@@ -1205,7 +1216,21 @@ class RunJob(BaseTask):
                 extra_vars.update(json.loads(job.display_extra_vars()))
             else:
                 extra_vars.update(json.loads(job.decrypted_extra_vars()))
-        args.extend(['-e', json.dumps(extra_vars)])
+
+        # By default, all extra vars disallow Jinja2 template usage for
+        # security reasons; top level key-values defined in JT.extra_vars, however,
+        # are whitelisted as "safe" (because they can only be set by users with
+        # higher levels of privilege - those that have the ability create and
+        # edit Job Templates)
+        safe_dict = {}
+        if job.job_template and settings.ALLOW_JINJA_IN_EXTRA_VARS == 'template':
+            safe_dict = job.job_template.extra_vars_dict
+        extra_vars_path = self.build_extra_vars_file(
+            vars=extra_vars,
+            safe_dict=safe_dict,
+            **kwargs
+        )
+        args.extend(['-e', '@%s' % (extra_vars_path)])
 
         # Add path to playbook (relative to project.local_path).
         args.append(job.playbook)
@@ -1460,7 +1485,8 @@ class RunProjectUpdate(BaseTask):
             'scm_revision_output': self.revision_path,
             'scm_revision': project_update.project.scm_revision,
         })
-        args.extend(['-e', json.dumps(extra_vars)])
+        extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
+        args.extend(['-e', '@%s' % (extra_vars_path)])
         args.append('project_update.yml')
         return args
 
@@ -2179,7 +2205,7 @@ class RunAdHocCommand(BaseTask):
         args = ['ansible', '-i', self.build_inventory(ad_hoc_command, **kwargs)]
         if ad_hoc_command.job_type == 'check':
             args.append('--check')
-        args.extend(['-u', ssh_username])
+        args.extend(['-u', sanitize_jinja(ssh_username)])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
         # We only specify sudo/su user and password if explicitly given by the
@@ -2187,9 +2213,9 @@ class RunAdHocCommand(BaseTask):
         if ad_hoc_command.become_enabled:
             args.append('--become')
         if become_method:
-            args.extend(['--become-method', become_method])
+            args.extend(['--become-method', sanitize_jinja(become_method)])
         if become_username:
-            args.extend(['--become-user', become_username])
+            args.extend(['--become-user', sanitize_jinja(become_username)])
         if 'become_password' in kwargs.get('passwords', {}):
             args.append('--ask-become-pass')
 
@@ -2220,10 +2246,11 @@ class RunAdHocCommand(BaseTask):
                     "{} are prohibited from use in ad hoc commands."
                 ).format(", ".join(removed_vars)))
             extra_vars.update(ad_hoc_command.extra_vars_dict)
-        args.extend(['-e', json.dumps(extra_vars)])
+        extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
+        args.extend(['-e', '@%s' % (extra_vars_path)])
 
         args.extend(['-m', ad_hoc_command.module_name])
-        args.extend(['-a', ad_hoc_command.module_args])
+        args.extend(['-a', sanitize_jinja(ad_hoc_command.module_args)])
 
         if ad_hoc_command.limit:
             args.append(ad_hoc_command.limit)
