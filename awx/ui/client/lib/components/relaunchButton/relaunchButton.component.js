@@ -129,7 +129,7 @@ function atRelaunchCtrl (
 
     vm.$onInit = () => {
         vm.showRelaunch = vm.job.type !== 'system_job' && vm.job.summary_fields.user_capabilities.start;
-        vm.showDropdown = vm.job.type === 'job' && vm.job.failed === true;
+        vm.showDropdown = vm.job.type === 'job' && vm.job.status === 'failed';
 
         vm.createDropdown();
         vm.createTooltips();
