@@ -58,7 +58,7 @@ def safe_dump(x, safe_dict=None):
         # equality matches (and consider those branches safe)
         for k, v in x.items():
             dumper = yaml.SafeDumper
-            if safe_dict.get(k) != v:
+            if k not in safe_dict or safe_dict.get(k) != v:
                 dumper = SafeStringDumper
             yamls.append(yaml.dump_all(
                 [{k: v}],

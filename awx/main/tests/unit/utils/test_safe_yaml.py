@@ -20,6 +20,18 @@ def test_raw_string():
     assert safe_dump('foo') == "!unsafe 'foo'\n"
 
 
+def test_kv_null():
+    assert safe_dump({'a': None}) == "!unsafe 'a': null\n"
+
+
+def test_kv_null_safe():
+    assert safe_dump({'a': None}, {'a': None}) == "a: null\n"
+
+
+def test_kv_null_unsafe():
+    assert safe_dump({'a': ''}, {'a': None}) == "!unsafe 'a': !unsafe ''\n"
+
+
 def test_kv_int():
     assert safe_dump({'a': 1}) == "!unsafe 'a': 1\n"
 
