@@ -377,6 +377,15 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                     response.status
                                             });
                                         });
+                            }],
+                            workflowLaunch: ['$stateParams', 'WorkflowJobTemplateModel',
+                                function($stateParams, WorkflowJobTemplate) {
+                                    let workflowJobTemplate = new WorkflowJobTemplate();
+
+                                    return workflowJobTemplate.getLaunch($stateParams.workflow_job_template_id)
+                                        .then(({data}) => {
+                                            return data;
+                                        });
                             }]
                         }
                     }
