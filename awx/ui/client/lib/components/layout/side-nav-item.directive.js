@@ -4,7 +4,7 @@ function atSideNavItemLink (scope, element, attrs, ctrl) {
     [scope.navVm, scope.layoutVm] = ctrl;
 }
 
-function AtSideNavItemController ($state, $scope, strings) {
+function AtSideNavItemController ($scope, strings) {
     const vm = this || {};
 
     $scope.$watch('layoutVm.currentState', current => {
@@ -21,10 +21,6 @@ function AtSideNavItemController ($state, $scope, strings) {
         }
     });
 
-    vm.go = () => {
-        $state.go($scope.route, {}, { reload: true });
-    };
-
     vm.tooltip = {
         popover: {
             text: strings.get(`layout.${$scope.name}`),
@@ -36,7 +32,7 @@ function AtSideNavItemController ($state, $scope, strings) {
     };
 }
 
-AtSideNavItemController.$inject = ['$state', '$scope', 'ComponentsStrings'];
+AtSideNavItemController.$inject = ['$scope', 'ComponentsStrings'];
 
 function atSideNavItem () {
     return {
