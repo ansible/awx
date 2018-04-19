@@ -114,6 +114,7 @@
 .at-Row-content {
     align-items: center;
     display: flex;
+    flex-wrap: wrap;
     grid-column-start: 2;
     padding: @at-padding-list-row;
 }
@@ -160,6 +161,10 @@
     line-height: @at-line-height-list-row-item-labels;
     display: flex;
     flex-wrap: wrap;
+
+    * {
+        font-size: 10px;
+    }
 }
 
 .at-RowItem-header {
@@ -268,6 +273,7 @@
 @media screen and (max-width: @at-breakpoint-compact-list) {
     .at-Row-actions {
         flex-direction: column;
+        align-items: center;
     }
 
     .at-RowAction {
