@@ -68,31 +68,33 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
 
                         vm.promptData.prompts.credentials.passwords = {};
 
-                        vm.promptData.launchConf.passwords_needed_to_start.forEach((passwordNeeded) => {
-                            if(passwordNeeded === "ssh_password") {
-                                vm.promptData.prompts.credentials.passwords.ssh = {};
-                            }
-                            if(passwordNeeded === "become_password") {
-                                vm.promptData.prompts.credentials.passwords.become = {};
-                            }
-                            if(passwordNeeded === "ssh_key_unlock") {
-                                vm.promptData.prompts.credentials.passwords.ssh_key_unlock = {};
-                            }
-                            if(passwordNeeded.startsWith("vault_password")) {
-                                let vault_id;
-                                if(passwordNeeded.includes('.')) {
-                                    vault_id = passwordNeeded.split(/\.(.+)/)[1];
+                        if(vm.promptData.launchConf.passwords_needed_to_start) {
+                            vm.promptData.launchConf.passwords_needed_to_start.forEach((passwordNeeded) => {
+                                if(passwordNeeded === "ssh_password") {
+                                    vm.promptData.prompts.credentials.passwords.ssh = {};
                                 }
-
-                                if(!vm.promptData.prompts.credentials.passwords.vault) {
-                                    vm.promptData.prompts.credentials.passwords.vault = [];
+                                if(passwordNeeded === "become_password") {
+                                    vm.promptData.prompts.credentials.passwords.become = {};
                                 }
+                                if(passwordNeeded === "ssh_key_unlock") {
+                                    vm.promptData.prompts.credentials.passwords.ssh_key_unlock = {};
+                                }
+                                if(passwordNeeded.startsWith("vault_password")) {
+                                    let vault_id;
+                                    if(passwordNeeded.includes('.')) {
+                                        vault_id = passwordNeeded.split(/\.(.+)/)[1];
+                                    }
 
-                                vm.promptData.prompts.credentials.passwords.vault.push({
-                                    vault_id: vault_id
-                                });
-                            }
-                        });
+                                    if(!vm.promptData.prompts.credentials.passwords.vault) {
+                                        vm.promptData.prompts.credentials.passwords.vault = [];
+                                    }
+
+                                    vm.promptData.prompts.credentials.passwords.vault.push({
+                                        vault_id: vault_id
+                                    });
+                                }
+                            });
+                        }
 
                         vm.promptData.credentialTypeMissing = [];
 
