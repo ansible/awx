@@ -3,11 +3,13 @@ import pytest
 from awx.main.access import (
     OAuth2ApplicationAccess,
     OAuth2TokenAccess,
+    ActivityStreamAccess,
 )
 from awx.main.models.oauth import (
     OAuth2Application as Application,
     OAuth2AccessToken as AccessToken,
 )
+from awx.main.models import ActivityStream
 from awx.api.versioning import reverse
 
 
@@ -32,6 +34,42 @@ class TestOAuth2Application:
                     client_type='confidential', authorization_grant_type='password', organization=organization
                 )
                 assert access.can_read(app) is can_access    
+                
+        
+        def test_app_activity_stream(self, org_admin, alice, organization):
+            app = Application.objects.create(
+                name='test app for {}'.format(org_admin.username), user=org_admin,
+                client_type='confidential', authorization_grant_type='password', organization=organization
+            )
+            access = OAuth2ApplicationAccess(org_admin)
+            assert access.can_read(app) is True
+            access = ActivityStreamAccess(org_admin)
+            activity_stream = ActivityStream.objects.filter(o_auth2_application=app).latest('pk')
+            assert access.can_read(activity_stream) is True
+            access = ActivityStreamAccess(alice)
+            assert access.can_read(app) is False
+            assert access.can_read(activity_stream) is False
+            
+
+        def test_token_activity_stream(self, org_admin, alice, organization, post):
+            app = Application.objects.create(
+                name='test app for {}'.format(org_admin.username), user=org_admin,
+                client_type='confidential', authorization_grant_type='password', organization=organization
+            )
+            response = post(
+                reverse('api:o_auth2_application_token_list', kwargs={'pk': app.pk}),
+                {'scope': 'read'}, org_admin, expect=201
+            )
+            token = AccessToken.objects.get(token=response.data['token'])
+            access = OAuth2ApplicationAccess(org_admin)
+            assert access.can_read(app) is True
+            access = ActivityStreamAccess(org_admin)
+            activity_stream = ActivityStream.objects.filter(o_auth2_access_token=token).latest('pk')
+            assert access.can_read(activity_stream) is True
+            access = ActivityStreamAccess(alice)
+            assert access.can_read(token) is False
+            assert access.can_read(activity_stream) is False
+            
     
     
         def test_can_edit_delete_app_org_admin(
