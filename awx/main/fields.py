@@ -405,7 +405,7 @@ class JSONSchemaField(JSONBField):
             error.message = re.sub(r'\bu(\'|")', r'\1', error.message)
 
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = error.schema['error'].format(instance=error.instance)
+                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
             elif error.validator == 'type':
                 expected_type = error.validator_value
                 if expected_type == 'object':
@@ -551,7 +551,7 @@ class CredentialInputField(JSONSchemaField):
             format_checker=self.format_checker
         ).iter_errors(decrypted_values):
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = error.schema['error'].format(instance=error.instance)
+                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
             if error.validator == 'dependencies':
                 # replace the default error messaging w/ a better i18n string
                 # I wish there was a better way to determine the parameters of
