@@ -16,8 +16,7 @@ SOSREPORT_TOWER_COMMANDS = [
     "tree -d /var/lib/awx",   # show me the dirs
     "ls -ll /var/lib/awx",    # check permissions
     "ls -ll /var/lib/awx/venv", # list all venvs
-    "ls -ll /etc/tower",
-    "ls -ll /var/lib/awx/job_status/"
+    "ls -ll /etc/tower"
 ]
 
 SOSREPORT_TOWER_DIRS = [
