@@ -8,15 +8,15 @@ from awx.main.models import (
 
 
 @pytest.fixture
-def instance_group(job_factory):
-    ig = InstanceGroup(name="east")
+def tower_instance_group():
+    ig = InstanceGroup(name='tower')
     ig.save()
     return ig
 
 
 @pytest.fixture
-def tower_instance_group():
-    ig = InstanceGroup(name='tower')
+def instance_group(job_factory):
+    ig = InstanceGroup(name="east")
     ig.save()
     return ig
 
@@ -84,16 +84,10 @@ def test_modify_delete_tower_instance_group_prevented(delete, options, tower_ins
     url = reverse("api:instance_group_detail", kwargs={'pk': tower_instance_group.pk})
     super_user = user('bob', True)
 
-    # DELETE tower group not allowed
     delete(url, None, super_user, expect=403)
 
-    # OPTIONS should just be "GET"
     resp = options(url, None, super_user, expect=200)
-    assert len(resp.data['actions'].keys()) == 1
+    assert len(resp.data['actions'].keys()) == 2
+    assert 'DELETE' not in resp.data['actions']
     assert 'GET' in resp.data['actions']
-
-    # Updating tower group fields not allowed
-    patch(url, {'name': 'foobar'}, super_user, expect=403)
-    patch(url, {'policy_instance_percentage': 40}, super_user, expect=403)
-    put(url, {'name': 'foobar'}, super_user, expect=403)
-
+    assert 'PUT' in resp.data['actions']
