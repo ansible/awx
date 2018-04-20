@@ -214,6 +214,7 @@
 
 - name: Tag task and web images as latest
   command: "docker tag {{ item }}:{{ awx_version }} {{ item }}:latest"
+  delegate_to: localhost
   with_items:
     - "{{ task_image }}"
     - "{{ web_image }}"
