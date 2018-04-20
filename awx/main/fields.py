@@ -723,7 +723,7 @@ class CredentialTypeInputField(JSONSchemaField):
                         params={'value': value},
                     )
                 else:
-                    field['type'] = 'string'
+                    field.pop('type')
                     field['choices'] = CHOICES_PRIVILEGE_ESCALATION_METHODS
 
             for key in ('choices', 'multiline', 'format', 'secret',):
