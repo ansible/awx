@@ -714,7 +714,7 @@ class CredentialTypeInputField(JSONSchemaField):
             if field['type'] == 'become_method':
                 if not model_instance.managed_by_tower:
                     raise django_exceptions.ValidationError(
-                        _('{0} is a reserved type name'.format(field['type'])),
+                        _('become_method is a reserved type name'),
                         code='invalid',
                         params={'value': value},
                     )

@@ -200,6 +200,6 @@ def add_azure_cloud_environment_field(apps, schema_editor):
 
 
 def remove_become_methods(apps, schema_editor):
-    become_credtype = CredentialType.objects.get(kind='ssh')
+    become_credtype = CredentialType.objects.get(kind='ssh').first()
     become_credtype.inputs = CredentialType.defaults.get('ssh')().inputs
     become_credtype.save()

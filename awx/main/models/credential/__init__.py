@@ -165,7 +165,7 @@ class V1Credential(object):
             max_length=32,
             blank=True,
             default='',
-            choices=PRIVILEGE_ESCALATION_METHODS,
+            choices=[('', _('None'))] + PRIVILEGE_ESCALATION_METHODS,
             help_text=_('Privilege escalation method.')
         ),
         'become_username': models.CharField(
