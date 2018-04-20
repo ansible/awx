@@ -14,6 +14,7 @@ __all__ = [
 CLOUD_PROVIDERS = ('azure_rm', 'ec2', 'gce', 'vmware', 'openstack', 'rhv', 'satellite6', 'cloudforms', 'tower')
 SCHEDULEABLE_PROVIDERS = CLOUD_PROVIDERS + ('custom', 'scm',)
 PRIVILEGE_ESCALATION_METHODS = [
+    ('', _('None')), ('enable', _('Enable')), ('doas', _('Doas')),
     ('sudo', _('Sudo')), ('su', _('Su')), ('pbrun', _('Pbrun')), ('pfexec', _('Pfexec')),
     ('dzdo', _('DZDO')), ('pmrun', _('Pmrun')), ('runas', _('Runas'))]
 ANSI_SGR_PATTERN = re.compile(r'\x1b\[[0-9;]*m')

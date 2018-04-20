@@ -45,6 +45,7 @@ from awx.main.utils.filters import SmartFilter
 from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main import utils
 
 
@@ -649,7 +650,7 @@ class CredentialTypeInputField(JSONSchemaField):
                     'items': {
                         'type': 'object',
                         'properties': {
-                            'type': {'enum': ['string', 'boolean']},
+                            'type': {'enum': ['string', 'boolean', 'become_method']},
                             'format': {'enum': ['ssh_private_key']},
                             'choices': {
                                 'type': 'array',
@@ -709,6 +710,17 @@ class CredentialTypeInputField(JSONSchemaField):
             if 'type' not in field:
                 # If no type is specified, default to string
                 field['type'] = 'string'
+
+            if field['type'] == 'become_method':
+                if not model_instance.managed_by_tower:
+                    raise django_exceptions.ValidationError(
+                        _('{0} is a reserved type name'.format(field['type'])),
+                        code='invalid',
+                        params={'value': value},
+                    )
+                else:
+                    field['type'] = 'string'
+                    field['choices'] = PRIVILEGE_ESCALATION_METHODS
 
             for key in ('choices', 'multiline', 'format', 'secret',):
                 if key in field and field['type'] != 'string':

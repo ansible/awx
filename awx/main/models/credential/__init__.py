@@ -165,7 +165,7 @@ class V1Credential(object):
             max_length=32,
             blank=True,
             default='',
-            choices=[('', _('None'))] + PRIVILEGE_ESCALATION_METHODS,
+            choices=PRIVILEGE_ESCALATION_METHODS,
             help_text=_('Privilege escalation method.')
         ),
         'become_username': models.CharField(
@@ -516,7 +516,7 @@ class CredentialType(CommonModelNameNotUnique):
             if field['id'] == field_id:
                 if 'choices' in field:
                     return field['choices'][0]
-                return {'string': '', 'boolean': False}[field['type']]
+                return {'string': '', 'boolean': False, 'become_method': ''}[field['type']]
 
     @classmethod
     def default(cls, f):
