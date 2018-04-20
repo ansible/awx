@@ -12,7 +12,9 @@ export default
         function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter, $state) {
             return {
                 restrict: 'E',
-                scope: false,
+                scope: {
+                    state: '='
+                },
                 templateUrl: templateUrl('templates/labels/labelsList'),
                 link: function(scope, element, attrs) {
                     scope.showDelete = attrs.showDelete === 'true';
@@ -33,7 +35,9 @@ export default
 
                     scope.seeMore = function () {
                         var seeMoreResolve = $q.defer();
-                        Rest.setUrl(scope[scope.$parent.list.iterator].related.labels);
+                        if (scope.state) {
+                            Rest.setUrl(scope.state.related.labels);
+                        }
                         Rest.get()
                             .then(({data}) => {
                                 if (data.next) {
@@ -92,23 +96,16 @@ export default
                         });
                     };
 
-                    if (scope.$parent.$parent.template) {
-                        if (_.has(scope, '$parent.$parent.template.summary_fields.labels.results')) {
-                            scope.labels = scope.$parent.$parent.template.summary_fields.labels.results.slice(0, 5);
-                            scope.count = scope.$parent.$parent.template.summary_fields.labels.count;
-                        }
-                    } else if (scope.$parent.$parent.job) {
-                        if (_.has(scope, '$parent.$parent.job.summary_fields.labels.results')) {
-                            scope.labels = scope.$parent.$parent.job.summary_fields.labels.results.slice(0, 5);
-                            scope.count = scope.$parent.$parent.job.summary_fields.labels.count;
-                        }
-                    } else {
-                        scope.$watchCollection(scope.$parent.list.iterator, function() {
+                    if (_.has(scope.state, 'summary_fields.labels.results')) {
+                        scope.labels = scope.state.summary_fields.labels.results.slice(0, 5);
+                        scope.count = scope.state.summary_fields.labels.count;
+                       } else {
+                        scope.$watchCollection(scope.state, function() {
                             // To keep the array of labels fresh, we need to set up a watcher - otherwise, the
                             // array will get set initially and then never be updated as labels are removed
-                            if (scope[scope.$parent.list.iterator].summary_fields.labels){
-                                scope.labels = scope[scope.$parent.list.iterator].summary_fields.labels.results.slice(0, 5);
-                                scope.count = scope[scope.$parent.list.iterator].summary_fields.labels.count;
+                            if (scope.state.summary_fields.labels){
+                                scope.labels = scope.state.summary_fields.labels.results.slice(0, 5);
+                                scope.count = scope.state.summary_fields.labels.count;
                             }
                             else{
                                 scope.labels = null;

@@ -35,7 +35,7 @@
         <at-list results='vm.instances'>
             <at-row ng-repeat="instance in vm.instances"
                 ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
-                <div class="at-Row-firstColumn">
+                <div class="at-Row-toggle">
                     <div class="ScheduleToggle"
                         ng-class="{'is-on': instance.enabled}">
                         <button ng-show="instance.enabled"
@@ -53,14 +53,13 @@
 
                 <div class="at-Row-items">
                     <at-row-item header-value="{{ instance.hostname }}"></at-row-item>
-                    <div class="at-Row--rowLayout">
-                        <at-row-item
-                            label-value="Running Jobs"
-                            label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}})"
-                            value="{{ instance.jobs_running }}"
-                            badge="true">
-                        </at-row-item>
-                    </div>
+                    <at-row-item
+                        label-value="Running Jobs"
+                        label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}})"
+                        value="{{ instance.jobs_running }}"
+                        inline="true"
+                        badge="true">
+                    </at-row-item>
                 </div>
 
                 <div class="at-Row-actions">
