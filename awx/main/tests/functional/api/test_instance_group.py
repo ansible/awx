@@ -22,6 +22,13 @@ def instance_group(job_factory):
 
 
 @pytest.fixture
+def isolated_instance_group(instance_group):
+    ig = InstanceGroup(name="iso", controller=instance_group)
+    ig.save()
+    return ig
+
+
+@pytest.fixture
 def create_job_factory(job_factory, instance_group):
     def fn(status='running'):
         j = job_factory()
@@ -91,3 +98,11 @@ def test_modify_delete_tower_instance_group_prevented(delete, options, tower_ins
     assert 'DELETE' not in resp.data['actions']
     assert 'GET' in resp.data['actions']
     assert 'PUT' in resp.data['actions']
+
+
+@pytest.mark.django_db
+def test_prevent_delete_iso_and_control_groups(delete, isolated_instance_group, admin):
+    iso_url = reverse("api:instance_group_detail", kwargs={'pk': isolated_instance_group.pk})
+    controller_url = reverse("api:instance_group_detail", kwargs={'pk': isolated_instance_group.controller.pk})
+    delete(iso_url, None, admin, expect=403)
+    delete(controller_url, None, admin, expect=403)

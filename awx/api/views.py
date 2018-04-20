@@ -671,6 +671,14 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     serializer_class = InstanceGroupSerializer
     permission_classes = (InstanceGroupTowerPermission,)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.controller is not None:
+            raise PermissionDenied(detail=_("Isolated Groups can not be removed from the API"))
+        if instance.controlled_groups.count():
+            raise PermissionDenied(detail=_("Instance Groups acting as a controller for an Isolated Group can not be removed from the API"))
+        return super(InstanceGroupDetail, self).destroy(request, *args, **kwargs)
+
 
 class InstanceGroupUnifiedJobsList(SubListAPIView):
 
