@@ -2087,7 +2087,7 @@ class ProjectUpdateEventAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            Q(project_update__in=ProjectUpdate.accessible_pk_qs(self.user, 'read_role')))
+            Q(project_update__project__in=Project.accessible_pk_qs(self.user, 'read_role')))
 
     def can_add(self, data):
         return False
@@ -2108,7 +2108,7 @@ class InventoryUpdateEventAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            Q(inventory_update__in=InventoryUpdate.accessible_pk_qs(self.user, 'read_role')))
+            Q(inventory_update__inventory_source__inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role')))
 
     def can_add(self, data):
         return False
