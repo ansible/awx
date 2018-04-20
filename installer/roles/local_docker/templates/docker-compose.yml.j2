@@ -22,7 +22,7 @@ services:
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
     {% if ca_trust_dir is defined %}
-      - "{{ ca_trust_dir +':/etc/pki/ca-trust:ro' }}"
+      - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
     {% endif %}
     {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) %}
     {% set awx_container_search_domains_list = awx_container_search_domains.split(',') %}
@@ -81,7 +81,7 @@ services:
       - "{{ project_data_dir +':/var/lib/awx/projects:rw' }}"
     {% endif %}
     {% if ca_trust_dir is defined %}
-      - "{{ ca_trust_dir +':/etc/pki/ca-trust:ro' }}"
+      - "{{ ca_trust_dir +':/etc/pki/ca-trust/source/anchors:ro' }}"
     {% endif %}
     {% if (awx_container_search_domains is defined) and (',' in awx_container_search_domains) %}
     {% set awx_container_search_domains_list = awx_container_search_domains.split(',') %}
