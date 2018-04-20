@@ -4,7 +4,6 @@ from collections import OrderedDict
 import functools
 import json
 import logging
-import operator
 import os
 import re
 import stat
@@ -22,7 +21,6 @@ from django.utils.encoding import force_text
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.fields import (ImplicitRoleField, CredentialInputField,
                              CredentialTypeInputField,
                              CredentialTypeInjectorField)
@@ -35,6 +33,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.utils import encrypt_field
+from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS
 from . import injectors as builtin_injectors
 
 __all__ = ['Credential', 'CredentialType', 'V1Credential', 'build_safe_env']
@@ -165,7 +164,7 @@ class V1Credential(object):
             max_length=32,
             blank=True,
             default='',
-            choices=[('', _('None'))] + PRIVILEGE_ESCALATION_METHODS,
+            choices=CHOICES_PRIVILEGE_ESCALATION_METHODS,
             help_text=_('Privilege escalation method.')
         ),
         'become_username': models.CharField(
@@ -708,8 +707,7 @@ def ssh(cls):
             }, {
                 'id': 'become_method',
                 'label': 'Privilege Escalation Method',
-                'choices': map(operator.itemgetter(0),
-                               V1Credential.FIELDS['become_method'].choices),
+                'type': 'become_method',
                 'help_text': ('Specify a method for "become" operations. This is '
                               'equivalent to specifying the --become-method '
                               'Ansible parameter.')

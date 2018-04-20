@@ -17,6 +17,7 @@ PRIVILEGE_ESCALATION_METHODS = [
     ('enable', _('Enable')), ('doas', _('Doas')),
     ('sudo', _('Sudo')), ('su', _('Su')), ('pbrun', _('Pbrun')), ('pfexec', _('Pfexec')),
     ('dzdo', _('DZDO')), ('pmrun', _('Pmrun')), ('runas', _('Runas'))]
+CHOICES_PRIVILEGE_ESCALATION_METHODS = [('', _('None'))] + PRIVILEGE_ESCALATION_METHODS
 ANSI_SGR_PATTERN = re.compile(r'\x1b\[[0-9;]*m')
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
