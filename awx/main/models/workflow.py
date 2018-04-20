@@ -389,10 +389,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return prompted_fields, rejected_fields, errors_dict
 
     def can_start_without_user_input(self):
-        return not bool(
-            self.variables_needed_to_start or
-            self.node_templates_missing() or
-            self.node_prompts_rejected())
+        return not bool(self.variables_needed_to_start)
 
     def node_templates_missing(self):
         return [node.pk for node in self.workflow_job_template_nodes.filter(
