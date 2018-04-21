@@ -1,6 +1,5 @@
 const templateUrl = require('~components/code-mirror/code-mirror.partial.html');
 
-const CodeMirrorEventListener = 'CodeMirror-init';
 const CodeMirrorID = 'codemirror-extra-vars';
 const CodeMirrorModalID = '#CodeMirror-modal';
 const ParseVariable = 'parseType';
@@ -43,10 +42,10 @@ function atCodeMirrorController (
     vm.expanded = false;
     vm.close = close;
     vm.expand = expand;
+    if ($scope.init) {
+        $scope.init = init;
+    }
     init($scope.variables);
-    $scope.$on(CodeMirrorEventListener, (e, vars) => {
-        init(vars);
-    });
 }
 
 atCodeMirrorController.$inject = [
@@ -70,7 +69,8 @@ function atCodeMirrorTextarea () {
             labelClass: '@',
             tooltip: '@',
             tooltipPlacement: '@',
-            variables: '@'
+            variables: '@',
+            init: '='
         }
     };
 }

@@ -8,6 +8,12 @@
  	['$scope', 'HostsService',
  	function($scope, HostsService){
 
+        function codemirror () {
+            return {
+                init:{}
+            };
+        }
+        $scope.codeMirror = new codemirror();
  		$scope.formCancel = function(){
             $scope.$parent.$broadcast('awxNet-closeDetailsPanel');
  		};
@@ -38,6 +44,8 @@
             } else {
                 $scope.item = data;
             }
-            $scope.$broadcast('CodeMirror-init', $scope.item.variables);
+            if ($scope.codeMirror.init) {
+                $scope.codeMirror.init($scope.item.variables);
+            }
         });
  	}];
