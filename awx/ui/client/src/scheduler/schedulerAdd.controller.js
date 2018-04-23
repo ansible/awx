@@ -8,10 +8,13 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
     'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
+    'WorkflowJobTemplateModel',
     function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
-        ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment) {
+        ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment,
+        WorkflowJobTemplate
+    ) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
         scheduler,
@@ -200,22 +203,74 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     }
                 }
             });
-    }
-    else if ($state.current.name === 'workflowJobTemplateSchedules.add'){
-        $scope.parseType = 'yaml';
-        // grab any existing extra_vars from parent workflow_job_template
-        let defaultUrl = GetBasePath('workflow_job_templates') + $stateParams.id + '/';
-        Rest.setUrl(defaultUrl);
-        Rest.get().then(function(res){
-            var data = res.data.extra_vars;
-            $scope.extraVars = data === '' ? '---' :  data;
-            ParseTypeChange({
-                scope: $scope,
-                variable: 'extraVars',
-                parse_variable: 'parseType',
-                field_id: 'SchedulerForm-extraVars'
+    } else if ($state.current.name === 'workflowJobTemplateSchedules.add'){
+        let workflowJobTemplate = new WorkflowJobTemplate();
+
+        $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
+            .then((responses) => {
+                let launchConf = responses[1].data;
+
+                let watchForPromptChanges = () => {
+                    $scope.$watch('missingSurveyValue', function() {
+                        $scope.promptModalMissingReqFields = $scope.missingSurveyValue ? true : false;
+                    });
+                };
+
+                if(!launchConf.survey_enabled) {
+                        $scope.showPromptButton = false;
+                } else {
+                    $scope.showPromptButton = true;
+
+                    if(launchConf.survey_enabled) {
+                        // go out and get the survey questions
+                        workflowJobTemplate.getSurveyQuestions(ParentObject.id)
+                            .then((surveyQuestionRes) => {
+
+                                let processed = PromptService.processSurveyQuestions({
+                                    surveyQuestions: surveyQuestionRes.data.spec
+                                });
+
+                                $scope.missingSurveyValue = processed.missingSurveyValue;
+
+                                $scope.promptData = {
+                                    launchConf: responses[1].data,
+                                    launchOptions: responses[0].data,
+                                    surveyQuestions: processed.surveyQuestions,
+                                    template: ParentObject.id,
+                                    prompts: PromptService.processPromptValues({
+                                        launchConf: responses[1].data,
+                                        launchOptions: responses[0].data
+                                    }),
+                                };
+
+                                $scope.$watch('promptData.surveyQuestions', () => {
+                                    let missingSurveyValue = false;
+                                    _.each($scope.promptData.surveyQuestions, (question) => {
+                                        if(question.required && (Empty(question.model) || question.model === [])) {
+                                            missingSurveyValue = true;
+                                        }
+                                    });
+                                    $scope.missingSurveyValue = missingSurveyValue;
+                                }, true);
+
+                                watchForPromptChanges();
+                            });
+                    }
+                    else {
+                        $scope.promptData = {
+                            launchConf: responses[1].data,
+                            launchOptions: responses[0].data,
+                            template: ParentObject.id,
+                            prompts: PromptService.processPromptValues({
+                                launchConf: responses[1].data,
+                                launchOptions: responses[0].data
+                            }),
+                        };
+
+                        watchForPromptChanges();
+                    }
+                }
             });
-        });
     }
     else if ($state.current.name === 'projectSchedules.add'){
         $scope.noVars = true;
