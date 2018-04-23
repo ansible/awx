@@ -5,6 +5,7 @@
 import copy
 import json
 import logging
+import operator
 import re
 import six
 import urllib
@@ -38,7 +39,13 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # AWX
-from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN, ACTIVE_STATES, TOKEN_CENSOR
+from awx.main.constants import (
+    SCHEDULEABLE_PROVIDERS,
+    ANSI_SGR_PATTERN,
+    ACTIVE_STATES,
+    TOKEN_CENSOR,
+    CHOICES_PRIVILEGE_ESCALATION_METHODS,
+)
 from awx.main.models import * # noqa
 from awx.main.models.base import NEW_JOB_TYPE_CHOICES
 from awx.main.access import get_user_capabilities
@@ -2494,6 +2501,9 @@ class CredentialTypeSerializer(BaseSerializer):
                 field['label'] = _(field['label'])
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
+                if field['type'] == 'become_method':
+                    field.pop('type')
+                    field['choices'] = map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS)
         return value
 
     def filter_field_metadata(self, fields, method):
