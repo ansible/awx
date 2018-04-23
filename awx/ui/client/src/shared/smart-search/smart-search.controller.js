@@ -155,16 +155,16 @@ function SmartSearchController (
         const unmodifiedQueryset = _.clone(queryset);
 
         const searchInputQueryset = qs.getSearchInputQueryset(terms, isRelatedField, isAnsibleFactField, singleSearchParam);
-        const modifiedQueryset = qs.mergeQueryset(queryset, searchInputQueryset, singleSearchParam);
+        queryset = qs.mergeQueryset(queryset, searchInputQueryset, singleSearchParam);
 
         // Go back to the first page after a new search
-        delete modifiedQueryset.page;
+        delete queryset.page;
 
         // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
         // This transition will not reload controllers/resolves/views but will register new
         // $stateParams[searchKey] terms.
         if (!$scope.querySet) {
-            $state.go('.', { [searchKey]: modifiedQueryset })
+            $state.go('.', { [searchKey]: queryset })
                 .then(() => {
                     // same as above in $scope.remove.  For some reason deleting the page
                     // from the queryset works for all lists except lists in modals.
@@ -172,10 +172,10 @@ function SmartSearchController (
                 });
         }
 
-        qs.search(path, modifiedQueryset)
+        qs.search(path, queryset)
             .then(({ data }) => {
                 if ($scope.querySet) {
-                    $scope.querySet = modifiedQueryset;
+                    $scope.querySet = queryset;
                 }
                 $scope.dataset = data;
                 $scope.collection = data.results;
@@ -191,10 +191,10 @@ function SmartSearchController (
         const { singleSearchParam } = $scope;
         const [term] = $scope.searchTags.splice(index, 1);
 
-        const modifiedQueryset = qs.removeTermsFromQueryset(queryset, term, isRelatedField, singleSearchParam);
+        queryset = qs.removeTermsFromQueryset(queryset, term, isRelatedField, singleSearchParam);
 
         if (!$scope.querySet) {
-            $state.go('.', { [searchKey]: modifiedQueryset })
+            $state.go('.', { [searchKey]: queryset })
                 .then(() => {
                     // for some reason deleting a tag from a list in a modal does not
                     // remove the param from $stateParams.  Here we'll manually check to make sure
