@@ -44,13 +44,6 @@ describe('Components | Side Nav Item', () => {
             expect(SideNavItemCtrl.isRoute).toBe(false);
         });
 
-        it('go() should call $state.go()', angular.mock.inject((_$state_) => {
-            spyOn(_$state_, 'go');
-            SideNavItemCtrl.go();
-            expect(_$state_.go).toHaveBeenCalled();
-            expect(_$state_.go).toHaveBeenCalledWith('dashboard', jasmine.any(Object), jasmine.any(Object));
-        }));
-
         it('should load name, icon, and route from scope', () => {
             expect(SideNavItem.isolateScope().name).toBeDefined();
             expect(SideNavItem.isolateScope().iconClass).toBeDefined();

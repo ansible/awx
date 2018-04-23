@@ -1,4 +1,4 @@
-<div class="at-Layout-sideNavItem" ng-click="vm.go()" ng-class="{'is-active': vm.isRoute}"
+<a class="at-Layout-sideNavItem" ui-sref="{{ route }}" ng-class="{'is-active': vm.isRoute}"
     ng-show="(!systemAdminOnly || layoutVm.isSuperUser) && layoutVm.isLoggedIn &&
         !layoutVm.licenseIsMissing">
         <at-popover state="vm.tooltip" ng-if="!navVm.isExpanded"></at-popover>
@@ -7,4 +7,4 @@
         <span class="at-Layout-sideNavItemName" ng-show="navVm.isExpanded">
             {{ layoutVm.getString(name) }}
         </span>
-</div>
+</a>
