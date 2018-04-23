@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0025_v330_delete_authtoken'),
+        ('main', '0026_v330_delete_authtoken'),
     ]
 
     operations = [
