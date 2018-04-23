@@ -53,7 +53,7 @@ function atLaunchTemplateCtrl (
                                 launchConf: launchData.data,
                                 launchOptions: launchOptions.data
                             }),
-                            triggerModalOpen: true,
+                            triggerModalOpen: true
                         };
 
                         if (launchData.data.survey_enabled) {
