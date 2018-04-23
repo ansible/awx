@@ -1263,10 +1263,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if not all(opts.values()):
             return False
 
-        # Sanity check: If we are running unit tests, then run synchronously.
-        if getattr(settings, 'CELERY_UNIT_TEST', False):
-            return self.start(None, None, **kwargs)
-
         # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.websocket_emit_status("pending")

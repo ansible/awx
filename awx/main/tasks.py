@@ -137,7 +137,7 @@ def inform_cluster_of_shutdown(*args, **kwargs):
         logger.exception('Encountered problem with normal shutdown signal.')
 
 
-@shared_task(bind=True, queue='tower_instance_router')
+@shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
 def apply_cluster_membership_policies(self):
     with advisory_lock('cluster_policy_lock', wait=True):
         considered_instances = Instance.objects.all().order_by('id')
@@ -148,20 +148,9 @@ def apply_cluster_membership_policies(self):
         Group = namedtuple('Group', ['obj', 'instances'])
         Node = namedtuple('Instance', ['obj', 'groups'])
 
-        # Add every instance to the special 'tower' group
-        tower_q = InstanceGroup.objects.filter(name='tower')
-        if tower_q.exists():
-            tower_inst = tower_q[0]
-            tower_inst.instances.set(Instance.objects.all_non_isolated())
-            instances_hostnames = [i.hostname for i in tower_inst.instances.all()]
-            logger.info(six.text_type("Setting 'tower' group instances to {}").format(instances_hostnames))
-            tower_inst.save()
-        else:
-            logger.warn(six.text_type("Special 'tower' Instance Group not found."))
-
         # Process policy instance list first, these will represent manually managed instances
         # that will not go through automatic policy determination
-        for ig in InstanceGroup.objects.exclude(name='tower'):
+        for ig in InstanceGroup.objects.all():
             logger.info(six.text_type("Considering group {}").format(ig.name))
             ig.instances.clear()
             group_actual = Group(obj=ig, instances=[])
@@ -269,7 +258,7 @@ def handle_update_celery_hostname(sender, instance, **kwargs):
     logger.warn(six.text_type("Set hostname to {}").format(instance.hostname))
 
 
-@shared_task(queue='tower')
+@shared_task(queue=settings.CELERY_DEFAULT_QUEUE)
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
@@ -293,7 +282,7 @@ def send_notifications(notification_list, job_id=None):
             notification.save()
 
 
-@shared_task(bind=True, queue='tower')
+@shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
 def run_administrative_checks(self):
     logger.warn("Running administrative checks.")
     if not settings.TOWER_ADMIN_ALERTS:
@@ -421,7 +410,7 @@ def awx_isolated_heartbeat(self):
         isolated_manager.IsolatedManager.health_check(isolated_instance_qs, awx_application_version)
 
 
-@shared_task(bind=True, queue='tower')
+@shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
 def awx_periodic_scheduler(self):
     run_now = now()
     state = TowerScheduleState.get_solo()
@@ -456,7 +445,7 @@ def awx_periodic_scheduler(self):
     state.save()
 
 
-@shared_task(bind=True, queue='tower')
+@shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
 def handle_work_success(self, result, task_actual):
     try:
         instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
@@ -470,7 +459,7 @@ def handle_work_success(self, result, task_actual):
     run_job_complete.delay(instance.id)
 
 
-@shared_task(queue='tower')
+@shared_task(queue=settings.CELERY_DEFAULT_QUEUE)
 def handle_work_error(task_id, *args, **kwargs):
     subtasks = kwargs.get('subtasks', None)
     logger.debug('Executing error task id %s, subtasks: %s' % (task_id, str(subtasks)))
@@ -511,7 +500,7 @@ def handle_work_error(task_id, *args, **kwargs):
         pass
 
 
-@shared_task(queue='tower')
+@shared_task(queue=settings.CELERY_DEFAULT_QUEUE)
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     '''
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -531,7 +520,7 @@ def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
         raise
 
 
-@shared_task(queue='tower')
+@shared_task(queue=settings.CELERY_DEFAULT_QUEUE)
 def update_host_smart_inventory_memberships():
     try:
         with transaction.atomic():
@@ -556,7 +545,7 @@ def update_host_smart_inventory_memberships():
         smart_inventory.update_computed_fields(update_groups=False, update_hosts=False)
 
 
-@shared_task(bind=True, queue='tower', max_retries=5)
+@shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE, max_retries=5)
 def delete_inventory(self, inventory_id, user_id):
     # Delete inventory as user
     if user_id is None:
@@ -1032,7 +1021,7 @@ class BaseTask(Task):
         except Exception:
             logger.exception(six.text_type('{} Final run hook errored.').format(instance.log_format))
         instance.websocket_emit_status(status)
-        if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
+        if status != 'successful':
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
             if status == 'canceled':
@@ -2333,7 +2322,7 @@ def _reconstruct_relationships(copy_mapping):
         new_obj.save()
 
 
-@shared_task(bind=True, queue='tower')
+@shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
 def deep_copy_model_obj(
     self, model_module, model_name, obj_pk, new_obj_pk,
     user_pk, sub_obj_list, permission_check_func=None

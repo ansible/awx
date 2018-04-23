@@ -9,7 +9,7 @@ import six
 import urllib
 
 from jinja2 import Environment, StrictUndefined
-from jinja2.exceptions import UndefinedError
+from jinja2.exceptions import UndefinedError, TemplateSyntaxError
 
 # Django
 from django.core import exceptions as django_exceptions
@@ -405,7 +405,7 @@ class JSONSchemaField(JSONBField):
             error.message = re.sub(r'\bu(\'|")', r'\1', error.message)
 
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = error.schema['error'].format(instance=error.instance)
+                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
             elif error.validator == 'type':
                 expected_type = error.validator_value
                 if expected_type == 'object':
@@ -420,6 +420,10 @@ class JSONSchemaField(JSONBField):
                         '{type} provided, expected {expected_type}'
                     ).format(path=list(error.path), type=type(error.instance).__name__,
                              expected_type=expected_type)
+            elif error.validator == 'additionalProperties' and hasattr(error, 'path'):
+                error.message = _(
+                    'Schema validation error in relative path {path} ({error})'
+                ).format(path=list(error.path), error=error.message)
             errors.append(error)
 
         if errors:
@@ -551,7 +555,7 @@ class CredentialInputField(JSONSchemaField):
             format_checker=self.format_checker
         ).iter_errors(decrypted_values):
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = error.schema['error'].format(instance=error.instance)
+                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
             if error.validator == 'dependencies':
                 # replace the default error messaging w/ a better i18n string
                 # I wish there was a better way to determine the parameters of
@@ -807,6 +811,12 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 except UndefinedError as e:
                     raise django_exceptions.ValidationError(
                         _('%s uses an undefined field (%s)') % (key, e),
+                        code='invalid',
+                        params={'value': value},
+                    )
+                except TemplateSyntaxError as e:
+                    raise django_exceptions.ValidationError(
+                        _('Syntax error rendering template for %s inside of %s (%s)') % (key, type_, e),
                         code='invalid',
                         params={'value': value},
                     )

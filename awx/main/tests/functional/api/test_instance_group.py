@@ -8,6 +8,13 @@ from awx.main.models import (
 
 
 @pytest.fixture
+def tower_instance_group():
+    ig = InstanceGroup(name='tower')
+    ig.save()
+    return ig
+
+
+@pytest.fixture
 def instance_group(job_factory):
     ig = InstanceGroup(name="east")
     ig.save()
@@ -15,8 +22,8 @@ def instance_group(job_factory):
 
 
 @pytest.fixture
-def tower_instance_group():
-    ig = InstanceGroup(name='tower')
+def isolated_instance_group(instance_group):
+    ig = InstanceGroup(name="iso", controller=instance_group)
     ig.save()
     return ig
 
@@ -84,16 +91,18 @@ def test_modify_delete_tower_instance_group_prevented(delete, options, tower_ins
     url = reverse("api:instance_group_detail", kwargs={'pk': tower_instance_group.pk})
     super_user = user('bob', True)
 
-    # DELETE tower group not allowed
     delete(url, None, super_user, expect=403)
 
-    # OPTIONS should just be "GET"
     resp = options(url, None, super_user, expect=200)
-    assert len(resp.data['actions'].keys()) == 1
+    assert len(resp.data['actions'].keys()) == 2
+    assert 'DELETE' not in resp.data['actions']
     assert 'GET' in resp.data['actions']
+    assert 'PUT' in resp.data['actions']
 
-    # Updating tower group fields not allowed
-    patch(url, {'name': 'foobar'}, super_user, expect=403)
-    patch(url, {'policy_instance_percentage': 40}, super_user, expect=403)
-    put(url, {'name': 'foobar'}, super_user, expect=403)
 
+@pytest.mark.django_db
+def test_prevent_delete_iso_and_control_groups(delete, isolated_instance_group, admin):
+    iso_url = reverse("api:instance_group_detail", kwargs={'pk': isolated_instance_group.pk})
+    controller_url = reverse("api:instance_group_detail", kwargs={'pk': isolated_instance_group.controller.pk})
+    delete(iso_url, None, admin, expect=403)
+    delete(controller_url, None, admin, expect=403)

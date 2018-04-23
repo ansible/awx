@@ -109,7 +109,7 @@ class OAuth2AccessToken(AbstractAccessToken):
     )
     scope = models.TextField(
         blank=True,
-        help_text=_('Allowed scopes, further restricts user\'s permissions.')
+        help_text=_('Allowed scopes, further restricts user\'s permissions. Must be a simple space-separated string with allowed scopes [\'read\', \'write\'].')
     )
 
     def is_valid(self, scopes=None):

@@ -6,9 +6,9 @@ import re  # noqa
 import sys
 import ldap
 import djcelery
+import six
 from datetime import timedelta
 
-from kombu import Queue, Exchange
 from kombu.common import Broadcast
 
 # global settings
@@ -451,7 +451,7 @@ djcelery.setup_loader()
 BROKER_POOL_LIMIT = None
 BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_EVENT_QUEUE_TTL = 5
-CELERY_DEFAULT_QUEUE = 'tower'
+CELERY_DEFAULT_QUEUE = 'awx_private_queue'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -463,8 +463,7 @@ CELERYD_AUTOSCALER = 'awx.main.utils.autoscale:DynamicAutoScaler'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
 CELERY_QUEUES = (
-    Queue('tower', Exchange('tower'), routing_key='tower'),
-    Broadcast('tower_broadcast_all')
+    Broadcast('tower_broadcast_all'),
 )
 CELERY_ROUTES = {}
 
@@ -515,7 +514,13 @@ AWX_INCONSISTENT_TASK_INTERVAL = 60 * 3
 # Celery queues that will always be listened to by celery workers
 # Note: Broadcast queues have unique, auto-generated names, with the alias
 # property value of the original queue name.
-AWX_CELERY_QUEUES_STATIC = ['tower_broadcast_all',]
+AWX_CELERY_QUEUES_STATIC = [
+    six.text_type(CELERY_DEFAULT_QUEUE),
+]
+
+AWX_CELERY_BCAST_QUEUES_STATIC = [
+    six.text_type('tower_broadcast_all'),
+]
 
 ASGI_AMQP = {
     'INIT_FUNC': 'awx.prepare_env',

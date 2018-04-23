@@ -153,8 +153,7 @@ class TaskManager():
                 queue_name = queue_name[1 if len(queue_name) > 1 else 0]
                 queues[queue_name] = active_tasks
         else:
-            if not hasattr(settings, 'CELERY_UNIT_TEST'):
-                return (None, None)
+            return (None, None)
 
         return (active_task_queues, queues)
 

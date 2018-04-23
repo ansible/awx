@@ -4562,7 +4562,7 @@ class InstanceSerializer(BaseSerializer):
         return obj.consumed_capacity
 
     def get_percent_capacity_remaining(self, obj):
-        if not obj.capacity or obj.consumed_capacity == obj.capacity:
+        if not obj.capacity or obj.consumed_capacity >= obj.capacity:
             return 0.0
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
@@ -4619,9 +4619,12 @@ class InstanceGroupSerializer(BaseSerializer):
     def get_percent_capacity_remaining(self, obj):
         if not obj.capacity:
             return 0.0
+        consumed = self.get_consumed_capacity(obj)
+        if consumed >= obj.capacity:
+            return 0.0
         else:
             return float("{0:.2f}".format(
-                ((float(obj.capacity) - float(self.get_consumed_capacity(obj))) / (float(obj.capacity))) * 100)
+                ((float(obj.capacity) - float(consumed)) / (float(obj.capacity))) * 100)
             )
 
     def get_jobs_running(self, obj):
@@ -4651,7 +4654,7 @@ class ActivityStreamSerializer(BaseSerializer):
             ('workflow_job_template_node', ('id', 'unified_job_template_id')),
             ('label', ('id', 'name', 'organization_id')),
             ('notification', ('id', 'status', 'notification_type', 'notification_template_id')),
-            ('o_auth2_access_token', ('id', 'user_id', 'description', 'application', 'scope')),
+            ('o_auth2_access_token', ('id', 'user_id', 'description', 'application_id', 'scope')),
             ('o_auth2_application', ('id', 'name', 'description')),
             ('credential_type', ('id', 'name', 'description', 'kind', 'managed_by_tower')),
             ('ad_hoc_command', ('id', 'name', 'status', 'limit'))

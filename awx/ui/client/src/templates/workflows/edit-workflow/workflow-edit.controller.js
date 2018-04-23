@@ -10,14 +10,38 @@ export default [
     'Wait', 'Empty', 'ToJSON', 'initSurvey', '$state', 'CreateSelect2',
     'ParseVariableString', 'TemplatesService', 'Rest', 'ToggleNotification',
     'OrgAdminLookup', 'availableLabels', 'selectedLabels', 'workflowJobTemplateData', 'i18n',
+    'workflowLaunch', '$transitions', 'WorkflowJobTemplateModel',
     function($scope, $stateParams, WorkflowForm, GenerateForm, Alert,
-    ProcessErrors, GetBasePath, $q, ParseTypeChange, Wait, Empty,
-    ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
-    TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData, i18n) {
+        ProcessErrors, GetBasePath, $q, ParseTypeChange, Wait, Empty,
+        ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
+        TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData, i18n,
+        workflowLaunch, $transitions, WorkflowJobTemplate
+    ) {
+
+        $scope.missingTemplates = _.has(workflowLaunch, 'node_templates_missing') && workflowLaunch.node_templates_missing.length > 0 ? true : false;
 
         $scope.$watch('workflow_job_template_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
                 $scope.canAddWorkflowJobTemplate = false;
+            }
+        });
+
+        const criteriaObj = {
+            from: (state) => state.name === 'templates.editWorkflowJobTemplate.workflowMaker',
+            to: (state) => state.name === 'templates.editWorkflowJobTemplate'
+        };
+
+        $transitions.onSuccess(criteriaObj, function() {
+            if ($scope.missingTemplates) {
+                // Go out and check the new launch response to see if the user has fixed the
+                // missing node templates
+
+                let workflowJobTemplate = new WorkflowJobTemplate();
+
+                workflowJobTemplate.getLaunch($stateParams.workflow_job_template_id)
+                    .then(({data}) => {
+                        $scope.missingTemplates = _.has(data, 'node_templates_missing') && data.node_templates_missing.length > 0 ? true : false;
+                    });
             }
         });
 
@@ -30,116 +54,33 @@ export default [
         $scope.parseType = 'yaml';
         $scope.includeWorkflowMaker = false;
 
-        function init() {
+        $scope.openWorkflowMaker = function() {
+            $state.go('.workflowMaker');
+        };
 
-            // Select2-ify the lables input
-            CreateSelect2({
-                element:'#workflow_job_template_labels',
-                multiple: true,
-                addNew: true
-            });
+        $scope.formSave = function () {
+            let fld, data = {};
+            $scope.invalid_survey = false;
 
-            SurveyControllerInit({
-                scope: $scope,
-                parent_scope: $scope,
-                id: id,
-                templateType: 'workflow_job_template'
-            });
+            // Can't have a survey enabled without a survey
+            if($scope.survey_enabled === true && $scope.survey_exists!==true){
+                $scope.survey_enabled = false;
+            }
 
-            $scope.labelOptions = availableLabels
-                .map((i) => ({label: i.name, value: i.id}));
+            generator.clearApiErrors($scope);
 
-            var opts = selectedLabels
-                .map(i => ({id: i.id + "",
-                    test: i.name}));
+            Wait('start');
 
-            CreateSelect2({
-                element:'#workflow_job_template_labels',
-                multiple: true,
-                addNew: true,
-                opts: opts
-            });
-
-            $scope.workflowEditorTooltip = i18n._("Click here to open the workflow graph editor.");
-            $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
-
-            $scope.workflow_job_template_obj = workflowJobTemplateData;
-            $scope.name = workflowJobTemplateData.name;
-            $scope.can_edit = workflowJobTemplateData.summary_fields.user_capabilities.edit;
-            let fld, i;
-            for (fld in form.fields) {
-                if (fld !== 'variables' && fld !== 'survey' && workflowJobTemplateData[fld] !== null && workflowJobTemplateData[fld] !== undefined) {
-                    if (form.fields[fld].type === 'select') {
-                        if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
-                            for (i = 0; i < $scope[fld + '_options'].length; i++) {
-                                if (workflowJobTemplateData[fld] === $scope[fld + '_options'][i].value) {
-                                    $scope[fld] = $scope[fld + '_options'][i];
-                                }
-                            }
-                        } else {
-                            $scope[fld] = workflowJobTemplateData[fld];
+            try {
+                for (fld in form.fields) {
+                    if(form.fields[fld].type === 'checkbox_group') {
+                        // Loop across the checkboxes
+                        for(var i=0; i<form.fields[fld].fields.length; i++) {
+                            data[form.fields[fld].fields[i].name] = $scope[form.fields[fld].fields[i].name];
                         }
                     } else {
-                        $scope[fld] = workflowJobTemplateData[fld];
-                        if(!Empty(workflowJobTemplateData.summary_fields.survey)) {
-                            $scope.survey_exists = true;
-                        }
+                        data[fld] = $scope[fld];
                     }
-                }
-                if (fld === 'variables') {
-                    // Parse extra_vars, converting to YAML.
-                    $scope.variables = ParseVariableString(workflowJobTemplateData.extra_vars);
-
-                    ParseTypeChange({ scope: $scope, field_id: 'workflow_job_template_variables' });
-                }
-                if (form.fields[fld].type === 'lookup' && workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel]) {
-                    $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                    workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                }
-            }
-
-            if(workflowJobTemplateData.organization) {
-                OrgAdminLookup.checkForRoleLevelAdminAccess(workflowJobTemplateData.organization, 'workflow_admin_role')
-                .then(function(canEditOrg){
-                    $scope.canEditOrg = canEditOrg;
-                });
-            }
-            else {
-                $scope.canEditOrg = true;
-            }
-
-            $scope.url = workflowJobTemplateData.url;
-            $scope.survey_enabled = workflowJobTemplateData.survey_enabled;
-
-            $scope.includeWorkflowMaker = true;
-
-            $scope.$on('SurveySaved', function() {
-                Wait('stop');
-                $scope.survey_exists = true;
-                $scope.invalid_survey = false;
-            });
-        }
-
-    $scope.openWorkflowMaker = function() {
-        $state.go('.workflowMaker');
-    };
-
-    $scope.formSave = function () {
-        let fld, data = {};
-        $scope.invalid_survey = false;
-
-        // Can't have a survey enabled without a survey
-        if($scope.survey_enabled === true && $scope.survey_exists!==true){
-            $scope.survey_enabled = false;
-        }
-
-        generator.clearApiErrors($scope);
-
-        Wait('start');
-
-        try {
-                for (fld in form.fields) {
-                    data[fld] = $scope[fld];
                 }
 
                 data.extra_vars = ToJSON($scope.parseType,
@@ -289,6 +230,91 @@ export default [
             });
         };
 
-        init();
+        // Select2-ify the lables input
+        CreateSelect2({
+            element:'#workflow_job_template_labels',
+            multiple: true,
+            addNew: true
+        });
+
+        SurveyControllerInit({
+            scope: $scope,
+            parent_scope: $scope,
+            id: id,
+            templateType: 'workflow_job_template'
+        });
+
+        $scope.labelOptions = availableLabels
+            .map((i) => ({label: i.name, value: i.id}));
+
+        var opts = selectedLabels
+            .map(i => ({id: i.id + "",
+                test: i.name}));
+
+        CreateSelect2({
+            element:'#workflow_job_template_labels',
+            multiple: true,
+            addNew: true,
+            opts: opts
+        });
+
+        $scope.workflowEditorTooltip = i18n._("Click here to open the workflow graph editor.");
+        $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
+
+        $scope.workflow_job_template_obj = workflowJobTemplateData;
+        $scope.name = workflowJobTemplateData.name;
+        $scope.can_edit = workflowJobTemplateData.summary_fields.user_capabilities.edit;
+        let fld, i;
+        for (fld in form.fields) {
+            if (fld !== 'variables' && fld !== 'survey' && workflowJobTemplateData[fld] !== null && workflowJobTemplateData[fld] !== undefined) {
+                if (form.fields[fld].type === 'select') {
+                    if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
+                        for (i = 0; i < $scope[fld + '_options'].length; i++) {
+                            if (workflowJobTemplateData[fld] === $scope[fld + '_options'][i].value) {
+                                $scope[fld] = $scope[fld + '_options'][i];
+                            }
+                        }
+                    } else {
+                        $scope[fld] = workflowJobTemplateData[fld];
+                    }
+                } else {
+                    $scope[fld] = workflowJobTemplateData[fld];
+                    if(!Empty(workflowJobTemplateData.summary_fields.survey)) {
+                        $scope.survey_exists = true;
+                    }
+                }
+            }
+            if (fld === 'variables') {
+                // Parse extra_vars, converting to YAML.
+                $scope.variables = ParseVariableString(workflowJobTemplateData.extra_vars);
+
+                ParseTypeChange({ scope: $scope, field_id: 'workflow_job_template_variables' });
+            }
+            if (form.fields[fld].type === 'lookup' && workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel]) {
+                $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+            }
+        }
+
+        if(workflowJobTemplateData.organization) {
+            OrgAdminLookup.checkForRoleLevelAdminAccess(workflowJobTemplateData.organization, 'workflow_admin_role')
+            .then(function(canEditOrg){
+                $scope.canEditOrg = canEditOrg;
+            });
+        }
+        else {
+            $scope.canEditOrg = true;
+        }
+
+        $scope.url = workflowJobTemplateData.url;
+        $scope.survey_enabled = workflowJobTemplateData.survey_enabled;
+
+        $scope.includeWorkflowMaker = true;
+
+        $scope.$on('SurveySaved', function() {
+            Wait('stop');
+            $scope.survey_exists = true;
+            $scope.invalid_survey = false;
+        });
     }
 ];

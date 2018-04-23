@@ -3,9 +3,6 @@
 # Copyright (c) 2017 Ansible Tower by Red Hat
 # All Rights Reserved.
 
-# Python
-import six
-
 # Django
 from django.conf import settings
 
@@ -16,24 +13,26 @@ from awx.main.models import Instance
 def _add_remove_celery_worker_queues(app, controlled_instances, worker_queues, worker_name):
     removed_queues = []
     added_queues = []
-    ig_names = set([six.text_type('tower_instance_router')])
+    ig_names = set()
     hostnames = set([instance.hostname for instance in controlled_instances])
     for instance in controlled_instances:
         ig_names.update(instance.rampart_groups.values_list('name', flat=True))
     worker_queue_names = set([q['name'] for q in worker_queues])
 
+    all_queue_names = ig_names | hostnames | set(settings.AWX_CELERY_QUEUES_STATIC)
+
     # Remove queues that aren't in the instance group
     for queue in worker_queues:
         if queue['name'] in settings.AWX_CELERY_QUEUES_STATIC or \
-                queue['alias'] in settings.AWX_CELERY_QUEUES_STATIC:
+                queue['alias'] in settings.AWX_CELERY_BCAST_QUEUES_STATIC:
             continue
 
-        if queue['name'] not in ig_names | hostnames or not instance.enabled:
+        if queue['name'] not in all_queue_names or not instance.enabled:
             app.control.cancel_consumer(queue['name'].encode("utf8"), reply=True, destination=[worker_name])
             removed_queues.append(queue['name'].encode("utf8"))
 
     # Add queues for instance and instance groups
-    for queue_name in ig_names | hostnames:
+    for queue_name in all_queue_names:
         if queue_name not in worker_queue_names:
             app.control.add_consumer(queue_name.encode("utf8"), reply=True, destination=[worker_name])
             added_queues.append(queue_name.encode("utf8"))
@@ -76,6 +75,5 @@ def register_celery_worker_queues(app, celery_worker_name):
     celery_worker_queues = celery_host_queues[celery_worker_name] if celery_host_queues else []
     (added_queues, removed_queues) = _add_remove_celery_worker_queues(app, controlled_instances,
                                                                       celery_worker_queues, celery_worker_name)
-
     return (controlled_instances, removed_queues, added_queues)
 

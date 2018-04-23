@@ -231,7 +231,7 @@ class IsSuperUser(permissions.BasePermission):
 
 class InstanceGroupTowerPermission(ModelAccessPermission):
     def has_object_permission(self, request, view, obj):
-        if request.method not in permissions.SAFE_METHODS and obj.name == "tower":
+        if request.method == 'DELETE' and obj.name == "tower":
             return False
         return super(InstanceGroupTowerPermission, self).has_object_permission(request, view, obj)
 

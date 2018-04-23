@@ -241,7 +241,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                         resourceName: $filter('sanitize')(name),
                         body: deleteModalBody,
                         action: action,
-                        actionText: 'DELETE'
+                        actionText: i18n._('DELETE')
                     });
                 });
         };

@@ -145,7 +145,8 @@ describe('Controller: WorkflowAdd', () => {
                 labels: undefined,
                 organization: undefined,
                 variables: undefined,
-                extra_vars: undefined
+                extra_vars: undefined,
+                allow_simultaneous: undefined
             });
         });
 

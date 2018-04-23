@@ -403,9 +403,7 @@ class Command(BaseCommand):
                     _eager_fields=dict(
                         job_args=json.dumps(sys.argv),
                         job_env=dict(os.environ.items()),
-                        job_cwd=os.getcwd(),
-                        execution_node=settings.CLUSTER_HOST_ID,
-                        instance_group=InstanceGroup.objects.get(name='tower'))
+                        job_cwd=os.getcwd())
                 )
 
         # FIXME: Wait or raise error if inventory is being updated by another
