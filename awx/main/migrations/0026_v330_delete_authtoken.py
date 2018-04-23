@@ -12,7 +12,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0024_v330_add_oauth_activity_stream_registrar'),
+        ('main', '0025_v330_add_oauth_activity_stream_registrar'),
     ]
 
     operations = [

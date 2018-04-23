@@ -13,9 +13,9 @@ import oauth2_provider.generators
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0030_v330_polymorphic_delete'),
+        ('main', '0032_v330_polymorphic_delete'),
     ]
-    
+
     operations = [
         migrations.AlterField(
             model_name='oauth2accesstoken',

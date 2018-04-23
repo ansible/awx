@@ -17,7 +17,7 @@ from awx.main.migrations import _migration_utils as migration_utils
 class Migration(ActivityStreamDisabledMigration):
 
     dependencies = [
-        ('main', '0027_v330_add_tower_verify'),
+        ('main', '0028_v330_add_tower_verify'),
     ]
 
     operations = [

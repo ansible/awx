@@ -9,7 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0029_v330_encrypt_oauth2_secret'),
+        ('main', '0031_v330_encrypt_oauth2_secret'),
     ]
 
     operations = [

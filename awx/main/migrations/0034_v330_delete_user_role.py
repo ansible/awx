@@ -12,7 +12,7 @@ from awx.main.migrations import _migration_utils as migration_utils
 class Migration(ActivityStreamDisabledMigration):
 
     dependencies = [
-        ('main', '0031_v330_oauth_help_text'),
+        ('main', '0033_v330_oauth_help_text'),
     ]
 
     operations = [
