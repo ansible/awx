@@ -190,9 +190,6 @@ module.exports = {
         credentials.section.navigation.expect.element('@credentials').enabled;
         credentials.section.navigation.click('@credentials');
 
-        credentials.waitForElementVisible('div.spinny');
-        credentials.waitForElementNotVisible('div.spinny');
-
         credentials.section.list.waitForElementVisible('@add');
         credentials.section.list.expect.element('@add').enabled;
         credentials.section.list.click('@add');
@@ -219,7 +216,6 @@ module.exports = {
         credentials.section.navigation.expect.element('@credentials').enabled;
         credentials.section.navigation.click('@credentials');
 
-        credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
         credentials.section.list.waitForElementVisible('@add');
