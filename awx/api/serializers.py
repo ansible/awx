@@ -5,6 +5,7 @@
 import copy
 import json
 import logging
+import operator
 import re
 import six
 import urllib

@@ -10,7 +10,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0034_v330_more_oauth2_help_text'),
+        ('main', '0035_v330_more_oauth2_help_text'),
+
     ]
 
     operations = [
