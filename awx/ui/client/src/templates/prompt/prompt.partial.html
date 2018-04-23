@@ -1,5 +1,5 @@
 <div class="Prompt">
-    <at-modal ng-if="vm.promptData">
+    <at-modal ng-if="vm.promptDataClone">
         <at-tab-group>
             <at-tab ng-if="vm.steps.inventory.tab" state="vm.steps.inventory.tab">{{:: vm.strings.get('prompt.INVENTORY') }}</at-tab>
             <at-tab ng-if="vm.steps.credential.tab" state="vm.steps.credential.tab">{{:: vm.strings.get('prompt.CREDENTIAL') }}</at-tab>
@@ -9,25 +9,25 @@
         </at-tab-group>
         <div class="Prompt-step">
             <div ng-if="vm.steps.inventory.includeStep" ng-show="vm.steps.inventory.tab._active">
-                <prompt-inventory prompt-data="vm.promptData"></prompt-inventory>
+                <prompt-inventory prompt-data="vm.promptDataClone"></prompt-inventory>
             </div>
             <div ng-if="vm.steps.credential.includeStep" ng-show="vm.steps.credential.tab._active">
-                <prompt-credential prompt-data="vm.promptData" credential-passwords-form="vm.forms.credentialPasswords"></prompt-credential>
+                <prompt-credential prompt-data="vm.promptDataClone" credential-passwords-form="vm.forms.credentialPasswords"></prompt-credential>
             </div>
             <div ng-if="vm.steps.other_prompts.includeStep" ng-show="vm.steps.other_prompts.tab._active">
-                <prompt-other-prompts prompt-data="vm.promptData" other-prompts-form="vm.forms.otherPrompts" is-active-step="vm.steps.other_prompts.tab._active"></prompt-other-prompts>
+                <prompt-other-prompts prompt-data="vm.promptDataClone" other-prompts-form="vm.forms.otherPrompts" is-active-step="vm.steps.other_prompts.tab._active"></prompt-other-prompts>
             </div>
             <div ng-if="vm.steps.survey.includeStep" ng-show="vm.steps.survey.tab._active">
-                <prompt-survey prompt-data="vm.promptData" survey-form="vm.forms.survey"></prompt-survey>
+                <prompt-survey prompt-data="vm.promptDataClone" survey-form="vm.forms.survey"></prompt-survey>
             </div>
             <div ng-if="vm.steps.preview.tab._active">
-                <prompt-preview prompt-data="vm.promptData"></prompt-preview>
+                <prompt-preview prompt-data="vm.promptDataClone"></prompt-preview>
             </div>
         </div>
         <div class="Prompt-footer">
             <button class="Prompt-defaultButton" ng-click="vm.cancel()">{{:: vm.strings.get('CANCEL') }}</button>
-            <button class="Prompt-actionButton" ng-show="vm.steps.inventory.tab._active" ng-click="vm.next(vm.steps.inventory.tab)" ng-disabled="!vm.promptData.prompts.inventory.value.id">{{:: vm.strings.get('NEXT') }}</button>
-            <button class="Prompt-actionButton" ng-show="vm.steps.credential.tab._active" ng-click="vm.next(vm.steps.credential.tab)" ng-disabled="!vm.forms.credentialPasswords.$valid || (vm.promptData.credentialTypeMissing && vm.promptData.credentialTypeMissing.length > 0)">{{:: vm.strings.get('NEXT') }}</button>
+            <button class="Prompt-actionButton" ng-show="vm.steps.inventory.tab._active" ng-click="vm.next(vm.steps.inventory.tab)" ng-disabled="!vm.promptDataClone.prompts.inventory.value.id">{{:: vm.strings.get('NEXT') }}</button>
+            <button class="Prompt-actionButton" ng-show="vm.steps.credential.tab._active" ng-click="vm.next(vm.steps.credential.tab)" ng-disabled="!vm.forms.credentialPasswords.$valid || (vm.promptDataClone.credentialTypeMissing && vm.promptDataClone.credentialTypeMissing.length > 0)">{{:: vm.strings.get('NEXT') }}</button>
             <button class="Prompt-actionButton" ng-show="vm.steps.other_prompts.tab._active" ng-click="vm.next(vm.steps.other_prompts.tab)" ng-disabled="!vm.forms.otherPrompts.$valid">{{:: vm.strings.get('NEXT') }}</button>
             <button class="Prompt-actionButton" ng-show="vm.steps.survey.tab._active" ng-click="vm.next(vm.steps.survey.tab)" ng-disabled="!vm.forms.survey.$valid">{{:: vm.strings.get('NEXT') }}</button>
             <button class="Prompt-actionButton" ng-show="vm.steps.preview.tab._active" ng-click="vm.finish()" ng-bind="vm.actionText" ng-disabled="vm.actionButtonClicked"></button>
