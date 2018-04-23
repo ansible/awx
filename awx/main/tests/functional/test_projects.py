@@ -176,9 +176,9 @@ def test_team_project_list(get, team_project_list):
 
 
 @pytest.mark.django_db
-def test_team_project_list_fail1(get, team_project_list):
-    objects = team_project_list
-    res = get(reverse('api:team_projects_list', kwargs={'pk':objects.teams.team2.pk,}), objects.users.alice)
+def test_team_project_list_fail1(get, team, rando):
+    # user not in organization not allowed to see team-based views
+    res = get(reverse('api:team_projects_list', kwargs={'pk':team.pk,}), rando)
     assert res.status_code == 403
 
 
