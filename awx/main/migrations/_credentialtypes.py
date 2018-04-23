@@ -197,3 +197,8 @@ def add_azure_cloud_environment_field(apps, schema_editor):
                                                    name='Microsoft Azure Resource Manager')
     azure_rm_credtype.inputs = CredentialType.defaults.get('azure_rm')().inputs
     azure_rm_credtype.save()
+
+def add_become_field(apps, schema_editor):
+    become_credtype = CredentialType.objects.get(kind='ssh')
+    become_credtype.inputs = CredentialType.defaults.get('ssh', None)().inputs
+    become_credtype.save()
