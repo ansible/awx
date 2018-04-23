@@ -10,6 +10,8 @@ describe('Components | Side Nav Item', () => {
         angular.mock.module('ui.router');
         angular.mock.module('at.lib.services');
         angular.mock.module('at.lib.components');
+        angular.mock.module('Utilities');
+        angular.mock.module('ngCookies');
     });
 
     beforeEach(angular.mock.inject((_$compile_, _$rootScope_) => {

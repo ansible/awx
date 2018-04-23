@@ -15,6 +15,8 @@ describe('Components | Side Nav', () => {
         angular.mock.module('at.lib.components', ($provide) => {
             $provide.value('$window', windowMock);
         });
+        angular.mock.module('Utilities');
+        angular.mock.module('ngCookies');
     });
 
     beforeEach(angular.mock.inject((_$compile_, _$rootScope_) => {
