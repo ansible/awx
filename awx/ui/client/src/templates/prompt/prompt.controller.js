@@ -70,16 +70,16 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
 
                         vm.promptDataClone.prompts.credentials.passwords = {};
 
-                        if(vm.promptData.launchConf.passwords_needed_to_start) {
-                            vm.promptData.launchConf.passwords_needed_to_start.forEach((passwordNeeded) => {
+                        if(vm.promptDataClone.launchConf.passwords_needed_to_start) {
+                            vm.promptDataClone.launchConf.passwords_needed_to_start.forEach((passwordNeeded) => {
                                 if(passwordNeeded === "ssh_password") {
-                                    vm.promptData.prompts.credentials.passwords.ssh = {};
+                                    vm.promptDataClone.prompts.credentials.passwords.ssh = {};
                                 }
                                 if(passwordNeeded === "become_password") {
-                                    vm.promptData.prompts.credentials.passwords.become = {};
+                                    vm.promptDataClone.prompts.credentials.passwords.become = {};
                                 }
                                 if(passwordNeeded === "ssh_key_unlock") {
-                                    vm.promptData.prompts.credentials.passwords.ssh_key_unlock = {};
+                                    vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock = {};
                                 }
                                 if(passwordNeeded.startsWith("vault_password")) {
                                     let vault_id;
@@ -87,11 +87,11 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                                         vault_id = passwordNeeded.split(/\.(.+)/)[1];
                                     }
 
-                                    if(!vm.promptData.prompts.credentials.passwords.vault) {
-                                        vm.promptData.prompts.credentials.passwords.vault = [];
+                                    if(!vm.promptDataClone.prompts.credentials.passwords.vault) {
+                                        vm.promptDataClone.prompts.credentials.passwords.vault = [];
                                     }
 
-                                    vm.promptData.prompts.credentials.passwords.vault.push({
+                                    vm.promptDataClone.prompts.credentials.passwords.vault.push({
                                         vault_id: vault_id
                                     });
                                 }
