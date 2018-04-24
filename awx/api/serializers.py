@@ -2673,7 +2673,9 @@ class CredentialSerializer(BaseSerializer):
             for field in set(data.keys()) - valid_fields - set(credential_type.defined_fields):
                 if data.get(field):
                     raise serializers.ValidationError(
-                        {"detail": _("'%s' is not a valid field for %s") % (field, credential_type.name)}
+                        {"detail": _("'{field_name}' is not a valid field for {credential_type_name}").format(
+                            field_name=field, credential_type_name=credential_type.name
+                        )}
                     )
             value.pop('kind', None)
             return value
