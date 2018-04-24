@@ -169,7 +169,7 @@ function JobRenderService ($q, $sce, $window) {
             }
 
             if (current.isHost) {
-                tdEvent = `<td class="at-Stdout-event--host" ui-sref="jobz.host-event.json({eventId: ${current.id},  taskUuid: '${current.uuid}' })">${content}</td>`;
+                tdEvent = `<td class="at-Stdout-event--host" ui-sref="jobz.host-event.json({eventId: ${current.id},  taskUuid: '${current.uuid}' })"><span ng-non-bindable>${content}</span></td>`;
             }
 
             if (current.time && current.line === ln) {
