@@ -474,7 +474,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
     @property
     def preferred_instance_groups(self):
-        return self.global_instance_groups
+        return []
 
     '''
     A WorkflowJob is a virtual job. It doesn't result in a celery task.

@@ -259,7 +259,7 @@ class TaskManager():
         else:
             if type(task) is WorkflowJob:
                 task.status = 'running'
-            if not task.supports_isolation() and rampart_group.controller_id:
+            elif not task.supports_isolation() and rampart_group.controller_id:
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
                 logger.info('Submitting isolated %s to queue %s via %s.',
@@ -271,7 +271,8 @@ class TaskManager():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()
 
-            self.consume_capacity(task, rampart_group.name)
+            if rampart_group is not None:
+                self.consume_capacity(task, rampart_group.name)
 
         def post_commit():
             task.websocket_emit_status(task.status)
@@ -281,7 +282,7 @@ class TaskManager():
         connection.on_commit(post_commit)
 
     def process_running_tasks(self, running_tasks):
-        map(lambda task: self.graph[task.instance_group.name]['graph'].add_job(task), running_tasks)
+        map(lambda task: self.graph[task.instance_group.name]['graph'].add_job(task) if task.instance_group else None, running_tasks)
 
     def create_project_update(self, task):
         project_task = Project.objects.get(id=task.project_id).create_project_update(
@@ -447,6 +448,9 @@ class TaskManager():
                 continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
+            if isinstance(task, WorkflowJob):
+                self.start_task(task, None, task.get_jobs_fail_chain())
+                continue
             for rampart_group in preferred_instance_groups:
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name)
                 if remaining_capacity <= 0:
