@@ -8,12 +8,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
     'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
-    'WorkflowJobTemplateModel',
+    'WorkflowJobTemplateModel', 'TemplatesStrings',
     function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
         ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment,
-        WorkflowJobTemplate
+        WorkflowJobTemplate, TemplatesStrings
     ) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
@@ -87,6 +87,8 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     $scope.parentObject = ParentObject;
 
     $scope.hideForm = true;
+
+    $scope.promptActionText = TemplatesStrings.get('prompt.CONFIRM');
 
     // extra_data field is not manifested in the UI when scheduling a Management Job
     if ($state.current.name === 'jobTemplateSchedules.add'){
