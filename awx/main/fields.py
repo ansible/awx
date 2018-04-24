@@ -59,7 +59,8 @@ __all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField',
 def __enum_validate__(validator, enums, instance, schema):
     if instance not in enums:
         yield jsonschema.exceptions.ValidationError(
-            _("'%s' is not one of ['%s']") % (instance, "', '".join(enums))
+            _("'{value}' is not one of ['{allowed_values}']").format(
+                value=instance, allowed_values="', '".join(enums))
         )
 
 
@@ -729,7 +730,8 @@ class CredentialTypeInputField(JSONSchemaField):
             for key in ('choices', 'multiline', 'format', 'secret',):
                 if key in field and field['type'] != 'string':
                     raise django_exceptions.ValidationError(
-                        _('%s not allowed for %s type (%s)' % (key, field['type'], field['id'])),
+                        _('{sub_key} not allowed for {element_type} type ({element_id})'.format(
+                            sub_key=key, element_type=field['type'], element_id=field['id'])),
                         code='invalid',
                         params={'value': value},
                     )
@@ -826,13 +828,15 @@ class CredentialTypeInjectorField(JSONSchemaField):
                     ).from_string(tmpl).render(valid_namespace)
                 except UndefinedError as e:
                     raise django_exceptions.ValidationError(
-                        _('%s uses an undefined field (%s)') % (key, e),
+                        _('{sub_key} uses an undefined field ({error_msg})').format(
+                            sub_key=key, error_msg=e),
                         code='invalid',
                         params={'value': value},
                     )
                 except TemplateSyntaxError as e:
                     raise django_exceptions.ValidationError(
-                        _('Syntax error rendering template for %s inside of %s (%s)') % (key, type_, e),
+                        _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(
+                            sub_key=key, type=type_, error_msg=e),
                         code='invalid',
                         params={'value': value},
                     )
