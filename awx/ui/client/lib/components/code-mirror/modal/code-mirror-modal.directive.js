@@ -43,6 +43,11 @@ function atCodeMirrorModalController (
         ParseTypeChange(options);
         resize();
         $(CodeMirrorModalID).on('hidden.bs.modal', $scope.closeFn);
+        $(`${CodeMirrorModalID} .modal-dialog`).resizable({
+            minHeight: 523,
+            minWidth: 600
+        });
+        $(`${CodeMirrorModalID} .modal-dialog`).on('resize', resize);
     }
 
     vm.strings = strings;
