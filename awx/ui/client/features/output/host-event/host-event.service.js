@@ -4,13 +4,22 @@ function HostEventService (
     GetBasePath,
     $rootScope
 ) {
+    this.getUrl = (id, type, params) => {
+        let url;
+        if (type === 'playbook') {
+            url = `${GetBasePath('jobs')}${id}/job_events/?${this.stringifyParams(params)}`;
+        } else if (type === 'command') {
+            url = `${GetBasePath('ad_hoc_commands')}${id}/events/?${this.stringifyParams(params)}`;
+        }
+        return url;
+    };
+
     // GET events related to a job run
     // e.g.
     // ?event=playbook_on_stats
     // ?parent=206&event__startswith=runner&page_size=200&order=host_name,counter
-    this.getRelatedJobEvents = (id, params) => {
-        let url = GetBasePath('jobs');
-        url = `${url}${id}/job_events/?${this.stringifyParams(params)}`;
+    this.getRelatedJobEvents = (id, type, params) => {
+        const url = this.getUrl(id, type, params);
         Rest.setUrl(url);
         return Rest.get()
             .then(response => response)
