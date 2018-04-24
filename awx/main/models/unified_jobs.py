@@ -263,14 +263,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
                 if field not in update_fields:
                     update_fields.append(field)
         # Do the actual save.
-        try:
-            super(UnifiedJobTemplate, self).save(*args, **kwargs)
-        except ValueError:
-            # A fix for https://trello.com/c/S4rU1F21
-            # Does not resolve the root cause. Tis merely a bandaid.
-            if 'scm_delete_on_next_update' in update_fields:
-                update_fields.remove('scm_delete_on_next_update')
-                super(UnifiedJobTemplate, self).save(*args, **kwargs)
+        super(UnifiedJobTemplate, self).save(*args, **kwargs)
 
 
     def _get_current_status(self):
@@ -722,7 +715,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _get_parent_instance(self):
         return getattr(self, self._get_parent_field_name(), None)
 
-    def _update_parent_instance_no_save(self, parent_instance, update_fields=[]):
+    def _update_parent_instance_no_save(self, parent_instance, update_fields=None):
+        if update_fields is None:
+            update_fields = []
+
         def parent_instance_set(key, val):
             setattr(parent_instance, key, val)
             if key not in update_fields:
