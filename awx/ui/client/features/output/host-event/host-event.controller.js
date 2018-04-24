@@ -26,7 +26,7 @@ function HostEventsController (
             $scope.module_name = 'No result found';
         }
 
-        if (_.has(hostEvent.event_data, 'res.result.stdout')) {
+        if (_.has(hostEvent.event_data, 'res.stdout')) {
             if (hostEvent.event_data.res.stdout === '') {
                 $scope.stdout = ' ';
             } else {
@@ -34,7 +34,7 @@ function HostEventsController (
             }
         }
 
-        if (_.has(hostEvent.event_data, 'res.result.stderr')) {
+        if (_.has(hostEvent.event_data, 'res.stderr')) {
             if (hostEvent.event_data.res.stderr === '') {
                 $scope.stderr = ' ';
             } else {
