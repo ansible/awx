@@ -85,7 +85,7 @@
             system-admin-only="true">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-server" route="instanceGroups" name="INSTANCE_GROUPS"
-            system-admin-only="true">
+            ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-cubes" route="applications" name="APPLICATIONS"
             system-admin-only="true">

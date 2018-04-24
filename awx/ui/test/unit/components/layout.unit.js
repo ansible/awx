@@ -1,6 +1,7 @@
 describe('Components | Layout', () => {
     let $compile;
     let $rootScope;
+    let $httpBackend;
     let element;
     let scope;
 
@@ -10,11 +11,14 @@ describe('Components | Layout', () => {
         angular.mock.module('ui.router');
         angular.mock.module('at.lib.services');
         angular.mock.module('at.lib.components');
+        angular.mock.module('Utilities');
+        angular.mock.module('ngCookies');
     });
 
-    beforeEach(angular.mock.inject((_$compile_, _$rootScope_) => {
+    beforeEach(angular.mock.inject((_$compile_, _$rootScope_, _$httpBackend_) => {
         $compile = _$compile_;
         $rootScope = _$rootScope_;
+        $httpBackend = _$httpBackend_;
         scope = $rootScope.$new();
 
         element = angular.element('<at-layout></at-layout>');
@@ -26,7 +30,15 @@ describe('Components | Layout', () => {
         let controller;
 
         beforeEach(() => {
+            const mockResponse = {
+                data: {
+                    count: 3
+                }
+            };
+
             controller = element.controller('atLayout');
+            $httpBackend.when('GET', /admin_of_organizations/)
+                .respond(mockResponse);
         });
 
         xit('$scope.$on($stateChangeSuccess) should assign toState name to currentState', () => {
