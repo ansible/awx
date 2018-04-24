@@ -77,11 +77,11 @@
                 </at-row-item>
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
-                    value="{{ vm.getModified(template) }}">
+                    value-bind-html="{{ vm.getModified(template) }}">
                 </at-row-item>
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RAN') }}"
-                    value="{{ vm.getLastRan(template) }}">
+                    value-bind-html="{{ vm.getLastRan(template) }}">
                 </at-row-item>
                 <labels-list class="LabelList" show-delete="false" is-row-item="true" state="template">
                 </labels-list>
