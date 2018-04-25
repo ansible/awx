@@ -2278,19 +2278,14 @@ class RunSystemJob(BaseTask):
                 json_vars = {}
             else:
                 json_vars = json.loads(system_job.extra_vars)
-            if 'days' in json_vars and system_job.job_type != 'cleanup_facts':
+            if 'days' in json_vars:
                 args.extend(['--days', str(json_vars.get('days', 60))])
-            if 'dry_run' in json_vars and json_vars['dry_run'] and system_job.job_type != 'cleanup_facts':
+            if 'dry_run' in json_vars and json_vars['dry_run']:
                 args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':
                 args.extend(['--jobs', '--project-updates', '--inventory-updates',
                              '--management-jobs', '--ad-hoc-commands', '--workflow-jobs',
                              '--notifications'])
-            if system_job.job_type == 'cleanup_facts':
-                if 'older_than' in json_vars:
-                    args.extend(['--older_than', str(json_vars['older_than'])])
-                if 'granularity' in json_vars:
-                    args.extend(['--granularity', str(json_vars['granularity'])])
         except Exception:
             logger.exception(six.text_type("{} Failed to parse system job").format(system_job.log_format))
         return args
