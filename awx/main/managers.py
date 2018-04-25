@@ -178,8 +178,6 @@ class InstanceGroupManager(models.Manager):
             if t.status == 'waiting' or not t.execution_node:
                 # Subtract capacity from any peer groups that share instances
                 if not t.instance_group:
-                    logger.warning('Excluded %s from capacity algorithm '
-                                   '(missing instance_group).', t.log_format)
                     impacted_groups = []
                 elif t.instance_group.name not in ig_ig_mapping:
                     # Waiting job in group with 0 capacity has no collateral impact
