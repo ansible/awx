@@ -73,16 +73,40 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
 
                         if(vm.promptDataClone.launchConf.passwords_needed_to_start) {
                             vm.promptDataClone.launchConf.passwords_needed_to_start.forEach((passwordNeeded) => {
-                                if(passwordNeeded === "ssh_password") {
-                                    vm.promptDataClone.prompts.credentials.passwords.ssh = {};
-                                }
-                                if(passwordNeeded === "become_password") {
-                                    vm.promptDataClone.prompts.credentials.passwords.become = {};
-                                }
-                                if(passwordNeeded === "ssh_key_unlock") {
-                                    vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock = {};
-                                }
-                                if(passwordNeeded.startsWith("vault_password")) {
+                                if (passwordNeeded === "ssh_password") {
+                                    vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
+                                        defaultCredential.passwords_needed.forEach((neededPassword) => {
+                                            if (neededPassword === "ssh_password") {
+                                                vm.promptDataClone.prompts.credentials.passwords.ssh = {
+                                                    id: defaultCredential.id,
+                                                    name: defaultCredential.name
+                                                };
+                                            }
+                                        });
+                                    });
+                                } else if (passwordNeeded === "become_password") {
+                                    vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
+                                        defaultCredential.passwords_needed.forEach((neededPassword) => {
+                                            if (neededPassword === "become_password") {
+                                                vm.promptDataClone.prompts.credentials.passwords.become = {
+                                                    id: defaultCredential.id,
+                                                    name: defaultCredential.name
+                                                };
+                                            }
+                                        });
+                                    });
+                                } else if (passwordNeeded === "ssh_key_unlock") {
+                                    vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
+                                        defaultCredential.passwords_needed.forEach((neededPassword) => {
+                                            if (neededPassword === "ssh_key_unlock") {
+                                                vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock = {
+                                                    id: defaultCredential.id,
+                                                    name: defaultCredential.name
+                                                };
+                                            }
+                                        });
+                                    });
+                                } else if (passwordNeeded.startsWith("vault_password")) {
                                     let vault_id = null;
                                     if (passwordNeeded.includes('.')) {
                                         vault_id = passwordNeeded.split(/\.(.+)/)[1];
