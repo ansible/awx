@@ -4,6 +4,7 @@ export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Datas
         const { instanceGroup } = resolvedModels;
 
         vm.strings = strings;
+        vm.isSuperuser = $scope.$root.user_is_superuser;
 
         init();
 
@@ -31,6 +32,12 @@ export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Datas
         $scope.$watch('$state.params.instance_group_id', () => {
             vm.activeId = parseInt($state.params.instance_group_id);
         });
+
+        vm.rowAction = {
+            trash: instance_group => {
+                return vm.isSuperuser && instance_group.name !== 'tower';
+            }
+        };
 
         vm.deleteInstanceGroup = instance_group => {
             if (!instance_group) {

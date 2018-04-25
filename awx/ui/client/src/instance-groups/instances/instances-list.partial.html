@@ -27,6 +27,7 @@
                     type="button"
                     ng-click="$state.go('instanceGroups.instances.modal.add')"
                     class="at-Button--add"
+                    ng-show="vm.isSuperuser"
                     aria-expanded="false">
                 </button>
                 <div ui-view="modal"></div>
@@ -37,15 +38,18 @@
                 ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
                 <div class="at-Row-toggle">
                     <div class="ScheduleToggle"
-                        ng-class="{'is-on': instance.enabled}">
+                        ng-class="{'is-on': instance.enabled,
+                            'ScheduleToggle--disabled': vm.rowAction.toggle._disabled}">
                         <button ng-show="instance.enabled"
                             class="ScheduleToggle-switch is-on ng-hide"
-                            ng-click="vm.toggle(instance)">
+                            ng-click="vm.toggle(instance)"
+                            ng-disabled="vm.rowAction.toggle._disabled">
                             {{:: vm.strings.get('ON') }}
                         </button>
                         <button ng-show="!instance.enabled"
                             class="ScheduleToggle-switch"
-                            ng-click="vm.toggle(instance)">
+                            ng-click="vm.toggle(instance)"
+                            ng-disabled="vm.rowAction.toggle._disabled">
                             {{:: vm.strings.get('OFF') }}
                         </button>
                     </div>
@@ -63,7 +67,7 @@
                 </div>
 
                 <div class="at-Row-actions">
-                    <capacity-adjuster state="instance"></capacity-adjuster>
+                    <capacity-adjuster state="instance" disabled="{{vm.rowAction.capacity_adjustment._disabled}}"></capacity-adjuster>
                     <capacity-bar label-value="Used Capacity" capacity="instance.consumed_capacity" total-capacity="instance.capacity"></capacity-bar>
                 </div>
             </at-row>
