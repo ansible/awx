@@ -82,17 +82,25 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                                     vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock = {};
                                 }
                                 if(passwordNeeded.startsWith("vault_password")) {
-                                    let vault_id;
-                                    if(passwordNeeded.includes('.')) {
+                                    let vault_id = null;
+                                    if (passwordNeeded.includes('.')) {
                                         vault_id = passwordNeeded.split(/\.(.+)/)[1];
                                     }
 
-                                    if(!vm.promptDataClone.prompts.credentials.passwords.vault) {
+                                    if (!vm.promptDataClone.prompts.credentials.passwords.vault) {
                                         vm.promptDataClone.prompts.credentials.passwords.vault = [];
                                     }
 
-                                    vm.promptDataClone.prompts.credentials.passwords.vault.push({
-                                        vault_id: vault_id
+                                    // Loop across the default credentials to find the name of the
+                                    // credential that requires a password
+                                    vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
+                                        if (defaultCredential.vault_id === vault_id) {
+                                            vm.promptDataClone.prompts.credentials.passwords.vault.push({
+                                                id: defaultCredential.id,
+                                                name: defaultCredential.name,
+                                                vault_id: defaultCredential.vault_id
+                                            });
+                                        }
                                     });
                                 }
                             });
