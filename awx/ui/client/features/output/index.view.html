@@ -1,14 +1,17 @@
 <div class="container-fluid">
-    <div class="col-md-4">
+    <div class="col-md-4" ng-show="!vm.fullscreen.isFullscreen">
         <at-panel>
             <at-job-details resource="vm.resource"></at-job-details>
         </at-panel>
     </div>
 
-    <div class="col-md-8">
+    <div ng-class="vm.fullscreen.isFullscreen ? 'col-md-12' : 'col-md-8'">
         <at-panel class="at-Stdout">
             <div class="at-Panel-headingTitle">{{ vm.title }}</div>
-            <at-job-stats resource="vm.resource"></at-job-stats>
+            <at-job-stats
+                resource="vm.resource"
+                fullscreen="vm.fullscreen">
+            </at-job-stats>
             <at-job-search></at-job-search>
 
             <div class="at-Stdout-menuTop">

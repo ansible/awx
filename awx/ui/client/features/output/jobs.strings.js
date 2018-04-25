@@ -31,6 +31,11 @@ function JobsStrings (BaseString) {
         PROJECT: t.s('View the Project'),
         PROJECT_UPDATE: t.s('View Project checkout results')
     };
+
+    ns.expandCollapse = {
+        EXPAND: t.s('Expand Output'),
+        COLLAPSE: t.s('Collapse Output')
+    };
 }
 
 JobsStrings.$inject = ['BaseStringService'];

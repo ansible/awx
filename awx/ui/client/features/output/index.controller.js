@@ -55,6 +55,10 @@ function JobsIndexController (
         up: scrollPageUp
     };
 
+    vm.fullscreen = {
+        isFullscreen: false
+    };
+
     render.requestAnimationFrame(() => init());
 }
 
