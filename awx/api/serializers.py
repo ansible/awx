@@ -4587,8 +4587,22 @@ class InstanceGroupSerializer(BaseSerializer):
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.SerializerMethodField()
     instances = serializers.SerializerMethodField()
-    policy_instance_percentage = serializers.IntegerField(min_value=0, max_value=100, required=False, initial=0)
-    policy_instance_minimum = serializers.IntegerField(min_value=0, required=False, initial=0)
+    # NOTE: help_text is duplicated from field definitions, no obvious way of
+    # both defining field details here and also getting the field's help_text
+    policy_instance_percentage = serializers.IntegerField(
+        default=0, min_value=0, max_value=100, required=False, initial=0,
+        help_text=_("Minimum percentage of all instances that will be automatically assigned to "
+                    "this group when new instances come online.")
+    )
+    policy_instance_minimum = serializers.IntegerField(
+        default=0, min_value=0, required=False, initial=0,
+        help_text=_("Static minimum number of Instances that will be automatically assign to "
+                    "this group when new instances come online.")
+    )
+    policy_instance_list = serializers.ListField(
+        child=serializers.CharField(),
+        help_text=_("List of exact-match Instances that will be assigned to this group")
+    )
 
     class Meta:
         model = InstanceGroup
@@ -4604,6 +4618,14 @@ class InstanceGroupSerializer(BaseSerializer):
         if obj.controller_id:
             res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
         return res
+
+    def validate_policy_instance_list(self, value):
+        for instance_name in value:
+            if value.count(instance_name) > 1:
+                raise serializers.ValidationError(_('Duplicate entry {}.').format(instance_name))
+            if not Instance.objects.filter(hostname=instance_name).exists():
+                raise serializers.ValidationError(_('{} is not a valid hostname of an existing instance.').format(instance_name))
+        return value
 
     def get_jobs_qs(self):
         # Store running jobs queryset in context, so it will be shared in ListView
