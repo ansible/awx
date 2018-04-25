@@ -252,23 +252,14 @@
     </div>
 
     <!-- EXTRA VARIABLES DETAIL -->
-    <div class="JobResults-resultRow JobResults-resultRow--variables" ng-show="vm.extraVars">
-        <label class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth">
-            <span>{{ vm.extraVars.label }}</span>
-            <i class="JobResults-extraVarsHelp fa fa-question-circle"
-                aw-tool-tip="{{ vm.extraVars.tooltip }}"
-                data-placement="top">
-            </i>
-        </label>
-        <textarea
-            disabled="disabled"
-            rows="6"
-            ng-model="vm.extraVars.value"
-            name="variables"
-            class="form-control Form-textArea Form-textAreaLabel Form-formGroup--fullWidth"
-            id="cm-extra-vars">
-        </textarea>
-    </div>
+    <at-code-mirror
+        ng-if="vm.extraVars"
+        variables="{{ vm.extraVars.value }}"
+        tooltip="{{ vm.extraVars.tooltip }}"
+        label="{{ vm.extraVars.label}}"
+        label-class="JobResults-codeMirrorResultRowLabel"
+        disabled="{{ vm.extraVars.disabled }}">
+    </at-code-mirror>
 
     <!-- LABELS DETAIL -->
     <div class="JobResults-resultRow" ng-show="vm.labels">

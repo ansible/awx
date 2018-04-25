@@ -34,6 +34,7 @@ import tab from '~components/tabs/tab.directive';
 import tabGroup from '~components/tabs/group.directive';
 import topNavItem from '~components/layout/top-nav-item.directive';
 import truncate from '~components/truncate/truncate.directive';
+import atCodeMirror from '~components/code-mirror';
 
 import BaseInputController from '~components/input/base.controller';
 import ComponentsStrings from '~components/components.strings';
@@ -42,7 +43,8 @@ const MODULE_NAME = 'at.lib.components';
 
 angular
     .module(MODULE_NAME, [
-        atLibServices
+        atLibServices,
+        atCodeMirror
     ])
     .directive('atActionGroup', actionGroup)
     .directive('atDivider', divider)
