@@ -129,7 +129,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
             $scope.extraVars = (data.extra_data === '' || _.isEmpty(data.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(data.extra_data);
 
-            if(schedule.extra_data.hasOwnProperty('granularity')){
+            if (schedule.extra_data.hasOwnProperty('granularity')){
                 $scope.isFactCleanup = true;
             }
             if (schedule.extra_data.hasOwnProperty('days')){
@@ -198,16 +198,15 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             scheduler.setRRule(schedule.rrule);
             scheduler.setName(schedule.name);
 
-            if($scope.isFactCleanup || $scope.cleanupJob){
+            if ($scope.isFactCleanup || $scope.cleanupJob){
                 var a,b, prompt_for_days,
                     keep_unit,
                     granularity,
                     granularity_keep_unit;
 
-                if($scope.cleanupJob){
+                if ($scope.cleanupJob){
                     $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
-                }
-                else if($scope.isFactCleanup){
+                } else if ($scope.isFactCleanup){
                     $scope.keep_unit_choices = [{
                         "label" : "Days",
                         "value" : "d"
@@ -274,9 +273,9 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
                             $scope.$watchGroup(promptValuesToWatch, function() {
                                 let missingPromptValue = false;
-                                if($scope.missingSurveyValue) {
+                                if ($scope.missingSurveyValue) {
                                     missingPromptValue = true;
-                                } else if(!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id) {
+                                } else if (!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id) {
                                     missingPromptValue = true;
                                 }
                                 $scope.promptModalMissingReqFields = missingPromptValue;
@@ -294,8 +293,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         const credentialHasScheduleOverride = (templateDefaultCred) => {
                             let credentialHasOverride = false;
                             scheduleCredentials.forEach((scheduleCred) => {
-                                if(templateDefaultCred.credential_type === scheduleCred.credential_type) {
-                                    if(
+                                if (templateDefaultCred.credential_type === scheduleCred.credential_type) {
+                                    if (
                                         (!templateDefaultCred.vault_id && !scheduleCred.inputs.vault_id) ||
                                         (templateDefaultCred.vault_id && scheduleCred.inputs.vault_id && templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
                                     ) {
@@ -307,9 +306,9 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                             return credentialHasOverride;
                         };
 
-                        if(_.has(launchConf, 'defaults.credentials')) {
+                        if (_.has(launchConf, 'defaults.credentials')) {
                             launchConf.defaults.credentials.forEach((defaultCred) => {
-                                if(!credentialHasScheduleOverride(defaultCred)) {
+                                if (!credentialHasScheduleOverride(defaultCred)) {
                                     defaultCredsWithoutOverrides.push(defaultCred);
                                 }
                             });
@@ -317,11 +316,11 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
                         prompts.credentials.value = defaultCredsWithoutOverrides.concat(scheduleCredentials);
 
-                        if(!launchConf.ask_variables_on_launch) {
+                        if (!launchConf.ask_variables_on_launch) {
                             $scope.noVars = true;
                         }
 
-                        if(!launchConf.survey_enabled &&
+                        if (!launchConf.survey_enabled &&
                             !launchConf.ask_inventory_on_launch &&
                             !launchConf.ask_credential_on_launch &&
                             !launchConf.ask_verbosity_on_launch &&
@@ -343,11 +342,11 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                             // Promptable variables will happen in the schedule form
                             launchConf.ignore_ask_variables = true;
 
-                            if(launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has(data, 'summary_fields.inventory')) {
+                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has(data, 'summary_fields.inventory')) {
                                 $scope.promptModalMissingReqFields = true;
                             }
 
-                            if(responses[1].data.survey_enabled) {
+                            if (responses[1].data.survey_enabled) {
                                 // go out and get the survey questions
                                 jobTemplate.getSurveyQuestions(ParentObject.id)
                                     .then((surveyQuestionRes) => {
@@ -380,7 +379,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                                         $scope.$watch('promptData.surveyQuestions', () => {
                                             let missingSurveyValue = false;
                                             _.each($scope.promptData.surveyQuestions, (question) => {
-                                                if(question.required && (Empty(question.model) || question.model === [])) {
+                                                if (question.required && (Empty(question.model) || question.model === [])) {
                                                     missingSurveyValue = true;
                                                 }
                                             });
@@ -389,8 +388,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
                                         watchForPromptChanges();
                                     });
-                            }
-                            else {
+                            } else {
                                 $scope.promptData = {
                                     launchConf: launchConf,
                                     launchOptions: launchOptions,
@@ -474,13 +472,12 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
             // extra_data field is not manifested in the UI when scheduling a Management Job
             if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
-                if ($state.current.name === 'projectSchedules.edit'){
+                if ($state.current.name === 'projectSchedules.edit' ||
+                    $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit' ||
+                    $state.current.name === 'workflowJobTemplateSchedules.add'
+                ){
                     $scope.noVars = true;
-                }
-                else if ($state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit'){
-                    $scope.noVars = true;
-                }
-                else {
+                } else {
                     ParseTypeChange({
                         scope: $scope,
                         variable: 'extraVars',
