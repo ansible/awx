@@ -72,7 +72,7 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
 I18N_FLAG_FILE = .i18n_built
 
-.PHONY: clean clean-tmp clean-venv requirements requirements_dev \
+.PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_ansible test_coverage coverage_html \
 	dev_build release_build release_clean sdist \
@@ -366,6 +366,11 @@ swagger: reports
 	(set -o pipefail && py.test awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
 
 check: flake8 pep8 # pyflakes pylint
+
+awx-link:
+	cp -R /tmp/awx.egg-info /awx_devel/ || true
+	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
+	cp /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 # Run all API unit tests.
