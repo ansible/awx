@@ -139,7 +139,7 @@
         register: doesRequirementsExist
 
       - name: fetch galaxy roles from requirements.yml
-        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ --force
+        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ {{ scm_result is defined|ternary('--force',omit) }}
         args:
           chdir: "{{project_path|quote}}/roles"
         when: doesRequirementsExist.stat.exists
