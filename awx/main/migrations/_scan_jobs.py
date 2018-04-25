@@ -102,3 +102,11 @@ def remove_scan_type_nodes(apps, schema_editor):
                 prompts.pop('job_type')
                 node.char_prompts = prompts
                 node.save()
+
+
+def remove_legacy_fact_cleanup(apps, schema_editor):
+    SystemJobTemplate = apps.get_model('main', 'SystemJobTemplate')
+    for job in SystemJobTemplate.objects.filter(job_type='cleanup_facts').all():
+        for sched in job.schedules.all():
+            sched.delete()
+        job.delete()
