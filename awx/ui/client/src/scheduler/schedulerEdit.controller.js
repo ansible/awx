@@ -1,11 +1,11 @@
 export default ['$filter', '$state', '$stateParams', 'Wait', '$scope', 'moment',
 '$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
 'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
-'WorkflowJobTemplateModel',
+'WorkflowJobTemplateModel', 'TemplatesStrings',
 function($filter, $state, $stateParams, Wait, $scope, moment,
     $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
     GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI,
-    WorkflowJobTemplate
+    WorkflowJobTemplate, TemplatesStrings
 ) {
 
     let schedule, scheduler, scheduleCredentials = [];
@@ -20,6 +20,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
     $scope.isEdit = true;
     $scope.hideForm = true;
     $scope.parseType = 'yaml';
+
+    $scope.strings = TemplatesStrings;
 
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight

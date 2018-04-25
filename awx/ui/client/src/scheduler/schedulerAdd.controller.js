@@ -8,12 +8,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
     'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
-    'WorkflowJobTemplateModel',
+    'WorkflowJobTemplateModel', 'TemplatesStrings',
     function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
         ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment,
-        WorkflowJobTemplate
+        WorkflowJobTemplate, TemplatesStrings
     ) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
@@ -33,6 +33,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     };
 
     $scope.preventCredsWithPasswords = true;
+    $scope.strings = TemplatesStrings;
 
     /*
      * This is a workaround for the angular-scheduler library inserting `ll` into fields after an
