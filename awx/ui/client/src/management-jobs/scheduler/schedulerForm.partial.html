@@ -161,7 +161,7 @@
                     ng-show="sheduler_frequency_error">
                 </div>
             </div>
-            <div class="form-group SchedulerForm-formGroup" ng-if="cleanupJob  && !isFactCleanup">
+            <div class="form-group SchedulerForm-formGroup" ng-if="cleanupJob">
                 <label class="Form-inputLabel"><span class="red-text">*</span> Days of data to keep</label>
                 <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" aw-spinner="schedulerPurgeDays" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
                 <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required" translate>A value is required.</div>
@@ -521,44 +521,6 @@
             <div class="RepeatFrequencyOptions-subFormBorderFixer"
                  ng-show="schedulerFrequency.value && schedulerFrequency.value !== 'none'">
             </div>
-        <!-- start management job fields -->
-            <div class="factDetailsNote" ng-if="isFactCleanup">
-            <span class="factDetailsHeader">Note:</span> For facts collected older than the time period specified, save one fact scan (snapshot) per time window (frequency). For example, facts older than 30 days are purged, while one weekly fact scan is kept.
-            Caution: Setting both numerical variables to "0" will delete all facts.</div>
-
-            <div class="form-group SchedulerForm-formGroup" ng-if="isFactCleanup">
-                <label class="Form-inputLabel RepeatFrequencyOptions-everyLabel"><span class="red-text">*</span> Select a time period after which to remove old facts</label>
-                <div class="RepeatFrequencyOptions-inputGroup RepeatFrequencyOptions-inputGroup--halvesWithSelect">
-                    <input id="keep_amount" name="keep_amount" ng-model="keep_amount" aw-spinner="keep_amount" ng-required="true" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" min="0" aw-min="0" max="9999" aw-max="9999" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)" integer required></input>
-                    <select id="keep_unit" name="keep_unit" ng-model="keep_unit" ng-options="type.label for type in keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"></select>
-                </div>
-
-                <!-- The below errors are ONLY for id="keep_amount", not for id="keep_unit" -->
-                <div>
-                    <div class="error" ng-show="scheduler_form.keep_amount.$dirty && scheduler_form.keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
-                    <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.number || scheduler_form.keep_amount.$error.integer" >Please enter a valid number.</div>
-                    <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.awMin">Please enter a non-negative number.</div>
-                    <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
-                </div>
-            </div>
-
-            <div class="form-group SchedulerForm-formGroup" ng-if="isFactCleanup">
-                <label class="Form-inputLabel RepeatFrequencyOptions-everyLabel"><span class="red-text">*</span> Select a frequency for snapshot retention</label>
-                <div class="RepeatFrequencyOptions-inputGroup RepeatFrequencyOptions-inputGroup--halvesWithSelect">
-                    <input sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" aw-spinner="granularity_keep_amount"
-                    ng-required="true" min="0" max="9999"  integer ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)" aw-min="0" aw-max="9999" required>
-                    <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit" ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"></select>
-                </div>
-
-                <!-- The below errors are ONLY for id="granularity_keep_amount", not for id="granularity_keep_unit" -->
-                <div>
-                    <div class="error" ng-show="scheduler_form.granularity_keep_amount.$dirty && scheduler_form.granularity_keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
-                    <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.number || scheduler_form.granularity_keep_amount.$error.integer" >Please enter a valid number.</div>
-                    <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.awMin">Please enter a non-negative number.</div>
-                    <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
-                </div>
-            </div>
-        <!-- end management job fields     -->
         </form>
         <div class="SchedulerFormDetail-container
             SchedulerFormDetail-container--error"

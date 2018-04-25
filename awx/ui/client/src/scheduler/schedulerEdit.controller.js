@@ -131,10 +131,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
             $scope.extraVars = (data.extra_data === '' || _.isEmpty(data.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(data.extra_data);
 
-            if (schedule.extra_data.hasOwnProperty('granularity')){
-                $scope.isFactCleanup = true;
-            }
-            if (schedule.extra_data.hasOwnProperty('days')){
+            if (_.has(schedule, 'summary_fields.unified_job_template.unified_job_type') &&
+                schedule.summary_fields.unified_job_template.unified_job_type === 'system_job'){
                 $scope.cleanupJob = true;
             }
 
@@ -146,8 +144,13 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             $http.get('/api/v2/schedules/zoneinfo/').then(({data}) => {
                 scheduler.scope.timeZones = data;
                 scheduler.scope.schedulerTimeZone = _.find(data, function(x) {
-                    let tz = $scope.schedule_obj.rrule.match(/TZID=\s*(.*?)\s*:/)[1];
-                    return x.name === tz;
+                    let tz = $scope.schedule_obj.rrule.match(/TZID=\s*(.*?)\s*:/);
+                    if (_.has(tz, '1')) {
+                        return x.name === tz[1];
+                    } else {
+                        return false;
+                    }
+
                 });
             });
             scheduler.inject('form-container', false);
@@ -200,56 +203,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             scheduler.setRRule(schedule.rrule);
             scheduler.setName(schedule.name);
 
-            if ($scope.isFactCleanup || $scope.cleanupJob){
-                var a,b, prompt_for_days,
-                    keep_unit,
-                    granularity,
-                    granularity_keep_unit;
-
-                if ($scope.cleanupJob){
-                    $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
-                } else if ($scope.isFactCleanup){
-                    $scope.keep_unit_choices = [{
-                        "label" : "Days",
-                        "value" : "d"
-                    },
-                    {
-                        "label": "Weeks",
-                        "value" : "w"
-                    },
-                    {
-                        "label" : "Years",
-                        "value" : "y"
-                    }];
-                    $scope.granularity_keep_unit_choices =  [{
-                        "label" : "Days",
-                        "value" : "d"
-                    },
-                    {
-                        "label": "Weeks",
-                        "value" : "w"
-                    },
-                    {
-                        "label" : "Years",
-                        "value" : "y"
-                    }];
-                    // the API returns something like 20w or 1y
-                    a = schedule.extra_data.older_than; // "20y"
-                    b = schedule.extra_data.granularity; // "1w"
-                    prompt_for_days = Number(_.initial(a,1).join('')); // 20
-                    keep_unit = _.last(a); // "y"
-                    granularity = Number(_.initial(b,1).join('')); // 1
-                    granularity_keep_unit = _.last(b); // "w"
-
-                    $scope.keep_amount = prompt_for_days;
-                    $scope.granularity_keep_amount = granularity;
-                    $scope.keep_unit = _.find($scope.keep_unit_choices, function(i){
-                        return i.value === keep_unit;
-                    });
-                    $scope.granularity_keep_unit =_.find($scope.granularity_keep_unit_choices, function(i){
-                        return i.value === granularity_keep_unit;
-                    });
-                }
+            if ($scope.cleanupJob){
+                $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
             }
 
             if ($state.current.name === 'jobTemplateSchedules.edit'){
