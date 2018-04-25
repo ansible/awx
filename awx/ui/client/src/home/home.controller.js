@@ -10,35 +10,24 @@ export default ['$scope', '$rootScope','Wait',
     Rest, GetBasePath, ProcessErrors, graphData) {
 
         var dataCount = 0;
+        let launchModalOpen = false;
+        let refreshAfterLaunchClose = false;
 
         $scope.$on('ws-jobs', function () {
-            Rest.setUrl(GetBasePath('dashboard'));
-            Rest.get()
-            .then(({data}) => {
-                $scope.dashboardData = data;
-            })
-            .catch(({data, status}) => {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard host graph data: ' + status });
-            });
+            if (!launchModalOpen) {
+                refreshLists();
+            } else {
+                refreshAfterLaunchClose = true;
+            }
+        });
 
-            Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
-            Rest.get()
-            .then(({data}) => {
-                $scope.dashboardJobsListData = data.results;
-            })
-            .catch(({data, status}) => {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
-            });
-
-            Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template");
-            Rest.get()
-            .then(({data}) => {
-                $scope.dashboardJobTemplatesListData = data.results;
-            })
-            .catch(({data, status}) => {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
-            });
-
+        $scope.$on('launchModalOpen', (evt, isOpen) => {
+            evt.stopPropagation();
+            if (!isOpen && refreshAfterLaunchClose) {
+                refreshAfterLaunchClose = false;
+                refreshLists();
+            }
+            launchModalOpen = isOpen;
         });
 
         if ($scope.removeDashboardDataLoadComplete) {
@@ -118,6 +107,35 @@ export default ['$scope', '$rootScope','Wait',
         };
 
         $scope.refresh();
+
+        function refreshLists () {
+            Rest.setUrl(GetBasePath('dashboard'));
+            Rest.get()
+            .then(({data}) => {
+                $scope.dashboardData = data;
+            })
+            .catch(({data, status}) => {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard host graph data: ' + status });
+            });
+
+            Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
+            Rest.get()
+            .then(({data}) => {
+                $scope.dashboardJobsListData = data.results;
+            })
+            .catch(({data, status}) => {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
+            });
+
+            Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template");
+            Rest.get()
+            .then(({data}) => {
+                $scope.dashboardJobTemplatesListData = data.results;
+            })
+            .catch(({data, status}) => {
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
+            });
+        }
 
     }
 ];

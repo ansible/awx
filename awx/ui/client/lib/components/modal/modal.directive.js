@@ -26,6 +26,7 @@ function AtModalController ($timeout, eventService, strings) {
         vm.modal = scope[scope.ns].modal;
         vm.modal.show = vm.show;
         vm.modal.hide = vm.hide;
+        vm.modal.onClose = scope.onClose;
     };
 
     vm.show = (title, message) => {
@@ -48,6 +49,10 @@ function AtModalController ($timeout, eventService, strings) {
         setTimeout(() => {
             overlay.style.display = 'none';
         }, DEFAULT_ANIMATION_DURATION);
+
+        if (vm.modal.onClose) {
+            vm.modal.onClose();
+        }
     };
 
     vm.clickToHide = event => {
