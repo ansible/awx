@@ -30,7 +30,11 @@ function AtJobStatsController (_strings_, _status_) {
     vm.init = scope => {
         const { resource } = scope;
 
+        vm.fullscreen = scope.fullscreen;
+
         vm.download = resource.model.get('related.stdout');
+
+        vm.toggleStdoutFullscreenTooltip = strings.get('expandCollapse.EXPAND');
 
         vm.setHostStatusCounts(status.getHostStatusCounts());
 
@@ -55,6 +59,13 @@ function AtJobStatsController (_strings_, _status_) {
 
         vm.statsAreAvailable = Boolean(status.getStatsEvent());
     };
+
+    vm.toggleFullscreen = () => {
+        vm.fullscreen.isFullscreen = !vm.fullscreen.isFullscreen;
+        vm.toggleStdoutFullscreenTooltip = vm.fullscreen.isFullscreen ?
+            strings.get('expandCollapse.COLLAPSE') :
+            strings.get('expandCollapse.EXPAND');
+    };
 }
 
 function atJobStats () {
@@ -67,9 +78,13 @@ function atJobStats () {
         controller: [
             'JobStrings',
             'JobStatusService',
+            '$scope',
             AtJobStatsController
         ],
-        scope: { resource: '=', },
+        scope: {
+            resource: '=',
+            fullscreen: '='
+        }
     };
 }
 

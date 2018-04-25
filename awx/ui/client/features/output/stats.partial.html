@@ -19,20 +19,20 @@
     </span>
 
     <a ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
-    <button class="btn at-Input-button at-u-noBorder"
-        aw-tool-tip="{{ standardOutTooltip }}"
-        data-tip-watch="standardOutTooltip"
-        data-placement="top">
-        <i class="fa fa-download"></i>
-    </button>
+        <button class="btn at-Input-button at-u-noBorder"
+            aw-tool-tip="{{ standardOutTooltip }}"
+            data-tip-watch="standardOutTooltip"
+            data-placement="top">
+            <i class="fa fa-download"></i>
+        </button>
     </a>
 
     <button class="btn at-Input-button at-u-noBorder"
-        aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}"
-        data-tip-watch="toggleStdoutFullscreenTooltip"
+        aw-tool-tip="{{ vm.toggleStdoutFullscreenTooltip }}"
+        data-tip-watch="vm.toggleStdoutFullscreenTooltip"
         data-placement="top"
-        ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"
-        ng-click="toggleStdoutFullscreen()">
+        ng-class="{'at-Input-button--active': vm.fullscreen.isFullscreen}"
+        ng-click="vm.toggleFullscreen()">
         <i class="fa fa-arrows-alt"></i>
     </button>
 </div>
