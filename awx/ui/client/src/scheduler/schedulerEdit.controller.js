@@ -1,9 +1,12 @@
 export default ['$filter', '$state', '$stateParams', 'Wait', '$scope', 'moment',
 '$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
 'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
+'WorkflowJobTemplateModel',
 function($filter, $state, $stateParams, Wait, $scope, moment,
     $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
-    GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI) {
+    GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI,
+    WorkflowJobTemplate
+) {
 
     let schedule, scheduler, scheduleCredentials = [];
 
@@ -363,6 +366,75 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                                             field_id: 'SchedulerForm-extraVars',
                                             readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
                                         });
+
+                                        $scope.promptData = {
+                                            launchConf: launchConf,
+                                            launchOptions: launchOptions,
+                                            prompts: prompts,
+                                            surveyQuestions: surveyQuestionRes.data.spec,
+                                            template: ParentObject.id
+                                        };
+
+                                        $scope.$watch('promptData.surveyQuestions', () => {
+                                            let missingSurveyValue = false;
+                                            _.each($scope.promptData.surveyQuestions, (question) => {
+                                                if(question.required && (Empty(question.model) || question.model === [])) {
+                                                    missingSurveyValue = true;
+                                                }
+                                            });
+                                            $scope.missingSurveyValue = missingSurveyValue;
+                                        }, true);
+
+                                        watchForPromptChanges();
+                                    });
+                            }
+                            else {
+                                $scope.promptData = {
+                                    launchConf: launchConf,
+                                    launchOptions: launchOptions,
+                                    prompts: prompts,
+                                    template: ParentObject.id
+                                };
+                                watchForPromptChanges();
+                            }
+                        }
+                    });
+            } else if ($state.current.name === 'workflowJobTemplateSchedules.edit') {
+                let workflowJobTemplate = new WorkflowJobTemplate();
+
+                $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
+                    .then((responses) => {
+                        let launchOptions = responses[0].data,
+                            launchConf = responses[1].data;
+
+                        let watchForPromptChanges = () => {
+                            $scope.$watch('missingSurveyValue', function() {
+                                $scope.promptModalMissingReqFields = $scope.missingSurveyValue ? true : false;
+                            });
+                        };
+
+                        let prompts = PromptService.processPromptValues({
+                            launchConf: responses[1].data,
+                            launchOptions: responses[0].data,
+                            currentValues: data
+                        });
+
+                        if(!launchConf.survey_enabled) {
+                            $scope.showPromptButton = false;
+                        } else {
+                            $scope.showPromptButton = true;
+
+                            if(responses[1].data.survey_enabled) {
+                                // go out and get the survey questions
+                                workflowJobTemplate.getSurveyQuestions(ParentObject.id)
+                                    .then((surveyQuestionRes) => {
+
+                                        let processed = PromptService.processSurveyQuestions({
+                                            surveyQuestions: surveyQuestionRes.data.spec,
+                                            extra_data: _.cloneDeep(data.extra_data)
+                                        });
+
+                                        $scope.missingSurveyValue = processed.missingSurveyValue;
 
                                         $scope.promptData = {
                                             launchConf: launchConf,
