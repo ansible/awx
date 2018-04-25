@@ -10,6 +10,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
     let schedule, scheduler, scheduleCredentials = [];
 
+    $scope.preventCredsWithPasswords = true;
+
     // initial end @ midnight values
     $scope.schedulerEndHour = "00";
     $scope.schedulerEndMinute = "00";

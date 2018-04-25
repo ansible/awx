@@ -16,6 +16,7 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
             ({ modal } = scope[scope.ns]);
 
             scope.$watch('vm.promptData.triggerModalOpen', () => {
+
                 vm.actionButtonClicked = false;
                 if(vm.promptData && vm.promptData.triggerModalOpen) {
 
