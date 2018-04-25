@@ -140,6 +140,12 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                         vm.steps.preview.tab.order = order;
                         modal.show('PROMPT');
                         vm.promptData.triggerModalOpen = false;
+
+                        modal.onClose = () => {
+                            scope.$emit('launchModalOpen', false);
+                        };
+
+                        scope.$emit('launchModalOpen', true);
                     })
                     .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, null, {

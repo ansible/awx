@@ -30,6 +30,9 @@ function ListTemplatesController(
     const choices = workflowTemplate.options('actions.GET.type.choices')
         .concat(jobTemplate.options('actions.GET.type.choices'));
 
+    let launchModalOpen = false;
+    let refreshAfterLaunchClose = false;
+
     vm.strings = strings;
     vm.templateTypes = mapChoices(choices);
     vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_template_id);
@@ -48,7 +51,7 @@ function ListTemplatesController(
     $scope.canAdd = ($scope.canAddJobTemplate || $scope.canAddWorkflowJobTemplate);
 
     // smart-search
-    $scope.list = { 
+    $scope.list = {
         iterator: 'template',
         name: 'templates'
     };
@@ -64,12 +67,20 @@ function ListTemplatesController(
     });
 
     $scope.$on(`ws-jobs`, () => {
-        let path = GetBasePath('unified_job_templates');
-        qs.search(path, $state.params.template_search)
-            .then(function(searchResponse) {
-                $scope.template_dataset = searchResponse.data;
-                $scope.templates = $scope.template_dataset.results;
-            });
+        if (!launchModalOpen) {
+            refreshTemplates();
+        } else {
+            refreshAfterLaunchClose = true;
+        }
+    });
+
+    $scope.$on('launchModalOpen', (evt, isOpen) => {
+        evt.stopPropagation();
+        if (!isOpen && refreshAfterLaunchClose) {
+            refreshAfterLaunchClose = false;
+            refreshTemplates();
+        }
+        launchModalOpen = isOpen;
     });
 
     vm.isInvalid = (template) => {
@@ -162,6 +173,15 @@ function ListTemplatesController(
 
         return html;
     };
+
+    function refreshTemplates() {
+        let path = GetBasePath('unified_job_templates');
+        qs.search(path, $state.params.template_search)
+            .then(function(searchResponse) {
+                $scope.template_dataset = searchResponse.data;
+                $scope.templates = $scope.template_dataset.results;
+            });
+    }
 
     function createErrorHandler(path, action) {
         return ({ data, status }) => {

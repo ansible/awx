@@ -29,6 +29,9 @@ function ListJobsController (
     const iterator = 'job';
     const key = 'job_dataset';
 
+    let launchModalOpen = false;
+    let refreshAfterLaunchClose = false;
+
     $scope.list = { iterator, name };
     $scope.collection = { iterator, basePath: 'unified_jobs' };
     $scope[key] = Dataset.data;
@@ -38,10 +41,20 @@ function ListJobsController (
         $scope[name] = dataset.results;
     });
     $scope.$on('ws-jobs', () => {
-        qs.search(unifiedJob.path, $state.params.job_search)
-            .then(({ data }) => {
-                $scope.$emit('updateDataset', data);
-            });
+        if (!launchModalOpen) {
+            refreshJobs();
+        } else {
+            refreshAfterLaunchClose = true;
+        }
+    });
+
+    $scope.$on('launchModalOpen', (evt, isOpen) => {
+        evt.stopPropagation();
+        if (!isOpen && refreshAfterLaunchClose) {
+            refreshAfterLaunchClose = false;
+            refreshJobs();
+        }
+        launchModalOpen = isOpen;
     });
 
     if ($state.includes('instanceGroups')) {
@@ -164,6 +177,13 @@ function ListJobsController (
             actionText: strings.get('CANCEL')
         });
     };
+
+    function refreshJobs () {
+        qs.search(unifiedJob.path, $state.params.job_search)
+            .then(({ data }) => {
+                $scope.$emit('updateDataset', data);
+            });
+    }
 }
 
 ListJobsController.$inject = [
