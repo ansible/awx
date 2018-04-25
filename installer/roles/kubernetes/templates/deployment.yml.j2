@@ -213,6 +213,7 @@ spec:
               cpu: "{{ rabbitmq_cpu_request }}m"
         - name: {{ kubernetes_deployment_name }}-memcached
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
+          imagePullPolicy: Always
           resources:
             requests:
               memory: "{{ memcached_mem_request }}Gi"
