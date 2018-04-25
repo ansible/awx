@@ -19,6 +19,7 @@ function atRowItem () {
             labelState: '@',
             value: '@',
             valueLink: '@',
+            valueBindHtml: '@',
             smartStatus: '=?',
             tagValues: '=?',
             // TODO: add see more for tags if applicable

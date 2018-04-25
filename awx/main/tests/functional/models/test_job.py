@@ -1,6 +1,7 @@
 import pytest
 
 from awx.main.models import JobTemplate, Job
+from crum import impersonate
 
 
 @pytest.mark.django_db
@@ -49,3 +50,18 @@ def test_awx_custom_virtualenv_without_jt(project):
 
     job = Job.objects.get(pk=job.id)
     assert job.ansible_virtualenv_path == '/venv/fancy-proj'
+
+
+@pytest.mark.django_db
+def test_update_parent_instance(job_template, alice):
+    # jobs are launched as a particular user, user not saved as modified_by
+    with impersonate(alice):
+        assert job_template.current_job is None
+        assert job_template.status == 'never updated'
+        assert job_template.modified_by is None
+        job = job_template.jobs.create(status='new')
+        job.status = 'pending'
+        job.save()
+        assert job_template.current_job == job
+        assert job_template.status == 'pending'
+        assert job_template.modified_by is None

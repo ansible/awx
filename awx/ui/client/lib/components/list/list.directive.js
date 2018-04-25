@@ -20,6 +20,7 @@ function atList () {
         templateUrl,
         scope: {
             results: '=',
+            emptyListReason: '@'
         },
         link: atListLink,
         controller: AtListController,

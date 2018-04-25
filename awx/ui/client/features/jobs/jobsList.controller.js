@@ -44,6 +44,10 @@ function ListJobsController (
             });
     });
 
+    if ($state.includes('instanceGroups')) {
+        vm.emptyListReason = strings.get('list.NO_RUNNING');
+    }
+
     vm.jobTypes = mapChoices(unifiedJob
         .options('actions.GET.type.choices'));
 

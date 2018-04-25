@@ -13,6 +13,7 @@ function JobsStrings (BaseString) {
         ROW_ITEM_LABEL_INVENTORY: t.s('Inventory'),
         ROW_ITEM_LABEL_PROJECT: t.s('Project'),
         ROW_ITEM_LABEL_CREDENTIALS: t.s('Credentials'),
+        NO_RUNNING: t.s('There are no running jobs.')
     };
 }
 

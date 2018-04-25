@@ -14,7 +14,7 @@ function exit () {
 }
 
 function HostEventResolve (HostEventService, $stateParams) {
-    return HostEventService.getRelatedJobEvents($stateParams.id, {
+    return HostEventService.getRelatedJobEvents($stateParams.id, $stateParams.type, {
         id: $stateParams.eventId
     }).then((response) => response.data.results[0]);
 }

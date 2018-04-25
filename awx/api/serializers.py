@@ -5,6 +5,7 @@
 import copy
 import json
 import logging
+import operator
 import re
 import six
 import urllib
@@ -38,7 +39,13 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # AWX
-from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN, ACTIVE_STATES, TOKEN_CENSOR
+from awx.main.constants import (
+    SCHEDULEABLE_PROVIDERS,
+    ANSI_SGR_PATTERN,
+    ACTIVE_STATES,
+    TOKEN_CENSOR,
+    CHOICES_PRIVILEGE_ESCALATION_METHODS,
+)
 from awx.main.models import * # noqa
 from awx.main.models.base import NEW_JOB_TYPE_CHOICES
 from awx.main.access import get_user_capabilities
@@ -2494,6 +2501,9 @@ class CredentialTypeSerializer(BaseSerializer):
                 field['label'] = _(field['label'])
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
+                if field['type'] == 'become_method':
+                    field.pop('type')
+                    field['choices'] = map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS)
         return value
 
     def filter_field_metadata(self, fields, method):
@@ -2663,7 +2673,9 @@ class CredentialSerializer(BaseSerializer):
             for field in set(data.keys()) - valid_fields - set(credential_type.defined_fields):
                 if data.get(field):
                     raise serializers.ValidationError(
-                        {"detail": _("'%s' is not a valid field for %s") % (field, credential_type.name)}
+                        {"detail": _("'{field_name}' is not a valid field for {credential_type_name}").format(
+                            field_name=field, credential_type_name=credential_type.name
+                        )}
                     )
             value.pop('kind', None)
             return value
@@ -4575,8 +4587,22 @@ class InstanceGroupSerializer(BaseSerializer):
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.SerializerMethodField()
     instances = serializers.SerializerMethodField()
-    policy_instance_percentage = serializers.IntegerField(min_value=0, max_value=100)
-    policy_instance_minimum = serializers.IntegerField(min_value=0)
+    # NOTE: help_text is duplicated from field definitions, no obvious way of
+    # both defining field details here and also getting the field's help_text
+    policy_instance_percentage = serializers.IntegerField(
+        default=0, min_value=0, max_value=100, required=False, initial=0,
+        help_text=_("Minimum percentage of all instances that will be automatically assigned to "
+                    "this group when new instances come online.")
+    )
+    policy_instance_minimum = serializers.IntegerField(
+        default=0, min_value=0, required=False, initial=0,
+        help_text=_("Static minimum number of Instances that will be automatically assign to "
+                    "this group when new instances come online.")
+    )
+    policy_instance_list = serializers.ListField(
+        child=serializers.CharField(),
+        help_text=_("List of exact-match Instances that will be assigned to this group")
+    )
 
     class Meta:
         model = InstanceGroup
@@ -4592,6 +4618,14 @@ class InstanceGroupSerializer(BaseSerializer):
         if obj.controller_id:
             res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
         return res
+
+    def validate_policy_instance_list(self, value):
+        for instance_name in value:
+            if value.count(instance_name) > 1:
+                raise serializers.ValidationError(_('Duplicate entry {}.').format(instance_name))
+            if not Instance.objects.filter(hostname=instance_name).exists():
+                raise serializers.ValidationError(_('{} is not a valid hostname of an existing instance.').format(instance_name))
+        return value
 
     def get_jobs_qs(self):
         # Store running jobs queryset in context, so it will be shared in ListView

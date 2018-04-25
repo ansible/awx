@@ -10,6 +10,8 @@ describe('Components | Side Nav Item', () => {
         angular.mock.module('ui.router');
         angular.mock.module('at.lib.services');
         angular.mock.module('at.lib.components');
+        angular.mock.module('Utilities');
+        angular.mock.module('ngCookies');
     });
 
     beforeEach(angular.mock.inject((_$compile_, _$rootScope_) => {
@@ -43,13 +45,6 @@ describe('Components | Side Nav Item', () => {
             scope.$digest();
             expect(SideNavItemCtrl.isRoute).toBe(false);
         });
-
-        it('go() should call $state.go()', angular.mock.inject((_$state_) => {
-            spyOn(_$state_, 'go');
-            SideNavItemCtrl.go();
-            expect(_$state_.go).toHaveBeenCalled();
-            expect(_$state_.go).toHaveBeenCalledWith('dashboard', jasmine.any(Object), jasmine.any(Object));
-        }));
 
         it('should load name, icon, and route from scope', () => {
             expect(SideNavItem.isolateScope().name).toBeDefined();
