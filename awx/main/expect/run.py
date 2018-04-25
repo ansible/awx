@@ -101,7 +101,7 @@ def run_pexpect(args, cwd, env, logfile,
 
     child = pexpect.spawn(
         args[0], args[1:], cwd=cwd, env=env, ignore_sighup=True,
-        encoding='utf-8', echo=False,
+        encoding='utf-8', echo=False, use_poll=True
     )
     child.logfile_read = logfile
     canceled = False

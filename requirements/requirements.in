@@ -30,7 +30,7 @@ jsonschema==2.6.0
 M2Crypto==0.29.0
 Markdown==2.6.11
 ordereddict==1.1
-pexpect==4.4.0
+pexpect==4.5.0
 psphere==0.5.2
 psutil==5.4.3
 psycopg2==2.7.3.2   # problems with Segmentation faults / wheels on upgrade
