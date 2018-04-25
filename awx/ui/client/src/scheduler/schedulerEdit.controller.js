@@ -21,7 +21,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
     $scope.hideForm = true;
     $scope.parseType = 'yaml';
 
-    $scope.promptActionText = TemplatesStrings.get('prompt.CONFIRM');
+    $scope.strings = TemplatesStrings;
 
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight

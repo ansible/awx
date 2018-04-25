@@ -33,6 +33,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     };
 
     $scope.preventCredsWithPasswords = true;
+    $scope.strings = TemplatesStrings;
 
     /*
      * This is a workaround for the angular-scheduler library inserting `ll` into fields after an
@@ -87,8 +88,6 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     $scope.parentObject = ParentObject;
 
     $scope.hideForm = true;
-
-    $scope.promptActionText = TemplatesStrings.get('prompt.CONFIRM');
 
     // extra_data field is not manifested in the UI when scheduling a Management Job
     if ($state.current.name === 'jobTemplateSchedules.add'){

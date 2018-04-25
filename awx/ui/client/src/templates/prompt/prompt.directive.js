@@ -5,7 +5,7 @@ export default [ 'templateUrl',
         scope: {
             promptData: '=',
             onFinish: '&',
-            actionText: '@actionText',
+            actionText: '@',
             preventCredsWithPasswords: '<'
         },
         templateUrl: templateUrl('templates/prompt/prompt'),

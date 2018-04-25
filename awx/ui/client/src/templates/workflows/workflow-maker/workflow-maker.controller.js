@@ -16,8 +16,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
         $scope.strings = TemplatesStrings;
         $scope.preventCredsWithPasswords = true;
 
-        $scope.promptActionText = $scope.strings.get('prompt.CONFIRM');
-
         $scope.workflowMakerFormConfig = {
             nodeMode: "idle",
             activeTab: "jobs",
