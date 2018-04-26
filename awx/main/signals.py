@@ -27,7 +27,7 @@ from django.contrib.sessions.models import Session
 from awx.api.serializers import * # noqa
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
-from awx.main.tasks import update_inventory_computed_fields
+from awx.main.tasks import schedule_inventory_computed_fields_update
 from awx.main.fields import is_implicit_parent
 
 from awx.main import consumers
@@ -112,7 +112,7 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     except Inventory.DoesNotExist:
         pass
     else:
-        update_inventory_computed_fields.delay(inventory.id, True)
+        schedule_inventory_computed_fields_update(inventory.id)
 
 
 def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
@@ -133,7 +133,7 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         pass
     else:
         if inventory is not None:
-            update_inventory_computed_fields.delay(inventory.id, True)
+            schedule_inventory_computed_fields_update(inventory.id)
 
 
 def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):
