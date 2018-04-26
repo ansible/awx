@@ -259,6 +259,7 @@ class TaskManager():
         else:
             if type(task) is WorkflowJob:
                 task.status = 'running'
+                logger.info('Transitioning %s to running status.', task.log_format)
             elif not task.supports_isolation() and rampart_group.controller_id:
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
