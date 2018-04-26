@@ -2,7 +2,7 @@ let Base;
 
 function createFormSchema (method, config) {
     function mungeSelectFromOptions (configObj, value) {
-        configObj.choices = [['', '']].concat(configObj.choices);
+        configObj.choices = [[null, '']].concat(configObj.choices);
         configObj._data = configObj.choices;
         configObj._exp = 'choice[1] for choice in state._data';
         configObj._format = 'selectFromOptions';
