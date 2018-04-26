@@ -290,7 +290,7 @@ function getResultTracebackDetails () {
     }
 
     const limit = 150;
-    const label = 'Results Traceback';
+    const label = 'Error Details';
 
     const more = traceback;
     const less = $filter('limitTo')(more, limit);
