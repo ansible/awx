@@ -270,6 +270,7 @@ def send_notifications(notification_list, job_id=None):
         job_actual.notifications.add(*notifications)
 
     for notification in notifications:
+        update_fields = ['status', 'notifications_sent']
         try:
             sent = notification.notification_template.send(notification.subject, notification.body)
             notification.status = "successful"
@@ -278,8 +279,9 @@ def send_notifications(notification_list, job_id=None):
             logger.error(six.text_type("Send Notification Failed {}").format(e))
             notification.status = "failed"
             notification.error = smart_str(e)
+            update_fields.append('error')
         finally:
-            notification.save()
+            notification.save(update_fields=update_fields)
 
 
 @shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
