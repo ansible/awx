@@ -11,7 +11,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0029_v330_members_can_see_teams'),
+        ('main', '0028_v330_add_tower_verify'),
     ]
 
     operations = [

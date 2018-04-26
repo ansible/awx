@@ -112,7 +112,7 @@ class Team(CommonModelNameNotUnique, ResourceMixin):
         parent_role='admin_role',
     )
     read_role = ImplicitRoleField(
-        parent_role=['organization.auditor_role', 'organization.member_role', 'member_role'],
+        parent_role=['organization.auditor_role', 'member_role'],
     )
 
     def get_absolute_url(self, request=None):
