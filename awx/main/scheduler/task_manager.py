@@ -277,7 +277,11 @@ class TaskManager():
         def post_commit():
             task.websocket_emit_status(task.status)
             if task.status != 'failed':
-                task.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler, queue=rampart_group.name)
+                if rampart_group is not None:
+                    actual_queue=rampart_group.name
+                else:
+                    actual_queue=settings.CELERY_DEFAULT_QUEUE
+                task.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler, queue=actual_queue)
 
         connection.on_commit(post_commit)
 
