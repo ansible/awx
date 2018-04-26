@@ -92,7 +92,7 @@ def test_org_counts_detail_member(resourced_organization, user, get):
         'job_templates': 0,
         'projects': 0,
         'inventories': 0,
-        'teams': 5
+        'teams': 0
     }
 
 
@@ -123,7 +123,7 @@ def test_org_counts_list_member(resourced_organization, user, get):
         'job_templates': 0,
         'projects': 0,
         'inventories': 0,
-        'teams': 5
+        'teams': 0
     }
 
 
