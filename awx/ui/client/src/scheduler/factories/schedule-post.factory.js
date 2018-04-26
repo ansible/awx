@@ -18,13 +18,7 @@ export default
                 scheduleData.rrule = RRuleToAPI(rrule.toString(), scope);
                 scheduleData.description = (/error/.test(rrule.toText())) ? '' : rrule.toText();
 
-                if (scope.isFactCleanup) {
-                    extra_vars = {
-                        "older_than": scope.scheduler_form.keep_amount.$viewValue + scope.scheduler_form.keep_unit.$viewValue.value,
-                        "granularity": scope.scheduler_form.granularity_keep_amount.$viewValue + scope.scheduler_form.granularity_keep_unit.$viewValue.value
-                    };
-                    scheduleData.extra_data = JSON.stringify(extra_vars);
-                } else if (scope.cleanupJob) {
+                if (scope.cleanupJob) {
                     extra_vars = {
                         "days" : scope.scheduler_form.schedulerPurgeDays.$viewValue
                     };

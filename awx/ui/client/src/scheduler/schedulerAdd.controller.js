@@ -274,7 +274,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                 }
             });
     }
-    
+
     if ($state.current.name === 'workflowJobTemplateSchedules.add' ||
         $state.current.name === 'projectSchedules.add' ||
         $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.add'
@@ -301,39 +301,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         }
     } else if (base === 'system_job_templates') {
         schedule_url = GetBasePath(base) + $stateParams.id + '/schedules/';
-        if (job_type === "cleanup_facts"){
-            $scope.isFactCleanup = true;
-            $scope.keep_unit_choices = [{
-                "label" : "Days",
-                "value" : "d"
-            },
-            {
-                "label": "Weeks",
-                "value" : "w"
-            },
-            {
-                "label" : "Years",
-                "value" : "y"
-            }];
-            $scope.granularity_keep_unit_choices =  [{
-                "label" : "Days",
-                "value" : "d"
-            },
-            {
-                "label": "Weeks",
-                "value" : "w"
-            },
-            {
-                "label" : "Years",
-                "value" : "y"
-            }];
-            $scope.prompt_for_days_facts_form.keep_amount.$setViewValue(30);
-            $scope.prompt_for_days_facts_form.granularity_keep_amount.$setViewValue(1);
-            $scope.keep_unit = $scope.keep_unit_choices[0];
-            $scope.granularity_keep_unit = $scope.granularity_keep_unit_choices[1];
-        } else {
-            $scope.cleanupJob = true;
-        }
+        $scope.cleanupJob = true;
     }
 
     Wait('start');
