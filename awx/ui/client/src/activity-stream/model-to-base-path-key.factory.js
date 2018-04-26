@@ -18,6 +18,9 @@ export default function ModelToBasePathKey() {
         var basePathKey;
 
         switch(model) {
+            case 'application':
+                basePathKey = 'applications';
+                break;
             case 'project':
                 basePathKey = 'projects';
                 break;

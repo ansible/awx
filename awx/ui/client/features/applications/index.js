@@ -62,7 +62,6 @@ function ApplicationsRun ($stateExtender, strings) {
         },
         data: {
             activityStream: true,
-            // TODO: double-check activity stream works
             activityStreamTarget: 'application'
         },
         views: {
@@ -111,7 +110,6 @@ function ApplicationsRun ($stateExtender, strings) {
         },
         data: {
             activityStream: true,
-            // TODO: double-check activity stream works
             activityStreamTarget: 'application'
         },
         views: {
