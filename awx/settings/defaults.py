@@ -169,6 +169,10 @@ STDOUT_MAX_BYTES_DISPLAY = 1048576
 # on how many events to display before truncating/hiding
 MAX_UI_JOB_EVENTS = 4000
 
+# Returned in index.html, tells the UI if it should make requests
+# to update job data in response to status changes websocket events
+UI_LIVE_UPDATES_ENABLED = True
+
 # The maximum size of the ansible callback event's res data structure
 # beyond this limit and the value will be removed
 MAX_EVENT_RES_DATA = 700000
@@ -643,6 +647,9 @@ CAPTURE_JOB_EVENT_HOSTS = False
 
 # Rebuild Host Smart Inventory memberships.
 AWX_REBUILD_SMART_MEMBERSHIP = False
+
+# By default, allow arbitrary Jinja templating in extra_vars defined on a Job Template
+ALLOW_JINJA_IN_EXTRA_VARS = 'template'
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
