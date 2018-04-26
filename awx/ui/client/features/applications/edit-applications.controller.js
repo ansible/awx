@@ -4,10 +4,8 @@ function EditApplicationsController (models, $state, strings, $scope) {
     const { me, application, organization } = models;
 
     const omit = [
-        'authorization_grant_type',
         'client_id',
         'client_secret',
-        'client_type',
         'created',
         'modified',
         'related',
@@ -90,9 +88,7 @@ function EditApplicationsController (models, $state, strings, $scope) {
 
     vm.form.save = data => {
         const hiddenData = {
-            authorization_grant_type: 'implicit',
-            user: me.get('id'),
-            client_type: 'public'
+            user: me.get('id')
         };
 
         const payload = _.merge(data, hiddenData);

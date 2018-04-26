@@ -59,7 +59,9 @@ function AtInputSelectController (baseInputController, eventService) {
     };
 
     vm.updateDisplayModel = () => {
-        if (scope.state._format === 'array') {
+        if (scope.state._format === 'selectFromOptions') {
+            scope.displayModel = scope.state._value[1];
+        } else if (scope.state._format === 'array') {
             scope.displayModel = scope.state._value;
         } else if (scope.state._format === 'objects') {
             scope.displayModel = scope.state._value[scope.state._display];

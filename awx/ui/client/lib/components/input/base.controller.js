@@ -14,7 +14,7 @@ function BaseInputController (strings) {
         scope.state._required = scope.state.required || false;
         scope.state._isValid = scope.state._isValid || false;
         scope.state._disabled = scope.state._disabled || false;
-        scope.state._activeModel = '_value';
+        scope.state._activeModel = scope.state._activeModel || '_value';
 
         if (scope.state.ask_at_runtime) {
             scope.state._displayPromptOnLaunch = true;
