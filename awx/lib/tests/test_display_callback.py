@@ -326,3 +326,28 @@ def test_callback_plugin_records_notify_events(executor, cache, playbook):
     assert notify_events[0]['event_data']['handler'] == 'my_handler'
     assert notify_events[0]['event_data']['host'] == 'localhost'
     assert notify_events[0]['event_data']['task'] == 'debug'
+
+
+@pytest.mark.parametrize('playbook', [
+{'no_log_module_with_var.yml': '''
+- name: ensure that module-level secrets are redacted
+  connection: local
+  hosts: all
+  vars:
+    - pw: SENSITIVE
+  tasks:
+    - uri:
+        url: https://example.org
+        user: john-jacob-jingleheimer-schmidt
+        password: "{{ pw }}"
+'''},  # noqa
+])
+def test_module_level_no_log(executor, cache, playbook):
+    # https://github.com/ansible/tower/issues/1101
+    # It's possible for `no_log=True` to be defined at the _module_ level,
+    # e.g., for the URI module password parameter
+    # This test ensures that we properly redact those
+    executor.run()
+    assert len(cache)
+    assert 'john-jacob-jingleheimer-schmidt' in json.dumps(cache.items())
+    assert 'SENSITIVE' not in json.dumps(cache.items())

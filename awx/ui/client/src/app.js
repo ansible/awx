@@ -113,7 +113,11 @@ angular
         $locationProvider.hashPrefix('');
     }])
     .config(['$logProvider', function($logProvider) {
-        $logProvider.debugEnabled($ENV['ng-debug'] || false);
+        window.debug = function(){
+            $logProvider.debugEnabled(!$logProvider.debugEnabled());
+            return $logProvider.debugEnabled();
+        };
+        window.debug(false);
     }])
     .config(['ngToastProvider', function(ngToastProvider) {
         ngToastProvider.configure({

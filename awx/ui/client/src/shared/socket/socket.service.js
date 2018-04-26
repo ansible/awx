@@ -8,7 +8,8 @@ export default
 ['$rootScope', '$location', '$log','$state', '$q', 'i18n',
     function ($rootScope, $location, $log, $state, $q, i18n) {
         var needsResubscribing = false,
-        socketPromise = $q.defer();
+        socketPromise = $q.defer(),
+        needsRefreshAfterBlur;
         return {
             init: function() {
                 var self = this,
@@ -23,6 +24,26 @@ export default
                     protocol = 'wss';
                 }
                 url = `${protocol}://${host}/websocket/`;
+
+                // only toggle background tabbed sockets if the
+                // UI_LIVE_UPDATES_ENABLED flag is true in the settings file
+                if(window.liveUpdates){
+                    document.addEventListener('visibilitychange', function() {
+                        $log.debug(document.visibilityState);
+                        if(document.visibilityState === 'hidden'){
+                            window.liveUpdates = false;
+                        }
+                        else if(document.visibilityState === 'visible'){
+                            window.liveUpdates = true;
+                            if(needsRefreshAfterBlur){
+                                $state.go('.', null, {reload: true});
+                                needsRefreshAfterBlur = false;
+                            }
+
+                        }
+                    });
+                }
+
 
                 if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
 
@@ -75,6 +96,13 @@ export default
                 $log.debug('Received From Server: ' + e.data);
 
                 var data = JSON.parse(e.data), str = "";
+
+                if(!window.liveUpdates && data.group_name !== "control" && $state.current.name !== "jobResult"){
+                    $log.debug('Message from server dropped: ' + e.data);
+                    needsRefreshAfterBlur = true;
+                    return;
+                }
+
                 if(data.group_name==="jobs" && !('status' in data)){
                     // we know that this must have been a
                     // summary complete message b/c status is missing.
