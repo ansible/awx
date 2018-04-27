@@ -76,7 +76,9 @@ function AtFormController (eventService, strings) {
                     return values;
                 }
 
-                if (component.state._key && typeof component.state._value === 'object') {
+                if (component.state._format === 'selectFromOptions') {
+                    values[component.state.id] = component.state._value[0];
+                } else if (component.state._key && typeof component.state._value === 'object') {
                     values[component.state.id] = component.state._value[component.state._key];
                 } else if (component.state._group) {
                     values[component.state._key] = values[component.state._key] || {};

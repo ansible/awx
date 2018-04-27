@@ -43,6 +43,9 @@ export default function GetTargetTitle(i18n) {
             case 'template':
                 rtnTitle = i18n._('TEMPLATES');
                 break;
+            case 'o_auth2_application':
+                rtnTitle = i18n._('APPLICATIONS');
+                break;
         }
 
         return rtnTitle;

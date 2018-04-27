@@ -25,6 +25,10 @@ function ApplicationsStrings (BaseString) {
         ROW_ITEM_LABEL_ORGANIZATION: t.s('ORG'),
         ROW_ITEM_LABEL_MODIFIED: t.s('LAST MODIFIED')
     };
+
+    ns.inputs = {
+        ORGANIZATION_PLACEHOLDER: t.s('SELECT AN ORGANIZATION')
+    };
 }
 
 ApplicationsStrings.$inject = ['BaseStringService'];
