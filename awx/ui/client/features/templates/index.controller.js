@@ -11,9 +11,9 @@ function IndexTemplatesController ($scope, strings, dataset) {
 }
 
 IndexTemplatesController.$inject = [
-	'$scope',
+    '$scope',
     'TemplatesStrings',
-    'Dataset',
+    'Dataset'
 ];
 
 export default IndexTemplatesController;
