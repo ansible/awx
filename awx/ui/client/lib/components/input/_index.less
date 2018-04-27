@@ -70,6 +70,10 @@
     height: @at-height-textarea;
 }
 
+.at-Input-button--active {
+    .at-mixin-ButtonColor(at-color-info, at-color-default);
+}
+
 .at-Input--focus {
     border-color: @at-color-input-focus;
 }
@@ -259,6 +263,14 @@
             height: 16px;
             margin-top: -7px;
             width: 16px;
+        }
+    }
+
+    input[type=range][disabled] {
+        &::-webkit-slider-thumb {
+            background: @at-color-disabled;
+            border: solid 1px @at-color-disabled;
+            cursor: not-allowed;
         }
     }
 }

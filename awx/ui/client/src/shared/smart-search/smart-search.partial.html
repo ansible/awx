@@ -3,11 +3,11 @@
     <div class="SmartSearch-bar" ng-class="{'SmartSearch-bar--fullWidth': searchBarFullWidth}">
         <div class="SmartSearch-searchTermContainer">
             <!-- string search input -->
-            <form name="smartSearch" class="SmartSearch-form" aw-enter-key="addTerm(searchTerm)" novalidate>
+            <form name="smartSearch" class="SmartSearch-form" aw-enter-key="addTerms(searchTerm)" novalidate>
                 <input class="SmartSearch-input" ng-model="searchTerm" placeholder="{{searchPlaceholder}}"
                 ng-disabled="disableSearch">
             </form>
-            <div type="submit" class="SmartSearch-searchButton" ng-disabled="!searchTerm" ng-click="addTerm(searchTerm)">
+            <div type="submit" class="SmartSearch-searchButton" ng-disabled="!searchTerm" ng-click="addTerms(searchTerm)">
                 <i class="fa fa-search"></i>
             </div>
         </div>

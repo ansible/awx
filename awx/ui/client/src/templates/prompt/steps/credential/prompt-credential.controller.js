@@ -51,11 +51,14 @@ export default
                 } else if(cred.inputs && !_.isEmpty(cred.inputs)) {
                     if(cred.inputs.password && cred.inputs.password === "ASK") {
                         delete scope.promptData.prompts.credentials.passwords.ssh;
-                    } else if(cred.inputs.become_password && cred.inputs.become_password === "ASK") {
+                    }
+                    if(cred.inputs.become_password && cred.inputs.become_password === "ASK") {
                         delete scope.promptData.prompts.credentials.passwords.become;
-                    } else if(cred.inputs.ssh_key_unlock && cred.inputs.ssh_key_unlock === "ASK") {
+                    }
+                    if(cred.inputs.ssh_key_unlock && cred.inputs.ssh_key_unlock === "ASK") {
                         delete scope.promptData.prompts.credentials.passwords.ssh_key_unlock;
-                    } else if(cred.inputs.vault_password && cred.inputs.vault_password === "ASK") {
+                    }
+                    if(cred.inputs.vault_password && cred.inputs.vault_password === "ASK") {
                         for (let i = scope.promptData.prompts.credentials.passwords.vault.length - 1; i >= 0; i--) {
                             if(cred.id === scope.promptData.prompts.credentials.passwords.vault[i].id) {
                                 scope.promptData.prompts.credentials.passwords.vault.splice(i, 1);
@@ -68,22 +71,33 @@ export default
 
             let updateNeededPasswords = (cred) => {
                 if(cred.inputs) {
-                    let credPassObj = {
-                        id: cred.id,
-                        name: cred.name
-                    };
                     if(cred.inputs.password && cred.inputs.password === "ASK") {
-                        scope.promptData.prompts.credentials.passwords.ssh = credPassObj;
-                    } else if(cred.inputs.become_password && cred.inputs.become_password === "ASK") {
-                        scope.promptData.prompts.credentials.passwords.become = credPassObj;
-                    } else if(cred.inputs.ssh_key_unlock && cred.inputs.ssh_key_unlock === "ASK") {
-                        scope.promptData.prompts.credentials.passwords.ssh_key_unlock = credPassObj;
-                    } else if(cred.inputs.vault_password && cred.inputs.vault_password === "ASK") {
-                        credPassObj.vault_id = cred.inputs.vault_id;
+                        scope.promptData.prompts.credentials.passwords.ssh = {
+                            id: cred.id,
+                            name: cred.name
+                        };
+                    }
+                    if(cred.inputs.become_password && cred.inputs.become_password === "ASK") {
+                        scope.promptData.prompts.credentials.passwords.become = {
+                            id: cred.id,
+                            name: cred.name
+                        };
+                    }
+                    if(cred.inputs.ssh_key_unlock && cred.inputs.ssh_key_unlock === "ASK") {
+                        scope.promptData.prompts.credentials.passwords.ssh_key_unlock = {
+                            id: cred.id,
+                            name: cred.name
+                        };
+                    }
+                    if(cred.inputs.vault_password && cred.inputs.vault_password === "ASK") {
                         if(!scope.promptData.prompts.credentials.passwords.vault) {
                             scope.promptData.prompts.credentials.passwords.vault = [];
                         }
-                        scope.promptData.prompts.credentials.passwords.vault.push(credPassObj);
+                        scope.promptData.prompts.credentials.passwords.vault.push({
+                            id: cred.id,
+                            name: cred.name,
+                            vault_id: cred.inputs.vault_id
+                        });
                     }
                 }
             };

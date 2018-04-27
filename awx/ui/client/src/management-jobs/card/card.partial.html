@@ -18,7 +18,7 @@
 					<h3 class="MgmtCards-label"> {{ card.name }}</h3>
 					<div class="MgmtCards-actionItems">
 						<button class="MgmtCards-actionItem List-actionButton"
-							ng-click='chooseRunJob(card.id, card.name)'
+							ng-click='submitJob(card.id, card.name)'
 							ng-show='current_user.is_superuser'
 							data-placement="top" aw-tool-tip="{{'Launch Management Job'|translate}}" data-original-title="" title="">
 							<i class="MgmtCards-actionItemIcon icon-launch"></i>

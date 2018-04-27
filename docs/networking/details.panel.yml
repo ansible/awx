@@ -1,0 +1,26 @@
+diagram_id: 70
+finite_state_machine_id: 21
+name: diagram
+states:
+- id: 1
+  label: Start
+  x: 590
+  y: 233
+- id: 2
+  label: Collapsed
+  x: 594
+  y: 490
+- id: 3
+  label: Expanded
+  x: 919
+  y: 491
+transitions:
+- from_state: Start
+  label: start
+  to_state: Collapsed
+- from_state: Expanded
+  label: onDetailsPanelClose
+  to_state: Collapsed
+- from_state: Collapsed
+  label: onDetailsPanel
+  to_state: Expanded

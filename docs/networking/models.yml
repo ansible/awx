@@ -1,0 +1,130 @@
+app: awx.network_ui
+external_models: []
+models:
+- display: name
+  fields:
+  - name: device_id
+    pk: true
+    type: AutoField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
+  - len: 200
+    name: name
+    type: CharField
+  - name: x
+    type: IntegerField
+  - name: y
+    type: IntegerField
+  - name: id
+    type: IntegerField
+  - len: 200
+    name: device_type
+    type: CharField
+  - default: 0
+    name: interface_id_seq
+    type: IntegerField
+  - default: 0
+    name: host_id
+    type: IntegerField
+  name: Device
+  x: 348
+  y: 124
+- fields:
+  - name: link_id
+    pk: true
+    type: AutoField
+  - name: from_device
+    ref: Device
+    ref_field: device_id
+    related_name: from_link
+    type: ForeignKey
+  - name: to_device
+    ref: Device
+    ref_field: device_id
+    related_name: to_link
+    type: ForeignKey
+  - name: from_interface
+    ref: Interface
+    ref_field: interface_id
+    related_name: from_link
+    type: ForeignKey
+  - name: to_interface
+    ref: Interface
+    ref_field: interface_id
+    related_name: to_link
+    type: ForeignKey
+  - name: id
+    type: IntegerField
+  - len: 200
+    name: name
+    type: CharField
+  name: Link
+  x: 731
+  y: -33
+- display: name
+  fields:
+  - name: topology_id
+    pk: true
+    type: AutoField
+  - len: 200
+    name: name
+    type: CharField
+  - name: scale
+    type: FloatField
+  - name: panX
+    type: FloatField
+  - name: panY
+    type: FloatField
+  - default: 0
+    name: device_id_seq
+    type: IntegerField
+  - default: 0
+    name: link_id_seq
+    type: IntegerField
+  name: Topology
+  x: 111
+  y: 127
+- fields:
+  - name: client_id
+    pk: true
+    type: AutoField
+  name: Client
+  x: -162
+  y: 282
+- display: name
+  fields:
+  - name: interface_id
+    pk: true
+    type: AutoField
+  - name: device
+    ref: Device
+    ref_field: device_id
+    type: ForeignKey
+  - len: 200
+    name: name
+    type: CharField
+  - name: id
+    type: IntegerField
+  name: Interface
+  x: 977
+  y: 312
+- fields:
+  - name: topology_inventory_id
+    pk: true
+    type: AutoField
+  - name: topology
+    ref: Topology
+    ref_field: topology_id
+    type: ForeignKey
+  - name: inventory_id
+    type: IntegerField
+  name: TopologyInventory
+  x: -204
+  y: 12
+modules: []
+view:
+  panX: 213.729555519212
+  panY: 189.446959094643
+  scaleXY: 0.69

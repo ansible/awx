@@ -39,6 +39,7 @@ class TestSmartFilterQueryFromString():
         ('a__b__c=3.14', Q(**{u"a__b__c": 3.14})),
         ('a__b__c=true', Q(**{u"a__b__c": True})),
         ('a__b__c=false', Q(**{u"a__b__c": False})),
+        ('a__b__c=null', Q(**{u"a__b__c": None})),
         ('ansible_facts__a="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
         #('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
@@ -114,7 +115,7 @@ class TestSmartFilterQueryFromString():
         assert six.text_type(q) == six.text_type(q_expected)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
-        ('ansible_facts__a=null', Q(**{u"ansible_facts__contains": {u"a": u"null"}})),
+        ('ansible_facts__a=null', Q(**{u"ansible_facts__contains": {u"a": None}})),
         ('ansible_facts__c="null"', Q(**{u"ansible_facts__contains": {u"c": u"\"null\""}})),
     ])
     def test_contains_query_generated_null(self, mock_get_host_model, filter_string, q_expected):
@@ -130,7 +131,10 @@ class TestSmartFilterQueryFromString():
             Q(**{u"group__name__contains": u"foo"}) | Q(**{u"group__description__contains": u"foo"}))),
         ('search=foo or ansible_facts__a=null',
             Q(Q(**{u"name__contains": u"foo"}) | Q(**{u"description__contains": u"foo"})) |
-            Q(**{u"ansible_facts__contains": {u"a": u"null"}})),
+            Q(**{u"ansible_facts__contains": {u"a": None}})),
+        ('search=foo or ansible_facts__a="null"',
+            Q(Q(**{u"name__contains": u"foo"}) | Q(**{u"description__contains": u"foo"})) |
+            Q(**{u"ansible_facts__contains": {u"a": u"\"null\""}})),
     ])
     def test_search_related_fields(self, mock_get_host_model, filter_string, q_expected):
         q = SmartFilter.query_from_string(filter_string)

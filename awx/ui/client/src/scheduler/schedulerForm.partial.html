@@ -686,5 +686,5 @@
                 ng-disabled="!schedulerIsValid || promptModalMissingReqFields"> Save</button>
         </div>
     </div>
-    <prompt prompt-data="promptData" action-text="CONFIRM"></launch>
+    <prompt prompt-data="promptData" action-text="{{:: strings.get('prompt.CONFIRM')}}" prevent-creds-with-passwords="preventCredsWithPasswords"></prompt>
 </div>

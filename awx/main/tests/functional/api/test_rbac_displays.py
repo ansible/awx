@@ -3,8 +3,8 @@ import pytest
 from awx.api.versioning import reverse
 from django.test.client import RequestFactory
 
-from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate
-from awx.main.access import access_registry
+from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate, WorkflowJobTemplate
+from awx.main.access import access_registry, WorkflowJobTemplateAccess
 from awx.main.utils import prefetch_page_capabilities
 from awx.api.serializers import JobTemplateSerializer, UnifiedJobTemplateSerializer
 
@@ -196,12 +196,6 @@ class TestAccessListCapabilities:
         direct_access_list = response.data['results'][0]['summary_fields']['direct_access']
         assert direct_access_list[0]['role']['user_capabilities']['unattach'] == 'foobar'
 
-    def test_user_access_list_direct_access_capability(self, rando, get):
-        "When a user views their own access list, they cannot unattach their admin role"
-        response = get(reverse('api:user_access_list', kwargs={'pk': rando.id}), rando)
-        direct_access_list = response.data['results'][0]['summary_fields']['direct_access']
-        assert not direct_access_list[0]['role']['user_capabilities']['unattach']
-
 
 @pytest.mark.django_db
 def test_team_roles_unattach(mocker, team, team_member, inventory, mock_access_method, get):
@@ -320,6 +314,17 @@ def test_prefetch_jt_copy_capability(job_template, project, inventory, rando):
         'project.use', 'inventory.use',
     ]}], rando)
     assert mapping[job_template.id] == {'copy': True}
+
+
+@pytest.mark.django_db
+def test_workflow_orphaned_capabilities(rando):
+    wfjt = WorkflowJobTemplate.objects.create(name='test', organization=None)
+    wfjt.admin_role.members.add(rando)
+    access = WorkflowJobTemplateAccess(rando)
+    assert not access.get_user_capabilities(
+        wfjt, method_list=['edit', 'copy'],
+        capabilities_cache={'copy': True}
+    )['copy']
 
 
 @pytest.mark.django_db

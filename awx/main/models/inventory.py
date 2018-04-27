@@ -233,7 +233,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                 return {}
             else:
                 all_group = data.setdefault('all', dict())
-                smart_hosts_qs = self.hosts.all()
+                smart_hosts_qs = self.hosts.filter(**hosts_q).all()
                 smart_hosts = list(smart_hosts_qs.values_list('name', flat=True))
                 all_group['hosts'] = smart_hosts
         else:
@@ -517,7 +517,7 @@ class SmartInventoryMembership(BaseModel):
     host = models.ForeignKey('Host', related_name='+', on_delete=models.CASCADE)
 
 
-class Host(CommonModelNameNotUnique):
+class Host(CommonModelNameNotUnique, RelatedJobsMixin):
     '''
     A managed node
     '''
@@ -702,6 +702,12 @@ class Host(CommonModelNameNotUnique):
     def delete(self, *args, **kwargs):
         self._update_host_smart_inventory_memeberships()
         super(Host, self).delete(*args, **kwargs)
+
+    '''
+    RelatedJobsMixin
+    '''
+    def _get_related_jobs(self):
+        return self.inventory._get_related_jobs()
 
 
 class Group(CommonModelNameNotUnique, RelatedJobsMixin):

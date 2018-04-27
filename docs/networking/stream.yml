@@ -1,0 +1,42 @@
+finite_state_machine_id: 20
+name: stream_fsm
+states:
+- id: 4
+  label: Connecting
+  x: 344
+  y: 312
+- id: 5
+  label: Selecting
+  x: 311
+  y: 23
+- id: 1
+  label: Ready
+  x: 36
+  y: 28
+- id: 3
+  label: Connected
+  x: 55
+  y: 317
+- id: 2
+  label: Start
+  x: 43
+  y: -188
+transitions:
+- from_state: Ready
+  label: onNewStream
+  to_state: Selecting
+- from_state: Start
+  label: start
+  to_state: Ready
+- from_state: Connected
+  label: start
+  to_state: Ready
+- from_state: Connecting
+  label: onMouseUp
+  to_state: Ready
+- from_state: Connecting
+  label: onMouseUp
+  to_state: Connected
+- from_state: Selecting
+  label: onMouseUp
+  to_state: Connecting

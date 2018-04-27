@@ -5,9 +5,7 @@
  *************************************************/
 
 import awxNetDetailsPanel from './details.directive';
-import awxNetExtraVars from './network-extra-vars/network-extra-vars.directive';
 
 export default
     angular.module('networkDetailsDirective', [])
-        .directive('awxNetDetailsPanel', awxNetDetailsPanel)
-        .directive('awxNetExtraVars', awxNetExtraVars);
+        .directive('awxNetDetailsPanel', awxNetDetailsPanel);

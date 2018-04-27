@@ -20,7 +20,10 @@ export default ['i18n', function(i18n) {
             stateTree: 'users',
             forceListeners: true,
             tabs: true,
-
+            messageBar: {
+                ngShow: 'isOrgAdmin && !canEdit',
+                message: i18n._("Contact your System Administrator to grant you the appropriate permissions to add and edit Users and Teams.")
+            },
             fields: {
                 first_name: {
                     label: i18n._('First Name'),

@@ -72,7 +72,7 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
 I18N_FLAG_FILE = .i18n_built
 
-.PHONY: clean clean-tmp clean-venv requirements requirements_dev \
+.PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_ansible test_coverage coverage_html \
 	dev_build release_build release_clean sdist \
@@ -234,7 +234,7 @@ migrate:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	$(MANAGEMENT_COMMAND) migrate --noinput --fake-initial
+	$(MANAGEMENT_COMMAND) migrate --noinput
 
 # Run after making changes to the models to create a new migration.
 dbchange:
@@ -323,7 +323,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	celery worker -A awx -l DEBUG -B -Ofair --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -n celery@$(COMPOSE_HOST) --pidfile /tmp/celery_pid
+	celery worker -A awx -l DEBUG -B -Ofair --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) --pidfile /tmp/celery_pid
 
 # Run to start the zeromq callback receiver
 receiver:
@@ -367,6 +367,11 @@ swagger: reports
 
 check: flake8 pep8 # pyflakes pylint
 
+awx-link:
+	cp -R /tmp/awx.egg-info /awx_devel/ || true
+	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
+	cp /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
+
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 # Run all API unit tests.
 test:
@@ -374,6 +379,8 @@ test:
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
 	py.test $(TEST_DIRS)
+
+test_combined: test_ansible test
 
 test_unit:
 	@if [ "$(VENV_BASE)" ]; then \

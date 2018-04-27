@@ -76,7 +76,11 @@ function ComponentsStrings (BaseString) {
         APPLICATIONS: t.s('Applications'),
         SETTINGS: t.s('Settings'),
         FOOTER_ABOUT: t.s('About'),
-        FOOTER_COPYRIGHT: t.s('Copyright © 2018 Red Hat, Inc.')
+        FOOTER_COPYRIGHT: t.s('Copyright © 2018 Red Hat, Inc.'),
+        VIEWS_HEADER: t.s('Views'),
+        RESOURCES_HEADER: t.s('Resources'),
+        ACCESS_HEADER: t.s('Access'),
+        ADMINISTRATION_HEADER: t.s('Administration')
     };
 
     ns.relaunch = {
@@ -85,6 +89,10 @@ function ComponentsStrings (BaseString) {
         DROPDOWN_TITLE: t.s('Relaunch On'),
         ALL: t.s('All'),
         FAILED: t.s('Failed')
+    };
+
+    ns.launchTemplate = {
+        DEFAULT: t.s('Start a job using this template')
     };
 
     ns.list = {

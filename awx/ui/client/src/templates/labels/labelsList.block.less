@@ -6,6 +6,9 @@
     align-items: flex-start;
 }
 
+.LabelList-tagContainer {
+    height: fit-content;
+}
 
 .LabelList-tagContainer,
 .LabelList-seeMoreLess {
@@ -70,6 +73,7 @@
 .LabelList-name {
     flex: initial;
     max-width: 100%;
+    word-break: break-word;
 }
 
 .LabelList-tag--deletable > .LabelList-name {
@@ -89,6 +93,10 @@
     display: flex;
     padding: 0 12px;
     overflow-y: hidden;
+}
+
+.LabelList-lookupTags[disabled] {
+    pointer-events: none;
 }
 
 .LabelList-lookupTags--disabled {

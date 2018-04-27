@@ -13,7 +13,8 @@ import { N_ } from '../i18n';
 import GetProjectPath from './factories/get-project-path.factory';
 import GetProjectIcon from './factories/get-project-icon.factory';
 import GetProjectToolTip from './factories/get-project-tool-tip.factory';
-import ProjectsTemplatesRoute from './projects-templates.route';
+
+import ProjectsTemplatesRoute from '~features/templates/routes/projectsTemplatesList.route';
 import ProjectsStrings from './projects.strings';
 
 export default

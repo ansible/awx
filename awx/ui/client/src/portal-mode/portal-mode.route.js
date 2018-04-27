@@ -50,7 +50,7 @@ export default {
                     list: PortalJobTemplateList,
                     mode: 'edit'
                 });
-                return html + '<prompt prompt-data="promptData" on-finish="launchJob()"></launch>';
+                return html + '<prompt prompt-data="promptData" on-finish="launchJob()"></prompt>';
             },
             controller: PortalModeJobTemplatesController
         }

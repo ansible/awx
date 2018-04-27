@@ -9,7 +9,13 @@ import json
 
 # Django
 from django.conf import settings
-from django.db.models.signals import post_save, pre_delete, post_delete, m2m_changed
+from django.db.models.signals import (
+    post_init,
+    post_save,
+    pre_delete,
+    post_delete,
+    m2m_changed,
+)
 from django.dispatch import receiver
 from django.contrib.auth import SESSION_KEY
 from django.utils import timezone
@@ -25,10 +31,14 @@ import six
 from awx.main.models import * # noqa
 from django.contrib.sessions.models import Session
 from awx.api.serializers import * # noqa
+from awx.main.constants import TOKEN_CENSOR
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
-from awx.main.fields import is_implicit_parent
+from awx.main.fields import (
+    is_implicit_parent,
+    update_role_parentage_for_instance,
+)
 
 from awx.main import consumers
 
@@ -162,39 +172,6 @@ def sync_superuser_status_to_rbac(instance, **kwargs):
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
 
 
-def create_user_role(instance, **kwargs):
-    if not kwargs.get('created', True):
-        return
-    try:
-        Role.objects.get(
-            content_type=ContentType.objects.get_for_model(instance),
-            object_id=instance.id,
-            role_field='admin_role'
-        )
-    except Role.DoesNotExist:
-        role = Role.objects.create(
-            role_field='admin_role',
-            content_object = instance,
-        )
-        role.members.add(instance)
-
-
-def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
-    content_type = ContentType.objects.get_for_model(Organization)
-
-    if reverse:
-        return
-    else:
-        if instance.content_type == content_type and \
-           instance.content_object.member_role.id == instance.id:
-            items = model.objects.filter(pk__in=pk_set).all()
-            for user in items:
-                if action == 'post_add':
-                    instance.content_object.admin_role.children.add(user.admin_role)
-                if action == 'pre_remove':
-                    instance.content_object.admin_role.children.remove(user.admin_role)
-
-
 def rbac_activity_stream(instance, sender, **kwargs):
     user_type = ContentType.objects.get_for_model(User)
     # Only if we are associating/disassociating
@@ -223,6 +200,29 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
             l.delete()
 
 
+def set_original_organization(sender, instance, **kwargs):
+    '''set_original_organization is used to set the original, or
+    pre-save organization, so we can later determine if the organization
+    field is dirty.
+    '''
+    instance.__original_org = instance.organization
+
+
+def save_related_job_templates(sender, instance, **kwargs):
+    '''save_related_job_templates loops through all of the
+    job templates that use an Inventory or Project that have had their
+    Organization updated. This triggers the rebuilding of the RBAC hierarchy
+    and ensures the proper access restrictions.
+    '''
+    if sender not in (Project, Inventory):
+        raise ValueError('This signal callback is only intended for use with Project or Inventory')
+
+    if instance.__original_org != instance.organization:
+        jtq = JobTemplate.objects.filter(**{sender.__name__.lower(): instance})
+        for jt in jtq:
+            update_role_parentage_for_instance(jt)
+
+
 def connect_computed_field_signals():
     post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
     post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -240,18 +240,19 @@ def connect_computed_field_signals():
 
 connect_computed_field_signals()
 
-
+post_init.connect(set_original_organization, sender=Project)
+post_init.connect(set_original_organization, sender=Inventory)
+post_save.connect(save_related_job_templates, sender=Project)
+post_save.connect(save_related_job_templates, sender=Inventory)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 post_save.connect(emit_project_update_event_detail, sender=ProjectUpdateEvent)
 post_save.connect(emit_inventory_update_event_detail, sender=InventoryUpdateEvent)
 post_save.connect(emit_system_job_event_detail, sender=SystemJobEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
-m2m_changed.connect(org_admin_edit_members, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.parents.through)
 post_save.connect(sync_superuser_status_to_rbac, sender=User)
-post_save.connect(create_user_role, sender=User)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
 pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobTemplate)
 
@@ -400,6 +401,14 @@ model_serializer_mapping = {
     AdHocCommand: AdHocCommandSerializer,
     NotificationTemplate: NotificationTemplateSerializer,
     Notification: NotificationSerializer,
+    CredentialType: CredentialTypeSerializer,
+    Schedule: ScheduleSerializer,
+    Label: LabelSerializer,
+    WorkflowJobTemplate: WorkflowJobTemplateSerializer,
+    WorkflowJobTemplateNode: WorkflowJobTemplateNodeSerializer,
+    WorkflowJob: WorkflowJobSerializer,
+    OAuth2AccessToken: OAuth2TokenSerializer,
+    OAuth2Application: OAuth2ApplicationSerializer,
 }
 
 
@@ -419,7 +428,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
         if type(instance) == OAuth2AccessToken:
-            changes['token'] = '*************'
+            changes['token'] = TOKEN_CENSOR
         activity_entry = ActivityStream(
             operation='create',
             object1=object1,
@@ -620,12 +629,3 @@ def create_access_token_user_if_missing(sender, **kwargs):
         post_save.connect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
 
 
-# @receiver(post_save, sender=User)
-# def create_default_oauth_app(sender, **kwargs):
-#     if kwargs.get('created', False):
-#         user = kwargs['instance']
-#         OAuth2Application.objects.create(
-#             name='Default application for {}'.format(user.username),
-#             user=user, client_type='confidential', redirect_uris='',
-#             authorization_grant_type='password'
-#         )

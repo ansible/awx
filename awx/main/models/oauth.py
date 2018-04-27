@@ -6,9 +6,13 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 # Django OAuth Toolkit
 from oauth2_provider.models import AbstractApplication, AbstractAccessToken
+from oauth2_provider.generators import generate_client_secret
+
+from awx.main.fields import OAuth2ClientSecretField
 
 
 DATA_URI_RE = re.compile(r'.*')  # FIXME
@@ -21,6 +25,24 @@ class OAuth2Application(AbstractApplication):
     class Meta:
         app_label = 'main'
         verbose_name = _('application')
+    
+    CLIENT_CONFIDENTIAL = "confidential"
+    CLIENT_PUBLIC = "public"
+    CLIENT_TYPES = (
+        (CLIENT_CONFIDENTIAL, _("Confidential")),
+        (CLIENT_PUBLIC, _("Public")),
+    )
+
+    GRANT_AUTHORIZATION_CODE = "authorization-code"
+    GRANT_IMPLICIT = "implicit"
+    GRANT_PASSWORD = "password"
+    GRANT_CLIENT_CREDENTIALS = "client-credentials"
+    GRANT_TYPES = (
+        (GRANT_AUTHORIZATION_CODE, _("Authorization code")),
+        (GRANT_IMPLICIT, _("Implicit")),
+        (GRANT_PASSWORD, _("Resource owner password-based")),
+        (GRANT_CLIENT_CREDENTIALS, _("Client credentials")),
+    )
 
     description = models.TextField(
         default='',
@@ -31,6 +53,34 @@ class OAuth2Application(AbstractApplication):
         editable=False,
         validators=[RegexValidator(DATA_URI_RE)],
     )
+    organization = models.ForeignKey(
+        'Organization',
+        related_name='applications',
+        help_text=_('Organization containing this application.'),
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    client_secret = OAuth2ClientSecretField(
+        max_length=1024, 
+        blank=True, 
+        default=generate_client_secret, 
+        db_index=True,
+        help_text=_('Used for more stringent verification of access to an application when creating a token.')
+    )
+    client_type = models.CharField(
+        max_length=32, 
+        choices=CLIENT_TYPES,
+        help_text=_('Set to Public or Confidential depending on how secure the client device is.')
+    )
+    skip_authorization = models.BooleanField(
+        default=False,
+        help_text=_('Set True to skip authorization step for completely trusted applications.')
+    )
+    authorization_grant_type = models.CharField(
+        max_length=32, 
+        choices=GRANT_TYPES,
+        help_text=_('The Grant type the user must use for acquire tokens for this application.')
+    )
 
 
 class OAuth2AccessToken(AbstractAccessToken):
@@ -39,6 +89,14 @@ class OAuth2AccessToken(AbstractAccessToken):
         app_label = 'main'
         verbose_name = _('access token')
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        blank=True, 
+        null=True,
+        related_name="%(app_label)s_%(class)s",
+        help_text=_('The user representing the token owner')
+    )
     description = models.CharField(
         max_length=200,
         default='',
@@ -48,6 +106,10 @@ class OAuth2AccessToken(AbstractAccessToken):
         null=True,
         default=None,
         editable=False,
+    )
+    scope = models.TextField(
+        blank=True,
+        help_text=_('Allowed scopes, further restricts user\'s permissions. Must be a simple space-separated string with allowed scopes [\'read\', \'write\'].')
     )
 
     def is_valid(self, scopes=None):

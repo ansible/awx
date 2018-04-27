@@ -6,11 +6,11 @@
 
 export default ['$scope', '$rootScope',
     '$stateParams', 'Rest', 'ProcessErrors',
-    'GetBasePath', 'InitiatePlaybookRun', 'Wait',
+    'GetBasePath', 'Wait',
     '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset', 'QuerySet',
     function($scope, $rootScope,
         $stateParams, Rest, ProcessErrors,
-        GetBasePath, InitiatePlaybookRun, Wait,
+        GetBasePath, Wait,
         $state, OrgJobTemplateList, Dataset, qs) {
 
         var list = OrgJobTemplateList,
@@ -71,10 +71,6 @@ export default ['$scope', '$rootScope',
 
         $scope.editJobTemplate = function(id) {
             $state.go('templates.editJobTemplate', { job_template_id: id });
-        };
-
-        $scope.submitJob = function(id) {
-            InitiatePlaybookRun({ scope: $scope, id: id, job_type: 'job_template' });
         };
 
         $scope.scheduleJob = function(id) {

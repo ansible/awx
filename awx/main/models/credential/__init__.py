@@ -2,13 +2,12 @@
 # All Rights Reserved.
 from collections import OrderedDict
 import functools
-import json
 import logging
-import operator
 import os
 import re
 import stat
 import tempfile
+import six
 
 # Jinja2
 from jinja2 import Template
@@ -21,11 +20,11 @@ from django.utils.encoding import force_text
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.fields import (ImplicitRoleField, CredentialInputField,
                              CredentialTypeInputField,
                              CredentialTypeInjectorField)
 from awx.main.utils import decrypt_field
+from awx.main.utils.safe_yaml import safe_dump
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.base import * # noqa
 from awx.main.models.mixins import ResourceMixin
@@ -34,6 +33,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.utils import encrypt_field
+from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS
 from . import injectors as builtin_injectors
 
 __all__ = ['Credential', 'CredentialType', 'V1Credential', 'build_safe_env']
@@ -164,7 +164,7 @@ class V1Credential(object):
             max_length=32,
             blank=True,
             default='',
-            choices=[('', _('None'))] + PRIVILEGE_ESCALATION_METHODS,
+            choices=CHOICES_PRIVILEGE_ESCALATION_METHODS,
             help_text=_('Privilege escalation method.')
         ),
         'become_username': models.CharField(
@@ -415,9 +415,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             type_alias = self.credential_type_id
         if self.kind == 'vault' and self.inputs.get('vault_id', None):
             if display:
-                fmt_str = '{} (id={})'
+                fmt_str = six.text_type('{} (id={})')
             else:
-                fmt_str = '{}_{}'
+                fmt_str = six.text_type('{}_{}')
             return fmt_str.format(type_alias, self.inputs.get('vault_id'))
         return str(type_alias)
 
@@ -445,6 +445,7 @@ class CredentialType(CommonModelNameNotUnique):
         'AD_HOC_COMMAND_ID', 'REST_API_URL', 'REST_API_TOKEN', 'MAX_EVENT_RES',
         'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
         'JOB_CALLBACK_DEBUG', 'INVENTORY_HOSTVARS', 'FACT_QUEUE',
+        'AWX_HOST', 'PROJECT_REVISION'
     ))
 
     class Meta:
@@ -514,7 +515,7 @@ class CredentialType(CommonModelNameNotUnique):
             if field['id'] == field_id:
                 if 'choices' in field:
                     return field['choices'][0]
-                return {'string': '', 'boolean': False}[field['type']]
+                return {'string': '', 'boolean': False, 'become_method': ''}[field['type']]
 
     @classmethod
     def default(cls, f):
@@ -630,7 +631,7 @@ class CredentialType(CommonModelNameNotUnique):
             data = Template(file_tmpl).render(**namespace)
             _, path = tempfile.mkstemp(dir=private_data_dir)
             with open(path, 'w') as f:
-                f.write(data)
+                f.write(data.encode('utf-8'))
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
 
             # determine if filename indicates single file or many
@@ -651,25 +652,20 @@ class CredentialType(CommonModelNameNotUnique):
         if 'INVENTORY_UPDATE_ID' not in env:
             # awx-manage inventory_update does not support extra_vars via -e
             extra_vars = {}
-            safe_extra_vars = {}
             for var_name, tmpl in self.injectors.get('extra_vars', {}).items():
                 extra_vars[var_name] = Template(tmpl).render(**namespace)
-                safe_extra_vars[var_name] = Template(tmpl).render(**safe_namespace)
 
             def build_extra_vars_file(vars, private_dir):
                 handle, path = tempfile.mkstemp(dir = private_dir)
                 f = os.fdopen(handle, 'w')
-                f.write(json.dumps(vars))
+                f.write(safe_dump(vars))
                 f.close()
                 os.chmod(path, stat.S_IRUSR)
                 return path
 
+            path = build_extra_vars_file(extra_vars, private_data_dir)
             if extra_vars:
-                path = build_extra_vars_file(extra_vars, private_data_dir)
                 args.extend(['-e', '@%s' % path])
-
-            if safe_extra_vars:
-                path = build_extra_vars_file(safe_extra_vars, private_data_dir)
                 safe_args.extend(['-e', '@%s' % path])
 
 
@@ -706,8 +702,7 @@ def ssh(cls):
             }, {
                 'id': 'become_method',
                 'label': 'Privilege Escalation Method',
-                'choices': map(operator.itemgetter(0),
-                               V1Credential.FIELDS['become_method'].choices),
+                'type': 'become_method',
                 'help_text': ('Specify a method for "become" operations. This is '
                               'equivalent to specifying the --become-method '
                               'Ansible parameter.')

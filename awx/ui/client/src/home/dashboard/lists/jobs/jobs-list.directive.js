@@ -28,8 +28,17 @@ export default
             function createList(list) {
                 // detailsUrl, status, name, time
                 scope.jobs = _.map(list, function(job){
+
+                let detailsUrl;
+
+                if (job.type === 'workflow_job') {
+                    detailsUrl = `/#/workflows/${job.id}`;
+                } else {
+                    detailsUrl = `/#/jobz/playbook/${job.id}`;
+                }
+
                 return {
-                    detailsUrl: job.type && job.type === 'workflow_job' ? job.url.replace(/api\/v\d+\/workflow_jobs/, "#/workflows") : job.url.replace(/api\/v\d+/, "#"),
+                    detailsUrl,
                     status: job.status,
                     name: job.name,
                     id: job.id,

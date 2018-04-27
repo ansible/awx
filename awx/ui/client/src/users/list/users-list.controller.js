@@ -14,21 +14,23 @@ const user_type_options = [
 
 export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter',
-    'rbacUiControlService', 'Dataset', 'i18n',
+    'rbacUiControlService', 'Dataset', 'i18n', 'resolvedModels',
     function($scope, $rootScope, Rest, UserList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService,
-    Dataset, i18n) {
+    Dataset, i18n, models) {
 
         for (var i = 0; i < user_type_options.length; i++) {
             user_type_options[i].label = i18n._(user_type_options[i].label);
         }
 
+        const { me } = models;
         var list = UserList,
-            defaultUrl = GetBasePath('users');
+        defaultUrl = GetBasePath('users');
 
         init();
 
         function init() {
+            $scope.canEdit = me.get('summary_fields.user_capabilities.edit');
             $scope.canAdd = false;
 
             rbacUiControlService.canAdd('users')

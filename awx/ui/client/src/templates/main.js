@@ -18,8 +18,7 @@ import workflowService from './workflows/workflow.service';
 import WorkflowForm from './workflows.form';
 import InventorySourcesList from './inventory-sources.list';
 import TemplateList from './templates.list';
-import TemplatesStrings from './templates.strings';
-import listRoute from '~features/templates/list.route.js';
+import listRoute from '~features/templates/routes/templatesList.route.js';
 import templateCompletedJobsRoute from '~features/jobs/routes/templateCompletedJobs.route.js';
 
 export default
@@ -32,7 +31,6 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
     // TODO: currently being kept arround for rbac selection, templates within projects and orgs, etc.
     .factory('TemplateList', TemplateList)
     .value('InventorySourcesList', InventorySourcesList)
-    .service('TemplatesStrings', TemplatesStrings)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,
@@ -378,6 +376,15 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                 msg: 'Failed to get workflow job template. GET returned status: ' +
                                                     response.status
                                             });
+                                        });
+                            }],
+                            workflowLaunch: ['$stateParams', 'WorkflowJobTemplateModel',
+                                function($stateParams, WorkflowJobTemplate) {
+                                    let workflowJobTemplate = new WorkflowJobTemplate();
+
+                                    return workflowJobTemplate.getLaunch($stateParams.workflow_job_template_id)
+                                        .then(({data}) => {
+                                            return data;
                                         });
                             }]
                         }

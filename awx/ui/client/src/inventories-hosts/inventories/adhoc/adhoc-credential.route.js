@@ -7,7 +7,8 @@ export default {
     params: {
         credential_search: {
             value: {
-                page_size: '5'
+                page_size: '5',
+                credential_type: null
             },
             squash: true,
             dynamic: true

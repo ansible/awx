@@ -3,6 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
+import defaultStrings from '~assets/default.strings.json';
 
 export default [
     '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert',
@@ -54,6 +55,8 @@ export default [
         ConfigurationUiForm
     ) {
         var vm = this;
+
+        vm.product = defaultStrings.BRAND_NAME;
 
         var formDefs = {
             'azure': configurationAzureForm,
@@ -166,7 +169,7 @@ export default [
             setCurrentSystem: function(form) {
                 this.currentSystem = form;
                 this.setCurrent(this.currentSystem);
-            }
+            },
         };
 
         // Default to auth form and tab
@@ -219,7 +222,7 @@ export default [
         };
 
         function activeTabCheck(setForm) {
-            if(!$scope[formTracker.currentFormName()].$dirty) {
+            if(!$scope[formTracker.currentFormName()] || !$scope[formTracker.currentFormName()].$dirty) {
                 active(setForm);
             } else {
                     var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
@@ -268,18 +271,36 @@ export default [
                     formTracker.setCurrentSystem(formTracker.currentSystem);
                 }
             }
-            else {
-                formTracker.setCurrent(setForm);
-            }
+
             vm.activeTab = setForm;
-            $state.go('configuration', {
-                currentTab: setForm
-            }, {
-                location: true,
-                inherit: false,
-                notify: false,
-                reload: false
-            });
+
+            if (setForm !== 'license') {
+                if (setForm === 'auth') {
+                    formTracker.setCurrentAuth(formTracker.currentAuth);
+                } else if (setForm === 'system') {
+                    formTracker.setCurrentSystem(formTracker.currenSystem);
+                } else {
+                    formTracker.setCurrent(setForm);
+                }
+
+                $state.go('configuration', {
+                    currentTab: setForm
+                }, {
+                    location: true,
+                    inherit: false,
+                    notify: false,
+                    reload: false
+                });
+            } else {
+                $state.go('configuration.license', {
+                    currentTab: setForm
+                }, {
+                    location: true,
+                    inherit: false,
+                    notify: false,
+                    reload: false
+                });
+            }
         }
 
         var formCancel = function() {
@@ -338,7 +359,6 @@ export default [
             Wait('start');
             var payload = {};
             payload[key] = $scope.configDataResolve[key].default;
-
             ConfigurationService.patchConfiguration(payload)
                 .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
@@ -361,10 +381,13 @@ export default [
                     else if($scope[key + '_field'].hasOwnProperty('codeMirror')){
                         const isLdap = (key.indexOf("AUTH_LDAP") !== -1);
 
+                        const isLdapGroupTypeParams = isLdap && (key.indexOf("GROUP_TYPE_PARAMS") !== -1);
                         const isLdapUserSearch = isLdap && (key.indexOf("USER_SEARCH") !== -1);
                         const isLdapGroupSearch = isLdap && (key.indexOf("GROUP_SEARCH") !== -1);
 
-                        if (isLdapUserSearch || isLdapGroupSearch) {
+                        if (isLdapGroupTypeParams) {
+                            $scope[key] = JSON.stringify($scope.configDataResolve[key].default);
+                        } else if (isLdapUserSearch || isLdapGroupSearch) {
                             $scope[key] = '[]';
                         } else {
                             $scope[key] = '{}';
@@ -456,7 +479,6 @@ export default [
                     }
                 }
             });
-
             return payload;
         };
 

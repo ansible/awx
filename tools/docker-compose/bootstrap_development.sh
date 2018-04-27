@@ -21,9 +21,7 @@ else
     echo "Failed to find awx source tree, map your development tree volume"
 fi
 
-cp -R /tmp/awx.egg-info /awx_devel/ || true
-sed -i "s/placeholder/$(git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
-cp /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
+make awx-link
 ln -s /awx_devel/tools/rdb.py /venv/awx/lib/python2.7/site-packages/rdb.py || true
 yes | cp -rf /awx_devel/tools/docker-compose/supervisor.conf /supervisor.conf
 

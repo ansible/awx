@@ -1,5 +1,4 @@
 /* Copyright (c) 2017 Red Hat, Inc. */
-var angular = require('angular');
 var fsm = require('./fsm.js');
 var mode_fsm = require('./mode.fsm.js');
 var hotkeys = require('./hotkeys.fsm.js');

@@ -23,7 +23,7 @@ from django.contrib.auth import views as auth_views
 
 # Django REST Framework
 from rest_framework.authentication import get_authorization_header
-from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
+from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
@@ -165,6 +165,9 @@ class APIView(views.APIView):
             request.drf_request_user = getattr(drf_request, 'user', False)
         except AuthenticationFailed:
             request.drf_request_user = None
+        except ParseError as exc:
+            request.drf_request_user = None
+            self.__init_request_error__ = exc
         return drf_request
 
     def finalize_response(self, request, response, *args, **kwargs):
@@ -174,6 +177,8 @@ class APIView(views.APIView):
         if response.status_code >= 400:
             status_msg = "status %s received by user %s attempting to access %s from %s" % \
                          (response.status_code, request.user, request.path, request.META.get('REMOTE_ADDR', None))
+            if hasattr(self, '__init_request_error__'):
+                response = self.handle_exception(self.__init_request_error__)
             if response.status_code == 401:
                 logger.info(status_msg)
             else:

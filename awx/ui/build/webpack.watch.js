@@ -20,16 +20,16 @@ const watch = {
     output: {
         filename: OUTPUT
     },
-    module: {
-        rules: [
-            {
-                test: /\.js$/,
-                enforce: 'pre',
-                exclude: /node_modules/,
-                loader: 'eslint-loader'
-            }
-        ]
-    },
+     module: {
+         rules: [
+             {
+                 test: /\.js$/,
+                 enforce: 'pre',
+                 exclude: /node_modules/,
+                 loader: 'eslint-loader'
+             }
+         ]
+     },
     plugins: [
         new HtmlWebpackHarddiskPlugin(),
         new HardSourceWebpackPlugin({
@@ -51,27 +51,39 @@ const watch = {
         stats: 'minimal',
         publicPath: '/static/',
         host: '127.0.0.1',
-        https: true,
+        https: false,
         port: 3000,
-        https: true,
-        proxy: {
-            '/': {
-                target: TARGET,
-                secure: false,
-                ws: false,
-                bypass: req => req.originalUrl.includes('hot-update.json')
-            },
-            '/websocket': {
-                target: TARGET,
-                secure: false,
-                ws: true
-            },
-            '/network_ui': {
-                target: TARGET,
-                secure: false,
-                ws: true
+        clientLogLevel: 'none',
+        proxy: [{
+            context: (pathname, req) => !(pathname === '/api/login/' && req.method === 'POST'),
+            target: TARGET,
+            secure: false,
+            ws: false,
+            bypass: req => req.originalUrl.includes('hot-update.json')
+        },
+        {
+            context: '/api/login/',
+            target: TARGET,
+            secure: false,
+            ws: false,
+            headers: {
+                Host: `localhost:${TARGET_PORT}`,
+                Origin: TARGET,
+                Referer: `${TARGET}/`
             }
-        }
+        },
+        {
+            context: '/websocket',
+            target: TARGET,
+            secure: false,
+            ws: true
+        },
+        {
+            context: '/network_ui',
+            target: TARGET,
+            secure: false,
+            ws: true
+        }]
     }
 };
 

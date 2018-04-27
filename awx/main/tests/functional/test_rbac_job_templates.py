@@ -11,6 +11,7 @@ from awx.main.access import (
     ScheduleAccess
 )
 from awx.main.models.jobs import JobTemplate
+from awx.main.models.organization import Organization
 from awx.main.models.schedules import Schedule
 
 
@@ -296,3 +297,30 @@ class TestJobTemplateSchedules:
             mock_change.return_value = True
             assert access.can_change(schedule, {'inventory': 42})
             mock_change.assert_called_once_with(schedule, {'inventory': 42})
+
+
+@pytest.mark.django_db
+def test_jt_org_ownership_change(user, jt_linked):
+    admin1 = user('admin1')
+    org1 = jt_linked.project.organization
+    org1.admin_role.members.add(admin1)
+    a1_access = JobTemplateAccess(admin1)
+
+    assert a1_access.can_read(jt_linked)
+
+
+    admin2 = user('admin2')
+    org2 = Organization.objects.create(name='mrroboto', description='domo')
+    org2.admin_role.members.add(admin2)
+    a2_access = JobTemplateAccess(admin2)
+
+    assert not a2_access.can_read(jt_linked)
+
+
+    jt_linked.project.organization = org2
+    jt_linked.project.save()
+    jt_linked.inventory.organization = org2
+    jt_linked.inventory.save()
+
+    assert a2_access.can_read(jt_linked)
+    assert not a1_access.can_read(jt_linked)

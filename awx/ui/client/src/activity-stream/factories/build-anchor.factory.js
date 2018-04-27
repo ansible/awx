@@ -33,7 +33,7 @@ export default function BuildAnchor($log, $filter) {
                      url += 'jobs/' + obj.id;
                      break;
                  case 'inventory':
-                     url += obj.kind && obj.kind === "smart" ? 'inventories/smart/' + obj.id + '/' : 'inventories/inventory' + obj.id + '/';
+                     url += obj.kind && obj.kind === "smart" ? 'inventories/smart/' + obj.id + '/' : 'inventories/inventory/' + obj.id + '/';
                      break;
                  case 'schedule':
                      // schedule urls depend on the resource they're associated with

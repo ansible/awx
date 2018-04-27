@@ -77,6 +77,7 @@ from awx.main.utils import (
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
 from awx.main.utils.insights import filter_insights_api_response
+from awx.main.redact import UriCleaner
 from awx.api.permissions import (
     JobTemplateCallbackPermission,
     TaskPermission,
@@ -203,6 +204,10 @@ class InstanceGroupMembershipMixin(object):
 
 class RelatedJobsPreventDeleteMixin(object):
     def perform_destroy(self, obj):
+        self.check_related_active_jobs(obj)
+        return super(RelatedJobsPreventDeleteMixin, self).perform_destroy(obj)
+
+    def check_related_active_jobs(self, obj):
         active_jobs = obj.get_active_jobs()
         if len(active_jobs) > 0:
             raise ActiveJobConflict(active_jobs)
@@ -213,7 +218,6 @@ class RelatedJobsPreventDeleteMixin(object):
                 raise PermissionDenied(_(
                     'Related job {} is still processing events.'
                 ).format(unified_job.log_format))
-        return super(RelatedJobsPreventDeleteMixin, self).perform_destroy(obj)
 
 
 class ApiRootView(APIView):
@@ -631,7 +635,7 @@ class InstanceDetail(RetrieveUpdateAPIView):
 
 class InstanceUnifiedJobsList(SubListAPIView):
 
-    view_name = _("Instance Running Jobs")
+    view_name = _("Instance Jobs")
     model = UnifiedJob
     serializer_class = UnifiedJobSerializer
     parent_model = Instance
@@ -666,6 +670,14 @@ class InstanceGroupDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAP
     model = InstanceGroup
     serializer_class = InstanceGroupSerializer
     permission_classes = (InstanceGroupTowerPermission,)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.controller is not None:
+            raise PermissionDenied(detail=_("Isolated Groups can not be removed from the API"))
+        if instance.controlled_groups.count():
+            raise PermissionDenied(detail=_("Instance Groups acting as a controller for an Isolated Group can not be removed from the API"))
+        return super(InstanceGroupDetail, self).destroy(request, *args, **kwargs)
 
 
 class InstanceGroupUnifiedJobsList(SubListAPIView):
@@ -995,6 +1007,8 @@ class OrganizationInventoriesList(SubListAPIView):
 class BaseUsersList(SubListCreateAttachDetachAPIView):
     def post(self, request, *args, **kwargs):
         ret = super(BaseUsersList, self).post( request, *args, **kwargs)
+        if ret.status_code != 201:
+            return ret
         try:
             if ret.data is not None and request.data.get('is_system_auditor', False):
                 # This is a faux-field that just maps to checking the system
@@ -1598,6 +1612,18 @@ class UserAuthorizedTokenList(SubListCreateAPIView):
 
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
+        
+
+class OrganizationApplicationList(SubListCreateAPIView):
+
+    view_name = _("Organization OAuth2 Applications")
+    
+    model = OAuth2Application
+    serializer_class = OAuth2ApplicationSerializer
+    parent_model = Organization
+    relationship = 'applications'
+    parent_key = 'organization'
+    swagger_topic = 'Authentication'
 
 
 class OAuth2PersonalTokenList(SubListCreateAPIView):
@@ -1669,14 +1695,8 @@ class UserRolesList(SubListAttachDetachAPIView):
         if not sub_id:
             return super(UserRolesList, self).post(request)
 
-        if sub_id == self.request.user.admin_role.pk:
-            raise PermissionDenied(_('You may not perform any action with your own admin_role.'))
-
         user = get_object_or_400(User, pk=self.kwargs['pk'])
         role = get_object_or_400(Role, pk=sub_id)
-        user_content_type = ContentType.objects.get_for_model(User)
-        if role.content_type == user_content_type:
-            raise PermissionDenied(_('You may not change the membership of a users admin_role'))
 
         credential_content_type = ContentType.objects.get_for_model(Credential)
         if role.content_type == credential_content_type:
@@ -2071,6 +2091,7 @@ class InventoryDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, Retri
         obj = self.get_object()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
+        self.check_related_active_jobs(obj)  # related jobs mixin
         try:
             obj.schedule_deletion(getattr(request.user, 'id', None))
             return Response(status=status.HTTP_202_ACCEPTED)
@@ -2169,7 +2190,7 @@ class HostList(HostRelatedSearchMixin, ListCreateAPIView):
             return Response(dict(error=_(six.text_type(e))), status=status.HTTP_400_BAD_REQUEST)
 
 
-class HostDetail(ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
+class HostDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUpdateDestroyAPIView):
 
     always_allow_superuser = False
     model = Host
@@ -3116,16 +3137,22 @@ class JobTemplateSurveySpec(GenericAPIView):
         return Response()
 
     def _validate_spec_data(self, new_spec, old_spec):
-        if "name" not in new_spec:
-            return Response(dict(error=_("'name' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if "description" not in new_spec:
-            return Response(dict(error=_("'description' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if "spec" not in new_spec:
-            return Response(dict(error=_("'spec' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(new_spec["spec"], list):
-            return Response(dict(error=_("'spec' must be a list of items.")), status=status.HTTP_400_BAD_REQUEST)
-        if len(new_spec["spec"]) < 1:
-            return Response(dict(error=_("'spec' doesn't contain any items.")), status=status.HTTP_400_BAD_REQUEST)
+        schema_errors = {}
+        for field, expect_type, type_label in [
+                ('name', six.string_types, 'string'),
+                ('description', six.string_types, 'string'),
+                ('spec', list, 'list of items')]:
+            if field not in new_spec:
+                schema_errors['error'] = _("Field '{}' is missing from survey spec.").format(field)
+            elif not isinstance(new_spec[field], expect_type):
+                schema_errors['error'] = _("Expected {} for field '{}', received {} type.").format(
+                    type_label, field, type(new_spec[field]).__name__)
+
+        if isinstance(new_spec.get('spec', None), list) and len(new_spec["spec"]) < 1:
+            schema_errors['error'] = _("'spec' doesn't contain any items.")
+
+        if schema_errors:
+            return Response(schema_errors, status=status.HTTP_400_BAD_REQUEST)
 
         variable_set = set()
         old_spec_dict = JobTemplate.pivot_spec(old_spec)
@@ -3457,6 +3484,13 @@ class JobTemplateJobsList(SubListCreateAPIView):
     parent_model = JobTemplate
     relationship = 'jobs'
     parent_key = 'job_template'
+
+    @property
+    def allowed_methods(self):
+        methods = super(JobTemplateJobsList, self).allowed_methods
+        if get_request_version(getattr(self, 'request', None)) > 1:
+            methods.remove('POST')
+        return methods
 
 
 class JobTemplateInstanceGroupsList(SubListAttachDetachAPIView):
@@ -4122,7 +4156,7 @@ class JobRelaunch(RetrieveAPIView):
                 for p in needed_passwords:
                     data['credential_passwords'][p] = u''
             else:
-                data.pop('credential_passwords')
+                data.pop('credential_passwords', None)
         return data
 
     @csrf_exempt
@@ -4618,9 +4652,17 @@ class UnifiedJobList(ListAPIView):
     serializer_class = UnifiedJobListSerializer
 
 
-class StdoutANSIFilter(object):
+def redact_ansi(line):
+    # Remove ANSI escape sequences used to embed event data.
+    line = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', line)
+    # Remove ANSI color escape sequences.
+    return re.sub(r'\x1b[^m]*m', '', line)
+
+
+class StdoutFilter(object):
 
     def __init__(self, fileobj):
+        self._functions = []
         self.fileobj = fileobj
         self.extra_data = ''
         if hasattr(fileobj, 'close'):
@@ -4632,10 +4674,7 @@ class StdoutANSIFilter(object):
             line = self.fileobj.readline(size)
             if not line:
                 break
-            # Remove ANSI escape sequences used to embed event data.
-            line = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', line)
-            # Remove ANSI color escape sequences.
-            line = re.sub(r'\x1b[^m]*m', '', line)
+            line = self.process_line(line)
             data += line
         if size > 0 and len(data) > size:
             self.extra_data = data[size:]
@@ -4643,6 +4682,14 @@ class StdoutANSIFilter(object):
         else:
             self.extra_data = ''
         return data
+
+    def register(self, func):
+        self._functions.append(func)
+
+    def process_line(self, line):
+        for func in self._functions:
+            line = func(line)
+        return line
 
 
 class UnifiedJobStdout(RetrieveAPIView):
@@ -4701,9 +4748,12 @@ class UnifiedJobStdout(RetrieveAPIView):
                     suffix='.ansi' if target_format == 'ansi_download' else ''
                 )
                 content_fd = unified_job.result_stdout_raw_handle(enforce_max_bytes=False)
+                redactor = StdoutFilter(content_fd)
                 if target_format == 'txt_download':
-                    content_fd = StdoutANSIFilter(content_fd)
-                response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
+                    redactor.register(redact_ansi)
+                if type(unified_job) == ProjectUpdate:
+                    redactor.register(UriCleaner.remove_sensitive)
+                response = HttpResponse(FileWrapper(redactor), content_type='text/plain')
                 response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
                 return response
             else:
@@ -4882,12 +4932,6 @@ class RoleUsersList(SubListAttachDetachAPIView):
 
         user = get_object_or_400(User, pk=sub_id)
         role = self.get_parent_object()
-        if role == self.request.user.admin_role:
-            raise PermissionDenied(_('You may not perform any action with your own admin_role.'))
-
-        user_content_type = ContentType.objects.get_for_model(User)
-        if role.content_type == user_content_type:
-            raise PermissionDenied(_('You may not change the membership of a users admin_role'))
 
         credential_content_type = ContentType.objects.get_for_model(Credential)
         if role.content_type == credential_content_type:

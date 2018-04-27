@@ -1,0 +1,68 @@
+<div id="CodeMirror-modal" class="CodeMirror-modal modal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="atCodeMirror-label">
+                    <div class="atCodeMirror-labelLeftSide">
+                         <span class="atCodeMirror-labelText" ng-class="labelClass">
+                                {{ label }}
+                            </span>
+                         <a id=""
+                            href=""
+                            aw-pop-over="{{ tooltip }}"
+                            data-placement="bottom"
+                            data-container="body"
+                            over-title="{{ label }}"
+                            class="help-link"
+                            data-original-title="{{ label }}"
+                            title="{{ label }}"
+                            tabindex="-1">
+                             <i class="fa fa-question-circle"></i>
+                         </a>
+                         <div class="atCodeMirror-toggleContainer FormToggle-container">
+                             <div class="btn-group">
+                                <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs btn-primary">
+                                    <input
+                                        type="radio"
+                                        value="yaml"
+                                        ng-model="parseType"
+                                        ng-change="vm.toggle()"
+                                        class="ng-pristine ng-untouched ng-valid ng-not-empty">
+                                            {{ vm.strings.get('label.YAML')}}
+                                </label>
+                                <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs Button-primary--hollow">
+                                    <input
+                                        type="radio"
+                                        value="json"
+                                        ng-model="parseType"
+                                        ng-change="vm.toggle()"
+                                        class="ng-pristine ng-untouched ng-valid ng-not-empty">
+                                            {{ vm.strings.get('label.JSON')}}
+                                </label>
+                            </div>
+                         </div>
+                    </div>
+                    <div>
+                        <button type="button" class="close" ng-click="closeFn()">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <textarea
+                    ng-disabled="disabled"
+                    ng-model="extra_variables"
+                    name="extra_variables"
+                    class="form-control Form-textArea"
+                    id="codemirror-extra-vars-modal">
+                </textarea>
+            </div>
+            <div class="modal-footer">
+                <div class="CodeMirror-modalControls">
+                    <button ng-click="closeFn()" class="btn btn-sm btn-default">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

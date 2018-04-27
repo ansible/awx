@@ -38,6 +38,7 @@ from awx.main.utils import (
     copy_model_by_class, copy_m2m_relationships,
     get_type_for_model, parse_yaml_or_json
 )
+from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
@@ -88,9 +89,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
     ]
 
     ALL_STATUS_CHOICES = OrderedDict(PROJECT_STATUS_CHOICES + INVENTORY_SOURCE_STATUS_CHOICES + JOB_TEMPLATE_STATUS_CHOICES + DEPRECATED_STATUS_CHOICES).items()
-
-    # NOTE: Working around a django-polymorphic issue: https://github.com/django-polymorphic/django-polymorphic/issues/229
-    base_manager_name = 'base_objects'
 
     class Meta:
         app_label = 'main'
@@ -265,14 +263,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
                 if field not in update_fields:
                     update_fields.append(field)
         # Do the actual save.
-        try:
-            super(UnifiedJobTemplate, self).save(*args, **kwargs)
-        except ValueError:
-            # A fix for https://trello.com/c/S4rU1F21
-            # Does not resolve the root cause. Tis merely a bandaid.
-            if 'scm_delete_on_next_update' in update_fields:
-                update_fields.remove('scm_delete_on_next_update')
-                super(UnifiedJobTemplate, self).save(*args, **kwargs)
+        super(UnifiedJobTemplate, self).save(*args, **kwargs)
 
 
     def _get_current_status(self):
@@ -536,9 +527,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     PASSWORD_FIELDS = ('start_args',)
 
-    # NOTE: Working around a django-polymorphic issue: https://github.com/django-polymorphic/django-polymorphic/issues/229
-    base_manager_name = 'base_objects'
-
     class Meta:
         app_label = 'main'
 
@@ -669,7 +657,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         blank=True,
         null=True,
         default=None,
-        on_delete=models.SET_NULL,
+        on_delete=polymorphic.SET_NULL,
         help_text=_('The Rampart/Instance group the job was run under'),
     )
     credentials = models.ManyToManyField(
@@ -727,7 +715,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _get_parent_instance(self):
         return getattr(self, self._get_parent_field_name(), None)
 
-    def _update_parent_instance_no_save(self, parent_instance, update_fields=[]):
+    def _update_parent_instance_no_save(self, parent_instance, update_fields=None):
+        if update_fields is None:
+            update_fields = []
+
         def parent_instance_set(key, val):
             setattr(parent_instance, key, val)
             if key not in update_fields:
@@ -1267,10 +1258,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
-
-        # Sanity check: If we are running unit tests, then run synchronously.
-        if getattr(settings, 'CELERY_UNIT_TEST', False):
-            return self.start(None, None, **kwargs)
 
         # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')

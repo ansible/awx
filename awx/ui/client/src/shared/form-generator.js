@@ -142,10 +142,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 .factory('GenerateForm', ['$rootScope', '$compile', 'generateList',
     'Attr', 'Icon', 'Column',
     'NavigationLink', 'HelpCollapse', 'Empty', 'SelectIcon',
-    'ActionButton', '$log', 'i18n',
+    'ActionButton', 'MessageBar', '$log', 'i18n',
     function ($rootScope, $compile, GenerateList,
         Attr, Icon, Column, NavigationLink, HelpCollapse,
-        Empty, SelectIcon, ActionButton, $log, i18n) {
+        Empty, SelectIcon, ActionButton, MessageBar, $log, i18n) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -177,6 +177,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 else {
                     return `
                     <div ui-view="preFormView"></div>
+                    ${MessageBar(this.form)}
                     <div class="Panel">
                     ${html}
                     <div ui-view="related"></div>
@@ -544,6 +545,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "' ";
                     html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
                     html += " class='ScheduleToggle-switch' ng-click='" + field.ngClick + "' translate>" + i18n._("OFF") + "</button></div></div>";
+                } else if (field.type === 'html') {
+                    html += field.html;
                 }
                 return html;
             },
@@ -598,6 +601,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         label = (includeLabel !== undefined && includeLabel === false) ? false : true;
 
                     if (label) {
+                        html += "<span class=\"Form-checkboxRow\">";
                         html += "<label class=\"";
                         html += (field.inline === undefined || field.inline === true) ? "checkbox-inline" : "";
                         html += (field.labelClass) ? " " + field.labelClass : "";
@@ -627,6 +631,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += field.label + " ";
                         html += (field.awPopOver) ? Attr(field, 'awPopOver', fld) : "";
                         html += "</label>\n";
+                        html += "</span>";
                     }
 
                     return html;

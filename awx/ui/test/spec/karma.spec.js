@@ -13,6 +13,7 @@ module.exports = config => {
         frameworks: ['jasmine'],
         reporters: ['progress', 'junit'],
         files:[
+            './polyfills.js',
             path.join(SRC_PATH, '**/*.html'),
             path.join(SRC_PATH, 'vendor.js'),
             path.join(NODE_MODULES, 'angular-mocks/angular-mocks.js'),

@@ -54,6 +54,13 @@ export default ['i18n', function(i18n) {
                 reset: 'AUTH_LDAP_2_GROUP_TYPE',
                 ngOptions: 'group.label for group in AUTH_LDAP_2_GROUP_TYPE_options track by group.value',
             },
+            AUTH_LDAP_2_GROUP_TYPE_PARAMS: {
+                type: 'textarea',
+                reset: 'AUTH_LDAP_2_GROUP_TYPE_PARAMS',
+                codeMirror: true,
+                rows: 6,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            },
             AUTH_LDAP_2_REQUIRE_GROUP: {
                 type: 'text',
                 reset: 'AUTH_LDAP_2_REQUIRE_GROUP'

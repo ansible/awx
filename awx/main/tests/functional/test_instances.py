@@ -62,6 +62,21 @@ def test_policy_instance_few_instances(mock, instance_factory, instance_group_fa
 
 @pytest.mark.django_db
 @mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
+def test_policy_instance_distribution_round_up(mock, instance_factory, instance_group_factory):
+    i1 = instance_factory("i1")
+    i2 = instance_factory("i2")
+    i3 = instance_factory("i3")
+    i4 = instance_factory("i4")
+    i5 = instance_factory("i5")
+    ig_1 = instance_group_factory("ig1", percentage=79)
+    apply_cluster_membership_policies()
+    assert len(ig_1.instances.all()) == 4
+    assert set([i1, i2, i3, i4]) == set(ig_1.instances.all())
+    assert i5 not in ig_1.instances.all()
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
 def test_policy_instance_distribution_uneven(mock, instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")

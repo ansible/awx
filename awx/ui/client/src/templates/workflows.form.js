@@ -27,6 +27,16 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
             detailsClick: "$state.go('templates.editWorkflowJobTemplate')",
             include: ['/static/partials/survey-maker-modal.html'],
 
+            headerFields: {
+                missingTemplates: {
+                    type: 'html',
+                    html: `<div ng-show="missingTemplates" class="Workflow-warning">
+                            <span class="Workflow-warningIcon fa fa-warning"></span>` +
+                            i18n._("Missing Job Templates found in the <span class='Workflow-warningLink' ng-click='openWorkflowMaker()'>Workflow Editor</span>") +
+                            `</div>`
+                }
+            },
+
             fields: {
                 name: {
                     label: i18n._('Name'),
@@ -82,6 +92,22 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)' // TODO: get working
+                },
+                checkbox_group: {
+                    label: i18n._('Options'),
+                    type: 'checkbox_group',
+                    fields: [{
+                        name: 'allow_simultaneous',
+                        label: i18n._('Enable Concurrent Jobs'),
+                        type: 'checkbox',
+                        column: 2,
+                        awPopOver: "<p>" + i18n._("If enabled, simultaneous runs of this workflow job template will be allowed.") + "</p>",
+                        dataPlacement: 'right',
+                        dataTitle: i18n._('Enable Concurrent Jobs'),
+                        dataContainer: "body",
+                        labelClass: 'stack-inline',
+                        ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                    }]
                 }
             },
 

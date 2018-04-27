@@ -1,2 +1,6 @@
-<div class="at-Row" id="row-{{ templateId }}" ng-transclude>
+<div class="at-Row" id="row-{{ templateId }}">
+    <div class="at-Row--invalid" ng-show="invalid">
+        <at-popover state="invalidTooltip"></at-popover>
+    </div>
+    <div class="at-Row-content" ng-transclude></div>
 </div>

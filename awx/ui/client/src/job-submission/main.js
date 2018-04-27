@@ -4,7 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
-import InitiatePlaybookRun from './job-submission-factories/initiateplaybookrun.factory';
 import LaunchJob from './job-submission-factories/launchjob.factory';
 import GetSurveyQuestions from './job-submission-factories/getsurveyquestions.factory';
 import AdhocRun from './job-submission-factories/adhoc-run.factory.js';
@@ -21,7 +20,6 @@ import awPasswordMax from './job-submission-directives/aw-password-max.directive
 
 export default
 	angular.module('jobSubmission', [])
-		.factory('InitiatePlaybookRun', InitiatePlaybookRun)
 		.factory('LaunchJob', LaunchJob)
 		.factory('GetSurveyQuestions', GetSurveyQuestions)
 		.factory('AdhocRun', AdhocRun)

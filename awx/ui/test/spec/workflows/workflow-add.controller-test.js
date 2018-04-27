@@ -16,7 +16,8 @@ describe('Controller: WorkflowAdd', () => {
         Wait,
         ParseTypeChange,
         ToJSON,
-        availableLabels;
+        availableLabels,
+        resolvedModels;
 
     beforeEach(angular.mock.module('awApp'));
     beforeEach(angular.mock.module('RestServices'));
@@ -48,7 +49,16 @@ describe('Controller: WorkflowAdd', () => {
             name: "foo",
             id: "1"
         }];
-      
+
+        resolvedModels = [
+            {},
+            {
+                options: () => {
+                    return true;
+                }
+            }
+        ];
+
         Alert = jasmine.createSpy('Alert');
         ProcessErrors = jasmine.createSpy('ProcessErrors');
         CreateSelect2 = jasmine.createSpy('CreateSelect2');
@@ -65,6 +75,7 @@ describe('Controller: WorkflowAdd', () => {
         $provide.value('ParseTypeChange', ParseTypeChange);
         $provide.value('ToJSON', ToJSON);
         $provide.value('availableLabels', availableLabels);
+        $provide.value('resolvedModels', resolvedModels);
     }));
 
     beforeEach(angular.mock.inject( ($rootScope, $controller, $q, $httpBackend, _state_, _ConfigService_, _GetChoices_, _Alert_, _GenerateForm_, _ProcessErrors_, _CreateSelect2_, _Wait_, _ParseTypeChange_, _ToJSON_, _availableLabels_) => {
@@ -134,7 +145,8 @@ describe('Controller: WorkflowAdd', () => {
                 labels: undefined,
                 organization: undefined,
                 variables: undefined,
-                extra_vars: undefined
+                extra_vars: undefined,
+                allow_simultaneous: undefined
             });
         });
 

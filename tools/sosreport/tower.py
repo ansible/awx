@@ -7,13 +7,16 @@ from distutils.version import LooseVersion
 SOSREPORT_TOWER_COMMANDS = [
     "ansible --version",      # ansible core version
     "awx-manage --version", # tower version
+    "awx-manage list_instances", # tower cluster configuration
     "supervisorctl status",   # tower process status
+    "rabbitmqctl status",
+    "rabbitmqctl cluster_status",
     "/var/lib/awx/venv/awx/bin/pip freeze",             # pip package list
     "/var/lib/awx/venv/ansible/bin/pip freeze",             # pip package list
     "tree -d /var/lib/awx",   # show me the dirs
     "ls -ll /var/lib/awx",    # check permissions
-    "ls -ll /etc/tower",
-    "ls -ll /var/lib/awx/job_status/"
+    "ls -ll /var/lib/awx/venv", # list all venvs
+    "ls -ll /etc/tower"
 ]
 
 SOSREPORT_TOWER_DIRS = [

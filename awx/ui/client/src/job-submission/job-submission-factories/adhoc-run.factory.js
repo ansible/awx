@@ -89,7 +89,7 @@
                      .then(({data}) => {
                           Wait('stop');
                           if($location.path().replace(/^\//, '').split('/')[0] !== 'jobs') {
-                              $state.go('adHocJobStdout', {id: data.id});
+                              $state.go('jobz', { id: data.id, type: 'command' });
                           }
                      })
                      .catch(({data, status}) => {

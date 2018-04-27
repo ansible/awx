@@ -1,0 +1,60 @@
+<div>
+    <div class="atCodeMirror-label">
+        <div class="atCodeMirror-labelLeftSide">
+             <span class="atCodeMirror-labelText" ng-class="labelClass">
+                    {{  label || vm.strings.get('code_mirror.label.VARIABLES') }}
+                </span>
+             <a id=""
+                href=""
+                aw-pop-over="{{ tooltip || vm.strings.get('code_mirror.tooltip.TOOLTIP') }}"
+                data-placement="{{ tooltipPlacement || 'top' }}"
+                data-container="body"
+                over-title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
+                class="help-link"
+                data-original-title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
+                title="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
+                tabindex="-1">
+                 <i class="fa fa-question-circle"></i>
+             </a>
+             <div class="atCodeMirror-toggleContainer FormToggle-container">
+                 <div class="btn-group">
+                    <label ng-class="{'btn-primary': parseType === 'yaml','Button-primary--hollow' : parseType === 'json'}" class="btn btn-xs btn-primary">
+                        <input
+                            type="radio"
+                            value="yaml"
+                            ng-model="parseType"
+                            ng-change="parseTypeChange('parseType', 'variables')"
+                            class="ng-pristine ng-untouched ng-valid ng-not-empty">
+                                {{ vm.strings.get('label.YAML')}}
+                    </label>
+                    <label ng-class="{'btn-primary': parseType === 'json','Button-primary--hollow' : parseType === 'yaml'}" class="btn btn-xs Button-primary--hollow">
+                        <input
+                            type="radio"
+                            value="json"
+                            ng-model="parseType"
+                            ng-change="parseTypeChange('parseType', 'variables')"
+                            class="ng-pristine ng-untouched ng-valid ng-not-empty">
+                                {{ vm.strings.get('label.JSON')}}
+                    </label>
+                </div>
+             </div>
+        </div>
+        <div class="atCodeMirror-expandTextContainer" ng-click="vm.expand()">{{ vm.strings.get('label.EXPAND') }}</div>
+    </div>
+    <textarea
+        ng-disabled="disabled"
+        rows="6"
+        ng-model="variables"
+        name="variables"
+        class="form-control Form-textArea"
+        id="codemirror-extra-vars">
+    </textarea>
+    <at-code-mirror-modal
+        ng-if="vm.expanded"
+        variables="{{ variables }}"
+        tooltip="{{ tooltip || vm.strings.get('code_mirror.tooltip.TOOLTIP') }}"
+        label="{{ label || vm.strings.get('code_mirror.label.VARIABLES') }}"
+        disabled="{{ disabled || false }}"
+        close-fn="vm.close()">
+    </at-code-mirror-modal>
+</div>

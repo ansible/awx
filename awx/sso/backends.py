@@ -182,13 +182,13 @@ class RADIUSBackend(BaseRADIUSBackend):
     Custom Radius backend to verify license status
     '''
 
-    def authenticate(self, username, password):
+    def authenticate(self, request, username, password):    
         if not django_settings.RADIUS_SERVER:
             return None
         if not feature_enabled('enterprise_auth'):
             logger.error("Unable to authenticate, license does not support RADIUS authentication")
             return None
-        return super(RADIUSBackend, self).authenticate(username, password)
+        return super(RADIUSBackend, self).authenticate(request, username, password)
 
     def get_user(self, user_id):
         if not django_settings.RADIUS_SERVER:

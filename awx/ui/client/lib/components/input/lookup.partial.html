@@ -21,7 +21,8 @@
                 ng-disabled="state._disabled || form.disabled">
 
             <span class="form-control Form-textInput Form-textInput--variableHeight LabelList-lookupTags"
-                ng-if="state._lookupTags">
+                ng-if="state._lookupTags"
+                ng-disabled="state._disabled || form.disabled">
                 <div class="LabelList-tagContainer" ng-repeat="tag in state._value track by $index">
                     <div class="LabelList-tag LabelList-tag--deletable">
                         <span ng-if="tag.hostname" class="LabelList-name">{{ tag.hostname }}</span>

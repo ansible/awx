@@ -14,6 +14,7 @@ module.exports = config => {
         browsers: ['PhantomJS'],
         reporters: ['progress', 'junit'],
         files: [
+            './polyfills.js',
             path.join(SRC_PATH, 'vendor.js'),
             path.join(SRC_PATH, 'app.js'),
             path.join(SRC_PATH, '**/*.html'),

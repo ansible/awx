@@ -41,7 +41,7 @@ Individual applications will be accessible via their primary keys:
             "results": [
                 {
                     "scope": "read",
-                    "token": "**************",
+                    "token": "*************",
                     "id": 2
                 }
             ]
@@ -114,7 +114,7 @@ Individual tokens will be accessible via their primary keys:
     "description": "App Token Test",
     "user": 1,
     "token": "*************",
-    "refresh_token": "**************",
+    "refresh_token": "*************",
     "application": 1,
     "expires": "2018-02-24T00:39:32.618279Z",
     "scope": "read"
@@ -142,8 +142,8 @@ The most common usage of OAuth 2 is authenticating users. The `token` field of a
 as part of the HTTP authentication header, in the format `Authorization: Bearer <token field value>`.  This _Bearer_
 token can be obtained by doing a curl to the `/api/o/token/` endpoint. For example:  
 ```
-curl -ku root:reverse -H "Content-Type: application/json" -X POST \
--d '{"description":"Tower CLI","application":null,"scope":"read"}' \
+curl -ku <user>:<password> -H "Content-Type: application/json" -X POST \
+-d '{"description":"Tower CLI", "application":null, "scope":"write"}' \
 https://localhost:8043/api/v2/users/1/personal_tokens/ | python -m json.tool
 ```
 Here is an example of using that PAT to access an API endpoint using `curl`:
