@@ -169,3 +169,9 @@ activity_stream_registrar.connect(OAuth2AccessToken)
 
 # prevent API filtering on certain Django-supplied sensitive fields
 prevent_search(User._meta.get_field('password'))
+prevent_search(OAuth2AccessToken._meta.get_field('token'))
+prevent_search(RefreshToken._meta.get_field('token'))
+prevent_search(OAuth2Application._meta.get_field('client_secret'))
+prevent_search(OAuth2Application._meta.get_field('client_id'))
+prevent_search(Grant._meta.get_field('code'))
+

@@ -10,6 +10,7 @@ from awx.main.models import (AdHocCommand, ActivityStream,
                              WorkflowJob, WorkflowJobTemplate,
                              WorkflowJobOptions, InventorySource,
                              JobEvent)
+from awx.main.models.oauth import OAuth2Application
 from awx.main.models.jobs import JobOptions
 
 # Django
@@ -82,7 +83,6 @@ def test_filter_on_password_field(password_field, lookup_suffix):
     (User, 'password__icontains'),
     (User, 'settings__value__icontains'),
     (User, 'main_oauth2accesstoken__token__gt'),
-    (User, 'main_oauth2application__name__gt'),
     (UnifiedJob, 'job_args__icontains'),
     (UnifiedJob, 'job_env__icontains'),
     (UnifiedJob, 'start_args__icontains'),
@@ -95,8 +95,8 @@ def test_filter_on_password_field(password_field, lookup_suffix):
     (JobTemplate, 'survey_spec__icontains'),
     (WorkflowJobTemplate, 'survey_spec__icontains'),
     (CustomInventoryScript, 'script__icontains'),
-    (ActivityStream, 'o_auth2_access_token__gt'),
-    (ActivityStream, 'o_auth2_application__gt')
+    (ActivityStream, 'o_auth2_application__client_secret__gt'),
+    (OAuth2Application, 'grant__code__gt')
 ])
 def test_filter_sensitive_fields_and_relations(model, query):
     field_lookup = FieldLookupBackend()
