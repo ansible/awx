@@ -1,0 +1,10 @@
+<div ui-view="form"></div>
+<at-panel>
+    <at-panel-heading>
+        {{:: vm.strings.get('list.PANEL_TITLE') }}
+        <div class="at-Panel-headingTitleBadge" ng-show="vm.count">
+            {{ vm.count }}
+        </div>
+    </at-panel-heading>
+    <div ui-view="templatesList"></div>
+</at-panel>

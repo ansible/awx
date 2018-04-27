@@ -256,6 +256,7 @@ class PrimordialModel(CreatedModifiedModel):
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
+        fields_are_specified = bool(update_fields)
         user = get_current_user()
         if user and not user.id:
             user = None
@@ -263,9 +264,14 @@ class PrimordialModel(CreatedModifiedModel):
             self.created_by = user
             if 'created_by' not in update_fields:
                 update_fields.append('created_by')
-        self.modified_by = user
-        if 'modified_by' not in update_fields:
-            update_fields.append('modified_by')
+        # Update modified_by if not called with update_fields, or if any
+        # editable fields are present in update_fields
+        if (
+                (not fields_are_specified) or
+                any(getattr(self._meta.get_field(name), 'editable', True) for name in update_fields)):
+            self.modified_by = user
+            if 'modified_by' not in update_fields:
+                update_fields.append('modified_by')
         super(PrimordialModel, self).save(*args, **kwargs)
 
     def clean_description(self):

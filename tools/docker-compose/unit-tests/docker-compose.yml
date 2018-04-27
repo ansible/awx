@@ -9,6 +9,6 @@ services:
     environment:
       SWIG_FEATURES: "-cpperraswarn -includeall -I/usr/include/openssl"
       TEST_DIRS: awx/main/tests/functional awx/main/tests/unit awx/conf/tests awx/sso/tests
-    command: ["make test"]
+    command: ["make test_combined"]
     volumes:
       - ../../../:/awx_devel

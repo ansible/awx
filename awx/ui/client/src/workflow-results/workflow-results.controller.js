@@ -195,6 +195,16 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             if(data.hasOwnProperty('workflow_job_id') &&
                 parseInt(data.workflow_job_id, 10) === parseInt($scope.workflow.id,10)){
 
+                    // This check ensures that the workflow status icon doesn't get stuck in
+                    // the waiting state due to the UI missing the initial socket message.  This
+                    // can happen if the GET request on the workflow job returns "waiting" and
+                    // the sockets aren't established yet so we miss the event that indicates
+                    // the workflow job has moved into a running state.
+                    if (!_.includes(['running', 'successful', 'failed', 'error'], $scope.workflow.status)){
+                        $scope.workflow.status = 'running';
+                        runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
+                    }
+
                     WorkflowService.updateStatusOfNode({
                         treeData: $scope.treeData,
                         nodeId: data.workflow_node_id,

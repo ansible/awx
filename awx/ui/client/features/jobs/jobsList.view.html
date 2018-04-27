@@ -12,7 +12,7 @@
             query-set="querySet">
         </smart-search>
     </div>
-    <at-list results="jobs">
+    <at-list results="jobs" empty-list-reason="{{ vm.emptyListReason }}">
         <!-- TODO: implement resources are missing red indicator as present in mockup -->
         <at-row ng-repeat="job in jobs" job-id="{{ job.id }}">
             <div class="at-Row-items">
@@ -24,15 +24,22 @@
                     header-link="{{ vm.getLink(job) }}"
                     header-tag="{{ vm.jobTypes[job.type] }}">
                 </at-row-item>
+                <div class="at-Row--inline">
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_STARTED') }}"
+                        value="{{ job.started | longDate }}"
+                        inline="true">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_FINISHED') }}"
+                        value="{{ job.finished | longDate }}"
+                        inline="true">
+                    </at-row-item>
+                </div>
                 <at-row-item
-                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_STARTED') }}"
-                    value="{{ job.started | longDate }}"
-                    inline="true">
-                </at-row-item>
-                <at-row-item
-                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_FINISHED') }}"
-                    value="{{ job.finished | longDate }}"
-                    inline="true">
+                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_WORKFLOW_JOB') }}"
+                    value="{{ job.summary_fields.source_workflow_job.name }}"
+                    value-link="/#/workflows/{{ job.summary_fields.source_workflow_job.id }}">
                 </at-row-item>
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_LAUNCHED_BY') }}"
@@ -59,15 +66,24 @@
                     tag-values="job.summary_fields.credentials"
                     tags-are-creds="true">
                 </at-row-item>
-                <labels-list class="LabelList" show-delete="false" is-row-item="true">
+                <labels-list class="LabelList" show-delete="false" is-row-item="true" state="job">
                 </labels-list>
             </div>
             <div class="at-Row-actions">
                 <at-relaunch job="job"
                     ng-show="job.summary_fields.user_capabilities.start">
                 </at-relaunch>
+                <at-row-action icon="fa-minus-circle" ng-click="vm.cancelJob(job)"
+                    ng-show="job.summary_fields.user_capabilities.start &&
+                             (job.status === 'pending' ||
+                             job.status === 'waiting' ||
+                             job.status === 'running')">
+                </at-row-action>
                 <at-row-action icon="fa-trash" ng-click="vm.deleteJob(job)"
-                    ng-show="job.summary_fields.user_capabilities.delete">
+                    ng-show="job.summary_fields.user_capabilities.delete &&
+                             !(job.status === 'pending' ||
+                             job.status === 'waiting' ||
+                             job.status === 'running')">
                 </at-row-action>
             </div>
         </at-row>

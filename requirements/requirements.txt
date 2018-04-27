@@ -95,9 +95,9 @@ backports.functools-lru-cache==1.5  # via jaraco.functools
 backports.ssl-match-hostname==3.5.0.1
 baron==0.6.6              # via redbaron
 billiard==3.3.0.23        # via celery
-boto3==1.6.2
+boto3==1.7.6
 boto==2.47.0
-botocore==1.9.7
+botocore==1.10.6
 celery==3.1.25
 certifi==2018.1.18        # via msrest
 cffi==1.11.5              # via azure-datalake-store, cryptography
@@ -170,7 +170,7 @@ os-service-types==1.2.0   # via openstacksdk
 packaging==17.1           # via deprecation
 pathlib2==2.3.0           # via azure-datalake-store
 pbr==3.1.1                # via keystoneauth1, openstacksdk, os-service-types, shade, stevedore
-pexpect==4.4.0
+pexpect==4.5.0
 psphere==0.5.2
 psutil==5.4.3
 psycopg2==2.7.3.2
@@ -184,7 +184,7 @@ pyjwt==1.6.0              # via adal, social-auth-core, twilio
 pyopenssl==17.5.0
 pyparsing==2.2.0
 pyrad==2.1                # via django-radius
-python-dateutil==2.7.0
+python-dateutil==2.7.2
 python-ldap==2.5.2        # via django-auth-ldap
 python-logstash==0.4.6
 python-memcached==1.59

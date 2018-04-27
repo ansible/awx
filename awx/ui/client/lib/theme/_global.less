@@ -13,6 +13,7 @@
 
     &[disabled] {
         background: @at-color-disabled;
+        border-color: @at-color-disabled;
     }
 }
 
@@ -48,6 +49,17 @@
 .at-ButtonIcon {
     padding: 4px @at-padding-button-horizontal;
     font-size: @at-font-size-body;
+}
+
+.at-ButtonIcon-noborder {
+    padding: 4px @at-padding-button-horizontal;
+    font-size: @at-font-size-body;
+    .at-mixin-Button();
+    .at-mixin-ButtonHollow(
+        'at-color-default',
+        'at-color-default',
+        'at-color-button-text-default'
+    );
 }
 
 .at-Button--expand {

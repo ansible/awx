@@ -1,5 +1,5 @@
 <div class="at-RowItem" ng-class="{'at-RowItem--isHeader': headerValue, 'at-RowItem--inline': inline}"
-    ng-show="status || headerValue || value || (smartStatus && smartStatus.summary_fields.recent_jobs.length) || (tagValues && tagValues.length)">
+    ng-show="status || headerValue || value || valueBindHtml || (smartStatus && smartStatus.summary_fields.recent_jobs.length) || (tagValues && tagValues.length)">
         <div class="at-RowItem-status" ng-if="status">
             <a ng-if="headerLink" ng-href="{{ headerLink }}"
                 aw-tool-tip="{{ statusTip }}" aw-tip-watch="statusTip"
@@ -31,6 +31,9 @@
         </div>
         <div class="at-RowItem-value" ng-class="{'at-RowItem-badge': badge}" ng-if="value && !valueLink"
             ng-bind-html="value">
+        </div>
+        <div class="at-RowItem-value" ng-class="{'at-RowItem-badge': badge}" ng-if="valueBindHtml"
+            ng-bind-html="valueBindHtml">
         </div>
         <aw-smart-status jobs="smartStatus.summary_fields.recent_jobs"
             template-type="smartStatus.type" ng-if="smartStatus">

@@ -7,6 +7,7 @@
 import configurationService from './configuration.service';
 import ConfigurationUtils from './configurationUtils.service';
 import configurationRoute from './configuration.route';
+import licenseRoute from './license.route';
 import configurationController from './configuration.controller.js';
 
 // Import forms
@@ -66,4 +67,5 @@ angular.module('configuration', [])
     .service('ConfigurationService', configurationService)
     .run(['$stateExtender', function($stateExtender) {
         $stateExtender.addState(configurationRoute);
+        $stateExtender.addState(licenseRoute);
     }]);

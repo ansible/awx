@@ -60,9 +60,10 @@ _Added in AWX 1.4_
 
     ?related__search=findme
 
-Note: If you want to provide more than one search terms, please use multiple
+Note: If you want to provide more than one search term, multiple
 search fields with the same key, like `?related__search=foo&related__search=bar`,
-All search terms with the same key will be ORed together.
+will be ORed together. Terms separated by commas, like `?related__search=foo,bar`
+will be ANDed together.
 
 ## Filtering
 

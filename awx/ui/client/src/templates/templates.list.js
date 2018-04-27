@@ -77,12 +77,8 @@ export default ['i18n', function(i18n) {
             columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-3',
 
             submit: {
-                label: i18n._('Launch'),
-                mode: 'all',
-                ngClick: 'submitJob(template)',
-                awToolTip: i18n._('Start a job using this template'),
-                dataPlacement: 'top',
-                ngShow: 'template.summary_fields.user_capabilities.start'
+                // The submit key lets the list generator know that we want to use the
+                // at-launch-template directive
             },
             schedule: {
                 label: i18n._('Schedule'),

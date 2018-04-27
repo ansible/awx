@@ -20,8 +20,8 @@ export default {
         }
     },
     resolve: {
-        inventorySourceData: ['$stateParams', 'SourcesService', function($stateParams, SourcesService) {
-            return SourcesService.get({id: $stateParams.inventory_source_id }).then(response => response.data.results[0]);
+        inventorySource: ['InventorySourceModel', '$stateParams', (InventorySource, $stateParams) => {
+            return new InventorySource('get', $stateParams.inventory_source_id);
         }],
         inventorySourcesOptions: ['InventoriesService', '$stateParams', function(InventoriesService, $stateParams) {
             return InventoriesService.inventorySourcesOptions($stateParams.inventory_id)

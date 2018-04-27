@@ -4,12 +4,13 @@
 # Python
 import copy
 import json
+import operator
 import re
 import six
 import urllib
 
 from jinja2 import Environment, StrictUndefined
-from jinja2.exceptions import UndefinedError
+from jinja2.exceptions import UndefinedError, TemplateSyntaxError
 
 # Django
 from django.core import exceptions as django_exceptions
@@ -42,19 +43,24 @@ from rest_framework import serializers
 
 # AWX
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
+from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS
 from awx.main import utils
 
 
-__all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField', 'SmartFilterField']
+__all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField',
+           'SmartFilterField', 'update_role_parentage_for_instance',
+           'is_implicit_parent']
 
 
 # Provide a (better) custom error message for enum jsonschema validation
 def __enum_validate__(validator, enums, instance, schema):
     if instance not in enums:
         yield jsonschema.exceptions.ValidationError(
-            _("'%s' is not one of ['%s']") % (instance, "', '".join(enums))
+            _("'{value}' is not one of ['{allowed_values}']").format(
+                value=instance, allowed_values="', '".join(enums))
         )
 
 
@@ -180,6 +186,23 @@ def is_implicit_parent(parent_role, child_role):
     return False
 
 
+def update_role_parentage_for_instance(instance):
+    '''update_role_parentage_for_instance
+    updates the parents listing for all the roles
+    of a given instance if they have changed
+    '''
+    for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
+        cur_role = getattr(instance, implicit_role_field.name)
+        new_parents = implicit_role_field._resolve_parent_roles(instance)
+        cur_role.parents.set(new_parents)
+        new_parents_list = list(new_parents)
+        new_parents_list.sort()
+        new_parents_json = json.dumps(new_parents_list)
+        if cur_role.implicit_parents != new_parents_json:
+            cur_role.implicit_parents = new_parents_json
+            cur_role.save()
+
+
 class ImplicitRoleDescriptor(ForwardManyToOneDescriptor):
     pass
 
@@ -273,43 +296,37 @@ class ImplicitRoleField(models.ForeignKey):
         Role_ = utils.get_current_apps().get_model('main', 'Role')
         ContentType_ = utils.get_current_apps().get_model('contenttypes', 'ContentType')
         ct_id = ContentType_.objects.get_for_model(instance).id
+
+        Model = utils.get_current_apps().get_model('main', instance.__class__.__name__)
+        latest_instance = Model.objects.get(pk=instance.pk)
+
         with batch_role_ancestor_rebuilding():
             # Create any missing role objects
             missing_roles = []
-            for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
-                cur_role = getattr(instance, implicit_role_field.name, None)
+            for implicit_role_field in getattr(latest_instance.__class__, '__implicit_role_fields'):
+                cur_role = getattr(latest_instance, implicit_role_field.name, None)
                 if cur_role is None:
                     missing_roles.append(
                         Role_(
                             role_field=implicit_role_field.name,
                             content_type_id=ct_id,
-                            object_id=instance.id
+                            object_id=latest_instance.id
                         )
                     )
+
             if len(missing_roles) > 0:
                 Role_.objects.bulk_create(missing_roles)
                 updates = {}
                 role_ids = []
-                for role in Role_.objects.filter(content_type_id=ct_id, object_id=instance.id):
-                    setattr(instance, role.role_field, role)
+                for role in Role_.objects.filter(content_type_id=ct_id, object_id=latest_instance.id):
+                    setattr(latest_instance, role.role_field, role)
                     updates[role.role_field] = role.id
                     role_ids.append(role.id)
-                type(instance).objects.filter(pk=instance.pk).update(**updates)
+                type(latest_instance).objects.filter(pk=latest_instance.pk).update(**updates)
                 Role.rebuild_role_ancestor_list(role_ids, [])
 
-            # Update parentage if necessary
-            for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
-                cur_role = getattr(instance, implicit_role_field.name)
-                original_parents = set(json.loads(cur_role.implicit_parents))
-                new_parents = implicit_role_field._resolve_parent_roles(instance)
-                cur_role.parents.remove(*list(original_parents - new_parents))
-                cur_role.parents.add(*list(new_parents - original_parents))
-                new_parents_list = list(new_parents)
-                new_parents_list.sort()
-                new_parents_json = json.dumps(new_parents_list)
-                if cur_role.implicit_parents != new_parents_json:
-                    cur_role.implicit_parents = new_parents_json
-                    cur_role.save()
+            update_role_parentage_for_instance(latest_instance)
+            instance.refresh_from_db()
 
 
     def _resolve_parent_roles(self, instance):
@@ -391,7 +408,25 @@ class JSONSchemaField(JSONBField):
             error.message = re.sub(r'\bu(\'|")', r'\1', error.message)
 
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = error.schema['error'] % error.instance
+                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
+            elif error.validator == 'type':
+                expected_type = error.validator_value
+                if expected_type == 'object':
+                    expected_type = 'dict'
+                if error.path:
+                    error.message = _(
+                        '{type} provided in relative path {path}, expected {expected_type}'
+                    ).format(path=list(error.path), type=type(error.instance).__name__,
+                             expected_type=expected_type)
+                else:
+                    error.message = _(
+                        '{type} provided, expected {expected_type}'
+                    ).format(path=list(error.path), type=type(error.instance).__name__,
+                             expected_type=expected_type)
+            elif error.validator == 'additionalProperties' and hasattr(error, 'path'):
+                error.message = _(
+                    'Schema validation error in relative path {path} ({error})'
+                ).format(path=list(error.path), error=error.message)
             errors.append(error)
 
         if errors:
@@ -474,6 +509,9 @@ class CredentialInputField(JSONSchemaField):
         properties = {}
         for field in model_instance.credential_type.inputs.get('fields', []):
             field = field.copy()
+            if field['type'] == 'become_method':
+                field.pop('type')
+                field['choices'] = map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS)
             properties[field['id']] = field
             if field.get('choices', []):
                 field['enum'] = field['choices'][:]
@@ -523,7 +561,7 @@ class CredentialInputField(JSONSchemaField):
             format_checker=self.format_checker
         ).iter_errors(decrypted_values):
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = error.schema['error'] % error.instance
+                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
             if error.validator == 'dependencies':
                 # replace the default error messaging w/ a better i18n string
                 # I wish there was a better way to determine the parameters of
@@ -617,7 +655,7 @@ class CredentialTypeInputField(JSONSchemaField):
                     'items': {
                         'type': 'object',
                         'properties': {
-                            'type': {'enum': ['string', 'boolean']},
+                            'type': {'enum': ['string', 'boolean', 'become_method']},
                             'format': {'enum': ['ssh_private_key']},
                             'choices': {
                                 'type': 'array',
@@ -628,7 +666,7 @@ class CredentialTypeInputField(JSONSchemaField):
                             'id': {
                                 'type': 'string',
                                 'pattern': '^[a-zA-Z_]+[a-zA-Z0-9_]*$',
-                                'error': '%s is an invalid variable name',
+                                'error': '{instance} is an invalid variable name',
                             },
                             'label': {'type': 'string'},
                             'help_text': {'type': 'string'},
@@ -678,10 +716,22 @@ class CredentialTypeInputField(JSONSchemaField):
                 # If no type is specified, default to string
                 field['type'] = 'string'
 
+            if field['type'] == 'become_method':
+                if not model_instance.managed_by_tower:
+                    raise django_exceptions.ValidationError(
+                        _('become_method is a reserved type name'),
+                        code='invalid',
+                        params={'value': value},
+                    )
+                else:
+                    field.pop('type')
+                    field['choices'] = CHOICES_PRIVILEGE_ESCALATION_METHODS
+
             for key in ('choices', 'multiline', 'format', 'secret',):
                 if key in field and field['type'] != 'string':
                     raise django_exceptions.ValidationError(
-                        _('%s not allowed for %s type (%s)' % (key, field['type'], field['id'])),
+                        _('{sub_key} not allowed for {element_type} type ({element_id})'.format(
+                            sub_key=key, element_type=field['type'], element_id=field['id'])),
                         code='invalid',
                         params={'value': value},
                     )
@@ -778,7 +828,15 @@ class CredentialTypeInjectorField(JSONSchemaField):
                     ).from_string(tmpl).render(valid_namespace)
                 except UndefinedError as e:
                     raise django_exceptions.ValidationError(
-                        _('%s uses an undefined field (%s)') % (key, e),
+                        _('{sub_key} uses an undefined field ({error_msg})').format(
+                            sub_key=key, error_msg=e),
+                        code='invalid',
+                        params={'value': value},
+                    )
+                except TemplateSyntaxError as e:
+                    raise django_exceptions.ValidationError(
+                        _('Syntax error rendering template for {sub_key} inside of {type} ({error_msg})').format(
+                            sub_key=key, type=type_, error_msg=e),
                         code='invalid',
                         params={'value': value},
                     )
@@ -801,3 +859,16 @@ class AskForField(models.BooleanField):
                 # self.name will be set by the model metaclass, not this field
                 raise Exception('Corresponding allows_field cannot be accessed until model is initialized.')
         return self._allows_field
+
+
+class OAuth2ClientSecretField(models.CharField):
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        return super(OAuth2ClientSecretField, self).get_db_prep_value(
+            encrypt_value(value), connection, prepared
+        )
+
+    def from_db_value(self, value, expression, connection, context):
+        if value and value.startswith('$encrypted$'):
+            return decrypt_value(get_encryption_key('value', pk=None), value)
+        return value

@@ -80,7 +80,7 @@ class NetworkingEvents(object):
                                      type='device_type',
                                      id='cid',
                                      host_id='host_id'), device)
-        logger.info("Device %s", device)
+        logger.info("Device created %s", device)
         d, _ = Device.objects.get_or_create(topology_id=topology_id, cid=device['cid'], defaults=device)
         d.x = device['x']
         d.y = device['y']
@@ -92,6 +92,7 @@ class NetworkingEvents(object):
                  .update(device_id_seq=device['cid']))
 
     def onDeviceDestroy(self, device, topology_id, client_id):
+        logger.info("Device removed %s", device)
         Device.objects.filter(topology_id=topology_id, cid=device['id']).delete()
 
     def onDeviceMove(self, device, topology_id, client_id):
@@ -101,6 +102,7 @@ class NetworkingEvents(object):
         Device.objects.filter(topology_id=topology_id, cid=device['id']).update(host_id=device['host_id'])
 
     def onDeviceLabelEdit(self, device, topology_id, client_id):
+        logger.debug("Device label edited %s", device)
         Device.objects.filter(topology_id=topology_id, cid=device['id']).update(name=device['name'])
 
     def onInterfaceLabelEdit(self, interface, topology_id, client_id):
@@ -111,6 +113,7 @@ class NetworkingEvents(object):
                   .update(name=interface['name']))
 
     def onLinkLabelEdit(self, link, topology_id, client_id):
+        logger.debug("Link label edited %s", link)
         Link.objects.filter(from_device__topology_id=topology_id, cid=link['id']).update(name=link['name'])
 
     def onInterfaceCreate(self, interface, topology_id, client_id):
@@ -125,6 +128,7 @@ class NetworkingEvents(object):
                .update(interface_id_seq=interface['id']))
 
     def onLinkCreate(self, link, topology_id, client_id):
+        logger.debug("Link created %s", link)
         device_map = dict(Device.objects
                                 .filter(topology_id=topology_id, cid__in=[link['from_device_id'], link['to_device_id']])
                                 .values_list('cid', 'pk'))
@@ -141,6 +145,7 @@ class NetworkingEvents(object):
                  .update(link_id_seq=link['id']))
 
     def onLinkDestroy(self, link, topology_id, client_id):
+        logger.debug("Link deleted %s", link)
         device_map = dict(Device.objects
                                 .filter(topology_id=topology_id, cid__in=[link['from_device_id'], link['to_device_id']])
                                 .values_list('cid', 'pk'))

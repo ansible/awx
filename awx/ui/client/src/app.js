@@ -19,7 +19,6 @@ import credentialTypes from './credential-types/main';
 import organizations from './organizations/main';
 import managementJobs from './management-jobs/main';
 import workflowResults from './workflow-results/main';
-import jobResults from './job-results/main';
 import jobSubmission from './job-submission/main';
 import notifications from './notifications/main';
 import about from './about/main';
@@ -30,7 +29,6 @@ import configuration from './configuration/main';
 import home from './home/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
-import standardOut from './standard-out/main';
 import Templates from './templates/main';
 import teams from './teams/main';
 import users from './users/main';
@@ -45,7 +43,7 @@ import atLibComponents from '~components';
 import atLibModels from '~models';
 import atLibServices from '~services';
 
-import networkUI from '~network-ui/main';
+import networkUI from '~network-ui/network.ui.app';
 
 start.bootstrap(() => {
     angular.bootstrap(document.body, ['awApp']);
@@ -67,7 +65,6 @@ angular
         'gettext',
         'Timezones',
         'lrInfiniteScroll',
-
         about.name,
         access.name,
         license.name,
@@ -86,17 +83,15 @@ angular
         login.name,
         activityStream.name,
         workflowResults.name,
-        jobResults.name,
         jobSubmission.name,
         notifications.name,
-        standardOut.name,
         Templates.name,
         portalMode.name,
         teams.name,
         users.name,
         projects.name,
         scheduler.name,
-        networkUI.tower.name,
+        networkUI.name,
 
         'Utilities',
         'templates',
@@ -118,7 +113,11 @@ angular
         $locationProvider.hashPrefix('');
     }])
     .config(['$logProvider', function($logProvider) {
-        $logProvider.debugEnabled($ENV['ng-debug'] || false);
+        window.debug = function(){
+            $logProvider.debugEnabled(!$logProvider.debugEnabled());
+            return $logProvider.debugEnabled();
+        };
+        window.debug(false);
     }])
     .config(['ngToastProvider', function(ngToastProvider) {
         ngToastProvider.configure({
@@ -221,7 +220,7 @@ angular
             if ($rootScope.removeConfigReady) {
                 $rootScope.removeConfigReady();
             }
-            $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
+            $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function(evt) {
                 var list, id;
                 // initially set row edit indicator for crud pages
                 if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
@@ -242,23 +241,6 @@ angular
                 $rootScope.crumbCache = [];
 
                 $transitions.onStart({}, function(trans) {
-                    // Remove any lingering intervals
-                    // except on jobResults.* states
-                    var jobResultStates = [
-                        'jobResult',
-                        'jobResult.host-summary',
-                        'jobResult.host-event.details',
-                        'jobResult.host-event.json',
-                        'jobResult.host-events',
-                        'jobResult.host-event.stdout'
-                    ];
-                    if ($rootScope.jobResultInterval && !_.includes(jobResultStates, trans.to().name) ) {
-                        window.clearInterval($rootScope.jobResultInterval);
-                    }
-                    if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, trans.to().name) ) {
-                        window.clearInterval($rootScope.jobStdOutInterval);
-                    }
-
                     $rootScope.flashMessage = null;
 
                     $('#form-modal2 .modal-body').empty();
@@ -309,7 +291,7 @@ angular
                         if (trans.to().name && (trans.to().name !== "signIn"  && trans.to().name !== "signOut" && trans.to().name !== "license")) {
                             ConfigService.getConfig().then(function() {
                                 // if not headed to /login or /logout, then check the license
-                                CheckLicense.test(event);
+                                CheckLicense.test(evt);
                             });
                         }
                     }

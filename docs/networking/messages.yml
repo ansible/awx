@@ -1,0 +1,19 @@
+messages:
+    - {msg_type: DeviceMove, fields: [msg_type, sender, id, x, y, previous_x, previous_y]}
+    - {msg_type: DeviceCreate, fields: [msg_type, sender, id, x, y, name, type, host_id]}
+    - {msg_type: DeviceDestroy, fields: [msg_type, sender, id, previous_x, previous_y, previous_name, previous_type, previous_host_id]}
+    - {msg_type: DeviceLabelEdit, fields: [msg_type, sender, id, name, previous_name]}
+    - {msg_type: DeviceSelected, fields: [msg_type, sender, id]}
+    - {msg_type: DeviceUnSelected, fields: [msg_type, sender, id]}
+    - {msg_type: InterfaceCreate, fields: [msg_type, sender, device_id, id, name]}
+    - {msg_type: InterfaceLabelEdit, fields: [msg_type, sender, id, device_id, name, previous_name]}
+    - {msg_type: LinkLabelEdit, fields: [msg_type, sender, id, name, previous_name]}
+    - {msg_type: LinkCreate, fields: [msg_type, id, sender, name, from_device_id, to_device_id, from_interface_id, to_interface_id]}
+    - {msg_type: LinkDestroy, fields: [msg_type, id, sender, name, from_device_id, to_device_id, from_interface_id, to_interface_id]}
+    - {msg_type: LinkSelected, fields: [msg_type, sender, id]}
+    - {msg_type: LinkUnSelected, fields: [msg_type, sender, id]}
+    - {msg_type: MultipleMessage, fields: [msg_type, sender, messages]}
+    - {msg_type: Snapshot, fields: [msg_type, sender, devices, links, order, trace_id]}
+    - {msg_type: id, type: int}
+    - {msg_type: topology_id, type: int}
+    - {msg_type: Topology, fields: [topology_id, name, panX, panY, scale, link_id_seq, device_id_seq]}

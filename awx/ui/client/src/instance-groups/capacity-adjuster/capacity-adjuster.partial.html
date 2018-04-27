@@ -8,6 +8,7 @@
             min="0"
             max="1"
             step="0.1"
+            ng-disabled="{{disabled}}"
             ng-change="vm.slide(state)"/>
         <p>{{max_capacity.label}} {{max_capacity.value}}</p>
     </div>

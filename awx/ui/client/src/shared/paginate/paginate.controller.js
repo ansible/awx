@@ -5,26 +5,8 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
             queryset, path;
 
         $scope.pageSize = pageSize;
-
         $scope.basePageSize = parseInt(pageSize) === 5 ? 5 : 20;
         $scope.maxVisiblePages = $scope.maxVisiblePages ? parseInt($scope.maxVisiblePages) : 10;
-
-        function init() {
-
-            let updatePaginationVariables = function() {
-                $scope.pageSize = calcPageSize();
-                $scope.current = calcCurrent();
-                $scope.last = calcLast();
-                $scope.pageRange = calcPageRange($scope.current, $scope.last);
-                $scope.dataRange = calcDataRange();
-            };
-
-            updatePaginationVariables();
-
-            $scope.$watch('collection', function(){
-                updatePaginationVariables();
-            });
-        }
 
         $scope.filter = function(id){
             let pageSize = Number(id);
@@ -32,18 +14,17 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 .replaceWith("<a id=\"period-dropdown\" class=\"DashboardGraphs-filterDropdownText DashboardGraphs-filterDropdownItems--period\" role=\"button\" data-toggle=\"dropdown\" data-target=\"#\" href=\"/page.html\">"+id+
             "<i class=\"fa fa-angle-down DashboardGraphs-filterIcon\"></i>\n");
 
-            if($scope.querySet){
+            if ($scope.querySet){
                 let origQuerySet = _.cloneDeep($scope.querySet);
                 queryset = _.merge(origQuerySet, { page_size: pageSize });
-            }
-            else {
+            } else {
                 queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page_size: pageSize, page: 1 });
             }
             $scope.toPage();
         };
 
         $scope.toPage = function(page) {
-            if(page === 0 || page > $scope.last) {
+            if (page === 0 || page > $scope.last) {
                 return;
             }
             if (GetBasePath($scope.basePath) || $scope.basePath) {
@@ -52,24 +33,24 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 let interpolator = $interpolate($scope.basePath);
                 path = interpolator({ $stateParams: $stateParams });
             }
-            if($scope.querySet) {
+            if ($scope.querySet) {
                 // merging $scope.querySet seems to destroy our initial reference which
                 // kills the two-way binding here.  To fix that, clone the queryset first
                 // and merge with that object.
                 let origQuerySet = _.cloneDeep($scope.querySet);
                 queryset = _.merge(origQuerySet, { page: page });
 
+            } else {
+                let origStateParams = _.cloneDeep($stateParams[`${$scope.iterator}_search`]);
+                queryset = _.merge(origStateParams, { page: page });
             }
-            else {
-                queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page: page });
-            }
-            if(!$scope.querySet) {
+            if (!$scope.querySet) {
                 $state.go('.', {
                     [$scope.iterator + '_search']: queryset
                 }, {notify: false});
             }
             qs.search(path, queryset).then((res) => {
-                if($scope.querySet) {
+                if ($scope.querySet) {
                     // Update the query set
                     $scope.querySet = queryset;
                 }
@@ -83,10 +64,9 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         }
 
         function calcCurrent() {
-            if($scope.querySet) {
+            if ($scope.querySet) {
                 return parseInt($scope.querySet.page || '1');
-            }
-            else {
+            } else {
                 return parseInt($stateParams[`${$scope.iterator}_search`].page || '1');
             }
         }
@@ -96,23 +76,20 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 maxVisiblePages = parseInt($scope.maxVisiblePages),
                 pagesLeft,
                 pagesRight;
-            if(maxVisiblePages % 2) {
+            if (maxVisiblePages % 2) {
                 // It's an odd number
                 pagesLeft = (maxVisiblePages - 1) / 2;
                 pagesRight = ((maxVisiblePages - 1) / 2) + 1;
-            }
-            else {
+            } else {
                 // Its an even number
                 pagesLeft = pagesRight = maxVisiblePages / 2;
             }
             if (last < maxVisiblePages) {
                 // Don't have enough pages to exceed the max range - just show all of them
                 result = _.range(1, last + 1);
-            }
-            else if(current === last) {
+            } else if (current === last) {
                  result = _.range(last + 1 - maxVisiblePages, last + 1);
-            }
-            else {
+            } else {
                 let topOfRange = current + pagesRight > maxVisiblePages + 1 ? (current + pagesRight < last + 1 ? current + pagesRight : last + 1) : maxVisiblePages + 1;
                 let bottomOfRange = (topOfRange === last + 1) ? last + 1 - maxVisiblePages : (current - pagesLeft > 0 ? current - pagesLeft : 1);
                 result = _.range(bottomOfRange, topOfRange);
@@ -137,6 +114,18 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
             return Number(pageSize) ;
         }
 
-        init();
+        let updatePaginationVariables = function() {
+            $scope.pageSize = calcPageSize();
+            $scope.current = calcCurrent();
+            $scope.last = calcLast();
+            $scope.pageRange = calcPageRange($scope.current, $scope.last);
+            $scope.dataRange = calcDataRange();
+        };
+
+        updatePaginationVariables();
+
+        $scope.$watch('collection', function(){
+            updatePaginationVariables();
+        });
     }
 ];

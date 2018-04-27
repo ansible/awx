@@ -37,25 +37,27 @@ export default
 
                 scope.promptData.extraVars = ToJSON(scope.parseType, scope.promptData.prompts.variables.value, false);
 
-                if(scope.promptData.launchConf.ask_tags_on_launch) {
+                const surveyPasswords = {};
+
+                if (scope.promptData.launchConf.ask_tags_on_launch) {
                     scope.promptData.prompts.tags.value = consolidateTags(scope.promptData.prompts.tags.value, "#job_launch_job_tags");
                 }
 
-                if(scope.promptData.launchConf.ask_skip_tags_on_launch) {
+                if (scope.promptData.launchConf.ask_skip_tags_on_launch) {
                     scope.promptData.prompts.skipTags.value = consolidateTags(scope.promptData.prompts.skipTags.value, "#job_launch_skip_tags");
                 }
 
-                if(scope.promptData.launchConf.survey_enabled){
+                if (scope.promptData.launchConf.survey_enabled){
                     scope.promptData.surveyQuestions.forEach(surveyQuestion => {
                         // grab all survey questions that have answers
-                        if(surveyQuestion.required || (surveyQuestion.required === false && surveyQuestion.model.toString()!=="")) {
-                            if(!scope.promptData.extraVars) {
+                        if (surveyQuestion.required || (surveyQuestion.required === false && surveyQuestion.model.toString()!=="")) {
+                            if (!scope.promptData.extraVars) {
                                 scope.promptData.extraVars = {};
                             }
                             scope.promptData.extraVars[surveyQuestion.variable] = surveyQuestion.model;
                         }
 
-                        if(surveyQuestion.required === false && _.isEmpty(surveyQuestion.model)) {
+                        if (surveyQuestion.required === false && _.isEmpty(surveyQuestion.model)) {
                             switch (surveyQuestion.type) {
                                 // for optional text and text-areas, submit a blank string if min length is 0
                                 // -- this is confusing, for an explanation see:
@@ -69,10 +71,20 @@ export default
                                 break;
                             }
                         }
+
+                        if (surveyQuestion.type === 'password' && surveyQuestion.model.toString()!=="") {
+                            surveyPasswords[surveyQuestion.variable] = '$encrypted$';
+                        }
                     });
                 }
 
-                scope.promptExtraVars = $.isEmptyObject(scope.promptData.extraVars) ? '---' : '---\n' + jsyaml.safeDump(scope.promptData.extraVars);
+                // We don't want to modify the extra vars when we merge them with the survey
+                // password $encrypted$ strings so we clone it
+                const extraVarsClone = _.cloneDeep(scope.promptData.extraVars);
+                // Replace the survey passwords with $encrypted$ to display to the user
+                const cleansedExtraVars = extraVarsClone ? Object.assign(extraVarsClone, surveyPasswords) : {};
+
+                scope.promptExtraVars = $.isEmptyObject(scope.promptData.extraVars) ? '---' : '---\n' + jsyaml.safeDump(cleansedExtraVars);
 
                 ParseTypeChange({
                     scope: scope,

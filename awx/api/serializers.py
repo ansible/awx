@@ -5,6 +5,7 @@
 import copy
 import json
 import logging
+import operator
 import re
 import six
 import urllib
@@ -38,9 +39,14 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # AWX
-from awx.main.constants import SCHEDULEABLE_PROVIDERS, ANSI_SGR_PATTERN
+from awx.main.constants import (
+    SCHEDULEABLE_PROVIDERS,
+    ANSI_SGR_PATTERN,
+    ACTIVE_STATES,
+    TOKEN_CENSOR,
+    CHOICES_PRIVILEGE_ESCALATION_METHODS,
+)
 from awx.main.models import * # noqa
-from awx.main.constants import ACTIVE_STATES
 from awx.main.models.base import NEW_JOB_TYPE_CHOICES
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
@@ -56,11 +62,10 @@ from awx.main.validators import vars_validate_or_raise
 
 from awx.conf.license import feature_enabled
 from awx.api.versioning import reverse, get_request_version
-from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, VerbatimField
+from awx.api.fields import (BooleanNullField, CharNullField, ChoiceNullField,
+                            VerbatimField, DeprecatedCredentialField)
 
 logger = logging.getLogger('awx.api.serializers')
-
-DEPRECATED = 'This resource has been deprecated and will be removed in a future release'
 
 # Fields that should be summarized regardless of object type.
 DEFAULT_SUMMARY_FIELDS = ('id', 'name', 'description')# , 'created_by', 'modified_by')#, 'type')
@@ -942,7 +947,6 @@ class UserSerializer(BaseSerializer):
             roles                  = self.reverse('api:user_roles_list',                  kwargs={'pk': obj.pk}),
             activity_stream        = self.reverse('api:user_activity_stream_list',        kwargs={'pk': obj.pk}),
             access_list            = self.reverse('api:user_access_list',                 kwargs={'pk': obj.pk}),
-            applications           = self.reverse('api:o_auth2_application_list',   kwargs={'pk': obj.pk}),
             tokens                 = self.reverse('api:o_auth2_token_list',         kwargs={'pk': obj.pk}),
             authorized_tokens      = self.reverse('api:user_authorized_token_list', kwargs={'pk': obj.pk}),
             personal_tokens        = self.reverse('api:o_auth2_personal_token_list',   kwargs={'pk': obj.pk}),
@@ -991,7 +995,7 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
         model = OAuth2AccessToken
         fields = (
             '*', '-name', 'description', 'user', 'token', 'refresh_token',
-            'expires', 'scope', 'application',
+            'expires', 'scope', 'application'
         )
         read_only_fields = ('user', 'token', 'expires')
         
@@ -1001,7 +1005,7 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return obj.token
             else:
-                return '*************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''    
         
@@ -1011,12 +1015,13 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return getattr(obj.refresh_token, 'token', '')
             else:
-                return '**************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
 
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        current_user = self.context['request'].user
+        validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
             seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
@@ -1025,7 +1030,7 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
         obj.save()
         if obj.application is not None:
             RefreshToken.objects.create(
-                user=self.context['request'].user,
+                user=current_user,
                 token=generate_token(),
                 application=obj.application,
                 access_token=obj
@@ -1040,13 +1045,14 @@ class OAuth2ApplicationSerializer(BaseSerializer):
     class Meta:
         model = OAuth2Application
         fields = (
-            '*', 'description', 'user', 'client_id', 'client_secret', 'client_type',
-            'redirect_uris',  'authorization_grant_type', 'skip_authorization',
+            '*', 'description', '-user', 'client_id', 'client_secret', 'client_type',
+            'redirect_uris',  'authorization_grant_type', 'skip_authorization', 'organization'
         )
         read_only_fields = ('client_id', 'client_secret')
         read_only_on_update_fields = ('user', 'authorization_grant_type')
         extra_kwargs = {
-            'user': {'allow_null': False, 'required': True},
+            'user': {'allow_null': True, 'required': False},
+            'organization': {'allow_null': False},
             'authorization_grant_type': {'allow_null': False}
         }        
         
@@ -1075,7 +1081,7 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         return ret
 
     def _summary_field_tokens(self, obj):
-        token_list = [{'id': x.pk, 'token': '**************', 'scope': x.scope} for x in obj.oauth2accesstoken_set.all()[:10]]
+        token_list = [{'id': x.pk, 'token': TOKEN_CENSOR, 'scope': x.scope} for x in obj.oauth2accesstoken_set.all()[:10]]
         if has_model_field_prefetched(obj, 'oauth2accesstoken_set'):
             token_count = len(obj.oauth2accesstoken_set.all())
         else:
@@ -1095,6 +1101,7 @@ class OAuth2TokenSerializer(BaseSerializer):
 
     refresh_token = serializers.SerializerMethodField()
     token = serializers.SerializerMethodField()
+    ALLOWED_SCOPES = ['read', 'write']
 
     class Meta:
         model = OAuth2AccessToken
@@ -1103,6 +1110,10 @@ class OAuth2TokenSerializer(BaseSerializer):
             'application', 'expires', 'scope',
         )
         read_only_fields = ('user', 'token', 'expires')
+        extra_kwargs = {
+            'scope': {'allow_null': False, 'required': True},
+            'user': {'allow_null': False, 'required': True}
+        }
 
     def get_modified(self, obj):
         if obj is None:
@@ -1128,7 +1139,7 @@ class OAuth2TokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return obj.token
             else:
-                return '*************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
 
@@ -1138,12 +1149,31 @@ class OAuth2TokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return getattr(obj.refresh_token, 'token', '')
             else:
-                return '**************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
 
+    def _is_valid_scope(self, value):
+        if not value or (not isinstance(value, six.string_types)):
+            return False
+        words = value.split()
+        for word in words:
+            if words.count(word) > 1:
+                return False  # do not allow duplicates
+            if word not in self.ALLOWED_SCOPES:
+                return False
+        return True
+
+    def validate_scope(self, value):
+        if not self._is_valid_scope(value):
+            raise serializers.ValidationError(_(
+                'Must be a simple space-separated string with allowed scopes {}.'
+            ).format(self.ALLOWED_SCOPES))
+        return value
+
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        current_user = self.context['request'].user
+        validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
             seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
@@ -1154,7 +1184,7 @@ class OAuth2TokenSerializer(BaseSerializer):
         obj.save()
         if obj.application is not None:
             RefreshToken.objects.create(
-                user=obj.application.user if obj.application.user else None,
+                user=current_user,
                 token=generate_token(),
                 application=obj.application,
                 access_token=obj
@@ -1176,10 +1206,13 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
     class Meta:
         model = OAuth2AccessToken
         fields = (
-            '*', '-name', 'description', 'user', 'token', 'refresh_token',
+            '*', '-name', 'description', '-user', 'token', 'refresh_token',
             'expires', 'scope', 'application',
         )
         read_only_fields = ('user', 'token', 'expires')
+        extra_kwargs = {
+            'scope': {'allow_null': False, 'required': True}
+        }
         
     def get_token(self, obj):
         request = self.context.get('request', None)
@@ -1187,7 +1220,7 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return obj.token
             else:
-                return '*************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''    
         
@@ -1197,12 +1230,13 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return getattr(obj.refresh_token, 'token', '')
             else:
-                return '**************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
             
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        current_user = self.context['request'].user
+        validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
             seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
@@ -1213,7 +1247,7 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
         obj.save()
         if obj.application is not None:
             RefreshToken.objects.create(
-                user=obj.application.user if obj.application.user else None,
+                user=current_user,
                 token=generate_token(),
                 application=obj.application,
                 access_token=obj
@@ -1233,6 +1267,9 @@ class OAuth2PersonalTokenSerializer(BaseSerializer):
             'application', 'expires', 'scope',
         )
         read_only_fields = ('user', 'token', 'expires', 'application')
+        extra_kwargs = {
+            'scope': {'allow_null': False, 'required': True}
+        }
 
     def get_modified(self, obj):
         if obj is None:
@@ -1258,7 +1295,7 @@ class OAuth2PersonalTokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return obj.token
             else:
-                return '*************'
+                return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
 
@@ -1271,6 +1308,7 @@ class OAuth2PersonalTokenSerializer(BaseSerializer):
         validated_data['expires'] = now() + timedelta(
             seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
         )
+        validated_data['application'] = None
         obj = super(OAuth2PersonalTokenSerializer, self).create(validated_data)
         obj.save()
         return obj
@@ -1293,6 +1331,7 @@ class OrganizationSerializer(BaseSerializer):
             admins      = self.reverse('api:organization_admins_list',         kwargs={'pk': obj.pk}),
             teams       = self.reverse('api:organization_teams_list',          kwargs={'pk': obj.pk}),
             credentials = self.reverse('api:organization_credential_list',     kwargs={'pk': obj.pk}),
+            applications    = self.reverse('api:organization_applications_list',     kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:organization_activity_stream_list', kwargs={'pk': obj.pk}),
             notification_templates = self.reverse('api:organization_notification_templates_list', kwargs={'pk': obj.pk}),
             notification_templates_any = self.reverse('api:organization_notification_templates_any_list', kwargs={'pk': obj.pk}),
@@ -1345,7 +1384,7 @@ class ProjectOptionsSerializer(BaseSerializer):
         if scm_type:
             attrs.pop('local_path', None)
         if 'local_path' in attrs and attrs['local_path'] not in valid_local_paths:
-            errors['local_path'] = 'Invalid path choice.'
+            errors['local_path'] = _('This path is already being used by another manual project.')
 
         if errors:
             raise serializers.ValidationError(errors)
@@ -1923,9 +1962,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
 
 
 class InventorySourceOptionsSerializer(BaseSerializer):
-    credential = models.PositiveIntegerField(
-        blank=True, null=True, default=None,
-        help_text='This resource has been deprecated and will be removed in a future release')
+    credential = DeprecatedCredentialField()
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
@@ -2261,6 +2298,7 @@ class RoleSerializer(BaseSerializer):
 
     class Meta:
         model = Role
+        fields = ('*', '-created', '-modified')
         read_only_fields = ('id', 'role_field', 'description', 'name')
 
     def to_representation(self, obj):
@@ -2276,8 +2314,6 @@ class RoleSerializer(BaseSerializer):
             ret['summary_fields']['resource_type'] = get_type_for_model(content_model)
             ret['summary_fields']['resource_type_display_name'] = content_model._meta.verbose_name.title()
 
-        ret.pop('created')
-        ret.pop('modified')
         return ret
 
     def get_related(self, obj):
@@ -2465,6 +2501,9 @@ class CredentialTypeSerializer(BaseSerializer):
                 field['label'] = _(field['label'])
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
+                if field['type'] == 'become_method':
+                    field.pop('type')
+                    field['choices'] = map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS)
         return value
 
     def filter_field_metadata(self, fields, method):
@@ -2634,7 +2673,9 @@ class CredentialSerializer(BaseSerializer):
             for field in set(data.keys()) - valid_fields - set(credential_type.defined_fields):
                 if data.get(field):
                     raise serializers.ValidationError(
-                        {"detail": _("'%s' is not a valid field for %s") % (field, credential_type.name)}
+                        {"detail": _("'{field_name}' is not a valid field for {credential_type_name}").format(
+                            field_name=field, credential_type_name=credential_type.name
+                        )}
                     )
             value.pop('kind', None)
             return value
@@ -2785,15 +2826,11 @@ class V1JobOptionsSerializer(BaseSerializer):
         model = Credential
         fields = ('*', 'cloud_credential', 'network_credential')
 
-    V1_FIELDS = {
-        'cloud_credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
-        'network_credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
-    }
+    V1_FIELDS = ('cloud_credential', 'network_credential',)
 
     def build_field(self, field_name, info, model_class, nested_depth):
         if field_name in self.V1_FIELDS:
-            return self.build_standard_field(field_name,
-                                             self.V1_FIELDS[field_name])
+            return (DeprecatedCredentialField, {})
         return super(V1JobOptionsSerializer, self).build_field(field_name, info, model_class, nested_depth)
 
 
@@ -2804,15 +2841,11 @@ class LegacyCredentialFields(BaseSerializer):
         model = Credential
         fields = ('*', 'credential', 'vault_credential')
 
-    LEGACY_FIELDS = {
-        'credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
-        'vault_credential': models.PositiveIntegerField(blank=True, null=True, default=None, help_text=DEPRECATED),
-    }
+    LEGACY_FIELDS = ('credential', 'vault_credential',)
 
     def build_field(self, field_name, info, model_class, nested_depth):
         if field_name in self.LEGACY_FIELDS:
-            return self.build_standard_field(field_name,
-                                             self.LEGACY_FIELDS[field_name])
+            return (DeprecatedCredentialField, {})
         return super(LegacyCredentialFields, self).build_field(field_name, info, model_class, nested_depth)
 
 
@@ -3045,6 +3078,11 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         inventory = get_field_from_model_or_attrs('inventory')
         project = get_field_from_model_or_attrs('project')
 
+        if get_field_from_model_or_attrs('host_config_key') and not inventory:
+            raise serializers.ValidationError({'host_config_key': _(
+                "Cannot enable provisioning callback without an inventory set."
+            )})
+
         prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
         if project is None:
             raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
@@ -3059,7 +3097,6 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
     def get_summary_fields(self, obj):
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
         all_creds = []
-        extra_creds = []
         if obj.pk:
             for cred in obj.credentials.all():
                 summarized_cred = {
@@ -3070,20 +3107,31 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
                     'credential_type_id': cred.credential_type_id
                 }
                 all_creds.append(summarized_cred)
-        if self.is_detail_view:
-            for summarized_cred in all_creds:
-                if summarized_cred['kind'] in ('cloud', 'net'):
-                    extra_creds.append(summarized_cred)
-                elif summarized_cred['kind'] == 'ssh':
-                    summary_fields['credential'] = summarized_cred
-                elif summarized_cred['kind'] == 'vault':
-                    summary_fields['vault_credential'] = summarized_cred
+        # Organize credential data into multitude of deprecated fields
+        extra_creds = []
+        vault_credential = None
+        credential = None
+        for summarized_cred in all_creds:
+            if summarized_cred['kind'] in ('cloud', 'net'):
+                extra_creds.append(summarized_cred)
+            elif summarized_cred['kind'] == 'ssh':
+                credential = summarized_cred
+            elif summarized_cred['kind'] == 'vault':
+                vault_credential = summarized_cred
+        # Selectively apply those fields, depending on view deetails
+        if (self.is_detail_view or self.version == 1) and credential:
+            summary_fields['credential'] = credential
+        else:
+            # Credential could be an empty dictionary in this case
+            summary_fields.pop('credential', None)
+        if (self.is_detail_view or self.version == 1) and vault_credential:
+            summary_fields['vault_credential'] = vault_credential
+        else:
+            # vault credential could be empty dictionary
+            summary_fields.pop('vault_credential', None)
         if self.version > 1:
             if self.is_detail_view:
                 summary_fields['extra_credentials'] = extra_creds
-            else:
-                # Credential would be an empty dictionary in this case
-                summary_fields.pop('credential', None)
             summary_fields['credentials'] = all_creds
         return summary_fields
 
@@ -3163,7 +3211,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                 data.setdefault('project', job_template.project.pk)
                 data.setdefault('playbook', job_template.playbook)
             if job_template.credential:
-                data.setdefault('credential', job_template.credential.pk)
+                data.setdefault('credential', job_template.credential)
             data.setdefault('forks', job_template.forks)
             data.setdefault('limit', job_template.limit)
             data.setdefault('verbosity', job_template.verbosity)
@@ -3210,11 +3258,12 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         return summary_fields
 
 
-class JobCancelSerializer(JobSerializer):
+class JobCancelSerializer(BaseSerializer):
 
     can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
+        model = Job
         fields = ('can_cancel',)
 
 
@@ -3669,9 +3718,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
 
 
 class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
-    credential = models.PositiveIntegerField(
-        blank=True, null=True, default=None,
-        help_text='This resource has been deprecated and will be removed in a future release')
+    credential = DeprecatedCredentialField()
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -3762,9 +3809,7 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
 
 
 class WorkflowJobNodeSerializer(LaunchConfigurationBaseSerializer):
-    credential = models.PositiveIntegerField(
-        blank=True, null=True, default=None,
-        help_text='This resource has been deprecated and will be removed in a future release')
+    credential = DeprecatedCredentialField()
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -4505,7 +4550,12 @@ class InstanceSerializer(BaseSerializer):
 
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
-    jobs_running = serializers.SerializerMethodField()
+    jobs_running = serializers.IntegerField(
+        help_text=_('Count of jobs in the running or waiting state that '
+                    'are targeted for this instance'),
+        read_only=True
+    )
+
 
     class Meta:
         model = Instance
@@ -4524,13 +4574,10 @@ class InstanceSerializer(BaseSerializer):
         return obj.consumed_capacity
 
     def get_percent_capacity_remaining(self, obj):
-        if not obj.capacity or obj.consumed_capacity == obj.capacity:
+        if not obj.capacity or obj.consumed_capacity >= obj.capacity:
             return 0.0
         else:
             return float("{0:.2f}".format(((float(obj.capacity) - float(obj.consumed_capacity)) / (float(obj.capacity))) * 100))
-
-    def get_jobs_running(self, obj):
-        return UnifiedJob.objects.filter(execution_node=obj.hostname, status__in=('running', 'waiting',)).count()
 
 
 class InstanceGroupSerializer(BaseSerializer):
@@ -4540,6 +4587,22 @@ class InstanceGroupSerializer(BaseSerializer):
     percent_capacity_remaining = serializers.SerializerMethodField()
     jobs_running = serializers.SerializerMethodField()
     instances = serializers.SerializerMethodField()
+    # NOTE: help_text is duplicated from field definitions, no obvious way of
+    # both defining field details here and also getting the field's help_text
+    policy_instance_percentage = serializers.IntegerField(
+        default=0, min_value=0, max_value=100, required=False, initial=0,
+        help_text=_("Minimum percentage of all instances that will be automatically assigned to "
+                    "this group when new instances come online.")
+    )
+    policy_instance_minimum = serializers.IntegerField(
+        default=0, min_value=0, required=False, initial=0,
+        help_text=_("Static minimum number of Instances that will be automatically assign to "
+                    "this group when new instances come online.")
+    )
+    policy_instance_list = serializers.ListField(
+        child=serializers.CharField(),
+        help_text=_("List of exact-match Instances that will be assigned to this group")
+    )
 
     class Meta:
         model = InstanceGroup
@@ -4555,6 +4618,14 @@ class InstanceGroupSerializer(BaseSerializer):
         if obj.controller_id:
             res['controller'] = self.reverse('api:instance_group_detail', kwargs={'pk': obj.controller_id})
         return res
+
+    def validate_policy_instance_list(self, value):
+        for instance_name in value:
+            if value.count(instance_name) > 1:
+                raise serializers.ValidationError(_('Duplicate entry {}.').format(instance_name))
+            if not Instance.objects.filter(hostname=instance_name).exists():
+                raise serializers.ValidationError(_('{} is not a valid hostname of an existing instance.').format(instance_name))
+        return value
 
     def get_jobs_qs(self):
         # Store running jobs queryset in context, so it will be shared in ListView
@@ -4582,9 +4653,12 @@ class InstanceGroupSerializer(BaseSerializer):
     def get_percent_capacity_remaining(self, obj):
         if not obj.capacity:
             return 0.0
+        consumed = self.get_consumed_capacity(obj)
+        if consumed >= obj.capacity:
+            return 0.0
         else:
             return float("{0:.2f}".format(
-                ((float(obj.capacity) - float(self.get_consumed_capacity(obj))) / (float(obj.capacity))) * 100)
+                ((float(obj.capacity) - float(consumed)) / (float(obj.capacity))) * 100)
             )
 
     def get_jobs_running(self, obj):
@@ -4614,7 +4688,10 @@ class ActivityStreamSerializer(BaseSerializer):
             ('workflow_job_template_node', ('id', 'unified_job_template_id')),
             ('label', ('id', 'name', 'organization_id')),
             ('notification', ('id', 'status', 'notification_type', 'notification_template_id')),
-            ('access_token', ('id', 'token'))
+            ('o_auth2_access_token', ('id', 'user_id', 'description', 'application_id', 'scope')),
+            ('o_auth2_application', ('id', 'name', 'description')),
+            ('credential_type', ('id', 'name', 'description', 'kind', 'managed_by_tower')),
+            ('ad_hoc_command', ('id', 'name', 'status', 'limit'))
         ]
         return field_list
 
@@ -4656,6 +4733,10 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_related(self, obj):
         rel = {}
+        VIEW_NAME_EXCEPTIONS = {
+            'custom_inventory_script': 'inventory_script_detail',
+            'o_auth2_access_token': 'o_auth2_token_detail'
+        }
         if obj.actor is not None:
             rel['actor'] = self.reverse('api:user_detail', kwargs={'pk': obj.actor.pk})
         for fk, __ in self._local_summarizable_fk_fields:
@@ -4669,18 +4750,11 @@ class ActivityStreamSerializer(BaseSerializer):
                     if getattr(thisItem, 'id', None) in id_list:
                         continue
                     id_list.append(getattr(thisItem, 'id', None))
-                    if fk == 'custom_inventory_script':
-                        rel[fk].append(self.reverse('api:inventory_script_detail', kwargs={'pk': thisItem.id}))
-                    elif fk == 'application':
-                        rel[fk].append(self.reverse(
-                            'api:o_auth2_application_detail', kwargs={'pk': thisItem.pk}
-                        ))
-                    elif fk == 'access_token':
-                        rel[fk].append(self.reverse(
-                            'api:o_auth2_token_detail', kwargs={'pk': thisItem.pk}
-                        ))
+                    if fk in VIEW_NAME_EXCEPTIONS:
+                        view_name = VIEW_NAME_EXCEPTIONS[fk]
                     else:
-                        rel[fk].append(self.reverse('api:' + fk + '_detail', kwargs={'pk': thisItem.id}))
+                        view_name = fk + '_detail'
+                    rel[fk].append(self.reverse('api:' + view_name, kwargs={'pk': thisItem.id}))
 
                     if fk == 'schedule':
                         rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url(self.context.get('request'))
@@ -4689,7 +4763,6 @@ class ActivityStreamSerializer(BaseSerializer):
                 'api:setting_singleton_detail',
                 kwargs={'category_slug': obj.setting['category']}
             )
-        rel['access_token'] = '*************'
         return rel
 
     def _get_rel(self, obj, fk):
@@ -4743,7 +4816,6 @@ class ActivityStreamSerializer(BaseSerializer):
                                            last_name = obj.actor.last_name)
         if obj.setting:
             summary_fields['setting'] = [obj.setting]
-        summary_fields['access_token'] = '*************'    
         return summary_fields
 
 

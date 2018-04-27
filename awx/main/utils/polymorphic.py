@@ -1,5 +1,6 @@
 
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 
 
 def build_polymorphic_ctypes_map(cls):
@@ -10,3 +11,7 @@ def build_polymorphic_ctypes_map(cls):
         if ct_model_class and issubclass(ct_model_class, cls):
             mapping[ct.id] = ct_model_class._camel_to_underscore(ct_model_class.__name__)
     return mapping
+
+
+def SET_NULL(collector, field, sub_objs, using):
+    return models.SET_NULL(collector, field, sub_objs.non_polymorphic(), using)

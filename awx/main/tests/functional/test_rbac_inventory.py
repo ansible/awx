@@ -32,23 +32,38 @@ def test_custom_inv_script_access(organization, user):
     assert ou in custom_inv.admin_role
 
 
-@pytest.mark.django_db
-def test_modify_inv_script_foreign_org_admin(org_admin, organization, organization_factory, project):
-    custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test',
-                                                      organization=organization)
+@pytest.fixture
+def custom_inv(organization):
+    return CustomInventoryScript.objects.create(
+        name='test', script='test', description='test', organization=organization)
 
+
+@pytest.mark.django_db
+def test_modify_inv_script_foreign_org_admin(
+        org_admin, organization, organization_factory, project, custom_inv):
     other_org = organization_factory('not-my-org').organization
     access = CustomInventoryScriptAccess(org_admin)
     assert not access.can_change(custom_inv, {'organization': other_org.pk, 'name': 'new-project'})
 
 
 @pytest.mark.django_db
-def test_org_member_inventory_script_permissions(org_member, organization):
-    custom_inv = CustomInventoryScript.objects.create(name='test', script='test', organization=organization)
+def test_org_member_inventory_script_permissions(org_member, organization, custom_inv):
     access = CustomInventoryScriptAccess(org_member)
     assert access.can_read(custom_inv)
     assert not access.can_delete(custom_inv)
     assert not access.can_change(custom_inv, {'name': 'ed-test'})
+
+
+@pytest.mark.django_db
+def test_copy_only_admin(org_member, organization, custom_inv):
+    custom_inv.admin_role.members.add(org_member)
+    access = CustomInventoryScriptAccess(org_member)
+    assert not access.can_copy(custom_inv)
+    assert access.get_user_capabilities(custom_inv, method_list=['edit', 'delete', 'copy']) == {
+        'edit': True,
+        'delete': True,
+        'copy': False
+    }
 
 
 @pytest.mark.django_db

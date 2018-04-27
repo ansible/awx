@@ -47,7 +47,7 @@ export default [
         }
 
         var activeForm = function() {
-            if(!$scope.$parent[formTracker.currentFormName()].$dirty) {
+            if(!_.get($scope.$parent, [formTracker.currentFormName(), '$dirty'])) {
                 systemVm.activeSystemForm = systemVm.dropdownValue;
                 formTracker.setCurrentSystem(systemVm.activeSystemForm);
             } else {

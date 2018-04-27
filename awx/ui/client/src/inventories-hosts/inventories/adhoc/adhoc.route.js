@@ -26,5 +26,14 @@ export default {
     },
     ncyBreadcrumb: {
         label: N_("RUN COMMAND")
+    },
+    resolve: {
+        credentialTypes: ['CredentialTypeModel', (CredentialType) =>
+            new CredentialType('get')
+                .then((model) => {
+                    const credentialTypeRes = model.get();
+                    return credentialTypeRes.results;
+                })
+        ]
     }
 };

@@ -16,7 +16,7 @@ function AtSideNavController ($scope, $window) {
     const vm = this || {};
     const breakpoint = 700;
 
-    vm.isExpanded = false;
+    vm.isExpanded = true;
 
     vm.toggleExpansion = () => {
         vm.isExpanded = !vm.isExpanded;

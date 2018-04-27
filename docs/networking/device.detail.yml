@@ -1,0 +1,19 @@
+finite_state_machine_id: 19
+name: device_detail_fsm
+states:
+- id: 2
+  label: Ready
+  x: 517
+  y: 588
+- id: 3
+  label: Disable
+  x: 770
+  y: 455
+- id: 1
+  label: Start
+  x: 507
+  y: 336
+transitions:
+- from_state: Start
+  label: start
+  to_state: Ready

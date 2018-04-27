@@ -1,0 +1,81 @@
+<!-- todo: styling, css etc. - disposition according to project lib conventions -->
+<div class="at-u-floatRight">
+    <span class="at-Panel-label">plays</span>
+    <span ng-show="!vm.plays" class="at-Panel-headingTitleBadge">...</span>
+    <span ng-show="vm.plays" class="at-Panel-headingTitleBadge">{{ vm.plays }}</span>
+
+    <span class="at-Panel-label">tasks</span>
+    <span ng-show="!vm.tasks" class="at-Panel-headingTitleBadge">...</span>
+    <span ng-show="vm.tasks" class="at-Panel-headingTitleBadge">{{ vm.tasks }}</span>
+
+    <span class="at-Panel-label">hosts</span>
+    <span ng-show="!vm.hosts" class="at-Panel-headingTitleBadge">...</span>
+    <span ng-show="vm.hosts" class="at-Panel-headingTitleBadge">{{ vm.hosts }}</span>
+
+    <span class="at-Panel-label">elapsed</span>
+    <span ng-show="!vm.elapsed" class="at-Panel-headingTitleBadge">...</span>
+    <span ng-show="vm.elapsed" class="at-Panel-headingTitleBadge">
+        {{ vm.elapsed * 1000 | duration: "hh:mm:ss" }}
+    </span>
+
+    <a ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
+        <button class="btn at-Input-button at-u-noBorder"
+            aw-tool-tip="{{ standardOutTooltip }}"
+            data-tip-watch="standardOutTooltip"
+            data-placement="top">
+            <i class="fa fa-download"></i>
+        </button>
+    </a>
+
+    <button class="btn at-Input-button at-u-noBorder"
+        aw-tool-tip="{{ vm.toggleStdoutFullscreenTooltip }}"
+        data-tip-watch="vm.toggleStdoutFullscreenTooltip"
+        data-placement="top"
+        ng-class="{'at-Input-button--active': vm.fullscreen.isFullscreen}"
+        ng-click="vm.toggleFullscreen()">
+        <i class="fa fa-arrows-alt"></i>
+    </button>
+</div>
+
+<div class="HostStatusBar">
+    <div class="HostStatusBar-ok"
+        ng-show="!vm.running"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.ok }}"
+        data-tip-watch="vm.tooltips.ok">
+    </div>
+    <div class="HostStatusBar-skipped"
+        ng-show="!vm.running"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.skipped }}"
+        data-tip-watch="vm.tooltips.skipped">
+    </div>
+    <div class="HostStatusBar-changed"
+        ng-show="!vm.running"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.changed }}"
+        data-tip-watch="vm.tooltips.changed">
+    </div>
+    <div class="HostStatusBar-failures"
+        ng-show="!vm.running"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.failures }}"
+        data-tip-watch="vm.tooltips.failures">
+    </div>
+    <div class="HostStatusBar-dark"
+        ng-show="!vm.running"
+        data-placement="top"
+        aw-tool-tip="{{ vm.tooltips.dark }}"
+        data-tip-watch="vm.tooltips.dark">
+    </div>
+    <div class="HostStatusBar-noData"
+        ng-show="vm.running"
+        data-placement="top"
+        aw-tool-tip="{{:: vm.tooltips.running }}">
+    </div>
+    <div class="HostStatusBar-noData"
+        ng-show="!vm.running && !vm.statsAreAvailable"
+        data-placement="top"
+        aw-tool-tip="{{:: vm.tooltips.unavailable }}">
+    </div>
+</div>

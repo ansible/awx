@@ -538,7 +538,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         for virtualenv in (
             self.job_template.custom_virtualenv if self.job_template else None,
             self.project.custom_virtualenv,
-            self.project.organization.custom_virtualenv
+            self.project.organization.custom_virtualenv if self.project.organization else None
         ):
             if virtualenv:
                 return virtualenv

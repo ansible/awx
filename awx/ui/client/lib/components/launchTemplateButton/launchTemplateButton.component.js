@@ -6,22 +6,24 @@ const atLaunchTemplate = {
         template: '<'
     },
     controller: ['JobTemplateModel', 'WorkflowJobTemplateModel', 'PromptService', '$state',
-        'ProcessErrors', '$scope', 'TemplatesStrings', 'Alert', atLaunchTemplateCtrl],
+        'ComponentsStrings', 'ProcessErrors', '$scope', 'TemplatesStrings', 'Alert',
+        atLaunchTemplateCtrl],
     controllerAs: 'vm'
 };
 
 function atLaunchTemplateCtrl (
     JobTemplate, WorkflowTemplate, PromptService, $state,
-    ProcessErrors, $scope, strings, Alert
+    componentsStrings, ProcessErrors, $scope, templatesStrings, Alert
 ) {
     const vm = this;
     const jobTemplate = new JobTemplate();
     const workflowTemplate = new WorkflowTemplate();
+    vm.strings = componentsStrings;
 
     const createErrorHandler = (path, action) =>
         ({ data, status }) => {
-            const hdr = strings.get('error.HEADER');
-            const msg = strings.get('error.CALL', { path, action, status });
+            const hdr = templatesStrings.get('error.HEADER');
+            const msg = templatesStrings.get('error.CALL', { path, action, status });
             ProcessErrors($scope, data, status, null, { hdr, msg });
         };
 
@@ -39,7 +41,7 @@ function atLaunchTemplateCtrl (
                         selectedJobTemplate
                             .postLaunch({ id: vm.template.id })
                             .then(({ data }) => {
-                                $state.go('jobResult', { id: data.job }, { reload: true });
+                                $state.go('jobz', { id: data.job, type: 'playbook' }, { reload: true });
                             });
                     } else {
                         const promptData = {
@@ -51,7 +53,7 @@ function atLaunchTemplateCtrl (
                                 launchConf: launchData.data,
                                 launchOptions: launchOptions.data
                             }),
-                            triggerModalOpen: true,
+                            triggerModalOpen: true
                         };
 
                         if (launchData.data.survey_enabled) {
@@ -111,7 +113,7 @@ function atLaunchTemplateCtrl (
                     }
                 });
         } else {
-            Alert(strings.get('error.UNKNOWN'), strings.get('alert.UNKNOWN_LAUNCH'));
+            Alert(templatesStrings.get('error.UNKNOWN'), templatesStrings.get('alert.UNKNOWN_LAUNCH'));
         }
     };
 
@@ -136,7 +138,7 @@ function atLaunchTemplateCtrl (
                 id: vm.promptData.template,
                 launchData: jobLaunchData
             }).then((launchRes) => {
-                $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
+                $state.go('jobz', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
             }).catch(createErrorHandler('launch job template', 'POST'));
         } else if (vm.promptData.templateType === 'workflow_job_template') {
             workflowTemplate.create().postLaunch({

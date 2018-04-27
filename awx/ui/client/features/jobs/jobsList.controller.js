@@ -29,6 +29,9 @@ function ListJobsController (
     const iterator = 'job';
     const key = 'job_dataset';
 
+    let launchModalOpen = false;
+    let refreshAfterLaunchClose = false;
+
     $scope.list = { iterator, name };
     $scope.collection = { iterator, basePath: 'unified_jobs' };
     $scope[key] = Dataset.data;
@@ -38,11 +41,25 @@ function ListJobsController (
         $scope[name] = dataset.results;
     });
     $scope.$on('ws-jobs', () => {
-        qs.search(unifiedJob.path, $state.params.job_search)
-            .then(({ data }) => {
-                $scope.$emit('updateDataset', data);
-            });
+        if (!launchModalOpen) {
+            refreshJobs();
+        } else {
+            refreshAfterLaunchClose = true;
+        }
     });
+
+    $scope.$on('launchModalOpen', (evt, isOpen) => {
+        evt.stopPropagation();
+        if (!isOpen && refreshAfterLaunchClose) {
+            refreshAfterLaunchClose = false;
+            refreshJobs();
+        }
+        launchModalOpen = isOpen;
+    });
+
+    if ($state.includes('instanceGroups')) {
+        vm.emptyListReason = strings.get('list.NO_RUNNING');
+    }
 
     vm.jobTypes = mapChoices(unifiedJob
         .options('actions.GET.type.choices'));
@@ -52,19 +69,19 @@ function ListJobsController (
 
         switch (type) {
             case 'job':
-                link = `/#/jobs/${id}`;
+                link = `/#/jobz/playbook/${id}`;
                 break;
             case 'ad_hoc_command':
-                link = `/#/ad_hoc_commands/${id}`;
+                link = `/#/jobz/command/${id}`;
                 break;
             case 'system_job':
-                link = `/#/management_jobs/${id}`;
+                link = `/#/jobz/system/${id}`;
                 break;
             case 'project_update':
-                link = `/#/scm_update/${id}`;
+                link = `/#/jobz/project/${id}`;
                 break;
             case 'inventory_update':
-                link = `/#/inventory_sync/${id}`;
+                link = `/#/jobz/inventory/${id}`;
                 break;
             case 'workflow_job':
                 link = `/#/workflows/${id}`;
@@ -118,6 +135,55 @@ function ListJobsController (
             actionText: 'DELETE'
         });
     };
+
+    vm.cancelJob = (job) => {
+        const action = () => {
+            $('#prompt-modal').modal('hide');
+            Wait('start');
+            Rest.setUrl(job.related.cancel);
+            Rest.post()
+                .then(() => {
+                    let reloadListStateParams = null;
+
+                    if ($scope.jobs.length === 1 && $state.params.job_search &&
+                    !_.isEmpty($state.params.job_search.page) &&
+                    $state.params.job_search.page !== '1') {
+                        const page = `${(parseInt(reloadListStateParams
+                            .job_search.page, 10) - 1)}`;
+                        reloadListStateParams = _.cloneDeep($state.params);
+                        reloadListStateParams.job_search.page = page;
+                    }
+
+                    $state.go('.', reloadListStateParams, { reload: true });
+                })
+                .catch(({ data, status }) => {
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: strings.get('error.HEADER'),
+                        msg: strings.get('error.CALL', { path: `${job.url}`, status })
+                    });
+                })
+                .finally(() => {
+                    Wait('stop');
+                });
+        };
+
+        const deleteModalBody = `<div class="Prompt-bodyQuery">${strings.get('cancelJob.SUBMIT_REQUEST')}</div>`;
+
+        Prompt({
+            hdr: strings.get('cancelJob.HEADER'),
+            resourceName: $filter('sanitize')(job.name),
+            body: deleteModalBody,
+            action,
+            actionText: strings.get('CANCEL')
+        });
+    };
+
+    function refreshJobs () {
+        qs.search(unifiedJob.path, $state.params.job_search)
+            .then(({ data }) => {
+                $scope.$emit('updateDataset', data);
+            });
+    }
 }
 
 ListJobsController.$inject = [

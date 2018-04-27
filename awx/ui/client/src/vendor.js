@@ -61,6 +61,8 @@ require('ng-toast-provider');
 require('ng-toast-directives');
 require('ng-toast');
 require('lr-infinite-scroll');
+require('codemirror/mode/yaml/yaml');
+require('codemirror/mode/javascript/javascript');
 
 // Network Visualization
 require('angular-mousewheel');

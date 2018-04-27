@@ -5,7 +5,6 @@ import networkDetailsDirective from './network-details/main';
 import networkZoomWidget from './zoom-widget/main';
 
 //console.log = function () { };
-var angular = require('angular');
 var NetworkUIController = require('./network.ui.controller.js');
 var cursor = require('./cursor.directive.js');
 var router = require('./router.directive.js');
@@ -21,7 +20,8 @@ var debug = require('./debug.directive.js');
 var test_results = require('./test_results.directive.js');
 var awxNetworkUI = require('./network.ui.directive.js');
 
-var networkUI = angular.module('networkUI', [
+export default
+    angular.module('networkUI', [
         'monospaced.mousewheel',
         atFeaturesNetworking,
         networkDetailsDirective.name,
@@ -41,5 +41,3 @@ var networkUI = angular.module('networkUI', [
     .directive('awxNetInventoryToolbox', inventoryToolbox.inventoryToolbox)
     .directive('awxNetTestResults', test_results.test_results)
     .directive('awxNetworkUi', awxNetworkUI.awxNetworkUI);
-
-exports.networkUI = networkUI;

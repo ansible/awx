@@ -1,6 +1,6 @@
 const templateUrl = require('~components/layout/layout.partial.html');
 
-function AtLayoutController ($scope, strings, $transitions) {
+function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions) {
     const vm = this || {};
 
     $transitions.onSuccess({}, (transition) => {
@@ -9,10 +9,14 @@ function AtLayoutController ($scope, strings, $transitions) {
 
     $scope.$watch('$root.current_user', (val) => {
         vm.isLoggedIn = val && val.username;
-        if (val) {
+        if (!_.isEmpty(val)) {
             vm.isSuperUser = $scope.$root.user_is_superuser || $scope.$root.user_is_system_auditor;
             vm.currentUsername = val.username;
             vm.currentUserId = val.id;
+
+            if (!vm.isSuperUser) {
+                checkOrgAdmin();
+            }
         }
     });
 
@@ -32,9 +36,27 @@ function AtLayoutController ($scope, strings, $transitions) {
             return strings.get(string);
         }
     };
+
+    function checkOrgAdmin () {
+        const usersPath = `/api/v2/users/${vm.currentUserId}/admin_of_organizations/`;
+        $http.get(usersPath)
+            .then(({ data }) => {
+                if (data.count > 0) {
+                    vm.isOrgAdmin = true;
+                } else {
+                    vm.isOrgAdmin = false;
+                }
+            })
+            .catch(({ data, status }) => {
+                ProcessErrors(null, data, status, null, {
+                    hdr: strings.get('error.HEADER'),
+                    msg: strings.get('error.CALL', { path: usersPath, action: 'GET', status })
+                });
+            });
+    }
 }
 
-AtLayoutController.$inject = ['$scope', 'ComponentsStrings', '$transitions'];
+AtLayoutController.$inject = ['$scope', '$http', 'ComponentsStrings', 'ProcessErrors', '$transitions'];
 
 function atLayout () {
     return {

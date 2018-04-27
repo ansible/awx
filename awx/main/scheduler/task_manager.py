@@ -153,8 +153,7 @@ class TaskManager():
                 queue_name = queue_name[1 if len(queue_name) > 1 else 0]
                 queues[queue_name] = active_tasks
         else:
-            if not hasattr(settings, 'CELERY_UNIT_TEST'):
-                return (None, None)
+            return (None, None)
 
         return (active_task_queues, queues)
 
@@ -260,7 +259,8 @@ class TaskManager():
         else:
             if type(task) is WorkflowJob:
                 task.status = 'running'
-            if not task.supports_isolation() and rampart_group.controller_id:
+                logger.info('Transitioning %s to running status.', task.log_format)
+            elif not task.supports_isolation() and rampart_group.controller_id:
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
                 logger.info('Submitting isolated %s to queue %s via %s.',
@@ -272,17 +272,22 @@ class TaskManager():
                 task.celery_task_id = str(uuid.uuid4())
                 task.save()
 
-            self.consume_capacity(task, rampart_group.name)
+            if rampart_group is not None:
+                self.consume_capacity(task, rampart_group.name)
 
         def post_commit():
             task.websocket_emit_status(task.status)
             if task.status != 'failed':
-                task.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler, queue=rampart_group.name)
+                if rampart_group is not None:
+                    actual_queue=rampart_group.name
+                else:
+                    actual_queue=settings.CELERY_DEFAULT_QUEUE
+                task.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler, queue=actual_queue)
 
         connection.on_commit(post_commit)
 
     def process_running_tasks(self, running_tasks):
-        map(lambda task: self.graph[task.instance_group.name]['graph'].add_job(task), running_tasks)
+        map(lambda task: self.graph[task.instance_group.name]['graph'].add_job(task) if task.instance_group else None, running_tasks)
 
     def create_project_update(self, task):
         project_task = Project.objects.get(id=task.project_id).create_project_update(
@@ -448,6 +453,9 @@ class TaskManager():
                 continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
+            if isinstance(task, WorkflowJob):
+                self.start_task(task, None, task.get_jobs_fail_chain())
+                continue
             for rampart_group in preferred_instance_groups:
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name)
                 if remaining_capacity <= 0:

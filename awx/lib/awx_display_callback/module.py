@@ -28,6 +28,7 @@ import uuid
 from copy import copy
 
 # Ansible
+from ansible import constants as C
 from ansible.plugins.callback import CallbackBase
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule
 
@@ -126,16 +127,19 @@ class BaseCallbackModule(CallbackBase):
             task=(task.name or task.action),
             task_uuid=str(task._uuid),
             task_action=task.action,
+            task_args='',
         )
         try:
             task_ctx['task_path'] = task.get_path()
         except AttributeError:
             pass
-        if task.no_log:
-            task_ctx['task_args'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
-        else:
-            task_args = ', '.join(('%s=%s' % a for a in task.args.items()))
-            task_ctx['task_args'] = task_args
+
+        if C.DISPLAY_ARGS_TO_STDOUT:
+            if task.no_log:
+                task_ctx['task_args'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+            else:
+                task_args = ', '.join(('%s=%s' % a for a in task.args.items()))
+                task_ctx['task_args'] = task_args
         if getattr(task, '_role', None):
             task_role = task._role._role_name
         else:
@@ -274,15 +278,14 @@ class BaseCallbackModule(CallbackBase):
         with self.capture_event_data('playbook_on_no_hosts_remaining'):
             super(BaseCallbackModule, self).v2_playbook_on_no_hosts_remaining()
 
-    def v2_playbook_on_notify(self, result, handler):
-        # NOTE: Not used by Ansible 2.x.
+    def v2_playbook_on_notify(self, handler, host):
+        # NOTE: Not used by Ansible < 2.5.
         event_data = dict(
-            host=result._host.get_name(),
-            task=result._task,
-            handler=handler,
+            host=host.get_name(),
+            handler=handler.get_name(),
         )
         with self.capture_event_data('playbook_on_notify', **event_data):
-            super(BaseCallbackModule, self).v2_playbook_on_notify(result, handler)
+            super(BaseCallbackModule, self).v2_playbook_on_notify(handler, host)
 
     '''
     ansible_stats is, retoractively, added in 2.2
@@ -315,6 +318,14 @@ class BaseCallbackModule(CallbackBase):
         with self.capture_event_data('playbook_on_stats', **event_data):
             super(BaseCallbackModule, self).v2_playbook_on_stats(stats)
 
+    @staticmethod
+    def _get_event_loop(task):
+        if hasattr(task, 'loop_with'):  # Ansible >=2.5
+            return task.loop_with
+        elif hasattr(task, 'loop'):  # Ansible <2.4
+            return task.loop
+        return None
+
     def v2_runner_on_ok(self, result):
         # FIXME: Display detailed results or not based on verbosity.
 
@@ -328,7 +339,7 @@ class BaseCallbackModule(CallbackBase):
             remote_addr=result._host.address,
             task=result._task,
             res=result._result,
-            event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
+            event_loop=self._get_event_loop(result._task),
         )
         with self.capture_event_data('runner_on_ok', **event_data):
             super(BaseCallbackModule, self).v2_runner_on_ok(result)
@@ -341,7 +352,7 @@ class BaseCallbackModule(CallbackBase):
             res=result._result,
             task=result._task,
             ignore_errors=ignore_errors,
-            event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
+            event_loop=self._get_event_loop(result._task),
         )
         with self.capture_event_data('runner_on_failed', **event_data):
             super(BaseCallbackModule, self).v2_runner_on_failed(result, ignore_errors)
@@ -351,7 +362,7 @@ class BaseCallbackModule(CallbackBase):
             host=result._host.get_name(),
             remote_addr=result._host.address,
             task=result._task,
-            event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
+            event_loop=self._get_event_loop(result._task),
         )
         with self.capture_event_data('runner_on_skipped', **event_data):
             super(BaseCallbackModule, self).v2_runner_on_skipped(result)

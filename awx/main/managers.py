@@ -8,6 +8,7 @@ from django.db import models
 from django.conf import settings
 
 from awx.main.utils.filters import SmartFilter
+from awx.main.utils.pglock import advisory_lock
 
 ___all__ = ['HostManager', 'InstanceManager', 'InstanceGroupManager']
 
@@ -86,6 +87,24 @@ class InstanceManager(models.Manager):
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
+    def register(self, uuid=None, hostname=None):
+        if not uuid:
+            uuid = settings.SYSTEM_UUID
+        if not hostname:
+            hostname = settings.CLUSTER_HOST_ID
+        with advisory_lock('instance_registration_%s' % hostname):
+            instance = self.filter(hostname=hostname)
+            if instance.exists():
+                return (False, instance[0])
+            instance = self.create(uuid=uuid, hostname=hostname)
+        return (True, instance)
+
+    def get_or_register(self):
+        if settings.AWX_AUTO_DEPROVISION_INSTANCES:
+            return self.register()
+        else:
+            return (False, self.me())
+
     def active_count(self):
         """Return count of active Tower nodes for licensing."""
         return self.all().count()
@@ -93,6 +112,9 @@ class InstanceManager(models.Manager):
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
+
+    def all_non_isolated(self):
+        return self.exclude(rampart_groups__controller__isnull=False)
 
 
 class InstanceGroupManager(models.Manager):
@@ -156,8 +178,6 @@ class InstanceGroupManager(models.Manager):
             if t.status == 'waiting' or not t.execution_node:
                 # Subtract capacity from any peer groups that share instances
                 if not t.instance_group:
-                    logger.warning('Excluded %s from capacity algorithm '
-                                   '(missing instance_group).', t.log_format)
                     impacted_groups = []
                 elif t.instance_group.name not in ig_ig_mapping:
                     # Waiting job in group with 0 capacity has no collateral impact

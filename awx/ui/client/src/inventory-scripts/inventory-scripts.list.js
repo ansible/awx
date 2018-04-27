@@ -63,7 +63,7 @@ export default ['i18n', function(i18n){
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Copy inventory script'),
                 dataPlacement: 'top',
-                ngShow: 'inventory_script.summary_fields.user_capabilities.edit'
+                ngShow: 'inventory_script.summary_fields.user_capabilities.copy'
             },
             view: {
                 ngClick: "editCustomInv(inventory_script.id)",

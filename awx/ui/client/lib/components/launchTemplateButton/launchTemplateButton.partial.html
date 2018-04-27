@@ -1,7 +1,9 @@
 <div class="at-LaunchTemplate">
     <button class="at-LaunchTemplate--button"
-            ng-click="vm.startLaunchTemplate()">
+            ng-click="vm.startLaunchTemplate()"
+            aw-tool-tip="{{:: vm.strings.get('launchTemplate.DEFAULT') }}"
+            data-placement="top">
             <i class="icon-launch"></i>
     </button>
-    <prompt prompt-data="vm.promptData" on-finish="vm.launchTemplateWithPrompts()"></launch>
+    <prompt prompt-data="vm.promptData" on-finish="vm.launchTemplateWithPrompts()"></prompt>
 </div>

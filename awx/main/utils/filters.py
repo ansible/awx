@@ -19,6 +19,8 @@ __all__ = ['SmartFilter']
 
 
 def string_to_type(t):
+    if t == u'null':
+        return None
     if t == u'true':
         return True
     elif t == u'false':

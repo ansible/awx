@@ -85,6 +85,10 @@ class Instance(models.Model):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "awx"
 
+    @property
+    def jobs_running(self):
+        return UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting',)).count()
+
     def is_lost(self, ref_time=None, isolated=False):
         if ref_time is None:
             ref_time = now()
@@ -188,9 +192,8 @@ class JobOrigin(models.Model):
 
 @receiver(post_save, sender=InstanceGroup)
 def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
-    if created:
-        from awx.main.tasks import apply_cluster_membership_policies
-        connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+    from awx.main.tasks import apply_cluster_membership_policies
+    connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
 
 
 @receiver(post_save, sender=Instance)

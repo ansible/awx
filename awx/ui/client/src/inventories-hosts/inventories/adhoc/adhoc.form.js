@@ -64,6 +64,7 @@ export default ['i18n', function(i18n) {
                 sourceModel: 'credential',
                 sourceField: 'name',
                 class: 'squeeze',
+                ngClick: 'lookupCredential()',
                 awPopOver: '<p>Select the credential you want to use when ' +
                     'accessing the remote hosts to run the command. ' +
                     'Choose the credential containing ' +

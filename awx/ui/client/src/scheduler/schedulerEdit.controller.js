@@ -1,11 +1,16 @@
 export default ['$filter', '$state', '$stateParams', 'Wait', '$scope', 'moment',
 '$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
 'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
+'WorkflowJobTemplateModel', 'TemplatesStrings',
 function($filter, $state, $stateParams, Wait, $scope, moment,
     $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
-    GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI) {
+    GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI,
+    WorkflowJobTemplate, TemplatesStrings
+) {
 
     let schedule, scheduler, scheduleCredentials = [];
+
+    $scope.preventCredsWithPasswords = true;
 
     // initial end @ midnight values
     $scope.schedulerEndHour = "00";
@@ -15,6 +20,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
     $scope.isEdit = true;
     $scope.hideForm = true;
     $scope.parseType = 'yaml';
+
+    $scope.strings = TemplatesStrings;
 
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
@@ -124,10 +131,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
             $scope.extraVars = (data.extra_data === '' || _.isEmpty(data.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(data.extra_data);
 
-            if(schedule.extra_data.hasOwnProperty('granularity')){
-                $scope.isFactCleanup = true;
-            }
-            if (schedule.extra_data.hasOwnProperty('days')){
+            if (_.has(schedule, 'summary_fields.unified_job_template.unified_job_type') &&
+                schedule.summary_fields.unified_job_template.unified_job_type === 'system_job'){
                 $scope.cleanupJob = true;
             }
 
@@ -139,8 +144,13 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             $http.get('/api/v2/schedules/zoneinfo/').then(({data}) => {
                 scheduler.scope.timeZones = data;
                 scheduler.scope.schedulerTimeZone = _.find(data, function(x) {
-                    let tz = $scope.schedule_obj.rrule.match(/TZID=\s*(.*?)\s*:/)[1];
-                    return x.name === tz;
+                    let tz = $scope.schedule_obj.rrule.match(/TZID=\s*(.*?)\s*:/);
+                    if (_.has(tz, '1')) {
+                        return x.name === tz[1];
+                    } else {
+                        return false;
+                    }
+
                 });
             });
             scheduler.inject('form-container', false);
@@ -193,57 +203,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             scheduler.setRRule(schedule.rrule);
             scheduler.setName(schedule.name);
 
-            if($scope.isFactCleanup || $scope.cleanupJob){
-                var a,b, prompt_for_days,
-                    keep_unit,
-                    granularity,
-                    granularity_keep_unit;
-
-                if($scope.cleanupJob){
-                    $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
-                }
-                else if($scope.isFactCleanup){
-                    $scope.keep_unit_choices = [{
-                        "label" : "Days",
-                        "value" : "d"
-                    },
-                    {
-                        "label": "Weeks",
-                        "value" : "w"
-                    },
-                    {
-                        "label" : "Years",
-                        "value" : "y"
-                    }];
-                    $scope.granularity_keep_unit_choices =  [{
-                        "label" : "Days",
-                        "value" : "d"
-                    },
-                    {
-                        "label": "Weeks",
-                        "value" : "w"
-                    },
-                    {
-                        "label" : "Years",
-                        "value" : "y"
-                    }];
-                    // the API returns something like 20w or 1y
-                    a = schedule.extra_data.older_than; // "20y"
-                    b = schedule.extra_data.granularity; // "1w"
-                    prompt_for_days = Number(_.initial(a,1).join('')); // 20
-                    keep_unit = _.last(a); // "y"
-                    granularity = Number(_.initial(b,1).join('')); // 1
-                    granularity_keep_unit = _.last(b); // "w"
-
-                    $scope.keep_amount = prompt_for_days;
-                    $scope.granularity_keep_amount = granularity;
-                    $scope.keep_unit = _.find($scope.keep_unit_choices, function(i){
-                        return i.value === keep_unit;
-                    });
-                    $scope.granularity_keep_unit =_.find($scope.granularity_keep_unit_choices, function(i){
-                        return i.value === granularity_keep_unit;
-                    });
-                }
+            if ($scope.cleanupJob){
+                $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
             }
 
             if ($state.current.name === 'jobTemplateSchedules.edit'){
@@ -269,9 +230,9 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
                             $scope.$watchGroup(promptValuesToWatch, function() {
                                 let missingPromptValue = false;
-                                if($scope.missingSurveyValue) {
+                                if ($scope.missingSurveyValue) {
                                     missingPromptValue = true;
-                                } else if(!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id) {
+                                } else if (!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id) {
                                     missingPromptValue = true;
                                 }
                                 $scope.promptModalMissingReqFields = missingPromptValue;
@@ -289,8 +250,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         const credentialHasScheduleOverride = (templateDefaultCred) => {
                             let credentialHasOverride = false;
                             scheduleCredentials.forEach((scheduleCred) => {
-                                if(templateDefaultCred.credential_type === scheduleCred.credential_type) {
-                                    if(
+                                if (templateDefaultCred.credential_type === scheduleCred.credential_type) {
+                                    if (
                                         (!templateDefaultCred.vault_id && !scheduleCred.inputs.vault_id) ||
                                         (templateDefaultCred.vault_id && scheduleCred.inputs.vault_id && templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
                                     ) {
@@ -302,9 +263,9 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                             return credentialHasOverride;
                         };
 
-                        if(_.has(launchConf, 'defaults.credentials')) {
+                        if (_.has(launchConf, 'defaults.credentials')) {
                             launchConf.defaults.credentials.forEach((defaultCred) => {
-                                if(!credentialHasScheduleOverride(defaultCred)) {
+                                if (!credentialHasScheduleOverride(defaultCred)) {
                                     defaultCredsWithoutOverrides.push(defaultCred);
                                 }
                             });
@@ -312,11 +273,11 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
                         prompts.credentials.value = defaultCredsWithoutOverrides.concat(scheduleCredentials);
 
-                        if(!launchConf.ask_variables_on_launch) {
+                        if (!launchConf.ask_variables_on_launch) {
                             $scope.noVars = true;
                         }
 
-                        if(!launchConf.survey_enabled &&
+                        if (!launchConf.survey_enabled &&
                             !launchConf.ask_inventory_on_launch &&
                             !launchConf.ask_credential_on_launch &&
                             !launchConf.ask_verbosity_on_launch &&
@@ -338,11 +299,11 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                             // Promptable variables will happen in the schedule form
                             launchConf.ignore_ask_variables = true;
 
-                            if(launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has(data, 'summary_fields.inventory')) {
+                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has(data, 'summary_fields.inventory')) {
                                 $scope.promptModalMissingReqFields = true;
                             }
 
-                            if(responses[1].data.survey_enabled) {
+                            if (responses[1].data.survey_enabled) {
                                 // go out and get the survey questions
                                 jobTemplate.getSurveyQuestions(ParentObject.id)
                                     .then((surveyQuestionRes) => {
@@ -363,6 +324,74 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                                             field_id: 'SchedulerForm-extraVars',
                                             readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
                                         });
+
+                                        $scope.promptData = {
+                                            launchConf: launchConf,
+                                            launchOptions: launchOptions,
+                                            prompts: prompts,
+                                            surveyQuestions: surveyQuestionRes.data.spec,
+                                            template: ParentObject.id
+                                        };
+
+                                        $scope.$watch('promptData.surveyQuestions', () => {
+                                            let missingSurveyValue = false;
+                                            _.each($scope.promptData.surveyQuestions, (question) => {
+                                                if (question.required && (Empty(question.model) || question.model === [])) {
+                                                    missingSurveyValue = true;
+                                                }
+                                            });
+                                            $scope.missingSurveyValue = missingSurveyValue;
+                                        }, true);
+
+                                        watchForPromptChanges();
+                                    });
+                            } else {
+                                $scope.promptData = {
+                                    launchConf: launchConf,
+                                    launchOptions: launchOptions,
+                                    prompts: prompts,
+                                    template: ParentObject.id
+                                };
+                                watchForPromptChanges();
+                            }
+                        }
+                    });
+            } else if ($state.current.name === 'workflowJobTemplateSchedules.edit') {
+                let workflowJobTemplate = new WorkflowJobTemplate();
+
+                $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
+                    .then((responses) => {
+                        let launchOptions = responses[0].data,
+                            launchConf = responses[1].data;
+
+                        let watchForPromptChanges = () => {
+                            $scope.$watch('missingSurveyValue', function() {
+                                $scope.promptModalMissingReqFields = $scope.missingSurveyValue ? true : false;
+                            });
+                        };
+
+                        let prompts = PromptService.processPromptValues({
+                            launchConf: responses[1].data,
+                            launchOptions: responses[0].data,
+                            currentValues: data
+                        });
+
+                        if(!launchConf.survey_enabled) {
+                            $scope.showPromptButton = false;
+                        } else {
+                            $scope.showPromptButton = true;
+
+                            if(responses[1].data.survey_enabled) {
+                                // go out and get the survey questions
+                                workflowJobTemplate.getSurveyQuestions(ParentObject.id)
+                                    .then((surveyQuestionRes) => {
+
+                                        let processed = PromptService.processSurveyQuestions({
+                                            surveyQuestions: surveyQuestionRes.data.spec,
+                                            extra_data: _.cloneDeep(data.extra_data)
+                                        });
+
+                                        $scope.missingSurveyValue = processed.missingSurveyValue;
 
                                         $scope.promptData = {
                                             launchConf: launchConf,
@@ -400,13 +429,12 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
             // extra_data field is not manifested in the UI when scheduling a Management Job
             if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
-                if ($state.current.name === 'projectSchedules.edit'){
+                if ($state.current.name === 'projectSchedules.edit' ||
+                    $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit' ||
+                    $state.current.name === 'workflowJobTemplateSchedules.add'
+                ){
                     $scope.noVars = true;
-                }
-                else if ($state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit'){
-                    $scope.noVars = true;
-                }
-                else {
+                } else {
                     ParseTypeChange({
                         scope: $scope,
                         variable: 'extraVars',

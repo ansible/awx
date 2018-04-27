@@ -44,6 +44,16 @@ def test_parse_yaml_or_json(input_, output):
     assert common.parse_yaml_or_json(input_) == output
 
 
+def test_recursive_vars_not_allowed():
+    rdict = {}
+    rdict['a'] = rdict
+    # YAML dumper will use a tag to give recursive data
+    data = yaml.dump(rdict, default_flow_style=False)
+    with pytest.raises(ParseError) as exc:
+        common.parse_yaml_or_json(data, silent_failure=False)
+    assert 'Circular reference detected' in str(exc)
+
+
 class TestParserExceptions:
 
     @staticmethod

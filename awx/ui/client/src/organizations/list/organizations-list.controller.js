@@ -6,39 +6,40 @@
 
 
 export default ['$stateParams', '$scope', '$rootScope',
-    'Rest', 'OrganizationList', 'Prompt',
-    'ProcessErrors', 'GetBasePath', 'Wait', '$state', 'rbacUiControlService', '$filter', 'Dataset', 'i18n',
+    'Rest', 'OrganizationList', 'Prompt', 'OrganizationModel',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state',
+    'rbacUiControlService', '$filter', 'Dataset', 'i18n',
+    'AppStrings',
     function($stateParams, $scope, $rootScope,
-        Rest, OrganizationList, Prompt,
-        ProcessErrors, GetBasePath, Wait, $state, rbacUiControlService, $filter, Dataset, i18n) {
+        Rest, OrganizationList, Prompt, Organization,
+        ProcessErrors, GetBasePath, Wait, $state,
+        rbacUiControlService, $filter, Dataset, i18n,
+        AppStrings
+    ) {
 
         var defaultUrl = GetBasePath('organizations'),
             list = OrganizationList;
 
-        init();
+        $scope.canAdd = false;
 
-        function init() {
-            $scope.canAdd = false;
+        rbacUiControlService.canAdd("organizations")
+            .then(function(params) {
+                $scope.canAdd = params.canAdd;
+            });
+        $scope.orgCount = Dataset.data.count;
 
-            rbacUiControlService.canAdd("organizations")
-                .then(function(params) {
-                    $scope.canAdd = params.canAdd;
-                });
-            $scope.orgCount = Dataset.data.count;
+        // search init
+        $scope.list = list;
+        $scope[`${list.iterator}_dataset`] = Dataset.data;
+        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
-            // search init
-            $scope.list = list;
-            $scope[`${list.iterator}_dataset`] = Dataset.data;
-            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+        $scope.orgCards = parseCardData($scope[list.name]);
+        $rootScope.flashMessage = null;
 
-            $scope.orgCards = parseCardData($scope[list.name]);
-            $rootScope.flashMessage = null;
-
-            // grab the pagination elements, move, destroy list generator elements
-            $('#organization-pagination').appendTo('#OrgCards');
-            $('#organizations tag-search').appendTo('.OrgCards-search');
-            $('#organizations-list').remove();
-        }
+        // grab the pagination elements, move, destroy list generator elements
+        $('#organization-pagination').appendTo('#OrgCards');
+        $('#organizations tag-search').appendTo('.OrgCards-search');
+        $('#organizations-list').remove();
 
         function parseCardData(cards) {
             return cards.map(function(card) {
@@ -167,13 +168,34 @@ export default ['$stateParams', '$scope', '$rootScope',
                     });
             };
 
-            Prompt({
-                hdr: i18n._('Delete'),
-                resourceName: $filter('sanitize')(name),
-                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete this organization?  This makes everything in this organization unavailable.') + '</div>',
-                action: action,
-                actionText: i18n._('DELETE')
-            });
+            const organization = new Organization();
+
+            organization.getDependentResourceCounts(id)
+                .then((counts) => {
+                    const invalidateRelatedLines = [];
+                    let deleteModalBody = `<div class="Prompt-bodyQuery">${AppStrings.get('deleteResource.CONFIRM', 'organization')}</div>`;
+
+                    counts.forEach(countObj => {
+                        if(countObj.count && countObj.count > 0) {
+                            invalidateRelatedLines.push(`<div><span class="Prompt-warningResourceTitle">${countObj.label}</span><span class="badge List-titleBadge">${countObj.count}</span></div>`);
+                        }
+                    });
+
+                    if (invalidateRelatedLines && invalidateRelatedLines.length > 0) {
+                        deleteModalBody = `<div class="Prompt-bodyQuery">${AppStrings.get('deleteResource.UNAVAILABLE', 'organization')} ${AppStrings.get('deleteResource.CONFIRM', 'organization')}</div>`;
+                        invalidateRelatedLines.forEach(invalidateRelatedLine => {
+                            deleteModalBody += invalidateRelatedLine;
+                        });
+                    }
+
+                    Prompt({
+                        hdr: i18n._('Delete'),
+                        resourceName: $filter('sanitize')(name),
+                        body: deleteModalBody,
+                        action: action,
+                        actionText: i18n._('DELETE')
+                    });
+                });
         };
     }
 ];

@@ -5,6 +5,7 @@ function InstancesController ($scope, $state, $http, models, Instance, strings, 
     vm.panelTitle = instanceGroup.get('name');
     vm.instances = instanceGroup.get('related.instances.results');
     vm.instance_group_id = instanceGroup.get('id');
+    vm.isSuperuser = $scope.$root.user_is_superuser;
 
     init();
 
@@ -44,6 +45,15 @@ function InstancesController ($scope, $state, $http, models, Instance, strings, 
         jobs: {
             _go: 'instanceGroups.jobs',
             _params: { instance_group_id: vm.instance_group_id }
+        }
+    };
+
+    vm.rowAction = {
+        toggle: {
+            _disabled: !vm.isSuperuser
+        },
+        capacity_adjustment: {
+            _disabled: !vm.isSuperuser
         }
     };
 

@@ -101,20 +101,35 @@ function atRelaunchCtrl (
                         };
                     });
             } else {
-                jobObj.postRelaunch({
-                    id: vm.job.id
-                }).then((launchRes) => {
-                    if (!$state.includes('jobs')) {
-                        $state.go('jobResult', { id: launchRes.data.id }, { reload: true });
-                    }
-                });
+                const launchParams = {
+                    id: vm.job.id,
+                };
+
+                if (_.has(option, 'name')) {
+                    launchParams.relaunchData = {
+                        hosts: (option.name).toLowerCase()
+                    };
+                }
+
+                jobObj.postRelaunch(launchParams)
+                    .then((launchRes) => {
+                        if (!$state.includes('jobs')) {
+                            const relaunchType = launchRes.data.type === 'job' ? 'playbook' : launchRes.data.type;
+                            $state.go('jobz', { id: launchRes.data.id, type: relaunchType }, { reload: true });
+                        }
+                    }).catch(({ data, status, config }) => {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: strings.get('error.HEADER'),
+                            msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                        });
+                    });
             }
         });
     };
 
     vm.$onInit = () => {
         vm.showRelaunch = vm.job.type !== 'system_job' && vm.job.summary_fields.user_capabilities.start;
-        vm.showDropdown = vm.job.type === 'job' && vm.job.failed === true;
+        vm.showDropdown = vm.job.type === 'job' && vm.job.status === 'failed';
 
         vm.createDropdown();
         vm.createTooltips();
@@ -153,8 +168,13 @@ function atRelaunchCtrl (
                         inventorySource.postUpdate(vm.job.inventory_source)
                             .then((postUpdateRes) => {
                                 if (!$state.includes('jobs')) {
-                                    $state.go('inventorySyncStdout', { id: postUpdateRes.data.id }, { reload: true });
+                                    $state.go('jobz', { id: postUpdateRes.data.id, type: 'inventory' }, { reload: true });
                                 }
+                            }).catch(({ data, status, config }) => {
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: strings.get('error.HEADER'),
+                                    msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                                });
                             });
                     } else {
                         Alert(
@@ -172,8 +192,13 @@ function atRelaunchCtrl (
                         project.postUpdate(vm.job.project)
                             .then((postUpdateRes) => {
                                 if (!$state.includes('jobs')) {
-                                    $state.go('scmUpdateStdout', { id: postUpdateRes.data.id }, { reload: true });
+                                    $state.go('jobz', { id: postUpdateRes.data.id, type: 'project' }, { reload: true });
                                 }
+                            }).catch(({ data, status, config }) => {
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: strings.get('error.HEADER'),
+                                    msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                                });
                             });
                     } else {
                         Alert(
@@ -191,6 +216,11 @@ function atRelaunchCtrl (
                 if (!$state.includes('jobs')) {
                     $state.go('workflowResults', { id: launchRes.data.id }, { reload: true });
                 }
+            }).catch(({ data, status, config }) => {
+                ProcessErrors($scope, data, status, null, {
+                    hdr: strings.get('error.HEADER'),
+                    msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                });
             });
         } else if (vm.job.type === 'ad_hoc_command') {
             const adHocCommand = new AdHocCommand();
@@ -208,8 +238,13 @@ function atRelaunchCtrl (
                         id: vm.job.id
                     }).then((launchRes) => {
                         if (!$state.includes('jobs')) {
-                            $state.go('adHocJobStdout', { id: launchRes.data.id }, { reload: true });
+                            $state.go('jobz', { id: launchRes.data.id, type: 'command' }, { reload: true });
                         }
+                    }).catch(({ data, status, config }) => {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: strings.get('error.HEADER'),
+                            msg: strings.get('error.CALL', { path: `${config.url}`, status })
+                        });
                     });
                 }
             });
@@ -228,7 +263,7 @@ function atRelaunchCtrl (
             relaunchData: PromptService.bundlePromptDataForRelaunch(vm.promptData)
         }).then((launchRes) => {
             if (!$state.includes('jobs')) {
-                $state.go('jobResult', { id: launchRes.data.job }, { reload: true });
+                $state.go('jobz', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
             }
         }).catch(({ data, status }) => {
             ProcessErrors($scope, data, status, null, {

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from contextlib import contextmanager
 from datetime import datetime
 from functools import partial
@@ -12,7 +14,9 @@ from backports.tempfile import TemporaryDirectory
 import fcntl
 import mock
 import pytest
+import six
 import yaml
+
 from django.conf import settings
 
 
@@ -24,6 +28,7 @@ from awx.main.models import (
     InventorySource,
     InventoryUpdate,
     Job,
+    JobTemplate,
     Notification,
     Project,
     ProjectUpdate,
@@ -36,7 +41,7 @@ from awx.main.models import (
 from awx.main import tasks
 from awx.main.queue import CallbackQueueDispatcher
 from awx.main.utils import encrypt_field, encrypt_value, OutputEventFilter
-
+from awx.main.utils.safe_yaml import SafeLoader
 
 
 @contextmanager
@@ -187,7 +192,7 @@ def parse_extra_vars(args):
     for chunk in args:
         if chunk.startswith('@/tmp/'):
             with open(chunk.strip('@'), 'r') as f:
-                extra_vars.update(json.load(f))
+                extra_vars.update(yaml.load(f, SafeLoader))
     return extra_vars
 
 
@@ -218,7 +223,7 @@ class TestJobExecution:
         self.run_pexpect.return_value = ['successful', 0]
 
         self.patches = [
-            mock.patch.object(CallbackQueueDispatcher, 'dispatch', lambda obj: None),
+            mock.patch.object(CallbackQueueDispatcher, 'dispatch', lambda self, obj: None),
             mock.patch.object(Project, 'get_project_path', lambda *a, **kw: self.project_path),
             # don't emit websocket statuses; they use the DB and complicate testing
             mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()),
@@ -267,7 +272,8 @@ class TestJobExecution:
             cancel_flag=False,
             project=Project(),
             playbook='helloworld.yml',
-            verbosity=3
+            verbosity=3,
+            job_template=JobTemplate(extra_vars='')
         )
 
         # mock the job.credentials M2M relation so we can avoid DB access
@@ -293,7 +299,141 @@ class TestJobExecution:
         return self.instance.pk
 
 
+class TestExtraVarSanitation(TestJobExecution):
+    # By default, extra vars are marked as `!unsafe` in the generated yaml
+    # _unless_ they've been specified on the JobTemplate's extra_vars (which
+    # are deemed trustable, because they can only be added by users w/ enough
+    # privilege to add/modify a Job Template)
+
+    UNSAFE = '{{ lookup(''pipe'',''ls -la'') }}'
+
+    def test_vars_unsafe_by_default(self):
+        self.instance.created_by = User(pk=123, username='angry-spud')
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+
+            # ensure that strings are marked as unsafe
+            for unsafe in ['awx_job_template_name', 'tower_job_template_name',
+                           'awx_user_name', 'tower_job_launch_type',
+                           'awx_project_revision',
+                           'tower_project_revision', 'tower_user_name',
+                           'awx_job_launch_type']:
+                assert hasattr(extra_vars[unsafe], '__UNSAFE__')
+
+            # ensure that non-strings are marked as safe
+            for safe in ['awx_job_template_id', 'awx_job_id', 'awx_user_id',
+                         'tower_user_id', 'tower_job_template_id',
+                         'tower_job_id']:
+                assert not hasattr(extra_vars[safe], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_launchtime_vars_unsafe(self):
+        self.instance.extra_vars = json.dumps({'msg': self.UNSAFE})
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == self.UNSAFE
+            assert hasattr(extra_vars['msg'], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_nested_launchtime_vars_unsafe(self):
+        self.instance.extra_vars = json.dumps({'msg': {'a': [self.UNSAFE]}})
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == {'a': [self.UNSAFE]}
+            assert hasattr(extra_vars['msg']['a'][0], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_whitelisted_jt_extra_vars(self):
+        self.instance.job_template.extra_vars = self.instance.extra_vars = json.dumps({'msg': self.UNSAFE})
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == self.UNSAFE
+            assert not hasattr(extra_vars['msg'], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_nested_whitelisted_vars(self):
+        self.instance.extra_vars = json.dumps({'msg': {'a': {'b': [self.UNSAFE]}}})
+        self.instance.job_template.extra_vars = self.instance.extra_vars
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == {'a': {'b': [self.UNSAFE]}}
+            assert not hasattr(extra_vars['msg']['a']['b'][0], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_sensitive_values_dont_leak(self):
+        # JT defines `msg=SENSITIVE`, the job *should not* be able to do
+        # `other_var=SENSITIVE`
+        self.instance.job_template.extra_vars = json.dumps({'msg': self.UNSAFE})
+        self.instance.extra_vars = json.dumps({
+            'msg': 'other-value',
+            'other_var': self.UNSAFE
+        })
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+
+            assert extra_vars['msg'] == 'other-value'
+            assert hasattr(extra_vars['msg'], '__UNSAFE__')
+
+            assert extra_vars['other_var'] == self.UNSAFE
+            assert hasattr(extra_vars['other_var'], '__UNSAFE__')
+
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_overwritten_jt_extra_vars(self):
+        self.instance.job_template.extra_vars = json.dumps({'msg': 'SAFE'})
+        self.instance.extra_vars = json.dumps({'msg': self.UNSAFE})
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            extra_vars = parse_extra_vars(args)
+            assert extra_vars['msg'] == self.UNSAFE
+            assert hasattr(extra_vars['msg'], '__UNSAFE__')
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+
 class TestGenericRun(TestJobExecution):
+
+    def test_generic_failure(self):
+        self.task.build_private_data_files = mock.Mock(side_effect=IOError())
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+        update_model_call = self.task.update_model.call_args[1]
+        assert 'IOError' in update_model_call['result_traceback']
+        assert update_model_call['status'] == 'error'
+        assert update_model_call['emitted_events'] == 0
 
     def test_cancel_flag(self):
         self.instance.cancel_flag = True
@@ -460,6 +600,13 @@ class TestAdhocRun(TestJobExecution):
             extra_vars={'awx_foo': 'awx-bar'}
         )
 
+    def test_options_jinja_usage(self):
+        self.instance.module_args = '{{ ansible_ssh_pass }}'
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+        update_model_call = self.task.update_model.call_args[1]
+        assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
+
     def test_created_by_extra_vars(self):
         self.instance.created_by = User(pk=123, username='angry-spud')
 
@@ -570,6 +717,33 @@ class TestJobCredentials(TestJobExecution):
             dict(field='become_password', password_name='become_password', expected_flag='--ask-become-pass'),
         ]
     }
+
+    def test_username_jinja_usage(self):
+        ssh = CredentialType.defaults['ssh']()
+        credential = Credential(
+            pk=1,
+            credential_type=ssh,
+            inputs = {'username': '{{ ansible_ssh_pass }}'}
+        )
+        self.instance.credentials.add(credential)
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+        update_model_call = self.task.update_model.call_args[1]
+        assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
+
+    @pytest.mark.parametrize("flag", ['become_username', 'become_method'])
+    def test_become_jinja_usage(self, flag):
+        ssh = CredentialType.defaults['ssh']()
+        credential = Credential(
+            pk=1,
+            credential_type=ssh,
+            inputs = {'username': 'joe', flag: '{{ ansible_ssh_pass }}'}
+        )
+        self.instance.credentials.add(credential)
+        with pytest.raises(Exception):
+            self.task.run(self.pk)
+        update_model_call = self.task.update_model.call_args[1]
+        assert 'Jinja variables are not allowed' in update_model_call['result_traceback']
 
     def test_ssh_passwords(self, field, password_name, expected_flag):
         ssh = CredentialType.defaults['ssh']()
@@ -1158,6 +1332,7 @@ class TestJobCredentials(TestJobExecution):
             args, cwd, env, stdout = args
             extra_vars = parse_extra_vars(args)
             assert extra_vars["api_token"] == "ABC123"
+            assert hasattr(extra_vars["api_token"], '__UNSAFE__')
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
@@ -1304,6 +1479,33 @@ class TestJobCredentials(TestJobExecution):
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
             assert open(env['MY_CLOUD_INI_FILE'], 'rb').read() == '[mycloud]\nABC123'
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    def test_custom_environment_injectors_with_unicode_content(self):
+        value = six.u('Iñtërnâtiônàlizætiøn')
+        some_cloud = CredentialType(
+            kind='cloud',
+            name='SomeCloud',
+            managed_by_tower=False,
+            inputs={'fields': []},
+            injectors={
+                'file': {'template': value},
+                'env': {'MY_CLOUD_INI_FILE': '{{tower.filename}}'}
+            }
+        )
+        credential = Credential(
+            pk=1,
+            credential_type=some_cloud,
+        )
+        self.instance.credentials.add(credential)
+        self.task.run(self.pk)
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert open(env['MY_CLOUD_INI_FILE'], 'rb').read() == value.encode('utf-8')
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect

@@ -1,7 +1,8 @@
 function CapacityAdjuster (templateUrl, ProcessErrors, Wait) {
     return {
         scope: {
-            state: '='
+            state: '=',
+            disabled: '@'
         },
         templateUrl: templateUrl('instance-groups/capacity-adjuster/capacity-adjuster'),
         restrict: 'E',
@@ -17,7 +18,6 @@ function CapacityAdjuster (templateUrl, ProcessErrors, Wait) {
 
             scope.min_capacity = _.min(adjustment_values, 'value');
             scope.max_capacity = _.max(adjustment_values, 'value');
-
         },
         controller: function($http) {
             const vm = this || {};

@@ -61,45 +61,21 @@ def test_user_queryset(user):
 
 @pytest.mark.django_db
 def test_user_accessible_objects(user, organization):
+    '''
+    We cannot directly use accessible_objects for User model because
+    both editing and read permissions are obligated to complex business logic
+    '''
     admin = user('admin', False)
     u = user('john', False)
-    assert User.accessible_objects(admin, 'admin_role').count() == 1
+    access = UserAccess(admin)
+    assert access.get_queryset().count() == 1  # can only see himself
 
     organization.member_role.members.add(u)
-    organization.admin_role.members.add(admin)
-    assert User.accessible_objects(admin, 'admin_role').count() == 2
+    organization.member_role.members.add(admin)
+    assert access.get_queryset().count() == 2
 
     organization.member_role.members.remove(u)
-    assert User.accessible_objects(admin, 'admin_role').count() == 1
-
-
-@pytest.mark.django_db
-def test_org_user_admin(user, organization):
-    admin = user('orgadmin')
-    member = user('orgmember')
-
-    organization.member_role.members.add(member)
-    assert admin not in member.admin_role
-
-    organization.admin_role.members.add(admin)
-    assert admin in member.admin_role
-
-    organization.admin_role.members.remove(admin)
-    assert admin not in member.admin_role
-
-
-@pytest.mark.django_db
-def test_org_user_removed(user, organization):
-    admin = user('orgadmin')
-    member = user('orgmember')
-
-    organization.admin_role.members.add(admin)
-    organization.member_role.members.add(member)
-
-    assert admin in member.admin_role
-
-    organization.member_role.members.remove(member)
-    assert admin not in member.admin_role
+    assert access.get_queryset().count() == 1
 
 
 @pytest.mark.django_db

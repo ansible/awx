@@ -1,4 +1,5 @@
 import textwrap
+import pytest
 
 # AWX
 from awx.main.redact import UriCleaner
@@ -78,60 +79,76 @@ TEST_CLEARTEXT.append({
 })
 
 
+@pytest.mark.parametrize('username, password, not_uri, expected', [
+    ('', '', 'www.famfamfam.com](http://www.famfamfam.com/fijdlfd', 'www.famfamfam.com](http://www.famfamfam.com/fijdlfd'),
+    ('', '', 'https://www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
+    ('root', 'gigity', 'https://root@gigity@www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
+    ('root', 'gigity@', 'https://root:gigity@@@www.famfamfam.com](http://www.famfamfam.com/fijdlfd', '$encrypted$'),
+])
 # should redact sensitive usernames and passwords
-def test_uri_scm_simple_redacted():
-    for uri in TEST_URIS:
-        redacted_str = UriCleaner.remove_sensitive(str(uri))
-        if uri.username:
-            assert uri.username not in redacted_str
-        if uri.password:
-            assert uri.username not in redacted_str
+def test_non_uri_redact(username, password, not_uri, expected):
+    redacted_str = UriCleaner.remove_sensitive(not_uri)
+    if username:
+        assert username not in redacted_str
+    if password:
+        assert password not in redacted_str
+
+    assert redacted_str == expected
+
+
+def test_multiple_non_uri_redact():
+    non_uri = 'https://www.famfamfam.com](http://www.famfamfam.com/fijdlfd hi '
+    non_uri += 'https://www.famfamfam.com](http://www.famfamfam.com/fijdlfd world '
+    non_uri += 'https://www.famfamfam.com](http://www.famfamfam.com/fijdlfd foo '
+    non_uri += 'https://foo:bar@giggity.com bar'
+    redacted_str = UriCleaner.remove_sensitive(non_uri)
+    assert redacted_str == '$encrypted$ hi $encrypted$ world $encrypted$ foo https://$encrypted$:$encrypted$@giggity.com bar'
 
 
 # should replace secret data with safe string, UriCleaner.REPLACE_STR
-def test_uri_scm_simple_replaced():
-    for uri in TEST_URIS:
-        redacted_str = UriCleaner.remove_sensitive(str(uri))
-        assert redacted_str.count(UriCleaner.REPLACE_STR) == uri.get_secret_count()
+@pytest.mark.parametrize('uri', TEST_URIS)
+def test_uri_scm_simple_replaced(uri):
+    redacted_str = UriCleaner.remove_sensitive(str(uri))
+    assert redacted_str.count(UriCleaner.REPLACE_STR) == uri.get_secret_count()
 
 
 # should redact multiple uris in text
-def test_uri_scm_multiple():
+@pytest.mark.parametrize('uri', TEST_URIS)
+def test_uri_scm_multiple(uri):
     cleartext = ''
-    for uri in TEST_URIS:
-        cleartext += str(uri) + ' '
-    for uri in TEST_URIS:
-        cleartext += str(uri) + '\n'
+    cleartext += str(uri) + ' '
+    cleartext += str(uri) + '\n'
 
     redacted_str = UriCleaner.remove_sensitive(str(uri))
     if uri.username:
         assert uri.username not in redacted_str
     if uri.password:
-        assert uri.username not in redacted_str
+        assert uri.password not in redacted_str
 
 
 # should replace multiple secret data with safe string
-def test_uri_scm_multiple_replaced():
+@pytest.mark.parametrize('uri', TEST_URIS)
+def test_uri_scm_multiple_replaced(uri):
     cleartext = ''
     find_count = 0
-    for uri in TEST_URIS:
-        cleartext += str(uri) + ' '
-        find_count += uri.get_secret_count()
 
-    for uri in TEST_URIS:
-        cleartext += str(uri) + '\n'
-        find_count += uri.get_secret_count()
+    cleartext += str(uri) + ' '
+    find_count += uri.get_secret_count()
+
+    cleartext += str(uri) + '\n'
+    find_count += uri.get_secret_count()
 
     redacted_str = UriCleaner.remove_sensitive(cleartext)
     assert redacted_str.count(UriCleaner.REPLACE_STR) == find_count
 
 
 # should redact and replace multiple secret data within a complex cleartext blob
-def test_uri_scm_cleartext_redact_and_replace():
-    for test_data in TEST_CLEARTEXT:
-        uri = test_data['uri']
-        redacted_str = UriCleaner.remove_sensitive(test_data['text'])
-        assert uri.username not in redacted_str
-        assert uri.password not in redacted_str
-        # Ensure the host didn't get redacted
-        assert redacted_str.count(uri.host) == test_data['host_occurrences']
+@pytest.mark.parametrize('test_data', TEST_CLEARTEXT)
+def test_uri_scm_cleartext_redact_and_replace(test_data):
+    uri = test_data['uri']
+    redacted_str = UriCleaner.remove_sensitive(test_data['text'])
+    assert uri.username not in redacted_str
+    assert uri.password not in redacted_str
+    # Ensure the host didn't get redacted
+    assert redacted_str.count(uri.host) == test_data['host_occurrences']
+
