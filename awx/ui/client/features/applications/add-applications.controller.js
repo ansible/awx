@@ -42,7 +42,7 @@ function AddApplicationsController (models, $state, strings) {
     vm.form.organization._resource = 'organization';
     vm.form.organization._route = 'applications.add.organization';
     vm.form.organization._model = organization;
-    vm.form.organization._placeholder = strings.get('SELECT AN ORGANIZATION');
+    vm.form.organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
 
     vm.form.name.required = true;
     vm.form.organization.required = true;
