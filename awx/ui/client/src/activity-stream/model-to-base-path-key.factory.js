@@ -18,7 +18,7 @@ export default function ModelToBasePathKey() {
         var basePathKey;
 
         switch(model) {
-            case 'application':
+            case 'o_auth2_application':
                 basePathKey = 'applications';
                 break;
             case 'project':
