@@ -54,7 +54,7 @@ def prevent_inactive_login(backend, details, user=None, *args, **kwargs):
         raise AuthInactive(backend)
 
 
-def _update_m2m_from_expression(user, rel, expr, remove=True, saml_team_names=False):
+def _update_m2m_from_expression(user, rel, expr, remove=True):
     '''
     Helper function to update m2m relationship based on user matching one or
     more expressions.
@@ -70,9 +70,6 @@ def _update_m2m_from_expression(user, rel, expr, remove=True, saml_team_names=Fa
         if isinstance(expr, (six.string_types, type(re.compile('')))):
             expr = [expr]
         for ex in expr:
-            if saml_team_names:
-                if ex in saml_team_names:
-                    should_add = True
             if isinstance(ex, six.string_types):
                 if user.username == ex or user.email == ex:
                     should_add = True
@@ -107,24 +104,16 @@ def update_user_orgs(backend, details, user=None, *args, **kwargs):
             except IndexError:
                 continue
 
-        team_map = backend.setting('SOCIAL_AUTH_SAML_TEAM_ATTR') or {}
-        saml_team_names = False
-        if team_map.get('saml_attr'):
-            saml_team_names = set(kwargs
-                                  .get('response', {})
-                                  .get('attributes', {})
-                                  .get(team_map['saml_attr'], []))
-
         # Update org admins from expression(s).
         remove = bool(org_opts.get('remove', True))
         admins_expr = org_opts.get('admins', None)
         remove_admins = bool(org_opts.get('remove_admins', remove))
-        _update_m2m_from_expression(user, org.admin_role.members, admins_expr, remove_admins, saml_team_names)
+        _update_m2m_from_expression(user, org.admin_role.members, admins_expr, remove_admins)
 
         # Update org users from expression(s).
         users_expr = org_opts.get('users', None)
         remove_users = bool(org_opts.get('remove_users', remove))
-        _update_m2m_from_expression(user, org.member_role.members, users_expr, remove_users, saml_team_names)
+        _update_m2m_from_expression(user, org.member_role.members, users_expr, remove_users)
 
 
 def update_user_teams(backend, details, user=None, *args, **kwargs):
