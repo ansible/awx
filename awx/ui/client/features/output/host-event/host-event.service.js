@@ -5,13 +5,27 @@ function HostEventService (
     $rootScope
 ) {
     this.getUrl = (id, type, params) => {
-        let url;
+        const queryString = this.stringifyParams(params);
+
+        let baseUrl;
+        let related;
+
         if (type === 'playbook') {
-            url = `${GetBasePath('jobs')}${id}/job_events/?${this.stringifyParams(params)}`;
-        } else if (type === 'command') {
-            url = `${GetBasePath('ad_hoc_commands')}${id}/events/?${this.stringifyParams(params)}`;
+            baseUrl = GetBasePath('jobs');
+            related = 'job_events';
         }
-        return url;
+
+        if (type === 'command') {
+            baseUrl = GetBasePath('ad_hoc_commands');
+            related = 'events';
+        }
+
+        if (type === 'project') {
+            baseUrl = GetBasePath('project_updates');
+            related = 'events';
+        }
+
+        return `${baseUrl}${id}/${related}/?${queryString}`;
     };
 
     // GET events related to a job run

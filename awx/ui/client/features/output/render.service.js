@@ -96,6 +96,20 @@ function JobRenderService ($q, $sce, $window) {
         return { html, count };
     };
 
+    this.isHostEvent = (event) => {
+        if (typeof event.host === 'number') {
+            return true;
+        }
+
+        if (event.type === 'project_update_event' &&
+            event.event !== 'runner_on_skipped' &&
+            event.event_data.host) {
+            return true;
+        }
+
+        return false;
+    };
+
     this.createRecord = (ln, lines, event) => {
         if (!event.uuid) {
             return null;
@@ -109,7 +123,7 @@ function JobRenderService ($q, $sce, $window) {
             start: event.start_line,
             end: event.end_line,
             isTruncated: (event.end_line - event.start_line) > lines.length,
-            isHost: typeof event.host === 'number'
+            isHost: this.isHostEvent(event),
         };
 
         if (event.parent_uuid) {
