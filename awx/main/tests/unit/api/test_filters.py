@@ -3,13 +3,17 @@
 import pytest
 
 from rest_framework.exceptions import PermissionDenied, ParseError
-from awx.api.filters import FieldLookupBackend
+from awx.api.filters import FieldLookupBackend, OrderByBackend, get_field_from_path
 from awx.main.models import (AdHocCommand, ActivityStream,
                              CustomInventoryScript, Credential, Job,
                              JobTemplate, SystemJob, UnifiedJob, User,
                              WorkflowJob, WorkflowJobTemplate,
-                             WorkflowJobOptions, InventorySource)
+                             WorkflowJobOptions, InventorySource,
+                             JobEvent)
 from awx.main.models.jobs import JobOptions
+
+# Django
+from django.db.models.fields import FieldDoesNotExist
 
 
 def test_related():
@@ -18,6 +22,27 @@ def test_related():
     field, new_lookup = field_lookup.get_field_from_lookup(InventorySource, lookup)
     print(field)
     print(new_lookup)
+
+
+def test_invalid_filter_key():
+    field_lookup = FieldLookupBackend()
+    # FieldDoesNotExist is caught and converted to ParseError by filter_queryset
+    with pytest.raises(FieldDoesNotExist) as excinfo:
+        field_lookup.value_to_python(JobEvent, 'event_data.task_action', 'foo')
+    assert 'has no field named' in str(excinfo)
+
+
+def test_invalid_field_hop():
+    with pytest.raises(ParseError) as excinfo:
+        get_field_from_path(Credential, 'organization__description__user')
+    assert 'No related model for' in str(excinfo)
+
+
+def test_invalid_order_by_key():
+    field_order_by = OrderByBackend()
+    with pytest.raises(ParseError) as excinfo:
+        [f for f in field_order_by._validate_ordering_fields(JobEvent, ('event_data.task_action',))]
+    assert 'has no field named' in str(excinfo)
 
 
 @pytest.mark.parametrize(u"empty_value", [u'', ''])
