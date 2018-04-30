@@ -161,16 +161,7 @@ module.exports = {
         const credentials = client.page.credentials();
         const { details } = credentials.section.add.section;
 
-        credentials.section.navigation.waitForElementVisible('@credentials');
-        credentials.section.navigation.expect.element('@credentials').enabled;
-        credentials.section.navigation.click('@credentials');
-
-        credentials.waitForElementVisible('div.spinny');
-        credentials.waitForElementNotVisible('div.spinny');
-
-        credentials.section.list.waitForElementVisible('@add');
-        credentials.section.list.expect.element('@add').enabled;
-        credentials.section.list.click('@add');
+        client.navigateTo(`${credentials.url()}/add`);
 
         details.waitForElementVisible('@save');
         details.clearAndSelectType('Vault');
@@ -186,13 +177,7 @@ module.exports = {
         credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
-        credentials.section.navigation.waitForElementVisible('@credentials');
-        credentials.section.navigation.expect.element('@credentials').enabled;
-        credentials.section.navigation.click('@credentials');
-
-        credentials.section.list.waitForElementVisible('@add');
-        credentials.section.list.expect.element('@add').enabled;
-        credentials.section.list.click('@add');
+        client.navigateTo(`${credentials.url()}/add`);
 
         details.waitForElementVisible('@save');
         details.clearAndSelectType('Vault');
@@ -212,15 +197,7 @@ module.exports = {
         const credentials = client.page.credentials();
         const { details } = credentials.section.add.section;
 
-        credentials.section.navigation.waitForElementVisible('@credentials');
-        credentials.section.navigation.expect.element('@credentials').enabled;
-        credentials.section.navigation.click('@credentials');
-
-        credentials.waitForElementNotVisible('div.spinny');
-
-        credentials.section.list.waitForElementVisible('@add');
-        credentials.section.list.expect.element('@add').enabled;
-        credentials.section.list.click('@add');
+        client.navigateTo(`${credentials.url()}/add`);
 
         details.waitForElementVisible('@save');
         details.clearAndSelectType('Machine');
@@ -236,12 +213,7 @@ module.exports = {
     'create job template': client => {
         const templates = client.page.templates();
 
-        templates.section.navigation.waitForElementVisible('@templates');
-        templates.section.navigation.expect.element('@templates').enabled;
-        templates.section.navigation.click('@templates');
-
-        templates.waitForElementVisible('div.spinny');
-        templates.waitForElementNotVisible('div.spinny');
+        client.navigateTo(templates.url());
 
         templates.selectAdd('Job Template');
         templates.selectInventory(INVENTORY_NAME);
