@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
 import cStringIO
-import json
 import logging
 import socket
 import datetime
@@ -10,7 +9,6 @@ from uuid import uuid4
 
 import mock
 
-from django.conf import settings
 from django.conf import LazySettings
 import pytest
 import requests
@@ -18,21 +16,9 @@ from requests_futures.sessions import FuturesSession
 
 from awx.main.utils.handlers import (BaseHandler, BaseHTTPSHandler as HTTPSHandler,
                                      TCPHandler, UDPHandler, _encode_payload_for_socket,
-                                     PARAM_NAMES, LoggingConnectivityException)
+                                     PARAM_NAMES, LoggingConnectivityException,
+                                     AWXProxyHandler)
 from awx.main.utils.formatters import LogstashFormatter
-
-
-@pytest.fixture()
-def dummy_log_record():
-    return logging.LogRecord(
-        'awx', # logger name
-        20, # loglevel INFO
-        './awx/some/module.py', # pathname
-        100, # lineno
-        'User joe logged in', # msg
-        tuple(), # args,
-        None # exc_info
-    )
 
 
 @pytest.fixture()
@@ -80,105 +66,91 @@ def test_https_logging_handler_requests_async_implementation():
 
 
 def test_https_logging_handler_has_default_http_timeout():
-    handler = HTTPSHandler.from_django_settings(settings)
+    handler = TCPHandler()
     assert handler.tcp_timeout == 5
 
 
-@pytest.mark.parametrize('param', PARAM_NAMES.keys())
+@pytest.mark.parametrize('param', ['host', 'port', 'indv_facts'])
 def test_base_logging_handler_defaults(param):
     handler = BaseHandler()
     assert hasattr(handler, param) and getattr(handler, param) is None
 
 
-@pytest.mark.parametrize('param', PARAM_NAMES.keys())
+@pytest.mark.parametrize('param', ['host', 'port', 'indv_facts'])
 def test_base_logging_handler_kwargs(param):
     handler = BaseHandler(**{param: 'EXAMPLE'})
     assert hasattr(handler, param) and getattr(handler, param) == 'EXAMPLE'
 
 
-@pytest.mark.parametrize('param, django_settings_name', PARAM_NAMES.items())
-def test_base_logging_handler_from_django_settings(param, django_settings_name):
+@pytest.mark.parametrize('params', [
+    {
+        'LOG_AGGREGATOR_HOST': 'https://server.invalid',
+        'LOG_AGGREGATOR_PORT': 22222,
+        'LOG_AGGREGATOR_TYPE': 'loggly',
+        'LOG_AGGREGATOR_USERNAME': 'foo',
+        'LOG_AGGREGATOR_PASSWORD': 'bar',
+        'LOG_AGGREGATOR_INDIVIDUAL_FACTS': True,
+        'LOG_AGGREGATOR_TCP_TIMEOUT': 96,
+        'LOG_AGGREGATOR_VERIFY_CERT': False,
+        'LOG_AGGREGATOR_PROTOCOL': 'https'
+    },
+    {
+        'LOG_AGGREGATOR_HOST': 'https://server.invalid',
+        'LOG_AGGREGATOR_PORT': 22222,
+        'LOG_AGGREGATOR_PROTOCOL': 'udp'
+    }
+])
+def test_real_handler_from_django_settings(params):
+    settings = LazySettings()
+    settings.configure(**params)
+    handler = AWXProxyHandler().get_handler(custom_settings=settings)
+    # need the _reverse_ dictionary from PARAM_NAMES
+    attr_lookup = {}
+    for attr_name, setting_name in PARAM_NAMES.items():
+        attr_lookup[setting_name] = attr_name
+    for setting_name, val in params.items():
+        attr_name = attr_lookup[setting_name]
+        if attr_name == 'protocol':
+            continue
+        assert hasattr(handler, attr_name)
+
+
+def test_invalid_kwarg_to_real_handler():
     settings = LazySettings()
     settings.configure(**{
-        django_settings_name: 'EXAMPLE'
+        'LOG_AGGREGATOR_HOST': 'https://server.invalid',
+        'LOG_AGGREGATOR_PORT': 22222,
+        'LOG_AGGREGATOR_PROTOCOL': 'udp',
+        'LOG_AGGREGATOR_VERIFY_CERT': False  # setting not valid for UDP handler
     })
-    handler = BaseHandler.from_django_settings(settings)
-    assert hasattr(handler, param) and getattr(handler, param) == 'EXAMPLE'
+    handler = AWXProxyHandler().get_handler(custom_settings=settings)
+    assert not hasattr(handler, 'verify_cert')
 
 
-@pytest.mark.parametrize('params, logger_name, expected', [
-    # skip all records if enabled_flag = False
-    ({'enabled_flag': False}, 'awx.main', True),
-    # skip all records if the host is undefined
-    ({'host': '', 'enabled_flag': True}, 'awx.main', True),
-    # skip all records if underlying logger is used by handlers themselves
-    ({'host': '127.0.0.1', 'enabled_flag': True}, 'awx.main.utils.handlers', True),
-    ({'host': '127.0.0.1', 'enabled_flag': True}, 'awx.main', False),
-    ({'host': '127.0.0.1', 'enabled_flag': True, 'enabled_loggers': ['abc']}, 'awx.analytics.xyz', True),
-    ({'host': '127.0.0.1', 'enabled_flag': True, 'enabled_loggers': ['xyz']}, 'awx.analytics.xyz', False),
-])
-def test_base_logging_handler_skip_log(params, logger_name, expected):
-    handler = BaseHandler(**params)
-    assert handler._skip_log(logger_name) is expected
-
-
-def test_base_logging_handler_emit(dummy_log_record):
-    handler = BaseHandler(host='127.0.0.1', enabled_flag=True,
-                          message_type='logstash', lvl='INFO',
-                          enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+def test_base_logging_handler_emit_system_tracking(dummy_log_record):
+    handler = BaseHandler(host='127.0.0.1', indv_facts=True)
     handler.setFormatter(LogstashFormatter())
-    sent_payloads = handler.emit(dummy_log_record)
-
-    assert len(sent_payloads) == 1
-    body = json.loads(sent_payloads[0])
-
-    assert body['level'] == 'INFO'
-    assert body['logger_name'] == 'awx'
-    assert body['message'] == 'User joe logged in'
-
-
-def test_base_logging_handler_ignore_low_severity_msg(dummy_log_record):
-    handler = BaseHandler(host='127.0.0.1', enabled_flag=True,
-                          message_type='logstash', lvl='WARNING',
-                          enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
-    handler.setFormatter(LogstashFormatter())
-    sent_payloads = handler.emit(dummy_log_record)
-    assert len(sent_payloads) == 0
-
-
-def test_base_logging_handler_emit_system_tracking():
-    handler = BaseHandler(host='127.0.0.1', enabled_flag=True,
-                          message_type='logstash', indv_facts=True, lvl='INFO',
-                          enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
-    handler.setFormatter(LogstashFormatter())
-    record = logging.LogRecord(
-        'awx.analytics.system_tracking', # logger name
-        20, # loglevel INFO
-        './awx/some/module.py', # pathname
-        100, # lineno
-        None, # msg
-        tuple(), # args,
-        None # exc_info
-    )
-    record.inventory_id = 11
-    record.host_name = 'my_lucky_host'
-    record.job_id = 777
-    record.ansible_facts = {
+    dummy_log_record.name = 'awx.analytics.system_tracking'
+    dummy_log_record.msg = None
+    dummy_log_record.inventory_id = 11
+    dummy_log_record.host_name = 'my_lucky_host'
+    dummy_log_record.job_id = 777
+    dummy_log_record.ansible_facts = {
         "ansible_kernel": "4.4.66-boot2docker",
         "ansible_machine": "x86_64",
         "ansible_swapfree_mb": 4663,
     }
-    record.ansible_facts_modified = datetime.datetime.now(tzutc()).isoformat()
-    sent_payloads = handler.emit(record)
+    dummy_log_record.ansible_facts_modified = datetime.datetime.now(tzutc()).isoformat()
+    sent_payloads = handler.emit(dummy_log_record)
 
     assert len(sent_payloads) == 1
-    assert sent_payloads[0]['ansible_facts'] == record.ansible_facts
-    assert sent_payloads[0]['ansible_facts_modified'] == record.ansible_facts_modified
+    assert sent_payloads[0]['ansible_facts'] == dummy_log_record.ansible_facts
+    assert sent_payloads[0]['ansible_facts_modified'] == dummy_log_record.ansible_facts_modified
     assert sent_payloads[0]['level'] == 'INFO'
     assert sent_payloads[0]['logger_name'] == 'awx.analytics.system_tracking'
-    assert sent_payloads[0]['job_id'] == record.job_id
-    assert sent_payloads[0]['inventory_id'] == record.inventory_id
-    assert sent_payloads[0]['host_name'] == record.host_name
+    assert sent_payloads[0]['job_id'] == dummy_log_record.job_id
+    assert sent_payloads[0]['inventory_id'] == dummy_log_record.inventory_id
+    assert sent_payloads[0]['host_name'] == dummy_log_record.host_name
 
 
 @pytest.mark.parametrize('host, port, normalized, hostname_only', [
@@ -236,16 +208,18 @@ def test_https_logging_handler_connectivity_test(http_adapter, status, reason, e
         def emit(self, record):
             return super(FakeHTTPSHandler, self).emit(record)
 
-    if exc:
-        with pytest.raises(exc) as e:
-            FakeHTTPSHandler.perform_test(settings)
-        assert str(e).endswith('%s: %s' % (status, reason))
-    else:
-        assert FakeHTTPSHandler.perform_test(settings) is None
+    with mock.patch.object(AWXProxyHandler, 'get_handler_class') as mock_get_class:
+        mock_get_class.return_value = FakeHTTPSHandler
+        if exc:
+            with pytest.raises(exc) as e:
+                AWXProxyHandler().perform_test(settings)
+            assert str(e).endswith('%s: %s' % (status, reason))
+        else:
+            assert AWXProxyHandler().perform_test(settings) is None
 
 
 def test_https_logging_handler_logstash_auth_info():
-    handler = HTTPSHandler(message_type='logstash', username='bob', password='ansible', lvl='INFO')
+    handler = HTTPSHandler(message_type='logstash', username='bob', password='ansible')
     handler._add_auth_information()
     assert isinstance(handler.session.auth, requests.auth.HTTPBasicAuth)
     assert handler.session.auth.username == 'bob'
@@ -261,9 +235,7 @@ def test_https_logging_handler_splunk_auth_info():
 
 def test_https_logging_handler_connection_error(connection_error_adapter,
                                                 dummy_log_record):
-    handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
-                           message_type='logstash', lvl='INFO',
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler = HTTPSHandler(host='127.0.0.1', message_type='logstash')
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', connection_error_adapter)
 
@@ -289,9 +261,7 @@ def test_https_logging_handler_connection_error(connection_error_adapter,
 @pytest.mark.parametrize('message_type', ['logstash', 'splunk'])
 def test_https_logging_handler_emit_without_cred(http_adapter, dummy_log_record,
                                                  message_type):
-    handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
-                           message_type=message_type, lvl='INFO',
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler = HTTPSHandler(host='127.0.0.1', message_type=message_type)
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', http_adapter)
     async_futures = handler.emit(dummy_log_record)
@@ -312,10 +282,9 @@ def test_https_logging_handler_emit_without_cred(http_adapter, dummy_log_record,
 
 def test_https_logging_handler_emit_logstash_with_creds(http_adapter,
                                                         dummy_log_record):
-    handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
+    handler = HTTPSHandler(host='127.0.0.1',
                            username='user', password='pass',
-                           message_type='logstash', lvl='INFO',
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+                           message_type='logstash')
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', http_adapter)
     async_futures = handler.emit(dummy_log_record)
@@ -328,9 +297,8 @@ def test_https_logging_handler_emit_logstash_with_creds(http_adapter,
 
 def test_https_logging_handler_emit_splunk_with_creds(http_adapter,
                                                       dummy_log_record):
-    handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
-                           password='pass', message_type='splunk', lvl='INFO',
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler = HTTPSHandler(host='127.0.0.1',
+                           password='pass', message_type='splunk')
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', http_adapter)
     async_futures = handler.emit(dummy_log_record)
@@ -351,9 +319,7 @@ def test_encode_payload_for_socket(payload, encoded_payload):
 
 
 def test_udp_handler_create_socket_at_init():
-    handler = UDPHandler(host='127.0.0.1', port=4399,
-                         enabled_flag=True, message_type='splunk', lvl='INFO',
-                         enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler = UDPHandler(host='127.0.0.1', port=4399)
     assert hasattr(handler, 'socket')
     assert isinstance(handler.socket, socket.socket)
     assert handler.socket.family == socket.AF_INET
@@ -361,9 +327,7 @@ def test_udp_handler_create_socket_at_init():
 
 
 def test_udp_handler_send(dummy_log_record):
-    handler = UDPHandler(host='127.0.0.1', port=4399,
-                         enabled_flag=True, message_type='splunk', lvl='INFO',
-                         enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler = UDPHandler(host='127.0.0.1', port=4399)
     handler.setFormatter(LogstashFormatter())
     with mock.patch('awx.main.utils.handlers._encode_payload_for_socket', return_value="des") as encode_mock,\
             mock.patch.object(handler, 'socket') as socket_mock:
@@ -373,9 +337,7 @@ def test_udp_handler_send(dummy_log_record):
 
 
 def test_tcp_handler_send(fake_socket, dummy_log_record):
-    handler = TCPHandler(host='127.0.0.1', port=4399, tcp_timeout=5,
-                         enabled_flag=True, message_type='splunk', lvl='INFO',
-                         enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler = TCPHandler(host='127.0.0.1', port=4399, tcp_timeout=5)
     handler.setFormatter(LogstashFormatter())
     with mock.patch('socket.socket', return_value=fake_socket) as sok_init_mock,\
             mock.patch('select.select', return_value=([], [fake_socket], [])):
@@ -388,9 +350,7 @@ def test_tcp_handler_send(fake_socket, dummy_log_record):
 
 
 def test_tcp_handler_return_if_socket_unavailable(fake_socket, dummy_log_record):
-    handler = TCPHandler(host='127.0.0.1', port=4399, tcp_timeout=5,
-                         enabled_flag=True, message_type='splunk', lvl='INFO',
-                         enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler = TCPHandler(host='127.0.0.1', port=4399, tcp_timeout=5)
     handler.setFormatter(LogstashFormatter())
     with mock.patch('socket.socket', return_value=fake_socket) as sok_init_mock,\
             mock.patch('select.select', return_value=([], [], [])):
@@ -403,9 +363,7 @@ def test_tcp_handler_return_if_socket_unavailable(fake_socket, dummy_log_record)
 
 
 def test_tcp_handler_log_exception(fake_socket, dummy_log_record):
-    handler = TCPHandler(host='127.0.0.1', port=4399, tcp_timeout=5,
-                         enabled_flag=True, message_type='splunk', lvl='INFO',
-                         enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler = TCPHandler(host='127.0.0.1', port=4399, tcp_timeout=5)
     handler.setFormatter(LogstashFormatter())
     with mock.patch('socket.socket', return_value=fake_socket) as sok_init_mock,\
             mock.patch('select.select', return_value=([], [], [])),\

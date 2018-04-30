@@ -149,8 +149,6 @@ SERVICE_NAME_DICT = {
     "uwsgi": "uwsgi",
     "daphne": "daphne",
     "nginx": "nginx"}
-# Used for sending commands in automatic restart
-UWSGI_FIFO_LOCATION = '/awxfifo'
 
 try:
     socket.gethostbyname('docker.for.mac.internal')

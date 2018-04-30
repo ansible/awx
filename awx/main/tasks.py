@@ -29,7 +29,7 @@ except Exception:
 
 # Celery
 from celery import Task, shared_task, Celery
-from celery.signals import celeryd_init, worker_process_init, worker_shutdown, worker_ready, celeryd_after_setup
+from celery.signals import celeryd_init, worker_shutdown, worker_ready, celeryd_after_setup
 
 # Django
 from django.conf import settings
@@ -59,10 +59,9 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             wrap_args_with_proot, OutputEventFilter, OutputVerboseFilter, ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, get_type_for_model, extract_ansible_vars)
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
-from awx.main.utils.reload import restart_local_services, stop_local_services
+from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.ha import update_celery_worker_routes, register_celery_worker_queues
-from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 from awx.conf import settings_registry
 
@@ -115,15 +114,6 @@ def celery_startup(conf=None, **kwargs):
                 sch.save()
         except Exception:
             logger.exception(six.text_type("Failed to rebuild schedule {}.").format(sch))
-
-
-@worker_process_init.connect
-def task_set_logger_pre_run(*args, **kwargs):
-    try:
-        cache.close()
-        configure_external_logger(settings, is_startup=False)
-    except Exception:
-        logger.exception('Encountered error on initial log configuration.')
 
 
 @worker_shutdown.connect
@@ -200,10 +190,6 @@ def handle_setting_changes(self, setting_keys):
     cache_keys = set(setting_keys)
     logger.debug('cache delete_many(%r)', cache_keys)
     cache.delete_many(cache_keys)
-    for key in cache_keys:
-        if key.startswith('LOG_AGGREGATOR_'):
-            restart_local_services(['uwsgi', 'celery', 'beat', 'callback'])
-            break
 
 
 @shared_task(bind=True, exchange='tower_broadcast_all')

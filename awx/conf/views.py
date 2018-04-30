@@ -21,7 +21,7 @@ from awx.api.generics import *  # noqa
 from awx.api.permissions import IsSuperUser
 from awx.api.versioning import reverse, get_request_version
 from awx.main.utils import *  # noqa
-from awx.main.utils.handlers import BaseHTTPSHandler, UDPHandler, LoggingConnectivityException
+from awx.main.utils.handlers import AWXProxyHandler, LoggingConnectivityException
 from awx.main.tasks import handle_setting_changes
 from awx.conf.license import get_licensed_features
 from awx.conf.models import Setting
@@ -198,12 +198,9 @@ class SettingLoggingTest(GenericAPIView):
             mock_settings = MockSettings()
             for k, v in serializer.validated_data.items():
                 setattr(mock_settings, k, v)
-            mock_settings.LOG_AGGREGATOR_LEVEL = 'DEBUG'
+            AWXProxyHandler().perform_test(custom_settings=mock_settings)
             if mock_settings.LOG_AGGREGATOR_PROTOCOL.upper() == 'UDP':
-                UDPHandler.perform_test(mock_settings)
                 return Response(status=status.HTTP_201_CREATED)
-            else:
-                BaseHTTPSHandler.perform_test(mock_settings)
         except LoggingConnectivityException as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(status=status.HTTP_200_OK)

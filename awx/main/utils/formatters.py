@@ -9,6 +9,8 @@ import logging
 
 import six
 
+from django.conf import settings
+
 
 class TimeFormatter(logging.Formatter):
     '''
@@ -20,15 +22,6 @@ class TimeFormatter(logging.Formatter):
 
 
 class LogstashFormatter(LogstashFormatterVersion1):
-    def __init__(self, **kwargs):
-        settings_module = kwargs.pop('settings_module', None)
-        ret = super(LogstashFormatter, self).__init__(**kwargs)
-        if settings_module:
-            self.host_id = getattr(settings_module, 'CLUSTER_HOST_ID', None)
-            if hasattr(settings_module, 'LOG_AGGREGATOR_TOWER_UUID'):
-                self.tower_uuid = settings_module.LOG_AGGREGATOR_TOWER_UUID
-            self.message_type = getattr(settings_module, 'LOG_AGGREGATOR_TYPE', 'other')
-        return ret
 
     def reformat_data_for_log(self, raw_data, kind=None):
         '''
@@ -147,6 +140,15 @@ class LogstashFormatter(LogstashFormatterVersion1):
         if record.name.startswith('awx.analytics'):
             log_kind = record.name[len('awx.analytics.'):]
             fields = self.reformat_data_for_log(fields, kind=log_kind)
+        # General AWX metadata
+        for log_name, setting_name in [
+                ('type', 'LOG_AGGREGATOR_TYPE'),
+                ('cluster_host_id', 'CLUSTER_HOST_ID'),
+                ('tower_uuid', 'LOG_AGGREGATOR_TOWER_UUID')]:
+            if hasattr(settings, setting_name):
+                fields[log_name] = getattr(settings, setting_name, None)
+            elif log_name == 'type':
+                fields[log_name] = 'other'
         return fields
 
     def format(self, record):
@@ -158,17 +160,11 @@ class LogstashFormatter(LogstashFormatterVersion1):
             '@timestamp': self.format_timestamp(record.created),
             'message': record.getMessage(),
             'host': self.host,
-            'type': self.message_type,
 
             # Extra Fields
             'level': record.levelname,
             'logger_name': record.name,
         }
-
-        if getattr(self, 'tower_uuid', None):
-            message['tower_uuid'] = self.tower_uuid
-        if getattr(self, 'host_id', None):
-            message['cluster_host_id'] = self.host_id
 
         # Add extra fields
         message.update(self.get_extra_fields(record))
