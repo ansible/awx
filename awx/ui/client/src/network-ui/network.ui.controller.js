@@ -52,7 +52,7 @@ var NetworkUIController = function($scope,
 
   $scope.initial_messages = [];
   if (!$scope.disconnected) {
-      $scope.control_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
+      $scope.control_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/topology/?inventory_id=" + $scope.inventory_id,
                                                          null,
                                                          {debug: false, reconnectInterval: 300});
       if ($scope.tests_enabled) {
