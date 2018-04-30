@@ -128,21 +128,6 @@ This can be tuned by overriding the variables found in [/installer/openshift/def
 
 For more detail on how resource requests are formed see: [https://docs.openshift.com/container-platform/latest/dev_guide/compute_resources.html#dev-compute-resources](https://docs.openshift.com/container-platform/latest/dev_guide/compute_resources.html#dev-compute-resources)
 
-#### Deploying to Minishift
-
-Install Minishift by following the [installation guide](https://docs.openshift.org/latest/minishift/getting-started/installing.html).
-
-The Minishift VM contains a Docker daemon, which you can use to build the AWX images. This is generally the approach you should take, and we recommend doing so. To use this instance, run the following command to setup your environment:
-
-```bash
-# Set DOCKER environment variable to point to the Minishift VM
-$ eval $(minishift docker-env)
-```
-
-**Note**
-
-> If you choose to not use the Docker instance running inside the VM, and build the images externally, you will have to enable the OpenShift cluster to access the images. This involves pushing the images to an external Docker registry, and granting the cluster access to it, or exposing the internal registry, and pushing the images into it.
-
 ### Pre-build steps
 
 Before starting the build process, review the [inventory](./installer/inventory) file, and uncomment and provide values for the following variables found in the `[all:vars]` section:
@@ -151,13 +136,22 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > IP address or hostname of the OpenShift cluster. If you're using Minishift, this will be the value returned by `minishift ip`.
 
-*awx_openshift_project*
+
+*openshift_skip_tls_verify*
+
+> Boolean. Set to True if using self-signed certs.
+
+*openshift_project*
 
 > Name of the OpenShift project that will be created, and used as the namespace for the AWX app. Defaults to *awx*.
 
 *openshift_user*
 
 > Username of the OpenShift user that will create the project, and deploy the application. Defaults to *developer*.
+
+*openshift_pg_emptydir*
+
+> Boolean. Set to True to use an emptyDir volume when deploying the PostgreSQL pod. Note: This should only be used for demo and testing purposes.
 
 *docker_registry*
 
@@ -171,11 +165,30 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > Username of the user that will push images to the registry. Will generally match the *openshift_user* value. Defaults to *developer*. This is not needed if you are using official hosted images.
 
+#### Deploying to Minishift
+
+Install Minishift by following the [installation guide](https://docs.openshift.org/latest/minishift/getting-started/installing.html).
+
+The recommended minimum resources for your Minishift VM:
+
+```bash
+$ minishift start --cpus=4 --memory=8GB
+```
+
+The Minishift VM contains a Docker daemon, which you can use to build the AWX images. This is generally the approach you should take, and we recommend doing so. To use this instance, run the following command to setup your environment:
+
+```bash
+# Set DOCKER environment variable to point to the Minishift VM
+$ eval $(minishift docker-env)
+```
+
+**Note**
+
+> If you choose to not use the Docker instance running inside the VM, and build the images externally, you will have to enable the OpenShift cluster to access the images. This involves pushing the images to an external Docker registry, and granting the cluster access to it, or exposing the internal registry, and pushing the images into it.
+
 #### PostgreSQL
 
-AWX requires access to a PostgreSQL database, and by default, one will be created and deployed in a pod. The database is configured for persistence and will create a persistent volume claim named `postgresql`. By default it will claim 5GB from the available persistent volume pool. This can be tuned by setting a variable in the inventory file or on the command line during the `ansible-playbook` run.
-
-    ansible-playbook ... -e pg_volume_capacity=n
+By default, AWX will deploy a PostgreSQL pod inside of your cluster. You will need to create a [Persistent Volume Claim](https://docs.openshift.org/latest/dev_guide/persistent_volumes.html) which is named `postgresql` by default, and can be overridden by setting the `openshift_pg_pvc_name` variable. For testing and demo purposes, you may set `openshift_pg_emptydir=yes`.
 
 If you wish to use an external database, in the inventory file, set the value of `pg_hostname`, and update `pg_username`, `pg_password`, `pg_database`, and `pg_port` with the connection information. When setting `pg_hostname` the installer will assume you have configured the database in that location and will not launch the postgresql pod.
 
@@ -317,7 +330,7 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 > Prior to running the installer, make sure you've configured the context for the cluster you'll be installing to. This is how the installer knows which cluster to connect to and what authentication to use
 
-*awx_kubernetes_namespace*
+*kubernetes_namespace*
 
 > Name of the Kubernetes namespace where the AWX resources will be installed. This will be created if it doesn't exist
 
