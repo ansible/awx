@@ -9,8 +9,6 @@ import djcelery
 import six
 from datetime import timedelta
 
-from kombu.common import Broadcast
-
 # global settings
 from django.conf import global_settings
 # ugettext lazy
@@ -466,9 +464,7 @@ CELERYD_POOL_RESTARTS = True
 CELERYD_AUTOSCALER = 'awx.main.utils.autoscale:DynamicAutoScaler'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
-CELERY_QUEUES = (
-    Broadcast('tower_broadcast_all'),
-)
+CELERY_QUEUES = ()
 CELERY_ROUTES = {}
 
 
