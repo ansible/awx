@@ -171,7 +171,7 @@ function PromptService (Empty, $filter)  {
                 if (key === "ssh_key_unlock") {
                     launchData.credential_passwords.ssh_key_unlock = val.value;
                 } else if (key !== "vault") {
-                    launchData.credential_passwords[`${key}_password`] = val.value;
+                    launchData.credential_passwords[`${key}`] = val.value;
                 } else {
                     _.each(val, (vaultCred) => {
                         launchData.credential_passwords[vaultCred.vault_id ? `${key}_password.${vaultCred.vault_id}` : `${key}_password`] = vaultCred.value;
@@ -198,7 +198,7 @@ function PromptService (Empty, $filter)  {
                 if (key === "ssh_key_unlock") {
                     launchData.credential_passwords.ssh_key_unlock = val.value;
                 } else if (key !== "vault") {
-                    launchData.credential_passwords[`${key}_password`] = val.value;
+                    launchData.credential_passwords[`${key}`] = val.value;
                 } else {
                     _.each(val, (vaultCred) => {
                         launchData.credential_passwords[vaultCred.vault_id ? `${key}_password.${vaultCred.vault_id}` : `${key}_password`] = vaultCred.value;

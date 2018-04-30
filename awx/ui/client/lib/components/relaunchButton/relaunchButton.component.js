@@ -33,11 +33,12 @@ function atRelaunchCtrl (
             ) {
                 const jobPromises = [
                     jobObj.request('get', vm.job.id),
-                    jobTemplate.optionsLaunch(vm.job.unified_job_template)
+                    jobTemplate.optionsLaunch(vm.job.unified_job_template),
+                    jobObj.getCredentials(vm.job.id)
                 ];
 
                 $q.all(jobPromises)
-                    .then(([jobRes, launchOptions]) => {
+                    .then(([jobRes, launchOptions, jobCreds]) => {
                         const populatedJob = jobRes.data;
                         const jobTypeChoices = _.get(
                             launchOptions,
@@ -68,7 +69,11 @@ function atRelaunchCtrl (
                             relaunchHostType: option ? (option.name).toLowerCase() : null,
                             prompts: {
                                 credentials: {
-                                    value: populatedJob.summary_fields.credentials || []
+                                    value: populatedJob.summary_fields.credentials ?
+                                        _.merge(
+                                            jobCreds.data.results,
+                                            populatedJob.summary_fields.credentials
+                                        ) : []
                                 },
                                 variables: {
                                     value: populatedJob.extra_vars

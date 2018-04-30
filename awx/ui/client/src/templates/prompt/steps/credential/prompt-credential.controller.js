@@ -35,9 +35,9 @@ export default
                 if(cred.passwords_needed) {
                     cred.passwords_needed.forEach((passwordNeeded => {
                         if(passwordNeeded === 'ssh_password') {
-                            delete scope.promptData.prompts.credentials.passwords.ssh;
+                            delete scope.promptData.prompts.credentials.passwords.ssh_password;
                         } else if(passwordNeeded === 'become_password') {
-                            delete scope.promptData.prompts.credentials.passwords.become;
+                            delete scope.promptData.prompts.credentials.passwords.become_password;
                         } else if(passwordNeeded === 'ssh_key_unlock') {
                             delete scope.promptData.prompts.credentials.passwords.ssh_key_unlock;
                         } else if(passwordNeeded.startsWith("vault_password")) {
@@ -50,10 +50,10 @@ export default
                     }));
                 } else if(cred.inputs && !_.isEmpty(cred.inputs)) {
                     if(cred.inputs.password && cred.inputs.password === "ASK") {
-                        delete scope.promptData.prompts.credentials.passwords.ssh;
+                        delete scope.promptData.prompts.credentials.passwords.ssh_password;
                     }
                     if(cred.inputs.become_password && cred.inputs.become_password === "ASK") {
-                        delete scope.promptData.prompts.credentials.passwords.become;
+                        delete scope.promptData.prompts.credentials.passwords.become_password;
                     }
                     if(cred.inputs.ssh_key_unlock && cred.inputs.ssh_key_unlock === "ASK") {
                         delete scope.promptData.prompts.credentials.passwords.ssh_key_unlock;
@@ -72,13 +72,13 @@ export default
             let updateNeededPasswords = (cred) => {
                 if(cred.inputs) {
                     if(cred.inputs.password && cred.inputs.password === "ASK") {
-                        scope.promptData.prompts.credentials.passwords.ssh = {
+                        scope.promptData.prompts.credentials.passwords.ssh_password = {
                             id: cred.id,
                             name: cred.name
                         };
                     }
                     if(cred.inputs.become_password && cred.inputs.become_password === "ASK") {
-                        scope.promptData.prompts.credentials.passwords.become = {
+                        scope.promptData.prompts.credentials.passwords.become_password = {
                             id: cred.id,
                             name: cred.name
                         };
@@ -291,10 +291,10 @@ export default
                             };
 
                             if(passwordNeeded === "ssh_password") {
-                                scope.promptData.prompts.credentials.passwords.ssh = credPassObj;
+                                scope.promptData.prompts.credentials.passwords.ssh_password = credPassObj;
                             }
                             if(passwordNeeded === "become_password") {
-                                scope.promptData.prompts.credentials.passwords.become = credPassObj;
+                                scope.promptData.prompts.credentials.passwords.become_password = credPassObj;
                             }
                             if(passwordNeeded === "ssh_key_unlock") {
                                 scope.promptData.prompts.credentials.passwords.ssh_key_unlock = credPassObj;

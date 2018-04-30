@@ -56,10 +56,12 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                     .then( (response) => {
                         vm.promptDataClone.prompts.credentials.credentialTypes = {};
                         vm.promptDataClone.prompts.credentials.credentialTypeOptions = [];
+                        let machineCredTypeId = null;
                         response.data.results.forEach((credentialTypeRow => {
                             vm.promptDataClone.prompts.credentials.credentialTypes[credentialTypeRow.id] = credentialTypeRow.kind;
                             if(credentialTypeRow.kind.match(/^(cloud|net|ssh|vault)$/)) {
                                 if(credentialTypeRow.kind === 'ssh') {
+                                    machineCredTypeId = credentialTypeRow.id;
                                     vm.promptDataClone.prompts.credentials.credentialKind = credentialTypeRow.id.toString();
                                 }
                                 vm.promptDataClone.prompts.credentials.credentialTypeOptions.push({
@@ -72,40 +74,33 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                         vm.promptDataClone.prompts.credentials.passwords = {};
 
                         if(vm.promptDataClone.launchConf.passwords_needed_to_start) {
+                            let machineCredPassObj = null;
                             vm.promptDataClone.launchConf.passwords_needed_to_start.forEach((passwordNeeded) => {
-                                if (passwordNeeded === "ssh_password") {
-                                    vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
-                                        defaultCredential.passwords_needed.forEach((neededPassword) => {
-                                            if (neededPassword === "ssh_password") {
-                                                vm.promptDataClone.prompts.credentials.passwords.ssh = {
+                                if (passwordNeeded === "ssh_password" ||
+                                    passwordNeeded === "become_password" ||
+                                    passwordNeeded === "ssh_key_unlock"
+                                ) {
+                                    if (!machineCredPassObj) {
+                                        vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
+                                            if (defaultCredential.kind && defaultCredential.kind === "ssh") {
+                                                machineCredPassObj = {
                                                     id: defaultCredential.id,
                                                     name: defaultCredential.name
                                                 };
+                                            } else if (defaultCredential.passwords_needed) {
+                                                defaultCredential.passwords_needed.forEach((neededPassword) => {
+                                                    if (neededPassword === passwordNeeded) {
+                                                        machineCredPassObj = {
+                                                            id: defaultCredential.id,
+                                                            name: defaultCredential.name
+                                                        };
+                                                    }
+                                                });
                                             }
                                         });
-                                    });
-                                } else if (passwordNeeded === "become_password") {
-                                    vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
-                                        defaultCredential.passwords_needed.forEach((neededPassword) => {
-                                            if (neededPassword === "become_password") {
-                                                vm.promptDataClone.prompts.credentials.passwords.become = {
-                                                    id: defaultCredential.id,
-                                                    name: defaultCredential.name
-                                                };
-                                            }
-                                        });
-                                    });
-                                } else if (passwordNeeded === "ssh_key_unlock") {
-                                    vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
-                                        defaultCredential.passwords_needed.forEach((neededPassword) => {
-                                            if (neededPassword === "ssh_key_unlock") {
-                                                vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock = {
-                                                    id: defaultCredential.id,
-                                                    name: defaultCredential.name
-                                                };
-                                            }
-                                        });
-                                    });
+                                    }
+
+                                    vm.promptDataClone.prompts.credentials.passwords[passwordNeeded] = angular.copy(machineCredPassObj);
                                 } else if (passwordNeeded.startsWith("vault_password")) {
                                     let vault_id = null;
                                     if (passwordNeeded.includes('.')) {
@@ -119,12 +114,15 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                                     // Loop across the default credentials to find the name of the
                                     // credential that requires a password
                                     vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
-                                        if (defaultCredential.vault_id === vault_id) {
-                                            vm.promptDataClone.prompts.credentials.passwords.vault.push({
-                                                id: defaultCredential.id,
-                                                name: defaultCredential.name,
-                                                vault_id: defaultCredential.vault_id
-                                            });
+                                        if (vm.promptDataClone.prompts.credentials.credentialTypes[defaultCredential.credential_type] === "vault") {
+                                            let defaultCredVaultId = defaultCredential.vault_id || _.get(defaultCredential, 'inputs.vault_id') || null;
+                                            if (defaultCredVaultId === vault_id) {
+                                                vm.promptDataClone.prompts.credentials.passwords.vault.push({
+                                                    id: defaultCredential.id,
+                                                    name: defaultCredential.name,
+                                                    vault_id: defaultCredVaultId
+                                                });
+                                            }
                                         }
                                     });
                                 }
