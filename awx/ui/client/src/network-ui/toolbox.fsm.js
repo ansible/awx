@@ -234,8 +234,19 @@ _Start.prototype.start.transitions = ['Ready'];
 
 _Move.prototype.onMouseUp = function (controller) {
 
-    controller.changeState(Dropping);
+    var i = 0;
+    var toolbox = controller.toolbox;
 
+    if (controller.scope.mouseX <  controller.toolbox.width) {
+        for(i = 0; i < toolbox.items.length; i++) {
+            toolbox.items[i].selected = false;
+        }
+        toolbox.selected_item = null;
+        controller.changeState(Ready);
+
+    } else {
+        controller.changeState(Dropping);
+    }
 };
 _Move.prototype.onMouseUp.transitions = ['Dropping'];
 
