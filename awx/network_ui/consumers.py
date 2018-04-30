@@ -1,6 +1,6 @@
 # Copyright (c) 2017 Red Hat, Inc
 from channels import Group
-from channels.sessions import channel_session
+from channels.auth import channel_session_user, channel_session_user_from_http
 from awx.network_ui.models import Topology, Device, Link, Client, Interface
 from awx.network_ui.models import TopologyInventory
 import urlparse
@@ -189,8 +189,15 @@ class NetworkingEvents(object):
 networking_events_dispatcher = NetworkingEvents()
 
 
-@channel_session
+@channel_session_user_from_http
 def ws_connect(message):
+    if not message.user.is_authenticated():
+        logger.error("Request user is not authenticated to use websocket.")
+        message.reply_channel.send({"close": True})
+        return
+    else:
+        message.reply_channel.send({"accept": True})
+
     data = urlparse.parse_qs(message.content['query_string'])
     inventory_id = parse_inventory_id(data)
     topology_ids = list(TopologyInventory.objects.filter(inventory_id=inventory_id).values_list('pk', flat=True))
@@ -268,7 +275,7 @@ def send_snapshot(channel, topology_id):
     channel.send({"text": json.dumps(["Snapshot", snapshot])})
 
 
-@channel_session
+@channel_session_user
 def ws_message(message):
     # Send to all clients editing the topology
     Group("topology-%s" % message.channel_session['topology_id']).send({"text": message['text']})
@@ -278,7 +285,7 @@ def ws_message(message):
                                          "client": message.channel_session['client_id']})
 
 
-@channel_session
+@channel_session_user
 def ws_disconnect(message):
     if 'topology_id' in message.channel_session:
         Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
