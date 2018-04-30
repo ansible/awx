@@ -28,9 +28,6 @@ export default ['$scope', 'Rest', 'TeamList', 'Prompt',
             $scope.list = list;
             $scope[`${list.iterator}_dataset`] = Dataset.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-            _.forEach($scope[list.name], (team) => {
-                team.organization_name = team.summary_fields.organization.name;
-            });
 
             $scope.selected = [];
         }

@@ -28,7 +28,7 @@ export default ['i18n', function(i18n) {
             },
             organization: {
                 label: i18n._('Organization'),
-                ngBind: 'team.organization_name',
+                ngBind: 'team.summary_fields.organization.name',
                 sourceModel: 'organization',
                 sourceField: 'name',
                 columnClass: 'col-md-3 hidden-sm hidden-xs',
