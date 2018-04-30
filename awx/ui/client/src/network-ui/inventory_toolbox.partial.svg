@@ -6,11 +6,7 @@
       ng-attr-width="{{toolbox.width}}"
       ng-attr-height="{{toolbox.height}}"
       rx=5></rect>
-<text
-    class="NetworkUI__toolbox--title"
-    ng-attr-transform="translate({{toolbox.title_coordinates.x}},{{toolbox.title_coordinates.y}})">
-        {{toolbox.name}}
-</text>
+
 
 <g clip-path="url(#inventory-toolbox-clip-path)">
 <g ng-attr-transform="translate({{toolbox.x}}, {{toolbox.y+20}})">
@@ -92,4 +88,10 @@
 </g> <!-- end selected item -->
 </g> <!-- ng-if -->
 </g> <!-- ng-if toolbox.enabled -->
+<text
+    class="NetworkUI__toolbox--title"
+    filter="url(#background)"
+    ng-attr-transform="translate({{toolbox.title_coordinates.x}},{{toolbox.title_coordinates.y}})">
+        {{toolbox.name}}
+</text>
 </g> <!-- ng-if !hide_menus -->
