@@ -14,7 +14,6 @@ from datetime import timedelta
 
 # OAuth2
 from oauthlib.common import generate_token
-from oauth2_provider.settings import oauth2_settings
 
 # Django
 from django.conf import settings
@@ -1024,7 +1023,7 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
         validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
-            seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+            seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
         obj = super(OAuth2TokenSerializer, self).create(validated_data)
         obj.save()
@@ -1176,7 +1175,7 @@ class OAuth2TokenSerializer(BaseSerializer):
         validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
-            seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+            seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
         obj = super(OAuth2TokenSerializer, self).create(validated_data)
         if obj.application and obj.application.user:
@@ -1239,7 +1238,7 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
         validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
-            seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+            seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
         obj = super(OAuth2AuthorizedTokenSerializer, self).create(validated_data)
         if obj.application and obj.application.user:
@@ -1306,7 +1305,7 @@ class OAuth2PersonalTokenSerializer(BaseSerializer):
         validated_data['user'] = self.context['request'].user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
-            seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+            seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
         validated_data['application'] = None
         obj = super(OAuth2PersonalTokenSerializer, self).create(validated_data)

@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 # AWX
 from awx.conf import fields, register
 from awx.api.fields import OAuth2ProviderField
+from oauth2_provider.settings import oauth2_settings
 
 
 register(
@@ -36,7 +37,7 @@ register(
 register(
     'OAUTH2_PROVIDER',
     field_class=OAuth2ProviderField,
-    default={'ACCESS_TOKEN_EXPIRE_SECONDS': 315360000000,
+    default={'ACCESS_TOKEN_EXPIRE_SECONDS': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
              'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600},
     label=_('OAuth 2 Timeout Settings'),
     help_text=_('Dictionary for customizing OAuth 2 timeouts, available items are '
