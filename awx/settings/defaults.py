@@ -454,6 +454,9 @@ BROKER_POOL_LIMIT = None
 BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_EVENT_QUEUE_TTL = 5
 CELERY_DEFAULT_QUEUE = 'awx_private_queue'
+CELERY_DEFAULT_EXCHANGE = 'awx_private_queue'
+CELERY_DEFAULT_ROUTING_KEY = 'awx_private_queue'
+CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -465,7 +468,7 @@ CELERYD_AUTOSCALER = 'awx.main.utils.autoscale:DynamicAutoScaler'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
 CELERY_QUEUES = ()
-CELERY_ROUTES = {}
+CELERY_ROUTES = ('awx.main.utils.ha.AWXCeleryRouter',)
 
 
 def log_celery_failure(*args):
