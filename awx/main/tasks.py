@@ -189,7 +189,7 @@ def apply_cluster_membership_policies(self):
         handle_ha_toplogy_changes.apply([])
 
 
-@shared_task(queue='tower_broadcast_all', bind=True)
+@shared_task(exchange='tower_broadcast_all', bind=True)
 def handle_setting_changes(self, setting_keys):
     orig_len = len(setting_keys)
     for i in range(orig_len):
@@ -208,7 +208,7 @@ def handle_setting_changes(self, setting_keys):
             restart_local_services(['uwsgi'])
 
 
-@shared_task(bind=True, queue='tower_broadcast_all')
+@shared_task(bind=True, exchange='tower_broadcast_all')
 def handle_ha_toplogy_changes(self):
     (changed, instance) = Instance.objects.get_or_register()
     if changed:
