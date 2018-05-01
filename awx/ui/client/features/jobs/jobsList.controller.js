@@ -174,7 +174,7 @@ function ListJobsController (
             resourceName: $filter('sanitize')(job.name),
             body: deleteModalBody,
             action,
-            actionText: strings.get('CANCEL')
+            actionText: strings.get('OK')
         });
     };
 
