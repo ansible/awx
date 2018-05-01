@@ -169,8 +169,7 @@ function JobsRun ($stateRegistry) {
         url: '/jobz/:type/:id?job_event_search',
         route: '/jobz/:type/:id?job_event_search',
         data: {
-            activityStream: true,
-            activityStreamTarget: 'jobs'
+            activityStream: false,
         },
         views: {
             '@': {
