@@ -121,8 +121,8 @@ export default ['i18n', function(i18n) {
                 mode: 'all',
                 ngClick: "createHost()",
                 awToolTip: i18n._("Create a new host"),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ADD HOST'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 ngShow: 'canAdd',
                 dataPlacement: "top",
             }

@@ -403,8 +403,8 @@ function(NotificationsList, i18n) {
                             ngClick: "$state.go('.add')",
                             label: 'Add',
                             awToolTip: i18n._('Add a permission'),
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ' + i18n._('ADD'),
+                            actionClass: 'at-Button--add',
+                            actionId: 'button-add',
                             ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                         }
                     },

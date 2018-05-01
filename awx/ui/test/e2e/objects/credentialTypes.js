@@ -28,7 +28,7 @@ const addEditPanel = {
 const listPanel = {
     selector: 'div[ui-view="list"]',
     elements: {
-        add: '.List-buttonSubmit',
+        add: '#button-add',
         badge: 'div[class="List-titleBadge]',
         titleText: 'div[class="List-titleText"]',
         noitems: 'div[class="List-noItems"]'

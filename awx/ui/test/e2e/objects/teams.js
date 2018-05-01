@@ -58,7 +58,7 @@ module.exports = {
             elements: {
                 badge: 'span[class~="badge"]',
                 title: 'div[class="List-titleText"]',
-                add: 'button[class~="List-buttonSubmit"]'
+                add: '#button-add'
             },
             sections: {
                 search,

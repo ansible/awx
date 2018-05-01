@@ -54,8 +54,8 @@ export default ['i18n', function(i18n) {
                 type: 'buttonDropdown',
                 basePaths: ['templates'],
                 awToolTip: i18n._('Create a new template'),
-                actionClass: 'btn List-dropdownSuccess',
-                buttonContent: '&#43; ' + i18n._('ADD'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 options: [
                     {
                         optionContent: i18n._('Job Template'),

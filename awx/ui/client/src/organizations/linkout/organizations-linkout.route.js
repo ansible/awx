@@ -63,9 +63,9 @@ let lists = [{
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/users`;
             list.searchRowActions = {
                 add: {
-                    buttonContent: '&#43; ADD user',
                     awToolTip: 'Add existing user to organization',
-                    actionClass: 'btn List-buttonSubmit',
+                    actionClass: 'at-Button--add',
+                    actionId: 'button-add',
                     ngClick: 'addUsers()'
                 }
             };
@@ -273,9 +273,8 @@ let lists = [{
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/admins`;
             list.searchRowActions = {
                 add: {
-                    buttonContent: '&#43; ADD administrator',
                     awToolTip: 'Add existing user to organization as administrator',
-                    actionClass: 'btn List-buttonSubmit',
+                    actionClass: 'at-Button--add',
                     ngClick: 'addUsers()'
                 }
             };

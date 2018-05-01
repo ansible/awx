@@ -124,7 +124,7 @@ module.exports = {
         inventories.waitForElementNotVisible('div.spinny');
     },
     'create host': client => {
-        const addHost = './/span[text()="+ ADD HOST"]';
+        const addHost = '.hostsList #button-add';
 
         client.expect.element('#hosts_tab').enabled;
         client.expect.element('#hosts_tab').css('opacity').equal('1');
@@ -136,11 +136,10 @@ module.exports = {
 
         client.expect.element('#hosts_tab').css('background-color').contain('132, 137, 146');
 
-        client.useXpath();
+        client.useCss();
         client.waitForElementVisible(addHost);
         client.expect.element(addHost).enabled;
         client.click(addHost);
-        client.useCss();
 
         client.waitForElementVisible('#host_name');
         client.sendKeys('#host_name', 'localhost');

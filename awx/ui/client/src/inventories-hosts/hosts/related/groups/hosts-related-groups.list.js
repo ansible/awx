@@ -49,8 +49,8 @@ export default ['i18n', function(i18n) {
                 mode: 'all',
                 ngClick: "associateGroup()",
                 awToolTip: i18n._("Associate this host with a new group"),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ASSOCIATE GROUP'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 ngShow: 'canAdd',
                 dataPlacement: "top",
             }

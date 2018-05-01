@@ -66,8 +66,8 @@
                 mode: 'all',
                 ngClick: "createSource()",
                 awToolTip: i18n._("Create a new source"),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ADD SOURCE'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 ngShow: 'canAdd',
                 dataPlacement: "top",
             }

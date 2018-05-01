@@ -883,9 +883,11 @@ input[type="checkbox"].checkbox-no-label {
 
 /* Display list actions next to search widget */
 .list-actions {
-    text-align: right;
-    margin-bottom: -34px;
+    display: flex;
     height: 34px;
+    justify-content: flex-end;
+    margin-bottom: -34px;
+    text-align: right;
 
     .fa-lg {
         vertical-align: -8%;

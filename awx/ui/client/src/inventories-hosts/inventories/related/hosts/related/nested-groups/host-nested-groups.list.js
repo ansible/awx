@@ -67,8 +67,8 @@
                 mode: 'all',
                 ngClick: 'associateGroup()',
                 awToolTip: i18n._("Associate an existing group"),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ASSOCIATE GROUP'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 ngShow: 'canAdd',
                 dataPlacement: "top",
             }

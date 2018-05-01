@@ -6,7 +6,7 @@ import search from './search';
 const permissions = {
     selector: 'div[ui-view="related"]',
     elements: {
-        add: 'button[class="btn List-buttonSubmit"]',
+        add: '#button-add',
         badge: 'div[class="List-titleBadge]',
         titleText: 'div[class="List-titleText"]',
         noitems: 'div[class="List-noItems"]'

@@ -67,8 +67,8 @@
                 mode: 'all',
                 type: 'buttonDropdown',
                 awToolTip: i18n._("Add a group"),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ADD'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 ngShow: 'canAdd',
                 dataPlacement: "top",
                 options: [

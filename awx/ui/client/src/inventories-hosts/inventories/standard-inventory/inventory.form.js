@@ -115,8 +115,8 @@ function(i18n) {
                         label: i18n._('Add'),
                         ngClick: "$state.go('.add')",
                         awToolTip: i18n._('Add a permission'),
-                        actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ADD',
+                        actionClass: 'at-Button--add',
+                        actionId: 'button-add',
                         ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
 
                     }
