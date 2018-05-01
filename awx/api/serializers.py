@@ -4627,6 +4627,11 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('{} is not a valid hostname of an existing instance.').format(instance_name))
         return value
 
+    def validate_name(self, value):
+        if self.instance and self.instance.name == 'tower' and value != 'tower':
+            raise serializers.ValidationError(_('tower instance group name may not be changed.'))
+        return value
+
     def get_jobs_qs(self):
         # Store running jobs queryset in context, so it will be shared in ListView
         if 'running_jobs' not in self.context:

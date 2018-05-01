@@ -87,7 +87,7 @@ def test_delete_instance_group_jobs_running(delete, instance_group_jobs_running,
 
 
 @pytest.mark.django_db
-def test_modify_delete_tower_instance_group_prevented(delete, options, tower_instance_group, user, patch, put):
+def test_delete_rename_tower_instance_group_prevented(delete, options, tower_instance_group, instance_group, user, patch):
     url = reverse("api:instance_group_detail", kwargs={'pk': tower_instance_group.pk})
     super_user = user('bob', True)
 
@@ -98,6 +98,13 @@ def test_modify_delete_tower_instance_group_prevented(delete, options, tower_ins
     assert 'DELETE' not in resp.data['actions']
     assert 'GET' in resp.data['actions']
     assert 'PUT' in resp.data['actions']
+
+    # Rename 'tower' instance group denied
+    patch(url, {'name': 'tower_prime'}, super_user, expect=400)
+
+    # Rename, other instance group OK
+    url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
+    patch(url, {'name': 'foobar'}, super_user, expect=200)
 
 
 @pytest.mark.django_db
