@@ -38,7 +38,7 @@ export default function BuildAnchor($log, $filter) {
                  case 'schedule':
                      // schedule urls depend on the resource they're associated with
                      if (activity.summary_fields.job_template){
-                         url += 'job_templates/' + activity.summary_fields.job_template.id + '/schedules/' + obj.id;
+                         url += 'templates/job_template/' + activity.summary_fields.job_template.id + '/schedules/' + obj.id;
                      }
                      else if (activity.summary_fields.project){
                          url += 'projects/' + activity.summary_fields.project.id + '/schedules/' + obj.id;
