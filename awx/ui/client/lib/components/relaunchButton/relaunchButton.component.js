@@ -23,6 +23,14 @@ function atRelaunchCtrl (
     const jobObj = new Job();
     const jobTemplate = new JobTemplate();
 
+    const updateTooltip = () => {
+        if (vm.job.type === 'job' && vm.job.status === 'failed') {
+            vm.tooltip = strings.get('relaunch.HOSTS');
+        } else {
+            vm.tooltip = strings.get('relaunch.DEFAULT');
+        }
+    };
+
     const checkRelaunchPlaybook = (option) => {
         jobObj.getRelaunch({
             id: vm.job.id
@@ -113,7 +121,7 @@ function atRelaunchCtrl (
 
                 jobObj.postRelaunch(launchParams)
                     .then((launchRes) => {
-                        if (!$state.includes('jobs')) {
+                        if (!$state.is('jobs')) {
                             const relaunchType = launchRes.data.type === 'job' ? 'playbook' : launchRes.data.type;
                             $state.go('jobz', { id: launchRes.data.id, type: relaunchType }, { reload: true });
                         }
@@ -129,13 +137,7 @@ function atRelaunchCtrl (
 
     vm.$onInit = () => {
         vm.showRelaunch = vm.job.type !== 'system_job' && vm.job.summary_fields.user_capabilities.start;
-        vm.showDropdown = vm.job.type === 'job' && vm.job.status === 'failed';
 
-        vm.createDropdown();
-        vm.createTooltips();
-    };
-
-    vm.createDropdown = () => {
         vm.icon = 'icon-launch';
         vm.dropdownTitle = strings.get('relaunch.DROPDOWN_TITLE');
         vm.dropdownOptions = [
@@ -148,14 +150,12 @@ function atRelaunchCtrl (
                 icon: 'icon-host-failed'
             }
         ];
-    };
 
-    vm.createTooltips = () => {
-        if (vm.showDropdown) {
-            vm.tooltip = strings.get('relaunch.HOSTS');
-        } else {
-            vm.tooltip = strings.get('relaunch.DEFAULT');
-        }
+        updateTooltip();
+
+        $scope.$watch('vm.job.status', () => {
+            updateTooltip();
+        });
     };
 
     vm.relaunchJob = () => {
@@ -167,7 +167,7 @@ function atRelaunchCtrl (
                     if (getUpdateRes.data.can_update) {
                         inventorySource.postUpdate(vm.job.inventory_source)
                             .then((postUpdateRes) => {
-                                if (!$state.includes('jobs')) {
+                                if (!$state.is('jobs')) {
                                     $state.go('jobz', { id: postUpdateRes.data.id, type: 'inventory' }, { reload: true });
                                 }
                             }).catch(({ data, status, config }) => {
@@ -191,7 +191,7 @@ function atRelaunchCtrl (
                     if (getUpdateRes.data.can_update) {
                         project.postUpdate(vm.job.project)
                             .then((postUpdateRes) => {
-                                if (!$state.includes('jobs')) {
+                                if (!$state.is('jobs')) {
                                     $state.go('jobz', { id: postUpdateRes.data.id, type: 'project' }, { reload: true });
                                 }
                             }).catch(({ data, status, config }) => {
@@ -213,7 +213,7 @@ function atRelaunchCtrl (
             workflowJob.postRelaunch({
                 id: vm.job.id
             }).then((launchRes) => {
-                if (!$state.includes('jobs')) {
+                if (!$state.is('jobs')) {
                     $state.go('workflowResults', { id: launchRes.data.id }, { reload: true });
                 }
             }).catch(({ data, status, config }) => {
@@ -237,7 +237,7 @@ function atRelaunchCtrl (
                     adHocCommand.postRelaunch({
                         id: vm.job.id
                     }).then((launchRes) => {
-                        if (!$state.includes('jobs')) {
+                        if (!$state.is('jobs')) {
                             $state.go('jobz', { id: launchRes.data.id, type: 'command' }, { reload: true });
                         }
                     }).catch(({ data, status, config }) => {
@@ -262,7 +262,7 @@ function atRelaunchCtrl (
             id: vm.promptData.job,
             relaunchData: PromptService.bundlePromptDataForRelaunch(vm.promptData)
         }).then((launchRes) => {
-            if (!$state.includes('jobs')) {
+            if (!$state.is('jobs')) {
                 $state.go('jobz', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
             }
         }).catch(({ data, status }) => {

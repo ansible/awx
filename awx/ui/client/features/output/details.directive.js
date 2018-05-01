@@ -556,7 +556,7 @@ function AtJobDetailsController (
         vm.labels = getLabelDetails();
 
         // Relaunch and Delete Components
-        vm.job = _.get(resource.model, 'model.GET', {});
+        vm.job = angular.copy(_.get(resource.model, 'model.GET', {}));
         vm.canDelete = resource.model.get('summary_fields.user_capabilities.delete');
 
         vm.cancelJob = cancelJob;
@@ -568,10 +568,14 @@ function AtJobDetailsController (
         };
 
         observe(status.getStarted, getStartDetails, 'started');
-        observe(status.getJobStatus, getStatusDetails, 'status');
         observe(status.getFinished, getFinishDetails, 'finished');
         observe(status.getProjectUpdateId, getProjectUpdateDetails, 'projectUpdate');
         observe(status.getProjectStatus, getProjectStatusDetails, 'projectStatus');
+
+        $scope.$watch(status.getJobStatus, jobStatus => {
+            vm.status = getStatusDetails(jobStatus);
+            vm.job.status = jobStatus;
+        });
     };
 }
 
