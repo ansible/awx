@@ -49,6 +49,7 @@ from crum import impersonate
 # AWX
 from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
+from awx.main.access import access_registry
 from awx.main.models import * # noqa
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError
@@ -64,6 +65,9 @@ from awx.main.utils.pglock import advisory_lock
 from awx.main.utils.ha import update_celery_worker_routes, register_celery_worker_queues
 from awx.main.consumers import emit_channel_notification
 from awx.conf import settings_registry
+
+from rest_framework.exceptions import PermissionDenied
+
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'handle_work_success', 'apply_cluster_membership_policies',
@@ -410,6 +414,13 @@ def awx_periodic_scheduler(self):
     for schedule in old_schedules:
         schedule.save()
     schedules = Schedule.objects.enabled().between(last_run, run_now)
+
+    invalid_license = False
+    try:
+        access_registry[Job](None).check_license()
+    except PermissionDenied as e:
+        invalid_license = e
+
     for schedule in schedules:
         template = schedule.unified_job_template
         schedule.save() # To update next_run timestamp.
@@ -419,6 +430,13 @@ def awx_periodic_scheduler(self):
         try:
             job_kwargs = schedule.get_job_kwargs()
             new_unified_job = schedule.unified_job_template.create_unified_job(**job_kwargs)
+
+            if invalid_license:
+                new_unified_job.status = 'failed'
+                new_unified_job.job_explanation = str(invalid_license)
+                new_unified_job.save(update_fields=['status', 'job_explanation'])
+                new_unified_job.websocket_emit_status("failed")
+                raise invalid_license
             can_start = new_unified_job.signal_start()
         except Exception:
             logger.exception('Error spawning scheduled job.')
