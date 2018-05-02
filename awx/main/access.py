@@ -1924,7 +1924,7 @@ class WorkflowJobAccess(BaseAccess):
         return self.can_recreate(obj)
 
     def can_recreate(self, obj):
-        node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credential', 'unified_job_template')
+        node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credentials', 'unified_job_template')
         node_access = WorkflowJobNodeAccess(user=self.user)
         wj_add_perm = True
         for node in node_qs:
