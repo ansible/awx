@@ -615,7 +615,7 @@ and for interaction performance on the UI.
 Messages
 --------
 
-JSON messages are passed over the `/network_ui/topology` websocket between the
+JSON messages are passed over the `/network_ui/topology/` websocket between the
 test client and the test server.  The protocol that is used for all messages is
 in ABNF (RFC5234):
 
