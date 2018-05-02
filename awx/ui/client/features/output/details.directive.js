@@ -509,8 +509,7 @@ function AtJobDetailsController (
     _strings_,
     _status_,
     _wait_,
-    ParseTypeChange,
-    ParseVariableString,
+    _parse_,
 ) {
     vm = this || {};
 
@@ -519,7 +518,7 @@ function AtJobDetailsController (
     $state = _$state_;
 
     error = _error_;
-    parse = ParseVariableString;
+    parse = _parse_;
     prompt = _prompt_;
     strings = _strings_;
     status = _status_;
@@ -588,7 +587,6 @@ AtJobDetailsController.$inject = [
     'JobStrings',
     'JobStatusService',
     'Wait',
-    'ParseTypeChange',
     'ParseVariableString',
 ];
 
