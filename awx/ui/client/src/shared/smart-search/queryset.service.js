@@ -364,7 +364,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
 
             return merged;
         },
-        getSearchInputQueryset (searchInput, isRelatedField = null, isAnsibleFactField = null, singleSearchParam = null) {
+        getSearchInputQueryset (searchInput, isFilterableBaseField = null, isRelatedField = null, isAnsibleFactField = null, singleSearchParam = null) {
             // XXX Should find a better approach than passing in the two 'is...Field' callbacks XXX
             const space = '%20and%20';
             let params = {};
@@ -406,12 +406,12 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
 
                 if (termParts.length === 1) {
                     termParams = searchWithoutKey(term, singleSearchParam);
-                } else if (isAnsibleFactField && isAnsibleFactField(termParts)) {
+                } else if ((isAnsibleFactField && isAnsibleFactField(termParts)) || (isFilterableBaseField && isFilterableBaseField(termParts))) {
                     termParams = this.encodeParam({ term, singleSearchParam });
                 } else if (isRelatedField && isRelatedField(termParts)) {
                     termParams = this.encodeParam({ term, singleSearchParam, related: true });
                 } else {
-                    termParams = this.encodeParam({ term, singleSearchParam });
+                    termParams = searchWithoutKey(term, singleSearchParam);
                 }
 
                 params = _.merge(params, termParams, combineSameSearches);
@@ -419,7 +419,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
 
             return params;
         },
-        removeTermsFromQueryset(queryset, term, isRelatedField = null, singleSearchParam = null) {
+        removeTermsFromQueryset(queryset, term, isFilterableBaseField, isRelatedField = null, isAnsibleFactField = null, singleSearchParam = null) {
             const modifiedQueryset = _.cloneDeep(queryset);
 
             const removeSingleTermFromQueryset = (value, key) => {
@@ -457,10 +457,12 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
 
             if (termParts.length === 1) {
                 removed = searchWithoutKey(term, singleSearchParam);
+            } else if ((isAnsibleFactField && isAnsibleFactField(termParts)) || (isFilterableBaseField && isFilterableBaseField(termParts))) {
+                removed = this.encodeParam({ term, singleSearchParam });
             } else if (isRelatedField && isRelatedField(termParts)) {
                 removed = this.encodeParam({ term, singleSearchParam, related: true });
             } else {
-                removed = this.encodeParam({ term, singleSearchParam });
+                removed = searchWithoutKey(term, singleSearchParam);
             }
 
             if (!removed) {

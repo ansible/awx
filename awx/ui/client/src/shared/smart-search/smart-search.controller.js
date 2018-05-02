@@ -52,6 +52,12 @@ function SmartSearchController (
             .then((data) => {
                 $scope.models = data.models;
                 $scope.options = data.options.data;
+                $scope.keyFields = _.reduce(data.models[$scope.djangoModel].base, function(result, value, key) {
+                    if (!(typeof value.filterable === "boolean" && value.filterable === false)) {
+                        result.push(key);
+                    }
+                    return result;
+                }, []);
                 if ($scope.list) {
                     $scope.$emit(optionsKey, data.options);
                 }
@@ -139,6 +145,17 @@ function SmartSearchController (
         return rootField === 'ansible_facts';
     }
 
+    function isFilterableBaseField (termParts) {
+        const rootField = termParts[0].split('.')[0].replace(/^-/, '');
+        const listName = $scope.list.name;
+        const baseFieldPath = `models.${listName}.base.${rootField}`;
+        const isBaseField = _.has($scope, `${baseFieldPath}`);
+        const filterable = _.get($scope, `${baseFieldPath}.filterable`);
+        const isNotFilterable = typeof filterable === "boolean" && filterable === false;
+        const isBaseModelRelatedSearchTermField = (_.get($scope, `${baseFieldPath}.type`) === 'field');
+        return isBaseField && !isBaseModelRelatedSearchTermField && !isNotFilterable;
+    }
+
     function isRelatedField (termParts) {
         const rootField = termParts[0].split('.')[0].replace(/^-/, '');
         const listName = $scope.list.name;
@@ -154,7 +171,7 @@ function SmartSearchController (
         const { singleSearchParam } = $scope;
         const unmodifiedQueryset = _.clone(queryset);
 
-        const searchInputQueryset = qs.getSearchInputQueryset(terms, isRelatedField, isAnsibleFactField, singleSearchParam);
+        const searchInputQueryset = qs.getSearchInputQueryset(terms, isFilterableBaseField, isRelatedField, isAnsibleFactField, singleSearchParam);
         queryset = qs.mergeQueryset(queryset, searchInputQueryset, singleSearchParam);
 
         // Go back to the first page after a new search
@@ -191,7 +208,7 @@ function SmartSearchController (
         const { singleSearchParam } = $scope;
         const [term] = $scope.searchTags.splice(index, 1);
 
-        queryset = qs.removeTermsFromQueryset(queryset, term, isRelatedField, singleSearchParam);
+        queryset = qs.removeTermsFromQueryset(queryset, term, isFilterableBaseField, isRelatedField, isAnsibleFactField, singleSearchParam);
 
         if (!$scope.querySet) {
             $state.go('.', { [searchKey]: queryset })
@@ -199,7 +216,7 @@ function SmartSearchController (
                     // for some reason deleting a tag from a list in a modal does not
                     // remove the param from $stateParams.  Here we'll manually check to make sure
                     // that that happened and remove it if it didn't.
-                    const clearedParams = qs.removeTermsFromQueryset($stateParams[searchKey], term, isRelatedField, singleSearchParam);
+                    const clearedParams = qs.removeTermsFromQueryset($stateParams[searchKey], term, isFilterableBaseField, isRelatedField, isAnsibleFactField, singleSearchParam);
                     $stateParams[searchKey] = clearedParams;
                 });
         }
@@ -237,6 +254,11 @@ function SmartSearchController (
             });
 
         $scope.searchTags = qs.stripDefaultParams(queryset, defaults);
+    };
+
+    $scope.hideUnfilterable = (field) => {
+        console.log(field);
+        return !(typeof field.value.filterable === "boolean" && field.value.filterable === false);
     };
 }
 
