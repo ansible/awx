@@ -45,10 +45,10 @@ export default ['$state', '$stateParams', '$scope', 'NestedGroupForm',
             };
 
             GroupsService.post(group).then(res => {
-                if ($stateParams.group_id) {
+                if ($stateParams.group_id && _.has(res, 'data')) {
                     return GroupsService.associateGroup(res.data, $stateParams.group_id)
                         .then(() => $state.go('^', null, { reload: true }));
-                } else {
+                } else if(_.has(res, 'data.id')){
                     $state.go('^.edit', { group_id: res.data.id }, { reload: true });
                 }
             });
