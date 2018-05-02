@@ -1,8 +1,10 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import logging
 import datetime
+import logging
+import re
+
 import dateutil.rrule
 from operator import itemgetter
 import dateutil.parser
@@ -11,7 +13,7 @@ from dateutil.tz import datetime_exists, tzutc
 # Django
 from django.db import models
 from django.db.models.query import QuerySet
-from django.utils.timezone import now
+from django.utils.timezone import now, make_aware
 from django.utils.translation import ugettext_lazy as _
 
 # AWX
@@ -129,6 +131,56 @@ class Schedule(CommonModel, LaunchTimeConfig):
         Apply our own custom rrule parsing requirements
         """
         kwargs['forceset'] = True
+
+        #
+        # RFC5545 specifies that the UNTIL rule part MUST ALWAYS be a date
+        # with UTC time.  This is extra work for API implementers because
+        # it requires them to perform DTSTART local -> UTC datetime coercion on
+        # POST and UTC -> DTSTART local coercion on GET.
+        #
+        # This block of code is a departure from the RFC.  If you send an
+        # rrule like this to the API (without a Z on the UNTIL):
+        #
+        # DTSTART;TZID=America/New_York:20180502T150000 RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20180502T180000
+        #
+        # ...we'll assume that the naive UNTIL is intended to match the DTSTART
+        # timezone (America/New_York), and so we'll coerce to UTC _for you_
+        # automatically.
+        #
+        if 'until=' in rrule.lower():
+            # if DTSTART;TZID= is used, coerce "naive" UNTIL values
+            # to the proper UTC date
+            match_until = re.match(".*?UNTIL\=(?P<until>[0-9]+T[0-9]+)(?P<utcflag>Z?)", rrule)
+            if not len(match_until.group('utcflag')):
+                # rrule = DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
+
+                # Find the UNTIL=N part of the string
+                # naive_until = 20200601T170000
+                naive_until = match_until.group('until')
+
+                # What is the DTSTART timezone for:
+                # DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000Z
+                # local_tz = tzfile('/usr/share/zoneinfo/America/New_York')
+                local_tz = dateutil.rrule.rrulestr(
+                    rrule.replace(naive_until, naive_until + 'Z'),
+                    tzinfos={x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
+                )._dtstart.tzinfo
+
+                # Make a datetime object with tzinfo=<the DTSTART timezone>
+                # localized_until = datetime.datetime(2020, 6, 1, 17, 0, tzinfo=tzfile('/usr/share/zoneinfo/America/New_York'))
+                localized_until = make_aware(
+                    datetime.datetime.strptime(naive_until, "%Y%m%dT%H%M%S"),
+                    local_tz
+                )
+
+                # Coerce the datetime to UTC and format it as a string w/ Zulu format
+                # utc_until = 20200601T220000Z
+                utc_until = localized_until.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
+
+                # rrule was:    DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
+                # rrule is now: DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T220000Z
+                rrule = rrule.replace(naive_until, utc_until)
+
         x = dateutil.rrule.rrulestr(rrule, **kwargs)
 
         for r in x._rrule:
