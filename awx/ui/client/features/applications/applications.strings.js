@@ -16,6 +16,10 @@ function ApplicationsStrings (BaseString) {
         USERS: t.s('Tokens')
     };
 
+    ns.tooltips = {
+        ADD: t.s('Create a new Application')
+    };
+
     ns.add = {
         PANEL_TITLE: t.s('NEW APPLICATION')
     };

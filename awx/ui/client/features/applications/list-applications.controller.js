@@ -38,6 +38,10 @@ function ListApplicationsController (
         vm.applicationsCount = dataset.count;
     });
 
+    vm.tooltips = {
+        add: strings.get('tooltips.ADD')
+    };
+
     vm.getModified = app => {
         const modified = _.get(app, 'modified');
 

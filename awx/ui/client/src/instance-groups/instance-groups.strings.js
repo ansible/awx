@@ -19,6 +19,11 @@ function InstanceGroupsStrings (BaseString) {
         JOBS: t.s('JOBS')
     };
 
+    ns.tooltips = {
+        ADD_INSTANCE_GROUP: t.s('Create a new Instance Group'),
+        ASSOCIATE_INSTANCES: t.s('Associate an existing Instance')
+    };
+
     ns.instance = {
         PANEL_TITLE: t.s('SELECT INSTANCE')
     };

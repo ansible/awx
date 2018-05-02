@@ -121,9 +121,9 @@ module.exports = {
             return this.navigate();
         },
         selectAdd (name) {
-            this.api.waitForElementVisible('button[id="button-add"]');
-            this.expect.element('button[id="button-add"]').enabled;
-            this.api.click('button[id="button-add"]');
+            this.api.waitForElementVisible('#button-add');
+            this.expect.element('#button-add').enabled;
+            this.api.click('#button-add');
 
             this.api.useXpath();
             this.api.waitForElementVisible(`.//a[normalize-space(text())="${name}"]`);
