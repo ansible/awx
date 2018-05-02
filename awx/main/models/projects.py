@@ -533,7 +533,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         return reverse('api:project_update_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urlparse.urljoin(settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
+        return urlparse.urljoin(settings.TOWER_URL_BASE, "/#/jobs/project/{}".format(self.pk))
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()
