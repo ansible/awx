@@ -48,6 +48,15 @@ function getStats () {
         });
 }
 
+function getCredentials (id) {
+    const req = {
+        method: 'GET',
+        url: `${this.path}${id}/credentials/`
+    };
+
+    return $http(req);
+}
+
 function JobModel (method, resource, config) {
     BaseModel.call(this, 'jobs');
 
@@ -56,6 +65,7 @@ function JobModel (method, resource, config) {
     this.postRelaunch = postRelaunch.bind(this);
     this.getRelaunch = getRelaunch.bind(this);
     this.getStats = getStats.bind(this);
+    this.getCredentials = getCredentials.bind(this);
 
     return this.create(method, resource, config);
 }
