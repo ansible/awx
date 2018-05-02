@@ -1161,15 +1161,12 @@ LOGGING = {
             'propagate': False
         },
         'awx.main.tasks': {
-            'handlers': ['task_system'],
+            'handlers': ['task_system', 'external_logger'],
             'propagate': False
         },
         'awx.main.scheduler': {
-            'handlers': ['task_system'],
+            'handlers': ['task_system', 'external_logger'],
             'propagate': False
-        },
-        'awx.main.consumers': {
-            'handlers': ['null']
         },
         'awx.main.access': {
             'handlers': ['null'],
