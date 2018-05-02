@@ -745,11 +745,7 @@ class ScheduleZoneInfo(APIView):
     swagger_topic = 'System Configuration'
 
     def get(self, request):
-        from dateutil.zoneinfo import get_zonefile_instance
-        return Response([
-            {'name': zone}
-            for zone in sorted(get_zonefile_instance().zones)
-        ])
+        return Response(Schedule.get_zoneinfo())
 
 
 class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):

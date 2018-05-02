@@ -4,7 +4,9 @@
 import logging
 import datetime
 import dateutil.rrule
-from dateutil.tz import datetime_exists
+from operator import itemgetter
+import dateutil.parser
+from dateutil.tz import datetime_exists, tzutc
 
 # Django
 from django.db import models
@@ -93,6 +95,33 @@ class Schedule(CommonModel, LaunchTimeConfig):
         editable=False,
         help_text=_("The next time that the scheduled action will run.")
     )
+
+    @classmethod
+    def get_zoneinfo(self):
+        from dateutil.zoneinfo import get_zonefile_instance
+        return [
+            {'name': zone}
+            for zone in sorted(get_zonefile_instance().zones)
+        ]
+
+    @property
+    def timezone(self):
+        utc = tzutc()
+        _rrule = dateutil.rrule.rrulestr(
+            self.rrule,
+            tzinfos={x: utc for x in dateutil.parser.parserinfo().UTCZONE}
+        )
+        tzinfo = _rrule._dtstart.tzinfo
+        if tzinfo == utc:
+            return 'UTC'
+        fname = tzinfo._filename
+        all_zones = map(itemgetter('name'), Schedule.get_zoneinfo())
+        all_zones.sort(key = lambda x: -len(x))
+        for zone in all_zones:
+            if fname.endswith(zone):
+                return zone
+        logger.warn('Could not detect valid zoneinfo for {}'.format(self.rrule))
+        return ''
 
     @classmethod
     def rrulestr(cls, rrule, **kwargs):

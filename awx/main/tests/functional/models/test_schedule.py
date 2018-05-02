@@ -203,3 +203,18 @@ def test_beginning_of_time(job_template):
     )
     with pytest.raises(ValueError):
         s.save()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('rrule, tz', [
+    ['DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1', 'UTC'],
+    ['DTSTART;TZID=America/New_York:20300112T210000 RRULE:FREQ=DAILY;INTERVAL=1', 'America/New_York']
+])
+def test_timezone_property(job_template, rrule, tz):
+    # ensure that really large generators don't have performance issues
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    assert s.timezone == tz

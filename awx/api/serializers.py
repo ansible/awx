@@ -4511,9 +4511,14 @@ class SchedulePreviewSerializer(BaseSerializer):
 class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
     show_capabilities = ['edit', 'delete']
 
+    timezone = serializers.SerializerMethodField()
+
     class Meta:
         model = Schedule
-        fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend', 'rrule', 'next_run',)
+        fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend', 'rrule', 'next_run', 'timezone',)
+
+    def get_timezone(self, obj):
+        return obj.timezone
 
     def get_related(self, obj):
         res = super(ScheduleSerializer, self).get_related(obj)
