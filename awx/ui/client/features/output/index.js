@@ -8,6 +8,7 @@ import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
 import EngineService from '~features/output/engine.service';
 import StatusService from '~features/output/status.service';
+import LegacyRedirect from '~features/output/legacy.route';
 
 import DetailsDirective from '~features/output/details.directive';
 import SearchDirective from '~features/output/search.directive';
@@ -125,12 +126,6 @@ function resolveWebSocketConnection ($stateParams, SocketService) {
     return SocketService.addStateResolve(state, id);
 }
 
-function resolveBreadcrumb (strings) {
-    return {
-        label: strings.get('state.TITLE')
-    };
-}
-
 function getWebSocketResource (type) {
     let name;
     let key;
@@ -163,11 +158,15 @@ function getWebSocketResource (type) {
     return { name, key };
 }
 
-function JobsRun ($stateRegistry) {
+function JobsRun ($stateRegistry, strings) {
+    const parent = 'jobs';
+    const ncyBreadcrumb = { parent, label: strings.get('state.BREADCRUMB_DEFAULT') };
+
     const state = {
-        name: 'jobz',
-        url: '/jobz/:type/:id?job_event_search',
-        route: '/jobz/:type/:id?job_event_search',
+        url: '/:type/:id?job_event_search',
+        name: 'output',
+        parent,
+        ncyBreadcrumb,
         data: {
             activityStream: false,
         },
@@ -179,6 +178,11 @@ function JobsRun ($stateRegistry) {
             }
         },
         resolve: {
+            webSocketConnection: [
+                '$stateParams',
+                'SocketService',
+                resolveWebSocketConnection
+            ],
             resource: [
                 'JobModel',
                 'ProjectUpdateModel',
@@ -191,14 +195,11 @@ function JobsRun ($stateRegistry) {
                 'Wait',
                 resolveResource
             ],
-            ncyBreadcrumb: [
-                'JobStrings',
-                resolveBreadcrumb
-            ],
-            webSocketConnection: [
-                '$stateParams',
-                'SocketService',
-                resolveWebSocketConnection
+            breadcrumbLabel: [
+                'resource',
+                ({ model }) => {
+                    ncyBreadcrumb.label = `${model.get('id')} - ${model.get('name')}`;
+                }
             ],
         },
     };
@@ -206,7 +207,7 @@ function JobsRun ($stateRegistry) {
     $stateRegistry.register(state);
 }
 
-JobsRun.$inject = ['$stateRegistry'];
+JobsRun.$inject = ['$stateRegistry', 'JobStrings'];
 
 angular
     .module(MODULE_NAME, [
@@ -223,6 +224,7 @@ angular
     .directive('atJobDetails', DetailsDirective)
     .directive('atJobSearch', SearchDirective)
     .directive('atJobStats', StatsDirective)
-    .run(JobsRun);
+    .run(JobsRun)
+    .run(LegacyRedirect);
 
 export default MODULE_NAME;

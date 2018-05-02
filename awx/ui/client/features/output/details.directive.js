@@ -227,7 +227,7 @@ function getProjectUpdateDetails (updateId) {
         return null;
     }
 
-    const link = `/#/jobz/project/${jobId}`;
+    const link = `/#/jobs/project/${jobId}`;
     const tooltip = strings.get('resourceTooltips.PROJECT_UPDATE');
 
     return { link, tooltip };
@@ -510,8 +510,7 @@ function AtJobDetailsController (
     _strings_,
     _status_,
     _wait_,
-    ParseTypeChange,
-    ParseVariableString,
+    _parse_,
 ) {
     vm = this || {};
 
@@ -520,7 +519,7 @@ function AtJobDetailsController (
     $state = _$state_;
 
     error = _error_;
-    parse = ParseVariableString;
+    parse = _parse_;
     prompt = _prompt_;
     strings = _strings_;
     status = _status_;
@@ -589,7 +588,6 @@ AtJobDetailsController.$inject = [
     'JobStrings',
     'JobStatusService',
     'Wait',
-    'ParseTypeChange',
     'ParseVariableString',
 ];
 

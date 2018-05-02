@@ -21,7 +21,7 @@
                     status="{{ job.status }}"
                     status-tip="Job {{job.status}}. Click for details."
                     header-value="{{ job.name }}"
-                    header-link="{{ vm.getLink(job) }}"
+                    header-state="{{ vm.getSref(job) }}"
                     header-tag="{{ vm.jobTypes[job.type] }}">
                 </at-row-item>
                 <div class="at-Row--inline">

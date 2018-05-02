@@ -898,13 +898,13 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                     let goToJobResults = function(job_type) {
                         if(job_type === 'job') {
-                            $state.go('jobz', {id: d.job.id, type: 'playbook'});
+                            $state.go('output', {id: d.job.id, type: 'playbook'});
                         }
                         else if(job_type === 'inventory_update') {
-                            $state.go('jobz', {id: d.job.id, type: 'inventory'});
+                            $state.go('output', {id: d.job.id, type: 'inventory'});
                         }
                         else if(job_type === 'project_update') {
-                            $state.go('jobz', {id: d.job.id, type: 'project'});
+                            $state.go('output', {id: d.job.id, type: 'project'});
                         }
                     };
 

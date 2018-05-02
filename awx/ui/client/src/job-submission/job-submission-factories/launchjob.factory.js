@@ -150,7 +150,7 @@ export default
                             // use $state.go with reload: true option to re-instantiate sockets in
 
                             var goTojobResults = function(type) {
-                                $state.go('jobz', {id: job, type}, {reload:true});
+                                $state.go('output', {id: job, type}, {reload:true});
                             };
 
                             if($state.includes('jobs')) {

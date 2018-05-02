@@ -25,7 +25,7 @@ HostEventResolve.$inject = [
 ];
 
 const hostEventModal = {
-    name: 'jobz.host-event',
+    name: 'output.host-event',
     url: '/host-event/:eventId',
     controller: 'HostEventsController',
     templateUrl: HostEventModalTemplate,
@@ -40,7 +40,7 @@ const hostEventModal = {
 };
 
 const hostEventJson = {
-    name: 'jobz.host-event.json',
+    name: 'output.host-event.json',
     url: '/json',
     controller: 'HostEventsController',
     templateUrl: HostEventCodeMirrorTemplate,
@@ -50,7 +50,7 @@ const hostEventJson = {
 };
 
 const hostEventStdout = {
-    name: 'jobz.host-event.stdout',
+    name: 'output.host-event.stdout',
     url: '/stdout',
     controller: 'HostEventsController',
     templateUrl: HostEventStdoutTemplate,
@@ -60,7 +60,7 @@ const hostEventStdout = {
 };
 
 const hostEventStderr = {
-    name: 'jobz.host-event.stderr',
+    name: 'output.host-event.stderr',
     url: '/stderr',
     controller: 'HostEventsController',
     templateUrl: HostEventStderrTemplate,

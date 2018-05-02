@@ -34,7 +34,7 @@ export default
                 if (job.type === 'workflow_job') {
                     detailsUrl = `/#/workflows/${job.id}`;
                 } else {
-                    detailsUrl = `/#/jobz/playbook/${job.id}`;
+                    detailsUrl = `/#/jobs/playbook/${job.id}`;
                 }
 
                 return {

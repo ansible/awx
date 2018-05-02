@@ -5,7 +5,7 @@ function JobsStrings (BaseString) {
     const ns = this.jobs;
 
     ns.state = {
-        TITLE: t.s('JOBZ')
+        BREADCRUMB_DEFAULT: t.s('RESULTS'),
     };
 
     ns.status = {

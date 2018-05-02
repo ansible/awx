@@ -11,7 +11,10 @@
         <div class="at-RowItem-header" ng-if="headerValue && headerLink">
             <a ng-href="{{ headerLink }}">{{ headerValue }}</a>
         </div>
-        <div class="at-RowItem-header" ng-if="headerValue && !headerLink">
+        <div class="at-RowItem-header" ng-if="headerValue && headerState">
+            <a ui-sref="{{ headerState }}" >{{ headerValue }}</a>
+        </div>
+        <div class="at-RowItem-header" ng-if="headerValue && !headerLink && !headerState">
             {{ headerValue }}
         </div>
         <div class="at-RowItem-tag at-RowItem-tag--header" ng-if="headerTag">
