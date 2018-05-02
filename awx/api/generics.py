@@ -878,6 +878,9 @@ class CopyAPIView(GenericAPIView):
                     obj, field.name, field_val
                 )
         new_obj = model.objects.create(**create_kwargs)
+        logger.debug(six.text_type('Deep copy: Created new object {}({})').format(
+            new_obj, model
+        ))
         # Need to save separatedly because Djang-crum get_current_user would
         # not work properly in non-request-response-cycle context.
         new_obj.created_by = creater

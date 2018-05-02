@@ -1821,7 +1821,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
                     missing_inventories.append(node.inventory.name)
                 for cred in node.credentials.all():
                     if self.user not in cred.use_role:
-                        missing_credentials.append(node.credential.name)
+                        missing_credentials.append(cred.name)
                 ujt = node.unified_job_template
                 if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
                     missing_ujt.append(ujt.name)
