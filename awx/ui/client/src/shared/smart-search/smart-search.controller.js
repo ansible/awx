@@ -255,11 +255,6 @@ function SmartSearchController (
 
         $scope.searchTags = qs.stripDefaultParams(queryset, defaults);
     };
-
-    $scope.hideUnfilterable = (field) => {
-        console.log(field);
-        return !(typeof field.value.filterable === "boolean" && field.value.filterable === false);
-    };
 }
 
 SmartSearchController.$inject = [
