@@ -8,27 +8,7 @@ import logging
 # Django
 from django.conf import settings
 
-# Celery
-from celery import Celery
-
 logger = logging.getLogger('awx.main.utils.reload')
-
-
-def _uwsgi_fifo_command(uwsgi_command):
-    # http://uwsgi-docs.readthedocs.io/en/latest/MasterFIFO.html#available-commands
-    logger.warn('Initiating uWSGI chain reload of server')
-    TRIGGER_COMMAND = uwsgi_command
-    with open(settings.UWSGI_FIFO_LOCATION, 'w') as awxfifo:
-        awxfifo.write(TRIGGER_COMMAND)
-
-
-def _reset_celery_thread_pool():
-    # Do not use current_app because of this outstanding issue:
-    # https://github.com/celery/celery/issues/4410
-    app = Celery('awx')
-    app.config_from_object('django.conf:settings')
-    app.control.broadcast('pool_restart', arguments={'reload': True},
-                          destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
 
 
 def _supervisor_service_command(service_internal_names, command, communicate=True):
@@ -66,21 +46,6 @@ def _supervisor_service_command(service_internal_names, command, communicate=Tru
                 command, restart_stdout.strip()))
     else:
         logger.info('Submitted supervisorctl {} command, not waiting for result'.format(command))
-
-
-def restart_local_services(service_internal_names):
-    logger.warn('Restarting services {} on this node in response to user action'.format(service_internal_names))
-    if 'uwsgi' in service_internal_names:
-        _uwsgi_fifo_command(uwsgi_command='c')
-        service_internal_names.remove('uwsgi')
-    restart_celery = False
-    if 'celery' in service_internal_names:
-        restart_celery = True
-        service_internal_names.remove('celery')
-    _supervisor_service_command(service_internal_names, command='restart')
-    if restart_celery:
-        # Celery restarted last because this probably includes current process
-        _reset_celery_thread_pool()
 
 
 def stop_local_services(service_internal_names, communicate=True):

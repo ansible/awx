@@ -1001,6 +1001,9 @@ LOGGING = {
         'require_debug_true_or_test': {
             '()': 'awx.main.utils.RequireDebugTrueOrTest',
         },
+        'external_log_enabled': {
+            '()': 'awx.main.utils.filters.ExternalLoggerEnabled'
+        },
     },
     'formatters': {
         'simple': {
@@ -1034,11 +1037,10 @@ LOGGING = {
             'class': 'logging.NullHandler',
             'formatter': 'simple',
         },
-        'http_receiver': {
-            'class': 'awx.main.utils.handlers.HTTPSNullHandler',
-            'level': 'DEBUG',
+        'external_logger': {
+            'class': 'awx.main.utils.handlers.AWXProxyHandler',
             'formatter': 'json',
-            'host': '',
+            'filters': ['external_log_enabled'],
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -1131,7 +1133,7 @@ LOGGING = {
             'handlers': ['console'],
         },
         'awx': {
-            'handlers': ['console', 'file', 'tower_warnings'],
+            'handlers': ['console', 'file', 'tower_warnings', 'external_logger'],
             'level': 'DEBUG',
         },
         'awx.conf': {
@@ -1179,7 +1181,7 @@ LOGGING = {
             'propagate': False,
         },
         'awx.analytics': {
-            'handlers': ['http_receiver'],
+            'handlers': ['external_logger'],
             'level': 'INFO',
             'propagate': False
         },

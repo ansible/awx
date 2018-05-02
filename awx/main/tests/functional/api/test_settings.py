@@ -14,7 +14,7 @@ import mock
 # AWX
 from awx.api.versioning import reverse
 from awx.conf.models import Setting
-from awx.main.utils.handlers import BaseHTTPSHandler, LoggingConnectivityException
+from awx.main.utils.handlers import AWXProxyHandler, LoggingConnectivityException
 
 import six
 
@@ -217,7 +217,7 @@ def test_logging_aggregrator_connection_test_bad_request(get, post, admin, key):
 
 @pytest.mark.django_db
 def test_logging_aggregrator_connection_test_valid(mocker, get, post, admin):
-    with mock.patch.object(BaseHTTPSHandler, 'perform_test') as perform_test:
+    with mock.patch.object(AWXProxyHandler, 'perform_test') as perform_test:
         url = reverse('api:setting_logging_test')
         user_data = {
             'LOG_AGGREGATOR_TYPE': 'logstash',
@@ -227,7 +227,8 @@ def test_logging_aggregrator_connection_test_valid(mocker, get, post, admin):
             'LOG_AGGREGATOR_PASSWORD': 'mcstash'
         }
         post(url, user_data, user=admin, expect=200)
-        create_settings = perform_test.call_args[0][0]
+        args, kwargs = perform_test.call_args_list[0]
+        create_settings = kwargs['custom_settings']
         for k, v in user_data.items():
             assert hasattr(create_settings, k)
             assert getattr(create_settings, k) == v
@@ -238,7 +239,7 @@ def test_logging_aggregrator_connection_test_with_masked_password(mocker, patch,
     url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'logging'})
     patch(url, user=admin, data={'LOG_AGGREGATOR_PASSWORD': 'password123'}, expect=200)
 
-    with mock.patch.object(BaseHTTPSHandler, 'perform_test') as perform_test:
+    with mock.patch.object(AWXProxyHandler, 'perform_test') as perform_test:
         url = reverse('api:setting_logging_test')
         user_data = {
             'LOG_AGGREGATOR_TYPE': 'logstash',
@@ -248,13 +249,14 @@ def test_logging_aggregrator_connection_test_with_masked_password(mocker, patch,
             'LOG_AGGREGATOR_PASSWORD': '$encrypted$'
         }
         post(url, user_data, user=admin, expect=200)
-        create_settings = perform_test.call_args[0][0]
+        args, kwargs = perform_test.call_args_list[0]
+        create_settings = kwargs['custom_settings']
         assert getattr(create_settings, 'LOG_AGGREGATOR_PASSWORD') == 'password123'
 
 
 @pytest.mark.django_db
 def test_logging_aggregrator_connection_test_invalid(mocker, get, post, admin):
-    with mock.patch.object(BaseHTTPSHandler, 'perform_test') as perform_test:
+    with mock.patch.object(AWXProxyHandler, 'perform_test') as perform_test:
         perform_test.side_effect = LoggingConnectivityException('404: Not Found')
         url = reverse('api:setting_logging_test')
         resp = post(url, {

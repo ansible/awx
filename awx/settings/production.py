@@ -68,8 +68,6 @@ SERVICE_NAME_DICT = {
     "channels": "awx-channels-worker",
     "uwsgi": "awx-uwsgi",
     "daphne": "awx-daphne"}
-# Used for sending commands in automatic restart
-UWSGI_FIFO_LOCATION = '/var/lib/awx/awxfifo'
 
 # Store a snapshot of default settings at this point before loading any
 # customizable config files.
