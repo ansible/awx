@@ -3,8 +3,7 @@
  *
  * All Rights Reserved
  ************************************************ */
-const mapChoices = choices => Object
-    .assign(...choices.map(([k, v]) => ({ [k]: v })));
+const mapChoices = choices => Object.assign(...choices.map(([k, v]) => ({ [k]: v })));
 
 function ListJobsController (
     $scope,
@@ -61,37 +60,36 @@ function ListJobsController (
         vm.emptyListReason = strings.get('list.NO_RUNNING');
     }
 
-    vm.jobTypes = mapChoices(unifiedJob
-        .options('actions.GET.type.choices'));
+    vm.jobTypes = mapChoices(unifiedJob.options('actions.GET.type.choices'));
 
-    vm.getLink = ({ type, id }) => {
-        let link;
+    vm.getSref = ({ type, id }) => {
+        let sref;
 
         switch (type) {
             case 'job':
-                link = `/#/jobz/playbook/${id}`;
+                sref = `output({type: 'playbook', id: ${id}})`;
                 break;
             case 'ad_hoc_command':
-                link = `/#/jobz/command/${id}`;
+                sref = `output({type: 'command', id: ${id}})`;
                 break;
             case 'system_job':
-                link = `/#/jobz/system/${id}`;
+                sref = `output({type: 'system', id: ${id}})`;
                 break;
             case 'project_update':
-                link = `/#/jobz/project/${id}`;
+                sref = `output({type: 'project', id: ${id}})`;
                 break;
             case 'inventory_update':
-                link = `/#/jobz/inventory/${id}`;
+                sref = `output({type: 'inventory', id: ${id}})`;
                 break;
             case 'workflow_job':
-                link = `/#/workflows/${id}`;
+                sref = `workflowResults({id: ${id}})`;
                 break;
             default:
-                link = '';
+                sref = '';
                 break;
         }
 
-        return link;
+        return sref;
     };
 
     vm.deleteJob = (job) => {

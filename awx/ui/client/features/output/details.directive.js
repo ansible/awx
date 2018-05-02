@@ -227,7 +227,7 @@ function getProjectUpdateDetails (updateId) {
         return null;
     }
 
-    const link = `/#/jobz/project/${jobId}`;
+    const link = `/#/jobs/project/${jobId}`;
     const tooltip = strings.get('resourceTooltips.PROJECT_UPDATE');
 
     return { link, tooltip };

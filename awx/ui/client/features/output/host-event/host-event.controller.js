@@ -57,7 +57,7 @@ function HostEventsController (
             $scope.stdout = event[0];// eslint-disable-line prefer-destructuring
         }
         // instantiate Codemirror
-        if ($state.current.name === 'jobz.host-event.json') {
+        if ($state.current.name === 'output.host-event.json') {
             try {
                 if (_.has(hostEvent.event_data, 'res')) {
                     initCodeMirror(
@@ -73,14 +73,14 @@ function HostEventsController (
                 // element with id HostEvent-codemirror is not the view
                 // controlled by this instance of HostEventController
             }
-        } else if ($state.current.name === 'jobz.host-event.stdout') {
+        } else if ($state.current.name === 'output.host-event.stdout') {
             try {
                 resize();
             } catch (err) {
                 // element with id HostEvent-codemirror is not the view
                 // controlled by this instance of HostEventController
             }
-        } else if ($state.current.name === 'jobz.host-event.stderr') {
+        } else if ($state.current.name === 'output.host-event.stderr') {
             try {
                 resize();
             } catch (err) {
@@ -98,11 +98,11 @@ function HostEventsController (
         });
 
         function resize () {
-            if ($state.current.name === 'jobz.host-event.json') {
+            if ($state.current.name === 'output.host-event.json') {
                 const editor = $('.CodeMirror')[0].CodeMirror;
                 const height = $('.modal-dialog').height() - $('.HostEvent-header').height() - $('.HostEvent-details').height() - $('.HostEvent-nav').height() - $('.HostEvent-controls').height() - 120;
                 editor.setSize('100%', height);
-            } else if ($state.current.name === 'jobz.host-event.stdout' || $state.current.name === 'jobz.host-event.stderr') {
+            } else if ($state.current.name === 'output.host-event.stdout' || $state.current.name === 'output.host-event.stderr') {
                 const height = $('.modal-dialog').height() - $('.HostEvent-header').height() - $('.HostEvent-details').height() - $('.HostEvent-nav').height() - $('.HostEvent-controls').height() - 120;
                 $('.HostEvent-stdout').width('100%');
                 $('.HostEvent-stdout').height(height);
@@ -154,7 +154,7 @@ function HostEventsController (
         // Unbind the listener so it doesn't fire when we close the modal via navigation
         $('#HostEvent').off('hidden.bs.modal');
         $('#HostEvent').modal('hide');
-        $state.go('jobz');
+        $state.go('output');
     }
     $scope.init = init;
     $scope.init();

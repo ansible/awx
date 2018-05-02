@@ -23,7 +23,7 @@ export default [ '$scope', 'Empty', 'Wait', 'GetBasePath', 'Rest', 'ProcessError
         };
 
         $scope.viewJob = function(jobId) {
-            $state.go('jobz', { id: jobId, type: 'playbook' });
+            $state.go('output', { id: jobId, type: 'playbook' });
         };
 
     }

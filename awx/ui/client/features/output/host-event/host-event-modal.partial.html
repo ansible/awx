@@ -40,19 +40,19 @@
 
 			<div class="HostEvent-nav">
 				<!-- view navigation buttons -->
-				<button ui-sref="jobz.host-event.json" type="button"
+				<button ui-sref="output.host-event.json" type="button"
 					class="btn btn-sm btn-default HostEvent-tab"
-					ng-class="{'HostEvent-tab--selected' : isActiveState('jobz.host-event.json')}">
+					ng-class="{'HostEvent-tab--selected' : isActiveState('output.host-event.json')}">
 					JSON
 				</button>
-				<button ng-if="stdout" ui-sref="jobz.host-event.stdout"
+				<button ng-if="stdout" ui-sref="output.host-event.stdout"
 					type="button" class="btn btn-sm btn-default HostEvent-tab"
-					ng-class="{'HostEvent-tab--selected' : isActiveState('jobz.host-event.stdout')}">
+					ng-class="{'HostEvent-tab--selected' : isActiveState('output.host-event.stdout')}">
 					Standard Out
 				</button>
-				<button ng-if="stderr" ui-sref="jobz.host-event.stderr"
+				<button ng-if="stderr" ui-sref="output.host-event.stderr"
 					type="button" class="btn btn-sm btn-default HostEvent-tab"
-					ng-class="{'HostEvent-tab--selected' : isActiveState('jobz.host-event.stderr')}">
+					ng-class="{'HostEvent-tab--selected' : isActiveState('output.host-event.stderr')}">
 					Standard Error
 				</button>
 

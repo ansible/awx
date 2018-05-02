@@ -11,6 +11,7 @@ function atRowItem () {
             badge: '@',
             headerValue: '@',
             headerLink: '@',
+            headerState: '@',
             headerTag: '@',
             status: '@',
             statusTip: '@',
