@@ -16,6 +16,7 @@ import SchedulePost from './factories/schedule-post.factory';
 import ToggleSchedule from './factories/toggle-schedule.factory';
 import SchedulesList from './schedules.list';
 import ScheduledJobsList from './scheduled-jobs.list';
+import editScheduleResolve from './editSchedule.resolve';
 
 export default
     angular.module('scheduler', [])
@@ -121,7 +122,8 @@ export default
                 ncyBreadcrumb: {
                     parent: 'jobTemplateSchedules',
                     label: '{{schedule_obj.name}}'
-                }
+                },
+                resolve: editScheduleResolve()
             });
 
             // workflows
@@ -212,7 +214,8 @@ export default
                 ncyBreadcrumb: {
                     parent: 'workflowJobTemplateSchedules',
                     label: '{{schedule_obj.name}}'
-                }
+                },
+                resolve: editScheduleResolve()
             });
             // projects
             $stateExtender.addState({
@@ -301,7 +304,8 @@ export default
                         controller: 'schedulerEditController',
                         templateUrl: templateUrl("scheduler/schedulerForm"),
                     }
-                }
+                },
+                resolve: editScheduleResolve()
             });
             // upcoming scheduled jobs
             $stateExtender.addState({

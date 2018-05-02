@@ -1,11 +1,11 @@
 export default ['$filter', '$state', '$stateParams', 'Wait', '$scope', 'moment',
 '$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
 'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
-'WorkflowJobTemplateModel', 'TemplatesStrings',
+'WorkflowJobTemplateModel', 'TemplatesStrings', 'scheduleResolve', 'timezonesResolve',
 function($filter, $state, $stateParams, Wait, $scope, moment,
     $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
     GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI,
-    WorkflowJobTemplate, TemplatesStrings
+    WorkflowJobTemplate, TemplatesStrings, scheduleResolve, timezonesResolve
 ) {
 
     let schedule, scheduler, scheduleCredentials = [];
@@ -118,337 +118,332 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
     Wait('start');
 
-    // Get the existing record
-    Rest.setUrl(GetBasePath('schedules') + parseInt($stateParams.schedule_id) + '/');
-    Rest.get()
-        .then(({data}) => {
-            schedule = data;
-            try {
-                schedule.extra_data = JSON.parse(schedule.extra_data);
-            } catch(e) {
-                // do nothing
-            }
+    //sets the timezone dropdown to the timezone specified by the API
+    function setTimezone () {
+        $scope.schedulerTimeZone = _.find($scope.timeZones, function(x) {
+            return x.name === scheduleResolve.timezone;
+        });
+    }
 
-            $scope.extraVars = (data.extra_data === '' || _.isEmpty(data.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(data.extra_data);
+    function init() {
+        schedule = scheduleResolve;
 
-            if (_.has(schedule, 'summary_fields.unified_job_template.unified_job_type') &&
-                schedule.summary_fields.unified_job_template.unified_job_type === 'system_job'){
-                $scope.cleanupJob = true;
-            }
+        try {
+            schedule.extra_data = JSON.parse(schedule.extra_data);
+        } catch(e) {
+            // do nothing
+        }
 
-            $scope.schedule_obj = data;
+        $scope.extraVars = (scheduleResolve.extra_data === '' || _.isEmpty(scheduleResolve.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(scheduleResolve.extra_data);
 
-            $('#form-container').empty();
-            scheduler = SchedulerInit({ scope: $scope, requireFutureStartTime: false });
+        if (_.has(schedule, 'summary_fields.unified_job_template.unified_job_type') &&
+            schedule.summary_fields.unified_job_template.unified_job_type === 'system_job'){
+            $scope.cleanupJob = true;
+        }
 
-            $http.get('/api/v2/schedules/zoneinfo/').then(({data}) => {
-                scheduler.scope.timeZones = data;
-                scheduler.scope.schedulerTimeZone = _.find(data, function(x) {
-                    let tz = $scope.schedule_obj.rrule.match(/TZID=\s*(.*?)\s*:/);
-                    if (_.has(tz, '1')) {
-                        return x.name === tz[1];
-                    } else {
-                        return false;
-                    }
+        $scope.schedule_obj = scheduleResolve;
 
-                });
-            });
-            scheduler.inject('form-container', false);
-            scheduler.injectDetail('occurrences', false);
+        $('#form-container').empty();
+        scheduler = SchedulerInit({ scope: $scope, requireFutureStartTime: false });
 
-            if (!/DTSTART/.test(schedule.rrule)) {
-                schedule.rrule += ";DTSTART=" + schedule.dtstart.replace(/\.\d+Z$/,'Z');
-            }
-            schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
-            schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
-            $scope.$on("htmlDetailReady", function() {
-                scheduler.setRRule(schedule.rrule);
-                scheduler.setName(schedule.name);
-                $scope.hideForm = false;
+        scheduler.scope.timeZones = timezonesResolve;
+        setTimezone();
 
-                $scope.$watchGroup(["schedulerName",
-                    "schedulerStartDt",
-                    "schedulerStartHour",
-                    "schedulerStartMinute",
-                    "schedulerStartSecond",
-                    "schedulerTimeZone",
-                    "schedulerFrequency",
-                    "schedulerInterval",
-                    "monthlyRepeatOption",
-                    "monthDay",
-                    "monthlyOccurrence",
-                    "monthlyWeekDay",
-                    "yearlyRepeatOption",
-                    "yearlyMonth",
-                    "yearlyMonthDay",
-                    "yearlyOccurrence",
-                    "yearlyWeekDay",
-                    "yearlyOtherMonth",
-                    "schedulerEnd",
-                    "schedulerOccurrenceCount",
-                    "schedulerEndDt"
-                ], function() {
-                    $rootScope.$broadcast("loadSchedulerDetailPane");
-                }, true);
+        scheduler.inject('form-container', false);
+        scheduler.injectDetail('occurrences', false);
 
-                $scope.$watch("weekDays", function() {
-                    $rootScope.$broadcast("loadSchedulerDetailPane");
-                }, true);
-
-                $rootScope.$broadcast("loadSchedulerDetailPane");
-                Wait('stop');
-            });
-
-            $scope.showRRuleDetail = false;
+        if (!/DTSTART/.test(schedule.rrule)) {
+            schedule.rrule += ";DTSTART=" + schedule.dtstart.replace(/\.\d+Z$/,'Z');
+        }
+        schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
+        schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
+        $scope.$on("htmlDetailReady", function() {
             scheduler.setRRule(schedule.rrule);
             scheduler.setName(schedule.name);
+            setTimezone();
+            $scope.hideForm = false;
 
-            if ($scope.cleanupJob){
-                $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
-            }
+            $scope.$watchGroup(["schedulerName",
+                "schedulerStartDt",
+                "schedulerStartHour",
+                "schedulerStartMinute",
+                "schedulerStartSecond",
+                "schedulerTimeZone",
+                "schedulerFrequency",
+                "schedulerInterval",
+                "monthlyRepeatOption",
+                "monthDay",
+                "monthlyOccurrence",
+                "monthlyWeekDay",
+                "yearlyRepeatOption",
+                "yearlyMonth",
+                "yearlyMonthDay",
+                "yearlyOccurrence",
+                "yearlyWeekDay",
+                "yearlyOtherMonth",
+                "schedulerEnd",
+                "schedulerOccurrenceCount",
+                "schedulerEndDt"
+            ], function() {
+                $rootScope.$broadcast("loadSchedulerDetailPane");
+            }, true);
 
-            if ($state.current.name === 'jobTemplateSchedules.edit'){
+            $scope.$watch("weekDays", function() {
+                $rootScope.$broadcast("loadSchedulerDetailPane");
+            }, true);
 
-                let jobTemplate = new JobTemplate();
-
-                Rest.setUrl(data.related.credentials);
-
-                $q.all([jobTemplate.optionsLaunch(ParentObject.id), jobTemplate.getLaunch(ParentObject.id), Rest.get()])
-                    .then((responses) => {
-                        let launchOptions = responses[0].data,
-                            launchConf = responses[1].data;
-
-                        scheduleCredentials = responses[2].data.results;
-
-                        let watchForPromptChanges = () => {
-                            let promptValuesToWatch = [
-                                'promptData.prompts.inventory.value',
-                                'promptData.prompts.jobType.value',
-                                'promptData.prompts.verbosity.value',
-                                'missingSurveyValue'
-                            ];
-
-                            $scope.$watchGroup(promptValuesToWatch, function() {
-                                let missingPromptValue = false;
-                                if ($scope.missingSurveyValue) {
-                                    missingPromptValue = true;
-                                } else if (!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id) {
-                                    missingPromptValue = true;
-                                }
-                                $scope.promptModalMissingReqFields = missingPromptValue;
-                            });
-                        };
-
-                        let prompts = PromptService.processPromptValues({
-                            launchConf: responses[1].data,
-                            launchOptions: responses[0].data,
-                            currentValues: data
-                        });
-
-                        let defaultCredsWithoutOverrides = [];
-
-                        const credentialHasScheduleOverride = (templateDefaultCred) => {
-                            let credentialHasOverride = false;
-                            scheduleCredentials.forEach((scheduleCred) => {
-                                if (templateDefaultCred.credential_type === scheduleCred.credential_type) {
-                                    if (
-                                        (!templateDefaultCred.vault_id && !scheduleCred.inputs.vault_id) ||
-                                        (templateDefaultCred.vault_id && scheduleCred.inputs.vault_id && templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
-                                    ) {
-                                        credentialHasOverride = true;
-                                    }
-                                }
-                            });
-
-                            return credentialHasOverride;
-                        };
-
-                        if (_.has(launchConf, 'defaults.credentials')) {
-                            launchConf.defaults.credentials.forEach((defaultCred) => {
-                                if (!credentialHasScheduleOverride(defaultCred)) {
-                                    defaultCredsWithoutOverrides.push(defaultCred);
-                                }
-                            });
-                        }
-
-                        prompts.credentials.value = defaultCredsWithoutOverrides.concat(scheduleCredentials);
-
-                        if (!launchConf.ask_variables_on_launch) {
-                            $scope.noVars = true;
-                        }
-
-                        if (!launchConf.survey_enabled &&
-                            !launchConf.ask_inventory_on_launch &&
-                            !launchConf.ask_credential_on_launch &&
-                            !launchConf.ask_verbosity_on_launch &&
-                            !launchConf.ask_job_type_on_launch &&
-                            !launchConf.ask_limit_on_launch &&
-                            !launchConf.ask_tags_on_launch &&
-                            !launchConf.ask_skip_tags_on_launch &&
-                            !launchConf.ask_diff_mode_on_launch &&
-                            !launchConf.survey_enabled &&
-                            !launchConf.credential_needed_to_start &&
-                            !launchConf.inventory_needed_to_start &&
-                            launchConf.passwords_needed_to_start.length === 0 &&
-                            launchConf.variables_needed_to_start.length === 0) {
-                                $scope.showPromptButton = false;
-                        } else {
-                            $scope.showPromptButton = true;
-
-                            // Ignore the fact that variables might be promptable on launch
-                            // Promptable variables will happen in the schedule form
-                            launchConf.ignore_ask_variables = true;
-
-                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has(data, 'summary_fields.inventory')) {
-                                $scope.promptModalMissingReqFields = true;
-                            }
-
-                            if (responses[1].data.survey_enabled) {
-                                // go out and get the survey questions
-                                jobTemplate.getSurveyQuestions(ParentObject.id)
-                                    .then((surveyQuestionRes) => {
-
-                                        let processed = PromptService.processSurveyQuestions({
-                                            surveyQuestions: surveyQuestionRes.data.spec,
-                                            extra_data: _.cloneDeep(data.extra_data)
-                                        });
-
-                                        $scope.missingSurveyValue = processed.missingSurveyValue;
-
-                                        $scope.extraVars = (processed.extra_data === '' || _.isEmpty(processed.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(processed.extra_data);
-
-                                        ParseTypeChange({
-                                            scope: $scope,
-                                            variable: 'extraVars',
-                                            parse_variable: 'parseType',
-                                            field_id: 'SchedulerForm-extraVars',
-                                            readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
-                                        });
-
-                                        $scope.promptData = {
-                                            launchConf: launchConf,
-                                            launchOptions: launchOptions,
-                                            prompts: prompts,
-                                            surveyQuestions: surveyQuestionRes.data.spec,
-                                            template: ParentObject.id
-                                        };
-
-                                        $scope.$watch('promptData.surveyQuestions', () => {
-                                            let missingSurveyValue = false;
-                                            _.each($scope.promptData.surveyQuestions, (question) => {
-                                                if (question.required && (Empty(question.model) || question.model === [])) {
-                                                    missingSurveyValue = true;
-                                                }
-                                            });
-                                            $scope.missingSurveyValue = missingSurveyValue;
-                                        }, true);
-
-                                        watchForPromptChanges();
-                                    });
-                            } else {
-                                $scope.promptData = {
-                                    launchConf: launchConf,
-                                    launchOptions: launchOptions,
-                                    prompts: prompts,
-                                    template: ParentObject.id
-                                };
-                                watchForPromptChanges();
-                            }
-                        }
-                    });
-            } else if ($state.current.name === 'workflowJobTemplateSchedules.edit') {
-                let workflowJobTemplate = new WorkflowJobTemplate();
-
-                $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
-                    .then((responses) => {
-                        let launchOptions = responses[0].data,
-                            launchConf = responses[1].data;
-
-                        let watchForPromptChanges = () => {
-                            $scope.$watch('missingSurveyValue', function() {
-                                $scope.promptModalMissingReqFields = $scope.missingSurveyValue ? true : false;
-                            });
-                        };
-
-                        let prompts = PromptService.processPromptValues({
-                            launchConf: responses[1].data,
-                            launchOptions: responses[0].data,
-                            currentValues: data
-                        });
-
-                        if(!launchConf.survey_enabled) {
-                            $scope.showPromptButton = false;
-                        } else {
-                            $scope.showPromptButton = true;
-
-                            if(responses[1].data.survey_enabled) {
-                                // go out and get the survey questions
-                                workflowJobTemplate.getSurveyQuestions(ParentObject.id)
-                                    .then((surveyQuestionRes) => {
-
-                                        let processed = PromptService.processSurveyQuestions({
-                                            surveyQuestions: surveyQuestionRes.data.spec,
-                                            extra_data: _.cloneDeep(data.extra_data)
-                                        });
-
-                                        $scope.missingSurveyValue = processed.missingSurveyValue;
-
-                                        $scope.promptData = {
-                                            launchConf: launchConf,
-                                            launchOptions: launchOptions,
-                                            prompts: prompts,
-                                            surveyQuestions: surveyQuestionRes.data.spec,
-                                            template: ParentObject.id
-                                        };
-
-                                        $scope.$watch('promptData.surveyQuestions', () => {
-                                            let missingSurveyValue = false;
-                                            _.each($scope.promptData.surveyQuestions, (question) => {
-                                                if(question.required && (Empty(question.model) || question.model === [])) {
-                                                    missingSurveyValue = true;
-                                                }
-                                            });
-                                            $scope.missingSurveyValue = missingSurveyValue;
-                                        }, true);
-
-                                        watchForPromptChanges();
-                                    });
-                            }
-                            else {
-                                $scope.promptData = {
-                                    launchConf: launchConf,
-                                    launchOptions: launchOptions,
-                                    prompts: prompts,
-                                    template: ParentObject.id
-                                };
-                                watchForPromptChanges();
-                            }
-                        }
-                    });
-            }
-
-            // extra_data field is not manifested in the UI when scheduling a Management Job
-            if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
-                if ($state.current.name === 'projectSchedules.edit' ||
-                    $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit' ||
-                    $state.current.name === 'workflowJobTemplateSchedules.add'
-                ){
-                    $scope.noVars = true;
-                } else {
-                    ParseTypeChange({
-                        scope: $scope,
-                        variable: 'extraVars',
-                        parse_variable: 'parseType',
-                        field_id: 'SchedulerForm-extraVars',
-                        readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
-                    });
-                }
-            }
-        })
-        .catch(({data, status}) => {
-            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                msg: 'Failed to retrieve schedule ' + parseInt($stateParams.schedule_id) + ' GET returned: ' + status });
+            $rootScope.$broadcast("loadSchedulerDetailPane");
+            Wait('stop');
         });
+
+        $scope.showRRuleDetail = false;
+        scheduler.setRRule(schedule.rrule);
+        scheduler.setName(schedule.name);
+        scheduler.scope.timeZones = timezonesResolve;
+        scheduler.scope.schedulerTimeZone = scheduleResolve.timezone;
+        if ($scope.cleanupJob){
+            $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
+        }
+
+        if ($state.current.name === 'jobTemplateSchedules.edit'){
+
+            let jobTemplate = new JobTemplate();
+
+            Rest.setUrl(scheduleResolve.related.credentials);
+
+            $q.all([jobTemplate.optionsLaunch(ParentObject.id), jobTemplate.getLaunch(ParentObject.id), Rest.get()])
+                .then((responses) => {
+                    let launchOptions = responses[0].data,
+                        launchConf = responses[1].data;
+
+                    scheduleCredentials = responses[2].data.results;
+
+                    let watchForPromptChanges = () => {
+                        let promptValuesToWatch = [
+                            'promptData.prompts.inventory.value',
+                            'promptData.prompts.jobType.value',
+                            'promptData.prompts.verbosity.value',
+                            'missingSurveyValue'
+                        ];
+
+                        $scope.$watchGroup(promptValuesToWatch, function() {
+                            let missingPromptValue = false;
+                            if ($scope.missingSurveyValue) {
+                                missingPromptValue = true;
+                            } else if (!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id) {
+                                missingPromptValue = true;
+                            }
+                            $scope.promptModalMissingReqFields = missingPromptValue;
+                        });
+                    };
+
+                    let prompts = PromptService.processPromptValues({
+                        launchConf: responses[1].data,
+                        launchOptions: responses[0].data,
+                        currentValues: scheduleResolve
+                    });
+
+                    let defaultCredsWithoutOverrides = [];
+
+                    const credentialHasScheduleOverride = (templateDefaultCred) => {
+                        let credentialHasOverride = false;
+                        scheduleCredentials.forEach((scheduleCred) => {
+                            if (templateDefaultCred.credential_type === scheduleCred.credential_type) {
+                                if (
+                                    (!templateDefaultCred.vault_id && !scheduleCred.inputs.vault_id) ||
+                                    (templateDefaultCred.vault_id && scheduleCred.inputs.vault_id && templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
+                                ) {
+                                    credentialHasOverride = true;
+                                }
+                            }
+                        });
+
+                        return credentialHasOverride;
+                    };
+
+                    if (_.has(launchConf, 'defaults.credentials')) {
+                        launchConf.defaults.credentials.forEach((defaultCred) => {
+                            if (!credentialHasScheduleOverride(defaultCred)) {
+                                defaultCredsWithoutOverrides.push(defaultCred);
+                            }
+                        });
+                    }
+
+                    prompts.credentials.value = defaultCredsWithoutOverrides.concat(scheduleCredentials);
+
+                    if (!launchConf.ask_variables_on_launch) {
+                        $scope.noVars = true;
+                    }
+
+                    if (!launchConf.survey_enabled &&
+                        !launchConf.ask_inventory_on_launch &&
+                        !launchConf.ask_credential_on_launch &&
+                        !launchConf.ask_verbosity_on_launch &&
+                        !launchConf.ask_job_type_on_launch &&
+                        !launchConf.ask_limit_on_launch &&
+                        !launchConf.ask_tags_on_launch &&
+                        !launchConf.ask_skip_tags_on_launch &&
+                        !launchConf.ask_diff_mode_on_launch &&
+                        !launchConf.survey_enabled &&
+                        !launchConf.credential_needed_to_start &&
+                        !launchConf.inventory_needed_to_start &&
+                        launchConf.passwords_needed_to_start.length === 0 &&
+                        launchConf.variables_needed_to_start.length === 0) {
+                            $scope.showPromptButton = false;
+                    } else {
+                        $scope.showPromptButton = true;
+
+                        // Ignore the fact that variables might be promptable on launch
+                        // Promptable variables will happen in the schedule form
+                        launchConf.ignore_ask_variables = true;
+
+                        if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has(scheduleResolve, 'summary_fields.inventory')) {
+                            $scope.promptModalMissingReqFields = true;
+                        }
+
+                        if (responses[1].data.survey_enabled) {
+                            // go out and get the survey questions
+                            jobTemplate.getSurveyQuestions(ParentObject.id)
+                                .then((surveyQuestionRes) => {
+
+                                    let processed = PromptService.processSurveyQuestions({
+                                        surveyQuestions: surveyQuestionRes.data.spec,
+                                        extra_data: _.cloneDeep(scheduleResolve.extra_data)
+                                    });
+
+                                    $scope.missingSurveyValue = processed.missingSurveyValue;
+
+                                    $scope.extraVars = (processed.extra_data === '' || _.isEmpty(processed.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(processed.extra_data);
+
+                                    ParseTypeChange({
+                                        scope: $scope,
+                                        variable: 'extraVars',
+                                        parse_variable: 'parseType',
+                                        field_id: 'SchedulerForm-extraVars',
+                                        readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
+                                    });
+
+                                    $scope.promptData = {
+                                        launchConf: launchConf,
+                                        launchOptions: launchOptions,
+                                        prompts: prompts,
+                                        surveyQuestions: surveyQuestionRes.data.spec,
+                                        template: ParentObject.id
+                                    };
+
+                                    $scope.$watch('promptData.surveyQuestions', () => {
+                                        let missingSurveyValue = false;
+                                        _.each($scope.promptData.surveyQuestions, (question) => {
+                                            if (question.required && (Empty(question.model) || question.model === [])) {
+                                                missingSurveyValue = true;
+                                            }
+                                        });
+                                        $scope.missingSurveyValue = missingSurveyValue;
+                                    }, true);
+
+                                    watchForPromptChanges();
+                                });
+                        } else {
+                            $scope.promptData = {
+                                launchConf: launchConf,
+                                launchOptions: launchOptions,
+                                prompts: prompts,
+                                template: ParentObject.id
+                            };
+                            watchForPromptChanges();
+                        }
+                    }
+                });
+        } else if ($state.current.name === 'workflowJobTemplateSchedules.edit') {
+            let workflowJobTemplate = new WorkflowJobTemplate();
+
+            $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
+                .then((responses) => {
+                    let launchOptions = responses[0].data,
+                        launchConf = responses[1].data;
+
+                    let watchForPromptChanges = () => {
+                        $scope.$watch('missingSurveyValue', function() {
+                            $scope.promptModalMissingReqFields = $scope.missingSurveyValue ? true : false;
+                        });
+                    };
+
+                    let prompts = PromptService.processPromptValues({
+                        launchConf: responses[1].data,
+                        launchOptions: responses[0].data,
+                        currentValues: scheduleResolve
+                    });
+
+                    if(!launchConf.survey_enabled) {
+                        $scope.showPromptButton = false;
+                    } else {
+                        $scope.showPromptButton = true;
+
+                        if(responses[1].data.survey_enabled) {
+                            // go out and get the survey questions
+                            workflowJobTemplate.getSurveyQuestions(ParentObject.id)
+                                .then((surveyQuestionRes) => {
+
+                                    let processed = PromptService.processSurveyQuestions({
+                                        surveyQuestions: surveyQuestionRes.data.spec,
+                                        extra_data: _.cloneDeep(scheduleResolve.extra_data)
+                                    });
+
+                                    $scope.missingSurveyValue = processed.missingSurveyValue;
+
+                                    $scope.promptData = {
+                                        launchConf: launchConf,
+                                        launchOptions: launchOptions,
+                                        prompts: prompts,
+                                        surveyQuestions: surveyQuestionRes.data.spec,
+                                        template: ParentObject.id
+                                    };
+
+                                    $scope.$watch('promptData.surveyQuestions', () => {
+                                        let missingSurveyValue = false;
+                                        _.each($scope.promptData.surveyQuestions, (question) => {
+                                            if(question.required && (Empty(question.model) || question.model === [])) {
+                                                missingSurveyValue = true;
+                                            }
+                                        });
+                                        $scope.missingSurveyValue = missingSurveyValue;
+                                    }, true);
+
+                                    watchForPromptChanges();
+                                });
+                        }
+                        else {
+                            $scope.promptData = {
+                                launchConf: launchConf,
+                                launchOptions: launchOptions,
+                                prompts: prompts,
+                                template: ParentObject.id
+                            };
+                            watchForPromptChanges();
+                        }
+                    }
+                });
+        }
+
+        // extra_data field is not manifested in the UI when scheduling a Management Job
+        if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
+            if ($state.current.name === 'projectSchedules.edit' ||
+                $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit' ||
+                $state.current.name === 'workflowJobTemplateSchedules.add'
+            ){
+                $scope.noVars = true;
+            } else {
+                ParseTypeChange({
+                    scope: $scope,
+                    variable: 'extraVars',
+                    parse_variable: 'parseType',
+                    field_id: 'SchedulerForm-extraVars',
+                    readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
+                });
+            }
+        }
+    }
+    init();
 
     callSelect2();
 }];
