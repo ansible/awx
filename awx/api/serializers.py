@@ -4599,7 +4599,7 @@ class InstanceGroupSerializer(BaseSerializer):
                     "this group when new instances come online.")
     )
     policy_instance_list = serializers.ListField(
-        child=serializers.CharField(),
+        child=serializers.CharField(), required=False,
         help_text=_("List of exact-match Instances that will be assigned to this group")
     )
 
