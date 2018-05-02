@@ -76,7 +76,7 @@ export default ['i18n', function(i18n) {
                         reqExpression: "isAddForm",
                         init: false
                     },
-                    ngChange: "clearPWConfirm('password_confirm')",
+                    ngChange: "clearPWConfirm()",
                     autocomplete: false,
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
