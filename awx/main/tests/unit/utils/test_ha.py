@@ -11,16 +11,8 @@ from contextlib import nested
 # AWX
 from awx.main.utils.ha import (
     _add_remove_celery_worker_queues,
-    update_celery_worker_routes,
+    AWXCeleryRouter,
 )
-
-
-@pytest.fixture
-def conf():
-    class Conf():
-        CELERY_ROUTES = dict()
-        CELERYBEAT_SCHEDULE = dict()
-    return Conf()
 
 
 class TestAddRemoveCeleryWorkerQueues():
@@ -73,7 +65,7 @@ class TestAddRemoveCeleryWorkerQueues():
             assert set(removed_queues) == set(removed_expected)
 
 
-class TestUpdateCeleryWorkerRoutes():
+class TestUpdateCeleryWorkerRouter():
 
     @pytest.mark.parametrize("is_controller,expected_routes", [
         (False, {
@@ -86,20 +78,16 @@ class TestUpdateCeleryWorkerRoutes():
             'awx.main.tasks.awx_isolated_heartbeat': {'queue': 'east-1', 'routing_key': 'east-1'},
         }),
     ])
-    def test_update_celery_worker_routes(self, mocker, conf, is_controller, expected_routes):
-        instance = mocker.MagicMock()
-        instance.hostname = 'east-1'
-        instance.is_controller = mocker.MagicMock(return_value=is_controller)
+    def test_update_celery_worker_routes(self, mocker, is_controller, expected_routes):
+        def get_or_register():
+            instance = mock.MagicMock()
+            instance.hostname = 'east-1'
+            instance.is_controller = mock.MagicMock(return_value=is_controller)
+            return (False, instance)
 
-        assert update_celery_worker_routes(instance, conf) == expected_routes
-        assert conf.CELERY_ROUTES == expected_routes
+        with mock.patch('awx.main.models.Instance.objects.get_or_register', get_or_register):
+            router = AWXCeleryRouter()
 
-    def test_update_celery_worker_routes_deleted(self, mocker, conf):
-        instance = mocker.MagicMock()
-        instance.hostname = 'east-1'
-        instance.is_controller = mocker.MagicMock(return_value=False)
-        conf.CELERY_ROUTES = {'awx.main.tasks.awx_isolated_heartbeat': 'foobar'}
-
-        update_celery_worker_routes(instance, conf)
-        assert 'awx.main.tasks.awx_isolated_heartbeat' not in conf.CELERY_ROUTES
+            for k,v in expected_routes.iteritems():
+                assert router.route_for_task(k) == v
 

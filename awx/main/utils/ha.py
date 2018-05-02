@@ -52,24 +52,21 @@ def _add_remove_celery_worker_queues(app, controlled_instances, worker_queues, w
     return (added_queues, removed_queues)
 
 
-def update_celery_worker_routes(instance, conf):
-    tasks = [
-        'awx.main.tasks.cluster_node_heartbeat',
-        'awx.main.tasks.purge_old_stdout_files',
-    ]
-    routes_updated = {}
-    # Instance is, effectively, a controller node
-    if instance.is_controller():
-        tasks.append('awx.main.tasks.awx_isolated_heartbeat')
-    else:
-        if 'awx.main.tasks.awx_isolated_heartbeat' in conf.CELERY_ROUTES:
-            del conf.CELERY_ROUTES['awx.main.tasks.awx_isolated_heartbeat']
+class AWXCeleryRouter(object):
+    def route_for_task(self, task, args=None, kwargs=None):
+        (changed, instance) = Instance.objects.get_or_register()
+        tasks = [
+            'awx.main.tasks.cluster_node_heartbeat',
+            'awx.main.tasks.purge_old_stdout_files',
+        ]
+        isolated_tasks = [
+            'awx.main.tasks.awx_isolated_heartbeat',
+        ]
+        if task in tasks:
+            return {'queue': instance.hostname.encode("utf8"), 'routing_key': instance.hostname.encode("utf8")}
 
-    for t in tasks:
-        conf.CELERY_ROUTES[t] = {'queue': instance.hostname.encode("utf8"), 'routing_key': instance.hostname.encode("utf8")}
-        routes_updated[t] = conf.CELERY_ROUTES[t]
-
-    return routes_updated
+        if instance.is_controller() and task in isolated_tasks:
+            return {'queue': instance.hostname.encode("utf8"), 'routing_key': instance.hostname.encode("utf8")}
 
 
 def register_celery_worker_queues(app, celery_worker_name):
