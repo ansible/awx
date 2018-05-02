@@ -16,6 +16,7 @@ function NetworkingController (models, $state, $scope, strings) {
     vm.groups = [];
     $scope.devices = [];
     vm.close = () => {
+        $scope.$broadcast('awxNet-closeNetworkUI');
         $state.go('inventories');
     };
 

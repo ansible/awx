@@ -1,7 +1,7 @@
 <div class="at-Layout-side"
-    ng-class="{'at-Layout-side--expanded': vm.isExpanded && layoutVm.isLoggedIn}" ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing">
+    ng-class="{'at-Layout-side--expanded': vm.isExpanded && layoutVm.isLoggedIn}" ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing && layoutVm.currentState !== 'inventories.edit.networking'">
         <div class="at-Layout-sideNavItem at-Layout-sideNavToggle" ng-click="vm.toggleExpansion()"
-            ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing">
+            ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing && layoutVm.currentState !== 'inventories.edit.networking'">
                 <i class="fa fa-bars"></i>
         </div>
         <ng-transclude></ng-transclude>
