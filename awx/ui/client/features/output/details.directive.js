@@ -442,9 +442,10 @@ function toggleLabels () {
 }
 
 function cancelJob () {
-    const actionText = strings.get('warnings.CANCEL_ACTION');
-    const hdr = strings.get('warnings.CANCEL_HEADER');
-    const warning = strings.get('warnings.CANCEL_BODY');
+    const actionText = strings.get('cancelJob.CANCEL_JOB');
+    const hdr = strings.get('cancelJob.HEADER');
+    const warning = strings.get('cancelJob.SUBMIT_REQUEST');
+    const cancelText = strings.get('cancelJob.RETURN');
 
     const id = resource.model.get('id');
     const name = $filter('sanitize')(resource.model.get('name'));
@@ -467,13 +468,13 @@ function cancelJob () {
             });
     };
 
-    prompt({ hdr, resourceName, body, actionText, action });
+    prompt({ hdr, resourceName, body, actionText, action, cancelText });
 }
 
 function deleteJob () {
     const actionText = strings.get('DELETE');
-    const hdr = strings.get('warnings.DELETE_HEADER');
-    const warning = strings.get('warnings.DELETE_BODY');
+    const hdr = strings.get('deleteResource.HEADER');
+    const warning = strings.get('deleteResource.CONFIRM', 'job');
 
     const id = resource.model.get('id');
     const name = $filter('sanitize')(resource.model.get('name'));

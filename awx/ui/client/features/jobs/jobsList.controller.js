@@ -132,7 +132,7 @@ function ListJobsController (
             resourceName: $filter('sanitize')(job.name),
             body: deleteModalBody,
             action,
-            actionText: 'DELETE'
+            actionText: strings.get('DELETE'),
         });
     };
 
@@ -174,7 +174,8 @@ function ListJobsController (
             resourceName: $filter('sanitize')(job.name),
             body: deleteModalBody,
             action,
-            actionText: strings.get('OK')
+            actionText: strings.get('cancelJob.CANCEL_JOB'),
+            cancelText: strings.get('cancelJob.RETURN')
         });
     };
 
