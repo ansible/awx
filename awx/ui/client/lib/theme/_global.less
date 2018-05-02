@@ -26,6 +26,11 @@
     border: none;
     display: flex;
     margin-left: @at-space-4x;
+
+    &[aria-expanded="true"] {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
 }
 
 .at-Button--info {

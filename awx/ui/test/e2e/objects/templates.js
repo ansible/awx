@@ -127,7 +127,7 @@ module.exports = {
             return this;
         },
         selectAdd (name) {
-            this.clickWhenEnabled(`#button-add`);
+            this.clickWhenEnabled('#button-add');
 
             this.api
                 .useXpath()
