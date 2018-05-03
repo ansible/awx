@@ -59,21 +59,22 @@ export default ['i18n', function(i18n){
         fieldActions: {
 
             columnClass: 'col-md-2 col-sm-3 col-xs-3',
-            test: {
-                ngClick: "testNotification(notification_template.id)",
-                icon: 'fa-bell-o',
-                label: i18n._('Edit'),
-                "class": 'btn-sm',
-                awToolTip: i18n._('Test notification'),
-                dataPlacement: 'top',
-                ngShow: 'notification_template.summary_fields.user_capabilities.edit'
-            },
+
             edit: {
                 ngClick: "editNotification(notification_template.id)",
                 icon: 'fa-edit',
                 label: i18n._('Edit'),
                 "class": 'btn-sm',
                 awToolTip: i18n._('Edit notification'),
+                dataPlacement: 'top',
+                ngShow: 'notification_template.summary_fields.user_capabilities.edit'
+            },
+            test: {
+                ngClick: "testNotification(notification_template.id)",
+                icon: 'fa-bell-o',
+                label: i18n._('Edit'),
+                "class": 'btn-sm',
+                awToolTip: i18n._('Test notification'),
                 dataPlacement: 'top',
                 ngShow: 'notification_template.summary_fields.user_capabilities.edit'
             },

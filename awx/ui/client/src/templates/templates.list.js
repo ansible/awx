@@ -76,6 +76,15 @@ export default ['i18n', function(i18n) {
 
             columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-3',
 
+            edit: {
+                label: i18n._('Edit'),
+                ngClick: "editJobTemplate(template)",
+                awToolTip: i18n._('Edit template'),
+                "class": 'btn-default btn-xs',
+                dataPlacement: 'top',
+                ngShow: 'template.summary_fields.user_capabilities.edit',
+                editStateParams: ['job_template_id', 'workflow_job_template_id']
+            },
             submit: {
                 // The submit key lets the list generator know that we want to use the
                 // at-launch-template directive
@@ -94,15 +103,6 @@ export default ['i18n', function(i18n) {
                 awToolTip: i18n._('Copy template'),
                 dataPlacement: 'top',
                 ngShow: 'template.summary_fields.user_capabilities.copy'
-            },
-            edit: {
-                label: i18n._('Edit'),
-                ngClick: "editJobTemplate(template)",
-                awToolTip: i18n._('Edit template'),
-                "class": 'btn-default btn-xs',
-                dataPlacement: 'top',
-                ngShow: 'template.summary_fields.user_capabilities.edit',
-                editStateParams: ['job_template_id', 'workflow_job_template_id']
             },
             view: {
                 label: i18n._('View'),
