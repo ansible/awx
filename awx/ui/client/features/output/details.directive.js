@@ -367,25 +367,49 @@ function getInstanceGroupDetails () {
 }
 
 function getJobTagDetails () {
-    const label = 'Job Tags';
-    const value = resource.model.get('job_tags');
+    const tagString = resource.model.get('job_tags');
 
-    if (!value) {
+    let jobTags;
+
+    if (tagString) {
+        jobTags = tagString.split(',');
+    } else {
+        jobTags = [];
+    }
+
+    if (jobTags.length < 1) {
         return null;
     }
 
-    return { label, value };
+    const label = 'Job Tags';
+    const more = false;
+
+    const value = jobTags.map($filter('sanitize'));
+
+    return { label, more, value };
 }
 
 function getSkipTagDetails () {
-    const label = 'Skip Tags';
-    const value = resource.model.get('skip_tags');
+    const tagString = resource.model.get('skip_tags');
 
-    if (!value) {
+    let skipTags;
+
+    if (tagString) {
+        skipTags = tagString.split(',');
+    } else {
+        skipTags = [];
+    }
+
+    if (skipTags.length < 1) {
         return null;
     }
 
-    return { label, value };
+    const label = 'Skip Tags';
+    const more = false;
+
+    const value = skipTags.map($filter('sanitize'));
+
+    return { label, more, value };
 }
 
 function getExtraVarsDetails () {
@@ -428,16 +452,38 @@ function createErrorHandler (path, action) {
 }
 
 const ELEMENT_LABELS = '#job-results-labels';
+const ELEMENT_JOB_TAGS = '#job-results-job-tags';
+const ELEMENT_SKIP_TAGS = '#job-results-skip-tags';
 const ELEMENT_PROMPT_MODAL = '#prompt-modal';
-const LABELS_SLIDE_DISTANCE = 200;
+const TAGS_SLIDE_DISTANCE = 200;
 
 function toggleLabels () {
     if (!this.labels.more) {
-        $(ELEMENT_LABELS).slideUp(LABELS_SLIDE_DISTANCE);
+        $(ELEMENT_LABELS).slideUp(TAGS_SLIDE_DISTANCE);
         this.labels.more = true;
     } else {
-        $(ELEMENT_LABELS).slideDown(LABELS_SLIDE_DISTANCE);
+        $(ELEMENT_LABELS).slideDown(TAGS_SLIDE_DISTANCE);
         this.labels.more = false;
+    }
+}
+
+function toggleJobTags () {
+    if (!this.jobTags.more) {
+        $(ELEMENT_JOB_TAGS).slideUp(TAGS_SLIDE_DISTANCE);
+        this.jobTags.more = true;
+    } else {
+        $(ELEMENT_JOB_TAGS).slideDown(TAGS_SLIDE_DISTANCE);
+        this.jobTags.more = false;
+    }
+}
+
+function toggleSkipTags () {
+    if (!this.skipTags.more) {
+        $(ELEMENT_SKIP_TAGS).slideUp(TAGS_SLIDE_DISTANCE);
+        this.skipTags.more = true;
+    } else {
+        $(ELEMENT_SKIP_TAGS).slideDown(TAGS_SLIDE_DISTANCE);
+        this.skipTags.more = false;
     }
 }
 
@@ -562,6 +608,8 @@ function AtJobDetailsController (
         vm.cancelJob = cancelJob;
         vm.deleteJob = deleteJob;
         vm.toggleLabels = toggleLabels;
+        vm.toggleJobTags = toggleJobTags;
+        vm.toggleSkipTags = toggleSkipTags;
 
         const observe = (getter, transform, key) => {
             $scope.$watch(getter, value => { vm[key] = transform(value); });
