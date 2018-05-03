@@ -136,11 +136,10 @@ module.exports = {
 
         client.expect.element('#hosts_tab').css('background-color').contain('132, 137, 146');
 
-        client.useXpath();
+        client.useCss();
         client.waitForElementVisible(addHost);
         client.expect.element(addHost).enabled;
         client.click(addHost);
-        client.useCss();
 
         client.waitForElementVisible('#host_name');
         client.sendKeys('#host_name', 'localhost');
@@ -268,9 +267,10 @@ module.exports = {
         client.waitForElementNotPresent(running, 60000);
         client.waitForElementVisible(success, 60000);
 
-        client.useCss();
+        client.useXpath();
         client.waitForElementVisible(output1, 60000);
         client.waitForElementVisible(output2, 60000);
+        client.useCss();
 
         client.end();
     }
