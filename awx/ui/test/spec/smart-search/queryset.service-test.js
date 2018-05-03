@@ -58,6 +58,32 @@ describe('Service: QuerySet', () => {
         });
     });
 
+    describe('getSearchInputQueryset', () => {
+        it('creates the expected queryset', () =>{
+            spyOn(QuerySet, 'encodeParam').and.callThrough();
+
+            const term = 'name:foo';
+            const isFilterableBaseField = () => true;
+            const isRelatedField = () => false;
+
+            expect(QuerySet.getSearchInputQueryset(term, isFilterableBaseField, isRelatedField)).toEqual({ name__icontains_DEFAULT: 'foo' });
+            expect(QuerySet.encodeParam).toHaveBeenCalledWith({ term: "name:foo",  searchTerm: true, singleSearchParam: null });
+        });
+    });
+
+    describe('removeTermsFromQueryset', () => {
+        it('creates the expected queryset', () =>{
+            spyOn(QuerySet, 'encodeParam').and.callThrough();
+
+            const queryset = { page_size: "20", order_by: "name", project__search_DEFAULT: "foo" };
+            const term = 'project:foo';
+            const isFilterableBaseField = () => false;
+            const isRelatedField = () => true;
+
+            expect(QuerySet.removeTermsFromQueryset(queryset, term, isFilterableBaseField, isRelatedField)).toEqual({ page_size: "20", order_by: "name" });
+            expect(QuerySet.encodeParam).toHaveBeenCalledWith({ term: 'project:foo',  relatedSearchTerm: true, singleSearchParam: null });
+        });
+    });
 
     describe('fn search', () => {
         let pattern = /\/api\/v2\/inventories\/(.+)\/groups\/*/,

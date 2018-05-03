@@ -104,6 +104,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
             }
             let paramString = exclude ? "not__" : "";
             let valueString = paramParts[1];
+
             if(keySplit.length === 1) {
                 if(searchTerm && !lessThanGreaterThan) {
                     if(singleSearchParam) {
@@ -407,9 +408,9 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                 if (termParts.length === 1) {
                     termParams = searchWithoutKey(term, singleSearchParam);
                 } else if ((isAnsibleFactField && isAnsibleFactField(termParts)) || (isFilterableBaseField && isFilterableBaseField(termParts))) {
-                    termParams = this.encodeParam({ term, singleSearchParam });
+                    termParams = this.encodeParam({ term, singleSearchParam, searchTerm: true });
                 } else if (isRelatedField && isRelatedField(termParts)) {
-                    termParams = this.encodeParam({ term, singleSearchParam, related: true });
+                    termParams = this.encodeParam({ term, singleSearchParam, relatedSearchTerm: true });
                 } else {
                     termParams = searchWithoutKey(term, singleSearchParam);
                 }
@@ -458,9 +459,9 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
             if (termParts.length === 1) {
                 removed = searchWithoutKey(term, singleSearchParam);
             } else if ((isAnsibleFactField && isAnsibleFactField(termParts)) || (isFilterableBaseField && isFilterableBaseField(termParts))) {
-                removed = this.encodeParam({ term, singleSearchParam });
+                removed = this.encodeParam({ term, singleSearchParam, searchTerm: true });
             } else if (isRelatedField && isRelatedField(termParts)) {
-                removed = this.encodeParam({ term, singleSearchParam, related: true });
+                removed = this.encodeParam({ term, singleSearchParam, relatedSearchTerm: true });
             } else {
                 removed = searchWithoutKey(term, singleSearchParam);
             }
