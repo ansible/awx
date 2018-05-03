@@ -42,7 +42,7 @@
             </div>
         </div>
         <div class="SmartSearch-keyRow">
-            <b translate>FIELDS:</b> <span ng-repeat="(key,value) in model.base">{{ key }}<span ng-if="!$last">, </span></span>
+            <b translate>FIELDS:</b> <span ng-repeat="field in keyFields">{{ field }}<span ng-if="!$last">, </span></span>
         </div>
         <div class="SmartSearch-keyRow" ng-show="model.related && model.related.length > 0">
             <b translate>RELATED FIELDS:</b> <span ng-repeat="relation in model.related">{{ relation }}<span ng-if="!$last">, </span></span>
