@@ -62,15 +62,11 @@ class Metadata(metadata.SimpleMetadata):
                 opts = serializer.Meta.model._meta.concrete_model._meta
                 verbose_name = smart_text(opts.verbose_name)
                 field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
-            # If field is not part of the model, then show it as non-filterable
-            else:
-                is_model_field = False
-                for model_field in serializer.Meta.model._meta.fields:
-                    if field.field_name == model_field.name:
-                        is_model_field = True
-                        break
-                if not is_model_field:
-                    field_info['filterable'] = False
+
+            for model_field in serializer.Meta.model._meta.fields:
+                if field.field_name == model_field.name:
+                    field_info['filterable'] = True
+                    break
 
         # Indicate if a field has a default value.
         # FIXME: Still isn't showing all default values?
