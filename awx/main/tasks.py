@@ -146,7 +146,7 @@ def apply_cluster_membership_policies(self):
         # Process policy instance list first, these will represent manually managed instances
         # that will not go through automatic policy determination
         for ig in InstanceGroup.objects.all():
-            logger.info(six.text_type("Considering group {}").format(ig.name))
+            logger.info(six.text_type("Applying cluster membership policies to Group {}").format(ig.name))
             ig.instances.clear()
             group_actual = Group(obj=ig, instances=[])
             for i in ig.policy_instance_list:
@@ -154,7 +154,7 @@ def apply_cluster_membership_policies(self):
                 if not inst.exists():
                     continue
                 inst = inst[0]
-                logger.info(six.text_type("Policy List, adding {} to {}").format(inst.hostname, ig.name))
+                logger.info(six.text_type("Policy List, adding Instance {} to Group {}").format(inst.hostname, ig.name))
                 group_actual.instances.append(inst.id)
                 ig.instances.add(inst)
                 filtered_instances.append(inst)
@@ -167,7 +167,7 @@ def apply_cluster_membership_policies(self):
             for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
                 if len(g.instances) >= g.obj.policy_instance_minimum:
                     break
-                logger.info(six.text_type("Policy minimum, adding {} to {}").format(i.obj.hostname, g.obj.name))
+                logger.info(six.text_type("Policy minimum, adding Instance {} to Group {}").format(i.obj.hostname, g.obj.name))
                 g.obj.instances.add(i.obj)
                 g.instances.append(i.obj.id)
                 i.groups.append(g.obj.id)
@@ -176,7 +176,7 @@ def apply_cluster_membership_policies(self):
             for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
                 if 100 * float(len(g.instances)) / len(actual_instances) >= g.obj.policy_instance_percentage:
                     break
-                logger.info(six.text_type("Policy percentage, adding {} to {}").format(i.obj.hostname, g.obj.name))
+                logger.info(six.text_type("Policy percentage, adding Instance {} to Group {}").format(i.obj.hostname, g.obj.name))
                 g.instances.append(i.obj.id)
                 g.obj.instances.add(i.obj)
                 i.groups.append(g.obj.id)
