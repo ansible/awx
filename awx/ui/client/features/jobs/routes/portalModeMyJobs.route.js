@@ -5,6 +5,9 @@ const jobsListTemplate = require('~features/jobs/jobsList.view.html');
 export default {
     name: 'portalMode.myJobs',
     url: '/myjobs?{job_search:queryset}',
+    ncyBreadcrumb: {
+        skip: true
+    },
     params: {
         job_search: {
             value: {
