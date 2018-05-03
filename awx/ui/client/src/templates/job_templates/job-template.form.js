@@ -348,7 +348,7 @@ function(NotificationsList, i18n) {
                         alwaysShowAsterisk: true
                     }
                 },
-                variables: {
+                extra_vars: {
                     label: i18n._('Extra Variables'),
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
