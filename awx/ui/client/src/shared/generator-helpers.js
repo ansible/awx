@@ -751,6 +751,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         html += (options.dataPlacement) ? "data-placement=\"" + options.dataPlacement + "\" " : "";
         html += (options.dataContainer) ? "data-container=\"" + options.dataContainer + "\" " : "";
         html += (options.actionClass) ? "class=\"" + options.actionClass + "\" " : "";
+        html += (options.actionId) ? "id=\"" + options.actionId + "\" " : "";
         html += (options.dataTitle) ? "data-title=\"" + options.dataTitle + "\" " : "";
         html += (options.ngDisabled) ? "ng-disabled=\"" + options.ngDisabled + "\" " : "";
         html += (options.ngClick) ? "ng-click=\"$eval(" + options.ngClick + ")\" " : "";

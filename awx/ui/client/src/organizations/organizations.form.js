@@ -92,8 +92,8 @@ export default ['NotificationsList', 'i18n',
                             ngClick: "$state.go('.add')",
                             label: i18n._('Add'),
                             awToolTip: i18n._('Add Users to this organization.'),
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ' + i18n._('ADD'),
+                            actionClass: 'at-Button--add',
+                            actionId: 'button-add',
                             ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },

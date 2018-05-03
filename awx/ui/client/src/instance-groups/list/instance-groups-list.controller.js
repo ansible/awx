@@ -33,6 +33,10 @@ export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Datas
             vm.activeId = parseInt($state.params.instance_group_id);
         });
 
+        vm.tooltips = {
+            add: strings.get('tooltips.ADD_INSTANCE_GROUP')
+        };
+
         vm.rowAction = {
             trash: instance_group => {
                 return vm.isSuperuser && instance_group.name !== 'tower';

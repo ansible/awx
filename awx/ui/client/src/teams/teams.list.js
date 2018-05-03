@@ -41,8 +41,8 @@ export default ['i18n', function(i18n) {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addTeam()',
                 awToolTip: i18n._('Create a new team'),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ADD'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 ngShow: 'canAdd && canEdit'
             }
         },

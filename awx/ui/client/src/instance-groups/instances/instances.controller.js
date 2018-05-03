@@ -48,6 +48,10 @@ function InstancesController ($scope, $state, $http, models, Instance, strings, 
         }
     };
 
+    vm.tooltips = {
+        add: strings.get('tooltips.ASSOCIATE_INSTANCES')
+    };
+
     vm.rowAction = {
         toggle: {
             _disabled: !vm.isSuperuser

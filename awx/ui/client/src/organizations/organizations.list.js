@@ -33,8 +33,8 @@ export default [function() {
                 ngClick: 'addOrganization()',
                 awToolTip: 'Create a new organization',
                 awFeature: 'multiple_organizations',
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                actionClass: 'at-Button--add',
+                actionId: 'button-add'
             }
         },
 

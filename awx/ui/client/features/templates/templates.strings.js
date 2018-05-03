@@ -10,7 +10,6 @@ function TemplatesStrings (BaseString) {
 
     ns.list = {
         PANEL_TITLE: t.s('TEMPLATES'),
-        ADD_BUTTON_LABEL: t.s('ADD'),
         ADD_DD_JT_LABEL: t.s('Job Template'),
         ADD_DD_WF_LABEL: t.s('Workflow Template'),
         ROW_ITEM_LABEL_ACTIVITY: t.s('Activity'),

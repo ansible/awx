@@ -220,6 +220,7 @@ table, tbody {
 }
 
 .List-actions {
+    align-items: center;
     display: flex;
     margin-bottom: -34px;
 }
@@ -233,10 +234,6 @@ table, tbody {
 
 .List-auxActionStream {
     width: 200px;
-}
-
-.List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
-    margin-left: 20px;
 }
 
 .List-buttonSubmit {
@@ -254,6 +251,8 @@ table, tbody {
     background-color: @btn-bg;
     color: @btn-txt;
     border-color: @b7grey;
+    height: 30px;
+    line-height: 14px;
 }
 
 .List-buttonDefault:hover,
@@ -463,16 +462,6 @@ table, tbody {
 .List-dropdownSuccess:focus {
     color: @submit-button-text;
     background-color: @submit-button-bg-hov;
-}
-
-.List-dropdownCarat {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    vertical-align: middle;
-    border-top: 4px dashed;
-    border-right: 4px solid transparent;
-    border-left: 4px solid transparent;
 }
 
 .List-infoCell {

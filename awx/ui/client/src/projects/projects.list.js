@@ -74,8 +74,8 @@ export default ['i18n', function(i18n) {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addProject()',
                 awToolTip: i18n._('Create a new project'),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ADD'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 ngShow: "canAdd"
             }
         },

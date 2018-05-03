@@ -14,13 +14,12 @@
         <div class="at-List-toolbarAction" ng-show="canAdd">
             <button
                 type="button"
-                class="at-List-toolbarActionButton at-Button--success"
+                class="at-Button--add"
+                id="button-add"
                 data-toggle="dropdown"
                 aria-haspopup="true"
                 aria-expanded="false">
-                    &#43; {{:: vm.strings.get('list.ADD_BUTTON_LABEL') }}
-                    <span class="at-List-toolbarDropdownCarat"></span>
-                    <span class="sr-only">Toggle Dropdown</span>
+                <span class="sr-only">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu at-List-toolbarActionDropdownMenu">
                 <li>

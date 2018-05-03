@@ -147,8 +147,8 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                             ngClick: "$state.go('.add')",
                             label: i18n._('Add'),
                             awToolTip: i18n._('Add a permission'),
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; '+ i18n._('ADD'),
+                            actionClass: 'at-Button--add',
+                            actionId: 'button-add',
                             ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                         }
                     },
