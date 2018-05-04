@@ -53,7 +53,7 @@ function SmartSearchController (
                 $scope.models = data.models;
                 $scope.options = data.options.data;
                 $scope.keyFields = _.reduce(data.models[$scope.djangoModel].base, function(result, value, key) {
-                    if (!(typeof value.filterable === "boolean" && value.filterable === false)) {
+                    if (value.filterable) {
                         result.push(key);
                     }
                     return result;
@@ -150,10 +150,11 @@ function SmartSearchController (
         const listName = $scope.list.name;
         const baseFieldPath = `models.${listName}.base.${rootField}`;
         const isBaseField = _.has($scope, `${baseFieldPath}`);
-        const filterable = _.get($scope, `${baseFieldPath}.filterable`);
-        const isNotFilterable = typeof filterable === "boolean" && filterable === false;
+
+        const isFilterable = _.get($scope, `${baseFieldPath}.filterable`);
         const isBaseModelRelatedSearchTermField = (_.get($scope, `${baseFieldPath}.type`) === 'field');
-        return isBaseField && !isBaseModelRelatedSearchTermField && !isNotFilterable;
+
+        return isBaseField && !isBaseModelRelatedSearchTermField && isFilterable;
     }
 
     function isRelatedField (termParts) {

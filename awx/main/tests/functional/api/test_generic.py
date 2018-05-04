@@ -94,10 +94,16 @@ class TestDeleteViews:
 
 
 @pytest.mark.django_db
-def test_non_filterable_field(options, instance, admin_user):
+def test_filterable_fields(options, instance, admin_user):
     r = options(
         url=instance.get_absolute_url(),
         user=admin_user
     )
-    field_info = r.data['actions']['GET']['percent_capacity_remaining']
-    assert 'filterable' in field_info
+
+    filterable_info = r.data['actions']['GET']['created']
+    non_filterable_info = r.data['actions']['GET']['percent_capacity_remaining']
+
+    assert 'filterable' in filterable_info
+    assert filterable_info['filterable'] is True
+
+    assert 'filterable' not in non_filterable_info
