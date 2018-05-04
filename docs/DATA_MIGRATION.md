@@ -36,7 +36,9 @@ Export all objects
 
 ### Teardown Old AWX
 
-Clean up remnants of the old AWX install:
+We recommend running the new AWX host on a different VM/machine and keeping the old host until it is confirmed the 
+import was successful.  Alternatively, you could back up the database using [`pg_dump`](https://www.postgresql.org/docs/9.2/static/app-pgdump.html)
+Then clean up remnants of the old AWX install:
 
 ```docker rm -f $(ps -aq)```     # remove all old awx containers
 
