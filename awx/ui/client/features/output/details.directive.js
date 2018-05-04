@@ -384,7 +384,7 @@ function getJobTagDetails () {
     const label = 'Job Tags';
     const more = false;
 
-    const value = jobTags.map($filter('sanitize'));
+    const value = jobTags.filter(tag => tag !== '').map($filter('sanitize'));
 
     return { label, more, value };
 }
@@ -406,8 +406,7 @@ function getSkipTagDetails () {
 
     const label = 'Skip Tags';
     const more = false;
-
-    const value = skipTags.map($filter('sanitize'));
+    const value = skipTags.filter(tag => tag !== '').map($filter('sanitize'));
 
     return { label, more, value };
 }
