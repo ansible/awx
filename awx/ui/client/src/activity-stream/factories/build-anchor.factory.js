@@ -62,10 +62,23 @@ export default function BuildAnchor($log, $filter) {
                  case 'workflow_job_template':
                      url += `templates/workflow_job_template/${obj.id}`;
                      break;
+                 case 'workflow_job':
+                     url += `workflows/${obj.id}`;
+                     break;
+                 case 'label':
+                     url = null;
+                     break;
                  default:
                      url += resource + 's/' + obj.id + '/';
              }
-             return ' <a href=\"' + url + '\"> ' + $filter('sanitize')(obj.name || obj.username) + ' </a> ';
+
+             const name = $filter('sanitize')(obj.name || obj.username);
+
+             if (url) {
+                return ` <a href=\"${url}\"> ${name} </a> `;
+             }
+
+             return ` <span> ${name} </span> `;
          }
          catch(err){
              $log.debug(err);

@@ -838,8 +838,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 setattr(unified_job, fd, val)
             unified_job.save()
 
-        # Labels coppied here
-        copy_m2m_relationships(self, unified_job, fields)
+        # Labels copied here
+        from awx.main.signals import disable_activity_stream
+        with disable_activity_stream():
+            copy_m2m_relationships(self, unified_job, fields)
+
         return unified_job
 
     def launch_prompts(self):
