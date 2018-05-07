@@ -359,6 +359,7 @@ function(NotificationsList, i18n) {
                     dataTitle: i18n._('Extra Variables'),
                     dataPlacement: 'right',
                     dataContainer: "body",
+                    id: 'extra_vars',
                     subCheckbox: {
                         variable: 'ask_variables_on_launch',
                         text: i18n._('Prompt on launch')
