@@ -8,6 +8,7 @@ import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
 import EngineService from '~features/output/engine.service';
 import StatusService from '~features/output/status.service';
+import MessageService from '~features/output/message.service';
 import LegacyRedirect from '~features/output/legacy.route';
 
 import DetailsDirective from '~features/output/details.directive';
@@ -221,6 +222,7 @@ angular
     .service('JobRenderService', RenderService)
     .service('JobEventEngine', EngineService)
     .service('JobStatusService', StatusService)
+    .service('JobMessageService', MessageService)
     .directive('atJobDetails', DetailsDirective)
     .directive('atJobSearch', SearchDirective)
     .directive('atJobStats', StatsDirective)
