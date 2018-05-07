@@ -802,23 +802,33 @@ class CredentialTypeInjectorField(JSONSchemaField):
             for field in model_instance.defined_fields
         )
 
+        class ExplodingNamespace:
+            def __unicode__(self):
+                raise UndefinedError(_('Must define unnamed file injector in order to reference `tower.filename`.'))
+
         class TowerNamespace:
-            filename = None
+            def __init__(self):
+                self.filename = ExplodingNamespace()
+
+            def __unicode__(self):
+                raise UndefinedError(_('Cannot directly reference reserved `tower` namespace container.'))
+
         valid_namespace['tower'] = TowerNamespace()
 
         # ensure either single file or multi-file syntax is used (but not both)
         template_names = [x for x in value.get('file', {}).keys() if x.startswith('template')]
-        if 'template' in template_names and len(template_names) > 1:
-            raise django_exceptions.ValidationError(
-                _('Must use multi-file syntax when injecting multiple files'),
-                code='invalid',
-                params={'value': value},
-            )
-        if 'template' not in template_names:
-            valid_namespace['tower'].filename = TowerNamespace()
+        if 'template' in template_names:
+            valid_namespace['tower'].filename = 'EXAMPLE_FILENAME'
+            if len(template_names) > 1:
+                raise django_exceptions.ValidationError(
+                    _('Must use multi-file syntax when injecting multiple files'),
+                    code='invalid',
+                    params={'value': value},
+                )
+        elif template_names:
             for template_name in template_names:
                 template_name = template_name.split('.')[1]
-                setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE')
+                setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE_FILENAME')
 
         for type_, injector in value.items():
             for key, tmpl in injector.items():
