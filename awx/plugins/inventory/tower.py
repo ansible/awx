@@ -90,6 +90,7 @@ def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_
         tower_host = "https://{}".format(tower_host)
     inventory_url = urljoin(tower_host, "/api/v2/inventories/{}/script/?hostvars=1&towervars=1&all=1".format(inventory.replace('/', '')))
     config_url = urljoin(tower_host, "/api/v2/config/")
+    reason = None
     try:
         if license_type != "open":
             config_response = requests.get(config_url,
@@ -106,14 +107,16 @@ def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_
         response = requests.get(inventory_url,
                                 auth=HTTPBasicAuth(tower_user, tower_pass),
                                 verify=not ignore_ssl)
+        try:
+            json_response = response.json()
+        except (ValueError, TypeError) as e:
+            reason = "Failed to parse json from host: {}".format(e)
         if response.ok:
-            return response.json()
-        json_reason = response.json()
-        reason = json_reason.get('detail', 'Retrieving Tower Inventory Failed')
+            return json_response
+        if not reason:
+            reason = json_response.get('detail', 'Retrieving Tower Inventory Failed')
     except requests.ConnectionError as e:
         reason = "Connection to remote host failed: {}".format(e)
-    except json.JSONDecodeError as e:
-        reason = "Failed to parse json from host: {}".format(e)
     raise RuntimeError(reason)
 
 
