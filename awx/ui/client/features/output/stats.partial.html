@@ -31,8 +31,8 @@
         aw-tool-tip="{{ vm.toggleStdoutFullscreenTooltip }}"
         data-tip-watch="vm.toggleStdoutFullscreenTooltip"
         data-placement="top"
-        ng-class="{'at-Input-button--active': vm.fullscreen.isFullscreen}"
-        ng-click="vm.toggleFullscreen()">
+        ng-class="{'at-Input-button--active': vm.expanded}"
+        ng-click="vm.toggleExpanded()">
         <i class="fa fa-arrows-alt"></i>
     </button>
 </div>

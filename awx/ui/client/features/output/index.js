@@ -8,11 +8,12 @@ import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
 import EngineService from '~features/output/engine.service';
 import StatusService from '~features/output/status.service';
+import MessageService from '~features/output/message.service';
 import LegacyRedirect from '~features/output/legacy.route';
 
-import DetailsDirective from '~features/output/details.directive';
-import SearchDirective from '~features/output/search.directive';
-import StatsDirective from '~features/output/stats.directive';
+import DetailsComponent from '~features/output/details.component';
+import SearchComponent from '~features/output/search.component';
+import StatsComponent from '~features/output/stats.component';
 import HostEvent from './host-event/index';
 
 const Template = require('~features/output/index.view.html');
@@ -175,7 +176,7 @@ function JobsRun ($stateRegistry, strings) {
                 templateUrl: Template,
                 controller: Controller,
                 controllerAs: 'vm'
-            }
+            },
         },
         resolve: {
             webSocketConnection: [
@@ -221,9 +222,10 @@ angular
     .service('JobRenderService', RenderService)
     .service('JobEventEngine', EngineService)
     .service('JobStatusService', StatusService)
-    .directive('atJobDetails', DetailsDirective)
-    .directive('atJobSearch', SearchDirective)
-    .directive('atJobStats', StatsDirective)
+    .service('JobMessageService', MessageService)
+    .component('atJobSearch', SearchComponent)
+    .component('atJobStats', StatsComponent)
+    .component('atJobDetails', DetailsComponent)
     .run(JobsRun)
     .run(LegacyRedirect);
 

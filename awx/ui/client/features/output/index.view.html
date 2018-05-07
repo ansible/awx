@@ -1,23 +1,25 @@
 <div ui-view></div>
 <div class="JobResults-container">
-    <at-panel ng-show="!vm.fullscreen.isFullscreen">
-        <at-job-details resource="vm.resource"></at-job-details>
+    <at-panel ng-show="!vm.expanded">
+        <at-job-details 
+            resource="vm.resource">
+        </at-job-details>
     </at-panel>
 
-    <at-panel class="at-Stdout" ng-class="{'at-Stdout--fullscreen': vm.fullscreen.isFullscreen}">
+    <at-panel class="at-Stdout" ng-class="{'at-Stdout--fullscreen': vm.expanded}">
         <div class="at-Panel-headingTitle">
             {{ vm.title }}
         </div>
         <at-job-stats
             resource="vm.resource"
-            fullscreen="vm.fullscreen">
+            expanded="vm.expanded">
         </at-job-stats>
         <at-job-search></at-job-search>
 
         <div class="at-Stdout-menuTop">
-            <div class="pull-left" ng-click="vm.expand()">
+            <div class="pull-left" ng-click="vm.toggleExpand()">
                 <i class="at-Stdout-menuIcon fa"
-                    ng-class="{ 'fa-minus': vm.isExpanded, 'fa-plus': !vm.isExpanded }"></i>
+                    ng-class="{ 'fa-minus': vm.expanded, 'fa-plus': !vm.expanded }"></i>
             </div>
 
             <div class="pull-right" ng-click="vm.scroll.end()">

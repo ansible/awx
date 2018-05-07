@@ -8,7 +8,6 @@ const PLACEHOLDER_RUNNING = 'CANNOT SEARCH RUNNING JOB';
 const PLACEHOLDER_DEFAULT = 'SEARCH';
 
 let $state;
-let status;
 let qs;
 
 let vm;
@@ -65,15 +64,8 @@ function clearSearch () {
     $state.transitionTo($state.current, $state.params, searchReloadOptions);
 }
 
-function atJobSearchLink (scope, el, attrs, controllers) {
-    const [atJobSearchController] = controllers;
-
-    atJobSearchController.init(scope);
-}
-
-function AtJobSearchController (_$state_, _status_, _qs_) {
+function JobSearchController (_$state_, _qs_, { subscribe }) {
     $state = _$state_;
-    status = _status_;
     qs = _qs_;
 
     vm = this || {};
@@ -91,39 +83,33 @@ function AtJobSearchController (_$state_, _status_, _qs_) {
     vm.removeSearchTag = removeSearchTag;
     vm.submitSearch = submitSearch;
 
-    vm.init = scope => {
-        vm.examples = scope.examples || searchKeyExamples;
-        vm.fields = scope.fields || searchKeyFields;
-        vm.placeholder = PLACEHOLDER_DEFAULT;
-        vm.relatedFields = scope.relatedFields || [];
+    let unsubscribe;
 
-        scope.$watch(status.isRunning, value => {
-            vm.disabled = value;
-            vm.placeholder = value ? PLACEHOLDER_RUNNING : PLACEHOLDER_DEFAULT;
+    vm.$onInit = () => {
+        vm.examples = searchKeyExamples;
+        vm.fields = searchKeyFields;
+        vm.placeholder = PLACEHOLDER_DEFAULT;
+        vm.relatedFields = [];
+
+        unsubscribe = subscribe(({ running }) => {
+            vm.disabled = running;
+            vm.placeholder = running ? PLACEHOLDER_RUNNING : PLACEHOLDER_DEFAULT;
         });
     };
-}
 
-AtJobSearchController.$inject = [
-    '$state',
-    'JobStatusService',
-    'QuerySet',
-];
-
-function atJobSearch () {
-    return {
-        templateUrl,
-        restrict: 'E',
-        require: ['atJobSearch'],
-        controllerAs: 'vm',
-        link: atJobSearchLink,
-        controller: AtJobSearchController,
-        scope: {
-            examples: '=',
-            fields: '=',
-            relatedFields: '=',
-        },
+    vm.$onDestroy = () => {
+        unsubscribe();
     };
 }
 
-export default atJobSearch;
+JobSearchController.$inject = [
+    '$state',
+    'QuerySet',
+    'JobStatusService',
+];
+
+export default {
+    templateUrl,
+    controller: JobSearchController,
+    controllerAs: 'vm',
+};
