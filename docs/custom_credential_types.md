@@ -177,7 +177,7 @@ certificate/key data:
             "template": "[mycloud]\ntoken={{api_token}}"
         },
         "env": {
-            "MY_CLOUD_INI_FILE": "{{tower.filename}"
+            "MY_CLOUD_INI_FILE": "{{tower.filename}}"
         }
     }
 
