@@ -10,7 +10,6 @@ let parse;
 let prompt;
 let resource;
 let strings;
-let status;
 let wait;
 
 let vm;
@@ -553,9 +552,9 @@ function AtJobDetailsController (
     _error_,
     _prompt_,
     _strings_,
-    _status_,
     _wait_,
     _parse_,
+    { subscribe }
 ) {
     vm = this || {};
 
@@ -567,7 +566,6 @@ function AtJobDetailsController (
     parse = _parse_;
     prompt = _prompt_;
     strings = _strings_;
-    status = _status_;
     wait = _wait_;
 
     vm.init = _$scope_ => {
@@ -610,18 +608,13 @@ function AtJobDetailsController (
         vm.toggleJobTags = toggleJobTags;
         vm.toggleSkipTags = toggleSkipTags;
 
-        const observe = (getter, transform, key) => {
-            $scope.$watch(getter, value => { vm[key] = transform(value); });
-        };
-
-        observe(status.getStarted, getStartDetails, 'started');
-        observe(status.getFinished, getFinishDetails, 'finished');
-        observe(status.getProjectUpdateId, getProjectUpdateDetails, 'projectUpdate');
-        observe(status.getProjectStatus, getProjectStatusDetails, 'projectStatus');
-
-        $scope.$watch(status.getJobStatus, jobStatus => {
-            vm.status = getStatusDetails(jobStatus);
-            vm.job.status = jobStatus;
+        subscribe(({ status, started, finished, scm }) => {
+            vm.job.status = status;
+            vm.status = getStatusDetails(status);
+            vm.started = getStartDetails(started);
+            vm.finished = getFinishDetails(finished);
+            vm.projectUpdate = getProjectUpdateDetails(scm.id);
+            vm.projectStatus = getProjectStatusDetails(scm.status);
         });
     };
 }
@@ -633,9 +626,9 @@ AtJobDetailsController.$inject = [
     'ProcessErrors',
     'Prompt',
     'JobStrings',
-    'JobStatusService',
     'Wait',
     'ParseVariableString',
+    'JobStatusService',
 ];
 
 function atJobDetailsLink (scope, el, attrs, controllers) {

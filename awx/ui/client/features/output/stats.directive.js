@@ -1,6 +1,5 @@
 const templateUrl = require('~features/output/stats.partial.html');
 
-let status;
 let strings;
 
 function createStatsBarTooltip (key, count) {
@@ -16,8 +15,7 @@ function atJobStatsLink (scope, el, attrs, controllers) {
     atJobStatsController.init(scope);
 }
 
-function AtJobStatsController (_strings_, _status_) {
-    status = _status_;
+function AtJobStatsController (_strings_, { subscribe }) {
     strings = _strings_;
 
     const vm = this || {};
@@ -36,18 +34,17 @@ function AtJobStatsController (_strings_, _status_) {
 
         vm.toggleStdoutFullscreenTooltip = strings.get('expandCollapse.EXPAND');
 
-        vm.setHostStatusCounts(status.getHostStatusCounts());
-
-        scope.$watch(status.getPlayCount, value => { vm.plays = value; });
-        scope.$watch(status.getTaskCount, value => { vm.tasks = value; });
-        scope.$watch(status.getElapsed, value => { vm.elapsed = value; });
-        scope.$watch(status.getHostCount, value => { vm.hosts = value; });
-        scope.$watch(status.isRunning, value => { vm.running = value; });
-
-        scope.$watchCollection(status.getHostStatusCounts, vm.setHostStatusCounts);
+        subscribe(({ running, elapsed, counts, stats, hosts }) => {
+            vm.plays = counts.plays;
+            vm.tasks = counts.tasks;
+            vm.hosts = counts.hosts;
+            vm.elapsed = elapsed;
+            vm.running = running;
+            vm.setHostStatusCounts(stats, hosts);
+        });
     };
 
-    vm.setHostStatusCounts = counts => {
+    vm.setHostStatusCounts = (stats, counts) => {
         Object.keys(counts).forEach(key => {
             const count = counts[key];
             const statusBarElement = $(`.HostStatusBar-${key}`);
@@ -57,7 +54,7 @@ function AtJobStatsController (_strings_, _status_) {
             vm.tooltips[key] = createStatsBarTooltip(key, count);
         });
 
-        vm.statsAreAvailable = Boolean(status.getStatsEvent());
+        vm.statsAreAvailable = stats;
     };
 
     vm.toggleFullscreen = () => {
@@ -78,7 +75,6 @@ function atJobStats () {
         controller: [
             'JobStrings',
             'JobStatusService',
-            '$scope',
             AtJobStatsController
         ],
         scope: {

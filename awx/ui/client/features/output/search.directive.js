@@ -8,7 +8,6 @@ const PLACEHOLDER_RUNNING = 'CANNOT SEARCH RUNNING JOB';
 const PLACEHOLDER_DEFAULT = 'SEARCH';
 
 let $state;
-let status;
 let qs;
 
 let vm;
@@ -71,9 +70,8 @@ function atJobSearchLink (scope, el, attrs, controllers) {
     atJobSearchController.init(scope);
 }
 
-function AtJobSearchController (_$state_, _status_, _qs_) {
+function AtJobSearchController (_$state_, _qs_, { subscribe }) {
     $state = _$state_;
-    status = _status_;
     qs = _qs_;
 
     vm = this || {};
@@ -97,17 +95,17 @@ function AtJobSearchController (_$state_, _status_, _qs_) {
         vm.placeholder = PLACEHOLDER_DEFAULT;
         vm.relatedFields = scope.relatedFields || [];
 
-        scope.$watch(status.isRunning, value => {
-            vm.disabled = value;
-            vm.placeholder = value ? PLACEHOLDER_RUNNING : PLACEHOLDER_DEFAULT;
+        subscribe(({ running }) => {
+            vm.disabled = running;
+            vm.placeholder = running ? PLACEHOLDER_RUNNING : PLACEHOLDER_DEFAULT;
         });
     };
 }
 
 AtJobSearchController.$inject = [
     '$state',
-    'JobStatusService',
     'QuerySet',
+    'JobStatusService',
 ];
 
 function atJobSearch () {
