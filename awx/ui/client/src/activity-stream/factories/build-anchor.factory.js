@@ -62,6 +62,9 @@ export default function BuildAnchor($log, $filter) {
                  case 'workflow_job_template':
                      url += `templates/workflow_job_template/${obj.id}`;
                      break;
+                 case 'workflow_job':
+                     url += `workflows/${obj.id}`;
+                     break;
                  default:
                      url += resource + 's/' + obj.id + '/';
              }
