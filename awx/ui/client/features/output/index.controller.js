@@ -38,9 +38,8 @@ function JobsIndexController (
     vm.clear = devClear;
 
     // Expand/collapse
-    // vm.toggle = toggle;
-    // vm.expand = expand;
-    vm.isExpanded = true;
+    vm.expanded = false;
+    vm.toggleExpanded = toggleExpanded;
 
     // Panel
     vm.resource = resource;
@@ -53,10 +52,6 @@ function JobsIndexController (
         end: scrollEnd,
         down: scrollPageDown,
         up: scrollPageUp
-    };
-
-    vm.fullscreen = {
-        isFullscreen: false
     };
 
     render.requestAnimationFrame(() => init());
@@ -96,13 +91,14 @@ function init () {
         },
         onStop () {
             status.updateStats();
+            status.dispatch();
         }
     });
 
     $scope.$on(resource.ws.events, handleJobEvent);
     $scope.$on(resource.ws.status, handleStatusEvent);
 
-    if (!status.isRunning()) {
+    if (!status.state.running) {
         next();
     }
 }
@@ -281,9 +277,9 @@ function scrollIsAtRest (isAtRest) {
     vm.scroll.showBackToTop = !isAtRest;
 }
 
-// function expand () {
-//     vm.toggle(parent, true);
-// }
+function toggleExpanded () {
+    vm.expanded = !vm.expanded;
+}
 
 // function showHostDetails (id) {
 //     jobEvent.request('get', id)

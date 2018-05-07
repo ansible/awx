@@ -1,6 +1,6 @@
 const templateUrl = require('~features/output/stats.partial.html');
 
-let strings;
+let vm;
 
 function createStatsBarTooltip (key, count) {
     const label = `<span class='HostStatusBar-tooltipLabel'>${key}</span>`;
@@ -9,32 +9,21 @@ function createStatsBarTooltip (key, count) {
     return `${label}${badge}`;
 }
 
-function atJobStatsLink (scope, el, attrs, controllers) {
-    const [atJobStatsController] = controllers;
+function JobStatsController (strings, { subscribe }) {
+    vm = this || {};
 
-    atJobStatsController.init(scope);
-}
-
-function AtJobStatsController (_strings_, { subscribe }) {
-    strings = _strings_;
-
-    const vm = this || {};
+    let unsubscribe;
 
     vm.tooltips = {
         running: strings.get('status.RUNNING'),
         unavailable: strings.get('status.UNAVAILABLE'),
     };
 
-    vm.init = scope => {
-        const { resource } = scope;
-
-        vm.fullscreen = scope.fullscreen;
-
-        vm.download = resource.model.get('related.stdout');
-
+    vm.$onInit = () => {
+        vm.download = vm.resource.model.get('related.stdout');
         vm.toggleStdoutFullscreenTooltip = strings.get('expandCollapse.EXPAND');
 
-        subscribe(({ running, elapsed, counts, stats, hosts }) => {
+        unsubscribe = subscribe(({ running, elapsed, counts, stats, hosts }) => {
             vm.plays = counts.plays;
             vm.tasks = counts.tasks;
             vm.hosts = counts.hosts;
@@ -42,6 +31,10 @@ function AtJobStatsController (_strings_, { subscribe }) {
             vm.running = running;
             vm.setHostStatusCounts(stats, hosts);
         });
+    };
+
+    vm.$onDestroy = () => {
+        unsubscribe();
     };
 
     vm.setHostStatusCounts = (stats, counts) => {
@@ -57,31 +50,25 @@ function AtJobStatsController (_strings_, { subscribe }) {
         vm.statsAreAvailable = stats;
     };
 
-    vm.toggleFullscreen = () => {
-        vm.fullscreen.isFullscreen = !vm.fullscreen.isFullscreen;
-        vm.toggleStdoutFullscreenTooltip = vm.fullscreen.isFullscreen ?
+    vm.toggleExpanded = () => {
+        vm.expanded = !vm.expanded;
+        vm.toggleStdoutFullscreenTooltip = vm.expanded ?
             strings.get('expandCollapse.COLLAPSE') :
             strings.get('expandCollapse.EXPAND');
     };
 }
 
-function atJobStats () {
-    return {
-        templateUrl,
-        restrict: 'E',
-        require: ['atJobStats'],
-        controllerAs: 'vm',
-        link: atJobStatsLink,
-        controller: [
-            'JobStrings',
-            'JobStatusService',
-            AtJobStatsController
-        ],
-        scope: {
-            resource: '=',
-            fullscreen: '='
-        }
-    };
-}
+JobStatsController.$inject = [
+    'JobStrings',
+    'JobStatusService',
+];
 
-export default atJobStats;
+export default {
+    templateUrl,
+    controller: JobStatsController,
+    controllerAs: 'vm',
+    bindings: {
+        resource: '<',
+        expanded: '=',
+    },
+};

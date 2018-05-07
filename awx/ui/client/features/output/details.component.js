@@ -2,7 +2,6 @@ const templateUrl = require('~features/output/details.partial.html');
 
 let $http;
 let $filter;
-let $scope;
 let $state;
 
 let error;
@@ -371,7 +370,7 @@ function getJobTagDetails () {
     let jobTags;
 
     if (tagString) {
-        jobTags = tagString.split(',');
+        jobTags = tagString.split(',').filter(tag => tag !== '');
     } else {
         jobTags = [];
     }
@@ -383,7 +382,7 @@ function getJobTagDetails () {
     const label = 'Job Tags';
     const more = false;
 
-    const value = jobTags.filter(tag => tag !== '').map($filter('sanitize'));
+    const value = jobTags.map($filter('sanitize'));
 
     return { label, more, value };
 }
@@ -394,7 +393,7 @@ function getSkipTagDetails () {
     let skipTags;
 
     if (tagString) {
-        skipTags = tagString.split(',');
+        skipTags = tagString.split(',').filter(tag => tag !== '');
     } else {
         skipTags = [];
     }
@@ -405,7 +404,7 @@ function getSkipTagDetails () {
 
     const label = 'Skip Tags';
     const more = false;
-    const value = skipTags.filter(tag => tag !== '').map($filter('sanitize'));
+    const value = skipTags.map($filter('sanitize'));
 
     return { label, more, value };
 }
@@ -445,7 +444,7 @@ function createErrorHandler (path, action) {
         const hdr = strings.get('error.HEADER');
         const msg = strings.get('error.CALL', { path, action, status: res.status });
 
-        error($scope, res.data, res.status, null, { hdr, msg });
+        error(null, res.data, res.status, null, { hdr, msg });
     };
 }
 
@@ -545,7 +544,7 @@ function deleteJob () {
     prompt({ hdr, resourceName, body, actionText, action });
 }
 
-function AtJobDetailsController (
+function JobDetailsController (
     _$http_,
     _$filter_,
     _$state_,
@@ -554,23 +553,24 @@ function AtJobDetailsController (
     _strings_,
     _wait_,
     _parse_,
-    { subscribe }
+    { subscribe },
 ) {
     vm = this || {};
 
     $http = _$http_;
     $filter = _$filter_;
     $state = _$state_;
-
     error = _error_;
+
     parse = _parse_;
     prompt = _prompt_;
     strings = _strings_;
     wait = _wait_;
 
-    vm.init = _$scope_ => {
-        $scope = _$scope_;
-        resource = $scope.resource; // eslint-disable-line prefer-destructuring
+    let unsubscribe;
+
+    vm.$onInit = () => {
+        resource = this.resource; // eslint-disable-line prefer-destructuring
 
         vm.status = getStatusDetails();
         vm.started = getStartDetails();
@@ -604,22 +604,26 @@ function AtJobDetailsController (
 
         vm.cancelJob = cancelJob;
         vm.deleteJob = deleteJob;
-        vm.toggleLabels = toggleLabels;
         vm.toggleJobTags = toggleJobTags;
         vm.toggleSkipTags = toggleSkipTags;
+        vm.toggleLabels = toggleLabels;
 
-        subscribe(({ status, started, finished, scm }) => {
-            vm.job.status = status;
-            vm.status = getStatusDetails(status);
+        unsubscribe = subscribe(({ status, started, finished, scm }) => {
             vm.started = getStartDetails(started);
             vm.finished = getFinishDetails(finished);
             vm.projectUpdate = getProjectUpdateDetails(scm.id);
             vm.projectStatus = getProjectStatusDetails(scm.status);
+            vm.status = getStatusDetails(status);
+            vm.job.status = status;
         });
+    };
+
+    vm.$onDestroy = () => {
+        unsubscribe();
     };
 }
 
-AtJobDetailsController.$inject = [
+JobDetailsController.$inject = [
     '$http',
     '$filter',
     '$state',
@@ -631,22 +635,11 @@ AtJobDetailsController.$inject = [
     'JobStatusService',
 ];
 
-function atJobDetailsLink (scope, el, attrs, controllers) {
-    const [atDetailsController] = controllers;
-
-    atDetailsController.init(scope);
-}
-
-function atJobDetails () {
-    return {
-        templateUrl,
-        restrict: 'E',
-        require: ['atJobDetails'],
-        controllerAs: 'vm',
-        link: atJobDetailsLink,
-        controller: AtJobDetailsController,
-        scope: { resource: '=', },
-    };
-}
-
-export default atJobDetails;
+export default {
+    templateUrl,
+    controller: JobDetailsController,
+    controllerAs: 'vm',
+    bindings: {
+        resource: '<'
+    },
+};

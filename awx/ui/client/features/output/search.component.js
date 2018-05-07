@@ -64,13 +64,7 @@ function clearSearch () {
     $state.transitionTo($state.current, $state.params, searchReloadOptions);
 }
 
-function atJobSearchLink (scope, el, attrs, controllers) {
-    const [atJobSearchController] = controllers;
-
-    atJobSearchController.init(scope);
-}
-
-function AtJobSearchController (_$state_, _qs_, { subscribe }) {
+function JobSearchController (_$state_, _qs_, { subscribe }) {
     $state = _$state_;
     qs = _qs_;
 
@@ -89,39 +83,33 @@ function AtJobSearchController (_$state_, _qs_, { subscribe }) {
     vm.removeSearchTag = removeSearchTag;
     vm.submitSearch = submitSearch;
 
-    vm.init = scope => {
-        vm.examples = scope.examples || searchKeyExamples;
-        vm.fields = scope.fields || searchKeyFields;
-        vm.placeholder = PLACEHOLDER_DEFAULT;
-        vm.relatedFields = scope.relatedFields || [];
+    let unsubscribe;
 
-        subscribe(({ running }) => {
+    vm.$onInit = () => {
+        vm.examples = searchKeyExamples;
+        vm.fields = searchKeyFields;
+        vm.placeholder = PLACEHOLDER_DEFAULT;
+        vm.relatedFields = [];
+
+        unsubscribe = subscribe(({ running }) => {
             vm.disabled = running;
             vm.placeholder = running ? PLACEHOLDER_RUNNING : PLACEHOLDER_DEFAULT;
         });
     };
+
+    vm.$onDestroy = () => {
+        unsubscribe();
+    };
 }
 
-AtJobSearchController.$inject = [
+JobSearchController.$inject = [
     '$state',
     'QuerySet',
     'JobStatusService',
 ];
 
-function atJobSearch () {
-    return {
-        templateUrl,
-        restrict: 'E',
-        require: ['atJobSearch'],
-        controllerAs: 'vm',
-        link: atJobSearchLink,
-        controller: AtJobSearchController,
-        scope: {
-            examples: '=',
-            fields: '=',
-            relatedFields: '=',
-        },
-    };
-}
-
-export default atJobSearch;
+export default {
+    templateUrl,
+    controller: JobSearchController,
+    controllerAs: 'vm',
+};
