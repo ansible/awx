@@ -1666,7 +1666,13 @@ class RunProjectUpdate(BaseTask):
             raise
 
         try:
+            start_time = time.time()
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
+            waiting_time = time.time() - start_time
+            if waiting_time > 1.0:
+                logger.info(six.text_type(
+                    '{} spent {} waiting to acquire lock for local source tree '
+                    'for path {}.').format(instance.log_format, waiting_time, lock_path))
         except IOError as e:
             os.close(self.lock_fd)
             logger.error(six.text_type("I/O error({0}) while trying to aquire lock on file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
