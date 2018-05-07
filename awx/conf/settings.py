@@ -63,7 +63,7 @@ def _log_database_error():
     try:
         yield
     except (ProgrammingError, OperationalError) as e:
-        if get_tower_migration_version() < '310':
+        if 'migrate' in sys.argv and get_tower_migration_version() < '310':
             logger.info('Using default settings until version 3.1 migration.')
         else:
             logger.warning('Database settings are not available, using defaults (%s)', e, exc_info=True)
