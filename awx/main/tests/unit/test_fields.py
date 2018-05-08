@@ -96,10 +96,26 @@ def test_cred_type_input_schema_validity(input_, valid):
     ({'invalid-injector': {}}, False),
     ({'file': 123}, False),
     ({'file': {}}, True),
+    # Uses credential inputs inside of unnamed file contents
     ({'file': {'template': '{{username}}'}}, True),
+    # Uses named file
     ({'file': {'template.username': '{{username}}'}}, True),
+    # Uses multiple named files
     ({'file': {'template.username': '{{username}}', 'template.password': '{{pass}}'}}, True),
+    # Use of unnamed file mutually exclusive with use of named files
     ({'file': {'template': '{{username}}', 'template.password': '{{pass}}'}}, False),
+    # References non-existant named file
+    ({'env': {'FROM_FILE': "{{tower.filename.cert}}"}}, False),
+    # References unnamed file, but a file was never defined
+    ({'env': {'FROM_FILE': "{{tower.filename}}"}}, False),
+    # Cannot reference tower namespace itself (what would this return??)
+    ({'env': {'FROM_FILE': "{{tower}}"}}, False),
+    # References filename of a named file
+    ({'file': {'template.cert': '{{awx_secret}}'}, 'env': {'FROM_FILE': "{{tower.filename.cert}}"}}, True),
+    # With named files, `tower.filename` is another namespace, so it cannot be referenced
+    ({'file': {'template.cert': '{{awx_secret}}'}, 'env': {'FROM_FILE': "{{tower.filename}}"}}, False),
+    # With an unnamed file, `tower.filename` is just the filename
+    ({'file': {'template': '{{awx_secret}}'}, 'env': {'THE_FILENAME': "{{tower.filename}}"}}, True),
     ({'file': {'foo': 'bar'}}, False),
     ({'env': 123}, False),
     ({'env': {}}, True),
