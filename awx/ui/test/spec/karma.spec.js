@@ -5,13 +5,6 @@ const NODE_MODULES = path.resolve(__dirname, '../../node_modules');
 
 const webpackConfig = require('./webpack.spec');
 
-// 'client/src/**/*.html'
-// ],
-// preprocessors: {
-// './client/src/app.js': ['webpack', 'sourcemap'],
-// './tests/**/*-test.js': ['webpack', 'sourcemap'],
-// 'client/src/**/*.html': ['html2js']
-
 module.exports = config => {
     config.set({
         basePath: '../..',
@@ -36,7 +29,7 @@ module.exports = config => {
         },
         webpack: webpackConfig,
         webpackMiddleware: {
-            noInfo: 'errors-only'
+            noInfo: true
         },
         junitReporter: {
             outputDir: 'reports',
