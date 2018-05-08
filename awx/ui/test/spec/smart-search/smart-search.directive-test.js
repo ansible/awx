@@ -1,7 +1,8 @@
 'use strict';
 
-xdescribe('Directive: Smart Search', () => {
+describe('Directive: Smart Search', () => {
     let $scope,
+        $q,
         template,
         element,
         dom,
@@ -9,119 +10,91 @@ xdescribe('Directive: Smart Search', () => {
         $state = {},
         $stateParams,
         GetBasePath,
-        QuerySet;
+        QuerySet,
+        ConfigService = {},
+        i18n,
+        $transitions,
+        translateFilter;
 
     beforeEach(angular.mock.module('shared'));
     beforeEach(angular.mock.module('SmartSearchModule', ($provide) => {
-        QuerySet = jasmine.createSpyObj('QuerySet', ['decodeParam']);
+        QuerySet = jasmine.createSpyObj('QuerySet', [
+            'decodeParam',
+            'search',
+            'stripDefaultParams',
+            'createSearchTagsFromQueryset',
+            'initFieldset'
+        ]);
         QuerySet.decodeParam.and.callFake((key, value) => {
             return `${key.split('__').join(':')}:${value}`;
         });
-        GetBasePath = jasmine.createSpy('GetBasePath');
+        QuerySet.stripDefaultParams.and.returnValue([]);
+        QuerySet.createSearchTagsFromQueryset.and.returnValue([]);
 
+        $transitions = jasmine.createSpyObj('$transitions', [
+            'onSuccess'
+        ]);
+        $transitions.onSuccess.and.returnValue({});
+
+        ConfigService = jasmine.createSpyObj('ConfigService', [
+            'getConfig'
+        ]);
+
+        GetBasePath = jasmine.createSpy('GetBasePath');
+        translateFilter = jasmine.createSpy('translateFilter');
+        i18n = jasmine.createSpy('i18n');
+        $state = jasmine.createSpyObj('$state', ['go']);
+
+        $provide.value('ConfigService', ConfigService);
         $provide.value('QuerySet', QuerySet);
         $provide.value('GetBasePath', GetBasePath);
         $provide.value('$state', $state);
+        $provide.value('i18n', { '_': (a) => { return a; } });
+        $provide.value('translateFilter', translateFilter);
     }));
-    beforeEach(angular.mock.inject(($templateCache, _$rootScope_, _$compile_) => {
+    beforeEach(angular.mock.inject(($templateCache, _$rootScope_, _$compile_, _$q_) => {
+        $q = _$q_;
+        $compile = _$compile_;
+        $scope = _$rootScope_.$new();
+
+        ConfigService.getConfig.and.returnValue($q.when({}));
+        QuerySet.search.and.returnValue($q.when({}));
+
+        QuerySet.initFieldset.and.callFake(() => {
+            var deferred = $q.defer();
+            deferred.resolve({
+                models: {
+                    mock: {
+                        base: {}
+                    }
+                },
+                options: {
+                    data: null
+                }
+            });
+            return deferred.promise;
+        });
+
         // populate $templateCache with directive.templateUrl at test runtime,
         template = window.__html__['client/src/shared/smart-search/smart-search.partial.html'];
         $templateCache.put('/static/partials/shared/smart-search/smart-search.partial.html', template);
-
-        $compile = _$compile_;
-        $scope = _$rootScope_.$new();
     }));
 
-    describe('initializing tags', () => {
-        beforeEach(() => {
-            QuerySet.initFieldset = function() {
-                return {
-                    then: function() {
-                        return;
-                    }
-                };
-            };
-        });
-        // some defaults like page_size and page will always be provided
-        // but should be squashed if initialized with default values
-        it('should not create tags', () => {
+    describe('clear all', () => {
+        it('should revert search back to non-null defaults and remove page', () => {
             $state.$current = {
-                params: {
-                    mock_search: {
-                        config: {
-                            value: {
-                                page_size: '20',
-                                order_by: '-finished',
-                                page: '1'
-                            }
-                        }
-                    }
-                }
-            };
-            $state.params = {
-                mock_search: {
-                    page_size: '20',
-                    order_by: '-finished',
-                    page: '1'
-                }
-            };
-            dom = angular.element(`<smart-search
-                django-model="mock"
-                search-size="mock"
-                base-path="mock"
-                iterator="mock"
-                collection="dataset"
-                search-tags="searchTags"
-                >
-                </smart-search>`);
-            element = $compile(dom)($scope);
-            $scope.$digest();
-            expect($('.SmartSearch-tagContainer', element).length).toEqual(0);
-        });
-        // set one possible default (order_by) with a custom value, but not another default (page_size)
-        it('should create an order_by tag, but not a page_size tag', () => {
-            $state.$current = {
-                params: {
-                    mock_search: {
-                        config: {
-                            value: {
-                                page_size: '20',
-                                order_by: '-finished'
-                            }
-                        }
-                    }
-                }
-            };
-            $state.params = {
-                mock_search: {
-                    page_size: '20',
-                    order_by: 'name'
-                }
-            };
-            dom = angular.element(`<smart-search
-                django-model="mock"
-                search-size="mock"
-                base-path="mock"
-                iterator="mock"
-                collection="dataset"
-                search-tags="searchTags"
-                >
-                </smart-search>`);
-            element = $compile(dom)($scope);
-            $scope.$digest();
-            expect($('.SmartSearch-tagContainer', element).length).toEqual(1);
-            expect($('.SmartSearch-tagContainer .SmartSearch-name', element)[0].innerText).toEqual('order_by:name');
-        });
-        // set many possible defaults and many non-defaults - page_size and page shouldn't generate tags, even when non-default values are set
-        it('should create an order_by tag, name tag, description tag - but not a page_size or page tag', () => {
-            $state.$current = {
-                params: {
-                    mock_search: {
-                        config: {
-                            value: {
-                                page_size: '20',
-                                order_by: '-finished',
-                                page: '1'
+                path: {
+                    mock: {
+                        params: {
+                            mock_search: {
+                                config: {
+                                    value: {
+                                        page_size: '20',
+                                        order_by: '-finished',
+                                        page: '1',
+                                        some_null_param: null
+                                    }
+                                }
                             }
                         }
                     }
@@ -136,6 +109,9 @@ xdescribe('Directive: Smart Search', () => {
                     name_icontains: 'ansible'
                 }
             };
+            $scope.list = {
+                iterator: 'mock'
+            };
             dom = angular.element(`<smart-search
                 django-model="mock"
                 search-size="mock"
@@ -143,21 +119,14 @@ xdescribe('Directive: Smart Search', () => {
                 iterator="mock"
                 collection="dataset"
                 search-tags="searchTags"
+                list="list"
                 >
                 </smart-search>`);
             element = $compile(dom)($scope);
             $scope.$digest();
-            expect($('.SmartSearch-tagContainer', element).length).toEqual(3);
+            const scope = element.isolateScope();
+            scope.clearAllTerms();
+            expect(QuerySet.search).toHaveBeenCalledWith('mock', {page_size: '20',order_by: '-finished',});
         });
-    });
-
-    describe('removing tags', () => {
-        // assert a default value is still provided after a custom tag is removed
-        xit('should revert to state-defined order_by when order_by tag is removed', () => {});
-    });
-
-    describe('accessing model', () => {
-        xit('should retrieve cached model OPTIONS from localStorage', () => {});
-        xit('should call QuerySet service to retrieve unstored model OPTIONS', () => {});
     });
 });
