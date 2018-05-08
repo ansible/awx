@@ -6,9 +6,9 @@ import logging
 import re
 
 import dateutil.rrule
-from operator import itemgetter
 import dateutil.parser
 from dateutil.tz import datetime_exists, tzutc
+from dateutil.zoneinfo import get_zonefile_instance
 
 # Django
 from django.db import models
@@ -100,28 +100,22 @@ class Schedule(CommonModel, LaunchTimeConfig):
 
     @classmethod
     def get_zoneinfo(self):
-        from dateutil.zoneinfo import get_zonefile_instance
-        return [
-            {'name': zone}
-            for zone in sorted(get_zonefile_instance().zones)
-        ]
+        return sorted(get_zonefile_instance().zones)
 
     @property
     def timezone(self):
         utc = tzutc()
-        _rrule = dateutil.rrule.rrulestr(
-            self.rrule,
-            tzinfos={x: utc for x in dateutil.parser.parserinfo().UTCZONE}
-        )
-        tzinfo = _rrule._dtstart.tzinfo
-        if tzinfo == utc:
-            return 'UTC'
-        fname = tzinfo._filename
-        all_zones = map(itemgetter('name'), Schedule.get_zoneinfo())
+        all_zones = Schedule.get_zoneinfo()
         all_zones.sort(key = lambda x: -len(x))
-        for zone in all_zones:
-            if fname.endswith(zone):
-                return zone
+        for r in Schedule.rrulestr(self.rrule)._rrule:
+            if r._dtstart:
+                tzinfo = r._dtstart.tzinfo
+                if tzinfo is utc:
+                    return 'UTC'
+                fname = tzinfo._filename
+                for zone in all_zones:
+                    if fname.endswith(zone):
+                        return zone
         logger.warn('Could not detect valid zoneinfo for {}'.format(self.rrule))
         return ''
 
@@ -130,6 +124,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
         """
         Apply our own custom rrule parsing requirements
         """
+        tzinfos = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
         kwargs['forceset'] = True
 
         #
@@ -163,7 +158,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
                 # local_tz = tzfile('/usr/share/zoneinfo/America/New_York')
                 local_tz = dateutil.rrule.rrulestr(
                     rrule.replace(naive_until, naive_until + 'Z'),
-                    tzinfos={x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
+                    tzinfos=tzinfos
                 )._dtstart.tzinfo
 
                 # Make a datetime object with tzinfo=<the DTSTART timezone>
@@ -181,7 +176,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
                 # rrule is now: DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T220000Z
                 rrule = rrule.replace(naive_until, utc_until)
 
-        x = dateutil.rrule.rrulestr(rrule, **kwargs)
+        x = dateutil.rrule.rrulestr(rrule, tzinfos=tzinfos, **kwargs)
 
         for r in x._rrule:
             if r._dtstart and r._dtstart.tzinfo is None:
