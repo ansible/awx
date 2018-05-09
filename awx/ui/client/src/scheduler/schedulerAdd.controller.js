@@ -408,8 +408,20 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         }
     });
 
-    CreateSelect2({
-        element: '.MakeSelect2',
-        multiple: false
+    var callSelect2 = function() {
+        CreateSelect2({
+            element: '.MakeSelect2',
+            multiple: false
+        });
+        $("#schedulerTimeZone").select2({
+            width:'100%',
+            containerCssClass: 'Form-dropDown',
+            placeholder: 'SEARCH'
+        });
+    };
+
+    $scope.$on("updateSchedulerSelects", function() {
+        callSelect2();
     });
+    callSelect2();
 }];

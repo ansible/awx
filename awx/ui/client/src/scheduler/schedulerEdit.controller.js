@@ -87,6 +87,11 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             element: '.MakeSelect2',
             multiple: false
         });
+        $("#schedulerTimeZone").select2({
+            width:'100%',
+            containerCssClass: 'Form-dropDown',
+            placeholder: 'SEARCH'
+        });
     };
 
     $scope.$on("updateSchedulerSelects", function() {
