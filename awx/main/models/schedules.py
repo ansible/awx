@@ -31,6 +31,9 @@ logger = logging.getLogger('awx.main.models.schedule')
 __all__ = ['Schedule']
 
 
+UTC_TIMEZONES = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
+
+
 class ScheduleFilterMethods(object):
 
     def enabled(self, enabled=True):
@@ -120,13 +123,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
         return ''
 
     @classmethod
-    def rrulestr(cls, rrule, **kwargs):
-        """
-        Apply our own custom rrule parsing requirements
-        """
-        tzinfos = {x: tzutc() for x in dateutil.parser.parserinfo().UTCZONE}
-        kwargs['forceset'] = True
-
+    def coerce_naive_until(cls, rrule):
         #
         # RFC5545 specifies that the UNTIL rule part MUST ALWAYS be a date
         # with UTC time.  This is extra work for API implementers because
@@ -158,7 +155,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
                 # local_tz = tzfile('/usr/share/zoneinfo/America/New_York')
                 local_tz = dateutil.rrule.rrulestr(
                     rrule.replace(naive_until, naive_until + 'Z'),
-                    tzinfos=tzinfos
+                    tzinfos=UTC_TIMEZONES
                 )._dtstart.tzinfo
 
                 # Make a datetime object with tzinfo=<the DTSTART timezone>
@@ -175,8 +172,16 @@ class Schedule(CommonModel, LaunchTimeConfig):
                 # rrule was:    DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
                 # rrule is now: DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T220000Z
                 rrule = rrule.replace(naive_until, utc_until)
+        return rrule
 
-        x = dateutil.rrule.rrulestr(rrule, tzinfos=tzinfos, **kwargs)
+    @classmethod
+    def rrulestr(cls, rrule, **kwargs):
+        """
+        Apply our own custom rrule parsing requirements
+        """
+        rrule = Schedule.coerce_naive_until(rrule)
+        kwargs['forceset'] = True
+        x = dateutil.rrule.rrulestr(rrule, tzinfos=UTC_TIMEZONES, **kwargs)
 
         for r in x._rrule:
             if r._dtstart and r._dtstart.tzinfo is None:
@@ -234,4 +239,5 @@ class Schedule(CommonModel, LaunchTimeConfig):
 
     def save(self, *args, **kwargs):
         self.update_computed_fields()
+        self.rrule = Schedule.coerce_naive_until(self.rrule)
         super(Schedule, self).save(*args, **kwargs)
