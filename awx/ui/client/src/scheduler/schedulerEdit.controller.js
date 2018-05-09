@@ -125,6 +125,21 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         });
     }
 
+    function setUntil (scheduler) {
+        let { until } = scheduleResolve;
+        if(until !== ''){
+            const date = moment(until);
+            const endDt =  moment.parseZone(date).format("MM/DD/YYYY");
+            const endHour = date.format('HH');
+            const endMinute = date.format('mm');
+            const endSecond = date.format('ss');
+            scheduler.scope.schedulerEndDt = endDt;
+            scheduler.scope.schedulerEndHour = endHour;
+            scheduler.scope.schedulerEndMinute = endMinute;
+            scheduler.scope.schedulerEndSecond = endSecond;
+        }
+    }
+
     function init() {
         schedule = scheduleResolve;
 
@@ -161,6 +176,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             scheduler.setRRule(schedule.rrule);
             scheduler.setName(schedule.name);
             setTimezone();
+            setUntil(scheduler);
             $scope.hideForm = false;
 
             $scope.$watchGroup(["schedulerName",
