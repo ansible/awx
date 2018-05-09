@@ -135,6 +135,51 @@ function getJobTemplateDetails () {
     return { label, link, value, tooltip };
 }
 
+function getInventoryJobNameDetails () {
+    if (resource.model.get('type') !== 'inventory_update') {
+        return null;
+    }
+
+    const jobArgs = resource.model.get('job_args');
+
+    if (!jobArgs) {
+        return null;
+    }
+
+    let parsedJobArgs;
+
+    try {
+        parsedJobArgs = JSON.parse(jobArgs);
+    } catch (e) {
+        return null;
+    }
+
+    if (!Array.isArray(parsedJobArgs)) {
+        return null;
+    }
+
+    const jobArgIndex = parsedJobArgs.indexOf('--inventory-id');
+    const inventoryId = parsedJobArgs[jobArgIndex + 1];
+
+    if (jobArgIndex < 0) {
+        return null;
+    }
+
+    if (!Number.isInteger(parseInt(inventoryId, 10))) {
+        return null;
+    }
+
+    const name = resource.model.get('name');
+    const id = resource.model.get('id');
+
+    const label = 'Name';
+    const tooltip = strings.get('resourceTooltips.INVENTORY');
+    const value = `${id} - ${$filter('sanitize')(name)}`;
+    const link = `/#/inventories/inventory/${inventoryId}`;
+
+    return { label, link, tooltip, value };
+}
+
 function getLaunchedByDetails () {
     const createdBy = resource.model.get('summary_fields.created_by');
     const jobTemplate = resource.model.get('summary_fields.job_template');
@@ -597,6 +642,7 @@ function JobDetailsController (
         vm.skipTags = getSkipTagDetails();
         vm.extraVars = getExtraVarsDetails();
         vm.labels = getLabelDetails();
+        vm.inventoryJobName = getInventoryJobNameDetails();
 
         // Relaunch and Delete Components
         vm.job = angular.copy(_.get(resource.model, 'model.GET', {}));
