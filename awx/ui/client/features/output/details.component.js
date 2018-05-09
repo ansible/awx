@@ -194,6 +194,28 @@ function getInventorySourceDetails () {
     return { label, value };
 }
 
+function getOverwriteDetails () {
+    if (!resource.model.has('overwrite')) {
+        return null;
+    }
+
+    const label = 'Overwrite';
+    const value = resource.model.get('overwrite');
+
+    return { label, value };
+}
+
+function getOverwriteVarsDetails () {
+    if (!resource.model.has('overwrite_vars')) {
+        return null;
+    }
+
+    const label = 'Overwrite Vars';
+    const value = resource.model.get('overwrite_vars');
+
+    return { label, value };
+}
+
 function getLaunchedByDetails () {
     const createdBy = resource.model.get('summary_fields.created_by');
     const jobTemplate = resource.model.get('summary_fields.job_template');
@@ -658,6 +680,8 @@ function JobDetailsController (
         vm.labels = getLabelDetails();
         vm.inventoryJobName = getInventoryJobNameDetails();
         vm.inventorySource = getInventorySourceDetails();
+        vm.overwrite = getOverwriteDetails();
+        vm.overwriteVars = getOverwriteVarsDetails();
 
         // Relaunch and Delete Components
         vm.job = angular.copy(_.get(resource.model, 'model.GET', {}));

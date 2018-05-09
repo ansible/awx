@@ -228,6 +228,22 @@
     </div>
 </div>
 
+<!-- OVERWRITE DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.overwrite">
+    <label class="JobResults-resultRowLabel">{{ vm.overwrite.label }}</label>
+    <div class="JobResults-resultRowText">
+        {{ vm.overwrite.value }}
+    </div>
+</div>
+
+<!-- OVERWRITE VARS DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.overwriteVars">
+    <label class="JobResults-resultRowLabel">{{ vm.overwriteVars.label }}</label>
+    <div class="JobResults-resultRowText">
+        {{ vm.overwriteVars.value }}
+    </div>
+</div>
+
 <!-- FORKS DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.forks">
     <label class="JobResults-resultRowLabel">{{ vm.forks.label }}</label>
