@@ -235,7 +235,7 @@ function SmartSearchController (
     };
 
     $scope.clearAllTerms = () => {
-        const cleared = _.cloneDeep(defaults);
+        const cleared = _(defaults).omit(_.isNull).value();
 
         delete cleared.page;
 

@@ -34,8 +34,10 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
             return defer.promise;
         },
         replaceDefaultFlags (value) {
-            value = value.toString().replace(/__icontains_DEFAULT/g, "__icontains");
-            value = value.toString().replace(/__search_DEFAULT/g, "__search");
+            if (value) {
+                value = value.toString().replace(/__icontains_DEFAULT/g, "__icontains");
+                value = value.toString().replace(/__search_DEFAULT/g, "__search");
+            }
 
             return value;
         },
