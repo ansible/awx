@@ -220,6 +220,14 @@
     </div>
 </div>
 
+<!-- INVENTORY SOURCE DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.inventorySource">
+    <label class="JobResults-resultRowLabel">{{ vm.inventorySource.label }}</label>
+    <div class="JobResults-resultRowText">
+        {{ vm.inventorySource.value }}
+    </div>
+</div>
+
 <!-- FORKS DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.forks">
     <label class="JobResults-resultRowLabel">{{ vm.forks.label }}</label>

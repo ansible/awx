@@ -180,6 +180,20 @@ function getInventoryJobNameDetails () {
     return { label, link, tooltip, value };
 }
 
+function getInventorySourceDetails () {
+    if (!resource.model.has('summary_fields.inventory_source.source')) {
+        return null;
+    }
+
+    const { source } = resource.model.get('summary_fields.inventory_source');
+    const choices = mapChoices(resource.model.options('actions.GET.source.choices'));
+
+    const label = 'Source';
+    const value = choices[source];
+
+    return { label, value };
+}
+
 function getLaunchedByDetails () {
     const createdBy = resource.model.get('summary_fields.created_by');
     const jobTemplate = resource.model.get('summary_fields.job_template');
@@ -643,6 +657,7 @@ function JobDetailsController (
         vm.extraVars = getExtraVarsDetails();
         vm.labels = getLabelDetails();
         vm.inventoryJobName = getInventoryJobNameDetails();
+        vm.inventorySource = getInventorySourceDetails();
 
         // Relaunch and Delete Components
         vm.job = angular.copy(_.get(resource.model, 'model.GET', {}));
