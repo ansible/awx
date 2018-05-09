@@ -216,6 +216,17 @@ function getOverwriteVarsDetails () {
     return { label, value };
 }
 
+function getLicenseErrorDetails () {
+    if (!resource.model.has('license_error')) {
+        return null;
+    }
+
+    const label = 'License Error';
+    const value = resource.model.get('license_error');
+
+    return { label, value };
+}
+
 function getLaunchedByDetails () {
     const createdBy = resource.model.get('summary_fields.created_by');
     const jobTemplate = resource.model.get('summary_fields.job_template');
@@ -682,6 +693,7 @@ function JobDetailsController (
         vm.inventorySource = getInventorySourceDetails();
         vm.overwrite = getOverwriteDetails();
         vm.overwriteVars = getOverwriteVarsDetails();
+        vm.licenseError = getLicenseErrorDetails();
 
         // Relaunch and Delete Components
         vm.job = angular.copy(_.get(resource.model, 'model.GET', {}));

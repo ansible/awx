@@ -84,6 +84,14 @@
     </div>
 </div>
 
+<!-- LICENSE ERROR DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.licenseError">
+    <label class="JobResults-resultRowLabel">{{ vm.licenseError.label }}</label>
+    <div class="JobResults-resultRowText">
+        {{ vm.licenseError.value }}
+    </div>
+</div>
+
 <!-- START TIME DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.started">
     <label class="JobResults-resultRowLabel">{{ vm.started.label }}</label>
