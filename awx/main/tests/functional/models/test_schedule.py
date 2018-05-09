@@ -206,3 +206,71 @@ def test_timezone_property(job_template, rrule, tz):
         unified_job_template=job_template
     )
     assert s.timezone == tz
+
+
+@pytest.mark.django_db
+def test_utc_until_property(job_template):
+    rrule = 'DTSTART:20380601T120000Z RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20380601T170000Z'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+
+    assert s.rrule.endswith('20380601T170000Z')
+    assert s.until == '2038-06-01T17:00:00'
+
+
+@pytest.mark.django_db
+def test_localized_until_property(job_template):
+    rrule = 'DTSTART;TZID=America/New_York:20380601T120000 RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20380601T220000Z'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+
+    assert s.rrule.endswith('20380601T220000Z')
+    assert s.until == '2038-06-01T17:00:00'
+
+
+@pytest.mark.django_db
+def test_utc_naive_coercion(job_template):
+    rrule = 'DTSTART:20380601T120000Z RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20380601T170000'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+
+    assert s.rrule.endswith('20380601T170000Z')
+    assert s.until == '2038-06-01T17:00:00'
+
+
+@pytest.mark.django_db
+def test_est_naive_coercion(job_template):
+    rrule = 'DTSTART;TZID=America/New_York:20380601T120000 RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20380601T170000'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+
+    assert s.rrule.endswith('20380601T220000Z')  # 5PM EDT = 10PM UTC
+    assert s.until == '2038-06-01T17:00:00'
+
+
+@pytest.mark.django_db
+def test_empty_until_property(job_template):
+    rrule = 'DTSTART;TZID=America/New_York:20380601T120000 RRULE:FREQ=HOURLY;INTERVAL=1'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+    assert s.until == ''

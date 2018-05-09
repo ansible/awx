@@ -122,6 +122,17 @@ class Schedule(CommonModel, LaunchTimeConfig):
         logger.warn('Could not detect valid zoneinfo for {}'.format(self.rrule))
         return ''
 
+    @property
+    def until(self):
+        # The UNTIL= datestamp (if any) coerced from UTC to the local naive time
+        # of the DTSTART
+        for r in Schedule.rrulestr(self.rrule)._rrule:
+            if r._until:
+                local_until = r._until.astimezone(r._dtstart.tzinfo)
+                naive_until = local_until.replace(tzinfo=None)
+                return naive_until.isoformat()
+        return ''
+
     @classmethod
     def coerce_naive_until(cls, rrule):
         #
