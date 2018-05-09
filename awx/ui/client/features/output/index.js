@@ -26,6 +26,7 @@ const PAGE_SIZE = 50;
 const WS_PREFIX = 'ws';
 
 function resolveResource (
+    $state,
     Job,
     ProjectUpdate,
     AdHocCommand,
@@ -36,7 +37,9 @@ function resolveResource (
     qs,
     Wait
 ) {
-    const { id, type, job_event_search } = $stateParams; // eslint-disable-line camelcase
+    const { id, type, handleErrors } = $stateParams;
+    const { job_event_search } = $stateParams; // eslint-disable-line camelcase
+
     const { name, key } = getWebSocketResource(type);
 
     let Resource;
@@ -77,7 +80,7 @@ function resolveResource (
     }
 
     Wait('start');
-    return new Resource(['get', 'options'], [id, id])
+    const resourcePromise = new Resource(['get', 'options'], [id, id])
         .then(model => {
             const promises = [model.getStats()];
 
@@ -105,8 +108,17 @@ function resolveResource (
                 pageLimit: PAGE_LIMIT
             }
         }))
-        .catch(({ data, status }) => qs.error(data, status))
         .finally(() => Wait('stop'));
+
+    if (!handleErrors) {
+        return resourcePromise;
+    }
+
+    return resourcePromise
+        .catch(({ data, status }) => {
+            $state.go($state.current, $state.params, { reload: true });
+            qs.error(data, status);
+        });
 }
 
 function resolveWebSocketConnection ($stateParams, SocketService) {
@@ -168,6 +180,9 @@ function JobsRun ($stateRegistry, strings) {
         name: 'output',
         parent,
         ncyBreadcrumb,
+        params: {
+            handleErrors: true,
+        },
         data: {
             activityStream: false,
         },
@@ -185,6 +200,7 @@ function JobsRun ($stateRegistry, strings) {
                 resolveWebSocketConnection
             ],
             resource: [
+                '$state',
                 'JobModel',
                 'ProjectUpdateModel',
                 'AdHocCommandModel',
