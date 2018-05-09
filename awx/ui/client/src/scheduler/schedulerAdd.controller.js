@@ -92,14 +92,6 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     // extra_data field is not manifested in the UI when scheduling a Management Job
     if ($state.current.name === 'jobTemplateSchedules.add'){
         $scope.parseType = 'yaml';
-        $scope.extraVars = ParentObject.extra_vars === '' ? '---' : ParentObject.extra_vars;
-
-        ParseTypeChange({
-            scope: $scope,
-            variable: 'extraVars',
-            parse_variable: 'parseType',
-            field_id: 'SchedulerForm-extraVars'
-        });
 
         let jobTemplate = new JobTemplate();
 
@@ -126,7 +118,16 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     });
                 };
 
-                if (!launchConf.ask_variables_on_launch) {
+                if (launchConf.ask_variables_on_launch) {
+                    $scope.extraVars = ParentObject.extra_vars === '' ? '---' : ParentObject.extra_vars;
+
+                    ParseTypeChange({
+                        scope: $scope,
+                        variable: 'extraVars',
+                        parse_variable: 'parseType',
+                        field_id: 'SchedulerForm-extraVars'
+                    });
+                } else {
                     $scope.noVars = true;
                 }
 
