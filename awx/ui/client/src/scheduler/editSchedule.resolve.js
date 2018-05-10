@@ -19,7 +19,7 @@ function editScheduleResolve () {
         ],
         timezonesResolve: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors',
             (Rest, $stateParams, GetBasePath, ProcessErrors) => {
-                var path = `${GetBasePath('schedules')}/zoneinfo`;
+                var path = `${GetBasePath('schedules')}zoneinfo`;
                 Rest.setUrl(path);
                 return Rest.get()
                     .then(function(data) {
