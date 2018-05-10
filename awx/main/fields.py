@@ -193,8 +193,10 @@ def update_role_parentage_for_instance(instance):
     '''
     for implicit_role_field in getattr(instance.__class__, '__implicit_role_fields'):
         cur_role = getattr(instance, implicit_role_field.name)
+        original_parents = set(json.loads(cur_role.implicit_parents))
         new_parents = implicit_role_field._resolve_parent_roles(instance)
-        cur_role.parents.set(new_parents)
+        cur_role.parents.remove(*list(original_parents - new_parents))
+        cur_role.parents.add(*list(new_parents - original_parents))
         new_parents_list = list(new_parents)
         new_parents_list.sort()
         new_parents_json = json.dumps(new_parents_list)
