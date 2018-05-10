@@ -53,7 +53,6 @@ function EditApplicationsController (models, $state, strings, $scope) {
     vm.form.disabled = !isEditable;
 
     vm.form.name.required = true;
-    vm.form.redirect_uris.required = true;
 
     const isOrgAdmin = _.some(me.get('related.admin_of_organizations.results'), (org) => org.id === organization.get('id'));
     const isSuperuser = me.get('is_superuser');

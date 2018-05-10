@@ -46,7 +46,6 @@ function AddApplicationsController (models, $state, strings) {
 
     vm.form.name.required = true;
     vm.form.organization.required = true;
-    vm.form.redirect_uris.required = true;
 
     delete vm.form.name.help_text;
 
