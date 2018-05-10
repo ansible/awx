@@ -40,6 +40,18 @@
 </div>
 
 <!-- LEFT PANE DETAILS GROUP -->
+<!-- INVENTORY JOB NAME  DETAIL -->
+<div class="JobResults-resultRow" ng-if="vm.inventoryJobName">
+    <label class="JobResults-resultRowLabel">{{ vm.inventoryJobName.label }}</label>
+    <div class="JobResults-resultRowText">
+        <a href="{{ vm.inventoryJobName.link }}"
+           aw-tool-tip="{{ vm.inventoryJobName.tooltip }}"
+           data-placement="top">
+            {{ vm.inventoryJobName.value }}
+        </a>
+    </div>
+</div>
+
 <!-- STATUS DETAIL -->
 <div class="JobResults-resultRow">
     <label class="JobResults-resultRowLabel">{{ vm.status.label }}</label>
@@ -69,6 +81,14 @@
                 ng-click="vm.jobExplanation.showMore = false">
             Show Less
         </span>
+    </div>
+</div>
+
+<!-- LICENSE ERROR DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.licenseError">
+    <label class="JobResults-resultRowLabel">{{ vm.licenseError.label }}</label>
+    <div class="JobResults-resultRowText">
+        {{ vm.licenseError.value }}
     </div>
 </div>
 
@@ -205,6 +225,30 @@
             data-tip-watch="vm.credential.tooltip">
             {{ vm.credential.value }}
         </a>
+    </div>
+</div>
+
+<!-- INVENTORY SOURCE DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.inventorySource">
+    <label class="JobResults-resultRowLabel">{{ vm.inventorySource.label }}</label>
+    <div class="JobResults-resultRowText">
+        {{ vm.inventorySource.value }}
+    </div>
+</div>
+
+<!-- OVERWRITE DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.overwrite">
+    <label class="JobResults-resultRowLabel">{{ vm.overwrite.label }}</label>
+    <div class="JobResults-resultRowText">
+        {{ vm.overwrite.value }}
+    </div>
+</div>
+
+<!-- OVERWRITE VARS DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.overwriteVars">
+    <label class="JobResults-resultRowLabel">{{ vm.overwriteVars.label }}</label>
+    <div class="JobResults-resultRowText">
+        {{ vm.overwriteVars.value }}
     </div>
 </div>
 
