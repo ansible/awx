@@ -137,7 +137,7 @@ export default [
             if($state.current.name.endsWith('.edit')) {
                 $state.go('^.add');
             }
-            else if(!$state.current.name.endsWith('.add')) {
+            if(!$state.current.name.endsWith('.add')) {
                 $state.go('.add');
             }
         };
@@ -165,7 +165,7 @@ export default [
                 switch(schedule.summary_fields.unified_job_template.unified_job_type){
                 case 'job':
                     deferred.resolve({
-                        name: 'jobTemplateSchedules.edit',
+                        name: 'templates.editJobTemplate.schedules.edit',
                         params: {
                             id: schedule.unified_job_template,
                             schedule_id: schedule.id

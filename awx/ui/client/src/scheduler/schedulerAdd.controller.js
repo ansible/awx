@@ -90,7 +90,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     $scope.hideForm = true;
 
     // extra_data field is not manifested in the UI when scheduling a Management Job
-    if ($state.current.name === 'jobTemplateSchedules.add'){
+    if ($state.current.name === 'templates.editJobTemplate.schedules.add'){
         $scope.parseType = 'yaml';
 
         let jobTemplate = new JobTemplate();

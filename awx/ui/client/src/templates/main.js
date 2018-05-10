@@ -21,6 +21,11 @@ import TemplateList from './templates.list';
 import listRoute from '~features/templates/routes/templatesList.route.js';
 import templateCompletedJobsRoute from '~features/jobs/routes/templateCompletedJobs.route.js';
 import workflowJobTemplateCompletedJobsRoute from '~features/jobs/routes/workflowJobTemplateCompletedJobs.route.js';
+import {
+    jobTemplatesSchedulesListRoute,
+    jobTemplatesSchedulesAddRoute,
+    jobTemplatesSchedulesEditRoute
+} from '../scheduler/schedules.route';
 
 export default
 angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, prompt.name, workflowAdd.name, workflowEdit.name,
@@ -748,7 +753,10 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                             stateExtender.buildDefinition(listRoute),
                             stateExtender.buildDefinition(templateCompletedJobsRoute),
                             stateExtender.buildDefinition(workflowJobTemplateCompletedJobsRoute),
-                            stateExtender.buildDefinition(workflowMaker)
+                            stateExtender.buildDefinition(workflowMaker),
+                            stateExtender.buildDefinition(jobTemplatesSchedulesListRoute),
+                            stateExtender.buildDefinition(jobTemplatesSchedulesAddRoute),
+                            stateExtender.buildDefinition(jobTemplatesSchedulesEditRoute)
                         ])
                     };
                 });
