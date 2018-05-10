@@ -130,6 +130,9 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         });
     }
 
+    // sets the UNTIL portion of the schedule form after the angular-scheduler
+    // sets it, but this function reads the 'until' key/value pair directly
+    // from the schedule GET response. 
     function setUntil (scheduler) {
         let { until } = scheduleResolve;
         if(until !== ''){
