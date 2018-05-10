@@ -1,11 +1,13 @@
 const templateUrl = require('~features/output/search.partial.html');
 
-const searchReloadOptions = { reload: true, inherit: false };
+const searchReloadOptions = { inherit: false, location: 'replace' };
 const searchKeyExamples = ['id:>1', 'task:set', 'created:>=2000-01-01'];
 const searchKeyFields = ['changed', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
 
 const PLACEHOLDER_RUNNING = 'CANNOT SEARCH RUNNING JOB';
 const PLACEHOLDER_DEFAULT = 'SEARCH';
+const REJECT_DEFAULT = 'Failed to update search results.';
+const REJECT_INVALID = 'Invalid search filter provided.';
 
 let $state;
 let qs;
@@ -30,38 +32,46 @@ function getSearchTags (queryset) {
         .filter(tag => !tag.startsWith('order_by'));
 }
 
+function reloadQueryset (queryset, rejection = REJECT_DEFAULT) {
+    const params = angular.copy($state.params);
+    const currentTags = vm.tags;
+
+    params.handleErrors = false;
+    params.job_event_search = qs.encodeArr(queryset);
+
+    vm.disabled = true;
+    vm.message = '';
+    vm.tags = getSearchTags(queryset);
+
+    return $state.transitionTo($state.current, params, searchReloadOptions)
+        .catch(() => {
+            vm.tags = currentTags;
+            vm.message = rejection;
+            vm.rejected = true;
+            vm.disabled = false;
+        });
+}
+
 function removeSearchTag (index) {
     const searchTerm = vm.tags[index];
 
     const currentQueryset = getCurrentQueryset();
     const modifiedQueryset = qs.removeTermsFromQueryset(currentQueryset, searchTerm);
 
-    vm.tags = getSearchTags(modifiedQueryset);
-    vm.disabled = true;
-
-    $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
-    $state.transitionTo($state.current, $state.params, searchReloadOptions);
+    reloadQueryset(modifiedQueryset);
 }
 
 function submitSearch () {
-    const searchInputQueryset = qs.getSearchInputQueryset(vm.value);
-
     const currentQueryset = getCurrentQueryset();
+
+    const searchInputQueryset = qs.getSearchInputQueryset(vm.value);
     const modifiedQueryset = qs.mergeQueryset(currentQueryset, searchInputQueryset);
 
-    vm.tags = getSearchTags(modifiedQueryset);
-    vm.disabled = true;
-
-    $state.params.job_event_search = qs.encodeArr(modifiedQueryset);
-    $state.transitionTo($state.current, $state.params, searchReloadOptions);
+    reloadQueryset(modifiedQueryset, REJECT_INVALID);
 }
 
 function clearSearch () {
-    vm.tags = [];
-    vm.disabled = true;
-
-    $state.params.job_event_search = '';
-    $state.transitionTo($state.current, $state.params, searchReloadOptions);
+    reloadQueryset();
 }
 
 function JobSearchController (_$state_, _qs_, { subscribe }) {
@@ -70,15 +80,12 @@ function JobSearchController (_$state_, _qs_, { subscribe }) {
 
     vm = this || {};
 
-    vm.value = '';
-    vm.key = false;
-    vm.rejected = false;
-    vm.disabled = true;
-    vm.tags = getSearchTags(getCurrentQueryset());
+    vm.examples = searchKeyExamples;
+    vm.fields = searchKeyFields;
+    vm.relatedFields = [];
+    vm.placeholder = PLACEHOLDER_DEFAULT;
 
     vm.clearSearch = clearSearch;
-    vm.searchKeyExamples = searchKeyExamples;
-    vm.searchKeyFields = searchKeyFields;
     vm.toggleSearchKey = toggleSearchKey;
     vm.removeSearchTag = removeSearchTag;
     vm.submitSearch = submitSearch;
@@ -86,10 +93,12 @@ function JobSearchController (_$state_, _qs_, { subscribe }) {
     let unsubscribe;
 
     vm.$onInit = () => {
-        vm.examples = searchKeyExamples;
-        vm.fields = searchKeyFields;
-        vm.placeholder = PLACEHOLDER_DEFAULT;
-        vm.relatedFields = [];
+        vm.value = '';
+        vm.message = '';
+        vm.key = false;
+        vm.rejected = false;
+        vm.disabled = true;
+        vm.tags = getSearchTags(getCurrentQueryset());
 
         unsubscribe = subscribe(({ running }) => {
             vm.disabled = running;
