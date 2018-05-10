@@ -37,6 +37,14 @@ function ListTokensController (
         $scope[name] = dataset.results;
         vm.tokensCount = dataset.count;
     });
+    
+    vm.getScopeString = str => {
+        if (str === 'Read') {
+            return vm.strings.get('add.SCOPE_READ_LABEL');
+        } else if (str === 'Write') {
+            return vm.strings.get('add.SCOPE_WRITE_LABEL');
+        }
+    }
 
     vm.getLastUsed = token => {
         const lastUsed = _.get(token, 'last_used');

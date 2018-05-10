@@ -33,7 +33,7 @@
             </at-row-item>
             <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_SCOPE') }}"
-                value="{{ token.scope }}">
+                value="{{ vm.getScopeString(token.scope) }}">
             </at-row-item>
             <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_APPLICATION') }}"
