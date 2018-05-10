@@ -21,6 +21,11 @@ export default {
     name: 'users.edit.tokens.add',
     params: {
     },
+    data: {
+        activityStream: true,
+        activityStreamTarget: 'o_auth2_access_token',
+        noActivityStreamID: true
+    },
     ncyBreadcrumb: {
         label: N_('CREATE TOKEN')
     },

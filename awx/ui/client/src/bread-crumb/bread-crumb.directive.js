@@ -97,7 +97,7 @@ export default
                                     order_by: '-timestamp',
                                     page_size: '20',
                                 };
-                                if (streamConfig.activityStreamTarget && streamConfig.activityStreamId) {
+                                if (streamConfig.activityStreamTarget && streamConfig.activityStreamId && !streamConfig.noActivityStreamID) {
                                     stateGoParams.activity_search[streamConfig.activityStreamTarget] = $state.params[streamConfig.activityStreamId];
                                 }
                             }
@@ -107,7 +107,7 @@ export default
                                     page_size: '20',
                                 };
                             }
-                            if(streamConfig.activityStreamId) {
+                            if(streamConfig.activityStreamId && !streamConfig.noActivityStreamID) {
                                 stateGoParams.id = $state.params[streamConfig.activityStreamId];
                             }
                             if(stateGoParams.target === "custom_inventory_script"){
