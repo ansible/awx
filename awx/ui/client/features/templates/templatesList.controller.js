@@ -211,6 +211,7 @@ function ListTemplatesController(
             .then(model => model.extend('get', 'copy'))
             .then(model => {
                 const action = () => {
+                    $('#prompt-modal').modal('hide');
                     Wait('start');
                     model.copy()
                         .then(({ id }) => {
