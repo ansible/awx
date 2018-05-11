@@ -301,7 +301,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
         $scope.editSchedules = function(id) {
             var project = Find({ list: $scope.projects, key: 'id', val: id });
             if (!(project.scm_type === "Manual" || Empty(project.scm_type)) && !(project.status === 'updating' || project.status === 'running' || project.status === 'pending')) {
-                $state.go('projectSchedules', { id: id });
+                $state.go('projects.edit.schedules', { project_id: id });
             }
         };
 

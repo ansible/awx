@@ -277,7 +277,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     }
 
     if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.add' ||
-        $state.current.name === 'projectSchedules.add' ||
+        $state.current.name === 'projects.edit.schedules.add' ||
         $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.add'
     ){
         $scope.noVars = true;

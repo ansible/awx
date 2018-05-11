@@ -451,7 +451,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
         // extra_data field is not manifested in the UI when scheduling a Management Job
         if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
-            if ($state.current.name === 'projectSchedules.edit' ||
+            if ($state.current.name === 'projects.edit.schedules.edit' ||
                 $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit' ||
                 $state.current.name === 'templates.editWorkflowJobTemplate.schedules.add'
             ){

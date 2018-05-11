@@ -199,9 +199,9 @@ export default [
 
                     case 'project_update':
                         deferred.resolve({
-                            name: 'projectSchedules.edit',
+                            name: 'projects.edit.schedules.edit',
                             params: {
-                                id: schedule.unified_job_template,
+                                project_id: schedule.unified_job_template,
                                 schedule_id: schedule.id
                             }
                         });

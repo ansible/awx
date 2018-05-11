@@ -185,11 +185,163 @@ const workflowSchedulesEditRoute = {
     resolve: editScheduleResolve()
 };
 
+const projectsSchedulesListRoute = {
+    searchPrefix: 'schedule',
+    name: 'projects.edit.schedules',
+    route: '/schedules',
+    data: {
+        activityStream: true,
+        activityStreamTarget: 'project',
+        activityStreamId: 'id'
+    },
+    ncyBreadcrumb: {
+        parent: 'projects.edit({project_id: parentObject.id})',
+        label: N_('SCHEDULES')
+    },
+    resolve: {
+        Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
+            function(list, qs, $stateParams, GetBasePath) {
+                let path = `${GetBasePath('projects')}${$stateParams.project_id}/schedules`;
+                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+            }
+        ],
+        ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath){
+            let path = `${GetBasePath('projects')}${$stateParams.project_id}`;
+            Rest.setUrl(path);
+            return Rest.get(path).then(response => response.data);
+        }],
+        UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+            function(Rest, GetBasePath, $stateParams, $q) {
+                Rest.setUrl(GetBasePath('unified_jobs'));
+                var val = $q.defer();
+                Rest.options()
+                    .then(function(data) {
+                        val.resolve(data.data);
+                    }, function(data) {
+                        val.reject(data);
+                    });
+                return val.promise;
+            }],
+        ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+            (SchedulesList, GetBasePath, $stateParams) => {
+                let list = _.cloneDeep(SchedulesList);
+                list.basePath = GetBasePath('projects') + $stateParams.project_id + '/schedules/';
+                return list;
+            }
+        ]
+    },
+    views: {
+        related: {
+            templateProvider: function(ScheduleList, generateList, ParentObject, $filter){
+                ScheduleList.title = false;
+                let html = generateList.build({
+                    list: ScheduleList,
+                    mode: 'edit'
+                });
+                return html;
+            },
+            controller: 'schedulerListController'
+        }
+    }
+};
+
+const projectsSchedulesAddRoute = {
+    name: 'projects.edit.schedules.add',
+    route: '/add',
+    ncyBreadcrumb: {
+        label: N_('CREATE SCHEDULE')
+    },
+    views: {
+        'scheduler@projects': {
+            controller: 'schedulerAddController',
+            templateUrl: templateUrl("scheduler/schedulerForm"),
+        }
+    }
+};
+
+const projectsSchedulesEditRoute = {
+    name: 'projects.edit.schedules.edit',
+    route: '/:schedule_id',
+    ncyBreadcrumb: {
+        label: '{{schedule_obj.name}}'
+    },
+    views: {
+        'scheduler@projects': {
+            controller: 'schedulerEditController',
+            templateUrl: templateUrl("scheduler/schedulerForm"),
+        }
+    },
+    resolve: editScheduleResolve()
+};
+
+const jobsSchedulesRoute = {
+    searchPrefix: 'schedule',
+    name: 'jobs.schedules',
+    route: '/schedules',
+    params: {
+        schedule_search: {
+            value: {
+                next_run__isnull: 'false',
+                order_by: 'unified_job_template__polymorphic_ctype__model'
+            },
+            dynamic: true
+        }
+    },
+    data: {
+        activityStream: false,
+    },
+    ncyBreadcrumb: {
+        parent: 'jobs',
+        label: N_('SCHEDULED')
+    },
+    resolve: {
+        ScheduleList: ['ScheduledJobsList', function(list){
+            return list;
+        }],
+        Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
+            function(list, qs, $stateParams, GetBasePath) {
+                let path = GetBasePath('schedules');
+                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+            }
+        ],
+        ParentObject: ['GetBasePath', (GetBasePath) =>{return {endpoint:GetBasePath('schedules')}; }],
+        UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+            function(Rest, GetBasePath, $stateParams, $q) {
+                Rest.setUrl(GetBasePath('unified_jobs'));
+                var val = $q.defer();
+                Rest.options()
+                    .then(function(data) {
+                        val.resolve(data.data);
+                    }, function(data) {
+                        val.reject(data);
+                    });
+                return val.promise;
+            }]
+    },
+    views: {
+        'schedulesList@jobs': {
+            templateProvider: function(ScheduleList, generateList){
+                let html = generateList.build({
+                    list: ScheduleList,
+                    mode: 'edit',
+                    title: false
+                });
+                return html;
+            },
+            controller: 'schedulerListController'
+        }
+    }
+};
+
 export {
     jobTemplatesSchedulesListRoute,
     jobTemplatesSchedulesAddRoute,
     jobTemplatesSchedulesEditRoute,
     workflowSchedulesRoute,
     workflowSchedulesAddRoute,
-    workflowSchedulesEditRoute
+    workflowSchedulesEditRoute,
+    projectsSchedulesListRoute,
+    projectsSchedulesAddRoute,
+    projectsSchedulesEditRoute,
+    jobsSchedulesRoute
 };
