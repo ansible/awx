@@ -49,7 +49,7 @@ const jobTemplatesSchedulesListRoute = {
     },
     views: {
         related: {
-            templateProvider: function(ScheduleList, generateList, ParentObject, $filter){
+            templateProvider: function(ScheduleList, generateList){
                 ScheduleList.title = false;
                 let html = generateList.build({
                     list: ScheduleList,
@@ -141,7 +141,7 @@ const workflowSchedulesRoute = {
     },
     views: {
         related: {
-            templateProvider: function(ScheduleList, generateList, ParentObject, $filter){
+            templateProvider: function(ScheduleList, generateList){
                 ScheduleList.title = false;
                 let html = generateList.build({
                     list: ScheduleList,
@@ -232,7 +232,7 @@ const projectsSchedulesListRoute = {
     },
     views: {
         related: {
-            templateProvider: function(ScheduleList, generateList, ParentObject, $filter){
+            templateProvider: function(ScheduleList, generateList){
                 ScheduleList.title = false;
                 let html = generateList.build({
                     list: ScheduleList,

@@ -7,9 +7,7 @@
 import listController from './schedulerList.controller';
 import addController from './schedulerAdd.controller';
 import editController from './schedulerEdit.controller';
-import {templateUrl} from '../shared/template-url/template-url.factory';
 import schedulerDatePicker from './schedulerDatePicker.directive';
-import { N_ } from '../i18n';
 import DeleteSchedule from './factories/delete-schedule.factory';
 import RRuleToAPI from './factories/r-rule-to-api.factory';
 import SchedulePost from './factories/schedule-post.factory';

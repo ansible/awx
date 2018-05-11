@@ -1,21 +1,35 @@
 import { N_ } from '../../../../../../i18n';
 
 export default {
+    searchPrefix: 'schedule',
     name: 'inventories.edit.inventory_sources.edit.schedules',
     url: '/schedules',
-    searchPrefix: 'schedule',
     ncyBreadcrumb: {
+        parent: 'inventories.edit.inventory_sources.edit',
         label: N_('SCHEDULES')
     },
+    views: {
+        'related': {
+            templateProvider: function(SchedulesList, generateList){
+                SchedulesList.title = false;
+                let html = generateList.build({
+                    list: SchedulesList,
+                    mode: 'edit'
+                });
+                return html;
+            },
+            controller: 'schedulerListController'
+        }
+    },
     resolve: {
-        Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath', 'inventorySourceData',
-            function(list, qs, $stateParams, GetBasePath, inventorySourceData) {
-                let path = `${inventorySourceData.related.schedules}`;
+        Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath', 'inventorySource',
+            function(list, qs, $stateParams, GetBasePath, inventorySource) {
+                let path = `${inventorySource.get().related.schedules}`;
                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
             }
         ],
-        ParentObject: ['inventorySourceData', function(inventorySourceData) {
-            return inventorySourceData;
+        ParentObject: ['inventorySource', function(inventorySource) {
+            return inventorySource.get();
         }],
         UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
             function(Rest, GetBasePath, $stateParams, $q) {
@@ -29,32 +43,12 @@ export default {
                     });
                 return val.promise;
             }],
-        ScheduleList: ['SchedulesList', 'inventorySourceData',
-            (SchedulesList, inventorySourceData) => {
+        ScheduleList: ['SchedulesList', 'inventorySource',
+            (SchedulesList, inventorySource) => {
                 let list = _.cloneDeep(SchedulesList);
-                list.basePath = `${inventorySourceData.related.schedules}`;
+                list.basePath = `${inventorySource.get().related.schedules}`;
                 return list;
             }
         ]
-    },
-    views: {
-        // clear form template when views render in this substate
-        'form': {
-            templateProvider: () => ''
-        },
-        // target the un-named ui-view @ root level
-        '@': {
-            templateProvider: function(ScheduleList, generateList, ParentObject, $filter) {
-                // include name of parent resource in listTitle
-                ScheduleList.listTitle = `${$filter('sanitize')(ParentObject.name)}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
-                let html = generateList.build({
-                    list: ScheduleList,
-                    mode: 'edit'
-                });
-                html = generateList.wrapPanel(html);
-                return "<div class='InventoryManage-container'>" + generateList.insertFormView() + html + "</div>";
-            },
-            controller: 'schedulerListController'
-        }
     }
 };

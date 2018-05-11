@@ -8,12 +8,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
     'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
-    'WorkflowJobTemplateModel', 'TemplatesStrings',
+    'WorkflowJobTemplateModel', 'TemplatesStrings', 'rbacUiControlService',
     function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
         ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment,
-        WorkflowJobTemplate, TemplatesStrings
+        WorkflowJobTemplate, TemplatesStrings, rbacUiControlService
     ) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
@@ -21,7 +21,15 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         job_type;
 
     var schedule_url = ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
-
+    if (ParentObject){
+        $scope.parentObject = ParentObject;
+        let scheduleEndpoint = ParentObject.endpoint|| ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
+        $scope.canAdd = false;
+        rbacUiControlService.canAdd(scheduleEndpoint)
+            .then(function(params) {
+                $scope.canAdd = params.canAdd;
+            });
+    }
     let processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);

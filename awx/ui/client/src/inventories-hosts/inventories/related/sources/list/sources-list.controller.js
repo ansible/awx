@@ -222,7 +222,7 @@
         $scope.scheduleSource = function(id) {
             // Add this inv source's id to the array of inv source id's so that it gets
             // added to the breadcrumb trail
-            $state.go('inventories.edit.inventory_sources.edit.schedules', {inventory_source_id: id}, {reload: true});
+            $state.go('inventories.edit.inventory_sources.edit.schedules',{inventory_source_id: id});
         };
 
         $scope.syncAllSources = function() {
