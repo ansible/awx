@@ -67,7 +67,6 @@ function init () {
     });
 
     render.init({
-        get: () => resource.model.get(`related.${resource.related}.results`),
         compile: html => $compile(html)($scope),
         isStreamActive: engine.isActive,
     });
@@ -95,21 +94,24 @@ function init () {
         }
     });
 
-    $scope.$on(resource.ws.events, handleJobEvent);
-    $scope.$on(resource.ws.status, handleStatusEvent);
-
     if (!status.state.running) {
-        next();
+        return next();
     }
+
+    $scope.$on(resource.ws.events, (scope, data) => handleJobEvent(data));
+    $scope.$on(resource.ws.status, (scope, data) => handleStatusEvent(data));
+
+    return resource.model
+        .get(`related.${resource.related}.results`)
+        .forEach(handleJobEvent);
 }
 
-function handleStatusEvent (scope, data) {
+function handleStatusEvent (data) {
     status.pushStatusEvent(data);
 }
 
-function handleJobEvent (scope, data) {
+function handleJobEvent (data) {
     engine.pushJobEvent(data);
-
     status.pushJobEvent(data);
 }
 
