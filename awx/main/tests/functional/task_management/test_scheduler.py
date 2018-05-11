@@ -113,7 +113,7 @@ def test_single_job_dependencies_project_launch(default_instance_group, job_temp
     p.scm_update_cache_timeout = 0
     p.scm_type = "git"
     p.scm_url = "http://github.com/ansible/ansible.git"
-    p.save()
+    p.save(skip_update=True)
     with mock.patch("awx.main.scheduler.TaskManager.start_task"):
         tm = TaskManager()
         with mock.patch.object(TaskManager, "create_project_update", wraps=tm.create_project_update) as mock_pu:
