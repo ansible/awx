@@ -1507,7 +1507,7 @@ class JobAccess(BaseAccess):
             elif not jt_access:
                 return False
 
-        org_access = obj.inventory and self.user in obj.inventory.organization.inventory_admin_role
+        org_access = bool(obj.inventory) and self.user in obj.inventory.organization.inventory_admin_role
         project_access = obj.project is None or self.user in obj.project.admin_role
         credential_access = all([self.user in cred.use_role for cred in obj.credentials.all()])
 

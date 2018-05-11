@@ -223,6 +223,17 @@ class TestJobRelaunchAccess:
         job.credentials.add(net_credential)
         assert not rando.can_access(Job, 'start', job, validate_license=False)
 
+    @pytest.mark.job_runtime_vars
+    def test_callback_relaunchable_by_user(self, job_template, rando):
+        job = job_template.create_unified_job(
+            _eager_fields={'launch_type': 'callback'},
+            limit='host2'
+        )
+        assert 'limit' in job.launch_config.prompts_dict()  # sanity assertion
+        job_template.execute_role.members.add(rando)
+        can_access, messages = rando.can_access_with_errors(Job, 'start', job, validate_license=False)
+        assert can_access, messages
+
 
 @pytest.mark.django_db
 class TestJobAndUpdateCancels:

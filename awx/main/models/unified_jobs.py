@@ -814,7 +814,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         # Done.
         return result
 
-    def copy_unified_job(self, limit=None):
+    def copy_unified_job(self, _eager_fields=None, **new_prompts):
         '''
         Returns saved object, including related fields.
         Create a copy of this unified job for the purpose of relaunch
@@ -824,12 +824,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         parent_field_name = unified_job_class._get_parent_field_name()
         fields = unified_jt_class._get_unified_job_field_names() | set([parent_field_name])
 
-        create_data = {"launch_type": "relaunch"}
-        if limit:
-            create_data["limit"] = limit
+        create_data = {}
+        if _eager_fields:
+            create_data = _eager_fields.copy()
+        create_data["launch_type"] = "relaunch"
 
         prompts = self.launch_prompts()
-        if self.unified_job_template and prompts:
+        if self.unified_job_template and (prompts is not None):
+            prompts.update(new_prompts)
             prompts['_eager_fields'] = create_data
             unified_job = self.unified_job_template.create_unified_job(**prompts)
         else:
