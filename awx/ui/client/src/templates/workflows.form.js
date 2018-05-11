@@ -181,6 +181,11 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     title: i18n._('Completed Jobs'),
                     skipGenerator: true,
                     ngClick: "$state.go('templates.editWorkflowJobTemplate.completed_jobs')"
+                },
+                "schedules": {
+                    title: i18n._('Schedules'),
+                    skipGenerator: true,
+                    ngClick: "$state.go('templates.editWorkflowJobTemplate.schedules')"
                 }
             },
 

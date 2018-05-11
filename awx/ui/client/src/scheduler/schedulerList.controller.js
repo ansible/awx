@@ -167,7 +167,7 @@ export default [
                     deferred.resolve({
                         name: 'templates.editJobTemplate.schedules.edit',
                         params: {
-                            id: schedule.unified_job_template,
+                            job_template_id: schedule.unified_job_template,
                             schedule_id: schedule.id
                         }
                     });
@@ -175,9 +175,9 @@ export default [
 
                     case 'workflow_job':
                         deferred.resolve({
-                            name: 'workflowJobTemplateSchedules.edit',
+                            name: 'templates.editWorkflowJobTemplate.schedules.edit',
                             params: {
-                                id: schedule.unified_job_template,
+                                workflow_job_template_id: schedule.unified_job_template,
                                 schedule_id: schedule.id
                             }
                         });

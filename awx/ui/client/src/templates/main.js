@@ -24,7 +24,10 @@ import workflowJobTemplateCompletedJobsRoute from '~features/jobs/routes/workflo
 import {
     jobTemplatesSchedulesListRoute,
     jobTemplatesSchedulesAddRoute,
-    jobTemplatesSchedulesEditRoute
+    jobTemplatesSchedulesEditRoute,
+    workflowSchedulesRoute,
+    workflowSchedulesAddRoute,
+    workflowSchedulesEditRoute
 } from '../scheduler/schedules.route';
 
 export default
@@ -756,7 +759,10 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                             stateExtender.buildDefinition(workflowMaker),
                             stateExtender.buildDefinition(jobTemplatesSchedulesListRoute),
                             stateExtender.buildDefinition(jobTemplatesSchedulesAddRoute),
-                            stateExtender.buildDefinition(jobTemplatesSchedulesEditRoute)
+                            stateExtender.buildDefinition(jobTemplatesSchedulesEditRoute),
+                            stateExtender.buildDefinition(workflowSchedulesRoute),
+                            stateExtender.buildDefinition(workflowSchedulesAddRoute),
+                            stateExtender.buildDefinition(workflowSchedulesEditRoute)
                         ])
                     };
                 });

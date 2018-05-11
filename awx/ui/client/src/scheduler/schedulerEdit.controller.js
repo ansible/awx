@@ -378,7 +378,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         }
                     }
                 });
-        } else if ($state.current.name === 'workflowJobTemplateSchedules.edit') {
+        } else if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.edit') {
             let workflowJobTemplate = new WorkflowJobTemplate();
 
             $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
@@ -453,7 +453,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
             if ($state.current.name === 'projectSchedules.edit' ||
                 $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit' ||
-                $state.current.name === 'workflowJobTemplateSchedules.add'
+                $state.current.name === 'templates.editWorkflowJobTemplate.schedules.add'
             ){
                 $scope.noVars = true;
             } else {

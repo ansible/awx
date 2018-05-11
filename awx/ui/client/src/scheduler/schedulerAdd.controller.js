@@ -206,7 +206,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     }
                 }
             });
-    } else if ($state.current.name === 'workflowJobTemplateSchedules.add'){
+    } else if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.add'){
         let workflowJobTemplate = new WorkflowJobTemplate();
 
         $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
@@ -276,7 +276,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
             });
     }
 
-    if ($state.current.name === 'workflowJobTemplateSchedules.add' ||
+    if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.add' ||
         $state.current.name === 'projectSchedules.add' ||
         $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.add'
     ){
