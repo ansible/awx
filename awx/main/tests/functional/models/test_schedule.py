@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.utils.timezone import now
 import mock
 import pytest
 import pytz
@@ -131,31 +132,19 @@ def test_utc_until(job_template, until, dtend):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('dtstart, until', [
-    ['20180601T120000Z', '20180602T170000'],
-    ['TZID=America/New_York:20180601T120000', '20180602T170000'],
+    ['DTSTART:20380601T120000Z', '20380601T170000'],  # noon UTC to 5PM UTC
+    ['DTSTART;TZID=America/New_York:20380601T120000', '20380601T170000'],  # noon EST to 5PM EST
 ])
 def test_tzinfo_naive_until(job_template, dtstart, until):
-    rrule = 'DTSTART;{} RRULE:FREQ=DAILY;INTERVAL=1;UNTIL={}'.format(dtstart, until)  # noqa
+    rrule = '{} RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL={}'.format(dtstart, until)  # noqa
     s = Schedule(
         name='Some Schedule',
         rrule=rrule,
         unified_job_template=job_template
     )
-    with pytest.raises(ValueError):
-        s.save()
-
-
-@pytest.mark.django_db
-def test_until_must_be_utc(job_template):
-    rrule = 'DTSTART;TZID=America/New_York:20180601T120000 RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20180602T000000'  # noqa the Z is required
-    s = Schedule(
-        name='Some Schedule',
-        rrule=rrule,
-        unified_job_template=job_template
-    )
-    with pytest.raises(ValueError) as e:
-        s.save()
-    assert 'RRULE UNTIL values must be specified in UTC' in str(e)
+    s.save()
+    gen = Schedule.rrulestr(s.rrule).xafter(now(), count=20)
+    assert len(list(gen)) == 6  # noon, 1PM, 2, 3, 4, 5PM
 
 
 @pytest.mark.django_db
@@ -203,3 +192,85 @@ def test_beginning_of_time(job_template):
     )
     with pytest.raises(ValueError):
         s.save()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('rrule, tz', [
+    ['DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1', 'UTC'],
+    ['DTSTART;TZID=America/New_York:20300112T210000 RRULE:FREQ=DAILY;INTERVAL=1', 'America/New_York']
+])
+def test_timezone_property(job_template, rrule, tz):
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    assert s.timezone == tz
+
+
+@pytest.mark.django_db
+def test_utc_until_property(job_template):
+    rrule = 'DTSTART:20380601T120000Z RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20380601T170000Z'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+
+    assert s.rrule.endswith('20380601T170000Z')
+    assert s.until == '2038-06-01T17:00:00'
+
+
+@pytest.mark.django_db
+def test_localized_until_property(job_template):
+    rrule = 'DTSTART;TZID=America/New_York:20380601T120000 RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20380601T220000Z'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+
+    assert s.rrule.endswith('20380601T220000Z')
+    assert s.until == '2038-06-01T17:00:00'
+
+
+@pytest.mark.django_db
+def test_utc_naive_coercion(job_template):
+    rrule = 'DTSTART:20380601T120000Z RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20380601T170000'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+
+    assert s.rrule.endswith('20380601T170000Z')
+    assert s.until == '2038-06-01T17:00:00'
+
+
+@pytest.mark.django_db
+def test_est_naive_coercion(job_template):
+    rrule = 'DTSTART;TZID=America/New_York:20380601T120000 RRULE:FREQ=HOURLY;INTERVAL=1;UNTIL=20380601T170000'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+
+    assert s.rrule.endswith('20380601T220000Z')  # 5PM EDT = 10PM UTC
+    assert s.until == '2038-06-01T17:00:00'
+
+
+@pytest.mark.django_db
+def test_empty_until_property(job_template):
+    rrule = 'DTSTART;TZID=America/New_York:20380601T120000 RRULE:FREQ=HOURLY;INTERVAL=1'
+    s = Schedule(
+        name='Some Schedule',
+        rrule=rrule,
+        unified_job_template=job_template
+    )
+    s.save()
+    assert s.until == ''

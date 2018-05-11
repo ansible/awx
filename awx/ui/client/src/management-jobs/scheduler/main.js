@@ -10,6 +10,8 @@ import controller from '../../scheduler/schedulerList.controller';
 import addController from '../../scheduler/schedulerAdd.controller';
 import editController from '../../scheduler/schedulerEdit.controller';
 import { N_ } from '../../i18n';
+import editScheduleResolve from '../../scheduler/editSchedule.resolve';
+
 
 export default
 angular.module('managementJobScheduler', [])
@@ -99,6 +101,7 @@ angular.module('managementJobScheduler', [])
                     templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
                     controller: 'managementJobEditController'
                 }
-            }
+            },
+            resolve: editScheduleResolve()
         });
     }]);

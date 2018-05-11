@@ -122,7 +122,6 @@
                 </label>
                 <select
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
-                    class="MakeSelect2"
                     name="schedulerTimeZone"
                     id="schedulerTimeZone"
                     ng-model="schedulerTimeZone"
@@ -130,6 +129,7 @@
                     required class="form-control input-sm"
                     ng-change="scheduleTimeChange()" >
                 </select>
+                <option></option>
             </div>
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
