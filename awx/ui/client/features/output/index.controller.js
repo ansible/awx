@@ -9,6 +9,7 @@ let engine;
 let status;
 
 let vm;
+let listeners = [];
 
 function JobsIndexController (
     _resource_,
@@ -89,21 +90,32 @@ function init () {
             status.setJobStatus('running');
         },
         onStop () {
+            stopListening();
             status.updateStats();
             status.dispatch();
         }
     });
 
     if (!status.state.running) {
-        return next();
+        next();
+        return;
     }
 
-    $scope.$on(resource.ws.events, (scope, data) => handleJobEvent(data));
-    $scope.$on(resource.ws.status, (scope, data) => handleStatusEvent(data));
-
-    return resource.model
-        .get(`related.${resource.related}.results`)
+    resource.model.get(`related.${resource.related}.results`)
         .forEach(handleJobEvent);
+
+    startListening();
+}
+
+function stopListening () {
+    listeners.forEach(deregister => deregister());
+    listeners = [];
+}
+
+function startListening () {
+    stopListening();
+    listeners.push($scope.$on(resource.ws.events, (scope, data) => handleJobEvent(data)));
+    listeners.push($scope.$on(resource.ws.status, (scope, data) => handleStatusEvent(data)));
 }
 
 function handleStatusEvent (data) {
@@ -115,9 +127,8 @@ function handleJobEvent (data) {
     status.pushJobEvent(data);
 }
 
-function devClear (pageMode) {
-    init(pageMode);
-    render.clear();
+function devClear () {
+    render.clear().then(() => init());
 }
 
 function next () {
