@@ -49,48 +49,60 @@ function JobStatusService (moment, message) {
     };
 
     this.pushStatusEvent = data => {
-        const isJobEvent = (this.job === data.unified_job_id);
-        const isProjectEvent = (this.project && (this.project === data.project_id));
+        const isJobStatusEvent = (this.job === data.unified_job_id);
+        const isProjectStatusEvent = (this.project && (this.project === data.project_id));
 
-        if (isJobEvent) {
+        if (isJobStatusEvent) {
             this.setJobStatus(data.status);
-        } else if (isProjectEvent) {
+            this.dispatch();
+        } else if (isProjectStatusEvent) {
             this.setProjectStatus(data.status);
             this.setProjectUpdateId(data.unified_job_id);
+            this.dispatch();
         }
     };
 
     this.pushJobEvent = data => {
         const isLatest = ((!this.counter) || (data.counter > this.counter));
 
+        let changed = false;
+
         if (!this.active && !(data.event === JOB_END)) {
             this.active = true;
             this.setJobStatus('running');
+            changed = true;
         }
 
         if (isLatest) {
             this.counter = data.counter;
             this.latestTime = data.created;
             this.setElapsed(moment(data.created).diff(this.created, 'seconds'));
+            changed = true;
         }
 
         if (data.event === JOB_START) {
             this.setStarted(this.state.started || data.created);
+            changed = true;
         }
 
         if (data.event === PLAY_START) {
             this.state.counts.plays++;
+            changed = true;
         }
 
         if (data.event === TASK_START) {
             this.state.counts.tasks++;
+            changed = true;
         }
 
         if (data.event === JOB_END) {
             this.setStatsEvent(data);
+            changed = true;
         }
 
-        this.dispatch();
+        if (changed) {
+            this.dispatch();
+        }
     };
 
     this.isExpectingStatsEvent = () => (this.jobType === 'job') ||
