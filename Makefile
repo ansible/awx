@@ -379,7 +379,7 @@ test:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test $(TEST_DIRS)
+	py.test -n auto $(TEST_DIRS)
 
 test_combined: test_ansible test
 

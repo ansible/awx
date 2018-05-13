@@ -2155,7 +2155,7 @@ def test_aquire_lock_open_fail_logged(logging_getLogger, os_open):
 
     ProjectUpdate = tasks.RunProjectUpdate()
 
-    with pytest.raises(OSError, errno=3, strerror='dummy message'):
+    with pytest.raises(OSError, message='dummy message'):
         ProjectUpdate.acquire_lock(instance)
     assert logger.err.called_with("I/O error({0}) while trying to open lock file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))
 
@@ -2181,7 +2181,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_
 
     ProjectUpdate = tasks.RunProjectUpdate()
 
-    with pytest.raises(IOError, errno=3, strerror='dummy message'):
+    with pytest.raises(IOError, message='dummy message'):
         ProjectUpdate.acquire_lock(instance)
     os_close.assert_called_with(3)
     assert logger.err.called_with("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(3, 'this_file_does_not_exist', 'dummy message'))

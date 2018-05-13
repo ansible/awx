@@ -158,7 +158,7 @@ def test_jt_existing_values_are_nonsensitive(job_template_with_ids, user_unit):
     """Assure that permission checks are not required if submitted data is
     identical to what the job template already has."""
 
-    data = model_to_dict(job_template_with_ids)
+    data = model_to_dict(job_template_with_ids, exclude=['unifiedjobtemplate_ptr'])
     access = JobTemplateAccess(user_unit)
 
     assert access.changes_are_non_sensitive(job_template_with_ids, data)
