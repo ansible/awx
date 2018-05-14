@@ -7,6 +7,8 @@ export default
             // modal title.  We want this toggle to be on by default
             scope.survey_enabled = true;
 
+            scope.initiallyHadQuestions = false;
+
             if (scope.removeDialogReady) {
                 scope.removeDialogReady();
             }

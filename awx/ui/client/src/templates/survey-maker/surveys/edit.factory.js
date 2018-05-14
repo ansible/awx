@@ -37,6 +37,7 @@ export default
                                 scope.survey_name = data.name;
                                 scope.survey_description = data.description;
                                 scope.survey_questions = data.spec;
+                                scope.initiallyHadQuestions = true;
                                 Wait('stop');
                             } else {
                                 AddSurvey({
