@@ -30,11 +30,11 @@ const re = new RegExp(pattern);
 const hasAnsi = input => re.test(input);
 
 function JobRenderService ($q, $sce, $window) {
-    this.init = ({ compile, apply, isStreamActive }) => {
+    this.init = ({ compile, isStreamActive }) => {
         this.parent = null;
         this.record = {};
         this.el = $(ELEMENT_TBODY);
-        this.hooks = { isStreamActive, compile, apply };
+        this.hooks = { isStreamActive, compile };
     };
 
     this.sortByLineNumber = (a, b) => {
@@ -238,8 +238,6 @@ function JobRenderService ($q, $sce, $window) {
 
         return list;
     };
-
-    this.getEvents = () => this.hooks.get();
 
     this.insert = (events, insert) => {
         const result = this.transformEventGroup(events);

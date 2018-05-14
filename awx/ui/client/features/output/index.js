@@ -70,13 +70,20 @@ function resolveResource (
             return null;
     }
 
-    const params = { page_size: PAGE_SIZE, order_by: 'start_line' };
-    const config = { pageCache: PAGE_CACHE, pageLimit: PAGE_LIMIT, params };
+    const params = {
+        page_size: PAGE_SIZE,
+        order_by: 'start_line',
+    };
+
+    const config = {
+        params,
+        pageCache: PAGE_CACHE,
+        pageLimit: PAGE_LIMIT,
+    };
 
     if (job_event_search) { // eslint-disable-line camelcase
-        const queryParams = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
-
-        Object.assign(config.params, queryParams);
+        const query = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
+        Object.assign(config.params, query);
     }
 
     Wait('start');
@@ -89,7 +96,6 @@ function resolveResource (
             }
 
             promises.push(model.extend('get', related, config));
-
             return Promise.all(promises);
         })
         .then(([stats, model]) => ({
@@ -107,18 +113,19 @@ function resolveResource (
                 size: PAGE_SIZE,
                 pageLimit: PAGE_LIMIT
             }
-        }))
-        .finally(() => Wait('stop'));
+        }));
 
     if (!handleErrors) {
-        return resourcePromise;
+        return resourcePromise
+            .finally(() => Wait('stop'));
     }
 
     return resourcePromise
         .catch(({ data, status }) => {
-            $state.go($state.current, $state.params, { reload: true });
             qs.error(data, status);
-        });
+            return $state.go($state.current, $state.params, { reload: true });
+        })
+        .finally(() => Wait('stop'));
 }
 
 function resolveWebSocketConnection ($stateParams, SocketService) {

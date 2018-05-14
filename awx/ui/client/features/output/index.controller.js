@@ -7,8 +7,11 @@ let resource;
 let scroll;
 let engine;
 let status;
+let $http;
 
 let vm;
+let streaming;
+let listeners = [];
 
 function JobsIndexController (
     _resource_,
@@ -20,6 +23,7 @@ function JobsIndexController (
     _$compile_,
     _$q_,
     _status_,
+    _$http_,
 ) {
     vm = this || {};
 
@@ -33,6 +37,7 @@ function JobsIndexController (
     render = _render_;
     engine = _engine_;
     status = _status_;
+    $http = _$http_;
 
     // Development helper(s)
     vm.clear = devClear;
@@ -67,7 +72,6 @@ function init () {
     });
 
     render.init({
-        get: () => resource.model.get(`related.${resource.related}.results`),
         compile: html => $compile(html)($scope),
         isStreamActive: engine.isActive,
     });
@@ -90,32 +94,72 @@ function init () {
             status.setJobStatus('running');
         },
         onStop () {
+            stopListening();
             status.updateStats();
             status.dispatch();
         }
     });
 
-    $scope.$on(resource.ws.events, handleJobEvent);
-    $scope.$on(resource.ws.status, handleStatusEvent);
-
-    if (!status.state.running) {
-        next();
-    }
+    streaming = false;
+    return next().then(() => startListening());
 }
 
-function handleStatusEvent (scope, data) {
+function stopListening () {
+    listeners.forEach(deregister => deregister());
+    listeners = [];
+}
+
+function startListening () {
+    stopListening();
+    listeners.push($scope.$on(resource.ws.events, (scope, data) => handleJobEvent(data)));
+    listeners.push($scope.$on(resource.ws.status, (scope, data) => handleStatusEvent(data)));
+}
+
+function handleStatusEvent (data) {
     status.pushStatusEvent(data);
 }
 
-function handleJobEvent (scope, data) {
-    engine.pushJobEvent(data);
-
-    status.pushJobEvent(data);
+function handleJobEvent (data) {
+    streaming = streaming || attachToRunningJob();
+    streaming.then(() => {
+        engine.pushJobEvent(data);
+        status.pushJobEvent(data);
+    });
 }
 
-function devClear (pageMode) {
-    init(pageMode);
-    render.clear();
+function attachToRunningJob () {
+    const target = `${resource.model.get('url')}${resource.related}/`;
+    const params = { order_by: '-created', page_size: resource.page.size };
+
+    scroll.pause();
+
+    return render.clear()
+        .then(() => $http.get(target, { params }))
+        .then(res => {
+            const { results } = res.data;
+
+            const minLine = 1 + Math.max(...results.map(event => event.end_line));
+            const maxCount = Math.max(...results.map(event => event.counter));
+
+            const lastPage = resource.model.updateCount(maxCount);
+
+            page.emptyCache(lastPage);
+            page.addPage(lastPage, [], true);
+
+            engine.setMinLine(minLine);
+
+            if (resource.model.page.current === lastPage) {
+                return $q.resolve();
+            }
+
+            return append(results);
+        })
+        .then(() => {
+            scroll.setScrollPosition(scroll.getScrollHeight());
+            scroll.resume();
+
+            return $q.resolve();
+        });
 }
 
 function next () {
@@ -281,6 +325,10 @@ function toggleExpanded () {
     vm.expanded = !vm.expanded;
 }
 
+function devClear () {
+    render.clear().then(() => init());
+}
+
 // function showHostDetails (id) {
 //     jobEvent.request('get', id)
 //         .then(() => {
@@ -331,6 +379,7 @@ JobsIndexController.$inject = [
     '$compile',
     '$q',
     'JobStatusService',
+    '$http',
 ];
 
 module.exports = JobsIndexController;
