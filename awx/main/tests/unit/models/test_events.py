@@ -44,3 +44,18 @@ def test_playbook_event_strip_invalid_keys(job_identifier, cls):
             'extra_key': 'extra_value'
         })
         manager.create.assert_called_with(**{job_identifier: 123})
+
+
+@pytest.mark.parametrize('field', [
+    'play', 'role', 'task', 'playbook'
+])
+def test_really_long_event_fields(field):
+    with mock.patch.object(JobEvent, 'objects') as manager:
+        JobEvent.create_from_data(**{
+            'job_id': 123,
+            field: 'X' * 4096
+        })
+        manager.create.assert_called_with(**{
+            'job_id': 123,
+            field: 'X' * 1021 + '...'
+        })
