@@ -625,17 +625,31 @@ def test_save_survey_passwords_on_migration(job_template_with_survey_passwords):
 
 
 @pytest.mark.django_db
-def test_job_template_custom_virtualenv(get, patch, organization_factory, job_template_factory):
+@pytest.mark.parametrize('access', ["superuser", "admin", "peon"])
+def test_job_template_custom_virtualenv(get, patch, organization_factory, job_template_factory, alice, access):
     objs = organization_factory("org", superusers=['admin'])
     jt = job_template_factory("jt", organization=objs.organization,
                               inventory='test_inv', project='test_proj').job_template
 
+    user = alice
+    if access == "superuser":
+        user = objs.superusers.admin
+    elif access == "admin":
+        jt.admin_role.members.add(alice)
+    else:
+        jt.read_role.members.add(alice)
+
     with TemporaryDirectory(dir=settings.BASE_VENV_PATH) as temp_dir:
-        admin = objs.superusers.admin
         os.makedirs(os.path.join(temp_dir, 'bin', 'activate'))
         url = reverse('api:job_template_detail', kwargs={'pk': jt.id})
-        patch(url, {'custom_virtualenv': temp_dir}, user=admin, expect=200)
-        assert get(url, user=admin).data['custom_virtualenv'] == os.path.join(temp_dir, '')
+
+        if access == "peon":
+            patch(url, {'custom_virtualenv': temp_dir}, user=user, expect=403)
+            assert 'custom_virtualenv' not in get(url, user=user)
+            assert JobTemplate.objects.get(pk=jt.id).custom_virtualenv is None
+        else:
+            patch(url, {'custom_virtualenv': temp_dir}, user=user, expect=200)
+            assert get(url, user=user).data['custom_virtualenv'] == os.path.join(temp_dir, '')
 
 
 @pytest.mark.django_db
