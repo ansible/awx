@@ -14,6 +14,17 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
             $scope[`${list.iterator}s`] = $scope[`${list.iterator}_dataset`].results;
         }
 
+        let reloadAfterDelete = () => {
+            let reloadListStateParams = null;
+
+            if($scope.permissions.length === 1 && $state.params.permission_search && _.has($state, 'params.permission_search.page') && parseInt($state.params.permission_search.page).toString() !== '1') {
+                reloadListStateParams = _.cloneDeep($state.params);
+                reloadListStateParams.permission_search.page = (parseInt(reloadListStateParams.permission_search.page)-1).toString();
+            }
+
+            $state.go('.', reloadListStateParams, {reload: true});
+        };
+
         $scope.deletePermissionFromUser = function(userId, userName, roleName, roleType, url) {
 
             var action = function() {
@@ -23,7 +34,7 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                 Rest.post({ "disassociate": true, "id": Number(userId) })
                     .then(() => {
                         Wait('stop');
-                        $state.go('.', null, {reload: true});
+                        reloadAfterDelete();
                     })
                     .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
@@ -56,7 +67,7 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                 Rest.post({ "disassociate": true, "id": teamId })
                     .then(() => {
                         Wait('stop');
-                        $state.go('.', null, {reload: true});
+                        reloadAfterDelete();
                     })
                     .catch(({data, status}) => {
                         ProcessErrors($scope, data, status, null, {
