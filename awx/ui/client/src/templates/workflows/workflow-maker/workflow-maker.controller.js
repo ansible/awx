@@ -221,11 +221,15 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                  });
                              });
 
-                             let credentialsToRemove = params.node.promptData.prompts.credentials.previousOverrides.filter(function(priorCred) {
-                                 return !credentialsNotInPriorCredentials.some(function(credNotInPrior) {
-                                     return priorCred.id === credNotInPrior.id;
+                             let credentialsToRemove = [];
+
+                             if (_.has(params, 'node.promptData.prompts.credentials.previousOverrides')) {
+                                 credentialsToRemove = params.node.promptData.prompts.credentials.previousOverrides.filter(function(priorCred) {
+                                     return !credentialsNotInPriorCredentials.some(function(credNotInPrior) {
+                                         return priorCred.id === credNotInPrior.id;
+                                     });
                                  });
-                             });
+                             }
 
                              credentialsToAdd.forEach((credentialToAdd) => {
                                  credentialRequests.push({
