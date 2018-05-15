@@ -231,7 +231,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
             $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
         }
 
-        if ($state.current.name === 'templates.editJobTemplate.schedules.edit'){
+        if ($state.current.name === 'templates.editJobTemplate.schedules.edit' || $scope.parentObject.type === 'job_template'){
 
             let jobTemplate = new JobTemplate();
 
@@ -380,7 +380,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         }
                     }
                 });
-        } else if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.edit') {
+        } else if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.edit' || $scope.parentObject.type === 'workflow_job_template') {
             let workflowJobTemplate = new WorkflowJobTemplate();
 
             $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
@@ -455,7 +455,9 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
             if ($state.current.name === 'projects.edit.schedules.edit' ||
                 $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit' ||
-                $state.current.name === 'templates.editWorkflowJobTemplate.schedules.add'
+                $state.current.name === 'templates.editWorkflowJobTemplate.schedules.add' ||
+                $scope.parentObject.type === 'inventory_source' ||
+                $scope.parentObject.type === 'project'
             ){
                 $scope.noVars = true;
             } else {

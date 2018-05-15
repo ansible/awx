@@ -326,6 +326,18 @@ const jobsSchedulesRoute = {
     }
 };
 
+// the /#/jobs/schedules/:schedule_id state needs to know about the type of
+// resource is being scheduled.
+const parentResolve = {
+    ParentObject: ['$stateParams', 'Rest', 'GetBasePath', 'scheduleResolve',
+        function($stateParams, Rest, GetBasePath, scheduleResolve){
+            let path = scheduleResolve.related.unified_job_template;
+            Rest.setUrl(path);
+            return Rest.get(path).then(response => response.data);
+        }
+    ]
+};
+
 const jobsSchedulesEditRoute = {
     name: 'jobs.schedules.edit',
     route: '/:schedule_id',
@@ -339,7 +351,7 @@ const jobsSchedulesEditRoute = {
             templateUrl: templateUrl("scheduler/schedulerForm"),
         }
     },
-    resolve: editScheduleResolve()
+    resolve: _.merge(editScheduleResolve(), parentResolve)
 };
 
 export {
