@@ -98,9 +98,9 @@ function ListTemplatesController(
         }
 
         if (isJobTemplate(template)) {
-            $state.go('jobTemplateSchedules', { id: template.id });
+            $state.go('templates.editJobTemplate.schedules', { job_template_id: template.id });
         } else if (isWorkflowTemplate(template)) {
-            $state.go('workflowJobTemplateSchedules', { id: template.id });
+            $state.go('templates.editWorkflowJobTemplate.schedules', { workflow_job_template_id: template.id });
         } else {
             Alert(strings.get('error.UNKNOWN'), strings.get('alert.UNKNOWN_SCHEDULE'));
         }

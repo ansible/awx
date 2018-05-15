@@ -438,6 +438,11 @@ function(NotificationsList, i18n) {
                     title: i18n._('Completed Jobs'),
                     skipGenerator: true,
                     ngClick: "$state.go('templates.editJobTemplate.completed_jobs')"
+                },
+                "schedules": {
+                    title: i18n._('Schedules'),
+                    skipGenerator: true,
+                    ngClick: "$state.go('templates.editJobTemplate.schedules')"
                 }
             },
 

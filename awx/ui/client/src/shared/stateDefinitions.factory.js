@@ -86,7 +86,11 @@ function($injector, $stateExtender, $log, i18n) {
                         });
                         html = generateList.wrapPanel(html);
                         // generateList.formView() inserts a ui-view="form" inside the list view's hierarchy
-                        return generateList.insertFormView() + html;
+                        html = generateList.insertFormView() + html;
+                        if(params.generateSchedulerView){
+                            html = generateList.insertSchedulerView() + html;
+                        }
+                        return html;
                     };
                 }
             }

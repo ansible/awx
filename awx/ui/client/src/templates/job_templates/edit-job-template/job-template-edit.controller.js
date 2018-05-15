@@ -278,6 +278,7 @@ export default
             $scope.removeLoadJobs = $scope.$on('LoadJobs', function() {
                 $scope.job_template_obj = jobTemplateData;
                 $scope.name = jobTemplateData.name;
+                $scope.breadcrumb.job_template_name = jobTemplateData.name;
                 var fld, i;
                 for (fld in form.fields) {
                     if (fld !== 'extra_vars' && fld !== 'survey' && fld !== 'forks' && jobTemplateData[fld] !== null && jobTemplateData[fld] !== undefined) {

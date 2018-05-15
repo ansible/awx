@@ -132,7 +132,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
     // sets the UNTIL portion of the schedule form after the angular-scheduler
     // sets it, but this function reads the 'until' key/value pair directly
-    // from the schedule GET response. 
+    // from the schedule GET response.
     function setUntil (scheduler) {
         let { until } = scheduleResolve;
         if(until !== ''){
@@ -223,13 +223,16 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         $scope.showRRuleDetail = false;
         scheduler.setRRule(schedule.rrule);
         scheduler.setName(schedule.name);
+        $rootScope.breadcrumb.schedule_name = $scope.schedulerName;
+        $rootScope.breadcrumb[`${$scope.parentObject.type}_name`] = $scope.parentObject.name;
+        $scope.noVars = true;
         scheduler.scope.timeZones = timezonesResolve;
         scheduler.scope.schedulerTimeZone = scheduleResolve.timezone;
         if ($scope.cleanupJob){
             $scope.schedulerPurgeDays = Number(schedule.extra_data.days);
         }
 
-        if ($state.current.name === 'jobTemplateSchedules.edit'){
+        if ($state.current.name === 'templates.editJobTemplate.schedules.edit' || $scope.parentObject.type === 'job_template'){
 
             let jobTemplate = new JobTemplate();
 
@@ -295,7 +298,19 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
                     prompts.credentials.value = defaultCredsWithoutOverrides.concat(scheduleCredentials);
 
-                    if (!launchConf.ask_variables_on_launch) {
+                    if (launchConf.ask_variables_on_launch) {
+                        // the extra vars codemirror is ONLY shown if the
+                        // schedule is for a JT and the JT has
+                        // ask_variables_on_launch = true.
+                        $scope.extraVars = ParentObject.extra_vars === '' ? '---' : ParentObject.extra_vars;
+                        $scope.noVars = false;
+                        ParseTypeChange({
+                            scope: $scope,
+                            variable: 'extraVars',
+                            parse_variable: 'parseType',
+                            field_id: 'SchedulerForm-extraVars'
+                        });
+                    } else {
                         $scope.noVars = true;
                     }
 
@@ -378,7 +393,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         }
                     }
                 });
-        } else if ($state.current.name === 'workflowJobTemplateSchedules.edit') {
+        } else if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.edit' || $scope.parentObject.type === 'workflow_job_template') {
             let workflowJobTemplate = new WorkflowJobTemplate();
 
             $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
@@ -447,26 +462,10 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         }
                     }
                 });
-        }
 
-        // extra_data field is not manifested in the UI when scheduling a Management Job
-        if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
-            if ($state.current.name === 'projectSchedules.edit' ||
-                $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit' ||
-                $state.current.name === 'workflowJobTemplateSchedules.add'
-            ){
-                $scope.noVars = true;
-            } else {
-                ParseTypeChange({
-                    scope: $scope,
-                    variable: 'extraVars',
-                    parse_variable: 'parseType',
-                    field_id: 'SchedulerForm-extraVars',
-                    readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
-                });
-            }
         }
     }
+
     init();
 
     callSelect2();

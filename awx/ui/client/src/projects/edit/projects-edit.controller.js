@@ -156,6 +156,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
 
                     $scope.project_obj = data;
                     $scope.name = data.name;
+                    $scope.breadcrumb.project_name = data.name;
                     $scope.$emit('projectLoaded');
                     Wait('stop');
                 })

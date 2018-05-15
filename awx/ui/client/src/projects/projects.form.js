@@ -285,6 +285,11 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
             templates: {
                 include: "TemplateList",
             },
+            schedules: {
+                title: i18n._('Schedules'),
+                skipGenerator: true,
+                ngClick: "$state.go('projects.edit.schedules')"
+            }
         }
 
     };

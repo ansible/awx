@@ -594,6 +594,10 @@ export default ['$compile', 'Attr', 'Icon',
 
             insertFormView: function(){
                 return `<div ui-view="form"></div>`;
+            },
+
+            insertSchedulerView: function(){
+                return `<div ui-view="scheduler"></div>`;
             }
         };
     }

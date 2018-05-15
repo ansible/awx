@@ -21,6 +21,14 @@ import TemplateList from './templates.list';
 import listRoute from '~features/templates/routes/templatesList.route.js';
 import templateCompletedJobsRoute from '~features/jobs/routes/templateCompletedJobs.route.js';
 import workflowJobTemplateCompletedJobsRoute from '~features/jobs/routes/workflowJobTemplateCompletedJobs.route.js';
+import {
+    jobTemplatesSchedulesListRoute,
+    jobTemplatesSchedulesAddRoute,
+    jobTemplatesSchedulesEditRoute,
+    workflowSchedulesRoute,
+    workflowSchedulesAddRoute,
+    workflowSchedulesEditRoute
+} from '../scheduler/schedules.route';
 
 export default
 angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, prompt.name, workflowAdd.name, workflowEdit.name,
@@ -155,6 +163,9 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                         activityStream: true,
                         activityStreamTarget: 'job_template',
                         activityStreamId: 'job_template_id'
+                    },
+                    breadcrumbs: {
+                        edit: '{{breadcrumb.job_template_name}}'
                     },
                     resolve: {
                         edit: {
@@ -337,6 +348,9 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                         activityStream: true,
                         activityStreamTarget: 'workflow_job_template',
                         activityStreamId: 'workflow_job_template_id'
+                    },
+                    breadcrumbs: {
+                        edit: '{{breadcrumb.workflow_job_template_name}}'
                     },
                     resolve: {
                         edit: {
@@ -748,7 +762,13 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                             stateExtender.buildDefinition(listRoute),
                             stateExtender.buildDefinition(templateCompletedJobsRoute),
                             stateExtender.buildDefinition(workflowJobTemplateCompletedJobsRoute),
-                            stateExtender.buildDefinition(workflowMaker)
+                            stateExtender.buildDefinition(workflowMaker),
+                            stateExtender.buildDefinition(jobTemplatesSchedulesListRoute),
+                            stateExtender.buildDefinition(jobTemplatesSchedulesAddRoute),
+                            stateExtender.buildDefinition(jobTemplatesSchedulesEditRoute),
+                            stateExtender.buildDefinition(workflowSchedulesRoute),
+                            stateExtender.buildDefinition(workflowSchedulesAddRoute),
+                            stateExtender.buildDefinition(workflowSchedulesEditRoute)
                         ])
                     };
                 });

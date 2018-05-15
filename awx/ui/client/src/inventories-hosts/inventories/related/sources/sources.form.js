@@ -411,8 +411,14 @@ return {
     },
 
     related: {
-        notifications: notifications_object
+        notifications: notifications_object,
+        schedules: {
+            title: i18n._('Schedules'),
+            skipGenerator: true,
+            ngClick: "$state.go('inventories.edit.inventory_sources.edit.schedules')"
+        }
     }
+
 };
 
 }];

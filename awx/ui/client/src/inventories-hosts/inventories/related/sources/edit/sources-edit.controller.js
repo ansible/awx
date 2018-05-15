@@ -33,6 +33,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             {verbosity: inventorySourceData.verbosity});
 
         $scope.inventory_source_obj = inventorySourceData;
+        $scope.breadcrumb.inventory_source_name = inventorySourceData.name;
         if (inventorySourceData.credential) {
             $scope.credential_name = inventorySourceData.summary_fields.credential.name;
         }
