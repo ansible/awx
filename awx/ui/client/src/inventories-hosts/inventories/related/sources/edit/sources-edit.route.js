@@ -1,5 +1,3 @@
-import { N_ } from '../../../../../i18n';
-
 export default {
     name: "inventories.edit.inventory_sources.edit",
     url: "/edit/:inventory_source_id",

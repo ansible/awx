@@ -3,7 +3,6 @@ function editScheduleResolve () {
         scheduleResolve: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors',
             (Rest, $stateParams, GetBasePath, ProcessErrors) => {
                 var path = `${GetBasePath('schedules')}${parseInt($stateParams.schedule_id)}/`;
-                // const path = GetBasePath('schedules') + parseInt($stateParams.schedule_id) + '/');
                 Rest.setUrl(path);
                 return Rest.get()
                     .then(function(data) {

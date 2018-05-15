@@ -285,7 +285,7 @@ const jobsSchedulesRoute = {
     },
     ncyBreadcrumb: {
         parent: 'jobs',
-        label: N_('SCHEDULED')
+        label: N_('SCHEDULES')
     },
     resolve: {
         ScheduleList: ['ScheduledJobsList', function(list){
@@ -326,6 +326,22 @@ const jobsSchedulesRoute = {
     }
 };
 
+const jobsSchedulesEditRoute = {
+    name: 'jobs.schedules.edit',
+    route: '/:schedule_id',
+    ncyBreadcrumb: {
+        parent: 'jobs.schedules',
+        label: "{{breadcrumb.schedule_name}}"
+    },
+    views: {
+        'scheduler@jobs': {
+            controller: 'schedulerEditController',
+            templateUrl: templateUrl("scheduler/schedulerForm"),
+        }
+    },
+    resolve: editScheduleResolve()
+};
+
 export {
     jobTemplatesSchedulesListRoute,
     jobTemplatesSchedulesAddRoute,
@@ -336,5 +352,6 @@ export {
     projectsSchedulesListRoute,
     projectsSchedulesAddRoute,
     projectsSchedulesEditRoute,
-    jobsSchedulesRoute
+    jobsSchedulesRoute,
+    jobsSchedulesEditRoute
 };

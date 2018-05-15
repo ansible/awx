@@ -144,7 +144,7 @@ export default [
 
         $scope.editSchedule = function(schedule) {
             if ($state.is('jobs.schedules')){
-                routeToScheduleForm(schedule, 'edit');
+                $state.go('jobs.schedules.edit', {schedule_id: schedule.id});
             }
             else {
                 if($state.current.name.endsWith('.add')) {
@@ -156,75 +156,6 @@ export default [
                 else {
                     $state.go('.edit', { schedule_id: schedule.id });
                 }
-            }
-
-            function buildStateMap(schedule){
-
-                let deferred = $q.defer();
-
-                switch(schedule.summary_fields.unified_job_template.unified_job_type){
-                case 'job':
-                    deferred.resolve({
-                        name: 'templates.editJobTemplate.schedules.edit',
-                        params: {
-                            job_template_id: schedule.unified_job_template,
-                            schedule_id: schedule.id
-                        }
-                    });
-                    break;
-
-                    case 'workflow_job':
-                        deferred.resolve({
-                            name: 'templates.editWorkflowJobTemplate.schedules.edit',
-                            params: {
-                                workflow_job_template_id: schedule.unified_job_template,
-                                schedule_id: schedule.id
-                            }
-                        });
-                        break;
-
-                    case 'inventory_update':
-                        Rest.setUrl(schedule.related.unified_job_template);
-                        Rest.get().then( (res) => {
-                            deferred.resolve({
-                                name: 'inventories.edit.inventory_sources.edit.schedules.edit',
-                                params: {
-                                    inventory_source_id: res.data.id,
-                                    inventory_id: res.data.inventory,
-                                    schedule_id: schedule.id,
-                                }
-                            });
-                        });
-                        break;
-
-                    case 'project_update':
-                        deferred.resolve({
-                            name: 'projects.edit.schedules.edit',
-                            params: {
-                                project_id: schedule.unified_job_template,
-                                schedule_id: schedule.id
-                            }
-                        });
-                        break;
-
-                    case 'system_job':
-                        deferred.resolve({
-                            name: 'managementJobsList.schedule.edit',
-                            params: {
-                                id: schedule.unified_job_template,
-                                schedule_id: schedule.id
-                            }
-                        });
-                        break;
-                }
-
-                return deferred.promise;
-            }
-
-            function routeToScheduleForm(schedule){
-                buildStateMap(schedule).then((state) =>{
-                    $state.go(state.name, state.params);
-                });
             }
         };
 
