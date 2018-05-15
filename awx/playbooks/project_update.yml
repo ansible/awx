@@ -139,8 +139,17 @@
         register: doesRequirementsExist
 
       - name: fetch galaxy roles from requirements.yml
-        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ {{ scm_result is defined|ternary('--force',omit) }}
+        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/
         args:
           chdir: "{{project_path|quote}}/roles"
-        when: doesRequirementsExist.stat.exists
+        register: galaxy_result
+        when: doesRequirementsExist.stat.exists and scm_result is undefined
+        changed_when: "'was installed successfully' in galaxy_result.stdout"
+
+      - name: fetch galaxy roles from requirements.yml (forced update)
+        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ --force
+        args:
+          chdir: "{{project_path|quote}}/roles"
+        when: doesRequirementsExist.stat.exists and scm_result is defined
+
       when: scm_full_checkout|bool
