@@ -2350,7 +2350,7 @@ def deep_copy_model_obj(
     except ObjectDoesNotExist:
         logger.warning("Object or user no longer exists.")
         return
-    with transaction.atomic():
+    with transaction.atomic(), ignore_inventory_computed_fields():
         copy_mapping = {}
         for sub_obj_setup in sub_obj_list:
             sub_model = getattr(importlib.import_module(sub_obj_setup[0]),
@@ -2370,3 +2370,5 @@ def deep_copy_model_obj(
                 importlib.import_module(permission_check_func[0]), permission_check_func[1]
             ), permission_check_func[2])
             permission_check_func(creater, copy_mapping.values())
+    if isinstance(new_obj, Inventory):
+        update_inventory_computed_fields.delay(new_obj.id, True)
