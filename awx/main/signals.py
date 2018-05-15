@@ -494,6 +494,8 @@ def activity_stream_delete(sender, instance, **kwargs):
         return
     changes = model_to_dict(instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
+    if type(instance) == OAuth2AccessToken:
+        changes['token'] = TOKEN_CENSOR
     activity_entry = ActivityStream(
         operation='delete',
         changes=json.dumps(changes),
