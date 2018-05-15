@@ -71,7 +71,6 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                 labels: {
                     label: i18n._('Labels'),
                     type: 'select',
-                    class: 'Form-formGroup--fullWidth',
                     ngOptions: 'label.label for label in labelOptions track by label.value',
                     multiSelect: true,
                     dataTitle: i18n._('Labels'),
