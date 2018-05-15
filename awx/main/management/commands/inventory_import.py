@@ -135,8 +135,7 @@ class AnsibleInventoryLoader(object):
             self.tmp_private_dir = build_proot_temp_dir()
             logger.debug("Using fresh temporary directory '{}' for isolation.".format(self.tmp_private_dir))
             kwargs['proot_temp_dir'] = self.tmp_private_dir
-            # Run from source's location so that custom script contents are in `show_paths`
-            cwd = functioning_dir(self.source)
+            kwargs['proot_show_paths'] = [functioning_dir(self.source)]
         logger.debug("Running from `{}` working directory.".format(cwd))
 
         return wrap_args_with_proot(cmd, cwd, **kwargs)

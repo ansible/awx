@@ -1720,6 +1720,10 @@ class RunInventoryUpdate(BaseTask):
     event_model = InventoryUpdateEvent
     event_data_key = 'inventory_update_id'
 
+    @property
+    def proot_show_paths(self):
+        return [self.get_path_to('..', 'plugins', 'inventory')]
+
     def build_private_data(self, inventory_update, **kwargs):
         """
         Return private data needed for inventory update.
@@ -2075,6 +2079,8 @@ class RunInventoryUpdate(BaseTask):
         return args
 
     def build_cwd(self, inventory_update, **kwargs):
+        if inventory_update.source == 'scm' and inventory_update.source_project_update:
+            return inventory_update.source_project_update.get_project_path(check_if_exists=False)
         return self.get_path_to('..', 'plugins', 'inventory')
 
     def get_idle_timeout(self):
