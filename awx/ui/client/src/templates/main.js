@@ -164,6 +164,9 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                         activityStreamTarget: 'job_template',
                         activityStreamId: 'job_template_id'
                     },
+                    breadcrumbs: {
+                        edit: '{{breadcrumb.job_template_name}}'
+                    },
                     resolve: {
                         edit: {
                             jobTemplateData: ['$stateParams', 'TemplatesService', 'ProcessErrors',
@@ -345,6 +348,9 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                         activityStream: true,
                         activityStreamTarget: 'workflow_job_template',
                         activityStreamId: 'workflow_job_template_id'
+                    },
+                    breadcrumbs: {
+                        edit: '{{breadcrumb.workflow_job_template_name}}'
                     },
                     resolve: {
                         edit: {

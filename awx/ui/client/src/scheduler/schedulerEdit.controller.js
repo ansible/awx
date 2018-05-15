@@ -223,6 +223,8 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         $scope.showRRuleDetail = false;
         scheduler.setRRule(schedule.rrule);
         scheduler.setName(schedule.name);
+        $rootScope.breadcrumb.schedule_name = $scope.schedulerName;
+        $rootScope.breadcrumb[`${$scope.parentObject.type}_name`] = $scope.parentObject.name;
         scheduler.scope.timeZones = timezonesResolve;
         scheduler.scope.schedulerTimeZone = scheduleResolve.timezone;
         if ($scope.cleanupJob){

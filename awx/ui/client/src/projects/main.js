@@ -91,6 +91,9 @@ angular.module('Projects', [])
                     ncyBreadcrumb: {
                         label: N_('PROJECTS')
                     },
+                    breadcrumbs: {
+                        edit: '{{breadcrumb.project_name}}'
+                    },
                     resolve: {
                         add: projectResolve,
                         edit: projectResolve

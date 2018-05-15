@@ -5,8 +5,8 @@ export default {
     name: 'inventories.edit.inventory_sources.edit.schedules.edit',
     url: '/:schedule_id',
     ncyBreadcrumb: {
-        parent: "inventories.edit.inventory_sources.edit.schedules",
-        label: "{{schedule_obj.name}}"
+        parent: 'inventories.edit.inventory_sources.edit.schedules',
+        label: "{{breadcrumb.schedule_name}}"
     },
     views: {
         'scheduler@inventories': {

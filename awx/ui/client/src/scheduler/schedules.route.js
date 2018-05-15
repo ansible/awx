@@ -12,7 +12,6 @@ const jobTemplatesSchedulesListRoute = {
         activityStreamId: 'id'
     },
     ncyBreadcrumb: {
-        parent: 'templates.editJobTemplate({job_template_id: parentObject.id})',
         label: N_('SCHEDULES')
     },
     resolve: {
@@ -72,7 +71,6 @@ const jobTemplatesSchedulesAddRoute = {
         }
     },
     ncyBreadcrumb: {
-        parent: 'templates.editJobTemplate({job_template_id: parentObject.id})',
         label: N_('CREATE SCHEDULE')
     }
 };
@@ -87,8 +85,7 @@ const jobTemplatesSchedulesEditRoute = {
         }
     },
     ncyBreadcrumb: {
-        parent: 'templates.editJobTemplate({job_template_id: parentObject.id})',
-        label: '{{schedule_obj.name}}'
+        label: "{{breadcrumb.schedule_name}}"
     },
     resolve: editScheduleResolve()
 };
@@ -104,7 +101,6 @@ const workflowSchedulesRoute = {
         activityStreamId: 'id'
     },
     ncyBreadcrumb: {
-        parent: 'templates.editWorkflowJobTemplate({workflow_job_template_id: parentObject.id})',
         label: N_('SCHEDULES')
     },
     resolve: {
@@ -164,7 +160,6 @@ const workflowSchedulesAddRoute = {
         }
     },
     ncyBreadcrumb: {
-        parent: 'templates.editWorkflowJobTemplate({workflow_job_template_id: parentObject.id})',
         label: N_('CREATE SCHEDULE')
     }
 };
@@ -179,8 +174,7 @@ const workflowSchedulesEditRoute = {
         }
     },
     ncyBreadcrumb: {
-        parent: 'templates.editWorkflowJobTemplate({workflow_job_template_id: parentObject.id})',
-        label: '{{schedule_obj.name}}'
+        label: '{{breadcrumb.schedule_name}}'
     },
     resolve: editScheduleResolve()
 };
@@ -195,7 +189,6 @@ const projectsSchedulesListRoute = {
         activityStreamId: 'id'
     },
     ncyBreadcrumb: {
-        parent: 'projects.edit({project_id: parentObject.id})',
         label: N_('SCHEDULES')
     },
     resolve: {
@@ -263,7 +256,7 @@ const projectsSchedulesEditRoute = {
     name: 'projects.edit.schedules.edit',
     route: '/:schedule_id',
     ncyBreadcrumb: {
-        label: '{{schedule_obj.name}}'
+        label: "{{breadcrumb.schedule_name}}"
     },
     views: {
         'scheduler@projects': {

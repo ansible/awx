@@ -5,7 +5,7 @@ export default {
     url: "/edit/:inventory_source_id",
     ncyBreadcrumb: {
         parent: "inventories.edit.inventory_sources",
-        label: N_("INVENTORY SOURCES")
+        label: '{{breadcrumb.inventory_source_name}}'
     },
     views: {
         'groupForm@inventories': {
