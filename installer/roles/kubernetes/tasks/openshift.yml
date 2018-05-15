@@ -23,7 +23,22 @@
     - openshift_user is defined
     - openshift_password is defined
     - openshift_token is not defined
+  register: openshift_auth_result
+  ignore_errors: true
   no_log: true
+
+- name: OpenShift authentication failed on TLS verification
+  fail:
+    msg: "Failed to verify TLS, consider settings openshift_skip_tls_verify=True {{ openshift_auth_result.stderr }}"
+  when:
+    - openshift_skip_tls_verify is not defined or not openshift_skip_tls_verify
+    - openshift_auth_result.rc != 0
+    - openshift_auth_result.stderr | search("certificate that does not match its hostname")
+
+- name: OpenShift authentication failed
+  fail:
+    msg: "{{ openshift_auth_result.stderr }}"
+  when: openshift_auth_result.rc != 0
 
 - name: Authenticate with OpenShift via token
   shell: |
