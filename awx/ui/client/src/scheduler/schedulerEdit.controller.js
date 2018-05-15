@@ -225,6 +225,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
         scheduler.setName(schedule.name);
         $rootScope.breadcrumb.schedule_name = $scope.schedulerName;
         $rootScope.breadcrumb[`${$scope.parentObject.type}_name`] = $scope.parentObject.name;
+        $scope.noVars = true;
         scheduler.scope.timeZones = timezonesResolve;
         scheduler.scope.schedulerTimeZone = scheduleResolve.timezone;
         if ($scope.cleanupJob){
@@ -297,7 +298,19 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
                     prompts.credentials.value = defaultCredsWithoutOverrides.concat(scheduleCredentials);
 
-                    if (!launchConf.ask_variables_on_launch) {
+                    if (launchConf.ask_variables_on_launch) {
+                        // the extra vars codemirror is ONLY shown if the
+                        // schedule is for a JT and the JT has
+                        // ask_variables_on_launch = true.
+                        $scope.extraVars = ParentObject.extra_vars === '' ? '---' : ParentObject.extra_vars;
+                        $scope.noVars = false;
+                        ParseTypeChange({
+                            scope: $scope,
+                            variable: 'extraVars',
+                            parse_variable: 'parseType',
+                            field_id: 'SchedulerForm-extraVars'
+                        });
+                    } else {
                         $scope.noVars = true;
                     }
 
@@ -449,28 +462,10 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         }
                     }
                 });
-        }
 
-        // extra_data field is not manifested in the UI when scheduling a Management Job
-        if ($state.current.name !== 'managementJobsList.schedule.add' && $state.current.name !== 'managementJobsList.schedule.edit'){
-            if ($state.current.name === 'projects.edit.schedules.edit' ||
-                $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.edit' ||
-                $state.current.name === 'templates.editWorkflowJobTemplate.schedules.add' ||
-                $scope.parentObject.type === 'inventory_source' ||
-                $scope.parentObject.type === 'project'
-            ){
-                $scope.noVars = true;
-            } else {
-                ParseTypeChange({
-                    scope: $scope,
-                    variable: 'extraVars',
-                    parse_variable: 'parseType',
-                    field_id: 'SchedulerForm-extraVars',
-                    readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
-                });
-            }
         }
     }
+
     init();
 
     callSelect2();

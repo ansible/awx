@@ -2,13 +2,13 @@
 <div class="tab-pane" id="jobs-page">
     <at-panel ng-cloak id="htmlTemplate">
         <div>
-            <div ng-hide="$state.is('jobs.schedules') || $state.is('jobs.schedules.edit')">
+            <div ng-hide="$state.includes('jobs.schedules')">
                 <at-panel-heading hide-dismiss="true">
                     <translate>JOBS</translate>
                 </at-panel-heading>
                 <div ui-view="jobsList"></div>
             </div>
-            <div ng-hide="!$state.is('jobs.schedules') && !$state.is('jobs.schedules.edit')">
+            <div ng-hide="!$state.includes('jobs.schedules')">
                 <at-panel-heading hide-dismiss="true">
                     <translate>SCHEDULES</translate>
                 </at-panel-heading>
