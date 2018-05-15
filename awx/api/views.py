@@ -4764,7 +4764,6 @@ class UnifiedJobStdout(RetrieveAPIView):
         try:
             target_format = request.accepted_renderer.format
             if target_format in ('html', 'api', 'json'):
-                content_format = request.query_params.get('content_format', 'html')
                 content_encoding = request.query_params.get('content_encoding', None)
                 start_line = request.query_params.get('start_line', 0)
                 end_line = request.query_params.get('end_line', None)
@@ -4790,10 +4789,10 @@ class UnifiedJobStdout(RetrieveAPIView):
                 if target_format == 'api':
                     return Response(mark_safe(data))
                 if target_format == 'json':
-                    if content_encoding == 'base64' and content_format == 'ansi':
-                        return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': b64encode(content.encode('utf-8'))})
-                    elif content_format == 'html':
-                        return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
+                    content = content.encode('utf-8')
+                    if content_encoding == 'base64':
+                        content = b64encode(content)
+                    return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': content})
                 return Response(data)
             elif target_format == 'txt':
                 return Response(unified_job.result_stdout)
