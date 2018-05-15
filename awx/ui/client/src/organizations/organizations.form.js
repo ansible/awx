@@ -45,7 +45,7 @@ export default ['NotificationsList', 'i18n',
                 },
                 custom_virtualenv: {
                     label: i18n._('Ansible Environment'),
-                    defaultText: i18n._('Select Ansible Environment'),
+                    defaultText: i18n._('Default Environment'),
                     type: 'select',
                     ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
                     awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this organization to run on.") + "</p>",
