@@ -537,19 +537,12 @@ ASGI_AMQP = {
 }
 
 # Django Caching Configuration
-if is_testing():
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        },
-    }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': 'memcached:11211',
-        },
-    }
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': 'memcached:11211',
+    },
+}
 
 # Social Auth configuration.
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'

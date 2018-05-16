@@ -127,12 +127,16 @@ class IllegalArgumentError(ValueError):
     pass
 
 
+def get_memoize_cache():
+    from django.core.cache import cache
+    return cache
+
+
 def memoize(ttl=60, cache_key=None, track_function=False):
     '''
     Decorator to wrap a function and cache its result.
     '''
-    from django.core.cache import cache
-
+    cache = get_memoize_cache()
 
     def _memoizer(f, *args, **kwargs):
         if cache_key and track_function:
@@ -160,8 +164,7 @@ def memoize(ttl=60, cache_key=None, track_function=False):
 
 
 def memoize_delete(function_name):
-    from django.core.cache import cache
-
+    cache = get_memoize_cache()
     return cache.delete(function_name)
 
 
