@@ -145,26 +145,14 @@
                     </div>
 
                     <!-- EXTRA VARIABLES DETAIL -->
-                    <div class="WorkflowResults-resultRow
-                        WorkflowResults-resultRow--variables"
-                        ng-show="variables">
-                        <label class="WorkflowResults-resultRowLabel
-                            WorkflowResults-resultRowLabel--fullWidth">
-                            Extra Variables
-                            <i class="WorkflowResults-extraVarsHelp fa fa-question-circle"
-                                aw-tool-tip="{{'Read only view of extra variables added to the workflow.'|translate}}"
-                                data-placement="top">
-                            </i>
-                        </label>
-                        <textarea
-                            rows="6"
-                            ng-model="variables"
-                            name="variables"
-                            class="form-control Form-textArea Form-textAreaLabel Form-formGroup--fullWidth"
-                            id="pre-formatted-variables"
-                            disabled="disabled">
-                        </textarea>
-                    </div>
+                    <at-code-mirror
+                        ng-if="variables"
+                        variables="{{ variables }}"
+                        tooltip="{{ varsTooltip }}"
+                        label="{{ varsLabel }}"
+                        label-class="WorkflowResults-extraVarsLabel"
+                        disabled="disabled">
+                    </at-code-mirror>
 
                     <!-- LABELS DETAIL -->
                     <div class="WorkflowResults-resultRow"
