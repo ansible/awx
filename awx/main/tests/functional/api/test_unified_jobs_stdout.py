@@ -282,7 +282,7 @@ def test_unicode_with_base64_ansi(sqlite_copy_expert, get, admin):
     url = reverse(
         'api:job_stdout',
         kwargs={'pk': job.pk}
-    ) + '?format=json&content_encoding=base64&content_format=ansi'
+    ) + '?format=json&content_encoding=base64'
 
     response = get(url, user=admin, expect=200)
     content = base64.b64decode(json.loads(response.content)['content'])
