@@ -84,9 +84,9 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             // set up a read only code mirror for extra vars
             $scope.variables = ParseVariableString($scope.workflow.extra_vars);
             $scope.parseType = 'yaml';
-            ParseTypeChange({ scope: $scope,
-                field_id: 'pre-formatted-variables',
-                readOnly: true });
+            $scope.varsTooltip= i18n._('Read only view of extra variables added to the workflow.');
+            $scope.varsLabel = i18n._('Extra Variables');
+
 
             // Click binding for the expand/collapse button on the standard out log
             $scope.stdoutFullScreen = false;
