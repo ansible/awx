@@ -13,6 +13,7 @@
 ###############################################################################
 import os
 import urllib
+import sys
 
 
 def patch_broken_pipe_error():
@@ -66,7 +67,7 @@ DATABASES = {
 # Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
 # commented out, Django will create the test_awx-dev database in PostgreSQL to
 # run unit tests.
-if is_testing(sys.argv):
+if "pytest" in sys.modules:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

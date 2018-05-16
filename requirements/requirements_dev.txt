@@ -6,12 +6,13 @@ unittest2
 pep8
 flake8
 pyflakes
-pytest==2.9.2
+pytest==3.5.1
 pytest-cov
 pytest-django
 pytest-pythonpath
 pytest-mock
 pytest-timeout
+pytest-xdist
 logutils
 flower
 uwsgitop

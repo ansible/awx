@@ -4,7 +4,6 @@
 import os
 import re  # noqa
 import sys
-import ldap
 import djcelery
 import six
 from datetime import timedelta
@@ -38,6 +37,13 @@ def is_testing(argv=None):
 def IS_TESTING(argv=None):
     return is_testing(argv)
 
+
+if "pytest" in sys.modules:
+    import mock
+    with mock.patch('__main__.__builtins__.dir', return_value=[]):
+        import ldap
+else:
+    import ldap
 
 DEBUG = True
 SQL_DEBUG = DEBUG

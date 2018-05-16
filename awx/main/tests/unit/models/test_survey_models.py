@@ -1,8 +1,9 @@
 import tempfile
 import json
 import yaml
-
 import pytest
+from itertools import count
+
 from awx.main.utils.encryption import encrypt_value
 from awx.main.tasks import RunJob
 from awx.main.models import (
@@ -14,6 +15,15 @@ from awx.main.models import (
 from awx.main.utils.safe_yaml import SafeLoader
 
 ENCRYPTED_SECRET = encrypt_value('secret')
+
+
+class DistinctParametrize(object):
+
+    def __init__(self):
+        self._gen = count(0)
+
+    def __call__(self, value):
+        return str(next(self._gen))
 
 
 @pytest.mark.survey
@@ -243,7 +253,7 @@ def test_optional_survey_question_defaults(
     ('password', 'foo', 5, {'extra_vars': {'x': ''}}, {'x': ''}),
     ('password', ENCRYPTED_SECRET, 5, {'extra_vars': {'x': '$encrypted$'}}, {}),
     ('password', ENCRYPTED_SECRET, 10, {'extra_vars': {'x': '$encrypted$'}}, {'x': ENCRYPTED_SECRET}),
-])
+    ], ids=DistinctParametrize())
 def test_survey_encryption_defaults(survey_spec_factory, question_type, default, maxlen, kwargs, expected):
     spec = survey_spec_factory([
         {
