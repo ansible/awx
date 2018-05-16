@@ -153,12 +153,12 @@ class Schedule(CommonModel, LaunchTimeConfig):
         if 'until=' in rrule.lower():
             # if DTSTART;TZID= is used, coerce "naive" UNTIL values
             # to the proper UTC date
-            match_until = re.match(".*?UNTIL\=(?P<until>[0-9]+T[0-9]+)(?P<utcflag>Z?)", rrule)
+            match_until = re.match(".*?(?P<until>UNTIL\=[0-9]+T[0-9]+)(?P<utcflag>Z?)", rrule)
             if not len(match_until.group('utcflag')):
                 # rrule = DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
 
                 # Find the UNTIL=N part of the string
-                # naive_until = 20200601T170000
+                # naive_until = UNTIL=20200601T170000
                 naive_until = match_until.group('until')
 
                 # What is the DTSTART timezone for:
@@ -172,13 +172,13 @@ class Schedule(CommonModel, LaunchTimeConfig):
                 # Make a datetime object with tzinfo=<the DTSTART timezone>
                 # localized_until = datetime.datetime(2020, 6, 1, 17, 0, tzinfo=tzfile('/usr/share/zoneinfo/America/New_York'))
                 localized_until = make_aware(
-                    datetime.datetime.strptime(naive_until, "%Y%m%dT%H%M%S"),
+                    datetime.datetime.strptime(re.sub('^UNTIL=', '', naive_until), "%Y%m%dT%H%M%S"),
                     local_tz
                 )
 
                 # Coerce the datetime to UTC and format it as a string w/ Zulu format
-                # utc_until = 20200601T220000Z
-                utc_until = localized_until.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
+                # utc_until = UNTIL=20200601T220000Z
+                utc_until = 'UNTIL=' + localized_until.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
 
                 # rrule was:    DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
                 # rrule is now: DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T220000Z
