@@ -3,7 +3,7 @@
         <at-panel-heading>
             {{:: vm.strings.get('instance.PANEL_TITLE') }}
         </at-panel-heading>
-        <multi-select-preview selected-rows='vm.selectedRows' available-rows='vm.instances'></multi-select-preview>
+        <multi-select-preview selected-rows='vm.selectedRows' available-rows='instances'></multi-select-preview>
         <at-panel-body>
             <div class="at-List-toolbar">
                 <smart-search
@@ -11,15 +11,15 @@
                     django-model="instances"
                     base-path="instances"
                     iterator="instance"
-                    default-params="vm.defaultParams"
                     list="list"
-                    dataset="vm.instances"
+                    dataset="instance_dataset"
                     collection="collection"
-                    search-tags="searchTags">
+                    search-tags="searchTags"
+                    query-set="querySet">
                 </smart-search>
             </div>
-            <at-list results='vm.instances'>
-                <at-row ng-repeat="instance in vm.instances"
+            <at-list results='instances'>
+                <at-row ng-repeat="instance in instances"
                     ng-class="{'at-Row--active': (instance.id === vm.activeId)}">
 
                     <input type="checkbox"
