@@ -255,7 +255,10 @@ def send_notifications(notification_list, job_id=None):
             notification.error = smart_str(e)
             update_fields.append('error')
         finally:
-            notification.save(update_fields=update_fields)
+            try:
+                notification.save(update_fields=update_fields)
+            except Exception as e:
+                logger.exception(six.text_type('Error saving notification {} result.').format(notification.id))
 
 
 @shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
