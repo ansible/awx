@@ -7,7 +7,6 @@ let resource;
 let scroll;
 let engine;
 let status;
-let $http;
 
 let vm;
 let streaming;
@@ -23,7 +22,6 @@ function JobsIndexController (
     _$compile_,
     _$q_,
     _status_,
-    _$http_,
 ) {
     vm = this || {};
 
@@ -37,7 +35,6 @@ function JobsIndexController (
     render = _render_;
     engine = _engine_;
     status = _status_;
-    $http = _$http_;
 
     // Development helper(s)
     vm.clear = devClear;
@@ -128,37 +125,20 @@ function handleJobEvent (data) {
 }
 
 function attachToRunningJob () {
-    const target = `${resource.model.get('url')}${resource.related}/`;
-    const params = { order_by: '-created', page_size: resource.page.size };
+    if (!status.state.running) {
+        return $q.resolve();
+    }
 
-    scroll.pause();
-
-    return render.clear()
-        .then(() => $http.get(target, { params }))
-        .then(res => {
-            const { results } = res.data;
-
-            const minLine = 1 + Math.max(...results.map(event => event.end_line));
-            const maxCount = Math.max(...results.map(event => event.counter));
-
-            const lastPage = resource.model.updateCount(maxCount);
-
-            page.emptyCache(lastPage);
-            page.addPage(lastPage, [], true);
-
-            engine.setMinLine(minLine);
-
-            if (resource.model.page.current === lastPage) {
+    return page.last()
+        .then(events => {
+            if (!events) {
                 return $q.resolve();
             }
 
-            return append(results);
-        })
-        .then(() => {
-            scroll.setScrollPosition(scroll.getScrollHeight());
-            scroll.resume();
+            const minLine = 1 + Math.max(...events.map(event => event.end_line));
 
-            return $q.resolve();
+            return render.clear()
+                .then(() => engine.setMinLine(minLine));
         });
 }
 
@@ -293,11 +273,11 @@ function scrollEnd () {
             }
 
             return render.clear()
-                .then(() => append(events))
-                .then(() => {
-                    scroll.setScrollPosition(scroll.getScrollHeight());
-                    scroll.resume();
-                });
+                .then(() => append(events));
+        })
+        .then(() => {
+            scroll.setScrollPosition(scroll.getScrollHeight());
+            scroll.resume();
         });
 }
 
@@ -379,7 +359,6 @@ JobsIndexController.$inject = [
     '$compile',
     '$q',
     'JobStatusService',
-    '$http',
 ];
 
 module.exports = JobsIndexController;

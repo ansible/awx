@@ -1,6 +1,7 @@
 function JobPageService ($q) {
     this.init = ({ resource }) => {
         this.resource = resource;
+        this.api = this.resource.events;
 
         this.page = {
             limit: this.resource.page.pageLimit,
@@ -125,8 +126,9 @@ function JobPageService ($q) {
         number = number || reference.state.current;
 
         reference.state.first = number;
-        reference.state.last = number;
         reference.state.current = number;
+        reference.state.last = number;
+
         reference.cache.splice(0, reference.cache.length);
     };
 
@@ -203,9 +205,9 @@ function JobPageService ($q) {
 
     this.next = () => {
         const reference = this.getActiveReference();
-        const config = this.buildRequestConfig(reference.state.last + 1);
+        const number = reference.state.last + 1;
 
-        return this.resource.model.goToPage(config)
+        return this.api.getPage(number)
             .then(data => {
                 if (!data || !data.results) {
                     return $q.resolve();
@@ -219,9 +221,8 @@ function JobPageService ($q) {
 
     this.previous = () => {
         const reference = this.getActiveReference();
-        const config = this.buildRequestConfig(reference.state.first - 1);
 
-        return this.resource.model.goToPage(config)
+        return this.api.getPage(reference.state.first - 1)
             .then(data => {
                 if (!data || !data.results) {
                     return $q.resolve();
@@ -233,45 +234,29 @@ function JobPageService ($q) {
             });
     };
 
-    this.last = () => {
-        const config = this.buildRequestConfig('last');
+    this.last = () => this.api.last()
+        .then(data => {
+            if (!data || !data.results || !data.results.length > 0) {
+                return $q.resolve();
+            }
 
-        return this.resource.model.goToPage(config)
-            .then(data => {
-                if (!data || !data.results) {
-                    return $q.resolve();
-                }
+            this.emptyCache(data.page);
+            this.addPage(data.page, [], true);
 
-                this.emptyCache(data.page);
-                this.addPage(data.page, [], true);
+            return data.results;
+        });
 
-                return data.results;
-            });
-    };
+    this.first = () => this.api.first()
+        .then(data => {
+            if (!data || !data.results) {
+                return $q.resolve();
+            }
 
-    this.first = () => {
-        const config = this.buildRequestConfig('first');
+            this.emptyCache(data.page);
+            this.addPage(data.page, [], false);
 
-        return this.resource.model.goToPage(config)
-            .then(data => {
-                if (!data || !data.results) {
-                    return $q.resolve();
-                }
-
-                this.emptyCache(data.page);
-                this.addPage(data.page, [], false);
-
-                return data.results;
-            });
-    };
-
-    this.buildRequestConfig = number => ({
-        page: number,
-        related: this.resource.related,
-        params: {
-            order_by: 'start_line'
-        }
-    });
+            return data.results;
+        });
 
     this.getActiveReference = () => (this.isBookmarkSet() ?
         this.getReference(true) : this.getReference());

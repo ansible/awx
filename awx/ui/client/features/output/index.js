@@ -9,6 +9,7 @@ import ScrollService from '~features/output/scroll.service';
 import EngineService from '~features/output/engine.service';
 import StatusService from '~features/output/status.service';
 import MessageService from '~features/output/message.service';
+import EventsApiService from '~features/output/api.events.service';
 import LegacyRedirect from '~features/output/legacy.route';
 
 import DetailsComponent from '~features/output/details.component';
@@ -35,7 +36,8 @@ function resolveResource (
     InventoryUpdate,
     $stateParams,
     qs,
-    Wait
+    Wait,
+    eventsApi,
 ) {
     const { id, type, handleErrors } = $stateParams;
     const { job_event_search } = $stateParams; // eslint-disable-line camelcase
@@ -86,23 +88,29 @@ function resolveResource (
         Object.assign(config.params, query);
     }
 
+    let model;
+
     Wait('start');
     const resourcePromise = new Resource(['get', 'options'], [id, id])
-        .then(model => {
-            const promises = [model.getStats()];
+        .then(job => {
+            const endpoint = `${job.get('url')}${related}/`;
+            eventsApi.init(endpoint, config.params);
 
-            if (model.has('related.labels')) {
-                promises.push(model.extend('get', 'labels'));
+            const promises = [job.getStats(), eventsApi.fetch()];
+
+            if (job.has('related.labels')) {
+                promises.push(job.extend('get', 'labels'));
             }
 
-            promises.push(model.extend('get', related, config));
+            model = job;
             return Promise.all(promises);
         })
-        .then(([stats, model]) => ({
+        .then(([stats, events]) => ({
             id,
             type,
             stats,
             model,
+            events,
             related,
             ws: {
                 events: `${WS_PREFIX}-${key}-${id}`,
@@ -217,6 +225,7 @@ function JobsRun ($stateRegistry, strings) {
                 '$stateParams',
                 'QuerySet',
                 'Wait',
+                'JobEventsApiService',
                 resolveResource
             ],
             breadcrumbLabel: [
@@ -246,6 +255,7 @@ angular
     .service('JobEventEngine', EngineService)
     .service('JobStatusService', StatusService)
     .service('JobMessageService', MessageService)
+    .service('JobEventsApiService', EventsApiService)
     .component('atJobSearch', SearchComponent)
     .component('atJobStats', StatsComponent)
     .component('atJobDetails', DetailsComponent)
