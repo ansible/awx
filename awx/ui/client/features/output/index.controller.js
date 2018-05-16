@@ -87,7 +87,6 @@ function init () {
             return shift().then(() => append(events, true));
         },
         onStart () {
-            status.resetCounts();
             status.setJobStatus('running');
         },
         onStop () {

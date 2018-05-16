@@ -26,9 +26,9 @@ function JobStatusService (moment, message) {
             running: false,
             stats: false,
             counts: {
-                plays: null,
-                tasks: null,
-                hosts: null,
+                plays: 0,
+                tasks: 0,
+                hosts: 0,
             },
             hosts: {},
             status: model.get('status'),
