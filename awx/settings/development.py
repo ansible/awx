@@ -10,6 +10,7 @@ import copy
 import sys
 import traceback
 import random
+import uuid
 
 # Centos-7 doesn't include the svg mime type
 # /usr/lib64/python/mimetypes.py
@@ -26,7 +27,7 @@ if "pytest" in sys.modules:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-{}'.format(random.randint(0, sys.maxint)),
+            'LOCATION': 'unique-{}'.format(str(uuid.uuid4())),
         },
     }
 
