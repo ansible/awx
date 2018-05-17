@@ -253,7 +253,7 @@ def test_optional_survey_question_defaults(
     ('password', 'foo', 5, {'extra_vars': {'x': ''}}, {'x': ''}),
     ('password', ENCRYPTED_SECRET, 5, {'extra_vars': {'x': '$encrypted$'}}, {}),
     ('password', ENCRYPTED_SECRET, 10, {'extra_vars': {'x': '$encrypted$'}}, {'x': ENCRYPTED_SECRET}),
-    ], ids=DistinctParametrize())
+], ids=DistinctParametrize())
 def test_survey_encryption_defaults(survey_spec_factory, question_type, default, maxlen, kwargs, expected):
     spec = survey_spec_factory([
         {
