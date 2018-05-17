@@ -4,24 +4,29 @@ function InstanceListPolicyLink (scope, el, attrs, controllers) {
     const instancePolicyController = controllers[0];
     const formController = controllers[1];
     const models = scope.$resolve.resolvedModels;
+    const Dataset = scope.$resolve.Dataset;
 
-    instancePolicyController.init(formController, models);
+    instancePolicyController.init(formController, models, Dataset);
 }
-
 
 function InstanceListPolicyController ($scope, $state, strings) {
     const vm = this || {};
     let form;
-    let instance;
     let instanceGroup;
+    vm.strings = strings;
 
-    vm.init = (_form_, _models_) => {
+    vm.init = (_form_, _models_, Dataset) => {
         form = _form_;
-        ({ instance, instanceGroup} = _models_);
+        ({ instanceGroup } = _models_);
 
-        vm.strings = strings;
         vm.instanceGroupId = instanceGroup.get('id');
-        vm.defaultParams = { page_size: '10', order_by: 'hostname' };
+
+        $scope.list = {
+            name: 'instances',
+            iterator: 'instance'
+        };
+        $scope.instance_dataset = Dataset.data;
+        $scope.instances = Dataset.data.results;
 
         if (vm.instanceGroupId === undefined) {
             vm.setInstances();
@@ -31,25 +36,24 @@ function InstanceListPolicyController ($scope, $state, strings) {
     };
 
     vm.setInstances = () => {
-        vm.instances = instance.get('results').map(instance => {
+        $scope.instances = $scope.instances.map(instance => {
             instance.isSelected = false;
             return instance;
         });
     };
 
     vm.setRelatedInstances = () => {
-        vm.instanceGroupName = instanceGroup.get('name');
         vm.relatedInstances = instanceGroup.get('policy_instance_list');
 
-        vm.instances = instance.get('results').map(instance => {
+        $scope.instances = $scope.instances.map(instance => {
             instance.isSelected = vm.relatedInstances.includes(instance.hostname);
             return instance;
         });
     };
 
-    $scope.$watch('vm.instances', function() {
-        vm.selectedRows = _.filter(vm.instances, 'isSelected');
-        vm.deselectedRows = _.filter(vm.instances, 'isSelected', false);
+    $scope.$watch('instances', function() {
+        vm.selectedRows = _.filter($scope.instances, 'isSelected');
+        vm.deselectedRows = _.filter($scope.instances, 'isSelected', false);
      }, true);
 
     vm.submit = () => {
