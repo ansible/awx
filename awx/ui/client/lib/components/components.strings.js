@@ -72,7 +72,7 @@ function ComponentsStrings (BaseString) {
         NOTIFICATIONS: t.s('Notifications'),
         MANAGEMENT_JOBS: t.s('Management Jobs'),
         INSTANCES: t.s('Instances'),
-        INSTANCE_GROUPS: t.s('Instance Groups'),
+        INSTANCE_GROUPS: t.s('INSTANCE GROUPS'),
         APPLICATIONS: t.s('Applications'),
         SETTINGS: t.s('Settings'),
         FOOTER_ABOUT: t.s('About'),
