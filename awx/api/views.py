@@ -1598,6 +1598,18 @@ class OAuth2TokenList(ListCreateAPIView):
     model = OAuth2AccessToken
     serializer_class = OAuth2TokenSerializer
     swagger_topic = 'Authentication'
+
+
+class OAuth2UserTokenList(SubListCreateAPIView):
+
+    view_name = _("OAuth2 User Tokens")
+
+    model = OAuth2AccessToken
+    serializer_class = OAuth2TokenSerializer
+    parent_model = User
+    relationship = 'main_oauth2accesstoken'
+    parent_key = 'user'
+    swagger_topic = 'Authentication'
     
     
 class OAuth2AuthorizedTokenList(SubListCreateAPIView):
