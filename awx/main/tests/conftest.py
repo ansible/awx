@@ -106,3 +106,21 @@ def get_ssh_version(mocker):
 @pytest.fixture
 def job_template_with_survey_passwords_unit(job_template_with_survey_passwords_factory):
     return job_template_with_survey_passwords_factory(persisted=False)
+
+
+@pytest.fixture
+def mock_cache():
+    class MockCache(object):
+        cache = {}
+
+        def get(self, key, default=None):
+            return self.cache.get(key, default)
+
+        def set(self, key, value, timeout=60):
+            self.cache[key] = value
+
+        def delete(self, key):
+            del self.cache[key]
+
+    return MockCache()
+

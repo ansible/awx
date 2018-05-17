@@ -241,15 +241,16 @@ def test_shared_dependencies_launch(default_instance_group, job_template_factory
 
 
 @pytest.mark.django_db
-def test_cleanup_interval():
-    assert cache.get('last_celery_task_cleanup') is None
+def test_cleanup_interval(mock_cache):
+    with mock.patch.multiple('awx.main.scheduler.task_manager.cache', get=mock_cache.get, set=mock_cache.set):
+        assert mock_cache.get('last_celery_task_cleanup') is None
 
-    TaskManager().cleanup_inconsistent_celery_tasks()
-    last_cleanup = cache.get('last_celery_task_cleanup')
-    assert isinstance(last_cleanup, datetime)
+        TaskManager().cleanup_inconsistent_celery_tasks()
+        last_cleanup = mock_cache.get('last_celery_task_cleanup')
+        assert isinstance(last_cleanup, datetime)
 
-    TaskManager().cleanup_inconsistent_celery_tasks()
-    assert cache.get('last_celery_task_cleanup') == last_cleanup
+        TaskManager().cleanup_inconsistent_celery_tasks()
+        assert cache.get('last_celery_task_cleanup') == last_cleanup
 
 
 class TestReaper():
@@ -326,7 +327,8 @@ class TestReaper():
     @pytest.mark.django_db
     @mock.patch.object(JobNotificationMixin, 'send_notification_templates')
     @mock.patch.object(TaskManager, 'get_active_tasks', lambda self: ([], []))
-    def test_cleanup_inconsistent_task(self, notify, active_tasks, considered_jobs, reapable_jobs, running_tasks, waiting_tasks, mocker):
+    def test_cleanup_inconsistent_task(self, notify, active_tasks, considered_jobs, reapable_jobs, running_tasks, waiting_tasks, mocker, settings):
+        settings.AWX_INCONSISTENT_TASK_INTERVAL = 0
         tm = TaskManager()
 
         tm.get_running_tasks = mocker.Mock(return_value=(running_tasks, waiting_tasks))

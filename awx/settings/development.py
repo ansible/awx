@@ -9,6 +9,7 @@ import socket
 import copy
 import sys
 import traceback
+import random
 
 # Centos-7 doesn't include the svg mime type
 # /usr/lib64/python/mimetypes.py
@@ -19,6 +20,15 @@ from split_settings.tools import optional, include
 
 # Load default settings.
 from defaults import *  # NOQA
+
+# don't use memcache when running tests
+if "pytest" in sys.modules:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-{}'.format(random.randint(0, sys.maxint)),
+        },
+    }
 
 # awx-manage shell_plus --notebook
 NOTEBOOK_ARGUMENTS = [
