@@ -6,6 +6,7 @@ import inspect
 import logging
 import time
 import six
+import urllib    
 
 # Django
 from django.conf import settings
@@ -29,6 +30,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import views
 from rest_framework.permissions import AllowAny
+from rest_framework.renderers import JSONRenderer
 
 # cryptography
 from cryptography.fernet import InvalidToken
@@ -39,7 +41,7 @@ from awx.main.models import *  # noqa
 from awx.main.access import access_registry
 from awx.main.utils import * # noqa
 from awx.main.utils.db import get_all_field_names
-from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer
+from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
 from awx.api.versioning import URLPathVersioning, get_request_version
 from awx.api.metadata import SublistAttachDetatchMetadata, Metadata
 
@@ -70,6 +72,13 @@ class LoggedLoginView(auth_views.LoginView):
         if current_user and getattr(current_user, 'pk', None) and current_user != original_user:
             logger.info("User {} logged in.".format(current_user.username))
         if request.user.is_authenticated:
+            logger.info(smart_text(u"User {} logged in".format(self.request.user.username)))
+            ret.set_cookie('userLoggedIn', 'true')
+            current_user = UserSerializer(self.request.user)
+            current_user = JSONRenderer().render(current_user.data)
+            current_user = urllib.quote('%s' % current_user, '')
+            ret.set_cookie('current_user', current_user)
+            
             return ret
         else:
             ret.status_code = 401
@@ -82,6 +91,7 @@ class LoggedLogoutView(auth_views.LogoutView):
         original_user = getattr(request, 'user', None)
         ret = super(LoggedLogoutView, self).dispatch(request, *args, **kwargs)
         current_user = getattr(request, 'user', None)
+        ret.set_cookie('userLoggedIn', 'false')
         if (not current_user or not getattr(current_user, 'pk', True)) \
                 and current_user != original_user:
             logger.info("User {} logged out.".format(original_user.username))
@@ -868,6 +878,9 @@ class CopyAPIView(GenericAPIView):
                     obj, field.name, field_val
                 )
         new_obj = model.objects.create(**create_kwargs)
+        logger.debug(six.text_type('Deep copy: Created new object {}({})').format(
+            new_obj, model
+        ))
         # Need to save separatedly because Djang-crum get_current_user would
         # not work properly in non-request-response-cycle context.
         new_obj.created_by = creater

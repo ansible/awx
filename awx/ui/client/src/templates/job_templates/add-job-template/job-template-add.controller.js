@@ -72,7 +72,13 @@
                 $scope.removeChoicesReady();
             }
             $scope.removeChoicesReady = $scope.$on('choicesReadyVerbosity', function () {
-                ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
+                ParseTypeChange({
+                    scope: $scope,
+                    field_id: 'extra_vars',
+                    variable: 'extra_vars',
+                    onChange: callback
+                });
+
                 selectCount++;
                 if (selectCount === 3) {
                     var verbosity;
@@ -279,7 +285,7 @@
                             }
                         }
                         else {
-                            if (fld !== 'variables' &&
+                            if (fld !== 'extra_vars' &&
                                 fld !== 'survey' &&
                                 fld !== 'forks') {
                                 data[fld] = $scope[fld];
@@ -304,7 +310,7 @@
                     delete data.credential;
                     delete data.vault_credential;
 
-                    data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
+                    data.extra_vars = ToJSON($scope.parseType, $scope.extra_vars, true);
 
                     // We only want to set the survey_enabled flag to
                     // true for this job template if a survey exists

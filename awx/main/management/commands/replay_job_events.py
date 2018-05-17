@@ -95,7 +95,7 @@ class ReplayJobEvents():
             raise RuntimeError("Job is of type {} and replay is not yet supported.".format(type(job)))
             sys.exit(1)
 
-    def run(self, job_id, speed=1.0, verbosity=0):
+    def run(self, job_id, speed=1.0, verbosity=0, skip=0):
         stats = {
             'events_ontime': {
                 'total': 0,
@@ -126,7 +126,10 @@ class ReplayJobEvents():
             sys.exit(1)
 
         je_previous = None
-        for je_current in job_events:
+        for n, je_current in enumerate(job_events):
+            if n < skip:
+                continue
+
             if not je_previous:
                 stats['recording_start'] = je_current.created
                 self.start(je_current.created)
@@ -163,21 +166,25 @@ class ReplayJobEvents():
 
             stats['events_total'] += 1
             je_previous = je_current
-        
-        stats['replay_end'] = self.now()
-        stats['replay_duration'] = (stats['replay_end'] - stats['replay_start']).total_seconds()
-        stats['replay_start'] = stats['replay_start'].isoformat()
-        stats['replay_end'] = stats['replay_end'].isoformat()
 
-        stats['recording_end'] = je_current.created
-        stats['recording_duration'] = (stats['recording_end'] - stats['recording_start']).total_seconds()
-        stats['recording_start'] = stats['recording_start'].isoformat()
-        stats['recording_end'] = stats['recording_end'].isoformat()
+        if stats['events_total'] > 2:
+            stats['replay_end'] = self.now()
+            stats['replay_duration'] = (stats['replay_end'] - stats['replay_start']).total_seconds()
+            stats['replay_start'] = stats['replay_start'].isoformat()
+            stats['replay_end'] = stats['replay_end'].isoformat()
 
-        stats['events_ontime']['percentage'] = (stats['events_ontime']['total'] / float(stats['events_total'])) * 100.00
-        stats['events_late']['percentage'] = (stats['events_late']['total'] / float(stats['events_total'])) * 100.00
-        stats['events_distance_average'] = stats['events_distance_total'] / stats['events_total']
-        stats['events_late']['lateness_average'] = stats['events_late']['lateness_total'] / stats['events_late']['total']
+            stats['recording_end'] = je_current.created
+            stats['recording_duration'] = (stats['recording_end'] - stats['recording_start']).total_seconds()
+            stats['recording_start'] = stats['recording_start'].isoformat()
+            stats['recording_end'] = stats['recording_end'].isoformat()
+
+            stats['events_ontime']['percentage'] = (stats['events_ontime']['total'] / float(stats['events_total'])) * 100.00
+            stats['events_late']['percentage'] = (stats['events_late']['total'] / float(stats['events_total'])) * 100.00
+            stats['events_distance_average'] = stats['events_distance_total'] / stats['events_total']
+            stats['events_late']['lateness_average'] = stats['events_late']['lateness_total'] / stats['events_late']['total']
+        else:
+            stats = {'events_total': stats['events_total']}
+
         if verbosity >= 2:
             print(json.dumps(stats, indent=4, sort_keys=True))
 
@@ -191,11 +198,14 @@ class Command(BaseCommand):
                             help='Id of the job to replay (job or adhoc)')
         parser.add_argument('--speed', dest='speed', type=int, metavar='s',
                             help='Speedup factor.')
+        parser.add_argument('--skip', dest='skip', type=int, metavar='k',
+                            help='Number of events to skip.')
 
     def handle(self, *args, **options):
         job_id = options.get('job_id')
         speed = options.get('speed') or 1
         verbosity = options.get('verbosity') or 0
+        skip = options.get('skip') or 0
 
         replayer = ReplayJobEvents()
-        replayer.run(job_id, speed, verbosity)
+        replayer.run(job_id, speed, verbosity, skip)

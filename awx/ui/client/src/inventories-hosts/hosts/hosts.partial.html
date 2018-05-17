@@ -11,7 +11,7 @@
             </div>
         </div>
         <div>
-            <div class="List-actionHolder List-actionHolder--leftAlign">
+            <div class="List-actionHolder">
                 <div class="List-actions">
                     <div ng-include="'/static/partials/shared/list-generator/list-actions.partial.html'"></div>
                 </div>
@@ -29,7 +29,7 @@
                     default-params="host_default_params"
                     query-set="host_queryset"
                     search-tags="searchTags">
-                </smart-search>
+                </smart-search>  
             </div>
 
             <div class="row" ng-show="hosts.length === 0 && !(searchTags | isEmpty)">

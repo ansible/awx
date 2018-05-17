@@ -205,7 +205,7 @@ def set_original_organization(sender, instance, **kwargs):
     pre-save organization, so we can later determine if the organization
     field is dirty.
     '''
-    instance.__original_org = instance.organization
+    instance.__original_org_id = instance.organization_id
 
 
 def save_related_job_templates(sender, instance, **kwargs):
@@ -217,7 +217,7 @@ def save_related_job_templates(sender, instance, **kwargs):
     if sender not in (Project, Inventory):
         raise ValueError('This signal callback is only intended for use with Project or Inventory')
 
-    if instance.__original_org != instance.organization:
+    if instance.__original_org_id != instance.organization_id:
         jtq = JobTemplate.objects.filter(**{sender.__name__.lower(): instance})
         for jt in jtq:
             update_role_parentage_for_instance(jt)
@@ -494,6 +494,8 @@ def activity_stream_delete(sender, instance, **kwargs):
         return
     changes = model_to_dict(instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
+    if type(instance) == OAuth2AccessToken:
+        changes['token'] = TOKEN_CENSOR
     activity_entry = ActivityStream(
         operation='delete',
         changes=json.dumps(changes),

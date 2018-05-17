@@ -102,21 +102,21 @@ class TestOAuth2Application:
                 assert access.can_delete(app) is can_access
     
 
-        def test_superuser_can_always_create(self, admin, org_admin, org_member, alice):
+        def test_superuser_can_always_create(self, admin, org_admin, org_member, alice, organization):
             access = OAuth2ApplicationAccess(admin)
             for user in [admin, org_admin, org_member, alice]:
                 assert access.can_add({
                     'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
-                    'authorization_grant_type': 'password', 'organization': 1
+                    'authorization_grant_type': 'password', 'organization': organization.id
                 })
         
-        def test_normal_user_cannot_create(self, admin, org_admin, org_member, alice):
+        def test_normal_user_cannot_create(self, admin, org_admin, org_member, alice, organization):
             for access_user in [org_member, alice]:
                 access = OAuth2ApplicationAccess(access_user)
                 for user in [admin, org_admin, org_member, alice]:
                     assert not access.can_add({
                         'name': 'test app', 'user': user.pk, 'client_type': 'confidential',
-                        'authorization_grant_type': 'password', 'organization': 1
+                        'authorization_grant_type': 'password', 'organization': organization.id
                     })
 
 

@@ -14,6 +14,7 @@
             type="button"
             ui-sref=".add"
             class="at-Button--add"
+            id="button-add"
             aria-haspopup="true"
             aria-expanded="false">
         </button>
@@ -24,15 +25,24 @@
     <at-row ng-repeat="token in tokens">
         <div class="at-Row-items">
             <at-row-item
-                header-value="{{ token.summary_fields.application.name }}">
+                header-value="{{ vm.strings.get('list.HEADER', token.summary_fields.application.name) }}">
             </at-row-item>
             <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION') }}"
                 value="{{ token.description }}">
             </at-row-item>
             <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_SCOPE') }}"
+                value="{{ vm.getScopeString(token.scope) }}">
+            </at-row-item>
+            <at-row-item
+                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_APPLICATION') }}"
+                value="{{ token.summary_fields.application.name }}"
+                value-link="/#/applications/{{ token.summary_fields.application.id }}">
+            </at-row-item>
+            <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_EXPIRED') }}"
-                value="{{ token.expriation | longDate }}">
+                value="{{ token.expires | longDate }}">
             </at-row-item>
             <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED') }}"

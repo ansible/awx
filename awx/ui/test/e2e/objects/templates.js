@@ -94,7 +94,7 @@ module.exports = {
             elements: {
                 badge: 'span[class~="badge"]',
                 title: 'div[class="List-titleText"]',
-                add: 'button[class~="List-buttonSubmit"]'
+                add: '#button-add'
             },
             sections: {
                 search,
@@ -127,7 +127,7 @@ module.exports = {
             return this;
         },
         selectAdd (name) {
-            this.clickWhenEnabled('button span[class="at-List-toolbarDropdownCarat"]');
+            this.clickWhenEnabled('#button-add');
 
             this.api
                 .useXpath()

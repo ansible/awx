@@ -251,7 +251,12 @@ export default
                     default_val: dft
                 });
 
-                ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
+                ParseTypeChange({
+                    scope: $scope,
+                    field_id: 'extra_vars',
+                    variable: 'extra_vars',
+                    onChange: callback
+                });
 
                 jobTemplateLoadFinished();
             });
@@ -273,9 +278,10 @@ export default
             $scope.removeLoadJobs = $scope.$on('LoadJobs', function() {
                 $scope.job_template_obj = jobTemplateData;
                 $scope.name = jobTemplateData.name;
+                $scope.breadcrumb.job_template_name = jobTemplateData.name;
                 var fld, i;
                 for (fld in form.fields) {
-                    if (fld !== 'variables' && fld !== 'survey' && fld !== 'forks' && jobTemplateData[fld] !== null && jobTemplateData[fld] !== undefined) {
+                    if (fld !== 'extra_vars' && fld !== 'survey' && fld !== 'forks' && jobTemplateData[fld] !== null && jobTemplateData[fld] !== undefined) {
                         if (form.fields[fld].type === 'select') {
                             if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
                                 for (i = 0; i < $scope[fld + '_options'].length; i++) {
@@ -300,10 +306,10 @@ export default
                             master[fld] = $scope[fld];
                         }
                     }
-                    if (fld === 'variables') {
+                    if (fld === 'extra_vars') {
                         // Parse extra_vars, converting to YAML.
-                        $scope.variables = ParseVariableString(jobTemplateData.extra_vars);
-                        master.variables = $scope.variables;
+                        $scope.extra_vars = ParseVariableString(jobTemplateData.extra_vars);
+                        master.extra_vars = $scope.extra_vars;
                     }
                     if (form.fields[fld].type === 'lookup' && jobTemplateData.summary_fields[form.fields[fld].sourceModel]) {
                         $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
@@ -617,7 +623,7 @@ export default
                             }
                         }
                         else {
-                            if (fld !== 'variables' &&
+                            if (fld !== 'extra_vars' &&
                                 fld !== 'survey' &&
                                 fld !== 'forks') {
                                 data[fld] = $scope[fld];
@@ -654,7 +660,7 @@ export default
                         data.vault_credential = null;
                     }
                     data.extra_vars = ToJSON($scope.parseType,
-                        $scope.variables, true);
+                        $scope.extra_vars, true);
 
                     // We only want to set the survey_enabled flag to
                     // true for this job template if a survey exists

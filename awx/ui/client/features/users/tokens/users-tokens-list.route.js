@@ -17,6 +17,11 @@ export default {
             controllerAs: 'vm'
         }
     },
+    data: {
+        activityStream: true,
+        activityStreamTarget: 'o_auth2_access_token',
+        noActivityStreamID: true
+    },
     searchPrefix: 'token',
     params: {
         token_search: {

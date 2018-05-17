@@ -73,8 +73,8 @@ export default ['i18n', function(i18n) {
                 type: 'buttonDropdown',
                 basePaths: ['inventories'],
                 awToolTip: i18n._('Create a new inventory'),
-                actionClass: 'btn List-dropdownSuccess',
-                buttonContent: '&#43; ' + i18n._('ADD'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 options: [
                     {
                         optionContent: i18n._('Inventory'),
@@ -93,19 +93,19 @@ export default ['i18n', function(i18n) {
 
         fieldActions: {
             columnClass: 'col-md-2 col-sm-3 col-xs-4',
-            network: {
-                label: i18n._('Network Visualization'),
-                ngClick: 'goToGraph(inventory)',
-                awToolTip: i18n._('Network Visualization'),
-                dataPlacement: 'top',
-                ngShow: '!inventory.pending_deletion'
-            },
             edit: {
                 label: i18n._('Edit'),
                 ngClick: 'editInventory(inventory)',
                 awToolTip: i18n._('Edit inventory'),
                 dataPlacement: 'top',
                 ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.edit'
+            },
+            network: {
+                label: i18n._('Network Visualization'),
+                ngClick: 'goToGraph(inventory)',
+                awToolTip: i18n._('Network Visualization'),
+                dataPlacement: 'top',
+                ngShow: '!inventory.pending_deletion'
             },
             copy: {
                 label: i18n._('Copy'),

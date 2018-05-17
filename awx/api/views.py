@@ -404,8 +404,10 @@ class ApiV1ConfigView(APIView):
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
-                custom_virtualenvs = get_custom_venv_choices(),
             ))
+
+        if JobTemplate.accessible_objects(request.user, 'admin_role').exists():
+            data['custom_virtualenvs'] = get_custom_venv_choices()
 
         return Response(data)
 
@@ -610,6 +612,7 @@ class InstanceList(ListAPIView):
     view_name = _("Instances")
     model = Instance
     serializer_class = InstanceSerializer
+    search_fields = ('hostname',)
 
 
 class InstanceDetail(RetrieveUpdateAPIView):
@@ -696,6 +699,7 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
     serializer_class = InstanceSerializer
     parent_model = InstanceGroup
     relationship = "instances"
+    search_fields = ('hostname',)
 
 
 class ScheduleList(ListAPIView):
@@ -745,11 +749,11 @@ class ScheduleZoneInfo(APIView):
     swagger_topic = 'System Configuration'
 
     def get(self, request):
-        from dateutil.zoneinfo import get_zonefile_instance
-        return Response([
+        zones = [
             {'name': zone}
-            for zone in sorted(get_zonefile_instance().zones)
-        ])
+            for zone in Schedule.get_zoneinfo()
+        ]
+        return Response(zones)
 
 
 class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
@@ -1072,6 +1076,7 @@ class OrganizationActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIV
     serializer_class = ActivityStreamSerializer
     parent_model = Organization
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
 
 class OrganizationNotificationTemplatesList(SubListCreateAttachDetachAPIView):
@@ -1126,6 +1131,7 @@ class OrganizationObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
     parent_model = Organization
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -1165,6 +1171,7 @@ class TeamRolesList(SubListAttachDetachAPIView):
     metadata_class = RoleMetadata
     parent_model = Team
     relationship='member_role.children'
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
@@ -1202,6 +1209,7 @@ class TeamObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
     parent_model = Team
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -1233,6 +1241,7 @@ class TeamActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Team
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1328,6 +1337,7 @@ class ProjectActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Project
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1415,6 +1425,7 @@ class ProjectUpdateEventsList(SubListAPIView):
     parent_model = ProjectUpdate
     relationship = 'project_update_events'
     view_name = _('Project Update Events List')
+    search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
@@ -1428,6 +1439,7 @@ class SystemJobEventsList(SubListAPIView):
     parent_model = SystemJob
     relationship = 'system_job_events'
     view_name = _('System Job Events List')
+    search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
@@ -1441,6 +1453,7 @@ class InventoryUpdateEventsList(SubListAPIView):
     parent_model = InventoryUpdate
     relationship = 'inventory_update_events'
     view_name = _('Inventory Update Events List')
+    search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.MAX_UI_JOB_EVENTS
@@ -1468,6 +1481,7 @@ class ProjectUpdateNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = ProjectUpdate
     relationship = 'notifications'
+    search_fields = ('subject', 'notification_type', 'body',)
 
 
 class ProjectUpdateScmInventoryUpdates(SubListCreateAPIView):
@@ -1491,6 +1505,7 @@ class ProjectObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
     parent_model = Project
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -1573,6 +1588,7 @@ class OAuth2ApplicationActivityStreamList(ActivityStreamEnforcementMixin, SubLis
     parent_model = OAuth2Application
     relationship = 'activitystream_set'
     swagger_topic = 'Authentication'
+    search_fields = ('changes',)
 
 
 class OAuth2TokenList(ListCreateAPIView):
@@ -1581,6 +1597,18 @@ class OAuth2TokenList(ListCreateAPIView):
 
     model = OAuth2AccessToken
     serializer_class = OAuth2TokenSerializer
+    swagger_topic = 'Authentication'
+
+
+class OAuth2UserTokenList(SubListCreateAPIView):
+
+    view_name = _("OAuth2 User Tokens")
+
+    model = OAuth2AccessToken
+    serializer_class = OAuth2TokenSerializer
+    parent_model = User
+    relationship = 'main_oauth2accesstoken'
+    parent_key = 'user'
     swagger_topic = 'Authentication'
     
     
@@ -1657,6 +1685,7 @@ class OAuth2TokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIVi
     parent_model = OAuth2AccessToken
     relationship = 'activitystream_set'
     swagger_topic = 'Authentication'
+    search_fields = ('changes',)
 
 
 class UserTeamsList(ListAPIView):
@@ -1680,6 +1709,7 @@ class UserRolesList(SubListAttachDetachAPIView):
     parent_model = User
     relationship='roles'
     permission_classes = (IsAuthenticated,)
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         u = get_object_or_404(User, pk=self.kwargs['pk'])
@@ -1766,6 +1796,7 @@ class UserActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = User
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1852,6 +1883,7 @@ class CredentialTypeActivityStreamList(ActivityStreamEnforcementMixin, SubListAP
     serializer_class = ActivityStreamSerializer
     parent_model = CredentialType
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
 
 # remove in 3.3
@@ -1965,6 +1997,7 @@ class CredentialActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIVie
     serializer_class = ActivityStreamSerializer
     parent_model = Credential
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
 
 class CredentialAccessList(ResourceAccessList):
@@ -1978,6 +2011,7 @@ class CredentialObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
     parent_model = Credential
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -2018,6 +2052,7 @@ class InventoryScriptObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
     parent_model = CustomInventoryScript
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -2105,6 +2140,7 @@ class InventoryActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView
     serializer_class = ActivityStreamSerializer
     parent_model = Inventory
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -2132,6 +2168,7 @@ class InventoryObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
     parent_model = Inventory
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -2275,6 +2312,7 @@ class HostActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Host
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -2288,6 +2326,7 @@ class HostFactVersionsList(SystemTrackingEnforcementMixin, ParentMixin, ListAPIV
     model = Fact
     serializer_class = FactVersionSerializer
     parent_model = Host
+    search_fields = ('facts',)
 
     def get_queryset(self):
         from_spec = self.request.query_params.get('from', None)
@@ -2521,6 +2560,7 @@ class GroupActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Group
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -2752,6 +2792,7 @@ class InventorySourceActivityStreamList(ActivityStreamEnforcementMixin, SubListA
     serializer_class = ActivityStreamSerializer
     parent_model = InventorySource
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
 
 class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
@@ -2891,6 +2932,7 @@ class InventoryUpdateNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = InventoryUpdate
     relationship = 'notifications'
+    search_fields = ('subject', 'notification_type', 'body',)
 
 
 class JobTemplateList(ListCreateAPIView):
@@ -3229,6 +3271,7 @@ class JobTemplateActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIVi
     serializer_class = ActivityStreamSerializer
     parent_model = JobTemplate
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
 
 class JobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
@@ -3512,6 +3555,7 @@ class JobTemplateObjectRolesList(SubListAPIView):
     model = Role
     serializer_class = RoleSerializer
     parent_model = JobTemplate
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -3529,6 +3573,7 @@ class WorkflowJobNodeList(WorkflowsEnforcementMixin, ListAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
+    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
 
 
 class WorkflowJobNodeDetail(WorkflowsEnforcementMixin, RetrieveAPIView):
@@ -3549,6 +3594,7 @@ class WorkflowJobTemplateNodeList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeSerializer
+    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
 
 
 class WorkflowJobTemplateNodeDetail(WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
@@ -3570,6 +3616,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
     parent_model = WorkflowJobTemplateNode
     relationship = ''
     enforce_parent_relationship = 'workflow_job_template'
+    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
 
     '''
     Limit the set of WorkflowJobTemplateNodes to the related nodes of specified by
@@ -3639,6 +3686,7 @@ class WorkflowJobNodeChildrenBaseList(WorkflowsEnforcementMixin, SubListAPIView)
     serializer_class = WorkflowJobNodeListSerializer
     parent_model = WorkflowJobNode
     relationship = ''
+    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
 
     #
     #Limit the set of WorkflowJobeNodes to the related nodes of specified by
@@ -3702,12 +3750,18 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, CopyAPIView):
                 item = getattr(obj, field_name, None)
                 if item is None:
                     continue
-                if field_name in ['inventory']:
+                elif field_name in ['inventory']:
                     if not user.can_access(item.__class__, 'use', item):
                         setattr(obj, field_name, None)
-                if field_name in ['unified_job_template']:
+                elif field_name in ['unified_job_template']:
                     if not user.can_access(item.__class__, 'start', item, validate_license=False):
                         setattr(obj, field_name, None)
+                elif field_name in ['credentials']:
+                    for cred in item.all():
+                        if not user.can_access(cred.__class__, 'use', cred):
+                            logger.debug(six.text_type(
+                                'Deep copy: removing {} from relationship due to permissions').format(cred))
+                            item.remove(cred.pk)
             obj.save()
 
 
@@ -3788,6 +3842,7 @@ class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCre
     parent_model = WorkflowJobTemplate
     relationship = 'workflow_job_template_nodes'
     parent_key = 'workflow_job_template'
+    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
 
     def get_queryset(self):
         return super(WorkflowJobTemplateWorkflowNodesList, self).get_queryset().order_by('id')
@@ -3848,6 +3903,7 @@ class WorkflowJobTemplateObjectRolesList(WorkflowsEnforcementMixin, SubListAPIVi
     model = Role
     serializer_class = RoleSerializer
     parent_model = WorkflowJobTemplate
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         po = self.get_parent_object()
@@ -3861,6 +3917,7 @@ class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityS
     serializer_class = ActivityStreamSerializer
     parent_model = WorkflowJobTemplate
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -3890,6 +3947,7 @@ class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
     parent_model = WorkflowJob
     relationship = 'workflow_job_nodes'
     parent_key = 'workflow_job'
+    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
 
     def get_queryset(self):
         return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
@@ -3918,6 +3976,7 @@ class WorkflowJobNotificationsList(WorkflowsEnforcementMixin, SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = WorkflowJob
     relationship = 'notifications'
+    search_fields = ('subject', 'notification_type', 'body',)
 
 
 class WorkflowJobActivityStreamList(WorkflowsEnforcementMixin, ActivityStreamEnforcementMixin, SubListAPIView):
@@ -3926,6 +3985,7 @@ class WorkflowJobActivityStreamList(WorkflowsEnforcementMixin, ActivityStreamEnf
     serializer_class = ActivityStreamSerializer
     parent_model = WorkflowJob
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
 
 class SystemJobTemplateList(ListAPIView):
@@ -4081,6 +4141,7 @@ class JobActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Job
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
 
 # TODO: remove endpoint in 3.3
@@ -4284,6 +4345,7 @@ class JobNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = Job
     relationship = 'notifications'
+    search_fields = ('subject', 'notification_type', 'body',)
 
 
 class BaseJobHostSummariesList(SubListAPIView):
@@ -4293,6 +4355,7 @@ class BaseJobHostSummariesList(SubListAPIView):
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_host_summaries'
     view_name = _('Job Host Summaries List')
+    search_fields = ('host_name',)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -4325,6 +4388,7 @@ class JobEventList(ListAPIView):
 
     model = JobEvent
     serializer_class = JobEventSerializer
+    search_fields = ('stdout',)
 
 
 class JobEventDetail(RetrieveAPIView):
@@ -4340,6 +4404,7 @@ class JobEventChildrenList(SubListAPIView):
     parent_model = JobEvent
     relationship = 'children'
     view_name = _('Job Event Children List')
+    search_fields = ('stdout',)
 
 
 class JobEventHostsList(HostRelatedSearchMixin, SubListAPIView):
@@ -4553,6 +4618,7 @@ class AdHocCommandEventList(ListAPIView):
 
     model = AdHocCommandEvent
     serializer_class = AdHocCommandEventSerializer
+    search_fields = ('stdout',)
 
 
 class AdHocCommandEventDetail(RetrieveAPIView):
@@ -4568,6 +4634,7 @@ class BaseAdHocCommandEventsList(SubListAPIView):
     parent_model = None # Subclasses must define this attribute.
     relationship = 'ad_hoc_command_events'
     view_name = _('Ad Hoc Command Events List')
+    search_fields = ('stdout',)
 
 
 class HostAdHocCommandEventsList(BaseAdHocCommandEventsList):
@@ -4590,6 +4657,7 @@ class AdHocCommandActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIV
     serializer_class = ActivityStreamSerializer
     parent_model = AdHocCommand
     relationship = 'activitystream_set'
+    search_fields = ('changes',)
 
 
 class AdHocCommandNotificationsList(SubListAPIView):
@@ -4598,6 +4666,7 @@ class AdHocCommandNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = AdHocCommand
     relationship = 'notifications'
+    search_fields = ('subject', 'notification_type', 'body',)
 
 
 class SystemJobList(ListCreateAPIView):
@@ -4638,6 +4707,7 @@ class SystemJobNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = SystemJob
     relationship = 'notifications'
+    search_fields = ('subject', 'notification_type', 'body',)
 
 
 class UnifiedJobTemplateList(ListAPIView):
@@ -4706,7 +4776,6 @@ class UnifiedJobStdout(RetrieveAPIView):
         try:
             target_format = request.accepted_renderer.format
             if target_format in ('html', 'api', 'json'):
-                content_format = request.query_params.get('content_format', 'html')
                 content_encoding = request.query_params.get('content_encoding', None)
                 start_line = request.query_params.get('start_line', 0)
                 end_line = request.query_params.get('end_line', None)
@@ -4732,10 +4801,10 @@ class UnifiedJobStdout(RetrieveAPIView):
                 if target_format == 'api':
                     return Response(mark_safe(data))
                 if target_format == 'json':
-                    if content_encoding == 'base64' and content_format == 'ansi':
-                        return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': b64encode(content.encode('utf-8'))})
-                    elif content_format == 'html':
-                        return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
+                    content = content.encode('utf-8')
+                    if content_encoding == 'base64':
+                        content = b64encode(content)
+                    return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': content})
                 return Response(data)
             elif target_format == 'txt':
                 return Response(unified_job.result_stdout)
@@ -4843,6 +4912,7 @@ class NotificationTemplateNotificationList(SubListAPIView):
     parent_model = NotificationTemplate
     relationship = 'notifications'
     parent_key = 'notification_template'
+    search_fields = ('subject', 'notification_type', 'body',)
 
 
 class NotificationTemplateCopy(CopyAPIView):
@@ -4855,6 +4925,7 @@ class NotificationList(ListAPIView):
 
     model = Notification
     serializer_class = NotificationSerializer
+    search_fields = ('subject', 'notification_type', 'body',)
 
 
 class NotificationDetail(RetrieveAPIView):
@@ -4879,6 +4950,7 @@ class ActivityStreamList(ActivityStreamEnforcementMixin, SimpleListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
+    search_fields = ('changes',)
 
 
 class ActivityStreamDetail(ActivityStreamEnforcementMixin, RetrieveAPIView):
@@ -4892,6 +4964,7 @@ class RoleList(ListAPIView):
     model = Role
     serializer_class = RoleSerializer
     permission_classes = (IsAuthenticated,)
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         result = Role.visible_roles(self.request.user)
@@ -5004,6 +5077,7 @@ class RoleParentsList(SubListAPIView):
     parent_model = Role
     relationship = 'parents'
     permission_classes = (IsAuthenticated,)
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         role = Role.objects.get(pk=self.kwargs['pk'])
@@ -5017,6 +5091,7 @@ class RoleChildrenList(SubListAPIView):
     parent_model = Role
     relationship = 'children'
     permission_classes = (IsAuthenticated,)
+    search_fields = ('role_field', 'content_type__model',)
 
     def get_queryset(self):
         role = Role.objects.get(pk=self.kwargs['pk'])

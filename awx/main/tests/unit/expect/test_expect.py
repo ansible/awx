@@ -90,7 +90,7 @@ def test_cancel_callback_error():
 
     extra_fields = {}
     status, rc = run.run_pexpect(
-        ['ls', '-la'],
+        ['sleep', '2'],
         HERE,
         {},
         stdout,

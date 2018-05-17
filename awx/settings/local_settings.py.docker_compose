@@ -13,6 +13,7 @@
 ###############################################################################
 import os
 import urllib
+import sys
 
 
 def patch_broken_pipe_error():
@@ -66,7 +67,7 @@ DATABASES = {
 # Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
 # commented out, Django will create the test_awx-dev database in PostgreSQL to
 # run unit tests.
-if is_testing(sys.argv):
+if "pytest" in sys.modules:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -195,11 +196,10 @@ LOGGING['handlers']['syslog'] = {
 
 LOGGING['loggers']['django.request']['handlers'] = ['console']
 LOGGING['loggers']['rest_framework.request']['handlers'] = ['console']
-LOGGING['loggers']['awx']['handlers'] = ['console']
+LOGGING['loggers']['awx']['handlers'] = ['console', 'external_logger']
 LOGGING['loggers']['awx.main.commands.run_callback_receiver']['handlers'] = ['console']
-LOGGING['loggers']['awx.main.commands.inventory_import']['handlers'] = ['console']
-LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console']
-LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console']
+LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console', 'external_logger']
+LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console', 'external_logger']
 LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
 LOGGING['loggers']['social']['handlers'] = ['console']
 LOGGING['loggers']['system_tracking_migrations']['handlers'] = ['console']

@@ -3,6 +3,7 @@
 
 # Django
 from django.conf import settings # noqa
+from django.db.models.signals import pre_delete  # noqa
 
 # AWX
 from awx.main.models.base import * # noqa
@@ -56,6 +57,18 @@ User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 User.add_to_class('can_access_with_errors', check_user_access_with_errors)
 User.add_to_class('accessible_objects', user_accessible_objects)
+
+
+def cleanup_created_modified_by(sender, **kwargs):
+    # work around a bug in django-polymorphic that doesn't properly
+    # handle cascades for reverse foreign keys on the polymorphic base model
+    # https://github.com/django-polymorphic/django-polymorphic/issues/229
+    for cls in (UnifiedJobTemplate, UnifiedJob):
+        cls.objects.filter(created_by=kwargs['instance']).update(created_by=None)
+        cls.objects.filter(modified_by=kwargs['instance']).update(modified_by=None)
+
+
+pre_delete.connect(cleanup_created_modified_by, sender=User)
 
 
 @property
@@ -169,3 +182,9 @@ activity_stream_registrar.connect(OAuth2AccessToken)
 
 # prevent API filtering on certain Django-supplied sensitive fields
 prevent_search(User._meta.get_field('password'))
+prevent_search(OAuth2AccessToken._meta.get_field('token'))
+prevent_search(RefreshToken._meta.get_field('token'))
+prevent_search(OAuth2Application._meta.get_field('client_secret'))
+prevent_search(OAuth2Application._meta.get_field('client_id'))
+prevent_search(Grant._meta.get_field('code'))
+

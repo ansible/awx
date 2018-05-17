@@ -1,8 +1,6 @@
-const path = require('path');
-
 const webpack = require('webpack');
 const merge = require('webpack-merge');
-const base = require(path.resolve(__dirname, '../..', 'build/webpack.base'));
+const base = require('../../build/webpack.base');
 
 const STATIC_URL = '/static/';
 

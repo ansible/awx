@@ -5,12 +5,43 @@ import mock
 from collections import namedtuple
 
 # AWX
-from awx.main.utils.filters import SmartFilter
+from awx.main.utils.filters import SmartFilter, ExternalLoggerEnabled
 
 # Django
 from django.db.models import Q
 
 import six
+
+
+@pytest.mark.parametrize('params, logger_name, expected', [
+    # skip all records if enabled_flag = False
+    ({'enabled_flag': False}, 'awx.main', False),
+    # skip all records if the host is undefined
+    ({'enabled_flag': True}, 'awx.main', False),
+    # skip all records if underlying logger is used by handlers themselves
+    ({'enabled_flag': True}, 'awx.main.utils.handlers', False),
+    ({'enabled_flag': True, 'enabled_loggers': ['awx']}, 'awx.main', True),
+    ({'enabled_flag': True, 'enabled_loggers': ['abc']}, 'awx.analytics.xyz', False),
+    ({'enabled_flag': True, 'enabled_loggers': ['xyz']}, 'awx.analytics.xyz', True),
+])
+def test_base_logging_handler_skip_log(params, logger_name, expected, dummy_log_record):
+    filter = ExternalLoggerEnabled(**params)
+    dummy_log_record.name = logger_name
+    assert filter.filter(dummy_log_record) is expected, (params, logger_name)
+
+
+@pytest.mark.parametrize('level, expect', [
+    (30, True),  # warning
+    (20, False)  # info
+])
+def test_log_configurable_severity(level, expect, dummy_log_record):
+    dummy_log_record.levelno = level
+    filter = ExternalLoggerEnabled(
+        enabled_flag=True,
+        enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'],
+        lvl='WARNING'
+    )
+    assert filter.filter(dummy_log_record) is expect
 
 
 Field = namedtuple('Field', 'name')

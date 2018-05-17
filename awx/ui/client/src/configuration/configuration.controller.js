@@ -278,7 +278,7 @@ export default [
                 if (setForm === 'auth') {
                     formTracker.setCurrentAuth(formTracker.currentAuth);
                 } else if (setForm === 'system') {
-                    formTracker.setCurrentSystem(formTracker.currenSystem);
+                    formTracker.setCurrentSystem(formTracker.currentSystem);
                 } else {
                     formTracker.setCurrent(setForm);
                 }

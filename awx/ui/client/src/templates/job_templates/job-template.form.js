@@ -234,7 +234,7 @@ function(NotificationsList, i18n) {
                 custom_virtualenv: {
                     label: i18n._('Ansible Environment'),
                     type: 'select',
-                    defaultText: i18n._('Select Ansible Environment'),
+                    defaultText: i18n._('Default Environment'),
                     ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
                     awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this job template to run on.") + "</p>",
                     dataTitle: i18n._('Ansible Environment'),
@@ -348,7 +348,7 @@ function(NotificationsList, i18n) {
                         alwaysShowAsterisk: true
                     }
                 },
-                variables: {
+                extra_vars: {
                     label: i18n._('Extra Variables'),
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
@@ -359,6 +359,7 @@ function(NotificationsList, i18n) {
                     dataTitle: i18n._('Extra Variables'),
                     dataPlacement: 'right',
                     dataContainer: "body",
+                    id: 'extra_vars',
                     subCheckbox: {
                         variable: 'ask_variables_on_launch',
                         text: i18n._('Prompt on launch')
@@ -403,8 +404,8 @@ function(NotificationsList, i18n) {
                             ngClick: "$state.go('.add')",
                             label: 'Add',
                             awToolTip: i18n._('Add a permission'),
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ' + i18n._('ADD'),
+                            actionClass: 'at-Button--add',
+                            actionId: 'button-add',
                             ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                         }
                     },
@@ -437,6 +438,11 @@ function(NotificationsList, i18n) {
                     title: i18n._('Completed Jobs'),
                     skipGenerator: true,
                     ngClick: "$state.go('templates.editJobTemplate.completed_jobs')"
+                },
+                "schedules": {
+                    title: i18n._('Schedules'),
+                    skipGenerator: true,
+                    ngClick: "$state.go('templates.editJobTemplate.schedules')"
                 }
             },
 

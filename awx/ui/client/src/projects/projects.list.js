@@ -35,7 +35,7 @@ export default ['i18n', function(i18n) {
             name: {
                 key: true,
                 label: i18n._('Name'),
-                columnClass: "col-lg-4 col-md-4 col-sm-5 col-xs-7 List-staticColumnAdjacent",
+                columnClass: "col-lg-4 col-md-4 col-sm-4 col-xs-7 List-staticColumnAdjacent",
                 modalColumnClass: 'col-md-8',
                 awToolTip: '{{project.description | sanitize}}',
                 dataPlacement: 'top'
@@ -44,18 +44,18 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Type'),
                 ngBind: 'project.type_label',
                 excludeModal: true,
-                columnClass: 'col-lg-2 col-md-2 col-sm-3 hidden-xs'
+                columnClass: 'col-lg-2 col-md-2 col-sm-2 hidden-xs'
             },
             scm_revision: {
                 label: i18n._('Revision'),
                 excludeModal: true,
-                columnClass: 'List-tableCell col-lg-4 col-md-2 col-sm-3 hidden-xs',
+                columnClass: 'List-tableCell col-lg-2 col-md-2 hidden-sm hidden-xs',
                 type: 'revision'
             },
             last_updated: {
                 label: i18n._('Last Updated'),
                 filter: "longDate",
-                columnClass: "col-lg-3 col-md-3 hidden-sm hidden-xs",
+                columnClass: "col-lg-3 hidden-md hidden-sm hidden-xs",
                 excludeModal: true,
                 nosort: true
             }
@@ -74,16 +74,21 @@ export default ['i18n', function(i18n) {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addProject()',
                 awToolTip: i18n._('Create a new project'),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ADD'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 ngShow: "canAdd"
             }
         },
 
         fieldActions: {
 
-            columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-5',
-
+            columnClass: 'col-lg-4 col-md-3 col-sm-4 col-xs-5',
+            edit: {
+                ngClick: "editProject(project.id)",
+                awToolTip: i18n._('Edit the project'),
+                dataPlacement: 'top',
+                ngShow: "project.summary_fields.user_capabilities.edit"
+            },
             scm_update: {
                 ngClick: 'SCMUpdate(project.id, $event)',
                 awToolTip: "{{ project.scm_update_tooltip }}",
@@ -107,12 +112,6 @@ export default ['i18n', function(i18n) {
                 awToolTip: i18n._('Copy project'),
                 dataPlacement: 'top',
                 ngShow: 'project.summary_fields.user_capabilities.copy'
-            },
-            edit: {
-                ngClick: "editProject(project.id)",
-                awToolTip: i18n._('Edit the project'),
-                dataPlacement: 'top',
-                ngShow: "project.summary_fields.user_capabilities.edit"
             },
             view: {
                 ngClick: "editProject(project.id)",

@@ -3,13 +3,18 @@
 import pytest
 
 from rest_framework.exceptions import PermissionDenied, ParseError
-from awx.api.filters import FieldLookupBackend
+from awx.api.filters import FieldLookupBackend, OrderByBackend, get_field_from_path
 from awx.main.models import (AdHocCommand, ActivityStream,
                              CustomInventoryScript, Credential, Job,
                              JobTemplate, SystemJob, UnifiedJob, User,
                              WorkflowJob, WorkflowJobTemplate,
-                             WorkflowJobOptions, InventorySource)
+                             WorkflowJobOptions, InventorySource,
+                             JobEvent)
+from awx.main.models.oauth import OAuth2Application
 from awx.main.models.jobs import JobOptions
+
+# Django
+from django.db.models.fields import FieldDoesNotExist
 
 
 def test_related():
@@ -18,6 +23,27 @@ def test_related():
     field, new_lookup = field_lookup.get_field_from_lookup(InventorySource, lookup)
     print(field)
     print(new_lookup)
+
+
+def test_invalid_filter_key():
+    field_lookup = FieldLookupBackend()
+    # FieldDoesNotExist is caught and converted to ParseError by filter_queryset
+    with pytest.raises(FieldDoesNotExist) as excinfo:
+        field_lookup.value_to_python(JobEvent, 'event_data.task_action', 'foo')
+    assert 'has no field named' in str(excinfo)
+
+
+def test_invalid_field_hop():
+    with pytest.raises(ParseError) as excinfo:
+        get_field_from_path(Credential, 'organization__description__user')
+    assert 'No related model for' in str(excinfo)
+
+
+def test_invalid_order_by_key():
+    field_order_by = OrderByBackend()
+    with pytest.raises(ParseError) as excinfo:
+        [f for f in field_order_by._validate_ordering_fields(JobEvent, ('event_data.task_action',))]
+    assert 'has no field named' in str(excinfo)
 
 
 @pytest.mark.parametrize(u"empty_value", [u'', ''])
@@ -57,7 +83,6 @@ def test_filter_on_password_field(password_field, lookup_suffix):
     (User, 'password__icontains'),
     (User, 'settings__value__icontains'),
     (User, 'main_oauth2accesstoken__token__gt'),
-    (User, 'main_oauth2application__name__gt'),
     (UnifiedJob, 'job_args__icontains'),
     (UnifiedJob, 'job_env__icontains'),
     (UnifiedJob, 'start_args__icontains'),
@@ -70,8 +95,8 @@ def test_filter_on_password_field(password_field, lookup_suffix):
     (JobTemplate, 'survey_spec__icontains'),
     (WorkflowJobTemplate, 'survey_spec__icontains'),
     (CustomInventoryScript, 'script__icontains'),
-    (ActivityStream, 'o_auth2_access_token__gt'),
-    (ActivityStream, 'o_auth2_application__gt')
+    (ActivityStream, 'o_auth2_application__client_secret__gt'),
+    (OAuth2Application, 'grant__code__gt')
 ])
 def test_filter_sensitive_fields_and_relations(model, query):
     field_lookup = FieldLookupBackend()

@@ -71,7 +71,6 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                 labels: {
                     label: i18n._('Labels'),
                     type: 'select',
-                    class: 'Form-formGroup--fullWidth',
                     ngOptions: 'label.label for label in labelOptions track by label.value',
                     multiSelect: true,
                     dataTitle: i18n._('Labels'),
@@ -147,8 +146,8 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                             ngClick: "$state.go('.add')",
                             label: i18n._('Add'),
                             awToolTip: i18n._('Add a permission'),
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; '+ i18n._('ADD'),
+                            actionClass: 'at-Button--add',
+                            actionId: 'button-add',
                             ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                         }
                     },
@@ -176,6 +175,16 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                 },
                 "notifications": {
                     include: "NotificationsList"
+                },
+                "completed_jobs": {
+                    title: i18n._('Completed Jobs'),
+                    skipGenerator: true,
+                    ngClick: "$state.go('templates.editWorkflowJobTemplate.completed_jobs')"
+                },
+                "schedules": {
+                    title: i18n._('Schedules'),
+                    skipGenerator: true,
+                    ngClick: "$state.go('templates.editWorkflowJobTemplate.schedules')"
                 }
             },
 

@@ -19,14 +19,13 @@
 </head>
 
 <body data-user-agent="{{userAgent}}">
-    <div ui-view="networking"><div>
+    <div ui-view="networking"></div>
     <at-layout>
         <bread-crumb></bread-crumb>
         <toast></toast>
         <div class="container-fluid" id="content-container">
             <div class="row">
-                <div class="col-lg-12" ui-view>
-                </div>
+                <div class="col-lg-12" ui-view></div>
             </div>
             <!-- Password Dialog -->
             <div id="password-modal" style="display: none;"></div>
@@ -48,7 +47,7 @@
                         <div class="Modal-body" ng-bind-html="promptBody" id="prompt-body">
                         </div>
                         <div class="Modal-footer">
-                            <a href="#" data-target="#prompt-modal" data-dismiss="modal" id="prompt_cancel_btn" class="btn Modal-defaultButton Modal-footerButton" translate>CANCEL</a>
+                            <a href="#" data-target="#prompt-modal" data-dismiss="modal" id="prompt_cancel_btn" class="btn Modal-defaultButton Modal-footerButton" ng-bind="cancelActionText"></a>
                             <a href="" ng-hide="hideActionButton" ng-class="promptActionBtnClass" ng-click="promptAction()" id="prompt_action_btn" class="btn Modal-footerButton" ng-bind="promptActionText"></a>
                         </div>
                     </div>

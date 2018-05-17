@@ -5,6 +5,7 @@ from awx.main.models import (
     Organization,
     Project,
 )
+from awx.main.fields import update_role_parentage_for_instance
 
 
 @pytest.mark.django_db
@@ -202,3 +203,11 @@ def test_auto_parenting():
     assert org1.admin_role.is_ancestor_of(prj2.admin_role) is False
     assert org2.admin_role.is_ancestor_of(prj1.admin_role)
     assert org2.admin_role.is_ancestor_of(prj2.admin_role)
+
+
+@pytest.mark.django_db
+def test_update_parents_keeps_teams(team, project):
+    project.update_role.parents.add(team.member_role)
+    assert team.member_role in project.update_role  # test prep sanity check
+    update_role_parentage_for_instance(project)
+    assert team.member_role in project.update_role  # actual assertion

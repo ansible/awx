@@ -76,7 +76,7 @@ export default ['i18n', function(i18n) {
                         reqExpression: "isAddForm",
                         init: false
                     },
-                    ngChange: "clearPWConfirm('password_confirm')",
+                    ngChange: "clearPWConfirm()",
                     autocomplete: false,
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
@@ -215,8 +215,8 @@ export default ['i18n', function(i18n) {
                             ngClick: "$state.go('.add')",
                             label: 'Add',
                             awToolTip: i18n._('Grant Permission'),
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ' + i18n._('ADD PERMISSIONS'),
+                            actionClass: 'at-Button--add',
+                            actionId: 'button-add',
                             ngShow: '(!is_superuser && (user_obj.summary_fields.user_capabilities.edit || canAdd))'
                         }
                     },

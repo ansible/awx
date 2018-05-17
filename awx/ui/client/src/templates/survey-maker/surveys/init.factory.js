@@ -109,15 +109,18 @@ export default
                     });
                 };
 
-                updateSurveyQuestions()
-                .then(function() {
-                    return updateSurveyEnabled();
-                })
-                .then(function() {
-                    scope.closeSurvey('survey-modal-dialog');
-                    scope.$emit('SurveySaved');
-                });
-
+                if (!scope.survey_questions || scope.survey_questions.length === 0) {
+                    scope.deleteSurvey();
+                } else {
+                    updateSurveyQuestions()
+                    .then(function() {
+                        return updateSurveyEnabled();
+                    })
+                    .then(function() {
+                        scope.closeSurvey('survey-modal-dialog');
+                        scope.$emit('SurveySaved');
+                    });
+                }
             };
 
             // Gets called when the user clicks the on/off toggle beside the survey modal title.

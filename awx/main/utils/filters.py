@@ -8,14 +8,106 @@ from pyparsing import (
     CharsNotIn,
     ParseException,
 )
+from logging import Filter, _levelNames
 
 import six
 
-import django
+from django.apps import apps
+from django.db import models
+from django.conf import settings
 
 from awx.main.utils.common import get_search_fields
 
-__all__ = ['SmartFilter']
+__all__ = ['SmartFilter', 'ExternalLoggerEnabled']
+
+
+class FieldFromSettings(object):
+    """
+    Field interface - defaults to getting value from setting
+    if otherwise set, provided value will take precedence
+        over value in settings
+    """
+
+    def __init__(self, setting_name):
+        self.setting_name = setting_name
+
+    def __get__(self, instance, type=None):
+        if self.setting_name in getattr(instance, 'settings_override', {}):
+            return instance.settings_override[self.setting_name]
+        return getattr(settings, self.setting_name, None)
+
+    def __set__(self, instance, value):
+        if value is None:
+            if hasattr(instance, 'settings_override'):
+                instance.settings_override.pop('instance', None)
+        else:
+            if not hasattr(instance, 'settings_override'):
+                instance.settings_override = {}
+            instance.settings_override[self.setting_name] = value
+
+
+class ExternalLoggerEnabled(Filter):
+
+    # Prevents recursive logging loops from swamping the server
+    LOGGER_BLACKLIST = (
+        # loggers that may be called in process of emitting a log
+        'awx.main.utils.handlers',
+        'awx.main.utils.formatters',
+        'awx.main.utils.filters',
+        'awx.main.utils.encryption',
+        'awx.main.utils.log',
+        # loggers that may be called getting logging settings
+        'awx.conf'
+    )
+
+    lvl = FieldFromSettings('LOG_AGGREGATOR_LEVEL')
+    enabled_loggers = FieldFromSettings('LOG_AGGREGATOR_LOGGERS')
+    enabled_flag = FieldFromSettings('LOG_AGGREGATOR_ENABLED')
+
+    def __init__(self, **kwargs):
+        super(ExternalLoggerEnabled, self).__init__()
+        for field_name, field_value in kwargs.items():
+            if not isinstance(ExternalLoggerEnabled.__dict__.get(field_name, None), FieldFromSettings):
+                raise Exception('%s is not a valid kwarg' % field_name)
+            if field_value is None:
+                continue
+            setattr(self, field_name, field_value)
+
+    def filter(self, record):
+        """
+        Uses the database settings to determine if the current
+        external log configuration says that this particular record
+        should be sent to the external log aggregator
+
+        False - should not be logged
+        True - should be logged
+        """
+        # Logger exceptions
+        for logger_name in self.LOGGER_BLACKLIST:
+            if record.name.startswith(logger_name):
+                return False
+        # General enablement
+        if not self.enabled_flag:
+            return False
+
+        # Level enablement
+        if record.levelno < _levelNames[self.lvl]:
+            # logging._levelNames -> logging._nameToLevel in python 3
+            return False
+
+        # Logger type enablement
+        loggers = self.enabled_loggers
+        if not loggers:
+            return False
+        if record.name.startswith('awx.analytics'):
+            base_path, headline_name = record.name.rsplit('.', 1)
+            return bool(headline_name in loggers)
+        else:
+            if '.' in record.name:
+                base_name, trailing_path = record.name.split('.', 1)
+            else:
+                base_name = record.name
+            return bool(base_name in loggers)
 
 
 def string_to_type(t):
@@ -36,7 +128,7 @@ def string_to_type(t):
 
 
 def get_model(name):
-    return django.apps.apps.get_model('main', name)
+    return apps.get_model('main', name)
 
 
 class SmartFilter(object):
@@ -52,7 +144,7 @@ class SmartFilter(object):
             search_kwargs = self._expand_search(k, v)
             if search_kwargs:
                 kwargs.update(search_kwargs)
-                q = reduce(lambda x, y: x | y, [django.db.models.Q(**{u'%s__contains' % _k:_v}) for _k, _v in kwargs.items()])
+                q = reduce(lambda x, y: x | y, [models.Q(**{u'%s__contains' % _k:_v}) for _k, _v in kwargs.items()])
                 self.result = Host.objects.filter(q)
             else:
                 kwargs[k] = v

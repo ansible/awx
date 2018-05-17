@@ -122,7 +122,6 @@
                 </label>
                 <select
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
-                    class="MakeSelect2"
                     name="schedulerTimeZone"
                     id="schedulerTimeZone"
                     ng-model="schedulerTimeZone"
@@ -130,6 +129,7 @@
                     required class="form-control input-sm"
                     ng-change="scheduleTimeChange()" >
                 </select>
+                <option></option>
             </div>
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
@@ -572,9 +572,9 @@
         </form>
         <div class="SchedulerFormDetail-container
             SchedulerFormDetail-container--error"
-            ng-show="!schedulerIsValid && scheduler_form.$dirty">
+            ng-show="(preview_list.isEmpty && scheduler_form.$dirty) || (!schedulerIsValid && scheduler_form.$dirty)">
             <p class="SchedulerFormDetail-errorText">
-                The scheduler options are invalid or incomplete.
+                The scheduler options are invalid, incomplete, or a date is in the past.
             </p>
         </div>
         <div class="SchedulerFormDetail-container"
@@ -607,7 +607,7 @@
                             ng-model="dateChoice"
                             id="date-choice-local"
                             value="local" >
-                        Local time
+                        Local Time Zone
                     </label>
                     <label class="radio-inline
                         SchedulerFormDetail-radioLabel">

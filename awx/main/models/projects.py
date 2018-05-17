@@ -241,6 +241,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
     SOFT_UNIQUE_TOGETHER = [('polymorphic_ctype', 'name', 'organization')]
     FIELDS_TO_PRESERVE_AT_COPY = ['labels', 'instance_groups', 'credentials']
     FIELDS_TO_DISCARD_AT_COPY = ['local_path']
+    FIELDS_TRIGGER_UPDATE = frozenset(['scm_url', 'scm_branch', 'scm_type'])
 
     class Meta:
         app_label = 'main'
@@ -323,6 +324,11 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
             ['name', 'description', 'schedule']
         )
 
+    def __init__(self, *args, **kwargs):
+        r = super(Project, self).__init__(*args, **kwargs)
+        self._prior_values_store = self._current_sensitive_fields()
+        return r
+
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         # If update_fields has been specified, add our field names to it,
@@ -354,8 +360,21 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
                 with disable_activity_stream():
                     self.save(update_fields=update_fields)
         # If we just created a new project with SCM, start the initial update.
-        if new_instance and self.scm_type and not skip_update:
+        # also update if certain fields have changed
+        relevant_change = False
+        new_values = self._current_sensitive_fields()
+        if hasattr(self, '_prior_values_store') and self._prior_values_store != new_values:
+            relevant_change = True
+        self._prior_values_store = new_values
+        if (relevant_change or new_instance) and (not skip_update) and self.scm_type:
             self.update()
+
+    def _current_sensitive_fields(self):
+        new_values = {}
+        for attr, val in self.__dict__.items():
+            if attr in Project.FIELDS_TRIGGER_UPDATE:
+                new_values[attr] = val
+        return new_values
 
     def _get_current_status(self):
         if self.scm_type:
@@ -533,7 +552,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         return reverse('api:project_update_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urlparse.urljoin(settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
+        return urlparse.urljoin(settings.TOWER_URL_BASE, "/#/jobs/project/{}".format(self.pk))
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()

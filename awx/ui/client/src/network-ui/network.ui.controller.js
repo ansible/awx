@@ -25,6 +25,7 @@ var NetworkUIController = function($scope,
                                    $http,
                                    $q,
                                    $state,
+                                   $log,
                                    ProcessErrors,
                                    ConfigService,
                                    rbacUiControlService) {
@@ -52,7 +53,7 @@ var NetworkUIController = function($scope,
 
   $scope.initial_messages = [];
   if (!$scope.disconnected) {
-      $scope.control_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/topology?inventory_id=" + $scope.inventory_id,
+      $scope.control_socket = new ReconnectingWebSocket(protocol + "://" + window.location.host + "/network_ui/topology/?inventory_id=" + $scope.inventory_id,
                                                          null,
                                                          {debug: false, reconnectInterval: 300});
       if ($scope.tests_enabled) {
@@ -269,19 +270,19 @@ var NetworkUIController = function($scope,
       $scope.for_each_page('/api/v2/inventories/' + $scope.inventory_id + '/hosts/',
            function(all_results) {
                let hosts = all_results;
-               console.log(hosts.length);
+               $log.debug(hosts.length);
                for(var i = 0; i<hosts.length; i++) {
-                   console.log(i);
+                   $log.debug(i);
                    try {
                        let device_type = null;
                        let device_name = null;
                        let device = null;
                        let host = hosts[i];
                        device_name = host.name;
-                       console.log(device_name);
+                       $log.debug(device_name);
                        if (host.variables !== "") {
                            host.data = jsyaml.safeLoad(host.variables);
-                           console.log(host.data);
+                           $log.debug(host.data);
                        } else {
                            host.data = {};
                        }
@@ -297,14 +298,14 @@ var NetworkUIController = function($scope,
                            $scope.update_links_in_vars_by_device(device_name, host.data);
                        }
                        if ($scope.devices_by_name[device_name] === undefined) {
-                           console.log(['adding', device_name]);
+                           $log.debug(['adding', device_name]);
                            device = new models.Device(0, device_name, 0, 0, device_type, host.id);
                            device.icon = true;
                            device.variables = host.data;
                            $scope.inventory_toolbox.items.push(device);
                        }
                    } catch (error) {
-                       console.log(error);
+                       $log.debug(error);
                    }
                }
            }, 100);
@@ -950,7 +951,7 @@ var NetworkUIController = function($scope,
     };
 
     $scope.create_device = function(data) {
-        console.log(data);
+        $log.debug(data);
         var device = new models.Device(data.id,
                                        data.name,
                                        data.x,
@@ -979,7 +980,7 @@ var NetworkUIController = function($scope,
     };
 
     $scope.onLinkCreate = function(data) {
-        console.log(data);
+        $log.debug(data);
         $scope.create_link(data);
     };
 
@@ -1011,7 +1012,7 @@ var NetworkUIController = function($scope,
                 }
             }
         }
-        console.log(new_link);
+        $log.debug(new_link);
         if (new_link.from_interface !== null && new_link.to_interface !== null) {
             new_link.from_interface.dot();
             new_link.to_interface.dot();
@@ -1227,12 +1228,12 @@ var NetworkUIController = function($scope,
             $scope.link_id_seq = util.natural_numbers(max_link_id);
         }
 
-        console.log(['data.inventory_toolbox', data.inventory_toolbox]);
+        $log.debug(['data.inventory_toolbox', data.inventory_toolbox]);
         if (data.inventory_toolbox !== undefined) {
             $scope.inventory_toolbox.items = [];
             for (i = 0; i < data.inventory_toolbox.length; i++) {
                 device = data.inventory_toolbox[i];
-                console.log(device);
+                $log.debug(device);
                 if (device.device_type === undefined) {
                     device.device_type = device.type;
                 }
@@ -1247,7 +1248,7 @@ var NetworkUIController = function($scope,
 				}
                 $scope.inventory_toolbox.items.push(new_device);
             }
-            console.log($scope.inventory_toolbox.items);
+            $log.debug($scope.inventory_toolbox.items);
         }
 
         $scope.updateInterfaceDots();
@@ -1322,6 +1323,12 @@ var NetworkUIController = function($scope,
         }
     };
 
+    $scope.$on('awxNet-closeNetworkUI', function(){
+        $scope.control_socket.close();
+        if ($scope.tests_enabled) {
+            $scope.test_socket.close();
+        }
+    });
 
     // End web socket
     //
@@ -1345,10 +1352,10 @@ var NetworkUIController = function($scope,
         $scope.$apply();
     }, 17);
 
-    console.log("Network UI started");
+    $log.debug("Network UI started");
 
     $scope.$on('$destroy', function () {
-        console.log("Network UI stopping");
+        $log.debug("Network UI stopping");
         $scope.first_channel.send('UnbindDocument', {});
     });
 
@@ -1380,7 +1387,7 @@ var NetworkUIController = function($scope,
             try {
                 $scope.first_channel.send(test_event.msg_type, test_event);
             } catch (err) {
-                console.log(["Test Error:", $scope.current_test, err]);
+                $log.debug(["Test Error:", $scope.current_test, err]);
                 $scope.test_errors.push(err);
             }
         }
@@ -1455,7 +1462,7 @@ var NetworkUIController = function($scope,
         }
         $scope.animations = [];
     };
+    $log.debug("Network UI loaded");
 };
 
 exports.NetworkUIController = NetworkUIController;
-console.log("Network UI loaded");

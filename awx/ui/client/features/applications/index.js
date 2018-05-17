@@ -62,8 +62,7 @@ function ApplicationsRun ($stateExtender, strings) {
         },
         data: {
             activityStream: true,
-            // TODO: double-check activity stream works
-            activityStreamTarget: 'application'
+            activityStreamTarget: 'o_auth2_application'
         },
         views: {
             '@': {
@@ -111,8 +110,7 @@ function ApplicationsRun ($stateExtender, strings) {
         },
         data: {
             activityStream: true,
-            // TODO: double-check activity stream works
-            activityStreamTarget: 'application'
+            activityStreamTarget: 'o_auth2_application'
         },
         views: {
             'add@applications': {
@@ -134,7 +132,7 @@ function ApplicationsRun ($stateExtender, strings) {
         },
         data: {
             activityStream: true,
-            activityStreamTarget: 'application',
+            activityStreamTarget: 'o_auth2_application',
             activityStreamId: 'application_id'
         },
         views: {
@@ -264,8 +262,7 @@ function ApplicationsRun ($stateExtender, strings) {
         },
         data: {
             activityStream: true,
-            // TODO: double-check activity stream works
-            activityStreamTarget: 'application'
+            activityStreamTarget: 'o_auth2_application'
         },
         views: {
             'userList@applications.edit': {

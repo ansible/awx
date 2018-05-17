@@ -264,6 +264,7 @@ export default [
         $scope.workflow_job_template_obj = workflowJobTemplateData;
         $scope.name = workflowJobTemplateData.name;
         $scope.can_edit = workflowJobTemplateData.summary_fields.user_capabilities.edit;
+        $scope.breadcrumb.workflow_job_template_name = $scope.name;
         let fld, i;
         for (fld in form.fields) {
             if (fld !== 'variables' && fld !== 'survey' && workflowJobTemplateData[fld] !== null && workflowJobTemplateData[fld] !== undefined) {

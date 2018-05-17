@@ -31,8 +31,8 @@
         aw-tool-tip="{{ vm.toggleStdoutFullscreenTooltip }}"
         data-tip-watch="vm.toggleStdoutFullscreenTooltip"
         data-placement="top"
-        ng-class="{'at-Input-button--active': vm.fullscreen.isFullscreen}"
-        ng-click="vm.toggleFullscreen()">
+        ng-class="{'at-Input-button--active': vm.expanded}"
+        ng-click="vm.toggleExpanded()">
         <i class="fa fa-arrows-alt"></i>
     </button>
 </div>
@@ -42,40 +42,47 @@
         ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.ok }}"
-        data-tip-watch="vm.tooltips.ok">
+        data-tip-watch="vm.tooltips.ok"
+        tooltip-outer-class="HostStatusBar-tooltip">
     </div>
     <div class="HostStatusBar-skipped"
         ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.skipped }}"
-        data-tip-watch="vm.tooltips.skipped">
+        data-tip-watch="vm.tooltips.skipped"
+        tooltip-outer-class="HostStatusBar-tooltip">
     </div>
     <div class="HostStatusBar-changed"
         ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.changed }}"
-        data-tip-watch="vm.tooltips.changed">
+        data-tip-watch="vm.tooltips.changed"
+        tooltip-outer-class="HostStatusBar-tooltip">
     </div>
     <div class="HostStatusBar-failures"
         ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.failures }}"
-        data-tip-watch="vm.tooltips.failures">
+        data-tip-watch="vm.tooltips.failures"
+        tooltip-outer-class="HostStatusBar-tooltip">
     </div>
     <div class="HostStatusBar-dark"
         ng-show="!vm.running"
         data-placement="top"
         aw-tool-tip="{{ vm.tooltips.dark }}"
-        data-tip-watch="vm.tooltips.dark">
+        data-tip-watch="vm.tooltips.dark"
+        tooltip-outer-class="HostStatusBar-tooltip">
     </div>
     <div class="HostStatusBar-noData"
         ng-show="vm.running"
         data-placement="top"
-        aw-tool-tip="{{:: vm.tooltips.running }}">
+        aw-tool-tip="{{:: vm.tooltips.running }}"
+        tooltip-outer-class="HostStatusBar-tooltip">
     </div>
     <div class="HostStatusBar-noData"
         ng-show="!vm.running && !vm.statsAreAvailable"
         data-placement="top"
-        aw-tool-tip="{{:: vm.tooltips.unavailable }}">
+        aw-tool-tip="{{:: vm.tooltips.unavailable }}"
+        tooltip-outer-class="HostStatusBar-tooltip">
     </div>
 </div>

@@ -7,24 +7,25 @@ const webpackConfig = require('./webpack.spec');
 
 module.exports = config => {
     config.set({
+        basePath: '../..',
         autoWatch: true,
         colors: true,
         browsers: ['Chrome', 'Firefox'],
         frameworks: ['jasmine'],
         reporters: ['progress', 'junit'],
         files:[
-            './polyfills.js',
-            path.join(SRC_PATH, '**/*.html'),
-            path.join(SRC_PATH, 'vendor.js'),
+            'test/spec/polyfills.js',
+            'client/src/vendor.js',
             path.join(NODE_MODULES, 'angular-mocks/angular-mocks.js'),
             path.join(SRC_PATH, 'app.js'),
-            '**/*-test.js',
+            'client/src/**/*.html',
+            'test/spec/**/*-test.js',
         ],
         preprocessors: {
-            [path.join(SRC_PATH, '**/*.html')]: 'html2js',
-            [path.join(SRC_PATH, 'vendor.js')]: 'webpack',
+            'client/src/vendor.js': 'webpack',
             [path.join(SRC_PATH, 'app.js')]: 'webpack',
-            '**/*-test.js': 'webpack'
+            'client/src/**/*.html': 'html2js',
+            'test/spec/**/*-test.js': 'webpack'
         },
         webpack: webpackConfig,
         webpackMiddleware: {

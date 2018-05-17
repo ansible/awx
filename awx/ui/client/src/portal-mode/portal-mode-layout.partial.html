@@ -1,10 +1,24 @@
 <div class="tab-pane PortalMode">
     <div ng-cloak id="portal-landing">
         <div class="PortalMode-container">
-            <div ui-view="job-templates" class="PortalMode-panel--left Panel">
+            <div class="PortalMode-panel PortalMode-panel--left Panel">
+                <div id="portal-container-job-templates">
+                    <div class="List-header">
+                        <div class="List-title">
+                            <div class="List-titleText" translate>JOB TEMPLATES</div>
+                        </div>
+                    </div>
+                    <div ui-view="templates">
+                    </div>
+                </div>
             </div>
-            <div class="PortalMode-panel--right">
+            <div class="PortalMode-panel PortalMode-panel--right">
                 <div id="portal-container-jobs" class="Panel">
+                    <div class="List-header">
+                        <div class="List-title">
+                            <div class="List-titleText" translate>JOBS</div>
+                        </div>
+                    </div>
                     <div class="PortalMode-filterHolder">
                         <div class="FormToggle-container">
                             <div class="btn-group">

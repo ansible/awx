@@ -38,6 +38,16 @@ function ListTokensController (
         vm.tokensCount = dataset.count;
     });
 
+    vm.getScopeString = str => {
+        if (str === 'Read') {
+            return vm.strings.get('add.SCOPE_READ_LABEL');
+        } else if (str === 'Write') {
+            return vm.strings.get('add.SCOPE_WRITE_LABEL');
+        }
+
+        return undefined;
+    };
+
     vm.getLastUsed = token => {
         const lastUsed = _.get(token, 'last_used');
 
@@ -95,7 +105,7 @@ function ListTokensController (
 
         Prompt({
             hdr: strings.get('deleteResource.HEADER'),
-            resourceName: 'token',
+            resourceName: strings.get('list.HEADER', tok.summary_fields.application.name),
             body: deleteModalBody,
             action,
             actionText: strings.get('add.DELETE_ACTION_LABEL')

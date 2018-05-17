@@ -31,8 +31,8 @@
 
 export default
 angular.module('PromptDialog', ['Utilities'])
-    .factory('Prompt', [
-        function () {
+    .factory('Prompt', [ 'AppStrings',
+        function (strings) {
             return function (params) {
 
                 var dialog = angular.element(document.getElementById('prompt-modal')),
@@ -42,7 +42,8 @@ angular.module('PromptDialog', ['Utilities'])
                 scope.promptResourceName = params.resourceName;
                 scope.promptBody = params.body;
                 scope.promptAction = params.action;
-                scope.promptActionText = (params.actionText === null || params.actionText === undefined || params.actionText === '') ? 'YES' : params.actionText;
+                scope.promptActionText = (params.actionText === null || params.actionText === undefined || params.actionText === '') ? strings.get('YES') : params.actionText;
+                scope.cancelActionText = (params.cancelText === null || params.cancelText === undefined || params.cancelText === '') ? strings.get('CANCEL') : params.cancelText;
                 scope.hideActionButton = params.hideActionButton ? true : false;
 
                 local_backdrop = (params.backdrop === undefined) ? "static" : params.backdrop;

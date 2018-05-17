@@ -94,7 +94,7 @@ export default
                                             Wait('stop');
                                             $("#prompt-for-days").dialog("close");
                                             // $("#configure-dialog").dialog('close');
-                                            $state.go('jobz', { id: data.system_job, type: 'system' }, { reload: true });
+                                            $state.go('output', { id: data.system_job, type: 'system' }, { reload: true });
                                         })
                                         .catch(({data, status}) => {
                                             let template_id = $scope.job_template_id;

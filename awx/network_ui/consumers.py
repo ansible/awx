@@ -1,6 +1,6 @@
 # Copyright (c) 2017 Red Hat, Inc
-from channels import Group
-from channels.sessions import channel_session
+import channels
+from channels.auth import channel_session_user, channel_session_user_from_http
 from awx.network_ui.models import Topology, Device, Link, Client, Interface
 from awx.network_ui.models import TopologyInventory
 import urlparse
@@ -22,6 +22,10 @@ def parse_inventory_id(data):
         inventory_id = int(inventory_id[0])
     except ValueError:
         inventory_id = None
+    except IndexError:
+        inventory_id = None
+    except TypeError:
+        inventory_id = None
     if not inventory_id:
         inventory_id = None
     return inventory_id
@@ -42,10 +46,10 @@ class NetworkingEvents(object):
             message_type = data.pop(0)
             message_value = data.pop(0)
             if isinstance(message_value, list):
-                logger.error("Message has no sender")
+                logger.warning("Message has no sender")
                 return None, None
             if isinstance(message_value, dict) and client_id != message_value.get('sender'):
-                logger.error("client_id mismatch expected: %s actual %s", client_id, message_value.get('sender'))
+                logger.warning("client_id mismatch expected: %s actual %s", client_id, message_value.get('sender'))
                 return None, None
             return message_type, message_value
         else:
@@ -58,11 +62,19 @@ class NetworkingEvents(object):
         of name onX where X is the message type.
         '''
         topology_id = message.get('topology')
-        assert topology_id is not None, "No topology_id"
+        if topology_id is None:
+            logger.warning("Unsupported message %s: no topology", message)
+            return
         client_id = message.get('client')
-        assert client_id is not None, "No client_id"
+        if client_id is None:
+            logger.warning("Unsupported message %s: no client", message)
+            return
+        if 'text' not in message:
+            logger.warning("Unsupported message %s: no data", message)
+            return
         message_type, message_value = self.parse_message_text(message['text'], client_id)
         if message_type is None:
+            logger.warning("Unsupported message %s: no message type", message)
             return
         handler = self.get_handler(message_type)
         if handler is not None:
@@ -98,9 +110,6 @@ class NetworkingEvents(object):
     def onDeviceMove(self, device, topology_id, client_id):
         Device.objects.filter(topology_id=topology_id, cid=device['id']).update(x=device['x'], y=device['y'])
 
-    def onDeviceInventoryUpdate(self, device, topology_id, client_id):
-        Device.objects.filter(topology_id=topology_id, cid=device['id']).update(host_id=device['host_id'])
-
     def onDeviceLabelEdit(self, device, topology_id, client_id):
         logger.debug("Device label edited %s", device)
         Device.objects.filter(topology_id=topology_id, cid=device['id']).update(name=device['name'])
@@ -132,6 +141,12 @@ class NetworkingEvents(object):
         device_map = dict(Device.objects
                                 .filter(topology_id=topology_id, cid__in=[link['from_device_id'], link['to_device_id']])
                                 .values_list('cid', 'pk'))
+        if link['from_device_id'] not in device_map:
+            logger.warning('Device not found')
+            return
+        if link['to_device_id'] not in device_map:
+            logger.warning('Device not found')
+            return
         Link.objects.get_or_create(cid=link['id'],
                                    name=link['name'],
                                    from_device_id=device_map[link['from_device_id']],
@@ -150,8 +165,10 @@ class NetworkingEvents(object):
                                 .filter(topology_id=topology_id, cid__in=[link['from_device_id'], link['to_device_id']])
                                 .values_list('cid', 'pk'))
         if link['from_device_id'] not in device_map:
+            logger.warning('Device not found')
             return
         if link['to_device_id'] not in device_map:
+            logger.warning('Device not found')
             return
         Link.objects.filter(cid=link['id'],
                             from_device_id=device_map[link['from_device_id']],
@@ -189,8 +206,15 @@ class NetworkingEvents(object):
 networking_events_dispatcher = NetworkingEvents()
 
 
-@channel_session
+@channel_session_user_from_http
 def ws_connect(message):
+    if not message.user.is_authenticated():
+        logger.error("Request user is not authenticated to use websocket.")
+        message.reply_channel.send({"close": True})
+        return
+    else:
+        message.reply_channel.send({"accept": True})
+
     data = urlparse.parse_qs(message.content['query_string'])
     inventory_id = parse_inventory_id(data)
     topology_ids = list(TopologyInventory.objects.filter(inventory_id=inventory_id).values_list('pk', flat=True))
@@ -205,11 +229,11 @@ def ws_connect(message):
         TopologyInventory(inventory_id=inventory_id, topology_id=topology.pk).save()
     topology_id = topology.pk
     message.channel_session['topology_id'] = topology_id
-    Group("topology-%s" % topology_id).add(message.reply_channel)
+    channels.Group("topology-%s" % topology_id).add(message.reply_channel)
     client = Client()
     client.save()
     message.channel_session['client_id'] = client.pk
-    Group("client-%s" % client.pk).add(message.reply_channel)
+    channels.Group("client-%s" % client.pk).add(message.reply_channel)
     message.reply_channel.send({"text": json.dumps(["id", client.pk])})
     message.reply_channel.send({"text": json.dumps(["topology_id", topology_id])})
     topology_data = transform_dict(dict(id='topology_id',
@@ -268,18 +292,18 @@ def send_snapshot(channel, topology_id):
     channel.send({"text": json.dumps(["Snapshot", snapshot])})
 
 
-@channel_session
+@channel_session_user
 def ws_message(message):
     # Send to all clients editing the topology
-    Group("topology-%s" % message.channel_session['topology_id']).send({"text": message['text']})
+    channels.Group("topology-%s" % message.channel_session['topology_id']).send({"text": message['text']})
     # Send to networking_events handler
     networking_events_dispatcher.handle({"text": message['text'],
                                          "topology": message.channel_session['topology_id'],
                                          "client": message.channel_session['client_id']})
 
 
-@channel_session
+@channel_session_user
 def ws_disconnect(message):
     if 'topology_id' in message.channel_session:
-        Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
+        channels.Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
 

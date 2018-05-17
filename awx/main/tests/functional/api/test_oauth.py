@@ -172,3 +172,12 @@ def test_oauth_application_delete(oauth_application, post, delete, admin):
     assert Application.objects.filter(client_id=oauth_application.client_id).count() == 0
     assert RefreshToken.objects.filter(application=oauth_application).count() == 0
     assert AccessToken.objects.filter(application=oauth_application).count() == 0
+
+
+@pytest.mark.django_db
+def test_oauth_list_user_tokens(oauth_application, post, get, admin, alice):
+    for user in (admin, alice):
+        url = reverse('api:o_auth2_token_list', kwargs={'pk': user.pk})
+        post(url, {'scope': 'read'}, user, expect=201)
+        response = get(url, admin, expect=200)
+        assert response.data['count'] == 1

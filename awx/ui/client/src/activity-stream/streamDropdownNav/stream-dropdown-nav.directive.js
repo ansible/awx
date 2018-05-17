@@ -21,6 +21,8 @@ export default ['templateUrl', 'i18n', function(templateUrl, i18n) {
 
             $scope.options = [
                 {label: i18n._('All Activity'), value: 'dashboard'},
+                {label: i18n._('Applications'), value: 'o_auth2_application'},
+                {label: i18n._('Tokens'), value: 'o_auth2_access_token'},
                 {label: i18n._('Credentials'), value: 'credential'},
                 {label: i18n._('Hosts'), value: 'host'},
                 {label: i18n._('Inventories'), value: 'inventory'},

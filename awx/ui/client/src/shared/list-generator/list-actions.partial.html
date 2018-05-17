@@ -4,9 +4,8 @@
     <div ng-if="options.type && options.type === 'template'" ng-include="options.template" ng-show="{{options.ngShow}}"></div>
     <div class="List-action--showTooltipOnDisabled" ng-if="options.showTipWhenDisabled" aw-tool-tip="{{options.awToolTip}}" data-tip-watch="{{options.dataTipWatch}}" data-placement="{{options.dataPlacement}}" data-container="{{options.dataContainer}}" data-title="{{options.dataTitle}}" data-tooltip-inner-class="{{options.tooltipInnerClass}}">
         <div class="btn-group" ng-if="options.type === 'buttonDropdown'" ng-disabled="{{options.ngDisabled}}">
-            <button type="button" class="{{options.actionClass}} List-dropdownButton" ng-bind-html="options.buttonContent" translate></button>
-            <button type="button" class="{{options.actionClass}} List-dropdownButton List-dropdownCaratButton dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="List-dropdownCarat"></span>
+            <button type="button" class="{{options.actionClass}} List-dropdownButton" id="{{options.actionId}}" ng-bind-html="options.buttonContent" translate></button>
+            <button type="button" class="List-dropdownButton dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
             <ul class="dropdown-menu pull-right">
@@ -20,6 +19,7 @@
                 toolbar-button
                 mode="options.mode"
                 class="{{options.actionClass}}"
+                id="{{options.actionId}}"
                 ng-disabled="{{options.ngDisabled}}"
                 ng-show="{{options.ngShow}}"
                 ng-click="$eval(options.ngClick)"
@@ -31,12 +31,11 @@
     </div>
     <span ng-if="!options.showTipWhenDisabled">
         <div class="btn-group" ng-if="options.type === 'buttonDropdown'" ng-disabled="{{options.ngDisabled}}" aw-tool-tip="{{options.awToolTip}}" data-tip-watch="{{options.dataTipWatch}}" data-placement="{{options.dataPlacement}}" data-container="{{options.dataContainer}}" ng-show="{{options.ngShow}}">
-            <button type="button" class="{{options.actionClass}} List-dropdownButton dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button type="button" class="{{options.actionClass}} List-dropdownButton dropdown-toggle" id="{{options.actionId}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span  ng-bind-html="options.buttonContent" translate></span>
-                <span class="List-dropdownCarat"></span>
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
-            <ul class="dropdown-menu pull-right">
+            <ul class="dropdown-menu at-List-toolbarActionDropdownMenu">
                 <li ng-repeat="option in options.options">
                     <a ui-sref="{{option.optionSref}}" ng-bind-html="option.optionContent" ng-show="{{option.ngShow}}"></a>
                 </li>
@@ -51,13 +50,14 @@
                 data-placement="{{options.dataPlacement}}"
                 data-container="{{options.dataContainer}}"
                 class="{{options.actionClass}}"
+                id="{{options.actionId}}"
                 data-title="{{options.dataTitle}}"
                 ng-disabled="{{options.ngDisabled}}"
                 ng-click="$eval(options.ngClick)"
                 ng-show="{{options.ngShow}}"
                 toolbar="true"
                 aw-feature="{{options.awFeature}}">
-                <span ng-bind-html="options.buttonContent" translate></span>
+                <span ng-if="options.buttonContent" ng-bind-html="options.buttonContent" translate></span>
             </button>
         </span>
     </span>

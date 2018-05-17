@@ -206,7 +206,7 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
             custom_virtualenv: {
                 label: i18n._('Ansible Environment'),
                 type: 'select',
-                defaultText: i18n._('Select Ansible Environment'),
+                defaultText: i18n._('Default Environment'),
                 ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
                 awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this project to run on.") + "</p>",
                 dataTitle: i18n._('Ansible Environment'),
@@ -253,8 +253,8 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                         ngClick: "$state.go('.add')",
                         label: 'Add',
                         awToolTip: i18n._('Add a permission'),
-                        actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ' + i18n._('ADD'),
+                        actionClass: 'at-Button--add',
+                        actionId: 'button-add',
                         ngShow: '(project_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }
                 },
@@ -285,6 +285,11 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
             templates: {
                 include: "TemplateList",
             },
+            schedules: {
+                title: i18n._('Schedules'),
+                skipGenerator: true,
+                ngClick: "$state.go('projects.edit.schedules')"
+            }
         }
 
     };

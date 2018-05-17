@@ -1,64 +1,64 @@
-<div class="container-fluid">
-    <div ui-view></div>
-    <div class="col-md-4" ng-show="!vm.fullscreen.isFullscreen">
-        <at-panel>
-            <at-job-details resource="vm.resource"></at-job-details>
-        </at-panel>
-    </div>
+<div ui-view></div>
+<div class="JobResults-container">
+    <at-panel ng-show="!vm.expanded">
+        <at-job-details 
+            resource="vm.resource">
+        </at-job-details>
+    </at-panel>
 
-    <div ng-class="vm.fullscreen.isFullscreen ? 'col-md-12' : 'col-md-8'">
-        <at-panel class="at-Stdout">
-            <div class="at-Panel-headingTitle">{{ vm.title }}</div>
-            <at-job-stats
-                resource="vm.resource"
-                fullscreen="vm.fullscreen">
-            </at-job-stats>
-            <at-job-search></at-job-search>
+    <at-panel class="at-Stdout" ng-class="{'at-Stdout--fullscreen': vm.expanded}">
+        <div class="at-Panel-headingTitle">
+            {{ vm.title }}
+        </div>
+        <at-job-stats
+            resource="vm.resource"
+            expanded="vm.expanded">
+        </at-job-stats>
+        <at-job-search></at-job-search>
 
-            <div class="at-Stdout-menuTop">
-                <div class="pull-left" ng-click="vm.expand()">
-                    <i class="at-Stdout-menuIcon fa"
-                       ng-class="{ 'fa-minus': vm.isExpanded, 'fa-plus': !vm.isExpanded }"></i>
-                </div>
-
-                <div class="pull-right" ng-click="vm.scroll.end()">
-                    <i class="at-Stdout-menuIcon--lg fa fa-angle-double-down"
-                       ng-class=" { 'at-Stdout-menuIcon--active': vm.scroll.isLocked }"></i>
-                </div>
-                <div class="pull-right" ng-click="vm.scroll.home()">
-                    <i class="at-Stdout-menuIcon--lg fa fa-angle-double-up"></i>
-                </div>
-                <div class="pull-right" ng-click="vm.scroll.down()">
-                    <i class="at-Stdout-menuIcon--lg fa fa-angle-down"></i>
-                </div>
-                <div class="pull-right" ng-click="vm.scroll.up()">
-                    <i class="at-Stdout-menuIcon--lg fa fa-angle-up"></i>
-                </div>
-
-                <div class="at-u-clear"></div>
+        <div class="at-Stdout-menuTop">
+            <div class="pull-left" ng-click="vm.toggleExpand()">
+                <i class="at-Stdout-menuIcon fa"
+                    ng-class="{ 'fa-minus': vm.expanded, 'fa-plus': !vm.expanded }"></i>
             </div>
 
-            <pre class="at-Stdout-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="at-Stdout-toggle">&nbsp;</th>
-                            <th class="at-Stdout-line"></th>
-                            <th class="at-Stdout-event"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="atStdoutResultTable"></tbody>
-                </table>
-            </pre>
-
-            <div ng-show="vm.scroll.showBackToTop" class="at-Stdout-menuBottom">
-                <div class="at-Stdout-menuIconGroup" ng-click="vm.scroll.home()">
-                    <p class="pull-left"><i class="fa fa-angle-double-up"></i></p>
-                    <p class="pull-right">Back to Top</p>
-                </div>
-
-                <div class="at-u-clear"></div>
+            <div class="pull-right" ng-click="vm.scroll.end()">
+                <i class="at-Stdout-menuIcon--lg fa fa-angle-double-down"
+                    ng-class=" { 'at-Stdout-menuIcon--active': vm.scroll.isLocked }"></i>
             </div>
-        </at-panel>
-    </div>
+            <div class="pull-right" ng-click="vm.scroll.home()">
+                <i class="at-Stdout-menuIcon--lg fa fa-angle-double-up"></i>
+            </div>
+            <div class="pull-right" ng-click="vm.scroll.down()">
+                <i class="at-Stdout-menuIcon--lg fa fa-angle-down"></i>
+            </div>
+            <div class="pull-right" ng-click="vm.scroll.up()">
+                <i class="at-Stdout-menuIcon--lg fa fa-angle-up"></i>
+            </div>
+
+            <div class="at-u-clear"></div>
+        </div>
+
+        <pre class="at-Stdout-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="at-Stdout-toggle">&nbsp;</th>
+                        <th class="at-Stdout-line"></th>
+                        <th class="at-Stdout-event"></th>
+                    </tr>
+                </thead>
+                <tbody id="atStdoutResultTable"></tbody>
+            </table>
+        </pre>
+
+        <div ng-show="vm.scroll.showBackToTop" class="at-Stdout-menuBottom">
+            <div class="at-Stdout-menuIconGroup" ng-click="vm.scroll.home()">
+                <p class="pull-left"><i class="fa fa-angle-double-up"></i></p>
+                <p class="pull-right">Back to Top</p>
+            </div>
+
+            <div class="at-u-clear"></div>
+        </div>
+    </at-panel>
 </div>

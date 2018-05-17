@@ -34,8 +34,10 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
             return defer.promise;
         },
         replaceDefaultFlags (value) {
-            value = value.toString().replace(/__icontains_DEFAULT/g, "__icontains");
-            value = value.toString().replace(/__search_DEFAULT/g, "__search");
+            if (value) {
+                value = value.toString().replace(/__icontains_DEFAULT/g, "__icontains");
+                value = value.toString().replace(/__search_DEFAULT/g, "__search");
+            }
 
             return value;
         },
@@ -104,6 +106,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
             }
             let paramString = exclude ? "not__" : "";
             let valueString = paramParts[1];
+
             if(keySplit.length === 1) {
                 if(searchTerm && !lessThanGreaterThan) {
                     if(singleSearchParam) {
@@ -364,7 +367,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
 
             return merged;
         },
-        getSearchInputQueryset (searchInput, isRelatedField = null, isAnsibleFactField = null, singleSearchParam = null) {
+        getSearchInputQueryset (searchInput, isFilterableBaseField = null, isRelatedField = null, isAnsibleFactField = null, singleSearchParam = null) {
             // XXX Should find a better approach than passing in the two 'is...Field' callbacks XXX
             const space = '%20and%20';
             let params = {};
@@ -406,12 +409,12 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
 
                 if (termParts.length === 1) {
                     termParams = searchWithoutKey(term, singleSearchParam);
-                } else if (isAnsibleFactField && isAnsibleFactField(termParts)) {
-                    termParams = this.encodeParam({ term, singleSearchParam });
+                } else if ((isAnsibleFactField && isAnsibleFactField(termParts)) || (isFilterableBaseField && isFilterableBaseField(termParts))) {
+                    termParams = this.encodeParam({ term, singleSearchParam, searchTerm: true });
                 } else if (isRelatedField && isRelatedField(termParts)) {
-                    termParams = this.encodeParam({ term, singleSearchParam, related: true });
+                    termParams = this.encodeParam({ term, singleSearchParam, relatedSearchTerm: true });
                 } else {
-                    termParams = this.encodeParam({ term, singleSearchParam });
+                    termParams = searchWithoutKey(term, singleSearchParam);
                 }
 
                 params = _.merge(params, termParams, combineSameSearches);
@@ -419,7 +422,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
 
             return params;
         },
-        removeTermsFromQueryset(queryset, term, isRelatedField = null, singleSearchParam = null) {
+        removeTermsFromQueryset(queryset, term, isFilterableBaseField, isRelatedField = null, isAnsibleFactField = null, singleSearchParam = null) {
             const modifiedQueryset = _.cloneDeep(queryset);
 
             const removeSingleTermFromQueryset = (value, key) => {
@@ -457,10 +460,12 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
 
             if (termParts.length === 1) {
                 removed = searchWithoutKey(term, singleSearchParam);
+            } else if ((isAnsibleFactField && isAnsibleFactField(termParts)) || (isFilterableBaseField && isFilterableBaseField(termParts))) {
+                removed = this.encodeParam({ term, singleSearchParam, searchTerm: true });
             } else if (isRelatedField && isRelatedField(termParts)) {
-                removed = this.encodeParam({ term, singleSearchParam, related: true });
+                removed = this.encodeParam({ term, singleSearchParam, relatedSearchTerm: true });
             } else {
-                removed = this.encodeParam({ term, singleSearchParam });
+                removed = searchWithoutKey(term, singleSearchParam);
             }
 
             if (!removed) {

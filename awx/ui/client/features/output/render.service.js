@@ -30,11 +30,11 @@ const re = new RegExp(pattern);
 const hasAnsi = input => re.test(input);
 
 function JobRenderService ($q, $sce, $window) {
-    this.init = ({ compile, apply, isStreamActive }) => {
+    this.init = ({ compile, isStreamActive }) => {
         this.parent = null;
         this.record = {};
         this.el = $(ELEMENT_TBODY);
-        this.hooks = { isStreamActive, compile, apply };
+        this.hooks = { isStreamActive, compile };
     };
 
     this.sortByLineNumber = (a, b) => {
@@ -96,6 +96,20 @@ function JobRenderService ($q, $sce, $window) {
         return { html, count };
     };
 
+    this.isHostEvent = (event) => {
+        if (typeof event.host === 'number') {
+            return true;
+        }
+
+        if (event.type === 'project_update_event' &&
+            event.event !== 'runner_on_skipped' &&
+            event.event_data.host) {
+            return true;
+        }
+
+        return false;
+    };
+
     this.createRecord = (ln, lines, event) => {
         if (!event.uuid) {
             return null;
@@ -109,7 +123,7 @@ function JobRenderService ($q, $sce, $window) {
             start: event.start_line,
             end: event.end_line,
             isTruncated: (event.end_line - event.start_line) > lines.length,
-            isHost: typeof event.host === 'number'
+            isHost: this.isHostEvent(event),
         };
 
         if (event.parent_uuid) {
@@ -169,7 +183,7 @@ function JobRenderService ($q, $sce, $window) {
             }
 
             if (current.isHost) {
-                tdEvent = `<td class="at-Stdout-event--host" ui-sref="jobz.host-event.json({eventId: ${current.id},  taskUuid: '${current.uuid}' })"><span ng-non-bindable>${content}</span></td>`;
+                tdEvent = `<td class="at-Stdout-event--host" ui-sref="output.host-event.json({eventId: ${current.id},  taskUuid: '${current.uuid}' })"><span ng-non-bindable>${content}</span></td>`;
             }
 
             if (current.time && current.line === ln) {
@@ -224,8 +238,6 @@ function JobRenderService ($q, $sce, $window) {
 
         return list;
     };
-
-    this.getEvents = () => this.hooks.get();
 
     this.insert = (events, insert) => {
         const result = this.transformEventGroup(events);

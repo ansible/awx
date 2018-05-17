@@ -4,9 +4,11 @@ import logging
 from django.conf import settings
 from django.db import models, DatabaseError
 from django.utils.dateparse import parse_datetime
+from django.utils.text import Truncator
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
+import six
 
 from awx.api.versioning import reverse
 from awx.main.fields import JSONField
@@ -20,6 +22,22 @@ logger = logging.getLogger('awx.main.models.events')
 
 __all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent',
            'InventoryUpdateEvent', 'SystemJobEvent']
+
+
+def sanitize_event_keys(kwargs, valid_keys):
+    # Sanity check: Don't honor keys that we don't recognize.
+    for key in kwargs.keys():
+        if key not in valid_keys:
+            kwargs.pop(key)
+
+    # Truncate certain values over 1k
+    for key in [
+        'play', 'role', 'task', 'playbook'
+    ]:
+        if isinstance(kwargs.get(key), six.string_types):
+            if len(kwargs[key]) > 1024:
+                kwargs[key] = Truncator(kwargs[key]).chars(1024)
+
 
 
 class BasePlaybookEvent(CreatedModifiedModel):
@@ -257,7 +275,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
         return updated_fields
 
     @classmethod
-    def create_from_data(self, **kwargs):
+    def create_from_data(cls, **kwargs):
         pk = None
         for key in ('job_id', 'project_update_id'):
             if key in kwargs:
@@ -279,12 +297,8 @@ class BasePlaybookEvent(CreatedModifiedModel):
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
-        # Sanity check: Don't honor keys that we don't recognize.
-        for key in kwargs.keys():
-            if key not in self.VALID_KEYS:
-                kwargs.pop(key)
-
-        job_event = self.objects.create(**kwargs)
+        sanitize_event_keys(kwargs, cls.VALID_KEYS)
+        job_event = cls.objects.create(**kwargs)
         analytics_logger.info('Event data saved.', extra=dict(python_objects=dict(job_event=job_event)))
         return job_event
 
@@ -551,7 +565,7 @@ class BaseCommandEvent(CreatedModifiedModel):
         return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
 
     @classmethod
-    def create_from_data(self, **kwargs):
+    def create_from_data(cls, **kwargs):
         # Convert the datetime for the event's creation
         # appropriately, and include a time zone for it.
         #
@@ -565,12 +579,8 @@ class BaseCommandEvent(CreatedModifiedModel):
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
-        # Sanity check: Don't honor keys that we don't recognize.
-        for key in kwargs.keys():
-            if key not in self.VALID_KEYS:
-                kwargs.pop(key)
-
-        return self.objects.create(**kwargs)
+        sanitize_event_keys(kwargs, cls.VALID_KEYS)
+        return cls.objects.create(**kwargs)
 
     def get_event_display(self):
         '''

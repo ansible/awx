@@ -69,6 +69,7 @@ function BaseStringService (namespace) {
     this.JSON = t.s('JSON');
     this.DELETE = t.s('DELETE');
     this.COPY = t.s('COPY');
+    this.YES = t.s('YES');
 
     this.deleteResource = {
         HEADER: t.s('Delete'),
@@ -79,7 +80,9 @@ function BaseStringService (namespace) {
 
     this.cancelJob = {
         HEADER: t.s('Cancel'),
-        SUBMIT_REQUEST: t.s('Are you sure you want to submit the request to cancel this job?')
+        SUBMIT_REQUEST: t.s('Are you sure you want to submit the request to cancel this job?'),
+        CANCEL_JOB: t.s('Cancel Job'),
+        RETURN: t.s('Return')
     };
 
     this.error = {

@@ -398,6 +398,13 @@ function extend (method, related, config = {}) {
     return Promise.reject(new Error(`No related property, ${related}, exists`));
 }
 
+function updateCount (count) {
+    this.page.count = count;
+    this.page.last = Math.ceil(count / this.page.size);
+
+    return this.page.last;
+}
+
 function goToPage (config) {
     const params = config.params || {};
     const { page } = config;
@@ -693,6 +700,7 @@ function BaseModel (resource, settings) {
     this.extend = extend;
     this.copy = copy;
     this.getDependentResourceCounts = getDependentResourceCounts;
+    this.updateCount = updateCount;
 
     this.http = {
         get: httpGet.bind(this),

@@ -187,7 +187,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                 // Grab the id from summary_fields
                 var id = (data.summary_fields.current_update) ? data.summary_fields.current_update.id : data.summary_fields.last_update.id;
 
-                $state.go('jobz', { id: id, type: 'project' });
+                $state.go('output', { id: id, type: 'project' });
 
             } else {
                 Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
@@ -301,7 +301,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
         $scope.editSchedules = function(id) {
             var project = Find({ list: $scope.projects, key: 'id', val: id });
             if (!(project.scm_type === "Manual" || Empty(project.scm_type)) && !(project.status === 'updating' || project.status === 'running' || project.status === 'pending')) {
-                $state.go('projectSchedules', { id: id });
+                $state.go('projects.edit.schedules', { project_id: id });
             }
         };
 

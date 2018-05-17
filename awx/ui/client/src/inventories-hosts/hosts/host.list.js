@@ -21,7 +21,7 @@ export default ['i18n', function(i18n) {
         trackBy: 'host.id',
         basePath: 'hosts',
         title: false,
-        actionHolderClass: 'List-actionHolder List-actionHolder--leftAlign',
+        actionHolderClass: 'List-actionHolder',
 
         fields: {
             toggleHost: {

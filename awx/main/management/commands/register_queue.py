@@ -19,11 +19,11 @@ class InstanceNotFound(Exception):
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('--queuename', dest='queuename', type=str,
+        parser.add_argument('--queuename', dest='queuename', type=lambda s: six.text_type(s, 'utf8'),
                             help='Queue to create/update')
-        parser.add_argument('--hostnames', dest='hostnames', type=str,
+        parser.add_argument('--hostnames', dest='hostnames', type=lambda s: six.text_type(s, 'utf8'),
                             help='Comma-Delimited Hosts to add to the Queue')
-        parser.add_argument('--controller', dest='controller', type=str,
+        parser.add_argument('--controller', dest='controller', type=lambda s: six.text_type(s, 'utf8'),
                             default='', help='The controlling group (makes this an isolated group)')
         parser.add_argument('--instance_percent', dest='instance_percent', type=int, default=0,
                             help='The percentage of active instances that will be assigned to this group'),
@@ -96,7 +96,7 @@ class Command(BaseCommand):
         if options.get('hostnames'):
             hostname_list = options.get('hostnames').split(",")
 
-        with advisory_lock('instance_group_registration_%s' % queuename):
+        with advisory_lock(six.text_type('instance_group_registration_{}').format(queuename)):
             (ig, created, changed) = self.get_create_update_instance_group(queuename, inst_per, inst_min)
             if created:
                 print(six.text_type("Creating instance group {}".format(ig.name)))

@@ -9,47 +9,69 @@
  * @name controllers.function:Activity Stream
  * @description This controller controls the activity stream.
  */
-export default ['$scope', '$state', 'subTitle', 'Stream', 'GetTargetTitle',
-    'StreamList', 'Dataset',
-    function activityStreamController($scope, $state, subTitle, Stream,
-    GetTargetTitle, list, Dataset) {
+export default ['$scope', '$state', 'subTitle', 'GetTargetTitle',
+    'StreamList', 'Dataset', '$rootScope', 'ShowDetail', 'BuildDescription',
+    function activityStreamController($scope, $state, subTitle, GetTargetTitle,
+    list, Dataset, $rootScope, ShowDetail, BuildDescription) {
 
-        init();
-        initOmitSmartTags();
+        // search init
+        $scope.list = list;
+        $scope[`${list.iterator}_dataset`] = Dataset.data;
+        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
-        function init() {
-            // search init
-            $scope.list = list;
-            $scope[`${list.iterator}_dataset`] = Dataset.data;
-            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+        // subTitle is passed in via a resolve on the route.  If there is no subtitle
+        // generated in the resolve then we go get the targets generic title.
 
-            // subTitle is passed in via a resolve on the route.  If there is no subtitle
-            // generated in the resolve then we go get the targets generic title.
+        // Get the streams sub-title based on the target.  This scope variable is leveraged
+        // when we define the activity stream list.  Specifically it is included in the list
+        // title.
+        $scope.streamSubTitle = subTitle ? subTitle : GetTargetTitle($state.params.target);
 
-            // Get the streams sub-title based on the target.  This scope variable is leveraged
-            // when we define the activity stream list.  Specifically it is included in the list
-            // title.
-            $scope.streamSubTitle = subTitle ? subTitle : GetTargetTitle($state.params.target);
+        $rootScope.flashMessage = null;
 
-            // Open the stream
-            Stream({
-                scope: $scope
+        $scope.refreshStream = function () {
+            $state.go('.', null, {reload: true});
+        };
+
+        $scope.showDetail = function (id) {
+            ShowDetail({
+                scope: $scope,
+                activity_id: id
             });
+        };
+
+        if($scope.activities && $scope.activities.length > 0) {
+            buildUserAndDescription();
         }
 
-        // Specification of smart-tags omission from the UI is done in the route/state init.
-        // A limitation is that this specficiation is static and the key for which to be omitted from
-        // the smart-tags must be known at that time.
-        // In the case of activity stream, we won't to dynamically ommit the resource for which we are
-        // displaying the activity stream for. i.e. 'project', 'credential', etc.
-        function initOmitSmartTags() {
-            let defaults, route = _.find($state.$current.path, (step) => {
-                return step.params.hasOwnProperty('activity_search');
+        $scope.$watch('activities', function(){
+            // Watch for future update to scope.activities (like page change, column sort, search, etc)
+            buildUserAndDescription();
+        });
+
+        function buildUserAndDescription(){
+            $scope.activities.forEach(function(activity, i) {
+                // build activity.user
+                if ($scope.activities[i].summary_fields.actor) {
+                    $scope.activities[i].user = "<a href=\"/#/users/" + $scope.activities[i].summary_fields.actor.id  + "\">" +
+                        $scope.activities[i].summary_fields.actor.username + "</a>";
+                } else {
+                    $scope.activities[i].user = 'system';
+                }
+                // build description column / action text
+                BuildDescription($scope.activities[i]);
+
             });
-            if (route && $state.params.target !== undefined) {
-                defaults = route.params.activity_search.config.value;
-                defaults[$state.params.target] = null;
-            }
         }
+        
+        const route = _.find($state.$current.path, (step) => {
+            return step.params.hasOwnProperty('activity_search');
+        });
+        let defaultParams = angular.copy(route.params.activity_search.config.value);
+
+        defaultParams.or__object1__in = $state.params.activity_search.or__object1__in ? $state.params.activity_search.or__object1__in : defaultParams.or__object1__in;
+        defaultParams.or__object2__in = $state.params.activity_search.or__object2__in ? $state.params.activity_search.or__object2__in : defaultParams.or__object2__in;
+
+        $scope[`${list.iterator}_default_params`] = defaultParams;
     }
 ];

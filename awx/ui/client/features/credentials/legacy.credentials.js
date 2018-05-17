@@ -69,8 +69,8 @@ function LegacyCredentialsService () {
                         ngClick: '$state.go(\'.add\')',
                         label: 'Add',
                         awToolTip: N_('Add a permission'),
-                        actionClass: 'btn List-buttonSubmit',
-                        buttonContent: `&#43; ${N_('ADD')}`,
+                        actionClass: 'at-Button--add',
+                        actionId: 'button-add',
                         ngShow: '(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }
                 },

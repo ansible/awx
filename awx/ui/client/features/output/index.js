@@ -8,10 +8,13 @@ import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
 import EngineService from '~features/output/engine.service';
 import StatusService from '~features/output/status.service';
+import MessageService from '~features/output/message.service';
+import EventsApiService from '~features/output/api.events.service';
+import LegacyRedirect from '~features/output/legacy.route';
 
-import DetailsDirective from '~features/output/details.directive';
-import SearchDirective from '~features/output/search.directive';
-import StatsDirective from '~features/output/stats.directive';
+import DetailsComponent from '~features/output/details.component';
+import SearchComponent from '~features/output/search.component';
+import StatsComponent from '~features/output/stats.component';
 import HostEvent from './host-event/index';
 
 const Template = require('~features/output/index.view.html');
@@ -24,6 +27,7 @@ const PAGE_SIZE = 50;
 const WS_PREFIX = 'ws';
 
 function resolveResource (
+    $state,
     Job,
     ProjectUpdate,
     AdHocCommand,
@@ -32,9 +36,12 @@ function resolveResource (
     InventoryUpdate,
     $stateParams,
     qs,
-    Wait
+    Wait,
+    eventsApi,
 ) {
-    const { id, type, job_event_search } = $stateParams; // eslint-disable-line camelcase
+    const { id, type, handleErrors } = $stateParams;
+    const { job_event_search } = $stateParams; // eslint-disable-line camelcase
+
     const { name, key } = getWebSocketResource(type);
 
     let Resource;
@@ -65,33 +72,45 @@ function resolveResource (
             return null;
     }
 
-    const params = { page_size: PAGE_SIZE, order_by: 'start_line' };
-    const config = { pageCache: PAGE_CACHE, pageLimit: PAGE_LIMIT, params };
+    const params = {
+        page_size: PAGE_SIZE,
+        order_by: 'start_line',
+    };
+
+    const config = {
+        params,
+        pageCache: PAGE_CACHE,
+        pageLimit: PAGE_LIMIT,
+    };
 
     if (job_event_search) { // eslint-disable-line camelcase
-        const queryParams = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
-
-        Object.assign(config.params, queryParams);
+        const query = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
+        Object.assign(config.params, query);
     }
 
-    Wait('start');
-    return new Resource(['get', 'options'], [id, id])
-        .then(model => {
-            const promises = [model.getStats()];
+    let model;
 
-            if (model.has('related.labels')) {
-                promises.push(model.extend('get', 'labels'));
+    Wait('start');
+    const resourcePromise = new Resource(['get', 'options'], [id, id])
+        .then(job => {
+            const endpoint = `${job.get('url')}${related}/`;
+            eventsApi.init(endpoint, config.params);
+
+            const promises = [job.getStats(), eventsApi.fetch()];
+
+            if (job.has('related.labels')) {
+                promises.push(job.extend('get', 'labels'));
             }
 
-            promises.push(model.extend('get', related, config));
-
+            model = job;
             return Promise.all(promises);
         })
-        .then(([stats, model]) => ({
+        .then(([stats, events]) => ({
             id,
             type,
             stats,
             model,
+            events,
             related,
             ws: {
                 events: `${WS_PREFIX}-${key}-${id}`,
@@ -102,8 +121,18 @@ function resolveResource (
                 size: PAGE_SIZE,
                 pageLimit: PAGE_LIMIT
             }
-        }))
-        .catch(({ data, status }) => qs.error(data, status))
+        }));
+
+    if (!handleErrors) {
+        return resourcePromise
+            .finally(() => Wait('stop'));
+    }
+
+    return resourcePromise
+        .catch(({ data, status }) => {
+            qs.error(data, status);
+            return $state.go($state.current, $state.params, { reload: true });
+        })
         .finally(() => Wait('stop'));
 }
 
@@ -123,12 +152,6 @@ function resolveWebSocketConnection ($stateParams, SocketService) {
     };
 
     return SocketService.addStateResolve(state, id);
-}
-
-function resolveBreadcrumb (strings) {
-    return {
-        label: strings.get('state.TITLE')
-    };
 }
 
 function getWebSocketResource (type) {
@@ -163,24 +186,36 @@ function getWebSocketResource (type) {
     return { name, key };
 }
 
-function JobsRun ($stateRegistry) {
+function JobsRun ($stateRegistry, strings) {
+    const parent = 'jobs';
+    const ncyBreadcrumb = { parent, label: strings.get('state.BREADCRUMB_DEFAULT') };
+
     const state = {
-        name: 'jobz',
-        url: '/jobz/:type/:id?job_event_search',
-        route: '/jobz/:type/:id?job_event_search',
+        url: '/:type/:id?job_event_search',
+        name: 'output',
+        parent,
+        ncyBreadcrumb,
+        params: {
+            handleErrors: true,
+        },
         data: {
-            activityStream: true,
-            activityStreamTarget: 'jobs'
+            activityStream: false,
         },
         views: {
             '@': {
                 templateUrl: Template,
                 controller: Controller,
                 controllerAs: 'vm'
-            }
+            },
         },
         resolve: {
+            webSocketConnection: [
+                '$stateParams',
+                'SocketService',
+                resolveWebSocketConnection
+            ],
             resource: [
+                '$state',
                 'JobModel',
                 'ProjectUpdateModel',
                 'AdHocCommandModel',
@@ -190,16 +225,14 @@ function JobsRun ($stateRegistry) {
                 '$stateParams',
                 'QuerySet',
                 'Wait',
+                'JobEventsApiService',
                 resolveResource
             ],
-            ncyBreadcrumb: [
-                'JobStrings',
-                resolveBreadcrumb
-            ],
-            webSocketConnection: [
-                '$stateParams',
-                'SocketService',
-                resolveWebSocketConnection
+            breadcrumbLabel: [
+                'resource',
+                ({ model }) => {
+                    ncyBreadcrumb.label = `${model.get('id')} - ${model.get('name')}`;
+                }
             ],
         },
     };
@@ -207,7 +240,7 @@ function JobsRun ($stateRegistry) {
     $stateRegistry.register(state);
 }
 
-JobsRun.$inject = ['$stateRegistry'];
+JobsRun.$inject = ['$stateRegistry', 'JobStrings'];
 
 angular
     .module(MODULE_NAME, [
@@ -221,9 +254,12 @@ angular
     .service('JobRenderService', RenderService)
     .service('JobEventEngine', EngineService)
     .service('JobStatusService', StatusService)
-    .directive('atJobDetails', DetailsDirective)
-    .directive('atJobSearch', SearchDirective)
-    .directive('atJobStats', StatsDirective)
-    .run(JobsRun);
+    .service('JobMessageService', MessageService)
+    .service('JobEventsApiService', EventsApiService)
+    .component('atJobSearch', SearchComponent)
+    .component('atJobStats', StatsComponent)
+    .component('atJobDetails', DetailsComponent)
+    .run(JobsRun)
+    .run(LegacyRedirect);
 
 export default MODULE_NAME;

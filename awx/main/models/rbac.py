@@ -172,7 +172,7 @@ class Role(models.Model):
         elif accessor.__class__.__name__ == 'Team':
             return self.ancestors.filter(pk=accessor.member_role.id).exists()
         elif type(accessor) == Role:
-            return self.ancestors.filter(pk=accessor).exists()
+            return self.ancestors.filter(pk=accessor.pk).exists()
         else:
             accessor_type = ContentType.objects.get_for_model(accessor)
             roles = Role.objects.filter(content_type__pk=accessor_type.id,

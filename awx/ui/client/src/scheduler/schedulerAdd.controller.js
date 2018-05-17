@@ -8,12 +8,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
     'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
-    'WorkflowJobTemplateModel', 'TemplatesStrings',
+    'WorkflowJobTemplateModel', 'TemplatesStrings', 'rbacUiControlService',
     function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
         ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment,
-        WorkflowJobTemplate, TemplatesStrings
+        WorkflowJobTemplate, TemplatesStrings, rbacUiControlService
     ) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
@@ -21,7 +21,15 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         job_type;
 
     var schedule_url = ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
-
+    if (ParentObject){
+        $scope.parentObject = ParentObject;
+        let scheduleEndpoint = ParentObject.endpoint|| ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
+        $scope.canAdd = false;
+        rbacUiControlService.canAdd(scheduleEndpoint)
+            .then(function(params) {
+                $scope.canAdd = params.canAdd;
+            });
+    }
     let processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);
@@ -90,16 +98,8 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     $scope.hideForm = true;
 
     // extra_data field is not manifested in the UI when scheduling a Management Job
-    if ($state.current.name === 'jobTemplateSchedules.add'){
+    if ($state.current.name === 'templates.editJobTemplate.schedules.add'){
         $scope.parseType = 'yaml';
-        $scope.extraVars = ParentObject.extra_vars === '' ? '---' : ParentObject.extra_vars;
-
-        ParseTypeChange({
-            scope: $scope,
-            variable: 'extraVars',
-            parse_variable: 'parseType',
-            field_id: 'SchedulerForm-extraVars'
-        });
 
         let jobTemplate = new JobTemplate();
 
@@ -126,7 +126,16 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     });
                 };
 
-                if (!launchConf.ask_variables_on_launch) {
+                if (launchConf.ask_variables_on_launch) {
+                    $scope.extraVars = ParentObject.extra_vars === '' ? '---' : ParentObject.extra_vars;
+
+                    ParseTypeChange({
+                        scope: $scope,
+                        variable: 'extraVars',
+                        parse_variable: 'parseType',
+                        field_id: 'SchedulerForm-extraVars'
+                    });
+                } else {
                     $scope.noVars = true;
                 }
 
@@ -205,7 +214,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     }
                 }
             });
-    } else if ($state.current.name === 'workflowJobTemplateSchedules.add'){
+    } else if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.add'){
         let workflowJobTemplate = new WorkflowJobTemplate();
 
         $q.all([workflowJobTemplate.optionsLaunch(ParentObject.id), workflowJobTemplate.getLaunch(ParentObject.id)])
@@ -275,8 +284,8 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
             });
     }
 
-    if ($state.current.name === 'workflowJobTemplateSchedules.add' ||
-        $state.current.name === 'projectSchedules.add' ||
+    if ($state.current.name === 'templates.editWorkflowJobTemplate.schedules.add' ||
+        $state.current.name === 'projects.edit.schedules.add' ||
         $state.current.name === 'inventories.edit.inventory_sources.edit.schedules.add'
     ){
         $scope.noVars = true;
@@ -408,8 +417,20 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
         }
     });
 
-    CreateSelect2({
-        element: '.MakeSelect2',
-        multiple: false
+    var callSelect2 = function() {
+        CreateSelect2({
+            element: '.MakeSelect2',
+            multiple: false
+        });
+        $("#schedulerTimeZone").select2({
+            width:'100%',
+            containerCssClass: 'Form-dropDown',
+            placeholder: 'SEARCH'
+        });
+    };
+
+    $scope.$on("updateSchedulerSelects", function() {
+        callSelect2();
     });
+    callSelect2();
 }];

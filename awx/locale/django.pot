@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-30 20:23+0000\n"
+"POT-Creation-Date: 2018-05-07 21:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,91 +17,105 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: awx/api/authentication.py:67
-msgid "Invalid token header. No credentials provided."
-msgstr ""
-
-#: awx/api/authentication.py:70
-msgid "Invalid token header. Token string should not contain spaces."
-msgstr ""
-
-#: awx/api/authentication.py:105
-msgid "User inactive or deleted"
-msgstr ""
-
-#: awx/api/authentication.py:161
-msgid "Invalid task token"
-msgstr ""
-
-#: awx/api/conf.py:12
+#: awx/api/conf.py:15
 msgid "Idle Time Force Log Out"
 msgstr ""
 
-#: awx/api/conf.py:13
+#: awx/api/conf.py:16
 msgid ""
 "Number of seconds that a user is inactive before they will need to login "
 "again."
 msgstr ""
 
-#: awx/api/conf.py:14 awx/api/conf.py:24 awx/api/conf.py:33 awx/sso/conf.py:85
-#: awx/sso/conf.py:96 awx/sso/conf.py:108 awx/sso/conf.py:123
+#: awx/api/conf.py:17 awx/api/conf.py:26 awx/api/conf.py:34 awx/api/conf.py:47
+#: awx/sso/conf.py:85 awx/sso/conf.py:96 awx/sso/conf.py:108
+#: awx/sso/conf.py:123
 msgid "Authentication"
 msgstr ""
 
-#: awx/api/conf.py:22
-msgid "Maximum number of simultaneous logins"
+#: awx/api/conf.py:24
+msgid "Maximum number of simultaneous logged in sessions"
 msgstr ""
 
-#: awx/api/conf.py:23
+#: awx/api/conf.py:25
 msgid ""
-"Maximum number of simultaneous logins a user may have. To disable enter -1."
-msgstr ""
-
-#: awx/api/conf.py:31
-msgid "Enable HTTP Basic Auth"
+"Maximum number of simultaneous logged in sessions a user may have. To "
+"disable enter -1."
 msgstr ""
 
 #: awx/api/conf.py:32
+msgid "Enable HTTP Basic Auth"
+msgstr ""
+
+#: awx/api/conf.py:33
 msgid "Enable HTTP Basic Auth for the API Browser."
 msgstr ""
 
-#: awx/api/filters.py:129
+#: awx/api/conf.py:42
+msgid "OAuth 2 Timeout Settings"
+msgstr ""
+
+#: awx/api/conf.py:43
+msgid ""
+"Dictionary for customizing OAuth 2 timeouts, available items are "
+"`ACCESS_TOKEN_EXPIRE_SECONDS`, the duration of access tokens in the number "
+"of seconds, and `AUTHORIZATION_CODE_EXPIRE_SECONDS`, the duration of "
+"authorization grants in the number of seconds."
+msgstr ""
+
+#: awx/api/exceptions.py:16
+msgid "Resource is being used by running jobs."
+msgstr ""
+
+#: awx/api/fields.py:81
+#, python-brace-format
+msgid "Invalid key names: {invalid_key_names}"
+msgstr ""
+
+#: awx/api/fields.py:107
+msgid "Credential {} does not exist"
+msgstr ""
+
+#: awx/api/filters.py:96
+msgid "No related model for field {}."
+msgstr ""
+
+#: awx/api/filters.py:113
 msgid "Filtering on password fields is not allowed."
 msgstr ""
 
-#: awx/api/filters.py:141 awx/api/filters.py:143
+#: awx/api/filters.py:125 awx/api/filters.py:127
 #, python-format
 msgid "Filtering on %s is not allowed."
 msgstr ""
 
-#: awx/api/filters.py:146
+#: awx/api/filters.py:130
 msgid "Loops not allowed in filters, detected on field {}."
 msgstr ""
 
-#: awx/api/filters.py:171
+#: awx/api/filters.py:159
+msgid "Query string field name not provided."
+msgstr ""
+
+#: awx/api/filters.py:186
 #, python-brace-format
 msgid "Invalid {field_name} id: {field_id}"
 msgstr ""
 
-#: awx/api/filters.py:302
+#: awx/api/filters.py:319
 #, python-format
 msgid "cannot filter on kind %s"
 msgstr ""
 
-#: awx/api/filters.py:409
-#, python-format
-msgid "cannot order by field %s"
-msgstr ""
-
-#: awx/api/generics.py:550 awx/api/generics.py:612
+#: awx/api/generics.py:600 awx/api/generics.py:662
 msgid "\"id\" field must be an integer."
 msgstr ""
 
-#: awx/api/generics.py:609
+#: awx/api/generics.py:659
 msgid "\"id\" is required to disassociate"
 msgstr ""
 
-#: awx/api/generics.py:660
+#: awx/api/generics.py:710
 msgid "{} 'id' field is missing."
 msgstr ""
 
@@ -141,872 +155,1060 @@ msgstr ""
 msgid "Timestamp when this {} was last modified."
 msgstr ""
 
-#: awx/api/parsers.py:64
+#: awx/api/parsers.py:33
 msgid "JSON parse error - not a JSON object"
 msgstr ""
 
-#: awx/api/parsers.py:67
+#: awx/api/parsers.py:36
 #, python-format
 msgid ""
 "JSON parse error - %s\n"
 "Possible cause: trailing comma."
 msgstr ""
 
-#: awx/api/serializers.py:268
+#: awx/api/serializers.py:153
+msgid ""
+"The original object is already named {}, a copy from it cannot have the same "
+"name."
+msgstr ""
+
+#: awx/api/serializers.py:295
 msgid "Playbook Run"
 msgstr ""
 
-#: awx/api/serializers.py:269
+#: awx/api/serializers.py:296
 msgid "Command"
 msgstr ""
 
-#: awx/api/serializers.py:270 awx/main/models/unified_jobs.py:435
+#: awx/api/serializers.py:297 awx/main/models/unified_jobs.py:525
 msgid "SCM Update"
 msgstr ""
 
-#: awx/api/serializers.py:271
+#: awx/api/serializers.py:298
 msgid "Inventory Sync"
 msgstr ""
 
-#: awx/api/serializers.py:272
+#: awx/api/serializers.py:299
 msgid "Management Job"
 msgstr ""
 
-#: awx/api/serializers.py:273
+#: awx/api/serializers.py:300
 msgid "Workflow Job"
 msgstr ""
 
-#: awx/api/serializers.py:274
+#: awx/api/serializers.py:301
 msgid "Workflow Template"
 msgstr ""
 
-#: awx/api/serializers.py:701 awx/api/serializers.py:759 awx/api/views.py:4365
-#, python-format
+#: awx/api/serializers.py:696
 msgid ""
-"Standard Output too large to display (%(text_size)d bytes), only download "
-"supported for sizes over %(supported_size)d bytes"
+"Indicates whether all of the events generated by this unified job have been "
+"saved to the database."
 msgstr ""
 
-#: awx/api/serializers.py:774
+#: awx/api/serializers.py:852
 msgid "Write-only field used to change the password."
 msgstr ""
 
-#: awx/api/serializers.py:776
+#: awx/api/serializers.py:854
 msgid "Set if the account is managed by an external service"
 msgstr ""
 
-#: awx/api/serializers.py:800
+#: awx/api/serializers.py:878
 msgid "Password required for new User."
 msgstr ""
 
-#: awx/api/serializers.py:886
+#: awx/api/serializers.py:969
 #, python-format
 msgid "Unable to change %s on user managed by LDAP."
 msgstr ""
 
-#: awx/api/serializers.py:1050
+#: awx/api/serializers.py:1169
+msgid "Must be a simple space-separated string with allowed scopes {}."
+msgstr ""
+
+#: awx/api/serializers.py:1386
+msgid "This path is already being used by another manual project."
+msgstr ""
+
+#: awx/api/serializers.py:1467
 msgid "Organization is missing"
 msgstr ""
 
-#: awx/api/serializers.py:1054
+#: awx/api/serializers.py:1471
 msgid "Update options must be set to false for manual projects."
 msgstr ""
 
-#: awx/api/serializers.py:1060
+#: awx/api/serializers.py:1477
 msgid "Array of playbooks available within this project."
 msgstr ""
 
-#: awx/api/serializers.py:1079
+#: awx/api/serializers.py:1496
 msgid ""
 "Array of inventory files and directories available within this project, not "
 "comprehensive."
 msgstr ""
 
-#: awx/api/serializers.py:1201
+#: awx/api/serializers.py:1629
 msgid "Smart inventories must specify host_filter"
 msgstr ""
 
-#: awx/api/serializers.py:1303
+#: awx/api/serializers.py:1733
 #, python-format
 msgid "Invalid port specification: %s"
 msgstr ""
 
-#: awx/api/serializers.py:1314
+#: awx/api/serializers.py:1744
 msgid "Cannot create Host for Smart Inventory"
 msgstr ""
 
-#: awx/api/serializers.py:1336 awx/api/serializers.py:3321
-#: awx/api/serializers.py:3406 awx/main/validators.py:198
-msgid "Must be valid JSON or YAML."
-msgstr ""
-
-#: awx/api/serializers.py:1432
+#: awx/api/serializers.py:1856
 msgid "Invalid group name."
 msgstr ""
 
-#: awx/api/serializers.py:1437
+#: awx/api/serializers.py:1861
 msgid "Cannot create Group for Smart Inventory"
 msgstr ""
 
-#: awx/api/serializers.py:1509
+#: awx/api/serializers.py:1936
 msgid ""
 "Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python"
 msgstr ""
 
-#: awx/api/serializers.py:1555
+#: awx/api/serializers.py:1984
 msgid "`{}` is a prohibited environment variable"
 msgstr ""
 
-#: awx/api/serializers.py:1566
+#: awx/api/serializers.py:1995
 msgid "If 'source' is 'custom', 'source_script' must be provided."
 msgstr ""
 
-#: awx/api/serializers.py:1572
+#: awx/api/serializers.py:2001
 msgid "Must provide an inventory."
 msgstr ""
 
-#: awx/api/serializers.py:1576
+#: awx/api/serializers.py:2005
 msgid ""
 "The 'source_script' does not belong to the same organization as the "
 "inventory."
 msgstr ""
 
-#: awx/api/serializers.py:1578
+#: awx/api/serializers.py:2007
 msgid "'source_script' doesn't exist."
 msgstr ""
 
-#: awx/api/serializers.py:1602
+#: awx/api/serializers.py:2041
 msgid "Automatic group relationship, will be removed in 3.3"
 msgstr ""
 
-#: awx/api/serializers.py:1679
+#: awx/api/serializers.py:2127
 msgid "Cannot use manual project for SCM-based inventory."
 msgstr ""
 
-#: awx/api/serializers.py:1685
+#: awx/api/serializers.py:2133
 msgid ""
 "Manual inventory sources are created automatically when a group is created "
 "in the v1 API."
 msgstr ""
 
-#: awx/api/serializers.py:1690
+#: awx/api/serializers.py:2138
 msgid "Setting not compatible with existing schedules."
 msgstr ""
 
-#: awx/api/serializers.py:1695
+#: awx/api/serializers.py:2143
 msgid "Cannot create Inventory Source for Smart Inventory"
 msgstr ""
 
-#: awx/api/serializers.py:1709
+#: awx/api/serializers.py:2194
 #, python-format
 msgid "Cannot set %s if not SCM type."
 msgstr ""
 
-#: awx/api/serializers.py:1950
+#: awx/api/serializers.py:2461
 msgid "Modifications not allowed for managed credential types"
 msgstr ""
 
-#: awx/api/serializers.py:1955
+#: awx/api/serializers.py:2466
 msgid ""
 "Modifications to inputs are not allowed for credential types that are in use"
 msgstr ""
 
-#: awx/api/serializers.py:1961
+#: awx/api/serializers.py:2472
 #, python-format
 msgid "Must be 'cloud' or 'net', not %s"
 msgstr ""
 
-#: awx/api/serializers.py:1967
+#: awx/api/serializers.py:2478
 msgid "'ask_at_runtime' is not supported for custom credentials."
 msgstr ""
 
-#: awx/api/serializers.py:2140
+#: awx/api/serializers.py:2656
 #, python-format
 msgid "\"%s\" is not a valid choice"
 msgstr ""
 
-#: awx/api/serializers.py:2159
-#, python-format
-msgid "'%s' is not a valid field for %s"
+#: awx/api/serializers.py:2675
+#, python-brace-format
+msgid "'{field_name}' is not a valid field for {credential_type_name}"
 msgstr ""
 
-#: awx/api/serializers.py:2180
+#: awx/api/serializers.py:2696
 msgid ""
 "You cannot change the credential type of the credential, as it may break the "
 "functionality of the resources using it."
 msgstr ""
 
-#: awx/api/serializers.py:2191
+#: awx/api/serializers.py:2708
 msgid ""
 "Write-only field used to add user to owner role. If provided, do not give "
 "either team or organization. Only valid for creation."
 msgstr ""
 
-#: awx/api/serializers.py:2196
+#: awx/api/serializers.py:2713
 msgid ""
 "Write-only field used to add team to owner role. If provided, do not give "
 "either user or organization. Only valid for creation."
 msgstr ""
 
-#: awx/api/serializers.py:2201
+#: awx/api/serializers.py:2718
 msgid ""
 "Inherit permissions from organization roles. If provided on creation, do not "
 "give either user or team."
 msgstr ""
 
-#: awx/api/serializers.py:2217
+#: awx/api/serializers.py:2734
 msgid "Missing 'user', 'team', or 'organization'."
 msgstr ""
 
-#: awx/api/serializers.py:2257
+#: awx/api/serializers.py:2774
 msgid ""
 "Credential organization must be set and match before assigning to a team"
 msgstr ""
 
-#: awx/api/serializers.py:2424
+#: awx/api/serializers.py:2974
 msgid "You must provide a cloud credential."
 msgstr ""
 
-#: awx/api/serializers.py:2425
+#: awx/api/serializers.py:2975
 msgid "You must provide a network credential."
 msgstr ""
 
-#: awx/api/serializers.py:2441
+#: awx/api/serializers.py:2976 awx/main/models/jobs.py:155
+msgid "You must provide an SSH credential."
+msgstr ""
+
+#: awx/api/serializers.py:2977
+msgid "You must provide a vault credential."
+msgstr ""
+
+#: awx/api/serializers.py:2996
 msgid "This field is required."
 msgstr ""
 
-#: awx/api/serializers.py:2443 awx/api/serializers.py:2445
+#: awx/api/serializers.py:2998 awx/api/serializers.py:3000
 msgid "Playbook not found for project."
 msgstr ""
 
-#: awx/api/serializers.py:2447
+#: awx/api/serializers.py:3002
 msgid "Must select playbook for project."
 msgstr ""
 
-#: awx/api/serializers.py:2522
+#: awx/api/serializers.py:3082
+msgid "Cannot enable provisioning callback without an inventory set."
+msgstr ""
+
+#: awx/api/serializers.py:3085
 msgid "Must either set a default value or ask to prompt on launch."
 msgstr ""
 
-#: awx/api/serializers.py:2524 awx/main/models/jobs.py:326
+#: awx/api/serializers.py:3087 awx/main/models/jobs.py:310
 msgid "Job types 'run' and 'check' must have assigned a project."
 msgstr ""
 
-#: awx/api/serializers.py:2611
+#: awx/api/serializers.py:3203
 msgid "Invalid job template."
 msgstr ""
 
-#: awx/api/serializers.py:2708
-msgid "Neither credential nor vault credential provided."
+#: awx/api/serializers.py:3276
+msgid "No change to job limit"
 msgstr ""
 
-#: awx/api/serializers.py:2711
+#: awx/api/serializers.py:3277
+msgid "All failed and unreachable hosts"
+msgstr ""
+
+#: awx/api/serializers.py:3292
+msgid "Missing passwords needed to start: {}"
+msgstr ""
+
+#: awx/api/serializers.py:3311
+msgid "Relaunch by host status not available until job finishes running."
+msgstr ""
+
+#: awx/api/serializers.py:3325
 msgid "Job Template Project is missing or undefined."
 msgstr ""
 
-#: awx/api/serializers.py:2713
+#: awx/api/serializers.py:3327
 msgid "Job Template Inventory is missing or undefined."
 msgstr ""
 
-#: awx/api/serializers.py:2782 awx/main/tasks.py:2186
+#: awx/api/serializers.py:3365
+msgid "Unknown, job may have been ran before launch configurations were saved."
+msgstr ""
+
+#: awx/api/serializers.py:3432 awx/main/tasks.py:2238
 msgid "{} are prohibited from use in ad hoc commands."
 msgstr ""
 
-#: awx/api/serializers.py:3008
-#, python-format
-msgid "%(job_type)s is not a valid job type. The choices are %(choices)s."
+#: awx/api/serializers.py:3501 awx/api/views.py:4763
+#, python-brace-format
+msgid ""
+"Standard Output too large to display ({text_size} bytes), only download "
+"supported for sizes over {supported_size} bytes."
 msgstr ""
 
-#: awx/api/serializers.py:3013
-msgid "Workflow job template is missing during creation."
+#: awx/api/serializers.py:3697
+msgid "Provided variable {} has no database value to replace with."
 msgstr ""
 
-#: awx/api/serializers.py:3018
+#: awx/api/serializers.py:3773
 #, python-format
 msgid "Cannot nest a %s inside a WorkflowJobTemplate"
 msgstr ""
 
-#: awx/api/serializers.py:3291
-#, python-format
-msgid "Job Template '%s' is missing or undefined."
+#: awx/api/serializers.py:3780 awx/api/views.py:776
+msgid "Related template is not configured to accept credentials on launch."
 msgstr ""
 
-#: awx/api/serializers.py:3294
+#: awx/api/serializers.py:4234
 msgid "The inventory associated with this Job Template is being deleted."
 msgstr ""
 
-#: awx/api/serializers.py:3335 awx/api/views.py:3023
-#, python-format
-msgid "Cannot assign multiple %s credentials."
+#: awx/api/serializers.py:4236
+msgid "The provided inventory is being deleted."
 msgstr ""
 
-#: awx/api/serializers.py:3337 awx/api/views.py:3026
-msgid "Extra credentials must be network or cloud."
+#: awx/api/serializers.py:4244
+msgid "Cannot assign multiple {} credentials."
 msgstr ""
 
-#: awx/api/serializers.py:3474
+#: awx/api/serializers.py:4257
+msgid ""
+"Removing {} credential at launch time without replacement is not supported. "
+"Provided list lacked credential(s): {}."
+msgstr ""
+
+#: awx/api/serializers.py:4382
 msgid ""
 "Missing required fields for Notification Configuration: notification_type"
 msgstr ""
 
-#: awx/api/serializers.py:3497
+#: awx/api/serializers.py:4405
 msgid "No values specified for field '{}'"
 msgstr ""
 
-#: awx/api/serializers.py:3502
+#: awx/api/serializers.py:4410
 msgid "Missing required fields for Notification Configuration: {}."
 msgstr ""
 
-#: awx/api/serializers.py:3505
+#: awx/api/serializers.py:4413
 msgid "Configuration field '{}' incorrect type, expected {}."
 msgstr ""
 
-#: awx/api/serializers.py:3558
-msgid "Inventory Source must be a cloud resource."
-msgstr ""
-
-#: awx/api/serializers.py:3560
-msgid "Manual Project cannot have a schedule set."
-msgstr ""
-
-#: awx/api/serializers.py:3563
+#: awx/api/serializers.py:4475
 msgid ""
-"Inventory sources with `update_on_project_update` cannot be scheduled. "
-"Schedule its source project `{}` instead."
+"Valid DTSTART required in rrule. Value should start with: DTSTART:"
+"YYYYMMDDTHHMMSSZ"
 msgstr ""
 
-#: awx/api/serializers.py:3582
-msgid "Projects and inventory updates cannot accept extra variables."
+#: awx/api/serializers.py:4477
+msgid ""
+"DTSTART cannot be a naive datetime.  Specify ;TZINFO= or YYYYMMDDTHHMMSSZZ."
 msgstr ""
 
-#: awx/api/serializers.py:3604
-msgid "DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ"
-msgstr ""
-
-#: awx/api/serializers.py:3606
+#: awx/api/serializers.py:4479
 msgid "Multiple DTSTART is not supported."
 msgstr ""
 
-#: awx/api/serializers.py:3608
-msgid "RRULE require in rrule."
+#: awx/api/serializers.py:4481
+msgid "RRULE required in rrule."
 msgstr ""
 
-#: awx/api/serializers.py:3610
+#: awx/api/serializers.py:4483
 msgid "Multiple RRULE is not supported."
 msgstr ""
 
-#: awx/api/serializers.py:3612
+#: awx/api/serializers.py:4485
 msgid "INTERVAL required in rrule."
 msgstr ""
 
-#: awx/api/serializers.py:3614
-msgid "TZID is not supported."
-msgstr ""
-
-#: awx/api/serializers.py:3616
+#: awx/api/serializers.py:4487
 msgid "SECONDLY is not supported."
 msgstr ""
 
-#: awx/api/serializers.py:3618
+#: awx/api/serializers.py:4489
 msgid "Multiple BYMONTHDAYs not supported."
 msgstr ""
 
-#: awx/api/serializers.py:3620
+#: awx/api/serializers.py:4491
 msgid "Multiple BYMONTHs not supported."
 msgstr ""
 
-#: awx/api/serializers.py:3622
+#: awx/api/serializers.py:4493
 msgid "BYDAY with numeric prefix not supported."
 msgstr ""
 
-#: awx/api/serializers.py:3624
+#: awx/api/serializers.py:4495
 msgid "BYYEARDAY not supported."
 msgstr ""
 
-#: awx/api/serializers.py:3626
+#: awx/api/serializers.py:4497
 msgid "BYWEEKNO not supported."
 msgstr ""
 
-#: awx/api/serializers.py:3630
+#: awx/api/serializers.py:4499
+msgid "RRULE may not contain both COUNT and UNTIL"
+msgstr ""
+
+#: awx/api/serializers.py:4503
 msgid "COUNT > 999 is unsupported."
 msgstr ""
 
-#: awx/api/serializers.py:3634
-msgid "rrule parsing failed validation."
+#: awx/api/serializers.py:4507
+msgid "rrule parsing failed validation: {}"
 msgstr ""
 
-#: awx/api/serializers.py:3760
+#: awx/api/serializers.py:4538
+msgid "Inventory Source must be a cloud resource."
+msgstr ""
+
+#: awx/api/serializers.py:4540
+msgid "Manual Project cannot have a schedule set."
+msgstr ""
+
+#: awx/api/serializers.py:4553
+msgid ""
+"Count of jobs in the running or waiting state that are targeted for this "
+"instance"
+msgstr ""
+
+#: awx/api/serializers.py:4593
+msgid ""
+"Minimum percentage of all instances that will be automatically assigned to "
+"this group when new instances come online."
+msgstr ""
+
+#: awx/api/serializers.py:4598
+msgid ""
+"Static minimum number of Instances that will be automatically assign to this "
+"group when new instances come online."
+msgstr ""
+
+#: awx/api/serializers.py:4603
+msgid "List of exact-match Instances that will be assigned to this group"
+msgstr ""
+
+#: awx/api/serializers.py:4624
+msgid "Duplicate entry {}."
+msgstr ""
+
+#: awx/api/serializers.py:4626
+msgid "{} is not a valid hostname of an existing instance."
+msgstr ""
+
+#: awx/api/serializers.py:4631
+msgid "tower instance group name may not be changed."
+msgstr ""
+
+#: awx/api/serializers.py:4711
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
 msgstr ""
 
-#: awx/api/serializers.py:3762
+#: awx/api/serializers.py:4713
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
 "associated or disassociated with object2."
 msgstr ""
 
-#: awx/api/serializers.py:3765
+#: awx/api/serializers.py:4716
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated "
 "with."
 msgstr ""
 
-#: awx/api/serializers.py:3768
+#: awx/api/serializers.py:4719
 msgid "The action taken with respect to the given object(s)."
 msgstr ""
 
-#: awx/api/serializers.py:3885
-msgid "Unable to login with provided credentials."
-msgstr ""
-
-#: awx/api/serializers.py:3887
-msgid "Must include \"username\" and \"password\"."
-msgstr ""
-
-#: awx/api/views.py:108
+#: awx/api/views.py:116
 msgid "Your license does not allow use of the activity stream."
 msgstr ""
 
-#: awx/api/views.py:118
+#: awx/api/views.py:126
 msgid "Your license does not permit use of system tracking."
 msgstr ""
 
-#: awx/api/views.py:128
+#: awx/api/views.py:136
 msgid "Your license does not allow use of workflows."
 msgstr ""
 
-#: awx/api/views.py:142
+#: awx/api/views.py:150
 msgid "Cannot delete job resource when associated workflow job is running."
 msgstr ""
 
-#: awx/api/views.py:146
+#: awx/api/views.py:155
 msgid "Cannot delete running job resource."
 msgstr ""
 
-#: awx/api/views.py:155 awx/templates/rest_framework/api.html:28
+#: awx/api/views.py:160
+msgid "Job has not finished processing events."
+msgstr ""
+
+#: awx/api/views.py:219
+msgid "Related job {} is still processing events."
+msgstr ""
+
+#: awx/api/views.py:226 awx/templates/rest_framework/api.html:28
 msgid "REST API"
 msgstr ""
 
-#: awx/api/views.py:164 awx/templates/rest_framework/api.html:4
+#: awx/api/views.py:236 awx/templates/rest_framework/api.html:4
 msgid "AWX REST API"
 msgstr ""
 
-#: awx/api/views.py:226
+#: awx/api/views.py:250
+msgid "API OAuth 2 Authorization Root"
+msgstr ""
+
+#: awx/api/views.py:315
 msgid "Version 1"
 msgstr ""
 
-#: awx/api/views.py:230
+#: awx/api/views.py:319
 msgid "Version 2"
 msgstr ""
 
-#: awx/api/views.py:241
+#: awx/api/views.py:328
 msgid "Ping"
 msgstr ""
 
-#: awx/api/views.py:272 awx/conf/apps.py:12
+#: awx/api/views.py:359 awx/conf/apps.py:10
 msgid "Configuration"
 msgstr ""
 
-#: awx/api/views.py:325
+#: awx/api/views.py:414
 msgid "Invalid license data"
 msgstr ""
 
-#: awx/api/views.py:327
+#: awx/api/views.py:416
 msgid "Missing 'eula_accepted' property"
 msgstr ""
 
-#: awx/api/views.py:331
+#: awx/api/views.py:420
 msgid "'eula_accepted' value is invalid"
 msgstr ""
 
-#: awx/api/views.py:334
+#: awx/api/views.py:423
 msgid "'eula_accepted' must be True"
 msgstr ""
 
-#: awx/api/views.py:341
+#: awx/api/views.py:430
 msgid "Invalid JSON"
 msgstr ""
 
-#: awx/api/views.py:349
+#: awx/api/views.py:438
 msgid "Invalid License"
 msgstr ""
 
-#: awx/api/views.py:359
+#: awx/api/views.py:448
 msgid "Invalid license"
 msgstr ""
 
-#: awx/api/views.py:367
+#: awx/api/views.py:456
 #, python-format
 msgid "Failed to remove license (%s)"
 msgstr ""
 
-#: awx/api/views.py:372
+#: awx/api/views.py:461
 msgid "Dashboard"
 msgstr ""
 
-#: awx/api/views.py:471
+#: awx/api/views.py:560
 msgid "Dashboard Jobs Graphs"
 msgstr ""
 
-#: awx/api/views.py:507
+#: awx/api/views.py:596
 #, python-format
 msgid "Unknown period \"%s\""
 msgstr ""
 
-#: awx/api/views.py:521
+#: awx/api/views.py:610
 msgid "Instances"
 msgstr ""
 
-#: awx/api/views.py:529
+#: awx/api/views.py:617
 msgid "Instance Detail"
 msgstr ""
 
-#: awx/api/views.py:537
-msgid "Instance Running Jobs"
+#: awx/api/views.py:638
+msgid "Instance Jobs"
 msgstr ""
 
-#: awx/api/views.py:552
+#: awx/api/views.py:652
 msgid "Instance's Instance Groups"
 msgstr ""
 
-#: awx/api/views.py:562
+#: awx/api/views.py:661
 msgid "Instance Groups"
 msgstr ""
 
-#: awx/api/views.py:570
+#: awx/api/views.py:669
 msgid "Instance Group Detail"
 msgstr ""
 
-#: awx/api/views.py:578
+#: awx/api/views.py:677
+msgid "Isolated Groups can not be removed from the API"
+msgstr ""
+
+#: awx/api/views.py:679
+msgid ""
+"Instance Groups acting as a controller for an Isolated Group can not be "
+"removed from the API"
+msgstr ""
+
+#: awx/api/views.py:685
 msgid "Instance Group Running Jobs"
 msgstr ""
 
-#: awx/api/views.py:588
+#: awx/api/views.py:694
 msgid "Instance Group's Instances"
 msgstr ""
 
-#: awx/api/views.py:598
+#: awx/api/views.py:703
 msgid "Schedules"
 msgstr ""
 
-#: awx/api/views.py:617
+#: awx/api/views.py:717
+msgid "Schedule Recurrence Rule Preview"
+msgstr ""
+
+#: awx/api/views.py:763
+msgid "Cannot assign credential when related template is null."
+msgstr ""
+
+#: awx/api/views.py:768
+msgid "Related template cannot accept {} on launch."
+msgstr ""
+
+#: awx/api/views.py:770
+msgid ""
+"Credential that requires user input on launch cannot be used in saved launch "
+"configuration."
+msgstr ""
+
+#: awx/api/views.py:778
+#, python-brace-format
+msgid ""
+"This launch configuration already provides a {credential_type} credential."
+msgstr ""
+
+#: awx/api/views.py:781
+#, python-brace-format
+msgid "Related template already uses {credential_type} credential."
+msgstr ""
+
+#: awx/api/views.py:799
 msgid "Schedule Jobs List"
 msgstr ""
 
-#: awx/api/views.py:843
+#: awx/api/views.py:954
 msgid "Your license only permits a single organization to exist."
 msgstr ""
 
-#: awx/api/views.py:1079 awx/api/views.py:4666
+#: awx/api/views.py:1183 awx/api/views.py:4972
 msgid "You cannot assign an Organization role as a child role for a Team."
 msgstr ""
 
-#: awx/api/views.py:1083 awx/api/views.py:4680
+#: awx/api/views.py:1187 awx/api/views.py:4986
 msgid "You cannot grant system-level permissions to a team."
 msgstr ""
 
-#: awx/api/views.py:1090 awx/api/views.py:4672
+#: awx/api/views.py:1194 awx/api/views.py:4978
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
 msgstr ""
 
-#: awx/api/views.py:1180
-msgid "Cannot delete project."
-msgstr ""
-
-#: awx/api/views.py:1215
+#: awx/api/views.py:1306
 msgid "Project Schedules"
 msgstr ""
 
-#: awx/api/views.py:1227
+#: awx/api/views.py:1317
 msgid "Project SCM Inventory Sources"
 msgstr ""
 
-#: awx/api/views.py:1354
+#: awx/api/views.py:1417
+msgid "Project Update Events List"
+msgstr ""
+
+#: awx/api/views.py:1430
+msgid "System Job Events List"
+msgstr ""
+
+#: awx/api/views.py:1443
+msgid "Inventory Update Events List"
+msgstr ""
+
+#: awx/api/views.py:1475
 msgid "Project Update SCM Inventory Updates"
 msgstr ""
 
-#: awx/api/views.py:1409
+#: awx/api/views.py:1533
 msgid "Me"
 msgstr ""
 
-#: awx/api/views.py:1453 awx/api/views.py:4623
-msgid "You may not perform any action with your own admin_role."
+#: awx/api/views.py:1541
+msgid "OAuth 2 Applications"
 msgstr ""
 
-#: awx/api/views.py:1459 awx/api/views.py:4627
-msgid "You may not change the membership of a users admin_role"
+#: awx/api/views.py:1550
+msgid "OAuth 2 Application Detail"
 msgstr ""
 
-#: awx/api/views.py:1464 awx/api/views.py:4632
+#: awx/api/views.py:1559
+msgid "OAuth 2 Application Tokens"
+msgstr ""
+
+#: awx/api/views.py:1580
+msgid "OAuth2 Tokens"
+msgstr ""
+
+#: awx/api/views.py:1589
+msgid "OAuth2 Authorized Access Tokens"
+msgstr ""
+
+#: awx/api/views.py:1604
+msgid "OAuth2 User Authorized Access Tokens"
+msgstr ""
+
+#: awx/api/views.py:1619
+msgid "Organization OAuth2 Applications"
+msgstr ""
+
+#: awx/api/views.py:1631
+msgid "OAuth2 Personal Access Tokens"
+msgstr ""
+
+#: awx/api/views.py:1646
+msgid "OAuth Token Detail"
+msgstr ""
+
+#: awx/api/views.py:1704 awx/api/views.py:4939
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
 msgstr ""
 
-#: awx/api/views.py:1468 awx/api/views.py:4636
+#: awx/api/views.py:1708 awx/api/views.py:4943
 msgid "You cannot grant private credential access to another user"
 msgstr ""
 
-#: awx/api/views.py:1566
+#: awx/api/views.py:1805
 #, python-format
 msgid "Cannot change %s."
 msgstr ""
 
-#: awx/api/views.py:1572
+#: awx/api/views.py:1811
 msgid "Cannot delete user."
 msgstr ""
 
-#: awx/api/views.py:1601
+#: awx/api/views.py:1835
 msgid "Deletion not allowed for managed credential types"
 msgstr ""
 
-#: awx/api/views.py:1603
+#: awx/api/views.py:1837
 msgid "Credential types that are in use cannot be deleted"
 msgstr ""
 
-#: awx/api/views.py:1781
+#: awx/api/views.py:2009
 msgid "Cannot delete inventory script."
 msgstr ""
 
-#: awx/api/views.py:1866
+#: awx/api/views.py:2099
 #, python-brace-format
 msgid "{0}"
 msgstr ""
 
-#: awx/api/views.py:2101
+#: awx/api/views.py:2326
 msgid "Fact not found."
 msgstr ""
 
-#: awx/api/views.py:2125
+#: awx/api/views.py:2348
 msgid "SSLError while trying to connect to {}"
 msgstr ""
 
-#: awx/api/views.py:2127
+#: awx/api/views.py:2350
 msgid "Request to {} timed out."
 msgstr ""
 
-#: awx/api/views.py:2129
-msgid "Unkown exception {} while trying to GET {}"
+#: awx/api/views.py:2352
+msgid "Unknown exception {} while trying to GET {}"
 msgstr ""
 
-#: awx/api/views.py:2132
+#: awx/api/views.py:2355
 msgid ""
 "Unauthorized access. Please check your Insights Credential username and "
 "password."
 msgstr ""
 
-#: awx/api/views.py:2134
+#: awx/api/views.py:2358
 msgid ""
 "Failed to gather reports and maintenance plans from Insights API at URL {}. "
 "Server responded with {} status code and message {}"
 msgstr ""
 
-#: awx/api/views.py:2140
+#: awx/api/views.py:2365
 msgid "Expected JSON response from Insights but instead got {}"
 msgstr ""
 
-#: awx/api/views.py:2147
+#: awx/api/views.py:2372
 msgid "This host is not recognized as an Insights host."
 msgstr ""
 
-#: awx/api/views.py:2152
+#: awx/api/views.py:2377
 msgid "The Insights Credential for \"{}\" was not found."
 msgstr ""
 
-#: awx/api/views.py:2221
+#: awx/api/views.py:2445
 msgid "Cyclical Group association."
 msgstr ""
 
-#: awx/api/views.py:2499
+#: awx/api/views.py:2658
 msgid "Inventory Source List"
 msgstr ""
 
-#: awx/api/views.py:2512
+#: awx/api/views.py:2670
 msgid "Inventory Sources Update"
 msgstr ""
 
-#: awx/api/views.py:2542
+#: awx/api/views.py:2703
 msgid "Could not start because `can_update` returned False"
 msgstr ""
 
-#: awx/api/views.py:2550
+#: awx/api/views.py:2711
 msgid "No inventory sources to update."
 msgstr ""
 
-#: awx/api/views.py:2582
-msgid "Cannot delete inventory source."
-msgstr ""
-
-#: awx/api/views.py:2590
+#: awx/api/views.py:2740
 msgid "Inventory Source Schedules"
 msgstr ""
 
-#: awx/api/views.py:2620
+#: awx/api/views.py:2767
 msgid "Notification Templates can only be assigned when source is one of {}."
 msgstr ""
 
-#: awx/api/views.py:2851
+#: awx/api/views.py:2822
+msgid "Vault credentials are not yet supported for inventory sources."
+msgstr ""
+
+#: awx/api/views.py:2827
+msgid "Source already has cloud credential assigned."
+msgstr ""
+
+#: awx/api/views.py:2986
+msgid ""
+"'credentials' cannot be used in combination with 'credential', "
+"'vault_credential', or 'extra_credentials'."
+msgstr ""
+
+#: awx/api/views.py:3098
 msgid "Job Template Schedules"
 msgstr ""
 
-#: awx/api/views.py:2871 awx/api/views.py:2882
+#: awx/api/views.py:3116 awx/api/views.py:3127
 msgid "Your license does not allow adding surveys."
 msgstr ""
 
-#: awx/api/views.py:2889
-msgid "'name' missing from survey spec."
+#: awx/api/views.py:3146
+msgid "Field '{}' is missing from survey spec."
 msgstr ""
 
-#: awx/api/views.py:2891
-msgid "'description' missing from survey spec."
+#: awx/api/views.py:3148
+msgid "Expected {} for field '{}', received {} type."
 msgstr ""
 
-#: awx/api/views.py:2893
-msgid "'spec' missing from survey spec."
-msgstr ""
-
-#: awx/api/views.py:2895
-msgid "'spec' must be a list of items."
-msgstr ""
-
-#: awx/api/views.py:2897
+#: awx/api/views.py:3152
 msgid "'spec' doesn't contain any items."
 msgstr ""
 
-#: awx/api/views.py:2903
+#: awx/api/views.py:3161
 #, python-format
 msgid "Survey question %s is not a json object."
 msgstr ""
 
-#: awx/api/views.py:2905
+#: awx/api/views.py:3163
 #, python-format
 msgid "'type' missing from survey question %s."
 msgstr ""
 
-#: awx/api/views.py:2907
+#: awx/api/views.py:3165
 #, python-format
 msgid "'question_name' missing from survey question %s."
 msgstr ""
 
-#: awx/api/views.py:2909
+#: awx/api/views.py:3167
 #, python-format
 msgid "'variable' missing from survey question %s."
 msgstr ""
 
-#: awx/api/views.py:2911
+#: awx/api/views.py:3169
 #, python-format
 msgid "'variable' '%(item)s' duplicated in survey question %(survey)s."
 msgstr ""
 
-#: awx/api/views.py:2916
+#: awx/api/views.py:3174
 #, python-format
 msgid "'required' missing from survey question %s."
 msgstr ""
 
-#: awx/api/views.py:2921
+#: awx/api/views.py:3179
 #, python-brace-format
 msgid "Value {question_default} for '{variable_name}' expected to be a string."
 msgstr ""
 
-#: awx/api/views.py:2928
+#: awx/api/views.py:3189
 #, python-brace-format
 msgid ""
-"$encrypted$ is reserved keyword for password questions and may not be used "
-"as a default for '{variable_name}' in survey question {question_position}."
+"$encrypted$ is a reserved keyword for password question defaults, survey "
+"question {question_position} is type {question_type}."
 msgstr ""
 
-#: awx/api/views.py:3049
+#: awx/api/views.py:3205
+#, python-brace-format
+msgid ""
+"$encrypted$ is a reserved keyword, may not be used for new default in "
+"position {question_position}."
+msgstr ""
+
+#: awx/api/views.py:3278
+#, python-brace-format
+msgid "Cannot assign multiple {credential_type} credentials."
+msgstr ""
+
+#: awx/api/views.py:3296
+msgid "Extra credentials must be network or cloud."
+msgstr ""
+
+#: awx/api/views.py:3318
 msgid "Maximum number of labels for {} reached."
 msgstr ""
 
-#: awx/api/views.py:3170
+#: awx/api/views.py:3441
 msgid "No matching host could be found!"
 msgstr ""
 
-#: awx/api/views.py:3173
+#: awx/api/views.py:3444
 msgid "Multiple hosts matched the request!"
 msgstr ""
 
-#: awx/api/views.py:3178
+#: awx/api/views.py:3449
 msgid "Cannot start automatically, user input required!"
 msgstr ""
 
-#: awx/api/views.py:3185
+#: awx/api/views.py:3456
 msgid "Host callback job already pending."
 msgstr ""
 
-#: awx/api/views.py:3199
+#: awx/api/views.py:3471 awx/api/views.py:4212
 msgid "Error starting job!"
 msgstr ""
 
-#: awx/api/views.py:3306
+#: awx/api/views.py:3587
 #, python-brace-format
 msgid "Cannot associate {0} when {1} have been associated."
 msgstr ""
 
-#: awx/api/views.py:3331
+#: awx/api/views.py:3612
 msgid "Multiple parent relationship not allowed."
 msgstr ""
 
-#: awx/api/views.py:3336
+#: awx/api/views.py:3617
 msgid "Cycle detected."
 msgstr ""
 
-#: awx/api/views.py:3540
+#: awx/api/views.py:3807
 msgid "Workflow Job Template Schedules"
 msgstr ""
 
-#: awx/api/views.py:3685 awx/api/views.py:4268
+#: awx/api/views.py:3938 awx/api/views.py:4610
 msgid "Superuser privileges needed."
 msgstr ""
 
-#: awx/api/views.py:3717
+#: awx/api/views.py:3970
 msgid "System Job Template Schedules"
 msgstr ""
 
-#: awx/api/views.py:3780
+#: awx/api/views.py:4028
 msgid "POST not allowed for Job launching in version 2 of the api"
 msgstr ""
 
-#: awx/api/views.py:3942
+#: awx/api/views.py:4195
+#, python-brace-format
+msgid "Wait until job finishes before retrying on {status_value} hosts."
+msgstr ""
+
+#: awx/api/views.py:4200
+#, python-brace-format
+msgid "Cannot retry on {status_value} hosts, playbook stats not available."
+msgstr ""
+
+#: awx/api/views.py:4205
+#, python-brace-format
+msgid "Cannot relaunch because previous job had 0 {status_value} hosts."
+msgstr ""
+
+#: awx/api/views.py:4234
+msgid "Cannot create schedule because job requires credential passwords."
+msgstr ""
+
+#: awx/api/views.py:4239
+msgid "Cannot create schedule because job was launched by legacy method."
+msgstr ""
+
+#: awx/api/views.py:4241
+msgid "Cannot create schedule because a related resource is missing."
+msgstr ""
+
+#: awx/api/views.py:4295
 msgid "Job Host Summaries List"
 msgstr ""
 
-#: awx/api/views.py:3989
+#: awx/api/views.py:4342
 msgid "Job Event Children List"
 msgstr ""
 
-#: awx/api/views.py:3998
+#: awx/api/views.py:4351
 msgid "Job Event Hosts List"
 msgstr ""
 
-#: awx/api/views.py:4008
+#: awx/api/views.py:4360
 msgid "Job Events List"
 msgstr ""
 
-#: awx/api/views.py:4222
+#: awx/api/views.py:4570
 msgid "Ad Hoc Command Events List"
 msgstr ""
 
-#: awx/api/views.py:4437
-msgid "Error generating stdout download file: {}"
-msgstr ""
-
-#: awx/api/views.py:4450
-#, python-format
-msgid "Error generating stdout download file: %s"
-msgstr ""
-
-#: awx/api/views.py:4495
+#: awx/api/views.py:4809
 msgid "Delete not allowed while there are pending notifications"
 msgstr ""
 
-#: awx/api/views.py:4502
+#: awx/api/views.py:4817
 msgid "Notification Template Test"
 msgstr ""
 
@@ -1158,17 +1360,29 @@ msgstr ""
 msgid "Example setting which can be different for each user."
 msgstr ""
 
-#: awx/conf/conf.py:95 awx/conf/registry.py:85 awx/conf/views.py:56
+#: awx/conf/conf.py:95 awx/conf/registry.py:85 awx/conf/views.py:55
 msgid "User"
 msgstr ""
 
-#: awx/conf/fields.py:63
+#: awx/conf/fields.py:60 awx/sso/fields.py:583
+#, python-brace-format
+msgid ""
+"Expected None, True, False, a string or list of strings but got {input_type} "
+"instead."
+msgstr ""
+
+#: awx/conf/fields.py:104
 msgid "Enter a valid URL"
 msgstr ""
 
-#: awx/conf/fields.py:95
+#: awx/conf/fields.py:136
 #, python-brace-format
 msgid "\"{input}\" is not a valid string."
+msgstr ""
+
+#: awx/conf/fields.py:151
+#, python-brace-format
+msgid "Expected a list of tuples of max length 2 but got {input_type} instead."
 msgstr ""
 
 #: awx/conf/license.py:22
@@ -1261,9 +1475,9 @@ msgstr ""
 #: awx/conf/tests/unit/test_settings.py:411
 #: awx/conf/tests/unit/test_settings.py:430
 #: awx/conf/tests/unit/test_settings.py:466 awx/main/conf.py:22
-#: awx/main/conf.py:32 awx/main/conf.py:42 awx/main/conf.py:51
-#: awx/main/conf.py:63 awx/main/conf.py:81 awx/main/conf.py:96
-#: awx/main/conf.py:121
+#: awx/main/conf.py:32 awx/main/conf.py:42 awx/main/conf.py:52
+#: awx/main/conf.py:61 awx/main/conf.py:73 awx/main/conf.py:86
+#: awx/main/conf.py:99 awx/main/conf.py:124
 msgid "System"
 msgstr ""
 
@@ -1275,103 +1489,104 @@ msgstr ""
 msgid "OtherSystem"
 msgstr ""
 
-#: awx/conf/views.py:48
+#: awx/conf/views.py:47
 msgid "Setting Categories"
 msgstr ""
 
-#: awx/conf/views.py:73
+#: awx/conf/views.py:71
 msgid "Setting Detail"
 msgstr ""
 
-#: awx/conf/views.py:168
+#: awx/conf/views.py:166
 msgid "Logging Connectivity Test"
 msgstr ""
 
-#: awx/main/access.py:44
-msgid "Resource is being used by running jobs."
+#: awx/main/access.py:57
+#, python-format
+msgid "Required related field %s for permission check."
 msgstr ""
 
-#: awx/main/access.py:237
+#: awx/main/access.py:73
 #, python-format
 msgid "Bad data found in related field %s."
 msgstr ""
 
-#: awx/main/access.py:281
+#: awx/main/access.py:293
 msgid "License is missing."
 msgstr ""
 
-#: awx/main/access.py:283
+#: awx/main/access.py:295
 msgid "License has expired."
 msgstr ""
 
-#: awx/main/access.py:291
+#: awx/main/access.py:303
 #, python-format
 msgid "License count of %s instances has been reached."
 msgstr ""
 
-#: awx/main/access.py:293
+#: awx/main/access.py:305
 #, python-format
 msgid "License count of %s instances has been exceeded."
 msgstr ""
 
-#: awx/main/access.py:295
+#: awx/main/access.py:307
 msgid "Host count exceeds available instances."
 msgstr ""
 
-#: awx/main/access.py:299
+#: awx/main/access.py:311
 #, python-format
 msgid "Feature %s is not enabled in the active license."
 msgstr ""
 
-#: awx/main/access.py:301
+#: awx/main/access.py:313
 msgid "Features not found in active license."
 msgstr ""
 
-#: awx/main/access.py:707
+#: awx/main/access.py:823
 msgid "Unable to change inventory on a host."
 msgstr ""
 
-#: awx/main/access.py:724 awx/main/access.py:769
+#: awx/main/access.py:840 awx/main/access.py:885
 msgid "Cannot associate two items from different inventories."
 msgstr ""
 
-#: awx/main/access.py:757
+#: awx/main/access.py:873
 msgid "Unable to change inventory on a group."
 msgstr ""
 
-#: awx/main/access.py:1017
+#: awx/main/access.py:1131
 msgid "Unable to change organization on a team."
 msgstr ""
 
-#: awx/main/access.py:1030
+#: awx/main/access.py:1148
 msgid "The {} role cannot be assigned to a team"
 msgstr ""
 
-#: awx/main/access.py:1032
+#: awx/main/access.py:1150
 msgid "The admin_role for a User cannot be assigned to a team"
 msgstr ""
 
-#: awx/main/access.py:1479
+#: awx/main/access.py:1517
 msgid "Job has been orphaned from its job template."
 msgstr ""
 
-#: awx/main/access.py:1481
-msgid "You do not have execute permission to related job template."
+#: awx/main/access.py:1519
+msgid "Job was launched with unknown prompted fields."
 msgstr ""
 
-#: awx/main/access.py:1484
+#: awx/main/access.py:1521
 msgid "Job was launched with prompted fields."
 msgstr ""
 
-#: awx/main/access.py:1486
+#: awx/main/access.py:1523
 msgid " Organization level permissions required."
 msgstr ""
 
-#: awx/main/access.py:1488
+#: awx/main/access.py:1525
 msgid " You do not have permission to related resources."
 msgstr ""
 
-#: awx/main/access.py:1833
+#: awx/main/access.py:1935
 msgid ""
 "You do not have permission to the workflow job resources required for "
 "relaunch."
@@ -1410,328 +1625,355 @@ msgid ""
 msgstr ""
 
 #: awx/main/conf.py:49
-msgid "Enable Administrator Alerts"
+msgid "Organization Admins Can Manage Users and Teams"
 msgstr ""
 
 #: awx/main/conf.py:50
-msgid "Email Admin users for system events that may require attention."
+msgid ""
+"Controls whether any Organization Admin has the privileges to create and "
+"manage users and teams. You may want to disable this ability if you are "
+"using an LDAP or SAML integration."
+msgstr ""
+
+#: awx/main/conf.py:59
+msgid "Enable Administrator Alerts"
 msgstr ""
 
 #: awx/main/conf.py:60
+msgid "Email Admin users for system events that may require attention."
+msgstr ""
+
+#: awx/main/conf.py:70
 msgid "Base URL of the Tower host"
 msgstr ""
 
-#: awx/main/conf.py:61
+#: awx/main/conf.py:71
 msgid ""
 "This setting is used by services like notifications to render a valid url to "
 "the Tower host."
 msgstr ""
 
-#: awx/main/conf.py:70
+#: awx/main/conf.py:80
 msgid "Remote Host Headers"
 msgstr ""
 
-#: awx/main/conf.py:71
+#: awx/main/conf.py:81
 msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. "
 "Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
-"behind a reverse proxy.\n"
-"\n"
-"Note: The headers will be searched in order and the first found remote host "
-"name or IP will be used.\n"
-"\n"
-"In the below example 8.8.8.7 would be the chosen IP address.\n"
-"X-Forwarded-For: 8.8.8.7, 192.168.2.1, 127.0.0.1\n"
-"Host: 127.0.0.1\n"
-"REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR', 'REMOTE_HOST']"
+"behind a reverse proxy. See the \"Proxy Support\" section of the "
+"Adminstrator guide formore details."
 msgstr ""
 
-#: awx/main/conf.py:88
+#: awx/main/conf.py:93
 msgid "Proxy IP Whitelist"
 msgstr ""
 
-#: awx/main/conf.py:89
+#: awx/main/conf.py:94
 msgid ""
 "If Tower is behind a reverse proxy/load balancer, use this setting to "
 "whitelist the proxy IP addresses from which Tower should trust custom "
-"REMOTE_HOST_HEADERS header values\n"
-"REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', ''REMOTE_ADDR', "
-"'REMOTE_HOST']\n"
-"PROXY_IP_WHITELIST = ['10.0.1.100', '10.0.1.101']\n"
-"If this setting is an empty list (the default), the headers specified by "
-"REMOTE_HOST_HEADERS will be trusted unconditionally')"
+"REMOTE_HOST_HEADERS header values. If this setting is an empty list (the "
+"default), the headers specified by REMOTE_HOST_HEADERS will be trusted "
+"unconditionally')"
 msgstr ""
 
-#: awx/main/conf.py:117
+#: awx/main/conf.py:120
 msgid "License"
 msgstr ""
 
-#: awx/main/conf.py:118
+#: awx/main/conf.py:121
 msgid ""
 "The license controls which features and functionality are enabled. Use /api/"
 "v1/config/ to update or change the license."
 msgstr ""
 
-#: awx/main/conf.py:128
+#: awx/main/conf.py:131
 msgid "Ansible Modules Allowed for Ad Hoc Jobs"
 msgstr ""
 
-#: awx/main/conf.py:129
+#: awx/main/conf.py:132
 msgid "List of modules allowed to be used by ad-hoc jobs."
 msgstr ""
 
-#: awx/main/conf.py:130 awx/main/conf.py:140 awx/main/conf.py:151
-#: awx/main/conf.py:161 awx/main/conf.py:171 awx/main/conf.py:181
-#: awx/main/conf.py:192 awx/main/conf.py:204 awx/main/conf.py:216
-#: awx/main/conf.py:229 awx/main/conf.py:241 awx/main/conf.py:251
-#: awx/main/conf.py:262 awx/main/conf.py:272 awx/main/conf.py:282
-#: awx/main/conf.py:292 awx/main/conf.py:304 awx/main/conf.py:316
-#: awx/main/conf.py:328 awx/main/conf.py:341
+#: awx/main/conf.py:133 awx/main/conf.py:155 awx/main/conf.py:164
+#: awx/main/conf.py:175 awx/main/conf.py:185 awx/main/conf.py:195
+#: awx/main/conf.py:205 awx/main/conf.py:216 awx/main/conf.py:228
+#: awx/main/conf.py:240 awx/main/conf.py:253 awx/main/conf.py:265
+#: awx/main/conf.py:275 awx/main/conf.py:286 awx/main/conf.py:297
+#: awx/main/conf.py:307 awx/main/conf.py:317 awx/main/conf.py:329
+#: awx/main/conf.py:341 awx/main/conf.py:353 awx/main/conf.py:367
 msgid "Jobs"
 msgstr ""
 
-#: awx/main/conf.py:138
+#: awx/main/conf.py:142
+msgid "Always"
+msgstr ""
+
+#: awx/main/conf.py:143
+msgid "Never"
+msgstr ""
+
+#: awx/main/conf.py:144
+msgid "Only On Job Template Definitions"
+msgstr ""
+
+#: awx/main/conf.py:147
+msgid "When can extra variables contain Jinja templates?"
+msgstr ""
+
+#: awx/main/conf.py:149
+msgid ""
+"Ansible allows variable substitution via the Jinja2 templating language for "
+"--extra-vars. This poses a potential security risk where Tower users with "
+"the ability to specify extra vars at job launch time can use Jinja2 "
+"templates to run arbitrary Python.  It is recommended that this value be set "
+"to \"template\" or \"never\"."
+msgstr ""
+
+#: awx/main/conf.py:162
 msgid "Enable job isolation"
 msgstr ""
 
-#: awx/main/conf.py:139
+#: awx/main/conf.py:163
 msgid ""
 "Isolates an Ansible job from protected parts of the system to prevent "
 "exposing sensitive information."
 msgstr ""
 
-#: awx/main/conf.py:147
+#: awx/main/conf.py:171
 msgid "Job execution path"
 msgstr ""
 
-#: awx/main/conf.py:148
+#: awx/main/conf.py:172
 msgid ""
 "The directory in which Tower will create new temporary directories for job "
 "execution and isolation (such as credential files and custom inventory "
 "scripts)."
 msgstr ""
 
-#: awx/main/conf.py:159
+#: awx/main/conf.py:183
 msgid "Paths to hide from isolated jobs"
 msgstr ""
 
-#: awx/main/conf.py:160
+#: awx/main/conf.py:184
 msgid ""
 "Additional paths to hide from isolated processes. Enter one path per line."
 msgstr ""
 
-#: awx/main/conf.py:169
+#: awx/main/conf.py:193
 msgid "Paths to expose to isolated jobs"
 msgstr ""
 
-#: awx/main/conf.py:170
+#: awx/main/conf.py:194
 msgid ""
 "Whitelist of paths that would otherwise be hidden to expose to isolated "
 "jobs. Enter one path per line."
 msgstr ""
 
-#: awx/main/conf.py:179
+#: awx/main/conf.py:203
 msgid "Isolated status check interval"
 msgstr ""
 
-#: awx/main/conf.py:180
+#: awx/main/conf.py:204
 msgid ""
 "The number of seconds to sleep between status checks for jobs running on "
 "isolated instances."
 msgstr ""
 
-#: awx/main/conf.py:189
+#: awx/main/conf.py:213
 msgid "Isolated launch timeout"
 msgstr ""
 
-#: awx/main/conf.py:190
+#: awx/main/conf.py:214
 msgid ""
 "The timeout (in seconds) for launching jobs on isolated instances.  This "
 "includes the time needed to copy source control files (playbooks) to the "
 "isolated instance."
 msgstr ""
 
-#: awx/main/conf.py:201
+#: awx/main/conf.py:225
 msgid "Isolated connection timeout"
 msgstr ""
 
-#: awx/main/conf.py:202
+#: awx/main/conf.py:226
 msgid ""
 "Ansible SSH connection timeout (in seconds) to use when communicating with "
 "isolated instances. Value should be substantially greater than expected "
 "network latency."
 msgstr ""
 
-#: awx/main/conf.py:212
+#: awx/main/conf.py:236
 msgid "Generate RSA keys for isolated instances"
 msgstr ""
 
-#: awx/main/conf.py:213
+#: awx/main/conf.py:237
 msgid ""
 "If set, a random RSA key will be generated and distributed to isolated "
 "instances.  To disable this behavior and manage authentication for isolated "
 "instances outside of Tower, disable this setting."
 msgstr ""
 
-#: awx/main/conf.py:227 awx/main/conf.py:228
+#: awx/main/conf.py:251 awx/main/conf.py:252
 msgid "The RSA private key for SSH traffic to isolated instances"
 msgstr ""
 
-#: awx/main/conf.py:239 awx/main/conf.py:240
+#: awx/main/conf.py:263 awx/main/conf.py:264
 msgid "The RSA public key for SSH traffic to isolated instances"
 msgstr ""
 
-#: awx/main/conf.py:249
+#: awx/main/conf.py:273
 msgid "Extra Environment Variables"
 msgstr ""
 
-#: awx/main/conf.py:250
+#: awx/main/conf.py:274
 msgid ""
 "Additional environment variables set for playbook runs, inventory updates, "
 "project updates, and notification sending."
 msgstr ""
 
-#: awx/main/conf.py:260
+#: awx/main/conf.py:284
 msgid "Standard Output Maximum Display Size"
 msgstr ""
 
-#: awx/main/conf.py:261
+#: awx/main/conf.py:285
 msgid ""
 "Maximum Size of Standard Output in bytes to display before requiring the "
 "output be downloaded."
 msgstr ""
 
-#: awx/main/conf.py:270
+#: awx/main/conf.py:294
 msgid "Job Event Standard Output Maximum Display Size"
 msgstr ""
 
-#: awx/main/conf.py:271
+#: awx/main/conf.py:296
 msgid ""
 "Maximum Size of Standard Output in bytes to display for a single job or ad "
 "hoc command event. `stdout` will end with `…` when truncated."
 msgstr ""
 
-#: awx/main/conf.py:280
+#: awx/main/conf.py:305
 msgid "Maximum Scheduled Jobs"
 msgstr ""
 
-#: awx/main/conf.py:281
+#: awx/main/conf.py:306
 msgid ""
 "Maximum number of the same job template that can be waiting to run when "
 "launching from a schedule before no more are created."
 msgstr ""
 
-#: awx/main/conf.py:290
+#: awx/main/conf.py:315
 msgid "Ansible Callback Plugins"
 msgstr ""
 
-#: awx/main/conf.py:291
+#: awx/main/conf.py:316
 msgid ""
 "List of paths to search for extra callback plugins to be used when running "
 "jobs. Enter one path per line."
 msgstr ""
 
-#: awx/main/conf.py:301
+#: awx/main/conf.py:326
 msgid "Default Job Timeout"
 msgstr ""
 
-#: awx/main/conf.py:302
+#: awx/main/conf.py:327
 msgid ""
 "Maximum time in seconds to allow jobs to run. Use value of 0 to indicate "
 "that no timeout should be imposed. A timeout set on an individual job "
 "template will override this."
 msgstr ""
 
-#: awx/main/conf.py:313
+#: awx/main/conf.py:338
 msgid "Default Inventory Update Timeout"
 msgstr ""
 
-#: awx/main/conf.py:314
+#: awx/main/conf.py:339
 msgid ""
 "Maximum time in seconds to allow inventory updates to run. Use value of 0 to "
 "indicate that no timeout should be imposed. A timeout set on an individual "
 "inventory source will override this."
 msgstr ""
 
-#: awx/main/conf.py:325
+#: awx/main/conf.py:350
 msgid "Default Project Update Timeout"
 msgstr ""
 
-#: awx/main/conf.py:326
+#: awx/main/conf.py:351
 msgid ""
 "Maximum time in seconds to allow project updates to run. Use value of 0 to "
 "indicate that no timeout should be imposed. A timeout set on an individual "
 "project will override this."
 msgstr ""
 
-#: awx/main/conf.py:337
+#: awx/main/conf.py:362
 msgid "Per-Host Ansible Fact Cache Timeout"
 msgstr ""
 
-#: awx/main/conf.py:338
+#: awx/main/conf.py:363
 msgid ""
 "Maximum time, in seconds, that stored Ansible facts are considered valid "
 "since the last time they were modified. Only valid, non-stale, facts will be "
 "accessible by a playbook. Note, this does not influence the deletion of "
-"ansible_facts from the database."
+"ansible_facts from the database. Use a value of 0 to indicate that no "
+"timeout should be imposed."
 msgstr ""
 
-#: awx/main/conf.py:350
+#: awx/main/conf.py:376
 msgid "Logging Aggregator"
 msgstr ""
 
-#: awx/main/conf.py:351
+#: awx/main/conf.py:377
 msgid "Hostname/IP where external logs will be sent to."
 msgstr ""
 
-#: awx/main/conf.py:352 awx/main/conf.py:363 awx/main/conf.py:375
-#: awx/main/conf.py:385 awx/main/conf.py:397 awx/main/conf.py:412
-#: awx/main/conf.py:424 awx/main/conf.py:433 awx/main/conf.py:443
-#: awx/main/conf.py:453 awx/main/conf.py:464 awx/main/conf.py:476
-#: awx/main/conf.py:489
+#: awx/main/conf.py:378 awx/main/conf.py:389 awx/main/conf.py:401
+#: awx/main/conf.py:411 awx/main/conf.py:423 awx/main/conf.py:438
+#: awx/main/conf.py:450 awx/main/conf.py:459 awx/main/conf.py:469
+#: awx/main/conf.py:479 awx/main/conf.py:490 awx/main/conf.py:502
+#: awx/main/conf.py:515
 msgid "Logging"
 msgstr ""
 
-#: awx/main/conf.py:360
+#: awx/main/conf.py:386
 msgid "Logging Aggregator Port"
 msgstr ""
 
-#: awx/main/conf.py:361
+#: awx/main/conf.py:387
 msgid ""
 "Port on Logging Aggregator to send logs to (if required and not provided in "
 "Logging Aggregator)."
 msgstr ""
 
-#: awx/main/conf.py:373
+#: awx/main/conf.py:399
 msgid "Logging Aggregator Type"
 msgstr ""
 
-#: awx/main/conf.py:374
+#: awx/main/conf.py:400
 msgid "Format messages for the chosen log aggregator."
 msgstr ""
 
-#: awx/main/conf.py:383
+#: awx/main/conf.py:409
 msgid "Logging Aggregator Username"
 msgstr ""
 
-#: awx/main/conf.py:384
+#: awx/main/conf.py:410
 msgid "Username for external log aggregator (if required)."
 msgstr ""
 
-#: awx/main/conf.py:395
+#: awx/main/conf.py:421
 msgid "Logging Aggregator Password/Token"
 msgstr ""
 
-#: awx/main/conf.py:396
+#: awx/main/conf.py:422
 msgid ""
 "Password or authentication token for external log aggregator (if required)."
 msgstr ""
 
-#: awx/main/conf.py:405
+#: awx/main/conf.py:431
 msgid "Loggers Sending Data to Log Aggregator Form"
 msgstr ""
 
-#: awx/main/conf.py:406
+#: awx/main/conf.py:432
 msgid ""
 "List of loggers that will send HTTP logs to the collector, these can include "
 "any or all of: \n"
@@ -1741,57 +1983,57 @@ msgid ""
 "system_tracking - facts gathered from scan jobs."
 msgstr ""
 
-#: awx/main/conf.py:419
+#: awx/main/conf.py:445
 msgid "Log System Tracking Facts Individually"
 msgstr ""
 
-#: awx/main/conf.py:420
+#: awx/main/conf.py:446
 msgid ""
-"If set, system tracking facts will be sent for each package, service, "
-"orother item found in a scan, allowing for greater search query granularity. "
+"If set, system tracking facts will be sent for each package, service, or "
+"other item found in a scan, allowing for greater search query granularity. "
 "If unset, facts will be sent as a single dictionary, allowing for greater "
 "efficiency in fact processing."
 msgstr ""
 
-#: awx/main/conf.py:431
+#: awx/main/conf.py:457
 msgid "Enable External Logging"
 msgstr ""
 
-#: awx/main/conf.py:432
+#: awx/main/conf.py:458
 msgid "Enable sending logs to external log aggregator."
 msgstr ""
 
-#: awx/main/conf.py:441
+#: awx/main/conf.py:467
 msgid "Cluster-wide Tower unique identifier."
 msgstr ""
 
-#: awx/main/conf.py:442
+#: awx/main/conf.py:468
 msgid "Useful to uniquely identify Tower instances."
 msgstr ""
 
-#: awx/main/conf.py:451
+#: awx/main/conf.py:477
 msgid "Logging Aggregator Protocol"
 msgstr ""
 
-#: awx/main/conf.py:452
+#: awx/main/conf.py:478
 msgid "Protocol used to communicate with log aggregator."
 msgstr ""
 
-#: awx/main/conf.py:460
+#: awx/main/conf.py:486
 msgid "TCP Connection Timeout"
 msgstr ""
 
-#: awx/main/conf.py:461
+#: awx/main/conf.py:487
 msgid ""
 "Number of seconds for a TCP connection to external log aggregator to "
 "timeout. Applies to HTTPS and TCP log aggregator protocols."
 msgstr ""
 
-#: awx/main/conf.py:471
+#: awx/main/conf.py:497
 msgid "Enable/disable HTTPS certificate verification"
 msgstr ""
 
-#: awx/main/conf.py:472
+#: awx/main/conf.py:498
 msgid ""
 "Flag to control enable/disable of certificate verification when "
 "LOG_AGGREGATOR_PROTOCOL is \"https\". If enabled, Tower's log handler will "
@@ -1799,11 +2041,11 @@ msgid ""
 "connection."
 msgstr ""
 
-#: awx/main/conf.py:484
+#: awx/main/conf.py:510
 msgid "Logging Aggregator Level Threshold"
 msgstr ""
 
-#: awx/main/conf.py:485
+#: awx/main/conf.py:511
 msgid ""
 "Level threshold used by log handler. Severities from lowest to highest are "
 "DEBUG, INFO, WARNING, ERROR, CRITICAL. Messages less severe than the "
@@ -1811,133 +2053,182 @@ msgid ""
 "anlytics ignore this setting)"
 msgstr ""
 
-#: awx/main/conf.py:508 awx/sso/conf.py:1105
+#: awx/main/conf.py:534 awx/sso/conf.py:1262
 msgid "\n"
 msgstr ""
 
-#: awx/main/constants.py:10
+#: awx/main/constants.py:17
 msgid "Sudo"
 msgstr ""
 
-#: awx/main/constants.py:10
+#: awx/main/constants.py:17
 msgid "Su"
 msgstr ""
 
-#: awx/main/constants.py:10
+#: awx/main/constants.py:17
 msgid "Pbrun"
 msgstr ""
 
-#: awx/main/constants.py:10
+#: awx/main/constants.py:17
 msgid "Pfexec"
 msgstr ""
 
-#: awx/main/constants.py:10
+#: awx/main/constants.py:18
 msgid "DZDO"
 msgstr ""
 
-#: awx/main/constants.py:10
+#: awx/main/constants.py:18
 msgid "Pmrun"
 msgstr ""
 
-#: awx/main/constants.py:10
+#: awx/main/constants.py:18
 msgid "Runas"
 msgstr ""
 
-#: awx/main/fields.py:57
-#, python-format
-msgid "'%s' is not one of ['%s']"
+#: awx/main/constants.py:19
+msgid "Enable"
 msgstr ""
 
-#: awx/main/fields.py:533
+#: awx/main/constants.py:19
+msgid "Doas"
+msgstr ""
+
+#: awx/main/constants.py:21
+msgid "None"
+msgstr ""
+
+#: awx/main/fields.py:62
+#, python-brace-format
+msgid "'{value}' is not one of ['{allowed_values}']"
+msgstr ""
+
+#: awx/main/fields.py:418
+#, python-brace-format
+msgid "{type} provided in relative path {path}, expected {expected_type}"
+msgstr ""
+
+#: awx/main/fields.py:423
+#, python-brace-format
+msgid "{type} provided, expected {expected_type}"
+msgstr ""
+
+#: awx/main/fields.py:428
+#, python-brace-format
+msgid "Schema validation error in relative path {path} ({error})"
+msgstr ""
+
+#: awx/main/fields.py:549
+msgid "secret values must be of type string, not {}"
+msgstr ""
+
+#: awx/main/fields.py:584
 #, python-format
 msgid "cannot be set unless \"%s\" is set"
 msgstr ""
 
-#: awx/main/fields.py:549
+#: awx/main/fields.py:600
 #, python-format
 msgid "required for %s"
 msgstr ""
 
-#: awx/main/fields.py:573
+#: awx/main/fields.py:624
 msgid "must be set when SSH key is encrypted."
 msgstr ""
 
-#: awx/main/fields.py:579
+#: awx/main/fields.py:630
 msgid "should not be set when SSH key is not encrypted."
 msgstr ""
 
-#: awx/main/fields.py:637
+#: awx/main/fields.py:688
 msgid "'dependencies' is not supported for custom credentials."
 msgstr ""
 
-#: awx/main/fields.py:651
+#: awx/main/fields.py:702
 msgid "\"tower\" is a reserved field name"
 msgstr ""
 
-#: awx/main/fields.py:658
+#: awx/main/fields.py:709
 #, python-format
 msgid "field IDs must be unique (%s)"
 msgstr ""
 
-#: awx/main/fields.py:671
-#, python-format
-msgid "%s not allowed for %s type (%s)"
+#: awx/main/fields.py:722
+msgid "become_method is a reserved type name"
 msgstr ""
 
-#: awx/main/fields.py:755
-#, python-format
-msgid "%s uses an undefined field (%s)"
+#: awx/main/fields.py:733
+#, python-brace-format
+msgid "{sub_key} not allowed for {element_type} type ({element_id})"
 msgstr ""
 
-#: awx/main/middleware.py:157
+#: awx/main/fields.py:813
+msgid "Must use multi-file syntax when injecting multiple files"
+msgstr ""
+
+#: awx/main/fields.py:831
+#, python-brace-format
+msgid "{sub_key} uses an undefined field ({error_msg})"
+msgstr ""
+
+#: awx/main/fields.py:838
+#, python-brace-format
+msgid ""
+"Syntax error rendering template for {sub_key} inside of {type} ({error_msg})"
+msgstr ""
+
+#: awx/main/middleware.py:146
 msgid "Formats of all available named urls"
 msgstr ""
 
-#: awx/main/middleware.py:158
+#: awx/main/middleware.py:147
 msgid ""
 "Read-only list of key-value pairs that shows the standard format of all "
 "available named URLs."
 msgstr ""
 
-#: awx/main/middleware.py:160 awx/main/middleware.py:170
+#: awx/main/middleware.py:149 awx/main/middleware.py:159
 msgid "Named URL"
 msgstr ""
 
-#: awx/main/middleware.py:167
+#: awx/main/middleware.py:156
 msgid "List of all named url graph nodes."
 msgstr ""
 
-#: awx/main/middleware.py:168
+#: awx/main/middleware.py:157
 msgid ""
 "Read-only list of key-value pairs that exposes named URL graph topology. Use "
 "this list to programmatically generate named URLs for resources"
 msgstr ""
 
-#: awx/main/migrations/_reencrypt.py:25 awx/main/models/notifications.py:33
+#: awx/main/migrations/_reencrypt.py:26 awx/main/models/notifications.py:35
 msgid "Email"
 msgstr ""
 
-#: awx/main/migrations/_reencrypt.py:26 awx/main/models/notifications.py:34
+#: awx/main/migrations/_reencrypt.py:27 awx/main/models/notifications.py:36
 msgid "Slack"
 msgstr ""
 
-#: awx/main/migrations/_reencrypt.py:27 awx/main/models/notifications.py:35
+#: awx/main/migrations/_reencrypt.py:28 awx/main/models/notifications.py:37
 msgid "Twilio"
 msgstr ""
 
-#: awx/main/migrations/_reencrypt.py:28 awx/main/models/notifications.py:36
+#: awx/main/migrations/_reencrypt.py:29 awx/main/models/notifications.py:38
 msgid "Pagerduty"
 msgstr ""
 
-#: awx/main/migrations/_reencrypt.py:29 awx/main/models/notifications.py:37
+#: awx/main/migrations/_reencrypt.py:30 awx/main/models/notifications.py:39
 msgid "HipChat"
 msgstr ""
 
-#: awx/main/migrations/_reencrypt.py:30 awx/main/models/notifications.py:38
+#: awx/main/migrations/_reencrypt.py:31 awx/main/models/notifications.py:41
+msgid "Mattermost"
+msgstr ""
+
+#: awx/main/migrations/_reencrypt.py:32 awx/main/models/notifications.py:40
 msgid "Webhook"
 msgstr ""
 
-#: awx/main/migrations/_reencrypt.py:31 awx/main/models/notifications.py:39
+#: awx/main/migrations/_reencrypt.py:33 awx/main/models/notifications.py:43
 msgid "IRC"
 msgstr ""
 
@@ -1961,242 +2252,323 @@ msgstr ""
 msgid "Entity was Disassociated with another Entity"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:100
+#: awx/main/models/ad_hoc_commands.py:95
 msgid "No valid inventory."
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:107
+#: awx/main/models/ad_hoc_commands.py:102
 msgid "You must provide a machine / SSH credential."
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:118
-#: awx/main/models/ad_hoc_commands.py:126
+#: awx/main/models/ad_hoc_commands.py:113
+#: awx/main/models/ad_hoc_commands.py:121
 msgid "Invalid type for ad hoc command"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:121
+#: awx/main/models/ad_hoc_commands.py:116
 msgid "Unsupported module for ad hoc commands."
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:129
+#: awx/main/models/ad_hoc_commands.py:124
 #, python-format
 msgid "No argument passed to %s module."
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:245 awx/main/models/jobs.py:911
-msgid "Host Failed"
-msgstr ""
-
-#: awx/main/models/ad_hoc_commands.py:246 awx/main/models/jobs.py:912
-msgid "Host OK"
-msgstr ""
-
-#: awx/main/models/ad_hoc_commands.py:247 awx/main/models/jobs.py:915
-msgid "Host Unreachable"
-msgstr ""
-
-#: awx/main/models/ad_hoc_commands.py:252 awx/main/models/jobs.py:914
-msgid "Host Skipped"
-msgstr ""
-
-#: awx/main/models/ad_hoc_commands.py:262 awx/main/models/jobs.py:942
-msgid "Debug"
-msgstr ""
-
-#: awx/main/models/ad_hoc_commands.py:263 awx/main/models/jobs.py:943
-msgid "Verbose"
-msgstr ""
-
-#: awx/main/models/ad_hoc_commands.py:264 awx/main/models/jobs.py:944
-msgid "Deprecated"
-msgstr ""
-
-#: awx/main/models/ad_hoc_commands.py:265 awx/main/models/jobs.py:945
-msgid "Warning"
-msgstr ""
-
-#: awx/main/models/ad_hoc_commands.py:266 awx/main/models/jobs.py:946
-msgid "System Warning"
-msgstr ""
-
-#: awx/main/models/ad_hoc_commands.py:267 awx/main/models/jobs.py:947
-#: awx/main/models/unified_jobs.py:64
-msgid "Error"
-msgstr ""
-
-#: awx/main/models/base.py:40 awx/main/models/base.py:46
-#: awx/main/models/base.py:51
+#: awx/main/models/base.py:33 awx/main/models/base.py:39
+#: awx/main/models/base.py:44 awx/main/models/base.py:49
 msgid "Run"
 msgstr ""
 
-#: awx/main/models/base.py:41 awx/main/models/base.py:47
-#: awx/main/models/base.py:52
+#: awx/main/models/base.py:34 awx/main/models/base.py:40
+#: awx/main/models/base.py:45 awx/main/models/base.py:50
 msgid "Check"
 msgstr ""
 
-#: awx/main/models/base.py:42
+#: awx/main/models/base.py:35
 msgid "Scan"
 msgstr ""
 
-#: awx/main/models/credential.py:86
+#: awx/main/models/credential/__init__.py:110
 msgid "Host"
 msgstr ""
 
-#: awx/main/models/credential.py:87
+#: awx/main/models/credential/__init__.py:111
 msgid "The hostname or IP address to use."
 msgstr ""
 
-#: awx/main/models/credential.py:93
+#: awx/main/models/credential/__init__.py:117
 msgid "Username"
 msgstr ""
 
-#: awx/main/models/credential.py:94
+#: awx/main/models/credential/__init__.py:118
 msgid "Username for this credential."
 msgstr ""
 
-#: awx/main/models/credential.py:100
+#: awx/main/models/credential/__init__.py:124
 msgid "Password"
 msgstr ""
 
-#: awx/main/models/credential.py:101
+#: awx/main/models/credential/__init__.py:125
 msgid ""
 "Password for this credential (or \"ASK\" to prompt the user for machine "
 "credentials)."
 msgstr ""
 
-#: awx/main/models/credential.py:108
+#: awx/main/models/credential/__init__.py:132
 msgid "Security Token"
 msgstr ""
 
-#: awx/main/models/credential.py:109
+#: awx/main/models/credential/__init__.py:133
 msgid "Security Token for this credential"
 msgstr ""
 
-#: awx/main/models/credential.py:115
+#: awx/main/models/credential/__init__.py:139
 msgid "Project"
 msgstr ""
 
-#: awx/main/models/credential.py:116
+#: awx/main/models/credential/__init__.py:140
 msgid "The identifier for the project."
 msgstr ""
 
-#: awx/main/models/credential.py:122
+#: awx/main/models/credential/__init__.py:146
 msgid "Domain"
 msgstr ""
 
-#: awx/main/models/credential.py:123
+#: awx/main/models/credential/__init__.py:147
 msgid "The identifier for the domain."
 msgstr ""
 
-#: awx/main/models/credential.py:128
+#: awx/main/models/credential/__init__.py:152
 msgid "SSH private key"
 msgstr ""
 
-#: awx/main/models/credential.py:129
+#: awx/main/models/credential/__init__.py:153
 msgid "RSA or DSA private key to be used instead of password."
 msgstr ""
 
-#: awx/main/models/credential.py:135
+#: awx/main/models/credential/__init__.py:159
 msgid "SSH key unlock"
 msgstr ""
 
-#: awx/main/models/credential.py:136
+#: awx/main/models/credential/__init__.py:160
 msgid ""
 "Passphrase to unlock SSH private key if encrypted (or \"ASK\" to prompt the "
 "user for machine credentials)."
 msgstr ""
 
-#: awx/main/models/credential.py:143
-msgid "None"
-msgstr ""
-
-#: awx/main/models/credential.py:144
+#: awx/main/models/credential/__init__.py:168
 msgid "Privilege escalation method."
 msgstr ""
 
-#: awx/main/models/credential.py:150
+#: awx/main/models/credential/__init__.py:174
 msgid "Privilege escalation username."
 msgstr ""
 
-#: awx/main/models/credential.py:156
+#: awx/main/models/credential/__init__.py:180
 msgid "Password for privilege escalation method."
 msgstr ""
 
-#: awx/main/models/credential.py:162
+#: awx/main/models/credential/__init__.py:186
 msgid "Vault password (or \"ASK\" to prompt the user)."
 msgstr ""
 
-#: awx/main/models/credential.py:166
+#: awx/main/models/credential/__init__.py:190
 msgid "Whether to use the authorize mechanism."
 msgstr ""
 
-#: awx/main/models/credential.py:172
+#: awx/main/models/credential/__init__.py:196
 msgid "Password used by the authorize mechanism."
 msgstr ""
 
-#: awx/main/models/credential.py:178
+#: awx/main/models/credential/__init__.py:202
 msgid "Client Id or Application Id for the credential"
 msgstr ""
 
-#: awx/main/models/credential.py:184
+#: awx/main/models/credential/__init__.py:208
 msgid "Secret Token for this credential"
 msgstr ""
 
-#: awx/main/models/credential.py:190
+#: awx/main/models/credential/__init__.py:214
 msgid "Subscription identifier for this credential"
 msgstr ""
 
-#: awx/main/models/credential.py:196
+#: awx/main/models/credential/__init__.py:220
 msgid "Tenant identifier for this credential"
 msgstr ""
 
-#: awx/main/models/credential.py:220
+#: awx/main/models/credential/__init__.py:244
 msgid ""
 "Specify the type of credential you want to create. Refer to the Ansible "
 "Tower documentation for details on each type."
 msgstr ""
 
-#: awx/main/models/credential.py:234 awx/main/models/credential.py:420
+#: awx/main/models/credential/__init__.py:258
+#: awx/main/models/credential/__init__.py:476
 msgid ""
 "Enter inputs using either JSON or YAML syntax. Use the radio button to "
 "toggle between the two. Refer to the Ansible Tower documentation for example "
 "syntax."
 msgstr ""
 
-#: awx/main/models/credential.py:401
+#: awx/main/models/credential/__init__.py:457
 msgid "Machine"
 msgstr ""
 
-#: awx/main/models/credential.py:402
+#: awx/main/models/credential/__init__.py:458
 msgid "Vault"
 msgstr ""
 
-#: awx/main/models/credential.py:403
+#: awx/main/models/credential/__init__.py:459
 msgid "Network"
 msgstr ""
 
-#: awx/main/models/credential.py:404
+#: awx/main/models/credential/__init__.py:460
 msgid "Source Control"
 msgstr ""
 
-#: awx/main/models/credential.py:405
+#: awx/main/models/credential/__init__.py:461
 msgid "Cloud"
 msgstr ""
 
-#: awx/main/models/credential.py:406
+#: awx/main/models/credential/__init__.py:462
 msgid "Insights"
 msgstr ""
 
-#: awx/main/models/credential.py:427
+#: awx/main/models/credential/__init__.py:483
 msgid ""
 "Enter injectors using either JSON or YAML syntax. Use the radio button to "
 "toggle between the two. Refer to the Ansible Tower documentation for example "
 "syntax."
 msgstr ""
 
-#: awx/main/models/credential.py:478
+#: awx/main/models/credential/__init__.py:534
 #, python-format
 msgid "adding %s credential type"
+msgstr ""
+
+#: awx/main/models/events.py:71 awx/main/models/events.py:598
+msgid "Host Failed"
+msgstr ""
+
+#: awx/main/models/events.py:72 awx/main/models/events.py:599
+msgid "Host OK"
+msgstr ""
+
+#: awx/main/models/events.py:73
+msgid "Host Failure"
+msgstr ""
+
+#: awx/main/models/events.py:74 awx/main/models/events.py:605
+msgid "Host Skipped"
+msgstr ""
+
+#: awx/main/models/events.py:75 awx/main/models/events.py:600
+msgid "Host Unreachable"
+msgstr ""
+
+#: awx/main/models/events.py:76 awx/main/models/events.py:90
+msgid "No Hosts Remaining"
+msgstr ""
+
+#: awx/main/models/events.py:77
+msgid "Host Polling"
+msgstr ""
+
+#: awx/main/models/events.py:78
+msgid "Host Async OK"
+msgstr ""
+
+#: awx/main/models/events.py:79
+msgid "Host Async Failure"
+msgstr ""
+
+#: awx/main/models/events.py:80
+msgid "Item OK"
+msgstr ""
+
+#: awx/main/models/events.py:81
+msgid "Item Failed"
+msgstr ""
+
+#: awx/main/models/events.py:82
+msgid "Item Skipped"
+msgstr ""
+
+#: awx/main/models/events.py:83
+msgid "Host Retry"
+msgstr ""
+
+#: awx/main/models/events.py:85
+msgid "File Difference"
+msgstr ""
+
+#: awx/main/models/events.py:86
+msgid "Playbook Started"
+msgstr ""
+
+#: awx/main/models/events.py:87
+msgid "Running Handlers"
+msgstr ""
+
+#: awx/main/models/events.py:88
+msgid "Including File"
+msgstr ""
+
+#: awx/main/models/events.py:89
+msgid "No Hosts Matched"
+msgstr ""
+
+#: awx/main/models/events.py:91
+msgid "Task Started"
+msgstr ""
+
+#: awx/main/models/events.py:93
+msgid "Variables Prompted"
+msgstr ""
+
+#: awx/main/models/events.py:94
+msgid "Gathering Facts"
+msgstr ""
+
+#: awx/main/models/events.py:95
+msgid "internal: on Import for Host"
+msgstr ""
+
+#: awx/main/models/events.py:96
+msgid "internal: on Not Import for Host"
+msgstr ""
+
+#: awx/main/models/events.py:97
+msgid "Play Started"
+msgstr ""
+
+#: awx/main/models/events.py:98
+msgid "Playbook Complete"
+msgstr ""
+
+#: awx/main/models/events.py:102 awx/main/models/events.py:615
+msgid "Debug"
+msgstr ""
+
+#: awx/main/models/events.py:103 awx/main/models/events.py:616
+msgid "Verbose"
+msgstr ""
+
+#: awx/main/models/events.py:104 awx/main/models/events.py:617
+msgid "Deprecated"
+msgstr ""
+
+#: awx/main/models/events.py:105 awx/main/models/events.py:618
+msgid "Warning"
+msgstr ""
+
+#: awx/main/models/events.py:106 awx/main/models/events.py:619
+msgid "System Warning"
+msgstr ""
+
+#: awx/main/models/events.py:107 awx/main/models/events.py:620
+#: awx/main/models/unified_jobs.py:67
+msgid "Error"
 msgstr ""
 
 #: awx/main/models/fact.py:25
@@ -2213,372 +2585,391 @@ msgid ""
 "host."
 msgstr ""
 
-#: awx/main/models/ha.py:78
+#: awx/main/models/ha.py:129
 msgid "Instances that are members of this InstanceGroup"
 msgstr ""
 
-#: awx/main/models/ha.py:83
+#: awx/main/models/ha.py:134
 msgid "Instance Group to remotely control this group."
 msgstr ""
 
-#: awx/main/models/inventory.py:52
+#: awx/main/models/ha.py:141
+msgid "Percentage of Instances to automatically assign to this group"
+msgstr ""
+
+#: awx/main/models/ha.py:145
+msgid ""
+"Static minimum number of Instances to automatically assign to this group"
+msgstr ""
+
+#: awx/main/models/ha.py:150
+msgid ""
+"List of exact-match Instances that will always be automatically assigned to "
+"this group"
+msgstr ""
+
+#: awx/main/models/inventory.py:61
 msgid "Hosts have a direct link to this inventory."
 msgstr ""
 
-#: awx/main/models/inventory.py:53
+#: awx/main/models/inventory.py:62
 msgid "Hosts for inventory generated using the host_filter property."
 msgstr ""
 
-#: awx/main/models/inventory.py:58
+#: awx/main/models/inventory.py:67
 msgid "inventories"
 msgstr ""
 
-#: awx/main/models/inventory.py:65
+#: awx/main/models/inventory.py:74
 msgid "Organization containing this inventory."
 msgstr ""
 
-#: awx/main/models/inventory.py:72
+#: awx/main/models/inventory.py:81
 msgid "Inventory variables in JSON or YAML format."
 msgstr ""
 
-#: awx/main/models/inventory.py:77
+#: awx/main/models/inventory.py:86
 msgid "Flag indicating whether any hosts in this inventory have failed."
 msgstr ""
 
-#: awx/main/models/inventory.py:82
+#: awx/main/models/inventory.py:91
 msgid "Total number of hosts in this inventory."
 msgstr ""
 
-#: awx/main/models/inventory.py:87
+#: awx/main/models/inventory.py:96
 msgid "Number of hosts in this inventory with active failures."
 msgstr ""
 
-#: awx/main/models/inventory.py:92
+#: awx/main/models/inventory.py:101
 msgid "Total number of groups in this inventory."
 msgstr ""
 
-#: awx/main/models/inventory.py:97
+#: awx/main/models/inventory.py:106
 msgid "Number of groups in this inventory with active failures."
 msgstr ""
 
-#: awx/main/models/inventory.py:102
+#: awx/main/models/inventory.py:111
 msgid ""
 "Flag indicating whether this inventory has any external inventory sources."
 msgstr ""
 
-#: awx/main/models/inventory.py:107
+#: awx/main/models/inventory.py:116
 msgid ""
 "Total number of external inventory sources configured within this inventory."
 msgstr ""
 
-#: awx/main/models/inventory.py:112
+#: awx/main/models/inventory.py:121
 msgid "Number of external inventory sources in this inventory with failures."
 msgstr ""
 
-#: awx/main/models/inventory.py:119
+#: awx/main/models/inventory.py:128
 msgid "Kind of inventory being represented."
 msgstr ""
 
-#: awx/main/models/inventory.py:125
+#: awx/main/models/inventory.py:134
 msgid "Filter that will be applied to the hosts of this inventory."
 msgstr ""
 
-#: awx/main/models/inventory.py:152
+#: awx/main/models/inventory.py:161
 msgid ""
 "Credentials to be used by hosts belonging to this inventory when accessing "
 "Red Hat Insights API."
 msgstr ""
 
-#: awx/main/models/inventory.py:161
+#: awx/main/models/inventory.py:170
 msgid "Flag indicating the inventory is being deleted."
 msgstr ""
 
-#: awx/main/models/inventory.py:374
+#: awx/main/models/inventory.py:459
 msgid "Assignment not allowed for Smart Inventory"
 msgstr ""
 
-#: awx/main/models/inventory.py:376 awx/main/models/projects.py:148
+#: awx/main/models/inventory.py:461 awx/main/models/projects.py:159
 msgid "Credential kind must be 'insights'."
 msgstr ""
 
-#: awx/main/models/inventory.py:443
+#: awx/main/models/inventory.py:546
 msgid "Is this host online and available for running jobs?"
 msgstr ""
 
-#: awx/main/models/inventory.py:449
+#: awx/main/models/inventory.py:552
 msgid ""
 "The value used by the remote inventory source to uniquely identify the host"
 msgstr ""
 
-#: awx/main/models/inventory.py:454
+#: awx/main/models/inventory.py:557
 msgid "Host variables in JSON or YAML format."
 msgstr ""
 
-#: awx/main/models/inventory.py:476
+#: awx/main/models/inventory.py:579
 msgid "Flag indicating whether the last job failed for this host."
 msgstr ""
 
-#: awx/main/models/inventory.py:481
+#: awx/main/models/inventory.py:584
 msgid ""
 "Flag indicating whether this host was created/updated from any external "
 "inventory sources."
 msgstr ""
 
-#: awx/main/models/inventory.py:487
+#: awx/main/models/inventory.py:590
 msgid "Inventory source(s) that created or modified this host."
 msgstr ""
 
-#: awx/main/models/inventory.py:492
+#: awx/main/models/inventory.py:595
 msgid "Arbitrary JSON structure of most recent ansible_facts, per-host."
 msgstr ""
 
-#: awx/main/models/inventory.py:498
+#: awx/main/models/inventory.py:601
 msgid "The date and time ansible_facts was last modified."
 msgstr ""
 
-#: awx/main/models/inventory.py:505
+#: awx/main/models/inventory.py:608
 msgid "Red Hat Insights host unique identifier."
 msgstr ""
 
-#: awx/main/models/inventory.py:633
+#: awx/main/models/inventory.py:743
 msgid "Group variables in JSON or YAML format."
 msgstr ""
 
-#: awx/main/models/inventory.py:639
+#: awx/main/models/inventory.py:749
 msgid "Hosts associated directly with this group."
 msgstr ""
 
-#: awx/main/models/inventory.py:644
+#: awx/main/models/inventory.py:754
 msgid "Total number of hosts directly or indirectly in this group."
 msgstr ""
 
-#: awx/main/models/inventory.py:649
+#: awx/main/models/inventory.py:759
 msgid "Flag indicating whether this group has any hosts with active failures."
 msgstr ""
 
-#: awx/main/models/inventory.py:654
+#: awx/main/models/inventory.py:764
 msgid "Number of hosts in this group with active failures."
 msgstr ""
 
-#: awx/main/models/inventory.py:659
+#: awx/main/models/inventory.py:769
 msgid "Total number of child groups contained within this group."
 msgstr ""
 
-#: awx/main/models/inventory.py:664
+#: awx/main/models/inventory.py:774
 msgid "Number of child groups within this group that have active failures."
 msgstr ""
 
-#: awx/main/models/inventory.py:669
+#: awx/main/models/inventory.py:779
 msgid ""
 "Flag indicating whether this group was created/updated from any external "
 "inventory sources."
 msgstr ""
 
-#: awx/main/models/inventory.py:675
+#: awx/main/models/inventory.py:785
 msgid "Inventory source(s) that created or modified this group."
 msgstr ""
 
-#: awx/main/models/inventory.py:865 awx/main/models/projects.py:42
-#: awx/main/models/unified_jobs.py:428
+#: awx/main/models/inventory.py:981 awx/main/models/projects.py:53
+#: awx/main/models/unified_jobs.py:518
 msgid "Manual"
 msgstr ""
 
-#: awx/main/models/inventory.py:866
+#: awx/main/models/inventory.py:982
 msgid "File, Directory or Script"
 msgstr ""
 
-#: awx/main/models/inventory.py:867
+#: awx/main/models/inventory.py:983
 msgid "Sourced from a Project"
 msgstr ""
 
-#: awx/main/models/inventory.py:868
+#: awx/main/models/inventory.py:984
 msgid "Amazon EC2"
 msgstr ""
 
-#: awx/main/models/inventory.py:869
+#: awx/main/models/inventory.py:985
 msgid "Google Compute Engine"
 msgstr ""
 
-#: awx/main/models/inventory.py:870
+#: awx/main/models/inventory.py:986
 msgid "Microsoft Azure Resource Manager"
 msgstr ""
 
-#: awx/main/models/inventory.py:871
+#: awx/main/models/inventory.py:987
 msgid "VMware vCenter"
 msgstr ""
 
-#: awx/main/models/inventory.py:872
+#: awx/main/models/inventory.py:988
 msgid "Red Hat Satellite 6"
 msgstr ""
 
-#: awx/main/models/inventory.py:873
+#: awx/main/models/inventory.py:989
 msgid "Red Hat CloudForms"
 msgstr ""
 
-#: awx/main/models/inventory.py:874
+#: awx/main/models/inventory.py:990
 msgid "OpenStack"
 msgstr ""
 
-#: awx/main/models/inventory.py:875
-msgid "oVirt4"
+#: awx/main/models/inventory.py:991
+msgid "Red Hat Virtualization"
 msgstr ""
 
-#: awx/main/models/inventory.py:876
+#: awx/main/models/inventory.py:992
 msgid "Ansible Tower"
 msgstr ""
 
-#: awx/main/models/inventory.py:877
+#: awx/main/models/inventory.py:993
 msgid "Custom Script"
 msgstr ""
 
-#: awx/main/models/inventory.py:994
+#: awx/main/models/inventory.py:1110
 msgid "Inventory source variables in YAML or JSON format."
 msgstr ""
 
-#: awx/main/models/inventory.py:1013
+#: awx/main/models/inventory.py:1121
 msgid ""
 "Comma-separated list of filter expressions (EC2 only). Hosts are imported "
 "when ANY of the filters match."
 msgstr ""
 
-#: awx/main/models/inventory.py:1019
+#: awx/main/models/inventory.py:1127
 msgid "Limit groups automatically created from inventory source (EC2 only)."
 msgstr ""
 
-#: awx/main/models/inventory.py:1023
+#: awx/main/models/inventory.py:1131
 msgid "Overwrite local groups and hosts from remote inventory source."
 msgstr ""
 
-#: awx/main/models/inventory.py:1027
+#: awx/main/models/inventory.py:1135
 msgid "Overwrite local variables from remote inventory source."
 msgstr ""
 
-#: awx/main/models/inventory.py:1032 awx/main/models/jobs.py:160
-#: awx/main/models/projects.py:117
+#: awx/main/models/inventory.py:1140 awx/main/models/jobs.py:140
+#: awx/main/models/projects.py:128
 msgid "The amount of time (in seconds) to run before the task is canceled."
 msgstr ""
 
-#: awx/main/models/inventory.py:1065
+#: awx/main/models/inventory.py:1173
 msgid "Image ID"
 msgstr ""
 
-#: awx/main/models/inventory.py:1066
+#: awx/main/models/inventory.py:1174
 msgid "Availability Zone"
 msgstr ""
 
-#: awx/main/models/inventory.py:1067
+#: awx/main/models/inventory.py:1175
 msgid "Account"
 msgstr ""
 
-#: awx/main/models/inventory.py:1068
+#: awx/main/models/inventory.py:1176
 msgid "Instance ID"
 msgstr ""
 
-#: awx/main/models/inventory.py:1069
+#: awx/main/models/inventory.py:1177
 msgid "Instance State"
 msgstr ""
 
-#: awx/main/models/inventory.py:1070
+#: awx/main/models/inventory.py:1178
+msgid "Platform"
+msgstr ""
+
+#: awx/main/models/inventory.py:1179
 msgid "Instance Type"
 msgstr ""
 
-#: awx/main/models/inventory.py:1071
+#: awx/main/models/inventory.py:1180
 msgid "Key Name"
 msgstr ""
 
-#: awx/main/models/inventory.py:1072
+#: awx/main/models/inventory.py:1181
 msgid "Region"
 msgstr ""
 
-#: awx/main/models/inventory.py:1073
+#: awx/main/models/inventory.py:1182
 msgid "Security Group"
 msgstr ""
 
-#: awx/main/models/inventory.py:1074
+#: awx/main/models/inventory.py:1183
 msgid "Tags"
 msgstr ""
 
-#: awx/main/models/inventory.py:1075
+#: awx/main/models/inventory.py:1184
 msgid "Tag None"
 msgstr ""
 
-#: awx/main/models/inventory.py:1076
+#: awx/main/models/inventory.py:1185
 msgid "VPC ID"
 msgstr ""
 
-#: awx/main/models/inventory.py:1145
+#: awx/main/models/inventory.py:1253
 #, python-format
 msgid ""
 "Cloud-based inventory sources (such as %s) require credentials for the "
 "matching cloud service."
 msgstr ""
 
-#: awx/main/models/inventory.py:1152
+#: awx/main/models/inventory.py:1259
 msgid "Credential is required for a cloud source."
 msgstr ""
 
-#: awx/main/models/inventory.py:1155
+#: awx/main/models/inventory.py:1262
 msgid ""
 "Credentials of type machine, source control, insights and vault are "
 "disallowed for custom inventory sources."
 msgstr ""
 
-#: awx/main/models/inventory.py:1179
+#: awx/main/models/inventory.py:1314
 #, python-format
 msgid "Invalid %(source)s region: %(region)s"
 msgstr ""
 
-#: awx/main/models/inventory.py:1203
+#: awx/main/models/inventory.py:1338
 #, python-format
 msgid "Invalid filter expression: %(filter)s"
 msgstr ""
 
-#: awx/main/models/inventory.py:1224
+#: awx/main/models/inventory.py:1359
 #, python-format
 msgid "Invalid group by choice: %(choice)s"
 msgstr ""
 
-#: awx/main/models/inventory.py:1259
+#: awx/main/models/inventory.py:1394
 msgid "Project containing inventory file used as source."
 msgstr ""
 
-#: awx/main/models/inventory.py:1407
+#: awx/main/models/inventory.py:1555
 #, python-format
 msgid ""
 "Unable to configure this item for cloud sync. It is already managed by %s."
 msgstr ""
 
-#: awx/main/models/inventory.py:1417
+#: awx/main/models/inventory.py:1565
 msgid ""
 "More than one SCM-based inventory source with update on project update per-"
 "inventory not allowed."
 msgstr ""
 
-#: awx/main/models/inventory.py:1424
+#: awx/main/models/inventory.py:1572
 msgid ""
 "Cannot update SCM-based inventory source on launch if set to update on "
 "project update. Instead, configure the corresponding source project to "
 "update on launch."
 msgstr ""
 
-#: awx/main/models/inventory.py:1430
-msgid "SCM type sources must set `overwrite_vars` to `true`."
+#: awx/main/models/inventory.py:1579
+msgid "SCM type sources must set `overwrite_vars` to `true` until Ansible 2.5."
 msgstr ""
 
-#: awx/main/models/inventory.py:1435
+#: awx/main/models/inventory.py:1584
 msgid "Cannot set source_path if not SCM type."
 msgstr ""
 
-#: awx/main/models/inventory.py:1460
+#: awx/main/models/inventory.py:1615
 msgid ""
 "Inventory files from this Project Update were used for the inventory update."
 msgstr ""
 
-#: awx/main/models/inventory.py:1573
+#: awx/main/models/inventory.py:1725
 msgid "Inventory script contents"
 msgstr ""
 
-#: awx/main/models/inventory.py:1578
+#: awx/main/models/inventory.py:1730
 msgid "Organization owning this inventory script"
 msgstr ""
 
@@ -2588,288 +2979,280 @@ msgid ""
 "shown in the standard output"
 msgstr ""
 
-#: awx/main/models/jobs.py:164
+#: awx/main/models/jobs.py:145
 msgid ""
 "If enabled, Tower will act as an Ansible Fact Cache Plugin; persisting facts "
 "at the end of a playbook run to the database and caching facts for use by "
 "Ansible."
 msgstr ""
 
-#: awx/main/models/jobs.py:173
-msgid "You must provide an SSH credential."
-msgstr ""
-
-#: awx/main/models/jobs.py:181
+#: awx/main/models/jobs.py:163
 msgid "You must provide a Vault credential."
 msgstr ""
 
-#: awx/main/models/jobs.py:317
+#: awx/main/models/jobs.py:308
 msgid "Job Template must provide 'inventory' or allow prompting for it."
 msgstr ""
 
-#: awx/main/models/jobs.py:321
-msgid "Job Template must provide 'credential' or allow prompting for it."
+#: awx/main/models/jobs.py:403
+msgid "Field is not configured to prompt on launch."
 msgstr ""
 
-#: awx/main/models/jobs.py:427
-msgid "Cannot override job_type to or from a scan job."
+#: awx/main/models/jobs.py:407
+msgid "Saved launch configurations cannot provide passwords needed to start."
 msgstr ""
 
-#: awx/main/models/jobs.py:493 awx/main/models/projects.py:263
+#: awx/main/models/jobs.py:415
+msgid "Job Template {} is missing or undefined."
+msgstr ""
+
+#: awx/main/models/jobs.py:496 awx/main/models/projects.py:276
 msgid "SCM Revision"
 msgstr ""
 
-#: awx/main/models/jobs.py:494
+#: awx/main/models/jobs.py:497
 msgid "The SCM Revision from the Project used for this job, if available"
 msgstr ""
 
-#: awx/main/models/jobs.py:502
+#: awx/main/models/jobs.py:505
 msgid ""
 "The SCM Refresh task used to make sure the playbooks were available for the "
 "job run"
 msgstr ""
 
-#: awx/main/models/jobs.py:809
+#: awx/main/models/jobs.py:632
+#, python-brace-format
+msgid "{status_value} is not a valid status option."
+msgstr ""
+
+#: awx/main/models/jobs.py:991
 msgid "job host summaries"
 msgstr ""
 
-#: awx/main/models/jobs.py:913
-msgid "Host Failure"
-msgstr ""
-
-#: awx/main/models/jobs.py:916 awx/main/models/jobs.py:930
-msgid "No Hosts Remaining"
-msgstr ""
-
-#: awx/main/models/jobs.py:917
-msgid "Host Polling"
-msgstr ""
-
-#: awx/main/models/jobs.py:918
-msgid "Host Async OK"
-msgstr ""
-
-#: awx/main/models/jobs.py:919
-msgid "Host Async Failure"
-msgstr ""
-
-#: awx/main/models/jobs.py:920
-msgid "Item OK"
-msgstr ""
-
-#: awx/main/models/jobs.py:921
-msgid "Item Failed"
-msgstr ""
-
-#: awx/main/models/jobs.py:922
-msgid "Item Skipped"
-msgstr ""
-
-#: awx/main/models/jobs.py:923
-msgid "Host Retry"
-msgstr ""
-
-#: awx/main/models/jobs.py:925
-msgid "File Difference"
-msgstr ""
-
-#: awx/main/models/jobs.py:926
-msgid "Playbook Started"
-msgstr ""
-
-#: awx/main/models/jobs.py:927
-msgid "Running Handlers"
-msgstr ""
-
-#: awx/main/models/jobs.py:928
-msgid "Including File"
-msgstr ""
-
-#: awx/main/models/jobs.py:929
-msgid "No Hosts Matched"
-msgstr ""
-
-#: awx/main/models/jobs.py:931
-msgid "Task Started"
-msgstr ""
-
-#: awx/main/models/jobs.py:933
-msgid "Variables Prompted"
-msgstr ""
-
-#: awx/main/models/jobs.py:934
-msgid "Gathering Facts"
-msgstr ""
-
-#: awx/main/models/jobs.py:935
-msgid "internal: on Import for Host"
-msgstr ""
-
-#: awx/main/models/jobs.py:936
-msgid "internal: on Not Import for Host"
-msgstr ""
-
-#: awx/main/models/jobs.py:937
-msgid "Play Started"
-msgstr ""
-
-#: awx/main/models/jobs.py:938
-msgid "Playbook Complete"
-msgstr ""
-
-#: awx/main/models/jobs.py:1351
+#: awx/main/models/jobs.py:1062
 msgid "Remove jobs older than a certain number of days"
 msgstr ""
 
-#: awx/main/models/jobs.py:1352
+#: awx/main/models/jobs.py:1063
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr ""
 
-#: awx/main/models/jobs.py:1353
+#: awx/main/models/jobs.py:1064
 msgid "Purge and/or reduce the granularity of system tracking data"
+msgstr ""
+
+#: awx/main/models/jobs.py:1134
+#, python-brace-format
+msgid "Variables {list_of_keys} are not allowed for system jobs."
+msgstr ""
+
+#: awx/main/models/jobs.py:1149
+msgid "days must be a positive integer."
 msgstr ""
 
 #: awx/main/models/label.py:29
 msgid "Organization this label belongs to."
 msgstr ""
 
-#: awx/main/models/notifications.py:138 awx/main/models/unified_jobs.py:59
+#: awx/main/models/mixins.py:309
+#, python-brace-format
+msgid ""
+"Variables {list_of_keys} are not allowed on launch. Check the Prompt on "
+"Launch setting on the Job Template to include Extra Variables."
+msgstr ""
+
+#: awx/main/models/mixins.py:446
+msgid "{} is not a valid virtualenv in {}"
+msgstr ""
+
+#: awx/main/models/notifications.py:42
+msgid "Rocket.Chat"
+msgstr ""
+
+#: awx/main/models/notifications.py:142 awx/main/models/unified_jobs.py:62
 msgid "Pending"
 msgstr ""
 
-#: awx/main/models/notifications.py:139 awx/main/models/unified_jobs.py:62
+#: awx/main/models/notifications.py:143 awx/main/models/unified_jobs.py:65
 msgid "Successful"
 msgstr ""
 
-#: awx/main/models/notifications.py:140 awx/main/models/unified_jobs.py:63
+#: awx/main/models/notifications.py:144 awx/main/models/unified_jobs.py:66
 msgid "Failed"
 msgstr ""
 
-#: awx/main/models/organization.py:132
-msgid "Token not invalidated"
+#: awx/main/models/notifications.py:218
+msgid "status_str must be either succeeded or failed"
 msgstr ""
 
-#: awx/main/models/organization.py:133
-msgid "Token is expired"
+#: awx/main/models/oauth.py:27
+msgid "application"
 msgstr ""
 
-#: awx/main/models/organization.py:134
-msgid "The maximum number of allowed sessions for this user has been exceeded."
+#: awx/main/models/oauth.py:32
+msgid "Confidential"
 msgstr ""
 
-#: awx/main/models/organization.py:137
-msgid "Invalid token"
+#: awx/main/models/oauth.py:33
+msgid "Public"
 msgstr ""
 
-#: awx/main/models/organization.py:155
-msgid "Reason the auth token was invalidated."
+#: awx/main/models/oauth.py:41
+msgid "Authorization code"
 msgstr ""
 
-#: awx/main/models/organization.py:194
-msgid "Invalid reason specified"
+#: awx/main/models/oauth.py:42
+msgid "Implicit"
 msgstr ""
 
-#: awx/main/models/projects.py:43
+#: awx/main/models/oauth.py:43
+msgid "Resource owner password-based"
+msgstr ""
+
+#: awx/main/models/oauth.py:44
+msgid "Client credentials"
+msgstr ""
+
+#: awx/main/models/oauth.py:59
+msgid "Organization containing this application."
+msgstr ""
+
+#: awx/main/models/oauth.py:68
+msgid ""
+"Used for more stringent verification of access to an application when "
+"creating a token."
+msgstr ""
+
+#: awx/main/models/oauth.py:73
+msgid ""
+"Set to Public or Confidential depending on how secure the client device is."
+msgstr ""
+
+#: awx/main/models/oauth.py:77
+msgid ""
+"Set True to skip authorization step for completely trusted applications."
+msgstr ""
+
+#: awx/main/models/oauth.py:82
+msgid ""
+"The Grant type the user must use for acquire tokens for this application."
+msgstr ""
+
+#: awx/main/models/oauth.py:90
+msgid "access token"
+msgstr ""
+
+#: awx/main/models/oauth.py:98
+msgid "The user representing the token owner"
+msgstr ""
+
+#: awx/main/models/oauth.py:112
+msgid ""
+"Allowed scopes, further restricts user's permissions. Must be a simple space-"
+"separated string with allowed scopes ['read', 'write']."
+msgstr ""
+
+#: awx/main/models/projects.py:54
 msgid "Git"
 msgstr ""
 
-#: awx/main/models/projects.py:44
+#: awx/main/models/projects.py:55
 msgid "Mercurial"
 msgstr ""
 
-#: awx/main/models/projects.py:45
+#: awx/main/models/projects.py:56
 msgid "Subversion"
 msgstr ""
 
-#: awx/main/models/projects.py:46
+#: awx/main/models/projects.py:57
 msgid "Red Hat Insights"
 msgstr ""
 
-#: awx/main/models/projects.py:72
+#: awx/main/models/projects.py:83
 msgid ""
 "Local path (relative to PROJECTS_ROOT) containing playbooks and related "
 "files for this project."
 msgstr ""
 
-#: awx/main/models/projects.py:81
+#: awx/main/models/projects.py:92
 msgid "SCM Type"
 msgstr ""
 
-#: awx/main/models/projects.py:82
+#: awx/main/models/projects.py:93
 msgid "Specifies the source control system used to store the project."
 msgstr ""
 
-#: awx/main/models/projects.py:88
+#: awx/main/models/projects.py:99
 msgid "SCM URL"
 msgstr ""
 
-#: awx/main/models/projects.py:89
+#: awx/main/models/projects.py:100
 msgid "The location where the project is stored."
 msgstr ""
 
-#: awx/main/models/projects.py:95
+#: awx/main/models/projects.py:106
 msgid "SCM Branch"
 msgstr ""
 
-#: awx/main/models/projects.py:96
+#: awx/main/models/projects.py:107
 msgid "Specific branch, tag or commit to checkout."
 msgstr ""
 
-#: awx/main/models/projects.py:100
+#: awx/main/models/projects.py:111
 msgid "Discard any local changes before syncing the project."
 msgstr ""
 
-#: awx/main/models/projects.py:104
+#: awx/main/models/projects.py:115
 msgid "Delete the project before syncing."
 msgstr ""
 
-#: awx/main/models/projects.py:133
+#: awx/main/models/projects.py:144
 msgid "Invalid SCM URL."
 msgstr ""
 
-#: awx/main/models/projects.py:136
+#: awx/main/models/projects.py:147
 msgid "SCM URL is required."
 msgstr ""
 
-#: awx/main/models/projects.py:144
+#: awx/main/models/projects.py:155
 msgid "Insights Credential is required for an Insights Project."
 msgstr ""
 
-#: awx/main/models/projects.py:150
+#: awx/main/models/projects.py:161
 msgid "Credential kind must be 'scm'."
 msgstr ""
 
-#: awx/main/models/projects.py:167
+#: awx/main/models/projects.py:178
 msgid "Invalid credential."
 msgstr ""
 
-#: awx/main/models/projects.py:249
+#: awx/main/models/projects.py:262
 msgid "Update the project when a job is launched that uses the project."
 msgstr ""
 
-#: awx/main/models/projects.py:254
+#: awx/main/models/projects.py:267
 msgid ""
 "The number of seconds after the last project update ran that a newproject "
 "update will be launched as a job dependency."
 msgstr ""
 
-#: awx/main/models/projects.py:264
+#: awx/main/models/projects.py:277
 msgid "The last revision fetched by a project update"
 msgstr ""
 
-#: awx/main/models/projects.py:271
+#: awx/main/models/projects.py:284
 msgid "Playbook Files"
 msgstr ""
 
-#: awx/main/models/projects.py:272
+#: awx/main/models/projects.py:285
 msgid "List of playbooks found in the project"
 msgstr ""
 
-#: awx/main/models/projects.py:279
+#: awx/main/models/projects.py:292
 msgid "Inventory Files"
 msgstr ""
 
-#: awx/main/models/projects.py:280
+#: awx/main/models/projects.py:293
 msgid ""
 "Suggested list of content that could be Ansible inventory in the project"
 msgstr ""
@@ -2891,200 +3274,262 @@ msgid "Admin"
 msgstr ""
 
 #: awx/main/models/rbac.py:40
-msgid "Auditor"
+msgid "Project Admin"
 msgstr ""
 
 #: awx/main/models/rbac.py:41
-msgid "Execute"
+msgid "Inventory Admin"
 msgstr ""
 
 #: awx/main/models/rbac.py:42
-msgid "Member"
+msgid "Credential Admin"
 msgstr ""
 
 #: awx/main/models/rbac.py:43
-msgid "Read"
+msgid "Workflow Admin"
 msgstr ""
 
 #: awx/main/models/rbac.py:44
-msgid "Update"
+msgid "Notification Admin"
 msgstr ""
 
 #: awx/main/models/rbac.py:45
-msgid "Use"
+msgid "Auditor"
+msgstr ""
+
+#: awx/main/models/rbac.py:46
+msgid "Execute"
+msgstr ""
+
+#: awx/main/models/rbac.py:47
+msgid "Member"
+msgstr ""
+
+#: awx/main/models/rbac.py:48
+msgid "Read"
 msgstr ""
 
 #: awx/main/models/rbac.py:49
-msgid "Can manage all aspects of the system"
+msgid "Update"
 msgstr ""
 
 #: awx/main/models/rbac.py:50
+msgid "Use"
+msgstr ""
+
+#: awx/main/models/rbac.py:54
+msgid "Can manage all aspects of the system"
+msgstr ""
+
+#: awx/main/models/rbac.py:55
 msgid "Can view all settings on the system"
 msgstr ""
 
-#: awx/main/models/rbac.py:51
+#: awx/main/models/rbac.py:56
 msgid "May run ad hoc commands on an inventory"
 msgstr ""
 
-#: awx/main/models/rbac.py:52
+#: awx/main/models/rbac.py:57
 #, python-format
 msgid "Can manage all aspects of the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:53
+#: awx/main/models/rbac.py:58
+#, python-format
+msgid "Can manage all projects of the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:59
+#, python-format
+msgid "Can manage all inventories of the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:60
+#, python-format
+msgid "Can manage all credentials of the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:61
+#, python-format
+msgid "Can manage all workflows of the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:62
+#, python-format
+msgid "Can manage all notifications of the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:63
 #, python-format
 msgid "Can view all settings for the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:54
+#: awx/main/models/rbac.py:65
+msgid "May run any executable resources in the organization"
+msgstr ""
+
+#: awx/main/models/rbac.py:66
 #, python-format
 msgid "May run the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:55
+#: awx/main/models/rbac.py:68
 #, python-format
 msgid "User is a member of the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:56
+#: awx/main/models/rbac.py:69
 #, python-format
 msgid "May view settings for the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:57
+#: awx/main/models/rbac.py:70
 msgid ""
 "May update project or inventory or group using the configured source update "
 "system"
 msgstr ""
 
-#: awx/main/models/rbac.py:58
+#: awx/main/models/rbac.py:71
 #, python-format
 msgid "Can use the %s in a job template"
 msgstr ""
 
-#: awx/main/models/rbac.py:122
+#: awx/main/models/rbac.py:135
 msgid "roles"
 msgstr ""
 
-#: awx/main/models/rbac.py:434
+#: awx/main/models/rbac.py:441
 msgid "role_ancestors"
 msgstr ""
 
-#: awx/main/models/schedules.py:71
+#: awx/main/models/schedules.py:72
 msgid "Enables processing of this schedule."
 msgstr ""
 
-#: awx/main/models/schedules.py:77
+#: awx/main/models/schedules.py:78
 msgid "The first occurrence of the schedule occurs on or after this time."
 msgstr ""
 
-#: awx/main/models/schedules.py:83
+#: awx/main/models/schedules.py:84
 msgid ""
 "The last occurrence of the schedule occurs before this time, aftewards the "
 "schedule expires."
 msgstr ""
 
-#: awx/main/models/schedules.py:87
+#: awx/main/models/schedules.py:88
 msgid "A value representing the schedules iCal recurrence rule."
 msgstr ""
 
-#: awx/main/models/schedules.py:93
+#: awx/main/models/schedules.py:94
 msgid "The next time that the scheduled action will run."
 msgstr ""
 
-#: awx/main/models/schedules.py:109
-msgid "Expected JSON"
-msgstr ""
-
-#: awx/main/models/schedules.py:121
-msgid "days must be a positive integer."
-msgstr ""
-
-#: awx/main/models/unified_jobs.py:58
+#: awx/main/models/unified_jobs.py:61
 msgid "New"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:60
+#: awx/main/models/unified_jobs.py:63
 msgid "Waiting"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:61
+#: awx/main/models/unified_jobs.py:64
 msgid "Running"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:65
+#: awx/main/models/unified_jobs.py:68
 msgid "Canceled"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:69
+#: awx/main/models/unified_jobs.py:72
 msgid "Never Updated"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:73 awx/ui/templates/ui/index.html:67
-#: awx/ui/templates/ui/index.html.py:86
+#: awx/main/models/unified_jobs.py:76
 msgid "OK"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:74
+#: awx/main/models/unified_jobs.py:77
 msgid "Missing"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:78
+#: awx/main/models/unified_jobs.py:81
 msgid "No External Source"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:85
+#: awx/main/models/unified_jobs.py:88
 msgid "Updating"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:429
-msgid "Relaunch"
+#: awx/main/models/unified_jobs.py:427
+msgid "Field is not allowed on launch."
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:430
-msgid "Callback"
-msgstr ""
-
-#: awx/main/models/unified_jobs.py:431
-msgid "Scheduled"
-msgstr ""
-
-#: awx/main/models/unified_jobs.py:432
-msgid "Dependency"
-msgstr ""
-
-#: awx/main/models/unified_jobs.py:433
-msgid "Workflow"
-msgstr ""
-
-#: awx/main/models/unified_jobs.py:434
-msgid "Sync"
-msgstr ""
-
-#: awx/main/models/unified_jobs.py:481
-msgid "The node the job executed on."
-msgstr ""
-
-#: awx/main/models/unified_jobs.py:507
-msgid "The date and time the job was queued for starting."
-msgstr ""
-
-#: awx/main/models/unified_jobs.py:513
-msgid "The date and time the job finished execution."
+#: awx/main/models/unified_jobs.py:455
+#, python-brace-format
+msgid ""
+"Variables {list_of_keys} provided, but this template cannot accept variables."
 msgstr ""
 
 #: awx/main/models/unified_jobs.py:519
+msgid "Relaunch"
+msgstr ""
+
+#: awx/main/models/unified_jobs.py:520
+msgid "Callback"
+msgstr ""
+
+#: awx/main/models/unified_jobs.py:521
+msgid "Scheduled"
+msgstr ""
+
+#: awx/main/models/unified_jobs.py:522
+msgid "Dependency"
+msgstr ""
+
+#: awx/main/models/unified_jobs.py:523
+msgid "Workflow"
+msgstr ""
+
+#: awx/main/models/unified_jobs.py:524
+msgid "Sync"
+msgstr ""
+
+#: awx/main/models/unified_jobs.py:572
+msgid "The node the job executed on."
+msgstr ""
+
+#: awx/main/models/unified_jobs.py:598
+msgid "The date and time the job was queued for starting."
+msgstr ""
+
+#: awx/main/models/unified_jobs.py:604
+msgid "The date and time the job finished execution."
+msgstr ""
+
+#: awx/main/models/unified_jobs.py:610
 msgid "Elapsed time in seconds that the job ran."
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:541
+#: awx/main/models/unified_jobs.py:632
 msgid ""
 "A status field to indicate the state of the job if it wasn't able to run and "
 "capture stdout"
 msgstr ""
 
-#: awx/main/models/unified_jobs.py:580
+#: awx/main/models/unified_jobs.py:661
 msgid "The Rampart/Instance group the job was run under"
+msgstr ""
+
+#: awx/main/models/workflow.py:203
+#, python-brace-format
+msgid ""
+"Bad launch configuration starting template {template_pk} as part of workflow "
+"{workflow_pk}. Errors:\n"
+"{error_text}"
+msgstr ""
+
+#: awx/main/models/workflow.py:387
+msgid "Field is not allowed for use in workflows."
 msgstr ""
 
 #: awx/main/notifications/base.py:17 awx/main/notifications/email_backend.py:28
@@ -3093,11 +3538,11 @@ msgid ""
 "\n"
 msgstr ""
 
-#: awx/main/notifications/hipchat_backend.py:47
+#: awx/main/notifications/hipchat_backend.py:48
 msgid "Error sending messages: {}"
 msgstr ""
 
-#: awx/main/notifications/hipchat_backend.py:49
+#: awx/main/notifications/hipchat_backend.py:50
 msgid "Error sending message to hipchat: {}"
 msgstr ""
 
@@ -3105,14 +3550,25 @@ msgstr ""
 msgid "Exception connecting to irc server: {}"
 msgstr ""
 
+#: awx/main/notifications/mattermost_backend.py:48
+#: awx/main/notifications/mattermost_backend.py:50
+msgid "Error sending notification mattermost: {}"
+msgstr ""
+
 #: awx/main/notifications/pagerduty_backend.py:39
 msgid "Exception connecting to PagerDuty: {}"
 msgstr ""
 
 #: awx/main/notifications/pagerduty_backend.py:48
-#: awx/main/notifications/slack_backend.py:52
+#: awx/main/notifications/slack_backend.py:82
+#: awx/main/notifications/slack_backend.py:99
 #: awx/main/notifications/twilio_backend.py:46
 msgid "Exception sending messages: {}"
+msgstr ""
+
+#: awx/main/notifications/rocketchat_backend.py:46
+#: awx/main/notifications/rocketchat_backend.py:49
+msgid "Error sending notification rocket.chat: {}"
 msgstr ""
 
 #: awx/main/notifications/twilio_backend.py:36
@@ -3124,140 +3580,156 @@ msgstr ""
 msgid "Error sending notification webhook: {}"
 msgstr ""
 
-#: awx/main/scheduler/task_manager.py:197
+#: awx/main/scheduler/task_manager.py:200
 msgid ""
 "Job spawned from workflow could not start because it was not in the right "
 "state or required manual credentials"
 msgstr ""
 
-#: awx/main/scheduler/task_manager.py:201
+#: awx/main/scheduler/task_manager.py:204
 msgid ""
 "Job spawned from workflow could not start because it was missing a related "
 "resource such as project or inventory"
 msgstr ""
 
-#: awx/main/tasks.py:184
+#: awx/main/signals.py:617
+msgid "limit_reached"
+msgstr ""
+
+#: awx/main/tasks.py:273
 msgid "Ansible Tower host usage over 90%"
 msgstr ""
 
-#: awx/main/tasks.py:189
+#: awx/main/tasks.py:278
 msgid "Ansible Tower license will expire soon"
 msgstr ""
 
-#: awx/main/tasks.py:318
-msgid "status_str must be either succeeded or failed"
+#: awx/main/tasks.py:1321
+msgid "Job could not start because it does not have a valid inventory."
 msgstr ""
 
-#: awx/main/tasks.py:1549
-msgid "Dependent inventory update {} was canceled."
-msgstr ""
-
-#: awx/main/utils/common.py:89
+#: awx/main/utils/common.py:97
 #, python-format
 msgid "Unable to convert \"%s\" to boolean"
 msgstr ""
 
-#: awx/main/utils/common.py:235
+#: awx/main/utils/common.py:251
 #, python-format
 msgid "Unsupported SCM type \"%s\""
 msgstr ""
 
-#: awx/main/utils/common.py:242 awx/main/utils/common.py:254
-#: awx/main/utils/common.py:273
+#: awx/main/utils/common.py:258 awx/main/utils/common.py:270
+#: awx/main/utils/common.py:289
 #, python-format
 msgid "Invalid %s URL"
 msgstr ""
 
-#: awx/main/utils/common.py:244 awx/main/utils/common.py:283
+#: awx/main/utils/common.py:260 awx/main/utils/common.py:299
 #, python-format
 msgid "Unsupported %s URL"
 msgstr ""
 
-#: awx/main/utils/common.py:285
+#: awx/main/utils/common.py:301
 #, python-format
 msgid "Unsupported host \"%s\" for file:// URL"
 msgstr ""
 
-#: awx/main/utils/common.py:287
+#: awx/main/utils/common.py:303
 #, python-format
 msgid "Host is required for %s URL"
 msgstr ""
 
-#: awx/main/utils/common.py:305
+#: awx/main/utils/common.py:321
 #, python-format
 msgid "Username must be \"git\" for SSH access to %s."
 msgstr ""
 
-#: awx/main/utils/common.py:311
+#: awx/main/utils/common.py:327
 #, python-format
 msgid "Username must be \"hg\" for SSH access to %s."
 msgstr ""
 
-#: awx/main/validators.py:60
+#: awx/main/utils/common.py:608
+#, python-brace-format
+msgid "Input type `{data_type}` is not a dictionary"
+msgstr ""
+
+#: awx/main/utils/common.py:641
+#, python-brace-format
+msgid "Variables not compatible with JSON standard (error: {json_error})"
+msgstr ""
+
+#: awx/main/utils/common.py:647
+#, python-brace-format
+msgid ""
+"Cannot parse as JSON (error: {json_error}) or YAML (error: {yaml_error})."
+msgstr ""
+
+#: awx/main/validators.py:67
 #, python-format
 msgid "Invalid certificate or key: %s..."
 msgstr ""
 
-#: awx/main/validators.py:74
+#: awx/main/validators.py:83
 #, python-format
 msgid "Invalid private key: unsupported type \"%s\""
 msgstr ""
 
-#: awx/main/validators.py:78
+#: awx/main/validators.py:87
 #, python-format
 msgid "Unsupported PEM object type: \"%s\""
 msgstr ""
 
-#: awx/main/validators.py:103
+#: awx/main/validators.py:112
 msgid "Invalid base64-encoded data"
 msgstr ""
 
-#: awx/main/validators.py:122
+#: awx/main/validators.py:131
 msgid "Exactly one private key is required."
 msgstr ""
 
-#: awx/main/validators.py:124
+#: awx/main/validators.py:133
 msgid "At least one private key is required."
 msgstr ""
 
-#: awx/main/validators.py:126
+#: awx/main/validators.py:135
 #, python-format
 msgid ""
 "At least %(min_keys)d private keys are required, only %(key_count)d provided."
 msgstr ""
 
-#: awx/main/validators.py:129
+#: awx/main/validators.py:138
 #, python-format
 msgid "Only one private key is allowed, %(key_count)d provided."
 msgstr ""
 
-#: awx/main/validators.py:131
+#: awx/main/validators.py:140
 #, python-format
 msgid ""
 "No more than %(max_keys)d private keys are allowed, %(key_count)d provided."
 msgstr ""
 
-#: awx/main/validators.py:136
+#: awx/main/validators.py:145
 msgid "Exactly one certificate is required."
 msgstr ""
 
-#: awx/main/validators.py:138
+#: awx/main/validators.py:147
 msgid "At least one certificate is required."
 msgstr ""
 
-#: awx/main/validators.py:140
+#: awx/main/validators.py:149
 #, python-format
 msgid ""
 "At least %(min_certs)d certificates are required, only %(cert_count)d "
 "provided."
 msgstr ""
 
-#: awx/main/validators.py:143
+#: awx/main/validators.py:152
 #, python-format
 msgid "Only one certificate is allowed, %(cert_count)d provided."
 msgstr ""
 
-#: awx/main/validators.py:145
+#: awx/main/validators.py:154
 #, python-format
 msgid ""
 "No more than %(max_certs)d certificates are allowed, %(cert_count)d provided."
@@ -3299,287 +3771,287 @@ msgstr ""
 msgid "A server error has occurred."
 msgstr ""
 
-#: awx/settings/defaults.py:665
+#: awx/settings/defaults.py:722
 msgid "US East (Northern Virginia)"
 msgstr ""
 
-#: awx/settings/defaults.py:666
+#: awx/settings/defaults.py:723
 msgid "US East (Ohio)"
 msgstr ""
 
-#: awx/settings/defaults.py:667
+#: awx/settings/defaults.py:724
 msgid "US West (Oregon)"
 msgstr ""
 
-#: awx/settings/defaults.py:668
+#: awx/settings/defaults.py:725
 msgid "US West (Northern California)"
 msgstr ""
 
-#: awx/settings/defaults.py:669
+#: awx/settings/defaults.py:726
 msgid "Canada (Central)"
 msgstr ""
 
-#: awx/settings/defaults.py:670
+#: awx/settings/defaults.py:727
 msgid "EU (Frankfurt)"
 msgstr ""
 
-#: awx/settings/defaults.py:671
+#: awx/settings/defaults.py:728
 msgid "EU (Ireland)"
 msgstr ""
 
-#: awx/settings/defaults.py:672
+#: awx/settings/defaults.py:729
 msgid "EU (London)"
 msgstr ""
 
-#: awx/settings/defaults.py:673
+#: awx/settings/defaults.py:730
 msgid "Asia Pacific (Singapore)"
 msgstr ""
 
-#: awx/settings/defaults.py:674
+#: awx/settings/defaults.py:731
 msgid "Asia Pacific (Sydney)"
 msgstr ""
 
-#: awx/settings/defaults.py:675
+#: awx/settings/defaults.py:732
 msgid "Asia Pacific (Tokyo)"
 msgstr ""
 
-#: awx/settings/defaults.py:676
+#: awx/settings/defaults.py:733
 msgid "Asia Pacific (Seoul)"
 msgstr ""
 
-#: awx/settings/defaults.py:677
+#: awx/settings/defaults.py:734
 msgid "Asia Pacific (Mumbai)"
 msgstr ""
 
-#: awx/settings/defaults.py:678
+#: awx/settings/defaults.py:735
 msgid "South America (Sao Paulo)"
 msgstr ""
 
-#: awx/settings/defaults.py:679
+#: awx/settings/defaults.py:736
 msgid "US West (GovCloud)"
 msgstr ""
 
-#: awx/settings/defaults.py:680
+#: awx/settings/defaults.py:737
 msgid "China (Beijing)"
 msgstr ""
 
-#: awx/settings/defaults.py:729
+#: awx/settings/defaults.py:786
 msgid "US East 1 (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:730
+#: awx/settings/defaults.py:787
 msgid "US East 1 (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:731
+#: awx/settings/defaults.py:788
 msgid "US East 1 (D)"
 msgstr ""
 
-#: awx/settings/defaults.py:732
+#: awx/settings/defaults.py:789
 msgid "US East 4 (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:733
+#: awx/settings/defaults.py:790
 msgid "US East 4 (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:734
+#: awx/settings/defaults.py:791
 msgid "US East 4 (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:735
+#: awx/settings/defaults.py:792
 msgid "US Central (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:736
+#: awx/settings/defaults.py:793
 msgid "US Central (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:737
+#: awx/settings/defaults.py:794
 msgid "US Central (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:738
+#: awx/settings/defaults.py:795
 msgid "US Central (F)"
 msgstr ""
 
-#: awx/settings/defaults.py:739
+#: awx/settings/defaults.py:796
 msgid "US West (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:740
+#: awx/settings/defaults.py:797
 msgid "US West (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:741
+#: awx/settings/defaults.py:798
 msgid "US West (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:742
+#: awx/settings/defaults.py:799
 msgid "Europe West 1 (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:743
+#: awx/settings/defaults.py:800
 msgid "Europe West 1 (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:744
+#: awx/settings/defaults.py:801
 msgid "Europe West 1 (D)"
 msgstr ""
 
-#: awx/settings/defaults.py:745
+#: awx/settings/defaults.py:802
 msgid "Europe West 2 (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:746
+#: awx/settings/defaults.py:803
 msgid "Europe West 2 (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:747
+#: awx/settings/defaults.py:804
 msgid "Europe West 2 (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:748
+#: awx/settings/defaults.py:805
 msgid "Asia East (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:749
+#: awx/settings/defaults.py:806
 msgid "Asia East (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:750
+#: awx/settings/defaults.py:807
 msgid "Asia East (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:751
+#: awx/settings/defaults.py:808
 msgid "Asia Southeast (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:752
+#: awx/settings/defaults.py:809
 msgid "Asia Southeast (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:753
+#: awx/settings/defaults.py:810
 msgid "Asia Northeast (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:754
+#: awx/settings/defaults.py:811
 msgid "Asia Northeast (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:755
+#: awx/settings/defaults.py:812
 msgid "Asia Northeast (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:756
+#: awx/settings/defaults.py:813
 msgid "Australia Southeast (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:757
+#: awx/settings/defaults.py:814
 msgid "Australia Southeast (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:758
+#: awx/settings/defaults.py:815
 msgid "Australia Southeast (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:780
+#: awx/settings/defaults.py:837
 msgid "US East"
 msgstr ""
 
-#: awx/settings/defaults.py:781
+#: awx/settings/defaults.py:838
 msgid "US East 2"
 msgstr ""
 
-#: awx/settings/defaults.py:782
+#: awx/settings/defaults.py:839
 msgid "US Central"
 msgstr ""
 
-#: awx/settings/defaults.py:783
+#: awx/settings/defaults.py:840
 msgid "US North Central"
 msgstr ""
 
-#: awx/settings/defaults.py:784
+#: awx/settings/defaults.py:841
 msgid "US South Central"
 msgstr ""
 
-#: awx/settings/defaults.py:785
+#: awx/settings/defaults.py:842
 msgid "US West Central"
 msgstr ""
 
-#: awx/settings/defaults.py:786
+#: awx/settings/defaults.py:843
 msgid "US West"
 msgstr ""
 
-#: awx/settings/defaults.py:787
+#: awx/settings/defaults.py:844
 msgid "US West 2"
 msgstr ""
 
-#: awx/settings/defaults.py:788
+#: awx/settings/defaults.py:845
 msgid "Canada East"
 msgstr ""
 
-#: awx/settings/defaults.py:789
+#: awx/settings/defaults.py:846
 msgid "Canada Central"
 msgstr ""
 
-#: awx/settings/defaults.py:790
+#: awx/settings/defaults.py:847
 msgid "Brazil South"
 msgstr ""
 
-#: awx/settings/defaults.py:791
+#: awx/settings/defaults.py:848
 msgid "Europe North"
 msgstr ""
 
-#: awx/settings/defaults.py:792
+#: awx/settings/defaults.py:849
 msgid "Europe West"
 msgstr ""
 
-#: awx/settings/defaults.py:793
+#: awx/settings/defaults.py:850
 msgid "UK West"
 msgstr ""
 
-#: awx/settings/defaults.py:794
+#: awx/settings/defaults.py:851
 msgid "UK South"
 msgstr ""
 
-#: awx/settings/defaults.py:795
+#: awx/settings/defaults.py:852
 msgid "Asia East"
 msgstr ""
 
-#: awx/settings/defaults.py:796
+#: awx/settings/defaults.py:853
 msgid "Asia Southeast"
 msgstr ""
 
-#: awx/settings/defaults.py:797
+#: awx/settings/defaults.py:854
 msgid "Australia East"
 msgstr ""
 
-#: awx/settings/defaults.py:798
+#: awx/settings/defaults.py:855
 msgid "Australia Southeast"
 msgstr ""
 
-#: awx/settings/defaults.py:799
+#: awx/settings/defaults.py:856
 msgid "India West"
 msgstr ""
 
-#: awx/settings/defaults.py:800
+#: awx/settings/defaults.py:857
 msgid "India South"
 msgstr ""
 
-#: awx/settings/defaults.py:801
+#: awx/settings/defaults.py:858
 msgid "Japan East"
 msgstr ""
 
-#: awx/settings/defaults.py:802
+#: awx/settings/defaults.py:859
 msgid "Japan West"
 msgstr ""
 
-#: awx/settings/defaults.py:803
+#: awx/settings/defaults.py:860
 msgid "Korea Central"
 msgstr ""
 
-#: awx/settings/defaults.py:804
+#: awx/settings/defaults.py:861
 msgid "Korea South"
 msgstr ""
 
@@ -3595,7 +4067,7 @@ msgid ""
 "their\n"
 "username and email address. Configuration details are available in the "
 "Ansible\n"
-"Tower documentation.'"
+"Tower documentation."
 msgstr ""
 
 #: awx/sso/conf.py:55
@@ -3633,11 +4105,11 @@ msgid ""
 "have a user account with a matching email address will be able to login."
 msgstr ""
 
-#: awx/sso/conf.py:137
+#: awx/sso/conf.py:141
 msgid "LDAP Server URI"
 msgstr ""
 
-#: awx/sso/conf.py:138
+#: awx/sso/conf.py:142
 msgid ""
 "URI to connect to LDAP server, such as \"ldap://ldap.example.com:389\" (non-"
 "SSL) or \"ldaps://ldap.example.com:636\" (SSL). Multiple LDAP servers may be "
@@ -3645,46 +4117,47 @@ msgid ""
 "disabled if this parameter is empty."
 msgstr ""
 
-#: awx/sso/conf.py:142 awx/sso/conf.py:158 awx/sso/conf.py:170
-#: awx/sso/conf.py:182 awx/sso/conf.py:198 awx/sso/conf.py:218
-#: awx/sso/conf.py:240 awx/sso/conf.py:255 awx/sso/conf.py:273
-#: awx/sso/conf.py:290 awx/sso/conf.py:307 awx/sso/conf.py:323
-#: awx/sso/conf.py:337 awx/sso/conf.py:354 awx/sso/conf.py:380
+#: awx/sso/conf.py:146 awx/sso/conf.py:162 awx/sso/conf.py:174
+#: awx/sso/conf.py:186 awx/sso/conf.py:202 awx/sso/conf.py:222
+#: awx/sso/conf.py:244 awx/sso/conf.py:259 awx/sso/conf.py:277
+#: awx/sso/conf.py:294 awx/sso/conf.py:306 awx/sso/conf.py:332
+#: awx/sso/conf.py:348 awx/sso/conf.py:362 awx/sso/conf.py:380
+#: awx/sso/conf.py:406
 msgid "LDAP"
 msgstr ""
 
-#: awx/sso/conf.py:154
+#: awx/sso/conf.py:158
 msgid "LDAP Bind DN"
 msgstr ""
 
-#: awx/sso/conf.py:155
+#: awx/sso/conf.py:159
 msgid ""
 "DN (Distinguished Name) of user to bind for all search queries. This is the "
 "system user account we will use to login to query LDAP for other user "
 "information. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
 
-#: awx/sso/conf.py:168
+#: awx/sso/conf.py:172
 msgid "LDAP Bind Password"
 msgstr ""
 
-#: awx/sso/conf.py:169
+#: awx/sso/conf.py:173
 msgid "Password used to bind LDAP user account."
 msgstr ""
 
-#: awx/sso/conf.py:180
+#: awx/sso/conf.py:184
 msgid "LDAP Start TLS"
 msgstr ""
 
-#: awx/sso/conf.py:181
+#: awx/sso/conf.py:185
 msgid "Whether to enable TLS when the LDAP connection is not using SSL."
 msgstr ""
 
-#: awx/sso/conf.py:191
+#: awx/sso/conf.py:195
 msgid "LDAP Connection Options"
 msgstr ""
 
-#: awx/sso/conf.py:192
+#: awx/sso/conf.py:196
 msgid ""
 "Additional options to set for the LDAP connection.  LDAP referrals are "
 "disabled by default (to prevent certain LDAP queries from hanging with AD). "
@@ -3693,11 +4166,11 @@ msgid ""
 "values that can be set."
 msgstr ""
 
-#: awx/sso/conf.py:211
+#: awx/sso/conf.py:215
 msgid "LDAP User Search"
 msgstr ""
 
-#: awx/sso/conf.py:212
+#: awx/sso/conf.py:216
 msgid ""
 "LDAP search query to find users.  Any user that matches the given pattern "
 "will be able to login to Tower.  The user should also be mapped into a Tower "
@@ -3706,11 +4179,11 @@ msgid ""
 "possible. See Tower documentation for details."
 msgstr ""
 
-#: awx/sso/conf.py:234
+#: awx/sso/conf.py:238
 msgid "LDAP User DN Template"
 msgstr ""
 
-#: awx/sso/conf.py:235
+#: awx/sso/conf.py:239
 msgid ""
 "Alternative to user search, if user DNs are all of the same format. This "
 "approach is more efficient for user lookups than searching if it is usable "
@@ -3718,77 +4191,85 @@ msgid ""
 "used instead of AUTH_LDAP_USER_SEARCH."
 msgstr ""
 
-#: awx/sso/conf.py:250
+#: awx/sso/conf.py:254
 msgid "LDAP User Attribute Map"
 msgstr ""
 
-#: awx/sso/conf.py:251
+#: awx/sso/conf.py:255
 msgid ""
 "Mapping of LDAP user schema to Tower API user attributes. The default "
 "setting is valid for ActiveDirectory but users with other LDAP "
 "configurations may need to change the values. Refer to the Ansible Tower "
-"documentation for additonal details."
+"documentation for additional details."
 msgstr ""
 
-#: awx/sso/conf.py:269
+#: awx/sso/conf.py:273
 msgid "LDAP Group Search"
 msgstr ""
 
-#: awx/sso/conf.py:270
+#: awx/sso/conf.py:274
 msgid ""
 "Users are mapped to organizations based on their membership in LDAP groups. "
 "This setting defines the LDAP search query to find groups. Unlike the user "
 "search, group search does not support LDAPSearchUnion."
 msgstr ""
 
-#: awx/sso/conf.py:286
+#: awx/sso/conf.py:290
 msgid "LDAP Group Type"
 msgstr ""
 
-#: awx/sso/conf.py:287
+#: awx/sso/conf.py:291
 msgid ""
 "The group type may need to be changed based on the type of the LDAP server.  "
-"Values are listed at: http://pythonhosted.org/django-auth-ldap/groups."
-"html#types-of-groups"
+"Values are listed at: https://django-auth-ldap.readthedocs.io/en/stable/"
+"groups.html#types-of-groups"
 msgstr ""
 
-#: awx/sso/conf.py:302
+#: awx/sso/conf.py:304
+msgid "LDAP Group Type Parameters"
+msgstr ""
+
+#: awx/sso/conf.py:305
+msgid "Key value parameters to send the chosen group type init method."
+msgstr ""
+
+#: awx/sso/conf.py:327
 msgid "LDAP Require Group"
 msgstr ""
 
-#: awx/sso/conf.py:303
+#: awx/sso/conf.py:328
 msgid ""
 "Group DN required to login. If specified, user must be a member of this "
 "group to login via LDAP. If not set, everyone in LDAP that matches the user "
 "search will be able to login via Tower. Only one require group is supported."
 msgstr ""
 
-#: awx/sso/conf.py:319
+#: awx/sso/conf.py:344
 msgid "LDAP Deny Group"
 msgstr ""
 
-#: awx/sso/conf.py:320
+#: awx/sso/conf.py:345
 msgid ""
 "Group DN denied from login. If specified, user will not be allowed to login "
 "if a member of this group.  Only one deny group is supported."
 msgstr ""
 
-#: awx/sso/conf.py:333
+#: awx/sso/conf.py:358
 msgid "LDAP User Flags By Group"
 msgstr ""
 
-#: awx/sso/conf.py:334
+#: awx/sso/conf.py:359
 msgid ""
 "Retrieve users from a given group. At this time, superuser and system "
 "auditors are the only groups supported. Refer to the Ansible Tower "
 "documentation for more detail."
 msgstr ""
 
-#: awx/sso/conf.py:349
+#: awx/sso/conf.py:375
 msgid "LDAP Organization Map"
 msgstr ""
 
-#: awx/sso/conf.py:350
+#: awx/sso/conf.py:376
 msgid ""
 "Mapping between organization admins/users and LDAP groups. This controls "
 "which users are placed into which Tower organizations relative to their LDAP "
@@ -3796,237 +4277,237 @@ msgid ""
 "documentation."
 msgstr ""
 
-#: awx/sso/conf.py:377
+#: awx/sso/conf.py:403
 msgid "LDAP Team Map"
 msgstr ""
 
-#: awx/sso/conf.py:378
+#: awx/sso/conf.py:404
 msgid ""
 "Mapping between team members (users) and LDAP groups. Configuration details "
 "are available in the Ansible Tower documentation."
 msgstr ""
 
-#: awx/sso/conf.py:406
+#: awx/sso/conf.py:440
 msgid "RADIUS Server"
 msgstr ""
 
-#: awx/sso/conf.py:407
+#: awx/sso/conf.py:441
 msgid ""
 "Hostname/IP of RADIUS server. RADIUS authentication is disabled if this "
 "setting is empty."
 msgstr ""
 
-#: awx/sso/conf.py:409 awx/sso/conf.py:423 awx/sso/conf.py:435
+#: awx/sso/conf.py:443 awx/sso/conf.py:457 awx/sso/conf.py:469
 #: awx/sso/models.py:14
 msgid "RADIUS"
 msgstr ""
 
-#: awx/sso/conf.py:421
+#: awx/sso/conf.py:455
 msgid "RADIUS Port"
 msgstr ""
 
-#: awx/sso/conf.py:422
+#: awx/sso/conf.py:456
 msgid "Port of RADIUS server."
 msgstr ""
 
-#: awx/sso/conf.py:433
+#: awx/sso/conf.py:467
 msgid "RADIUS Secret"
 msgstr ""
 
-#: awx/sso/conf.py:434
+#: awx/sso/conf.py:468
 msgid "Shared secret for authenticating to RADIUS server."
 msgstr ""
 
-#: awx/sso/conf.py:450
+#: awx/sso/conf.py:484
 msgid "TACACS+ Server"
 msgstr ""
 
-#: awx/sso/conf.py:451
+#: awx/sso/conf.py:485
 msgid "Hostname of TACACS+ server."
 msgstr ""
 
-#: awx/sso/conf.py:452 awx/sso/conf.py:465 awx/sso/conf.py:478
-#: awx/sso/conf.py:491 awx/sso/conf.py:503 awx/sso/models.py:15
+#: awx/sso/conf.py:486 awx/sso/conf.py:499 awx/sso/conf.py:512
+#: awx/sso/conf.py:525 awx/sso/conf.py:537 awx/sso/models.py:15
 msgid "TACACS+"
 msgstr ""
 
-#: awx/sso/conf.py:463
+#: awx/sso/conf.py:497
 msgid "TACACS+ Port"
 msgstr ""
 
-#: awx/sso/conf.py:464
+#: awx/sso/conf.py:498
 msgid "Port number of TACACS+ server."
 msgstr ""
 
-#: awx/sso/conf.py:476
+#: awx/sso/conf.py:510
 msgid "TACACS+ Secret"
 msgstr ""
 
-#: awx/sso/conf.py:477
+#: awx/sso/conf.py:511
 msgid "Shared secret for authenticating to TACACS+ server."
 msgstr ""
 
-#: awx/sso/conf.py:489
+#: awx/sso/conf.py:523
 msgid "TACACS+ Auth Session Timeout"
 msgstr ""
 
-#: awx/sso/conf.py:490
+#: awx/sso/conf.py:524
 msgid "TACACS+ session timeout value in seconds, 0 disables timeout."
 msgstr ""
 
-#: awx/sso/conf.py:501
+#: awx/sso/conf.py:535
 msgid "TACACS+ Authentication Protocol"
 msgstr ""
 
-#: awx/sso/conf.py:502
+#: awx/sso/conf.py:536
 msgid "Choose the authentication protocol used by TACACS+ client."
 msgstr ""
 
-#: awx/sso/conf.py:517
+#: awx/sso/conf.py:551
 msgid "Google OAuth2 Callback URL"
 msgstr ""
 
-#: awx/sso/conf.py:518 awx/sso/conf.py:611 awx/sso/conf.py:676
+#: awx/sso/conf.py:552 awx/sso/conf.py:645 awx/sso/conf.py:710
 msgid ""
 "Provide this URL as the callback URL for your application as part of your "
 "registration process. Refer to the Ansible Tower documentation for more "
 "detail."
 msgstr ""
 
-#: awx/sso/conf.py:521 awx/sso/conf.py:533 awx/sso/conf.py:545
-#: awx/sso/conf.py:558 awx/sso/conf.py:572 awx/sso/conf.py:584
-#: awx/sso/conf.py:596
+#: awx/sso/conf.py:555 awx/sso/conf.py:567 awx/sso/conf.py:579
+#: awx/sso/conf.py:592 awx/sso/conf.py:606 awx/sso/conf.py:618
+#: awx/sso/conf.py:630
 msgid "Google OAuth2"
 msgstr ""
 
-#: awx/sso/conf.py:531
+#: awx/sso/conf.py:565
 msgid "Google OAuth2 Key"
 msgstr ""
 
-#: awx/sso/conf.py:532
+#: awx/sso/conf.py:566
 msgid "The OAuth2 key from your web application."
 msgstr ""
 
-#: awx/sso/conf.py:543
+#: awx/sso/conf.py:577
 msgid "Google OAuth2 Secret"
 msgstr ""
 
-#: awx/sso/conf.py:544
+#: awx/sso/conf.py:578
 msgid "The OAuth2 secret from your web application."
 msgstr ""
 
-#: awx/sso/conf.py:555
+#: awx/sso/conf.py:589
 msgid "Google OAuth2 Whitelisted Domains"
 msgstr ""
 
-#: awx/sso/conf.py:556
+#: awx/sso/conf.py:590
 msgid ""
 "Update this setting to restrict the domains who are allowed to login using "
 "Google OAuth2."
 msgstr ""
 
-#: awx/sso/conf.py:567
+#: awx/sso/conf.py:601
 msgid "Google OAuth2 Extra Arguments"
 msgstr ""
 
-#: awx/sso/conf.py:568
+#: awx/sso/conf.py:602
 msgid ""
 "Extra arguments for Google OAuth2 login. You can restrict it to only allow a "
 "single domain to authenticate, even if the user is logged in with multple "
 "Google accounts. Refer to the Ansible Tower documentation for more detail."
 msgstr ""
 
-#: awx/sso/conf.py:582
+#: awx/sso/conf.py:616
 msgid "Google OAuth2 Organization Map"
 msgstr ""
 
-#: awx/sso/conf.py:594
+#: awx/sso/conf.py:628
 msgid "Google OAuth2 Team Map"
 msgstr ""
 
-#: awx/sso/conf.py:610
+#: awx/sso/conf.py:644
 msgid "GitHub OAuth2 Callback URL"
 msgstr ""
 
-#: awx/sso/conf.py:614 awx/sso/conf.py:626 awx/sso/conf.py:637
-#: awx/sso/conf.py:649 awx/sso/conf.py:661
+#: awx/sso/conf.py:648 awx/sso/conf.py:660 awx/sso/conf.py:671
+#: awx/sso/conf.py:683 awx/sso/conf.py:695
 msgid "GitHub OAuth2"
 msgstr ""
 
-#: awx/sso/conf.py:624
+#: awx/sso/conf.py:658
 msgid "GitHub OAuth2 Key"
 msgstr ""
 
-#: awx/sso/conf.py:625
+#: awx/sso/conf.py:659
 msgid "The OAuth2 key (Client ID) from your GitHub developer application."
 msgstr ""
 
-#: awx/sso/conf.py:635
+#: awx/sso/conf.py:669
 msgid "GitHub OAuth2 Secret"
 msgstr ""
 
-#: awx/sso/conf.py:636
+#: awx/sso/conf.py:670
 msgid ""
 "The OAuth2 secret (Client Secret) from your GitHub developer application."
 msgstr ""
 
-#: awx/sso/conf.py:647
+#: awx/sso/conf.py:681
 msgid "GitHub OAuth2 Organization Map"
 msgstr ""
 
-#: awx/sso/conf.py:659
+#: awx/sso/conf.py:693
 msgid "GitHub OAuth2 Team Map"
 msgstr ""
 
-#: awx/sso/conf.py:675
+#: awx/sso/conf.py:709
 msgid "GitHub Organization OAuth2 Callback URL"
 msgstr ""
 
-#: awx/sso/conf.py:679 awx/sso/conf.py:691 awx/sso/conf.py:702
-#: awx/sso/conf.py:715 awx/sso/conf.py:726 awx/sso/conf.py:738
+#: awx/sso/conf.py:713 awx/sso/conf.py:725 awx/sso/conf.py:736
+#: awx/sso/conf.py:749 awx/sso/conf.py:760 awx/sso/conf.py:772
 msgid "GitHub Organization OAuth2"
 msgstr ""
 
-#: awx/sso/conf.py:689
+#: awx/sso/conf.py:723
 msgid "GitHub Organization OAuth2 Key"
 msgstr ""
 
-#: awx/sso/conf.py:690 awx/sso/conf.py:768
+#: awx/sso/conf.py:724 awx/sso/conf.py:802
 msgid "The OAuth2 key (Client ID) from your GitHub organization application."
 msgstr ""
 
-#: awx/sso/conf.py:700
+#: awx/sso/conf.py:734
 msgid "GitHub Organization OAuth2 Secret"
 msgstr ""
 
-#: awx/sso/conf.py:701 awx/sso/conf.py:779
+#: awx/sso/conf.py:735 awx/sso/conf.py:813
 msgid ""
 "The OAuth2 secret (Client Secret) from your GitHub organization application."
 msgstr ""
 
-#: awx/sso/conf.py:712
+#: awx/sso/conf.py:746
 msgid "GitHub Organization Name"
 msgstr ""
 
-#: awx/sso/conf.py:713
+#: awx/sso/conf.py:747
 msgid ""
 "The name of your GitHub organization, as used in your organization's URL: "
 "https://github.com/<yourorg>/."
 msgstr ""
 
-#: awx/sso/conf.py:724
+#: awx/sso/conf.py:758
 msgid "GitHub Organization OAuth2 Organization Map"
 msgstr ""
 
-#: awx/sso/conf.py:736
+#: awx/sso/conf.py:770
 msgid "GitHub Organization OAuth2 Team Map"
 msgstr ""
 
-#: awx/sso/conf.py:752
+#: awx/sso/conf.py:786
 msgid "GitHub Team OAuth2 Callback URL"
 msgstr ""
 
-#: awx/sso/conf.py:753
+#: awx/sso/conf.py:787
 msgid ""
 "Create an organization-owned application at https://github.com/organizations/"
 "<yourorg>/settings/applications and obtain an OAuth2 key (Client ID) and "
@@ -4034,170 +4515,172 @@ msgid ""
 "application."
 msgstr ""
 
-#: awx/sso/conf.py:757 awx/sso/conf.py:769 awx/sso/conf.py:780
-#: awx/sso/conf.py:793 awx/sso/conf.py:804 awx/sso/conf.py:816
+#: awx/sso/conf.py:791 awx/sso/conf.py:803 awx/sso/conf.py:814
+#: awx/sso/conf.py:827 awx/sso/conf.py:838 awx/sso/conf.py:850
 msgid "GitHub Team OAuth2"
 msgstr ""
 
-#: awx/sso/conf.py:767
+#: awx/sso/conf.py:801
 msgid "GitHub Team OAuth2 Key"
 msgstr ""
 
-#: awx/sso/conf.py:778
+#: awx/sso/conf.py:812
 msgid "GitHub Team OAuth2 Secret"
 msgstr ""
 
-#: awx/sso/conf.py:790
+#: awx/sso/conf.py:824
 msgid "GitHub Team ID"
 msgstr ""
 
-#: awx/sso/conf.py:791
+#: awx/sso/conf.py:825
 msgid ""
 "Find the numeric team ID using the Github API: http://fabian-kostadinov."
 "github.io/2015/01/16/how-to-find-a-github-team-id/."
 msgstr ""
 
-#: awx/sso/conf.py:802
+#: awx/sso/conf.py:836
 msgid "GitHub Team OAuth2 Organization Map"
 msgstr ""
 
-#: awx/sso/conf.py:814
+#: awx/sso/conf.py:848
 msgid "GitHub Team OAuth2 Team Map"
 msgstr ""
 
-#: awx/sso/conf.py:830
+#: awx/sso/conf.py:864
 msgid "Azure AD OAuth2 Callback URL"
 msgstr ""
 
-#: awx/sso/conf.py:831
+#: awx/sso/conf.py:865
 msgid ""
 "Provide this URL as the callback URL for your application as part of your "
 "registration process. Refer to the Ansible Tower documentation for more "
 "detail. "
 msgstr ""
 
-#: awx/sso/conf.py:834 awx/sso/conf.py:846 awx/sso/conf.py:857
-#: awx/sso/conf.py:869 awx/sso/conf.py:881
+#: awx/sso/conf.py:868 awx/sso/conf.py:880 awx/sso/conf.py:891
+#: awx/sso/conf.py:903 awx/sso/conf.py:915
 msgid "Azure AD OAuth2"
 msgstr ""
 
-#: awx/sso/conf.py:844
+#: awx/sso/conf.py:878
 msgid "Azure AD OAuth2 Key"
 msgstr ""
 
-#: awx/sso/conf.py:845
+#: awx/sso/conf.py:879
 msgid "The OAuth2 key (Client ID) from your Azure AD application."
 msgstr ""
 
-#: awx/sso/conf.py:855
+#: awx/sso/conf.py:889
 msgid "Azure AD OAuth2 Secret"
 msgstr ""
 
-#: awx/sso/conf.py:856
+#: awx/sso/conf.py:890
 msgid "The OAuth2 secret (Client Secret) from your Azure AD application."
 msgstr ""
 
-#: awx/sso/conf.py:867
+#: awx/sso/conf.py:901
 msgid "Azure AD OAuth2 Organization Map"
 msgstr ""
 
-#: awx/sso/conf.py:879
+#: awx/sso/conf.py:913
 msgid "Azure AD OAuth2 Team Map"
 msgstr ""
 
-#: awx/sso/conf.py:904
+#: awx/sso/conf.py:938
 msgid "SAML Assertion Consumer Service (ACS) URL"
 msgstr ""
 
-#: awx/sso/conf.py:905
+#: awx/sso/conf.py:939
 msgid ""
 "Register Tower as a service provider (SP) with each identity provider (IdP) "
 "you have configured. Provide your SP Entity ID and this ACS URL for your "
 "application."
 msgstr ""
 
-#: awx/sso/conf.py:908 awx/sso/conf.py:922 awx/sso/conf.py:936
-#: awx/sso/conf.py:951 awx/sso/conf.py:965 awx/sso/conf.py:978
-#: awx/sso/conf.py:999 awx/sso/conf.py:1017 awx/sso/conf.py:1036
-#: awx/sso/conf.py:1070 awx/sso/conf.py:1083 awx/sso/models.py:16
+#: awx/sso/conf.py:942 awx/sso/conf.py:956 awx/sso/conf.py:970
+#: awx/sso/conf.py:985 awx/sso/conf.py:999 awx/sso/conf.py:1012
+#: awx/sso/conf.py:1033 awx/sso/conf.py:1051 awx/sso/conf.py:1070
+#: awx/sso/conf.py:1106 awx/sso/conf.py:1138 awx/sso/conf.py:1152
+#: awx/sso/conf.py:1169 awx/sso/conf.py:1182 awx/sso/conf.py:1195
+#: awx/sso/conf.py:1211 awx/sso/models.py:16
 msgid "SAML"
 msgstr ""
 
-#: awx/sso/conf.py:919
+#: awx/sso/conf.py:953
 msgid "SAML Service Provider Metadata URL"
 msgstr ""
 
-#: awx/sso/conf.py:920
+#: awx/sso/conf.py:954
 msgid ""
 "If your identity provider (IdP) allows uploading an XML metadata file, you "
 "can download one from this URL."
 msgstr ""
 
-#: awx/sso/conf.py:932
+#: awx/sso/conf.py:966
 msgid "SAML Service Provider Entity ID"
 msgstr ""
 
-#: awx/sso/conf.py:933
+#: awx/sso/conf.py:967
 msgid ""
 "The application-defined unique identifier used as the audience of the SAML "
 "service provider (SP) configuration. This is usually the URL for Tower."
 msgstr ""
 
-#: awx/sso/conf.py:948
+#: awx/sso/conf.py:982
 msgid "SAML Service Provider Public Certificate"
 msgstr ""
 
-#: awx/sso/conf.py:949
+#: awx/sso/conf.py:983
 msgid ""
 "Create a keypair for Tower to use as a service provider (SP) and include the "
 "certificate content here."
 msgstr ""
 
-#: awx/sso/conf.py:962
+#: awx/sso/conf.py:996
 msgid "SAML Service Provider Private Key"
 msgstr ""
 
-#: awx/sso/conf.py:963
+#: awx/sso/conf.py:997
 msgid ""
 "Create a keypair for Tower to use as a service provider (SP) and include the "
 "private key content here."
 msgstr ""
 
-#: awx/sso/conf.py:975
+#: awx/sso/conf.py:1009
 msgid "SAML Service Provider Organization Info"
 msgstr ""
 
-#: awx/sso/conf.py:976
+#: awx/sso/conf.py:1010
 msgid ""
 "Provide the URL, display name, and the name of your app. Refer to the "
 "Ansible Tower documentation for example syntax."
 msgstr ""
 
-#: awx/sso/conf.py:995
+#: awx/sso/conf.py:1029
 msgid "SAML Service Provider Technical Contact"
 msgstr ""
 
-#: awx/sso/conf.py:996
+#: awx/sso/conf.py:1030
 msgid ""
 "Provide the name and email address of the technical contact for your service "
 "provider. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
 
-#: awx/sso/conf.py:1013
+#: awx/sso/conf.py:1047
 msgid "SAML Service Provider Support Contact"
 msgstr ""
 
-#: awx/sso/conf.py:1014
+#: awx/sso/conf.py:1048
 msgid ""
 "Provide the name and email address of the support contact for your service "
 "provider. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
 
-#: awx/sso/conf.py:1030
+#: awx/sso/conf.py:1064
 msgid "SAML Enabled Identity Providers"
 msgstr ""
 
-#: awx/sso/conf.py:1031
+#: awx/sso/conf.py:1065
 msgid ""
 "Configure the Entity ID, SSO URL and certificate for each identity provider "
 "(IdP) in use. Multiple SAML IdPs are supported. Some IdPs may provide user "
@@ -4206,126 +4689,165 @@ msgid ""
 "additional details and syntax."
 msgstr ""
 
-#: awx/sso/conf.py:1068
+#: awx/sso/conf.py:1102
+msgid "SAML Security Config"
+msgstr ""
+
+#: awx/sso/conf.py:1103
+msgid ""
+"A dict of key value pairs that are passed to the underlying python-saml "
+"security setting https://github.com/onelogin/python-saml#settings"
+msgstr ""
+
+#: awx/sso/conf.py:1135
+msgid "SAML Service Provider extra configuration data"
+msgstr ""
+
+#: awx/sso/conf.py:1136
+msgid ""
+"A dict of key value pairs to be passed to the underlying python-saml Service "
+"Provider configuration setting."
+msgstr ""
+
+#: awx/sso/conf.py:1149
+msgid "SAML IDP to extra_data attribute mapping"
+msgstr ""
+
+#: awx/sso/conf.py:1150
+msgid ""
+"A list of tuples that maps IDP attributes to extra_attributes. Each "
+"attribute will be a list of values, even if only 1 value."
+msgstr ""
+
+#: awx/sso/conf.py:1167
 msgid "SAML Organization Map"
 msgstr ""
 
-#: awx/sso/conf.py:1081
+#: awx/sso/conf.py:1180
 msgid "SAML Team Map"
 msgstr ""
 
-#: awx/sso/fields.py:123
+#: awx/sso/conf.py:1193
+msgid "SAML Organization Attribute Mapping"
+msgstr ""
+
+#: awx/sso/conf.py:1194
+msgid "Used to translate user organization membership into Tower."
+msgstr ""
+
+#: awx/sso/conf.py:1209
+msgid "SAML Team Attribute Mapping"
+msgstr ""
+
+#: awx/sso/conf.py:1210
+msgid "Used to translate user team membership into Tower."
+msgstr ""
+
+#: awx/sso/fields.py:183
 #, python-brace-format
 msgid "Invalid connection option(s): {invalid_options}."
 msgstr ""
 
-#: awx/sso/fields.py:194
+#: awx/sso/fields.py:254
 msgid "Base"
 msgstr ""
 
-#: awx/sso/fields.py:195
+#: awx/sso/fields.py:255
 msgid "One Level"
 msgstr ""
 
-#: awx/sso/fields.py:196
+#: awx/sso/fields.py:256
 msgid "Subtree"
 msgstr ""
 
-#: awx/sso/fields.py:214
+#: awx/sso/fields.py:274
 #, python-brace-format
 msgid "Expected a list of three items but got {length} instead."
 msgstr ""
 
-#: awx/sso/fields.py:215
+#: awx/sso/fields.py:275
 #, python-brace-format
 msgid "Expected an instance of LDAPSearch but got {input_type} instead."
 msgstr ""
 
-#: awx/sso/fields.py:251
+#: awx/sso/fields.py:311
 #, python-brace-format
 msgid ""
 "Expected an instance of LDAPSearch or LDAPSearchUnion but got {input_type} "
 "instead."
 msgstr ""
 
-#: awx/sso/fields.py:289
+#: awx/sso/fields.py:349
 #, python-brace-format
 msgid "Invalid user attribute(s): {invalid_attrs}."
 msgstr ""
 
-#: awx/sso/fields.py:306
+#: awx/sso/fields.py:366
 #, python-brace-format
 msgid "Expected an instance of LDAPGroupType but got {input_type} instead."
 msgstr ""
 
-#: awx/sso/fields.py:334
-#, python-brace-format
-msgid "Invalid user flag: \"{invalid_flag}\"."
-msgstr ""
-
-#: awx/sso/fields.py:350 awx/sso/fields.py:517
-#, python-brace-format
-msgid ""
-"Expected None, True, False, a string or list of strings but got {input_type} "
-"instead."
-msgstr ""
-
-#: awx/sso/fields.py:386
-#, python-brace-format
-msgid "Missing key(s): {missing_keys}."
-msgstr ""
-
-#: awx/sso/fields.py:387
+#: awx/sso/fields.py:406 awx/sso/fields.py:453
 #, python-brace-format
 msgid "Invalid key(s): {invalid_keys}."
 msgstr ""
 
-#: awx/sso/fields.py:436 awx/sso/fields.py:553
+#: awx/sso/fields.py:431
+#, python-brace-format
+msgid "Invalid user flag: \"{invalid_flag}\"."
+msgstr ""
+
+#: awx/sso/fields.py:452
+#, python-brace-format
+msgid "Missing key(s): {missing_keys}."
+msgstr ""
+
+#: awx/sso/fields.py:502 awx/sso/fields.py:619
 #, python-brace-format
 msgid "Invalid key(s) for organization map: {invalid_keys}."
 msgstr ""
 
-#: awx/sso/fields.py:454
+#: awx/sso/fields.py:520
 #, python-brace-format
 msgid "Missing required key for team map: {invalid_keys}."
 msgstr ""
 
-#: awx/sso/fields.py:455 awx/sso/fields.py:572
+#: awx/sso/fields.py:521 awx/sso/fields.py:638
 #, python-brace-format
 msgid "Invalid key(s) for team map: {invalid_keys}."
 msgstr ""
 
-#: awx/sso/fields.py:571
+#: awx/sso/fields.py:637
 #, python-brace-format
 msgid "Missing required key for team map: {missing_keys}."
 msgstr ""
 
-#: awx/sso/fields.py:589
+#: awx/sso/fields.py:655
 #, python-brace-format
 msgid "Missing required key(s) for org info record: {missing_keys}."
 msgstr ""
 
-#: awx/sso/fields.py:602
+#: awx/sso/fields.py:668
 #, python-brace-format
 msgid "Invalid language code(s) for org info: {invalid_lang_codes}."
 msgstr ""
 
-#: awx/sso/fields.py:621
+#: awx/sso/fields.py:687
 #, python-brace-format
 msgid "Missing required key(s) for contact: {missing_keys}."
 msgstr ""
 
-#: awx/sso/fields.py:633
+#: awx/sso/fields.py:699
 #, python-brace-format
 msgid "Missing required key(s) for IdP: {missing_keys}."
 msgstr ""
 
-#: awx/sso/pipeline.py:24
+#: awx/sso/pipeline.py:31
 #, python-brace-format
 msgid "An account cannot be found for {0}"
 msgstr ""
 
-#: awx/sso/pipeline.py:30
+#: awx/sso/pipeline.py:37
 msgid "Your account is inactive"
 msgstr ""
 
@@ -4352,68 +4874,48 @@ msgstr ""
 msgid "AWX"
 msgstr ""
 
-#: awx/templates/rest_framework/api.html:39
+#: awx/templates/rest_framework/api.html:42
 msgid "Ansible Tower API Guide"
 msgstr ""
 
-#: awx/templates/rest_framework/api.html:40
+#: awx/templates/rest_framework/api.html:43
 msgid "Back to Ansible Tower"
 msgstr ""
 
-#: awx/templates/rest_framework/api.html:41
+#: awx/templates/rest_framework/api.html:44
 msgid "Resize"
 msgstr ""
 
+#: awx/templates/rest_framework/base.html:37
+msgid "navbar"
+msgstr ""
+
+#: awx/templates/rest_framework/base.html:75
+msgid "content"
+msgstr ""
+
 #: awx/templates/rest_framework/base.html:78
-#: awx/templates/rest_framework/base.html:92
-#, python-format
-msgid "Make a GET request on the %(name)s resource"
+msgid "request form"
 msgstr ""
 
-#: awx/templates/rest_framework/base.html:80
-msgid "Specify a format for the GET request"
-msgstr ""
-
-#: awx/templates/rest_framework/base.html:86
-#, python-format
-msgid ""
-"Make a GET request on the %(name)s resource with the format set to `"
-"%(format)s`"
-msgstr ""
-
-#: awx/templates/rest_framework/base.html:100
-#, python-format
-msgid "Make an OPTIONS request on the %(name)s resource"
-msgstr ""
-
-#: awx/templates/rest_framework/base.html:106
-#, python-format
-msgid "Make a DELETE request on the %(name)s resource"
-msgstr ""
-
-#: awx/templates/rest_framework/base.html:113
+#: awx/templates/rest_framework/base.html:134
 msgid "Filters"
 msgstr ""
 
-#: awx/templates/rest_framework/base.html:172
-#: awx/templates/rest_framework/base.html:186
-#, python-format
-msgid "Make a POST request on the %(name)s resource"
+#: awx/templates/rest_framework/base.html:139
+msgid "main content"
 msgstr ""
 
-#: awx/templates/rest_framework/base.html:216
-#: awx/templates/rest_framework/base.html:230
-#, python-format
-msgid "Make a PUT request on the %(name)s resource"
+#: awx/templates/rest_framework/base.html:155
+msgid "request info"
 msgstr ""
 
-#: awx/templates/rest_framework/base.html:233
-#, python-format
-msgid "Make a PATCH request on the %(name)s resource"
+#: awx/templates/rest_framework/base.html:159
+msgid "response info"
 msgstr ""
 
 #: awx/ui/apps.py:9 awx/ui/conf.py:22 awx/ui/conf.py:36 awx/ui/conf.py:51
-#: awx/ui/conf.py:63
+#: awx/ui/conf.py:63 awx/ui/conf.py:73
 msgid "UI"
 msgstr ""
 
@@ -4461,12 +4963,22 @@ msgid ""
 msgstr ""
 
 #: awx/ui/conf.py:60
-msgid "Max Job Events Retreived by UI"
+msgid "Max Job Events Retrieved by UI"
 msgstr ""
 
 #: awx/ui/conf.py:61
 msgid ""
-"Maximum number of job events for the UI to retreive within a single request."
+"Maximum number of job events for the UI to retrieve within a single request."
+msgstr ""
+
+#: awx/ui/conf.py:70
+msgid "Enable Live Updates in the UI"
+msgstr ""
+
+#: awx/ui/conf.py:71
+msgid ""
+"If disabled, the page will not refresh when events are received. Reloading "
+"the page will be required to get the latest details."
 msgstr ""
 
 #: awx/ui/fields.py:29
@@ -4477,70 +4989,4 @@ msgstr ""
 
 #: awx/ui/fields.py:30
 msgid "Invalid base64-encoded data in data URL."
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:31
-msgid ""
-"Your session will expire in <span id=\"remaining_seconds\" class=\"IdleModal-"
-"remainingSeconds\">60</span> seconds, would you like to continue?"
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:46
-msgid "CANCEL"
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:98
-msgid "Set how many days of data should be retained."
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:104
-msgid ""
-"Please enter an integer<span ng-show=\"prompt_for_days_form.days_to_keep."
-"$dirty && prompt_for_days_form.days_to_keep.$error.min\"> that is not "
-"negative</span><span ng-show=\"prompt_for_days_form.days_to_keep.$dirty && "
-"prompt_for_days_form.days_to_keep.$error.max\"> that is lower than 9999</"
-"span>."
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:109
-msgid ""
-"For facts collected older than the time period specified, save one fact scan "
-"(snapshot) per time window (frequency). For example, facts older than 30 "
-"days are purged, while one weekly fact scan is kept.\n"
-"                    <br>\n"
-"                    <br> CAUTION: Setting both numerical variables to \"0\" "
-"will delete all facts.\n"
-"                    <br>\n"
-"                    <br>"
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:118
-msgid "Select a time period after which to remove old facts"
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:132
-msgid ""
-"Please enter an integer<span ng-show=\"prompt_for_days_facts_form."
-"keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.min\"> "
-"that is not negative</span><span ng-show=\"prompt_for_days_facts_form."
-"keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.max\"> "
-"that is lower than 9999</span>."
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:137
-msgid "Select a frequency for snapshot retention"
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:151
-msgid ""
-"Please enter an integer<span ng-show=\"prompt_for_days_facts_form."
-"granularity_keep_amount.$dirty && prompt_for_days_facts_form."
-"granularity_keep_amount.$error.min\"> that is not negative</span><span ng-"
-"show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
-"prompt_for_days_facts_form.granularity_keep_amount.$error.max\"> that is "
-"lower than 9999</span>."
-msgstr ""
-
-#: awx/ui/templates/ui/index.html:157
-msgid "working..."
 msgstr ""

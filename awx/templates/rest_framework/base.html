@@ -157,8 +157,8 @@
               </div>
 
               <div class="response-info" aria-label="{% trans "response info" %}">
-                <pre class="prettyprint"><span class="meta nocode"><b>HTTP {{ response.status_code }} {{ response.status_text }}</b>{% autoescape off %}{% for key, val in response_headers|items %}
-<b>{{ key }}:</b> <span class="lit">{{ val|break_long_headers|urlize_quoted_links }}</span>{% endfor %}
+                <pre class="prettyprint"><span class="meta nocode"><b>HTTP {{ response.status_code }} {{ response.status_text }}</b>{% autoescape off %}{% if response_headers %}{% for key, val in response_headers|items %}
+<b>{{ key }}:</b> <span class="lit">{{ val|break_long_headers|urlize_quoted_links }}</span>{% endfor %}{% endif %}
 {# Original line below had the side effect of also escaping content: #}
 {#   </span>{{ content|urlize_quoted_links }}</pre>{% endautoescape %}   #}
 {# For AWX, disable automatic URL creation and move content outside of autoescape off block. #}

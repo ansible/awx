@@ -20,7 +20,7 @@ export default [ '$scope', 'Wait', 'Empty', 'Rest', 'ProcessErrors', '$state',
         $scope.viewJob = function(url) {
             // Pull the id out of the URL
             var id = url.replace(/^\//, '').split('/')[3];
-            $state.go('jobz', { id, type: 'inventory' } );
+            $state.go('output', { id, type: 'inventory' } );
         };
 
     }

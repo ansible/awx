@@ -1,6 +1,7 @@
 from django.db import connection
 from django.db.models.signals import post_migrate
 from django.apps import apps
+from django.conf import settings
 
 
 def app_post_migration(sender, app_config, **kwargs):
@@ -17,7 +18,8 @@ def app_post_migration(sender, app_config, **kwargs):
         )
 
 
-post_migrate.connect(app_post_migration, sender=apps.get_app_config('main'))
+if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+    post_migrate.connect(app_post_migration, sender=apps.get_app_config('main'))
 
 
 

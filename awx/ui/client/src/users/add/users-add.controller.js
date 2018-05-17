@@ -109,10 +109,11 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
         };
 
         // Password change
-        $scope.clearPWConfirm = function(fld) {
+        $scope.clearPWConfirm = function() {
             // If password value changes, make sure password_confirm must be re-entered
-            $scope[fld] = '';
-            $scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
+            $scope.password_confirm = '';
+            let passValidity = (!$scope.password || $scope.password === '') ? true : false;
+            $scope[form.name + '_form'].password_confirm.$setValidity('awpassmatch', passValidity);
         };
     }
 ];

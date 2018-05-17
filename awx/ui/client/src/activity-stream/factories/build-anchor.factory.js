@@ -38,7 +38,7 @@ export default function BuildAnchor($log, $filter) {
                  case 'schedule':
                      // schedule urls depend on the resource they're associated with
                      if (activity.summary_fields.job_template){
-                         url += 'job_templates/' + activity.summary_fields.job_template.id + '/schedules/' + obj.id;
+                         url += 'templates/job_template/' + activity.summary_fields.job_template.id + '/schedules/' + obj.id;
                      }
                      else if (activity.summary_fields.project){
                          url += 'projects/' + activity.summary_fields.project.id + '/schedules/' + obj.id;
@@ -62,10 +62,23 @@ export default function BuildAnchor($log, $filter) {
                  case 'workflow_job_template':
                      url += `templates/workflow_job_template/${obj.id}`;
                      break;
+                 case 'workflow_job':
+                     url += `workflows/${obj.id}`;
+                     break;
+                 case 'label':
+                     url = null;
+                     break;
                  default:
                      url += resource + 's/' + obj.id + '/';
              }
-             return ' <a href=\"' + url + '\"> ' + $filter('sanitize')(obj.name || obj.username) + ' </a> ';
+
+             const name = $filter('sanitize')(obj.name || obj.username);
+
+             if (url) {
+                return ` <a href=\"${url}\"> ${name} </a> `;
+             }
+
+             return ` <span> ${name} </span> `;
          }
          catch(err){
              $log.debug(err);

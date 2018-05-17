@@ -3,10 +3,8 @@ function AddApplicationsController (models, $state, strings) {
 
     const { application, me, organization } = models;
     const omit = [
-        'authorization_grant_type',
         'client_id',
         'client_secret',
-        'client_type',
         'created',
         'modified',
         'related',
@@ -44,19 +42,16 @@ function AddApplicationsController (models, $state, strings) {
     vm.form.organization._resource = 'organization';
     vm.form.organization._route = 'applications.add.organization';
     vm.form.organization._model = organization;
-    vm.form.organization._placeholder = strings.get('SELECT AN ORGANIZATION');
+    vm.form.organization._placeholder = strings.get('inputs.ORGANIZATION_PLACEHOLDER');
 
     vm.form.name.required = true;
     vm.form.organization.required = true;
-    vm.form.redirect_uris.required = true;
 
     delete vm.form.name.help_text;
 
     vm.form.save = data => {
         const hiddenData = {
-            authorization_grant_type: 'implicit',
-            user: me.get('id'),
-            client_type: 'public'
+            user: me.get('id')
         };
 
         const payload = _.merge(data, hiddenData);

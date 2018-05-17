@@ -77,7 +77,7 @@ class InstanceManager(models.Manager):
     def me(self):
         """Return the currently active instance."""
         # If we are running unit tests, return a stub record.
-        if settings.IS_TESTING(sys.argv):
+        if settings.IS_TESTING(sys.argv) or hasattr(sys, '_called_from_test'):
             return self.model(id=1,
                               hostname='localhost',
                               uuid='00000000-0000-0000-0000-000000000000')

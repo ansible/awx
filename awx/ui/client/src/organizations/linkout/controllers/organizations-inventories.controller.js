@@ -234,7 +234,7 @@ export default ['$scope', '$rootScope', '$location',
         $scope.viewJob = function(url) {
             // Pull the id out of the URL
             var id = url.replace(/^\//, '').split('/')[3];
-            $state.go('jobz', { id: id, type: 'inventory' });
+            $state.go('output', { id: id, type: 'inventory' });
 
         };
 

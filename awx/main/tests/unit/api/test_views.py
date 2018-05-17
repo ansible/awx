@@ -16,6 +16,9 @@ from awx.api.views import (
 from awx.main.models import (
     Host,
 )
+from awx.main.views import handle_error
+
+from rest_framework.test import APIRequestFactory
 
 
 @pytest.fixture
@@ -23,6 +26,12 @@ def mock_response_new(mocker):
     m = mocker.patch('awx.api.views.Response.__new__')
     m.return_value = m
     return m
+
+
+def test_handle_error():
+    # Assure that templating of error does not raise errors
+    request = APIRequestFactory().get('/fooooo/')
+    handle_error(request)
 
 
 class TestApiRootView:

@@ -4,12 +4,9 @@
 import os
 import re  # noqa
 import sys
-import ldap
 import djcelery
 import six
 from datetime import timedelta
-
-from kombu.common import Broadcast
 
 # global settings
 from django.conf import global_settings
@@ -40,6 +37,13 @@ def is_testing(argv=None):
 def IS_TESTING(argv=None):
     return is_testing(argv)
 
+
+if "pytest" in sys.modules:
+    import mock
+    with mock.patch('__main__.__builtins__.dir', return_value=[]):
+        import ldap
+else:
+    import ldap
 
 DEBUG = True
 SQL_DEBUG = DEBUG
@@ -456,6 +460,9 @@ BROKER_POOL_LIMIT = None
 BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_EVENT_QUEUE_TTL = 5
 CELERY_DEFAULT_QUEUE = 'awx_private_queue'
+CELERY_DEFAULT_EXCHANGE = 'awx_private_queue'
+CELERY_DEFAULT_ROUTING_KEY = 'awx_private_queue'
+CELERY_DEFAULT_EXCHANGE_TYPE = 'direct'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -466,10 +473,8 @@ CELERYD_POOL_RESTARTS = True
 CELERYD_AUTOSCALER = 'awx.main.utils.autoscale:DynamicAutoScaler'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
-CELERY_QUEUES = (
-    Broadcast('tower_broadcast_all'),
-)
-CELERY_ROUTES = {}
+CELERY_QUEUES = ()
+CELERY_ROUTES = ('awx.main.utils.ha.AWXCeleryRouter',)
 
 
 def log_celery_failure(*args):
@@ -532,19 +537,12 @@ ASGI_AMQP = {
 }
 
 # Django Caching Configuration
-if is_testing():
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        },
-    }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': 'memcached:11211',
-        },
-    }
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': 'memcached:11211',
+    },
+}
 
 # Social Auth configuration.
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
@@ -1005,6 +1003,9 @@ LOGGING = {
         'require_debug_true_or_test': {
             '()': 'awx.main.utils.RequireDebugTrueOrTest',
         },
+        'external_log_enabled': {
+            '()': 'awx.main.utils.filters.ExternalLoggerEnabled'
+        },
     },
     'formatters': {
         'simple': {
@@ -1038,11 +1039,10 @@ LOGGING = {
             'class': 'logging.NullHandler',
             'formatter': 'simple',
         },
-        'http_receiver': {
-            'class': 'awx.main.utils.handlers.HTTPSNullHandler',
-            'level': 'DEBUG',
+        'external_logger': {
+            'class': 'awx.main.utils.handlers.AWXProxyHandler',
             'formatter': 'json',
-            'host': '',
+            'filters': ['external_log_enabled'],
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -1135,7 +1135,7 @@ LOGGING = {
             'handlers': ['console'],
         },
         'awx': {
-            'handlers': ['console', 'file', 'tower_warnings'],
+            'handlers': ['console', 'file', 'tower_warnings', 'external_logger'],
             'level': 'DEBUG',
         },
         'awx.conf': {
@@ -1160,15 +1160,12 @@ LOGGING = {
             'propagate': False
         },
         'awx.main.tasks': {
-            'handlers': ['task_system'],
+            'handlers': ['task_system', 'external_logger'],
             'propagate': False
         },
         'awx.main.scheduler': {
-            'handlers': ['task_system'],
+            'handlers': ['task_system', 'external_logger'],
             'propagate': False
-        },
-        'awx.main.consumers': {
-            'handlers': ['null']
         },
         'awx.main.access': {
             'handlers': ['null'],
@@ -1183,7 +1180,7 @@ LOGGING = {
             'propagate': False,
         },
         'awx.analytics': {
-            'handlers': ['http_receiver'],
+            'handlers': ['external_logger'],
             'level': 'INFO',
             'propagate': False
         },

@@ -6,6 +6,7 @@
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
         border-bottom: none;
+        margin-top: 15px;
 
         & > div {
             user-select: none;
@@ -123,7 +124,7 @@
 
     &-container {
         font-family: monospace;
-        height: calc(~"100vh - 240px");
+        height: 100%;
         overflow-y: scroll;
         font-size: 15px;
         border: 1px solid @at-gray-b7;
@@ -134,6 +135,7 @@
         border-radius: 0;
         border-bottom-right-radius: 4px;
         border-bottom-left-radius: 4px;
+        max-height: ~"calc(100vh - 350px)";
 
         & > table {
             table-layout: fixed;
@@ -142,6 +144,11 @@
                 background: white;
             }
         }
+    }
+
+    &--fullscreen {
+        grid-column-start: 1;
+        grid-column-end: 3;
     }
 }
 
@@ -201,18 +208,18 @@
     flex-wrap: wrap;
 }
 
-
 // Status Bar -----------------------------------------------------------------------------
 .HostStatusBar {
     display: flex;
     flex: 0 0 auto;
     width: 100%;
+    margin-bottom: 15px;
 }
 
 .HostStatusBar-ok,
 .HostStatusBar-changed,
 .HostStatusBar-dark,
-.HostStatusBar-failed,
+.HostStatusBar-failures,
 .HostStatusBar-skipped,
 .HostStatusBar-noData {
     height: 15px;
@@ -236,7 +243,7 @@
     flex: 0 0 auto;
 }
 
-.HostStatusBar-failed {
+.HostStatusBar-failures {
     background-color: @default-err;
     flex: 0 0 auto;
 }
@@ -282,49 +289,29 @@
 
 }
 
+.HostStatusBar-tooltip.top {
+    margin-top: 4px;
+}
+
 // Job Details ---------------------------------------------------------------------------------
 
 @breakpoint-md: 1200px;
 
-.JobResults {
-    .OnePlusTwo-container(100%, @breakpoint-md);
+.JobResults-container {
+    display: grid;
+    grid-gap: 20px;
+    grid-template-columns: minmax(300px, 1fr) minmax(500px, 2fr);
+    grid-template-rows: minmax(500px, ~"calc(100vh - 130px)");
 
-    &.fullscreen {
-        .JobResults-rightSide {
-            max-width: 100%;
-        }
+    .at-Panel {
+        min-width: 0;
+        overflow-y: auto;
     }
 }
 
-.JobResults-leftSide {
-    .OnePlusTwo-left--panel(100%, @breakpoint-md);
-    max-width: 30%;
-    height: ~"calc(100vh - 177px)";
-
-    @media screen and (max-width: @breakpoint-md) {
-        max-width: 100%;
-    }
-}
-
-.JobResults-rightSide {
-    .OnePlusTwo-right--panel(100%, @breakpoint-md);
-    height: ~"calc(100vh - 177px)";
-
-    @media (max-width: @breakpoint-md - 1px) {
-        padding-right: 15px;
-    }
-}
-
-.JobResults-detailsPanel{
-    overflow-y: scroll;
-}
-
-.JobResults-stdoutActionButton--active {
-    display: none;
-    visibility: hidden;
-    flex:none;
-    width:0px;
-    padding-right: 0px;
+.JobResults-detailsPanel {
+    display: flex;
+    flex-direction: column;
 }
 
 .JobResults-panelHeader {
@@ -352,8 +339,8 @@
     flex-wrap: wrap;
 }
 
-.JobResults-codeMirrorResultRowLabel{
-    font-size: 12px;
+.JobResults-resultRow #cm-variables-container {
+    width: 100%;
 }
 
 .JobResults-resultRowLabel {
@@ -416,107 +403,8 @@
     padding-right: 10px;
 }
 
-.JobResults-badgeRow {
-    display: flex;
-    align-items: center;
-    margin-right: 5px;
-}
-
-.JobResults-badgeTitle{
-    color: @default-interface-txt;
-    font-size: 14px;
-    margin-right: 10px;
-    font-weight: normal;
-    text-transform: uppercase;
-    margin-left: 20px;
-}
-
-@media (max-width: @breakpoint-md) {
-    .JobResults-detailsPanel {
-        overflow-y: auto;
-    }
-
-    .JobResults-rightSide {
-        height: inherit;
-    }
-}
-
-.JobResults-timeBadge {
-    float:right;
-    font-size: 11px;
-    font-weight: normal;
-    padding: 1px 10px;
-    height: 14px;
-    margin: 3px 15px;
-    width: 80px;
-    background-color: @default-bg;
-    border-radius: 5px;
-    color: @default-interface-txt;
-    margin-right: -5px;
-}
-
-.JobResults-panelRight {
-    display: flex;
-    flex-direction: column;
-}
-
-.JobResults-panelRight .SmartSearch-bar {
-    width: 100%;
-}
-
-.JobResults-panelRightTitle{
-    flex-wrap: wrap;
-}
-
-.JobResults-panelRightTitleText{
-    word-wrap: break-word;
-    word-break: break-all;
-    max-width: 100%;
-}
-
-.JobResults-badgeAndActionRow{
-    display:flex;
-    flex: 1 0 auto;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    max-width: 100%;
-}
-
 .StandardOut-panelHeader {
     flex: initial;
-}
-
-.StandardOut-panelHeader--jobIsRunning {
-    margin-bottom: 20px;
-}
-
-host-status-bar {
-    flex: initial;
-    margin-bottom: 20px;
-}
-
-smart-search {
-    flex: initial;
-}
-
-job-results-standard-out {
-    flex: 1;
-    flex-basis: auto;
-    height: ~"calc(100% - 800px)";
-    display: flex;
-    border: 1px solid @d7grey;
-    border-radius: 5px;
-    margin-top: 20px;
-}
-@media screen and (max-width: @breakpoint-md) {
-  job-results-standard-out {
-      height: auto;
-  }
-}
-
-.JobResults-extraVarsHelp {
-    margin-left: 10px;
-    color: @default-icon;
 }
 
 .JobResults-seeMoreLess {
@@ -527,4 +415,11 @@ job-results-standard-out {
     cursor: pointer;
     border-radius: 5px;
     font-size: 11px;
+}
+
+@media screen and (max-width: @breakpoint-md) {
+    .JobResults-container {
+        display: flex;
+        flex-direction: column;
+    }
 }

@@ -34,7 +34,10 @@ function TokensStrings (BaseString) {
     ns.list = {
         ROW_ITEM_LABEL_DESCRIPTION: t.s('DESCRIPTION'),
         ROW_ITEM_LABEL_EXPIRED: t.s('EXPIRATION'),
-        ROW_ITEM_LABEL_USED: t.s('LAST USED')
+        ROW_ITEM_LABEL_USED: t.s('LAST USED'),
+        ROW_ITEM_LABEL_SCOPE: t.s('SCOPE'),
+        ROW_ITEM_LABEL_APPLICATION: t.s('APPLICATION'),
+        HEADER: appName => t.s('{{ appName }} Token', { appName }),
     };
 }
 

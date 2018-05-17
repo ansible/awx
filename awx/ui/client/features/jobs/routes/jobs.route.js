@@ -22,6 +22,8 @@ export default {
         }
     },
     data: {
+        activityStream: true,
+        activityStreamTarget: 'job',
         socket: {
             groups: {
                 jobs: ['status_changed'],

@@ -7,10 +7,10 @@ import pytest
 from uuid import uuid4
 import json
 import yaml
+import mock
 
 from backports.tempfile import TemporaryDirectory
 from django.conf import settings
-from django.core.cache import cache
 
 from rest_framework.exceptions import ParseError
 
@@ -24,14 +24,6 @@ from awx.main.models import (
     SystemJob,
     WorkflowJob
 )
-
-
-@pytest.fixture(autouse=True)
-def clear_cache():
-    '''
-    Clear cache (local memory) for each test to prevent using cached settings.
-    '''
-    cache.clear()
 
 
 @pytest.mark.parametrize('input_, output', [
@@ -114,46 +106,48 @@ def test_get_type_for_model(model, name):
 
 
 @pytest.fixture
-def memoized_function(mocker):
-    @common.memoize(track_function=True)
-    def myfunction(key, value):
-        if key not in myfunction.calls:
-            myfunction.calls[key] = 0
+def memoized_function(mocker, mock_cache):
+    with mock.patch('awx.main.utils.common.get_memoize_cache', return_value=mock_cache):
+        @common.memoize(track_function=True)
+        def myfunction(key, value):
+            if key not in myfunction.calls:
+                myfunction.calls[key] = 0
 
-        myfunction.calls[key] += 1
+            myfunction.calls[key] += 1
 
-        if myfunction.calls[key] == 1:
-            return value
-        else:
-            return '%s called %s times' % (value, myfunction.calls[key])
-    myfunction.calls = dict()
-    return myfunction
+            if myfunction.calls[key] == 1:
+                return value
+            else:
+                return '%s called %s times' % (value, myfunction.calls[key])
+        myfunction.calls = dict()
+        return myfunction
 
 
-def test_memoize_track_function(memoized_function):
+def test_memoize_track_function(memoized_function, mock_cache):
     assert memoized_function('scott', 'scotterson') == 'scotterson'
-    assert cache.get('myfunction') == {u'scott-scotterson': 'scotterson'}
+    assert mock_cache.get('myfunction') == {u'scott-scotterson': 'scotterson'}
     assert memoized_function('scott', 'scotterson') == 'scotterson'
 
     assert memoized_function.calls['scott'] == 1
 
     assert memoized_function('john', 'smith') == 'smith'
-    assert cache.get('myfunction') == {u'scott-scotterson': 'scotterson', u'john-smith': 'smith'}
+    assert mock_cache.get('myfunction') == {u'scott-scotterson': 'scotterson', u'john-smith': 'smith'}
     assert memoized_function('john', 'smith') == 'smith'
-    
+
     assert memoized_function.calls['john'] == 1
 
 
-def test_memoize_delete(memoized_function):
+def test_memoize_delete(memoized_function, mock_cache):
     assert memoized_function('john', 'smith') == 'smith'
     assert memoized_function('john', 'smith') == 'smith'
     assert memoized_function.calls['john'] == 1
 
-    assert cache.get('myfunction') == {u'john-smith': 'smith'}
+    assert mock_cache.get('myfunction') == {u'john-smith': 'smith'}
 
-    common.memoize_delete('myfunction')
+    with mock.patch('awx.main.utils.common.memoize_delete', side_effect=mock_cache.delete):
+        common.memoize_delete('myfunction')
 
-    assert cache.get('myfunction') is None
+    assert mock_cache.get('myfunction') is None
 
     assert memoized_function('john', 'smith') == 'smith called 2 times'
     assert memoized_function.calls['john'] == 2

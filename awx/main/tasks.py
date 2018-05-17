@@ -29,7 +29,7 @@ except Exception:
 
 # Celery
 from celery import Task, shared_task, Celery
-from celery.signals import celeryd_init, worker_process_init, worker_shutdown, worker_ready, celeryd_after_setup
+from celery.signals import celeryd_init, worker_shutdown, worker_ready, celeryd_after_setup
 
 # Django
 from django.conf import settings
@@ -49,6 +49,7 @@ from crum import impersonate
 # AWX
 from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
+from awx.main.access import access_registry
 from awx.main.models import * # noqa
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError
@@ -59,12 +60,14 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             wrap_args_with_proot, OutputEventFilter, OutputVerboseFilter, ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, get_type_for_model, extract_ansible_vars)
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
-from awx.main.utils.reload import restart_local_services, stop_local_services
+from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
-from awx.main.utils.ha import update_celery_worker_routes, register_celery_worker_queues
-from awx.main.utils.handlers import configure_external_logger
+from awx.main.utils.ha import register_celery_worker_queues
 from awx.main.consumers import emit_channel_notification
 from awx.conf import settings_registry
+
+from rest_framework.exceptions import PermissionDenied
+
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'handle_work_success', 'apply_cluster_membership_policies',
@@ -117,15 +120,6 @@ def celery_startup(conf=None, **kwargs):
             logger.exception(six.text_type("Failed to rebuild schedule {}.").format(sch))
 
 
-@worker_process_init.connect
-def task_set_logger_pre_run(*args, **kwargs):
-    try:
-        cache.close()
-        configure_external_logger(settings, is_startup=False)
-    except Exception:
-        logger.exception('Encountered error on initial log configuration.')
-
-
 @worker_shutdown.connect
 def inform_cluster_of_shutdown(*args, **kwargs):
     try:
@@ -152,7 +146,7 @@ def apply_cluster_membership_policies(self):
         # Process policy instance list first, these will represent manually managed instances
         # that will not go through automatic policy determination
         for ig in InstanceGroup.objects.all():
-            logger.info(six.text_type("Considering group {}").format(ig.name))
+            logger.info(six.text_type("Applying cluster membership policies to Group {}").format(ig.name))
             ig.instances.clear()
             group_actual = Group(obj=ig, instances=[])
             for i in ig.policy_instance_list:
@@ -160,7 +154,7 @@ def apply_cluster_membership_policies(self):
                 if not inst.exists():
                     continue
                 inst = inst[0]
-                logger.info(six.text_type("Policy List, adding {} to {}").format(inst.hostname, ig.name))
+                logger.info(six.text_type("Policy List, adding Instance {} to Group {}").format(inst.hostname, ig.name))
                 group_actual.instances.append(inst.id)
                 ig.instances.add(inst)
                 filtered_instances.append(inst)
@@ -173,7 +167,7 @@ def apply_cluster_membership_policies(self):
             for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
                 if len(g.instances) >= g.obj.policy_instance_minimum:
                     break
-                logger.info(six.text_type("Policy minimum, adding {} to {}").format(i.obj.hostname, g.obj.name))
+                logger.info(six.text_type("Policy minimum, adding Instance {} to Group {}").format(i.obj.hostname, g.obj.name))
                 g.obj.instances.add(i.obj)
                 g.instances.append(i.obj.id)
                 i.groups.append(g.obj.id)
@@ -182,14 +176,14 @@ def apply_cluster_membership_policies(self):
             for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
                 if 100 * float(len(g.instances)) / len(actual_instances) >= g.obj.policy_instance_percentage:
                     break
-                logger.info(six.text_type("Policy percentage, adding {} to {}").format(i.obj.hostname, g.obj.name))
+                logger.info(six.text_type("Policy percentage, adding Instance {} to Group {}").format(i.obj.hostname, g.obj.name))
                 g.instances.append(i.obj.id)
                 g.obj.instances.add(i.obj)
                 i.groups.append(g.obj.id)
         handle_ha_toplogy_changes.apply([])
 
 
-@shared_task(queue='tower_broadcast_all', bind=True)
+@shared_task(exchange='tower_broadcast_all', bind=True)
 def handle_setting_changes(self, setting_keys):
     orig_len = len(setting_keys)
     for i in range(orig_len):
@@ -200,15 +194,9 @@ def handle_setting_changes(self, setting_keys):
     cache_keys = set(setting_keys)
     logger.debug('cache delete_many(%r)', cache_keys)
     cache.delete_many(cache_keys)
-    for key in cache_keys:
-        if key.startswith('LOG_AGGREGATOR_'):
-            restart_local_services(['uwsgi', 'celery', 'beat', 'callback'])
-            break
-        elif key == 'OAUTH2_PROVIDER':
-            restart_local_services(['uwsgi'])
 
 
-@shared_task(bind=True, queue='tower_broadcast_all')
+@shared_task(bind=True, exchange='tower_broadcast_all')
 def handle_ha_toplogy_changes(self):
     (changed, instance) = Instance.objects.get_or_register()
     if changed:
@@ -217,37 +205,22 @@ def handle_ha_toplogy_changes(self):
     awx_app = Celery('awx')
     awx_app.config_from_object('django.conf:settings')
     instances, removed_queues, added_queues = register_celery_worker_queues(awx_app, self.request.hostname)
-    for instance in instances:
-        logger.info(six.text_type("Workers on tower node '{}' removed from queues {} and added to queues {}")
-                    .format(instance.hostname, removed_queues, added_queues))
-        updated_routes = update_celery_worker_routes(instance, settings)
-        logger.info(six.text_type("Worker on tower node '{}' updated celery routes {} all routes are now {}")
-                    .format(instance.hostname, updated_routes, self.app.conf.CELERY_ROUTES))
+    if len(removed_queues) + len(added_queues) > 0:
+        logger.info(six.text_type("Workers on tower node(s) '{}' removed from queues {} and added to queues {}")
+                    .format([i.hostname for i in instances], removed_queues, added_queues))
 
 
 @worker_ready.connect
 def handle_ha_toplogy_worker_ready(sender, **kwargs):
     logger.debug(six.text_type("Configure celeryd queues task on host {}").format(sender.hostname))
     instances, removed_queues, added_queues = register_celery_worker_queues(sender.app, sender.hostname)
-    for instance in instances:
-        logger.info(six.text_type("Workers on tower node '{}' unsubscribed from queues {} and subscribed to queues {}")
-                    .format(instance.hostname, removed_queues, added_queues))
+    if len(removed_queues) + len(added_queues) > 0:
+        logger.info(six.text_type("Workers on tower node(s) '{}' removed from queues {} and added to queues {}")
+                    .format([i.hostname for i in instances], removed_queues, added_queues))
 
     # Expedite the first hearbeat run so a node comes online quickly.
     cluster_node_heartbeat.apply([])
     apply_cluster_membership_policies.apply([])
-
-
-@celeryd_init.connect
-def handle_update_celery_routes(sender=None, conf=None, **kwargs):
-    conf = conf if conf else sender.app.conf
-    logger.debug(six.text_type("Registering celery routes for {}").format(sender))
-    (changed, instance) = Instance.objects.get_or_register()
-    if changed:
-        logger.info(six.text_type("Registered tower node '{}'").format(instance.hostname))
-    added_routes = update_celery_worker_routes(instance, conf)
-    logger.info(six.text_type("Workers on tower node '{}' added routes {} all routes are now {}")
-                .format(instance.hostname, added_routes, conf.CELERY_ROUTES))
 
 
 @celeryd_after_setup.connect
@@ -282,7 +255,10 @@ def send_notifications(notification_list, job_id=None):
             notification.error = smart_str(e)
             update_fields.append('error')
         finally:
-            notification.save(update_fields=update_fields)
+            try:
+                notification.save(update_fields=update_fields)
+            except Exception as e:
+                logger.exception(six.text_type('Error saving notification {} result.').format(notification.id))
 
 
 @shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
@@ -426,6 +402,13 @@ def awx_periodic_scheduler(self):
     for schedule in old_schedules:
         schedule.save()
     schedules = Schedule.objects.enabled().between(last_run, run_now)
+
+    invalid_license = False
+    try:
+        access_registry[Job](None).check_license()
+    except PermissionDenied as e:
+        invalid_license = e
+
     for schedule in schedules:
         template = schedule.unified_job_template
         schedule.save() # To update next_run timestamp.
@@ -435,6 +418,13 @@ def awx_periodic_scheduler(self):
         try:
             job_kwargs = schedule.get_job_kwargs()
             new_unified_job = schedule.unified_job_template.create_unified_job(**job_kwargs)
+
+            if invalid_license:
+                new_unified_job.status = 'failed'
+                new_unified_job.job_explanation = str(invalid_license)
+                new_unified_job.save(update_fields=['status', 'job_explanation'])
+                new_unified_job.websocket_emit_status("failed")
+                raise invalid_license
             can_start = new_unified_job.signal_start()
         except Exception:
             logger.exception('Error spawning scheduled job.')
@@ -561,6 +551,8 @@ def delete_inventory(self, inventory_id, user_id):
     with ignore_inventory_computed_fields(), ignore_inventory_group_removal(), impersonate(user):
         try:
             i = Inventory.objects.get(id=inventory_id)
+            for host in i.hosts.iterator():
+                host.job_events_as_primary_host.update(host=None)
             i.delete()
             emit_channel_notification(
                 'inventories-status_changed',
@@ -1677,7 +1669,13 @@ class RunProjectUpdate(BaseTask):
             raise
 
         try:
+            start_time = time.time()
             fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
+            waiting_time = time.time() - start_time
+            if waiting_time > 1.0:
+                logger.info(six.text_type(
+                    '{} spent {} waiting to acquire lock for local source tree '
+                    'for path {}.').format(instance.log_format, waiting_time, lock_path))
         except IOError as e:
             os.close(self.lock_fd)
             logger.error(six.text_type("I/O error({0}) while trying to aquire lock on file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
@@ -1724,6 +1722,10 @@ class RunInventoryUpdate(BaseTask):
     model = InventoryUpdate
     event_model = InventoryUpdateEvent
     event_data_key = 'inventory_update_id'
+
+    @property
+    def proot_show_paths(self):
+        return [self.get_path_to('..', 'plugins', 'inventory')]
 
     def build_private_data(self, inventory_update, **kwargs):
         """
@@ -2080,6 +2082,8 @@ class RunInventoryUpdate(BaseTask):
         return args
 
     def build_cwd(self, inventory_update, **kwargs):
+        if inventory_update.source == 'scm' and inventory_update.source_project_update:
+            return inventory_update.source_project_update.get_project_path(check_if_exists=False)
         return self.get_path_to('..', 'plugins', 'inventory')
 
     def get_idle_timeout(self):
@@ -2331,6 +2335,9 @@ def _reconstruct_relationships(copy_mapping):
                 setattr(new_obj, field_name, related_obj)
             elif field.many_to_many:
                 for related_obj in getattr(old_obj, field_name).all():
+                    logger.debug(six.text_type('Deep copy: Adding {} to {}({}).{} relationship').format(
+                        related_obj, new_obj, model, field_name
+                    ))
                     getattr(new_obj, field_name).add(copy_mapping.get(related_obj, related_obj))
         new_obj.save()
 
@@ -2352,7 +2359,7 @@ def deep_copy_model_obj(
     except ObjectDoesNotExist:
         logger.warning("Object or user no longer exists.")
         return
-    with transaction.atomic():
+    with transaction.atomic(), ignore_inventory_computed_fields():
         copy_mapping = {}
         for sub_obj_setup in sub_obj_list:
             sub_model = getattr(importlib.import_module(sub_obj_setup[0]),
@@ -2372,3 +2379,5 @@ def deep_copy_model_obj(
                 importlib.import_module(permission_check_func[0]), permission_check_func[1]
             ), permission_check_func[2])
             permission_check_func(creater, copy_mapping.values())
+    if isinstance(new_obj, Inventory):
+        update_inventory_computed_fields.delay(new_obj.id, True)

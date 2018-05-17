@@ -38,6 +38,12 @@ function JobEventEngine ($q) {
         };
     };
 
+    this.setMinLine = min => {
+        if (min > this.lines.min) {
+            this.lines.min = min;
+        }
+    };
+
     this.getBatchFactors = size => {
         const factors = [1];
 
@@ -140,10 +146,6 @@ function JobEventEngine ($q) {
 
     this.renderFrame = events => this.hooks.onEventFrame(events)
         .then(() => {
-            if (this.scroll.isLocked()) {
-                this.scroll.scrollToBottom();
-            }
-
             if (this.isEnding()) {
                 const lastEvents = this.page.emptyBuffer();
 

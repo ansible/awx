@@ -73,6 +73,13 @@ export default ['i18n', function(i18n) {
         fieldActions: {
 
             columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
+            edit: {
+                ngClick: "editHost(host)",
+                icon: 'icon-edit',
+                awToolTip: i18n._('Edit host'),
+                dataPlacement: 'top',
+                ngShow: 'host.summary_fields.user_capabilities.edit'
+            },
             insights: {
                 ngClick: "goToInsights(host)",
                 icon: 'fa-info',
@@ -80,13 +87,6 @@ export default ['i18n', function(i18n) {
                 dataPlacement: 'top',
                 ngShow: 'host.insights_system_id && host.summary_fields.inventory.hasOwnProperty("insights_credential_id")',
                 ngClass: "{'List-actionButton--selected': $stateParams['host_id'] == host.id && $state.is('inventories.edit.hosts.edit.insights')}"
-            },
-            edit: {
-                ngClick: "editHost(host)",
-                icon: 'icon-edit',
-                awToolTip: i18n._('Edit host'),
-                dataPlacement: 'top',
-                ngShow: 'host.summary_fields.user_capabilities.edit'
             },
             view: {
                 ngClick: "editHost(host)",
@@ -121,8 +121,8 @@ export default ['i18n', function(i18n) {
                 mode: 'all',
                 ngClick: "createHost()",
                 awToolTip: i18n._("Create a new host"),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ' + i18n._('ADD HOST'),
+                actionClass: 'at-Button--add',
+                actionId: 'button-add',
                 ngShow: 'canAdd',
                 dataPlacement: "top",
             }

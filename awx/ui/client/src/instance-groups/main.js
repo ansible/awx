@@ -35,15 +35,12 @@ function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance) {
 
     if (!instanceGroupId && !instanceId) {
         promises.instanceGroup = new InstanceGroup(['get', 'options']);
-        promises.instance = new Instance(['get', 'options']);
-
         return $q.all(promises);
     }
 
     if (instanceGroupId && instanceId) {
         promises.instance = new Instance(['get', 'options'], [instanceId, instanceId])
             .then((instance) => instance.extend('get', 'jobs', {params: {page_size: "10", order_by: "-finished"}}));
-
         return $q.all(promises);
     }
 
@@ -111,6 +108,14 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         ncyBreadcrumb: {
             label: strings.get('state.ADD_BREADCRUMB_LABEL')
         },
+        params: {
+            instance_search: {
+                value: {
+                    order_by: 'hostname',
+                    page_size: '10'
+                }
+            }
+        },
         views: {
             'add@instanceGroups': {
                 templateUrl: AddEditTemplate,
@@ -119,7 +124,17 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
             }
         },
         resolve: {
-            resolvedModels: InstanceGroupsResolve
+            resolvedModels: InstanceGroupsResolve,
+            Dataset: [
+                '$stateParams',
+                'GetBasePath',
+                'QuerySet',
+                ($stateParams, GetBasePath, qs) => {
+                    const searchParams = $stateParams.instance_search;
+                    const searchPath = GetBasePath('instances');
+                    return qs.search(searchPath, searchParams);
+                }
+            ]
         }
     });
 
@@ -146,8 +161,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
             "modal": {
                 template: '<instance-list-policy></instance-list-policy>',
             }
-        },
-        resolvedModels: InstanceGroupsResolve
+        }
     });
 
     $stateExtender.addState({
@@ -155,6 +169,14 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         route: '/:instance_group_id',
         ncyBreadcrumb: {
             label: strings.get('state.EDIT_BREADCRUMB_LABEL')
+        },
+        params: {
+            instance_search: {
+                value: {
+                    order_by: 'hostname',
+                    page_size: '10'
+                }
+            }
         },
         views: {
             'edit@instanceGroups': {
@@ -164,7 +186,17 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
             }
         },
         resolve: {
-            resolvedModels: InstanceGroupsResolve
+            resolvedModels: InstanceGroupsResolve,
+            Dataset: [
+                '$stateParams',
+                'GetBasePath',
+                'QuerySet',
+                ($stateParams, GetBasePath, qs) => {
+                    const searchParams = $stateParams.instance_search;
+                    const searchPath = GetBasePath('instances');
+                    return qs.search(searchPath, searchParams);
+                }
+            ]
         }
     });
 
@@ -192,8 +224,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
             "modal": {
                 template: '<instance-list-policy></instance-list-policy>',
             }
-        },
-        resolvedModels: InstanceGroupsResolve
+        }
     });
 
     $stateExtender.addState({

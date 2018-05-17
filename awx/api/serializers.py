@@ -14,7 +14,6 @@ from datetime import timedelta
 
 # OAuth2
 from oauthlib.common import generate_token
-from oauth2_provider.settings import oauth2_settings
 
 # Django
 from django.conf import settings
@@ -1024,7 +1023,7 @@ class UserAuthorizedTokenSerializer(BaseSerializer):
         validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
-            seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+            seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
         obj = super(OAuth2TokenSerializer, self).create(validated_data)
         obj.save()
@@ -1176,7 +1175,7 @@ class OAuth2TokenSerializer(BaseSerializer):
         validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
-            seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+            seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
         obj = super(OAuth2TokenSerializer, self).create(validated_data)
         if obj.application and obj.application.user:
@@ -1239,7 +1238,7 @@ class OAuth2AuthorizedTokenSerializer(BaseSerializer):
         validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
-            seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+            seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
         obj = super(OAuth2AuthorizedTokenSerializer, self).create(validated_data)
         if obj.application and obj.application.user:
@@ -1306,7 +1305,7 @@ class OAuth2PersonalTokenSerializer(BaseSerializer):
         validated_data['user'] = self.context['request'].user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
-            seconds=oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS
+            seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
         validated_data['application'] = None
         obj = super(OAuth2PersonalTokenSerializer, self).create(validated_data)
@@ -4512,9 +4511,19 @@ class SchedulePreviewSerializer(BaseSerializer):
 class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSerializer):
     show_capabilities = ['edit', 'delete']
 
+    timezone = serializers.SerializerMethodField()
+    until = serializers.SerializerMethodField()
+
     class Meta:
         model = Schedule
-        fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend', 'rrule', 'next_run',)
+        fields = ('*', 'unified_job_template', 'enabled', 'dtstart', 'dtend', 'rrule', 'next_run', 'timezone',
+                  'until')
+
+    def get_timezone(self, obj):
+        return obj.timezone
+
+    def get_until(self, obj):
+        return obj.until
 
     def get_related(self, obj):
         res = super(ScheduleSerializer, self).get_related(obj)
@@ -4600,7 +4609,7 @@ class InstanceGroupSerializer(BaseSerializer):
                     "this group when new instances come online.")
     )
     policy_instance_list = serializers.ListField(
-        child=serializers.CharField(),
+        child=serializers.CharField(), required=False,
         help_text=_("List of exact-match Instances that will be assigned to this group")
     )
 
@@ -4625,6 +4634,11 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('Duplicate entry {}.').format(instance_name))
             if not Instance.objects.filter(hostname=instance_name).exists():
                 raise serializers.ValidationError(_('{} is not a valid hostname of an existing instance.').format(instance_name))
+        return value
+
+    def validate_name(self, value):
+        if self.instance and self.instance.name == 'tower' and value != 'tower':
+            raise serializers.ValidationError(_('tower instance group name may not be changed.'))
         return value
 
     def get_jobs_qs(self):

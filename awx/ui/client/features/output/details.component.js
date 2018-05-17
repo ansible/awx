@@ -2,7 +2,6 @@ const templateUrl = require('~features/output/details.partial.html');
 
 let $http;
 let $filter;
-let $scope;
 let $state;
 
 let error;
@@ -10,7 +9,6 @@ let parse;
 let prompt;
 let resource;
 let strings;
-let status;
 let wait;
 
 let vm;
@@ -137,6 +135,98 @@ function getJobTemplateDetails () {
     return { label, link, value, tooltip };
 }
 
+function getInventoryJobNameDetails () {
+    if (resource.model.get('type') !== 'inventory_update') {
+        return null;
+    }
+
+    const jobArgs = resource.model.get('job_args');
+
+    if (!jobArgs) {
+        return null;
+    }
+
+    let parsedJobArgs;
+
+    try {
+        parsedJobArgs = JSON.parse(jobArgs);
+    } catch (e) {
+        return null;
+    }
+
+    if (!Array.isArray(parsedJobArgs)) {
+        return null;
+    }
+
+    const jobArgIndex = parsedJobArgs.indexOf('--inventory-id');
+    const inventoryId = parsedJobArgs[jobArgIndex + 1];
+
+    if (jobArgIndex < 0) {
+        return null;
+    }
+
+    if (!Number.isInteger(parseInt(inventoryId, 10))) {
+        return null;
+    }
+
+    const name = resource.model.get('name');
+    const id = resource.model.get('id');
+
+    const label = 'Name';
+    const tooltip = strings.get('resourceTooltips.INVENTORY');
+    const value = `${id} - ${$filter('sanitize')(name)}`;
+    const link = `/#/inventories/inventory/${inventoryId}`;
+
+    return { label, link, tooltip, value };
+}
+
+function getInventorySourceDetails () {
+    if (!resource.model.has('summary_fields.inventory_source.source')) {
+        return null;
+    }
+
+    const { source } = resource.model.get('summary_fields.inventory_source');
+    const choices = mapChoices(resource.model.options('actions.GET.source.choices'));
+
+    const label = 'Source';
+    const value = choices[source];
+
+    return { label, value };
+}
+
+function getOverwriteDetails () {
+    if (!resource.model.has('overwrite')) {
+        return null;
+    }
+
+    const label = 'Overwrite';
+    const value = resource.model.get('overwrite');
+
+    return { label, value };
+}
+
+function getOverwriteVarsDetails () {
+    if (!resource.model.has('overwrite_vars')) {
+        return null;
+    }
+
+    const label = 'Overwrite Vars';
+    const value = resource.model.get('overwrite_vars');
+
+    return { label, value };
+}
+
+function getLicenseErrorDetails () {
+    if (!resource.model.has('license_error')) {
+        return null;
+    }
+
+    const label = 'License Error';
+    const value = resource.model.get('license_error');
+
+    return { label, value };
+}
+
 function getLaunchedByDetails () {
     const createdBy = resource.model.get('summary_fields.created_by');
     const jobTemplate = resource.model.get('summary_fields.job_template');
@@ -227,7 +317,7 @@ function getProjectUpdateDetails (updateId) {
         return null;
     }
 
-    const link = `/#/jobz/project/${jobId}`;
+    const link = `/#/jobs/project/${jobId}`;
     const tooltip = strings.get('resourceTooltips.PROJECT_UPDATE');
 
     return { link, tooltip };
@@ -290,7 +380,7 @@ function getResultTracebackDetails () {
     }
 
     const limit = 150;
-    const label = 'Results Traceback';
+    const label = 'Error Details';
 
     const more = traceback;
     const less = $filter('limitTo')(more, limit);
@@ -367,25 +457,48 @@ function getInstanceGroupDetails () {
 }
 
 function getJobTagDetails () {
-    const label = 'Job Tags';
-    const value = resource.model.get('job_tags');
+    const tagString = resource.model.get('job_tags');
 
-    if (!value) {
+    let jobTags;
+
+    if (tagString) {
+        jobTags = tagString.split(',').filter(tag => tag !== '');
+    } else {
+        jobTags = [];
+    }
+
+    if (jobTags.length < 1) {
         return null;
     }
 
-    return { label, value };
+    const label = 'Job Tags';
+    const more = false;
+
+    const value = jobTags.map($filter('sanitize'));
+
+    return { label, more, value };
 }
 
 function getSkipTagDetails () {
-    const label = 'Skip Tags';
-    const value = resource.model.get('skip_tags');
+    const tagString = resource.model.get('skip_tags');
 
-    if (!value) {
+    let skipTags;
+
+    if (tagString) {
+        skipTags = tagString.split(',').filter(tag => tag !== '');
+    } else {
+        skipTags = [];
+    }
+
+    if (skipTags.length < 1) {
         return null;
     }
 
-    return { label, value };
+    const label = 'Skip Tags';
+    const more = false;
+    const value = skipTags.map($filter('sanitize'));
+
+    return { label, more, value };
 }
 
 function getExtraVarsDetails () {
@@ -423,28 +536,51 @@ function createErrorHandler (path, action) {
         const hdr = strings.get('error.HEADER');
         const msg = strings.get('error.CALL', { path, action, status: res.status });
 
-        error($scope, res.data, res.status, null, { hdr, msg });
+        error(null, res.data, res.status, null, { hdr, msg });
     };
 }
 
 const ELEMENT_LABELS = '#job-results-labels';
+const ELEMENT_JOB_TAGS = '#job-results-job-tags';
+const ELEMENT_SKIP_TAGS = '#job-results-skip-tags';
 const ELEMENT_PROMPT_MODAL = '#prompt-modal';
-const LABELS_SLIDE_DISTANCE = 200;
+const TAGS_SLIDE_DISTANCE = 200;
 
 function toggleLabels () {
     if (!this.labels.more) {
-        $(ELEMENT_LABELS).slideUp(LABELS_SLIDE_DISTANCE);
+        $(ELEMENT_LABELS).slideUp(TAGS_SLIDE_DISTANCE);
         this.labels.more = true;
     } else {
-        $(ELEMENT_LABELS).slideDown(LABELS_SLIDE_DISTANCE);
+        $(ELEMENT_LABELS).slideDown(TAGS_SLIDE_DISTANCE);
         this.labels.more = false;
     }
 }
 
+function toggleJobTags () {
+    if (!this.jobTags.more) {
+        $(ELEMENT_JOB_TAGS).slideUp(TAGS_SLIDE_DISTANCE);
+        this.jobTags.more = true;
+    } else {
+        $(ELEMENT_JOB_TAGS).slideDown(TAGS_SLIDE_DISTANCE);
+        this.jobTags.more = false;
+    }
+}
+
+function toggleSkipTags () {
+    if (!this.skipTags.more) {
+        $(ELEMENT_SKIP_TAGS).slideUp(TAGS_SLIDE_DISTANCE);
+        this.skipTags.more = true;
+    } else {
+        $(ELEMENT_SKIP_TAGS).slideDown(TAGS_SLIDE_DISTANCE);
+        this.skipTags.more = false;
+    }
+}
+
 function cancelJob () {
-    const actionText = strings.get('warnings.CANCEL_ACTION');
-    const hdr = strings.get('warnings.CANCEL_HEADER');
-    const warning = strings.get('warnings.CANCEL_BODY');
+    const actionText = strings.get('cancelJob.CANCEL_JOB');
+    const hdr = strings.get('cancelJob.HEADER');
+    const warning = strings.get('cancelJob.SUBMIT_REQUEST');
+    const cancelText = strings.get('cancelJob.RETURN');
 
     const id = resource.model.get('id');
     const name = $filter('sanitize')(resource.model.get('name'));
@@ -467,13 +603,13 @@ function cancelJob () {
             });
     };
 
-    prompt({ hdr, resourceName, body, actionText, action });
+    prompt({ hdr, resourceName, body, actionText, action, cancelText });
 }
 
 function deleteJob () {
     const actionText = strings.get('DELETE');
-    const hdr = strings.get('warnings.DELETE_HEADER');
-    const warning = strings.get('warnings.DELETE_BODY');
+    const hdr = strings.get('deleteResource.HEADER');
+    const warning = strings.get('deleteResource.CONFIRM', 'job');
 
     const id = resource.model.get('id');
     const name = $filter('sanitize')(resource.model.get('name'));
@@ -500,34 +636,33 @@ function deleteJob () {
     prompt({ hdr, resourceName, body, actionText, action });
 }
 
-function AtJobDetailsController (
+function JobDetailsController (
     _$http_,
     _$filter_,
     _$state_,
     _error_,
     _prompt_,
     _strings_,
-    _status_,
     _wait_,
-    ParseTypeChange,
-    ParseVariableString,
+    _parse_,
+    { subscribe },
 ) {
     vm = this || {};
 
     $http = _$http_;
     $filter = _$filter_;
     $state = _$state_;
-
     error = _error_;
-    parse = ParseVariableString;
+
+    parse = _parse_;
     prompt = _prompt_;
     strings = _strings_;
-    status = _status_;
     wait = _wait_;
 
-    vm.init = _$scope_ => {
-        $scope = _$scope_;
-        resource = $scope.resource; // eslint-disable-line prefer-destructuring
+    let unsubscribe;
+
+    vm.$onInit = () => {
+        resource = this.resource; // eslint-disable-line prefer-destructuring
 
         vm.status = getStatusDetails();
         vm.started = getStartDetails();
@@ -554,56 +689,54 @@ function AtJobDetailsController (
         vm.skipTags = getSkipTagDetails();
         vm.extraVars = getExtraVarsDetails();
         vm.labels = getLabelDetails();
+        vm.inventoryJobName = getInventoryJobNameDetails();
+        vm.inventorySource = getInventorySourceDetails();
+        vm.overwrite = getOverwriteDetails();
+        vm.overwriteVars = getOverwriteVarsDetails();
+        vm.licenseError = getLicenseErrorDetails();
 
         // Relaunch and Delete Components
-        vm.job = _.get(resource.model, 'model.GET', {});
+        vm.job = angular.copy(_.get(resource.model, 'model.GET', {}));
         vm.canDelete = resource.model.get('summary_fields.user_capabilities.delete');
 
         vm.cancelJob = cancelJob;
         vm.deleteJob = deleteJob;
+        vm.toggleJobTags = toggleJobTags;
+        vm.toggleSkipTags = toggleSkipTags;
         vm.toggleLabels = toggleLabels;
 
-        const observe = (getter, transform, key) => {
-            $scope.$watch(getter, value => { vm[key] = transform(value); });
-        };
+        unsubscribe = subscribe(({ status, started, finished, scm }) => {
+            vm.started = getStartDetails(started);
+            vm.finished = getFinishDetails(finished);
+            vm.projectUpdate = getProjectUpdateDetails(scm.id);
+            vm.projectStatus = getProjectStatusDetails(scm.status);
+            vm.status = getStatusDetails(status);
+            vm.job.status = status;
+        });
+    };
 
-        observe(status.getStarted, getStartDetails, 'started');
-        observe(status.getJobStatus, getStatusDetails, 'status');
-        observe(status.getFinished, getFinishDetails, 'finished');
-        observe(status.getProjectUpdateId, getProjectUpdateDetails, 'projectUpdate');
-        observe(status.getProjectStatus, getProjectStatusDetails, 'projectStatus');
+    vm.$onDestroy = () => {
+        unsubscribe();
     };
 }
 
-AtJobDetailsController.$inject = [
+JobDetailsController.$inject = [
     '$http',
     '$filter',
     '$state',
     'ProcessErrors',
     'Prompt',
     'JobStrings',
-    'JobStatusService',
     'Wait',
-    'ParseTypeChange',
     'ParseVariableString',
+    'JobStatusService',
 ];
 
-function atJobDetailsLink (scope, el, attrs, controllers) {
-    const [atDetailsController] = controllers;
-
-    atDetailsController.init(scope);
-}
-
-function atJobDetails () {
-    return {
-        templateUrl,
-        restrict: 'E',
-        require: ['atJobDetails'],
-        controllerAs: 'vm',
-        link: atJobDetailsLink,
-        controller: AtJobDetailsController,
-        scope: { resource: '=', },
-    };
-}
-
-export default atJobDetails;
+export default {
+    templateUrl,
+    controller: JobDetailsController,
+    controllerAs: 'vm',
+    bindings: {
+        resource: '<'
+    },
+};

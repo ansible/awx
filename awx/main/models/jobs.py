@@ -530,7 +530,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return reverse('api:job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "/#/jobs/playbook/{}".format(self.pk))
 
     @property
     def ansible_virtualenv_path(self):
@@ -1192,7 +1192,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         return reverse('api:system_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "/#/jobs/system/{}".format(self.pk))
 
     @property
     def event_class(self):

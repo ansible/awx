@@ -166,6 +166,7 @@
                 <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" aw-spinner="schedulerPurgeDays" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
                 <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required" translate>A value is required.</div>
                 <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number" translate>This is not a valid number.</div>
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.min" translate>Please input a number greater than 1.</div>
             </div>
             <div class="RepeatFrequencyOptions-label"
                 ng-show="schedulerFrequency.value && schedulerFrequency.value !== 'none'">

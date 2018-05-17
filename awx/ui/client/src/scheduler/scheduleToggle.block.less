@@ -15,8 +15,9 @@
     background-color: @default-link;
     margin-top: 2px;
     cursor: pointer;
-    display: inline-block;
-    min-width: 42px;
+    display: flex;
+    justify-content: flex-end;
+    width: 42px;
 
     &.ScheduleToggle--disabled  {
         cursor: not-allowed;
@@ -32,30 +33,27 @@
 .ScheduleToggle-switch {
     color: @default-link;
     background-color: @default-bg;
-    margin-left: 7px;
     border-left: 1px solid @default-link;
-    margin-right: 0px;
     text-align: center;
     text-transform: uppercase;
     font-size: 11px;
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
-    padding-top: 0px;
+    padding: 0px 5px;
     border-top: 0px;
     border-bottom: 0px;
     border-right: 0px;
-    display: inline-block;
-    height: 22px;
+    height: 16px;
+    line-height: 16px;
 }
 
 .ScheduleToggle.is-on {
     border-color: @default-link;
     background-color: @default-bg;
+    justify-content: flex-start;
 }
 
 .ScheduleToggle-switch.is-on {
-    margin-right: 5px;
-    margin-left: 0px;
     background-color: @default-link;
     color: @default-bg;
     border-left: 0;
@@ -63,6 +61,7 @@
     border-bottom-right-radius: 0px;
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
+    padding: 0 7px;
 }
 
 .ScheduleToggle-switch:hover {

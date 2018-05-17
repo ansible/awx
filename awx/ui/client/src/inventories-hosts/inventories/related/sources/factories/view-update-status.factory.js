@@ -17,7 +17,7 @@ export default
                         // Get the ID from the correct summary field
                         var update_id = (data.summary_fields.current_update) ? data.summary_fields.current_update.id : data.summary_fields.last_update.id;
 
-                        $state.go('jobz', { id: update_id, type: 'inventory' });
+                        $state.go('output', { id: update_id, type: 'inventory' });
                     })
                     .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, null, { hdr: 'Error!',

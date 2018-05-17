@@ -9,6 +9,8 @@ let engine;
 let status;
 
 let vm;
+let streaming;
+let listeners = [];
 
 function JobsIndexController (
     _resource_,
@@ -38,9 +40,8 @@ function JobsIndexController (
     vm.clear = devClear;
 
     // Expand/collapse
-    // vm.toggle = toggle;
-    // vm.expand = expand;
-    vm.isExpanded = true;
+    vm.expanded = false;
+    vm.toggleExpanded = toggleExpanded;
 
     // Panel
     vm.resource = resource;
@@ -53,10 +54,6 @@ function JobsIndexController (
         end: scrollEnd,
         down: scrollPageDown,
         up: scrollPageUp
-    };
-
-    vm.fullscreen = {
-        isFullscreen: false
     };
 
     render.requestAnimationFrame(() => init());
@@ -72,7 +69,6 @@ function init () {
     });
 
     render.init({
-        get: () => resource.model.get(`related.${resource.related}.results`),
         compile: html => $compile(html)($scope),
         isStreamActive: engine.isActive,
     });
@@ -91,35 +87,58 @@ function init () {
             return shift().then(() => append(events, true));
         },
         onStart () {
-            status.resetCounts();
             status.setJobStatus('running');
         },
         onStop () {
+            stopListening();
             status.updateStats();
+            status.dispatch();
         }
     });
 
-    $scope.$on(resource.ws.events, handleJobEvent);
-    $scope.$on(resource.ws.status, handleStatusEvent);
-
-    if (!status.isRunning()) {
-        next();
-    }
+    streaming = false;
+    return next().then(() => startListening());
 }
 
-function handleStatusEvent (scope, data) {
+function stopListening () {
+    listeners.forEach(deregister => deregister());
+    listeners = [];
+}
+
+function startListening () {
+    stopListening();
+    listeners.push($scope.$on(resource.ws.events, (scope, data) => handleJobEvent(data)));
+    listeners.push($scope.$on(resource.ws.status, (scope, data) => handleStatusEvent(data)));
+}
+
+function handleStatusEvent (data) {
     status.pushStatusEvent(data);
 }
 
-function handleJobEvent (scope, data) {
-    engine.pushJobEvent(data);
-
-    status.pushJobEvent(data);
+function handleJobEvent (data) {
+    streaming = streaming || attachToRunningJob();
+    streaming.then(() => {
+        engine.pushJobEvent(data);
+        status.pushJobEvent(data);
+    });
 }
 
-function devClear (pageMode) {
-    init(pageMode);
-    render.clear();
+function attachToRunningJob () {
+    if (!status.state.running) {
+        return $q.resolve();
+    }
+
+    return page.last()
+        .then(events => {
+            if (!events) {
+                return $q.resolve();
+            }
+
+            const minLine = 1 + Math.max(...events.map(event => event.end_line));
+
+            return render.clear()
+                .then(() => engine.setMinLine(minLine));
+        });
 }
 
 function next () {
@@ -253,11 +272,11 @@ function scrollEnd () {
             }
 
             return render.clear()
-                .then(() => append(events))
-                .then(() => {
-                    scroll.setScrollPosition(scroll.getScrollHeight());
-                    scroll.resume();
-                });
+                .then(() => append(events));
+        })
+        .then(() => {
+            scroll.setScrollPosition(scroll.getScrollHeight());
+            scroll.resume();
         });
 }
 
@@ -281,9 +300,13 @@ function scrollIsAtRest (isAtRest) {
     vm.scroll.showBackToTop = !isAtRest;
 }
 
-// function expand () {
-//     vm.toggle(parent, true);
-// }
+function toggleExpanded () {
+    vm.expanded = !vm.expanded;
+}
+
+function devClear () {
+    render.clear().then(() => init());
+}
 
 // function showHostDetails (id) {
 //     jobEvent.request('get', id)
