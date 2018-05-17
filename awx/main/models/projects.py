@@ -324,13 +324,9 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
             ['name', 'description', 'schedule']
         )
 
-    def __init__(self, *args, **kwargs):
-        r = super(Project, self).__init__(*args, **kwargs)
-        self._prior_values_store = self._current_sensitive_fields()
-        return r
-
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
+        pre_save_vals = getattr(self, '_prior_values_store', {})
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
@@ -361,20 +357,12 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
                     self.save(update_fields=update_fields)
         # If we just created a new project with SCM, start the initial update.
         # also update if certain fields have changed
-        relevant_change = False
-        new_values = self._current_sensitive_fields()
-        if hasattr(self, '_prior_values_store') and self._prior_values_store != new_values:
-            relevant_change = True
-        self._prior_values_store = new_values
+        relevant_change = any(
+            pre_save_vals.get(fd_name, None) != self._prior_values_store.get(fd_name, None)
+            for fd_name in self.FIELDS_TRIGGER_UPDATE
+        )
         if (relevant_change or new_instance) and (not skip_update) and self.scm_type:
             self.update()
-
-    def _current_sensitive_fields(self):
-        new_values = {}
-        for attr, val in self.__dict__.items():
-            if attr in Project.FIELDS_TRIGGER_UPDATE:
-                new_values[attr] = val
-        return new_values
 
     def _get_current_status(self):
         if self.scm_type:
