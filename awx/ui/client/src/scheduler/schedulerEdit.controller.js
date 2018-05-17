@@ -207,7 +207,10 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                 "yearlyOtherMonth",
                 "schedulerEnd",
                 "schedulerOccurrenceCount",
-                "schedulerEndDt"
+                "schedulerEndDt",
+                "schedulerEndHour",
+                "schedulerEndMinute",
+                "schedulerEndSecond"
             ], function() {
                 $rootScope.$broadcast("loadSchedulerDetailPane");
             }, true);
