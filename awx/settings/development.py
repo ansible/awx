@@ -9,7 +9,6 @@ import socket
 import copy
 import sys
 import traceback
-import random
 import uuid
 
 # Centos-7 doesn't include the svg mime type
