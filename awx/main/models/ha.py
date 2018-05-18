@@ -3,6 +3,7 @@
 
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -10,12 +11,14 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 
+import six
 from solo.models import SingletonModel
 
 from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.fields import JSONField
+from awx.main.models.base import BaseModel
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
@@ -26,7 +29,16 @@ from awx.main.models.mixins import RelatedJobsMixin
 __all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
 
 
-class Instance(models.Model):
+def validate_queuename(v):
+    # celery and kombu don't play nice with unicode in queue names
+    if v:
+        try:
+            '{}'.format(v.decode('utf-8'))
+        except UnicodeEncodeError:
+            raise ValidationError(_(six.text_type('{} contains unsupported characters')).format(v))
+
+
+class Instance(BaseModel):
     """A model representing an AWX instance running against this database."""
     objects = InstanceManager()
 
@@ -113,9 +125,13 @@ class Instance(models.Model):
         self.save(update_fields=['capacity', 'version', 'modified', 'cpu',
                                  'memory', 'cpu_capacity', 'mem_capacity'])
 
+    def clean_hostname(self):
+        validate_queuename(self.hostname)
+        return self.hostname
+
     
 
-class InstanceGroup(models.Model, RelatedJobsMixin):
+class InstanceGroup(BaseModel, RelatedJobsMixin):
     """A model representing a Queue/Group of AWX Instances."""
     objects = InstanceGroupManager()
 
@@ -166,6 +182,10 @@ class InstanceGroup(models.Model, RelatedJobsMixin):
 
     class Meta:
         app_label = 'main'
+
+    def clean_name(self):
+        validate_queuename(self.name)
+        return self.name
 
 
 class TowerScheduleState(SingletonModel):
