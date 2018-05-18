@@ -1672,14 +1672,14 @@ class RunProjectUpdate(BaseTask):
         start_time = time.time()
         while True:
             try:
-                instance.refresh_from_db()
+                instance.refresh_from_db(fields=['cancel_flag'])
                 if instance.cancel_flag:
                     logger.info(six.text_type("ProjectUpdate({0}) was cancelled".format(instance.pk)))
                     return
                 fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
             except IOError as e:
-                if e.errno != errno.EAGAIN:
+                if e.errno not in (errno.EAGAIN, errno.EACCES):
                     os.close(self.lock_fd)
                     logger.error(six.text_type("I/O error({0}) while trying to aquire lock on file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
                     raise
