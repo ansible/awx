@@ -5,6 +5,7 @@
 from collections import OrderedDict, namedtuple
 import ConfigParser
 import cStringIO
+import errno
 import functools
 import importlib
 import json
@@ -1668,18 +1669,28 @@ class RunProjectUpdate(BaseTask):
             logger.error(six.text_type("I/O error({0}) while trying to open lock file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
             raise
 
-        try:
-            start_time = time.time()
-            fcntl.flock(self.lock_fd, fcntl.LOCK_EX)
-            waiting_time = time.time() - start_time
-            if waiting_time > 1.0:
-                logger.info(six.text_type(
-                    '{} spent {} waiting to acquire lock for local source tree '
-                    'for path {}.').format(instance.log_format, waiting_time, lock_path))
-        except IOError as e:
-            os.close(self.lock_fd)
-            logger.error(six.text_type("I/O error({0}) while trying to aquire lock on file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
-            raise
+        start_time = time.time()
+        while True:
+            try:
+                instance.refresh_from_db(fields=['cancel_flag'])
+                if instance.cancel_flag:
+                    logger.info(six.text_type("ProjectUpdate({0}) was cancelled".format(instance.pk)))
+                    return
+                fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except IOError as e:
+                if e.errno not in (errno.EAGAIN, errno.EACCES):
+                    os.close(self.lock_fd)
+                    logger.error(six.text_type("I/O error({0}) while trying to aquire lock on file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
+                    raise
+                else:
+                    time.sleep(1.0)
+        waiting_time = time.time() - start_time
+
+        if waiting_time > 1.0:
+            logger.info(six.text_type(
+                '{} spent {} waiting to acquire lock for local source tree '
+                'for path {}.').format(instance.log_format, waiting_time, lock_path))
 
     def pre_run_hook(self, instance, **kwargs):
         # re-create root project folder if a natural disaster has destroyed it

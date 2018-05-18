@@ -2171,6 +2171,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_
 
     instance = mock.Mock()
     instance.get_lock_file.return_value = 'this_file_does_not_exist'
+    instance.cancel_flag = False
 
     os_open.return_value = 3
 
@@ -2180,7 +2181,6 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_
     fcntl_flock.side_effect = err
 
     ProjectUpdate = tasks.RunProjectUpdate()
-
     with pytest.raises(IOError, message='dummy message'):
         ProjectUpdate.acquire_lock(instance)
     os_close.assert_called_with(3)
