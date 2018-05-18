@@ -110,6 +110,9 @@ export default [
                             authVm.activeAuthForm = getActiveAuthForm();
                             formTracker.setCurrentAuth(authVm.activeAuthForm);
                             $('#FormModal-dialog').dialog('close');
+                        }).catch(() => {
+                            event.preventDefault();
+                            $('#FormModal-dialog').dialog('close');
                         });
                     },
                     "class": "btn btn-primary",

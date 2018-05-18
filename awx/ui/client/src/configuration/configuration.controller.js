@@ -8,7 +8,7 @@ import defaultStrings from '~assets/default.strings.json';
 export default [
     '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert',
     'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'i18n', 'ParseTypeChange', 'ProcessErrors', 'Store',
-    'Wait', 'configDataResolve', 'ToJSON', 'ConfigService',
+    'Wait', 'configDataResolve', 'ToJSON', 'ConfigService', 'ngToast',
     //Form definitions
     'configurationAzureForm',
     'configurationGithubForm',
@@ -32,7 +32,7 @@ export default [
     function(
         $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert,
         ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, i18n, ParseTypeChange, ProcessErrors, Store,
-        Wait, configDataResolve, ToJSON, ConfigService,
+        Wait, configDataResolve, ToJSON, ConfigService, ngToast,
         //Form definitions
         configurationAzureForm,
         configurationGithubForm,
@@ -241,10 +241,15 @@ export default [
                     }, {
                         label: i18n._("Save changes"),
                         onClick: function() {
-                            vm.formSave();
-                            $scope[formTracker.currentFormName()].$setPristine();
-                            $('#FormModal-dialog').dialog('close');
-                            active(setForm);
+                            vm.formSave().then(() => {
+                                $scope[formTracker.currentFormName()].$setPristine();
+                                $('#FormModal-dialog').dialog('close');
+                                active(setForm);
+                            }).catch(()=> {
+                                event.preventDefault();
+                                $('#FormModal-dialog').dialog('close');
+                            });
+
                         },
                         "class": "btn btn-primary",
                         "id": "formmodal-save-button"
@@ -396,11 +401,12 @@ export default [
                     }
                     loginUpdate();
                 })
-                .catch(function(error) {
-                    ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
+                .catch(function(data) {
+                    ProcessErrors($scope, data.error, data.status, formDefs[formTracker.getCurrent()],
                         {
-                            hdr: i18n._('Error!'),
-                            msg: i18n._('There was an error resetting value. Returned status: ') + error.detail
+                            hdr: `<i class="fa fa-warning ConfigureTower-errorIcon"></i>
+                                <span class="error-color">${ i18n._('Error!')} </span>`,
+                            msg: i18n._('There was an error resetting value. Returned status: ') + data.error.detail
                         });
 
                 })
@@ -495,14 +501,23 @@ export default [
 
                     saveDeferred.resolve(data);
                     $scope[formTracker.currentFormName()].$setPristine();
+                    ngToast.success({
+                        timeout: 2000,
+                        dismissButton: false,
+                        dismissOnTimeout: true,
+                        content: `<i class="fa fa-check-circle
+                            Toast-successIcon"></i>` +
+                                i18n._('Save Complete')
+                    });
                 })
-                .catch(function(error, status) {
-                    ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
+                .catch(function(data) {
+                    ProcessErrors($scope, data.data, data.status, formDefs[formTracker.getCurrent()],
                         {
-                            hdr: i18n._('Error!'),
-                            msg: i18n._('Failed to save settings. Returned status: ') + status
+                            hdr: `<i class="fa fa-warning ConfigureTower-errorIcon"></i>
+                                <span class="error-color">${ i18n._('Error!')} </span>`,
+                            msg: i18n._('Failed to save settings. Returned status: ') + data.status
                         });
-                    saveDeferred.reject(error);
+                    saveDeferred.reject(data);
                 })
                 .finally(function() {
                     Wait('stop');
@@ -528,13 +543,14 @@ export default [
                 .then(function() {
                     //TODO consider updating form values with returned data here
                 })
-                .catch(function(error, status) {
+                .catch(function(data) {
                     //Change back on unsuccessful update
                     $scope[key] = !$scope[key];
-                    ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
+                    ProcessErrors($scope, data.data, data.status, formDefs[formTracker.getCurrent()],
                         {
-                            hdr: i18n._('Error!'),
-                            msg: i18n._('Failed to save toggle settings. Returned status: ') + error.detail
+                            hdr: `<i class="fa fa-warning ConfigureTower-errorIcon"></i>
+                                <span class="error-color">${ i18n._('Error!')} </span>`,
+                            msg: i18n._('Failed to save toggle settings. Returned status: ') + data.status
                         });
                 })
                 .finally(function() {
@@ -577,11 +593,12 @@ export default [
                     });
 
                 })
-                .catch(function(error) {
-                    ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
+                .catch(function(data) {
+                    ProcessErrors($scope, data.error, data.status, formDefs[formTracker.getCurrent()],
                         {
-                            hdr: i18n._('Error!'),
-                            msg: i18n._('There was an error resetting values. Returned status: ') + error.detail
+                            hdr: `<i class="fa fa-warning ConfigureTower-errorIcon"></i>
+                                <span class="error-color">${ i18n._('Error!')} </span>`,
+                            msg: i18n._('There was an error resetting values. Returned status: ') + data.error.detail
                         });
                 })
                 .finally(function() {
