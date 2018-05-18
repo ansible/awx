@@ -290,6 +290,10 @@ class PrimordialModel(CreatedModifiedModel):
             if hasattr(field, 'attname'):
                 if field.attname == 'id':
                     continue
+                elif field.attname.endswith('ptr_id'):
+                    # polymorphic fields should always be non-editable, see:
+                    # https://github.com/django-polymorphic/django-polymorphic/issues/349
+                    continue
                 if getattr(field, 'editable', True):
                     fds.add(field.attname)
         return fds
