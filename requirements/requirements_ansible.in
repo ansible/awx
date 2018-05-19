@@ -21,6 +21,7 @@ backports.ssl-match-hostname==3.5.0.1
 boto==2.47.0    # last which does not break ec2 scripts
 boto3==1.6.2
 ovirt-engine-sdk-python==4.2.4    # minimum set inside Ansible facts module requirements
+pexpect==4.5.0
 python-memcached==1.59    # same as AWX requirement
 psphere==0.5.2
 psutil==5.4.3    # same as AWX requirement
