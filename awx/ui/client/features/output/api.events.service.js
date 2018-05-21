@@ -29,7 +29,7 @@ function JobEventsApiService ($http, $q) {
 
     this.getLastPage = count => Math.ceil(count / this.state.params.page_size);
 
-    this.fetch = () => {
+    this.clearCache = () => {
         delete this.cache;
         delete this.keys;
         delete this.pageSizes;
@@ -37,9 +37,9 @@ function JobEventsApiService ($http, $q) {
         this.cache = {};
         this.keys = [];
         this.pageSizes = {};
-
-        return this.getPage(1).then(() => this);
     };
+
+    this.fetch = () => this.first().then(() => this);
 
     this.getPage = number => {
         if (number < 1 || number > this.state.last) {
@@ -79,11 +79,18 @@ function JobEventsApiService ($http, $q) {
                 return { results, page: number };
             });
 
+        if (number === 1) {
+            this.clearCache();
+        }
+
         this.cache[number] = promise;
         this.keys.push(number);
 
         if (this.keys.length > PAGE_LIMIT) {
-            delete this.cache[this.keys.shift()];
+            const remove = this.keys.shift();
+
+            delete this.cache[remove];
+            delete this.pageSizes[remove];
         }
 
         return promise;
@@ -107,17 +114,22 @@ function JobEventsApiService ($http, $q) {
                 const { results, count } = data;
                 const lastPage = this.getLastPage(count);
 
-                results.reverse();
-                const shifted = results.splice(count % PAGE_SIZE);
+                if (count > PAGE_SIZE) {
+                    results.splice(count % PAGE_SIZE);
+                }
 
-                this.state.results = shifted;
+                results.reverse();
+
+                this.state.results = results;
                 this.state.count = count;
                 this.state.page = lastPage;
                 this.state.next = lastPage;
                 this.state.last = lastPage;
                 this.state.previous = Math.max(1, this.state.page - 1);
 
-                return { results: shifted, page: lastPage };
+                this.clearCache();
+
+                return { results, page: lastPage };
             });
 
         return promise;

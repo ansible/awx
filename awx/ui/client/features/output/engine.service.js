@@ -73,9 +73,8 @@ function JobEventEngine ($q) {
     this.buffer = data => {
         const pageAdded = this.page.addToBuffer(data);
 
-        this.pageCount++;
-
         if (pageAdded) {
+            this.pageCount++;
             this.setBatchFrameCount();
 
             if (this.isPausing()) {
@@ -117,6 +116,9 @@ function JobEventEngine ($q) {
         this.chain = this.chain
             .then(() => {
                 if (!this.isActive()) {
+                    if (data.start_line < (this.lines.min)) {
+                        return $q.resolve();
+                    }
                     this.start();
                 } else if (data.event === JOB_END) {
                     if (this.isPaused()) {
@@ -146,6 +148,10 @@ function JobEventEngine ($q) {
 
     this.renderFrame = events => this.hooks.onEventFrame(events)
         .then(() => {
+            if (this.scroll.isLocked()) {
+                this.scroll.scrollToBottom();
+            }
+
             if (this.isEnding()) {
                 const lastEvents = this.page.emptyBuffer();
 
