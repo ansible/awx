@@ -1407,6 +1407,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         'admin', 'update',
         {'copy': 'organization.project_admin'}
     ]
+    scm_delete_on_next_update = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
 
     class Meta:
         model = Project
