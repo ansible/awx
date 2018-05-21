@@ -35,7 +35,7 @@ function ListTemplatesController(
 
     vm.strings = strings;
     vm.templateTypes = mapChoices(choices);
-    vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_template_id);
+    vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_job_template_id);
     vm.invalidTooltip = {
         popover: {
             text: strings.get('error.INVALID'),
@@ -61,6 +61,16 @@ function ListTemplatesController(
     };
     $scope.template_dataset = Dataset.data;
     $scope.templates = Dataset.data.results;
+
+    $scope.$watch('$state.params', function(newValue, oldValue) {
+        const job_template_id = _.get($state.params, 'job_template_id');
+        const workflow_job_template_id = _.get($state.params, 'workflow_job_template_id');
+
+        if((job_template_id || workflow_job_template_id) && (newValue !== oldValue)) {
+            vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_job_template_id);
+        }
+    }, true);
+
     $scope.$on('updateDataset', (e, dataset) => {
         $scope.template_dataset = dataset;
         $scope.templates = dataset.results;
