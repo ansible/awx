@@ -151,12 +151,11 @@ function JobStatusService (moment, message) {
     };
 
     this.setJobStatus = status => {
-        this.state.status = status;
-
+        const isExpectingStats = this.isExpectingStatsEvent();
         const isIncomplete = _.includes(INCOMPLETE, status);
         const isFinished = _.includes(FINISHED, status);
 
-        if ((this.isExpectingStatsEvent() && isIncomplete) || isFinished) {
+        if ((isExpectingStats && isIncomplete) || (!isExpectingStats && isFinished)) {
             if (this.latestTime) {
                 this.setFinished(this.latestTime);
                 if (!this.state.started && this.state.elapsed) {
@@ -166,6 +165,7 @@ function JobStatusService (moment, message) {
             }
         }
 
+        this.state.status = status;
         this.updateRunningState();
     };
 
