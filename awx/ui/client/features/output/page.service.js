@@ -17,7 +17,7 @@ function JobPageService ($q) {
 
         this.bookmark = {
             pending: false,
-            set: false,
+            set: true,
             cache: [],
             state: {
                 count: 0,

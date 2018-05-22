@@ -50,8 +50,8 @@ function JobsIndexController (
     // Stdout Navigation
     vm.scroll = {
         showBackToTop: false,
-        home: scrollHome,
-        end: scrollEnd,
+        home: scrollFirst,
+        end: scrollLast,
         down: scrollPageDown,
         up: scrollPageUp
     };
@@ -97,7 +97,14 @@ function init () {
     });
 
     streaming = false;
-    return next().then(() => startListening());
+
+    if (status.state.running) {
+        return scrollLast().then(() => startListening());
+    } else if (!status.state.finished) {
+        return scrollFirst().then(() => startListening());
+    }
+
+    return scrollLast();
 }
 
 function stopListening () {
@@ -117,28 +124,11 @@ function handleStatusEvent (data) {
 
 function handleJobEvent (data) {
     streaming = streaming || attachToRunningJob();
+
     streaming.then(() => {
         engine.pushJobEvent(data);
         status.pushJobEvent(data);
     });
-}
-
-function attachToRunningJob () {
-    if (!status.state.running) {
-        return $q.resolve();
-    }
-
-    return page.last()
-        .then(events => {
-            if (!events) {
-                return $q.resolve();
-            }
-
-            const minLine = 1 + Math.max(...events.map(event => event.end_line));
-
-            return render.clear()
-                .then(() => engine.setMinLine(minLine));
-        });
 }
 
 function next () {
@@ -217,8 +207,16 @@ function shift () {
     return render.shift(lines);
 }
 
-function scrollHome () {
-    if (scroll.isPaused()) {
+function scrollFirst () {
+    if (engine.isActive()) {
+        if (engine.isTransitioning()) {
+            return $q.resolve();
+        }
+
+        if (!engine.isPaused()) {
+            engine.pause(true);
+        }
+    } else if (scroll.isPaused()) {
         return $q.resolve();
     }
 
@@ -246,19 +244,57 @@ function scrollHome () {
         });
 }
 
-function scrollEnd () {
+function scrollLast () {
     if (engine.isActive()) {
         if (engine.isTransitioning()) {
             return $q.resolve();
         }
 
         if (engine.isPaused()) {
-            engine.resume();
-        } else {
-            engine.pause();
+            engine.resume(true);
+        }
+    } else if (scroll.isPaused()) {
+        return $q.resolve();
+    }
+
+    scroll.pause();
+
+    return render.clear()
+        .then(() => page.last())
+        .then(events => {
+            if (!events) {
+                return $q.resolve();
+            }
+
+            const minLine = 1 + Math.max(...events.map(event => event.end_line));
+            engine.setMinLine(minLine);
+
+            return append(events);
+        })
+        .then(() => {
+            if (!engine.isActive()) {
+                scroll.resume();
+            }
+            scroll.setScrollPosition(scroll.getScrollHeight());
+        })
+        .then(() => {
+            if (!engine.isActive() && scroll.isMissing()) {
+                return previous();
+            }
+
+            return $q.resolve();
+        });
+}
+
+function attachToRunningJob () {
+    if (engine.isActive()) {
+        if (engine.isTransitioning()) {
+            return $q.resolve();
         }
 
-        return $q.resolve();
+        if (engine.isPaused()) {
+            engine.resume(true);
+        }
     } else if (scroll.isPaused()) {
         return $q.resolve();
     }
@@ -271,12 +307,13 @@ function scrollEnd () {
                 return $q.resolve();
             }
 
-            return render.clear()
-                .then(() => append(events));
+            const minLine = 1 + Math.max(...events.map(event => event.end_line));
+            engine.setMinLine(minLine);
+
+            return append(events);
         })
         .then(() => {
             scroll.setScrollPosition(scroll.getScrollHeight());
-            scroll.resume();
         });
 }
 

@@ -4,7 +4,9 @@ const PLAY_START = 'playbook_on_play_start';
 const TASK_START = 'playbook_on_task_start';
 
 const HOST_STATUS_KEYS = ['dark', 'failures', 'changed', 'ok', 'skipped'];
-const FINISHED = ['successful', 'failed', 'error'];
+const COMPLETE = ['successful', 'failed'];
+const INCOMPLETE = ['canceled', 'error'];
+const FINISHED = COMPLETE.concat(INCOMPLETE);
 
 function JobStatusService (moment, message) {
     this.dispatch = () => message.dispatch('status', this.state);
@@ -151,7 +153,10 @@ function JobStatusService (moment, message) {
     this.setJobStatus = status => {
         this.state.status = status;
 
-        if (!this.isExpectingStatsEvent() && _.includes(FINISHED, status)) {
+        const isIncomplete = _.includes(INCOMPLETE, status);
+        const isFinished = _.includes(FINISHED, status);
+
+        if ((this.isExpectingStatsEvent() && isIncomplete) || isFinished) {
             if (this.latestTime) {
                 this.setFinished(this.latestTime);
                 if (!this.state.started && this.state.elapsed) {
