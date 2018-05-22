@@ -15,20 +15,15 @@ from awx.main.models import (
 )
 
 # other AWX
-from awx.main.utils import model_to_dict
+from awx.main.utils import model_to_dict, model_instance_diff
 from awx.main.utils.common import get_allowed_fields
-from awx.api.serializers import InventorySourceSerializer
+from awx.main.signals import model_serializer_mapping
 
 # Django
 from django.contrib.auth.models import AnonymousUser
 
 # Django-CRUM
 from crum import impersonate
-
-
-model_serializer_mapping = {
-    InventorySource: InventorySourceSerializer
-}
 
 
 class TestImplicitRolesOmitted:
@@ -220,8 +215,24 @@ def test_modified_not_allowed_field(somecloud_type):
     activity_stream_registrar, but did not add its serializer to
     the model->serializer mapping.
     '''
-    from awx.main.signals import model_serializer_mapping
     from awx.main.registrar import activity_stream_registrar
 
     for Model in activity_stream_registrar.models:
         assert 'modified' not in get_allowed_fields(Model(), model_serializer_mapping), Model
+
+
+@pytest.mark.django_db
+def test_survey_spec_create_entry(job_template, survey_spec_factory):
+    start_count = job_template.activitystream_set.count()
+    job_template.survey_spec = survey_spec_factory('foo')
+    job_template.save()
+    assert job_template.activitystream_set.count() == start_count + 1
+
+
+@pytest.mark.django_db
+def test_survey_create_diff(job_template, survey_spec_factory):
+    old = JobTemplate.objects.get(pk=job_template.pk)
+    job_template.survey_spec = survey_spec_factory('foo')
+    before, after = model_instance_diff(old, job_template, model_serializer_mapping)['survey_spec']
+    assert before == '{}'
+    assert json.loads(after) == survey_spec_factory('foo')
