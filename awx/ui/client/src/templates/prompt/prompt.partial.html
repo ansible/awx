@@ -19,7 +19,7 @@
                 </prompt-credential>
             </div>
             <div ng-if="vm.steps.other_prompts.includeStep" ng-show="vm.steps.other_prompts.tab._active">
-                <prompt-other-prompts prompt-data="vm.promptDataClone" other-prompts-form="vm.forms.otherPrompts" is-active-step="vm.steps.other_prompts.tab._active"></prompt-other-prompts>
+                <prompt-other-prompts prompt-data="vm.promptDataClone" other-prompts-form="vm.forms.otherPrompts" is-active-step="vm.steps.other_prompts.tab._active" validate="vm.codeMirror.validate"></prompt-other-prompts>
             </div>
             <div ng-if="vm.steps.survey.includeStep" ng-show="vm.steps.survey.tab._active">
                 <prompt-survey prompt-data="vm.promptDataClone" survey-form="vm.forms.survey"></prompt-survey>

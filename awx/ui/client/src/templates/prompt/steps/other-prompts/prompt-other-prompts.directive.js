@@ -12,7 +12,8 @@ export default [ 'templateUrl',
         scope: {
             promptData: '=',
             otherPromptsForm: '=',
-            isActiveStep: '='
+            isActiveStep: '=',
+            validate: '='
         },
         templateUrl: templateUrl('templates/prompt/steps/other-prompts/prompt-other-prompts'),
         controller: promptOtherPrompts,
