@@ -75,7 +75,7 @@ def test_job_relaunch_on_failed_hosts(post, inventory, project, machine_credenti
         project=project
     )
     jt.credentials.add(machine_credential)
-    job = jt.create_unified_job(_eager_fields={'status': 'failed', 'limit': 'host1,host2,host3'})
+    job = jt.create_unified_job(_eager_fields={'status': 'failed'}, limit='host1,host2,host3')
     job.job_events.create(event='playbook_on_stats')
     job.job_host_summaries.create(host=h1, failed=False, ok=1, changed=0, failures=0, host_name=h1.name)
     job.job_host_summaries.create(host=h2, failed=False, ok=0, changed=1, failures=0, host_name=h2.name)

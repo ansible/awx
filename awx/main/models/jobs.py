@@ -975,6 +975,8 @@ class JobLaunchConfig(LaunchTimeConfig):
                 return True
         for field_name, ask_field_name in ask_mapping.items():
             if field_name in prompts and not getattr(template, ask_field_name):
+                if field_name == 'limit' and self.job and self.job.launch_type == 'callback':
+                    continue  # exception for relaunching callbacks
                 return True
         else:
             return False
