@@ -209,14 +209,17 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     } else {
                         if (data[field]) {
                             scope[field + '_api_error'] = data[field][0];
-                            //scope[form.name + '_form'][field].$setValidity('apiError', false);
                             $('[name="' + field + '"]').addClass('ng-invalid');
+                            $('label[for="' + field + '"] span').addClass('error-color');
                             $('html, body').animate({scrollTop: $('[name="' + field + '"]').offset().top}, 0);
                             fieldErrors = true;
+                            if(form.fields[field].codeMirror){
+                                $(`#cm-${field}-container .CodeMirror`).addClass('error-border');
+                            }
                         }
                     }
                 }
-                if ((!fieldErrors) && defaultMsg) {
+                if (defaultMsg) {
                     Alert(defaultMsg.hdr, defaultMsg.msg);
                 }
             } else if (typeof data === 'object' && data !== null) {
