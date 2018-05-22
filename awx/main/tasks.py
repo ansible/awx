@@ -1889,6 +1889,7 @@ class RunInventoryUpdate(BaseTask):
 
             group_patterns = '[]'
             group_prefix = 'foreman_'
+            want_hostcollections = 'False'
             foreman_opts = dict(inventory_update.source_vars_dict.items())
             foreman_opts.setdefault('ssl_verify', 'False')
             for k, v in foreman_opts.items():
@@ -1896,6 +1897,8 @@ class RunInventoryUpdate(BaseTask):
                     group_patterns = v
                 elif k == 'satellite6_group_prefix' and isinstance(v, basestring):
                     group_prefix = v
+                elif k == 'satellite6_want_hostcollections' and isinstance(v, bool):
+                    want_hostcollections = v
                 else:
                     cp.set(section, k, six.text_type(v))
 
@@ -1908,6 +1911,7 @@ class RunInventoryUpdate(BaseTask):
             cp.add_section(section)
             cp.set(section, 'group_patterns', group_patterns)
             cp.set(section, 'want_facts', True)
+            cp.set(section, 'want_hostcollections', want_hostcollections)
             cp.set(section, 'group_prefix', group_prefix)
 
             section = 'cache'
