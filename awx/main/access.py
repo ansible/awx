@@ -1488,7 +1488,7 @@ class JobAccess(BaseAccess):
         # Obtain prompts used to start original job
         JobLaunchConfig = obj._meta.get_field('launch_config').related_model
         try:
-            config = obj.launch_config
+            config = JobLaunchConfig.objects.prefetch_related('credentials').get(job=obj)
         except JobLaunchConfig.DoesNotExist:
             config = None
 
@@ -1496,6 +1496,12 @@ class JobAccess(BaseAccess):
         if obj.job_template is not None:
             if config is None:
                 prompts_access = False
+            elif config.prompts_dict() == {}:
+                prompts_access = True
+            elif obj.created_by_id != self.user.pk:
+                prompts_access = False
+                if self.save_messages:
+                    self.messages['detail'] = _('Job was launched with prompts provided by another user.')
             else:
                 prompts_access = (
                     JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}) and
@@ -1513,7 +1519,7 @@ class JobAccess(BaseAccess):
 
         # job can be relaunched if user could make an equivalent JT
         ret = org_access and credential_access and project_access
-        if not ret and self.save_messages:
+        if not ret and self.save_messages and not self.messages:
             if not obj.job_template:
                 pretext = _('Job has been orphaned from its job template.')
             elif config is None:
