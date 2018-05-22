@@ -116,7 +116,7 @@ function JobEventEngine ($q) {
         this.chain = this.chain
             .then(() => {
                 if (!this.isActive()) {
-                    if (data.start_line < (this.lines.min)) {
+                    if (data.end_line < (this.lines.min)) {
                         return $q.resolve();
                     }
                     this.start();
