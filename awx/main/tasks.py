@@ -872,10 +872,12 @@ class BaseTask(Task):
         '''
         Run the job/task and capture its output.
         '''
+        '''
         execution_node = settings.CLUSTER_HOST_ID
         if isolated_host is not None:
             execution_node = isolated_host
-        instance = self.update_model(pk, status='running', execution_node=execution_node,
+        '''
+        instance = self.update_model(pk, status='running',
                                      start_args='')  # blank field to remove encrypted passwords
 
         instance.websocket_emit_status("running")

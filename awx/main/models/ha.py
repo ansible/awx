@@ -93,6 +93,10 @@ class Instance(BaseModel):
                                                                     status__in=('running', 'waiting')))
 
     @property
+    def remaining_capacity(self):
+        return self.capacity - self.consumed_capacity
+
+    @property
     def role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "awx"
@@ -186,6 +190,25 @@ class InstanceGroup(BaseModel, RelatedJobsMixin):
     def clean_name(self):
         validate_queuename(self.name)
         return self.name
+
+    def fit_task_to_most_remaining_capacity_instance(self, task):
+        instance_most_capacity = None
+        for i in self.instances.order_by('hostname'):
+            if i.remaining_capacity >= task.task_impact and \
+                    (instance_most_capacity is None or
+                     i.remaining_capacity > instance_most_capacity.remaining_capacity):
+                instance_most_capacity = i
+        return instance_most_capacity
+
+    def find_largest_idle_instance(self):
+        largest_instance = None
+        for i in self.instances.order_by('hostname'):
+            if i.jobs_running == 0:
+                if largest_instance is None:
+                    largest_instance = i
+                elif i.capacity > largest_instance.capacity:
+                    largest_instance = i
+        return largest_instance
 
 
 class TowerScheduleState(SingletonModel):

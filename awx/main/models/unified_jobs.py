@@ -1228,9 +1228,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             raise RuntimeError("Expected celery_task_id to be set on model.")
         kwargs['task_id'] = self.celery_task_id
         task_class = self._get_task_class()
+        args = [self.pk]
         from awx.main.models.ha import InstanceGroup
         ig = InstanceGroup.objects.get(name=queue)
-        args = [self.pk]
         if ig.controller_id:
             if self.supports_isolation():  # case of jobs and ad hoc commands
                 isolated_instance = ig.instances.order_by('-capacity').first()
