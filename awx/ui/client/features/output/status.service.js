@@ -107,10 +107,8 @@ function JobStatusService (moment, message) {
         }
     };
 
-    this.isExpectingStatsEvent = () => (
-        (this.jobType === 'job') ||
-        (this.jobType === 'project_update')) &&
-            (!_.includes(INCOMPLETE, this.state.status));
+    this.isExpectingStatsEvent = () => (this.jobType === 'job') ||
+        (this.jobType === 'project_update');
 
     this.updateStats = () => {
         this.updateHostCounts();
@@ -155,7 +153,10 @@ function JobStatusService (moment, message) {
     this.setJobStatus = status => {
         this.state.status = status;
 
-        if (!this.isExpectingStatsEvent() && _.includes(FINISHED, status)) {
+        const isIncomplete = _.includes(INCOMPLETE, status);
+        const isFinished = _.includes(FINISHED, status);
+
+        if ((this.isExpectingStatsEvent() && isIncomplete) || isFinished) {
             if (this.latestTime) {
                 this.setFinished(this.latestTime);
                 if (!this.state.started && this.state.elapsed) {
