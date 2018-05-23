@@ -10,7 +10,6 @@ import json
 # Django
 from django.conf import settings
 from django.db.models.signals import (
-    post_init,
     post_save,
     pre_delete,
     post_delete,
@@ -200,14 +199,6 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
             l.delete()
 
 
-def set_original_organization(sender, instance, **kwargs):
-    '''set_original_organization is used to set the original, or
-    pre-save organization, so we can later determine if the organization
-    field is dirty.
-    '''
-    instance.__original_org_id = instance.organization_id
-
-
 def save_related_job_templates(sender, instance, **kwargs):
     '''save_related_job_templates loops through all of the
     job templates that use an Inventory or Project that have had their
@@ -217,7 +208,7 @@ def save_related_job_templates(sender, instance, **kwargs):
     if sender not in (Project, Inventory):
         raise ValueError('This signal callback is only intended for use with Project or Inventory')
 
-    if instance.__original_org_id != instance.organization_id:
+    if instance._prior_values_store.get('organization_id') != instance.organization_id:
         jtq = JobTemplate.objects.filter(**{sender.__name__.lower(): instance})
         for jt in jtq:
             update_role_parentage_for_instance(jt)
@@ -240,8 +231,6 @@ def connect_computed_field_signals():
 
 connect_computed_field_signals()
 
-post_init.connect(set_original_organization, sender=Project)
-post_init.connect(set_original_organization, sender=Inventory)
 post_save.connect(save_related_job_templates, sender=Project)
 post_save.connect(save_related_job_templates, sender=Inventory)
 post_save.connect(emit_job_event_detail, sender=JobEvent)

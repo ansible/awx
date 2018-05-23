@@ -254,9 +254,13 @@ class PrimordialModel(CreatedModifiedModel):
 
     tags = TaggableManager(blank=True)
 
+    def __init__(self, *args, **kwargs):
+        r = super(PrimordialModel, self).__init__(*args, **kwargs)
+        self._prior_values_store = self._get_fields_snapshot()
+        return r
+
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
-        fields_are_specified = bool(update_fields)
         user = get_current_user()
         if user and not user.id:
             user = None
@@ -264,15 +268,43 @@ class PrimordialModel(CreatedModifiedModel):
             self.created_by = user
             if 'created_by' not in update_fields:
                 update_fields.append('created_by')
-        # Update modified_by if not called with update_fields, or if any
-        # editable fields are present in update_fields
-        if (
-                (not fields_are_specified) or
-                any(getattr(self._meta.get_field(name), 'editable', True) for name in update_fields)):
+        # Update modified_by if any editable fields have changed
+        new_values = self._get_fields_snapshot()
+        if (not self.pk and not self.modified_by) or self.has_user_edits(new_values):
             self.modified_by = user
             if 'modified_by' not in update_fields:
                 update_fields.append('modified_by')
         super(PrimordialModel, self).save(*args, **kwargs)
+        self._prior_values_store = new_values
+
+    def has_user_edits(self, new_values):
+        return any(
+            new_values.get(fd_name, None) != self._prior_values_store.get(fd_name, None)
+            for fd_name in new_values.keys()
+        )
+
+    @classmethod
+    def _get_editable_fields(cls):
+        fds = set([])
+        for field in cls._meta.concrete_fields:
+            if hasattr(field, 'attname'):
+                if field.attname == 'id':
+                    continue
+                elif field.attname.endswith('ptr_id'):
+                    # polymorphic fields should always be non-editable, see:
+                    # https://github.com/django-polymorphic/django-polymorphic/issues/349
+                    continue
+                if getattr(field, 'editable', True):
+                    fds.add(field.attname)
+        return fds
+
+    def _get_fields_snapshot(self):
+        new_values = {}
+        editable_set = self._get_editable_fields()
+        for attr, val in self.__dict__.items():
+            if attr in editable_set:
+                new_values[attr] = val
+        return new_values
 
     def clean_description(self):
         # Description should always be empty string, never null.
