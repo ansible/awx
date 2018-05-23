@@ -209,9 +209,10 @@ function($injector, $stateExtender, $log, i18n) {
                             FormDefinition: [params.form, function(definition) {
                                 return definition;
                             }],
-                            resourceData: ['FormDefinition', 'Rest', '$stateParams', 'GetBasePath',
-                                function(FormDefinition, Rest, $stateParams, GetBasePath) {
+                            resourceData: ['FormDefinition', 'Rest', '$stateParams', 'GetBasePath', '$q', 'ProcessErrors',
+                                function(FormDefinition, Rest, $stateParams, GetBasePath, $q, ProcessErrors) {
                                     let form, path;
+                                    let deferred = $q.defer();
                                     form = typeof(FormDefinition) === 'function' ?
                                         FormDefinition() : FormDefinition;
                                     if (GetBasePath(form.basePath) === undefined && GetBasePath(form.stateTree) === undefined ){
@@ -221,7 +222,18 @@ function($injector, $stateExtender, $log, i18n) {
                                         path = (GetBasePath(form.basePath) || GetBasePath(form.stateTree) || form.basePath) + $stateParams[`${form.name}_id`];
                                     }
                                     Rest.setUrl(path);
-                                    return Rest.get();
+                                    Rest.get()
+                                        .then((response) => deferred.resolve(response))
+                                        .catch(({ data, status }) => {
+                                            ProcessErrors(null, data, status, null,
+                                                {
+                                                    hdr: i18n._('Error!'),
+                                                    msg: i18n._('Unable to get resource: ') + status
+                                                }
+                                            );
+                                            deferred.reject();
+                                        });
+                                    return deferred.promise;
                                 }
                             ]
                         },
