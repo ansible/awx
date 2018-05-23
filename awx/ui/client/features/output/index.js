@@ -186,9 +186,10 @@ function getWebSocketResource (type) {
     return { name, key };
 }
 
-function JobsRun ($stateRegistry, strings) {
+function JobsRun ($stateRegistry, $filter, strings) {
     const parent = 'jobs';
     const ncyBreadcrumb = { parent, label: strings.get('state.BREADCRUMB_DEFAULT') };
+    const sanitize = $filter('sanitize');
 
     const state = {
         url: '/:type/:id?job_event_search',
@@ -231,7 +232,7 @@ function JobsRun ($stateRegistry, strings) {
             breadcrumbLabel: [
                 'resource',
                 ({ model }) => {
-                    ncyBreadcrumb.label = `${model.get('id')} - ${model.get('name')}`;
+                    ncyBreadcrumb.label = `${model.get('id')} - ${sanitize(model.get('name'))}`;
                 }
             ],
         },
@@ -240,7 +241,7 @@ function JobsRun ($stateRegistry, strings) {
     $stateRegistry.register(state);
 }
 
-JobsRun.$inject = ['$stateRegistry', 'JobStrings'];
+JobsRun.$inject = ['$stateRegistry', '$filter', 'JobStrings'];
 
 angular
     .module(MODULE_NAME, [
