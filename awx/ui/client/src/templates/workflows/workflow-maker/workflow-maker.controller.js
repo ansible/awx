@@ -613,7 +613,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                     if (!_.isEmpty($scope.nodeBeingEdited.promptData)) {
                         $scope.promptData = _.cloneDeep($scope.nodeBeingEdited.promptData);
-                    } else if ($scope.nodeBeingEdited.unifiedJobTemplate){
+                    } else if (
+                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'job_template' ||
+                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === 'job_template'
+                    ) {
                         let promises = [jobTemplate.optionsLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id), jobTemplate.getLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id)];
 
                         if (_.has($scope, 'nodeBeingEdited.originalNodeObj.related.credentials')) {
