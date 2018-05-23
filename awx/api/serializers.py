@@ -4831,6 +4831,9 @@ class ActivityStreamSerializer(BaseSerializer):
                                            username = obj.actor.username,
                                            first_name = obj.actor.first_name,
                                            last_name = obj.actor.last_name)
+        elif obj.deleted_actor:
+            summary_fields['actor'] = obj.deleted_actor.copy()
+            summary_fields['actor']['id'] = None
         if obj.setting:
             summary_fields['setting'] = [obj.setting]
         return summary_fields
