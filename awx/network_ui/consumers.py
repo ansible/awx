@@ -3,6 +3,7 @@ import channels
 from channels.auth import channel_session_user, channel_session_user_from_http
 from awx.network_ui.models import Topology, Device, Link, Client, Interface
 from awx.network_ui.models import TopologyInventory
+from awx.main.models.inventory import Inventory
 import urlparse
 from django.db.models import Q
 from collections import defaultdict
@@ -217,6 +218,18 @@ def ws_connect(message):
 
     data = urlparse.parse_qs(message.content['query_string'])
     inventory_id = parse_inventory_id(data)
+    try:
+        inventory = Inventory.objects.get(id=inventory_id)
+    except Inventory.DoesNotExist:
+        logger.error("User {} attempted connecting inventory_id {} that does not exist.".format(
+            message.user.id, inventory_id)
+        )
+        message.reply_channel.send({"close": True})
+    if message.user not in inventory.admin_role:
+        logger.warn("User {} attempted connecting to inventory_id {} without permission.".format(
+            message.user.id, inventory_id
+        ))
+        message.reply_channel.send({"close": True})
     topology_ids = list(TopologyInventory.objects.filter(inventory_id=inventory_id).values_list('pk', flat=True))
     topology_id = None
     if len(topology_ids) > 0:
