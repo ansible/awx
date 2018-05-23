@@ -18,7 +18,7 @@
                 collection="collection"
                 search-tags="searchTags">
             </smart-search>
-            <div class="at-List-toolbarAction">
+            <div class="at-List-toolbarAction" ng-show="canAdd">
                 <button
                     type="button"
                     ui-sref="applications.add"
@@ -51,13 +51,9 @@
                     </at-row-item>
                 </div>
                 <div class="at-Row-actions">
-                    <!-- TODO: delete application should be based on user capabilities but that's not
-                    implemented in the api yet -->
-                    <at-row-action icon="fa-trash" ng-click="vm.deleteApplication(application)">
-                    </at-row-action>
-                    <!-- <at-row-action icon="fa-trash" ng-click="vm.deleteApplication(application)"
+                    <at-row-action icon="fa-trash" ng-click="vm.deleteApplication(application)"
                         ng-show="application.summary_fields.user_capabilities.delete">
-                    </at-row-action> -->
+                    </at-row-action>
                 </div>
             </at-row>
         </at-list>
