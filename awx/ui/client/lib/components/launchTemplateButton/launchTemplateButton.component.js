@@ -73,12 +73,13 @@ function atLaunchTemplateCtrl (
         } else if (vm.template.type === 'workflow_job_template') {
             const selectedWorkflowJobTemplate = workflowTemplate.create();
             const preLaunchPromises = [
+                selectedWorkflowJobTemplate.request('get', vm.template.id),
                 selectedWorkflowJobTemplate.getLaunch(vm.template.id),
                 selectedWorkflowJobTemplate.optionsLaunch(vm.template.id),
             ];
 
             Promise.all(preLaunchPromises)
-                .then(([launchData, launchOptions]) => {
+                .then(([wfjtData, launchData, launchOptions]) => {
                     if (selectedWorkflowJobTemplate.canLaunchWithoutPrompt()) {
                         selectedWorkflowJobTemplate
                             .postLaunch({ id: vm.template.id })
@@ -86,6 +87,9 @@ function atLaunchTemplateCtrl (
                                 $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
                             });
                     } else {
+                        launchData.data.defaults = {
+                            extra_vars: wfjtData.data.extra_vars
+                        };
                         const promptData = {
                             launchConf: launchData.data,
                             launchOptions: launchOptions.data,
