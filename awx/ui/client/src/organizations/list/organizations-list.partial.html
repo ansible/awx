@@ -24,15 +24,6 @@
                     </button>
                 </div>
             </div>
-            <!-- smart-search directive bindings:
-                djangoModel: '@', // one-way, interpolated
-                basePath: '@',
-                iterator: '@',
-                dataset: '=', // two-way
-                list: '=',
-                collection: '=',
-                searchTags: '=',
-            -->
             <smart-search
                 django-model="organizations"
                 base-path="organizations"
@@ -99,17 +90,11 @@
                     </div>
                 </div>
             </div>
-            <!-- paginate directive bindings
-                collection: '=', // two-way
-                dataset: '=',
-                iterator: '@', // one-way, interpolated
-                basePath: '@'
-            -->
             <paginate
                     base-path="organizations"
                     iterator="organization"
                     dataset="organization_dataset"
-                    collection="organization">
+                    collection="organizations">
             </paginate>
         </div>
     </div>
