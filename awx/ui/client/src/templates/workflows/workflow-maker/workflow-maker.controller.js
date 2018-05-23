@@ -252,8 +252,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                          }
                     }
 
-                    if ((params.node.originalParentId && params.parentId !== params.node.originalParentId) || params.node.originalEdge !== params.node.edgeType) {//beep
-
+                    if (params.node.originalParentId && (params.parentId !== params.node.originalParentId || params.node.originalEdge !== params.node.edgeType)) {
                         let parentIsDeleted = false;
 
                         _.forEach($scope.treeData.data.deletedNodes, function(deletedNode) {
@@ -973,6 +972,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
         };
 
         $scope.templateManuallySelected = function(selectedTemplate) {
+
+            if (surveyQuestionWatcher) {
+                surveyQuestionWatcher();
+            }
 
             if (selectedTemplate.type === "job_template") {
                 let jobTemplate = new JobTemplate();
