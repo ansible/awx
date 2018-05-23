@@ -5,7 +5,7 @@
  *************************************************/
 
 export default
-    ['ParseTypeChange', 'CreateSelect2', 'TemplatesStrings', '$timeout', function(ParseTypeChange, CreateSelect2, strings, $timeout) {
+    ['ParseTypeChange', 'CreateSelect2', 'TemplatesStrings', '$timeout', 'ToJSON', function(ParseTypeChange, CreateSelect2, strings, $timeout, ToJSON) {
             const vm = this;
 
             vm.strings = strings;
@@ -79,7 +79,14 @@ export default
                         codemirrorExtraVars();
                     }
                 });
+
+                function validate () {
+                    return ToJSON(scope.parseType, scope.extraVariables, true);
+                }
+                scope.validate = validate;
             };
+
+
 
             vm.toggleDiff = () => {
                 scope.promptData.prompts.diffMode.value = !scope.promptData.prompts.diffMode.value;

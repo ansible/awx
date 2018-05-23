@@ -158,6 +158,13 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                                 order: order
                             };
                             order++;
+
+                            let codemirror = () =>  {
+                                return {
+                                    validate:{}
+                                };
+                            };
+                            vm.codeMirror = new codemirror();
                         }
                         if(vm.promptDataClone.launchConf.survey_enabled) {
                             vm.steps.survey.includeStep = true;
@@ -189,6 +196,16 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
         };
 
         vm.next = (currentTab) => {
+            if(_.has(vm.steps.other_prompts, 'tab._active') && vm.steps.other_prompts.tab._active === true){
+                try {
+                    if (vm.codeMirror.validate) {
+                        vm.codeMirror.validate();
+                    }
+                } catch (err) {
+                    event.preventDefault();
+                    return;
+                }
+            }
             Object.keys(vm.steps).forEach(step => {
                 if(vm.steps[step].tab) {
                     if(vm.steps[step].tab.order === currentTab.order) {
