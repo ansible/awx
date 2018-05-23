@@ -295,6 +295,11 @@ export default [
                 $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                 workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
             }
+            if (form.fields[fld].type === 'checkbox_group') {
+                for(var j=0; j<form.fields[fld].fields.length; j++) {
+                    $scope[form.fields[fld].fields[j].name] = workflowJobTemplateData[form.fields[fld].fields[j].name];
+                }
+            }
         }
 
         if(workflowJobTemplateData.organization) {
