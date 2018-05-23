@@ -1,8 +1,8 @@
 const templateUrl = require('~features/output/search.partial.html');
 
 const searchReloadOptions = { inherit: false, location: 'replace' };
-const searchKeyExamples = ['id:>1', 'task:set', 'created:>=2000-01-01'];
-const searchKeyFields = ['changed', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
+const searchKeyExamples = ['host_name:localhost', 'task:set', 'created:>=2000-01-01'];
+const searchKeyFields = ['changed', 'created', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
 
 const PLACEHOLDER_RUNNING = 'CANNOT SEARCH RUNNING JOB';
 const PLACEHOLDER_DEFAULT = 'SEARCH';
@@ -52,11 +52,16 @@ function reloadQueryset (queryset, rejection = REJECT_DEFAULT) {
         });
 }
 
+const isFilterable = term => {
+    const field = term[0].split('.')[0].replace(/^-/, '');
+    return (searchKeyFields.indexOf(field) > -1);
+};
+
 function removeSearchTag (index) {
     const searchTerm = vm.tags[index];
 
     const currentQueryset = getCurrentQueryset();
-    const modifiedQueryset = qs.removeTermsFromQueryset(currentQueryset, searchTerm);
+    const modifiedQueryset = qs.removeTermsFromQueryset(currentQueryset, searchTerm, isFilterable);
 
     reloadQueryset(modifiedQueryset);
 }
@@ -64,7 +69,7 @@ function removeSearchTag (index) {
 function submitSearch () {
     const currentQueryset = getCurrentQueryset();
 
-    const searchInputQueryset = qs.getSearchInputQueryset(vm.value);
+    const searchInputQueryset = qs.getSearchInputQueryset(vm.value, isFilterable);
     const modifiedQueryset = qs.mergeQueryset(currentQueryset, searchInputQueryset);
 
     reloadQueryset(modifiedQueryset, REJECT_INVALID);
