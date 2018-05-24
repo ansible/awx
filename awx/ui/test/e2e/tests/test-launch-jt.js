@@ -72,103 +72,78 @@ module.exports = {
     'expected jt launch with no prompts to navigate to job details': client => {
         const templates = client.page.templates();
         templates.load();
-
         templates.waitForElementVisible('input[class*="SmartSearch-input"]');
-
         templates.section.list.section.search
             .sendKeys('@input', `id:${templateReferences.noPrompt.id}`);
         templates.section.list.section.search.getValue('@input', function(result) {
             client.assert.equal(result.value, `id:${templateReferences.noPrompt.id}`);
         });
+        client.pause(1000).waitForElementNotVisible('div.spinny');
+        templates.waitForElementVisible('i[class$="search"]');
         templates.section.list.section.search.click('i[class$="search"]');
-
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
-
+        templates.expect.element('.at-Panel-headingTitleBadge').text.equal('1');
         templates.expect.element(`#templates_list .at-Row[id="row-${templateReferences.noPrompt.id}"]`).visible;
         templates.expect.element('i[class*="icon-launch"]').visible;
         templates.expect.element('i[class*="icon-launch"]').enabled;
-
         templates.click('i[class*="icon-launch"]');
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
-
-        client.waitForElementVisible('at-job-details');
+        client.waitForElementVisible('at-job-details', 10000);
     },
     'expected jt launch with prompts but no changes to navigate to job details': client => {
         const templates = client.page.templates();
-
         templates.load();
         templates.waitForElementVisible('input[class*="SmartSearch-input"]');
-
         templates.section.list.section.search
             .sendKeys('@input', `id:${templateReferences.promptNoPass.id}`);
-
         templates.section.list.section.search.getValue('@input', function(result) {
             client.assert.equal(result.value, `id:${templateReferences.promptNoPass.id}`);
         });
-
+        client.pause(1000).waitForElementNotVisible('div.spinny');
+        templates.waitForElementVisible('i[class$="search"]');
         templates.section.list.section.search.click('i[class$="search"]');
-
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
-
+        templates.expect.element('.at-Panel-headingTitleBadge').text.equal('1');
         templates.expect.element(`#templates_list .at-Row[id="row-${templateReferences.promptNoPass.id}"]`).visible;
         templates.expect.element('i[class*="icon-launch"]').visible;
         templates.expect.element('i[class*="icon-launch"]').enabled;
-
         templates.click('i[class*="icon-launch"]');
-
         templates.waitForElementVisible('.Prompt-previewTag');
-
         templates.expect.element('#prompt_inventory_tab').visible;
         templates.expect.element('#prompt_inventory_tab').to.have.attribute('class').which.contains('at-Tab--active');
         templates.expect.element('#prompt_inventory_next').visible;
         templates.expect.element('#prompt_inventory_next').enabled;
-
         templates.click('#prompt_inventory_next');
-
         templates.waitForElementVisible('#prompt_credential_step');
-
         templates.expect.element('#prompt_credential_tab').visible;
         templates.expect.element('#prompt_credential_tab').to.have.attribute('class').which.contains('at-Tab--active');
         templates.expect.element('#prompt_credential_next').visible;
         templates.expect.element('#prompt_credential_next').enabled;
-
         templates.click('#prompt_credential_next');
-
         templates.waitForElementVisible('#prompt_other_prompts_step');
-
         templates.expect.element('#prompt_other_prompts_tab').visible;
         templates.expect.element('#prompt_other_prompts_tab').to.have.attribute('class').which.contains('at-Tab--active');
         templates.expect.element('#prompt_other_prompts_next').visible;
         templates.expect.element('#prompt_other_prompts_next').enabled;
-
         templates.click('#prompt_other_prompts_next');
-
         templates.waitForElementVisible('#prompt_survey_step');
-
         templates.expect.element('#prompt_survey_tab').visible;
         templates.expect.element('#prompt_survey_tab').to.have.attribute('class').which.contains('at-Tab--active');
         templates.expect.element('#prompt_survey_next').visible;
         templates.expect.element('#prompt_survey_next').enabled;
-
         templates.click('#prompt_survey_next');
-
         templates.waitForElementVisible('#prompt_preview_step');
-
         templates.expect.element('#prompt_preview_tab').visible;
         templates.expect.element('#prompt_preview_tab').to.have.attribute('class').which.contains('at-Tab--active');
         templates.expect.element('#prompt_finish').visible;
         templates.expect.element('#prompt_finish').enabled;
-
         templates.click('#prompt_finish');
-
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
-
-        client.waitForElementVisible('at-job-details');
-
+        client.waitForElementVisible('at-job-details', 10000);
         client.end();
     }
 };
