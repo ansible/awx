@@ -43,7 +43,7 @@ urls = [
         OAuth2TokenActivityStreamList.as_view(),
         name='o_auth2_token_activity_stream_list'
     ),
-    url(r'^personal_tokens/$', OAuth2PersonalTokenList.as_view(), name='o_auth2_personal_token_list'),    
+    url(r'^personal_tokens/$', OAuth2PersonalTokenList.as_view(), name='user_personal_token_list'),    
 ]
 
 __all__ = ['urls']

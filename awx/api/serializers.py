@@ -948,7 +948,7 @@ class UserSerializer(BaseSerializer):
             access_list            = self.reverse('api:user_access_list',                 kwargs={'pk': obj.pk}),
             tokens                 = self.reverse('api:o_auth2_token_list',         kwargs={'pk': obj.pk}),
             authorized_tokens      = self.reverse('api:user_authorized_token_list', kwargs={'pk': obj.pk}),
-            personal_tokens        = self.reverse('api:o_auth2_personal_token_list',   kwargs={'pk': obj.pk}),
+            personal_tokens        = self.reverse('api:user_personal_token_list',   kwargs={'pk': obj.pk}),
             
         ))
         return res
@@ -1013,10 +1013,30 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
         except ObjectDoesNotExist:
             return ''
             
-    def get_modified(self, obj):
-        if obj is None:
+    def get_refresh_token(self, obj):
+        request = self.context.get('request', None)
+        try:
+            if not obj.refresh_token:
+                return None
+            elif request.method == 'POST':
+                return getattr(obj.refresh_token, 'token', '')
+            else:
+                return TOKEN_CENSOR
+        except ObjectDoesNotExist:
             return None
-        return obj.updated
+
+    def get_related(self, obj):
+        ret = super(BaseOAuth2TokenSerializer, self).get_related(obj)
+        if obj.user:
+            ret['user'] = self.reverse('api:user_detail', kwargs={'pk': obj.user.pk})
+        if obj.application:
+            ret['application'] = self.reverse(
+                'api:o_auth2_application_detail', kwargs={'pk': obj.application.pk}
+            )
+        ret['activity_stream'] = self.reverse(
+            'api:o_auth2_token_activity_stream_list', kwargs={'pk': obj.pk}
+        )
+        return ret
 
     def _is_valid_scope(self, value):
         if not value or (not isinstance(value, six.string_types)):
@@ -1038,16 +1058,13 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
             
 
 class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):  
-        
-    def get_refresh_token(self, obj):
-        request = self.context.get('request', None)
-        try:
-            if request.method == 'POST':
-                return getattr(obj.refresh_token, 'token', '')
-            else:
-                return TOKEN_CENSOR
-        except ObjectDoesNotExist:
-            return ''
+
+    class Meta:
+        extra_kwargs = {
+            'scope': {'allow_null': False, 'required': True},
+            'user': {'allow_null': False, 'required': True},
+            'application': {'allow_null': False, 'required': True}
+        }
 
     def create(self, validated_data):
         current_user = self.context['request'].user
@@ -1069,36 +1086,6 @@ class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
 
 
 class OAuth2TokenSerializer(BaseOAuth2TokenSerializer):
-
-    def get_modified(self, obj):
-        if obj is None:
-            return None
-        return obj.updated
-
-    def get_related(self, obj):
-        ret = super(OAuth2TokenSerializer, self).get_related(obj)
-        if obj.user:
-            ret['user'] = self.reverse('api:user_detail', kwargs={'pk': obj.user.pk})
-        if obj.application:
-            ret['application'] = self.reverse(
-                'api:o_auth2_application_detail', kwargs={'pk': obj.application.pk}
-            )
-        ret['activity_stream'] = self.reverse(
-            'api:o_auth2_token_activity_stream_list', kwargs={'pk': obj.pk}
-        )
-        return ret
-
-    def get_refresh_token(self, obj):
-        request = self.context.get('request', None)
-        try:
-            if request.method == 'POST':
-                return getattr(obj.refresh_token, 'token', '')
-            elif not obj.refresh_token:
-                return None
-            else:
-                return TOKEN_CENSOR
-        except ObjectDoesNotExist:
-            return None
 
     def create(self, validated_data):
         current_user = self.context['request'].user
@@ -1127,55 +1114,10 @@ class OAuth2TokenDetailSerializer(OAuth2TokenSerializer):
         read_only_fields = ('*', 'user', 'application')       
 
 
-class OAuth2AuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
-        
-    def get_refresh_token(self, obj):
-        request = self.context.get('request', None)
-        try:
-            if request.method == 'POST':
-                return getattr(obj.refresh_token, 'token', '')
-            else:
-                return TOKEN_CENSOR
-        except ObjectDoesNotExist:
-            return ''
-            
-    def create(self, validated_data):
-        current_user = self.context['request'].user
-        validated_data['user'] = current_user
-        validated_data['token'] = generate_token()
-        validated_data['expires'] = now() + timedelta(
-            seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
-        )
-        obj = super(OAuth2AuthorizedTokenSerializer, self).create(validated_data)
-        if obj.application and obj.application.user:
-            obj.user = obj.application.user
-        obj.save()
-        if obj.application is not None:
-            RefreshToken.objects.create(
-                user=current_user,
-                token=generate_token(),
-                application=obj.application,
-                access_token=obj
-            )
-        return obj
-
-
-class OAuth2PersonalTokenSerializer(BaseOAuth2TokenSerializer):
+class UserPersonalTokenSerializer(BaseOAuth2TokenSerializer):
 
     class Meta:
         read_only_fields = ('user', 'token', 'expires', 'application')
-
-    def get_related(self, obj):
-        ret = super(OAuth2PersonalTokenSerializer, self).get_related(obj)
-        if obj.user:
-            ret['user'] = self.reverse('api:user_detail', kwargs={'pk': obj.user.pk})
-        ret['activity_stream'] = self.reverse(
-            'api:o_auth2_token_activity_stream_list', kwargs={'pk': obj.pk}
-        )
-        return ret
-
-    def get_refresh_token(self, obj):
-            return None
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
@@ -1184,7 +1126,7 @@ class OAuth2PersonalTokenSerializer(BaseOAuth2TokenSerializer):
             seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
         validated_data['application'] = None
-        obj = super(OAuth2PersonalTokenSerializer, self).create(validated_data)
+        obj = super(UserPersonalTokenSerializer, self).create(validated_data)
         obj.save()
         return obj
     
@@ -1217,18 +1159,6 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         if obj is None:
             return None
         return obj.updated
-
-    def get_related(self, obj):
-        ret = super(OAuth2ApplicationSerializer, self).get_related(obj)
-        if obj.user:
-            ret['user'] = self.reverse('api:user_detail', kwargs={'pk': obj.user.pk})
-        ret['tokens'] = self.reverse(
-            'api:o_auth2_application_token_list', kwargs={'pk': obj.pk}
-        )
-        ret['activity_stream'] = self.reverse(
-            'api:o_auth2_application_activity_stream_list', kwargs={'pk': obj.pk}
-        )
-        return ret
 
     def _summary_field_tokens(self, obj):
         token_list = [{'id': x.pk, 'token': TOKEN_CENSOR, 'scope': x.scope} for x in obj.oauth2accesstoken_set.all()[:10]]
