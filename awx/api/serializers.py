@@ -991,6 +991,18 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
     token = serializers.SerializerMethodField()
     ALLOWED_SCOPES = ['read', 'write']
 
+    class Meta:
+        model = OAuth2AccessToken
+        fields = (
+            '*', '-name', 'description', 'user', 'token', 'refresh_token',
+            'application', 'expires', 'scope',
+        )
+        read_only_fields = ('user', 'token', 'expires', 'refresh_token')
+        extra_kwargs = {
+            'scope': {'allow_null': False, 'required': True},
+            'user': {'allow_null': False, 'required': True}
+        }
+
     def get_token(self, obj):
         request = self.context.get('request', None)
         try:
@@ -1000,6 +1012,11 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
                 return TOKEN_CENSOR
         except ObjectDoesNotExist:
             return ''
+            
+    def get_modified(self, obj):
+        if obj is None:
+            return None
+        return obj.updated
 
     def _is_valid_scope(self, value):
         if not value or (not isinstance(value, six.string_types)):
@@ -1020,15 +1037,7 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
         return value
             
 
-class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
-
-    class Meta:
-        model = OAuth2AccessToken
-        fields = (
-            '*', '-name', 'description', 'user', 'token', 'refresh_token',
-            'expires', 'scope', 'application'
-        )
-        read_only_fields = ('user', 'token', 'expires')   
+class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):  
         
     def get_refresh_token(self, obj):
         request = self.context.get('request', None)
@@ -1061,18 +1070,6 @@ class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
 
 class OAuth2TokenSerializer(BaseOAuth2TokenSerializer):
 
-    class Meta:
-        model = OAuth2AccessToken
-        fields = (
-            '*', '-name', 'description', 'user', 'token', 'refresh_token',
-            'application', 'expires', 'scope',
-        )
-        read_only_fields = ('user', 'token', 'expires')
-        extra_kwargs = {
-            'scope': {'allow_null': False, 'required': True},
-            'user': {'allow_null': False, 'required': True}
-        }
-
     def get_modified(self, obj):
         if obj is None:
             return None
@@ -1096,10 +1093,12 @@ class OAuth2TokenSerializer(BaseOAuth2TokenSerializer):
         try:
             if request.method == 'POST':
                 return getattr(obj.refresh_token, 'token', '')
+            elif not obj.refresh_token:
+                return None
             else:
                 return TOKEN_CENSOR
         except ObjectDoesNotExist:
-            return ''
+            return None
 
     def create(self, validated_data):
         current_user = self.context['request'].user
@@ -1129,17 +1128,6 @@ class OAuth2TokenDetailSerializer(OAuth2TokenSerializer):
 
 
 class OAuth2AuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
-
-    class Meta:
-        model = OAuth2AccessToken
-        fields = (
-            '*', '-name', 'description', '-user', 'token', 'refresh_token',
-            'expires', 'scope', 'application',
-        )
-        read_only_fields = ('user', 'token', 'expires')
-        extra_kwargs = {
-            'scope': {'allow_null': False, 'required': True}
-        } 
         
     def get_refresh_token(self, obj):
         request = self.context.get('request', None)
@@ -1175,20 +1163,7 @@ class OAuth2AuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
 class OAuth2PersonalTokenSerializer(BaseOAuth2TokenSerializer):
 
     class Meta:
-        model = OAuth2AccessToken
-        fields = (
-            '*', '-name', 'description', 'user', 'token', 'refresh_token',
-            'application', 'expires', 'scope',
-        )
         read_only_fields = ('user', 'token', 'expires', 'application')
-        extra_kwargs = {
-            'scope': {'allow_null': False, 'required': True}
-        }
-
-    def get_modified(self, obj):
-        if obj is None:
-            return None
-        return obj.updated
 
     def get_related(self, obj):
         ret = super(OAuth2PersonalTokenSerializer, self).get_related(obj)
@@ -1237,7 +1212,6 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         if obj.client_type == 'public':
             ret.pop('client_secret', None)
         return ret
-        
         
     def get_modified(self, obj):
         if obj is None:
