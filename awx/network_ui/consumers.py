@@ -225,11 +225,13 @@ def ws_connect(message):
             message.user.id, inventory_id)
         )
         message.reply_channel.send({"close": True})
+        return
     if message.user not in inventory.admin_role:
         logger.warn("User {} attempted connecting to inventory_id {} without permission.".format(
             message.user.id, inventory_id
         ))
         message.reply_channel.send({"close": True})
+        return
     topology_ids = list(TopologyInventory.objects.filter(inventory_id=inventory_id).values_list('pk', flat=True))
     topology_id = None
     if len(topology_ids) > 0:
