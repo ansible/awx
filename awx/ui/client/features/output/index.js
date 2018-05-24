@@ -1,7 +1,7 @@
 import atLibModels from '~models';
 import atLibComponents from '~components';
 
-import Strings from '~features/output/jobs.strings';
+import Strings from '~features/output/output.strings';
 import Controller from '~features/output/index.controller';
 import PageService from '~features/output/page.service';
 import RenderService from '~features/output/render.service';
@@ -241,7 +241,7 @@ function JobsRun ($stateRegistry, $filter, strings) {
     $stateRegistry.register(state);
 }
 
-JobsRun.$inject = ['$stateRegistry', '$filter', 'JobStrings'];
+JobsRun.$inject = ['$stateRegistry', '$filter', 'OutputStrings'];
 
 angular
     .module(MODULE_NAME, [
@@ -249,7 +249,7 @@ angular
         atLibComponents,
         HostEvent
     ])
-    .service('JobStrings', Strings)
+    .service('OutputStrings', Strings)
     .service('JobPageService', PageService)
     .service('JobScrollService', ScrollService)
     .service('JobRenderService', RenderService)

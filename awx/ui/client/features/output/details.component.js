@@ -27,7 +27,7 @@ function getStatusDetails (jobStatus) {
 
     const choices = mapChoices(resource.model.options('actions.GET.status.choices'));
 
-    const label = 'Status';
+    const label = strings.get('labels.STATUS');
     const icon = `fa icon-job-${unmapped}`;
     const value = choices[unmapped];
 
@@ -36,15 +36,14 @@ function getStatusDetails (jobStatus) {
 
 function getStartDetails (started) {
     const unfiltered = started || resource.model.get('started');
-
-    const label = 'Started';
+    const label = strings.get('labels.STARTED');
 
     let value;
 
     if (unfiltered) {
         value = $filter('longDate')(unfiltered);
     } else {
-        value = 'Not Started';
+        value = strings.get('details.NOT_STARTED');
     }
 
     return { label, value };
@@ -52,15 +51,14 @@ function getStartDetails (started) {
 
 function getFinishDetails (finished) {
     const unfiltered = finished || resource.model.get('finished');
-
-    const label = 'Finished';
+    const label = strings.get('labels.FINISHED');
 
     let value;
 
     if (unfiltered) {
         value = $filter('longDate')(unfiltered);
     } else {
-        value = 'Not Finished';
+        value = strings.get('details.NOT_FINISHED');
     }
 
     return { label, value };
@@ -68,7 +66,7 @@ function getFinishDetails (finished) {
 
 function getModuleArgDetails () {
     const value = resource.model.get('module_args');
-    const label = 'Module Args';
+    const label = strings.get('labels.MODULE_ARGS');
 
     if (!value) {
         return null;
@@ -86,7 +84,7 @@ function getJobTypeDetails () {
 
     const choices = mapChoices(resource.model.options('actions.GET.job_type.choices'));
 
-    const label = 'Job Type';
+    const label = strings.get('labels.JOB_TYPE');
     const value = choices[unmapped];
 
     return { label, value };
@@ -101,7 +99,7 @@ function getVerbosityDetails () {
 
     const choices = mapChoices(resource.model.options('actions.GET.verbosity.choices'));
 
-    const label = 'Verbosity';
+    const label = strings.get('labels.VERBOSITY');
     const value = choices[verbosity];
 
     return { label, value };
@@ -115,7 +113,7 @@ function getSourceWorkflowJobDetails () {
     }
 
     const link = `/#/workflows/${sourceWorkflowJob.id}`;
-    const tooltip = strings.get('resourceTooltips.SOURCE_WORKFLOW_JOB');
+    const tooltip = strings.get('tooltips.SOURCE_WORKFLOW_JOB');
 
     return { link, tooltip };
 }
@@ -127,10 +125,10 @@ function getJobTemplateDetails () {
         return null;
     }
 
-    const label = 'Job Template';
+    const label = strings.get('labels.JOB_TEMPLATE');
     const link = `/#/templates/job_template/${jobTemplate.id}`;
     const value = $filter('sanitize')(jobTemplate.name);
-    const tooltip = strings.get('resourceTooltips.JOB_TEMPLATE');
+    const tooltip = strings.get('tooltips.JOB_TEMPLATE');
 
     return { label, link, value, tooltip };
 }
@@ -172,8 +170,8 @@ function getInventoryJobNameDetails () {
     const name = resource.model.get('name');
     const id = resource.model.get('id');
 
-    const label = 'Name';
-    const tooltip = strings.get('resourceTooltips.INVENTORY');
+    const label = strings.get('labels.NAME');
+    const tooltip = strings.get('tooltips.INVENTORY');
     const value = `${id} - ${$filter('sanitize')(name)}`;
     const link = `/#/inventories/inventory/${inventoryId}`;
 
@@ -188,7 +186,7 @@ function getInventorySourceDetails () {
     const { source } = resource.model.get('summary_fields.inventory_source');
     const choices = mapChoices(resource.model.options('actions.GET.source.choices'));
 
-    const label = 'Source';
+    const label = strings.get('labels.SOURCE');
     const value = choices[source];
 
     return { label, value };
@@ -199,7 +197,7 @@ function getOverwriteDetails () {
         return null;
     }
 
-    const label = 'Overwrite';
+    const label = strings.get('labels.OVERWRITE');
     const value = resource.model.get('overwrite');
 
     return { label, value };
@@ -210,7 +208,7 @@ function getOverwriteVarsDetails () {
         return null;
     }
 
-    const label = 'Overwrite Vars';
+    const label = strings.get('labels.OVERWRITE_VARS');
     const value = resource.model.get('overwrite_vars');
 
     return { label, value };
@@ -221,7 +219,7 @@ function getLicenseErrorDetails () {
         return null;
     }
 
-    const label = 'License Error';
+    const label = strings.get('labels.LICENSE_ERROR');
     const value = resource.model.get('license_error');
 
     return { label, value };
@@ -230,7 +228,6 @@ function getLicenseErrorDetails () {
 function getLaunchedByDetails () {
     const createdBy = resource.model.get('summary_fields.created_by');
     const jobTemplate = resource.model.get('summary_fields.job_template');
-
     const relatedSchedule = resource.model.get('related.schedule');
     const schedule = resource.model.get('summary_fields.schedule');
 
@@ -238,18 +235,18 @@ function getLaunchedByDetails () {
         return null;
     }
 
-    const label = 'Launched By';
+    const label = strings.get('labels.LAUNCHED_BY');
 
     let link;
     let tooltip;
     let value;
 
     if (createdBy) {
-        tooltip = strings.get('resourceTooltips.USER');
+        tooltip = strings.get('tooltips.USER');
         link = `/#/users/${createdBy.id}`;
         value = $filter('sanitize')(createdBy.username);
     } else if (relatedSchedule && jobTemplate) {
-        tooltip = strings.get('resourceTooltips.SCHEDULE');
+        tooltip = strings.get('tooltips.SCHEDULE');
         link = `/#/templates/job_template/${jobTemplate.id}/schedules/${schedule.id}`;
         value = $filter('sanitize')(schedule.name);
     } else {
@@ -268,8 +265,8 @@ function getInventoryDetails () {
         return null;
     }
 
-    const label = 'Inventory';
-    const tooltip = strings.get('resourceTooltips.INVENTORY');
+    const label = strings.get('labels.INVENTORY');
+    const tooltip = strings.get('tooltips.INVENTORY');
     const value = $filter('sanitize')(inventory.name);
 
     let link;
@@ -290,10 +287,10 @@ function getProjectDetails () {
         return null;
     }
 
-    const label = 'Project';
+    const label = strings.get('labels.PROJECT');
     const link = `/#/projects/${project.id}`;
     const value = $filter('sanitize')(project.name);
-    const tooltip = strings.get('resourceTooltips.PROJECT');
+    const tooltip = strings.get('tooltips.PROJECT');
 
     return { label, link, value, tooltip };
 }
@@ -318,13 +315,13 @@ function getProjectUpdateDetails (updateId) {
     }
 
     const link = `/#/jobs/project/${jobId}`;
-    const tooltip = strings.get('resourceTooltips.PROJECT_UPDATE');
+    const tooltip = strings.get('tooltips.PROJECT_UPDATE');
 
     return { link, tooltip };
 }
 
 function getSCMRevisionDetails () {
-    const label = 'Revision';
+    const label = strings.get('labels.SCM_REVISION');
     const value = resource.model.get('scm_revision');
 
     if (!value) {
@@ -335,7 +332,7 @@ function getSCMRevisionDetails () {
 }
 
 function getPlaybookDetails () {
-    const label = 'Playbook';
+    const label = strings.get('labels.PLAYBOOK');
     const value = resource.model.get('playbook');
 
     if (!value) {
@@ -353,7 +350,7 @@ function getJobExplanationDetails () {
     }
 
     const limit = 150;
-    const label = 'Explanation';
+    const label = strings.get('labels.JOB_EXPLANATION');
 
     let more = explanation;
 
@@ -380,7 +377,7 @@ function getResultTracebackDetails () {
     }
 
     const limit = 150;
-    const label = 'Error Details';
+    const label = strings.get('labels.RESULT_TRACEBACK');
 
     const more = traceback;
     const less = $filter('limitTo')(more, limit);
@@ -398,25 +395,25 @@ function getCredentialDetails () {
         return null;
     }
 
-    let label = 'Credential';
+    let label = strings.get('labels.CREDENTIAL');
 
     if (resource.type === 'playbook') {
-        label = 'Machine Credential';
+        label = strings.get('labels.MACHINE_CREDENTIAL');
     }
 
     if (resource.type === 'inventory') {
-        label = 'Source Credential';
+        label = strings.get('labels.SOURCE_CREDENTIAL');
     }
 
     const link = `/#/credentials/${credential.id}`;
-    const tooltip = strings.get('resourceTooltips.CREDENTIAL');
+    const tooltip = strings.get('tooltips.CREDENTIAL');
     const value = $filter('sanitize')(credential.name);
 
     return { label, link, tooltip, value };
 }
 
 function getForkDetails () {
-    const label = 'Forks';
+    const label = strings.get('labels.FORKS');
     const value = resource.model.get('forks');
 
     if (!value) {
@@ -427,7 +424,7 @@ function getForkDetails () {
 }
 
 function getLimitDetails () {
-    const label = 'Limit';
+    const label = strings.get('labels.LIMIT');
     const value = resource.model.get('limit');
 
     if (!value) {
@@ -444,13 +441,13 @@ function getInstanceGroupDetails () {
         return null;
     }
 
-    const label = 'Instance Group';
+    const label = strings.get('labels.INSTANCE_GROUP');
     const value = $filter('sanitize')(instanceGroup.name);
 
     let isolated = null;
 
     if (instanceGroup.controller_id) {
-        isolated = 'Isolated';
+        isolated = strings.get('details.ISOLATED');
     }
 
     return { label, value, isolated };
@@ -471,7 +468,7 @@ function getJobTagDetails () {
         return null;
     }
 
-    const label = 'Job Tags';
+    const label = strings.get('labels.JOB_TAGS');
     const more = false;
 
     const value = jobTags.map($filter('sanitize'));
@@ -494,8 +491,8 @@ function getSkipTagDetails () {
         return null;
     }
 
-    const label = 'Skip Tags';
     const more = false;
+    const label = strings.get('labels.SKIP_TAGS');
     const value = skipTags.map($filter('sanitize'));
 
     return { label, more, value };
@@ -508,8 +505,8 @@ function getExtraVarsDetails () {
         return null;
     }
 
-    const label = 'Extra Variables';
-    const tooltip = 'Read-only view of extra variables added to the job template.';
+    const label = strings.get('labels.EXTRA_VARS');
+    const tooltip = strings.get('tooltips.EXTRA_VARS');
     const value = parse(extraVars);
     const disabled = true;
 
@@ -523,7 +520,7 @@ function getLabelDetails () {
         return null;
     }
 
-    const label = 'Labels';
+    const label = strings.get('labels.LABELS');
     const more = false;
 
     const value = jobLabels.map(({ name }) => name).map($filter('sanitize'));
@@ -663,6 +660,7 @@ function JobDetailsController (
 
     vm.$onInit = () => {
         resource = this.resource; // eslint-disable-line prefer-destructuring
+        vm.strings = strings;
 
         vm.status = getStatusDetails();
         vm.started = getStartDetails();
@@ -726,7 +724,7 @@ JobDetailsController.$inject = [
     '$state',
     'ProcessErrors',
     'Prompt',
-    'JobStrings',
+    'OutputStrings',
     'Wait',
     'ParseVariableString',
     'JobStatusService',

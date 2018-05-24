@@ -154,6 +154,11 @@ function JobStatusService (moment, message) {
         const isExpectingStats = this.isExpectingStatsEvent();
         const isIncomplete = _.includes(INCOMPLETE, status);
         const isFinished = _.includes(FINISHED, status);
+        const isAlreadyFinished = _.includes(FINISHED, this.state.status);
+
+        if (isAlreadyFinished) {
+            return;
+        }
 
         if ((isExpectingStats && isIncomplete) || (!isExpectingStats && isFinished)) {
             if (this.latestTime) {
