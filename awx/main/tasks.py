@@ -175,6 +175,10 @@ def apply_cluster_membership_policies(self):
         # Finally process instance policy percentages
         for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
             for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+                if i.obj.id in g.instances:
+                    # If the instance is already _in_ the group, it was
+                    # probably applied earlier via a minimum policy
+                    continue
                 if 100 * float(len(g.instances)) / len(actual_instances) >= g.obj.policy_instance_percentage:
                     break
                 logger.info(six.text_type("Policy percentage, adding Instance {} to Group {}").format(i.obj.hostname, g.obj.name))
