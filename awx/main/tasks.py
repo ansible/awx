@@ -2360,6 +2360,7 @@ def deep_copy_model_obj(
 ):
     logger.info(six.text_type('Deep copy {} from {} to {}.').format(model_name, obj_pk, new_obj_pk))
     from awx.api.generics import CopyAPIView
+    from awx.main.signals import disable_activity_stream
     model = getattr(importlib.import_module(model_module), model_name, None)
     if model is None:
         return
@@ -2370,7 +2371,7 @@ def deep_copy_model_obj(
     except ObjectDoesNotExist:
         logger.warning("Object or user no longer exists.")
         return
-    with transaction.atomic(), ignore_inventory_computed_fields():
+    with transaction.atomic(), ignore_inventory_computed_fields(), disable_activity_stream():
         copy_mapping = {}
         for sub_obj_setup in sub_obj_list:
             sub_model = getattr(importlib.import_module(sub_obj_setup[0]),
