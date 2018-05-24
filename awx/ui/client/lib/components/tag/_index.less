@@ -1,0 +1,53 @@
+.TagComponentWrapper {
+    padding: 5px;
+}
+.TagComponent {
+    color: white;
+    background: #337AB7;
+    border-radius: @at-space;
+    font-size: 12px;
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    min-height: @at-space-4x;
+    overflow: hidden;
+    max-width: 200px;
+}
+
+.TagComponent-name {
+    margin: @at-space @at-space-2x;
+    align-self: center;
+    word-break: break-word;
+    text-transform: lowercase;
+}
+
+.TagComponent--cloud {
+    &:before {
+        content: '\f0c2';
+        color: white;
+        height: 20px;
+        width: @at-space-4x;
+    }
+}
+
+.TagComponent--key {
+    &:before {
+        content: '\f084';
+        color: white;
+        height: @at-space-4x;
+        width: @at-space-4x;
+    }
+}
+
+.TagComponent-button {
+    padding: 0 @at-space;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.TagComponent-button:hover {
+    cursor: pointer;
+    border-color: @default-err;
+    background-color: @default-err;
+}

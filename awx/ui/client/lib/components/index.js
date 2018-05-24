@@ -32,6 +32,7 @@ import sideNav from '~components/layout/side-nav.directive';
 import sideNavItem from '~components/layout/side-nav-item.directive';
 import tab from '~components/tabs/tab.directive';
 import tabGroup from '~components/tabs/group.directive';
+import tag from '~components/tag/tag.directive';
 import topNavItem from '~components/layout/top-nav-item.directive';
 import truncate from '~components/truncate/truncate.directive';
 import atCodeMirror from '~components/code-mirror';
@@ -78,6 +79,7 @@ angular
     .directive('atSideNavItem', sideNavItem)
     .directive('atTab', tab)
     .directive('atTabGroup', tabGroup)
+    .directive('atTag', tag)
     .directive('atTopNavItem', topNavItem)
     .directive('atTruncate', truncate)
     .service('BaseInputController', BaseInputController)
