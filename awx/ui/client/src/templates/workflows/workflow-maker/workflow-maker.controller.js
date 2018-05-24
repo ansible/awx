@@ -6,10 +6,10 @@
 
 export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
     '$state', 'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
-    'Empty', 'PromptService', 'Rest', 'TemplatesStrings',
+    'Empty', 'PromptService', 'Rest', 'TemplatesStrings', '$timeout',
     function($scope, WorkflowService, GetBasePath, TemplatesService,
     $state, ProcessErrors, CreateSelect2, $q, JobTemplate,
-    Empty, PromptService, Rest, TemplatesStrings) {
+    Empty, PromptService, Rest, TemplatesStrings, $timeout) {
 
         let promptWatcher, surveyQuestionWatcher;
 
@@ -808,7 +808,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             break;
                     }
 
-                    updateEdgeDropdownOptions(edgeDropdownOptions);
+                    $timeout(updateEdgeDropdownOptions(edgeDropdownOptions));
 
                     $scope.$broadcast("refreshWorkflowChart");
                 };
