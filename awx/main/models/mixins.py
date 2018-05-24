@@ -436,7 +436,8 @@ class CustomVirtualEnvMixin(models.Model):
         blank=True,
         null=True,
         default=None,
-        max_length=100
+        max_length=100,
+        help_text=_('Local absolute file path containing a custom Python virtualenv to use')
     )
 
     def clean_custom_virtualenv(self):
