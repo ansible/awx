@@ -519,12 +519,7 @@ class UserAccess(BaseAccess):
     def user_membership_roles(self, u):
         return Role.objects.filter(
             content_type=ContentType.objects.get_for_model(Organization),
-            role_field__in=[
-                'admin_role', 'member_role',
-                'execute_role', 'project_admin_role', 'inventory_admin_role',
-                'credential_admin_role', 'workflow_admin_role',
-                'notification_admin_role'
-            ],
+            role_field__in=Organization.member_role.field.parent_role + ['member_role'],
             members=u
         )
 
@@ -2531,7 +2526,8 @@ class RoleAccess(BaseAccess):
         # administrators of that Organization the ability to edit that user. To prevent
         # unwanted escalations lets ensure that the Organization administartor has the abilty
         # to admin the user being added to the role.
-        if isinstance(obj.content_object, Organization) and obj.role_field in ['member_role', 'admin_role']:
+        if (isinstance(obj.content_object, Organization) and
+                obj.role_field in (Organization.member_role.field.parent_role + ['member_role'])):
             if not UserAccess(self.user).can_admin(sub_obj, None, allow_orphans=True):
                 return False
 
