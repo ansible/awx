@@ -1639,7 +1639,7 @@ class OrganizationApplicationList(SubListCreateAPIView):
     swagger_topic = 'Authentication'
 
 
-class OAuth2PersonalTokenList(SubListCreateAPIView):
+class UserPersonalTokenList(SubListCreateAPIView):
     
     view_name = _("OAuth2 Personal Access Tokens")
     
