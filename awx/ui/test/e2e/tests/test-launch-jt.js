@@ -77,10 +77,9 @@ module.exports = {
 
         templates.section.list.section.search
             .sendKeys('@input', `id:${templateReferences.noPrompt.id}`);
-        // work in progress trying to check search input for correct text
-        // templates.section.list.section.search.getText('@input', function(result) {
-        //     client.assert.equal(result.value, `id:${templateReferences.noPrompt.id}`);
-        // });
+        templates.section.list.section.search.getValue('@input', function(result) {
+            client.assert.equal(result.value, `id:${templateReferences.noPrompt.id}`);
+        });
         templates.section.list.section.search.click('i[class$="search"]');
 
         templates.waitForElementVisible('div.spinny');
@@ -100,10 +99,15 @@ module.exports = {
         const templates = client.page.templates();
 
         templates.load();
-        templates.waitForElementVisible('input[class*="SmartSearch-input"]', 5000);
+        templates.waitForElementVisible('input[class*="SmartSearch-input"]');
 
         templates.section.list.section.search
             .sendKeys('@input', `id:${templateReferences.promptNoPass.id}`);
+
+        templates.section.list.section.search.getValue('@input', function(result) {
+            client.assert.equal(result.value, `id:${templateReferences.promptNoPass.id}`);
+        });
+
         templates.section.list.section.search.click('i[class$="search"]');
 
         templates.waitForElementVisible('div.spinny');
