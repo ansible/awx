@@ -17,14 +17,14 @@ module.exports = {
         Promise.all(resources)
             .then(([project, inventory]) => {
                 const noPromptPromise = getOrCreate('/job_templates/', {
-                    name: `test-launch-jt-no-prompts`,
+                    name: 'test-launch-jt-no-prompts',
                     inventory: inventory.id,
                     project: project.id,
                     playbook: 'hello_world.yml',
                 });
 
                 const promptNoPassPromise = getOrCreate('/job_templates/', {
-                    name: `test-launch-jt-prompts-no-pass`,
+                    name: 'test-launch-jt-prompts-no-pass',
                     inventory: inventory.id,
                     ask_inventory_on_launch: true,
                     project: project.id,
@@ -40,28 +40,28 @@ module.exports = {
                 });
 
                 Promise.all([noPromptPromise, promptNoPassPromise])
-                .then(([noPrompt, promptNoPass]) => {
-                    templateReferences = {noPrompt, promptNoPass};
-                    let surveyPost = post(promptNoPass.related.survey_spec, {
-                        name: "",
-                        description: "",
-			spec: [{
-				question_name: "Foo",
-				question_description: "",
-				required: true,
-				type: "text",
-				variable: "foo",
-				min: 0,
-				max: 1024,
-				default: "bar",
-				choices: "",
-				new_question: true
-			}]
+                    .then(([noPrompt, promptNoPass]) => {
+                        templateReferences = { noPrompt, promptNoPass };
+                        const surveyPost = post(promptNoPass.related.survey_spec, {
+                            name: '',
+                            description: '',
+                            spec: [{
+                                question_name: 'Foo',
+                                question_description: '',
+                                required: true,
+                                type: 'text',
+                                variable: 'foo',
+                                min: 0,
+                                max: 1024,
+                                default: 'bar',
+                                choices: '',
+                                new_question: true
+                            }]
+                        });
+                        const surveyPatch = patch(promptNoPass.url, { survey_enabled: true });
+                        Promise.all([surveyPost, surveyPatch])
+                            .then(done);
                     });
-                    let surveyPatch = patch(promptNoPass.url, { survey_enabled: true });
-                    Promise.all([surveyPost, surveyPatch])
-                    .then(done);
-                });
             });
     },
     'login to awx': client => {
@@ -75,7 +75,7 @@ module.exports = {
         templates.waitForElementVisible('input[class*="SmartSearch-input"]');
         templates.section.list.section.search
             .sendKeys('@input', `id:${templateReferences.noPrompt.id}`);
-        templates.section.list.section.search.getValue('@input', function(result) {
+        templates.section.list.section.search.getValue('@input', (result) => {
             client.assert.equal(result.value, `id:${templateReferences.noPrompt.id}`);
         });
         client.pause(1000).waitForElementNotVisible('div.spinny');
@@ -98,7 +98,7 @@ module.exports = {
         templates.waitForElementVisible('input[class*="SmartSearch-input"]');
         templates.section.list.section.search
             .sendKeys('@input', `id:${templateReferences.promptNoPass.id}`);
-        templates.section.list.section.search.getValue('@input', function(result) {
+        templates.section.list.section.search.getValue('@input', (result) => {
             client.assert.equal(result.value, `id:${templateReferences.promptNoPass.id}`);
         });
         client.pause(1000).waitForElementNotVisible('div.spinny');
