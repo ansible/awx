@@ -12,7 +12,7 @@
     <span ng-show="!vm.hosts" class="at-Panel-headingTitleBadge">...</span>
     <span ng-show="vm.hosts" class="at-Panel-headingTitleBadge">{{ vm.hosts }}</span>
 
-    <span class="at-Panel-label">{{ vm.strings.get('stats.ELAPSED') }}</span>
+    <span class="at-Panel-label">{{:: vm.strings.get('stats.ELAPSED') }}</span>
     <span ng-show="!vm.elapsed" class="at-Panel-headingTitleBadge">...</span>
     <span ng-show="vm.elapsed" class="at-Panel-headingTitleBadge">
         {{ vm.elapsed * 1000 | duration: "hh:mm:ss" }}
@@ -20,7 +20,7 @@
 
     <a ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
         <button class="btn at-Input-button at-u-noBorder"
-            aw-tool-tip="{{ vm.strings.get('tooltips.DOWNLOAD_OUTPUT') }}"
+            aw-tool-tip="{{:: vm.strings.get('tooltips.DOWNLOAD_OUTPUT') }}"
             data-placement="top">
             <i class="fa fa-download"></i>
         </button>
