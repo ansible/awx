@@ -15,7 +15,7 @@ from django.conf import LazySettings
 from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured
-from django.db import ProgrammingError, OperationalError
+from django.db import ProgrammingError, OperationalError, transaction, connection
 from django.utils.functional import cached_property
 
 # Django REST Framework
@@ -61,24 +61,66 @@ __all__ = ['SettingsWrapper', 'get_settings_to_cache', 'SETTING_CACHE_NOTSET']
 
 
 @contextlib.contextmanager
-def _log_database_error():
+def _ctit_db_wrapper(trans_safe=False):
+    '''
+    Wrapper to avoid undesired actions by Django ORM when managing settings
+    if only getting a setting, can use trans_safe=True, which will avoid
+    throwing errors if the prior context was a broken transaction.
+    Any database errors will be logged, but exception will be suppressed.
+    '''
+    rollback_set = None
+    is_atomic = None
     try:
+        if trans_safe:
+            is_atomic = connection.in_atomic_block
+            if is_atomic:
+                rollback_set = transaction.get_rollback()
+                if rollback_set:
+                    logger.debug('Obtaining database settings in spite of broken transaction.')
+                    transaction.set_rollback(False)
         yield
     except (ProgrammingError, OperationalError):
         if 'migrate' in sys.argv and get_tower_migration_version() < '310':
             logger.info('Using default settings until version 3.1 migration.')
         else:
-            # Somewhat ugly - craming the full stack trace into the log message
-            # the available exc_info does not give information about the real caller
-            # TODO: replace in favor of stack_info kwarg in python 3
-            sio = StringIO.StringIO()
-            traceback.print_stack(file=sio)
-            sinfo = sio.getvalue()
-            sio.close()
-            sinfo = sinfo.strip('\n')
-            logger.warning('Database settings are not available, using defaults, logged from:\n{}'.format(sinfo))
+            # We want the _full_ traceback with the context
+            # First we get the current call stack, which constitutes the "top",
+            # it has the context up to the point where the context manager is used
+            top_stack = StringIO.StringIO()
+            traceback.print_stack(file=top_stack)
+            top_lines = top_stack.getvalue().strip('\n').split('\n')
+            top_stack.close()
+            # Get "bottom" stack from the local error that happened
+            # inside of the "with" block this wraps
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            bottom_stack = StringIO.StringIO()
+            traceback.print_tb(exc_traceback, file=bottom_stack)
+            bottom_lines = bottom_stack.getvalue().strip('\n').split('\n')
+            # Glue together top and bottom where overlap is found
+            bottom_cutoff = 0
+            for i, line in enumerate(bottom_lines):
+                if line in top_lines:
+                    # start of overlapping section, take overlap from bottom
+                    top_lines = top_lines[:top_lines.index(line)]
+                    bottom_cutoff = i
+                    break
+            bottom_lines = bottom_lines[bottom_cutoff:]
+            tb_lines = top_lines + bottom_lines
+
+            tb_string = '\n'.join(
+                ['Traceback (most recent call last):'] +
+                tb_lines +
+                ['{}: {}'.format(exc_type.__name__, str(exc_value))]
+            )
+            bottom_stack.close()
+            # Log the combined stack
+            if trans_safe:
+                logger.warning('Database settings are not available, using defaults, error:\n{}'.format(tb_string))
+            else:
+                logger.error('Error modifying something related to database settings.\n{}'.format(tb_string))
     finally:
-        pass
+        if trans_safe and is_atomic and rollback_set:
+            transaction.set_rollback(rollback_set)
 
 
 def filter_sensitive(registry, key, value):
@@ -398,7 +440,7 @@ class SettingsWrapper(UserSettingsHolder):
     def __getattr__(self, name):
         value = empty
         if name in self.all_supported_settings:
-            with _log_database_error():
+            with _ctit_db_wrapper(trans_safe=True):
                 value = self._get_local(name)
         if value is not empty:
             return value
@@ -430,7 +472,7 @@ class SettingsWrapper(UserSettingsHolder):
 
     def __setattr__(self, name, value):
         if name in self.all_supported_settings:
-            with _log_database_error():
+            with _ctit_db_wrapper():
                 self._set_local(name, value)
         else:
             setattr(self.default_settings, name, value)
@@ -446,14 +488,14 @@ class SettingsWrapper(UserSettingsHolder):
 
     def __delattr__(self, name):
         if name in self.all_supported_settings:
-            with _log_database_error():
+            with _ctit_db_wrapper():
                 self._del_local(name)
         else:
             delattr(self.default_settings, name)
 
     def __dir__(self):
         keys = []
-        with _log_database_error():
+        with _ctit_db_wrapper(trans_safe=True):
             for setting in Setting.objects.filter(
                     key__in=self.all_supported_settings, user__isnull=True):
                 # Skip returning settings that have been overridden but are
@@ -470,7 +512,7 @@ class SettingsWrapper(UserSettingsHolder):
     def is_overridden(self, setting):
         set_locally = False
         if setting in self.all_supported_settings:
-            with _log_database_error():
+            with _ctit_db_wrapper(trans_safe=True):
                 set_locally = Setting.objects.filter(key=setting, user__isnull=True).exists()
         set_on_default = getattr(self.default_settings, 'is_overridden', lambda s: False)(setting)
         return (set_locally or set_on_default)
