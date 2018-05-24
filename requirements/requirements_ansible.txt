@@ -68,9 +68,11 @@ os-service-types==1.2.0   # via openstacksdk
 ovirt-engine-sdk-python==4.2.4
 packaging==17.1           # via deprecation
 paramiko==2.4.0           # via azure-cli-core
+pexpect==4.5.0
 pbr==3.1.1                # via keystoneauth1, openstacksdk, os-service-types, shade, stevedore
 psphere==0.5.2
 psutil==5.4.3
+ptyprocess==0.5.2         # via pexpect
 pyasn1==0.4.2             # via paramiko
 pycparser==2.18           # via cffi
 pycurl==7.43.0.1          # via ovirt-engine-sdk-python
