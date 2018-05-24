@@ -88,6 +88,12 @@ def test_invalid_rrules(post, admin_user, project, inventory, rrule, error):
 
 
 @pytest.mark.django_db
+def test_normal_users_can_preview_schedules(post, alice):
+    url = reverse('api:schedule_rrule')
+    post(url, {'rrule': get_rrule()}, alice, expect=200)
+
+
+@pytest.mark.django_db
 def test_utc_preview(post, admin_user):
     url = reverse('api:schedule_rrule')
     r = post(url, {'rrule': get_rrule()}, admin_user, expect=200)
