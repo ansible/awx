@@ -1622,7 +1622,7 @@ class JobLaunchConfigAccess(BaseAccess):
         if isinstance(sub_obj, Credential) and relationship == 'credentials':
             return self.user in sub_obj.use_role
         else:
-            raise NotImplemented('Only credentials can be attached to launch configurations.')
+            raise NotImplementedError('Only credentials can be attached to launch configurations.')
 
     def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if isinstance(sub_obj, Credential) and relationship == 'credentials':
@@ -1631,7 +1631,7 @@ class JobLaunchConfigAccess(BaseAccess):
             else:
                 return self.user in sub_obj.read_role
         else:
-            raise NotImplemented('Only credentials can be attached to launch configurations.')
+            raise NotImplementedError('Only credentials can be attached to launch configurations.')
 
 
 class WorkflowJobTemplateNodeAccess(BaseAccess):
@@ -1720,7 +1720,7 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
         elif relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.check_same_WFJT(obj, sub_obj)
         else:
-            raise NotImplemented('Relationship {} not understood for WFJT nodes.'.format(relationship))
+            raise NotImplementedError('Relationship {} not understood for WFJT nodes.'.format(relationship))
 
     def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         if not self.wfjt_admin(obj):
@@ -1735,7 +1735,7 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
         elif relationship in ('success_nodes', 'failure_nodes', 'always_nodes'):
             return self.check_same_WFJT(obj, sub_obj)
         else:
-            raise NotImplemented('Relationship {} not understood for WFJT nodes.'.format(relationship))
+            raise NotImplementedError('Relationship {} not understood for WFJT nodes.'.format(relationship))
 
 
 class WorkflowJobNodeAccess(BaseAccess):
