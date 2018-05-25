@@ -37,15 +37,12 @@
 </form>
 
 <div class="jobz-tagz">
-    <div class="LabelList-tagContainer" ng-repeat="tag in vm.tags track by $index">
-        <div class="LabelList-tag LabelList-tag--deletable"><span class="LabelList-name">{{ tag }}</span></div>
-        <div class="LabelList-deleteContainer" ng-click="vm.removeSearchTag($index)">
-            <i class="fa fa-times LabelList-tagDelete"></i>
-        </div>
+    <div class="TagComponentWrapper" ng-repeat="tag in vm.tags track by $index">
+        <at-tag tag="tag" remove-tag="vm.removeSearchTag($index)"></at-tag>
     </div>
-    <div><a href class="jobz-searchClearAll" ng-click="vm.clearSearch()" ng-show="!(vm.tags | isEmpty)">
-        {{:: vm.strings.get('search.CLEAR_ALL') }}
-    </a></div>
+    <div class="jobz-searchClearAllContainer">
+        <a href class="jobz-searchClearAll" ng-click="vm.clearSearch()" ng-show="!(vm.tags | isEmpty)">{{:: vm.strings.get('search.CLEAR_ALL') }}</a>
+    </div>
 </div>
 
 <div class="jobz-searchKeyPaneContainer" ng-show="vm.key">
