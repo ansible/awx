@@ -261,8 +261,9 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
 
                 fields: {
                     username: {
+                        key: true,
                         label: i18n._('User'),
-                        uiSref: 'users({user_id: field.id})',
+                        linkBase: 'users',
                         class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                     },
                     role: {
