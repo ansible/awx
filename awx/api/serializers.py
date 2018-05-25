@@ -2363,6 +2363,7 @@ class CredentialTypeSerializer(BaseSerializer):
 
         # translate labels and help_text for credential fields "managed by Tower"
         if value.get('managed_by_tower'):
+            value['name'] = _(value['name'])
             for field in value.get('inputs', {}).get('fields', []):
                 field['label'] = _(field['label'])
                 if 'help_text' in field:
