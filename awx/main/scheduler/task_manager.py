@@ -7,6 +7,7 @@ import logging
 import uuid
 import json
 import six
+import random
 from sets import Set
 
 # Django
@@ -265,8 +266,16 @@ class TaskManager():
             elif not task.supports_isolation() and rampart_group.controller_id:
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
-                logger.info('Submitting isolated %s to queue %s via %s.',
-                            task.log_format, task.instance_group_id, rampart_group.controller_id)
+                task.execution_node = random.choice(list(rampart_group.controller.instances.all().values_list('hostname', flat=True)))
+                logger.info(six.text_type('Submitting isolated {} to queue {}.').format(
+                            task.log_format, task.instance_group.name, task.execution_node))
+            elif task.supports_isolation() and rampart_group.controller_id:
+                # TODO: Select from only online nodes in the controller node
+                task.instance_group = rampart_group
+                task.execution_node = instance.hostname
+                task.controller_node = random.choice(list(rampart_group.controller.instances.all().values_list('hostname', flat=True)))
+                logger.info(six.text_type('Submitting isolated {} to queue {} controlled by {}.').format(
+                            task.log_format, task.execution_node, task.controller_node))
             else:
                 task.instance_group = rampart_group
                 if instance is not None:
@@ -284,11 +293,10 @@ class TaskManager():
         def post_commit():
             task.websocket_emit_status(task.status)
             if task.status != 'failed':
-                if instance is not None:
-                    actual_queue=instance.hostname
-                else:
-                    actual_queue=settings.CELERY_DEFAULT_QUEUE
-                task.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler, queue=actual_queue)
+                task.start_celery_task(opts,
+                                       error_callback=error_handler,
+                                       success_callback=success_handler,
+                                       queue=task.get_celery_queue_name())
 
         connection.on_commit(post_commit)
 

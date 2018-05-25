@@ -507,7 +507,8 @@ class StdoutMaxBytesExceeded(Exception):
         self.supported = supported
 
 
-class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
+class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique,
+                 UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
     '''
     Concrete base class for unified job run by the task engine.
     '''
@@ -570,6 +571,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default='',
         editable=False,
         help_text=_("The node the job executed on."),
+    )
+    controller_node = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+        help_text=_("The instance that managed the isolated execution environment."),
     )
     notifications = models.ManyToManyField(
         'Notification',
@@ -1228,17 +1235,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             raise RuntimeError("Expected celery_task_id to be set on model.")
         kwargs['task_id'] = self.celery_task_id
         task_class = self._get_task_class()
-        args = [self.pk]
-        from awx.main.models.ha import InstanceGroup
-        ig = InstanceGroup.objects.get(name=queue)
-        if ig.controller_id:
-            if self.supports_isolation():  # case of jobs and ad hoc commands
-                isolated_instance = ig.instances.order_by('-capacity').first()
-                args.append(isolated_instance.hostname)
-            else:  # proj & inv updates, system jobs run on controller
-                queue = ig.controller.name
         kwargs['queue'] = queue
-        task_class().apply_async(args, opts, **kwargs)
+        task_class().apply_async([self.pk], opts, **kwargs)
 
     def start(self, error_callback, success_callback, **kwargs):
         '''
@@ -1400,3 +1398,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     r['{}_schedule_id'.format(name)] = self.schedule.pk
                     r['{}_schedule_name'.format(name)] = self.schedule.name
         return r
+
+    def get_celery_queue_name(self):
+        return self.controller_node or self.execution_node or settings.CELERY_DEFAULT_QUEUE
+
+    def get_isolated_execution_node_name(self):
+        return self.execution_node if self.controller_node else None

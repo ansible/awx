@@ -868,14 +868,9 @@ class BaseTask(Task):
         '''
 
     @with_path_cleanup
-    def run(self, pk, isolated_host=None, **kwargs):
+    def run(self, pk, **kwargs):
         '''
         Run the job/task and capture its output.
-        '''
-        '''
-        execution_node = settings.CLUSTER_HOST_ID
-        if isolated_host is not None:
-            execution_node = isolated_host
         '''
         instance = self.update_model(pk, status='running',
                                      start_args='')  # blank field to remove encrypted passwords
@@ -886,6 +881,8 @@ class BaseTask(Task):
         extra_update_fields = {}
         event_ct = 0
         stdout_handle = None
+        isolated_host = instance.get_isolated_execution_node_name()
+
         try:
             kwargs['isolated'] = isolated_host is not None
             self.pre_run_hook(instance, **kwargs)
