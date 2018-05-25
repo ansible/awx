@@ -11,6 +11,7 @@ function createStatsBarTooltip (key, count) {
 
 function JobStatsController (strings, { subscribe }) {
     vm = this || {};
+    vm.strings = strings;
 
     let unsubscribe;
 
@@ -21,7 +22,9 @@ function JobStatsController (strings, { subscribe }) {
 
     vm.$onInit = () => {
         vm.download = vm.resource.model.get('related.stdout');
-        vm.toggleStdoutFullscreenTooltip = strings.get('expandCollapse.EXPAND');
+        vm.tooltips.toggleExpand = vm.expanded ?
+            strings.get('tooltips.COLLAPSE_OUTPUT') :
+            strings.get('tooltips.EXPAND_OUTPUT');
 
         unsubscribe = subscribe(({ running, elapsed, counts, stats, hosts }) => {
             vm.plays = counts.plays;
@@ -52,14 +55,14 @@ function JobStatsController (strings, { subscribe }) {
 
     vm.toggleExpanded = () => {
         vm.expanded = !vm.expanded;
-        vm.toggleStdoutFullscreenTooltip = vm.expanded ?
-            strings.get('expandCollapse.COLLAPSE') :
-            strings.get('expandCollapse.EXPAND');
+        vm.tooltips.toggleExpand = vm.expanded ?
+            strings.get('tooltips.COLLAPSE_OUTPUT') :
+            strings.get('tooltips.EXPAND_OUTPUT');
     };
 }
 
 JobStatsController.$inject = [
-    'JobStrings',
+    'OutputStrings',
     'JobStatusService',
 ];
 

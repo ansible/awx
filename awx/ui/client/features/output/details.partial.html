@@ -1,6 +1,6 @@
 <!-- todo: styling, css etc. - disposition according to project lib conventions -->
 <div class="JobResults-panelHeader">
-    <div class="JobResults-panelHeaderText" translate> DETAILS</div>
+    <div class="JobResults-panelHeaderText"> {{:: vm.strings.get('details.HEADER')}}</div>
     <!-- LEFT PANE HEADER ACTIONS -->
     <div class="JobResults-panelHeaderButtonActions">
         <!-- RELAUNCH ACTION -->
@@ -14,7 +14,7 @@
             ng-show="vm.status.value === 'Pending' ||
                      vm.status.value === 'Waiting' ||
                      vm.status.value === 'Running'"
-            aw-tool-tip="{{'Cancel' | translate }}"
+            aw-tool-tip="{{:: vm.strings.get('tooltips.CANCEL') }}"
             data-original-title=""
             title="">
             <i class="fa fa-minus-circle"></i>
@@ -31,7 +31,7 @@
                    vm.status.value === 'Failed' ||
                    vm.status.value === 'Error' ||
                    vm.status.value === 'Canceled')"
-            aw-tool-tip="{{ 'Delete' | translate }}"
+            aw-tool-tip="{{:: vm.strings.get('tooltips.DELETE') }}"
             data-original-title=""
             title="">
             <i class="fa fa-trash-o"></i>
@@ -71,7 +71,7 @@
         <span ng-show="vm.jobExplanation.hasMoreToShow"
                 class="JobResults-seeMoreLess"
                 ng-click="vm.jobExplanation.showMore = true">
-            Show More
+            {{:: vm.strings.get('details.SHOW_MORE') }}
         </span>
     </div>
     <div class="JobResults-resultRowText"
@@ -79,7 +79,7 @@
         {{ vm.jobExplanation.more }}
         <span class="JobResults-seeMoreLess"
                 ng-click="vm.jobExplanation.showMore = false">
-            Show Less
+            {{:: vm.strings.get('details.SHOW_LESS') }}
         </span>
     </div>
 </div>
@@ -124,7 +124,7 @@
         <span ng-show="vm.resultTraceback.hasMoreToShow"
                 class="JobResults-seeMoreLess"
                 ng-click="vm.resultTraceback.showMore = true">
-            Show More
+            {{:: vm.strings.get('details.SHOW_MORE') }}
         </span>
     </div>
     <div class="JobResults-resultRowText"
@@ -132,7 +132,7 @@
         {{ vm.resultTraceback.more }}
         <span class="JobResults-seeMoreLess"
                 ng-click="vm.resultTraceback.showMore = false">
-            Show Less
+            {{:: vm.strings.get('details.SHOW_LESS') }}
         </span>
     </div>
 </div>
@@ -298,14 +298,14 @@
             ng-show="vm.labels.more"
             href=""
             ng-click="vm.toggleLabels()">
-            <span translate>{{ vm.labels.label }}</span>
+            <span>{{ vm.labels.label }}</span>
             <i class="JobResults-expandArrow fa fa-caret-right"></i>
         </a>
         <a class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth"
             ng-show="!vm.labels.more"
             href=""
             ng-click="vm.toggleLabels()">
-            <span translate>{{ vm.labels.label }}</span>
+            <span>{{ vm.labels.label }}</span>
             <i class="JobResults-expandArrow fa fa-caret-down"></i>
         </a>
     </div>
@@ -323,14 +323,14 @@
             ng-show="vm.jobTags.more"
             href=""
             ng-click="vm.toggleJobTags()">
-            <span translate>{{ vm.jobTags.label }}</span>
+            <span>{{ vm.jobTags.label }}</span>
             <i class="JobResults-expandArrow fa fa-caret-right"></i>
         </a>
         <a class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth"
             ng-show="!vm.jobTags.more"
             href=""
             ng-click="vm.toggleJobTags()">
-            <span translate>{{ vm.jobTags.label }}</span>
+            <span>{{ vm.jobTags.label }}</span>
             <i class="JobResults-expandArrow fa fa-caret-down"></i>
         </a>
     </div>
@@ -348,14 +348,14 @@
             ng-show="vm.skipTags.more"
             href=""
             ng-click="vm.toggleSkipTags()">
-            <span translate>{{ vm.skipTags.label }}</span>
+            <span>{{ vm.skipTags.label }}</span>
             <i class="JobResults-expandArrow fa fa-caret-right"></i>
         </a>
         <a class="JobResults-resultRowLabel JobResults-resultRowLabel--fullWidth"
             ng-show="!vm.skipTags.more"
             href=""
             ng-click="vm.toggleSkipTags()">
-            <span translate>{{ vm.skipTags.label }}</span>
+            <span>{{ vm.skipTags.label }}</span>
             <i class="JobResults-expandArrow fa fa-caret-down"></i>
         </a>
     </div>

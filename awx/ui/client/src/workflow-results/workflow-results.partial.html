@@ -15,7 +15,7 @@
                 <div class="WorkflowResults-panelHeader">
                     <div
                         class="WorkflowResults-panelHeaderText">
-                        DETAILS
+                        {{ strings.details.HEADER }}
                     </div>
 
                     <!-- LEFT PANE HEADER ACTIONS -->
@@ -26,7 +26,7 @@
                             data-placement="top"
                             mode="all"
                             ng-click="relaunchJob()"
-                            aw-tool-tip="{{'Relaunch using the same parameters'|translate}}"
+                            aw-tool-tip="{{ strings.tooltips.RELAUNCH }}"
                             data-original-title=""
                             title="">
                             <i class="icon-launch"></i>
@@ -39,7 +39,7 @@
                             ng-click="cancelJob()"
                             ng-show="workflow.status == 'running' ||
                                 workflow.status=='pending' "
-                            aw-tool-tip="{{'Cancel'|translate}}"
+                            aw-tool-tip="{{ strings.tooltips.CANCEL }}"
                             data-original-title="" title="">
                             <i class="fa fa-minus-circle"></i>
                         </button>
@@ -51,7 +51,7 @@
                             ng-click="deleteJob()"
                             ng-hide="workflow.status == 'running' ||
                                 workflow.status == 'pending' "
-                            aw-tool-tip="{{'Delete'|translate}}"
+                            aw-tool-tip="{{ strings.tooltips.DELETE }}"
                             data-original-title=""
                             title="">
                             <i class="fa fa-trash-o"></i>
@@ -71,7 +71,7 @@
                              <i	class="WorkflowResults-statusResultIcon
                                      fa
                                      icon-job-{{ workflow.status }}">
-                             </i> {{ status_label }}
+                             </i> {{ strings.labels.STATUS }}
                          </div>
                      </div>
 
@@ -79,10 +79,10 @@
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.started">
                         <label class="WorkflowResults-resultRowLabel">
-                            Started
+                            {{ strings.labels.STARTED }}
                         </label>
                         <div class="WorkflowResults-resultRowText">
-                            {{ workflow.started | longDate }}
+                            {{ (workflow.started | longDate) || strings.details.NOT_STARTED }}
                         </div>
                     </div>
 
@@ -90,11 +90,11 @@
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.started">
                         <label class="WorkflowResults-resultRowLabel">
-                            Finished
+                            {{ strings.labels.FINISHED }}
                         </label>
                         <div class="WorkflowResults-resultRowText">
                             {{ (workflow.finished |
-                                longDate) || "Not Finished" }}
+                                longDate) || strings.details.NOT_FINISHED }}
                         </div>
                     </div>
 
@@ -102,11 +102,11 @@
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.summary_fields.workflow_job_template.name">
                         <label class="WorkflowResults-resultRowLabel">
-                            Template
+                            {{ strings.labels.TEMPLATE }}
                         </label>
                         <div class="WorkflowResults-resultRowText">
                             <a href="{{ workflow_job_template_link }}"
-                                aw-tool-tip="Edit the workflow job template"
+                                aw-tool-tip="{{ strings.tooltips.EDIT_WORKFLOW }}"
                                 data-placement="top">
                                 {{ workflow.summary_fields.workflow_job_template.name }}
                             </a>
@@ -117,11 +117,11 @@
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.summary_fields.created_by.username">
                         <label class="WorkflowResults-resultRowLabel">
-                            Launched By
+                            {{ strings.labels.LAUNCHED_BY }}
                         </label>
                         <div class="WorkflowResults-resultRowText">
                             <a href="{{ created_by_link }}"
-                                aw-tool-tip="{{'Edit the User'|translate}}"
+                                aw-tool-tip="{{ strings.tooltips.EDIT_USER }}"
                                 data-placement="top">
                                 {{ workflow.summary_fields.created_by.username }}
                             </a>
@@ -133,11 +133,11 @@
                         ng-show="workflow.summary_fields.schedule.name">
                         <label
                             class="WorkflowResults-resultRowLabel">
-                            Launched By
+                            {{ strings.labels.LAUNCHED_BY }}
                         </label>
                         <div class="WorkflowResults-resultRowText">
                             <a href="{{ scheduled_by_link }}"
-                                aw-tool-tip="Edit the Schedule"
+                                aw-tool-tip="{{ strings.tooltips.EDIT_SCHEDULE }}"
                                 data-placement="top">
                                 {{ workflow.summary_fields.schedule.name }}
                             </a>
@@ -163,7 +163,7 @@
                                 ng-show="lessLabels"
                                 href=""
                                 ng-click="toggleLessLabels()">
-                                    Labels
+                                    {{ strings.labels.LABELS }}
                                 <i class="WorkflowResults-expandArrow
                                     fa fa-caret-right"></i>
                             </a>
@@ -172,7 +172,7 @@
                                 ng-show="!lessLabels"
                                 href=""
                                 ng-click="toggleLessLabels()">
-                                    Labels
+                                    {{ strings.labels.LABELS }}
                                 <i class="WorkflowResults-expandArrow
                                     fa fa-caret-down"></i>
                             </a>
@@ -207,7 +207,7 @@
                         <i class="WorkflowResults-statusResultIcon
                             fa icon-job-{{ workflow.status }}"
                             ng-show="stdoutFullScreen"
-                            aw-tool-tip="Job {{status_label}}"
+                            aw-tool-tip="{{ strings.tooltips.STATUS }}"
                             aw-tip-placement="top"
                             data-original-title>
                         </i>
@@ -218,7 +218,7 @@
                         <div class="WorkflowResults-badgeRow">
                             <!-- PLAYS COUNT -->
                             <div class="WorkflowResults-badgeTitle">
-                                Total Jobs
+                                {{ strings.results.TOTAL_JOBS }}
                             </div>
                             <span class="badge List-titleBadge">
                                 {{ workflow_nodes.length || 0}}
@@ -226,7 +226,7 @@
 
                             <!-- ELAPSED TIME -->
                             <div class="WorkflowResults-badgeTitle">
-                                Elapsed
+                                {{ strings.results.ELAPSED }}
                             </div>
                             <span class="badge List-titleBadge">
                                 {{ workflow.elapsed * 1000 | duration: "hh:mm:ss"}}
@@ -238,8 +238,8 @@
 
                             <!-- FULL-SCREEN TOGGLE ACTION -->
                             <button class="StandardOut-actionButton"
-                                aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}"
-                                data-tip-watch="toggleStdoutFullscreenTooltip"
+                                aw-tool-tip="{{ strings.tooltips.TOGGLE_STDOUT_FULLSCREEN }}"
+                                data-tip-watch="strings.tooltips.TOGGLE_STDOUT_FULLSCREEN"
                                 data-placement="top"
                                 ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"
                                 ng-click="toggleStdoutFullscreen()">
@@ -252,26 +252,26 @@
                 <workflow-status-bar></workflow-status-bar>
                 <div class="WorkflowLegend-details">
                     <div class="WorkflowLegend-details--left">
-                        <div class="WorkflowLegend-legendItem">KEY:</div>
+                        <div class="WorkflowLegend-legendItem">{{ strings.legend.KEY }}:</div>
                         <div class="WorkflowLegend-legendItem">
                             <div class="WorkflowLegend-onSuccessLegend"></div>
-                            <div>On Success</div>
+                            <div>{{ strings.legend.ON_SUCCESS }}</div>
                         </div>
                         <div class="WorkflowLegend-legendItem">
                             <div class="WorkflowLegend-onFailLegend"></div>
-                            <div>On Fail</div>
+                            <div>{{ strings.legend.ON_FAIL }}</div>
                         </div>
                         <div class="WorkflowLegend-legendItem">
                             <div class="WorkflowLegend-alwaysLegend"></div>
-                            <div>Always</div>
+                            <div>{{ strings.legend.ALWAYS }}</div>
                         </div>
                         <div class="WorkflowLegend-legendItem">
                             <div class="WorkflowLegend-letterCircle">P</div>
-                            <div>Project Sync</div>
+                            <div>{{ strings.legend.PROJECT_SYNC }}</div>
                         </div>
                         <div class="WorkflowLegend-legendItem">
                             <div class="WorkflowLegend-letterCircle">I</div>
-                            <div>Inventory Sync</div>
+                            <div>{{ strings.legend.INVENTORY_SYNC }}</div>
                         </div>
                     </div>
                     <div class="WorkflowLegend-details--right">

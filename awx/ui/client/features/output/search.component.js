@@ -3,14 +3,11 @@ const templateUrl = require('~features/output/search.partial.html');
 const searchReloadOptions = { inherit: false, location: 'replace' };
 const searchKeyExamples = ['host_name:localhost', 'task:set', 'created:>=2000-01-01'];
 const searchKeyFields = ['changed', 'created', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
-
-const PLACEHOLDER_RUNNING = 'CANNOT SEARCH RUNNING JOB';
-const PLACEHOLDER_DEFAULT = 'SEARCH';
-const REJECT_DEFAULT = 'Failed to update search results.';
-const REJECT_INVALID = 'Invalid search filter provided.';
+const searchKeyDocLink = 'https://docs.ansible.com/ansible-tower/3.3.0/html/userguide/search_sort.html';
 
 let $state;
 let qs;
+let strings;
 
 let vm;
 
@@ -32,7 +29,7 @@ function getSearchTags (queryset) {
         .filter(tag => !tag.startsWith('order_by'));
 }
 
-function reloadQueryset (queryset, rejection = REJECT_DEFAULT) {
+function reloadQueryset (queryset, rejection = strings.get('search.REJECT_DEFAULT')) {
     const params = angular.copy($state.params);
     const currentTags = vm.tags;
 
@@ -72,23 +69,25 @@ function submitSearch () {
     const searchInputQueryset = qs.getSearchInputQueryset(vm.value, isFilterable);
     const modifiedQueryset = qs.mergeQueryset(currentQueryset, searchInputQueryset);
 
-    reloadQueryset(modifiedQueryset, REJECT_INVALID);
+    reloadQueryset(modifiedQueryset, strings.get('search.REJECT_INVALID'));
 }
 
 function clearSearch () {
     reloadQueryset();
 }
 
-function JobSearchController (_$state_, _qs_, { subscribe }) {
+function JobSearchController (_$state_, _qs_, _strings_, { subscribe }) {
     $state = _$state_;
     qs = _qs_;
+    strings = _strings_;
 
     vm = this || {};
+    vm.strings = strings;
 
     vm.examples = searchKeyExamples;
     vm.fields = searchKeyFields;
+    vm.docLink = searchKeyDocLink;
     vm.relatedFields = [];
-    vm.placeholder = PLACEHOLDER_DEFAULT;
 
     vm.clearSearch = clearSearch;
     vm.toggleSearchKey = toggleSearchKey;
@@ -103,11 +102,12 @@ function JobSearchController (_$state_, _qs_, { subscribe }) {
         vm.key = false;
         vm.rejected = false;
         vm.disabled = true;
+        vm.running = false;
         vm.tags = getSearchTags(getCurrentQueryset());
 
         unsubscribe = subscribe(({ running }) => {
             vm.disabled = running;
-            vm.placeholder = running ? PLACEHOLDER_RUNNING : PLACEHOLDER_DEFAULT;
+            vm.running = running;
         });
     };
 
@@ -119,6 +119,7 @@ function JobSearchController (_$state_, _qs_, { subscribe }) {
 JobSearchController.$inject = [
     '$state',
     'QuerySet',
+    'OutputStrings',
     'JobStatusService',
 ];
 

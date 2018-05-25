@@ -1,6 +1,8 @@
 let $compile;
+let $filter;
 let $q;
 let $scope;
+
 let page;
 let render;
 let resource;
@@ -13,28 +15,33 @@ let streaming;
 let listeners = [];
 
 function JobsIndexController (
+    _$compile_,
+    _$filter_,
+    _$q_,
+    _$scope_,
     _resource_,
     _page_,
     _scroll_,
     _render_,
     _engine_,
-    _$scope_,
-    _$compile_,
-    _$q_,
     _status_,
+    _strings_,
 ) {
     vm = this || {};
 
     $compile = _$compile_;
-    $scope = _$scope_;
+    $filter = _$filter_;
     $q = _$q_;
-    resource = _resource_;
+    $scope = _$scope_;
 
+    resource = _resource_;
     page = _page_;
     scroll = _scroll_;
     render = _render_;
     engine = _engine_;
     status = _status_;
+
+    vm.strings = _strings_;
 
     // Development helper(s)
     vm.clear = devClear;
@@ -45,7 +52,7 @@ function JobsIndexController (
 
     // Panel
     vm.resource = resource;
-    vm.title = resource.model.get('name');
+    vm.title = $filter('sanitize')(resource.model.get('name'));
 
     // Stdout Navigation
     vm.scroll = {
@@ -386,15 +393,17 @@ function devClear () {
 // }
 
 JobsIndexController.$inject = [
+    '$compile',
+    '$filter',
+    '$q',
+    '$scope',
     'resource',
     'JobPageService',
     'JobScrollService',
     'JobRenderService',
     'JobEventEngine',
-    '$scope',
-    '$compile',
-    '$q',
     'JobStatusService',
+    'OutputStrings',
 ];
 
 module.exports = JobsIndexController;
