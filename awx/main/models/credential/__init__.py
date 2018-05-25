@@ -14,7 +14,7 @@ from jinja2 import Template
 
 # Django
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext_noop
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_text
 
@@ -673,46 +673,46 @@ class CredentialType(CommonModelNameNotUnique):
 def ssh(cls):
     return cls(
         kind='ssh',
-        name='Machine',
+        name=ugettext_noop('Machine'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
                 'ask_at_runtime': True
             }, {
                 'id': 'ssh_key_data',
-                'label': 'SSH Private Key',
+                'label': ugettext_noop('SSH Private Key'),
                 'type': 'string',
                 'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True
             }, {
                 'id': 'ssh_key_unlock',
-                'label': 'Private Key Passphrase',
+                'label': ugettext_noop('Private Key Passphrase'),
                 'type': 'string',
                 'secret': True,
                 'ask_at_runtime': True
             }, {
                 'id': 'become_method',
-                'label': 'Privilege Escalation Method',
+                'label': ugettext_noop('Privilege Escalation Method'),
                 'type': 'become_method',
-                'help_text': ('Specify a method for "become" operations. This is '
-                              'equivalent to specifying the --become-method '
-                              'Ansible parameter.')
+                'help_text': ugettext_noop('Specify a method for "become" operations. This is '
+                                           'equivalent to specifying the --become-method '
+                                           'Ansible parameter.')
             }, {
                 'id': 'become_username',
-                'label': 'Privilege Escalation Username',
+                'label': ugettext_noop('Privilege Escalation Username'),
                 'type': 'string',
             }, {
                 'id': 'become_password',
-                'label': 'Privilege Escalation Password',
+                'label': ugettext_noop('Privilege Escalation Password'),
                 'type': 'string',
                 'secret': True,
                 'ask_at_runtime': True
@@ -728,28 +728,28 @@ def ssh(cls):
 def scm(cls):
     return cls(
         kind='scm',
-        name='Source Control',
+        name=ugettext_noop('Source Control'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True
             }, {
                 'id': 'ssh_key_data',
-                'label': 'SCM Private Key',
+                'label': ugettext_noop('SCM Private Key'),
                 'type': 'string',
                 'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True
             }, {
                 'id': 'ssh_key_unlock',
-                'label': 'Private Key Passphrase',
+                'label': ugettext_noop('Private Key Passphrase'),
                 'type': 'string',
                 'secret': True
             }],
@@ -764,25 +764,25 @@ def scm(cls):
 def vault(cls):
     return cls(
         kind='vault',
-        name='Vault',
+        name=ugettext_noop('Vault'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'vault_password',
-                'label': 'Vault Password',
+                'label': ugettext_noop('Vault Password'),
                 'type': 'string',
                 'secret': True,
                 'ask_at_runtime': True
             }, {
                 'id': 'vault_id',
-                'label': 'Vault Identifier',
+                'label': ugettext_noop('Vault Identifier'),
                 'type': 'string',
                 'format': 'vault_id',
-                'help_text': ('Specify an (optional) Vault ID. This is '
-                              'equivalent to specifying the --vault-id '
-                              'Ansible parameter for providing multiple Vault '
-                              'passwords.  Note: this feature only works in '
-                              'Ansible 2.4+.')
+                'help_text': ugettext_noop('Specify an (optional) Vault ID. This is '
+                                           'equivalent to specifying the --vault-id '
+                                           'Ansible parameter for providing multiple Vault '
+                                           'passwords.  Note: this feature only works in '
+                                           'Ansible 2.4+.')
             }],
             'required': ['vault_password'],
         }
@@ -793,37 +793,37 @@ def vault(cls):
 def net(cls):
     return cls(
         kind='net',
-        name='Network',
+        name=ugettext_noop('Network'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             }, {
                 'id': 'ssh_key_data',
-                'label': 'SSH Private Key',
+                'label': ugettext_noop('SSH Private Key'),
                 'type': 'string',
                 'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True
             }, {
                 'id': 'ssh_key_unlock',
-                'label': 'Private Key Passphrase',
+                'label': ugettext_noop('Private Key Passphrase'),
                 'type': 'string',
                 'secret': True,
             }, {
                 'id': 'authorize',
-                'label': 'Authorize',
+                'label': ugettext_noop('Authorize'),
                 'type': 'boolean',
             }, {
                 'id': 'authorize_password',
-                'label': 'Authorize Password',
+                'label': ugettext_noop('Authorize Password'),
                 'type': 'string',
                 'secret': True,
             }],
@@ -840,27 +840,27 @@ def net(cls):
 def aws(cls):
     return cls(
         kind='cloud',
-        name='Amazon Web Services',
+        name=ugettext_noop('Amazon Web Services'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Access Key',
+                'label': ugettext_noop('Access Key'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Secret Key',
+                'label': ugettext_noop('Secret Key'),
                 'type': 'string',
                 'secret': True,
             }, {
                 'id': 'security_token',
-                'label': 'STS Token',
+                'label': ugettext_noop('STS Token'),
                 'type': 'string',
                 'secret': True,
-                'help_text': ('Security Token Service (STS) is a web service '
-                              'that enables you to request temporary, '
-                              'limited-privilege credentials for AWS Identity '
-                              'and Access Management (IAM) users.'),
+                'help_text': ugettext_noop('Security Token Service (STS) is a web service '
+                                           'that enables you to request temporary, '
+                                           'limited-privilege credentials for AWS Identity '
+                                           'and Access Management (IAM) users.'),
             }],
             'required': ['username', 'password']
         }
@@ -871,36 +871,36 @@ def aws(cls):
 def openstack(cls):
     return cls(
         kind='cloud',
-        name='OpenStack',
+        name=ugettext_noop('OpenStack'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password (API Key)',
+                'label': ugettext_noop('Password (API Key)'),
                 'type': 'string',
                 'secret': True,
             }, {
                 'id': 'host',
-                'label': 'Host (Authentication URL)',
+                'label': ugettext_noop('Host (Authentication URL)'),
                 'type': 'string',
-                'help_text': ('The host to authenticate with.  For example, '
-                              'https://openstack.business.com/v2.0/')
+                'help_text': ugettext_noop('The host to authenticate with.  For example, '
+                                           'https://openstack.business.com/v2.0/')
             }, {
                 'id': 'project',
-                'label': 'Project (Tenant Name)',
+                'label': ugettext_noop('Project (Tenant Name)'),
                 'type': 'string',
             }, {
                 'id': 'domain',
-                'label': 'Domain Name',
+                'label': ugettext_noop('Domain Name'),
                 'type': 'string',
-                'help_text': ('OpenStack domains define administrative boundaries. '
-                              'It is only needed for Keystone v3 authentication '
-                              'URLs. Refer to Ansible Tower documentation for '
-                              'common scenarios.')
+                'help_text': ugettext_noop('OpenStack domains define administrative boundaries. '
+                                           'It is only needed for Keystone v3 authentication '
+                                           'URLs. Refer to Ansible Tower documentation for '
+                                           'common scenarios.')
             }],
             'required': ['username', 'password', 'host', 'project']
         }
@@ -911,22 +911,22 @@ def openstack(cls):
 def vmware(cls):
     return cls(
         kind='cloud',
-        name='VMware vCenter',
+        name=ugettext_noop('VMware vCenter'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'host',
-                'label': 'VCenter Host',
+                'label': ugettext_noop('VCenter Host'),
                 'type': 'string',
-                'help_text': ('Enter the hostname or IP address that corresponds '
-                              'to your VMware vCenter.')
+                'help_text': ugettext_noop('Enter the hostname or IP address that corresponds '
+                                           'to your VMware vCenter.')
             }, {
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             }],
@@ -939,22 +939,22 @@ def vmware(cls):
 def satellite6(cls):
     return cls(
         kind='cloud',
-        name='Red Hat Satellite 6',
+        name=ugettext_noop('Red Hat Satellite 6'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'host',
-                'label': 'Satellite 6 URL',
+                'label': ugettext_noop('Satellite 6 URL'),
                 'type': 'string',
-                'help_text': ('Enter the URL that corresponds to your Red Hat '
-                              'Satellite 6 server. For example, https://satellite.example.org')
+                'help_text': ugettext_noop('Enter the URL that corresponds to your Red Hat '
+                                           'Satellite 6 server. For example, https://satellite.example.org')
             }, {
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             }],
@@ -967,23 +967,23 @@ def satellite6(cls):
 def cloudforms(cls):
     return cls(
         kind='cloud',
-        name='Red Hat CloudForms',
+        name=ugettext_noop('Red Hat CloudForms'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'host',
-                'label': 'CloudForms URL',
+                'label': ugettext_noop('CloudForms URL'),
                 'type': 'string',
-                'help_text': ('Enter the URL for the virtual machine that '
-                              'corresponds to your CloudForm instance. '
-                              'For example, https://cloudforms.example.org')
+                'help_text': ugettext_noop('Enter the URL for the virtual machine that '
+                                           'corresponds to your CloudForm instance. '
+                                           'For example, https://cloudforms.example.org')
             }, {
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             }],
@@ -996,32 +996,32 @@ def cloudforms(cls):
 def gce(cls):
     return cls(
         kind='cloud',
-        name='Google Compute Engine',
+        name=ugettext_noop('Google Compute Engine'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Service Account Email Address',
+                'label': ugettext_noop('Service Account Email Address'),
                 'type': 'string',
-                'help_text': ('The email address assigned to the Google Compute '
-                              'Engine service account.')
+                'help_text': ugettext_noop('The email address assigned to the Google Compute '
+                                           'Engine service account.')
             }, {
                 'id': 'project',
                 'label': 'Project',
                 'type': 'string',
-                'help_text': ('The Project ID is the GCE assigned identification. '
-                              'It is often constructed as three words or two words '
-                              'followed by a three-digit number. Examples: project-id-000 '
-                              'and another-project-id')
+                'help_text': ugettext_noop('The Project ID is the GCE assigned identification. '
+                                           'It is often constructed as three words or two words '
+                                           'followed by a three-digit number. Examples: project-id-000 '
+                                           'and another-project-id')
             }, {
                 'id': 'ssh_key_data',
-                'label': 'RSA Private Key',
+                'label': ugettext_noop('RSA Private Key'),
                 'type': 'string',
                 'format': 'ssh_private_key',
                 'secret': True,
                 'multiline': True,
-                'help_text': ('Paste the contents of the PEM file associated '
-                              'with the service account email.')
+                'help_text': ugettext_noop('Paste the contents of the PEM file associated '
+                                           'with the service account email.')
             }],
             'required': ['username', 'ssh_key_data'],
         }
@@ -1032,43 +1032,43 @@ def gce(cls):
 def azure_rm(cls):
     return cls(
         kind='cloud',
-        name='Microsoft Azure Resource Manager',
+        name=ugettext_noop('Microsoft Azure Resource Manager'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'subscription',
-                'label': 'Subscription ID',
+                'label': ugettext_noop('Subscription ID'),
                 'type': 'string',
-                'help_text': ('Subscription ID is an Azure construct, which is '
-                              'mapped to a username.')
+                'help_text': ugettext_noop('Subscription ID is an Azure construct, which is '
+                                           'mapped to a username.')
             }, {
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             }, {
                 'id': 'client',
-                'label': 'Client ID',
+                'label': ugettext_noop('Client ID'),
                 'type': 'string'
             }, {
                 'id': 'secret',
-                'label': 'Client Secret',
+                'label': ugettext_noop('Client Secret'),
                 'type': 'string',
                 'secret': True,
             }, {
                 'id': 'tenant',
-                'label': 'Tenant ID',
+                'label': ugettext_noop('Tenant ID'),
                 'type': 'string'
             }, {
                 'id': 'cloud_environment',
-                'label': 'Azure Cloud Environment',
+                'label': ugettext_noop('Azure Cloud Environment'),
                 'type': 'string',
-                'help_text': ('Environment variable AZURE_CLOUD_ENVIRONMENT when'
-                              ' using Azure GovCloud or Azure stack.')
+                'help_text': ugettext_noop('Environment variable AZURE_CLOUD_ENVIRONMENT when'
+                                           ' using Azure GovCloud or Azure stack.')
             }],
             'required': ['subscription'],
         }
@@ -1079,16 +1079,16 @@ def azure_rm(cls):
 def insights(cls):
     return cls(
         kind='insights',
-        name='Insights',
+        name=ugettext_noop('Insights'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True
             }],
@@ -1107,28 +1107,28 @@ def insights(cls):
 def rhv(cls):
     return cls(
         kind='cloud',
-        name='Red Hat Virtualization',
+        name=ugettext_noop('Red Hat Virtualization'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'host',
-                'label': 'Host (Authentication URL)',
+                'label': ugettext_noop('Host (Authentication URL)'),
                 'type': 'string',
-                'help_text': ('The host to authenticate with.')
+                'help_text': ugettext_noop('The host to authenticate with.')
             }, {
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             }, {
                 'id': 'ca_file',
-                'label': 'CA File',
+                'label': ugettext_noop('CA File'),
                 'type': 'string',
-                'help_text': ('Absolute file path to the CA file to use (optional)')
+                'help_text': ugettext_noop('Absolute file path to the CA file to use (optional)')
             }],
             'required': ['host', 'username', 'password'],
         },
@@ -1159,26 +1159,26 @@ def rhv(cls):
 def tower(cls):
     return cls(
         kind='cloud',
-        name='Ansible Tower',
+        name=ugettext_noop('Ansible Tower'),
         managed_by_tower=True,
         inputs={
             'fields': [{
                 'id': 'host',
-                'label': 'Ansible Tower Hostname',
+                'label': ugettext_noop('Ansible Tower Hostname'),
                 'type': 'string',
-                'help_text': ('The Ansible Tower base URL to authenticate with.')
+                'help_text': ugettext_noop('The Ansible Tower base URL to authenticate with.')
             }, {
                 'id': 'username',
-                'label': 'Username',
+                'label': ugettext_noop('Username'),
                 'type': 'string'
             }, {
                 'id': 'password',
-                'label': 'Password',
+                'label': ugettext_noop('Password'),
                 'type': 'string',
                 'secret': True,
             }, {
                 'id': 'verify_ssl',
-                'label': 'Verify SSL',
+                'label': ugettext_noop('Verify SSL'),
                 'type': 'boolean',
                 'secret': False
             }],
