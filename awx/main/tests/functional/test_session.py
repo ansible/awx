@@ -24,6 +24,20 @@ class AlwaysPassBackend(object):
         return '{}.{}'.format(cls.__module__, cls.__name__)
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize('accept, status', [
+    ['*/*', 200],
+    ['text/html', 200],
+    ['application/json', 406]
+])
+def test_login_json_not_allowed(get, accept, status):
+    get(
+        '/api/login/',
+        HTTP_ACCEPT=accept,
+        expect=status
+    )
+
+
 @pytest.mark.skip(reason="Needs Update - CA")
 @pytest.mark.django_db
 def test_session_create_delete(admin, post, get):
