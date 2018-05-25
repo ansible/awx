@@ -194,6 +194,19 @@ def test_inherited_instance_group_membership(instance_group_factory, default_ins
 
 
 @pytest.mark.django_db
+@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
+def test_mixed_group_membership(mock, instance_factory, instance_group_factory):
+    for i in range(5):
+        instance_factory("i{}".format(i))
+    ig_1 = instance_group_factory("ig1", percentage=60)
+    ig_2 = instance_group_factory("ig2", minimum=3)
+    ig_3 = instance_group_factory("ig3", minimum=1, percentage=60)
+    apply_cluster_membership_policies()
+    for group in (ig_1, ig_2, ig_3):
+        assert len(group.instances.all()) == 3
+
+
+@pytest.mark.django_db
 def test_instance_group_capacity(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
