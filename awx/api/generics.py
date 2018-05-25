@@ -24,13 +24,14 @@ from django.contrib.auth import views as auth_views
 
 # Django REST Framework
 from rest_framework.authentication import get_authorization_header
-from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError
+from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError, NotAcceptable
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import views
 from rest_framework.permissions import AllowAny
-from rest_framework.renderers import JSONRenderer
+from rest_framework.renderers import StaticHTMLRenderer, JSONRenderer
+from rest_framework.negotiation import DefaultContentNegotiation
 
 # cryptography
 from cryptography.fernet import InvalidToken
@@ -63,6 +64,25 @@ analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 class LoggedLoginView(auth_views.LoginView):
+
+    def get(self, request, *args, **kwargs):
+        # The django.auth.contrib login form doesn't perform the content
+        # negotiation we've come to expect from DRF; add in code to catch
+        # situations where Accept != text/html (or */*) and reply with
+        # an HTTP 406
+        try:
+            DefaultContentNegotiation().select_renderer(
+                request,
+                [StaticHTMLRenderer],
+                'html'
+            )
+        except NotAcceptable:
+            resp = Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+            resp.accepted_renderer = StaticHTMLRenderer()
+            resp.accepted_media_type = 'text/plain'
+            resp.renderer_context = {}
+            return resp
+        return super(LoggedLoginView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         original_user = getattr(request, 'user', None)
