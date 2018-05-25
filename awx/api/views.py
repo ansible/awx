@@ -1611,21 +1611,6 @@ class OAuth2UserTokenList(SubListCreateAPIView):
     relationship = 'main_oauth2accesstoken'
     parent_key = 'user'
     swagger_topic = 'Authentication'
-    
-    
-class OAuth2AuthorizedTokenList(SubListCreateAPIView):
-
-    view_name = _("OAuth2 Authorized Access Tokens")
-    
-    model = OAuth2AccessToken
-    serializer_class = OAuth2AuthorizedTokenSerializer
-    parent_model = OAuth2Application
-    relationship = 'oauth2accesstoken_set'
-    parent_key = 'application'
-    swagger_topic = 'Authentication'
-
-    def get_queryset(self):
-        return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
         
         
 class UserAuthorizedTokenList(SubListCreateAPIView):
@@ -1633,7 +1618,7 @@ class UserAuthorizedTokenList(SubListCreateAPIView):
     view_name = _("OAuth2 User Authorized Access Tokens")
     
     model = OAuth2AccessToken
-    serializer_class = OAuth2AuthorizedTokenSerializer
+    serializer_class = UserAuthorizedTokenSerializer
     parent_model = User
     relationship = 'oauth2accesstoken_set'
     parent_key = 'user'
@@ -1655,12 +1640,12 @@ class OrganizationApplicationList(SubListCreateAPIView):
     swagger_topic = 'Authentication'
 
 
-class OAuth2PersonalTokenList(SubListCreateAPIView):
+class UserPersonalTokenList(SubListCreateAPIView):
     
     view_name = _("OAuth2 Personal Access Tokens")
     
     model = OAuth2AccessToken
-    serializer_class = OAuth2PersonalTokenSerializer
+    serializer_class = UserPersonalTokenSerializer
     parent_model = User
     relationship = 'main_oauth2accesstoken'
     parent_key = 'user'

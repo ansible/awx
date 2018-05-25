@@ -200,7 +200,7 @@ class TestOAuth2Token:
         user_list = [admin, org_admin, org_member, alice]
         can_access_list = [True, False, True, False]
         response = post(
-            reverse('api:o_auth2_personal_token_list', kwargs={'pk': org_member.pk}),
+            reverse('api:user_personal_token_list', kwargs={'pk': org_member.pk}),
             {'scope': 'read'}, org_member, expect=201
         )
         token = AccessToken.objects.get(token=response.data['token'])
@@ -220,7 +220,7 @@ class TestOAuth2Token:
 
         for user, can_access in zip(user_list, can_access_list):
             response = post(
-                reverse('api:o_auth2_personal_token_list', kwargs={'pk': user.pk}),
+                reverse('api:user_personal_token_list', kwargs={'pk': user.pk}),
                 {'scope': 'read', 'application':None}, user, expect=201
             )
             token = AccessToken.objects.get(token=response.data['token'])

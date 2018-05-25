@@ -29,7 +29,7 @@ def test_personal_access_token_creation(oauth_application, post, alice):
 
 
 @pytest.mark.django_db
-def test_oauth_application_create(admin, organization, post):
+def test_oauth2_application_create(admin, organization, post):
     response = post(
         reverse('api:o_auth2_application_list'), {
             'name': 'test app',
@@ -47,7 +47,18 @@ def test_oauth_application_create(admin, organization, post):
     assert created_app.client_type == 'confidential'
     assert created_app.authorization_grant_type == 'password'
     assert created_app.organization == organization
-
+    
+    
+@pytest.mark.django_db
+def test_oauth2_validator(admin, oauth_application, post):
+    post(
+        reverse('api:o_auth2_application_list'), {
+            'name': 'Write App Token', 
+            'application': oauth_application.pk,
+            'scope': 'Write',
+        }, admin, expect=400
+    )
+    
 
 @pytest.mark.django_db
 def test_oauth_application_update(oauth_application, organization, patch, admin, alice):

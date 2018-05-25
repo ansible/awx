@@ -11,7 +11,6 @@ from awx.api.views import (
     OAuth2TokenList,
     OAuth2TokenDetail,
     OAuth2TokenActivityStreamList,
-    OAuth2PersonalTokenList
 )
 
 
@@ -42,8 +41,7 @@ urls = [
         r'^tokens/(?P<pk>[0-9]+)/activity_stream/$',
         OAuth2TokenActivityStreamList.as_view(),
         name='o_auth2_token_activity_stream_list'
-    ),
-    url(r'^personal_tokens/$', OAuth2PersonalTokenList.as_view(), name='o_auth2_personal_token_list'),    
+    ),   
 ]
 
 __all__ = ['urls']
