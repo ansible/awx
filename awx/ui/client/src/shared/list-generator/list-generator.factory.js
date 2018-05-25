@@ -290,6 +290,7 @@ export default ['$compile', 'Attr', 'Icon',
                 // gotcha: transcluded elements require custom scope linking - binding to $parent models assumes a very rigid DOM hierarchy
                 // see: lookup-modal.directive.js for example
                 innerTable += options.mode === 'lookup' ? `<tbody ng-init="selection.${list.iterator} = {id: $parent.${list.iterator}, name: $parent.${list.iterator}_name}">` : `"<tbody>\n"`;
+
                 innerTable += "<tr ng-class=\"[" + list.iterator;
                 innerTable += (options.mode === 'lookup' || options.mode === 'select') ? ".success_class" : ".active_class";
 
@@ -313,7 +314,7 @@ export default ['$compile', 'Attr', 'Icon',
                     innerTable += `, {'List-tableRow--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}`;
                 }
 
-                innerTable += (list.disableRow) ? `, {true: 'List-tableRow--disabled'}[${list.iterator}.pending_deletion]` : "";
+                innerTable += (list.disableRow) ? `, {true: 'List-tableRow--disabled'}[${list.iterator}.${list.disableRowValue}]` : "";
 
                 if (list.multiSelect) {
                     innerTable += ", " + list.iterator + ".isSelected ? 'is-selected-row' : ''";
@@ -323,18 +324,21 @@ export default ['$compile', 'Attr', 'Icon',
                 innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
                 innerTable += "class=\"List-tableRow " + list.iterator + "_class\" ";
                 innerTable += (list.disableRow) ? " disable-row=\"" + list.disableRow + "\" " : "";
+                if(_.has(list, 'disableTooltip')){
+                    let { placement, tipWatch } = list.disableTooltip;
+                    innerTable += `aw-tool-tip="{{tipWatch}}" data-placement="${placement}" data-tip-watch="${tipWatch}"`;
+                }
                 innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
                 innerTable += (list.trackBy) ? " track by " + list.trackBy : "";
                 innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
                 innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
                 innerTable += "\">\n";
-
                 if (list.index) {
                     innerTable += "<td class=\"index-column hidden-xs List-tableCell\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</td>\n";
                 }
 
                 if (list.multiSelect) {
-                    innerTable += '<td class="col-xs-1 select-column List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
+                    innerTable += '<td class="col-xs-1 select-column List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\" disabled="'+list.iterator + '.' + list.disableRowValue+'"></select-list-item></td>';
                 }
 
                 // Change layout if a lookup list, place radio buttons before labels
