@@ -73,7 +73,7 @@ function OutputStrings (BaseString) {
 
     ns.search = {
         ADDITIONAL_INFORMATION_HEADER: t.s('ADDITIONAL_INFORMATION'),
-        ADDITIONAL_INFORMATION: t.s('For additional information on advanced search search syntax please see the Ansible Tower'),
+        ADDITIONAL_INFORMATION: t.s('For additional information on advanced search syntax please see the Ansible Tower'),
         CLEAR_ALL: t.s('CLEAR ALL'),
         DOCUMENTATION: t.s('documentation'),
         EXAMPLES: t.s('EXAMPLES'),
