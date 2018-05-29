@@ -30,6 +30,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
 
                 scope.period="month";
                 scope.jobType="all";
+                scope.status="both";
 
                 scope.$watch('data', function(value) {
                     if (value) {
@@ -43,7 +44,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
                             scope.data = data;
                             scope.period = period;
                             scope.jobType = jobType;
-                            scope.status = status;
+                            scope.status = Object.is(status, undefined) ? scope.status : status;
                         });
                 }
 
