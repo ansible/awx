@@ -1073,7 +1073,7 @@ class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
         validated_data['expires'] = now() + timedelta(
             seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
         )
-        obj = super(OAuth2TokenSerializer, self).create(validated_data)
+        obj = super(UserAuthorizedTokenSerializer, self).create(validated_data)
         obj.save()
         if obj.application is not None:
             RefreshToken.objects.create(

@@ -42,11 +42,11 @@ function AddTokensController (
         required: true,
         _component: 'at-input-select',
         _data: [
-            strings.get('add.SCOPE_PLACEHOLDER'),
-            strings.get('add.SCOPE_READ_LABEL'),
-            strings.get('add.SCOPE_WRITE_LABEL')
+            { label: strings.get('add.SCOPE_PLACEHOLDER'), value: '' },
+            { label: strings.get('add.SCOPE_READ_LABEL'), value: 'read' },
+            { label: strings.get('add.SCOPE_WRITE_LABEL'), value: 'write' }
         ],
-        _exp: 'choice for (index, choice) in state._data',
+        _exp: 'choice.value as choice.label for (index, choice) in state._data',
         _format: 'array'
     };
 
