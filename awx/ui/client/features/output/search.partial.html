@@ -37,7 +37,7 @@
 </form>
 
 <div class="jobz-tagz">
-    <div class="TagComponentWrapper" ng-repeat="tag in vm.tags track by $index">
+    <div ng-repeat="tag in vm.tags track by $index">
         <at-tag tag="tag" remove-tag="vm.removeSearchTag($index)"></at-tag>
     </div>
     <div class="jobz-searchClearAllContainer">

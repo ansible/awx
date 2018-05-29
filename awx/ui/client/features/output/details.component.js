@@ -389,27 +389,29 @@ function getResultTracebackDetails () {
 }
 
 function getCredentialDetails () {
-    const credential = resource.model.get('summary_fields.credential');
+    const credentials = resource.model.get('summary_fields.credentials');
 
-    if (!credential) {
+    let credentialTags = [];
+
+    if (!credentials || credentials.length < 1) {
         return null;
     }
 
-    let label = strings.get('labels.CREDENTIAL');
+    credentialTags = credentials.map((cred) => buildCredentialDetails(cred));
 
-    if (resource.type === 'playbook') {
-        label = strings.get('labels.MACHINE_CREDENTIAL');
-    }
+    const label = strings.get('labels.CREDENTIAL');
+    const value = credentialTags;
 
-    if (resource.type === 'inventory') {
-        label = strings.get('labels.SOURCE_CREDENTIAL');
-    }
+    return { label, value };
+}
 
+function buildCredentialDetails (credential) {
+    const icon = `${credential.kind}`;
     const link = `/#/credentials/${credential.id}`;
     const tooltip = strings.get('tooltips.CREDENTIAL');
     const value = $filter('sanitize')(credential.name);
 
-    return { label, link, tooltip, value };
+    return { icon, link, tooltip, value };
 }
 
 function getForkDetails () {
@@ -679,7 +681,7 @@ function JobDetailsController (
         vm.launchedBy = getLaunchedByDetails();
         vm.jobExplanation = getJobExplanationDetails();
         vm.verbosity = getVerbosityDetails();
-        vm.credential = getCredentialDetails();
+        vm.credentials = getCredentialDetails();
         vm.forks = getForkDetails();
         vm.limit = getLimitDetails();
         vm.instanceGroup = getInstanceGroupDetails();
