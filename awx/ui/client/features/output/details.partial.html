@@ -216,15 +216,18 @@
 </div>
 
 <!-- CREDENTIAL DETAIL -->
-<div class="JobResults-resultRow" ng-if="vm.credential">
-    <label class="JobResults-resultRowLabel">{{ vm.credential.label }}</label>
+<div class="JobResults-resultRow" ng-if="vm.credentials">
+    <label class="JobResults-resultRowLabel">{{ vm.credentials.label }}</label>
     <div class="JobResults-resultRowText">
-        <a href="{{ vm.credential.link }}"
-            aw-tool-tip="{{ vm.credential.tooltip }}"
+        <at-tag
+            ng-repeat="credential in vm.credentials.value"
+            tag="credential.value"
+            icon="{{ credential.icon }}"
+            link="{{ credential.link }}"
+            aw-tool-tip="{{ credential.tooltip }}"
             data-placement="top"
-            data-tip-watch="vm.credential.tooltip">
-            {{ vm.credential.value }}
-        </a>
+            data-tip-watch="credential.tooltip">
+        </at-tag>
     </div>
 </div>
 
