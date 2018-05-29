@@ -170,7 +170,7 @@ os-service-types==1.2.0   # via openstacksdk
 packaging==17.1           # via deprecation
 pathlib2==2.3.0           # via azure-datalake-store
 pbr==3.1.1                # via keystoneauth1, openstacksdk, os-service-types, shade, stevedore
-pexpect==4.5.0
+pexpect==4.6.0
 psphere==0.5.2
 psutil==5.4.3
 psycopg2==2.7.3.2
