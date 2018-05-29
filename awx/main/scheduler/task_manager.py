@@ -234,8 +234,10 @@ class TaskManager():
     def get_dependent_jobs_for_inv_and_proj_update(self, job_obj):
         return [{'type': j.model_to_str(), 'id': j.id} for j in job_obj.dependent_jobs.all()]
 
-    def start_task(self, task, rampart_group, dependent_tasks=[]):
+    def start_task(self, task, rampart_group, dependent_tasks=None):
         from awx.main.tasks import handle_work_error, handle_work_success
+
+        dependent_tasks = dependent_tasks or []
 
         task_actual = {
             'type': get_type_for_model(type(task)),
