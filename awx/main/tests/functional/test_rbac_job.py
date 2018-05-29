@@ -19,6 +19,8 @@ from awx.main.models import (
     Credential
 )
 
+from crum import impersonate
+
 
 @pytest.fixture
 def normal_job(deploy_jobtemplate):
@@ -151,11 +153,14 @@ class TestJobRelaunchAccess:
             ask_inventory_on_launch=True,
             ask_credential_on_launch=True
         )
-        job_with_links = Job.objects.create(name='existing-job', inventory=inventory, job_template=job_template)
+        u = user('user1', False)
+        job_with_links = Job.objects.create(
+            name='existing-job', inventory=inventory, job_template=job_template,
+            created_by=u
+        )
         job_with_links.credentials.add(machine_credential)
         JobLaunchConfig.objects.create(job=job_with_links, inventory=inventory)
         job_with_links.launch_config.credentials.add(machine_credential)  # credential was prompted
-        u = user('user1', False)
         job_template.execute_role.members.add(u)
         if inv_access:
             job_with_links.inventory.use_role.members.add(u)
@@ -225,14 +230,29 @@ class TestJobRelaunchAccess:
 
     @pytest.mark.job_runtime_vars
     def test_callback_relaunchable_by_user(self, job_template, rando):
-        job = job_template.create_unified_job(
-            _eager_fields={'launch_type': 'callback'},
-            limit='host2'
-        )
+        with impersonate(rando):
+            job = job_template.create_unified_job(
+                _eager_fields={'launch_type': 'callback'},
+                limit='host2'
+            )
         assert 'limit' in job.launch_config.prompts_dict()  # sanity assertion
         job_template.execute_role.members.add(rando)
         can_access, messages = rando.can_access_with_errors(Job, 'start', job, validate_license=False)
         assert can_access, messages
+
+    def test_other_user_prompts(self, inventory, project, alice, bob):
+        jt = JobTemplate.objects.create(
+            name='testjt', inventory=inventory, project=project,
+            ask_credential_on_launch=True,
+            ask_variables_on_launch=True)
+        jt.execute_role.members.add(alice, bob)
+
+        with impersonate(bob):
+            job = jt.create_unified_job(extra_vars={'job_var': 'foo2'})
+
+        assert 'job_var' in job.launch_config.extra_data
+        assert bob.can_access(Job, 'start', job, validate_license=False)
+        assert not alice.can_access(Job, 'start', job, validate_license=False)
 
 
 @pytest.mark.django_db

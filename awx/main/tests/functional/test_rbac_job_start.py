@@ -87,6 +87,7 @@ class TestJobRelaunchAccess:
         for cred in job_with_prompts.credentials.all():
             cred.use_role.members.add(rando)
         job_with_prompts.inventory.use_role.members.add(rando)
+        job_with_prompts.created_by = rando
         assert rando.can_access(Job, 'start', job_with_prompts)
 
     def test_no_relaunch_after_limit_change(self, inventory, machine_credential, rando):

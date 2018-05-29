@@ -11,6 +11,8 @@ from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
 
 from awx.main.models import JobTemplate, User, Job
 
+from crum import impersonate
+
 
 @pytest.mark.django_db
 def test_extra_credentials(get, organization_factory, job_template_factory, credential):
@@ -33,7 +35,8 @@ def test_job_relaunch_permission_denied_response(
     jt.credentials.add(machine_credential)
     jt_user = User.objects.create(username='jobtemplateuser')
     jt.execute_role.members.add(jt_user)
-    job = jt.create_unified_job()
+    with impersonate(jt_user):
+        job = jt.create_unified_job()
 
     # User capability is shown for this
     r = get(job.get_absolute_url(), jt_user, expect=200)
@@ -44,6 +47,29 @@ def test_job_relaunch_permission_denied_response(
     r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, jt_user, expect=403)
     assert 'launched with prompted fields' in r.data['detail']
     assert 'do not have permission' in r.data['detail']
+
+
+@pytest.mark.django_db
+def test_job_relaunch_permission_denied_response_other_user(get, post, inventory, project, alice, bob):
+    '''
+    Asserts custom permission denied message corresponding to
+    awx/main/tests/functional/test_rbac_job.py::TestJobRelaunchAccess::test_other_user_prompts
+    '''
+    jt = JobTemplate.objects.create(
+        name='testjt', inventory=inventory, project=project,
+        ask_credential_on_launch=True,
+        ask_variables_on_launch=True)
+    jt.execute_role.members.add(alice, bob)
+    with impersonate(bob):
+        job = jt.create_unified_job(extra_vars={'job_var': 'foo2'})
+
+    # User capability is shown for this
+    r = get(job.get_absolute_url(), alice, expect=200)
+    assert r.data['summary_fields']['user_capabilities']['start']
+
+    # Job has prompted data, launch denied w/ message
+    r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, alice, expect=403)
+    assert 'Job was launched with prompts provided by another user' in r.data['detail']
 
 
 @pytest.mark.django_db
