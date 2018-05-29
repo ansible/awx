@@ -32,9 +32,9 @@ function AddTokensController (
 
     vm.form.scope = {
         choices: [
-            '',
-            'read',
-            'write'
+            [null, ''],
+            ['read', strings.get('add.SCOPE_READ_LABEL')],
+            ['write', strings.get('add.SCOPE_WRITE_LABEL')]
         ],
         help_text: strings.get('add.SCOPE_HELP_TEXT'),
         id: 'scope',
@@ -42,12 +42,12 @@ function AddTokensController (
         required: true,
         _component: 'at-input-select',
         _data: [
-            strings.get('add.SCOPE_PLACEHOLDER'),
-            strings.get('add.SCOPE_READ_LABEL'),
-            strings.get('add.SCOPE_WRITE_LABEL')
+            [null, ''],
+            ['read', strings.get('add.SCOPE_READ_LABEL')],
+            ['write', strings.get('add.SCOPE_WRITE_LABEL')]
         ],
-        _exp: 'choice for (index, choice) in state._data',
-        _format: 'array'
+        _exp: 'choice[1] for (index, choice) in state._data',
+        _format: 'selectFromOptions'
     };
 
     vm.form.save = payload => {
