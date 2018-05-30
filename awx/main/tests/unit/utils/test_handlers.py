@@ -127,6 +127,17 @@ def test_invalid_kwarg_to_real_handler():
     assert not hasattr(handler, 'verify_cert')
 
 
+def test_protocol_not_specified():
+    settings = LazySettings()
+    settings.configure(**{
+        'LOG_AGGREGATOR_HOST': 'https://server.invalid',
+        'LOG_AGGREGATOR_PORT': 22222,
+        'LOG_AGGREGATOR_PROTOCOL': None  # awx/settings/defaults.py
+    })
+    handler = AWXProxyHandler().get_handler(custom_settings=settings)
+    assert isinstance(handler, logging.NullHandler)
+
+
 def test_base_logging_handler_emit_system_tracking(dummy_log_record):
     handler = BaseHandler(host='127.0.0.1', indv_facts=True)
     handler.setFormatter(LogstashFormatter())
