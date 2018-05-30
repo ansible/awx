@@ -90,7 +90,6 @@ def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_
         tower_host = "https://{}".format(tower_host)
     inventory_url = urljoin(tower_host, "/api/v2/inventories/{}/script/?hostvars=1&towervars=1&all=1".format(inventory.replace('/', '')))
     config_url = urljoin(tower_host, "/api/v2/config/")
-    reason = None
     try:
         if license_type != "open":
             config_response = requests.get(config_url,
@@ -102,22 +101,22 @@ def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_
                     raise RuntimeError("Tower server licenses must match: source: {} local: {}".format(source_type,
                                                                                                        license_type))
             else:
-                raise RuntimeError("Failed to validate the license of the remote Tower: {}".format(config_response.data))
+                raise RuntimeError("Failed to validate the license of the remote Tower: {}".format(config_response))
 
         response = requests.get(inventory_url,
                                 auth=HTTPBasicAuth(tower_user, tower_pass),
                                 verify=not ignore_ssl)
+        if not response.ok:
+            # If the GET /api/v2/inventories/N/script is not HTTP 200, print the error code
+            raise RuntimeError("Connection to remote host failed: {}".format(response))
         try:
-            json_response = response.json()
+            # Attempt to parse JSON
+            return response.json()
         except (ValueError, TypeError) as e:
-            reason = "Failed to parse json from host: {}".format(e)
-        if response.ok:
-            return json_response
-        if not reason:
-            reason = json_response.get('detail', 'Retrieving Tower Inventory Failed')
+            # If the JSON parse fails, print the ValueError
+            raise RuntimeError("Failed to parse json from host: {}".format(e)
     except requests.ConnectionError as e:
-        reason = "Connection to remote host failed: {}".format(e)
-    raise RuntimeError(reason)
+        raise RuntimeError("Connection to remote host failed: {}".format(e))
 
 
 def main():
