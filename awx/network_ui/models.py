@@ -42,11 +42,6 @@ class Topology(models.Model):
         return self.name
 
 
-class Client(models.Model):
-
-    id = models.AutoField(primary_key=True,)
-
-
 class Interface(models.Model):
 
     id = models.AutoField(primary_key=True,)

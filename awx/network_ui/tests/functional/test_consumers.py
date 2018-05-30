@@ -8,7 +8,7 @@ patch('channels.auth.channel_session_user_from_http', lambda x: x).start()
 
 from awx.main.models import Inventory  # noqa
 from awx.network_ui.consumers import parse_inventory_id, networking_events_dispatcher, send_snapshot # noqa
-from awx.network_ui.models import Topology, Device, Link, Interface, TopologyInventory, Client # noqa
+from awx.network_ui.models import Topology, Device, Link, Interface, TopologyInventory # noqa
 import awx # noqa
 import awx.network_ui # noqa
 import awx.network_ui.consumers # noqa
@@ -181,7 +181,7 @@ def test_ws_connect_new_topology():
     mock_user = mock.Mock()
     message = mock.MagicMock(user=mock_user)
     logger = logging.getLogger('awx.network_ui.consumers')
-    with mock.patch('awx.network_ui.consumers.Client') as client_mock,\
+    with mock.patch('awx.network_ui.consumers.uuid') as client_mock,\
             mock.patch('awx.network_ui.consumers.Topology') as topology_mock,\
             mock.patch('channels.Group'),\
             mock.patch('awx.network_ui.consumers.send_snapshot') as send_snapshot_mock,\
@@ -194,13 +194,13 @@ def test_ws_connect_new_topology():
             mock.patch.object(Link, 'objects'),\
             mock.patch.object(Interface, 'objects'),\
             mock.patch.object(Inventory, 'objects') as inventory_objects:
-        client_mock.return_value.pk = 777
+        client_mock.uuid4 = mock.MagicMock(return_value="777")
         topology_mock.return_value = Topology(
             name="topology", scale=1.0, panX=0, panY=0, pk=999)
         inventory_objects.get.return_value = mock.Mock(admin_role=[mock_user])
         awx.network_ui.consumers.ws_connect(message)
         message.reply_channel.send.assert_has_calls([
-            mock.call({'text': '["id", 777]'}),
+            mock.call({'text': '["id", "777"]'}),
             mock.call({'text': '["topology_id", 999]'}),
             mock.call(
                 {'text': '["Topology", {"scale": 1.0, "name": "topology", "device_id_seq": 0, "panY": 0, "panX": 0, "topology_id": 999, "link_id_seq": 0}]'}),
@@ -212,7 +212,7 @@ def test_ws_connect_existing_topology():
     mock_user = mock.Mock()
     message = mock.MagicMock(user=mock_user)
     logger = logging.getLogger('awx.network_ui.consumers')
-    with mock.patch('awx.network_ui.consumers.Client') as client_mock,\
+    with mock.patch('awx.network_ui.consumers.uuid') as client_mock,\
             mock.patch('awx.network_ui.consumers.send_snapshot') as send_snapshot_mock,\
             mock.patch('channels.Group'),\
             mock.patch.object(logger, 'warning'),\
@@ -226,7 +226,7 @@ def test_ws_connect_existing_topology():
             mock.patch.object(Inventory, 'objects') as inventory_objects:
         topology_inventory_objects_mock.filter.return_value.values_list.return_value = [
             1]
-        client_mock.return_value.pk = 888
+        client_mock.uuid4 = mock.MagicMock(return_value="888")
         topology_objects_mock.get.return_value = Topology(pk=1001,
                                                           id=1,
                                                           name="topo",
@@ -238,7 +238,7 @@ def test_ws_connect_existing_topology():
         inventory_objects.get.return_value = mock.Mock(admin_role=[mock_user])
         awx.network_ui.consumers.ws_connect(message)
         message.reply_channel.send.assert_has_calls([
-            mock.call({'text': '["id", 888]'}),
+            mock.call({'text': '["id", "888"]'}),
             mock.call({'text': '["topology_id", 1001]'}),
             mock.call(
                 {'text': '["Topology", {"scale": 1.0, "name": "topo", "device_id_seq": 1, "panY": 0, "panX": 0, "topology_id": 1001, "link_id_seq": 1}]'}),

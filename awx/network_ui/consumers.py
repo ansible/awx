@@ -1,13 +1,15 @@
 # Copyright (c) 2017 Red Hat, Inc
 import channels
 from channels.auth import channel_session_user, channel_session_user_from_http
-from awx.network_ui.models import Topology, Device, Link, Client, Interface
+from awx.network_ui.models import Topology, Device, Link, Interface
 from awx.network_ui.models import TopologyInventory
 from awx.main.models.inventory import Inventory
 import urlparse
 from django.db.models import Q
 from collections import defaultdict
 import logging
+import uuid
+import six
 
 
 from awx.network_ui.utils import transform_dict
@@ -245,11 +247,10 @@ def ws_connect(message):
     topology_id = topology.pk
     message.channel_session['topology_id'] = topology_id
     channels.Group("topology-%s" % topology_id).add(message.reply_channel)
-    client = Client()
-    client.save()
-    message.channel_session['client_id'] = client.pk
-    channels.Group("client-%s" % client.pk).add(message.reply_channel)
-    message.reply_channel.send({"text": json.dumps(["id", client.pk])})
+    client_id = six.text_type(uuid.uuid4())
+    message.channel_session['client_id'] = client_id
+    channels.Group("client-%s" % client_id).add(message.reply_channel)
+    message.reply_channel.send({"text": json.dumps(["id", client_id])})
     message.reply_channel.send({"text": json.dumps(["topology_id", topology_id])})
     topology_data = transform_dict(dict(id='topology_id',
                                         name='name',

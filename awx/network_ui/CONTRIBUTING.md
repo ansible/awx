@@ -33,7 +33,7 @@ information about the interfaces on the devices and the links connecting those
 interfaces.
 
 These requirements determine the database schema needed for the network UI which
-requires these models: Topology, Device, Interface, Link, Client, and TopologyInventory.
+requires these models: Topology, Device, Interface, Link, and TopologyInventory.
 
 ![Models](designs/models.png)
 
@@ -46,7 +46,6 @@ The models are:
 * Link - a physical connection between two devices to their respective interfaces
 * Topology - a collection of devices and links
 * TopologyInventory - a mapping between topologies and Tower inventories
-* Client - a UI client session
 
 
 Network UI Websocket Protocol
@@ -117,7 +116,7 @@ the database.
 Client Tracking
 ---------------
 
-Each user session to the network UI canvas is tracked with the `Client` model.  Multiple
+Each user session to the network UI canvas is tracked with the `client_id` param.  Multiple
 clients can view and interact with the network UI canvas at a time.  They will see each other's
 edits to the canvas in real time.  This works by broadcasting the canvas change events to
 all clients viewing the same topology.
