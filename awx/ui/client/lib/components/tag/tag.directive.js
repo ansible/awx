@@ -8,6 +8,8 @@ function atTag () {
         templateUrl,
         scope: {
             tag: '=',
+            icon: '@?',
+            link: '@?',
             removeTag: '&?',
         },
     };
