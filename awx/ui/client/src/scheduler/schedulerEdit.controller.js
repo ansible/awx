@@ -1,11 +1,11 @@
 export default ['$filter', '$state', '$stateParams', 'Wait', '$scope', 'moment',
 '$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
 'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
-'WorkflowJobTemplateModel', 'TemplatesStrings', 'scheduleResolve', 'timezonesResolve',
+'WorkflowJobTemplateModel', 'TemplatesStrings', 'scheduleResolve', 'timezonesResolve', 'Alert', 'i18n',
 function($filter, $state, $stateParams, Wait, $scope, moment,
     $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
     GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI,
-    WorkflowJobTemplate, TemplatesStrings, scheduleResolve, timezonesResolve
+    WorkflowJobTemplate, TemplatesStrings, scheduleResolve, timezonesResolve, Alert, i18n
 ) {
 
     let schedule, scheduler, scheduleCredentials = [];
@@ -249,8 +249,15 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                 .then((responses) => {
                     let launchOptions = responses[0].data,
                         launchConf = responses[1].data;
+                        scheduleCredentials = responses[2].data.results;
 
-                    scheduleCredentials = responses[2].data.results;
+                    if (launchConf.passwords_needed_to_start &&
+                        launchConf.passwords_needed_to_start.length > 0 &&
+                        !launchConf.ask_credential_on_launch
+                    ) {
+                        Alert(i18n._('Warning'), i18n._('This Job Template has a default credential that requires a password before launch.  Adding or editing schedules is prohibited while this credential is selected.  To add or edit a schedule, credentials that require a password must be removed from the Job Template.'), 'alert-info');
+                        $scope.credentialRequiresPassword = true;
+                    }
 
                     let watchForPromptChanges = () => {
                         let promptValuesToWatch = [

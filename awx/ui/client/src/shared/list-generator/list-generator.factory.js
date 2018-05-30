@@ -314,7 +314,7 @@ export default ['$compile', 'Attr', 'Icon',
                     innerTable += `, {'List-tableRow--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}`;
                 }
 
-                innerTable += (list.disableRow) ? `, {true: 'List-tableRow--disabled'}[${list.iterator}.${list.disableRowValue}]` : "";
+                innerTable += (list.disableRow) ? `, {'List-tableRow--disabled': ${list.disableRowValue}}` : "";
 
                 if (list.multiSelect) {
                     innerTable += ", " + list.iterator + ".isSelected ? 'is-selected-row' : ''";
@@ -338,13 +338,13 @@ export default ['$compile', 'Attr', 'Icon',
                 }
 
                 if (list.multiSelect) {
-                    innerTable += '<td class="col-xs-1 select-column List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\" disabled="'+list.iterator + '.' + list.disableRowValue+'"></select-list-item></td>';
+                    innerTable += '<td class="col-xs-1 select-column List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\" disabled="'+list.disableRowValue+'"></select-list-item></td>';
                 }
 
                 // Change layout if a lookup list, place radio buttons before labels
                 if (options.mode === 'lookup') {
                     if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
-                        innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator})"></td>`;
+                        innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator})" ng-disabled="${list.disableRowValue}"></td>`;
                     }
                     else { // its assumed that options.input_type = checkbox
                         innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +

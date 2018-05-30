@@ -12,7 +12,8 @@ export default [ 'templateUrl', '$compile', 'generateList',
         scope: {
           promptData: '=',
           credentialPasswordsForm: '=',
-          preventCredsWithPasswords: '<'
+          preventCredsWithPasswords: '<',
+          readOnlyPrompts: '<'
         },
         templateUrl: templateUrl('templates/prompt/steps/credential/prompt-credential'),
         controller: promptCredentialController,
@@ -42,6 +43,9 @@ export default [ 'templateUrl', '$compile', 'generateList',
                         dataPlacement: 'top',
                     };
                 }
+
+                list.disableRow = "{{ readOnlyPrompts }}";
+                list.disableRowValue = "readOnlyPrompts";
 
                 let html = GenerateList.build({
                     list: list,

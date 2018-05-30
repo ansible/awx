@@ -11,7 +11,8 @@ export default [ 'templateUrl',
     return {
         scope: {
             promptData: '=',
-            surveyForm: '='
+            surveyForm: '=',
+            readOnlyPrompts: '<'
         },
         templateUrl: templateUrl('templates/prompt/steps/survey/prompt-survey'),
         controller: promptSurvey,

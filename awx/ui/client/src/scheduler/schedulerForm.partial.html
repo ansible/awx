@@ -28,7 +28,7 @@
                     name="schedulerName"
                     id="schedulerName"
                     ng-model="schedulerName" required
-                    ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                    ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                     placeholder="Schedule name">
                 <div class="error"
                     ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required">
@@ -42,7 +42,7 @@
                 </label>
                 <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
                     <scheduler-date-picker date="schedulerStartDt"
-                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
+                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
                     </scheduler-date-picker>
                 </div>
                 <div class="error"
@@ -67,7 +67,7 @@
                     <input name="schedulerStartHour"
                         id="schedulerStartHour"
                         sch-spinner="scheduler_form"
-                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                         class="scheduler-time-spinner
                             ScheduleTime-input SpinnerInput"
                         aw-spinner="schedulerStartHour"
@@ -83,7 +83,7 @@
                     <input name="schedulerStartMinute"
                         id="schedulerStartMinute"
                         sch-spinner="scheduler_form"
-                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                         class="scheduler-time-spinner
                             SchedulerTime-input SpinnerInput"
                         aw-spinner="schedulerStartMinute"
@@ -99,7 +99,7 @@
                     <input name="schedulerStartSecond"
                         id="schedulerStartSecond"
                         sch-spinner="scheduler_form"
-                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                         class="scheduler-time-spinner
                             SchedulerTime-input SpinnerInput"
                         aw-spinner="schedulerStartSecond"
@@ -121,7 +121,7 @@
                     Local Time Zone
                 </label>
                 <select
-                    ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                    ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                     name="schedulerTimeZone"
                     id="schedulerTimeZone"
                     ng-model="schedulerTimeZone"
@@ -137,7 +137,7 @@
                     Repeat frequency
                 </label>
                 <select name="schedulerFrequency"
-                    ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                    ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                     id="schedulerFrequency"
                     class="MakeSelect2"
                     ng-model="schedulerFrequency"
@@ -166,7 +166,7 @@
                     <input name="schedulerInterval"
                         id="schedulerInterval"
                         sch-spinner="scheduler_form"
-                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                         class="scheduler-spinner
                             SpinnerInput"
                         aw-spinner="schedulerInterval"
@@ -193,7 +193,7 @@
                         <label class="Form-inputLabel">
                             <span class="red-text">*</span>
                             <input type="radio" value="day"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 ng-model="$parent.monthlyRepeatOption"
                                 ng-change="monthlyRepeatChange()"
                                 name="monthlyRepeatOption"
@@ -205,7 +205,7 @@
                         name="monthDay"
                         id="monthDay"
                         sch-spinner="scheduler_form"
-                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                         class="scheduler-spinner SpinnerInput"
                         aw-spinner="$parent.monthDay"
                         ng-model="$parent.monthDay"
@@ -224,7 +224,7 @@
                         <label class="Form-inputLabel">
                             <span class="red-text">*</span>
                             <input type="radio"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 value="other"
                                 ng-model="$parent.monthlyRepeatOption"
                                 ng-change="monthlyRepeatChange()"
@@ -239,7 +239,7 @@
                             id="monthlyOccurrence"
                             ng-model="$parent.monthlyOccurrence"
                             ng-options="o.name for o in occurrences"
-                            ng-disabled="monthlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="monthlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class=" MakeSelect2 form-control
                                 input-sm
                                 RepeatFrequencyOptions-spacedSelect
@@ -250,7 +250,7 @@
                             id="monthlyWeekDay"
                             ng-model="$parent.monthlyWeekDay"
                             ng-options="w.name for w in weekdays"
-                            ng-disabled="monthlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="monthlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="MakeSelect2 form-control input-sm" >
                         </select>
                     </div>
@@ -263,7 +263,7 @@
                         <span class="red-text">*</span>
                         <label class="Form-inputLabel">
                             <input type="radio"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 value="month"
                                 ng-model="$parent.yearlyRepeatOption"
                                 ng-change="yearlyRepeatChange()"
@@ -278,7 +278,7 @@
                             id="yearlyMonth"
                             ng-model="$parent.yearlyMonth"
                             ng-options="m.name for m in months"
-                            ng-disabled="yearlyRepeatOption != 'month' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="yearlyRepeatOption != 'month' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="MakeSelect2 form-control input-sm
                                 RepeatFrequencyOptions-spacedSelect"
                         >
@@ -286,7 +286,7 @@
                         <input name="yearlyMonthDay"
                             id="yearlyMonthDay"
                             sch-spinner="scheduler_form"
-                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="scheduler-spinner
                                 SpinnerInput"
                             aw-spinner="$parent.yearlyMonthDay"
@@ -308,7 +308,7 @@
                         <label class="Form-inputLabel">
                             <span class="red-text">*</span>
                             <input type="radio"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 value="other"
                                 ng-model="$parent.yearlyRepeatOption"
                                 ng-change="yearlyRepeatChange()"
@@ -325,7 +325,7 @@
                             id="yearlyOccurrence"
                             ng-model="$parent.yearlyOccurrence"
                             ng-options="o.name for o in occurrences"
-                            ng-disabled="yearlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="yearlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="MakeSelect2
                                 form-control input-sm
                                 RepeatFrequencyOptions-spacedSelect
@@ -337,7 +337,7 @@
                             id="yearlyWeekDay"
                             ng-model="$parent.yearlyWeekDay"
                             ng-options="w.name for w in weekdays"
-                            ng-disabled="yearlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="yearlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="MakeSelect2
                                 form-control input-sm
                                 RepeatFrequencyOptions-spacedSelect
@@ -348,7 +348,7 @@
                             id="yearlyOtherMonth"
                             ng-model="$parent.yearlyOtherMonth"
                             ng-options="m.name for m in months"
-                            ng-disabled="yearlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="yearlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="MakeSelect2
                                 form-control input-sm
                                 RepeatFrequencyOptions-thirdSelect">
@@ -370,7 +370,7 @@
                             data-toggle="buttons-checkbox"
                             id="weekdaySelect">
                             <button type="button"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 ng-class="weekDaySUClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -379,7 +379,7 @@
                                 Sun
                             </button>
                             <button type="button"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 ng-class="weekDayMOClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -388,7 +388,7 @@
                                 Mon
                             </button>
                             <button type="button"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 ng-class="weekDayTUClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -397,7 +397,7 @@
                                 Tue
                             </button>
                             <button type="button"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 ng-class="weekDayWEClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -406,7 +406,7 @@
                                 Wed
                             </button>
                             <button type="button"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 ng-class="weekDayTHClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -415,7 +415,7 @@
                                 Thu
                             </button>
                             <button type="button"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 ng-class="weekDayFRClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -424,7 +424,7 @@
                                 Fri
                             </button>
                             <button type="button"
-                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                                 ng-class="weekDaySAClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -448,7 +448,7 @@
                     </label>
                     <div>
                         <select id="schedulerEnd"
-                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             name="schedulerEnd"
                             ng-model="$parent.schedulerEnd"
                             ng-options="e.name for e in endOptions"
@@ -470,7 +470,7 @@
                             ng-name="schedulerOccurrenceCount"
                             ng-id="schedulerOccurrenceCount"
                             sch-spinner="scheduler_form"
-                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="scheduler-spinner
                                 SpinnerInput"
                             aw-spinner="$parent.schedulerOccurrenceCount"
@@ -492,7 +492,7 @@
                     </label>
                     <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
                         <scheduler-date-picker date="$parent.schedulerEndDt"
-                          disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
+                          disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
                         </scheduler-date-picker>
                     </div>
                     <div class="error"
@@ -518,7 +518,7 @@
                         <input name="schedulerEndHour"
                             id="schedulerEndHour"
                             sch-spinner="scheduler_form"
-                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="scheduler-time-spinner
                                 ScheduleTime-input SpinnerInput"
                             aw-spinner="$parent.schedulerEndHour"
@@ -534,7 +534,7 @@
                         <input name="schedulerEndMinute"
                             id="$parent.schedulerEndMinute"
                             sch-spinner="scheduler_form"
-                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="scheduler-time-spinner
                                 SchedulerTime-input SpinnerInput"
                             aw-spinner="$parent.schedulerEndMinute"
@@ -550,7 +550,7 @@
                         <input name="schedulerEndSecond"
                             id="schedulerEndSecond"
                             sch-spinner="scheduler_form"
-                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
                             class="scheduler-time-spinner
                                 SchedulerTime-input SpinnerInput"
                             aw-spinner="$parent.schedulerEndSecond"
@@ -656,7 +656,7 @@
                 </div>
 
             </label>
-            <div ng-class="{'CodeMirror--disabled': !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)}">
+            <div ng-class="{'CodeMirror--disabled': !(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword}">
                 <textarea rows="6" ng-model="extraVars" name="Scheduler-extraVars" class="form-control" id="SchedulerForm-extraVars"></textarea>
             </div>
         </div>
@@ -665,26 +665,26 @@
         <button type="button"
             class="btn btn-sm Form-primaryButton Form-primaryButton--noMargin"
             id="schedule_prompt_btn"
-            ng-show="(schedule_obj.summary_fields.user_capabilities.edit || canAdd) && showPromptButton"
+            ng-show="showPromptButton"
             ng-click="prompt()">Prompt</button>
         <button type="button"
             class="btn btn-sm Form-cancelButton"
             id="schedule_cancel_btn"
-            ng-show="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+            ng-show="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
             ng-click="formCancel()">Close</button>
         <button type="button"
             class="btn btn-sm Form-cancelButton"
             id="schedule_cancel_btn"
-            ng-show="(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+            ng-show="(schedule_obj.summary_fields.user_capabilities.edit || canAdd) && !credentialRequiresPassword"
             ng-click="formCancel()">Cancel</button>
-        <div class="SchedulerForm-promptSave" ng-show="(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
+        <div class="SchedulerForm-promptSave" ng-show="(schedule_obj.summary_fields.user_capabilities.edit || canAdd) && !credentialRequiresPassword">
             <div ng-if="promptModalMissingReqFields" class="SchedulerForm-promptSaveTooltip" aw-tool-tip="Additional information required in the Prompt area before saving" data-placement="top"></div>
             <button type="button"
                 class="btn btn-sm Form-saveButton"
                 id="schedule_save_btn"
                 ng-click="saveSchedule()"
-                ng-disabled="!schedulerIsValid || promptModalMissingReqFields || (preview_list.isEmpty && scheduler_form.$dirty)"> Save</button>
+                ng-disabled="!schedulerIsValid || promptModalMissingReqFields || (preview_list.isEmpty && scheduler_form.$dirty) || credentialRequiresPassword"> Save</button>
         </div>
     </div>
-    <prompt prompt-data="promptData" action-text="{{:: strings.get('prompt.CONFIRM')}}" prevent-creds-with-passwords="preventCredsWithPasswords"></prompt>
+<prompt prompt-data="promptData" prevent-creds-with-passwords="preventCredsWithPasswords" action-text="{{:: strings.get('prompt.CONFIRM')}}" read-only-prompts="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"></prompt>
 </div>

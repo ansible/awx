@@ -482,19 +482,19 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                     }
 
                                     $scope.toggle_row = function(selectedRow) {
+                                        if ($scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) {
+                                            $scope.job_templates.forEach(function(row, i) {
+                                                if (row.id === selectedRow.id) {
+                                                    $scope.job_templates[i].checked = 1;
+                                                    $scope.selection[list.iterator] = {
+                                                        id: row.id,
+                                                        name: row.name
+                                                    };
 
-                                        $scope.job_templates.forEach(function(row, i) {
-                                            if (row.id === selectedRow.id) {
-                                                $scope.job_templates[i].checked = 1;
-                                                $scope.selection[list.iterator] = {
-                                                    id: row.id,
-                                                    name: row.name
-                                                };
-
-                                                $scope.templateManuallySelected(row);
-                                            }
-                                        });
-
+                                                    $scope.templateManuallySelected(row);
+                                                }
+                                            });
+                                        }
                                     };
 
                                     $scope.$watch('selectedTemplate', () => {
@@ -559,19 +559,19 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                     }
 
                                     $scope.toggle_row = function(selectedRow) {
+                                        if ($scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) {
+                                            $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                                if (row.id === selectedRow.id) {
+                                                    $scope.workflow_inventory_sources[i].checked = 1;
+                                                    $scope.selection[list.iterator] = {
+                                                        id: row.id,
+                                                        name: row.name
+                                                    };
 
-                                        $scope.workflow_inventory_sources.forEach(function(row, i) {
-                                            if (row.id === selectedRow.id) {
-                                                $scope.workflow_inventory_sources[i].checked = 1;
-                                                $scope.selection[list.iterator] = {
-                                                    id: row.id,
-                                                    name: row.name
-                                                };
-
-                                                $scope.templateManuallySelected(row);
-                                            }
-                                        });
-
+                                                    $scope.templateManuallySelected(row);
+                                                }
+                                            });
+                                        }
                                     };
 
                                     $scope.$watch('selectedTemplate', () => {
@@ -636,19 +636,19 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                     }
 
                                     $scope.toggle_row = function(selectedRow) {
+                                        if ($scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit) {
+                                            $scope.projects.forEach(function(row, i) {
+                                                if (row.id === selectedRow.id) {
+                                                    $scope.projects[i].checked = 1;
+                                                    $scope.selection[list.iterator] = {
+                                                        id: row.id,
+                                                        name: row.name
+                                                    };
 
-                                        $scope.projects.forEach(function(row, i) {
-                                            if (row.id === selectedRow.id) {
-                                                $scope.projects[i].checked = 1;
-                                                $scope.selection[list.iterator] = {
-                                                    id: row.id,
-                                                    name: row.name
-                                                };
-
-                                                $scope.templateManuallySelected(row);
-                                            }
-                                        });
-
+                                                    $scope.templateManuallySelected(row);
+                                                }
+                                            });
+                                        }
                                     };
 
                                     $scope.$watch('selectedTemplate', () => {
@@ -708,6 +708,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                 delete list.fields.labels;
                                 delete list.fieldActions;
                                 list.fields.name.columnClass = "col-md-8";
+                                list.disableRow = "{{ !workflowJobTemplateObj.summary_fields.user_capabilities.edit }}";
+                                list.disableRowValue = '!workflowJobTemplateObj.summary_fields.user_capabilities.edit';
                                 list.iterator = 'job_template';
                                 list.name = 'job_templates';
                                 list.basePath = "job_templates";
@@ -733,6 +735,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                 list.fields.name.columnClass = "col-md-11";
                                 list.maxVisiblePages = 5;
                                 list.searchBarFullWidth = true;
+                                list.disableRow = "{{ !workflowJobTemplateObj.summary_fields.user_capabilities.edit }}";
+                                list.disableRowValue = '!workflowJobTemplateObj.summary_fields.user_capabilities.edit';
 
                                 return list;
                             }
@@ -742,6 +746,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                 let list = _.cloneDeep(InventorySourcesList);
                                 list.maxVisiblePages = 5;
                                 list.searchBarFullWidth = true;
+                                list.disableRow = "{{ !workflowJobTemplateObj.summary_fields.user_capabilities.edit }}";
+                                list.disableRowValue = '!workflowJobTemplateObj.summary_fields.user_capabilities.edit';
 
                                 return list;
                             }

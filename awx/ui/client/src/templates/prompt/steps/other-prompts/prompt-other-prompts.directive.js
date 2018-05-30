@@ -13,7 +13,8 @@ export default [ 'templateUrl',
             promptData: '=',
             otherPromptsForm: '=',
             isActiveStep: '=',
-            validate: '='
+            validate: '=',
+            readOnlyPrompts: '<'
         },
         templateUrl: templateUrl('templates/prompt/steps/other-prompts/prompt-other-prompts'),
         controller: promptOtherPrompts,

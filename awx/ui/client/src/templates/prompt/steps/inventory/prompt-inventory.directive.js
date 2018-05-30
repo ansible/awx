@@ -10,7 +10,8 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
     (templateUrl, qs, GetBasePath, GenerateList, $compile, InventoryList) => {
     return {
         scope: {
-            promptData: '='
+            promptData: '=',
+            readOnlyPrompts: '<'
         },
         templateUrl: templateUrl('templates/prompt/steps/inventory/prompt-inventory'),
         controller: promptInventoryController,
@@ -43,6 +44,8 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
                     scope.inventories = scope.inventory_dataset.results;
 
                     let invList = _.cloneDeep(InventoryList);
+                    invList.disableRow = "{{ readOnlyPrompts }}";
+                    invList.disableRowValue = "readOnlyPrompts";
                     let html = GenerateList.build({
                         list: invList,
                         input_type: 'radio',

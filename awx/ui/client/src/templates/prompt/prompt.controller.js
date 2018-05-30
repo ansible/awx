@@ -145,7 +145,7 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                             vm.steps.credential.includeStep = true;
                             vm.steps.credential.tab = {
                                 _active: order === 1 ? true : false,
-                                _disabled: order === 1 ? false : true,
+                                _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
                             order++;
@@ -154,7 +154,7 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                             vm.steps.other_prompts.includeStep = true;
                             vm.steps.other_prompts.tab = {
                                 _active: order === 1 ? true : false,
-                                _disabled: order === 1 ? false : true,
+                                _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
                             order++;
@@ -170,12 +170,13 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                             vm.steps.survey.includeStep = true;
                             vm.steps.survey.tab = {
                                 _active: order === 1 ? true : false,
-                                _disabled: order === 1 ? false : true,
+                                _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
                             order++;
                         }
                         vm.steps.preview.tab.order = order;
+                        vm.steps.preview.tab._disabled = vm.readOnlyPrompts ? false : true;
                         modal.show('PROMPT');
                         vm.promptData.triggerModalOpen = false;
 

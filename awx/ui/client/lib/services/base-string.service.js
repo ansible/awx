@@ -58,6 +58,7 @@ function BaseStringService (namespace) {
      * the project.
      */
     this.CANCEL = t.s('CANCEL');
+    this.CLOSE = t.s('CLOSE');
     this.SAVE = t.s('SAVE');
     this.OK = t.s('OK');
     this.NEXT = t.s('NEXT');

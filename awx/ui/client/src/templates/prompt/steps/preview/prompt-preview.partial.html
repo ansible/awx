@@ -9,19 +9,11 @@
     <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.credentials.value && promptData.prompts.credentials.value.length > 0">
         <div class="Prompt-previewRowTitle">{{:: vm.strings.get('prompt.CREDENTIAL') }}</div>
         <div class="Prompt-previewRowValue">
-            <div class="Prompt-previewTagContainer u-wordwrap" ng-repeat="credential in promptData.prompts.credentials.value">
-                <div class="Prompt-previewTag">
-                    <span ng-switch="promptData.prompts.credentials.credentialTypes[credential.credential_type]">
-                        <span class="fa fa-cloud" ng-switch-when="cloud"></span>
-                        <span class="fa fa-info" ng-switch-when="insights"></span>
-                        <span class="fa fa-sitemap" ng-switch-when="net"></span>
-                        <span class="fa fa-code-fork" ng-switch-when="scm"></span>
-                        <span class="fa fa-key" ng-switch-when="ssh"></span>
-                        <span class="fa fa-archive" ng-switch-when="vault"></span>
-                    </span>
-                    <span ng-bind="credential.name"></span>
-                </div>
-            </div>
+            <at-tag
+                ng-repeat="credential in promptData.prompts.credentials.value"
+                tag="credential.name"
+                icon="{{ promptData.prompts.credentials.credentialTypes[credential.credential_type] }}">
+            </at-tag>
         </div>
     </div>
     <div class="Prompt-previewRow--flex" ng-if="promptData.prompts.inventory.value.id">
