@@ -257,6 +257,15 @@ class UDPHandler(BaseHandler):
         return SocketResult(True, reason=self.message)
 
 
+class AWXNullHandler(logging.NullHandler):
+    '''
+    Only additional this does is accept arbitrary __init__ params because
+    the proxy handler does not (yet) work with arbitrary handler classes
+    '''
+    def __init__(self, *args, **kwargs):
+        super(AWXNullHandler, self).__init__()
+
+
 HANDLER_MAPPING = {
     'https': BaseHTTPSHandler,
     'tcp': TCPHandler,
@@ -285,7 +294,7 @@ class AWXProxyHandler(logging.Handler):
         self._old_kwargs = {}
 
     def get_handler_class(self, protocol):
-        return HANDLER_MAPPING[protocol]
+        return HANDLER_MAPPING.get(protocol, AWXNullHandler)
 
     def get_handler(self, custom_settings=None, force_create=False):
         new_kwargs = {}
