@@ -821,6 +821,10 @@ class CopyAPIView(GenericAPIView):
     new_in_330 = True
     new_in_api_v2 = True
 
+    def v1_not_allowed(self):
+        return Response({'detail': 'Action only possible starting with v2 API.'},
+                        status=status.HTTP_404_NOT_FOUND)
+
     def _get_copy_return_serializer(self, *args, **kwargs):
         if not self.copy_return_serializer_class:
             return self.get_serializer(*args, **kwargs)
@@ -922,6 +926,8 @@ class CopyAPIView(GenericAPIView):
         return ret
 
     def get(self, request, *args, **kwargs):
+        if get_request_version(request) < 2:
+            return self.v1_not_allowed()
         obj = self.get_object()
         create_kwargs = self._build_create_dict(obj)
         for key in create_kwargs:
@@ -929,6 +935,8 @@ class CopyAPIView(GenericAPIView):
         return Response({'can_copy': request.user.can_access(self.model, 'add', create_kwargs)})
 
     def post(self, request, *args, **kwargs):
+        if get_request_version(request) < 2:
+            return self.v1_not_allowed()
         obj = self.get_object()
         create_kwargs = self._build_create_dict(obj)
         create_kwargs_check = {}
