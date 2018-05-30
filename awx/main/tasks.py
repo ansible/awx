@@ -558,6 +558,9 @@ def delete_inventory(self, inventory_id, user_id):
             i = Inventory.objects.get(id=inventory_id)
             for host in i.hosts.iterator():
                 host.job_events_as_primary_host.update(host=None)
+            for topology_rel in i.topologyinventory_set.iterator():
+                topology_rel.topology.delete()
+                topology_rel.delete()
             i.delete()
             emit_channel_notification(
                 'inventories-status_changed',
