@@ -95,7 +95,7 @@ class AnsibleInventoryLoader(object):
             potential_path = os.path.join(path.strip('"'), 'ansible-inventory')
             if os.path.isfile(potential_path) and os.access(potential_path, os.X_OK):
                 logger.debug('Using system install of ansible-inventory CLI: {}'.format(potential_path))
-                return [potential_path, '-i', self.source]
+                return [potential_path, '-i', self.source, '--export']
 
         # Stopgap solution for group_vars, do not use backported module for official
         # vendored cloud modules or custom scripts TODO: remove after Ansible 2.3 deprecation
