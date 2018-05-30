@@ -42,7 +42,7 @@
             template-type="smartStatus.type" ng-if="smartStatus">
         </aw-smart-status>
         <div class="at-RowItem-tagContainer" ng-if="tagValues && tagValues.length">
-            <div ng-repeat="tag in tagValues" class="at-RowItem-tag at-RowItem-tag--primary">
+            <!-- <div ng-repeat="tag in tagValues" class="at-RowItem-tag at-RowItem-tag--primary">
                 <span ng-switch="tag.kind" class="at-RowItem-tagIcon"
                     ng-if="tagsAreCreds">
                     <span class="fa fa-cloud" ng-switch-when="cloud"></span>
@@ -53,6 +53,10 @@
                     <span class="fa fa-archive" ng-switch-when="vault"></span>
                 </span>
                 {{ tag.name }}
+            </div> -->
+            <div ng-if="tagValues.length <= 5">
+                <at-tag tag="tagValues"></at-tag>
             </div>
+            <at-toggle-tag tags="tagValues" ng-if="tagValues.length > 5"></at-toggle-tag>
         </div>
 </div>

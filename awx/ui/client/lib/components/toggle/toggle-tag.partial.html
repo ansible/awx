@@ -1,0 +1,14 @@
+<div class="ToggleComponent-wrapper">
+    <div ng-show="vm.truncated" class="ToggleComponent-container">
+        <div ng-repeat="tag in tags | limitTo: vm.truncatedLength">
+            <at-tag tag="tag.name"></at-tag>
+        </div>
+        <button ng-click="vm.toggle()">VIEW MORE</button>
+    </div>
+    <div ng-show="!vm.truncated" class="ToggleComponent-container">
+        <div ng-repeat="tag in tags">
+            <at-tag tag="tag.name"></at-tag>
+        </div>
+        <button ng-click="vm.toggle()">VIEW LESS</button>
+    </div>
+</div>
