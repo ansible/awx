@@ -52,8 +52,8 @@
                 var url = GetBasePath('groups') + id + '/children';
                 return url;
             },
-            rootGroupsUrl: function(id){
-                var url = GetBasePath('inventory') + id+ '/root_groups';
+            groupsUrl: function(id){
+                var url = GetBasePath('inventory') + id+ '/groups';
                 return url;
             },
             inventorySourcesOptions: function(inventoryId) {
