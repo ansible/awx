@@ -27,10 +27,15 @@
 }
 
 .TagComponent-icon {
+    .at-mixin-VerticallyCenter();
     line-height: 20px;
     margin-left: @at-space-2x;
 
-    &--cloud:before {
+    &--cloud:before,
+    &--aws:before,
+    &--tower:before,
+    &--azure_rm:before,
+    {
         content: '\f0c2';
     }
 
