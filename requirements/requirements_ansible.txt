@@ -59,6 +59,7 @@ monotonic==1.4            # via humanfriendly
 msrest==0.4.26
 msrestazure==0.4.22
 munch==2.2.0              # via openstacksdk
+netaddr==0.7.19
 netifaces==0.10.6         # via openstacksdk
 ntlm-auth==1.0.6          # via requests-credssp, requests-ntlm
 oauthlib==2.0.6           # via requests-oauthlib
