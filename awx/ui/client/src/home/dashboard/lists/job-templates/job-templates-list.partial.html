@@ -33,7 +33,8 @@
               <td class="List-actionsContainer">
                   <div class="List-actionButtonCell">
                       <button class="List-actionButton" ng-click="editTemplate(template)">
-                          <i class="fa fa-pencil"></i>
+                          <i class="fa fa-pencil" ng-show="template.can_edit"></i>
+                          <i class="fa fa-search-plus" ng-show="!template.can_edit"></i>
                       </button>
                       <at-launch-template template="template"
                           ng-show="template.can_start">
