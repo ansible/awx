@@ -70,7 +70,7 @@
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-users" route="teams" name="TEAMS">
         </at-side-nav-item>
-        <div class="at-Layout-sideNavSpacer" ng-show="$parent.layoutVm.isSuperUser">
+        <div class="at-Layout-sideNavSpacer" ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
             <span class="at-Layout-sideNavHeader">
                 {{:: $parent.layoutVm.getString('ADMINISTRATION_HEADER') }}
             <span>
@@ -88,7 +88,7 @@
             ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-cubes" route="applications" name="APPLICATIONS"
-            system-admin-only="true">
+            ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-cog" route="configuration" name="SETTINGS"
             system-admin-only="true">
