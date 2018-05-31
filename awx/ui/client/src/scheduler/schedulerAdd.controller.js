@@ -30,7 +30,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                 $scope.canAdd = params.canAdd;
             });
     }
-    let processSchedulerEndDt = function(){
+
+    /*
+    * Keep processSchedulerEndDt method on the $scope
+    * because angular-scheduler references it
+    */
+    $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);
         // increment date by 1 day
@@ -329,7 +334,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     });
     if ($scope.schedulerUTCTime) {
         // The UTC time is already set
-        processSchedulerEndDt();
+        $scope.processSchedulerEndDt();
     } else {
         // We need to wait for it to be set by angular-scheduler because the following function depends
         // on it
@@ -337,7 +342,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
             if (newVal) {
                 // Remove the watcher
                 schedulerUTCTimeWatcher();
-                processSchedulerEndDt();
+                $scope.processSchedulerEndDt();
             }
         });
     }
@@ -370,9 +375,6 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     scheduler.clear();
     $scope.$on("htmlDetailReady", function() {
         $scope.hideForm = false;
-        $scope.$on("formUpdated", function() {
-            $rootScope.$broadcast("loadSchedulerDetailPane");
-        });
         $scope.$watchGroup(["schedulerName",
             "schedulerStartDt",
             "schedulerStartHour",
@@ -398,11 +400,11 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
             "schedulerEndMinute",
             "schedularEndSecond"
         ], function() {
-            $scope.$emit("formUpdated");
+            $rootScope.$broadcast("loadSchedulerDetailPane");
         }, true);
 
         $scope.$watch("weekDays", function() {
-            $scope.$emit("formUpdated");
+            $rootScope.$broadcast("loadSchedulerDetailPane");
         }, true);
 
         Wait('stop');

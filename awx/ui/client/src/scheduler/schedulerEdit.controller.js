@@ -23,6 +23,10 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
 
     $scope.strings = TemplatesStrings;
 
+    /*
+    * Keep processSchedulerEndDt method on the $scope
+    * because angular-scheduler references it
+    */
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);
