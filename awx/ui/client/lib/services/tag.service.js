@@ -9,6 +9,6 @@ function TagService (strings, $filter) {
     };
 }
 
-TagService.$inject = ['OutputStrings', '$filter'];
+TagService.$inject = ['ComponentsStrings', '$filter'];
 
 export default TagService;
