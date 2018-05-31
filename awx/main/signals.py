@@ -6,6 +6,7 @@ import contextlib
 import logging
 import threading
 import json
+import sys
 
 # Django
 from django.conf import settings
@@ -31,7 +32,7 @@ from awx.main.models import * # noqa
 from django.contrib.sessions.models import Session
 from awx.api.serializers import * # noqa
 from awx.main.constants import TOKEN_CENSOR
-from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
+from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
 from awx.main.fields import (
@@ -49,6 +50,13 @@ logger = logging.getLogger('awx.main.signals')
 
 # Update has_active_failures for inventory/groups when a Host/Group is deleted,
 # when a Host-Group or Group-Group relationship is updated, or when a Job is deleted
+
+
+def get_activity_stream_class():
+    if 'migrate' in sys.argv:
+        return get_current_apps().get_model('main', 'ActivityStream')
+    else:
+        return ActivityStream
 
 
 def get_current_user_or_none():
@@ -418,7 +426,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
                 changes['extra_vars'] = instance.display_extra_vars()
         if type(instance) == OAuth2AccessToken:
             changes['token'] = TOKEN_CENSOR
-        activity_entry = ActivityStream(
+        activity_entry = get_activity_stream_class()(
             operation='create',
             object1=object1,
             changes=json.dumps(changes),
@@ -428,7 +436,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
         #      we don't really use them anyway.
         if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
             activity_entry.save()
-            getattr(activity_entry, object1).add(instance)
+            getattr(activity_entry, object1).add(instance.pk)
         else:
             activity_entry.setting = conf_to_dict(instance)
             activity_entry.save()
@@ -452,14 +460,14 @@ def activity_stream_update(sender, instance, **kwargs):
     if getattr(_type, '_deferred', False):
         return
     object1 = camelcase_to_underscore(instance.__class__.__name__)
-    activity_entry = ActivityStream(
+    activity_entry = get_activity_stream_class()(
         operation='update',
         object1=object1,
         changes=json.dumps(changes),
         actor=get_current_user_or_none())
     if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
         activity_entry.save()
-        getattr(activity_entry, object1).add(instance)
+        getattr(activity_entry, object1).add(instance.pk)
     else:
         activity_entry.setting = conf_to_dict(instance)
         activity_entry.save()
@@ -485,7 +493,7 @@ def activity_stream_delete(sender, instance, **kwargs):
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     if type(instance) == OAuth2AccessToken:
         changes['token'] = TOKEN_CENSOR
-    activity_entry = ActivityStream(
+    activity_entry = get_activity_stream_class()(
         operation='delete',
         changes=json.dumps(changes),
         object1=object1,
@@ -532,7 +540,7 @@ def activity_stream_associate(sender, instance, **kwargs):
                 continue
             if isinstance(obj1, SystemJob) or isinstance(obj2_actual, SystemJob):
                 continue
-            activity_entry = ActivityStream(
+            activity_entry = get_activity_stream_class()(
                 changes=json.dumps(dict(object1=object1,
                                         object1_pk=obj1.pk,
                                         object2=object2,
@@ -545,8 +553,8 @@ def activity_stream_associate(sender, instance, **kwargs):
                 object_relationship_type=obj_rel,
                 actor=get_current_user_or_none())
             activity_entry.save()
-            getattr(activity_entry, object1).add(obj1)
-            getattr(activity_entry, object2).add(obj2_actual)
+            getattr(activity_entry, object1).add(obj1.pk)
+            getattr(activity_entry, object2).add(obj2_actual.pk)
 
             # Record the role for RBAC changes
             if 'role' in kwargs:

@@ -180,6 +180,17 @@ def add_vault_id_field(apps, schema_editor):
     vault_credtype.save()
 
 
+def remove_vault_id_field(apps, schema_editor):
+    vault_credtype = CredentialType.objects.get(kind='vault')
+    idx = 0
+    for i, input in enumerate(vault_credtype.inputs['fields']):
+        if input['id'] == 'vault_id':
+            idx = i
+            break
+    vault_credtype.inputs['fields'].pop(idx)
+    vault_credtype.save()
+
+
 def create_rhv_tower_credtype(apps, schema_editor):
     CredentialType.setup_tower_managed_defaults()
 
