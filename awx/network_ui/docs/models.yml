@@ -86,13 +86,6 @@ models:
   name: Topology
   x: 111
   y: 127
-- fields:
-  - name: client_id
-    pk: true
-    type: AutoField
-  name: Client
-  x: -162
-  y: 282
 - display: name
   fields:
   - name: interface_id
