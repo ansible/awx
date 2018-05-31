@@ -2,11 +2,12 @@ import { TRUNCATED, TRUNCATE_LENGTH } from './constants';
 
 const templateUrl = require('~components/toggle/toggle-tag.partial.html');
 
-function controller ($scope, TagService) {
+function controller ($scope, TagService, strings) {
     const { tags } = $scope;
     const vm = this;
     vm.truncatedLength = TRUNCATE_LENGTH;
     vm.truncated = TRUNCATED;
+    vm.strings = strings;
 
     vm.toggle = () => {
         vm.truncated = !vm.truncated;
@@ -19,7 +20,7 @@ function controller ($scope, TagService) {
     });
 }
 
-controller.$inject = ['$scope', 'TagService'];
+controller.$inject = ['$scope', 'TagService', 'ComponentsStrings'];
 
 function atToggleTag () {
     return {
