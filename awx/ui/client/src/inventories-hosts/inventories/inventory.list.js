@@ -19,6 +19,7 @@ export default ['i18n', function(i18n) {
         basePath: 'inventory',
         title: false,
         disableRow: "{{ inventory.pending_deletion }}",
+        disableRowValue: 'pending_deletion',
 
         fields: {
             status: {

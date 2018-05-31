@@ -7,10 +7,10 @@
 /* jshint unused: vars */
 export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateList', 'ProjectList',
     'InventoryList', 'CredentialList', '$compile', 'generateList',
-    'OrganizationList', '$window',
+    'OrganizationList', '$window', 'i18n',
     function(addPermissionsTeamsList, addPermissionsUsersList, TemplateList, ProjectList,
     InventoryList, CredentialList, $compile, generateList,
-    OrganizationList, $window) {
+    OrganizationList, $window, i18n) {
     return {
         restrict: 'E',
         scope: {
@@ -159,6 +159,21 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             // iterate over the list and add fields like type label, after the
             // OPTIONS request returns, or the list is sorted/paginated/searched
             function optionsRequestDataProcessing(){
+                if(scope.list.name === 'users'){
+                    if (scope[list.name] !== undefined) {
+                        scope[list.name].forEach(function(item, item_idx) {
+                            var itm = scope[list.name][item_idx];
+                            if(itm.summary_fields.user_capabilities.edit){
+                                // undefined doesn't render the tooltip, 
+                                // which is intended here.
+                                itm.tooltip = undefined;
+                            }
+                            else if(!itm.summary_fields.user_capabilities.edit){
+                                itm.tooltip = i18n._('You do not have permission to manage this user');
+                            }
+                        });
+                    }
+                }
                 if(scope.list.name === 'projects'){
                     if (scope[list.name] !== undefined) {
                         scope[list.name].forEach(function(item, item_idx) {
