@@ -54,7 +54,7 @@ export default {
                 }
                 else {
                     //reaches here if the user is on the root level group
-                    list.basePath = GetBasePath('inventory') + $stateParams.inventory_id + '/root_groups';
+                    list.basePath = GetBasePath('inventory') + $stateParams.inventory_id + '/groups';
                 }
 
                 let html = generateList.build({
