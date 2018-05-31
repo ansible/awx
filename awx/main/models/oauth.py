@@ -109,6 +109,7 @@ class OAuth2AccessToken(AbstractAccessToken):
     )
     scope = models.TextField(
         blank=True,
+        default='write',
         help_text=_('Allowed scopes, further restricts user\'s permissions. Must be a simple space-separated string with allowed scopes [\'read\', \'write\'].')
     )
 

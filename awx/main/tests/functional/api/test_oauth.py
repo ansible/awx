@@ -29,6 +29,26 @@ def test_personal_access_token_creation(oauth_application, post, alice):
 
 
 @pytest.mark.django_db
+def test_pat_creation_no_default_scope(oauth_application, post, admin):
+    # tests that the default scope is overriden
+    url = reverse('api:o_auth2_token_list')
+    response = post(url, {'description': 'test token',
+                          'scope': 'read',
+                          'application': oauth_application.pk,
+                          }, admin)
+    assert response.data['scope'] == 'read'
+    
+    
+@pytest.mark.django_db
+def test_pat_creation_no_scope(oauth_application, post, admin):
+    url = reverse('api:o_auth2_token_list')
+    response = post(url, {'description': 'test token',
+                          'application': oauth_application.pk,
+                          }, admin)
+    assert response.data['scope'] == 'write'
+
+
+@pytest.mark.django_db
 def test_oauth2_application_create(admin, organization, post):
     response = post(
         reverse('api:o_auth2_application_list'), {

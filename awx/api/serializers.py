@@ -999,7 +999,7 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
         )
         read_only_fields = ('user', 'token', 'expires', 'refresh_token')
         extra_kwargs = {
-            'scope': {'allow_null': False, 'required': True},
+            'scope': {'allow_null': False, 'required': False},
             'user': {'allow_null': False, 'required': True}
         }
 
@@ -1061,7 +1061,7 @@ class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
 
     class Meta:
         extra_kwargs = {
-            'scope': {'allow_null': False, 'required': True},
+            'scope': {'allow_null': False, 'required': False},
             'user': {'allow_null': False, 'required': True},
             'application': {'allow_null': False, 'required': True}
         }
