@@ -196,7 +196,7 @@ def parse_extra_vars(args):
     return extra_vars
 
 
-class TestJobExecution:
+class TestJobExecution(object):
     """
     For job runs, test that `ansible-playbook` is invoked with the proper
     arguments, environment variables, and pexpect passwords for a variety of
@@ -440,7 +440,7 @@ class TestGenericRun(TestJobExecution):
         with pytest.raises(Exception):
             self.task.run(self.pk)
         for c in [
-            mock.call(self.pk, execution_node=settings.CLUSTER_HOST_ID, status='running', start_args=''),
+            mock.call(self.pk, status='running', start_args=''),
             mock.call(self.pk, status='canceled')
         ]:
             assert c in self.task.update_model.call_args_list
@@ -626,7 +626,12 @@ class TestAdhocRun(TestJobExecution):
 
 class TestIsolatedExecution(TestJobExecution):
 
-    REMOTE_HOST = 'some-isolated-host'
+    ISOLATED_HOST = 'some-isolated-host'
+
+    def get_instance(self):
+        instance = super(TestIsolatedExecution, self).get_instance()
+        instance.get_isolated_execution_node_name = mock.Mock(return_value=self.ISOLATED_HOST)
+        return instance
 
     def test_with_ssh_credentials(self):
         ssh = CredentialType.defaults['ssh']()
@@ -659,12 +664,12 @@ class TestIsolatedExecution(TestJobExecution):
                         f.write(data)
             return ('successful', 0)
         self.run_pexpect.side_effect = _mock_job_artifacts
-        self.task.run(self.pk, self.REMOTE_HOST)
+        self.task.run(self.pk)
 
         playbook_run = self.run_pexpect.call_args_list[0][0]
         assert ' '.join(playbook_run[0]).startswith(' '.join([
             'ansible-playbook', 'run_isolated.yml', '-u', settings.AWX_ISOLATED_USERNAME,
-            '-T', str(settings.AWX_ISOLATED_CONNECTION_TIMEOUT), '-i', self.REMOTE_HOST + ',',
+            '-T', str(settings.AWX_ISOLATED_CONNECTION_TIMEOUT), '-i', self.ISOLATED_HOST + ',',
             '-e',
         ]))
         extra_vars = playbook_run[0][playbook_run[0].index('-e') + 1]
@@ -705,7 +710,7 @@ class TestIsolatedExecution(TestJobExecution):
             with mock.patch('requests.get') as mock_get:
                 mock_get.return_value = mock.Mock(content=inventory)
                 with pytest.raises(Exception):
-                    self.task.run(self.pk, self.REMOTE_HOST)
+                    self.task.run(self.pk, self.ISOLATED_HOST)
 
 
 class TestJobCredentials(TestJobExecution):
