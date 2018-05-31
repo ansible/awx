@@ -1,13 +1,13 @@
 <div class="ToggleComponent-wrapper">
     <div ng-show="vm.truncated" class="ToggleComponent-container">
-        <div ng-repeat="tag in tags | limitTo: vm.truncatedLength">
-            <at-tag tag="tag.name" icon="{{ tag.kind }}"></at-tag>
+        <div ng-repeat="tag in vm.tags | limitTo: vm.truncatedLength">
+            <at-tag tag="tag.value" icon="{{ tag.icon }}" link="{{ tag.link }}"></at-tag>
         </div>
         <button class="ToggleComponent-button" ng-click="vm.toggle()">VIEW MORE</button>
     </div>
     <div ng-show="!vm.truncated" class="ToggleComponent-container">
-        <div ng-repeat="tag in tags">
-            <at-tag tag="tag.name" icon="{{ tag.kind }}"></at-tag>
+        <div ng-repeat="tag in vm.tags">
+            <at-tag tag="tag.value" icon="{{ tag.icon }}" link="{{ tag.link }}"></at-tag>
         </div>
         <button class="ToggleComponent-button" ng-click="vm.toggle()">VIEW LESS</button>
     </div>
