@@ -5,7 +5,7 @@ function NetworkingController (models, $state, $scope, strings) {
     const {
         inventory
     } = models;
-
+    vm.networkUIisOpen = true;
     vm.strings = strings;
     vm.panelTitle = `${strings.get('state.BREADCRUMB_LABEL')} | ${inventory.name}`;
     vm.hostDetail = {};
@@ -16,6 +16,7 @@ function NetworkingController (models, $state, $scope, strings) {
     vm.groups = [];
     $scope.devices = [];
     vm.close = () => {
+        vm.networkUIisOpen = false;
         $scope.$broadcast('awxNet-closeNetworkUI');
         $state.go('inventories');
     };

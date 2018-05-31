@@ -550,6 +550,13 @@ var NetworkUIController = function($scope,
             if (originalEvent.wheelDeltaY !== undefined) {
                 $event.deltaY = $event.originalEvent.wheelDeltaY;
             }
+            if (originalEvent.deltaX !== undefined) {
+                $event.deltaX = $event.originalEvent.deltaX;
+            }
+            if (originalEvent.deltaY !== undefined) {
+                $event.deltaY = $event.originalEvent.deltaY;
+                $event.delta = $event.originalEvent.deltaY;
+            }
         }
     };
 
