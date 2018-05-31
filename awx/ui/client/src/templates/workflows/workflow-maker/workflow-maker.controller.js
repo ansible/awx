@@ -11,7 +11,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
     $state, ProcessErrors, CreateSelect2, $q, JobTemplate,
     Empty, PromptService, Rest, TemplatesStrings, $timeout) {
 
-        let promptWatcher, surveyQuestionWatcher;
+        let promptWatcher, surveyQuestionWatcher, credentialsWatcher;
 
         $scope.strings = TemplatesStrings;
         $scope.preventCredsWithPasswords = true;
@@ -341,6 +341,20 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             });
         };
 
+        let checkCredentialsForRequiredPasswords = () => {
+            let credentialRequiresPassword = false;
+            $scope.promptData.prompts.credentials.value.forEach((credential) => {
+                if ((credential.passwords_needed &&
+                    credential.passwords_needed.length > 0) ||
+                    (_.has(credential, 'inputs.vault_password') &&
+                    credential.inputs.vault_password === "ASK")
+                ) {
+                    credentialRequiresPassword = true;
+                }
+            });
+            $scope.credentialRequiresPassword = credentialRequiresPassword;
+        };
+
         let watchForPromptChanges = () => {
             let promptDataToWatch = [
                 'promptData.prompts.inventory.value',
@@ -357,6 +371,12 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 }
                 $scope.promptModalMissingReqFields = missingPromptValue;
             });
+
+            if ($scope.promptData.launchConf.ask_credential_on_launch && $scope.credentialRequiresPassword) {
+                credentialsWatcher = $scope.$watch('promptData.prompts.credentials', () => {
+                    checkCredentialsForRequiredPasswords();
+                });
+            }
         };
 
         $scope.closeWorkflowMaker = function() {
@@ -537,6 +557,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 surveyQuestionWatcher();
             }
 
+            if (credentialsWatcher) {
+                credentialsWatcher();
+            }
+
             $scope.promptData = null;
 
             // Reset the edgeConflict flag
@@ -562,6 +586,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
             if (surveyQuestionWatcher) {
                 surveyQuestionWatcher();
+            }
+
+            if (credentialsWatcher) {
+                credentialsWatcher();
             }
 
             $scope.promptData = null;
@@ -671,6 +699,24 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                     $scope.selectedTemplateInvalid = false;
                                 }
 
+                                let credentialRequiresPassword = false;
+
+                                prompts.credentials.value.forEach((credential) => {
+                                    if(credential.inputs) {
+                                        if ((credential.inputs.password && credential.inputs.password === "ASK") ||
+                                            (credential.inputs.become_password && credential.inputs.become_password === "ASK") ||
+                                            (credential.inputs.ssh_key_unlock && credential.inputs.ssh_key_unlock === "ASK") ||
+                                            (credential.inputs.vault_password && credential.inputs.vault_password === "ASK")
+                                        ) {
+                                            credentialRequiresPassword = true;
+                                        }
+                                    } else if (credential.passwords_needed && credential.passwords_needed.length > 0) {
+                                        credentialRequiresPassword = true;
+                                    }
+                                });
+
+                                $scope.credentialRequiresPassword = credentialRequiresPassword;
+
                                 if (!launchConf.survey_enabled &&
                                     !launchConf.ask_inventory_on_launch &&
                                     !launchConf.ask_credential_on_launch &&
@@ -682,7 +728,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                     !launchConf.ask_diff_mode_on_launch &&
                                     !launchConf.survey_enabled &&
                                     !launchConf.credential_needed_to_start &&
-                                    launchConf.passwords_needed_to_start.length === 0 &&
                                     launchConf.variables_needed_to_start.length === 0) {
                                         $scope.showPromptButton = false;
                                         $scope.promptModalMissingReqFields = false;
@@ -727,6 +772,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                                     $scope.missingSurveyValue = missingSurveyValue;
                                                 }, true);
 
+                                                checkCredentialsForRequiredPasswords();
+
                                                 watchForPromptChanges();
                                             });
                                     } else {
@@ -736,6 +783,9 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                             prompts: prompts,
                                             template: $scope.nodeBeingEdited.unifiedJobTemplate.id
                                         };
+
+                                        checkCredentialsForRequiredPasswords();
+
                                         watchForPromptChanges();
                                     }
                                 }
@@ -980,6 +1030,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 surveyQuestionWatcher();
             }
 
+            if (credentialsWatcher) {
+                credentialsWatcher();
+            }
+
             if (selectedTemplate.type === "job_template") {
                 let jobTemplate = new JobTemplate();
 
@@ -991,6 +1045,12 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             $scope.selectedTemplateInvalid = true;
                         } else {
                             $scope.selectedTemplateInvalid = false;
+                        }
+
+                        if (launchConf.passwords_needed_to_start && launchConf.passwords_needed_to_start.length > 0) {
+                            $scope.credentialRequiresPassword = true;
+                        } else {
+                            $scope.credentialRequiresPassword = false;
                         }
 
                         $scope.selectedTemplate = angular.copy(selectedTemplate);
@@ -1006,7 +1066,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             !launchConf.ask_diff_mode_on_launch &&
                             !launchConf.survey_enabled &&
                             !launchConf.credential_needed_to_start &&
-                            launchConf.passwords_needed_to_start.length === 0 &&
                             launchConf.variables_needed_to_start.length === 0) {
                                 $scope.showPromptButton = false;
                                 $scope.promptModalMissingReqFields = false;
@@ -1069,7 +1128,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                         }
                     });
             } else {
-                // TODO - clear out prompt data?
                 $scope.selectedTemplate = angular.copy(selectedTemplate);
                 $scope.selectedTemplateInvalid = false;
                 $scope.showPromptButton = false;

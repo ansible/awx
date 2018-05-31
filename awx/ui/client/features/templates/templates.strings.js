@@ -33,7 +33,7 @@ function TemplatesStrings (BaseString) {
         NO_INVENTORY_SELECTED: t.s('No inventory selected'),
         REVERT: t.s('REVERT'),
         CREDENTIAL_TYPE: t.s('Credential Type'),
-        CREDENTIAL_PASSWORD_WARNING: t.s('Credentials that require passwords on launch are not permitted for template schedules and workflow nodes.  The following credentials must be removed or replaced to proceed:'),
+        CREDENTIAL_PASSWORD_WARNING: t.s('Credentials that require passwords on launch are not permitted for template schedules and workflow nodes.  The following credentials must be replaced to proceed:'),
         PASSWORDS_REQUIRED_HELP: t.s('Launching this job requires the passwords listed below. Enter and confirm each password before continuing.'),
         PLEASE_ENTER_PASSWORD: t.s('Please enter a password.'),
         credential_passwords: {
@@ -93,7 +93,8 @@ function TemplatesStrings (BaseString) {
     };
 
     ns.workflows = {
-        INVALID_JOB_TEMPLATE: t.s('This Job Template is missing a default inventory or project. This must be addressed in the Job Template form before this node can be saved.')
+        INVALID_JOB_TEMPLATE: t.s('This Job Template is missing a default inventory or project. This must be addressed in the Job Template form before this node can be saved.'),
+        CREDENTIAL_WITH_PASS: t.s('This Job Template has a credential that requires a password.  Credentials requiring passwords on launch are not permitted on workflow nodes.')
     };
 }
 
