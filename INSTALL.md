@@ -318,7 +318,7 @@ The default resource requests per-pod requires:
 > Memory: 6GB
 > CPU: 3 cores
 
-This can be tuned by overriding the variables found in [/installer/kubernetes/defaults/main.yml](/installer/kubernetes[/defaults/main.yml). Special care should be taken when doing this as undersized instances will experience crashes and resource exhaustion.
+This can be tuned by overriding the variables found in [/installer/kubernetes/defaults/main.yml](/installer/roles/kubernetes/defaults/main.yml). Special care should be taken when doing this as undersized instances will experience crashes and resource exhaustion.
 
 For more detail on how resource requests are formed see: [https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
 
