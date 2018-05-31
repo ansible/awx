@@ -2100,6 +2100,40 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
+    @pytest.mark.parametrize('verify', [True, False])
+    def test_tower_source(self, verify):
+        tower = CredentialType.defaults['tower']()
+        self.instance.source = 'tower'
+        self.instance.instance_filters = '12345'
+        inputs = {
+            'host': 'https://tower.example.org',
+            'username': 'bob',
+            'password': 'secret',
+            'verify_ssl': verify
+        }
+
+        def get_cred():
+            cred = Credential(pk=1, credential_type=tower, inputs = inputs)
+            cred.inputs['password'] = encrypt_field(cred, 'password')
+            return cred
+        self.instance.get_cloud_credential = get_cred
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert env['TOWER_HOST'] == 'https://tower.example.org'
+            assert env['TOWER_USERNAME'] == 'bob'
+            assert env['TOWER_PASSWORD'] == 'secret'
+            assert env['TOWER_INVENTORY'] == '12345'
+            if verify:
+                assert env['TOWER_VERIFY_SSL'] == 'True'
+            else:
+                assert env['TOWER_VERIFY_SSL'] == 'False'
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+        assert self.instance.job_env['TOWER_PASSWORD'] == tasks.HIDDEN_PASSWORD
+
     def test_awx_task_env(self):
         gce = CredentialType.defaults['gce']()
         self.instance.source = 'gce'
