@@ -23,10 +23,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
         };
 
         $scope.job_type_options = [{
-            label: "Run",
+            label: $scope.strings.get('workflow_maker.RUN'),
             value: "run"
         }, {
-            label: "Check",
+            label: $scope.strings.get('workflow_maker.CHECK'),
             value: "check"
         }];
 
@@ -36,15 +36,15 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
          $scope.edgeTypeOptions = [
              {
-                 label: 'Always',
+                 label: $scope.strings.get('workflow_maker.ALWAYS'),
                  value: 'always'
              },
              {
-                 label: 'On Success',
+                 label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
                  value: 'success'
              },
              {
-                 label: 'On Failure',
+                 label: $scope.strings.get('workflow_maker.ON_FAILURE'),
                  value: 'failure'
              }
          ];
@@ -318,17 +318,17 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 optionsToInclude.forEach((optionToInclude) => {
                     if (optionToInclude === "always") {
                         $scope.edgeTypeOptions.push({
-                            label: 'Always',
+                            label: $scope.strings.get('workflow_maker.ALWAYS'),
                             value: 'always'
                         });
                     } else if (optionToInclude === "success") {
                         $scope.edgeTypeOptions.push({
-                            label: 'On Success',
+                            label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
                             value: 'success'
                         });
                     } else if (optionToInclude === "failure") {
                         $scope.edgeTypeOptions.push({
-                            label: 'On Failure',
+                            label: $scope.strings.get('workflow_maker.ON_FAILURE'),
                             value: 'failure'
                         });
                     }
@@ -486,20 +486,20 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             });
 
             // Set the default to success
-            let edgeType = {label: "On Success", value: "success"};
+            let edgeType = {label: $scope.strings.get('workflow_maker.ON_SUCCESS'), value: "success"};
 
             if (parent && ((betweenTwoNodes && parent.source.isStartNode) || (!betweenTwoNodes && parent.isStartNode))) {
                 // We don't want to give the user the option to select
                 // a type as this node will always be executed
                 updateEdgeDropdownOptions(["always"]);
-                edgeType = {label: "Always", value: "always"};
+                edgeType = {label: $scope.strings.get('workflow_maker.ALWAYS'), value: "always"};
             } else {
                 if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
                     updateEdgeDropdownOptions(["success", "failure"]);
-                    edgeType = {label: "On Success", value: "success"};
+                    edgeType = {label: $scope.strings.get('workflow_maker.ON_SUCCESS'), value: "success"};
                 } else if (_.includes(siblingConnectionTypes, "always")) {
                     updateEdgeDropdownOptions(["always"]);
-                    edgeType = {label: "Always", value: "always"};
+                    edgeType = {label: $scope.strings.get('workflow_maker.ALWAYS'), value: "always"};
                 } else {
                     updateEdgeDropdownOptions();
                 }

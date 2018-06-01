@@ -1,11 +1,11 @@
 export default ['$filter', '$state', '$stateParams', 'Wait', '$scope', 'moment',
 '$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
 'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
-'WorkflowJobTemplateModel', 'TemplatesStrings', 'scheduleResolve', 'timezonesResolve', 'Alert', 'i18n',
+'WorkflowJobTemplateModel', 'SchedulerStrings', 'scheduleResolve', 'timezonesResolve', 'Alert',
 function($filter, $state, $stateParams, Wait, $scope, moment,
     $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
     GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI,
-    WorkflowJobTemplate, TemplatesStrings, scheduleResolve, timezonesResolve, Alert, i18n
+    WorkflowJobTemplate, SchedulerStrings, scheduleResolve, timezonesResolve, Alert
 ) {
 
     let schedule, scheduler, scheduleCredentials = [];
@@ -21,7 +21,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
     $scope.hideForm = true;
     $scope.parseType = 'yaml';
 
-    $scope.strings = TemplatesStrings;
+    $scope.strings = SchedulerStrings;
 
     /*
     * Keep processSchedulerEndDt method on the $scope
@@ -255,7 +255,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         launchConf.passwords_needed_to_start.length > 0 &&
                         !launchConf.ask_credential_on_launch
                     ) {
-                        Alert(i18n._('Warning'), i18n._('This Job Template has a default credential that requires a password before launch.  Adding or editing schedules is prohibited while this credential is selected.  To add or edit a schedule, credentials that require a password must be removed from the Job Template.'), 'alert-info');
+                        Alert(SchedulerStrings.get('form.WARNING'), SchedulerStrings.get('form.CREDENTIAL_REQUIRES_PASSWORD_WARNING'), 'alert-info');
                         $scope.credentialRequiresPassword = true;
                     }
 

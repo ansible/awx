@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
- 	['$scope', 'HostsService',
- 	function($scope, HostsService){
+ 	['$scope', 'HostsService', 'awxNetStrings',
+ 	function($scope, HostsService, strings){
 
         function codemirror () {
             return {
@@ -17,6 +17,8 @@
  		$scope.formCancel = function(){
             $scope.$parent.$broadcast('awxNet-closeDetailsPanel');
  		};
+        $scope.strings = strings;
+        $scope.hostPopover = `<p>${$scope.strings.get('details.HOST_POPOVER')}</p><blockquote>myserver.domain.com<br/>127.0.0.1<br />10.1.0.140:25<br />server.example.com:25</blockquote>`;
 
  		$scope.formSave = function(){
  			var host = {

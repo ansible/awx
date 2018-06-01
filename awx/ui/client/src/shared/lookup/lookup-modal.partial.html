@@ -2,7 +2,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header Form-header">
-                <div class="Form-title Form-title--uppercase">Select {{modalTitle}}</div>
+                <div class="Form-title Form-title--uppercase">{{modalTitle}}</div>
                 <!-- optional: transclude header fields -->
                 <div class="Form-header--fields"></div>
                 <div class="Form-exitHolder">
@@ -16,8 +16,8 @@
                 <!-- see: lookup-modal.directive.js -->
             </div>
             <div class="modal-footer">
-                <button ng-click="cancelForm()" class="Lookup-cancel btn btn-default">Cancel</button>
-                <button ng-click="saveForm()" class="Lookup-save btn btn-primary" ng-disabled="!currentSelection || !currentSelection.id" ng-bind="list.lookupConfirmText ? list.lookupConfirmText : 'Select'"></button>
+                <button ng-click="cancelForm()" class="Lookup-cancel btn btn-default" translate>Cancel</button>
+                <button ng-click="saveForm()" class="Lookup-save btn btn-primary" ng-disabled="!currentSelection || !currentSelection.id" translate>Select</button>
             </div>
         </div>
     </div>

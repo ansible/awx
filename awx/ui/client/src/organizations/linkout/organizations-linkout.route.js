@@ -108,7 +108,7 @@ let lists = [{
             delete list.fieldActions.delete;
             list.listTitle = N_('Teams') + ` | {{ name }}`;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/teams`;
-            list.emptyListText = "This list is populated by teams added from the&nbsp;<a ui-sref='teams.add'>Teams</a>&nbsp;section";
+            list.emptyListText = `${N_('This list is populated by teams added from the')}&nbsp;<a ui-sref='teams.add'>${N_('Teams')}</a>&nbsp;${N_('section')}`;
             return list;
         }],
         OrgTeamsDataset: ['OrgTeamList', 'QuerySet', '$stateParams', 'GetBasePath',

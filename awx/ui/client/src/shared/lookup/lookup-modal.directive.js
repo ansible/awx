@@ -1,4 +1,4 @@
-export default ['templateUrl', function(templateUrl) {
+export default ['templateUrl', 'i18n', function(templateUrl, i18n) {
     return {
         restrict: 'E',
         replace: true,
@@ -55,8 +55,8 @@ export default ['templateUrl', function(templateUrl) {
                 $scope.$watch(list.name, function(){
                     selectRowIfPresent();
                 });
-
-                $scope.modalTitle = list.iterator.replace(/_/g, ' ');
+                let resource = list.iterator.replace(/_/g, ' ');
+                $scope.modalTitle = i18n._('Select') + ' ' + i18n._(resource);
 
                 listeners = eventService.addListeners([
                     [window, 'click', clickToHide]

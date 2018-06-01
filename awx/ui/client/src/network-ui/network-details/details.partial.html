@@ -11,9 +11,9 @@
 <div ng-show="item.host_id">
     <form class="Form Networking-form ng-pristine ng-valid ng-valid-required" name="host_form" id="host_form" autocomplete="off" novalidate="">
         <div class="form-group Form-formGroup Form-formGroup--fullWidth">
-            <label class="Form-inputLabelContainer" for="name">
+            <label class="Form-inputLabelContainer">
                 <span class="Form-requiredAsterisk">*</span>
-                <span class="Form-inputLabel" translate="">Host Name</span><a id="awp-name" href="" aw-pop-over="<p>Provide a host name, ip address, or ip address:port. Examples include:</p><blockquote>myserver.domain.com<br/>127.0.0.1<br />10.1.0.140:25<br />server.example.com:25</blockquote>" data-placement="right" data-container="body" over-title="Host Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a>
+                <span class="Form-inputLabel"> {{strings.get('details.HOST_NAME')}}</span><a id="awp-name" href="" aw-pop-over="{{hostPopover}}" data-placement="right" data-tip-watch="hostPopover" data-container="body" over-title="{{strings.get('details.HOST_NAME')}}" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a>
             </label>
             <div>
                 <input readonly type="text" ng-model="item.name" name="name" id="host_name" class="form-control Form-textInput Networking-input ng-pristine ng-untouched ng-valid ng-not-empty ng-valid-required" required="" ng-disabled="!(item.summary_fields.user_capabilities.edit || canAdd)">
@@ -22,8 +22,8 @@
             </div>
         </div>
         <div class="form-group Form-formGroup Form-formGroup--fullWidth">
-            <label class="Form-inputLabelContainer" for="description">
-                <span class="Form-inputLabel" translate="">Description</span>
+            <label class="Form-inputLabelContainer">
+                <span class="Form-inputLabel">{{strings.get('details.DESCRIPTION')}}</span>
             </label>
             <div>
                 <input readonly type="text" ng-model="item.description" name="description" id="host_description" class="form-control Form-textInput Networking-input" ng-disabled="!(item.summary_fields.user_capabilities.edit || canAdd)">
@@ -40,9 +40,9 @@
         </div>
     </form>
     <div class="buttons Form-buttons" id="host_controls">
-        <button type="button" class="btn btn-sm Form-cancelButton" id="host_cancel_btn" ng-click="formCancel()"> Cancel</button>
+        <button type="button" class="btn btn-sm Form-cancelButton" id="host_cancel_btn" ng-click="formCancel()"> {{strings.get('details.CANCEL')}}</button>
     </div>
     <div class="Networking-saveConfirmation" ng-show="saveConfirmed">
-        Save Complete <i class="fa fa-check-circle"></i>
+        {{strings.get('details.SAVE_COMPLETE')}} <i class="fa fa-check-circle"></i>
     </div>
 </div>

@@ -299,10 +299,11 @@ class BaseSerializer(serializers.ModelSerializer):
             'system_job': _('Management Job'),
             'workflow_job': _('Workflow Job'),
             'workflow_job_template': _('Workflow Template'),
+            'job_template': _('Job Template')
         }
         choices = []
         for t in self.get_types():
-            name = type_name_map.get(t, force_text(get_model_for_type(t)._meta.verbose_name).title())
+            name = _(type_name_map.get(t, force_text(get_model_for_type(t)._meta.verbose_name).title()))
             choices.append((t, name))
         return choices
 

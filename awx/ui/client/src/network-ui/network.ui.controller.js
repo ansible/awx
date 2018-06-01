@@ -28,7 +28,8 @@ var NetworkUIController = function($scope,
                                    $log,
                                    ProcessErrors,
                                    ConfigService,
-                                   rbacUiControlService) {
+                                   rbacUiControlService,
+                                   awxNetStrings) {
 
   window.scope = $scope;
 
@@ -153,6 +154,7 @@ var NetworkUIController = function($scope,
                  to_x: 0,
                  to_y: 0};
   $scope.canEdit = $scope.$parent.$resolve.resolvedModels.canEdit;
+  $scope.strings = awxNetStrings;
   $scope.send_trace_message = function (message) {
         if (!$scope.recording) {
             return;
@@ -265,7 +267,7 @@ var NetworkUIController = function($scope,
   };
 
   //Inventory Toolbox Setup
-  $scope.inventory_toolbox = new models.ToolBox(0, 'Inventory', 'device', 0, toolboxTopMargin, 200, toolboxHeight);
+  $scope.inventory_toolbox = new models.ToolBox(0, $scope.strings.get('toolbox.INVENTORY'), 'device', 0, toolboxTopMargin, 200, toolboxHeight);
   if (!$scope.disconnected) {
       $scope.for_each_page('/api/v2/inventories/' + $scope.inventory_id + '/hosts/',
            function(all_results) {
@@ -920,8 +922,8 @@ var NetworkUIController = function($scope,
     const contextMenuButtonHeight = 26;
     let contextMenuHeight = 64;
     $scope.context_menu_buttons = [
-        new models.ContextMenuButton("Details", 236, 231, 160, contextMenuButtonHeight, $scope.onDetailsContextButton, $scope),
-        new models.ContextMenuButton("Remove", 256, 231, 160, contextMenuButtonHeight, $scope.onDeleteContextMenu, $scope)
+        new models.ContextMenuButton($scope.strings.get('context_menu.DETAILS'), 236, 231, 160, contextMenuButtonHeight, $scope.onDetailsContextButton, $scope, 'details'),
+        new models.ContextMenuButton($scope.strings.get('context_menu.REMOVE'), 256, 231, 160, contextMenuButtonHeight, $scope.onDeleteContextMenu, $scope, 'remove')
     ];
     if(!$scope.canEdit){
         $scope.context_menu_buttons.pop();

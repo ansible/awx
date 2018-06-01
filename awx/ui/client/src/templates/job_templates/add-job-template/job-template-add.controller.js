@@ -200,18 +200,17 @@
                             var msg;
                             switch (data.status) {
                             case 'failed':
-                                msg = "<div>The Project selected has a status of \"failed\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
+                                msg = `<div>${i18n._('The Project selected has a status of')} \"${i18n._('failed')}\". ${i18n._('You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.')}</div>`;
                                 break;
                             case 'never updated':
-                                msg = "<div>The Project selected has a status of \"never updated\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
+                                msg = `<div>${i18n._('The Project selected has a status of')} \"${i18n._('never updated')}\". ${i18n._('You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.')}</div>`;
                                 break;
                             case 'missing':
-                                msg = '<div>The selected project has a status of \"missing\". Please check the server and make sure ' +
-                                    ' the directory exists and file permissions are set correctly.</div>';
+                                msg = `<div>${i18n._('The selected project has a status of')} \"${i18n._('missing')}\". ${i18n._('Please check the server and make sure the directory exists and file permissions are set correctly.')}</div>`;
                                 break;
                             }
                             if (msg) {
-                                Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
+                                Alert(i18n._('Warning'), msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
                             }
                         })
                         .catch(({data, status}) => {

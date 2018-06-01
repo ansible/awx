@@ -11,7 +11,7 @@
     dy=".3em"
     text-anchor="left">{{contextMenuButton.name}}
 </text>
-<text ng-show="contextMenuButton.name ==='Remove'" ng-attr-class="{{contextMenuButton.is_pressed ? 'NetworkUI__contextMenuRemoveButtonText-pressed' : contextMenuButton.mouse_over ? 'NetworkUI__contextMenuRemoveButtonText-hover' : 'NetworkUI__contextMenuRemoveButtonText'}}"
+<text ng-show="contextMenuButton.type ==='remove'" ng-attr-class="{{contextMenuButton.is_pressed ? 'NetworkUI__contextMenuRemoveButtonText-pressed' : contextMenuButton.mouse_over ? 'NetworkUI__contextMenuRemoveButtonText-hover' : 'NetworkUI__contextMenuRemoveButtonText'}}"
     x=15
     ng-attr-y="{{(contextMenuButton.height * $parent.$index) + 18}}"
     dy=".3em"

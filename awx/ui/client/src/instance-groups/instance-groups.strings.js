@@ -34,7 +34,8 @@ function InstanceGroupsStrings (BaseString) {
 
     ns.capacityBar = {
         IS_OFFLINE: t.s('Unavailable to run jobs.'),
-        IS_OFFLINE_LABEL: t.s('Unavailable')
+        IS_OFFLINE_LABEL: t.s('Unavailable'),
+        USED_CAPACITY: t.s('Used Capacity')
     };
 
     ns.capacityAdjuster = {
@@ -43,7 +44,8 @@ function InstanceGroupsStrings (BaseString) {
     };
 
     ns.jobs = {
-        PANEL_TITLE: t.s('Jobs')
+        PANEL_TITLE: t.s('Jobs'),
+        RUNNING_JOBS: t.s('Running Jobs')
     };
 
     ns.error = {

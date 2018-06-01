@@ -1,5 +1,4 @@
 import NetworkingController from './network.nav.controller';
-import NetworkingStrings from './network.nav.strings';
 
 const MODULE_NAME = 'at.features.networking';
 
@@ -45,12 +44,11 @@ function NetworkingRun ($stateExtender, strings) {
 
 NetworkingRun.$inject = [
     '$stateExtender',
-    'NetworkingStrings'
+    'awxNetStrings'
 ];
 
 angular
     .module(MODULE_NAME, [])
-    .service('NetworkingStrings', NetworkingStrings)
     .run(NetworkingRun);
 
 export default MODULE_NAME;

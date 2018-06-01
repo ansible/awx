@@ -2,14 +2,15 @@ function HostEventsController (
     $scope,
     $state,
     HostEventService,
-    hostEvent
+    hostEvent,
+    OutputStrings
 ) {
     $scope.processEventStatus = HostEventService.processEventStatus;
     $scope.processResults = processResults;
     $scope.isActiveState = isActiveState;
     $scope.getActiveHostIndex = getActiveHostIndex;
     $scope.closeHostEvent = closeHostEvent;
-
+    $scope.strings = OutputStrings;
     function init () {
         hostEvent.event_name = hostEvent.event;
         $scope.event = _.cloneDeep(hostEvent);
@@ -165,6 +166,7 @@ HostEventsController.$inject = [
     '$state',
     'HostEventService',
     'hostEvent',
+    'OutputStrings'
 ];
 
 module.exports = HostEventsController;

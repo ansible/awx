@@ -87,10 +87,24 @@ function OutputStrings (BaseString) {
 
     ns.stats = {
         ELAPSED: t.s('Elapsed'),
+        PLAYS: t.s('Plays'),
+        TASKS: t.s('Tasks'),
+        HOSTS: t.s('Hosts')
     };
 
     ns.stdout = {
         BACK_TO_TOP: t.s('Back to Top'),
+    };
+
+    ns.host_event_modal = {
+        CREATED: t.s('CREATED'),
+        ID: t.s('ID'),
+        PLAY: t.s('PLAY'),
+        TASK: t.s('TASK'),
+        MODULE: t.s('MODULE'),
+        NO_RESULT_FOUND: t.s('No result found'),
+        STANDARD_OUT: t.s('Standard Out'),
+        STANDARD_ERROR: t.s('Standard Error')
     };
 }
 

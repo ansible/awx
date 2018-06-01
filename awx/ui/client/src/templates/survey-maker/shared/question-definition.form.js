@@ -273,7 +273,7 @@ export default ['i18n', function(i18n){
                 '<div>'+
                 '<div class="input-group">'+
                 '<span class="input-group-btn">'+
-                '<button type="button" class="btn btn-default show_input_button" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-container="#survey-modal-dialog" data-original-title="" title="">SHOW</button>'+
+                '<button type="button" class="btn btn-default show_input_button" id="default_password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput(&quot;#default_password&quot;)" data-container="#survey-modal-dialog" data-original-title="" title="" translate>SHOW</button>'+
                 '</span>'+
                 '<input id="default_password" type="password" ng-model="default_password" name="default_password" class="form-control Form-textInput" autocomplete="false">'+
                 '</div>'+
