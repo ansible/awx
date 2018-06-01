@@ -6,7 +6,49 @@ the HTTP authentication header. The token can be scoped to have more restrictive
 the base RBAC permissions of the user.  Refer to [RFC 6749](https://tools.ietf.org/html/rfc6749) for 
 more details of OAuth 2 specification.
 
-## Usage
+## Basic Usage
+
+To get started using OAuth 2 tokens for accessing the browsable API using OAuth 2, we will walkthrough acquiring a token, and using it.  
+
+1. Make an application with authorization_grant_type set to 'password'. HTTP POST the following to the `/api/v2/applications/`  endpoint (supplying your own organization-id):
+```
+{
+    "name": "Admin Internal Application",
+    "description": "For use by secure services & clients. ",
+    "client_type": "confidential",
+    "redirect_uris": "",
+    "authorization_grant_type": "password",
+    "skip_authorization": false,
+    "organization": <organization-id>
+}
+```
+2. Make a token with a POST to the `/api/v2/tokens/` endpoint: 
+```
+{
+    "description": "My Access Token",
+    "application": <application-id>,
+    "scope": "write"
+}
+```
+This will return a `<token-value>` that you can use to authenticate with for future requests (this will not be shown again)
+
+3. Use token to access a resource.  We will use curl to demonstrate this:
+```
+curl -H "Authorization: Bearer <token-value>" -X GET https://<awx>/api/v2/users/
+```
+> The `-k` flag may be needed if you have not set up a CA yet and are using SSL.  
+
+This token can be revoked by making a DELETE on the detail page for that token.  All you need is that token's id.  For example: 
+```
+curl -ku <user>:<password> -X DELETE https://<awx>/api/v2/tokens/<pk>/
+```
+
+Similarly, using a token:
+```
+curl -H "Authorization: Bearer <token-value>" -X DELETE https://<awx>/api/v2/tokens/<pk>/ -k
+```
+
+## More Information
 
 #### Managing OAuth 2 applications and tokens
 Applications and tokens can be managed as a top-level resource at `/api/<version>/applications` and 
@@ -14,11 +56,11 @@ Applications and tokens can be managed as a top-level resource at `/api/<version
 `/api/<version>/users/N/<resource>`.  Applications can be created by making a POST to either `api/<version>/applications`
 or `/api/<version>/users/N/applications`.  
 
-Each OAuth 2 application represents a specific API client on the server side. For an API client to use the API, 
-it must first have an application, and issue an access token.  
+Each OAuth 2 application represents a specific API client on the server side. For an API client to use the API via an application token, 
+it must first have an application and issue an access token.  
 
 Individual applications will be accessible via their primary keys:
-`/api/<version>/applications/<primary key of an application>/`. Here is a typical application:
+`/api/<version>/applications/<pk>/`. Here is a typical application:
 ```
 {
     "id": 1,
@@ -59,10 +101,10 @@ Individual applications will be accessible via their primary keys:
     "skip_authorization": false
 },
 ```
-In the above example, `user` is the primary key of the user this application associates to and `name` is
+In the above example, `user` is the primary key of the user associated to this application and `name` is
  a human-readable identifier for the application. The other fields, like `client_id` and
 `redirect_uris`, are mainly used for OAuth 2 authorization, which will be covered later in the 'Using
-OAuth token system' section.
+OAuth 2 Token System' section.
 
 Fields `client_id` and `client_secret` are immutable identifiers of applications, and will be
 generated during creation; Fields `user` and `authorization_grant_type`, on the other hand, are
@@ -85,7 +127,7 @@ token scope; or POSTing to `/api/v2/applications/<pk>/tokens/` by providing only
 the parent application will be automatically linked.
 
 Individual tokens will be accessible via their primary keys:
-`/api/<version>/tokens/<primary key of a token>/`. Here is a typical token:
+`/api/<version>/tokens/<pk>/`. Here is a typical token:
 ```
 {
     "id": 4,
@@ -123,7 +165,7 @@ Individual tokens will be accessible via their primary keys:
 For an OAuth 2 token, the only fully mutable fields are `scope` and `description`. The `application` 
 field is *immutable on update*, and all other fields are totally immutable, and will be auto-populated 
 during creation
-* `user` field will be the `user` field of related application
+* `user` field corresponds to the user the token is created for
 * `expires` will be generated according to Tower configuration setting `OAUTH2_PROVIDER`
 * `token` and `refresh_token` will be auto-generated to be non-clashing random strings.  
 Both application tokens and personal access tokens will be shown at the `/api/v2/tokens/` 
@@ -134,26 +176,27 @@ On RBAC side:
 - System admin is able to see and manipulate every token in the system; 
 - Organization admins will be able to see and manipulate all tokens belonging to Organization
   members;
+  System Auditors can see all tokens and applications
 - Other normal users will only be able to see and manipulate their own tokens.
 > Note: Users can only see the token or refresh-token _value_ at the time of creation ONLY.  
 
-#### Using OAuth 2 token system for Personal Access Tokens (PAT)
+#### Using OAuth 2 Token System for Personal Access Tokens (PAT)
 The most common usage of OAuth 2 is authenticating users. The `token` field of a token is used
 as part of the HTTP authentication header, in the format `Authorization: Bearer <token field value>`.  This _Bearer_
 token can be obtained by doing a curl to the `/api/o/token/` endpoint. For example:  
 ```
 curl -ku <user>:<password> -H "Content-Type: application/json" -X POST \
 -d '{"description":"Tower CLI", "application":null, "scope":"write"}' \
-https://localhost:8043/api/v2/users/1/personal_tokens/ | python -m json.tool
+https://<awx>/api/v2/users/1/personal_tokens/ | python -m json.tool
 ```
 Here is an example of using that PAT to access an API endpoint using `curl`:
 ```
-curl -H "Authorization: Bearer kqHqxfpHGRRBXLNCOXxT5Zt3tpJogn" http://localhost:8013/api/v2/credentials/
+curl -H "Authorization: Bearer kqHqxfpHGRRBXLNCOXxT5Zt3tpJogn" http://<awx>/api/v2/credentials/
 ```
 
 According to OAuth 2 specification, users should be able to acquire, revoke and refresh an access
-token. In AWX the equivalent, and the easiest, way of doing that is creating a token, deleting
-a token, and deleting a token quickly followed by creating a new one.
+token. In AWX the equivalent, and easiest, way of doing that is creating a token, deleting
+a token, and deleting a token quickly followed by creating a new one. 
 
 The specification also provides standard ways of doing this. RFC 6749 elaborates
 on those topics, but in summary, an OAuth 2 token is officially acquired via authorization using
@@ -166,6 +209,7 @@ In AWX, our OAuth 2 system is built on top of
 support on standard authorization, token revoke and refresh. AWX implements them and puts related
 endpoints under `/api/o/` endpoint. Detailed examples on the most typical usage of those endpoints
 are available as description text of `/api/o/`. See below for information on Application Access Token usage.  
+> Note: The `/api/o/` endpoints can only be used for application tokens, and are not valid for personal access tokens.  
 
 #### Token scope mask over RBAC system
 The scope of an OAuth 2 token is a space-separated string composed of keywords like 'read' and 'write'.
@@ -204,7 +248,7 @@ Make a POST to the `/api/v2/applications/` endpoint.
     "name": "AuthCodeApp",
     "user": 1,
     "client_type": "confidential",
-    "redirect_uris": "http://localhost:8013/api/v2",
+    "redirect_uris": "http://<awx>/api/v2",
     "authorization_grant_type": "authorization-code",
     "skip_authorization": false
 }
@@ -237,7 +281,7 @@ Suppose we have an application `admin's app` of grant type `implicit`:
     "client_id": "L0uQQWW8pKX51hoqIRQGsuqmIdPi2AcXZ9EJRGmj",
     "client_secret": "9Wp4dUrUsigI8J15fQYJ3jn0MJHLkAjyw7ikBsABeWTNJbZwy7eB2Xro9ykYuuygerTPQ2gIF2DCTtN3kurkt0Me3AhanEw6peRNvNLs1NNfI4f53mhX8zo5JQX0BKy5",
     "client_type": "confidential",
-    "redirect_uris": "http://localhost:8013/api/",
+    "redirect_uris": "http://<awx>/api/",
     "authorization_grant_type": "implicit",
     "skip_authorization": false
 }
@@ -293,7 +337,7 @@ curl -X POST \
   -d "grant_type=password&username=<username>&password=<password>&scope=read" \
   -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569e
 IaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
-  http://localhost:8013/api/o/token/ -i
+  http://<awx>/api/o/token/ -i
 ```
 In the above post request, parameters `username` and `password` are username and password of the related
 AWX user of the underlying application, and the authentication information is of format
@@ -340,7 +384,7 @@ The `/api/o/token/` endpoint is used for refreshing access token:
 curl -X POST \
   -d "grant_type=refresh_token&refresh_token=AL0NK9TTpv0qp54dGbC4VUZtsZ9r8z" \
   -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
-  http://localhost:8013/api/o/token/ -i
+  http://<awx>/api/o/token/ -i
 ```
 In the above post request, `refresh_token` is provided by `refresh_token` field of the access token
 above. The authentication information is of format `<client_id>:<client_secret>`, where `client_id`
@@ -368,41 +412,16 @@ after, with information like scope and related application identical to the orig
 verify by checking the new token is present and the old token is deleted at the /api/v2/tokens/ endpoint.
 
 #### Revoke an access token
-Revoking an access token is the same as deleting the token resource object. Suppose we have
-an existing token to revoke:
-```text
-{
-    "id": 30,
-    "type": "access_token",
-    "url": "/api/v2/tokens/30/",
-    ...
-    "user": null,
-    "token": "rQONsve372fQwuc2pn76k3IHDCYpi7",
-    "refresh_token": "",
-    "application": 6,
-    "expires": "2017-12-06T03:24:25.614523Z",
-    "scope": "read"
-}
-```
-Revoking is conducted by POSTing to `/api/o/revoke_token/` with the token to revoke as parameter:
+
+##### Alternatively Revoke using the /api/o/revoke-token/ endpoint
+Revoking an access token by this method is the same as deleting the token resource object, but it allows you to delete a token by providing its token value, and the associated `client_id` (and `client_secret` if the application is `confidential`).  For example: 
 ```bash
 curl -X POST -d "token=rQONsve372fQwuc2pn76k3IHDCYpi7" \
   -u "gwSPoasWSdNkMDtBN3Hu2WYQpPWCO9SwUEsKK22l:fI6ZpfocHYBGfm1tP92r0yIgCyfRdDQt0Tos9L8a4fNsJjQQMwp9569eIaUBsaVDgt2eiwOGe0bg5m5vCSstClZmtdy359RVx2rQK5YlIWyPlrolpt2LEpVeKXWaiybo" \
-  http://localhost:8013/api/o/revoke_token/ -i
+  http://<awx>/api/o/revoke_token/ -i
 ```
 `200 OK` means a successful delete.
-```text
-HTTP/1.1 200 OK
-Server: nginx/1.12.2
-Date: Tue, 05 Dec 2017 18:05:18 GMT
-Content-Type: text/html; charset=utf-8
-Content-Length: 0
-Connection: keep-alive
-Vary: Accept-Language, Cookie
-Content-Language: en
-Strict-Transport-Security: max-age=15768000
 
-```
 We can verify the effect by checking if the token is no longer present 
 at /api/v2/tokens/.
 
