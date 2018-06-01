@@ -2269,7 +2269,10 @@ class RunAdHocCommand(BaseTask):
         args.extend(['-e', '@%s' % (extra_vars_path)])
 
         args.extend(['-m', ad_hoc_command.module_name])
-        args.extend(['-a', sanitize_jinja(ad_hoc_command.module_args)])
+        module_args = ad_hoc_command.module_args
+        if settings.ALLOW_JINJA_IN_EXTRA_VARS != 'always':
+            module_args = sanitize_jinja(module_args)
+        args.extend(['-a', module_args])
 
         if ad_hoc_command.limit:
             args.append(ad_hoc_command.limit)
