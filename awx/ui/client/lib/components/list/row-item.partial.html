@@ -47,6 +47,6 @@
                 <at-tag tag="tag.name" icon="{{ tag.kind }}" link="/#/credentials/{{ tag.id }}"></at-tag>
             </div>
             <!-- If there are 5 or MORE credential tags, handle them accordingly with Toggle Tag Component -->
-            <at-toggle-tag tags="tagValues" ng-if="tagValues.length > 5"></at-toggle-tag>
+            <at-toggle-tag tag-type="cred" tags="tagValues" ng-if="tagValues.length > 5"></at-toggle-tag>
         </div>
 </div>

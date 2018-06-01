@@ -14,9 +14,15 @@ function controller ($scope, TagService, strings) {
     };
 
     vm.tags = [];
-    // build credentials from tags object
+
+    // Let the controller handle what type of tag should be passed to the directive
+    // e.g. default tag, crential tag, etc.
     Object.keys(tags).forEach(key => {
-        vm.tags.push(TagService.buildCredentialTag(tags[key]));
+        if ($scope.tagType === 'cred') {
+            vm.tags.push(TagService.buildCredentialTag(tags[key]));
+        } else {
+            vm.tags.push(TagService.buildTag(tags[key]));
+        }
     });
 }
 
@@ -32,6 +38,7 @@ function atToggleTag () {
         templateUrl,
         scope: {
             tags: '=',
+            tagType: '@',
         },
     };
 }

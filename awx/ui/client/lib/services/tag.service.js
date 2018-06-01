@@ -7,6 +7,10 @@ function TagService (strings, $filter) {
 
         return { icon, link, tooltip, value };
     };
+    this.buildTag = tag => {
+        const value = $filter('sanitize')(tag);
+        return { value };
+    };
 }
 
 TagService.$inject = ['ComponentsStrings', '$filter'];
