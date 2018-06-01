@@ -270,17 +270,15 @@ class TaskManager():
                 logger.info(six.text_type('Submitting isolated {} to queue {}.').format(
                             task.log_format, task.instance_group.name, task.execution_node))
             elif task.supports_isolation() and rampart_group.controller_id:
-                # TODO: Select from only online nodes in the controller node
                 task.instance_group = rampart_group
                 task.execution_node = instance.hostname
-                task.controller_node = random.choice(list(rampart_group.controller.instances.all().values_list('hostname', flat=True)))
+                task.controller_node = rampart_group.choose_online_controller_node()
                 logger.info(six.text_type('Submitting isolated {} to queue {} controlled by {}.').format(
                             task.log_format, task.execution_node, task.controller_node))
             else:
                 task.instance_group = rampart_group
                 if instance is not None:
                     task.execution_node = instance.hostname
-                logger.debug(six.text_type("Dependent {} is blocked from running").format(task.log_format))
                 logger.info(six.text_type('Submitting {} to <instance group, instance> <{},{}>.').format(
                             task.log_format, task.instance_group_id, task.execution_node))
             with disable_activity_stream():

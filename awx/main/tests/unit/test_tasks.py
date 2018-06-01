@@ -627,10 +627,12 @@ class TestAdhocRun(TestJobExecution):
 class TestIsolatedExecution(TestJobExecution):
 
     ISOLATED_HOST = 'some-isolated-host'
+    ISOLATED_CONTROLLER_HOST = 'some-isolated-controller-host'
 
     def get_instance(self):
         instance = super(TestIsolatedExecution, self).get_instance()
-        instance.get_isolated_execution_node_name = mock.Mock(return_value=self.ISOLATED_HOST)
+        instance.controller_node = self.ISOLATED_CONTROLLER_HOST
+        instance.execution_node = self.ISOLATED_HOST
         return instance
 
     def test_with_ssh_credentials(self):
