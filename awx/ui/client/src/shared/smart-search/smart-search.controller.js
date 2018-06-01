@@ -235,11 +235,15 @@ function SmartSearchController (
     };
 
     $scope.clearAllTerms = () => {
-        const cleared = _(defaults).omit(_.isNull).value();
+        const cleared = {};
 
-        delete cleared.page;
+        _.forOwn(defaults, function(value, key) {
+            if (key !== "page") {
+                cleared[key] = _.has(queryset, key) ? queryset[key] : value;
+            }
+        });
 
-        queryset = cleared;
+        queryset = _(cleared).omit(_.isNull).value();
 
         if (!$scope.querySet) {
             $state.go('.', { [searchKey]: queryset });
