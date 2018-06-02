@@ -114,7 +114,7 @@ def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_
             return response.json()
         except (ValueError, TypeError) as e:
             # If the JSON parse fails, print the ValueError
-            raise RuntimeError("Failed to parse json from host: {}".format(e)
+            raise RuntimeError("Failed to parse json from host: {}".format(e))
     except requests.ConnectionError as e:
         raise RuntimeError("Connection to remote host failed: {}".format(e))
 
