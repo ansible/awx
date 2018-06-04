@@ -58,7 +58,7 @@ function ComponentsStrings (BaseString) {
     };
 
     ns.tooltips = {
-        CREDENTIAL: t.s('View the Credential'),
+        VIEW_THE_CREDENTIAL: t.s('View the Credential'),
     };
 
     ns.layout = {
