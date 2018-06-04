@@ -251,7 +251,13 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
             }
         },
         resolve: {
-            resolvedModels: InstanceGroupsResolve
+            resolvedModels: InstanceGroupsResolve,
+            Dataset: ['GetBasePath', 'QuerySet', '$stateParams',
+                function(GetBasePath, qs, $stateParams) {
+                    let path = `${GetBasePath('instance_groups')}${$stateParams['instance_group_id']}/instances`;
+                    return qs.search(path, $stateParams[`instance_search`]);
+                }
+            ]
         }
     });
 
