@@ -949,7 +949,6 @@ class UserSerializer(BaseSerializer):
             tokens                 = self.reverse('api:o_auth2_token_list',         kwargs={'pk': obj.pk}),
             authorized_tokens      = self.reverse('api:user_authorized_token_list', kwargs={'pk': obj.pk}),
             personal_tokens        = self.reverse('api:o_auth2_personal_token_list',   kwargs={'pk': obj.pk}),
-
         ))
         return res
 

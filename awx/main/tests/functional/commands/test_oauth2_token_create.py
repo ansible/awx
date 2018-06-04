@@ -1,11 +1,17 @@
+# Python
 import pytest
 import string
 import random
 import StringIO
+
+# Django
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from awx.main.models.oauth import OAuth2AccessToken
 from django.core.management.base import CommandError
+
+# AWX
+from awx.main.models.oauth import OAuth2AccessToken
+
 
 
 @pytest.mark.django_db

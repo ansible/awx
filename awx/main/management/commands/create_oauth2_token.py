@@ -1,5 +1,4 @@
 # Django
-
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -17,6 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not options['user']:
+
             raise CommandError('Username not supplied. Usage: awx-manage create_oauth2_token --user=username.')
         try:
             user = User.objects.get(username=options['user'])
