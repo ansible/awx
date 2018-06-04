@@ -1,6 +1,6 @@
 import { TRUNCATED, TRUNCATE_LENGTH } from './constants';
 
-const templateUrl = require('~components/toggle/toggle-tag.partial.html');
+const templateUrl = require('~components/toggle-tag/toggle-tag.partial.html');
 
 function controller ($scope, TagService, strings) {
     const { tags } = $scope;
