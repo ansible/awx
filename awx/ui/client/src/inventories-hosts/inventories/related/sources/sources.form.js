@@ -15,7 +15,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
     var notifications_object = {
         name: 'notifications',
         index: false,
-        basePath: "notifications",
+        basePath: "notification_templates",
         include: "NotificationsList",
         title: i18n._('Notifications'),
         iterator: 'notification',
