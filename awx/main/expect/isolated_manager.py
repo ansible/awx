@@ -468,13 +468,11 @@ class IsolatedManager(object):
 
         return OutputEventFilter(job_event_callback)
 
-    def run(self, instance, host, private_data_dir, proot_temp_dir):
+    def run(self, instance, private_data_dir, proot_temp_dir):
         """
         Run a job on an isolated host.
 
         :param instance:         a `model.Job` instance
-        :param host:             the hostname (or IP address) to run the
-                                 isolated job on
         :param private_data_dir: an absolute path on the local file system
                                  where job-specific data should be written
                                  (i.e., `/tmp/ansible_awx_xyz/`)
@@ -486,7 +484,7 @@ class IsolatedManager(object):
         `ansible-playbook` run.
         """
         self.instance = instance
-        self.host = host
+        self.host = instance.execution_node
         self.private_data_dir = private_data_dir
         self.proot_temp_dir = proot_temp_dir
         status, rc = self.dispatch()
