@@ -122,7 +122,14 @@ export default ['Rest', 'Wait',
                         multiple: false
                     });
 
-                    $scope.hipchatColors = [i18n._('Gray'), i18n._('Green'), i18n._('Purple'), i18n._('Red'), i18n._('Yellow'), i18n._('Random')];
+                    $scope.hipchatColors = [
+                        {'id': 'gray', 'name': i18n._('Gray')},
+                        {'id': 'green', 'name': i18n._('Green')},
+                        {'id': 'purple', 'name': i18n._('Purple')},
+                        {'id': 'red', 'name': i18n._('Red')},
+                        {'id': 'yellow', 'name': i18n._('Yellow')},
+                        {'id': 'random', 'name': i18n._('Random')}
+                    ];
                     CreateSelect2({
                         element: '#notification_template_color',
                         multiple: false
