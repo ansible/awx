@@ -106,6 +106,10 @@ class Instance(BaseModel):
     def jobs_running(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting',)).count()
 
+    @property
+    def jobs_total(self):
+        return UnifiedJob.objects.filter(execution_node=self.hostname).count()
+
     def is_lost(self, ref_time=None, isolated=False):
         if ref_time is None:
             ref_time = now()
@@ -177,6 +181,15 @@ class InstanceGroup(BaseModel, RelatedJobsMixin):
     @property
     def capacity(self):
         return sum([inst.capacity for inst in self.instances.all()])
+
+    @property
+    def jobs_running(self):
+        return UnifiedJob.objects.filter(status__in=('running', 'waiting'),
+                                         instance_group=self).count()
+
+    @property
+    def jobs_total(self):
+        return UnifiedJob.objects.filter(instance_group=self).count()
 
     '''
     RelatedJobsMixin

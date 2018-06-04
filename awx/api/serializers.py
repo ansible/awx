@@ -4440,13 +4440,16 @@ class InstanceSerializer(BaseSerializer):
                     'are targeted for this instance'),
         read_only=True
     )
-
+    jobs_total = serializers.IntegerField(
+        help_text=_('Count of all jobs that target this instance'),
+        read_only=True
+    )
 
     class Meta:
         model = Instance
         read_only_fields = ('uuid', 'hostname', 'version')
         fields = ("id", "type", "url", "related", "uuid", "hostname", "created", "modified", 'capacity_adjustment',
-                  "version", "capacity", "consumed_capacity", "percent_capacity_remaining", "jobs_running",
+                  "version", "capacity", "consumed_capacity", "percent_capacity_remaining", "jobs_running", "jobs_total",
                   "cpu", "memory", "cpu_capacity", "mem_capacity", "enabled")
 
     def get_related(self, obj):
@@ -4470,7 +4473,15 @@ class InstanceGroupSerializer(BaseSerializer):
     committed_capacity = serializers.SerializerMethodField()
     consumed_capacity = serializers.SerializerMethodField()
     percent_capacity_remaining = serializers.SerializerMethodField()
-    jobs_running = serializers.SerializerMethodField()
+    jobs_running = serializers.IntegerField(
+        help_text=_('Count of jobs in the running or waiting state that '
+                    'are targeted for this instance group'),
+        read_only=True
+    )
+    jobs_total = serializers.IntegerField(
+        help_text=_('Count of all jobs that target this instance group'),
+        read_only=True
+    )
     instances = serializers.SerializerMethodField()
     # NOTE: help_text is duplicated from field definitions, no obvious way of
     # both defining field details here and also getting the field's help_text
@@ -4493,7 +4504,8 @@ class InstanceGroupSerializer(BaseSerializer):
         model = InstanceGroup
         fields = ("id", "type", "url", "related", "name", "created", "modified",
                   "capacity", "committed_capacity", "consumed_capacity",
-                  "percent_capacity_remaining", "jobs_running", "instances", "controller",
+                  "percent_capacity_remaining", "jobs_running", "jobs_total",
+                  "instances", "controller",
                   "policy_instance_percentage", "policy_instance_minimum", "policy_instance_list")
 
     def get_related(self, obj):
@@ -4517,21 +4529,15 @@ class InstanceGroupSerializer(BaseSerializer):
             raise serializers.ValidationError(_('tower instance group name may not be changed.'))
         return value
 
-    def get_jobs_qs(self):
-        # Store running jobs queryset in context, so it will be shared in ListView
-        if 'running_jobs' not in self.context:
-            self.context['running_jobs'] = UnifiedJob.objects.filter(
-                status__in=('running', 'waiting'))
-        return self.context['running_jobs']
-
     def get_capacity_dict(self):
         # Store capacity values (globally computed) in the context
         if 'capacity_map' not in self.context:
             ig_qs = None
+            jobs_qs = UnifiedJob.objects.filter(status__in=('running', 'waiting'))
             if self.parent:  # Is ListView:
                 ig_qs = self.parent.instance
             self.context['capacity_map'] = InstanceGroup.objects.capacity_values(
-                qs=ig_qs, tasks=self.get_jobs_qs(), breakdown=True)
+                qs=ig_qs, tasks=jobs_qs, breakdown=True)
         return self.context['capacity_map']
 
     def get_consumed_capacity(self, obj):
@@ -4550,10 +4556,6 @@ class InstanceGroupSerializer(BaseSerializer):
             return float("{0:.2f}".format(
                 ((float(obj.capacity) - float(consumed)) / (float(obj.capacity))) * 100)
             )
-
-    def get_jobs_running(self, obj):
-        jobs_qs = self.get_jobs_qs()
-        return sum(1 for job in jobs_qs if job.instance_group_id == obj.id)
 
     def get_instances(self, obj):
         return obj.instances.count()
