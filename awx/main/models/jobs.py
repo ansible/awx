@@ -402,7 +402,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 if 'prompts' not in exclude_errors:
                     errors_dict[field_name] = _('Field is not configured to prompt on launch.').format(field_name=field_name)
 
-        if 'prompts' not in exclude_errors and self.passwords_needed_to_start:
+        if ('prompts' not in exclude_errors and
+                (not getattr(self, 'ask_credential_on_launch', False)) and
+                self.passwords_needed_to_start):
             errors_dict['passwords_needed_to_start'] = _(
                 'Saved launch configurations cannot provide passwords needed to start.')
 
