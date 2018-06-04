@@ -88,7 +88,7 @@ class TestIsolatedRuns:
         with mock.patch.object(job, '_get_task_class') as task_class:
             task_class.return_value = MockTaskClass
             job.start_celery_task([], error_callback, success_callback, 'thepentagon')
-        mock_async.assert_called_with([job.id, 'iso2'], [], 
+        mock_async.assert_called_with([job.id], [], 
                                       link_error=error_callback, 
                                       link=success_callback, 
                                       queue='thepentagon',
@@ -100,7 +100,7 @@ class TestIsolatedRuns:
         with mock.patch.object(job, '_get_task_class') as task_class:
             task_class.return_value = MockTaskClass
             job.start_celery_task([], error_callback, success_callback, 'thepentagon')
-        mock_async.assert_called_with([job.id, 'iso1'], [], 
+        mock_async.assert_called_with([job.id], [], 
                                       link_error=error_callback, 
                                       link=success_callback, 
                                       queue='thepentagon',

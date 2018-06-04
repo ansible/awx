@@ -27,4 +27,7 @@ RUN ssh-keygen -A
 RUN mkdir -p /root/.ssh
 RUN touch /root/.ssh/authorized_keys
 
+STOPSIGNAL SIGRTMIN+3
+
+
 CMD ["/usr/sbin/init"]

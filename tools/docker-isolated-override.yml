@@ -14,4 +14,6 @@ services:
       - "../awx/main/expect:/awx_devel"
       - "../awx/lib:/awx_lib"
       - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    privileged: true
+    tmpfs:
+      - "/tmp:exec"
+      - "/run"

@@ -868,14 +868,11 @@ class BaseTask(Task):
         '''
 
     @with_path_cleanup
-    def run(self, pk, isolated_host=None, **kwargs):
+    def run(self, pk, **kwargs):
         '''
         Run the job/task and capture its output.
         '''
-        execution_node = settings.CLUSTER_HOST_ID
-        if isolated_host is not None:
-            execution_node = isolated_host
-        instance = self.update_model(pk, status='running', execution_node=execution_node,
+        instance = self.update_model(pk, status='running',
                                      start_args='')  # blank field to remove encrypted passwords
 
         instance.websocket_emit_status("running")
@@ -884,8 +881,8 @@ class BaseTask(Task):
         extra_update_fields = {}
         event_ct = 0
         stdout_handle = None
+
         try:
-            kwargs['isolated'] = isolated_host is not None
             self.pre_run_hook(instance, **kwargs)
             if instance.cancel_flag:
                 instance = self.update_model(instance.pk, status='canceled')
@@ -945,7 +942,7 @@ class BaseTask(Task):
                         credential, env, safe_env, args, safe_args, kwargs['private_data_dir']
                     )
 
-            if isolated_host is None:
+            if instance.is_isolated() is False:
                 stdout_handle = self.get_stdout_handle(instance)
             else:
                 stdout_handle = isolated_manager.IsolatedManager.get_stdout_handle(
@@ -961,7 +958,7 @@ class BaseTask(Task):
             ssh_key_path = self.get_ssh_key_path(instance, **kwargs)
             # If we're executing on an isolated host, don't bother adding the
             # key to the agent in this environment
-            if ssh_key_path and isolated_host is None:
+            if ssh_key_path and instance.is_isolated() is False:
                 ssh_auth_sock = os.path.join(kwargs['private_data_dir'], 'ssh_auth.sock')
                 args = run.wrap_args_with_ssh_agent(args, ssh_key_path, ssh_auth_sock)
                 safe_args = run.wrap_args_with_ssh_agent(safe_args, ssh_key_path, ssh_auth_sock)
@@ -981,11 +978,11 @@ class BaseTask(Task):
                 proot_cmd=getattr(settings, 'AWX_PROOT_CMD', 'bwrap'),
             )
             instance = self.update_model(instance.pk, output_replacements=output_replacements)
-            if isolated_host:
+            if instance.is_isolated() is True:
                 manager_instance = isolated_manager.IsolatedManager(
                     args, cwd, env, stdout_handle, ssh_key_path, **_kw
                 )
-                status, rc = manager_instance.run(instance, isolated_host,
+                status, rc = manager_instance.run(instance,
                                                   kwargs['private_data_dir'],
                                                   kwargs.get('proot_temp_dir'))
             else:
@@ -1336,7 +1333,7 @@ class RunJob(BaseTask):
             job_request_id = '' if self.request.id is None else self.request.id
             pu_ig = job.instance_group
             pu_en = job.execution_node
-            if kwargs['isolated']:
+            if job.is_isolated() is True:
                 pu_ig = pu_ig.controller
                 pu_en = settings.CLUSTER_HOST_ID
             local_project_sync = job.project.create_project_update(

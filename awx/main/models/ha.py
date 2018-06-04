@@ -1,6 +1,8 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import six
+import random
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -11,7 +13,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 
-import six
 from solo.models import SingletonModel
 
 from awx import __version__ as awx_application_version
@@ -91,6 +92,10 @@ class Instance(BaseModel):
     def consumed_capacity(self):
         return sum(x.task_impact for x in UnifiedJob.objects.filter(execution_node=self.hostname,
                                                                     status__in=('running', 'waiting')))
+
+    @property
+    def remaining_capacity(self):
+        return self.capacity - self.consumed_capacity
 
     @property
     def role(self):
@@ -186,6 +191,31 @@ class InstanceGroup(BaseModel, RelatedJobsMixin):
     def clean_name(self):
         validate_queuename(self.name)
         return self.name
+
+    def fit_task_to_most_remaining_capacity_instance(self, task):
+        instance_most_capacity = None
+        for i in self.instances.filter(capacity__gt=0).order_by('hostname'):
+            if i.remaining_capacity >= task.task_impact and \
+                    (instance_most_capacity is None or
+                     i.remaining_capacity > instance_most_capacity.remaining_capacity):
+                instance_most_capacity = i
+        return instance_most_capacity
+
+    def find_largest_idle_instance(self):
+        largest_instance = None
+        for i in self.instances.filter(capacity__gt=0).order_by('hostname'):
+            if i.jobs_running == 0:
+                if largest_instance is None:
+                    largest_instance = i
+                elif i.capacity > largest_instance.capacity:
+                    largest_instance = i
+        return largest_instance
+
+    def choose_online_controller_node(self):
+        return random.choice(list(self.controller
+                                      .instances
+                                      .filter(capacity__gt=0)
+                                      .values_list('hostname', flat=True)))
 
 
 class TowerScheduleState(SingletonModel):
