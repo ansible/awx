@@ -9,6 +9,7 @@ function TagService (strings, $filter) {
     };
     this.buildTag = tag => {
         const value = $filter('sanitize')(tag);
+
         return { value };
     };
 }
