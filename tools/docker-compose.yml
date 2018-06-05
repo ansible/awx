@@ -22,17 +22,18 @@ services:
       - postgres
       - memcached
       - rabbitmq
-      - logstash
     #   - sync
     # volumes_from:
     #   - sync
     volumes:
       - "../:/awx_devel"
     privileged: true
-  logstash:
-    build:
-      context: ./docker-compose
-      dockerfile: Dockerfile-logstash
+  # A useful container that simply passes through log messages to the console
+  # helpful for testing awx/tower logging
+  # logstash:
+  #   build:
+  #     context: ./docker-compose
+  #     dockerfile: Dockerfile-logstash
   # Postgres Database Container
   postgres:
     image: postgres:9.6
