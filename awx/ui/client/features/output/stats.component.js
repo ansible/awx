@@ -63,7 +63,7 @@ function JobStatsController (strings, { subscribe }) {
 
 JobStatsController.$inject = [
     'OutputStrings',
-    'JobStatusService',
+    'OutputStatusService',
 ];
 
 export default {

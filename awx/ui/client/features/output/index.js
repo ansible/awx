@@ -3,13 +3,13 @@ import atLibComponents from '~components';
 
 import Strings from '~features/output/output.strings';
 import Controller from '~features/output/index.controller';
-import PageService from '~features/output/page.service';
 import RenderService from '~features/output/render.service';
 import ScrollService from '~features/output/scroll.service';
-import EngineService from '~features/output/engine.service';
+import StreamService from '~features/output/stream.service';
 import StatusService from '~features/output/status.service';
 import MessageService from '~features/output/message.service';
 import EventsApiService from '~features/output/api.events.service';
+import SlideService from '~features/output/slide.service';
 import LegacyRedirect from '~features/output/legacy.route';
 
 import DetailsComponent from '~features/output/details.component';
@@ -24,6 +24,8 @@ const MODULE_NAME = 'at.features.output';
 const PAGE_CACHE = true;
 const PAGE_LIMIT = 5;
 const PAGE_SIZE = 50;
+const ORDER_BY = 'counter';
+// const ORDER_BY = 'start_line';
 const WS_PREFIX = 'ws';
 
 function resolveResource (
@@ -74,7 +76,7 @@ function resolveResource (
 
     const params = {
         page_size: PAGE_SIZE,
-        order_by: 'start_line',
+        order_by: ORDER_BY,
     };
 
     const config = {
@@ -250,13 +252,13 @@ angular
         HostEvent
     ])
     .service('OutputStrings', Strings)
-    .service('JobPageService', PageService)
-    .service('JobScrollService', ScrollService)
-    .service('JobRenderService', RenderService)
-    .service('JobEventEngine', EngineService)
-    .service('JobStatusService', StatusService)
-    .service('JobMessageService', MessageService)
+    .service('OutputScrollService', ScrollService)
+    .service('OutputRenderService', RenderService)
+    .service('OutputStreamService', StreamService)
+    .service('OutputStatusService', StatusService)
+    .service('OutputMessageService', MessageService)
     .service('JobEventsApiService', EventsApiService)
+    .service('OutputSlideService', SlideService)
     .component('atJobSearch', SearchComponent)
     .component('atJobStats', StatsComponent)
     .component('atJobDetails', DetailsComponent)

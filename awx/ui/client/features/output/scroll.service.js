@@ -4,7 +4,7 @@ const DELAY = 100;
 const THRESHOLD = 0.1;
 
 function JobScrollService ($q, $timeout) {
-    this.init = (hooks) => {
+    this.init = ({ next, previous }) => {
         this.el = $(ELEMENT_CONTAINER);
         this.timer = null;
 
@@ -14,15 +14,15 @@ function JobScrollService ($q, $timeout) {
         };
 
         this.hooks = {
-            isAtRest: hooks.isAtRest,
-            next: hooks.next,
-            previous: hooks.previous
+            next,
+            previous,
+            isAtRest: () => $q.resolve()
         };
 
         this.state = {
-            locked: false,
+            hidden: false,
             paused: false,
-            top: true
+            top: true,
         };
 
         this.el.scroll(this.listen);
@@ -156,6 +156,20 @@ function JobScrollService ($q, $timeout) {
 
     this.unlock = () => {
         this.state.locked = false;
+    };
+
+    this.hide = () => {
+        if (!this.state.hidden) {
+            this.el.css('overflow', 'hidden');
+            this.state.hidden = true;
+        }
+    };
+
+    this.unhide = () => {
+        if (this.state.hidden) {
+            this.el.css('overflow', 'auto');
+            this.state.hidden = false;
+        }
     };
 
     this.isLocked = () => this.state.locked;

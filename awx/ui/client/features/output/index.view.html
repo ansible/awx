@@ -22,17 +22,17 @@
                     ng-class="{ 'fa-minus': vm.expanded, 'fa-plus': !vm.expanded }"></i>
             </div>
 
-            <div class="pull-right" ng-click="vm.scroll.end()">
+            <div class="pull-right" ng-click="vm.menu.end()">
                 <i class="at-Stdout-menuIcon--lg fa fa-angle-double-down"
-                    ng-class=" { 'at-Stdout-menuIcon--active': vm.scroll.isLocked }"></i>
+                    ng-class=" { 'at-Stdout-menuIcon--active': vm.menu.isLocked }"></i>
             </div>
-            <div class="pull-right" ng-click="vm.scroll.home()">
+            <div class="pull-right" ng-click="vm.menu.home()">
                 <i class="at-Stdout-menuIcon--lg fa fa-angle-double-up"></i>
             </div>
-            <div class="pull-right" ng-click="vm.scroll.down()">
+            <div class="pull-right" ng-click="vm.menu.down()">
                 <i class="at-Stdout-menuIcon--lg fa fa-angle-down"></i>
             </div>
-            <div class="pull-right" ng-click="vm.scroll.up()">
+            <div class="pull-right" ng-click="vm.menu.up()">
                 <i class="at-Stdout-menuIcon--lg fa fa-angle-up"></i>
             </div>
 
@@ -52,8 +52,8 @@
             </table>
         </pre>
 
-        <div ng-show="vm.scroll.showBackToTop" class="at-Stdout-menuBottom">
-            <div class="at-Stdout-menuIconGroup" ng-click="vm.scroll.home()">
+        <div ng-show="vm.menu.showBackToTop" class="at-Stdout-menuBottom">
+            <div class="at-Stdout-menuIconGroup" ng-click="vm.menu.home()">
                 <p class="pull-left"><i class="fa fa-angle-double-up"></i></p>
                 <p class="pull-right">{{:: vm.strings.get('stdout.BACK_TO_TOP') }}</p>
             </div>

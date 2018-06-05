@@ -729,7 +729,7 @@ JobDetailsController.$inject = [
     'OutputStrings',
     'Wait',
     'ParseVariableString',
-    'JobStatusService',
+    'OutputStatusService',
 ];
 
 export default {

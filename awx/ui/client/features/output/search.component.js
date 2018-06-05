@@ -132,7 +132,7 @@ JobSearchController.$inject = [
     '$state',
     'QuerySet',
     'OutputStrings',
-    'JobStatusService',
+    'OutputStatusService',
 ];
 
 export default {
