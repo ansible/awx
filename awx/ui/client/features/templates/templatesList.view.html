@@ -69,11 +69,23 @@
                     value-link="/#/projects/{{ template.summary_fields.project.id }}">
                 </at-row-item>
                 <!-- TODO: add see more for creds -->
-                <at-row-item
+                <at-toggle-tag tags="vm.buildCredentialTags(template.summary_fields.credentials)"></at-toggle-tag>
+
+
+
+
+                <!-- <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_CREDENTIALS') }}"
                     tag-values="template.summary_fields.credentials"
-                    tags-are-creds="true">
-                </at-row-item>
+                    tags-are-creds="true"> -->
+                        
+                    <!-- If there are 5 or less credential tags, show them all with Tag Component -->
+                    <!-- <div ng-if="tagValues.length <= 5" ng-repeat="tag in tagValues">
+                        <at-tag tag="tag.name" icon="{{ tag.kind }}" link="/#/credentials/{{ tag.id }}"></at-tag>
+                    </div> -->
+                    <!-- If there are 5 or MORE credential tags, handle them accordingly with Toggle Tag Component -->
+                    <!-- <at-toggle-tag tag-type="cred" tags="tagValues" ng-if="tagValues.length > 5"></at-toggle-tag> -->
+                <!-- </at-row-item> -->
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
                     value-bind-html="{{ vm.getModified(template) }}">

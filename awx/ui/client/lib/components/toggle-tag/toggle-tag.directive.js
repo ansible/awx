@@ -2,8 +2,8 @@ import { TRUNCATED, TRUNCATE_LENGTH } from './constants';
 
 const templateUrl = require('~components/toggle-tag/toggle-tag.partial.html');
 
-function controller ($scope, TagService, strings) {
-    const { tags } = $scope;
+function controller (strings) {
+    // const { tags } = $scope;
     const vm = this;
     vm.truncatedLength = TRUNCATE_LENGTH;
     vm.truncated = TRUNCATED;
@@ -13,20 +13,20 @@ function controller ($scope, TagService, strings) {
         vm.truncated = !vm.truncated;
     };
 
-    vm.tags = [];
+    // vm.tags = [];
 
     // Let the controller handle what type of tag should be passed to the directive
     // e.g. default tag, crential tag, etc.
-    Object.keys(tags).forEach(key => {
-        if ($scope.tagType === 'cred') {
-            vm.tags.push(TagService.buildCredentialTag(tags[key]));
-        } else {
-            vm.tags.push(TagService.buildTag(tags[key]));
-        }
-    });
+    // Object.keys(tags).forEach(key => {
+    //     if ($scope.tagType === 'cred') {
+    //         vm.tags.push(TagService.buildCredentialTag(tags[key]));
+    //     } else {
+    //         vm.tags.push(TagService.buildTag(tags[key]));
+    //     }
+    // });
 }
 
-controller.$inject = ['$scope', 'TagService', 'ComponentsStrings'];
+controller.$inject = ['ComponentsStrings'];
 
 function atToggleTag () {
     return {
@@ -39,6 +39,7 @@ function atToggleTag () {
         scope: {
             tags: '=',
             tagType: '@',
+            tagLength: '@',
         },
     };
 }
