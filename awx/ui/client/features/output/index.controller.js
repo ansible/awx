@@ -2,6 +2,7 @@ let $compile;
 let $filter;
 let $q;
 let $scope;
+let $state;
 
 let page;
 let render;
@@ -19,6 +20,7 @@ function JobsIndexController (
     _$filter_,
     _$q_,
     _$scope_,
+    _$state_,
     _resource_,
     _page_,
     _scroll_,
@@ -33,6 +35,7 @@ function JobsIndexController (
     $filter = _$filter_;
     $q = _$q_;
     $scope = _$scope_;
+    $state = _$state_;
 
     resource = _resource_;
     page = _page_;
@@ -352,19 +355,9 @@ function devClear () {
     render.clear().then(() => init());
 }
 
-// function showHostDetails (id) {
-//     jobEvent.request('get', id)
-//         .then(() => {
-//             const title = jobEvent.get('host_name');
-
-//             vm.host = {
-//                 menu: true,
-//                 stdout: jobEvent.get('stdout')
-//             };
-
-//             $scope.jobs.modal.show(title);
-//         });
-// }
+function showHostDetails (id, uuid) {
+    $state.go('output.host-event.json', { eventId: id, taskUuid: uuid });
+}
 
 // function toggle (uuid, menu) {
 //     const lines = $(`.child-of-${uuid}`);
@@ -397,6 +390,7 @@ JobsIndexController.$inject = [
     '$filter',
     '$q',
     '$scope',
+    '$state',
     'resource',
     'JobPageService',
     'JobScrollService',

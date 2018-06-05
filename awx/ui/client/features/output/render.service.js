@@ -30,11 +30,13 @@ const re = new RegExp(pattern);
 const hasAnsi = input => re.test(input);
 
 function JobRenderService ($q, $sce, $window) {
-    this.init = ({ compile, isStreamActive }) => {
+    this.init = ({ compile }) => {
         this.parent = null;
         this.record = {};
         this.el = $(ELEMENT_TBODY);
-        this.hooks = { isStreamActive, compile };
+        this.hooks = { compile };
+
+        this.createToggles = false;
     };
 
     this.sortByLineNumber = (a, b) => {
@@ -55,12 +57,11 @@ function JobRenderService ($q, $sce, $window) {
 
         events.sort(this.sortByLineNumber);
 
-        events.forEach(event => {
-            const line = this.transformEvent(event);
-
+        for (let i = 0; i < events.length; ++i) {
+            const line = this.transformEvent(events[i]);
             html += line.html;
             lines += line.count;
-        });
+        }
 
         return { html, lines };
     };
@@ -177,13 +178,13 @@ function JobRenderService ($q, $sce, $window) {
         }
 
         if (current) {
-            if (!this.hooks.isStreamActive() && current.isParent && current.line === ln) {
+            if (this.createToggles && current.isParent && current.line === ln) {
                 id = current.uuid;
                 tdToggle = `<td class="at-Stdout-toggle" ng-click="vm.toggle('${id}')"><i class="fa fa-angle-down can-toggle"></i></td>`;
             }
 
             if (current.isHost) {
-                tdEvent = `<td class="at-Stdout-event--host" ui-sref="output.host-event.json({eventId: ${current.id},  taskUuid: '${current.uuid}' })"><span ng-non-bindable>${content}</span></td>`;
+                tdEvent = `<td class="at-Stdout-event--host" ng-click="vm.showHostDetails('${current.id}', '${current.uuid}')">${content}</td>`;
             }
 
             if (current.time && current.line === ln) {
@@ -239,18 +240,7 @@ function JobRenderService ($q, $sce, $window) {
         return list;
     };
 
-    this.insert = (events, insert) => {
-        const result = this.transformEventGroup(events);
-        const html = this.trustHtml(result.html);
-
-        return this.requestAnimationFrame(() => insert(html))
-            .then(() => this.compile(html))
-            .then(() => result.lines);
-    };
-
-    this.remove = elements => this.requestAnimationFrame(() => {
-        elements.remove();
-    });
+    this.remove = elements => this.requestAnimationFrame(() => elements.remove());
 
     this.requestAnimationFrame = fn => $q(resolve => {
         $window.requestAnimationFrame(() => {
@@ -262,9 +252,8 @@ function JobRenderService ($q, $sce, $window) {
         });
     });
 
-    this.compile = html => {
-        html = $(this.el);
-        this.hooks.compile(html);
+    this.compile = content => {
+        this.hooks.compile(content);
 
         return this.requestAnimationFrame();
     };
@@ -286,9 +275,35 @@ function JobRenderService ($q, $sce, $window) {
         return this.remove(elements);
     };
 
-    this.prepend = events => this.insert(events, html => this.el.prepend(html));
+    this.prepend = events => {
+        if (events.length < 1) {
+            return $q.resolve();
+        }
 
-    this.append = events => this.insert(events, html => this.el.append(html));
+        const result = this.transformEventGroup(events);
+        const html = this.trustHtml(result.html);
+
+        const newElements = angular.element(html);
+
+        return this.requestAnimationFrame(() => this.el.prepend(newElements))
+            .then(() => this.compile(newElements))
+            .then(() => result.lines);
+    };
+
+    this.append = events => {
+        if (events.length < 1) {
+            return $q.resolve();
+        }
+
+        const result = this.transformEventGroup(events);
+        const html = this.trustHtml(result.html);
+
+        const newElements = angular.element(html);
+
+        return this.requestAnimationFrame(() => this.el.append(newElements))
+            .then(() => this.compile(newElements))
+            .then(() => result.lines);
+    };
 
     this.trustHtml = html => $sce.getTrustedHtml($sce.trustAsHtml(html));
 
