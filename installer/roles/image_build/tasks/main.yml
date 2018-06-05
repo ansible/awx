@@ -134,7 +134,7 @@
   delegate_to: localhost
 
 - name: Stage nginx.conf
-  copy:
+  template:
     src: nginx.conf
     dest: "{{ docker_base_path }}/nginx.conf"
   delegate_to: localhost
