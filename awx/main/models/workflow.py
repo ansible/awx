@@ -288,7 +288,8 @@ class WorkflowJobOptions(BaseModel):
 
     def create_relaunch_workflow_job(self):
         new_workflow_job = self.copy_unified_job()
-        new_workflow_job.copy_nodes_from_original(original=self)
+        if self.workflow_job_template is None:
+            new_workflow_job.copy_nodes_from_original(original=self)
         return new_workflow_job
 
 
