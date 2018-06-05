@@ -1114,6 +1114,9 @@ class TeamAccess(BaseAccess):
     select_related = ('created_by', 'modified_by', 'organization',)
 
     def filtered_queryset(self):
+        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
+                (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
+            return self.model.objects.all()
         return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser

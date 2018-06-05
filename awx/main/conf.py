@@ -38,7 +38,8 @@ register(
     'ORG_ADMINS_CAN_SEE_ALL_USERS',
     field_class=fields.BooleanField,
     label=_('All Users Visible to Organization Admins'),
-    help_text=_('Controls whether any Organization Admin can view all users, even those not associated with their Organization.'),
+    help_text=_('Controls whether any Organization Admin can view all users and teams, '
+                'even those not associated with their Organization.'),
     category=_('System'),
     category_slug='system',
 )

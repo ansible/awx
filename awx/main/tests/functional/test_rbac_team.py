@@ -1,7 +1,8 @@
 import pytest
+import mock
 
 from awx.main.access import TeamAccess
-from awx.main.models import Project
+from awx.main.models import Project, Organization, Team
 
 
 @pytest.mark.django_db
@@ -116,3 +117,14 @@ def test_org_admin_team_access(organization, team, user, project):
     team.member_role.children.add(project.use_role)
 
     assert len(Project.accessible_objects(u, 'use_role')) == 1
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('enabled', [True, False])
+def test_org_admin_view_all_teams(org_admin, enabled):
+    access = TeamAccess(org_admin)
+    other_org = Organization.objects.create(name='other-org')
+    other_team = Team.objects.create(name='other-team', organization=other_org)
+    with mock.patch('awx.main.access.settings') as settings_mock:
+        settings_mock.ORG_ADMINS_CAN_SEE_ALL_USERS = enabled
+        assert access.can_read(other_team) is enabled
