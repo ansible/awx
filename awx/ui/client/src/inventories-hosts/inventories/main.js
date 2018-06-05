@@ -45,6 +45,7 @@ import hostNestedGroupsAssociateRoute from './related/hosts/related/nested-group
 import groupNestedGroupsAssociateRoute from './related/groups/related/nested-groups/group-nested-groups-associate.route';
 import nestedHostsAssociateRoute from './related/groups/related/nested-hosts/group-nested-hosts-associate.route';
 import nestedHostsAddRoute from './related/groups/related/nested-hosts/group-nested-hosts-add.route';
+import hostCompletedJobsRoute from '~features/jobs/routes/hostCompletedJobs.route.js';
 
 export default
 angular.module('inventory', [
@@ -292,6 +293,9 @@ angular.module('inventory', [
                 let smartInventoryAdhocCredential = _.cloneDeep(adhocCredentialRoute);
                 smartInventoryAdhocCredential.name = 'inventories.editSmartInventory.adhoc.credential';
 
+                let relatedHostCompletedJobs = _.cloneDeep(hostCompletedJobsRoute);
+                relatedHostCompletedJobs.name = 'inventories.edit.hosts.edit.completed_jobs';
+
                 return Promise.all([
                     standardInventoryAdd,
                     standardInventoryEdit,
@@ -339,7 +343,8 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(hostNestedGroupsAssociateRoute),
                             stateExtender.buildDefinition(nestedHostsAssociateRoute),
                             stateExtender.buildDefinition(nestedGroupsAdd),
-                            stateExtender.buildDefinition(nestedHostsAddRoute)
+                            stateExtender.buildDefinition(nestedHostsAddRoute),
+                            stateExtender.buildDefinition(relatedHostCompletedJobs)
                         ])
                     };
                 });
