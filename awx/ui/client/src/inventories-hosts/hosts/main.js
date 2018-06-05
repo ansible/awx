@@ -14,6 +14,7 @@
  import insightsRoute from '../inventories/insights/insights.route';
  import hostGroupsRoute from './related/groups/hosts-related-groups.route';
  import hostGroupsAssociateRoute from './related/groups/hosts-related-groups-associate.route';
+ import hostCompletedJobsRoute from '~features/jobs/routes/hostCompletedJobs.route.js';
  import hostGroups from './related/groups/main';
 
 export default
@@ -87,6 +88,9 @@ angular.module('host', [
                 let hostInsights = _.cloneDeep(insightsRoute);
                 hostInsights.name = 'hosts.edit.insights';
 
+                let hostCompletedJobs = _.cloneDeep(hostCompletedJobsRoute);
+                hostCompletedJobs.name = 'hosts.edit.completed_jobs';
+
                 return Promise.all([
                     hostTree
                 ]).then((generated) => {
@@ -97,7 +101,8 @@ angular.module('host', [
                             stateExtender.buildDefinition(hostAnsibleFacts),
                             stateExtender.buildDefinition(hostInsights),
                             stateExtender.buildDefinition(hostGroupsRoute),
-                            stateExtender.buildDefinition(hostGroupsAssociateRoute)
+                            stateExtender.buildDefinition(hostGroupsAssociateRoute),
+                            stateExtender.buildDefinition(hostCompletedJobs)
                         ])
                     };
                 });
