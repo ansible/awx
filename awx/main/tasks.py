@@ -1006,7 +1006,7 @@ class BaseTask(Task):
                 if stdout_handle:
                     stdout_handle.flush()
                     stdout_handle.close()
-                    event_ct = getattr(stdout_handle, '_event_ct', 0)
+                    event_ct = getattr(stdout_handle, '_counter', 0)
                 logger.info('%s finished running, producing %s events.',
                             instance.log_format, event_ct)
             except Exception:

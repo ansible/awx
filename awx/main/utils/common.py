@@ -945,8 +945,7 @@ class OutputEventFilter(object):
 
     def __init__(self, event_callback):
         self._event_callback = event_callback
-        self._event_ct = 0
-        self._counter = 1
+        self._counter = 0
         self._start_line = 0
         self._buffer = StringIO()
         self._last_chunk = ''
@@ -1005,8 +1004,8 @@ class OutputEventFilter(object):
             stdout_chunks = []
 
         for stdout_chunk in stdout_chunks:
-            event_data['counter'] = self._counter
             self._counter += 1
+            event_data['counter'] = self._counter
             event_data['stdout'] = stdout_chunk[:-2] if len(stdout_chunk) > 2 else ""
             n_lines = stdout_chunk.count('\n')
             event_data['start_line'] = self._start_line
@@ -1014,7 +1013,6 @@ class OutputEventFilter(object):
             self._start_line += n_lines
             if self._event_callback:
                 self._event_callback(event_data)
-                self._event_ct += 1
 
         if next_event_data.get('uuid', None):
             self._current_event_data = next_event_data
