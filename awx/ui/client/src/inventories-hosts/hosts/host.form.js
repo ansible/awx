@@ -123,6 +123,11 @@ function(i18n) {
                     title: i18n._('Insights'),
                     skipGenerator: true,
                     ngIf: "host.insights_system_id!==null && host.summary_fields.inventory.hasOwnProperty('insights_credential_id')"
+                },
+                completed_jobs: {
+                    name: 'completed_jobs',
+                    title: i18n._('Completed Jobs'),
+                    skipGenerator: true
                 }
             }
         };
