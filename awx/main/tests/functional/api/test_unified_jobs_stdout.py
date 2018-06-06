@@ -3,11 +3,8 @@
 import base64
 import json
 import re
-import shutil
-import tempfile
 
 from django.conf import settings
-from django.db.backends.sqlite3.base import SQLiteCursorWrapper
 import mock
 import pytest
 
@@ -29,28 +26,6 @@ def _mk_inventory_update():
     source.save()
     iu = InventoryUpdate(inventory_source=source)
     return iu
-
-
-@pytest.fixture(scope='function')
-def sqlite_copy_expert(request):
-    # copy_expert is postgres-specific, and SQLite doesn't support it; mock its
-    # behavior to test that it writes a file that contains stdout from events
-    path = tempfile.mkdtemp(prefix='job-event-stdout')
-
-    def write_stdout(self, sql, fd):
-        # simulate postgres copy_expert support with ORM code
-        parts = sql.split(' ')
-        tablename = parts[parts.index('from') + 1]
-        for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
-                    InventoryUpdateEvent, SystemJobEvent):
-            if cls._meta.db_table == tablename:
-                for event in cls.objects.order_by('start_line').all():
-                    fd.write(event.stdout.encode('utf-8'))
-
-    setattr(SQLiteCursorWrapper, 'copy_expert', write_stdout)
-    request.addfinalizer(lambda: shutil.rmtree(path))
-    request.addfinalizer(lambda: delattr(SQLiteCursorWrapper, 'copy_expert'))
-    return path
 
 
 @pytest.mark.django_db

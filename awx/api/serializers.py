@@ -3356,7 +3356,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
 
     class Meta:
         model = SystemJob
-        fields = ('*', 'system_job_template', 'job_type', 'extra_vars', 'result_stdout')
+        fields = ('*', 'system_job_template', 'job_type', 'extra_vars', 'result_stdout', '-controller_node',)
 
     def get_related(self, obj):
         res = super(SystemJobSerializer, self).get_related(obj)
