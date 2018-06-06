@@ -1,2 +1,2 @@
 export const TRUNCATE_LENGTH = 5;
-export const TRUNCATED = true;
+export const IS_TRUNCATED = true;

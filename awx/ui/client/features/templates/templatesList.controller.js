@@ -164,7 +164,7 @@ function ListTemplatesController(
 
         return html;
     };
-
+    
     vm.buildCredentialTags = (credentials) => {
         return credentials.map(credential => {
             const icon = `${credential.kind}`;

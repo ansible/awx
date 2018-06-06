@@ -42,19 +42,6 @@
             template-type="smartStatus.type" ng-if="smartStatus">
         </aw-smart-status>
         <div class="at-RowItem-tagContainer" ng-if="tagValues && tagValues.length">
-            <div ng-if="tagValues.length <= 5" ng-repeat="tag in tagValues">
-                <at-tag tag="tag.name" icon="{{ tag.kind }}" link="/#/credentials/{{ tag.id }}"></at-tag>
-            </div>
-
-
-
-            <!-- <at-toggle-tag tag-length="tagValues.length" tags="tagValues"></at-toggle-tag> -->
-            <!-- <at-tag tag="thing"></at-tag> -->
-            <!-- If there are 5 or less credential tags, show them all with Tag Component -->
-            <!-- <div ng-if="tagValues.length <= 5" ng-repeat="tag in tagValues">
-                <at-tag tag="tag.name" icon="{{ tag.kind }}" link="/#/credentials/{{ tag.id }}"></at-tag>
-            </div> -->
-            <!-- If there are 5 or MORE credential tags, handle them accordingly with Toggle Tag Component -->
-            <!-- <at-toggle-tag tag-type="cred" tags="tagValues" ng-if="tagValues.length > 5"></at-toggle-tag> -->
+            <ng-transclude></ng-transclude>
         </div>
 </div>

@@ -1,16 +1,21 @@
 <div class="ToggleComponent-wrapper">
-    <div ng-show="vm.truncated" class="ToggleComponent-container">
-        <div ng-repeat="tag in tags | limitTo: vm.truncatedLength">
-            <at-tag tag="tag.value" icon="{{ tag.icon }}" link="{{ tag.link }}"></at-tag>
-            <!-- <at-tag tag="tag.value"></at-tag> -->
+    <div ng-if="tags.length > vm.truncatedLength">
+        <div ng-show="vm.isTruncated" class="ToggleComponent-container">
+            <div ng-repeat="tag in tags | limitTo: vm.truncatedLength">
+                <at-tag tag="tag.value" icon="{{ tag.icon }}" link="{{ tag.link }}"></at-tag>
+            </div>
+            <button class="ToggleComponent-button" ng-click="vm.toggle()">{{:: vm.strings.get('toggle.VIEW_MORE') }}</button>
         </div>
-        <button class="ToggleComponent-button" ng-click="vm.toggle()">{{:: vm.strings.get('toggle.VIEW_MORE') }}</button>
+        <div ng-show="!vm.isTruncated" class="ToggleComponent-container">
+            <div ng-repeat="tag in tags">
+                <at-tag tag="tag.value" icon="{{ tag.icon }}" link="{{ tag.link }}"></at-tag>
+            </div>
+            <button class="ToggleComponent-button" ng-click="vm.toggle()">{{:: vm.strings.get('toggle.VIEW_LESS') }}</button>
+        </div>
     </div>
-    <div ng-show="!vm.truncated" class="ToggleComponent-container">
+    <div ng-if="tags.length <= vm.truncatedLength" class="ToggleComponent-container">
         <div ng-repeat="tag in tags">
-            <!-- <at-tag ng-if="tagType === 'cred'" tag="tag.value" icon="{{ tag.icon }}" link="{{ tag.link }}"></at-tag> -->
             <at-tag tag="tag.value" icon="{{ tag.icon }}" link="{{ tag.link }}"></at-tag>
         </div>
-        <button class="ToggleComponent-button" ng-click="vm.toggle()">{{:: vm.strings.get('toggle.VIEW_LESS') }}</button>
     </div>
 </div>
