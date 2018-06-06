@@ -3258,8 +3258,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         model = AdHocCommand
         fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
                   'module_name', 'module_args', 'forks', 'verbosity', 'extra_vars',
-                  'become_enabled', 'diff_mode', '-unified_job_template', '-description',
-                  '-controller_node',)
+                  'become_enabled', 'diff_mode', '-unified_job_template', '-description')
         extra_kwargs = {
             'name': {
                 'read_only': True,

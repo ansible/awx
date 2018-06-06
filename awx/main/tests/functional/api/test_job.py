@@ -192,10 +192,10 @@ class TestControllerNode():
         r = get(job.get_absolute_url(), admin_user, expect=200)
         assert 'controller_node' in r.data
 
-        r = get(reverse('api:project_update_detail', kwargs={'pk': project_update.pk}), admin_user, expect=200)
-        assert 'controller_node' not in r.data
-
         r = get(reverse('api:ad_hoc_command_detail', kwargs={'pk': adhoc.pk}), admin_user, expect=200)
+        assert 'controller_node' in r.data
+
+        r = get(reverse('api:project_update_detail', kwargs={'pk': project_update.pk}), admin_user, expect=200)
         assert 'controller_node' not in r.data
 
         r = get(reverse('api:inventory_update_detail', kwargs={'pk': inventory_update.pk}), admin_user, expect=200)
