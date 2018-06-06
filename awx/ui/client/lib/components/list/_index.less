@@ -167,6 +167,8 @@
 .at-RowItem-tagContainer {
     display: flex;
     margin-left: @at-margin-left-list-row-item-tag-container;
+    flex-wrap: wrap;
+    line-height: initial;
 }
 
 .at-RowItem-tag {
@@ -175,8 +177,7 @@
     border-radius: @at-border-radius;
     color: @at-color-list-row-item-tag;
     font-size: @at-font-size-list-row-item-tag;
-    margin-left: @at-margin-left-list-row-item-tag;
-    margin-top: @at-margin-top-list-row-item-tag;
+    margin: @at-space;
     padding: @at-padding-list-row-item-tag;
     line-height: @at-line-height-list-row-item-tag;
 }

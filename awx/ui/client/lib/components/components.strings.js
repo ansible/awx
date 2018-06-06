@@ -52,6 +52,15 @@ function ComponentsStrings (BaseString) {
         COPIED: t.s('Copied to clipboard.')
     };
 
+    ns.toggle = {
+        VIEW_MORE: t.s('VIEW MORE'),
+        VIEW_LESS: t.s('VIEW LESS')
+    };
+
+    ns.tooltips = {
+        VIEW_THE_CREDENTIAL: t.s('View the Credential'),
+    };
+
     ns.layout = {
         CURRENT_USER_LABEL: t.s('Logged in as'),
         VIEW_DOCS: t.s('View Documentation'),

@@ -68,11 +68,11 @@
                     value="{{ template.summary_fields.project.name }}"
                     value-link="/#/projects/{{ template.summary_fields.project.id }}">
                 </at-row-item>
-                <!-- TODO: add see more for creds -->
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_CREDENTIALS') }}"
                     tag-values="template.summary_fields.credentials"
                     tags-are-creds="true">
+                    <at-toggle-tag ng-init="credTags=vm.buildCredentialTags(template.summary_fields.credentials)" tags="credTags"></at-toggle-tag>
                 </at-row-item>
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
