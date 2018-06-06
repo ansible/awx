@@ -2,7 +2,6 @@ import AppStrings from '~services/app.strings';
 import BaseStringService from '~services/base-string.service';
 import CacheService from '~services/cache.service';
 import EventService from '~services/event.service';
-import TagService from '~services/tag.service';
 
 const MODULE_NAME = 'at.lib.services';
 
@@ -13,7 +12,6 @@ angular
     .service('AppStrings', AppStrings)
     .service('BaseStringService', BaseStringService)
     .service('CacheService', CacheService)
-    .service('EventService', EventService)
-    .service('TagService', TagService);
+    .service('EventService', EventService);
 
 export default MODULE_NAME;
