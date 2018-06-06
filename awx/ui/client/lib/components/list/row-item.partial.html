@@ -27,7 +27,7 @@
             {{ labelValue }}
         </div>
         <div class="at-RowItem-label" ng-if="labelValue && labelState">
-            <a ui-sref="{{ labelState }}"  ui-sref-opts="{reload: true, notify: true}">{{ labelValue }}</a>
+            <a ui-sref="{{ labelState }}"  ui-sref-opts="{reload: true, notify: true, inherit: false}">{{ labelValue }}</a>
         </div>
         <div class="at-RowItem-value" ng-if="value && valueLink">
             <a ng-href="{{ valueLink }}">{{ value }}</a>

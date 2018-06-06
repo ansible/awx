@@ -45,17 +45,23 @@
 
                     <div class="at-Row--inline">
                         <at-row-item
-                            label-value="Instances"
+                            label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INSTANCES') }}"
                             label-link="/#/instance_groups/{{ instance_group.id }}/instances"
                             value="{{ instance_group.instances }}"
                             inline="true"
                             badge="true">
                         </at-row-item>
-
                         <at-row-item
-                            label-value="Running Jobs"
-                            label-link="/#/instance_groups/{{ instance_group.id }}/jobs"
+                            label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
+                            label-state="instanceGroups.jobs({instance_group_id: {{ instance_group.id }}, job_search: {status__in: ['running,waiting']}})"
                             value="{{ instance_group.jobs_running }}"
+                            inline="true"
+                            badge="true">
+                        </at-row-item>
+                        <at-row-item
+                            label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_TOTAL_JOBS') }}"
+                            label-state="instanceGroups.jobs({instance_group_id: {{ instance_group.id }}})"
+                            value="{{ instance_group.jobs_total }}"
                             inline="true"
                             badge="true">
                         </at-row-item>
@@ -63,7 +69,7 @@
                 </div>
 
                 <div class="at-Row-actions">
-                    <capacity-bar label-value="Used Capacity" capacity="instance_group.consumed_capacity" total-capacity="instance_group.capacity"></capacity-bar>
+                    <capacity-bar label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED_CAPACITY') }}" capacity="instance_group.consumed_capacity" total-capacity="instance_group.capacity"></capacity-bar>
                     <at-row-action icon="fa-trash" ng-click="vm.deleteInstanceGroup(instance_group)" ng-if="vm.rowAction.trash(instance_group)">
                     </at-row-action>
                 </div>
