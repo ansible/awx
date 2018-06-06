@@ -4080,7 +4080,7 @@ class JobDetail(UnifiedJobDeletionMixin, RetrieveUpdateDestroyAPIView):
 
     model = Job
     metadata_class = JobTypeMetadata
-    serializer_class = JobSerializer
+    serializer_class = JobDetailSerializer
 
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
