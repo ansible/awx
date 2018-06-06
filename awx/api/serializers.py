@@ -2038,14 +2038,14 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
     def _update_deprecated_fields(self, fields, obj):
         if 'credential' in fields:
             new_cred = fields['credential']
-            existing_creds = obj.credentials.exclude(credential_type__kind='vault')
-            for cred in existing_creds:
-                # Remove all other cloud credentials
-                if cred != new_cred:
+            existing = obj.credentials.all()
+            if new_cred not in existing:
+                for cred in existing:
+                    # Remove all other cloud credentials
                     obj.credentials.remove(cred)
-            if new_cred:
-                # Add new credential
-                obj.credentials.add(new_cred)
+                if new_cred:
+                    # Add new credential
+                    obj.credentials.add(new_cred)
 
     def validate(self, attrs):
         deprecated_fields = {}
@@ -2834,11 +2834,12 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             ('network_credential', obj.network_credentials),
         ):
             if key in fields:
-                for cred in existing:
-                    obj.credentials.remove(cred)
-                if fields[key]:
-                    obj.credentials.add(fields[key])
-        obj.save()
+                new_cred = fields[key]
+                if new_cred not in existing:
+                    for cred in existing:
+                        obj.credentials.remove(cred)
+                    if new_cred:
+                        obj.credentials.add(new_cred)
 
     def validate(self, attrs):
         v1_credentials = {}
@@ -3675,10 +3676,13 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             deprecated_fields['credential'] = validated_data.pop('credential')
         obj = super(WorkflowJobTemplateNodeSerializer, self).update(obj, validated_data)
         if 'credential' in deprecated_fields:
-            for cred in obj.credentials.filter(credential_type__kind='ssh'):
-                obj.credentials.remove(cred)
-            if deprecated_fields['credential']:
-                obj.credentials.add(deprecated_fields['credential'])
+            existing = obj.credentials.filter(credential_type__kind='ssh')
+            new_cred = deprecated_fields['credential']
+            if new_cred not in existing:
+                for cred in existing:
+                    obj.credentials.remove(cred)
+                if new_cred:
+                    obj.credentials.add(new_cred)
         return obj
 
 

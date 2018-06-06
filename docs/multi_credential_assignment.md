@@ -93,9 +93,17 @@ as they did before:
 
 `PATCH /api/v2/job_templates/N/ {'credential': X, 'vault_credential': Y}`
 
-Under this model, when a JobTemplate with multiple vault Credentials is updated
-in this way, the new underlying list will _only_ contain the single Vault
-Credential specified in the deprecated request.
+If the job template (with pk=N) only has 1 vault credential,
+that will be replaced with the new `Y` vault credential.
+
+If the job template has multiple vault credentials, and these do not include
+`Y`, then the new list will _only_ contain the single vault credential `Y`
+specified in the deprecated request.
+
+If the JobTemplate already has the `Y` vault credential associated with it,
+then no change will take effect (the other vault credentials will not be
+removed in this case). This is so that clients making deprecated requests
+do not interfere with clients using the new `credentials` relation.
 
 `GET` requests to `/api/v2/job_templates/N/` and `/api/v2/jobs/N/`
 have traditionally included a variety of metadata in the response via
