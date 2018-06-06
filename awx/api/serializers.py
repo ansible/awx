@@ -1147,7 +1147,19 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         extra_kwargs = {
             'user': {'allow_null': True, 'required': False},
             'organization': {'allow_null': False},
-            'authorization_grant_type': {'allow_null': False}
+            'authorization_grant_type': {'allow_null': False, 'label': _('Authorization Grant Type')},
+            'client_secret': {
+                'label': _('Client Secret')
+            },
+            'client_type': {
+                'label': _('Client Type')
+            },
+            'redirect_uris': {
+                'label': _('Redirect URIs')
+            },
+            'skip_authorization': {
+                'label': _('Skip Authorization')
+            },
         }        
         
     def to_representation(self, obj):
@@ -4487,16 +4499,19 @@ class InstanceGroupSerializer(BaseSerializer):
     # both defining field details here and also getting the field's help_text
     policy_instance_percentage = serializers.IntegerField(
         default=0, min_value=0, max_value=100, required=False, initial=0,
+        label=_('Policy Instance Percentage'),
         help_text=_("Minimum percentage of all instances that will be automatically assigned to "
                     "this group when new instances come online.")
     )
     policy_instance_minimum = serializers.IntegerField(
         default=0, min_value=0, required=False, initial=0,
+        label=_('Policy Instance Minimum'),
         help_text=_("Static minimum number of Instances that will be automatically assign to "
                     "this group when new instances come online.")
     )
     policy_instance_list = serializers.ListField(
         child=serializers.CharField(), required=False,
+        label=_('Policy Instance List'),
         help_text=_("List of exact-match Instances that will be assigned to this group")
     )
 
