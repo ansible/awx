@@ -1400,7 +1400,7 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = ProjectUpdate
-        fields = ('*', 'project', 'job_type')
+        fields = ('*', 'project', 'job_type', '-controller_node')
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
@@ -2110,7 +2110,8 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
     class Meta:
         model = InventoryUpdate
-        fields = ('*', 'inventory_source', 'license_error', 'source_project_update')
+        fields = ('*', 'inventory_source', 'license_error', 'source_project_update',
+                  '-controller_node',)
 
     def get_related(self, obj):
         res = super(InventoryUpdateSerializer, self).get_related(obj)
@@ -3257,7 +3258,8 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         model = AdHocCommand
         fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
                   'module_name', 'module_args', 'forks', 'verbosity', 'extra_vars',
-                  'become_enabled', 'diff_mode', '-unified_job_template', '-description')
+                  'become_enabled', 'diff_mode', '-unified_job_template', '-description',
+                  '-controller_node',)
         extra_kwargs = {
             'name': {
                 'read_only': True,
@@ -3366,7 +3368,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
 
     class Meta:
         model = SystemJob
-        fields = ('*', 'system_job_template', 'job_type', 'extra_vars', 'result_stdout')
+        fields = ('*', 'system_job_template', 'job_type', 'extra_vars', 'result_stdout', '-controller_node',)
 
     def get_related(self, obj):
         res = super(SystemJobSerializer, self).get_related(obj)

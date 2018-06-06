@@ -4,6 +4,8 @@ import mock
 import json
 import os
 import six
+import tempfile
+import shutil
 from datetime import timedelta
 from six.moves import xrange
 
@@ -14,6 +16,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.backends.sqlite3.base import SQLiteCursorWrapper
 from jsonbfield.fields import JSONField
 
 # AWX
@@ -43,6 +46,13 @@ from awx.main.models.rbac import Role
 from awx.main.models.notifications import (
     NotificationTemplate,
     Notification
+)
+from awx.main.models.events import (
+    JobEvent,
+    AdHocCommandEvent,
+    ProjectUpdateEvent,
+    InventoryUpdateEvent,
+    SystemJobEvent,
 )
 from awx.main.models.workflow import WorkflowJobTemplate
 from awx.main.models.ad_hoc_commands import AdHocCommand
@@ -729,3 +739,26 @@ def oauth_application(admin):
         name='test app', user=admin, client_type='confidential',
         authorization_grant_type='password'
     )
+
+
+@pytest.fixture
+def sqlite_copy_expert(request):
+    # copy_expert is postgres-specific, and SQLite doesn't support it; mock its
+    # behavior to test that it writes a file that contains stdout from events
+    path = tempfile.mkdtemp(prefix='job-event-stdout')
+
+    def write_stdout(self, sql, fd):
+        # simulate postgres copy_expert support with ORM code
+        parts = sql.split(' ')
+        tablename = parts[parts.index('from') + 1]
+        for cls in (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
+                    InventoryUpdateEvent, SystemJobEvent):
+            if cls._meta.db_table == tablename:
+                for event in cls.objects.order_by('start_line').all():
+                    fd.write(event.stdout.encode('utf-8'))
+
+    setattr(SQLiteCursorWrapper, 'copy_expert', write_stdout)
+    request.addfinalizer(lambda: shutil.rmtree(path))
+    request.addfinalizer(lambda: delattr(SQLiteCursorWrapper, 'copy_expert'))
+    return path
+

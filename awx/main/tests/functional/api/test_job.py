@@ -9,7 +9,13 @@ from rest_framework.exceptions import PermissionDenied
 from awx.api.versioning import reverse
 from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
 
-from awx.main.models import JobTemplate, User, Job
+from awx.main.models import (
+    JobTemplate,
+    User,
+    Job,
+    AdHocCommand,
+    ProjectUpdate,
+)
 
 from crum import impersonate
 
@@ -159,3 +165,41 @@ def test_block_related_unprocessed_events(mocker, organization, project, delete,
     with mock.patch('awx.api.views.now', lambda: time_of_request):
         with pytest.raises(PermissionDenied):
             view.perform_destroy(organization)
+
+
+class TestControllerNode():
+    @pytest.fixture
+    def project_update(self, project):
+        return ProjectUpdate.objects.create(project=project)
+
+    @pytest.fixture
+    def job(self):
+        return JobTemplate.objects.create().create_unified_job()
+
+    @pytest.fixture
+    def adhoc(self, inventory):
+        return AdHocCommand.objects.create(inventory=inventory)
+
+    @pytest.mark.django_db
+    def test_field_controller_node_exists(self, sqlite_copy_expert,
+                                          admin_user, job, project_update,
+                                          inventory_update, adhoc, get, system_job_factory):
+        system_job = system_job_factory()
+
+        r = get(reverse('api:unified_job_list') + '?id={}'.format(job.id), admin_user, expect=200)
+        assert 'controller_node' in r.data['results'][0]
+
+        r = get(job.get_absolute_url(), admin_user, expect=200)
+        assert 'controller_node' in r.data
+
+        r = get(reverse('api:project_update_detail', kwargs={'pk': project_update.pk}), admin_user, expect=200)
+        assert 'controller_node' not in r.data
+
+        r = get(reverse('api:ad_hoc_command_detail', kwargs={'pk': adhoc.pk}), admin_user, expect=200)
+        assert 'controller_node' not in r.data
+
+        r = get(reverse('api:inventory_update_detail', kwargs={'pk': inventory_update.pk}), admin_user, expect=200)
+        assert 'controller_node' not in r.data
+
+        r = get(reverse('api:system_job_detail', kwargs={'pk': system_job.pk}), admin_user, expect=200)
+        assert 'controller_node' not in r.data
