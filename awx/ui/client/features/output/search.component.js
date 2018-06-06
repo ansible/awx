@@ -64,9 +64,21 @@ function removeSearchTag (index) {
 }
 
 function submitSearch () {
+    // empty input, not submit new search, return.
+    if (!vm.value) {
+        return;
+    }
+
     const currentQueryset = getCurrentQueryset();
+    // check duplicate , see if search input already exists in current search tags
+    if (currentQueryset.search) {
+        if (currentQueryset.search.includes(vm.value)) {
+            return;
+        }
+    }
 
     const searchInputQueryset = qs.getSearchInputQueryset(vm.value, isFilterable);
+
     const modifiedQueryset = qs.mergeQueryset(currentQueryset, searchInputQueryset);
 
     reloadQueryset(modifiedQueryset, strings.get('search.REJECT_INVALID'));
