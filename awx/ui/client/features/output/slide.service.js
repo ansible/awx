@@ -309,10 +309,13 @@ function SlidingWindowService ($q) {
         return Number.isFinite(head) ? head : 0;
     };
 
-    this.compareRange = (a, b) => a[0] === b[0] && a[1] === b[1];
-    this.getRange = () => [this.getHeadCounter(), this.getTailCounter()];
+    this.getMaxCounter = () => {
+        const counter = this.api.getMaxCounter();
 
-    this.getMaxCounter = () => this.api.getMaxCounter();
+        return Number.isFinite(counter) ? counter : this.getTailCounter();
+    };
+
+    this.getRange = () => [this.getHeadCounter(), this.getTailCounter()];
     this.getRecordCount = () => Object.keys(this.records).length;
     this.getCapacity = () => EVENT_LIMIT - this.getRecordCount();
 }

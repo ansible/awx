@@ -32,13 +32,23 @@ function bufferAdd (event) {
     bufferState[0] += 1;
     bufferState[1] += 1;
 
-    return bufferState;
+    return bufferState[1];
 }
 
-function bufferEmpty () {
-    bufferState[0] = 0;
+function bufferEmpty (min, max) {
+    let count = 0;
+    let removed = [];
 
-    return rx.splice(0, rx.length);
+    for (let i = bufferState[0] - 1; i >= 0; i--) {
+        if (rx[i].counter <= max) {
+            removed = removed.concat(rx.splice(i, 1));
+            count++;
+        }
+    }
+
+    bufferState[0] -= count;
+
+    return removed;
 }
 
 function onFrames (events) {
