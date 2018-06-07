@@ -241,7 +241,7 @@ def ws_connect(message):
     if topology_id is not None:
         topology = Topology.objects.get(pk=topology_id)
     else:
-        topology = Topology(name="topology", scale=1.0, panX=0, panY=0)
+        topology = Topology(name="topology", scale=0.7, panX=0, panY=0)
         topology.save()
         TopologyInventory(inventory_id=inventory_id, topology_id=topology.pk).save()
     topology_id = topology.pk
@@ -322,4 +322,3 @@ def ws_message(message):
 def ws_disconnect(message):
     if 'topology_id' in message.channel_session:
         channels.Group("topology-%s" % message.channel_session['topology_id']).discard(message.reply_channel)
-
