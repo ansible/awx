@@ -10,9 +10,10 @@ export default [function() {
             const maxPanels = parseInt(scope.maxPanels);
 
             scope.$watch(
-                () => angular.element('#' + scope.panelContainer).find('.Panel').length,
+                () => angular.element('#' + scope.panelContainer).find('.Panel, .at-Panel').length,
                 () => {
-                    const panels = angular.element('#' + scope.panelContainer).find('.Panel');
+                    const panels = angular.element('#' + scope.panelContainer).find('.Panel, .at-Panel');
+
                     if(panels.length > maxPanels) {
                         // hide the excess panels
                         $(panels).each(function( index ) {

@@ -1,4 +1,4 @@
-function CapacityAdjuster (templateUrl, ProcessErrors, Wait) {
+function CapacityAdjuster (templateUrl, ProcessErrors, Wait, strings) {
     return {
         scope: {
             state: '=',
@@ -9,10 +9,10 @@ function CapacityAdjuster (templateUrl, ProcessErrors, Wait) {
         replace: true,
         link: function(scope) {
             const adjustment_values = [{
-                label: 'CPU',
+                label: strings.get('capacityAdjuster.CPU'),
                 value: scope.state.cpu_capacity,
             },{
-                label: 'RAM',
+                label: strings.get('capacityAdjuster.RAM'),
                 value: scope.state.mem_capacity
             }];
 
@@ -51,7 +51,8 @@ function CapacityAdjuster (templateUrl, ProcessErrors, Wait) {
 CapacityAdjuster.$inject = [
     'templateUrl',
     'ProcessErrors',
-    'Wait'
+    'Wait',
+    'InstanceGroupsStrings'
 ];
 
 export default CapacityAdjuster;

@@ -10,7 +10,11 @@ function InstanceGroupsStrings (BaseString) {
     };
 
     ns.list = {
-        PANEL_TITLE: t.s('INSTANCE GROUPS')
+        PANEL_TITLE: t.s('INSTANCE GROUPS'),
+        ROW_ITEM_LABEL_INSTANCES: t.s('Instances'),
+        ROW_ITEM_LABEL_RUNNING_JOBS: t.s('Running Jobs'),
+        ROW_ITEM_LABEL_TOTAL_JOBS: t.s('Total Jobs'),
+        ROW_ITEM_LABEL_USED_CAPACITY: t.s('Used Capacity')
     };
 
     ns.tab = {
@@ -31,6 +35,11 @@ function InstanceGroupsStrings (BaseString) {
     ns.capacityBar = {
         IS_OFFLINE: t.s('Unavailable to run jobs.'),
         IS_OFFLINE_LABEL: t.s('Unavailable')
+    };
+
+    ns.capacityAdjuster = {
+        CPU: t.s('CPU'),
+        RAM: t.s('RAM')
     };
 
     ns.jobs = {

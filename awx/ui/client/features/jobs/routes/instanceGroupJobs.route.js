@@ -16,8 +16,7 @@ export default {
         job_search: {
             value: {
                 page_size: '10',
-                order_by: '-id',
-                status: 'running'
+                order_by: '-finished'
             },
             dynamic: true
         }

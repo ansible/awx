@@ -9,7 +9,7 @@ export default {
     name: 'instanceGroups.instanceJobs',
     url: '/:instance_group_id/instances/:instance_id/jobs',
     ncyBreadcrumb: {
-        parent: 'instanceGroups.edit',
+        parent: 'instanceGroups.instances',
         label: N_('JOBS')
     },
     views: {

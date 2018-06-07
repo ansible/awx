@@ -61,9 +61,16 @@
                 <div class="at-Row-items">
                     <at-row-item header-value="{{ instance.hostname }}"></at-row-item>
                     <at-row-item
-                        label-value="Running Jobs"
-                        label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}})"
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
+                        label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}, job_search: {status__in: ['running,waiting']}})"
                         value="{{ instance.jobs_running }}"
+                        inline="true"
+                        badge="true">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_TOTAL_JOBS') }}"
+                        label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}})"
+                        value="{{ instance.jobs_total }}"
                         inline="true"
                         badge="true">
                     </at-row-item>
@@ -71,7 +78,7 @@
 
                 <div class="at-Row-actions">
                     <capacity-adjuster state="instance" disabled="{{vm.rowAction.capacity_adjustment._disabled}}"></capacity-adjuster>
-                    <capacity-bar label-value="Used Capacity" capacity="instance.consumed_capacity" total-capacity="instance.capacity"></capacity-bar>
+                    <capacity-bar label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED_CAPACITY') }}" capacity="instance.consumed_capacity" total-capacity="instance.capacity"></capacity-bar>
                 </div>
             </at-row>
         </at-list>
