@@ -89,27 +89,18 @@ function resolveResource (
         Object.assign(config.params, query);
     }
 
-    let model;
-
     Wait('start');
     const resourcePromise = new Resource(['get', 'options'], [id, id])
-        .then(job => {
-            const endpoint = `${job.get('url')}${related}/`;
+        .then(model => {
+            const endpoint = `${model.get('url')}${related}/`;
             eventsApi.init(endpoint, config.params);
 
-            const promises = [job.getStats(), eventsApi.fetch()];
-
-            if (job.has('related.labels')) {
-                promises.push(job.extend('get', 'labels'));
-            }
-
-            model = job;
-            return Promise.all(promises);
+            return eventsApi.fetch()
+                .then(events => ([model, events]));
         })
-        .then(([stats, events]) => ({
+        .then(([model, events]) => ({
             id,
             type,
-            stats,
             model,
             events,
             related,

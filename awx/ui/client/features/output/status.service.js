@@ -1,3 +1,4 @@
+/* eslint camelcase: 0 */
 const JOB_START = 'playbook_on_start';
 const JOB_END = 'playbook_on_stats';
 const PLAY_START = 'playbook_on_play_start';
@@ -12,7 +13,7 @@ function JobStatusService (moment, message) {
     this.dispatch = () => message.dispatch('status', this.state);
     this.subscribe = listener => message.subscribe('status', listener);
 
-    this.init = ({ model, stats }) => {
+    this.init = ({ model }) => {
         this.created = model.get('created');
         this.job = model.get('id');
         this.jobType = model.get('type');
@@ -24,7 +25,6 @@ function JobStatusService (moment, message) {
 
         this.state = {
             running: false,
-            stats: false,
             counts: {
                 plays: 0,
                 tasks: 0,
@@ -41,11 +41,35 @@ function JobStatusService (moment, message) {
             },
         };
 
-        this.setStatsEvent(stats);
-        this.updateStats();
-        this.updateRunningState();
+        if (model.get('type') === 'job' || model.get('type') === 'project_update') {
+            if (model.has('playbook_counts')) {
+                this.setPlaybookCounts(model.get('playbook_counts'));
+            }
 
+            if (model.has('host_status_counts')) {
+                this.setHostStatusCounts(model.get('host_status_counts'));
+            }
+        } else {
+            const hostStatusCounts = this.createHostStatusCounts(this.state.status);
+
+            this.setHostStatusCounts(hostStatusCounts);
+            this.setPlaybookCounts({ task_count: 1, play_count: 1 });
+        }
+
+        this.updateRunningState();
         this.dispatch();
+    };
+
+    this.createHostStatusCounts = status => {
+        if (_.includes(COMPLETE, status)) {
+            return { ok: 1 };
+        }
+
+        if (_.includes(INCOMPLETE, status)) {
+            return { failures: 1 };
+        }
+
+        return null;
     };
 
     this.pushStatusEvent = data => {
@@ -112,7 +136,6 @@ function JobStatusService (moment, message) {
         this.updateHostCounts();
 
         if (this.statsEvent) {
-            this.state.stats = true;
             this.setFinished(this.statsEvent.created);
             this.setJobStatus(this.statsEvent.failed ? 'failed' : 'successful');
         }
@@ -199,7 +222,23 @@ function JobStatusService (moment, message) {
     };
 
     this.setHostStatusCounts = counts => {
+        counts = counts || {};
+
+        HOST_STATUS_KEYS.forEach(key => {
+            counts[key] = counts[key] || 0;
+        });
+
+        if (!this.state.counts.hosts) {
+            this.state.counts.hosts = Object.keys(counts)
+                .reduce((sum, key) => sum + counts[key], 0);
+        }
+
         this.state.hosts = counts;
+    };
+
+    this.setPlaybookCounts = ({ play_count, task_count }) => {
+        this.state.counts.plays = play_count;
+        this.state.counts.tasks = task_count;
     };
 
     this.resetCounts = () => {
