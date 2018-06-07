@@ -909,9 +909,11 @@ class CopyAPIView(GenericAPIView):
         # not work properly in non-request-response-cycle context.
         new_obj.created_by = creater
         new_obj.save()
-        for m2m in m2m_to_preserve:
-            for related_obj in m2m_to_preserve[m2m].all():
-                getattr(new_obj, m2m).add(related_obj)
+        from awx.main.signals import disable_activity_stream
+        with disable_activity_stream():
+            for m2m in m2m_to_preserve:
+                for related_obj in m2m_to_preserve[m2m].all():
+                    getattr(new_obj, m2m).add(related_obj)
         if not old_parent:
             sub_objects = []
             for o2m in o2m_to_preserve:
