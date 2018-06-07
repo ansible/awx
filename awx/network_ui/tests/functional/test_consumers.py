@@ -196,7 +196,7 @@ def test_ws_connect_new_topology():
             mock.patch.object(Inventory, 'objects') as inventory_objects:
         client_mock.uuid4 = mock.MagicMock(return_value="777")
         topology_mock.return_value = Topology(
-            name="topology", scale=1.0, panX=0, panY=0, pk=999)
+            name="topology", scale=0.7, panX=0, panY=0, pk=999)
         inventory_objects.get.return_value = mock.Mock(admin_role=[mock_user])
         awx.network_ui.consumers.ws_connect(message)
         message.reply_channel.send.assert_has_calls([

@@ -29,7 +29,7 @@ def test_deletion():
     host1 = inv.hosts.create(name='foo')
     host2 = inv.hosts.create(name='bar')
     topology = Topology.objects.create(
-        name='inv', scale=1.0, panX=0.0, panY=0.0
+        name='inv', scale=0.7, panX=0.0, panY=0.0
     )
     inv.topologyinventory_set.create(topology=topology)
     device1 = topology.device_set.create(name='foo', host=host1, x=0.0, y=0.0, cid=1)

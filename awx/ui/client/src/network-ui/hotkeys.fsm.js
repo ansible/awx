@@ -62,7 +62,7 @@ _Enabled.prototype.onKeyDown = function(controller, msg_type, $event) {
     }
 
     if ($event.key === '0') {
-        scope.jump_to_animation(0, 0, 1.0);
+        scope.jump_to_animation(0, 0, 0.7);
     }
 
 	controller.delegate_channel.send(msg_type, $event);
@@ -83,5 +83,3 @@ _Disabled.prototype.onEnable = function (controller) {
 
 };
 _Disabled.prototype.onEnable.transitions = ['Enabled'];
-
-
