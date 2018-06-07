@@ -1927,12 +1927,22 @@ class WorkflowJobAccess(BaseAccess):
         if not wfjt:
             return False
 
-        # execute permission to WFJT is mandatory for any relaunch
-        if self.user not in wfjt.execute_role:
-            return False
+        # If job was launched by another user, it could have survey passwords
+        if obj.created_by_id != self.user.pk:
+            # Obtain prompts used to start original job
+            JobLaunchConfig = obj._meta.get_field('launch_config').related_model
+            try:
+                config = JobLaunchConfig.objects.get(job=obj)
+            except JobLaunchConfig.DoesNotExist:
+                config = None
 
-        # user's WFJT access doesn't guarentee permission to launch, introspect nodes
-        return self.can_recreate(obj)
+            if config is None or config.prompts_dict():
+                if self.save_messages:
+                    self.messages['detail'] = _('Job was launched with prompts provided by another user.')
+                return False
+
+        # execute permission to WFJT is mandatory for any relaunch
+        return (self.user in wfjt.execute_role)
 
     def can_recreate(self, obj):
         node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credentials', 'unified_job_template')
