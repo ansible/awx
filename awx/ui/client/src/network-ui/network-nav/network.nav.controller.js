@@ -45,13 +45,15 @@ function NetworkingController (models, $state, $scope, strings) {
         $("#networking-search").select2({
             width:'400px',
             containerCssClass: 'Form-dropDown',
-            placeholder: 'SEARCH'
+            placeholder: 'SEARCH',
+            dropdownParent: $('.Networking-toolbar'),
         });
         $("#networking-actionsDropdown").select2({
             width:'400px',
             containerCssClass: 'Form-dropDown',
             minimumResultsForSearch: -1,
-            placeholder: 'ACTIONS'
+            placeholder: 'ACTIONS',
+            dropdownParent: $('.Networking-toolbar'),
         });
     });
 
