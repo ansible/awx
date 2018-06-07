@@ -94,6 +94,7 @@ function BaseInputController (strings) {
                 scope.state._value = scope.state._preEditValue;
                 scope.state._activeModel = '_displayValue';
                 scope.state._placeholder = vm.strings.get('ENCRYPTED');
+                vm.check();
             } else {
                 scope.state._buttonText = vm.strings.get('REVERT');
                 scope.state._disabled = false;
@@ -101,6 +102,7 @@ function BaseInputController (strings) {
                 scope.state._activeModel = '_value';
                 scope.state._value = '';
                 scope.state._placeholder = '';
+                vm.check();
             }
         };
 
