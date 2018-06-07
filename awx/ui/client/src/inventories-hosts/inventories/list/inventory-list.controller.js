@@ -158,7 +158,7 @@ function InventoriesList($scope,
                 reloadListStateParams.inventory_search.page = (parseInt(reloadListStateParams.inventory_search.page)-1).toString();
             }
 
-            if (parseInt($state.params.inventory_id) === data.inventory_id) {
+            if (parseInt($state.params.inventory_id) === data.inventory_id || parseInt($state.params.smartinventory_id) === data.inventory_id) {
                 $state.go("^", reloadListStateParams, {reload: true});
             } else {
                 $state.go('.', reloadListStateParams, {reload: true});
