@@ -9,7 +9,7 @@ import operator
 import re
 import six
 import urllib
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 from datetime import timedelta
 
 # OAuth2
@@ -3142,6 +3142,48 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                 summary_fields['extra_credentials'] = extra_creds
                 summary_fields['credentials'] = all_creds
         return summary_fields
+
+
+class JobDetailSerializer(JobSerializer):
+
+    host_status_counts = serializers.SerializerMethodField(
+        help_text=_('A count of hosts uniquely assigned to each status.'),
+    )
+    playbook_counts = serializers.SerializerMethodField(
+        help_text=_('A count of all plays and tasks for the job run.'),
+    )
+
+    class Meta:
+        model = Job
+        fields = ('*', 'host_status_counts', 'playbook_counts',)
+
+    def get_playbook_counts(self, obj):
+        task_count = obj.job_events.filter(event='playbook_on_task_start').count()
+        play_count = obj.job_events.filter(event='playbook_on_play_start').count()
+
+        data = {'play_count': play_count, 'task_count': task_count}
+
+        return data
+
+    def get_host_status_counts(self, obj):
+        try:
+            event_data = obj.job_events.only('event_data').get(event='playbook_on_stats').event_data
+        except JobEvent.DoesNotExist:
+            event_data = {}
+
+        host_status = {}
+        host_status_keys = ['skipped', 'ok', 'changed', 'failures', 'dark']
+
+        for key in host_status_keys:
+            for host in event_data.get(key, {}):
+                host_status[host] = key
+
+        host_status_counts = defaultdict(lambda: 0)
+
+        for value in host_status.values():
+            host_status_counts[value] += 1
+
+        return host_status_counts
 
 
 class JobCancelSerializer(BaseSerializer):
