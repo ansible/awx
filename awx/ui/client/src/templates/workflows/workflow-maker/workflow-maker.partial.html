@@ -99,7 +99,13 @@
                         <span>{{:: strings.get('workflows.INVALID_JOB_TEMPLATE') }}</span>
                     </div>
                 </div>
-                <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-show="selectedTemplate && !selectedTemplateInvalid">
+                <div ng-if="selectedTemplate && credentialRequiresPassword">
+                    <div class="WorkflowMaker-invalidJobTemplateWarning">
+                        <span class="fa fa-warning"></span>
+                        <span>{{:: strings.get('workflows.CREDENTIAL_WITH_PASS') }}</span>
+                    </div>
+                </div>
+                <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-show="selectedTemplate && !selectedTemplateInvalid && !(credentialRequiresPassword && !promptData.launchConf.ask_credential_on_launch)">
                     <label for="verbosity" class="Form-inputLabelContainer">
                         <span class="Form-requiredAsterisk">*</span>
                         <span class="Form-inputLabel">RUN</span>
@@ -112,6 +118,7 @@
                             class="form-control Form-dropDown"
                             name="edgeType"
                             tabindex="-1"
+                            ng-disabled="!workflowJobTemplateObj.summary_fields.user_capabilities.edit"
                             aria-hidden="true">
                         </select>
                     </div>
@@ -120,7 +127,7 @@
                     <button type="button" class="btn btn-sm Form-primaryButton Form-primaryButton--noMargin" id="workflow_maker_prompt_btn" ng-show="showPromptButton" ng-click="openPromptModal()"> Prompt</button>
                     <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_btn" ng-show="(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)" ng-click="cancelNodeForm()"> Cancel</button>
                     <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_close_btn" ng-show="!(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)" ng-click="cancelNodeForm()"> Close</button>
-                    <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_btn" ng-show="(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) && !selectedTemplateInvalid" ng-click="confirmNodeForm()" ng-disabled="!selectedTemplate || promptModalMissingReqFields"> Select</button>
+                    <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_btn" ng-show="(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) && !selectedTemplateInvalid && !(credentialRequiresPassword && !promptData.launchConf.ask_credential_on_launch)" ng-click="confirmNodeForm()" ng-disabled="!selectedTemplate || promptModalMissingReqFields || credentialRequiresPassword"> Select</button>
                 </div>
             </div>
         </div>
@@ -129,5 +136,5 @@
         <button type="button" class="btn btn-sm WorkflowMaker-cancelButton" ng-click="closeWorkflowMaker()"> Close</button>
         <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate" ng-disabled="edgeFlags.conflict || workflowMakerFormConfig.nodeMode === 'add'"> Save</button>
     </div>
-    <prompt prompt-data="promptData" action-text="{{:: strings.get('prompt.CONFIRM')}}" prevent-creds-with-passwords="preventCredsWithPasswords"></prompt>
+    <prompt prompt-data="promptData" action-text="{{:: strings.get('prompt.CONFIRM')}}" prevent-creds-with-passwords="preventCredsWithPasswords" read-only-prompts="!(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)"></prompt>
 </div>

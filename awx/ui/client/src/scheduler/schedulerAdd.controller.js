@@ -8,12 +8,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
     'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
-    'WorkflowJobTemplateModel', 'TemplatesStrings', 'rbacUiControlService',
+    'WorkflowJobTemplateModel', 'TemplatesStrings', 'rbacUiControlService', 'Alert', 'i18n',
     function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
         ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment,
-        WorkflowJobTemplate, TemplatesStrings, rbacUiControlService
+        WorkflowJobTemplate, TemplatesStrings, rbacUiControlService, Alert, i18n
     ) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
@@ -112,6 +112,14 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
             .then((responses) => {
                 let launchConf = responses[1].data;
 
+                if (launchConf.passwords_needed_to_start &&
+                    launchConf.passwords_needed_to_start.length > 0 &&
+                    !launchConf.ask_credential_on_launch
+                ) {
+                    Alert(i18n._('Warning'), i18n._('This Job Template has a default credential that requires a password before launch.  Adding or editing schedules is prohibited while this credential is selected.  To add or edit a schedule, credentials that require a password must be removed from the Job Template.'), 'alert-info');
+                    $state.go('^', { reload: true });
+                }
+
                 let watchForPromptChanges = () => {
                     let promptValuesToWatch = [
                         'promptData.prompts.inventory.value',
@@ -156,7 +164,6 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     !launchConf.survey_enabled &&
                     !launchConf.credential_needed_to_start &&
                     !launchConf.inventory_needed_to_start &&
-                    launchConf.passwords_needed_to_start.length === 0 &&
                     launchConf.variables_needed_to_start.length === 0) {
                         $scope.showPromptButton = false;
                 } else {

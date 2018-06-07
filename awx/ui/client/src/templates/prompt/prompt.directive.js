@@ -6,7 +6,8 @@ export default [ 'templateUrl',
             promptData: '=',
             onFinish: '&',
             actionText: '@',
-            preventCredsWithPasswords: '<'
+            preventCredsWithPasswords: '<',
+            readOnlyPrompts: '='
         },
         templateUrl: templateUrl('templates/prompt/prompt'),
         replace: true,

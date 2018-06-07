@@ -93,7 +93,8 @@ function TemplatesStrings (BaseString) {
     };
 
     ns.workflows = {
-        INVALID_JOB_TEMPLATE: t.s('This Job Template is missing a default inventory or project. This must be addressed in the Job Template form before this node can be saved.')
+        INVALID_JOB_TEMPLATE: t.s('This Job Template is missing a default inventory or project. This must be addressed in the Job Template form before this node can be saved.'),
+        CREDENTIAL_WITH_PASS: t.s('This Job Template has a credential that requires a password.  Credentials requiring passwords on launch are not permitted on workflow nodes.')
     };
 }
 

@@ -73,61 +73,65 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
 
                         vm.promptDataClone.prompts.credentials.passwords = {};
 
-                        if(vm.promptDataClone.launchConf.passwords_needed_to_start) {
-                            let machineCredPassObj = null;
-                            vm.promptDataClone.launchConf.passwords_needed_to_start.forEach((passwordNeeded) => {
-                                if (passwordNeeded === "ssh_password" ||
-                                    passwordNeeded === "become_password" ||
-                                    passwordNeeded === "ssh_key_unlock"
-                                ) {
-                                    if (!machineCredPassObj) {
-                                        vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
-                                            if (defaultCredential.kind && defaultCredential.kind === "ssh") {
-                                                machineCredPassObj = {
-                                                    id: defaultCredential.id,
-                                                    name: defaultCredential.name
-                                                };
-                                            } else if (defaultCredential.passwords_needed) {
-                                                defaultCredential.passwords_needed.forEach((neededPassword) => {
-                                                    if (neededPassword === passwordNeeded) {
-                                                        machineCredPassObj = {
-                                                            id: defaultCredential.id,
-                                                            name: defaultCredential.name
-                                                        };
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-
-                                    vm.promptDataClone.prompts.credentials.passwords[passwordNeeded] = angular.copy(machineCredPassObj);
-                                } else if (passwordNeeded.startsWith("vault_password")) {
-                                    let vault_id = null;
-                                    if (passwordNeeded.includes('.')) {
-                                        vault_id = passwordNeeded.split(/\.(.+)/)[1];
-                                    }
-
-                                    if (!vm.promptDataClone.prompts.credentials.passwords.vault) {
+                        vm.promptDataClone.prompts.credentials.value.forEach((credential) => {
+                            if(credential.inputs) {
+                                if(credential.inputs.password && credential.inputs.password === "ASK") {
+                                    vm.promptDataClone.prompts.credentials.passwords.ssh_password = {
+                                        id: credential.id,
+                                        name: credential.name
+                                    };
+                                }
+                                if(credential.inputs.become_password && credential.inputs.become_password === "ASK") {
+                                    vm.promptDataClone.prompts.credentials.passwords.become_password = {
+                                        id: credential.id,
+                                        name: credential.name
+                                    };
+                                }
+                                if(credential.inputs.ssh_key_unlock && credential.inputs.ssh_key_unlock === "ASK") {
+                                    vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock = {
+                                        id: credential.id,
+                                        name: credential.name
+                                    };
+                                }
+                                if(credential.inputs.vault_password && credential.inputs.vault_password === "ASK") {
+                                    if(!vm.promptDataClone.prompts.credentials.passwords.vault) {
                                         vm.promptDataClone.prompts.credentials.passwords.vault = [];
                                     }
-
-                                    // Loop across the default credentials to find the name of the
-                                    // credential that requires a password
-                                    vm.promptDataClone.prompts.credentials.value.forEach((defaultCredential) => {
-                                        if (vm.promptDataClone.prompts.credentials.credentialTypes[defaultCredential.credential_type] === "vault") {
-                                            let defaultCredVaultId = defaultCredential.vault_id || _.get(defaultCredential, 'inputs.vault_id') || null;
-                                            if (defaultCredVaultId === vault_id) {
-                                                vm.promptDataClone.prompts.credentials.passwords.vault.push({
-                                                    id: defaultCredential.id,
-                                                    name: defaultCredential.name,
-                                                    vault_id: defaultCredVaultId
-                                                });
-                                            }
-                                        }
+                                    vm.promptDataClone.prompts.credentials.passwords.vault.push({
+                                        id: credential.id,
+                                        name: credential.name,
+                                        vault_id: credential.inputs.vault_id
                                     });
                                 }
-                            });
-                        }
+                            } else if(credential.passwords_needed && credential.passwords_needed.length > 0) {
+                                credential.passwords_needed.forEach((passwordNeeded) => {
+                                    if (passwordNeeded === "ssh_password" ||
+                                        passwordNeeded === "become_password" ||
+                                        passwordNeeded === "ssh_key_unlock"
+                                    ) {
+                                        vm.promptDataClone.prompts.credentials.passwords[passwordNeeded] = {
+                                            id: credential.id,
+                                            name: credential.name
+                                        };
+                                    } else if (passwordNeeded.startsWith("vault_password")) {
+                                        let vault_id = null;
+                                        if (passwordNeeded.includes('.')) {
+                                            vault_id = passwordNeeded.split(/\.(.+)/)[1];
+                                        }
+
+                                        if (!vm.promptDataClone.prompts.credentials.passwords.vault) {
+                                            vm.promptDataClone.prompts.credentials.passwords.vault = [];
+                                        }
+
+                                        vm.promptDataClone.prompts.credentials.passwords.vault.push({
+                                            id: credential.id,
+                                            name: credential.name,
+                                            vault_id: vault_id
+                                        });
+                                    }
+                                });
+                            }
+                        });
 
                         vm.promptDataClone.credentialTypeMissing = [];
 
@@ -141,11 +145,17 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                             };
                             order++;
                         }
-                        if(vm.promptDataClone.launchConf.ask_credential_on_launch || (vm.promptDataClone.launchConf.passwords_needed_to_start && vm.promptDataClone.launchConf.passwords_needed_to_start.length > 0)) {
+                        if (vm.promptDataClone.launchConf.ask_credential_on_launch ||
+                            (_.has(vm, 'promptDataClone.prompts.credentials.passwords.vault') &&
+                            vm.promptDataClone.prompts.credentials.passwords.vault.length > 0) ||
+                            _.has(vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock) ||
+                            _.has(vm.promptDataClone.prompts.credentials.passwords.become_password) ||
+                            _.has(vm.promptDataClone.prompts.credentials.passwords.ssh_password)
+                        ) {
                             vm.steps.credential.includeStep = true;
                             vm.steps.credential.tab = {
                                 _active: order === 1 ? true : false,
-                                _disabled: order === 1 ? false : true,
+                                _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
                             order++;
@@ -154,7 +164,7 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                             vm.steps.other_prompts.includeStep = true;
                             vm.steps.other_prompts.tab = {
                                 _active: order === 1 ? true : false,
-                                _disabled: order === 1 ? false : true,
+                                _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
                             order++;
@@ -170,12 +180,13 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                             vm.steps.survey.includeStep = true;
                             vm.steps.survey.tab = {
                                 _active: order === 1 ? true : false,
-                                _disabled: order === 1 ? false : true,
+                                _disabled: (order === 1 || vm.readOnlyPrompts) ? false : true,
                                 order: order
                             };
                             order++;
                         }
                         vm.steps.preview.tab.order = order;
+                        vm.steps.preview.tab._disabled = vm.readOnlyPrompts ? false : true;
                         modal.show('PROMPT');
                         vm.promptData.triggerModalOpen = false;
 

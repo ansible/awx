@@ -9,37 +9,53 @@
         </at-tab-group>
         <div class="Prompt-step">
             <div ng-if="vm.steps.inventory.includeStep" ng-show="vm.steps.inventory.tab._active">
-                <prompt-inventory prompt-data="vm.promptDataClone"></prompt-inventory>
+                <prompt-inventory
+                prompt-data="vm.promptDataClone"
+                read-only-prompts="vm.readOnlyPrompts">
+            </prompt-inventory>
             </div>
             <div ng-if="vm.steps.credential.includeStep" ng-show="vm.steps.credential.tab._active">
                 <prompt-credential
                     prompt-data="vm.promptDataClone"
                     credential-passwords-form="vm.forms.credentialPasswords"
-                    prevent-creds-with-passwords="vm.preventCredsWithPasswords">
+                    prevent-creds-with-passwords="vm.preventCredsWithPasswords"
+                    read-only-prompts="vm.readOnlyPrompts">
                 </prompt-credential>
             </div>
             <div ng-if="vm.steps.other_prompts.includeStep" ng-show="vm.steps.other_prompts.tab._active">
-                <prompt-other-prompts prompt-data="vm.promptDataClone" other-prompts-form="vm.forms.otherPrompts" is-active-step="vm.steps.other_prompts.tab._active" validate="vm.codeMirror.validate"></prompt-other-prompts>
+                <prompt-other-prompts
+                    prompt-data="vm.promptDataClone"
+                    other-prompts-form="vm.forms.otherPrompts"
+                    is-active-step="vm.steps.other_prompts.tab._active"
+                    validate="vm.codeMirror.validate"
+                    read-only-prompts="vm.readOnlyPrompts">
+                </prompt-other-prompts>
             </div>
             <div ng-if="vm.steps.survey.includeStep" ng-show="vm.steps.survey.tab._active">
-                <prompt-survey prompt-data="vm.promptDataClone" survey-form="vm.forms.survey"></prompt-survey>
+                <prompt-survey
+                    prompt-data="vm.promptDataClone"
+                    survey-form="vm.forms.survey"
+                    read-only-prompts="vm.readOnlyPrompts">
+                </prompt-survey>
             </div>
             <div ng-if="vm.steps.preview.tab._active">
                 <prompt-preview prompt-data="vm.promptDataClone"></prompt-preview>
             </div>
         </div>
         <div class="Prompt-footer">
-            <button class="Prompt-defaultButton" ng-click="vm.cancel()">{{:: vm.strings.get('CANCEL') }}</button>
-            <button class="Prompt-actionButton" ng-show="vm.steps.inventory.tab._active" ng-click="vm.next(vm.steps.inventory.tab)" ng-disabled="!vm.promptDataClone.prompts.inventory.value.id">{{:: vm.strings.get('NEXT') }}</button>
+            <button class="Prompt-defaultButton" ng-click="vm.cancel()" ng-show="!vm.readOnlyPrompts">{{:: vm.strings.get('CANCEL') }}</button>
+            <button class="Prompt-defaultButton" ng-click="vm.cancel()" ng-show="vm.readOnlyPrompts">{{:: vm.strings.get('CLOSE') }}</button>
+            <button class="Prompt-actionButton" ng-show="vm.steps.inventory.tab._active" ng-click="vm.next(vm.steps.inventory.tab)" ng-disabled="!vm.promptDataClone.prompts.inventory.value.id && !vm.readOnlyPrompts">{{:: vm.strings.get('NEXT') }}</button>
             <button class="Prompt-actionButton"
                 ng-show="vm.steps.credential.tab._active"
                 ng-click="vm.next(vm.steps.credential.tab)"
-                ng-disabled="(preventCredsWithPasswords && (vm.promptDataClone.prompts.credentials.passwords.ssh_password || vm.promptDataClone.prompts.credentials.passwords.become_password || vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock || (vm.promptDataClone.prompts.credentials.passwords.vault && vm.promptDataClone.prompts.credentials.passwords.vault.length > 0))) ||
-                 !vm.forms.credentialPasswords.$valid ||
-                 (vm.promptData.credentialTypeMissing && vm.promptData.credentialTypeMissing.length > 0)">{{:: vm.strings.get('NEXT') }}</button>
-            <button class="Prompt-actionButton" ng-show="vm.steps.other_prompts.tab._active" ng-click="vm.next(vm.steps.other_prompts.tab)" ng-disabled="!vm.forms.otherPrompts.$valid">{{:: vm.strings.get('NEXT') }}</button>
-            <button class="Prompt-actionButton" ng-show="vm.steps.survey.tab._active" ng-click="vm.next(vm.steps.survey.tab)" ng-disabled="!vm.forms.survey.$valid">{{:: vm.strings.get('NEXT') }}</button>
-            <button class="Prompt-actionButton" ng-show="vm.steps.preview.tab._active" ng-click="vm.finish()" ng-bind="vm.actionText" ng-disabled="vm.actionButtonClicked"></button>
+                ng-disabled="!vm.readOnlyPrompts &&
+                ((preventCredsWithPasswords && (vm.promptDataClone.prompts.credentials.passwords.ssh_password || vm.promptDataClone.prompts.credentials.passwords.become_password || vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock || (vm.promptDataClone.prompts.credentials.passwords.vault && vm.promptDataClone.prompts.credentials.passwords.vault.length > 0))) ||
+                !vm.forms.credentialPasswords.$valid ||
+                (vm.promptDataClone.credentialTypeMissing && vm.promptDataClone.credentialTypeMissing.length > 0))">{{:: vm.strings.get('NEXT') }}</button>
+            <button class="Prompt-actionButton" ng-show="vm.steps.other_prompts.tab._active" ng-click="vm.next(vm.steps.other_prompts.tab)" ng-disabled="!vm.readOnlyPrompts && !vm.forms.otherPrompts.$valid">{{:: vm.strings.get('NEXT') }}</button>
+            <button class="Prompt-actionButton" ng-show="vm.steps.survey.tab._active" ng-click="vm.next(vm.steps.survey.tab)" ng-disabled="!vm.readOnlyPrompts && !vm.forms.survey.$valid">{{:: vm.strings.get('NEXT') }}</button>
+            <button class="Prompt-actionButton" ng-show="vm.steps.preview.tab._active && !vm.readOnlyPrompts" ng-click="vm.finish()" ng-bind="vm.actionText" ng-disabled="vm.actionButtonClicked"></button>
         </div>
     </at-modal>
 </div>

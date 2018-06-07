@@ -13,13 +13,12 @@
 
 export default [
     '$filter', '$scope', '$location', '$stateParams', 'ScheduleList', 'Rest',
-    'rbacUiControlService',
-    'ToggleSchedule', 'DeleteSchedule', '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions',
-    function($filter, $scope, $location, $stateParams,
-        ScheduleList, Rest,
-        rbacUiControlService,
-        ToggleSchedule, DeleteSchedule,
-        $q, $state, Dataset, ParentObject, UnifiedJobsOptions) {
+    'rbacUiControlService', 'JobTemplateModel', 'ToggleSchedule', 'DeleteSchedule',
+    '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions', 'i18n',
+    function($filter, $scope, $location, $stateParams, ScheduleList, Rest,
+        rbacUiControlService, JobTemplate, ToggleSchedule, DeleteSchedule,
+        $q, $state, Dataset, ParentObject, UnifiedJobsOptions, i18n
+    ) {
 
         var base, scheduleEndpoint,
             list = ScheduleList;
@@ -35,6 +34,19 @@ export default [
                     .then(function(params) {
                         $scope.canAdd = params.canAdd;
                     });
+                if (_.has(ParentObject, 'type') && ParentObject.type === 'job_template') {
+                    const jobTemplate = new JobTemplate();
+                    jobTemplate.getLaunch(ParentObject.id)
+                        .then(({data}) => {
+                            if (data.passwords_needed_to_start &&
+                                data.passwords_needed_to_start.length > 0 &&
+                                !ParentObject.ask_credential_on_launch
+                            ) {
+                                $scope.credentialRequiresPassword = true;
+                                $scope.addTooltip = i18n._("Using a credential that requires a password on launch is prohibited when creating a Job Template schedule");
+                            }
+                        });
+                }
             }
 
             // search init
@@ -107,13 +119,15 @@ export default [
         function buildTooltips(schedule) {
             var job = schedule.summary_fields.unified_job_template;
             if (schedule.enabled) {
-                schedule.play_tip = 'Schedule is active. Click to stop.';
+                const tip = (schedule.summary_fields.user_capabilities.edit || $scope.credentialRequiresPassword) ? i18n._('Schedule is active.') : i18n._('Schedule is active. Click to stop.');
+                schedule.play_tip = tip;
                 schedule.status = 'active';
-                schedule.status_tip = 'Schedule is active. Click to stop.';
+                schedule.status_tip = tip;
             } else {
-                schedule.play_tip = 'Schedule is stopped. Click to activate.';
+                const tip = (schedule.summary_fields.user_capabilities.edit || $scope.credentialRequiresPassword) ? i18n._('Schedule is stopped.') : i18n._('Schedule is stopped. Click to activate.');
+                schedule.play_tip = tip;
                 schedule.status = 'stopped';
-                schedule.status_tip = 'Schedule is stopped. Click to activate.';
+                schedule.status_tip = tip;
             }
 
             schedule.nameTip = $filter('sanitize')(schedule.name);
