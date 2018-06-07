@@ -15,11 +15,9 @@ export default [
     '$filter', '$scope', '$location', '$stateParams', 'ScheduleList', 'Rest',
     'rbacUiControlService', 'JobTemplateModel', 'ToggleSchedule', 'DeleteSchedule',
     '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions', 'i18n',
-    'Alert',
     function($filter, $scope, $location, $stateParams, ScheduleList, Rest,
         rbacUiControlService, JobTemplate, ToggleSchedule, DeleteSchedule,
-        $q, $state, Dataset, ParentObject, UnifiedJobsOptions, i18n,
-        Alert
+        $q, $state, Dataset, ParentObject, UnifiedJobsOptions, i18n
     ) {
 
         var base, scheduleEndpoint,
