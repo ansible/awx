@@ -1416,7 +1416,7 @@ class ProjectUpdateList(ListAPIView):
 class ProjectUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = ProjectUpdate
-    serializer_class = ProjectUpdateSerializer
+    serializer_class = ProjectUpdateDetailSerializer
 
 
 class ProjectUpdateEventsList(SubListAPIView):
