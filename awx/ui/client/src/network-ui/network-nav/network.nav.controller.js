@@ -85,6 +85,7 @@ function NetworkingController (models, $state, $scope, strings) {
     //Handlers for actions drop down
     $('#networking-actionsDropdown').on('select2:select', (e) => {
         $scope.$broadcast('awxNet-toolbarButtonEvent', e.params.data.title);
+        $("#networking-actionsDropdown").val(null).trigger('change');
     });
 
     $('#networking-actionsDropdown').on('select2:open', () => {
