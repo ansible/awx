@@ -880,7 +880,11 @@ function($injector, $stateExtender, $log, i18n) {
                                     $stateParams[`${list.iterator}_search`].role_level = "admin_role";
                                     $stateParams[`${list.iterator}_search`].credential_type = InsightsCredTypePK.toString() ;
                                 }
-
+                                if(list.iterator === 'credential') {
+                                    if($state.current.name.includes('projects.edit') || $state.current.name.includes('projects.add')) {
+                                        state.params[`${list.iterator}_search`].value = _.merge(state.params[`${list.iterator}_search`].value, $stateParams[`${list.iterator}_search`]);
+                                    }
+                                }
 
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }

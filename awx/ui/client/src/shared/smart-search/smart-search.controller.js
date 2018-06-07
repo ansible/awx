@@ -235,10 +235,14 @@ function SmartSearchController (
     };
 
     $scope.clearAllTerms = () => {
+        _.forOwn(defaults, (value, key) => {
+            // preserve the `credential_type` queryset param if it exists
+            if (key === 'credential_type') {
+                defaults[key] = queryset[key];
+            }
+        });
         const cleared = _(defaults).omit(_.isNull).value();
-
         delete cleared.page;
-
         queryset = cleared;
 
         if (!$scope.querySet) {
