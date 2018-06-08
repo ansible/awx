@@ -1,126 +1,156 @@
+/* eslint camelcase: 0 */
 let $compile;
-let $filter;
 let $q;
 let $scope;
+let $state;
 
-let page;
-let render;
 let resource;
+let render;
 let scroll;
-let engine;
 let status;
+let slide;
+let stream;
 
 let vm;
-let streaming;
-let listeners = [];
 
-function JobsIndexController (
-    _$compile_,
-    _$filter_,
-    _$q_,
-    _$scope_,
-    _resource_,
-    _page_,
-    _scroll_,
-    _render_,
-    _engine_,
-    _status_,
-    _strings_,
-) {
-    vm = this || {};
+const bufferState = [0, 0]; // [length, count]
+const listeners = [];
+const rx = [];
 
-    $compile = _$compile_;
-    $filter = _$filter_;
-    $q = _$q_;
-    $scope = _$scope_;
+let following = false;
 
-    resource = _resource_;
-    page = _page_;
-    scroll = _scroll_;
-    render = _render_;
-    engine = _engine_;
-    status = _status_;
+function bufferInit () {
+    rx.length = 0;
 
-    vm.strings = _strings_;
-
-    // Development helper(s)
-    vm.clear = devClear;
-
-    // Expand/collapse
-    vm.expanded = false;
-    vm.toggleExpanded = toggleExpanded;
-
-    // Panel
-    vm.resource = resource;
-    vm.title = $filter('sanitize')(resource.model.get('name'));
-
-    // Stdout Navigation
-    vm.scroll = {
-        showBackToTop: false,
-        home: scrollFirst,
-        end: scrollLast,
-        down: scrollPageDown,
-        up: scrollPageUp
-    };
-
-    render.requestAnimationFrame(() => init());
+    bufferState[0] = 0;
+    bufferState[1] = 0;
 }
 
-function init () {
-    status.init({
-        resource,
-    });
+function bufferAdd (event) {
+    rx.push(event);
 
-    page.init({
-        resource,
-    });
+    bufferState[0] += 1;
+    bufferState[1] += 1;
 
-    render.init({
-        compile: html => $compile(html)($scope),
-        isStreamActive: engine.isActive,
-    });
+    return bufferState;
+}
 
-    scroll.init({
-        isAtRest: scrollIsAtRest,
-        previous,
-        next,
-    });
+function bufferEmpty () {
+    bufferState[0] = 0;
 
-    engine.init({
-        page,
-        scroll,
-        resource,
-        onEventFrame (events) {
-            return shift().then(() => append(events, true));
-        },
-        onStart () {
-            status.setJobStatus('running');
-        },
-        onStop () {
-            stopListening();
-            status.updateStats();
-            status.dispatch();
+    return rx.splice(0, rx.length);
+}
+
+function onFrames (events) {
+    if (!following) {
+        const minCounter = Math.min(...events.map(({ counter }) => counter));
+        // attachment range
+        const max = slide.getTailCounter() + 1;
+        const min = Math.max(1, slide.getHeadCounter(), max - 50);
+
+        if (minCounter > max || minCounter < min) {
+            return $q.resolve();
         }
-    });
 
-    streaming = false;
-
-    if (status.state.running) {
-        return scrollLast().then(() => startListening());
-    } else if (!status.state.finished) {
-        return scrollFirst().then(() => startListening());
+        follow();
     }
 
-    return scrollLast();
+    const capacity = slide.getCapacity();
+
+    if (capacity >= events.length) {
+        return slide.pushFront(events);
+    }
+
+    delete render.record;
+
+    render.record = {};
+
+    return slide.popBack(events.length - capacity)
+        .then(() => slide.pushFront(events))
+        .then(() => {
+            scroll.setScrollPosition(scroll.getScrollHeight());
+
+            return $q.resolve();
+        });
+}
+
+function first () {
+    unfollow();
+    scroll.pause();
+
+    return slide.getFirst()
+        .then(() => {
+            scroll.resetScrollPosition();
+            scroll.resume();
+
+            return $q.resolve();
+        });
+}
+
+function next () {
+    return slide.slideDown();
+}
+
+function previous () {
+    unfollow();
+
+    const initialPosition = scroll.getScrollPosition();
+
+    return slide.slideUp()
+        .then(changed => {
+            if (changed[0] !== 0 || changed[1] !== 0) {
+                const currentHeight = scroll.getScrollHeight();
+                scroll.setScrollPosition((currentHeight / 4) - initialPosition);
+            }
+
+            return $q.resolve();
+        });
+}
+
+function last () {
+    scroll.pause();
+
+    return slide.getLast()
+        .then(() => {
+            stream.setMissingCounterThreshold(slide.getTailCounter() + 1);
+            scroll.setScrollPosition(scroll.getScrollHeight());
+
+            scroll.resume();
+
+            return $q.resolve();
+        });
+}
+
+function compile (html) {
+    return $compile(html)($scope);
+}
+
+function follow () {
+    scroll.pause();
+    // scroll.hide();
+
+    following = true;
+}
+
+function unfollow () {
+    following = false;
+
+    // scroll.unhide();
+    scroll.resume();
+}
+
+function showHostDetails (id, uuid) {
+    $state.go('output.host-event.json', { eventId: id, taskUuid: uuid });
 }
 
 function stopListening () {
     listeners.forEach(deregister => deregister());
-    listeners = [];
+    listeners.length = 0;
 }
 
 function startListening () {
     stopListening();
+
     listeners.push($scope.$on(resource.ws.events, (scope, data) => handleJobEvent(data)));
     listeners.push($scope.$on(resource.ws.status, (scope, data) => handleStatusEvent(data)));
 }
@@ -130,280 +160,95 @@ function handleStatusEvent (data) {
 }
 
 function handleJobEvent (data) {
-    streaming = streaming || attachToRunningJob();
+    stream.pushJobEvent(data);
+    status.pushJobEvent(data);
+}
 
-    streaming.then(() => {
-        engine.pushJobEvent(data);
-        status.pushJobEvent(data);
+function OutputIndexController (
+    _$compile_,
+    _$q_,
+    _$scope_,
+    _$state_,
+    _resource_,
+    _scroll_,
+    _render_,
+    _status_,
+    _slide_,
+    _stream_,
+    $filter,
+    strings,
+) {
+    $compile = _$compile_;
+    $q = _$q_;
+    $scope = _$scope_;
+    $state = _$state_;
+
+    resource = _resource_;
+    scroll = _scroll_;
+    render = _render_;
+    slide = _slide_;
+    status = _status_;
+    stream = _stream_;
+
+    vm = this || {};
+
+    // Panel
+    vm.strings = strings;
+    vm.resource = resource;
+    vm.title = $filter('sanitize')(resource.model.get('name'));
+
+    vm.expanded = false;
+    vm.showHostDetails = showHostDetails;
+    vm.toggleExpanded = () => { vm.expanded = !vm.expanded; };
+
+    // Stdout Navigation
+    vm.menu = {
+        end: last,
+        home: first,
+        up: previous,
+        down: next,
+    };
+
+    render.requestAnimationFrame(() => {
+        bufferInit();
+
+        status.init(resource);
+        slide.init(render, resource.events);
+
+        render.init({ compile });
+        scroll.init({ previous, next });
+
+        stream.init({
+            bufferAdd,
+            bufferEmpty,
+            onFrames,
+            onStop () {
+                stopListening();
+                status.updateStats();
+                status.dispatch();
+                unfollow();
+            }
+        });
+
+        startListening();
+
+        return last();
     });
 }
 
-function next () {
-    return page.next()
-        .then(events => {
-            if (!events) {
-                return $q.resolve();
-            }
-
-            return shift()
-                .then(() => append(events))
-                .then(() => {
-                    if (scroll.isMissing()) {
-                        return next();
-                    }
-
-                    return $q.resolve();
-                });
-        });
-}
-
-function previous () {
-    const initialPosition = scroll.getScrollPosition();
-    let postPopHeight;
-
-    return page.previous()
-        .then(events => {
-            if (!events) {
-                return $q.resolve();
-            }
-
-            return pop()
-                .then(() => {
-                    postPopHeight = scroll.getScrollHeight();
-
-                    return prepend(events);
-                })
-                .then(() => {
-                    const currentHeight = scroll.getScrollHeight();
-                    scroll.setScrollPosition(currentHeight - postPopHeight + initialPosition);
-                });
-        });
-}
-
-function append (events, eng) {
-    return render.append(events)
-        .then(count => {
-            page.updateLineCount(count, eng);
-        });
-}
-
-function prepend (events) {
-    return render.prepend(events)
-        .then(count => {
-            page.updateLineCount(count);
-        });
-}
-
-function pop () {
-    if (!page.isOverCapacity()) {
-        return $q.resolve();
-    }
-
-    const lines = page.trim();
-
-    return render.pop(lines);
-}
-
-function shift () {
-    if (!page.isOverCapacity()) {
-        return $q.resolve();
-    }
-
-    const lines = page.trim(true);
-
-    return render.shift(lines);
-}
-
-function scrollFirst () {
-    if (engine.isActive()) {
-        if (engine.isTransitioning()) {
-            return $q.resolve();
-        }
-
-        if (!engine.isPaused()) {
-            engine.pause(true);
-        }
-    } else if (scroll.isPaused()) {
-        return $q.resolve();
-    }
-
-    scroll.pause();
-
-    return page.first()
-        .then(events => {
-            if (!events) {
-                return $q.resolve();
-            }
-
-            return render.clear()
-                .then(() => prepend(events))
-                .then(() => {
-                    scroll.resetScrollPosition();
-                    scroll.resume();
-                })
-                .then(() => {
-                    if (scroll.isMissing()) {
-                        return next();
-                    }
-
-                    return $q.resolve();
-                });
-        });
-}
-
-function scrollLast () {
-    if (engine.isActive()) {
-        if (engine.isTransitioning()) {
-            return $q.resolve();
-        }
-
-        if (engine.isPaused()) {
-            engine.resume(true);
-        }
-    } else if (scroll.isPaused()) {
-        return $q.resolve();
-    }
-
-    scroll.pause();
-
-    return render.clear()
-        .then(() => page.last())
-        .then(events => {
-            if (!events) {
-                return $q.resolve();
-            }
-
-            const minLine = 1 + Math.max(...events.map(event => event.end_line));
-            engine.setMinLine(minLine);
-
-            return append(events);
-        })
-        .then(() => {
-            if (!engine.isActive()) {
-                scroll.resume();
-            }
-            scroll.setScrollPosition(scroll.getScrollHeight());
-        })
-        .then(() => {
-            if (!engine.isActive() && scroll.isMissing()) {
-                return previous();
-            }
-
-            return $q.resolve();
-        });
-}
-
-function attachToRunningJob () {
-    if (engine.isActive()) {
-        if (engine.isTransitioning()) {
-            return $q.resolve();
-        }
-
-        if (engine.isPaused()) {
-            engine.resume(true);
-        }
-    } else if (scroll.isPaused()) {
-        return $q.resolve();
-    }
-
-    scroll.pause();
-
-    return page.last()
-        .then(events => {
-            if (!events) {
-                return $q.resolve();
-            }
-
-            const minLine = 1 + Math.max(...events.map(event => event.end_line));
-            engine.setMinLine(minLine);
-
-            return append(events);
-        })
-        .then(() => {
-            scroll.setScrollPosition(scroll.getScrollHeight());
-        });
-}
-
-function scrollPageUp () {
-    if (scroll.isPaused()) {
-        return;
-    }
-
-    scroll.pageUp();
-}
-
-function scrollPageDown () {
-    if (scroll.isPaused()) {
-        return;
-    }
-
-    scroll.pageDown();
-}
-
-function scrollIsAtRest (isAtRest) {
-    vm.scroll.showBackToTop = !isAtRest;
-}
-
-function toggleExpanded () {
-    vm.expanded = !vm.expanded;
-}
-
-function devClear () {
-    render.clear().then(() => init());
-}
-
-// function showHostDetails (id) {
-//     jobEvent.request('get', id)
-//         .then(() => {
-//             const title = jobEvent.get('host_name');
-
-//             vm.host = {
-//                 menu: true,
-//                 stdout: jobEvent.get('stdout')
-//             };
-
-//             $scope.jobs.modal.show(title);
-//         });
-// }
-
-// function toggle (uuid, menu) {
-//     const lines = $(`.child-of-${uuid}`);
-//     let icon = $(`#${uuid} .at-Stdout-toggle > i`);
-
-//     if (menu || record[uuid].level === 1) {
-//         vm.isExpanded = !vm.isExpanded;
-//     }
-
-//     if (record[uuid].children) {
-//         icon = icon.add($(`#${record[uuid].children.join(', #')}`)
-//             .find('.at-Stdout-toggle > i'));
-//     }
-
-//     if (icon.hasClass('fa-angle-down')) {
-//         icon.addClass('fa-angle-right');
-//         icon.removeClass('fa-angle-down');
-
-//         lines.addClass('hidden');
-//     } else {
-//         icon.addClass('fa-angle-down');
-//         icon.removeClass('fa-angle-right');
-
-//         lines.removeClass('hidden');
-//     }
-// }
-
-JobsIndexController.$inject = [
+OutputIndexController.$inject = [
     '$compile',
-    '$filter',
     '$q',
     '$scope',
+    '$state',
     'resource',
-    'JobPageService',
-    'JobScrollService',
-    'JobRenderService',
-    'JobEventEngine',
-    'JobStatusService',
+    'OutputScrollService',
+    'OutputRenderService',
+    'OutputStatusService',
+    'OutputSlideService',
+    'OutputStreamService',
+    '$filter',
     'OutputStrings',
 ];
 
-module.exports = JobsIndexController;
+module.exports = OutputIndexController;

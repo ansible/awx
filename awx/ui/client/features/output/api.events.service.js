@@ -1,144 +1,94 @@
-const PAGE_LIMIT = 5;
+const API_PAGE_SIZE = 200;
 const PAGE_SIZE = 50;
+const ORDER_BY = 'counter';
 
 const BASE_PARAMS = {
-    order_by: 'start_line',
     page_size: PAGE_SIZE,
+    order_by: ORDER_BY,
 };
 
 const merge = (...objs) => _.merge({}, ...objs);
 
-const getInitialState = params => ({
-    results: [],
-    count: 0,
-    previous: 1,
-    page: 1,
-    next: 1,
-    last: 1,
-    params: merge(BASE_PARAMS, params),
-});
-
 function JobEventsApiService ($http, $q) {
     this.init = (endpoint, params) => {
-        this.keys = [];
-        this.cache = {};
-        this.pageSizes = {};
         this.endpoint = endpoint;
-        this.state = getInitialState(params);
+        this.params = merge(BASE_PARAMS, params);
+
+        this.state = { current: 0, count: 0 };
     };
 
-    this.getLastPage = count => Math.ceil(count / this.state.params.page_size);
+    this.fetch = () => this.getFirst().then(() => this);
 
-    this.clearCache = () => {
-        delete this.cache;
-        delete this.keys;
-        delete this.pageSizes;
+    this.getFirst = () => {
+        const page = 1;
+        const params = merge(this.params, { page });
 
-        this.cache = {};
-        this.keys = [];
-        this.pageSizes = {};
-    };
-
-    this.fetch = () => this.first().then(() => this);
-
-    this.getPage = number => {
-        if (number < 1 || number > this.state.last) {
-            return $q.resolve();
-        }
-
-        if (this.cache[number]) {
-            if (this.pageSizes[number] === PAGE_SIZE) {
-                return this.cache[number];
-            }
-
-            delete this.pageSizes[number];
-            delete this.cache[number];
-
-            this.keys.splice(this.keys.indexOf(number));
-        }
-
-        const { params } = this.state;
-
-        delete params.page;
-
-        params.page = number;
-
-        const promise = $http.get(this.endpoint, { params })
+        return $http.get(this.endpoint, { params })
             .then(({ data }) => {
                 const { results, count } = data;
 
-                this.state.results = results;
                 this.state.count = count;
-                this.state.page = number;
-                this.state.last = this.getLastPage(count);
-                this.state.previous = Math.max(1, number - 1);
-                this.state.next = Math.min(this.state.last, number + 1);
+                this.state.current = page;
 
-                this.pageSizes[number] = results.length;
-
-                return { results, page: number };
+                return results;
             });
-
-        if (number === 1) {
-            this.clearCache();
-        }
-
-        this.cache[number] = promise;
-        this.keys.push(number);
-
-        if (this.keys.length > PAGE_LIMIT) {
-            const remove = this.keys.shift();
-
-            delete this.cache[remove];
-            delete this.pageSizes[remove];
-        }
-
-        return promise;
     };
 
-    this.first = () => this.getPage(1);
-    this.next = () => this.getPage(this.state.next);
-    this.previous = () => this.getPage(this.state.previous);
+    this.getRange = range => {
+        if (!range) {
+            return $q.resolve([]);
+        }
 
-    this.last = () => {
-        const params = merge({}, this.state.params);
+        const [low, high] = range;
+        const params = merge(this.params, { counter__gte: [low], counter__lte: [high] });
 
-        delete params.page;
-        delete params.order_by;
+        params.page_size = API_PAGE_SIZE;
 
-        params.page = 1;
-        params.order_by = '-start_line';
-
-        const promise = $http.get(this.endpoint, { params })
+        return $http.get(this.endpoint, { params })
             .then(({ data }) => {
-                const { results, count } = data;
-                const lastPage = this.getLastPage(count);
+                const { results } = data;
+                const maxCounter = Math.max(results.map(({ counter }) => counter));
+
+                this.state.current = Math.ceil(maxCounter / PAGE_SIZE);
+
+                return results;
+            });
+    };
+
+    this.getLast = () => {
+        const params = merge(this.params, { page: 1, order_by: `-${ORDER_BY}` });
+
+        return $http.get(this.endpoint, { params })
+            .then(({ data }) => {
+                const { results } = data;
+                const count = Math.max(...results.map(({ counter }) => counter));
+
+                let rotated = results;
 
                 if (count > PAGE_SIZE) {
-                    results.splice(count % PAGE_SIZE);
+                    rotated = results.splice(count % PAGE_SIZE);
+
+                    if (results.length > 0) {
+                        rotated = results;
+                    }
                 }
-
-                results.reverse();
-
-                this.state.results = results;
                 this.state.count = count;
-                this.state.page = lastPage;
-                this.state.next = lastPage;
-                this.state.last = lastPage;
-                this.state.previous = Math.max(1, this.state.page - 1);
+                this.state.current = Math.ceil(count / PAGE_SIZE);
 
-                this.clearCache();
-
-                return { results, page: lastPage };
+                return rotated;
             });
-
-        return promise;
     };
+
+    this.getCurrentPageNumber = () => this.state.current;
+    this.getLastPageNumber = () => Math.ceil(this.state.count / PAGE_SIZE);
+    this.getPreviousPageNumber = () => Math.max(1, this.state.current - 1);
+    this.getNextPageNumber = () => Math.min(this.state.current + 1, this.getLastPageNumber());
+    this.getMaxCounter = () => this.state.count;
+
+    this.getNext = () => this.getPage(this.getNextPageNumber());
+    this.getPrevious = () => this.getPage(this.getPreviousPageNumber());
 }
 
-JobEventsApiService.$inject = [
-    '$http',
-    '$q'
-];
+JobEventsApiService.$inject = ['$http', '$q'];
 
 export default JobEventsApiService;

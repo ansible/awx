@@ -12,9 +12,7 @@ function JobStatusService (moment, message) {
     this.dispatch = () => message.dispatch('status', this.state);
     this.subscribe = listener => message.subscribe('status', listener);
 
-    this.init = ({ resource }) => {
-        const { model } = resource;
-
+    this.init = ({ model, stats }) => {
         this.created = model.get('created');
         this.job = model.get('id');
         this.jobType = model.get('type');
@@ -43,7 +41,7 @@ function JobStatusService (moment, message) {
             },
         };
 
-        this.setStatsEvent(resource.stats);
+        this.setStatsEvent(stats);
         this.updateStats();
         this.updateRunningState();
 
@@ -213,7 +211,7 @@ function JobStatusService (moment, message) {
 
 JobStatusService.$inject = [
     'moment',
-    'JobMessageService',
+    'OutputMessageService',
 ];
 
 export default JobStatusService;
