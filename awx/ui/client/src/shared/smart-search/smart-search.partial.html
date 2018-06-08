@@ -20,14 +20,11 @@
         <div class="SmartSearch-tagSection">
             <div class="SmartSearch-flexContainer">
                 <div class="SmartSearch-tagContainer" ng-repeat="tag in searchTags track by $index">
-                    <div class="SmartSearch-deleteContainer" ng-click="removeTerm($index)">
-                        <i class="fa fa-times SmartSearch-tagDelete"></i>
-                    </div>
-                    <div class="SmartSearch-tag SmartSearch-tag--deletable">
-                        <span class="SmartSearch-name">{{tag}}</span>
-                    </div>
+                    <at-tag tag="tag" remove-tag="removeTerm($index)"></at-tag>
                 </div>
-                <a href class="SmartSearch-clearAll" ng-click="clearAllTerms()" translate>CLEAR ALL</a>
+                <div class="SmartSearch-clearAll-container">
+                    <a href class="SmartSearch-clearAll" ng-click="clearAllTerms()" translate>CLEAR ALL</a>
+                </div>
             </div>
         </div>
     </div>
