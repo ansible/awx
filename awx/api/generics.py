@@ -931,6 +931,8 @@ class CopyAPIView(GenericAPIView):
         if get_request_version(request) < 2:
             return self.v1_not_allowed()
         obj = self.get_object()
+        if not request.user.can_access(obj.__class__, 'read', obj):
+            raise PermissionDenied()
         create_kwargs = self._build_create_dict(obj)
         for key in create_kwargs:
             create_kwargs[key] = getattr(create_kwargs[key], 'pk', None) or create_kwargs[key]

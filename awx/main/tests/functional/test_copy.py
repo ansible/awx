@@ -170,7 +170,7 @@ def test_credential_copy(post, get, machine_credential, credentialtype_ssh, admi
 @pytest.mark.django_db
 def test_notification_template_copy(post, get, notification_template_with_encrypt,
                                     organization, alice):
-    #notification_template_with_encrypt.admin_role.members.add(alice)
+    notification_template_with_encrypt.organization.auditor_role.members.add(alice)
     assert get(
         reverse(
             'api:notification_template_copy', kwargs={'pk': notification_template_with_encrypt.pk}
@@ -197,6 +197,7 @@ def test_notification_template_copy(post, get, notification_template_with_encryp
 
 @pytest.mark.django_db
 def test_inventory_script_copy(post, get, inventory_script, organization, alice):
+    inventory_script.organization.auditor_role.members.add(alice)
     assert get(
         reverse('api:inventory_script_copy', kwargs={'pk': inventory_script.pk}), alice, expect=200
     ).data['can_copy'] is False
