@@ -17,14 +17,11 @@ def construct_bcast_queue_name(common_name):
 def _add_remove_celery_worker_queues(app, controlled_instances, worker_queues, worker_name):
     removed_queues = []
     added_queues = []
-    ig_names = set()
     hostnames = set([instance.hostname for instance in controlled_instances])
-    for instance in controlled_instances:
-        ig_names.update(instance.rampart_groups.values_list('name', flat=True))
     worker_queue_names = set([q['name'] for q in worker_queues])
 
     bcast_queue_names = set([construct_bcast_queue_name(n) for n in settings.AWX_CELERY_BCAST_QUEUES_STATIC])
-    all_queue_names = ig_names | hostnames | set(settings.AWX_CELERY_QUEUES_STATIC)
+    all_queue_names = hostnames | set(settings.AWX_CELERY_QUEUES_STATIC)
     desired_queues = bcast_queue_names | (all_queue_names if instance.enabled else set())
 
     # Remove queues
@@ -33,7 +30,7 @@ def _add_remove_celery_worker_queues(app, controlled_instances, worker_queues, w
             app.control.cancel_consumer(queue_name.encode("utf8"), reply=True, destination=[worker_name])
             removed_queues.append(queue_name.encode("utf8"))
 
-    # Add queues for instance and instance groups
+    # Add queues for instances
     for queue_name in all_queue_names:
         if queue_name not in worker_queue_names:
             app.control.add_consumer(queue_name.encode("utf8"), reply=True, destination=[worker_name])
