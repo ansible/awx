@@ -7,7 +7,7 @@ from awx.main.access import (
     # WorkflowJobNodeAccess
 )
 
-from awx.main.models import InventorySource
+from awx.main.models import InventorySource, JobLaunchConfig
 
 
 @pytest.fixture
@@ -134,6 +134,20 @@ class TestWorkflowJobAccess:
         wfjt.admin_role.members.add(rando)
         access = WorkflowJobAccess(rando)
         assert access.can_cancel(workflow_job)
+
+    def test_execute_role_relaunch(self, wfjt, workflow_job, rando):
+        wfjt.execute_role.members.add(rando)
+        JobLaunchConfig.objects.create(job=workflow_job)
+        assert WorkflowJobAccess(rando).can_start(workflow_job)
+
+    def test_cannot_relaunch_friends_job(self, wfjt, rando, alice):
+        workflow_job = wfjt.workflow_jobs.create(name='foo', created_by=alice)
+        JobLaunchConfig.objects.create(
+            job=workflow_job,
+            extra_data={'foo': 'fooforyou'}
+        )
+        wfjt.execute_role.members.add(alice)
+        assert not WorkflowJobAccess(rando).can_start(workflow_job)
 
 
 @pytest.mark.django_db
