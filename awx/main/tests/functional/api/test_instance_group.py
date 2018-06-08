@@ -73,12 +73,12 @@ def test_delete_instance_group_jobs(delete, instance_group_jobs_successful, inst
 @pytest.mark.django_db
 def test_delete_instance_group_jobs_running(delete, instance_group_jobs_running, instance_group_jobs_successful, instance_group, admin):
     def sort_keys(x):
-        return (x['type'], x['id'])
+        return (x['type'], str(x['id']))
 
     url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
     response = delete(url, None, admin, expect=409)
 
-    expect_transformed = [dict(id=str(j.id), type=j.model_to_str()) for j in instance_group_jobs_running]
+    expect_transformed = [dict(id=j.id, type=j.model_to_str()) for j in instance_group_jobs_running]
     response_sorted = sorted(response.data['active_jobs'], key=sort_keys)
     expect_sorted = sorted(expect_transformed, key=sort_keys)
 

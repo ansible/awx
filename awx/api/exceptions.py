@@ -12,7 +12,11 @@ class ActiveJobConflict(ValidationError):
     status_code = 409
 
     def __init__(self, active_jobs):
-        super(ActiveJobConflict, self).__init__({
+        # During APIException.__init__(), Django Rest Framework
+        # turn everything in self.detail into string by using force_text.
+        # Declare detail afterwards circumvent this behavior.
+        super(ActiveJobConflict, self).__init__()
+        self.detail = {
             "error": _("Resource is being used by running jobs."),
             "active_jobs": active_jobs
-        })
+        }
