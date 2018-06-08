@@ -61,7 +61,7 @@ class TestAddRemoveCeleryWorkerQueues():
                 mock.patch('awx.main.utils.ha.settings.AWX_CELERY_QUEUES_STATIC', static_queues),
                 mock.patch('awx.main.utils.ha.settings.AWX_CELERY_BCAST_QUEUES_STATIC', broadcast_queues),
                 mock.patch('awx.main.utils.ha.settings.CLUSTER_HOST_ID', hostname)):
-            (added_queues, removed_queues) = _add_remove_celery_worker_queues(mock_app, [instance], worker_queues, hostname)
+            (added_queues, removed_queues) = _add_remove_celery_worker_queues(mock_app, instance, worker_queues, hostname)
             assert set(added_expected) == set(added_queues)
             assert set(removed_expected) == set(removed_queues)
 
