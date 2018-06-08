@@ -19,22 +19,6 @@ function JobEventsApiService ($http, $q) {
 
     this.fetch = () => this.getFirst().then(() => this);
 
-    this.getPage = number => {
-        if (number === 1) return this.getFirst();
-
-        const [low, high] = [1 + PAGE_SIZE * (number - 1), PAGE_SIZE * number];
-        const params = merge(this.params, { counter__gte: [low], counter__lte: [high] });
-
-        return $http.get(this.endpoint, { params })
-            .then(({ data }) => {
-                const { results } = data;
-
-                this.state.current = number;
-
-                return results;
-            });
-    };
-
     this.getFirst = () => {
         const page = 1;
         const params = merge(this.params, { page });

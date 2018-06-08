@@ -3,10 +3,60 @@ const PAGE_SIZE = 50;
 const PAGE_LIMIT = 5;
 const EVENT_LIMIT = PAGE_LIMIT * PAGE_SIZE;
 
-const TAIL_ADDITION = 'TAIL_ADDITION';
-const TAIL_DELETION = 'TAIL_DELETION';
-const HEAD_ADDITION = 'HEAD_ADDITION';
-const HEAD_DELETION = 'HEAD_DELETION';
+/**
+ * Check if a range overlaps another range
+ *
+ * @arg {Array} range - A [low, high] range array.
+ * @arg {Array} other - A [low, high] range array to be compared with the first.
+ *
+ * @returns {Boolean} - Indicating that the ranges overlap.
+ */
+function checkRangeOverlap (range, other) {
+    const span = Math.max(range[1], other[1]) - Math.min(range[0], other[0]);
+
+    return (range[1] - range[0]) + (other[1] - other[0]) >= span;
+}
+
+/**
+ * Get an array that describes the overlap of two ranges.
+ *
+ * @arg {Array} range - A [low, high] range array.
+ * @arg {Array} other - A [low, high] range array to be compared with the first.
+ *
+ * @returns {(Array|Boolean)} - Returns false if the ranges aren't overlapping.
+ * For overlapping ranges, a length-2 array describing the nature of the overlap
+ * is returned. The overlap array describes the position of the second range in
+ * terms of how many steps inward (negative) or outward (positive) its sides are
+ * relative to the first range.
+ *
+ *  ++45678
+ *  234---- => getOverlapArray([4, 8], [2, 4]) = [2, -4]
+ *
+ *  45678
+ *  45---   => getOverlapArray([4, 8], [4, 5]) = [0, -3]
+ *
+ *  45678
+ *  -56--   => getOverlapArray([4, 8], [5, 6]) = [-1, -2]
+ *
+ *  45678
+ *  --678   => getOverlapArray([4, 8], [6, 8]) = [-2, 0]
+ *
+ *  456++
+ *  --678   => getOverlapArray([4, 6], [6, 8]) = [-2, 2]
+ *
+ * +++456++
+ * 12345678 => getOverlapArray([4, 6], [1, 8]) = [3, 2]
+ ^
+ * 12345678
+ * ---456-- => getOverlapArray([1, 8], [4, 6]) = [-3, -2]
+ */
+function getOverlapArray (range, other) {
+    if (!checkRangeOverlap(range, other)) {
+        return false;
+    }
+
+    return [range[0] - other[0], other[1] - range[1]];
+}
 
 function SlidingWindowService ($q) {
     this.init = (storage, api) => {
@@ -25,20 +75,6 @@ function SlidingWindowService ($q) {
             append,
             shift,
             pop
-        };
-
-        this.commands = {
-            [TAIL_ADDITION]: this.pushFront,
-            [HEAD_ADDITION]: this.pushBack,
-            [TAIL_DELETION]: this.popFront,
-            [HEAD_DELETION]: this.popBack
-        };
-
-        this.vectors = {
-            [TAIL_ADDITION]: [0, 1],
-            [HEAD_ADDITION]: [-1, 0],
-            [TAIL_DELETION]: [0, -1],
-            [HEAD_DELETION]: [1, 0],
         };
 
         this.records = {};
@@ -80,11 +116,11 @@ function SlidingWindowService ($q) {
         }
 
         const max = this.getTailCounter();
-        const min = Math.max(this.getHeadCounter(), max - count);
+        const min = max - count;
 
         let lines = 0;
 
-        for (let i = min; i <= max; ++i) {
+        for (let i = max; i >= min; --i) {
             if (this.records[i]) {
                 lines += (this.records[i].end_line - this.records[i].start_line);
             }
@@ -92,7 +128,7 @@ function SlidingWindowService ($q) {
 
         return this.storage.pop(lines)
             .then(() => {
-                for (let i = min; i <= max; ++i) {
+                for (let i = max; i >= min; --i) {
                     delete this.records[i];
                 }
 
@@ -106,11 +142,11 @@ function SlidingWindowService ($q) {
         }
 
         const min = this.getHeadCounter();
-        const max = Math.min(this.getTailCounter(), min + count);
+        const max = min + count;
 
         let lines = 0;
 
-        for (let i = min; i <= max; ++i) {
+        for (let i = min; i <= min + count; ++i) {
             if (this.records[i]) {
                 lines += (this.records[i].end_line - this.records[i].start_line);
             }
@@ -144,66 +180,40 @@ function SlidingWindowService ($q) {
             return $q.resolve([0, 0]);
         }
 
-        const additions = [];
-        const deletions = [];
+        const overlap = getOverlapArray([head, tail], [newHead, newTail]);
 
-        for (let counter = tail + 1; counter <= newTail; counter++) {
-            additions.push([counter, TAIL_ADDITION]);
+        if (!overlap) {
+            this.chain = this.chain
+                .then(() => this.popBack(this.getRecordCount()))
+                .then(() => this.api.getRange([newHead, newTail]))
+                .then(events => this.pushFront(events));
         }
 
-        for (let counter = head - 1; counter >= newHead; counter--) {
-            additions.push([counter, HEAD_ADDITION]);
+        if (overlap && overlap[0] > 0) {
+            const pushBackRange = [head - overlap[0], head];
+
+            this.chain = this.chain
+                .then(() => this.api.getRange(pushBackRange))
+                .then(events => this.pushBack(events));
         }
 
-        for (let counter = head; counter < newHead; counter++) {
-            deletions.push([counter, HEAD_DELETION]);
+        if (overlap && overlap[1] > 0) {
+            const pushFrontRange = [tail, tail + overlap[1]];
+
+            this.chain = this.chain
+                .then(() => this.api.getRange(pushFrontRange))
+                .then(events => this.pushFront(events));
         }
 
-        for (let counter = tail; counter > newTail; counter--) {
-            deletions.push([counter, TAIL_DELETION]);
+        if (overlap && overlap[0] < 0) {
+            this.chain = this.chain.then(() => this.popBack(Math.abs(overlap[0])));
         }
 
-        const hasCounter = (items, n) => items
-            .filter(([counter]) => counter === n).length !== 0;
-
-        const commandRange = {
-            [TAIL_DELETION]: 0,
-            [HEAD_DELETION]: 0,
-            [TAIL_ADDITION]: [tail, tail],
-            [HEAD_ADDITION]: [head, head],
-        };
-
-        deletions.forEach(([counter, key]) => {
-            if (!hasCounter(additions, counter)) {
-                commandRange[key] += 1;
-            }
-
-            commandRange[TAIL_ADDITION][0] += this.vectors[key][0];
-            commandRange[TAIL_ADDITION][1] += this.vectors[key][1];
-
-            commandRange[HEAD_ADDITION][0] += this.vectors[key][0];
-            commandRange[HEAD_ADDITION][1] += this.vectors[key][1];
-        });
-
-        additions.forEach(([counter, key]) => {
-            if (!hasCounter(deletions, counter)) {
-                if (counter < commandRange[key][0]) {
-                    commandRange[key][0] = counter;
-                }
-
-                if (counter > commandRange[key][1]) {
-                    commandRange[key][1] = counter;
-                }
-            }
-        });
+        if (overlap && overlap[1] < 0) {
+            this.chain = this.chain.then(() => this.popFront(Math.abs(overlap[1])));
+        }
 
         this.chain = this.chain
-            .then(() => this.commands[TAIL_DELETION](commandRange[TAIL_DELETION]))
-            .then(() => this.commands[HEAD_DELETION](commandRange[HEAD_DELETION]))
-            .then(() => this.api.getRange(commandRange[TAIL_ADDITION]))
-            .then(events => this.commands[TAIL_ADDITION](events))
-            .then(() => this.api.getRange(commandRange[HEAD_ADDITION]))
-            .then(events => this.commands[HEAD_ADDITION](events))
             .then(() => {
                 const range = this.getRange();
                 const displacement = [range[0] - head, range[1] - tail];
@@ -219,7 +229,14 @@ function SlidingWindowService ($q) {
 
         const tailRoom = this.getMaxCounter() - tail;
         const tailDisplacement = Math.min(tailRoom, displacement);
-        const headDisplacement = Math.min(tailRoom, displacement);
+
+        const newTail = tail + tailDisplacement;
+
+        let headDisplacement = 0;
+
+        if (newTail - head > EVENT_LIMIT) {
+            headDisplacement = (newTail - EVENT_LIMIT) - head;
+        }
 
         return this.move([head + headDisplacement, tail + tailDisplacement]);
     };
@@ -229,9 +246,16 @@ function SlidingWindowService ($q) {
 
         const headRoom = head - 1;
         const headDisplacement = Math.min(headRoom, displacement);
-        const tailDisplacement = Math.min(headRoom, displacement);
 
-        return this.move([head - headDisplacement, tail - tailDisplacement]);
+        const newHead = head - headDisplacement;
+
+        let tailDisplacement = 0;
+
+        if (tail - newHead > EVENT_LIMIT) {
+            tailDisplacement = tail - (newHead + EVENT_LIMIT);
+        }
+
+        return this.move([newHead, tail - tailDisplacement]);
     };
 
     this.moveHead = displacement => {
@@ -257,7 +281,7 @@ function SlidingWindowService ($q) {
 
         if (count > 0) {
             this.chain = this.chain
-                .then(() => this.commands[HEAD_DELETION](count));
+                .then(() => this.popBack(count));
         }
 
         return this.chain;
@@ -265,12 +289,12 @@ function SlidingWindowService ($q) {
 
     this.getFirst = () => this.clear()
         .then(() => this.api.getFirst())
-        .then(events => this.commands[TAIL_ADDITION](events))
+        .then(events => this.pushFront(events))
         .then(() => this.moveTail(PAGE_SIZE));
 
     this.getLast = () => this.clear()
         .then(() => this.api.getLast())
-        .then(events => this.commands[HEAD_ADDITION](events))
+        .then(events => this.pushBack(events))
         .then(() => this.moveHead(-PAGE_SIZE));
 
     this.getTailCounter = () => {

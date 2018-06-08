@@ -127,7 +127,7 @@ function compile (html) {
 
 function follow () {
     scroll.pause();
-    scroll.hide();
+    // scroll.hide();
 
     following = true;
 }
@@ -135,7 +135,7 @@ function follow () {
 function unfollow () {
     following = false;
 
-    scroll.unhide();
+    // scroll.unhide();
     scroll.resume();
 }
 

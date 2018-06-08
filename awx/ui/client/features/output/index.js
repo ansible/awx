@@ -25,7 +25,6 @@ const PAGE_CACHE = true;
 const PAGE_LIMIT = 5;
 const PAGE_SIZE = 50;
 const ORDER_BY = 'counter';
-// const ORDER_BY = 'start_line';
 const WS_PREFIX = 'ws';
 
 function resolveResource (
