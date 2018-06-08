@@ -466,7 +466,7 @@ class RelatedJobsMixin(object):
         return self._get_related_jobs().filter(status__in=ACTIVE_STATES)
 
     '''
-    Returns [{'id': '1', 'type': 'job'}, {'id': 2, 'type': 'project_update'}, ...]
+    Returns [{'id': 1, 'type': 'job'}, {'id': 2, 'type': 'project_update'}, ...]
     '''
     def get_active_jobs(self):
         UnifiedJob = apps.get_model('main', 'UnifiedJob')
@@ -475,5 +475,5 @@ class RelatedJobsMixin(object):
         if not isinstance(jobs, QuerySet):
             raise RuntimeError("Programmer error. Expected _get_active_jobs() to return a QuerySet.")
 
-        return [dict(id=str(t[0]), type=mapping[t[1]]) for t in jobs.values_list('id', 'polymorphic_ctype_id')]
+        return [dict(id=t[0], type=mapping[t[1]]) for t in jobs.values_list('id', 'polymorphic_ctype_id')]
 
