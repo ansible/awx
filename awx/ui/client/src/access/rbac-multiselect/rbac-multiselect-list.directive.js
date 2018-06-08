@@ -88,6 +88,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
                     break;
                 case 'Users':
+                    list.querySet = { order_by: 'username', page_size: '5' };
                     list.fields = {
                         username: list.fields.username,
                         first_name: list.fields.first_name,
@@ -161,10 +162,11 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             function optionsRequestDataProcessing(){
                 if(scope.list.name === 'users'){
                     if (scope[list.name] !== undefined) {
+                        scope[`${list.iterator}_queryset`] = list.querySet;
                         scope[list.name].forEach(function(item, item_idx) {
                             var itm = scope[list.name][item_idx];
                             if(itm.summary_fields.user_capabilities.edit){
-                                // undefined doesn't render the tooltip, 
+                                // undefined doesn't render the tooltip,
                                 // which is intended here.
                                 itm.tooltip = undefined;
                             }
