@@ -643,22 +643,7 @@ export default
                     data.ask_credential_on_launch = $scope.ask_credential_on_launch ? $scope.ask_credential_on_launch : false;
                     data.job_tags = (Array.isArray($scope.job_tags)) ? $scope.job_tags.join() : "";
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ? $scope.skip_tags.join() : "";
-                    if ($scope.selectedCredentials && $scope.selectedCredentials
-                        .machine && $scope.selectedCredentials
-                            .machine.id) {
-                                data.credential = $scope.selectedCredentials
-                                    .machine.id;
-                    } else {
-                        data.credential = null;
-                    }
-                    if ($scope.selectedCredentials && $scope.selectedCredentials
-                        .vault && $scope.selectedCredentials
-                            .vault.id) {
-                                data.vault_credential = $scope.selectedCredentials
-                                    .vault.id;
-                    } else {
-                        data.vault_credential = null;
-                    }
+
                     data.extra_vars = ToJSON($scope.parseType,
                         $scope.extra_vars, true);
 
@@ -699,13 +684,8 @@ export default
                     data.job_tags = (Array.isArray($scope.job_tags)) ? _.uniq($scope.job_tags).join() : "";
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ?  _.uniq($scope.skip_tags).join() : "";
 
-                    // drop legacy 'credential' and 'vault_credential' keys from the update request as they will
-                    // be provided to the related credentials endpoint by the template save success handler.
-                    delete data.credential;
-                    delete data.vault_credential;
-
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
-                    Rest.put(data)
+                    Rest.patch(data)
                         .then(({data}) => {
                             $scope.$emit('templateSaveSuccess', data);
                         })
