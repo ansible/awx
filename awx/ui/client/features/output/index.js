@@ -106,6 +106,7 @@ function resolveResource (
             ws: {
                 events: `${WS_PREFIX}-${key}-${id}`,
                 status: `${WS_PREFIX}-${name}`,
+                summary: `${WS_PREFIX}-${name}-summary`,
             },
             page: {
                 cache: PAGE_CACHE,
