@@ -516,7 +516,7 @@ function getExtraVarsDetails () {
 }
 
 function getLabelDetails () {
-    const jobLabels = _.get(resource.model.get('related.labels'), 'results', []);
+    const jobLabels = _.get(resource.model.get('summary_fields.labels'), 'results', []);
 
     if (jobLabels.length < 1) {
         return null;

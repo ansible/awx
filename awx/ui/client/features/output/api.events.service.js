@@ -17,7 +17,7 @@ function JobEventsApiService ($http, $q) {
         this.state = { current: 0, count: 0 };
     };
 
-    this.fetch = () => this.getFirst().then(() => this);
+    this.fetch = () => this.getLast().then(() => this);
 
     this.getFirst = () => {
         const page = 1;

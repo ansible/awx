@@ -19,17 +19,12 @@ function postRelaunch (params) {
     return $http(req);
 }
 
-function getStats () {
-    return Promise.resolve(null);
-}
-
 function AdHocCommandModel (method, resource, config) {
     BaseModel.call(this, 'ad_hoc_commands');
 
     this.Constructor = AdHocCommandModel;
     this.postRelaunch = postRelaunch.bind(this);
     this.getRelaunch = getRelaunch.bind(this);
-    this.getStats = getStats.bind(this);
 
     return this.create(method, resource, config);
 }

@@ -26,19 +26,20 @@ const PAGE_LIMIT = 5;
 const PAGE_SIZE = 50;
 const ORDER_BY = 'counter';
 const WS_PREFIX = 'ws';
+const API_ROOT = '/api/v2/';
 
 function resolveResource (
     $state,
+    $stateParams,
     Job,
     ProjectUpdate,
     AdHocCommand,
     SystemJob,
     WorkflowJob,
     InventoryUpdate,
-    $stateParams,
     qs,
     Wait,
-    eventsApi,
+    Events,
 ) {
     const { id, type, handleErrors } = $stateParams;
     const { job_event_search } = $stateParams; // eslint-disable-line camelcase
@@ -46,24 +47,28 @@ function resolveResource (
     const { name, key } = getWebSocketResource(type);
 
     let Resource;
-    let related = 'events';
+    let related;
 
     switch (type) {
         case 'project':
             Resource = ProjectUpdate;
+            related = `project_updates/${id}/events/`;
             break;
         case 'playbook':
             Resource = Job;
-            related = 'job_events';
+            related = `jobs/${id}/job_events/`;
             break;
         case 'command':
             Resource = AdHocCommand;
+            related = `ad_hoc_commands/${id}/events/`;
             break;
         case 'system':
             Resource = SystemJob;
+            related = `system_jobs/${id}/events/`;
             break;
         case 'inventory':
             Resource = InventoryUpdate;
+            related = `inventory_updates/${id}/events/`;
             break;
         // case 'workflow':
             // todo: integrate workflow chart components into this view
@@ -89,30 +94,15 @@ function resolveResource (
         Object.assign(config.params, query);
     }
 
-    let model;
+    Events.init(`${API_ROOT}${related}`, config.params);
 
     Wait('start');
-    const resourcePromise = new Resource(['get', 'options'], [id, id])
-        .then(job => {
-            const endpoint = `${job.get('url')}${related}/`;
-            eventsApi.init(endpoint, config.params);
-
-            const promises = [job.getStats(), eventsApi.fetch()];
-
-            if (job.has('related.labels')) {
-                promises.push(job.extend('get', 'labels'));
-            }
-
-            model = job;
-            return Promise.all(promises);
-        })
-        .then(([stats, events]) => ({
+    const promise = Promise.all([new Resource(['get', 'options'], [id, id]), Events.fetch()])
+        .then(([model, events]) => ({
             id,
             type,
-            stats,
             model,
             events,
-            related,
             ws: {
                 events: `${WS_PREFIX}-${key}-${id}`,
                 status: `${WS_PREFIX}-${name}`,
@@ -125,13 +115,14 @@ function resolveResource (
         }));
 
     if (!handleErrors) {
-        return resourcePromise
+        return promise
             .finally(() => Wait('stop'));
     }
 
-    return resourcePromise
+    return promise
         .catch(({ data, status }) => {
             qs.error(data, status);
+
             return $state.go($state.current, $state.params, { reload: true });
         })
         .finally(() => Wait('stop'));
@@ -218,13 +209,13 @@ function JobsRun ($stateRegistry, $filter, strings) {
             ],
             resource: [
                 '$state',
+                '$stateParams',
                 'JobModel',
                 'ProjectUpdateModel',
                 'AdHocCommandModel',
                 'SystemJobModel',
                 'WorkflowJobModel',
                 'InventoryUpdateModel',
-                '$stateParams',
                 'QuerySet',
                 'Wait',
                 'JobEventsApiService',

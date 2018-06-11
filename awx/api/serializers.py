@@ -1419,6 +1419,48 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
         return res
 
 
+class ProjectUpdateDetailSerializer(ProjectUpdateSerializer):
+
+    host_status_counts = serializers.SerializerMethodField(
+        help_text=_('A count of hosts uniquely assigned to each status.'),
+    )
+    playbook_counts = serializers.SerializerMethodField(
+        help_text=_('A count of all plays and tasks for the job run.'),
+    )
+
+    class Meta:
+        model = ProjectUpdate
+        fields = ('*', 'host_status_counts', 'playbook_counts',)
+
+    def get_playbook_counts(self, obj):
+        task_count = obj.project_update_events.filter(event='playbook_on_task_start').count()
+        play_count = obj.project_update_events.filter(event='playbook_on_play_start').count()
+
+        data = {'play_count': play_count, 'task_count': task_count}
+
+        return data
+
+    def get_host_status_counts(self, obj):
+        try:
+            event_data = obj.project_update_events.only('event_data').get(event='playbook_on_stats').event_data
+        except ProjectUpdateEvent.DoesNotExist:
+            event_data = {}
+
+        host_status = {}
+        host_status_keys = ['skipped', 'ok', 'changed', 'failures', 'dark']
+
+        for key in host_status_keys:
+            for host in event_data.get(key, {}):
+                host_status[host] = key
+
+        host_status_counts = defaultdict(lambda: 0)
+
+        for value in host_status.values():
+            host_status_counts[value] += 1
+
+        return host_status_counts
+
+
 class ProjectUpdateListSerializer(ProjectUpdateSerializer, UnifiedJobListSerializer):
 
     pass
