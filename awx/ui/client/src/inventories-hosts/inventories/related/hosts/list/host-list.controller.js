@@ -112,7 +112,7 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
 
                 let reloadListStateParams = null;
 
-                if($scope.hosts.length === 1 && $state.params.host_search && !_.isEmpty($state.params.host_search.page) && $state.params.host_search.page !== '1') {
+                if($scope.hosts.length === 1 && $state.params.host_search && _.has($state, 'params.host_search.page') && $state.params.host_search.page !== '1') {
                     reloadListStateParams = _.cloneDeep($state.params);
                     reloadListStateParams.host_search.page = (parseInt(reloadListStateParams.host_search.page)-1).toString();
                 }

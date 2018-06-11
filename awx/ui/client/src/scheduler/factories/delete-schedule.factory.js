@@ -28,7 +28,7 @@ export default
 
                         let reloadListStateParams = null;
 
-                        if(scope.schedules.length === 1 && $state.params.schedule_search && !_.isEmpty($state.params.schedule_search.page) && $state.params.schedule_search.page !== '1') {
+                        if(scope.schedules.length === 1 && $state.params.schedule_search && _.has($state, 'params.schedule_search.page') && $state.params.schedule_search.page !== '1') {
                             reloadListStateParams = _.cloneDeep($state.params);
                             reloadListStateParams.schedule_search.page = (parseInt(reloadListStateParams.schedule_search.page)-1).toString();
                         }

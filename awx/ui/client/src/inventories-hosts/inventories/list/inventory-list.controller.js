@@ -153,7 +153,7 @@ function InventoriesList($scope,
         if (data.status === 'deleted') {
             let reloadListStateParams = null;
 
-            if($scope.inventories.length === 1 && $state.params.inventory_search && !_.isEmpty($state.params.inventory_search.page) && $state.params.inventory_search.page !== '1') {
+            if($scope.inventories.length === 1 && $state.params.inventory_search && _.has($state, 'params.inventory_search.page') && $state.params.inventory_search.page !== '1') {
                 reloadListStateParams = _.cloneDeep($state.params);
                 reloadListStateParams.inventory_search.page = (parseInt(reloadListStateParams.inventory_search.page)-1).toString();
             }

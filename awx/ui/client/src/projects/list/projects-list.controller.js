@@ -198,7 +198,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
 
                         let reloadListStateParams = null;
 
-                        if($scope.projects.length === 1 && $state.params.project_search && !_.isEmpty($state.params.project_search.page) && $state.params.project_search.page !== '1') {
+                        if($scope.projects.length === 1 && $state.params.project_search && _.has($state, 'params.project_search.page') && $state.params.project_search.page !== '1') {
                             reloadListStateParams = _.cloneDeep($state.params);
                             reloadListStateParams.project_search.page = (parseInt(reloadListStateParams.project_search.page)-1).toString();
                         }

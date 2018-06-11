@@ -73,7 +73,7 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
 
                         let reloadListStateParams = null;
 
-                        if($scope.inventory_scripts.length === 1 && $state.params.inventory_script_search && !_.isEmpty($state.params.inventory_script_search.page) && $state.params.inventory_script_search.page !== '1') {
+                        if($scope.inventory_scripts.length === 1 && $state.params.inventory_script_search && _.has($state, 'params.inventory_script_search.page') && $state.params.inventory_script_search.page !== '1') {
                             reloadListStateParams = _.cloneDeep($state.params);
                             reloadListStateParams.inventory_script_search.page = (parseInt(reloadListStateParams.inventory_script_search.page)-1).toString();
                         }

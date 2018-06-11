@@ -102,12 +102,11 @@ function ListJobsController (
                     let reloadListStateParams = null;
 
                     if ($scope.jobs.length === 1 && $state.params.job_search &&
-                    !_.isEmpty($state.params.job_search.page) &&
+                    _.has($state, 'params.job_search.page') &&
                     $state.params.job_search.page !== '1') {
-                        const page = `${(parseInt(reloadListStateParams
-                            .job_search.page, 10) - 1)}`;
                         reloadListStateParams = _.cloneDeep($state.params);
-                        reloadListStateParams.job_search.page = page;
+                        reloadListStateParams.job_search.page =
+                        (parseInt(reloadListStateParams.job_search.page, 10) - 1).toString();
                     }
 
                     $state.go('.', reloadListStateParams, { reload: true });

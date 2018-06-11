@@ -164,7 +164,7 @@ function ListTemplatesController(
 
         return html;
     };
-    
+
     vm.buildCredentialTags = (credentials) => {
         return credentials.map(credential => {
             const icon = `${credential.kind}`;
@@ -265,7 +265,7 @@ function ListTemplatesController(
         const { page } = _.get($state.params, 'template_search');
         let reloadListStateParams = null;
 
-        if ($scope.templates.length === 1 && !_.isEmpty(page) && page !== '1') {
+        if ($scope.templates.length === 1 && page && page !== '1') {
             reloadListStateParams = _.cloneDeep($state.params);
             const pageNumber = (parseInt(reloadListStateParams.template_search.page, 0) - 1);
             reloadListStateParams.template_search.page = pageNumber.toString();
