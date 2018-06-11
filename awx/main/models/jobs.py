@@ -774,9 +774,13 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             if not os.path.realpath(filepath).startswith(destination):
                 system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue
-            with codecs.open(filepath, 'w', encoding='utf-8') as f:
-                os.chmod(f.name, 0o600)
-                json.dump(host.ansible_facts, f)
+            try:
+                with codecs.open(filepath, 'w', encoding='utf-8') as f:
+                    os.chmod(f.name, 0o600)
+                    json.dump(host.ansible_facts, f)
+            except IOError:
+                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
+                continue
             # make note of the time we wrote the file so we can check if it changed later
             modification_times[filepath] = os.path.getmtime(filepath)
 
