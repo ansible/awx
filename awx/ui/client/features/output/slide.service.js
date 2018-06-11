@@ -60,7 +60,7 @@ function getOverlapArray (range, other) {
 
 function SlidingWindowService ($q) {
     this.init = (storage, api) => {
-        const { prepend, append, shift, pop } = storage;
+        const { prepend, append, shift, pop, deleteRecord } = storage;
         const { getMaxCounter, getRange, getFirst, getLast } = api;
 
         this.api = {
@@ -74,10 +74,12 @@ function SlidingWindowService ($q) {
             prepend,
             append,
             shift,
-            pop
+            pop,
+            deleteRecord,
         };
 
         this.records = {};
+        this.uuids = {};
         this.chain = $q.resolve();
     };
 
@@ -87,8 +89,9 @@ function SlidingWindowService ($q) {
 
         return this.storage.append(newEvents)
             .then(() => {
-                newEvents.forEach(({ counter, start_line, end_line }) => {
+                newEvents.forEach(({ counter, start_line, end_line, uuid }) => {
                     this.records[counter] = { start_line, end_line };
+                    this.uuids[counter] = uuid;
                 });
 
                 return $q.resolve();
@@ -102,8 +105,9 @@ function SlidingWindowService ($q) {
 
         return this.storage.prepend(newEvents)
             .then(() => {
-                newEvents.forEach(({ counter, start_line, end_line }) => {
+                newEvents.forEach(({ counter, start_line, end_line, uuid }) => {
                     this.records[counter] = { start_line, end_line };
+                    this.uuids[counter] = uuid;
                 });
 
                 return $q.resolve();
@@ -130,6 +134,9 @@ function SlidingWindowService ($q) {
             .then(() => {
                 for (let i = max; i >= min; --i) {
                     delete this.records[i];
+
+                    this.storage.deleteRecord(this.uuids[i]);
+                    delete this.uuids[i];
                 }
 
                 return $q.resolve();
@@ -156,6 +163,9 @@ function SlidingWindowService ($q) {
             .then(() => {
                 for (let i = min; i <= max; ++i) {
                     delete this.records[i];
+
+                    this.storage.deleteRecord(this.uuids[i]);
+                    delete this.uuids[i];
                 }
 
                 return $q.resolve();

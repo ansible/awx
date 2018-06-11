@@ -30,13 +30,13 @@ const re = new RegExp(pattern);
 const hasAnsi = input => re.test(input);
 
 function JobRenderService ($q, $sce, $window) {
-    this.init = ({ compile }) => {
+    this.init = ({ compile, toggles }) => {
         this.parent = null;
         this.record = {};
         this.el = $(ELEMENT_TBODY);
         this.hooks = { compile };
 
-        this.createToggles = false;
+        this.createToggles = toggles;
     };
 
     this.sortByLineNumber = (a, b) => {
@@ -164,6 +164,24 @@ function JobRenderService ($q, $sce, $window) {
         return info;
     };
 
+    this.deleteRecord = uuid => {
+        delete this.record[uuid];
+    };
+
+    this.getParentEvents = (uuid, list) => {
+        list = list || [];
+
+        if (this.record[uuid]) {
+            list.push(uuid);
+
+            if (this.record[uuid].parents) {
+                list = list.concat(this.record[uuid].parents);
+            }
+        }
+
+        return list;
+    };
+
     this.createRow = (current, ln, content) => {
         let id = '';
         let timestamp = '';
@@ -180,7 +198,7 @@ function JobRenderService ($q, $sce, $window) {
         if (current) {
             if (this.createToggles && current.isParent && current.line === ln) {
                 id = current.uuid;
-                tdToggle = `<td class="at-Stdout-toggle" ng-click="vm.toggle('${id}')"><i class="fa fa-angle-down can-toggle"></i></td>`;
+                tdToggle = `<td class="at-Stdout-toggle" ng-click="vm.toggleLineExpand('${id}')"><i class="fa fa-angle-down can-toggle"></i></td>`;
             }
 
             if (current.isHost) {
@@ -224,20 +242,6 @@ function JobRenderService ($q, $sce, $window) {
         const second = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds();
 
         return `${hour}:${minute}:${second}`;
-    };
-
-    this.getParentEvents = (uuid, list) => {
-        list = list || [];
-
-        if (this.record[uuid]) {
-            list.push(uuid);
-
-            if (this.record[uuid].parents) {
-                list = list.concat(this.record[uuid].parents);
-            }
-        }
-
-        return list;
     };
 
     this.remove = elements => this.requestAnimationFrame(() => elements.remove());
