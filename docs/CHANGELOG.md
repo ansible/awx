@@ -67,6 +67,8 @@
   [[#1873](https://github.com/ansible/awx/issues/1873)].
 * Switched authentication to Django sessions.
 * Implemented OAuth2 support for token based authentication [[#21](https://github.com/ansible/awx/issues/21)].
+* Added the ability to forcibly expire sessions through `awx-manage expire_sessions`.
+* Disallowed using HTTP PUT/PATCH methods to modify existing jobs in Job Details API endpoint.
 
 3.2.0
 =====

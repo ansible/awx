@@ -1,14 +1,16 @@
+# Python
 import pytest
 import mock
-
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from crum import impersonate
 
+# Django rest framework
 from rest_framework.exceptions import PermissionDenied
 
+# AWX
 from awx.api.versioning import reverse
 from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
-
 from awx.main.models import (
     JobTemplate,
     User,
@@ -16,8 +18,6 @@ from awx.main.models import (
     AdHocCommand,
     ProjectUpdate,
 )
-
-from crum import impersonate
 
 
 @pytest.mark.django_db
@@ -165,6 +165,33 @@ def test_block_related_unprocessed_events(mocker, organization, project, delete,
     with mock.patch('awx.api.views.now', lambda: time_of_request):
         with pytest.raises(PermissionDenied):
             view.perform_destroy(organization)
+
+
+@pytest.mark.django_db
+def test_disallowed_http_update_methods(put, patch, post, inventory, project, admin_user):
+    jt = JobTemplate.objects.create(
+        name='test_disallowed_methods', inventory=inventory,
+        project=project
+    )
+    job = jt.create_unified_job()
+    post(
+        url=reverse('api:job_detail', kwargs={'pk': job.pk, 'version': 'v2'}),
+        data={},
+        user=admin_user,
+        expect=405
+    )
+    put(
+        url=reverse('api:job_detail', kwargs={'pk': job.pk, 'version': 'v2'}),
+        data={},
+        user=admin_user,
+        expect=405
+    )
+    patch(
+        url=reverse('api:job_detail', kwargs={'pk': job.pk, 'version': 'v2'}),
+        data={},
+        user=admin_user,
+        expect=405
+    )
 
 
 class TestControllerNode():

@@ -1613,12 +1613,12 @@ class OAuth2UserTokenList(SubListCreateAPIView):
     relationship = 'main_oauth2accesstoken'
     parent_key = 'user'
     swagger_topic = 'Authentication'
-        
-        
+
+
 class UserAuthorizedTokenList(SubListCreateAPIView):
 
     view_name = _("OAuth2 User Authorized Access Tokens")
-    
+
     model = OAuth2AccessToken
     serializer_class = UserAuthorizedTokenSerializer
     parent_model = User
@@ -1628,12 +1628,12 @@ class UserAuthorizedTokenList(SubListCreateAPIView):
 
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
-        
+
 
 class OrganizationApplicationList(SubListCreateAPIView):
 
     view_name = _("Organization OAuth2 Applications")
-    
+
     model = OAuth2Application
     serializer_class = OAuth2ApplicationSerializer
     parent_model = Organization
@@ -1643,16 +1643,16 @@ class OrganizationApplicationList(SubListCreateAPIView):
 
 
 class UserPersonalTokenList(SubListCreateAPIView):
-    
+
     view_name = _("OAuth2 Personal Access Tokens")
-    
+
     model = OAuth2AccessToken
     serializer_class = UserPersonalTokenSerializer
     parent_model = User
     relationship = 'main_oauth2accesstoken'
     parent_key = 'user'
     swagger_topic = 'Authentication'
-    
+
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=True, user=self.request.user)
 
@@ -4083,6 +4083,29 @@ class JobDetail(UnifiedJobDeletionMixin, RetrieveUpdateDestroyAPIView):
     model = Job
     metadata_class = JobTypeMetadata
     serializer_class = JobDetailSerializer
+
+    # NOTE: When removing the V1 API in 3.4, delete the following four methods,
+    # and let this class inherit from RetrieveDestroyAPIView instead of
+    # RetrieveUpdateDestroyAPIView.
+    @property
+    def allowed_methods(self):
+        methods = super(JobDetail, self).allowed_methods
+        if get_request_version(getattr(self, 'request', None)) > 1:
+            methods.remove('PUT')
+            methods.remove('PATCH')
+        return methods
+
+    def put(self, request, *args, **kwargs):
+        if get_request_version(self.request) > 1:
+            return Response({"error": _("PUT not allowed for Job Details in version 2 of the API")},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super(JobDetail, self).put(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        if get_request_version(self.request) > 1:
+            return Response({"error": _("PUT not allowed for Job Details in version 2 of the API")},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super(JobDetail, self).patch(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
