@@ -39,7 +39,7 @@ class Command(BaseCommand):
         while True:
             try:
                 pongs = app.control.ping(['celery@{}'.format(socket.gethostname())])
-            except:
+            except Exception:
                 pongs = []
             if len(pongs):
                 sys.stderr.write(str(pongs) + '\n')
