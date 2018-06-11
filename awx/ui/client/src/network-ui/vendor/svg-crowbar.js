@@ -30,7 +30,7 @@ function svg_crowbar () {
           documents.push(el.contentDocument);
         }
       } catch(err) {
-        console.log(err);
+        controller.log.debug(err);
       }
     });
 
@@ -40,7 +40,7 @@ function svg_crowbar () {
           documents.push(el.contentDocument);
         }
       } catch(err) {
-        console.log(err);
+        controller.log.debug(err);
       }
     });
 
@@ -124,7 +124,7 @@ function svg_crowbar () {
       button.textContent = "Download";
 
       button.onclick = function() {
-        // console.log(el, d, i, sources)
+        // controller.log.debug(el, d, i, sources)
         download(d);
       };
 
