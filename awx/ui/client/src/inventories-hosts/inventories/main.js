@@ -252,7 +252,6 @@ angular.module('inventory', [
 
                 let addSourceCredential = _.cloneDeep(inventorySourcesCredentialRoute);
                 addSourceCredential.name = 'inventories.edit.inventory_sources.add.credential';
-                addSourceCredential.url = '/credential';
 
                 let addSourceInventoryScript = _.cloneDeep(inventorySourcesInventoryScriptRoute);
                 addSourceInventoryScript.name = 'inventories.edit.inventory_sources.add.inventory_script';
@@ -260,7 +259,6 @@ angular.module('inventory', [
 
                 let editSourceCredential = _.cloneDeep(inventorySourcesCredentialRoute);
                 editSourceCredential.name = 'inventories.edit.inventory_sources.edit.credential';
-                editSourceCredential.url = '/credential';
 
                 let addSourceProject = _.cloneDeep(inventorySourcesProjectRoute);
                 addSourceProject.name = 'inventories.edit.inventory_sources.add.project';
