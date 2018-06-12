@@ -532,8 +532,8 @@ class UserAccess(BaseAccess):
         return not self.user_membership_roles(u).exists()
 
     @check_superuser
-    def can_admin(self, obj, data, allow_orphans=False):
-        if not settings.MANAGE_ORGANIZATION_AUTH:
+    def can_admin(self, obj, data, allow_orphans=False, check_setting=True):
+        if check_setting and (not settings.MANAGE_ORGANIZATION_AUTH):
             return False
         if obj.is_superuser or obj.is_system_auditor:
             # must be superuser to admin users with system roles
@@ -1066,7 +1066,7 @@ class CredentialAccess(BaseAccess):
             return True
         if data and data.get('user', None):
             user_obj = get_object_from_data('user', User, data)
-            return check_user_access(self.user, User, 'change', user_obj, None)
+            return bool(self.user == user_obj or UserAccess(self.user).can_admin(user_obj, None, check_setting=False))
         if data and data.get('team', None):
             team_obj = get_object_from_data('team', Team, data)
             return check_user_access(self.user, Team, 'change', team_obj, None)
