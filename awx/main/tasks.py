@@ -209,19 +209,19 @@ def handle_ha_toplogy_changes(self):
     logger.debug(six.text_type("Reconfigure celeryd queues task on host {}").format(self.request.hostname))
     awx_app = Celery('awx')
     awx_app.config_from_object('django.conf:settings')
-    instances, removed_queues, added_queues = register_celery_worker_queues(awx_app, self.request.hostname)
+    removed_queues, added_queues = register_celery_worker_queues(awx_app, self.request.hostname)
     if len(removed_queues) + len(added_queues) > 0:
-        logger.info(six.text_type("Workers on tower node(s) '{}' removed from queues {} and added to queues {}")
-                    .format([i.hostname for i in instances], removed_queues, added_queues))
+        logger.info(six.text_type("Workers on tower node '{}' removed from queues {} and added to queues {}")
+                    .format(self.request.hostname, removed_queues, added_queues))
 
 
 @worker_ready.connect
 def handle_ha_toplogy_worker_ready(sender, **kwargs):
     logger.debug(six.text_type("Configure celeryd queues task on host {}").format(sender.hostname))
-    instances, removed_queues, added_queues = register_celery_worker_queues(sender.app, sender.hostname)
+    removed_queues, added_queues = register_celery_worker_queues(sender.app, sender.hostname)
     if len(removed_queues) + len(added_queues) > 0:
-        logger.info(six.text_type("Workers on tower node(s) '{}' removed from queues {} and added to queues {}")
-                    .format([i.hostname for i in instances], removed_queues, added_queues))
+        logger.info(six.text_type("Workers on tower node '{}' removed from queues {} and added to queues {}")
+                    .format(sender.hostname, removed_queues, added_queues))
 
     # Expedite the first hearbeat run so a node comes online quickly.
     cluster_node_heartbeat.apply([])
