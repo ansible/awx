@@ -67,6 +67,7 @@ def test_org_user_role_attach(user, organization, inventory):
 
     role_access = RoleAccess(admin)
     assert not role_access.can_attach(organization.member_role, nonmember, 'members', None)
+    assert not role_access.can_attach(organization.notification_admin_role, nonmember, 'members', None)
     assert not role_access.can_attach(organization.admin_role, nonmember, 'members', None)
 
 
