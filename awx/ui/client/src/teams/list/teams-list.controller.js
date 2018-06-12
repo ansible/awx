@@ -53,7 +53,7 @@ export default ['$scope', 'Rest', 'TeamList', 'Prompt',
 
                         let reloadListStateParams = null;
 
-                        if($scope.teams.length === 1 && $state.params.team_search && !_.isEmpty($state.params.team_search.page) && $state.params.team_search.page !== '1') {
+                        if($scope.teams.length === 1 && $state.params.team_search && _.has($state, 'params.team_search.page') && $state.params.team_search.page !== '1') {
                             reloadListStateParams = _.cloneDeep($state.params);
                             reloadListStateParams.team_search.page = (parseInt(reloadListStateParams.team_search.page)-1).toString();
                         }

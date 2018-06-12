@@ -68,7 +68,7 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
 
                         let reloadListStateParams = null;
 
-                        if($scope.credential_types.length === 1 && $state.params.credential_type_search && !_.isEmpty($state.params.credential_type_search.page) && $state.params.credential_type_search.page !== '1') {
+                        if($scope.credential_types.length === 1 && $state.params.credential_type_search && _.has($state, 'params.credential_type_search.page') && $state.params.credential_type_search.page !== '1') {
                             reloadListStateParams = _.cloneDeep($state.params);
                             reloadListStateParams.credential_type_search.page = (parseInt(reloadListStateParams.credential_type_search.page)-1).toString();
                         }

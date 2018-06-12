@@ -66,10 +66,17 @@ export default ['$scope', '$filter', '$state', 'Alert', 'resolvedModels', 'Datas
         };
 
         function handleSuccessfulDelete(instance_group) {
+            let reloadListStateParams = null;
+
+            if($scope.instance_groups.length === 1 && $state.params.instance_group_search && _.has($state, 'params.instance_group_search.page') && $state.params.instance_group_search.page !== '1') {
+                reloadListStateParams = _.cloneDeep($state.params);
+                reloadListStateParams.instance_group_search.page = (parseInt(reloadListStateParams.instance_group_search.page)-1).toString();
+            }
+
             if (parseInt($state.params.instance_group_id, 0) === instance_group.id) {
-                $state.go('instanceGroups', $state.params, { reload: true });
+                $state.go('instanceGroups', reloadListStateParams, { reload: true });
             } else {
-                $state.go('.', $state.params, { reload: true });
+                $state.go('.', reloadListStateParams, { reload: true });
             }
         }
 
