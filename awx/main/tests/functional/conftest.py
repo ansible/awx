@@ -563,7 +563,9 @@ def _request(verb):
                                 response.data[key] = str(value)
                     except Exception:
                         response.data = data_copy
-            assert response.status_code == expect
+            assert response.status_code == expect, 'Response data: {}'.format(
+                getattr(response, 'data', None)
+            )
         if hasattr(response, 'render'):
             response.render()
         __SWAGGER_REQUESTS__.setdefault(request.path, {})[

@@ -394,3 +394,43 @@ def test_inventory_source_invalid_deprecated_credential(patch, admin, ec2_source
     url = reverse('api:inventory_source_detail', kwargs={'pk': ec2_source.pk})
     resp = patch(url, {'credential': 999999}, admin, expect=400)
     assert 'Credential 999999 does not exist' in resp.content
+
+
+@pytest.mark.django_db
+def test_deprecated_credential_activity_stream(patch, admin_user, machine_credential, job_template):
+    job_template.credentials.add(machine_credential)
+    starting_entries = job_template.activitystream_set.count()
+    # no-op patch
+    patch(
+        job_template.get_absolute_url(),
+        admin_user,
+        data={'credential': machine_credential.pk},
+        expect=200
+    )
+    # no-op should not produce activity stream entries
+    assert starting_entries == job_template.activitystream_set.count()
+
+
+@pytest.mark.django_db
+def test_multi_vault_preserved_on_put(get, put, admin_user, job_template, vault_credential):
+    '''
+    A PUT request will necessarily specify deprecated fields, but if the deprecated
+    field is a singleton while the `credentials` relation has many, that makes
+    it very easy to drop those credentials not specified in the PUT data
+    '''
+    vault2 = Credential.objects.create(
+        name='second-vault',
+        credential_type=vault_credential.credential_type,
+        inputs={'vault_password': 'foo', 'vault_id': 'foo'}
+    )
+    job_template.credentials.add(vault_credential, vault2)
+    assert job_template.credentials.count() == 2  # sanity check
+    r = get(job_template.get_absolute_url(), admin_user, expect=200)
+    # should be a no-op PUT request
+    put(
+        job_template.get_absolute_url(),
+        admin_user,
+        data=r.data,
+        expect=200
+    )
+    assert job_template.credentials.count() == 2
