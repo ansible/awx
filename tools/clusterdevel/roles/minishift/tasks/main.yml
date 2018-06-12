@@ -1,0 +1,85 @@
+---
+- name: Apply admin user addon
+  shell: minishift addon apply admin-user
+
+- name: Attach AWX dev tree volume locally
+  shell:  "minishift hostfolder add -t sshfs --source {{ devtree_directory }} --target /mnt/sda1/awx awx"
+  register: hostfolderadd
+  ignore_errors: yes
+
+- name: Fail if hostfolder add issue was something other than already attached
+  fail: msg="There was an issue attaching hostfolder '{{ hostfolderadd.stdout }}' '{{ hostfolderadd.stderr }}'"
+  when: hostfolderadd.rc != 0 and "there is already a host folder" not in hostfolderadd.stderr
+
+- name: Mount AWX dev volume
+  shell: minishift hostfolder mount awx
+
+- name: Authenticate with OpenShift via token
+  shell: "oc login -u admin -p admin"
+
+- name: Get Project Detail
+  shell: "oc get project {{ awx_dev_project }}"
+  register: project_details
+  ignore_errors: yes
+
+- name: Get Postgres Service Detail
+  shell: "oc describe svc postgresql -n {{ awx_dev_project }}"
+  register: postgres_svc_details
+  ignore_errors: yes
+
+- name: Create AWX Openshift Project
+  shell: "oc new-project {{ awx_dev_project }}"
+  when: project_details.rc != 0
+
+- name: Stage serviceacct.yml
+  template:
+    src: serviceacct.yml.j2
+    dest: /tmp/serviceacct.yml
+
+- name: Apply svc account
+  shell: "oc apply -f /tmp/serviceacct.yml ; rm -rf /tmp/serviceaccount.yml"
+
+- name: Stage hostfolderpvc.yml
+  template:
+    src: hostfolderpvc.yml.j2
+    dest: /tmp/hostfolderpvc.yml
+
+- name: Create PV for host folder
+  shell: "oc apply -f /tmp/hostfolderpvc.yml ; rm -rf /tmp/hostfolderpvc.yml"
+
+- name: Stage volumeclaim.yml
+  template:
+    src: volumeclaim.yml.j2
+    dest: /tmp/volumeclaim.yml
+
+- name: Create PV for host folder
+  shell: "oc apply -f /tmp/volumeclaim.yml ; rm -rf /tmp/volumeclaim.yml"
+
+- name: Create privileged user service account awx
+  shell: "oc adm policy add-scc-to-user privileged system:serviceaccount:{{ awx_dev_project }}:awx"
+
+- name: Deploy and Activate Postgres
+  shell: "oc new-app --template=postgresql-persistent -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi -e NAMESPACE=openshift -e DATABASE_SERVICE_NAME=postgresql  -e POSTGRESQL_USER={{ pg_username|default('awx') }} -e POSTGRESQL_PASSWORD={{ pg_password|default('awx') }} -e POSTGRESQL_DATABASE={{ pg_database|default('awx') }} -e VOLUME_CAPACITY={{ pg_volume_capacity|default('5')}}Gi -e POSTGRESQL_VERSION=9.5 -n {{ awx_dev_project }}"
+  when: postgres_svc_details is defined and postgres_svc_details.rc != 0
+  register: openshift_pg_activate
+
+- name: Wait for Postgres to activate
+  pause:
+    seconds: 15
+  when: openshift_pg_activate|changed
+
+- name: Template configmap
+  template:
+    src: configmap.yml.j2
+    dest: "/tmp/configmap.yml"
+
+- name: Create configmap
+  shell: "oc apply -f /tmp/configmap.yml ; rm -rf /tmp/configmap.yml"
+
+- name: Template deployment
+  template:
+    src: hostdev.yml.j2
+    dest: "/tmp/hostdev.yml"
+
+- name: Create deployment
+  shell: "oc apply -f /tmp/hostdev.yml ; rm -rf /tmp/hostdev.yml"

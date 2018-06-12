@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1beta1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: awx
+  namespace: {{ awx_dev_project }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: awx
+    spec:
+      serviceAccountName: awx
+      containers:
+        - image: ansible/awx-dev:latest
+          name: awx
+          command: ["/awx_devel/tools/clusterdevel/bootstrap_minishift.sh"]
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: localdev
+              mountPath: /awx_devel
+            - name: awx-application-config
+              mountPath: /etc/tower
+        - name: awx-rabbit
+          image: ansible/awx_rabbitmq:latest
+          imagePullPolicy: Always
+          env:
+            # For consupmption by rabbitmq-env.conf
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: RABBITMQ_USE_LONGNAME
+              value: "true"
+            - name: ERLANG_COOKIE
+              value: "test"
+            - name: RABBITMQ_ERLANG_COOKIE
+              value: "cookiemonster"
+            - name: RABBITMQ_NODENAME
+              value: "rabbit@$(MY_POD_IP)"
+            - name: AUTOCLUSTER_TYPE
+              value: "etcd"
+            - name: AUTOCLUSTER_DELAY
+              value: "60"
+            - name: ETCD_HOST
+              value: "etcd"
+            - name: AUTOCLUSTER_CLEANUP
+              value: "true"
+            - name: CLEANUP_WARN_ONLY
+              value: "false"
+            - name: CLEANUP_INTERVAL
+              value: "30"
+            - name: RABBITMQ_DEFAULT_USER
+              value: "awx"
+            - name: RABBITMQ_DEFAULT_PASS
+              value: "abcdefg"
+            - name: RABBITMQ_DEFAULT_VHOST
+              value: "awx"
+            - name: RABBITMQ_CONFIG_FILE
+              value: "/etc/rabbitmq/rabbitmq"
+        - name: awx-memcached
+          image: memcached
+        - name: postgres
+          image: postgres:9.6
+      volumes:
+        - name: localdev
+          persistentVolumeClaim:
+            claimName: devtest
+        - name: awx-application-config
+          configMap:
+            name: awx-dev-config
+            items:
+              - key: awx_settings
+                path: settings.py
+              - key: secret_key
+                path: SECRET_KEY
