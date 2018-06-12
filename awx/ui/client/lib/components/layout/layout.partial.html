@@ -94,7 +94,7 @@
             system-admin-only="true">
         </at-side-nav-item>
     </at-side-nav>
-    <div class="at-Layout-main">
+    <div class="at-Layout-main" ng-class="{'at-Layout-main--noLicense': vm.licenseIsMissing}">
         <div class="at-Layout-content">
             <ng-transclude></ng-transclude>
         </div>
