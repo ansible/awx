@@ -479,8 +479,8 @@ export default [
                 else {
                     // Everything else
                     if (key !== 'LOG_AGGREGATOR_TCP_TIMEOUT' ||
-                        ($scope.LOG_AGGREGATOR_PROTOCOL === 'https' ||
-                            $scope.LOG_AGGREGATOR_PROTOCOL === 'tcp')) {
+                        ($scope.LOG_AGGREGATOR_PROTOCOL.value === 'https' ||
+                            $scope.LOG_AGGREGATOR_PROTOCOL.value === 'tcp')) {
                                 payload[key] = $scope[key];
                     }
                 }
