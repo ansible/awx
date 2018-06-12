@@ -2,14 +2,12 @@
     <div class="form-group at-u-flat">
         <at-input-label></at-input-label>
 
-        <div class="input-group">
-            <span class="input-group-btn">
-                <button class="btn at-ButtonHollow--default at-Input-button"
-                        ng-disabled="state._disabled || form.disabled"
-                        ng-click="vm.lookup()">
-                    <i class="fa fa-search"></i>
-                </button>
-            </span>
+        <div class="at-InputLookup">
+            <button class="at-InputLookup-button"
+                    ng-disabled="state._disabled || form.disabled"
+                    ng-click="vm.lookup()">
+                <i class="fa fa-search"></i>
+            </button>
             <input type="text"
                 class="form-control at-Input"
                 ng-class="{ 'at-Input--rejected': state._rejected }"
@@ -20,7 +18,7 @@
                 ng-hide="state._lookupTags"
                 ng-disabled="state._disabled || form.disabled">
 
-            <span class="form-control Form-textInput Form-textInput--variableHeight LabelList-lookupTags"
+            <span class="at-InputLookup-tagContainer LabelList-lookupTags"
                 ng-if="state._lookupTags"
                 ng-disabled="state._disabled || form.disabled">
                 <div class="LabelList-tagContainer" ng-repeat="tag in state._value track by $index">
