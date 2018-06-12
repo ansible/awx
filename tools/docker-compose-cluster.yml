@@ -24,10 +24,12 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       SDB_HOST: 0.0.0.0
+      SDB_PORT: 5899
       AWX_GROUP_QUEUES: alpha,tower
     volumes:
       - "../:/awx_devel"
-
+    ports:
+      - "5899-5999:5899-5999"
   awx_2:
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
@@ -38,9 +40,12 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       SDB_HOST: 0.0.0.0
+      SDB_PORT: 6899
       AWX_GROUP_QUEUES: bravo,tower
     volumes:
       - "../:/awx_devel"
+    ports:
+      - "6899-6999:6899-6999"
   awx_3:
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
@@ -51,9 +56,12 @@ services:
       RABBITMQ_PASS: guest
       RABBITMQ_VHOST: /
       SDB_HOST: 0.0.0.0
+      SDB_PORT: 7899
       AWX_GROUP_QUEUES: charlie,tower
     volumes:
       - "../:/awx_devel"
+    ports:
+      - "7899-7999:7899-7999"
   rabbitmq_1:
     image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_1
