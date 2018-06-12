@@ -67,14 +67,6 @@ function onFrames (events) {
 
     const capacity = slide.getCapacity();
 
-    if (capacity >= events.length) {
-        return slide.pushFront(events);
-    }
-
-    delete render.record;
-
-    render.record = {};
-
     return slide.popBack(events.length - capacity)
         .then(() => slide.pushFront(events))
         .then(() => {
@@ -131,10 +123,6 @@ function last () {
         });
 }
 
-function compile (html) {
-    return $compile(html)($scope);
-}
-
 function follow () {
     scroll.pause();
     // scroll.hide();
@@ -147,6 +135,69 @@ function unfollow () {
 
     // scroll.unhide();
     scroll.resume();
+}
+
+function togglePanelExpand () {
+    vm.isPanelExpanded = !vm.isPanelExpanded;
+}
+
+function toggleMenuExpand () {
+    if (scroll.isPaused()) return;
+
+    const recordList = Object.keys(render.record).map(key => render.record[key]);
+    const minLevel = Math.min(...recordList.map(({ level }) => level));
+
+    const toggled = recordList
+        .filter(({ level }) => level === minLevel)
+        .map(({ uuid }) => getToggleElements(uuid))
+        .filter(({ icon }) => icon.length > 0)
+        .map(({ icon, lines }) => setExpanded(icon, lines, !vm.isMenuExpanded));
+
+    if (toggled.length > 0) {
+        vm.isMenuExpanded = !vm.isMenuExpanded;
+    }
+}
+
+function toggleLineExpand (uuid) {
+    if (scroll.isPaused()) return;
+
+    const { icon, lines } = getToggleElements(uuid);
+    const isExpanded = icon.hasClass('fa-angle-down');
+
+    setExpanded(icon, lines, !isExpanded);
+
+    vm.isMenuExpanded = !isExpanded;
+}
+
+function getToggleElements (uuid) {
+    const record = render.record[uuid];
+    const lines = $(`.child-of-${uuid}`);
+
+    const iconSelector = '.at-Stdout-toggle > i';
+    const additionalSelector = `#${(record.children || []).join(', #')}`;
+
+    let icon = $(`#${uuid} ${iconSelector}`);
+    if (additionalSelector) {
+        icon = icon.add($(additionalSelector).find(iconSelector));
+    }
+
+    return { icon, lines };
+}
+
+function setExpanded (icon, lines, expanded) {
+    if (expanded) {
+        icon.removeClass('fa-angle-right');
+        icon.addClass('fa-angle-down');
+        lines.removeClass('hidden');
+    } else {
+        icon.removeClass('fa-angle-down');
+        icon.addClass('fa-angle-right');
+        lines.addClass('hidden');
+    }
+}
+
+function compile (html) {
+    return $compile(html)($scope);
 }
 
 function showHostDetails (id, uuid) {
@@ -215,13 +266,11 @@ function OutputIndexController (
     vm = this || {};
 
     // Panel
+    vm.title = $filter('sanitize')(resource.model.get('name'));
     vm.strings = strings;
     vm.resource = resource;
-    vm.title = $filter('sanitize')(resource.model.get('name'));
-
-    vm.expanded = false;
-    vm.showHostDetails = showHostDetails;
-    vm.toggleExpanded = () => { vm.expanded = !vm.expanded; };
+    vm.isPanelExpanded = false;
+    vm.togglePanelExpand = togglePanelExpand;
 
     // Stdout Navigation
     vm.menu = {
@@ -230,6 +279,11 @@ function OutputIndexController (
         up: previous,
         down: next,
     };
+    vm.isMenuExpanded = true;
+    vm.toggleMenuExpand = toggleMenuExpand;
+    vm.toggleLineExpand = toggleLineExpand;
+    vm.showHostDetails = showHostDetails;
+    vm.toggleLineEnabled = resource.model.get('type') === 'job';
 
     render.requestAnimationFrame(() => {
         bufferInit();
@@ -237,7 +291,7 @@ function OutputIndexController (
         status.init(resource);
         slide.init(render, resource.events);
 
-        render.init({ compile });
+        render.init({ compile, toggles: vm.toggleLineEnabled });
         scroll.init({ previous, next });
 
         stream.init({
