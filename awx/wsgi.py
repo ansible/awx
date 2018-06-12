@@ -13,6 +13,7 @@ from django.core.wsgi import WSGIHandler  # NOQA
 import django  # NOQA
 from django.conf import settings  # NOQA
 from django.urls import resolve  # NOQA
+import social_django  # NOQA
 
 
 """
@@ -33,6 +34,11 @@ if MODE == 'production':
     except Exception:
         logger.error("Missing or incorrect metadata for Tower version.  Ensure Tower was installed using the setup playbook.")
         raise Exception("Missing or incorrect metadata for Tower version.  Ensure Tower was installed using the setup playbook.")
+
+if social_django.__version__ != '2.1.0':
+    raise RuntimeError("social_django version other than 2.1.0 detected {}. \
+            Confirm that per-request social_django.utils.BACKENDS override \
+            still works".format(social_django.__version__))
 
 
 if django.__version__ != '1.11.11':
