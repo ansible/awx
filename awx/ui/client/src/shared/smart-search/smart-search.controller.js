@@ -40,7 +40,7 @@ function SmartSearchController (
         }
 
         if ($scope.querySet) {
-            queryset = _.cloneDeep($scope.querySet);
+            queryset = $scope.querySet;
         } else {
             queryset = $state.params[searchKey];
         }
