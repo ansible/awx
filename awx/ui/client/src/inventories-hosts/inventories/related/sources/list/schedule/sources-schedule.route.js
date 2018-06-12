@@ -10,10 +10,9 @@ export default {
     },
     views: {
         'related': {
-            templateProvider: function(SchedulesList, generateList){
-                SchedulesList.title = false;
+            templateProvider: function(ScheduleList, generateList){
                 let html = generateList.build({
-                    list: SchedulesList,
+                    list: ScheduleList,
                     mode: 'edit'
                 });
                 return html;
@@ -47,6 +46,7 @@ export default {
             (SchedulesList, inventorySource) => {
                 let list = _.cloneDeep(SchedulesList);
                 list.basePath = `${inventorySource.get().related.schedules}`;
+                list.title = false;
                 return list;
             }
         ]
