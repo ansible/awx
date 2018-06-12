@@ -14,10 +14,10 @@ function OutputStream ($q) {
 
         this.counters = {
             used: [],
+            ready: [],
             min: 1,
             max: 0,
-            last: null,
-            ready: false,
+            final: null,
         };
 
         this.state = {
@@ -81,16 +81,14 @@ function OutputStream ($q) {
         if (maxReady) {
             minReady = this.counters.min;
 
-            this.counters.ready = true;
             this.counters.min = maxReady + 1;
             this.counters.used = this.counters.used.filter(c => c > maxReady);
-        } else {
-            this.counters.ready = false;
         }
 
         this.counters.missing = missing;
+        this.counters.ready = [minReady, maxReady];
 
-        return [minReady, maxReady];
+        return this.counters.ready;
     };
 
     this.pushJobEvent = data => {
@@ -100,7 +98,7 @@ function OutputStream ($q) {
             .then(() => {
                 if (data.event === JOB_END) {
                     this.state.ending = true;
-                    this.counters.last = data.counter;
+                    this.counters.final = data.counter;
                 }
 
                 const [minReady, maxReady] = this.updateCounterState(data);
@@ -117,12 +115,33 @@ function OutputStream ($q) {
                     return $q.resolve();
                 }
 
-                const isLastFrame = this.state.ending && (maxReady >= this.counters.last);
+                const isLastFrame = this.state.ending && (maxReady >= this.counters.final);
                 const events = this.hooks.bufferEmpty(minReady, maxReady);
 
                 return this.emitFrames(events, isLastFrame);
             })
             .then(() => --this.lag);
+
+        return this.chain;
+    };
+
+    this.setFinalCounter = counter => {
+        this.chain = this.chain
+            .then(() => {
+                this.state.ending = true;
+                this.counters.final = counter;
+
+                if (counter >= this.counters.min) {
+                    return $q.resolve();
+                }
+
+                let events = [];
+                if (this.counters.ready.length > 0) {
+                    events = this.hooks.bufferEmpty(...this.counters.ready);
+                }
+
+                return this.emitFrames(events, true);
+            });
 
         return this.chain;
     };
@@ -136,6 +155,7 @@ function OutputStream ($q) {
                 this.hooks.onStop();
             }
 
+            this.counters.ready.length = 0;
             return $q.resolve();
         });
 }

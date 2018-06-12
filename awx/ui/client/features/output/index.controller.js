@@ -163,6 +163,11 @@ function startListening () {
 
     listeners.push($scope.$on(resource.ws.events, (scope, data) => handleJobEvent(data)));
     listeners.push($scope.$on(resource.ws.status, (scope, data) => handleStatusEvent(data)));
+
+    if (resource.model.get('type') === 'job') return;
+    if (resource.model.get('type') === 'project_update') return;
+
+    listeners.push($scope.$on(resource.ws.summary, (scope, data) => handleSummaryEvent(data)));
 }
 
 function handleStatusEvent (data) {
@@ -172,6 +177,13 @@ function handleStatusEvent (data) {
 function handleJobEvent (data) {
     stream.pushJobEvent(data);
     status.pushJobEvent(data);
+}
+
+function handleSummaryEvent (data) {
+    if (resource.model.get('id') !== data.unified_job_id) return;
+    if (!data.final_counter) return;
+
+    stream.setFinalCounter(data.final_counter);
 }
 
 function OutputIndexController (

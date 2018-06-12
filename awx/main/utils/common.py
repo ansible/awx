@@ -989,7 +989,7 @@ class OutputEventFilter(object):
         if value:
             self._emit_event(value)
             self._buffer = StringIO()
-        self._event_callback(dict(event='EOF', final_line_count=self._start_line))
+        self._event_callback(dict(event='EOF', final_counter=self._counter - 1))
 
     def _emit_event(self, buffered_stdout, next_event_data=None):
         next_event_data = next_event_data or {}
