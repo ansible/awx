@@ -16,8 +16,8 @@
                     <select id="networking-actionsDropdown"
                         style="width:400px">
                             <option></option>
-                            <option value="Export" title="Export">Export SVG</option>
-                            <option value="ExportYaml" title="ExportYaml">Export YAML</option>
+                            <option value="Export" title="Export">{{ vm.strings.get('actions.EXPORT') }} SVG</option>
+                            <option value="ExportYaml" title="ExportYaml">{{ vm.strings.get('actions.EXPORT') }} YAML</option>
                     </select>
                 </div>
             </div>
@@ -33,26 +33,26 @@
                     </button>
                     <div class="Networking-keyDropDownPanel" ng-if="vm.keyPanelExpanded">
                         <div class="Networking-dropdownPanelTitle">
-                            KEY
+                            {{ vm.strings.get('key.KEY') }}
                         </div>
                         <div class="Networking-keyPanelOption">
                             <div class="Networking-keySymbol">d</div>
-                            <div class="Networking-keySymbolLabel">DEBUG MODE</div>
+                            <div class="Networking-keySymbolLabel">{{ vm.strings.get('key.DEBUG_MODE') }}</div>
                         </div>
                         <div class="Networking-keyPanelOption">
                             <div class="Networking-keySymbol">i</div>
-                            <div class="Networking-keySymbolLabel">HIDE INTERFACES</div>
+                            <div class="Networking-keySymbolLabel">{{ vm.strings.get('key.HIDE_INTERFACES') }}</div>
                         </div>
                         <div class="Networking-keyPanelOption">
                             <div class="Networking-keySymbol">0</div>
-                            <div class="Networking-keySymbolLabel">RESET ZOOM</div>
+                            <div class="Networking-keySymbolLabel">{{ vm.strings.get('key.RESET_ZOOM') }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="Networking-searchBarContainer">
                     <select id="networking-search"
                         ng-model="device"
-                        ng-options="device.label group by device.type | capitalize for device in devices | orderBy:'label' "
+                        ng-options="device.label group by device.group_type for device in devices | orderBy:'label' "
                         style="width:400px">
                             <option></option>
                     </select>

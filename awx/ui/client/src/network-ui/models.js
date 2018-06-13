@@ -303,7 +303,7 @@ ContextMenu.prototype.is_selected = function (x, y) {
 
 };
 
-function ContextMenuButton(name, x, y, width, height, callback, tracer) {
+function ContextMenuButton(name, x, y, width, height, callback, tracer, type) {
     this.name = name;
     this.x = x;
     this.y = y;
@@ -313,6 +313,7 @@ function ContextMenuButton(name, x, y, width, height, callback, tracer) {
     this.is_pressed = false;
     this.mouse_over = false;
     this.enabled = true;
+    this.type = type;
     this.fsm = new fsm.FSMController(this, "button_fsm", button.Start, tracer);
 }
 exports.ContextMenuButton = ContextMenuButton;

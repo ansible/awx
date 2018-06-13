@@ -8,12 +8,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
     'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
-    'WorkflowJobTemplateModel', 'TemplatesStrings', 'rbacUiControlService', 'Alert', 'i18n',
+    'WorkflowJobTemplateModel', 'SchedulerStrings', 'rbacUiControlService', 'Alert',
     function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
         ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment,
-        WorkflowJobTemplate, TemplatesStrings, rbacUiControlService, Alert, i18n
+        WorkflowJobTemplate, SchedulerStrings, rbacUiControlService, Alert
     ) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
@@ -46,7 +46,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     };
 
     $scope.preventCredsWithPasswords = true;
-    $scope.strings = TemplatesStrings;
+    $scope.strings = SchedulerStrings;
 
     /*
      * This is a workaround for the angular-scheduler library inserting `ll` into fields after an
@@ -116,7 +116,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     launchConf.passwords_needed_to_start.length > 0 &&
                     !launchConf.ask_credential_on_launch
                 ) {
-                    Alert(i18n._('Warning'), i18n._('This Job Template has a default credential that requires a password before launch.  Adding or editing schedules is prohibited while this credential is selected.  To add or edit a schedule, credentials that require a password must be removed from the Job Template.'), 'alert-info');
+                    Alert(SchedulerStrings.get('form.WARNING'), SchedulerStrings.get('form.CREDENTIAL_REQUIRES_PASSWORD_WARNING'), 'alert-info');
                     $state.go('^', { reload: true });
                 }
 

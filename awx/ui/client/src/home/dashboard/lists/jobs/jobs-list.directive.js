@@ -3,7 +3,8 @@ export default
     [   '$filter',
         'templateUrl',
         '$location',
-        function JobsList($filter, templateUrl, $location) {
+        'i18n',
+        function JobsList($filter, templateUrl, $location, i18n) {
         return {
             restrict: 'E',
             link: link,
@@ -29,7 +30,7 @@ export default
                 // detailsUrl, status, name, time
                 scope.jobs = _.map(list, function(job){
 
-                let detailsUrl;
+                let detailsUrl, tooltip;
 
                 if (job.type === 'workflow_job') {
                     detailsUrl = `/#/workflows/${job.id}`;
@@ -37,12 +38,20 @@ export default
                     detailsUrl = `/#/jobs/playbook/${job.id}`;
                 }
 
+                if(_.has(job, 'status') && job.status === 'successful'){
+                    tooltip = i18n._('Job successful. Click for details.');
+                }
+                else if(_.has(job, 'status') && job.status === 'failed'){
+                    tooltip = i18n._('Job failed. Click for details.');
+                }
+
                 return {
                     detailsUrl,
                     status: job.status,
                     name: job.name,
                     id: job.id,
-                    time: $filter('longDate')(job.finished)
+                    time: $filter('longDate')(job.finished),
+                    tooltip: tooltip
                 }; });
             }
 

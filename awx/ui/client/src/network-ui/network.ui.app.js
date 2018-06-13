@@ -3,6 +3,7 @@
 import atFeaturesNetworking from './network-nav/main';
 import networkDetailsDirective from './network-details/main';
 import networkZoomWidget from './zoom-widget/main';
+import awxNetStrings from './network.ui.strings';
 
 //console.log = function () { };
 var NetworkUIController = require('./network.ui.controller.js');
@@ -40,4 +41,5 @@ export default
     .directive('awxNetQuadrants', quadrants.quadrants)
     .directive('awxNetInventoryToolbox', inventoryToolbox.inventoryToolbox)
     .directive('awxNetTestResults', test_results.test_results)
-    .directive('awxNetworkUi', awxNetworkUI.awxNetworkUI);
+    .directive('awxNetworkUi', awxNetworkUI.awxNetworkUI)
+    .service('awxNetStrings', awxNetStrings);

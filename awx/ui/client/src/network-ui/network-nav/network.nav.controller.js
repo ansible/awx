@@ -33,26 +33,42 @@ function NetworkingController (models, $state, $scope, strings) {
     $scope.$on('awxNet-instatiateSelect', (e, devices) => {
         for(var i = 0; i < devices.length; i++){
             let device = devices[i];
+            let grouping;
+            switch (device.type){
+                case 'host':
+                    grouping = strings.get('search.HOST');
+                    break;
+                case 'switch':
+                    grouping = strings.get('search.SWITCH');
+                    break;
+                case 'router':
+                    grouping = strings.get('search.ROUTER');
+                    break;
+                default:
+                    grouping = strings.get('search.UNKNOWN');
+            }
             $scope.devices.push({
                     value: device.id,
                     text: device.name,
                     label: device.name,
                     id: device.id,
-                    type: device.type
+                    type: device.type,
+                    group_type: grouping
                 });
         }
 
         $("#networking-search").select2({
             width:'400px',
             containerCssClass: 'Form-dropDown',
-            placeholder: 'SEARCH',
+            placeholder: strings.get('search.SEARCH'),
             dropdownParent: $('.Networking-toolbar'),
         });
+
         $("#networking-actionsDropdown").select2({
             width:'400px',
             containerCssClass: 'Form-dropDown',
             minimumResultsForSearch: -1,
-            placeholder: 'ACTIONS',
+            placeholder: strings.get('actions.ACTIONS'),
             dropdownParent: $('.Networking-toolbar'),
         });
     });
@@ -118,7 +134,7 @@ NetworkingController.$inject = [
     'resolvedModels',
     '$state',
     '$scope',
-    'NetworkingStrings',
+    'awxNetStrings',
     'CreateSelect2'
 ];
 

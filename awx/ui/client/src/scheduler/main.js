@@ -14,6 +14,7 @@ import SchedulePost from './factories/schedule-post.factory';
 import ToggleSchedule from './factories/toggle-schedule.factory';
 import SchedulesList from './schedules.list';
 import ScheduledJobsList from './scheduled-jobs.list';
+import SchedulerStrings from './scheduler.strings';
 
 export default
     angular.module('scheduler', [])
@@ -26,4 +27,5 @@ export default
         .factory('ToggleSchedule', ToggleSchedule)
         .factory('SchedulesList', SchedulesList)
         .factory('ScheduledJobsList', ScheduledJobsList)
-        .directive('schedulerDatePicker', schedulerDatePicker);
+        .directive('schedulerDatePicker', schedulerDatePicker)
+        .service('SchedulerStrings', SchedulerStrings);

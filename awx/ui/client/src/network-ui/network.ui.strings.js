@@ -1,0 +1,56 @@
+function awxNetStrings (BaseString) {
+    BaseString.call(this, 'awxNet');
+
+    const { t } = this;
+    const ns = this.awxNet;
+
+    ns.state = {
+        BREADCRUMB_LABEL: t.s('INVENTORIES')
+    };
+
+    ns.toolbox = {
+        INVENTORY: t.s('Inventory')
+    };
+
+    ns.actions = {
+        ACTIONS: t.s('Actions'),
+        EXPORT: t.s('Export'),
+        EXPAND_PANEL: t.s('Expand Panel'),
+        COLLAPSE_PANEL: t.s('Collapse Panel')
+    };
+
+    ns.key = {
+        KEY: t.s('Key'),
+        DEBUG_MODE: t.s('Debug Mode'),
+        HIDE_CURSOR: t.s('Hide Cursor'),
+        HIDE_BUTTONS: t.s('Hide Buttons'),
+        HIDE_INTERFACES: t.s('Hide Interfaces'),
+        RESET_ZOOM: t.s('Reset Zoom')
+    };
+
+    ns.search = {
+        SEARCH: t.s('Search'),
+        HOST: t.s('Host'),
+        SWITCH: t.s('Switch'),
+        ROUTER: t.s('Router'),
+        UNKNOWN: t.s('Unknown')
+    };
+
+    ns.context_menu = {
+        DETAILS:  t.s('Details'),
+        REMOVE: t.s('Remove')
+    };
+
+    ns.details = {
+        HOST_NAME: t.s('Host Name'),
+        DESCRIPTION: t.s('Description'),
+        HOST_POPOVER: t.s('Provide a host name, ip address, or ip address:port. Examples include:'),
+        SAVE_COMPLETE: t.s('Save Complete'),
+        CANCEL: t.s('Cancel')
+    };
+
+}
+
+awxNetStrings.$inject = ['BaseStringService'];
+
+export default awxNetStrings;

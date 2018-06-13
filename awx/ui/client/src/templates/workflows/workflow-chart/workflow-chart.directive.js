@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'GetBasePath', 'ProcessErrors',
-    function($state, moment, $timeout, $window, $filter, Rest, GetBasePath, ProcessErrors) {
+export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'GetBasePath', 'ProcessErrors', 'TemplatesStrings',
+    function($state, moment, $timeout, $window, $filter, Rest, GetBasePath, ProcessErrors, TemplatesStrings) {
 
     return {
         scope: {
@@ -280,7 +280,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("y", 30)
                                 .attr("dy", ".35em")
                                 .attr("class", "WorkflowChart-startText")
-                                .text(function () { return "START"; })
+                                .text(function () { return TemplatesStrings.get('workflow_maker.START'); })
                                 .call(add_node);
                         }
                         else {
@@ -333,7 +333,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                  .style("font-size","0.7em")
                                  .attr("class", "WorkflowChart-conflictText")
                                  .html(function () {
-                                     return "<span class=\"WorkflowChart-conflictIcon\">\uf06a</span><span> EDGE CONFLICT</span>";
+                                     return `<span class=\"WorkflowChart-conflictIcon\">\uf06a</span><span> ${TemplatesStrings.get('workflow_maker.EDGE_CONFLICT')}</span>`;
                                  })
                                  .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
 
@@ -344,7 +344,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("text-anchor", "middle")
                                 .attr("class", "WorkflowChart-defaultText WorkflowChart-deletedText")
                                 .html(function () {
-                                    return "<span>DELETED</span>";
+                                    return `<span>${TemplatesStrings.get('workflow_maker.DELETED')}</span>`;
                                 })
                                 .style("display", function(d) { return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
 
@@ -423,7 +423,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("class", "WorkflowChart-detailsLink")
                                 .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; })
                                 .text(function () {
-                                    return "DETAILS";
+                                    return TemplatesStrings.get('workflow_maker.DETAILS');
                                 })
                                 .call(details);
                             thisNode.append("circle")

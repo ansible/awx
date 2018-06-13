@@ -68,7 +68,7 @@ function ComponentsStrings (BaseString) {
         DASHBOARD: t.s('Dashboard'),
         JOBS: t.s('Jobs'),
         SCHEDULES: t.s('Schedules'),
-        PORTAL_MODE: t.s('Portal Mode'),
+        MY_VIEW: t.s('My View'),
         PROJECTS: t.s('Projects'),
         CREDENTIALS: t.s('Credentials'),
         CREDENTIAL_TYPES: t.s('Credential Types'),

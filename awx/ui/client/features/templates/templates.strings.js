@@ -23,6 +23,7 @@ function TemplatesStrings (BaseString) {
     ns.prompt = {
         INVENTORY: t.s('Inventory'),
         CREDENTIAL: t.s('Credential'),
+        PROMPT: t.s('PROMPT'),
         OTHER_PROMPTS: t.s('Other Prompts'),
         SURVEY: t.s('Survey'),
         PREVIEW: t.s('Preview'),
@@ -96,6 +97,31 @@ function TemplatesStrings (BaseString) {
         INVALID_JOB_TEMPLATE: t.s('This Job Template is missing a default inventory or project. This must be addressed in the Job Template form before this node can be saved.'),
         CREDENTIAL_WITH_PASS: t.s('This Job Template has a credential that requires a password.  Credentials requiring passwords on launch are not permitted on workflow nodes.')
     };
+
+    ns.workflow_maker = {
+        DELETE_NODE_PROMPT_TEXT: t.s('Are you sure you want to delete this workflow node?'),
+        KEY: t.s('KEY'),
+        ON_SUCCESS: t.s('On Success'),
+        ON_FAILURE: t.s('On Failure'),
+        ALWAYS: t.s('Always'),
+        PROJECT_SYNC: t.s('Project Sync'),
+        INVENTORY_SYNC: t.s('Inventory Sync'),
+        WARNING: t.s('Warning'),
+        TOTAL_TEMPLATES: t.s('TOTAL TEMPLATES'),
+        ADD_A_TEMPLATE: t.s('ADD A TEMPLATE'),
+        EDIT_TEMPLATE: t.s('EDIT TEMPLATE'),
+        JOBS: t.s('JOBS'),
+        PLEASE_CLICK_THE_START_BUTTON: t.s('Please click the start button to build your workflow.'),
+        PLEASE_HOVER_OVER_A_TEMPLATE: t.s('Please hover over a template for additional options.'),
+        RUN: t.s('RUN'),
+        CHECK: t.s('CHECK'),
+        SELECT: t.s('SELECT'),
+        EDGE_CONFLICT: t.s('EDGE CONFLICT'),
+        DELETED: t.s('DELETED'),
+        START: t.s('START'),
+        DETAILS: t.s('DETAILS')
+    }
+
 }
 
 TemplatesStrings.$inject = ['BaseStringService'];

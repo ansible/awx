@@ -49,9 +49,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     STARTED: i18n._('Started'),
                     FINISHED: i18n._('Finished'),
                     LABELS: i18n._('Labels'),
-                    STATUS: '',     // re-assigned elsewhere
-                    JOB_TYPE: '',   // re-assigned elsewhere
-                    VERBOSITY: '',  // re-assigned elsewhere
+                    STATUS: i18n._('Status')
                 },
                 details: {
                     HEADER: i18n._('DETAILS'),
@@ -84,10 +82,8 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                 }
             };
 
-            $scope.strings.labels.STATUS = getLabel('status');
-            $scope.strings.tooltips.STATUS = `Job ${$scope.strings.labels.STATUS}`;
-            $scope.strings.labels.JOB_TYPE = getLabel('job_type');
-            $scope.strings.labels.VERBOSITY = getLabel('verbosity');
+            $scope.workflow.statusLabel = i18n._(getLabel('status'));
+            $scope.strings.tooltips.STATUS = `${i18n._('Job')} ${$scope.workflow.statusLabel}`;
         };
 
         var updateWorkflowJobElapsedTimer = function(time) {

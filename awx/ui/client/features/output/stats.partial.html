@@ -8,7 +8,7 @@
     <span ng-show="!vm.tasks" class="at-Panel-headingTitleBadge">...</span>
     <span ng-show="vm.tasks" class="at-Panel-headingTitleBadge">{{ vm.tasks }}</span>
 
-    <span class="at-Panel-label">hosts</span>
+    <span class="at-Panel-label">{{:: vm.strings.get('stats.HOSTS')}}</span>
     <span ng-show="!vm.hosts" class="at-Panel-headingTitleBadge">...</span>
     <span ng-show="vm.hosts" class="at-Panel-headingTitleBadge">{{ vm.hosts }}</span>
 

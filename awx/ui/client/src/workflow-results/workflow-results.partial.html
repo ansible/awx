@@ -65,13 +65,13 @@
                     <!-- STATUS DETAIL -->
                     <div class="WorkflowResults-resultRow">
                         <label class="WorkflowResults-resultRowLabel">
-                             Status
+                             {{strings.labels.STATUS}}
                          </label>
                          <div class="WorkflowResults-resultRowText">
                              <i	class="WorkflowResults-statusResultIcon
                                      fa
                                      icon-job-{{ workflow.status }}">
-                             </i> {{ strings.labels.STATUS }}
+                             </i> {{ workflow.statusLabel }}
                          </div>
                      </div>
 

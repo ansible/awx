@@ -71,6 +71,7 @@ function BaseStringService (namespace) {
     this.DELETE = t.s('DELETE');
     this.COPY = t.s('COPY');
     this.YES = t.s('YES');
+    this.CLOSE = t.s('CLOSE');
 
     this.deleteResource = {
         HEADER: t.s('Delete'),

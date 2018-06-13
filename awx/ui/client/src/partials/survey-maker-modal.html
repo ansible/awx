@@ -57,17 +57,17 @@
                                     <i>{{question.question_description}}</i>
                                 </div>
                                 <div class="SurveyMaker-previewInputRow">
-                                    <span dnd-handle class="SurveyMaker-reorderButton" data-placement="top" aw-tool-tip="Drag to reorder question" data-container="#survey-modal-dialog" data-original-title="" title="" ng-show="(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)">
+                                    <span dnd-handle class="SurveyMaker-reorderButton" data-placement="top" aw-tool-tip="dragQuestionTooltip" data-tip-watch="dragQuestionTooltip" data-container="#survey-modal-dialog" data-original-title="" title="" ng-show="(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)">
                                         <i class="fa fa-ellipsis-v"></i>
                                         <span>&nbsp;</span>
                                         <i class="fa fa-ellipsis-v"></i>
                                     </span>
                                     <survey-question class="SurveyMaker-previewInput" preview="true" question="question" ng-required="question.required" ng-disabled=true></survey-question>
                                     <div class="SurveyMaker-previewActions" ng-show="(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)">
-                                        <button class="List-actionButton" data-placement="top" ng-class="{'SurveyMaker-previewActions--selected' : editQuestionIndex == $index}" ng-click="editQuestion($index)" aw-tool-tip="Edit question" data-container="#survey-modal-dialog" data-original-title="" title="">
+                                        <button class="List-actionButton" data-placement="top" ng-class="{'SurveyMaker-previewActions--selected' : editQuestionIndex == $index}" ng-click="editQuestion($index)" aw-tool-tip="{{editQuestionTooltip}}" data-tip-watch="editQuestionTooltip" data-container="#survey-modal-dialog" data-original-title="" title="">
                                             <i class="fa fa-pencil"></i>
                                         </button>
-                                        <button class="List-actionButton List-actionButton--delete" data-placement="top" ng-click="showDeleteQuestion($index)" aw-tool-tip="Delete question" data-container="#survey-modal-dialog" data-original-title="" title="">
+                                        <button class="List-actionButton List-actionButton--delete" data-placement="top" ng-click="showDeleteQuestion($index)" aw-tool-tip="deleteQuestionTooltip" data-tip-watch="deleteQuestionTooltip" data-container="#survey-modal-dialog" data-original-title="" title="">
                                             <i class="fa fa-trash-o"></i>
                                         </button>
                                     </div>
