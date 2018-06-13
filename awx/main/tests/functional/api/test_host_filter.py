@@ -47,3 +47,6 @@ def test_q1(inventory_structure, get, user):
     query = '(name="host1" and groups__name="g1") or (name="host3" and groups__name="g2")'
     evaluate_query(query, [hosts[0], hosts[2]])
 
+    # The following test verifies if the search in host_filter is case insensitive.
+    query = 'search="HOST1"'
+    evaluate_query(query, [hosts[0]])
