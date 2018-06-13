@@ -50,7 +50,6 @@ class Instance(BaseModel):
     last_isolated_check = models.DateTimeField(
         null=True,
         editable=False,
-        auto_now_add=True
     )
     version = models.CharField(max_length=24, blank=True)
     capacity = models.PositiveIntegerField(
