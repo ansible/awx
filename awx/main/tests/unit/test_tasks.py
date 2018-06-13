@@ -1122,19 +1122,22 @@ class TestJobCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
-    def test_net_credentials(self):
+    @pytest.mark.parametrize('authorize, expected_authorize', [
+        [True, '1'],
+        [False, '0'],
+        [None, '0'],
+    ])
+    def test_net_credentials(self, authorize, expected_authorize):
         net = CredentialType.defaults['net']()
-        credential = Credential(
-            pk=1,
-            credential_type=net,
-            inputs = {
-                'username': 'bob',
-                'password': 'secret',
-                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY,
-                'authorize': True,
-                'authorize_password': 'authorizeme'
-            }
-        )
+        inputs = {
+            'username': 'bob',
+            'password': 'secret',
+            'ssh_key_data': self.EXAMPLE_PRIVATE_KEY,
+            'authorize_password': 'authorizeme'
+        }
+        if authorize is not None:
+            inputs['authorize'] = authorize
+        credential = Credential(pk=1,credential_type=net, inputs = inputs)
         for field in ('password', 'ssh_key_data', 'authorize_password'):
             credential.inputs[field] = encrypt_field(credential, field)
         self.instance.credentials.add(credential)
@@ -1143,8 +1146,9 @@ class TestJobCredentials(TestJobExecution):
             args, cwd, env, stdout = args
             assert env['ANSIBLE_NET_USERNAME'] == 'bob'
             assert env['ANSIBLE_NET_PASSWORD'] == 'secret'
-            assert env['ANSIBLE_NET_AUTHORIZE'] == '1'
-            assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
+            assert env['ANSIBLE_NET_AUTHORIZE'] == expected_authorize
+            if authorize:
+                assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
             assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
@@ -2140,6 +2144,30 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
         assert self.instance.job_env['TOWER_PASSWORD'] == tasks.HIDDEN_PASSWORD
+
+    def test_tower_source_ssl_verify_empty(self):
+        tower = CredentialType.defaults['tower']()
+        self.instance.source = 'tower'
+        self.instance.instance_filters = '12345'
+        inputs = {
+            'host': 'https://tower.example.org',
+            'username': 'bob',
+            'password': 'secret',
+        }
+
+        def get_cred():
+            cred = Credential(pk=1, credential_type=tower, inputs = inputs)
+            cred.inputs['password'] = encrypt_field(cred, 'password')
+            return cred
+        self.instance.get_cloud_credential = get_cred
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert env['TOWER_VERIFY_SSL'] == 'False'
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
 
     def test_awx_task_env(self):
         gce = CredentialType.defaults['gce']()

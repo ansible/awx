@@ -623,6 +623,11 @@ class CredentialType(CommonModelNameNotUnique):
             if len(value):
                 namespace[field_name] = value
 
+        # default missing boolean fields to False
+        for field in self.inputs.get('fields', []):
+            if field['type'] == 'boolean' and field['id'] not in credential.inputs.keys():
+                namespace[field['id']] = safe_namespace[field['id']] = False
+
         file_tmpls = self.injectors.get('file', {})
         # If any file templates are provided, render the files and update the
         # special `tower` template namespace so the filename can be
