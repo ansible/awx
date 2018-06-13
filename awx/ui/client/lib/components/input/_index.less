@@ -221,6 +221,32 @@
     padding: 6px @at-padding-input 0 @at-padding-input;
 }
 
+.at-InputLookup {
+    display: flex;
+
+    .at-InputLookup-button {
+        .at-mixin-InputButton();
+        border-radius: @at-border-radius 0 0 @at-border-radius;
+        border-right: none;
+        flex: 0 0 35px;
+        height: auto;
+        min-height: 30px
+    }
+
+    .at-InputLookup-tagContainer {
+        .at-mixin-Border;
+        display: flex;
+        flex-flow: row wrap;
+        padding: 0 10px;
+        width: 100%;
+    }
+
+    .at-InputLookup-button + .at-Input,
+    .at-InputLookup-tagContainer {
+        border-radius: 0 @at-border-radius @at-border-radius 0;
+    }
+}
+
 .at-InputSlider {
     display: flex;
     padding: 5px 0;

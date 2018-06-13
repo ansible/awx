@@ -20,6 +20,12 @@
     padding: 0;
 }
 
+.at-mixin-Border (@color: @at-border-default-color) {
+    border-width: @at-border-default-width;
+    border-style: @at-border-default-style;
+    border-color: @color
+}
+
 .at-mixin-Button () {
     border-radius: @at-border-radius;
     height: @at-height-input;
