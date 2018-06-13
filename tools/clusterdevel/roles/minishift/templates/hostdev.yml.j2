@@ -10,6 +10,7 @@ spec:
     metadata:
       labels:
         name: awx
+        app: rabbitmq
     spec:
       serviceAccountName: awx
       containers:
@@ -26,6 +27,23 @@ spec:
         - name: awx-rabbit
           image: ansible/awx_rabbitmq:latest
           imagePullPolicy: Always
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 15672
+            - name: amqp
+              protocol: TCP
+              containerPort: 5672
+          livenessProbe:
+            exec:
+              command: ["rabbitmqctl", "status"]
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["rabbitmqctl", "status"]
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
           env:
             # For consupmption by rabbitmq-env.conf
             - name: MY_POD_IP
@@ -34,32 +52,15 @@ spec:
                   fieldPath: status.podIP
             - name: RABBITMQ_USE_LONGNAME
               value: "true"
-            - name: ERLANG_COOKIE
-              value: "test"
-            - name: RABBITMQ_ERLANG_COOKIE
-              value: "cookiemonster"
             - name: RABBITMQ_NODENAME
               value: "rabbit@$(MY_POD_IP)"
-            - name: AUTOCLUSTER_TYPE
-              value: "etcd"
-            - name: AUTOCLUSTER_DELAY
-              value: "60"
-            - name: ETCD_HOST
-              value: "etcd"
-            - name: AUTOCLUSTER_CLEANUP
-              value: "true"
-            - name: CLEANUP_WARN_ONLY
-              value: "false"
-            - name: CLEANUP_INTERVAL
-              value: "30"
-            - name: RABBITMQ_DEFAULT_USER
-              value: "awx"
-            - name: RABBITMQ_DEFAULT_PASS
-              value: "abcdefg"
-            - name: RABBITMQ_DEFAULT_VHOST
-              value: "awx"
-            - name: RABBITMQ_CONFIG_FILE
-              value: "/etc/rabbitmq/rabbitmq"
+            - name: K8S_SERVICE_NAME
+              value: "rabbitmq"
+            - name: RABBITMQ_ERLANG_COOKIE
+              value: "cookiemonster"
+          volumeMounts:
+            - name: rabbitmq-config
+              mountPath: /etc/rabbitmq
         - name: awx-memcached
           image: memcached
         - name: postgres
@@ -76,3 +77,102 @@ spec:
                 path: settings.py
               - key: secret_key
                 path: SECRET_KEY
+        - name: rabbitmq-config
+          configMap:
+            name: rabbitmq-config
+            items:
+            - key: rabbitmq.conf
+              path: rabbitmq.conf
+            - key: enabled_plugins
+              path: enabled_plugins
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: awx-web-svc
+  namespace: {{ awx_dev_project }}
+  labels:
+    name: awx-web-svc
+spec:
+  type: "NodePort"
+  ports:
+    - name: https
+      port: 8043
+    - name: http
+      port: 8013
+    - name: notsure
+      port: 8080
+  selector:
+    name: awx
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: {{ awx_dev_project }}
+  name: rabbitmq
+  labels:
+    app: rabbitmq
+    type: LoadBalancer
+spec:
+  type: NodePort
+  ports:
+   - name: http
+     protocol: TCP
+     port: 15672
+     targetPort: 15672
+   - name: amqp
+     protocol: TCP
+     port: 5672
+     targetPort: 5672
+  selector:
+    app: rabbitmq
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: awx-rmq-mgmt
+  namespace: {{ awx_dev_project }}
+  labels:
+    name: awx-rmq-mgmt
+spec:
+  type: ClusterIP
+  ports:
+    - name: rmqmgmt
+      port: 15672
+      targetPort: 15672
+  selector:
+    name: awx
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: awx-web-svc
+  namespace: {{ awx_dev_project }}
+spec:
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Allow
+    termination: edge
+  to:
+    kind: Service
+    name: awx-web-svc
+    weight: 100
+  wildcardPolicy: None
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: awx-rmq-mgmt
+  namespace: {{ awx_dev_project }}
+spec:
+  port:
+    targetPort: rmqmgmt
+  tls:
+    insecureEdgeTerminationPolicy: Allow
+    termination: edge
+  to:
+    kind: Service
+    name: rabbitmq
+    weight: 100
+  wildcardPolicy: None

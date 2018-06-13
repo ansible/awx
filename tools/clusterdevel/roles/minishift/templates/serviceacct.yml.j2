@@ -4,3 +4,28 @@ kind: ServiceAccount
 metadata:
   name: awx
   namespace: {{ awx_dev_project }}
+---
+kind: Role
+apiVersion: v1
+metadata:
+  name: endpoint-reader
+  namespace: {{ awx_dev_project }}
+rules:
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get"]
+---
+kind: RoleBinding
+apiVersion: v1
+metadata:
+  name: endpoint-reader
+  namespace: {{ awx_dev_project }}
+roleRef:
+  name: endpoint-reader
+  namespace: {{ awx_dev_project }}
+subjects:
+  - kind: ServiceAccount
+    name: awx
+    namespace: {{ awx_dev_project }}
+userNames:
+  - system:serviceaccount:{{ awx_dev_project }}:awx
