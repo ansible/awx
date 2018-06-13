@@ -226,6 +226,7 @@ def handle_ha_toplogy_worker_ready(sender, **kwargs):
     # Expedite the first hearbeat run so a node comes online quickly.
     cluster_node_heartbeat.apply([])
     apply_cluster_membership_policies.apply([])
+    awx_isolated_heartbeat.apply([])
 
 
 @celeryd_after_setup.connect
@@ -380,7 +381,11 @@ def awx_isolated_heartbeat(self):
     accept_before = nowtime - timedelta(seconds=(poll_interval - 10))
     isolated_instance_qs = Instance.objects.filter(
         rampart_groups__controller__instances__hostname=local_hostname,
+    )
+    isolated_instance_qs = isolated_instance_qs.filter(
         last_isolated_check__lt=accept_before
+    ) | isolated_instance_qs.filter(
+        last_isolated_check=None
     )
     # Fast pass of isolated instances, claiming the nodes to update
     with transaction.atomic():
@@ -883,6 +888,7 @@ class BaseTask(Task):
         stdout_handle = None
 
         try:
+            kwargs['isolated'] = instance.is_isolated()
             self.pre_run_hook(instance, **kwargs)
             if instance.cancel_flag:
                 instance = self.update_model(instance.pk, status='canceled')

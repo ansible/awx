@@ -18,7 +18,7 @@
       file: path="{{item}}" state=absent
       register: result
       with_items: "{{cleanup_dirs}}"
-      until: result|succeeded
+      until: result is succeeded
       ignore_errors: yes
       retries: 3
       delay: 5
@@ -26,4 +26,4 @@
     - name: fail if build artifacts were not cleaned
       fail:
         msg: 'Unable to cleanup build artifacts'
-      when: not result|succeeded
+      when: not result is succeeded

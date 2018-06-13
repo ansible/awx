@@ -434,6 +434,7 @@ class IsolatedManager(object):
                 task_result = {}
             if 'capacity_cpu' in task_result and 'capacity_mem' in task_result:
                 cls.update_capacity(instance, task_result, awx_application_version)
+                logger.debug('Isolated instance {} successful heartbeat'.format(instance.hostname))
             elif instance.capacity == 0:
                 logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
                     instance.hostname))
