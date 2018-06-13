@@ -36,7 +36,7 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
     $scope.$watch('vm.instances', function() {
         vm.selectedRows = _.filter(vm.instances, 'isSelected');
         vm.deselectedRows = _.filter(vm.instances, 'isSelected', false);
-     }, true);
+    }, true);
 
     vm.submit = () => {
         Wait('start');
@@ -69,6 +69,10 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
 
     vm.onSaveSuccess = () => {
         $state.go('instanceGroups.instances', {}, {reload: 'instanceGroups.instances'});
+    };
+
+    vm.dismiss = () => {
+        $state.go('instanceGroups.instances');
     };
 }
 

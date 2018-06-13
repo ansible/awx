@@ -66,6 +66,10 @@ function InstanceListPolicyController ($scope, $state, strings) {
 
         $state.go("^.^");
     };
+
+    vm.dismiss = () => {
+        $state.go('^.^');
+    };
 }
 
 InstanceListPolicyController.$inject = [

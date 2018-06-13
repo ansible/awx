@@ -1,8 +1,16 @@
 <div id="instance-modal" class="modal-dialog">
-    <at-panel on-dismiss="^.^">
-        <at-panel-heading>
-            {{:: vm.strings.get('instance.PANEL_TITLE') }}
-        </at-panel-heading>
+    <div class="modal-content">
+        <div class="row at-Panel-headingRow">
+            <div class="col-xs-10">
+                <h3 class="at-Panel-headingTitle">{{:: vm.strings.get('instance.PANEL_TITLE') }}</h3>
+            </div>
+            <div class="col-xs-2">
+                <div class="at-Panel-dismiss">
+                    <i class="fa fa-times-circle fa-lg" ng-click="vm.dismiss()"></i>
+                </div>
+            </div>
+        </div>
+
         <multi-select-preview selected-rows='vm.selectedRows' available-rows='instances'></multi-select-preview>
         <at-panel-body>
             <div class="at-List-toolbar">
@@ -49,5 +57,5 @@
                 </div>
             </div>
         </at-panel-body>
-    </at-panel>
+    </div>
 </div>
