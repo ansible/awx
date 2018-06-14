@@ -20,6 +20,7 @@ import time
 import traceback
 import six
 import urlparse
+import socket
 from distutils.version import LooseVersion as Version
 import yaml
 import fcntl
@@ -231,11 +232,21 @@ def handle_ha_toplogy_worker_ready(sender, **kwargs):
 
 @celeryd_after_setup.connect
 def handle_update_celery_hostname(sender, instance, **kwargs):
-    (changed, tower_instance) = Instance.objects.get_or_register()
-    if changed:
-        logger.info(six.text_type("Registered tower node '{}'").format(tower_instance.hostname))
-    instance.hostname = 'celery@{}'.format(tower_instance.hostname)
-    logger.warn(six.text_type("Set hostname to {}").format(instance.hostname))
+    '''
+    Celery will appear to infinitely reboot if an error occurs here.
+    '''
+    try:
+        (changed, tower_instance) = Instance.objects.get_or_register()
+        if changed:
+            logger.info(six.text_type("Registered tower node '{}'").format(tower_instance.hostname))
+        system_hostname = socket.gethostname()
+        if system_hostname != tower_instance.system_hostname:
+            tower_instance.system_hostname = system_hostname
+            tower_instance.save(update_fields=['system_hostname'])
+            logger.warn(six.text_type("Set system hostname to {}").format(tower_instance.system_hostname))
+    except Exception as e:
+        logger.error("Error encountered while starting celery and getting system hostname {}".format(e))
+        raise e
 
 
 @shared_task(queue=settings.CELERY_DEFAULT_QUEUE)
