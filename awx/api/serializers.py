@@ -1169,6 +1169,13 @@ class OAuth2ApplicationSerializer(BaseSerializer):
             ret.pop('client_secret', None)
         return ret
         
+    def get_related(self, obj):
+        res = super(OAuth2ApplicationSerializer, self).get_related(obj)
+        res.update(dict(
+            tokens   = self.reverse('api:o_auth2_application_token_list',     kwargs={'pk': obj.pk}),
+        ))
+        return res
+        
     def get_modified(self, obj):
         if obj is None:
             return None
