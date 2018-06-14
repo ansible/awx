@@ -6,7 +6,7 @@ unittest2
 pep8
 flake8
 pyflakes
-pytest==3.5.1
+pytest==3.6.0
 pytest-cov
 pytest-django
 pytest-pythonpath
