@@ -19,6 +19,8 @@
 * Removed `TOWER_HOST` as a default environment variable in job running environment
   due to conflict with tower credential type. Playbook authors should replace their
   use with `AWX_HOST`. [[#1727](https://github.com/ansible/awx/issues/1727)]
+* Boolean fields for custom credential types will now always default extra_vars and
+  environment variables to `False` when a value is not provided. [[#2038](https://github.com/ansible/tower/issues/2038)]
 * Add validation to prevent string "$encrypted$" from becoming a literal
   survey question default [[#518](https://github.com/ansible/awx/issues/518)].
 * Enable the `--export` option for `ansible-inventory` via the environment
