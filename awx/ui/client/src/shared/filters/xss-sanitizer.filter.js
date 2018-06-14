@@ -6,7 +6,7 @@
 
  export default [function() {
      return function(input) {
-         input = $("<span>").text(input)[0].innerHTML;
+         input = $("<span>").text(input)[0].textContent;
          return input;
      };
  }];
