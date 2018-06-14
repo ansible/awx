@@ -783,7 +783,9 @@ def check_proot_installed():
                                 stderr=subprocess.PIPE)
         proc.communicate()
         return bool(proc.returncode == 0)
-    except (OSError, ValueError):
+    except (OSError, ValueError) as e:
+        if isinstance(e, ValueError) or getattr(e, 'errno', 1) != 2:  # ENOENT, no such file or directory
+            logger.exception('bwrap unavailable for unexpected reason.')
         return False
 
 
