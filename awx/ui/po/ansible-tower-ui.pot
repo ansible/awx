@@ -68,11 +68,12 @@ msgid ""
 "            </p>"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:54
+#: client/features/templates/templates.strings.js:55
 msgid "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>JSON:<br /><blockquote>{<br />&quot;somevar&quot;: &quot;somevalue&quot;,<br />&quot;password&quot;: &quot;magic&quot;<br /> }</blockquote>YAML:<br /><blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>"
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:33
+#: client/src/scheduler/scheduler.strings.js:14
 msgid "A schedule name is required."
 msgstr ""
 
@@ -104,6 +105,14 @@ msgstr ""
 
 #: client/src/organizations/linkout/addUsers/addUsers.partial.html:8
 msgid "ADD"
+msgstr ""
+
+#: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:3
+msgid "ADD A NEW TEMPLATE"
+msgstr ""
+
+#: client/features/templates/templates.strings.js:111
+msgid "ADD A TEMPLATE"
 msgstr ""
 
 #: client/src/templates/survey-maker/shared/question-definition.form.js:16
@@ -162,11 +171,11 @@ msgstr ""
 msgid "ASSOCIATED HOSTS"
 msgstr ""
 
-#: client/lib/components/components.strings.js:78
+#: client/lib/components/components.strings.js:87
 msgid "About"
 msgstr ""
 
-#: client/lib/components/components.strings.js:82
+#: client/lib/components/components.strings.js:91
 msgid "Access"
 msgstr ""
 
@@ -188,7 +197,8 @@ msgstr ""
 
 #: client/src/home/dashboard/lists/job-templates/job-templates-list.partial.html:20
 #: client/src/inventories-hosts/hosts/hosts.partial.html:47
-#: client/src/shared/list-generator/list-generator.factory.js:582
+#: client/src/network-ui/network.ui.strings.js:16
+#: client/src/shared/list-generator/list-generator.factory.js:586
 msgid "Actions"
 msgstr ""
 
@@ -276,7 +286,7 @@ msgstr ""
 msgid "Admin"
 msgstr ""
 
-#: client/lib/components/components.strings.js:83
+#: client/lib/components/components.strings.js:92
 msgid "Administration"
 msgstr ""
 
@@ -288,7 +298,7 @@ msgstr ""
 msgid "After every project update where the SCM revision changes, refresh the inventory from the selected source before executing job tasks. This is intended for static content, like the Ansible inventory .ini file format."
 msgstr ""
 
-#: client/lib/components/components.strings.js:90
+#: client/lib/components/components.strings.js:99
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:37
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:43
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:65
@@ -310,7 +320,8 @@ msgstr ""
 msgid "Allow Provisioning Callbacks"
 msgstr ""
 
-#: client/src/workflow-results/workflow-results.controller.js:68
+#: client/features/templates/templates.strings.js:106
+#: client/src/workflow-results/workflow-results.controller.js:66
 msgid "Always"
 msgstr ""
 
@@ -337,7 +348,7 @@ msgstr ""
 msgid "Answer Variable Name"
 msgstr ""
 
-#: client/lib/components/components.strings.js:76
+#: client/lib/components/components.strings.js:85
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:24
 msgid "Applications"
 msgstr ""
@@ -354,7 +365,11 @@ msgstr ""
 msgid "Are you sure you want to delete this user?"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:78
+#: client/features/templates/templates.strings.js:102
+msgid "Are you sure you want to delete this workflow node?"
+msgstr ""
+
+#: client/lib/services/base-string.service.js:80
 msgid "Are you sure you want to delete this {{ resourceType }}?"
 msgstr ""
 
@@ -388,7 +403,7 @@ msgstr ""
 msgid "Are you sure you want to remove the %s below from %s?"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:83
+#: client/lib/services/base-string.service.js:85
 msgid "Are you sure you want to submit the request to cancel this job?"
 msgstr ""
 
@@ -403,7 +418,7 @@ msgstr ""
 msgid "Ask at runtime?"
 msgstr ""
 
-#: client/src/instance-groups/instance-groups.strings.js:24
+#: client/src/instance-groups/instance-groups.strings.js:28
 msgid "Associate an existing Instance"
 msgstr ""
 
@@ -452,7 +467,7 @@ msgstr ""
 msgid "BROWSE"
 msgstr ""
 
-#: client/features/output/output.strings.js:93
+#: client/features/output/output.strings.js:96
 msgid "Back to Top"
 msgstr ""
 
@@ -498,6 +513,10 @@ msgstr ""
 msgid "CHANGES"
 msgstr ""
 
+#: client/features/templates/templates.strings.js:117
+msgid "CHECK"
+msgstr ""
+
 #: client/lib/components/components.strings.js:20
 msgid "CHOOSE A FILE"
 msgstr ""
@@ -507,10 +526,13 @@ msgstr ""
 msgid "CLEAR ALL"
 msgstr ""
 
+#: client/lib/services/base-string.service.js:61
+#: client/lib/services/base-string.service.js:74
 #: client/src/partials/survey-maker-modal.html:86
 msgid "CLOSE"
 msgstr ""
 
+#: client/features/jobs/routes/hostCompletedJobs.route.js:20
 #: client/features/jobs/routes/templateCompletedJobs.route.js:21
 #: client/features/jobs/routes/workflowJobTemplateCompletedJobs.route.js:21
 msgid "COMPLETED JOBS"
@@ -520,16 +542,21 @@ msgstr ""
 msgid "CONFIGURE {{ BRAND_NAME }}"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:30
+#: client/features/templates/templates.strings.js:31
+#: client/src/scheduler/scheduler.strings.js:55
 msgid "CONFIRM"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:71
+#: client/lib/services/base-string.service.js:72
 msgid "COPY"
 msgstr ""
 
 #: client/features/users/tokens/tokens.strings.js:25
 msgid "COULD NOT CREATE TOKEN"
+msgstr ""
+
+#: client/src/instance-groups/instance-groups.strings.js:42
+msgid "CPU"
 msgstr ""
 
 #: client/src/shared/stateDefinitions.factory.js:161
@@ -569,6 +596,7 @@ msgid "CREATE INVENTORY SOURCE"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/sources/list/schedule/sources-schedule-add.route.js:9
+#: client/src/scheduler/scheduler.strings.js:8
 #: client/src/scheduler/schedules.route.js:163
 #: client/src/scheduler/schedules.route.js:245
 #: client/src/scheduler/schedules.route.js:74
@@ -587,6 +615,10 @@ msgstr ""
 #: client/features/users/tokens/tokens.strings.js:9
 #: client/features/users/tokens/users-tokens-add.route.js:30
 msgid "CREATE TOKEN"
+msgstr ""
+
+#: client/features/output/output.strings.js:100
+msgid "CREATED"
 msgstr ""
 
 #: client/src/job-submission/job-submission.partial.html:351
@@ -657,21 +689,24 @@ msgstr ""
 msgid "Call to get project failed. GET status:"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:90
+#: client/lib/services/base-string.service.js:92
 msgid "Call to {{ path }} failed. {{ action }} returned status: {{ status }}."
 msgstr ""
 
 #: client/features/output/output.strings.js:17
-#: client/lib/services/base-string.service.js:82
+#: client/lib/services/base-string.service.js:84
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:105
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:188
 #: client/src/configuration/configuration.controller.js:611
+#: client/src/network-ui/network.ui.strings.js:49
+#: client/src/scheduler/scheduler.strings.js:48
 #: client/src/shared/form-generator.js:1708
+#: client/src/shared/lookup/lookup-modal.partial.html:19
 #: client/src/workflow-results/workflow-results.controller.js:38
 msgid "Cancel"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:84
+#: client/lib/services/base-string.service.js:86
 msgid "Cancel Job"
 msgstr ""
 
@@ -691,7 +726,7 @@ msgstr ""
 msgid "Canceled. Click for details"
 msgstr ""
 
-#: client/src/shared/smart-search/smart-search.controller.js:106
+#: client/src/shared/smart-search/smart-search.controller.js:158
 msgid "Cannot search running job"
 msgstr ""
 
@@ -711,7 +746,7 @@ msgstr ""
 msgid "Channel"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:60
+#: client/features/templates/templates.strings.js:61
 msgid "Check"
 msgstr ""
 
@@ -719,11 +754,11 @@ msgstr ""
 msgid "Choose a %s"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:51
+#: client/features/templates/templates.strings.js:52
 msgid "Choose a job type"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:52
+#: client/features/templates/templates.strings.js:53
 msgid "Choose a verbosity"
 msgstr ""
 
@@ -791,6 +826,7 @@ msgstr ""
 msgid "Client Secret"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:47
 #: client/src/shared/form-generator.js:1712
 msgid "Close"
 msgstr ""
@@ -809,14 +845,16 @@ msgid "CloudForms URL"
 msgstr ""
 
 #: client/features/output/output.strings.js:18
-#: client/src/workflow-results/workflow-results.controller.js:156
+#: client/src/workflow-results/workflow-results.controller.js:152
 msgid "Collapse Output"
 msgstr ""
 
-#: client/src/network-ui/network-nav/network.nav.strings.js:13
+#: client/src/network-ui/network.ui.strings.js:19
 msgid "Collapse Panel"
 msgstr ""
 
+#: client/src/inventories-hosts/hosts/host.form.js:129
+#: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:128
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:155
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:172
 #: client/src/templates/job_templates/job-template.form.js:438
@@ -866,7 +904,7 @@ msgid "Copied to clipboard."
 msgstr ""
 
 #: client/src/credentials/credentials.list.js:73
-#: client/src/inventories-hosts/inventories/inventory.list.js:111
+#: client/src/inventories-hosts/inventories/inventory.list.js:112
 #: client/src/inventory-scripts/inventory-scripts.list.js:61
 #: client/src/notifications/notificationTemplates.list.js:82
 #: client/src/projects/projects.list.js:109
@@ -874,7 +912,7 @@ msgstr ""
 msgid "Copy"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:76
+#: client/features/templates/templates.strings.js:77
 msgid "Copy Workflow"
 msgstr ""
 
@@ -886,7 +924,7 @@ msgstr ""
 msgid "Copy full revision to clipboard."
 msgstr ""
 
-#: client/src/inventories-hosts/inventories/inventory.list.js:114
+#: client/src/inventories-hosts/inventories/inventory.list.js:115
 msgid "Copy inventory"
 msgstr ""
 
@@ -912,7 +950,7 @@ msgid ""
 "                          Visit <a href=\"http://www.ansible.com/\" target=\"_blank\">Ansible.com</a> for more information.<br>"
 msgstr ""
 
-#: client/lib/components/components.strings.js:79
+#: client/lib/components/components.strings.js:88
 msgid "Copyright © 2018 Red Hat, Inc."
 msgstr ""
 
@@ -924,7 +962,7 @@ msgstr ""
 msgid "Create a new Application"
 msgstr ""
 
-#: client/src/instance-groups/instance-groups.strings.js:23
+#: client/src/instance-groups/instance-groups.strings.js:27
 msgid "Create a new Instance Group"
 msgstr ""
 
@@ -948,7 +986,7 @@ msgstr ""
 msgid "Create a new host"
 msgstr ""
 
-#: client/src/inventories-hosts/inventories/inventory.list.js:75
+#: client/src/inventories-hosts/inventories/inventory.list.js:76
 msgid "Create a new inventory"
 msgstr ""
 
@@ -989,11 +1027,11 @@ msgstr ""
 msgid "Credential"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:35
+#: client/features/templates/templates.strings.js:36
 msgid "Credential Type"
 msgstr ""
 
-#: client/lib/components/components.strings.js:65
+#: client/lib/components/components.strings.js:74
 #: client/lib/models/models.strings.js:12
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:34
 msgid "Credential Types"
@@ -1001,7 +1039,7 @@ msgstr ""
 
 #: client/features/jobs/jobs.strings.js:15
 #: client/features/templates/templates.strings.js:18
-#: client/lib/components/components.strings.js:64
+#: client/lib/components/components.strings.js:73
 #: client/lib/models/models.strings.js:8
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:129
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:58
@@ -1010,7 +1048,7 @@ msgstr ""
 msgid "Credentials"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:36
+#: client/features/templates/templates.strings.js:37
 msgid "Credentials that require passwords on launch are not permitted for template schedules and workflow nodes.  The following credentials must be removed or replaced to proceed:"
 msgstr ""
 
@@ -1036,7 +1074,7 @@ msgid "DASHBOARD"
 msgstr ""
 
 #: client/features/users/tokens/tokens.strings.js:28
-#: client/lib/services/base-string.service.js:70
+#: client/lib/services/base-string.service.js:71
 #: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:52
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:74
 #: client/src/notifications/notification-templates-list/list.controller.js:221
@@ -1052,12 +1090,17 @@ msgstr ""
 msgid "DELETE SURVEY"
 msgstr ""
 
+#: client/features/templates/templates.strings.js:120
+msgid "DELETED"
+msgstr ""
+
 #: client/features/users/tokens/tokens.strings.js:35
 msgid "DESCRIPTION"
 msgstr ""
 
-#: client/src/instance-groups/instance-groups.strings.js:17
-#: client/src/workflow-results/workflow-results.controller.js:57
+#: client/features/templates/templates.strings.js:122
+#: client/src/instance-groups/instance-groups.strings.js:21
+#: client/src/workflow-results/workflow-results.controller.js:55
 msgid "DETAILS"
 msgstr ""
 
@@ -1076,8 +1119,16 @@ msgstr ""
 msgid "DYNAMIC HOSTS"
 msgstr ""
 
-#: client/lib/components/components.strings.js:59
+#: client/lib/components/components.strings.js:68
 msgid "Dashboard"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:44
+msgid "Date format"
+msgstr ""
+
+#: client/src/network-ui/network.ui.strings.js:24
+msgid "Debug Mode"
 msgstr ""
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:140
@@ -1091,12 +1142,12 @@ msgid "Default Environment"
 msgstr ""
 
 #: client/features/output/output.strings.js:19
-#: client/lib/services/base-string.service.js:75
+#: client/lib/services/base-string.service.js:77
 #: client/src/credential-types/credential-types.list.js:73
 #: client/src/credential-types/list/list.controller.js:106
 #: client/src/credentials/credentials.list.js:92
 #: client/src/credentials/list/credentials-list.controller.js:164
-#: client/src/inventories-hosts/inventories/inventory.list.js:126
+#: client/src/inventories-hosts/inventories/inventory.list.js:127
 #: client/src/inventories-hosts/inventories/list/inventory-list.controller.js:139
 #: client/src/inventory-scripts/inventory-scripts.list.js:79
 #: client/src/inventory-scripts/list/list.controller.js:114
@@ -1105,7 +1156,7 @@ msgstr ""
 #: client/src/organizations/list/organizations-list.controller.js:192
 #: client/src/projects/edit/projects-edit.controller.js:251
 #: client/src/projects/list/projects-list.controller.js:240
-#: client/src/scheduler/schedules.list.js:98
+#: client/src/scheduler/schedules.list.js:100
 #: client/src/teams/teams.list.js:72
 #: client/src/templates/templates.list.js:116
 #: client/src/users/list/users-list.controller.js:91
@@ -1117,6 +1168,10 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:6
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.partial.html:6
 msgid "Delete Group"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:23
+msgid "Delete Question"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:195
@@ -1157,7 +1212,7 @@ msgstr[1] ""
 msgid "Delete hosts"
 msgstr ""
 
-#: client/src/inventories-hosts/inventories/inventory.list.js:128
+#: client/src/inventories-hosts/inventories/inventory.list.js:129
 msgid "Delete inventory"
 msgstr ""
 
@@ -1178,7 +1233,7 @@ msgstr ""
 msgid "Delete or promote the group's children?"
 msgstr ""
 
-#: client/src/scheduler/schedules.list.js:101
+#: client/src/scheduler/schedules.list.js:103
 msgid "Delete schedule"
 msgstr ""
 
@@ -1218,7 +1273,7 @@ msgstr ""
 msgid "Deleting group"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:77
+#: client/lib/services/base-string.service.js:79
 msgid "Deleting this {{ resourceType }} will make the following resources unavailable."
 msgstr ""
 
@@ -1242,7 +1297,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:28
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:36
 #: client/src/inventory-scripts/inventory-scripts.form.js:35
-#: client/src/network-ui/network-details/details.partial.html:26
+#: client/src/network-ui/network.ui.strings.js:46
 #: client/src/notifications/notificationTemplates.form.js:39
 #: client/src/organizations/organizations.form.js:33
 #: client/src/projects/projects.form.js:37
@@ -1277,6 +1332,7 @@ msgstr ""
 #: client/features/output/output.strings.js:34
 #: client/features/users/tokens/tokens.strings.js:14
 #: client/src/license/license.partial.html:5
+#: client/src/network-ui/network.ui.strings.js:40
 #: client/src/shared/form-generator.js:1490
 msgid "Details"
 msgstr ""
@@ -1288,6 +1344,10 @@ msgstr ""
 #: client/src/notifications/notificationTemplates.form.js:369
 #: client/src/notifications/notificationTemplates.form.js:401
 msgid "Disable SSL Verification"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:518
+msgid "Disable survey"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-groups/group-nested-groups-disassociate.partial.html:6
@@ -1311,6 +1371,10 @@ msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.list.js:87
 msgid "Disassociate host"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:21
+msgid "Disble Survey"
 msgstr ""
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:93
@@ -1342,8 +1406,16 @@ msgstr ""
 msgid "Drag and drop your custom inventory script file here or create one in the field to import your custom inventory. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
 
+#: client/src/templates/survey-maker/surveys/init.factory.js:24
+msgid "Drag to reorder question"
+msgstr ""
+
 #: client/src/partials/survey-maker-modal.html:77
 msgid "Drop question here to reorder"
+msgstr ""
+
+#: client/features/templates/templates.strings.js:119
+msgid "EDGE CONFLICT"
 msgstr ""
 
 #: client/features/applications/applications.strings.js:10
@@ -1362,12 +1434,20 @@ msgstr ""
 msgid "EDIT INSTANCE GROUP"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:9
+msgid "EDIT SCHEDULE"
+msgstr ""
+
 #: client/src/management-jobs/scheduler/main.js:97
 msgid "EDIT SCHEDULED JOB"
 msgstr ""
 
 #: client/src/templates/survey-maker/shared/question-definition.form.js:17
 msgid "EDIT SURVEY PROMPT"
+msgstr ""
+
+#: client/features/templates/templates.strings.js:112
+msgid "EDIT TEMPLATE"
 msgstr ""
 
 #: client/lib/components/components.strings.js:9
@@ -1414,15 +1494,19 @@ msgstr ""
 
 #: client/src/credential-types/credential-types.list.js:56
 #: client/src/credentials/credentials.list.js:66
-#: client/src/inventories-hosts/inventories/inventory.list.js:97
+#: client/src/inventories-hosts/inventories/inventory.list.js:98
 #: client/src/inventory-scripts/inventory-scripts.list.js:54
 #: client/src/notifications/notificationTemplates.list.js:66
 #: client/src/notifications/notificationTemplates.list.js:75
-#: client/src/scheduler/schedules.list.js:83
+#: client/src/scheduler/schedules.list.js:85
 #: client/src/teams/teams.list.js:55
 #: client/src/templates/templates.list.js:80
 #: client/src/users/users.list.js:60
 msgid "Edit"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:22
+msgid "Edit Question"
 msgstr ""
 
 #: client/src/shared/form-generator.js:1724
@@ -1451,7 +1535,7 @@ msgstr ""
 msgid "Edit host"
 msgstr ""
 
-#: client/src/inventories-hosts/inventories/inventory.list.js:99
+#: client/src/inventories-hosts/inventories/inventory.list.js:100
 msgid "Edit inventory"
 msgstr ""
 
@@ -1463,7 +1547,7 @@ msgstr ""
 msgid "Edit notification"
 msgstr ""
 
-#: client/src/scheduler/schedules.list.js:86
+#: client/src/scheduler/schedules.list.js:88
 msgid "Edit schedule"
 msgstr ""
 
@@ -1505,7 +1589,7 @@ msgid "Either you do not have access or the SCM update process completed. Click 
 msgstr ""
 
 #: client/features/output/output.strings.js:89
-#: client/src/workflow-results/workflow-results.controller.js:63
+#: client/src/workflow-results/workflow-results.controller.js:61
 msgid "Elapsed"
 msgstr ""
 
@@ -1521,10 +1605,18 @@ msgstr ""
 msgid "Enable Concurrent Jobs"
 msgstr ""
 
+#: client/src/configuration/system-form/configuration-system.partial.html:30
+msgid "Enable External Logging"
+msgstr ""
+
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:124
 #: client/src/templates/job_templates/job-template.form.js:274
 #: client/src/templates/job_templates/job-template.form.js:279
 msgid "Enable Privilege Escalation"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:518
+msgid "Enable survey"
 msgstr ""
 
 #: client/src/templates/job_templates/job-template.form.js:289
@@ -1533,6 +1625,18 @@ msgstr ""
 
 #: client/src/credentials/factories/credential-form-save.factory.js:73
 msgid "Encrypted credentials are not supported."
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:36
+msgid "End"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:38
+msgid "End Date"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:40
+msgid "End Time"
 msgstr ""
 
 #: client/src/license/license.partial.html:113
@@ -1608,7 +1712,7 @@ msgstr ""
 msgid "Error Details"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:89
+#: client/lib/services/base-string.service.js:91
 #: client/src/configuration/configuration.controller.js:408
 #: client/src/configuration/configuration.controller.js:517
 #: client/src/configuration/configuration.controller.js:552
@@ -1649,6 +1753,10 @@ msgstr ""
 msgid "Event summary not available"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:21
+msgid "Every"
+msgstr ""
+
 #: client/src/projects/add/projects-add.controller.js:137
 #: client/src/projects/edit/projects-edit.controller.js:273
 msgid "Example URLs for GIT SCM include:"
@@ -1677,12 +1785,12 @@ msgid "Existing Host"
 msgstr ""
 
 #: client/features/output/output.strings.js:22
-#: client/src/workflow-results/workflow-results.controller.js:158
+#: client/src/workflow-results/workflow-results.controller.js:154
 #: client/src/workflow-results/workflow-results.controller.js:43
 msgid "Expand Output"
 msgstr ""
 
-#: client/src/network-ui/network-nav/network.nav.strings.js:12
+#: client/src/network-ui/network.ui.strings.js:18
 msgid "Expand Panel"
 msgstr ""
 
@@ -1694,17 +1802,22 @@ msgstr ""
 msgid "Explanation"
 msgstr ""
 
+#: client/src/network-ui/network.ui.strings.js:17
+msgid "Export"
+msgstr ""
+
 #: client/features/output/output.strings.js:44
-#: client/features/templates/templates.strings.js:53
+#: client/features/templates/templates.strings.js:54
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:133
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:145
 #: client/src/job-submission/job-submission.partial.html:165
 #: client/src/partials/logviewer.html:8
+#: client/src/scheduler/scheduler.strings.js:45
 #: client/src/templates/job_templates/job-template.form.js:352
 #: client/src/templates/job_templates/job-template.form.js:359
 #: client/src/templates/workflows.form.js:83
 #: client/src/templates/workflows.form.js:90
-#: client/src/workflow-results/workflow-results.controller.js:126
+#: client/src/workflow-results/workflow-results.controller.js:122
 msgid "Extra Variables"
 msgstr ""
 
@@ -1713,7 +1826,7 @@ msgstr ""
 msgid "FACTS"
 msgstr ""
 
-#: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:64
+#: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:65
 msgid "FAILED"
 msgstr ""
 
@@ -1725,13 +1838,17 @@ msgstr ""
 msgid "FIELDS:"
 msgstr ""
 
+#: client/src/smart-status/smart-status.controller.js:43
+msgid "FINISHED"
+msgstr ""
+
 #: client/src/inventories-hosts/hosts/host.form.js:107
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:106
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:107
 msgid "Facts"
 msgstr ""
 
-#: client/lib/components/components.strings.js:91
+#: client/lib/components/components.strings.js:100
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:80
 msgid "Failed"
 msgstr ""
@@ -1806,7 +1923,7 @@ msgstr ""
 msgid "Finished"
 msgstr ""
 
-#: client/src/access/rbac-multiselect/permissionsUsers.list.js:21
+#: client/src/access/rbac-multiselect/permissionsUsers.list.js:27
 #: client/src/users/users.form.js:29
 #: client/src/users/users.list.js:33
 msgid "First Name"
@@ -1814,6 +1931,10 @@ msgstr ""
 
 #: client/src/scheduler/schedules.list.js:46
 msgid "First Run"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:19
+msgid "Float"
 msgstr ""
 
 #: client/features/output/output.strings.js:76
@@ -1848,7 +1969,16 @@ msgid "Forks"
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:173
+#: client/src/scheduler/scheduler.strings.js:20
 msgid "Frequency Details"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:33
+msgid "Fri"
+msgstr ""
+
+#: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
+msgid "GO TO <a ui-sref=\"notifications.add\" translate=\"\">NOTIFICATIONS</a> TO"
 msgstr ""
 
 #: client/src/inventories-hosts/hosts/related/groups/hosts-related-groups.route.js:45
@@ -1859,6 +1989,10 @@ msgstr ""
 #: client/src/projects/edit/projects-edit.controller.js:135
 #: client/src/projects/list/projects-list.controller.js:76
 msgid "Get latest SCM revision"
+msgstr ""
+
+#: client/src/credential-types/add/add.controller.js:41
+msgid "Getting Started with Credential Types"
 msgstr ""
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:129
@@ -1882,13 +2016,13 @@ msgstr ""
 msgid "Grant Permission"
 msgstr ""
 
-#: client/src/notifications/add/add.controller.js:78
-#: client/src/notifications/edit/edit.controller.js:125
+#: client/src/notifications/add/add.controller.js:79
+#: client/src/notifications/edit/edit.controller.js:126
 msgid "Gray"
 msgstr ""
 
-#: client/src/notifications/add/add.controller.js:78
-#: client/src/notifications/edit/edit.controller.js:125
+#: client/src/notifications/add/add.controller.js:80
+#: client/src/notifications/edit/edit.controller.js:127
 msgid "Green"
 msgstr ""
 
@@ -1911,7 +2045,8 @@ msgid "Groups"
 msgstr ""
 
 #: client/lib/components/components.strings.js:12
-#: client/lib/services/base-string.service.js:65
+#: client/lib/services/base-string.service.js:66
+#: client/src/templates/survey-maker/surveys/init.factory.js:483
 msgid "HIDE"
 msgstr ""
 
@@ -1921,7 +2056,7 @@ msgstr ""
 
 #: client/src/activity-stream/get-target-title.factory.js:41
 #: client/src/inventories-hosts/hosts/hosts.partial.html:9
-#: client/src/inventories-hosts/hosts/main.js:80
+#: client/src/inventories-hosts/hosts/main.js:81
 #: client/src/inventories-hosts/inventories/inventories.partial.html:15
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.route.js:18
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-hosts.route.js:17
@@ -1937,11 +2072,24 @@ msgstr ""
 msgid "Hide Activity Stream"
 msgstr ""
 
+#: client/src/network-ui/network.ui.strings.js:26
+msgid "Hide Buttons"
+msgstr ""
+
+#: client/src/network-ui/network.ui.strings.js:25
+msgid "Hide Cursor"
+msgstr ""
+
+#: client/src/network-ui/network.ui.strings.js:27
+msgid "Hide Interfaces"
+msgstr ""
+
 #: client/src/inventories-hosts/inventories/insights/insights.partial.html:23
 msgid "High"
 msgstr ""
 
 #: client/src/credentials/credentials.form.js:139
+#: client/src/network-ui/network.ui.strings.js:33
 #: client/src/notifications/notificationTemplates.form.js:83
 msgid "Host"
 msgstr ""
@@ -1968,7 +2116,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:56
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:45
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:56
-#: client/src/network-ui/network-details/details.partial.html:16
+#: client/src/network-ui/network.ui.strings.js:45
 msgid "Host Name"
 msgstr ""
 
@@ -1998,6 +2146,7 @@ msgstr ""
 msgid "Host status information for this job is unavailable."
 msgstr ""
 
+#: client/features/output/output.strings.js:92
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:27
 #: client/src/home/dashboard/counts/dashboard-counts.directive.js:39
 #: client/src/inventories-hosts/inventories/related/groups/groups.form.js:98
@@ -2029,6 +2178,10 @@ msgstr ""
 msgid "I agree to the End User License Agreement"
 msgstr ""
 
+#: client/features/output/output.strings.js:101
+msgid "ID"
+msgstr ""
+
 #: client/src/partials/job-template-details.html:2
 msgid "INFO"
 msgstr ""
@@ -2041,14 +2194,14 @@ msgstr ""
 msgid "INSIGHTS"
 msgstr ""
 
-#: client/lib/components/components.strings.js:75
+#: client/lib/components/components.strings.js:84
 #: client/src/instance-groups/instance-groups.list.js:6
 #: client/src/instance-groups/instance-groups.list.js:7
 #: client/src/instance-groups/instance-groups.strings.js:13
 msgid "INSTANCE GROUPS"
 msgstr ""
 
-#: client/src/instance-groups/instance-groups.strings.js:18
+#: client/src/instance-groups/instance-groups.strings.js:22
 msgid "INSTANCES"
 msgstr ""
 
@@ -2058,7 +2211,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/inventories.route.js:8
 #: client/src/inventories-hosts/inventories/inventory.list.js:14
 #: client/src/inventories-hosts/inventories/inventory.list.js:15
-#: client/src/network-ui/network-nav/network.nav.strings.js:8
+#: client/src/network-ui/network.ui.strings.js:8
 #: client/src/organizations/linkout/organizations-linkout.route.js:144
 #: client/src/organizations/list/organizations-list.controller.js:67
 msgid "INVENTORIES"
@@ -2204,7 +2357,7 @@ msgstr ""
 msgid "Instance Group"
 msgstr ""
 
-#: client/src/instance-groups/instance-groups.strings.js:47
+#: client/src/instance-groups/instance-groups.strings.js:58
 msgid "Instance Group parameter is missing."
 msgstr ""
 
@@ -2234,8 +2387,13 @@ msgstr ""
 msgid "Instance Type:"
 msgstr ""
 
-#: client/lib/components/components.strings.js:74
+#: client/lib/components/components.strings.js:83
+#: client/src/instance-groups/instance-groups.strings.js:14
 msgid "Instances"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:18
+msgid "Integer"
 msgstr ""
 
 #: client/src/license/license.partial.html:11
@@ -2259,7 +2417,7 @@ msgstr ""
 msgid "Invalid username and/or password.  Please try again."
 msgstr ""
 
-#: client/lib/components/components.strings.js:66
+#: client/lib/components/components.strings.js:75
 #: client/lib/models/models.strings.js:16
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:122
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:52
@@ -2274,9 +2432,10 @@ msgstr ""
 #: client/features/templates/templates.strings.js:16
 #: client/features/templates/templates.strings.js:24
 #: client/src/inventories-hosts/hosts/host.list.js:69
-#: client/src/inventories-hosts/inventories/inventory.list.js:80
+#: client/src/inventories-hosts/inventories/inventory.list.js:81
 #: client/src/inventories-hosts/inventories/list/inventory-list.controller.js:71
 #: client/src/job-submission/job-submission.partial.html:17
+#: client/src/network-ui/network.ui.strings.js:12
 #: client/src/organizations/linkout/controllers/organizations-inventories.controller.js:70
 #: client/src/templates/job_templates/job-template.form.js:66
 #: client/src/templates/job_templates/job-template.form.js:80
@@ -2288,7 +2447,7 @@ msgstr ""
 msgid "Inventory File"
 msgstr ""
 
-#: client/lib/components/components.strings.js:71
+#: client/lib/components/components.strings.js:80
 #: client/lib/models/models.strings.js:20
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:29
 msgid "Inventory Scripts"
@@ -2298,8 +2457,9 @@ msgstr ""
 msgid "Inventory Sources"
 msgstr ""
 
+#: client/features/templates/templates.strings.js:108
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:46
-#: client/src/workflow-results/workflow-results.controller.js:70
+#: client/src/workflow-results/workflow-results.controller.js:68
 msgid "Inventory Sync"
 msgstr ""
 
@@ -2317,6 +2477,10 @@ msgstr ""
 
 #: client/features/output/output.strings.js:35
 msgid "Isolated"
+msgstr ""
+
+#: client/src/smart-status/smart-status.controller.js:43
+msgid "JOB ID"
 msgstr ""
 
 #: client/features/output/output.strings.js:83
@@ -2343,15 +2507,16 @@ msgstr ""
 #: client/features/jobs/routes/instanceJobs.route.js:13
 #: client/features/jobs/routes/inventoryCompletedJobs.route.js:22
 #: client/features/jobs/routes/jobs.route.js:12
+#: client/features/templates/templates.strings.js:113
 #: client/src/activity-stream/get-target-title.factory.js:32
-#: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:118
-#: client/src/instance-groups/instance-groups.strings.js:19
+#: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:119
+#: client/src/instance-groups/instance-groups.strings.js:23
 #: client/src/portal-mode/portal-mode-layout.partial.html:19
 msgid "JOBS"
 msgstr ""
 
 #: client/lib/components/code-mirror/code-mirror.strings.js:12
-#: client/lib/services/base-string.service.js:69
+#: client/lib/services/base-string.service.js:70
 #: client/src/job-submission/job-submission.partial.html:173
 msgid "JSON"
 msgstr ""
@@ -2362,8 +2527,12 @@ msgstr ""
 msgid "JSON:"
 msgstr ""
 
+#: client/src/workflow-results/workflow-results.controller.js:86
+msgid "Job"
+msgstr ""
+
 #: client/features/output/output.strings.js:50
-#: client/features/templates/templates.strings.js:47
+#: client/features/templates/templates.strings.js:48
 #: client/src/job-submission/job-submission.partial.html:228
 #: client/src/templates/job_templates/job-template.form.js:190
 #: client/src/templates/job_templates/job-template.form.js:197
@@ -2385,7 +2554,7 @@ msgid "Job Templates"
 msgstr ""
 
 #: client/features/output/output.strings.js:52
-#: client/features/templates/templates.strings.js:49
+#: client/features/templates/templates.strings.js:50
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:32
 #: client/src/job-submission/job-submission.partial.html:202
 #: client/src/templates/job_templates/job-template.form.js:47
@@ -2393,20 +2562,30 @@ msgstr ""
 msgid "Job Type"
 msgstr ""
 
-#: client/lib/components/components.strings.js:60
+#: client/src/home/dashboard/lists/jobs/jobs-list.directive.js:45
+msgid "Job failed. Click for details."
+msgstr ""
+
+#: client/src/home/dashboard/lists/jobs/jobs-list.directive.js:42
+msgid "Job successful. Click for details."
+msgstr ""
+
+#: client/lib/components/components.strings.js:69
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:30
 #: client/src/configuration/configuration.partial.html:22
-#: client/src/instance-groups/instance-groups.strings.js:37
+#: client/src/instance-groups/instance-groups.strings.js:47
 msgid "Jobs"
 msgstr ""
 
 #: client/features/output/output.strings.js:81
-#: client/src/workflow-results/workflow-results.controller.js:71
+#: client/features/templates/templates.strings.js:103
+#: client/src/workflow-results/workflow-results.controller.js:69
 msgid "KEY"
 msgstr ""
 
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:61
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:154
+#: client/src/network-ui/network.ui.strings.js:23
 #: client/src/shared/smart-search/smart-search.partial.html:14
 msgid "Key"
 msgstr ""
@@ -2429,7 +2608,7 @@ msgstr ""
 msgid "LAST USED"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:29
+#: client/features/templates/templates.strings.js:30
 msgid "LAUNCH"
 msgstr ""
 
@@ -2484,7 +2663,7 @@ msgstr ""
 msgid "Last Modified"
 msgstr ""
 
-#: client/src/access/rbac-multiselect/permissionsUsers.list.js:25
+#: client/src/access/rbac-multiselect/permissionsUsers.list.js:31
 #: client/src/users/users.form.js:36
 #: client/src/users/users.list.js:37
 msgid "Last Name"
@@ -2516,7 +2695,7 @@ msgstr ""
 msgid "Launched By"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:37
+#: client/features/templates/templates.strings.js:38
 #: client/src/job-submission/job-submission.partial.html:99
 msgid "Launching this job requires the passwords listed below. Enter and confirm each password before continuing."
 msgstr ""
@@ -2552,7 +2731,7 @@ msgid "License Type"
 msgstr ""
 
 #: client/features/output/output.strings.js:56
-#: client/features/templates/templates.strings.js:48
+#: client/features/templates/templates.strings.js:49
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:45
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:55
 #: client/src/job-submission/job-submission.partial.html:220
@@ -2576,6 +2755,10 @@ msgstr ""
 msgid "Limit to hosts where the Name tag begins with"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:43
+msgid "Limited to first 10"
+msgstr ""
+
 #: client/src/shared/socket/socket.service.js:203
 msgid "Live events: attempting to connect to the  server."
 msgstr ""
@@ -2593,6 +2776,7 @@ msgid "Loading..."
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:133
+#: client/src/scheduler/scheduler.strings.js:18
 msgid "Local Time Zone"
 msgstr ""
 
@@ -2604,7 +2788,7 @@ msgstr ""
 msgid "Log aggregator test successful."
 msgstr ""
 
-#: client/lib/components/components.strings.js:56
+#: client/lib/components/components.strings.js:65
 msgid "Logged in as"
 msgstr ""
 
@@ -2612,7 +2796,7 @@ msgstr ""
 msgid "Logging"
 msgstr ""
 
-#: client/lib/components/components.strings.js:58
+#: client/lib/components/components.strings.js:67
 msgid "Logout"
 msgstr ""
 
@@ -2623,6 +2807,10 @@ msgstr ""
 #: client/src/management-jobs/card/card.partial.html:6
 #: client/src/management-jobs/card/card.route.js:20
 msgid "MANAGEMENT JOBS"
+msgstr ""
+
+#: client/features/output/output.strings.js:104
+msgid "MODULE"
 msgstr ""
 
 #: client/features/templates/routes/portalModeTemplatesList.route.js:12
@@ -2639,7 +2827,7 @@ msgstr ""
 msgid "Machine Credential"
 msgstr ""
 
-#: client/lib/components/components.strings.js:73
+#: client/lib/components/components.strings.js:82
 msgid "Management Jobs"
 msgstr ""
 
@@ -2677,6 +2865,10 @@ msgstr ""
 msgid "Module Args"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:29
+msgid "Mon"
+msgstr ""
+
 #: client/src/inventories-hosts/shared/factories/set-status.factory.js:25
 msgid "Most recent job failed. Click to view jobs."
 msgstr ""
@@ -2685,12 +2877,24 @@ msgstr ""
 msgid "Most recent job successful. Click to view jobs."
 msgstr ""
 
+#: client/src/templates/survey-maker/surveys/init.factory.js:17
+msgid "Multiple Choice (multiple select)"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:16
+msgid "Multiple Choice (single select)"
+msgstr ""
+
 #: client/src/templates/survey-maker/shared/question-definition.form.js:77
 msgid "Multiple Choice Options"
 msgstr ""
 
 #: client/src/portal-mode/portal-mode-layout.partial.html:25
 msgid "My Jobs"
+msgstr ""
+
+#: client/lib/components/components.strings.js:71
+msgid "My View"
 msgstr ""
 
 #: client/features/applications/applications.strings.js:24
@@ -2745,7 +2949,7 @@ msgstr ""
 msgid "NEW WORKFLOW JOB TEMPLATE"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:63
+#: client/lib/services/base-string.service.js:64
 msgid "NEXT"
 msgstr ""
 
@@ -2774,6 +2978,7 @@ msgstr ""
 #: client/src/management-jobs/notifications/notification.route.js:46
 #: client/src/notifications/main.js:42
 #: client/src/notifications/main.js:89
+#: client/src/notifications/notification-templates-list/add-notifications-action.partial.html:2
 msgid "NOTIFICATIONS"
 msgstr ""
 
@@ -2786,7 +2991,7 @@ msgstr ""
 #: client/src/home/dashboard/lists/jobs/jobs-list.partial.html:13
 #: client/src/instance-groups/instance-groups.list.js:15
 #: client/src/inventories-hosts/hosts/host.list.js:61
-#: client/src/inventories-hosts/inventories/inventory.list.js:47
+#: client/src/inventories-hosts/inventories/inventory.list.js:48
 #: client/src/inventories-hosts/inventories/list/host-summary-popover/host-summary-popover.directive.js:55
 #: client/src/inventories-hosts/inventories/related/groups/groups.form.js:32
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-groups/group-nested-groups.form.js:33
@@ -2804,6 +3009,7 @@ msgstr ""
 #: client/src/projects/projects.form.js:30
 #: client/src/projects/projects.list.js:37
 #: client/src/scheduler/scheduled-jobs.list.js:31
+#: client/src/scheduler/scheduler.strings.js:13
 #: client/src/scheduler/schedules.list.js:41
 #: client/src/teams/teams.form.js:127
 #: client/src/teams/teams.form.js:28
@@ -2821,8 +3027,8 @@ msgstr ""
 msgid "Network"
 msgstr ""
 
-#: client/src/inventories-hosts/inventories/inventory.list.js:104
-#: client/src/inventories-hosts/inventories/inventory.list.js:106
+#: client/src/inventories-hosts/inventories/inventory.list.js:105
+#: client/src/inventories-hosts/inventories/inventory.list.js:107
 msgid "Network Visualization"
 msgstr ""
 
@@ -2847,7 +3053,7 @@ msgstr ""
 msgid "No Credentials Have Been Created"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:61
+#: client/features/templates/templates.strings.js:62
 #: client/src/job-submission/lists/credential/job-sub-cred-list.controller.js:44
 #: client/src/templates/job_templates/multi-credential/multi-credential-modal.directive.js:15
 msgid "No Credentials Matching This Type Have Been Created"
@@ -2885,7 +3091,7 @@ msgstr ""
 msgid "No Users exist"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:32
+#: client/features/templates/templates.strings.js:33
 msgid "No credentials selected"
 msgstr ""
 
@@ -2901,7 +3107,7 @@ msgstr ""
 msgid "No hosts with failures. Click for details."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:33
+#: client/features/templates/templates.strings.js:34
 msgid "No inventory selected"
 msgstr ""
 
@@ -2921,7 +3127,7 @@ msgstr ""
 msgid "No job failures"
 msgstr ""
 
-#: client/src/home/dashboard/lists/job-templates/job-templates-list.partial.html:54
+#: client/src/home/dashboard/lists/job-templates/job-templates-list.partial.html:55
 msgid "No job templates were recently used."
 msgstr ""
 
@@ -2952,6 +3158,10 @@ msgstr ""
 msgid "No records matched your search."
 msgstr ""
 
+#: client/features/output/output.strings.js:105
+msgid "No result found"
+msgstr ""
+
 #: client/src/scheduler/scheduled-jobs.list.js:16
 msgid "No schedules exist"
 msgstr ""
@@ -2968,12 +3178,12 @@ msgid "Normal User"
 msgstr ""
 
 #: client/features/output/output.strings.js:36
-#: client/src/workflow-results/workflow-results.controller.js:58
+#: client/src/workflow-results/workflow-results.controller.js:56
 msgid "Not Finished"
 msgstr ""
 
 #: client/features/output/output.strings.js:37
-#: client/src/workflow-results/workflow-results.controller.js:59
+#: client/src/workflow-results/workflow-results.controller.js:57
 msgid "Not Started"
 msgstr ""
 
@@ -3008,7 +3218,7 @@ msgstr ""
 msgid "Notification Templates"
 msgstr ""
 
-#: client/lib/components/components.strings.js:72
+#: client/lib/components/components.strings.js:81
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:20
 #: client/src/management-jobs/notifications/notification.route.js:21
 #: client/src/notifications/notifications.list.js:17
@@ -3019,7 +3229,7 @@ msgstr ""
 msgid "Notify Channel"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:67
+#: client/lib/services/base-string.service.js:68
 #: client/src/inventories-hosts/hosts/hosts.partial.html:55
 #: client/src/job-submission/job-submission.partial.html:269
 #: client/src/partials/survey-maker-modal.html:27
@@ -3029,12 +3239,12 @@ msgstr ""
 msgid "OFF"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:62
-#: client/src/network-ui/network-nav/network.nav.view.html:93
+#: client/lib/services/base-string.service.js:63
+#: client/src/network-ui/network-nav/network.nav.view.html:85
 msgid "OK"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:66
+#: client/lib/services/base-string.service.js:67
 #: client/src/inventories-hosts/hosts/hosts.partial.html:54
 #: client/src/job-submission/job-submission.partial.html:267
 #: client/src/partials/survey-maker-modal.html:26
@@ -3058,11 +3268,20 @@ msgstr ""
 msgid "ORGANIZATIONS"
 msgstr ""
 
-#: client/src/workflow-results/workflow-results.controller.js:67
+#: client/src/scheduler/scheduler.strings.js:37
+msgid "Occurrences"
+msgstr ""
+
+#: client/src/workflow-results/workflow-results.controller.js:65
 msgid "On Fail"
 msgstr ""
 
-#: client/src/workflow-results/workflow-results.controller.js:66
+#: client/features/templates/templates.strings.js:105
+msgid "On Failure"
+msgstr ""
+
+#: client/features/templates/templates.strings.js:104
+#: client/src/workflow-results/workflow-results.controller.js:64
 msgid "On Success"
 msgstr ""
 
@@ -3089,7 +3308,7 @@ msgstr ""
 
 #: client/src/credentials/credentials.form.js:46
 #: client/src/credentials/credentials.form.js:53
-#: client/src/inventories-hosts/inventories/inventory.list.js:60
+#: client/src/inventories-hosts/inventories/inventory.list.js:61
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:33
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:41
 #: client/src/inventory-scripts/inventory-scripts.form.js:40
@@ -3105,7 +3324,7 @@ msgstr ""
 msgid "Organization"
 msgstr ""
 
-#: client/lib/components/components.strings.js:68
+#: client/lib/components/components.strings.js:77
 #: client/lib/models/models.strings.js:35
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:136
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:64
@@ -3114,7 +3333,7 @@ msgstr ""
 msgid "Organizations"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:26
+#: client/features/templates/templates.strings.js:27
 #: client/src/job-submission/job-submission.partial.html:19
 msgid "Other Prompts"
 msgstr ""
@@ -3179,6 +3398,10 @@ msgstr ""
 msgid "PERMISSIONS"
 msgstr ""
 
+#: client/features/output/output.strings.js:102
+msgid "PLAY"
+msgstr ""
+
 #: client/src/partials/job-template-details.html:2
 msgid "PLAYBOOK"
 msgstr ""
@@ -3208,6 +3431,10 @@ msgstr ""
 #: client/src/projects/projects.list.js:14
 #: client/src/projects/projects.list.js:15
 msgid "PROJECTS"
+msgstr ""
+
+#: client/features/templates/templates.strings.js:26
+msgid "PROMPT"
 msgstr ""
 
 #: client/src/shared/paginate/paginate.partial.html:33
@@ -3246,6 +3473,7 @@ msgstr ""
 #: client/src/credentials/factories/kind-change.factory.js:97
 #: client/src/job-submission/job-submission.partial.html:104
 #: client/src/notifications/shared/type-change.service.js:30
+#: client/src/templates/survey-maker/surveys/init.factory.js:15
 #: client/src/users/users.form.js:71
 msgid "Password"
 msgstr ""
@@ -3280,7 +3508,7 @@ msgstr ""
 msgid "Paste the contents of the SSH private key file.%s or click to close%s"
 msgstr ""
 
-#: client/src/inventories-hosts/inventories/inventory.list.js:134
+#: client/src/inventories-hosts/inventories/inventory.list.js:135
 msgid "Pending Delete"
 msgstr ""
 
@@ -3317,12 +3545,16 @@ msgstr ""
 msgid "Playbook Directory"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:59
+#: client/features/templates/templates.strings.js:60
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:52
 msgid "Playbook Run"
 msgstr ""
 
-#: client/lib/components/components.strings.js:99
+#: client/features/output/output.strings.js:90
+msgid "Plays"
+msgstr ""
+
+#: client/lib/components/components.strings.js:108
 msgid "Please add items to this list."
 msgstr ""
 
@@ -3338,12 +3570,20 @@ msgstr ""
 msgid "Please assign roles to the selected users/teams"
 msgstr ""
 
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:209
+msgid "Please check the server and make sure the directory exists and file permissions are set correctly."
+msgstr ""
+
 #: client/src/license/license.partial.html:84
 msgid "Please click the button below to visit Ansible's website to get a Tower license key."
 msgstr ""
 
 #: client/src/inventories-hosts/inventory-hosts.strings.js:27
 msgid "Please click the icon to edit the host filter."
+msgstr ""
+
+#: client/features/templates/templates.strings.js:114
+msgid "Please click the start button to build your workflow."
 msgstr ""
 
 #: client/src/shared/form-generator.js:870
@@ -3363,7 +3603,7 @@ msgstr ""
 msgid "Please enter a number."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:38
+#: client/features/templates/templates.strings.js:39
 #: client/src/job-submission/job-submission.partial.html:112
 #: client/src/job-submission/job-submission.partial.html:126
 #: client/src/job-submission/job-submission.partial.html:140
@@ -3401,17 +3641,17 @@ msgstr ""
 msgid "Please enter an answer between"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:58
+#: client/features/templates/templates.strings.js:59
 #: client/src/job-submission/job-submission.partial.html:316
 msgid "Please enter an answer that is a decimal number."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:57
+#: client/features/templates/templates.strings.js:58
 #: client/src/job-submission/job-submission.partial.html:310
 msgid "Please enter an answer that is a valid integer."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:55
+#: client/features/templates/templates.strings.js:56
 #: client/src/job-submission/job-submission.partial.html:288
 #: client/src/job-submission/job-submission.partial.html:293
 #: client/src/job-submission/job-submission.partial.html:304
@@ -3420,8 +3660,20 @@ msgstr ""
 msgid "Please enter an answer."
 msgstr ""
 
+#: client/features/templates/templates.strings.js:115
+msgid "Please hover over a template for additional options."
+msgstr ""
+
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:169
 msgid "Please input a number greater than 1."
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:39
+msgid "Please provide a valid date."
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:22
+msgid "Please provide a value between 1 and 999."
 msgstr ""
 
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:54
@@ -3517,7 +3769,7 @@ msgstr ""
 msgid "Please select a number."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:56
+#: client/features/templates/templates.strings.js:57
 msgid "Please select a value"
 msgstr ""
 
@@ -3540,6 +3792,10 @@ msgstr ""
 msgid "Please select at least one value."
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:35
+msgid "Please select one or more days."
+msgstr ""
+
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:30
 msgid "Please select resources from the lists below."
 msgstr ""
@@ -3552,11 +3808,7 @@ msgstr ""
 msgid "Port"
 msgstr ""
 
-#: client/lib/components/components.strings.js:62
-msgid "Portal Mode"
-msgstr ""
-
-#: client/features/templates/templates.strings.js:28
+#: client/features/templates/templates.strings.js:29
 msgid "Preview"
 msgstr ""
 
@@ -3566,7 +3818,7 @@ msgstr ""
 msgid "Private Key"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:41
+#: client/features/templates/templates.strings.js:42
 #: client/src/credentials/credentials.form.js:264
 #: client/src/job-submission/job-submission.partial.html:118
 msgid "Private Key Passphrase"
@@ -3577,7 +3829,7 @@ msgstr ""
 msgid "Privilege Escalation"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:42
+#: client/features/templates/templates.strings.js:43
 #: client/src/credentials/credentials.form.js:305
 #: client/src/job-submission/job-submission.partial.html:132
 msgid "Privilege Escalation Password"
@@ -3616,7 +3868,8 @@ msgstr ""
 msgid "Project Path"
 msgstr ""
 
-#: client/src/workflow-results/workflow-results.controller.js:69
+#: client/features/templates/templates.strings.js:107
+#: client/src/workflow-results/workflow-results.controller.js:67
 msgid "Project Sync"
 msgstr ""
 
@@ -3628,7 +3881,7 @@ msgstr ""
 msgid "Project lookup failed. GET returned:"
 msgstr ""
 
-#: client/lib/components/components.strings.js:63
+#: client/lib/components/components.strings.js:72
 #: client/lib/models/models.strings.js:40
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:115
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:47
@@ -3666,6 +3919,7 @@ msgstr ""
 msgid "Promote {{ group }} and {{ host }}"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:46
 #: client/src/templates/survey-maker/shared/question-definition.form.js:27
 msgid "Prompt"
 msgstr ""
@@ -3696,6 +3950,7 @@ msgstr ""
 #: client/src/inventories-hosts/hosts/host.form.js:50
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.form.js:49
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:49
+#: client/src/network-ui/network.ui.strings.js:47
 msgid "Provide a host name, ip address, or ip address:port. Examples include:"
 msgstr ""
 
@@ -3721,13 +3976,17 @@ msgstr ""
 msgid "Provisioning Callback URL"
 msgstr ""
 
-#: client/src/notifications/add/add.controller.js:78
-#: client/src/notifications/edit/edit.controller.js:125
+#: client/src/notifications/add/add.controller.js:81
+#: client/src/notifications/edit/edit.controller.js:128
 msgid "Purple"
 msgstr ""
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:134
 msgid "RADIUS"
+msgstr ""
+
+#: client/src/instance-groups/instance-groups.strings.js:43
+msgid "RAM"
 msgstr ""
 
 #: client/src/home/dashboard/lists/jobs/jobs-list.partial.html:4
@@ -3738,7 +3997,7 @@ msgstr ""
 msgid "RECENTLY RUN JOBS"
 msgstr ""
 
-#: client/src/home/dashboard/lists/job-templates/job-templates-list.partial.html:50
+#: client/src/home/dashboard/lists/job-templates/job-templates-list.partial.html:51
 msgid "RECENTLY USED JOB TEMPLATES"
 msgstr ""
 
@@ -3779,7 +4038,7 @@ msgstr ""
 msgid "RESULTS"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:34
+#: client/features/templates/templates.strings.js:35
 #: client/lib/components/components.strings.js:8
 #: client/src/job-submission/job-submission.partial.html:44
 #: client/src/job-submission/job-submission.partial.html:87
@@ -3790,6 +4049,10 @@ msgstr ""
 #: client/src/credentials/factories/become-method-change.factory.js:25
 #: client/src/credentials/factories/kind-change.factory.js:82
 msgid "RSA Private Key"
+msgstr ""
+
+#: client/features/templates/templates.strings.js:116
+msgid "RUN"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.route.js:28
@@ -3804,8 +4067,8 @@ msgstr ""
 msgid "RUN COMMANDS"
 msgstr ""
 
-#: client/src/notifications/add/add.controller.js:78
-#: client/src/notifications/edit/edit.controller.js:125
+#: client/src/notifications/add/add.controller.js:84
+#: client/src/notifications/edit/edit.controller.js:131
 msgid "Random"
 msgstr ""
 
@@ -3813,7 +4076,7 @@ msgstr ""
 msgid "Read"
 msgstr ""
 
-#: client/src/workflow-results/workflow-results.controller.js:125
+#: client/src/workflow-results/workflow-results.controller.js:121
 msgid "Read only view of extra variables added to the workflow."
 msgstr ""
 
@@ -3831,8 +4094,8 @@ msgstr ""
 msgid "Recipient List"
 msgstr ""
 
-#: client/src/notifications/add/add.controller.js:78
-#: client/src/notifications/edit/edit.controller.js:125
+#: client/src/notifications/add/add.controller.js:82
+#: client/src/notifications/edit/edit.controller.js:129
 msgid "Red"
 msgstr ""
 
@@ -3867,15 +4130,15 @@ msgstr ""
 msgid "Related Groups"
 msgstr ""
 
-#: client/lib/components/components.strings.js:89
+#: client/lib/components/components.strings.js:98
 msgid "Relaunch On"
 msgstr ""
 
-#: client/lib/components/components.strings.js:88
+#: client/lib/components/components.strings.js:97
 msgid "Relaunch using host parameters"
 msgstr ""
 
-#: client/lib/components/components.strings.js:87
+#: client/lib/components/components.strings.js:96
 #: client/src/workflow-results/workflow-results.controller.js:37
 msgid "Relaunch using the same parameters"
 msgstr ""
@@ -3886,6 +4149,7 @@ msgstr ""
 
 #: client/src/access/add-rbac-user-team/rbac-selected-list.directive.js:102
 #: client/src/access/add-rbac-user-team/rbac-selected-list.directive.js:103
+#: client/src/network-ui/network.ui.strings.js:41
 #: client/src/teams/teams.form.js:145
 #: client/src/users/users.form.js:225
 msgid "Remove"
@@ -3896,6 +4160,7 @@ msgid "Remove any local modifications prior to performing an update."
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:149
+#: client/src/scheduler/scheduler.strings.js:19
 msgid "Repeat frequency"
 msgstr ""
 
@@ -3911,16 +4176,20 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
-#: client/lib/components/components.strings.js:81
+#: client/src/network-ui/network.ui.strings.js:28
+msgid "Reset Zoom"
+msgstr ""
+
+#: client/lib/components/components.strings.js:90
 msgid "Resources"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:88
+#: client/features/templates/templates.strings.js:89
 #: client/src/scheduler/schedules.list.js:24
 msgid "Resources are missing from this template."
 msgstr ""
 
-#: client/lib/services/base-string.service.js:85
+#: client/lib/services/base-string.service.js:87
 msgid "Return"
 msgstr ""
 
@@ -3977,7 +4246,13 @@ msgstr ""
 msgid "Role"
 msgstr ""
 
+#: client/src/network-ui/network.ui.strings.js:35
+msgid "Router"
+msgstr ""
+
 #: client/src/instance-groups/instance-groups.list.js:26
+#: client/src/instance-groups/instance-groups.strings.js:15
+#: client/src/instance-groups/instance-groups.strings.js:48
 msgid "Running Jobs"
 msgstr ""
 
@@ -3985,7 +4260,7 @@ msgstr ""
 msgid "SAML"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:61
+#: client/lib/services/base-string.service.js:62
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory-host-filter/host-filter-modal/host-filter-modal.partial.html:17
 #: client/src/inventories-hosts/shared/associate-groups/associate-groups.partial.html:17
 #: client/src/inventories-hosts/shared/associate-hosts/associate-hosts.partial.html:17
@@ -4068,7 +4343,7 @@ msgstr ""
 msgid "SEARCH"
 msgstr ""
 
-#: client/src/inventories-hosts/inventories/adhoc/adhoc-credential.route.js:36
+#: client/features/templates/templates.strings.js:118
 #: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:84
 msgid "SELECT"
 msgstr ""
@@ -4094,11 +4369,11 @@ msgstr ""
 msgid "SELECT HOSTS"
 msgstr ""
 
-#: client/src/instance-groups/instance-groups.strings.js:28
+#: client/src/instance-groups/instance-groups.strings.js:32
 msgid "SELECT INSTANCE"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:31
+#: client/features/templates/templates.strings.js:32
 msgid "SELECTED"
 msgstr ""
 
@@ -4117,7 +4392,8 @@ msgid "SETTING NAME"
 msgstr ""
 
 #: client/lib/components/components.strings.js:11
-#: client/lib/services/base-string.service.js:64
+#: client/lib/services/base-string.service.js:65
+#: client/src/templates/survey-maker/surveys/init.factory.js:486
 msgid "SHOW"
 msgstr ""
 
@@ -4143,7 +4419,7 @@ msgstr ""
 msgid "SSH Key"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:40
+#: client/features/templates/templates.strings.js:41
 msgid "SSH Password"
 msgstr ""
 
@@ -4155,12 +4431,20 @@ msgstr ""
 msgid "SSL Connection"
 msgstr ""
 
+#: client/features/templates/templates.strings.js:121
+msgid "START"
+msgstr ""
+
+#: client/src/smart-status/smart-status.controller.js:43
+msgid "STATUS"
+msgstr ""
+
 #: client/src/credentials/credentials.form.js:119
 #: client/src/credentials/credentials.form.js:127
 msgid "STS Token"
 msgstr ""
 
-#: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:61
+#: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:62
 msgid "SUCCESSFUL"
 msgstr ""
 
@@ -4176,6 +4460,10 @@ msgstr ""
 msgid "SYSTEM TRACKING"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:34
+msgid "Sat"
+msgstr ""
+
 #: client/src/credentials/factories/become-method-change.factory.js:70
 #: client/src/credentials/factories/kind-change.factory.js:127
 msgid "Satellite 6 URL"
@@ -4184,11 +4472,13 @@ msgstr ""
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:110
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:193
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:158
+#: client/src/scheduler/scheduler.strings.js:49
 #: client/src/shared/form-generator.js:1700
 msgid "Save"
 msgstr ""
 
 #: client/src/configuration/configuration.controller.js:510
+#: client/src/network-ui/network.ui.strings.js:48
 msgid "Save Complete"
 msgstr ""
 
@@ -4207,6 +4497,10 @@ msgstr ""
 msgid "Schedule"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:42
+msgid "Schedule Description"
+msgstr ""
+
 #: client/src/management-jobs/card/card.partial.html:28
 msgid "Schedule Management Job"
 msgstr ""
@@ -4219,11 +4513,27 @@ msgstr ""
 msgid "Schedule inventory syncs"
 msgstr ""
 
+#: client/src/scheduler/schedulerList.controller.js:122
+msgid "Schedule is active."
+msgstr ""
+
+#: client/src/scheduler/schedulerList.controller.js:122
+msgid "Schedule is active. Click to stop."
+msgstr ""
+
+#: client/src/scheduler/schedulerList.controller.js:127
+msgid "Schedule is stopped."
+msgstr ""
+
+#: client/src/scheduler/schedulerList.controller.js:127
+msgid "Schedule is stopped. Click to activate."
+msgstr ""
+
 #: client/src/templates/templates.list.js:96
 msgid "Schedule job template runs"
 msgstr ""
 
-#: client/lib/components/components.strings.js:61
+#: client/lib/components/components.strings.js:70
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:416
 #: client/src/projects/projects.form.js:290
@@ -4232,8 +4542,9 @@ msgstr ""
 msgid "Schedules"
 msgstr ""
 
-#: client/src/shared/smart-search/smart-search.controller.js:108
-#: client/src/shared/smart-search/smart-search.controller.js:32
+#: client/src/network-ui/network.ui.strings.js:32
+#: client/src/shared/smart-search/smart-search.controller.js:121
+#: client/src/shared/smart-search/smart-search.controller.js:160
 msgid "Search"
 msgstr ""
 
@@ -4251,6 +4562,8 @@ msgid "Security Token Service (STS) is a web service that enables you to request
 msgstr ""
 
 #: client/src/shared/form-generator.js:1704
+#: client/src/shared/lookup/lookup-modal.directive.js:59
+#: client/src/shared/lookup/lookup-modal.partial.html:20
 msgid "Select"
 msgstr ""
 
@@ -4374,7 +4687,7 @@ msgstr ""
 msgid "Service Account JSON File"
 msgstr ""
 
-#: client/lib/components/components.strings.js:77
+#: client/lib/components/components.strings.js:86
 msgid "Settings"
 msgstr ""
 
@@ -4388,7 +4701,7 @@ msgstr ""
 msgid "Show"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:45
+#: client/features/templates/templates.strings.js:46
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:115
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:118
 #: client/src/templates/job_templates/job-template.form.js:256
@@ -4420,7 +4733,7 @@ msgid "Sign in with %s Teams"
 msgstr ""
 
 #: client/features/output/output.strings.js:66
-#: client/features/templates/templates.strings.js:46
+#: client/features/templates/templates.strings.js:47
 #: client/src/job-submission/job-submission.partial.html:245
 #: client/src/templates/job_templates/job-template.form.js:207
 #: client/src/templates/job_templates/job-template.form.js:214
@@ -4436,7 +4749,7 @@ msgstr ""
 msgid "Smart Host Filter"
 msgstr ""
 
-#: client/src/inventories-hosts/inventories/inventory.list.js:85
+#: client/src/inventories-hosts/inventories/inventory.list.js:86
 #: client/src/inventories-hosts/inventories/list/inventory-list.controller.js:71
 #: client/src/organizations/linkout/controllers/organizations-inventories.controller.js:70
 #: client/src/shared/form-generator.js:1465
@@ -4522,19 +4835,26 @@ msgstr ""
 msgid "Specify which groups to create automatically. Group names will be created similar to the options selected. If blank, all groups above are created. Refer to Ansible Tower documentation for more detail."
 msgstr ""
 
+#: client/features/output/output.strings.js:107
+msgid "Standard Error"
+msgstr ""
+
+#: client/features/output/output.strings.js:106
 #: client/src/partials/logviewer.html:5
 msgid "Standard Out"
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:41
+#: client/src/scheduler/scheduler.strings.js:15
 msgid "Start Date"
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:56
+#: client/src/scheduler/scheduler.strings.js:16
 msgid "Start Time"
 msgstr ""
 
-#: client/lib/components/components.strings.js:95
+#: client/lib/components/components.strings.js:104
 msgid "Start a job using this template"
 msgstr ""
 
@@ -4554,6 +4874,7 @@ msgstr ""
 #: client/src/inventories-hosts/shared/factories/set-status.factory.js:43
 #: client/src/notifications/notification-templates-list/list.controller.js:71
 #: client/src/partials/logviewer.html:4
+#: client/src/workflow-results/workflow-results.controller.js:52
 msgid "Status"
 msgstr ""
 
@@ -4586,7 +4907,11 @@ msgstr ""
 msgid "Successful"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:27
+#: client/src/scheduler/scheduler.strings.js:28
+msgid "Sun"
+msgstr ""
+
+#: client/features/templates/templates.strings.js:28
 #: client/src/job-submission/job-submission.partial.html:20
 msgid "Survey"
 msgstr ""
@@ -4594,6 +4919,10 @@ msgstr ""
 #: client/src/templates/job_templates/edit-job-template/job-template-edit.controller.js:62
 #: client/src/templates/workflows/edit-workflow/workflow-edit.controller.js:262
 msgid "Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch."
+msgstr ""
+
+#: client/src/network-ui/network.ui.strings.js:34
+msgid "Switch"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/sources/sources.list.js:58
@@ -4652,6 +4981,10 @@ msgstr ""
 msgid "TACACS+"
 msgstr ""
 
+#: client/features/output/output.strings.js:103
+msgid "TASK"
+msgstr ""
+
 #: client/src/activity-stream/get-target-title.factory.js:23
 #: client/src/organizations/linkout/organizations-linkout.route.js:98
 #: client/src/organizations/list/organizations-list.controller.js:61
@@ -4674,7 +5007,7 @@ msgstr ""
 msgid "THERE ARE CURRENTLY NO INSTANCE GROUPS DEFINED"
 msgstr ""
 
-#: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:104
+#: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:105
 msgid "TIME"
 msgstr ""
 
@@ -4692,6 +5025,10 @@ msgstr ""
 #: client/features/users/tokens/users-tokens-list.route.js:11
 #: client/src/activity-stream/get-target-title.factory.js:50
 msgid "TOKENS"
+msgstr ""
+
+#: client/features/templates/templates.strings.js:110
+msgid "TOTAL TEMPLATES"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:235
@@ -4714,6 +5051,10 @@ msgstr ""
 msgid "Target URL"
 msgstr ""
 
+#: client/features/output/output.strings.js:91
+msgid "Tasks"
+msgstr ""
+
 #: client/features/credentials/legacy.credentials.js:91
 #: client/src/credentials/credentials.form.js:468
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:136
@@ -4723,10 +5064,11 @@ msgstr ""
 msgid "Team Roles"
 msgstr ""
 
-#: client/lib/components/components.strings.js:70
+#: client/lib/components/components.strings.js:79
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:40
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:36
 #: client/src/organizations/linkout/organizations-linkout.route.js:109
+#: client/src/organizations/linkout/organizations-linkout.route.js:111
 #: client/src/shared/stateDefinitions.factory.js:426
 #: client/src/users/users.form.js:162
 msgid "Teams"
@@ -4737,11 +5079,11 @@ msgstr ""
 msgid "Template"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:66
+#: client/features/templates/templates.strings.js:67
 msgid "Template parameter is missing."
 msgstr ""
 
-#: client/lib/components/components.strings.js:67
+#: client/lib/components/components.strings.js:76
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:37
 msgid "Templates"
 msgstr ""
@@ -4756,6 +5098,14 @@ msgstr ""
 
 #: client/src/notifications/notificationTemplates.list.js:77
 msgid "Test notification"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:13
+msgid "Text"
+msgstr ""
+
+#: client/src/templates/survey-maker/surveys/init.factory.js:14
+msgid "Textarea"
 msgstr ""
 
 #: client/src/shared/form-generator.js:1395
@@ -4776,8 +5126,17 @@ msgstr ""
 msgid "The Project ID is the GCE assigned identification. It is constructed as two words followed by a three digit number.  Such as:"
 msgstr ""
 
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:203
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:206
+msgid "The Project selected has a status of"
+msgstr ""
+
 #: client/src/projects/edit/projects-edit.controller.js:340
 msgid "The SCM update process is running."
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:24
+msgid "The day must be between 1 and 31."
 msgstr ""
 
 #: client/src/credentials/credentials.form.js:190
@@ -4813,6 +5172,14 @@ msgstr ""
 msgid "The project value"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:41
+msgid "The scheduler options are invalid, incomplete, or a date is in the past."
+msgstr ""
+
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:209
+msgid "The selected project has a status of"
+msgstr ""
+
 #: client/src/projects/list/projects-list.controller.js:176
 msgid "The selected project is not configured for SCM. To configure for SCM, edit the project and provide SCM settings, and then run an update."
 msgstr ""
@@ -4822,10 +5189,11 @@ msgid "The suggested format for variable names is lowercase and underscore-separ
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:124
+#: client/src/scheduler/scheduler.strings.js:17
 msgid "The time must be in HH24:MM:SS format."
 msgstr ""
 
-#: client/lib/services/base-string.service.js:76
+#: client/lib/services/base-string.service.js:78
 msgid "The {{ resourceType }} is currently being used by other resources."
 msgstr ""
 
@@ -4873,7 +5241,15 @@ msgstr ""
 msgid "These are the modules that {{BRAND_NAME}} supports running commands against."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:96
+#: client/features/templates/templates.strings.js:98
+msgid "This Job Template has a credential that requires a password.  Credentials requiring passwords on launch are not permitted on workflow nodes."
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:51
+msgid "This Job Template has a default credential that requires a password before launch.  Adding or editing schedules is prohibited while this credential is selected.  To add or edit a schedule, credentials that require a password must be removed from the Job Template."
+msgstr ""
+
+#: client/features/templates/templates.strings.js:97
 msgid "This Job Template is missing a default inventory or project. This must be addressed in the Job Template form before this node can be saved."
 msgstr ""
 
@@ -4899,12 +5275,16 @@ msgstr ""
 msgid "This is the tenant name.  This value is usually the same  as the username."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:62
+#: client/features/templates/templates.strings.js:63
 msgid "This job template has a default {{typeLabel}} credential which must be included or replaced before proceeding."
 msgstr ""
 
 #: client/src/notifications/notifications.list.js:21
 msgid "This list is populated by notification templates added from the %sNotifications%s section"
+msgstr ""
+
+#: client/src/organizations/linkout/organizations-linkout.route.js:111
+msgid "This list is populated by teams added from the"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/insights/insights.partial.html:4
@@ -4926,6 +5306,10 @@ msgstr ""
 
 #: client/src/configuration/configuration.controller.js:626
 msgid "This will reset all configuration values to their factory defaults. Are you sure you want to proceed?"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:32
+msgid "Thu"
 msgstr ""
 
 #: client/src/activity-stream/streams.list.js:25
@@ -4969,7 +5353,8 @@ msgstr ""
 msgid "Total Issues"
 msgstr ""
 
-#: client/src/workflow-results/workflow-results.controller.js:62
+#: client/src/instance-groups/instance-groups.strings.js:16
+#: client/src/workflow-results/workflow-results.controller.js:60
 msgid "Total Jobs"
 msgstr ""
 
@@ -4977,9 +5362,13 @@ msgstr ""
 msgid "Traceback"
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:30
+msgid "Tue"
+msgstr ""
+
 #: client/src/credentials/credentials.form.js:60
 #: client/src/credentials/credentials.form.js:84
-#: client/src/inventories-hosts/inventories/inventory.list.js:55
+#: client/src/inventories-hosts/inventories/inventory.list.js:56
 #: client/src/inventories-hosts/inventories/related/sources/sources.list.js:41
 #: client/src/notifications/notificationTemplates.form.js:54
 #: client/src/notifications/notificationTemplates.list.js:39
@@ -5020,43 +5409,43 @@ msgstr ""
 msgid "Unable to Submit"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:87
+#: client/features/templates/templates.strings.js:88
 msgid "Unable to copy template."
 msgstr ""
 
-#: client/src/instance-groups/instance-groups.strings.js:43
+#: client/src/instance-groups/instance-groups.strings.js:54
 msgid "Unable to delete instance group."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:83
+#: client/features/templates/templates.strings.js:84
 msgid "Unable to delete template."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:85
+#: client/features/templates/templates.strings.js:86
 msgid "Unable to determine template type."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:68
+#: client/features/templates/templates.strings.js:69
 msgid "Unable to determine this template's type while copying."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:69
+#: client/features/templates/templates.strings.js:70
 msgid "Unable to determine this template's type while deleting."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:70
+#: client/features/templates/templates.strings.js:71
 msgid "Unable to determine this template's type while editing."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:71
+#: client/features/templates/templates.strings.js:72
 msgid "Unable to determine this template's type while launching."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:72
+#: client/features/templates/templates.strings.js:73
 msgid "Unable to determine this template's type while scheduling."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:82
+#: client/features/templates/templates.strings.js:83
 msgid "Unable to edit template."
 msgstr ""
 
@@ -5064,19 +5453,19 @@ msgstr ""
 msgid "Unable to get resource:"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:84
+#: client/features/templates/templates.strings.js:85
 msgid "Unable to launch template."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:86
+#: client/features/templates/templates.strings.js:87
 msgid "Unable to schedule job."
 msgstr ""
 
-#: client/src/instance-groups/instance-groups.strings.js:33
+#: client/src/instance-groups/instance-groups.strings.js:37
 msgid "Unavailable"
 msgstr ""
 
-#: client/src/instance-groups/instance-groups.strings.js:32
+#: client/src/instance-groups/instance-groups.strings.js:36
 msgid "Unavailable to run jobs."
 msgstr ""
 
@@ -5086,6 +5475,10 @@ msgstr ""
 
 #: client/lib/components/components.strings.js:25
 msgid "Unexpected server error. View the console for more information"
+msgstr ""
+
+#: client/src/network-ui/network.ui.strings.js:36
+msgid "Unknown"
 msgstr ""
 
 #: client/lib/components/components.strings.js:38
@@ -5166,6 +5559,11 @@ msgstr ""
 msgid "Use TLS"
 msgstr ""
 
+#: client/src/instance-groups/instance-groups.strings.js:17
+#: client/src/instance-groups/instance-groups.strings.js:38
+msgid "Used Capacity"
+msgstr ""
+
 #: client/src/credentials/credentials.form.js:76
 msgid "Used to check out and synchronize playbook repositories with a remote source control management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are used by Projects."
 msgstr ""
@@ -5189,7 +5587,7 @@ msgstr ""
 msgid "User Type"
 msgstr ""
 
-#: client/src/access/rbac-multiselect/permissionsUsers.list.js:30
+#: client/src/access/rbac-multiselect/permissionsUsers.list.js:36
 #: client/src/credentials/factories/become-method-change.factory.js:17
 #: client/src/credentials/factories/become-method-change.factory.js:38
 #: client/src/credentials/factories/kind-change.factory.js:17
@@ -5208,12 +5606,16 @@ msgstr ""
 msgid "Usernames, passwords, and access keys for authenticating to the specified cloud or infrastructure provider. These are used for smart inventory sources and for cloud provisioning and deployment in playbook runs."
 msgstr ""
 
-#: client/lib/components/components.strings.js:69
+#: client/lib/components/components.strings.js:78
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:35
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:38
 #: client/src/organizations/organizations.form.js:86
 #: client/src/teams/teams.form.js:78
 msgid "Users"
+msgstr ""
+
+#: client/src/scheduler/schedulerList.controller.js:46
+msgid "Using a credential that requires a password on launch is prohibited when creating a Job Template schedule"
 msgstr ""
 
 #: client/lib/components/code-mirror/code-mirror.strings.js:9
@@ -5223,6 +5625,14 @@ msgstr ""
 #: client/src/home/dashboard/lists/job-templates/job-templates-list.partial.html:7
 #: client/src/home/dashboard/lists/jobs/jobs-list.partial.html:7
 msgid "VIEW ALL"
+msgstr ""
+
+#: client/lib/components/components.strings.js:57
+msgid "VIEW LESS"
+msgstr ""
+
+#: client/lib/components/components.strings.js:56
+msgid "VIEW MORE"
 msgstr ""
 
 #: client/src/shared/paginate/paginate.partial.html:48
@@ -5257,14 +5667,14 @@ msgstr ""
 msgid "Vault ID"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:43
+#: client/features/templates/templates.strings.js:44
 #: client/src/credentials/credentials.form.js:391
 #: client/src/job-submission/job-submission.partial.html:146
 msgid "Vault Password"
 msgstr ""
 
 #: client/features/output/output.strings.js:71
-#: client/features/templates/templates.strings.js:50
+#: client/features/templates/templates.strings.js:51
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:82
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:91
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:307
@@ -5283,10 +5693,10 @@ msgstr ""
 #: client/src/credential-types/credential-types.list.js:64
 #: client/src/credentials/credentials.list.js:82
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:58
-#: client/src/inventories-hosts/inventories/inventory.list.js:119
+#: client/src/inventories-hosts/inventories/inventory.list.js:120
 #: client/src/inventory-scripts/inventory-scripts.list.js:70
 #: client/src/notifications/notificationTemplates.list.js:91
-#: client/src/scheduler/schedules.list.js:91
+#: client/src/scheduler/schedules.list.js:93
 #: client/src/teams/teams.list.js:64
 #: client/src/templates/templates.list.js:108
 #: client/src/users/users.list.js:70
@@ -5297,7 +5707,7 @@ msgstr ""
 msgid "View Activity Stream"
 msgstr ""
 
-#: client/lib/components/components.strings.js:57
+#: client/lib/components/components.strings.js:66
 msgid "View Documentation"
 msgstr ""
 
@@ -5373,7 +5783,7 @@ msgstr ""
 msgid "View host"
 msgstr ""
 
-#: client/src/inventories-hosts/inventories/inventory.list.js:121
+#: client/src/inventories-hosts/inventories/inventory.list.js:122
 msgid "View inventory"
 msgstr ""
 
@@ -5385,7 +5795,7 @@ msgstr ""
 msgid "View notification"
 msgstr ""
 
-#: client/src/scheduler/schedules.list.js:93
+#: client/src/scheduler/schedules.list.js:95
 msgid "View schedule"
 msgstr ""
 
@@ -5407,6 +5817,7 @@ msgid "View the"
 msgstr ""
 
 #: client/features/output/output.strings.js:21
+#: client/lib/components/components.strings.js:61
 msgid "View the Credential"
 msgstr ""
 
@@ -5446,7 +5857,7 @@ msgstr ""
 msgid "View user"
 msgstr ""
 
-#: client/lib/components/components.strings.js:80
+#: client/lib/components/components.strings.js:89
 msgid "Views"
 msgstr ""
 
@@ -5454,11 +5865,21 @@ msgstr ""
 msgid "WORKFLOW"
 msgstr ""
 
+#: client/features/templates/templates.strings.js:109
+#: client/src/scheduler/scheduler.strings.js:50
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:213
+msgid "Warning"
+msgstr ""
+
 #: client/src/configuration/auth-form/configuration-auth.controller.js:91
 #: client/src/configuration/configuration.controller.js:229
 #: client/src/configuration/configuration.controller.js:314
 #: client/src/configuration/system-form/configuration-system.controller.js:55
 msgid "Warning: Unsaved Changes"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:31
+msgid "Wed"
 msgstr ""
 
 #: client/src/license/license.partial.html:78
@@ -5505,7 +5926,7 @@ msgid "Write"
 msgstr ""
 
 #: client/lib/components/code-mirror/code-mirror.strings.js:11
-#: client/lib/services/base-string.service.js:68
+#: client/lib/services/base-string.service.js:69
 #: client/src/job-submission/job-submission.partial.html:171
 msgid "YAML"
 msgstr ""
@@ -5516,20 +5937,20 @@ msgstr ""
 msgid "YAML:"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:72
+#: client/lib/services/base-string.service.js:73
 msgid "YES"
 msgstr ""
 
-#: client/src/notifications/add/add.controller.js:78
-#: client/src/notifications/edit/edit.controller.js:125
+#: client/src/notifications/add/add.controller.js:83
+#: client/src/notifications/edit/edit.controller.js:130
 msgid "Yellow"
 msgstr ""
 
-#: client/src/home/dashboard/lists/job-templates/job-templates-list.partial.html:56
+#: client/src/home/dashboard/lists/job-templates/job-templates-list.partial.html:57
 msgid "You can create a job template <a href=\"#/templates/add_job_template\">here</a>."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:92
+#: client/features/templates/templates.strings.js:93
 msgid "You do not have access to all resources used by this workflow. Resources that you don't have access to will not be copied and will result in an incomplete workflow."
 msgstr ""
 
@@ -5545,7 +5966,11 @@ msgstr ""
 msgid "You do not have permission to add a user."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:67
+#: client/src/access/rbac-multiselect/rbac-multiselect-list.directive.js:174
+msgid "You do not have permission to manage this user"
+msgstr ""
+
+#: client/features/templates/templates.strings.js:68
 msgid "You do not have permission to perform this action."
 msgstr ""
 
@@ -5558,6 +5983,11 @@ msgstr ""
 #: client/src/configuration/configuration.controller.js:313
 #: client/src/configuration/system-form/configuration-system.controller.js:54
 msgid "You have unsaved changes. Would you like to proceed <strong>without</strong> saving?"
+msgstr ""
+
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:203
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:206
+msgid "You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook."
 msgstr ""
 
 #: client/src/projects/list/projects-list.controller.js:257
@@ -5591,6 +6021,10 @@ msgstr ""
 #: client/features/output/output.strings.js:78
 #: client/src/shared/smart-search/smart-search.partial.html:53
 msgid "documentation"
+msgstr ""
+
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:203
+msgid "failed"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/sources/add/sources-add.controller.js:247
@@ -5632,8 +6066,16 @@ msgstr ""
 msgid "hosts with failures. Click for details."
 msgstr ""
 
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:209
+msgid "missing"
+msgstr ""
+
 #: client/src/access/rbac-multiselect/permissionsTeams.list.js:21
 msgid "name"
+msgstr ""
+
+#: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:206
+msgid "never updated"
 msgstr ""
 
 #: client/src/shared/paginate/paginate.partial.html:34
@@ -5645,12 +6087,32 @@ msgstr ""
 msgid "of the filters match."
 msgstr ""
 
+#: client/src/scheduler/scheduler.strings.js:26
+msgid "on"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:23
+msgid "on day"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:27
+msgid "on days"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:25
+msgid "on the"
+msgstr ""
+
 #: client/src/access/rbac-multiselect/permissionsTeams.list.js:24
 msgid "organization"
 msgstr ""
 
 #: client/src/shared/form-generator.js:1078
 msgid "playbook"
+msgstr ""
+
+#: client/src/organizations/linkout/organizations-linkout.route.js:111
+msgid "section"
 msgstr ""
 
 #: client/src/credentials/credentials.form.js:138
@@ -5726,7 +6188,7 @@ msgstr ""
 msgid "{{ appName }} Token"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:93
+#: client/lib/services/base-string.service.js:95
 msgid "{{ header }} {{ body }}"
 msgstr ""
 
