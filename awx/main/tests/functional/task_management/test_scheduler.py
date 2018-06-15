@@ -265,10 +265,10 @@ class TestReaper():
     def all_jobs(self, mocker):
         now = tz_now()
 
-        Instance.objects.create(hostname='host1', capacity=100)
-        Instance.objects.create(hostname='host2', capacity=100)
-        Instance.objects.create(hostname='host3_split', capacity=100)
-        Instance.objects.create(hostname='host4_offline', capacity=0)
+        Instance.objects.create(hostname='host1', system_hostname='host1_not_really', capacity=100)
+        Instance.objects.create(hostname='host2', system_hostname='host2', capacity=100)
+        Instance.objects.create(hostname='host3_split', system_hostname='host3_not_really', capacity=100)
+        Instance.objects.create(hostname='host4_offline', system_hostname='host4_offline', capacity=0)
 
         j1 = Job.objects.create(status='pending', execution_node='host1')
         j2 = Job.objects.create(status='waiting', celery_task_id='considered_j2')
@@ -327,7 +327,7 @@ class TestReaper():
     @pytest.fixture
     def active_tasks(self):
         return ([], {
-            'host1': ['considered_j2', 'considered_j3', 'considered_j4',],
+            'host1_not_really': ['considered_j2', 'considered_j3', 'considered_j4',],
             'host2': ['considered_j6', 'considered_j7'],
         })
 
@@ -340,9 +340,9 @@ class TestReaper():
 
         tm.get_running_tasks = mocker.Mock(return_value=(running_tasks, waiting_tasks))
         tm.get_active_tasks = mocker.Mock(return_value=active_tasks)
-        
+
         tm.cleanup_inconsistent_celery_tasks()
-        
+
         for j in considered_jobs:
             if j not in reapable_jobs:
                 j.save.assert_not_called()
