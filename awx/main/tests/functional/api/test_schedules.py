@@ -2,7 +2,8 @@ import pytest
 
 from awx.api.versioning import reverse
 
-from awx.main.models import JobTemplate
+from awx.main.models import JobTemplate, Schedule
+from awx.main.utils.encryption import decrypt_value, get_encryption_key
 
 
 RRULE_EXAMPLE = 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
@@ -49,6 +50,50 @@ def test_valid_survey_answer(post, admin_user, project, inventory, survey_spec_f
     url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
     post(url, {'name': 'test sch', 'rrule': RRULE_EXAMPLE, 'extra_data': '{"var1": 54}'},
          admin_user, expect=201)
+
+
+@pytest.mark.django_db
+def test_encrypted_survey_answer(post, patch, admin_user, project, inventory, survey_spec_factory):
+    job_template = JobTemplate.objects.create(
+        name='test-jt',
+        project=project,
+        playbook='helloworld.yml',
+        inventory=inventory,
+        ask_variables_on_launch=False,
+        survey_enabled=True,
+        survey_spec=survey_spec_factory([{'variable': 'var1', 'type': 'password'}])
+    )
+
+    # test encrypted-on-create
+    url = reverse('api:job_template_schedules_list', kwargs={'pk': job_template.id})
+    r = post(url, {'name': 'test sch', 'rrule': RRULE_EXAMPLE, 'extra_data': '{"var1": "foo"}'},
+             admin_user, expect=201)
+    assert r.data['extra_data']['var1'] == "$encrypted$"
+    schedule = Schedule.objects.get(pk=r.data['id'])
+    assert schedule.extra_data['var1'].startswith('$encrypted$')
+    assert decrypt_value(get_encryption_key('value', pk=None), schedule.extra_data['var1']) == 'foo'
+
+    # test a no-op change
+    r = patch(
+        schedule.get_absolute_url(),
+        data={'extra_data': {'var1': '$encrypted$'}},
+        user=admin_user,
+        expect=200
+    )
+    assert r.data['extra_data']['var1'] == '$encrypted$'
+    schedule.refresh_from_db()
+    assert decrypt_value(get_encryption_key('value', pk=None), schedule.extra_data['var1']) == 'foo'
+
+    # change to a different value
+    r = patch(
+        schedule.get_absolute_url(),
+        data={'extra_data': {'var1': 'bar'}},
+        user=admin_user,
+        expect=200
+    )
+    assert r.data['extra_data']['var1'] == '$encrypted$'
+    schedule.refresh_from_db()
+    assert decrypt_value(get_encryption_key('value', pk=None), schedule.extra_data['var1']) == 'bar'
 
 
 @pytest.mark.django_db

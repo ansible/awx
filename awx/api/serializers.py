@@ -3632,6 +3632,10 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         return summary_fields
 
     def validate(self, attrs):
+        db_extra_data = {}
+        if self.instance:
+            db_extra_data = parse_yaml_or_json(self.instance.extra_data)
+
         attrs = super(LaunchConfigurationBaseSerializer, self).validate(attrs)
 
         ujt = None
@@ -3640,39 +3644,38 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         elif self.instance:
             ujt = self.instance.unified_job_template
 
-        # Replace $encrypted$ submissions with db value if exists
         # build additional field survey_passwords to track redacted variables
+        password_dict = {}
+        extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
+        if hasattr(ujt, 'survey_password_variables'):
+            # Prepare additional field survey_passwords for save
+            for key in ujt.survey_password_variables():
+                if key in extra_data:
+                    password_dict[key] = REPLACE_STR
+
+        # Replace $encrypted$ submissions with db value if exists
         if 'extra_data' in attrs:
-            extra_data = parse_yaml_or_json(attrs.get('extra_data', {}))
-            if hasattr(ujt, 'survey_password_variables'):
-                # Prepare additional field survey_passwords for save
-                password_dict = {}
-                for key in ujt.survey_password_variables():
-                    if key in extra_data:
-                        password_dict[key] = REPLACE_STR
+            if password_dict:
                 if not self.instance or password_dict != self.instance.survey_passwords:
                     attrs['survey_passwords'] = password_dict.copy()
                 # Force dict type (cannot preserve YAML formatting if passwords are involved)
-                if not isinstance(attrs['extra_data'], dict):
-                    attrs['extra_data'] = parse_yaml_or_json(attrs['extra_data'])
                 # Encrypt the extra_data for save, only current password vars in JT survey
+                # but first, make a copy or else this is referenced by request.data, and
+                # user could get encrypted string in form data in API browser
+                attrs['extra_data'] = extra_data.copy()
                 encrypt_dict(attrs['extra_data'], password_dict.keys())
                 # For any raw $encrypted$ string, either
                 # - replace with existing DB value
                 # - raise a validation error
-                # - remove key from extra_data if survey default is present
-                if self.instance:
-                    db_extra_data = parse_yaml_or_json(self.instance.extra_data)
-                else:
-                    db_extra_data = {}
+                # - ignore, if default present
                 for key in password_dict.keys():
                     if attrs['extra_data'].get(key, None) == REPLACE_STR:
                         if key not in db_extra_data:
                             element = ujt.pivot_spec(ujt.survey_spec)[key]
-                            if 'default' in element and element['default']:
-                                attrs['survey_passwords'].pop(key, None)
-                                attrs['extra_data'].pop(key, None)
-                            else:
+                            # NOTE: validation _of_ the default values of password type
+                            # questions not done here or on launch, but doing so could
+                            # leak info about values, so it should not be added
+                            if not ('default' in element and element['default']):
                                 raise serializers.ValidationError(
                                     {"extra_data": _('Provided variable {} has no database value to replace with.').format(key)})
                         else:
@@ -3682,6 +3685,18 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         mock_obj = self._build_mock_obj(attrs)
         accepted, rejected, errors = ujt._accept_or_ignore_job_kwargs(
             _exclude_errors=self.exclude_errors, **mock_obj.prompts_dict())
+
+        # Remove all unprocessed $encrypted$ strings, indicating default usage
+        if 'extra_data' in attrs and password_dict:
+            for key, value in attrs['extra_data'].copy().items():
+                if value == REPLACE_STR:
+                    if key in password_dict:
+                        attrs['extra_data'].pop(key)
+                        attrs.get('survey_passwords', {}).pop(key, None)
+                    else:
+                        errors.setdefault('extra_vars', []).append(
+                            _('"$encrypted$ is a reserved keyword, may not be used for {var_name}."'.format(key))
+                        )
 
         # Launch configs call extra_vars extra_data for historical reasons
         if 'extra_vars' in errors:
