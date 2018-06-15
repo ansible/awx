@@ -3034,6 +3034,10 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
     def get_summary_fields(self, obj):
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
         all_creds = []
+        # Organize credential data into multitude of deprecated fields
+        vault_credential = None
+        credential = None
+        extra_creds = []
         if obj.pk:
             for cred in obj.credentials.all():
                 summarized_cred = {
@@ -3044,17 +3048,12 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
                     'credential_type_id': cred.credential_type_id
                 }
                 all_creds.append(summarized_cred)
-        # Organize credential data into multitude of deprecated fields
-        extra_creds = []
-        vault_credential = None
-        credential = None
-        for summarized_cred in all_creds:
-            if summarized_cred['kind'] in ('cloud', 'net'):
-                extra_creds.append(summarized_cred)
-            elif summarized_cred['kind'] == 'ssh':
-                credential = summarized_cred
-            elif summarized_cred['kind'] == 'vault':
-                vault_credential = summarized_cred
+                if cred.credential_type.kind in ('cloud', 'net'):
+                    extra_creds.append(summarized_cred)
+                elif summarized_cred['kind'] == 'ssh':
+                    credential = summarized_cred
+                elif summarized_cred['kind'] == 'vault':
+                    vault_credential = summarized_cred
         # Selectively apply those fields, depending on view deetails
         if (self.is_detail_view or self.version == 1) and credential:
             summary_fields['credential'] = credential
