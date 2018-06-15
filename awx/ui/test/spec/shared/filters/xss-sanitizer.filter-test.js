@@ -12,6 +12,6 @@ describe('Filter: sanitize', () => {
     });
 
     it('should sanitize xss-vulnerable strings', function(){
-      expect(filter("<div>foobar</div>")).toBe("&lt;div&gt;foobar&lt;/div&gt;");
+      expect(filter("<div>foobar</div>")).toBe("<div>foobar</div>");
     });
 });
