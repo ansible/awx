@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0040_v330_unifiedjob_controller_node'),
+        ('main', '0041_v330_update_oauth_refreshtoken'),
     ]
 
     operations = [
