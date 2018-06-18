@@ -26,7 +26,10 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
         function init(){
             // @issue What is this doing, why
             $scope.$emit("HideOrgListHeader");
-            $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+            $scope.custom_virtualenvs_visible = ConfigData.custom_virtualenvs.length > 1;
+            $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs.filter(
+                v => !/\/ansible\/$/.test(v)
+            );
             CreateSelect2({
                 element: '#organization_custom_virtualenv',
                 multiple: false,

@@ -928,7 +928,7 @@ def get_custom_venv_choices():
         return [
             os.path.join(custom_venv_path, x.decode('utf-8'), '')
             for x in os.listdir(custom_venv_path)
-            if x not in ('awx', 'ansible') and
+            if x != 'awx' and
             os.path.isdir(os.path.join(custom_venv_path, x)) and
             os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
         ]

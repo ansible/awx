@@ -234,14 +234,15 @@ function(NotificationsList, i18n) {
                 custom_virtualenv: {
                     label: i18n._('Ansible Environment'),
                     type: 'select',
-                    defaultText: i18n._('Default Environment'),
+                    defaultText: i18n._('Use Default Environment'),
                     ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
+
                     awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this job template to run on.") + "</p>",
                     dataTitle: i18n._('Ansible Environment'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)',
-                    ngShow: 'custom_virtualenvs_options.length > 0'
+                    ngShow: 'custom_virtualenvs_options.length > 1'
                 },
                 instance_groups: {
                     label: i18n._('Instance Groups'),
