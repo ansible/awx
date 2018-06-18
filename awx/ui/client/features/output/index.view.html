@@ -1,7 +1,7 @@
 <div ui-view></div>
 <div class="JobResults-container">
     <at-panel ng-show="!vm.isPanelExpanded">
-        <at-job-details 
+        <at-job-details
             resource="vm.resource">
         </at-job-details>
     </at-panel>
@@ -14,7 +14,7 @@
             resource="vm.resource"
             expanded="vm.isPanelExpanded">
         </at-job-stats>
-        <at-job-search></at-job-search>
+        <at-job-search reload="vm.reloadState"></at-job-search>
 
         <div class="at-Stdout-menuTop">
             <div class="pull-left" ng-click="vm.toggleMenuExpand()">

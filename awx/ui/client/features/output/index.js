@@ -191,6 +191,7 @@ function JobsRun ($stateRegistry, $filter, strings) {
         ncyBreadcrumb,
         params: {
             handleErrors: true,
+            isPanelExpanded: false,
         },
         data: {
             activityStream: false,
