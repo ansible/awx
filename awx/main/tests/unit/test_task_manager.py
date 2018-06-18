@@ -26,7 +26,6 @@ class TestCleanupInconsistentCeleryTasks():
     def test_instance_does_not_exist(self, logger_mock, *args):
         logger_mock.error = mock.MagicMock(side_effect=RuntimeError("mocked"))
         tm = TaskManager()
-        tm.map_system_hostname_to_instance_hostname = lambda *args: dict()
         with pytest.raises(RuntimeError) as excinfo:
             tm.cleanup_inconsistent_celery_tasks()
 
@@ -46,7 +45,6 @@ class TestCleanupInconsistentCeleryTasks():
         job.websocket_emit_status = mock.MagicMock()
         get_running_tasks.return_value = ({'host1': [job]}, [])
         tm = TaskManager()
-        tm.map_system_hostname_to_instance_hostname = lambda *args: dict(host1=[])
 
         with mock.patch.object(job, 'save', side_effect=DatabaseError):
             tm.cleanup_inconsistent_celery_tasks()

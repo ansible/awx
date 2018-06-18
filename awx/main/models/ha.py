@@ -45,11 +45,6 @@ class Instance(BaseModel):
 
     uuid = models.CharField(max_length=40)
     hostname = models.CharField(max_length=250, unique=True)
-    system_hostname = models.CharField(
-        max_length=255,
-        db_index=True,
-        help_text="Machine hostname",
-    )
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     last_isolated_check = models.DateTimeField(
@@ -113,10 +108,6 @@ class Instance(BaseModel):
     @property
     def jobs_total(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname).count()
-
-    @property
-    def celery_system_hostname(self):
-        return 'celery@{}'.format(self.system_hostname)
 
     def is_lost(self, ref_time=None, isolated=False):
         if ref_time is None:
