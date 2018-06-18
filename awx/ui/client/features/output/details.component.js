@@ -289,7 +289,7 @@ function getProjectDetails () {
 
     const label = strings.get('labels.PROJECT');
     const link = `/#/projects/${project.id}`;
-    const value = $filter('sanitize')(project.name);
+    const value = project.name;
     const tooltip = strings.get('tooltips.PROJECT');
 
     return { label, link, value, tooltip };
