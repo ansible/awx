@@ -237,6 +237,12 @@ function handleSummaryEvent (data) {
     stream.setFinalCounter(data.final_counter);
 }
 
+function reloadState (params) {
+    params.isPanelExpanded = vm.isPanelExpanded;
+
+    return $state.transitionTo($state.current, params, { inherit: false, location: 'replace' });
+}
+
 function OutputIndexController (
     _$compile_,
     _$q_,
@@ -250,6 +256,7 @@ function OutputIndexController (
     _stream_,
     $filter,
     strings,
+    $stateParams,
 ) {
     $compile = _$compile_;
     $q = _$q_;
@@ -269,7 +276,10 @@ function OutputIndexController (
     vm.title = $filter('sanitize')(resource.model.get('name'));
     vm.strings = strings;
     vm.resource = resource;
-    vm.isPanelExpanded = false;
+
+    const { isPanelExpanded } = $stateParams;
+    vm.reloadState = reloadState;
+    vm.isPanelExpanded = isPanelExpanded;
     vm.togglePanelExpand = togglePanelExpand;
 
     // Stdout Navigation
@@ -325,6 +335,7 @@ OutputIndexController.$inject = [
     'OutputStreamService',
     '$filter',
     'OutputStrings',
+    '$stateParams',
 ];
 
 module.exports = OutputIndexController;

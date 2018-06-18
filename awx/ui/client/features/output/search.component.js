@@ -1,6 +1,5 @@
 const templateUrl = require('~features/output/search.partial.html');
 
-const searchReloadOptions = { inherit: false, location: 'replace' };
 const searchKeyExamples = ['host_name:localhost', 'task:set', 'created:>=2000-01-01'];
 const searchKeyFields = ['changed', 'created', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
 const searchKeyDocLink = 'https://docs.ansible.com/ansible-tower/3.3.0/html/userguide/search_sort.html';
@@ -40,7 +39,7 @@ function reloadQueryset (queryset, rejection = strings.get('search.REJECT_DEFAUL
     vm.message = '';
     vm.tags = getSearchTags(queryset);
 
-    return $state.transitionTo($state.current, params, searchReloadOptions)
+    return vm.reload(params)
         .catch(() => {
             vm.tags = currentTags;
             vm.message = rejection;
@@ -139,4 +138,7 @@ export default {
     templateUrl,
     controller: JobSearchController,
     controllerAs: 'vm',
+    bindings: {
+        reload: '=',
+    },
 };
