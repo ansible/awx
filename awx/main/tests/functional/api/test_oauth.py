@@ -1,5 +1,6 @@
 import pytest
 import base64
+import json
 
 from django.db import connection
 
@@ -177,7 +178,7 @@ def test_oauth_token_delete(oauth_application, post, delete, get, admin):
         admin, expect=204
     )
     assert AccessToken.objects.count() == 0
-    assert RefreshToken.objects.count() == 0
+    assert RefreshToken.objects.count() == 1
     response = get(
         reverse('api:o_auth2_application_token_list', kwargs={'pk': oauth_application.pk}),
         admin, expect=200
@@ -212,3 +213,33 @@ def test_oauth_list_user_tokens(oauth_application, post, get, admin, alice):
         post(url, {'scope': 'read'}, user, expect=201)
         response = get(url, admin, expect=200)
         assert response.data['count'] == 1
+        
+        
+@pytest.mark.django_db
+def test_refresh_accesstoken(oauth_application, post, get, delete, admin):
+    response = post(
+        reverse('api:o_auth2_application_token_list', kwargs={'pk': oauth_application.pk}),
+        {'scope': 'read'}, admin, expect=201
+    )    
+    token = AccessToken.objects.get(token=response.data['token'])
+    refresh_token = RefreshToken.objects.get(token=response.data['refresh_token'])
+    assert AccessToken.objects.count() == 1
+    assert RefreshToken.objects.count() == 1
+    
+    refresh_url = drf_reverse('api:oauth_authorization_root_view') + 'token/'    
+    response = post(
+        refresh_url,
+        data='grant_type=refresh_token&refresh_token=' + refresh_token.token,
+        content_type='application/x-www-form-urlencoded',
+        HTTP_AUTHORIZATION='Basic ' + base64.b64encode(':'.join([
+            oauth_application.client_id, oauth_application.client_secret
+        ]))
+    )
+
+    new_token = json.loads(response._container[0])['access_token']
+    new_refresh_token = json.loads(response._container[0])['refresh_token']
+    assert token not in AccessToken.objects.all()
+    assert AccessToken.objects.get(token=new_token) != 0
+    assert RefreshToken.objects.get(token=new_refresh_token) != 0
+    refresh_token = RefreshToken.objects.get(token=refresh_token)
+    assert refresh_token.revoked
