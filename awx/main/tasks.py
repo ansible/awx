@@ -230,12 +230,31 @@ def handle_ha_toplogy_worker_ready(sender, **kwargs):
 
 
 @celeryd_after_setup.connect
-def handle_update_celery_hostname(sender, instance, **kwargs):
+def auto_register_ha_instance(sender, instance, **kwargs):
+    #
+    # When celeryd starts, if the instance cannot be found in the database,
+    # automatically register it.  This is mostly useful for openshift-based
+    # deployments where:
+    #
+    # 2 Instances come online
+    # Instance B encounters a network blip, Instance A notices, and
+    # deprovisions it
+    # Instance B's connectivity is restored, celeryd starts, and it
+    # re-registers itself
+    #
+    # In traditional container-less deployments, instances don't get
+    # deprovisioned when they miss their heartbeat, so this code is mostly a
+    # no-op.
+    #
+    if instance.hostname != 'celery@{}'.format(settings.CLUSTER_HOST_ID):
+        error = six.text_type('celery -n {} does not match settings.CLUSTER_HOST_ID={}').format(
+            instance.hostname, settings.CLUSTER_HOST_ID
+        )
+        logger.error(error)
+        raise RuntimeError(error)
     (changed, tower_instance) = Instance.objects.get_or_register()
     if changed:
         logger.info(six.text_type("Registered tower node '{}'").format(tower_instance.hostname))
-    instance.hostname = 'celery@{}'.format(tower_instance.hostname)
-    logger.warn(six.text_type("Set hostname to {}").format(instance.hostname))
 
 
 @shared_task(queue=settings.CELERY_DEFAULT_QUEUE)
