@@ -226,7 +226,6 @@ def handle_ha_toplogy_worker_ready(sender, **kwargs):
     # Expedite the first hearbeat run so a node comes online quickly.
     cluster_node_heartbeat.apply([])
     apply_cluster_membership_policies.apply([])
-    awx_isolated_heartbeat.apply([])
 
 
 @celeryd_after_setup.connect
