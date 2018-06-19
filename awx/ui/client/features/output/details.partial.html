@@ -278,7 +278,9 @@
 <div class="JobResults-resultRow" ng-if="vm.instanceGroup">
     <label class="JobResults-resultRowLabel">{{ vm.instanceGroup.label }}</label>
     <div class="JobResults-resultRowText JobResults-resultRowText--instanceGroup">
-        {{ vm.instanceGroup.value }}
+        <a href="{{ vm.instanceGroup.link }}">
+            {{ vm.instanceGroup.value }}
+        </a>
         <span class="JobResults-isolatedBadge" ng-if="vm.instanceGroup.isolated">
             {{ vm.instanceGroup.isolated }}
         </span>
