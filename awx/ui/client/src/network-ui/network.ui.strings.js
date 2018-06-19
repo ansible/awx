@@ -4,6 +4,10 @@ function awxNetStrings (BaseString) {
     const { t } = this;
     const ns = this.awxNet;
 
+    ns.feature = {
+        ACTION_BUTTON: t.s('Network Visualizer')
+    };
+
     ns.state = {
         BREADCRUMB_LABEL: t.s('INVENTORIES')
     };
@@ -13,7 +17,7 @@ function awxNetStrings (BaseString) {
     };
 
     ns.actions = {
-        ACTIONS: t.s('Actions'),
+        ACTIONS: t.s('ACTIONS'),
         EXPORT: t.s('Export'),
         EXPAND_PANEL: t.s('Expand Panel'),
         COLLAPSE_PANEL: t.s('Collapse Panel')
@@ -29,7 +33,7 @@ function awxNetStrings (BaseString) {
     };
 
     ns.search = {
-        SEARCH: t.s('Search'),
+        SEARCH: t.s('SEARCH'),
         HOST: t.s('Host'),
         SWITCH: t.s('Switch'),
         ROUTER: t.s('Router'),

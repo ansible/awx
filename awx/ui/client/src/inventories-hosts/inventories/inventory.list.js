@@ -5,7 +5,7 @@
  *************************************************/
 
 
-export default ['i18n', function(i18n) {
+export default ['i18n', 'awxNetStrings' , function(i18n, awxNetStrings) {
     return {
 
         name: 'inventories',
@@ -102,9 +102,9 @@ export default ['i18n', function(i18n) {
                 ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.edit'
             },
             network: {
-                label: i18n._('Network Visualization'),
+                label: awxNetStrings.get('feature.ACTION_BUTTON'),
                 ngClick: 'goToGraph(inventory)',
-                awToolTip: i18n._('Network Visualization'),
+                awToolTip: awxNetStrings.get('feature.ACTION_BUTTON'),
                 dataPlacement: 'top',
                 ngShow: '!inventory.pending_deletion'
             },

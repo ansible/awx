@@ -10,8 +10,8 @@
  * @description This form is for adding/editing an inventory
  */
 
-export default ['i18n',
-function(i18n) {
+export default ['i18n', 'awxNetStrings',
+function(i18n, awxNetStrings) {
     return {
 
         addTitle: i18n._('NEW INVENTORY'),
@@ -178,6 +178,11 @@ function(i18n) {
                 ngClick: 'remediateInventory(id, insights_credential)',
                 ngShow: 'is_insights && mode !== "add" && canRemediate',
                 label: i18n._('Remediate Inventory'),
+                class: 'Form-primaryButton'
+            },
+            network: {
+                ngClick: 'goToGraph()',
+                label: awxNetStrings.get('feature.ACTION_BUTTON'),
                 class: 'Form-primaryButton'
             }
         }
