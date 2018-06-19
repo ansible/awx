@@ -25,7 +25,7 @@ class LoggedBasicAuthentication(authentication.BasicAuthentication):
         ret = super(LoggedBasicAuthentication, self).authenticate(request)
         if ret:
             username = ret[0].username if ret[0] else '<none>'
-            logger.debug(smart_text(u"User {} performed a {} to {} through the API".format(username, request.method, request.path)))
+            logger.info(smart_text(u"User {} performed a {} to {} through the API".format(username, request.method, request.path)))
         return ret
 
     def authenticate_header(self, request):
@@ -50,7 +50,7 @@ class LoggedOAuth2Authentication(OAuth2Authentication):
         if ret:
             user, token = ret
             username = user.username if user else '<none>'
-            logger.debug(smart_text(
+            logger.info(smart_text(
                 u"User {} performed a {} to {} through the API using OAuth token {}.".format(
                     username, request.method, request.path, token.pk
                 )
