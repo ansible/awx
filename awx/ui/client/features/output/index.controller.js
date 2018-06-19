@@ -82,7 +82,6 @@ function first () {
 
     return slide.getFirst()
         .then(() => {
-            scroll.resetScrollPosition();
             scroll.resume();
 
             return $q.resolve();
@@ -99,11 +98,9 @@ function previous () {
     const initialPosition = scroll.getScrollPosition();
 
     return slide.slideUp()
-        .then(changed => {
-            if (changed[0] !== 0 || changed[1] !== 0) {
-                const currentHeight = scroll.getScrollHeight();
-                scroll.setScrollPosition((currentHeight / 4) - initialPosition);
-            }
+        .then(popHeight => {
+            const currentHeight = scroll.getScrollHeight();
+            scroll.setScrollPosition(currentHeight - popHeight + initialPosition);
 
             return $q.resolve();
         });
@@ -299,7 +296,7 @@ function OutputIndexController (
         bufferInit();
 
         status.init(resource);
-        slide.init(render, resource.events);
+        slide.init(render, resource.events, scroll);
 
         render.init({ compile, toggles: vm.toggleLineEnabled });
         scroll.init({ previous, next });

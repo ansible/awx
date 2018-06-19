@@ -59,7 +59,7 @@ function getOverlapArray (range, other) {
 }
 
 function SlidingWindowService ($q) {
-    this.init = (storage, api) => {
+    this.init = (storage, api, { getScrollHeight }) => {
         const { prepend, append, shift, pop, deleteRecord } = storage;
         const { getMaxCounter, getRange, getFirst, getLast } = api;
 
@@ -76,6 +76,10 @@ function SlidingWindowService ($q) {
             shift,
             pop,
             deleteRecord,
+        };
+
+        this.hooks = {
+            getScrollHeight,
         };
 
         this.records = {};
@@ -153,7 +157,7 @@ function SlidingWindowService ($q) {
 
         let lines = 0;
 
-        for (let i = min; i <= min + count; ++i) {
+        for (let i = min; i <= max; ++i) {
             if (this.records[i]) {
                 lines += (this.records[i].end_line - this.records[i].start_line);
             }
@@ -199,6 +203,21 @@ function SlidingWindowService ($q) {
                 .then(events => this.pushFront(events));
         }
 
+        if (overlap && overlap[0] < 0) {
+            this.chain = this.chain.then(() => this.popBack(Math.abs(overlap[0])));
+        }
+
+        if (overlap && overlap[1] < 0) {
+            this.chain = this.chain.then(() => this.popFront(Math.abs(overlap[1])));
+        }
+
+        let popHeight;
+        this.chain = this.chain.then(() => {
+            popHeight = this.hooks.getScrollHeight();
+
+            return $q.resolve();
+        });
+
         if (overlap && overlap[0] > 0) {
             const pushBackRange = [head - overlap[0], head];
 
@@ -215,21 +234,8 @@ function SlidingWindowService ($q) {
                 .then(events => this.pushFront(events));
         }
 
-        if (overlap && overlap[0] < 0) {
-            this.chain = this.chain.then(() => this.popBack(Math.abs(overlap[0])));
-        }
-
-        if (overlap && overlap[1] < 0) {
-            this.chain = this.chain.then(() => this.popFront(Math.abs(overlap[1])));
-        }
-
         this.chain = this.chain
-            .then(() => {
-                const range = this.getRange();
-                const displacement = [range[0] - head, range[1] - tail];
-
-                return $q.resolve(displacement);
-            });
+            .then(() => $q.resolve(popHeight));
 
         return this.chain;
     };
