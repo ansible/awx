@@ -82,7 +82,6 @@ function first () {
 
     return slide.getFirst()
         .then(() => {
-            scroll.resetScrollPosition();
             scroll.resume();
 
             return $q.resolve();
