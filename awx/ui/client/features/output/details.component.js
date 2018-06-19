@@ -445,6 +445,7 @@ function getInstanceGroupDetails () {
 
     const label = strings.get('labels.INSTANCE_GROUP');
     const value = $filter('sanitize')(instanceGroup.name);
+    const link = `/#/instance_groups/${instanceGroup.id}`;
 
     let isolated = null;
 
@@ -452,7 +453,7 @@ function getInstanceGroupDetails () {
         isolated = strings.get('details.ISOLATED');
     }
 
-    return { label, value, isolated };
+    return { label, value, isolated, link };
 }
 
 function getJobTagDetails () {
