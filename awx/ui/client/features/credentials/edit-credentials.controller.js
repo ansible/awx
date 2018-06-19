@@ -113,6 +113,9 @@ function EditCredentialsController (models, $state, $scope, strings, componentsS
             delete data.inputs[gceFileInputSchema.id];
         }
 
+        const filteredInputs = _.omit(data.inputs, (value) => value === '');
+        data.inputs = filteredInputs;
+
         return credential.request('put', { data });
     };
 
