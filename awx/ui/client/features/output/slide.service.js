@@ -327,8 +327,9 @@ function SlidingWindowService ($q) {
 
     this.getMaxCounter = () => {
         const counter = this.api.getMaxCounter();
+        const tail = this.getTailCounter();
 
-        return Number.isFinite(counter) ? counter : this.getTailCounter();
+        return Number.isFinite(counter) ? Math.max(tail, counter) : tail;
     };
 
     this.getRange = () => [this.getHeadCounter(), this.getTailCounter()];
