@@ -61,13 +61,13 @@ InstanceGroupsResolve.$inject = [
     'InstanceModel'
 ];
 
-function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
+function InstanceGroupsRun ($stateExtender, strings) {
     $stateExtender.addState({
         name: 'instanceGroups',
         url: '/instance_groups',
         searchPrefix: 'instance_group',
         ncyBreadcrumb: {
-            label: ComponentsStrings.get('layout.INSTANCE_GROUPS')
+            label: strings.get('state.INSTANCE_GROUPS_BREADCRUMB_LABEL')
         },
         params: {
             instance_group_search: {
@@ -232,7 +232,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         url: '/:instance_group_id/instances',
         ncyBreadcrumb: {
             parent: 'instanceGroups.edit',
-            label: ComponentsStrings.get('layout.INSTANCES')
+            label: strings.get('state.INSTANCES_BREADCRUMB_LABEL')
         },
         params: {
             instance_search: {
@@ -296,8 +296,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
 
 InstanceGroupsRun.$inject = [
     '$stateExtender',
-    'InstanceGroupsStrings',
-    'ComponentsStrings'
+    'InstanceGroupsStrings'
 ];
 
 angular.module(MODULE_NAME, [])

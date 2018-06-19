@@ -5,6 +5,8 @@ function InstanceGroupsStrings (BaseString) {
     const ns = this.instanceGroups;
 
     ns.state = {
+        INSTANCE_GROUPS_BREADCRUMB_LABEL: t.s('INSTANCE GROUPS'),
+        INSTANCES_BREADCRUMB_LABEL: t.s('INSTANCES'),
         ADD_BREADCRUMB_LABEL: t.s('CREATE INSTANCE GROUP'),
         EDIT_BREADCRUMB_LABEL: t.s('EDIT INSTANCE GROUP')
     };
