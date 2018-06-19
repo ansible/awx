@@ -46,7 +46,7 @@ function awxNetStrings (BaseString) {
         DESCRIPTION: t.s('Description'),
         HOST_POPOVER: t.s('Provide a host name, ip address, or ip address:port. Examples include:'),
         SAVE_COMPLETE: t.s('Save Complete'),
-        CANCEL: t.s('Cancel')
+        CLOSE: t.s('Close')
     };
 
 }

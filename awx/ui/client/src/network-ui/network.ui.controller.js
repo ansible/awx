@@ -42,7 +42,7 @@ var NetworkUIController = function($scope,
   $scope.topology_id = 0;
   // Create a web socket to connect to the backend server
 
-  $scope.inventory_id = $state.params.inventory_id;
+  $scope.inventory_id = $scope.$parent.$resolve.inventory.id;
 
   var protocol = null;
 
@@ -153,7 +153,7 @@ var NetworkUIController = function($scope,
                  from_y: 0,
                  to_x: 0,
                  to_y: 0};
-  $scope.canEdit = $scope.$parent.$resolve.resolvedModels.canEdit;
+  $scope.canEdit = $scope.$parent.$resolve.canEdit;
   $scope.strings = awxNetStrings;
   $scope.send_trace_message = function (message) {
         if (!$scope.recording) {

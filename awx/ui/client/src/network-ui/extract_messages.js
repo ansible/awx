@@ -54,4 +54,4 @@ while(next_message !== undefined) {
 }
 
 
-controller.log.debug(YAML.stringify(data));
+console.log(YAML.stringify(data));
