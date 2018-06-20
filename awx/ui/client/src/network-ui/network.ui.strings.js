@@ -9,7 +9,7 @@ function awxNetStrings (BaseString) {
     };
 
     ns.state = {
-        BREADCRUMB_LABEL: t.s('INVENTORIES')
+        BREADCRUMB_LABEL: t.s('NETWORK VISUALIZER')
     };
 
     ns.toolbox = {
