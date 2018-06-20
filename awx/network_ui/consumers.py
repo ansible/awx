@@ -72,6 +72,9 @@ class NetworkingEvents(object):
         if client_id is None:
             logger.warning("Unsupported message %s: no client", message)
             return
+        if not message.get('can_edit'):
+            logger.warning("Client {0} does not have permission to edit topology {1}".format(client_id, topology_id))
+            return
         if 'text' not in message:
             logger.warning("Unsupported message %s: no data", message)
             return
@@ -228,12 +231,13 @@ def ws_connect(message):
         )
         message.reply_channel.send({"close": True})
         return
-    if message.user not in inventory.admin_role:
+    if message.user not in inventory.read_role:
         logger.warn("User {} attempted connecting to inventory_id {} without permission.".format(
             message.user.id, inventory_id
         ))
         message.reply_channel.send({"close": True})
         return
+    message.channel_session['can_edit'] = message.user in inventory.admin_role
     topology_ids = list(TopologyInventory.objects.filter(inventory_id=inventory_id).values_list('pk', flat=True))
     topology_id = None
     if len(topology_ids) > 0:
@@ -311,11 +315,13 @@ def send_snapshot(channel, topology_id):
 @channel_session_user
 def ws_message(message):
     # Send to all clients editing the topology
-    channels.Group("topology-%s" % message.channel_session['topology_id']).send({"text": message['text']})
+    if message.channel_session['can_edit']:
+        channels.Group("topology-%s" % message.channel_session['topology_id']).send({"text": message['text']})
     # Send to networking_events handler
     networking_events_dispatcher.handle({"text": message['text'],
                                          "topology": message.channel_session['topology_id'],
-                                         "client": message.channel_session['client_id']})
+                                         "client": message.channel_session['client_id'],
+                                         "can_edit": message.channel_session['can_edit']})
 
 
 @channel_session_user
