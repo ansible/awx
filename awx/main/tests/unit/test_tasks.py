@@ -448,7 +448,7 @@ class TestGenericRun(TestJobExecution):
     def test_event_count(self):
         with mock.patch.object(self.task, 'get_stdout_handle') as mock_stdout:
             handle = OutputEventFilter(lambda event_data: None)
-            handle._event_ct = 334
+            handle._counter = 334
             mock_stdout.return_value = handle
             self.task.run(self.pk)
 
