@@ -62,7 +62,8 @@ export default
                 $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
                 $scope.job_tag_options = [];
                 $scope.skip_tag_options = [];
-                $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+                const virtualEnvs = ConfigData.custom_virtualenvs || [];
+                $scope.custom_virtualenvs_options = virtualEnvs;
 
                 SurveyControllerInit({
                     scope: $scope,
