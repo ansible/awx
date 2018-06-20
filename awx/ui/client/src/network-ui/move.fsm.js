@@ -174,7 +174,7 @@ _Ready.prototype.onPasteDevice = function (controller, msg_type, message) {
     }
     scope.selected_devices.push(device);
     device.selected = true;
-    console.log(c_messages);
+    controller.log.debug(c_messages);
     scope.$emit('awxNet-addSearchOption', device);
     scope.send_control_message(new messages.MultipleMessage(controller.scope.client_id, c_messages));
     controller.changeState(Selected2);

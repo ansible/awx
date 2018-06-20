@@ -5,7 +5,6 @@ import networkDetailsDirective from './network-details/main';
 import networkZoomWidget from './zoom-widget/main';
 import awxNetStrings from './network.ui.strings';
 
-//console.log = function () { };
 var NetworkUIController = require('./network.ui.controller.js');
 var cursor = require('./cursor.directive.js');
 var router = require('./router.directive.js');

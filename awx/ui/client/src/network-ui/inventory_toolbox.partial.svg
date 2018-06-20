@@ -91,6 +91,7 @@
 <text
     class="NetworkUI__toolbox--title"
     filter="url(#background)"
+    ng-if="toolbox.enabled"
     ng-attr-transform="translate({{toolbox.title_coordinates.x}},{{toolbox.title_coordinates.y}})">
         {{toolbox.name}}
 </text>

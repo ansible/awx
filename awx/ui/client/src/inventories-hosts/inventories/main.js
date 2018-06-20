@@ -46,6 +46,7 @@ import groupNestedGroupsAssociateRoute from './related/groups/related/nested-gro
 import nestedHostsAssociateRoute from './related/groups/related/nested-hosts/group-nested-hosts-associate.route';
 import nestedHostsAddRoute from './related/groups/related/nested-hosts/group-nested-hosts-add.route';
 import hostCompletedJobsRoute from '~features/jobs/routes/hostCompletedJobs.route.js';
+import networkUIRoute from '../../network-ui/network.ui.route.js';
 
 export default
 angular.module('inventory', [
@@ -294,6 +295,9 @@ angular.module('inventory', [
                 let relatedHostCompletedJobs = _.cloneDeep(hostCompletedJobsRoute);
                 relatedHostCompletedJobs.name = 'inventories.edit.hosts.edit.completed_jobs';
 
+                let smartInvNetworkUI = _.cloneDeep(networkUIRoute);
+                smartInvNetworkUI.name = 'inventories.editSmartInventory.networking';
+
                 return Promise.all([
                     standardInventoryAdd,
                     standardInventoryEdit,
@@ -342,7 +346,9 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(nestedHostsAssociateRoute),
                             stateExtender.buildDefinition(nestedGroupsAdd),
                             stateExtender.buildDefinition(nestedHostsAddRoute),
-                            stateExtender.buildDefinition(relatedHostCompletedJobs)
+                            stateExtender.buildDefinition(relatedHostCompletedJobs),
+                            stateExtender.buildDefinition(networkUIRoute),
+                            stateExtender.buildDefinition(smartInvNetworkUI)
                         ])
                     };
                 });

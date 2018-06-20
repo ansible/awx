@@ -14,7 +14,7 @@
             };
         }
         $scope.codeMirror = new codemirror();
- 		$scope.formCancel = function(){
+ 		$scope.formClose = function(){
             $scope.$parent.$broadcast('awxNet-closeDetailsPanel');
  		};
         $scope.strings = strings;

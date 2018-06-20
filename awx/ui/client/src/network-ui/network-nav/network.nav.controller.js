@@ -1,15 +1,12 @@
 /* eslint-disable */
-function NetworkingController (models, $state, $scope, strings) {
+function NetworkingController (canEdit, inventory, $state, $scope, strings) {
     const vm = this || {};
 
-    const {
-        inventory
-    } = models;
     vm.networkUIisOpen = true;
     vm.strings = strings;
     vm.panelTitle = `${strings.get('state.BREADCRUMB_LABEL')} | ${inventory.name}`;
     vm.hostDetail = {};
-    vm.canEdit = models.canEdit;
+    vm.canEdit = canEdit;
     vm.rightPanelIsExpanded = false;
     vm.leftPanelIsExpanded = true;
     vm.keyPanelExpanded = false;
@@ -131,7 +128,8 @@ function NetworkingController (models, $state, $scope, strings) {
 }
 
 NetworkingController.$inject = [
-    'resolvedModels',
+    'canEdit',
+    'inventory',
     '$state',
     '$scope',
     'awxNetStrings',

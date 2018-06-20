@@ -117,7 +117,7 @@ _Reporting.prototype.start = function (controller) {
                                         new Date().toISOString(),
                                         controller.scope.version);
     controller.scope.test_results.push(test_result);
-    console.log(["Reporting test", test_result.name, test_result.id]);
+    controller.log.debug(["Reporting test", test_result.name, test_result.id]);
     controller.scope.send_test_message(new messages.TestResult(controller.scope.client_id,
                                                                test_result.id,
                                                                test_result.name,
@@ -125,7 +125,7 @@ _Reporting.prototype.start = function (controller) {
                                                                test_result.date,
                                                                test_result.code_under_test));
     if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
-        console.log(["Reporting coverage", test_result.name, test_result.id]);
+        controller.log.debug(["Reporting coverage", test_result.name, test_result.id]);
         controller.scope.send_test_message(new messages.Coverage(controller.scope.client_id, window.__coverage__, test_result.id));
     }
     controller.changeState(Loading);
@@ -138,7 +138,7 @@ _Loading.prototype.start = function (controller) {
     if (controller.scope.current_tests.length === 0) {
         controller.changeState(Disabled);
     } else {
-        console.log("Starting test");
+        controller.log.debug("Starting test");
         controller.scope.reset_coverage();
         controller.scope.current_test = controller.scope.current_tests.shift();
         controller.scope.reset_toolboxes();
@@ -169,7 +169,7 @@ _Ready.prototype.start = function (controller) {
 
     var load_id = controller.scope.test_result_id_seq();
 
-    console.log(["Reporting Load", load_id]);
+    controller.log.debug(["Reporting Load", load_id]);
     controller.scope.send_test_message(new messages.TestResult(controller.scope.client_id,
                                                                load_id,
                                                                "Load",
@@ -177,7 +177,7 @@ _Ready.prototype.start = function (controller) {
                                                                new Date().toISOString(),
                                                                controller.scope.version));
     if (typeof(window.__coverage__) !== "undefined" && window.__coverage__ !== null) {
-        console.log(["Reporting Load Coverage", load_id]);
+        controller.log.debug(["Reporting Load Coverage", load_id]);
         controller.scope.send_test_message(new messages.Coverage(controller.scope.client_id, window.__coverage__, load_id));
     }
 

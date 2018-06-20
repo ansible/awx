@@ -22,7 +22,7 @@ function NullChannel(from_controller, tracer) {
 NullChannel.prototype.send = function() {
 };
 
-function FSMController (scope, name, initial_state, tracer) {
+function FSMController (scope, name, initial_state, tracer, log) {
     this.scope = scope;
     this.name = name;
     this.state = initial_state;
@@ -32,6 +32,7 @@ function FSMController (scope, name, initial_state, tracer) {
     this.handling_message_type = 'start';
     this.state.start(this);
     this.handling_message_type = null;
+    this.log = log; 
 }
 exports.FSMController = FSMController;
 

@@ -4,8 +4,12 @@ function awxNetStrings (BaseString) {
     const { t } = this;
     const ns = this.awxNet;
 
+    ns.feature = {
+        ACTION_BUTTON: t.s('Network Visualizer')
+    };
+
     ns.state = {
-        BREADCRUMB_LABEL: t.s('INVENTORIES')
+        BREADCRUMB_LABEL: t.s('NETWORK VISUALIZER')
     };
 
     ns.toolbox = {
@@ -13,7 +17,7 @@ function awxNetStrings (BaseString) {
     };
 
     ns.actions = {
-        ACTIONS: t.s('Actions'),
+        ACTIONS: t.s('ACTIONS'),
         EXPORT: t.s('Export'),
         EXPAND_PANEL: t.s('Expand Panel'),
         COLLAPSE_PANEL: t.s('Collapse Panel')
@@ -29,7 +33,7 @@ function awxNetStrings (BaseString) {
     };
 
     ns.search = {
-        SEARCH: t.s('Search'),
+        SEARCH: t.s('SEARCH'),
         HOST: t.s('Host'),
         SWITCH: t.s('Switch'),
         ROUTER: t.s('Router'),
@@ -46,7 +50,7 @@ function awxNetStrings (BaseString) {
         DESCRIPTION: t.s('Description'),
         HOST_POPOVER: t.s('Provide a host name, ip address, or ip address:port. Examples include:'),
         SAVE_COMPLETE: t.s('Save Complete'),
-        CANCEL: t.s('Cancel')
+        CLOSE: t.s('Close')
     };
 
 }

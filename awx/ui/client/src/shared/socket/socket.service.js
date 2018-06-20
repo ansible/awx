@@ -150,7 +150,7 @@ export default
                 if(this.socket){
                     this.socket.close();
                     delete this.socket;
-                    console.log("Socket deleted: "+this.socket);
+                    $log.debug("Socket deleted: "+this.socket);
                 }
             },
             subscribe: function(state){

@@ -42,7 +42,7 @@ var NetworkUIController = function($scope,
   $scope.topology_id = 0;
   // Create a web socket to connect to the backend server
 
-  $scope.inventory_id = $state.params.inventory_id;
+  $scope.inventory_id = $scope.$parent.$resolve.inventory.id;
 
   var protocol = null;
 
@@ -153,7 +153,7 @@ var NetworkUIController = function($scope,
                  from_y: 0,
                  to_x: 0,
                  to_y: 0};
-  $scope.canEdit = $scope.$parent.$resolve.resolvedModels.canEdit;
+  $scope.canEdit = $scope.$parent.$resolve.canEdit;
   $scope.strings = awxNetStrings;
   $scope.send_trace_message = function (message) {
         if (!$scope.recording) {
@@ -194,17 +194,17 @@ var NetworkUIController = function($scope,
     };
 
   //Define the FSMs
-  $scope.hotkeys_controller = new fsm.FSMController($scope, "hotkeys_fsm", hotkeys.Start, $scope);
-  $scope.keybindings_controller = new fsm.FSMController($scope, "keybindings_fsm", keybindings.Start, $scope);
-  $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope);
-  $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope);
-  $scope.move_readonly_controller = new fsm.FSMController($scope, "move_readonly_fsm", move_readonly.Start, $scope);
-  $scope.details_panel_controller = new fsm.FSMController($scope, "details_panel_fsm", details_panel_fsm.Start, $scope);
-  $scope.buttons_controller = new fsm.FSMController($scope, "buttons_fsm", buttons.Start, $scope);
-  $scope.time_controller = new fsm.FSMController($scope, "time_fsm", time.Start, $scope);
-  $scope.test_controller = new fsm.FSMController($scope, "test_fsm", test_fsm.Start, $scope);
+  $scope.hotkeys_controller = new fsm.FSMController($scope, "hotkeys_fsm", hotkeys.Start, $scope, $log);
+  $scope.keybindings_controller = new fsm.FSMController($scope, "keybindings_fsm", keybindings.Start, $scope, $log);
+  $scope.view_controller = new fsm.FSMController($scope, "view_fsm", view.Start, $scope, $log);
+  $scope.move_controller = new fsm.FSMController($scope, "move_fsm", move.Start, $scope, $log);
+  $scope.move_readonly_controller = new fsm.FSMController($scope, "move_readonly_fsm", move_readonly.Start, $scope, $log);
+  $scope.details_panel_controller = new fsm.FSMController($scope, "details_panel_fsm", details_panel_fsm.Start, $scope, $log);
+  $scope.buttons_controller = new fsm.FSMController($scope, "buttons_fsm", buttons.Start, $scope, $log);
+  $scope.time_controller = new fsm.FSMController($scope, "time_fsm", time.Start, $scope, $log);
+  $scope.test_controller = new fsm.FSMController($scope, "test_fsm", test_fsm.Start, $scope, $log);
 
-  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope);
+  $scope.inventory_toolbox_controller = new fsm.FSMController($scope, "toolbox_fsm", toolbox_fsm.Start, $scope, $log);
 
   var toolboxTopMargin = $('.Networking-top').height();
   var toolboxTitleMargin = toolboxTopMargin + 35;
