@@ -29,6 +29,7 @@ from django.utils.functional import cached_property
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.relations import ManyRelatedField
 from rest_framework import fields
 from rest_framework import serializers
 from rest_framework import validators
@@ -276,6 +277,16 @@ class BaseSerializer(serializers.ModelSerializer):
     # make certain fields read only
     created       = serializers.SerializerMethodField()
     modified      = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super(BaseSerializer, self).__init__(*args, **kwargs)
+        # The following lines fix the problem of being able to pass JSON dict into PrimaryKeyRelatedField.
+        data = kwargs.get('data', False)
+        if data:
+            for field_name, field_instance in six.iteritems(self.fields):
+                if isinstance(field_instance, ManyRelatedField) and not field_instance.read_only:
+                    if isinstance(data.get(field_name, False), dict):
+                        raise serializers.ValidationError(_('Cannot use dictionary for %s' % field_name))
 
     @property
     def version(self):
