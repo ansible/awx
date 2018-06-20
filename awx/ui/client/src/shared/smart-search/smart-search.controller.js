@@ -77,6 +77,7 @@ function SmartSearchController (
             }
             $scope.dataset = res.data;
             $scope.collection = res.data.results;
+            $scope.$emit('updateDataset', res.data);
         });
 
         $scope.searchTerm = null;
@@ -200,6 +201,7 @@ function SmartSearchController (
                 }
                 $scope.dataset = data;
                 $scope.collection = data.results;
+                $scope.$emit('updateDataset', data);
             })
             .catch(() => revertSearch(unmodifiedQueryset));
 
@@ -234,6 +236,7 @@ function SmartSearchController (
                 }
                 $scope.dataset = data;
                 $scope.collection = data.results;
+                $scope.$emit('updateDataset', data);
             });
 
         generateSearchTags();
@@ -263,6 +266,7 @@ function SmartSearchController (
                 }
                 $scope.dataset = data;
                 $scope.collection = data.results;
+                $scope.$emit('updateDataset', data);
             });
 
         $scope.searchTags = qs.stripDefaultParams(queryset, defaults);
