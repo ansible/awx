@@ -161,7 +161,8 @@ export default ['i18n', 'awxNetStrings', function(i18n, awxNetStrings) {
                 network: {
                     ngClick: 'goToGraph()',
                     label: awxNetStrings.get('feature.ACTION_BUTTON'),
-                    class: 'Form-primaryButton'
+                    class: 'Form-primaryButton',
+                    ngShow: "$state.is('inventories.editSmartInventory')"
                 }
             }
 

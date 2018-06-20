@@ -174,15 +174,16 @@ function(i18n, awxNetStrings) {
             }
         },
         relatedButtons: {
-            remediate_inventory: {
-                ngClick: 'remediateInventory(id, insights_credential)',
-                ngShow: 'is_insights && mode !== "add" && canRemediate',
-                label: i18n._('Remediate Inventory'),
-                class: 'Form-primaryButton'
-            },
             network: {
                 ngClick: 'goToGraph()',
+                ngShow: "$state.is('inventories.edit')",
                 label: awxNetStrings.get('feature.ACTION_BUTTON'),
+                class: 'Form-primaryButton'
+            },
+            remediate_inventory: {
+                ngClick: 'remediateInventory(id, insights_credential)',
+                ngShow: "is_insights && mode !== 'add' && canRemediate && ($state.is('inventories.edit') || $state.is('inventories.edit.hosts'))",
+                label: i18n._('Remediate Inventory'),
                 class: 'Form-primaryButton'
             }
         }
