@@ -1996,7 +1996,6 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             update = self.reverse('api:inventory_source_update_view', kwargs={'pk': obj.pk}),
             inventory_updates = self.reverse('api:inventory_source_updates_list', kwargs={'pk': obj.pk}),
             schedules = self.reverse('api:inventory_source_schedules_list', kwargs={'pk': obj.pk}),
-            credentials = self.reverse('api:inventory_source_credentials_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:inventory_source_activity_stream_list', kwargs={'pk': obj.pk}),
             hosts = self.reverse('api:inventory_source_hosts_list', kwargs={'pk': obj.pk}),
             groups = self.reverse('api:inventory_source_groups_list', kwargs={'pk': obj.pk}),
@@ -2018,6 +2017,8 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
         if self.version == 1:  # TODO: remove in 3.3
             if obj.deprecated_group:
                 res['group'] = self.reverse('api:group_detail', kwargs={'pk': obj.deprecated_group.pk})
+        else:
+            res['credentials'] = self.reverse('api:inventory_source_credentials_list', kwargs={'pk': obj.pk})
         return res
 
     def get_fields(self):  # TODO: remove in 3.3
@@ -2187,12 +2188,13 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
         res.update(dict(
             cancel = self.reverse('api:inventory_update_cancel', kwargs={'pk': obj.pk}),
             notifications = self.reverse('api:inventory_update_notifications_list', kwargs={'pk': obj.pk}),
-            credentials = self.reverse('api:inventory_update_credentials_list', kwargs={'pk': obj.pk}),
             events = self.reverse('api:inventory_update_events_list', kwargs={'pk': obj.pk}),
         ))
         if obj.source_project_update_id:
             res['source_project_update'] = self.reverse('api:project_update_detail',
                                                         kwargs={'pk': obj.source_project_update.pk})
+        if self.version > 1:
+            res['credentials'] = self.reverse('api:inventory_update_credentials_list', kwargs={'pk': obj.pk})
         return res
 
 
