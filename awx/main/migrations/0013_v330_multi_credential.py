@@ -13,6 +13,13 @@ class Migration(migrations.Migration):
     dependencies = [
         ('main', '0012_v322_update_cred_types'),
     ]
+    run_before = [
+        # Django-vendored migrations will make reference to settings
+        # this migration was introduced in Django 1.11 / Tower 3.3 upgrade
+        # migration main-0009 changed the setting model and is not backward compatible,
+        # so we assure that at least all of Tower 3.2 migrations are finished before running it
+        ('auth', '0008_alter_user_username_max_length')
+    ]
 
     operations = [
         migrations.AddField(
