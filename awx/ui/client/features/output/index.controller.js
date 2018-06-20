@@ -142,10 +142,8 @@ function toggleMenuExpand () {
     if (scroll.isPaused()) return;
 
     const recordList = Object.keys(render.record).map(key => render.record[key]);
-    const minLevel = Math.min(...recordList.map(({ level }) => level));
 
     const toggled = recordList
-        .filter(({ level }) => level === minLevel)
         .map(({ uuid }) => getToggleElements(uuid))
         .filter(({ icon }) => icon.length > 0)
         .map(({ icon, lines }) => setExpanded(icon, lines, !vm.isMenuExpanded));
