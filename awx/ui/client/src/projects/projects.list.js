@@ -57,7 +57,6 @@ export default ['i18n', function(i18n) {
                 filter: "longDate",
                 columnClass: "col-lg-3 hidden-md hidden-sm hidden-xs",
                 excludeModal: true,
-                nosort: true
             }
         },
 
