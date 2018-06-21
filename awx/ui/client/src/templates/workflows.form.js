@@ -214,12 +214,12 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     awToolTip: '{{surveyTooltip}}',
                     dataPlacement: 'top'
                 },
-                workflow_editor: {
+                workflow_visualizer: {
                     ngClick: 'openWorkflowMaker()',
                     ngShow: '$state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate.workflowMaker\')',
-                    awToolTip: '{{workflowEditorTooltip}}',
+                    awToolTip: '{{workflowVisualizerTooltip}}',
                     dataPlacement: 'top',
-                    label: i18n._('Workflow Editor'),
+                    label: i18n._('Workflow Visualizer'),
                     class: 'Form-primaryButton'
                 }
             }

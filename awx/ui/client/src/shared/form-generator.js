@@ -1728,8 +1728,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     button.label = i18n._('View Survey');
                                     button['class'] = 'Form-surveyButton';
                                 }
-                                if (btn === 'workflow_editor') {
-                                    button.label = i18n._('Workflow Editor');
+                                if (btn === 'workflow_visualizer') {
+                                    button.label = i18n._('Workflow Visualizer');
                                     button['class'] = 'Form-primaryButton';
                                 }
 
