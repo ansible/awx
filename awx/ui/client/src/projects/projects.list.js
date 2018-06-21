@@ -56,7 +56,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Last Updated'),
                 filter: "longDate",
                 columnClass: "col-lg-3 hidden-md hidden-sm hidden-xs",
-                excludeModal: true,
+                excludeModal: true
             }
         },
 
