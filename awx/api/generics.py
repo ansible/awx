@@ -234,8 +234,11 @@ class APIView(views.APIView):
         was attempted.
         """
         for authenticator in self.get_authenticators():
-            resp_hdr = authenticator.authenticate_header(request)
-            if not resp_hdr:
+            try: 
+                resp_hdr = authenticator.authenticate_header(request)
+                if not resp_hdr:
+                    continue
+            except AttributeError:
                 continue
             req_hdr = get_authorization_header(request)
             if not req_hdr:
