@@ -39,18 +39,11 @@
             <div class="at-u-clear"></div>
         </div>
 
-        <pre class="at-Stdout-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="at-Stdout-toggle">&nbsp;</th>
-                        <th class="at-Stdout-line"></th>
-                        <th class="at-Stdout-event"></th>
-                    </tr>
-                </thead>
-                <tbody id="atStdoutResultTable"></tbody>
-            </table>
-        </pre>
+        <div class="at-Stdout-container">
+            <div class="at-Stdout-borderHeader"></div>
+            <div id="atStdoutResultTable"></div>
+            <div class="at-Stdout-borderFooter"></div>
+        </div>
 
         <div ng-show="vm.menu.showBackToTop" class="at-Stdout-menuBottom">
             <div class="at-Stdout-menuIconGroup" ng-click="vm.menu.home()">

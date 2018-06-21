@@ -198,11 +198,11 @@ function JobRenderService ($q, $sce, $window) {
         if (current) {
             if (this.createToggles && current.isParent && current.line === ln) {
                 id = current.uuid;
-                tdToggle = `<td class="at-Stdout-toggle" ng-click="vm.toggleLineExpand('${id}')"><i class="fa fa-angle-down can-toggle"></i></td>`;
+                tdToggle = `<div class="at-Stdout-toggle" ng-click="vm.toggleLineExpand('${id}')"><i class="fa fa-angle-down can-toggle"></i></div>`;
             }
 
             if (current.isHost) {
-                tdEvent = `<td class="at-Stdout-event--host" ng-click="vm.showHostDetails('${current.id}', '${current.uuid}')">${content}</td>`;
+                tdEvent = `<div class="at-Stdout-event--host" ng-click="vm.showHostDetails('${current.id}', '${current.uuid}')">${content}</div>`;
             }
 
             if (current.time && current.line === ln) {
@@ -215,11 +215,11 @@ function JobRenderService ($q, $sce, $window) {
         }
 
         if (!tdEvent) {
-            tdEvent = `<td class="at-Stdout-event">${content}</td>`;
+            tdEvent = `<div class="at-Stdout-event">${content}</div>`;
         }
 
         if (!tdToggle) {
-            tdToggle = '<td class="at-Stdout-toggle"></td>';
+            tdToggle = '<div class="at-Stdout-toggle"></div>';
         }
 
         if (!ln) {
@@ -227,12 +227,12 @@ function JobRenderService ($q, $sce, $window) {
         }
 
         return `
-            <tr id="${id}" class="${classList}">
+            <div id="${id}" class="at-Stdout-row ${classList}">
                 ${tdToggle}
-                <td class="at-Stdout-line">${ln}</td>
+                <div class="at-Stdout-line">${ln}</div>
                 ${tdEvent}
-                <td class="at-Stdout-time">${timestamp}</td>
-            </tr>`;
+                <div class="at-Stdout-time">${timestamp}</div>
+            </div>`;
     };
 
     this.getTimestamp = created => {
