@@ -1964,8 +1964,10 @@ class InventorySourceOptionsSerializer(BaseSerializer):
             if cred:
                 summary_fields['credential'] = {
                     'id': cred.id, 'name': cred.name, 'description': cred.description,
-                    'kind': cred.kind, 'cloud': True, 'credential_type_id': cred.credential_type_id
+                    'kind': cred.kind, 'cloud': True
                 }
+                if self.version > 1:
+                    summary_fields['credential']['credential_type_id'] = cred.credential_type_id
             else:
                 summary_fields.pop('credential')
         return summary_fields
