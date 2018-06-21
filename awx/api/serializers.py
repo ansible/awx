@@ -3136,7 +3136,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                 )
         except ObjectDoesNotExist:
             pass
-        res['create_schedule'] = self.reverse('api:job_create_schedule', kwargs={'pk': obj.pk})
+        if self.version > 1:
+            res['create_schedule'] = self.reverse('api:job_create_schedule', kwargs={'pk': obj.pk})
         res['relaunch'] = self.reverse('api:job_relaunch', kwargs={'pk': obj.pk})
         return res
 
