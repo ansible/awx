@@ -3059,9 +3059,10 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
                     'id': cred.pk,
                     'name': cred.name,
                     'description': cred.description,
-                    'kind': cred.kind,
-                    'credential_type_id': cred.credential_type_id
+                    'kind': cred.kind
                 }
+                if self.version > 1:
+                    summarized_cred['credential_type_id'] = cred.credential_type_id
                 all_creds.append(summarized_cred)
                 if cred.credential_type.kind in ('cloud', 'net'):
                     extra_creds.append(summarized_cred)
@@ -3194,9 +3195,10 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                     'id': cred.pk,
                     'name': cred.name,
                     'description': cred.description,
-                    'kind': cred.kind,
-                    'credential_type_id': cred.credential_type_id
+                    'kind': cred.kind
                 }
+                if self.version > 1:
+                    summarized_cred['credential_type_id'] = cred.credential_type_id
                 all_creds.append(summarized_cred)
                 if cred.credential_type.kind in ('cloud', 'net'):
                     extra_creds.append(summarized_cred)
