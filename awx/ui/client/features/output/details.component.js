@@ -525,10 +525,12 @@ function getLabelDetails () {
 
     const label = strings.get('labels.LABELS');
     const more = false;
-
+    const hasMoreToShow = jobLabels.length < _.get(resource.model.get('summary_fields.labels'), 'count');
     const value = jobLabels.map(({ name }) => name).map($filter('sanitize'));
+    const truncate = true;
+    const truncateLength = 5;
 
-    return { label, more, value };
+    return { label, more, hasMoreToShow, value, truncate, truncateLength };
 }
 
 function createErrorHandler (path, action) {
@@ -545,6 +547,32 @@ const ELEMENT_JOB_TAGS = '#job-results-job-tags';
 const ELEMENT_SKIP_TAGS = '#job-results-skip-tags';
 const ELEMENT_PROMPT_MODAL = '#prompt-modal';
 const TAGS_SLIDE_DISTANCE = 200;
+
+function showLabels () {
+    const jobLabelsCount = _.get(resource.model.get('summary_fields.labels'), 'count');
+    const maxCount = 25;
+
+    if (!this.labels.truncate) {
+        this.labels.truncate = true;
+    } else {
+        this.labels.truncate = false;
+    }
+
+    if (this.labels.value.length === jobLabelsCount || this.labels.value.length === maxCount) {
+        return;
+    }
+
+    if (this.labels.value.length < maxCount) {
+        wait('start');
+        resource.model.extend('get', 'labels')
+            .then((model) => {
+                const jobLabels = _.get(model.get('related.labels'), 'results', []);
+                this.labels.value = jobLabels.map(({ name }) => name).map($filter('sanitize'));
+            })
+            .catch(createErrorHandler('get labels', 'GET'))
+            .finally(wait('stop'));
+    }
+}
 
 function toggleLabels () {
     if (!this.labels.more) {
@@ -705,6 +733,7 @@ function JobDetailsController (
         vm.toggleJobTags = toggleJobTags;
         vm.toggleSkipTags = toggleSkipTags;
         vm.toggleLabels = toggleLabels;
+        vm.showLabels = showLabels;
 
         unsubscribe = subscribe(({ status, started, finished, scm }) => {
             vm.started = getStartDetails(started);
