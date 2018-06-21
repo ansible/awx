@@ -37,15 +37,6 @@
 
 // Disabled
 textarea[disabled="disabled"] + div[id*="-container"]{
-        .CodeMirror {
-            cursor: not-allowed;
-        }
-
-        .CodeMirror.cm-s-default,
-        .CodeMirror-line {
-            background-color: @ebgrey;
-        }
-
         .CodeMirror-gutters {
             border-color: @b7grey;
         }
@@ -54,13 +45,5 @@ textarea[disabled="disabled"] + div[id*="-container"]{
         .CodeMirror-gutter.CodeMirror-linenumbers {
             background-color: @default-bg;
             color: @default-interface-txt;
-        }
-
-        .CodeMirror-lines {
-            cursor: default;
-        }
-
-        .CodeMirror-cursors {
-            display: none;
         }
 }
