@@ -46,14 +46,17 @@ class SessionAuthentication(authentication.SessionAuthentication):
 class LoggedOAuth2Authentication(OAuth2Authentication):
 
     def authenticate(self, request):
-        ret = super(LoggedOAuth2Authentication, self).authenticate(request)
-        if ret:
-            user, token = ret
-            username = user.username if user else '<none>'
-            logger.info(smart_text(
-                u"User {} performed a {} to {} through the API using OAuth token {}.".format(
-                    username, request.method, request.path, token.pk
-                )
-            ))
-            setattr(user, 'oauth_scopes', [x for x in token.scope.split() if x])
-        return ret
+        if 'Bearer' in request.META['HTTP_AUTHORIZATION']:
+            ret = super(LoggedOAuth2Authentication, self).authenticate(request)
+            if ret:
+                user, token = ret
+                username = user.username if user else '<none>'
+                logger.debug(smart_text(
+                    u"User {} performed a {} to {} through the API using OAuth token {}.".format(
+                        username, request.method, request.path, token.pk
+                    )
+                ))
+                setattr(user, 'oauth_scopes', [x for x in token.scope.split() if x])
+            return ret
+        else:
+            return None
