@@ -89,7 +89,8 @@
                         }
                     }
                     $scope.job_type = $scope.job_type_options[form.fields.job_type.default];
-                    $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+                    const virtualEnvs = ConfigData.custom_virtualenvs || [];
+                    $scope.custom_virtualenvs_options = virtualEnvs;
 
                     CreateSelect2({
                         element:'#job_template_job_type',

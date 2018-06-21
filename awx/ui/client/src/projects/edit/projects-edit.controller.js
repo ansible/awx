@@ -25,7 +25,8 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
         function init() {
             $scope.project_local_paths = [];
             $scope.base_dir = '';
-            $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+            const virtualEnvs = ConfigData.custom_virtualenvs || [];
+            $scope.custom_virtualenvs_options = virtualEnvs;
         }
 
         $scope.$watch('project_obj.summary_fields.user_capabilities.edit', function(val) {

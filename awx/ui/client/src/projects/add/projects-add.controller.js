@@ -21,7 +21,8 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
 
         function init() {
             $scope.canEditOrg = true;
-            $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+            const virtualEnvs = ConfigData.custom_virtualenvs || [];
+            $scope.custom_virtualenvs_options = virtualEnvs;
 
             Rest.setUrl(GetBasePath('projects'));
             Rest.options()
