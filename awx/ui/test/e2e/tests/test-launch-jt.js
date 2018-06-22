@@ -1,7 +1,7 @@
 import { post, patch } from '../api';
 import {
     getOrCreate,
-    getProject,
+    getUpdatedProject,
     getInventory
 } from '../fixtures';
 
@@ -10,7 +10,7 @@ let templateReferences = {};
 module.exports = {
     before: (client, done) => {
         const resources = [
-            getProject('test-launch-jt'),
+            getUpdatedProject('test-launch-jt'),
             getInventory('test-launch-jt')
         ];
 
