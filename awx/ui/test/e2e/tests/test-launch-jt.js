@@ -112,7 +112,7 @@ module.exports = {
         templates.expect.element('i[class*="icon-launch"]').visible;
         templates.expect.element('i[class*="icon-launch"]').enabled;
         templates.click('i[class*="icon-launch"]');
-        templates.waitForElementVisible('.Prompt-previewTag');
+        templates.waitForElementVisible('#prompt-inventory');
         templates.expect.element('#prompt_inventory_tab').visible;
         templates.expect.element('#prompt_inventory_tab').to.have.attribute('class').which.contains('at-Tab--active');
         templates.expect.element('#prompt_inventory_next').visible;
