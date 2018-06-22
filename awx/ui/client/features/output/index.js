@@ -144,7 +144,7 @@ function resolveWebSocketConnection ($stateParams, SocketService) {
         }
     };
 
-    return SocketService.addStateResolve(state, id);
+    SocketService.addStateResolve(state, id);
 }
 
 function getWebSocketResource (type) {
