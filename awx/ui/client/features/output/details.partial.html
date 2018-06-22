@@ -315,9 +315,26 @@
             <i class="JobResults-expandArrow fa fa-caret-down"></i>
         </a>
     </div>
-    <div id="job-results-labels" class="LabelList JobResults-resultRowText JobResults-resultRowText--fullWidth">
-        <div ng-repeat="label in vm.labels.value" class="LabelList-tagContainer">
-            <div class="LabelList-tag"><div class="LabelList-name">{{ label }}</div></div>
+    <div id="job-results-labels">
+        <div ng-show="vm.labels.truncate" class="LabelList JobResults-resultRowText JobResults-resultRowText--fullWidth">
+            <div ng-repeat="label in vm.labels.value | limitTo: vm.labels.truncateLength" class="LabelList-tagContainer">
+                <div class="LabelList-tag"><div class="LabelList-name">{{ label }}</div></div>
+            </div>
+            <span ng-show="vm.labels.hasMoreToShow"
+                class="JobResults-seeMoreLess"
+                ng-click="vm.showLabels()">
+                {{:: vm.strings.get('details.SHOW_MORE') }}
+            </span>
+        </div>
+        <div ng-show="!vm.labels.truncate" class="LabelList JobResults-resultRowText JobResults-resultRowText--fullWidth">
+            <div ng-repeat="label in vm.labels.value" class="LabelList-tagContainer">
+                <div class="LabelList-tag"><div class="LabelList-name">{{ label }}</div></div>
+            </div>
+            <span ng-show="vm.labels.hasMoreToShow"
+                class="JobResults-seeMoreLess"
+                ng-click="vm.showLabels()">
+                {{:: vm.strings.get('details.SHOW_LESS') }}
+            </span>
         </div>
     </div>
 </div>
