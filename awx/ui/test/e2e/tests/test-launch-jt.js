@@ -92,6 +92,10 @@ module.exports = {
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
         client.waitForElementVisible('at-job-details', 10000);
+
+        client.useXpath();
+        client.waitForElementVisible('.//span[normalize-space(text())=\'"msg": "Hello World!"\']', 60000);
+        client.useCss();
     },
     'expected jt launch with prompts but no changes to navigate to job details': client => {
         const templates = client.page.templates();
@@ -145,6 +149,11 @@ module.exports = {
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
         client.waitForElementVisible('at-job-details', 10000);
+
+        client.useXpath();
+        client.waitForElementVisible('.//span[normalize-space(text())=\'"msg": "Hello World!"\']', 60000);
+        client.useCss();
+
         client.end();
     }
 };
