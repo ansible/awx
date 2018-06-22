@@ -2,13 +2,13 @@
 <div class="tab-pane" id="jobs-page">
     <at-panel ng-cloak id="htmlTemplate">
         <div>
-            <div ng-hide="$state.includes('jobs.schedules')">
+            <div ng-hide="$state.includes('schedules')">
                 <at-panel-heading hide-dismiss="true">
                     <translate>JOBS</translate>
                 </at-panel-heading>
                 <div ui-view="jobsList"></div>
             </div>
-            <div ng-hide="!$state.includes('jobs.schedules')">
+            <div ng-hide="!$state.includes('schedules')">
                 <at-panel-heading hide-dismiss="true">
                     <translate>SCHEDULES</translate>
                 </at-panel-heading>
