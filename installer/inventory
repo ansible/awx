@@ -32,7 +32,7 @@ dockerhub_version=latest
 # task_mem_request=2
 
 # Common Docker parameters
-postgres_data_dir=/tmp/pgdocker
+postgres_data_dir=/var/lib/awx/pgdocker
 host_port=80
 
 # Docker Compose Install
