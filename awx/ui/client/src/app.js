@@ -353,6 +353,10 @@ angular
                     } else {
                         $rootScope.$broadcast("RemoveIndicator");
                     }
+
+                    if(_.contains(trans.from().name, 'output') && trans.to().name === 'jobs'){
+                        $state.reload();
+                    }
                 });
 
                 if (!Authorization.isUserLoggedIn()) {
