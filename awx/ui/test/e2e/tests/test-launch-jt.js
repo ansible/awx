@@ -58,8 +58,9 @@ module.exports = {
                                 new_question: true
                             }]
                         });
-                        const surveyPatch = patch(promptNoPass.url, { survey_enabled: true });
-                        Promise.all([surveyPost, surveyPatch])
+
+                        surveyPost
+                            .then(() => patch(promptNoPass.url, { survey_enabled: true }))
                             .then(done);
                     });
             });
