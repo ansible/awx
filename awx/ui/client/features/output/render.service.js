@@ -170,13 +170,11 @@ function JobRenderService ($q, $sce, $window) {
 
     this.getParentEvents = (uuid, list) => {
         list = list || [];
-
-        if (this.record[uuid]) {
-            list.push(uuid);
-
-            if (this.record[uuid].parents) {
-                list = list.concat(this.record[uuid].parents);
-            }
+        // always push its parent if exists
+        list.push(uuid);
+        // if we can get grandparent in current visible lines, we also push it
+        if (this.record[uuid] && this.record[uuid].parents) {
+            list = list.concat(this.record[uuid].parents);
         }
 
         return list;
@@ -211,6 +209,13 @@ function JobRenderService ($q, $sce, $window) {
 
             if (current.parents) {
                 classList = current.parents.reduce((list, uuid) => `${list} child-of-${uuid}`, '');
+            }
+            // if a row has children, and has parent,
+            // we grab all its children and append parent to its children
+            if (id !== '' && current.parents) {
+                const children = $(`.child-of-${current.uuid}`);
+                const parentId = current.parents[0];
+                children.addClass(`child-of-${parentId}`);
             }
         }
 
