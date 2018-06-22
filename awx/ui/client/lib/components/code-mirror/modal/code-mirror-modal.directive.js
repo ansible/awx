@@ -16,8 +16,12 @@ function atCodeMirrorModalController (
     ParseVariableString
 ) {
     const vm = this;
-
     function resize () {
+        if ($scope.disabled === 'true') {
+            $scope.disabled = true;
+        } else if ($scope.disabled === 'false') {
+            $scope.disabled = false;
+        }
         const editor = $(`${CodeMirrorModalID} .CodeMirror`)[0].CodeMirror;
         const height = $(ModalHeight).height() - $(ModalHeader).height() -
             $(ModalFooter).height() - 100;
@@ -30,6 +34,11 @@ function atCodeMirrorModalController (
     }
 
     function init () {
+        if ($scope.disabled === 'true') {
+            $scope.disabled = true;
+        } else if ($scope.disabled === 'false') {
+            $scope.disabled = false;
+        }
         $(CodeMirrorModalID).modal('show');
         $scope.extra_variables = ParseVariableString(_.cloneDeep($scope.variables));
         $scope.parseType = ParseType;

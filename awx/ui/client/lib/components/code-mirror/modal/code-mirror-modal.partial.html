@@ -42,7 +42,10 @@
                             </div>
                          </div>
                     </div>
-                    <div>
+                    <div class="atCodeMirror-labelRightSide">
+                        <div class="at-RowItem-tag at-RowItem-tag--header atCodeMirror-badge" ng-show="disabled === 'true' || disabled === true">
+                            {{ vm.strings.get('label.READONLY')}}
+                        </div>
                         <button type="button" class="close" ng-click="closeFn()">
                             <i class="fa fa-times-circle"></i>
                         </button>
