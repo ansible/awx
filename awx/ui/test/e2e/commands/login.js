@@ -22,12 +22,12 @@ Login.prototype.command = function command (username, password) {
     loginPage
         .navigate()
         .waitForElementVisible('@submit', AWX_E2E_TIMEOUT_LONG)
-        .waitForElementNotVisible('div.spinny')
+        .waitForElementNotVisible('div.spinny', AWX_E2E_TIMEOUT_LONG)
         .setValue('@username', username)
         .setValue('@password', password)
         .click('@submit')
-        .waitForElementVisible('div.spinny')
-        .waitForElementNotVisible('div.spinny');
+        .waitForElementVisible('div.spinny', AWX_E2E_TIMEOUT_LONG)
+        .waitForElementNotVisible('div.spinny', AWX_E2E_TIMEOUT_LONG);
 
     // temporary hack while login issue is resolved
     this.api.elements('css selector', '.LoginModal-alert', result => {
@@ -39,8 +39,8 @@ Login.prototype.command = function command (username, password) {
                     loginPage.setValue('@username', username);
                     loginPage.setValue('@password', password);
                     loginPage.click('@submit');
-                    loginPage.waitForElementVisible('div.spinny');
-                    loginPage.waitForElementNotVisible('div.spinny');
+                    loginPage.waitForElementVisible('div.spinny', AWX_E2E_TIMEOUT_LONG);
+                    loginPage.waitForElementNotVisible('div.spinny', AWX_E2E_TIMEOUT_LONG);
                 }
             });
         });

@@ -11,7 +11,7 @@ import pagination from './sections/pagination';
 import permissions from './sections/permissions';
 import search from './sections/search';
 
-const details = createFormSection({
+const jtDetails = createFormSection({
     selector: 'form',
     props: {
         formElementSelectors: [
@@ -27,6 +27,25 @@ const details = createFormSection({
         name: 'Name',
         description: 'Description',
         playbook: 'Playbook'
+
+    }
+});
+
+const wfjtDetails = createFormSection({
+    selector: 'form',
+    props: {
+        formElementSelectors: [
+            '#workflow_job_template_form .Form-textInput',
+            '#workflow_job_template_form select.Form-dropDown',
+            '#workflow_job_template_form .Form-textArea',
+            '#workflow_job_template_form input[type="checkbox"]',
+            '#workflow_job_template_form .ui-spinner-input',
+            '#workflow_job_template_form .ScheduleToggle-switch'
+        ]
+    },
+    labels: {
+        name: 'Name',
+        description: 'Description'
 
     }
 });
@@ -54,7 +73,7 @@ module.exports = {
         addJobTemplate: {
             selector: 'div[ui-view="form"]',
             sections: {
-                details
+                jtDetails
             },
             elements: {
                 title: 'div[class^="Form-title"]'
@@ -63,7 +82,7 @@ module.exports = {
         editJobTemplate: {
             selector: 'div[ui-view="form"]',
             sections: {
-                details,
+                jtDetails,
                 permissions
             },
             elements: {
@@ -73,7 +92,7 @@ module.exports = {
         addWorkflowJobTemplate: {
             selector: 'div[ui-view="form"]',
             sections: {
-                details
+                wfjtDetails
             },
             elements: {
                 title: 'div[class^="Form-title"]'
@@ -82,7 +101,7 @@ module.exports = {
         editWorkflowJobTemplate: {
             selector: 'div[ui-view="form"]',
             sections: {
-                details,
+                wfjtDetails,
                 permissions
             },
             elements: {
@@ -90,7 +109,7 @@ module.exports = {
             }
         },
         list: {
-            selector: '.Panel',
+            selector: '.at-Panel',
             elements: {
                 badge: 'span[class~="badge"]',
                 title: 'div[class="List-titleText"]',
