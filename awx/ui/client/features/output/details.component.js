@@ -525,10 +525,10 @@ function getLabelDetails () {
 
     const label = strings.get('labels.LABELS');
     const more = false;
-    const hasMoreToShow = jobLabels.length < _.get(resource.model.get('summary_fields.labels'), 'count');
     const value = jobLabels.map(({ name }) => name).map($filter('sanitize'));
     const truncate = true;
     const truncateLength = 5;
+    const hasMoreToShow = jobLabels.length > truncateLength;
 
     return { label, more, hasMoreToShow, value, truncate, truncateLength };
 }
@@ -549,29 +549,29 @@ const ELEMENT_PROMPT_MODAL = '#prompt-modal';
 const TAGS_SLIDE_DISTANCE = 200;
 
 function showLabels () {
+    this.labels.truncate = !this.labels.truncate;
+
     const jobLabelsCount = _.get(resource.model.get('summary_fields.labels'), 'count');
-    const maxCount = 25;
+    const maxCount = 50;
 
-    if (!this.labels.truncate) {
-        this.labels.truncate = true;
-    } else {
-        this.labels.truncate = false;
-    }
-
-    if (this.labels.value.length === jobLabelsCount || this.labels.value.length === maxCount) {
+    if (this.labels.value.length === jobLabelsCount || this.labels.value.length >= maxCount) {
         return;
     }
 
-    if (this.labels.value.length < maxCount) {
-        wait('start');
-        resource.model.extend('get', 'labels')
-            .then((model) => {
-                const jobLabels = _.get(model.get('related.labels'), 'results', []);
-                this.labels.value = jobLabels.map(({ name }) => name).map($filter('sanitize'));
-            })
-            .catch(createErrorHandler('get labels', 'GET'))
-            .finally(wait('stop'));
-    }
+    const config = {
+        params: {
+            page_size: maxCount
+        }
+    };
+
+    wait('start');
+    resource.model.extend('get', 'labels', config)
+        .then((model) => {
+            const jobLabels = _.get(model.get('related.labels'), 'results', []);
+            this.labels.value = jobLabels.map(({ name }) => name).map($filter('sanitize'));
+        })
+        .catch(createErrorHandler('get labels', 'GET'))
+        .finally(() => wait('stop'));
 }
 
 function toggleLabels () {
