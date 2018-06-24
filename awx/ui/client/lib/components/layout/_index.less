@@ -6,7 +6,6 @@
     &-topNav {
         display: flex;
         background-color: @at-color-top-nav-background;
-        border-bottom: @at-border-default-width solid @at-color-top-nav-border-bottom;
         z-index: @at-z-index-nav;
         position: fixed;
         right: 0;
@@ -90,19 +89,8 @@
         overflow-y: auto;
         max-height: 100vh;
         min-width: @at-width-collapsed-side-nav;
-        width: @at-width-collapsed-side-nav;
-        overflow-x: hidden;
         z-index: @at-z-index-side-nav;
-
-        .at-Popover-container {
-            margin-top: 2px;
-            margin-left: -11px;
-        }
-
-        .at-Popover-arrow {
-            padding-top: 7px;
-            margin-left: -10px;
-        }
+	display: none;
 
         .at-Layout-sideNavItem {
             background: inherit;
@@ -110,25 +98,20 @@
             display: flex;
             cursor: pointer;
             text-transform: uppercase;
-            font-size: 12px;
+
+                > i.fa {
+                    padding-left: 20px;
+                }
+
                 i {
                     cursor: pointer;
-                    color: @at-color-side-nav-item-icon;
-                    font-size: @at-font-size-side-nav-icon;
+                    color: @at-color-side-nav-content;
+                    font-size: @at-height-side-nav-item-icon;
                     padding: @at-padding-side-nav-item-icon;
-                    padding-left: @at-padding-left-side-nav-item-icon;
                 }
 
                 i.fa-cubes {
                     margin-left: -4px;
-                }
-
-                i.fa-user {
-                    margin-left: 1px;
-                }
-
-                i.fa-users {
-                    margin-left: -1px;
                 }
 
                 &:hover,
@@ -144,73 +127,27 @@
                     i.fa-cubes {
                         margin-left: -9px;
                     }
-
-                    i.fa-user {
-                        margin-left: -4px;
-                    }
-
-                    i.fa-users {
-                        margin-left: -6px;
-                    }
                 }
         }
 
-        .at-Layout-sideNavToggle {
-            padding-top: @at-padding-top-side-nav-toggle;
-
-            i {
-                padding-left: @at-padding-left-side-nav-toggle-icon;
-            }
-        }
-
         .at-Layout-sideNavSpacer {
-            border-bottom: 1px solid @at-color-side-nav-space-collapsed-border;
-            padding: 0;
-            margin: @at-margin-side-nav-space-collapsed;
-        }
-
-        .at-Layout-sideNavSpacer--first {
-          display: none;
-        }
-
-        .at-Layout-sideNavHeader {
-            display: none;
+            background: inherit;
+            height: 5px;
         }
 
         &--expanded {
             width: @at-width-expanded-side-nav;
+	    display: block;
 
             .at-Layout-sideNavItem {
                 display: flex;
                 justify-content: flex-start;
                 align-items: center;
                 padding-right: @at-padding-between-side-nav-icon-text;
-
-                i {
-                    padding-left: @at-padding-left-side-nav-item-icon-expanded;
-                }
             }
 
             + .at-Layout-main {
                 padding-left: @at-width-expanded-side-nav;
-            }
-
-            .at-Layout-sideNavSpacer--first {
-                display: inherit;
-            }
-
-            .at-Layout-sideNavSpacer {
-                height: @at-height-side-nav-spacer;
-                font-size: @at-font-size-side-nav-space;
-                color: @at-color-side-nav-item-spacer;
-                padding: @at-padding-side-nav-item-spacer;
-                text-transform: uppercase;
-                border-bottom: 0;
-                margin: 0;
-            }
-
-            .at-Layout-sideNavHeader {
-                display: inherit;
             }
         }
     }
@@ -220,7 +157,6 @@
         height: 100%;
         width: 100%;
         flex-direction: column;
-        padding-left: @at-width-collapsed-side-nav;
         overflow-x: hidden;
     }
 
@@ -255,13 +191,9 @@
 
             .at-Layout-sideNavItem.at-Layout-sideNavToggle {
                 display: flex;
-                height: @at-height-side-nav-toggle-mobile;
+                height: 40px;
                 align-items: center;
-                width: @at-width-side-nav-toggle-mobile;
-
-                i {
-                    padding-bottom: @at-padding-bottom-side-nav-toggle-mobile;
-                }
+                width: 55px;
             }
 
             .at-Layout-sideNavItem,

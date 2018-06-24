@@ -5,7 +5,36 @@
                 <img ng-src="/static/assets/logo-header.svg">
             </a>
         </at-top-nav-item>
-        <div class="at-Layout-topNavRightAligner"></div>
+	<at-top-nav-item  >
+	<a onclick="$('.at-Layout-side').toggle();$('.at-Layout-side').toggleClass('at-Layout-side--expanded');">
+                <i class="fa fa-bars"></i>
+        </a>
+	</at-top-nav-item>
+	<at-top-nav-item  route="dashboard" name="DASHBOARD">
+	<a ng-href="/#/home">
+	        <i class="fa fa-tachometer"></i>
+        	<span class="at-Layout-sideNavItemName" >
+	            DASHBOARD
+       		 </span>
+	</a>
+	</at-top-nav-item>
+	<at-top-nav-item  route="templates" name="TEMPLATES">
+            <a ng-href="/#/templates" >
+	        <i class="fa fa-pencil-square-o"></i>
+                <span class="at-Layout-sideNavItemName" >
+                 	TEMPLATES
+		</span>
+	    </a>
+	</at-top-nav-item>
+	<at-top-nav-item  route="jobs" name="JOBS">
+            <a ng-href="/#/jobs" >    
+		<i class="fa fa-spinner"></i>
+                <span class="at-Layout-sideNavItemName" >
+                	JOBS 
+		</span>
+            </a>
+	</at-top-nav-item>
+	<div class="at-Layout-topNavRightAligner"></div>
         <at-top-nav-item class="at-Layout-topNavItem--user">
             <a ng-href="/#/users/{{ $parent.layoutVm.currentUserId }}">
                 <i class="fa fa-user"
@@ -31,62 +60,40 @@
         </at-top-nav-item>
     </div>
     <at-side-nav>
-        <div class="at-Layout-sideNavSpacer at-Layout-sideNavSpacer--first">
-          <span class="at-Layout-sideNavHeader">
-              {{:: $parent.layoutVm.getString('VIEWS_HEADER') }}
-          <span>
-        </div>
-        <at-side-nav-item icon-class="fa-tachometer" route="dashboard" name="DASHBOARD">
-        </at-side-nav-item>
-        <at-side-nav-item icon-class="fa-spinner" route="jobs" name="JOBS">
-        </at-side-nav-item>
         <at-side-nav-item icon-class="fa-calendar" route="jobs.schedules" name="SCHEDULES">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-columns" route="portalMode.myJobs" name="PORTAL_MODE">
         </at-side-nav-item>
-        <div class="at-Layout-sideNavSpacer">
-            <span class="at-Layout-sideNavHeader">
-                {{:: $parent.layoutVm.getString('RESOURCES_HEADER') }}
-            <span>
-        </div>
-        <at-side-nav-item icon-class="fa-pencil-square-o" route="templates" name="TEMPLATES">
+        <div class="at-Layout-sideNavSpacer"></div>
+        <at-side-nav-item icon-class="fa-folder-open" route="projects" name="PROJECTS">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-key" route="credentials" name="CREDENTIALS">
         </at-side-nav-item>
-        <at-side-nav-item icon-class="fa-folder-open" route="projects" name="PROJECTS">
+        <at-side-nav-item icon-class="fa-list-alt" route="credentialTypes" name="CREDENTIAL_TYPES"
+            system-admin-only="true">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-sitemap" route="inventories" name="INVENTORIES">
         </at-side-nav-item>
-        <at-side-nav-item icon-class="fa-code" route="inventoryScripts" name="INVENTORY_SCRIPTS">
-        </at-side-nav-item>
-        <div class="at-Layout-sideNavSpacer">
-            <span class="at-Layout-sideNavHeader">
-                {{:: $parent.layoutVm.getString('ACCESS_HEADER') }}
-            <span>
-        </div>
+        <div class="at-Layout-sideNavSpacer"></div>
         <at-side-nav-item icon-class="fa-building" route="organizations" name="ORGANIZATIONS">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-user" route="users" name="USERS">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-users" route="teams" name="TEAMS">
         </at-side-nav-item>
-        <div class="at-Layout-sideNavSpacer" ng-show="$parent.layoutVm.isSuperUser">
-            <span class="at-Layout-sideNavHeader">
-                {{:: $parent.layoutVm.getString('ADMINISTRATION_HEADER') }}
-            <span>
-        </div>
-        <at-side-nav-item icon-class="fa-list-alt" route="credentialTypes" name="CREDENTIAL_TYPES"
-            system-admin-only="true">
+        <div class="at-Layout-sideNavSpacer"></div>
+        <at-side-nav-item icon-class="fa-code" route="inventoryScripts" name="INVENTORY_SCRIPTS">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-bell" route="notifications" name="NOTIFICATIONS"
             system-admin-only="true">
         </at-side-nav-item>
-        <at-side-nav-item icon-class="fa-briefcase" route="managementJobsList" name="MANAGEMENT_JOBS"
+        <at-side-nav-item icon-class="fa-wrench" route="managementJobsList" name="MANAGEMENT_JOBS"
             system-admin-only="true">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-server" route="instanceGroups" name="INSTANCE_GROUPS"
-            ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
+            system-admin-only="true">
         </at-side-nav-item>
+        <div class="at-Layout-sideNavSpacer"></div>
         <at-side-nav-item icon-class="fa-cubes" route="applications" name="APPLICATIONS"
             system-admin-only="true">
         </at-side-nav-item>
