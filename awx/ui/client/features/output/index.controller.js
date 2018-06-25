@@ -1,4 +1,7 @@
 /* eslint camelcase: 0 */
+const EVENT_START_TASK = 'playbook_on_task_start';
+const EVENT_START_PLAY = 'playbook_on_play_start';
+
 let $compile;
 let $q;
 let $scope;
@@ -142,8 +145,15 @@ function toggleMenuExpand () {
     if (scroll.isPaused()) return;
 
     const recordList = Object.keys(render.record).map(key => render.record[key]);
+    const playRecords = recordList.filter(({ name }) => name === EVENT_START_PLAY);
+    const playIds = playRecords.map(({ uuid }) => uuid);
 
-    const toggled = recordList
+    // get any task record that does not have a parent play record
+    const orphanTaskRecords = recordList
+        .filter(({ name }) => name === EVENT_START_TASK)
+        .filter(({ parents }) => !parents.some(uuid => playIds.indexOf(uuid) >= 0));
+
+    const toggled = playRecords.concat(orphanTaskRecords)
         .map(({ uuid }) => getToggleElements(uuid))
         .filter(({ icon }) => icon.length > 0)
         .map(({ icon, lines }) => setExpanded(icon, lines, !vm.isMenuExpanded));
