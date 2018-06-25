@@ -3,7 +3,7 @@
         {{ vm.panelTitle }}
     </at-panel-heading>
 
-    <at-tab-group>
+    <at-tab-group class="at-TabGroup--padBelow">
         <at-tab state="vm.tab.details">{{:: vm.strings.get('tab.DETAILS') }}</at-tab>
         <at-tab state="vm.tab.instances">{{:: vm.strings.get('tab.INSTANCES') }}</at-tab>
         <at-tab state="vm.tab.jobs" ng-hide="$state.current.name === 'instanceGroups.add'">{{:: vm.strings.get('tab.JOBS') }}</at-tab>
