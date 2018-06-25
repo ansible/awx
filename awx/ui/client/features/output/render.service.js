@@ -200,7 +200,7 @@ function JobRenderService ($q, $sce, $window) {
             }
 
             if (current.isHost) {
-                tdEvent = `<div class="at-Stdout-event--host" ng-click="vm.showHostDetails('${current.id}', '${current.uuid}')">${content}</div>`;
+                tdEvent = `<div class="at-Stdout-event--host" ng-click="vm.showHostDetails('${current.id}', '${current.uuid}')"><span ng-non-bindable>${content}</span></div>`;
             }
 
             if (current.time && current.line === ln) {
@@ -220,7 +220,7 @@ function JobRenderService ($q, $sce, $window) {
         }
 
         if (!tdEvent) {
-            tdEvent = `<div class="at-Stdout-event">${content}</div>`;
+            tdEvent = `<div class="at-Stdout-event"><span ng-non-bindable>${content}</span></div>`;
         }
 
         if (!tdToggle) {
