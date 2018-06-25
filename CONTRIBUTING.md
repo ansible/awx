@@ -6,14 +6,14 @@ Have questions about this document or anything not covered here? Come chat with 
 
 ## Table of contents
 
-* [Things to know prior to submitting code](#things-to-know-before-contributing-code)
+* [Things to know prior to submitting code](#things-to-know-prior-to-contributing-code)
 * [Setting up your development environment](#setting-up-your-development-environment)
   * [Prerequisites](#prerequisites)
     * [Docker](#docker)
     * [Docker compose](#docker-compose)
     * [Node and npm](#node-and-npm)
-  * [Building the environment](#building-the-environment)
-    * [Clone the AWX repo](#clone-the-awx-repo)
+  * [Build the environment](#build-the-environment)
+    * [Fork and clone the AWX repo](#fork-and-clone-the-awx-repo)
     * [Create local settings](#create-local-settings)
     * [Build the base image](#build-the-base-image)
     * [Build the user interface](#build-the-user-interface)
