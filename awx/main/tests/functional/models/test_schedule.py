@@ -113,11 +113,11 @@ def test_leap_year_day(job_template):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('until, dtend', [
-    ['20180602T170000Z', '2018-06-02 12:00:00+00:00'],
-    ['20180602T000000Z', '2018-06-01 12:00:00+00:00'],
+    ['20300602T170000Z', '2030-06-02 12:00:00+00:00'],
+    ['20300602T000000Z', '2030-06-01 12:00:00+00:00'],
 ])
 def test_utc_until(job_template, until, dtend):
-    rrule = 'DTSTART:20180601T120000Z RRULE:FREQ=DAILY;INTERVAL=1;UNTIL={}'.format(until)
+    rrule = 'DTSTART:20300601T120000Z RRULE:FREQ=DAILY;INTERVAL=1;UNTIL={}'.format(until)
     s = Schedule(
         name='Some Schedule',
         rrule=rrule,
@@ -125,7 +125,7 @@ def test_utc_until(job_template, until, dtend):
     )
     s.save()
 
-    assert str(s.next_run) == '2018-06-01 12:00:00+00:00'
+    assert str(s.next_run) == '2030-06-01 12:00:00+00:00'
     assert str(s.next_run) == str(s.dtstart)
     assert str(s.dtend) == dtend
 
