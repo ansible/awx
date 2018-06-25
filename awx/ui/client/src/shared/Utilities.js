@@ -165,8 +165,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 Alert('Conflict', data.conflict || "Resource currently in use.");
             } else if (status === 410) {
                 Alert('Deleted Object', 'The requested object was previously deleted and can no longer be accessed.');
-            } else if ((status === 'Session is expired') || (status === 401 && data.detail && data.detail === 'Token is expired') ||
-                (status === 401 && data && data.detail && data.detail === 'Invalid token')) {
+            } else if ((status === 'Session is expired') || (status === 401)) {
                 if ($rootScope.sessionTimer) {
                     $rootScope.sessionTimer.expireSession('idle');
                 }

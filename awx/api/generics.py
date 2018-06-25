@@ -233,6 +233,8 @@ class APIView(views.APIView):
         use the request header as an indication for which authentication method
         was attempted.
         """
+        if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            return 'Bearer realm=api'
         for authenticator in self.get_authenticators():
             try: 
                 resp_hdr = authenticator.authenticate_header(request)
