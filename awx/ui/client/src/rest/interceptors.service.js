@@ -22,9 +22,9 @@
                     return config;
                 },
                 response: function(config) {
-                    if(config.headers('auth-token-timeout') !== null){
+                    if(config.headers('Session-Timeout') !== null){
                         $rootScope.loginConfig.promise.then(function () {
-                            $AnsibleConfig.session_timeout = Number(config.headers('auth-token-timeout'));
+                            $AnsibleConfig.session_timeout = Number(config.headers('Session-Timeout'));
                         });
                     }
                     return config;
