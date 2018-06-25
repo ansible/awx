@@ -1,21 +1,21 @@
 <!-- todo: styling, markup, css etc. - disposition according to project lib conventions -->
 <div class="at-u-floatRight">
     <span class="at-Panel-label">plays</span>
-    <span ng-show="!vm.plays" class="at-Panel-headingTitleBadge">...</span>
-    <span ng-show="vm.plays" class="at-Panel-headingTitleBadge">{{ vm.plays }}</span>
+    <span ng-show="vm.running" class="at-Panel-headingTitleBadge">...</span>
+    <span ng-show="!vm.running" class="at-Panel-headingTitleBadge">{{ vm.plays || 0 }}</span>
 
     <span class="at-Panel-label">tasks</span>
-    <span ng-show="!vm.tasks" class="at-Panel-headingTitleBadge">...</span>
-    <span ng-show="vm.tasks" class="at-Panel-headingTitleBadge">{{ vm.tasks }}</span>
+    <span ng-show="vm.running" class="at-Panel-headingTitleBadge">...</span>
+    <span ng-show="!vm.running" class="at-Panel-headingTitleBadge">{{ vm.tasks || 0 }}</span>
 
     <span class="at-Panel-label">{{:: vm.strings.get('stats.HOSTS')}}</span>
-    <span ng-show="!vm.hosts" class="at-Panel-headingTitleBadge">...</span>
-    <span ng-show="vm.hosts" class="at-Panel-headingTitleBadge">{{ vm.hosts }}</span>
+    <span ng-show="vm.running" class="at-Panel-headingTitleBadge">...</span>
+    <span ng-show="!vm.running" class="at-Panel-headingTitleBadge">{{ vm.hosts || 0 }}</span>
 
     <span class="at-Panel-label">{{:: vm.strings.get('stats.ELAPSED') }}</span>
-    <span ng-show="!vm.elapsed" class="at-Panel-headingTitleBadge">...</span>
-    <span ng-show="vm.elapsed" class="at-Panel-headingTitleBadge">
-        {{ vm.elapsed * 1000 | duration: "hh:mm:ss" }}
+    <span ng-show="vm.running" class="at-Panel-headingTitleBadge">...</span>
+    <span ng-show="!vm.running" class="at-Panel-headingTitleBadge">
+        {{ (vm.elapsed * 1000 || 0) | duration: "hh:mm:ss"}}
     </span>
 
     <a ng-show="vm.download && !vm.running" href="{{ vm.download }}?format=txt_download">
