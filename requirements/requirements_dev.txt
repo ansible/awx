@@ -11,7 +11,7 @@ pytest-cov
 pytest-django
 pytest-pythonpath
 pytest-mock
-pytest-timeout
+pytest-timeout=1.2.1
 pytest-xdist
 logutils
 flower
