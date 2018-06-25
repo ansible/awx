@@ -303,6 +303,30 @@ return {
             dataContainer: 'body',
             subForm: 'sourceSubForm'
         },
+        azure_rm_variables: {
+            id: 'azure_rm_variables',
+            label: i18n._('Source Variables'), //"{{vars_label}}" ,
+            ngShow: "source && source.value == 'azure_rm'",
+            type: 'textarea',
+            class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            rows: 6,
+            'default': '---',
+            parseTypeName: 'envParseType',
+            dataTitle: i18n._("Source Variables"),
+            dataPlacement: 'right',
+            awPopOver: "<p>" + i18n._("Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables ") +
+                "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/azure_rm.ini\" target=\"_blank\">" +
+                i18n._("view azure_rm.ini in the Ansible github repo.") + "</a></p>" +
+                "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
+                i18n._("JSON:") + "<br />\n" +
+                "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                i18n._("YAML:") + "<br />\n" +
+                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
+        },
         verbosity: {
             label: i18n._('Verbosity'),
             type: 'select',

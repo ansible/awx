@@ -1907,11 +1907,16 @@ class RunInventoryUpdate(BaseTask):
             cp.set(section, 'group_by_resource_group', 'yes')
             cp.set(section, 'group_by_location', 'yes')
             cp.set(section, 'group_by_tag', 'yes')
+
             if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
                 cp.set(
                     section, 'locations',
                     ','.join([x.strip() for x in inventory_update.source_regions.split(',')])
                 )
+
+            azure_rm_opts = dict(inventory_update.source_vars_dict.items())
+            for k,v in azure_rm_opts.items():
+                cp.set(section, k, six.text_type(v))
 
         # Return INI content.
         if cp.sections():
