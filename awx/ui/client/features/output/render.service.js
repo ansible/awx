@@ -119,6 +119,7 @@ function JobRenderService ($q, $sce, $window) {
         const info = {
             id: event.id,
             line: ln + 1,
+            name: event.event,
             uuid: event.uuid,
             level: event.event_level,
             start: event.start_line,
@@ -209,13 +210,6 @@ function JobRenderService ($q, $sce, $window) {
 
             if (current.parents) {
                 classList = current.parents.reduce((list, uuid) => `${list} child-of-${uuid}`, '');
-            }
-            // if a row has children, and has parent,
-            // we grab all its children and append parent to its children
-            if (id !== '' && current.parents) {
-                const children = $(`.child-of-${current.uuid}`);
-                const parentId = current.parents[0];
-                children.addClass(`child-of-${parentId}`);
             }
         }
 
