@@ -102,13 +102,11 @@ module.exports = {
 
         templates.expect.element('@save').visible;
         templates.expect.element('@save').enabled;
+        client.pause(1000);
 
-        client
-            .useXpath()
-            .pause(1000)
-            .waitForElementVisible('//*[text()=" Workflow Editor"]')
-            .click('//*[text()=" Workflow Editor"]')
-            .useCss()
+        templates.section.editWorkflowJobTemplate
+            .waitForElementVisible('@visualizerButton')
+            .click('@visualizerButton')
             .waitForElementVisible('div.spinny')
             .waitForElementNotVisible('div.spinny')
             .waitForAngular();

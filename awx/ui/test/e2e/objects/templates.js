@@ -95,7 +95,8 @@ module.exports = {
                 wfjtDetails
             },
             elements: {
-                title: 'div[class^="Form-title"]'
+                title: 'div[class^="Form-title"]',
+                visualizerButton: '#workflow_job_template_workflow_visualizer_btn',
             }
         },
         editWorkflowJobTemplate: {
@@ -105,7 +106,8 @@ module.exports = {
                 permissions
             },
             elements: {
-                title: 'div[class^="Form-title"]'
+                title: 'div[class^="Form-title"]',
+                visualizerButton: '#workflow_job_template_workflow_visualizer_btn',
             }
         },
         list: {
