@@ -11,7 +11,7 @@ function AtSideNavItemController ($scope, strings) {
         if ($scope.name === 'portal mode') {
             vm.isRoute = (current && current.indexOf('portalMode') === 0);
         } else if (current && current.indexOf($scope.route) === 0) {
-            if (current.indexOf('jobs.schedules') === 0 && $scope.route === 'jobs') {
+            if (current.indexOf('schedules') === 0 && $scope.route === 'jobs') {
                 vm.isRoute = false;
             } else {
                 vm.isRoute = true;

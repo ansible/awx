@@ -269,7 +269,7 @@ const projectsSchedulesEditRoute = {
 
 const jobsSchedulesRoute = {
     searchPrefix: 'schedule',
-    name: 'jobs.schedules',
+    name: 'schedules',
     route: '/schedules',
     params: {
         schedule_search: {
@@ -284,7 +284,6 @@ const jobsSchedulesRoute = {
         activityStream: false,
     },
     ncyBreadcrumb: {
-        parent: 'jobs',
         label: N_('SCHEDULES')
     },
     resolve: {
@@ -312,8 +311,9 @@ const jobsSchedulesRoute = {
             }]
     },
     views: {
-        'schedulesList@jobs': {
+        '@': {
             templateProvider: function(ScheduleList, generateList){
+                ScheduleList.well = true;
                 let html = generateList.build({
                     list: ScheduleList,
                     mode: 'edit',
@@ -339,14 +339,14 @@ const parentResolve = {
 };
 
 const jobsSchedulesEditRoute = {
-    name: 'jobs.schedules.edit',
+    name: 'schedules.edit',
     route: '/:schedule_id',
     ncyBreadcrumb: {
-        parent: 'jobs.schedules',
+        parent: 'schedules',
         label: "{{breadcrumb.schedule_name}}"
     },
     views: {
-        'scheduler@jobs': {
+        '@': {
             controller: 'schedulerEditController',
             templateUrl: templateUrl("scheduler/schedulerForm"),
         }

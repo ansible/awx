@@ -101,7 +101,7 @@ export default [
                 }
                 buildTooltips(itm);
 
-                if (!$state.is('jobs.schedules')){
+                if (!$state.is('schedules')){
                     if($state.current.name.endsWith('.add')) {
                         itm.linkToDetails = `^.edit({schedule_id:schedule.id})`;
                     }
@@ -157,8 +157,8 @@ export default [
         };
 
         $scope.editSchedule = function(schedule) {
-            if ($state.is('jobs.schedules')){
-                $state.go('jobs.schedules.edit', {schedule_id: schedule.id});
+            if ($state.is('schedules')){
+                $state.go('schedules.edit', {schedule_id: schedule.id});
             }
             else {
                 if($state.current.name.endsWith('.add')) {
