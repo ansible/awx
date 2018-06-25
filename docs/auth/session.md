@@ -45,7 +45,7 @@ Any client should follow the standard rules of [cookie protocol](https://tools.i
 parse that header to obtain information about the session, such as session cookie name (`session_id`),
 session cookie value, expiration date, duration, etc.
 
-The duration of the cookie is configurable by Tower Configuration setting `SESSION_COOKIE_AGE` under
+The duration of the cookie is configurable by Tower Configuration setting `AUTH_TOKEN_EXPIRATION` under
 category `authentication`. It is an integer denoting the number of seconds the session cookie should
 live. The default session cookie age is 2 weeks.  
 
@@ -76,7 +76,7 @@ is updated, all sessions she owned will be invalidated and deleted.
 * User should be able to log in via `/api/login/` endpoint by correctly providing all necessary fields.
 * Logged in users should be able to authenticate themselves by providing correct session auth info.
 * Logged in users should be able to log out via `/api/logout/`.
-* The duration of a session cookie should be configurable by `SESSION_COOKIE_AGE`.
+* The duration of a session cookie should be configurable by `AUTH_TOKEN_EXPIRATION`.
 * The maximum number of concurrent login for one user should be configurable by `SESSIONS_PER_USER`,
   and over-limit user sessions should be warned by websocket.
 * When a user's password is changed, all her sessions should be invalidated and deleted.

@@ -49,7 +49,7 @@
 * Impose stricter criteria to admin users - organization admin role now
   necessary for all organizations target user is member of.
 * Remove unused `admin_role` associated with users.
-* Enforce max value for `SESSION_COOKIE_AGE`
+* Enforce max value for `AUTH_TIMEOUT_EXPIRATION`
   [[#1651](https://github.com/ansible/awx/issues/1651)].
 * Add stricter validation to `order_by` query params
   [[#776](https://github.com/ansible/awx/issues/776)].
