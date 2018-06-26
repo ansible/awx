@@ -58,6 +58,23 @@ function getOverlapArray (range, other) {
     return [range[0] - other[0], other[1] - range[1]];
 }
 
+/**
+ * Apply a minimum and maximum boundary to a range.
+ *
+ * @arg {Array} range - A [low, high] range array.
+ * @arg {Array} other - A [low, high] range array to be applied as a boundary.
+ *
+ * @returns {(Array)} - Returns a new range array by applying the second range
+ * as a boundary to the first.
+ *
+ * getBoundedRange([2, 6], [2, 8]) = [2, 6]
+ * getBoundedRange([1, 9], [2, 8]) = [2, 8]
+ * getBoundedRange([4, 9], [2, 8]) = [4, 8]
+ */
+function getBoundedRange (range, other) {
+    return [Math.max(range[0], other[0]), Math.min(range[1], other[1])];
+}
+
 function SlidingWindowService ($q) {
     this.init = (storage, api, { getScrollHeight }) => {
         const { prepend, append, shift, pop, deleteRecord } = storage;
@@ -67,7 +84,7 @@ function SlidingWindowService ($q) {
             getMaxCounter,
             getRange,
             getFirst,
-            getLast
+            getLast,
         };
 
         this.storage = {
@@ -85,6 +102,8 @@ function SlidingWindowService ($q) {
         this.records = {};
         this.uuids = {};
         this.chain = $q.resolve();
+
+        api.clearCache();
     };
 
     this.pushFront = events => {
@@ -176,47 +195,54 @@ function SlidingWindowService ($q) {
             });
     };
 
-    this.getBoundedRange = ([low, high]) => {
-        const bounds = [1, this.getMaxCounter()];
-
-        return [Math.max(low, bounds[0]), Math.min(high, bounds[1])];
-    };
-
     this.move = ([low, high]) => {
-        const [head, tail] = this.getRange();
-        const [newHead, newTail] = this.getBoundedRange([low, high]);
+        const bounds = [1, this.getMaxCounter()];
+        const [newHead, newTail] = getBoundedRange([low, high], bounds);
+
+        let popHeight = this.hooks.getScrollHeight();
 
         if (newHead > newTail) {
-            return $q.resolve([0, 0]);
+            this.chain = this.chain
+                .then(() => $q.resolve(popHeight));
+
+            return this.chain;
         }
 
         if (!Number.isFinite(newHead) || !Number.isFinite(newTail)) {
-            return $q.resolve([0, 0]);
+            this.chain = this.chain
+                .then(() => $q.resolve(popHeight));
+
+            return this.chain;
         }
 
+        const [head, tail] = this.getRange();
         const overlap = getOverlapArray([head, tail], [newHead, newTail]);
 
         if (!overlap) {
             this.chain = this.chain
-                .then(() => this.popBack(this.getRecordCount()))
+                .then(() => this.clear())
                 .then(() => this.api.getRange([newHead, newTail]))
                 .then(events => this.pushFront(events));
         }
 
         if (overlap && overlap[0] < 0) {
-            this.chain = this.chain.then(() => this.popBack(Math.abs(overlap[0])));
+            const popBackCount = Math.abs(overlap[0]);
+
+            this.chain = this.chain.then(() => this.popBack(popBackCount));
         }
 
         if (overlap && overlap[1] < 0) {
-            this.chain = this.chain.then(() => this.popFront(Math.abs(overlap[1])));
+            const popFrontCount = Math.abs(overlap[1]);
+
+            this.chain = this.chain.then(() => this.popFront(popFrontCount));
         }
 
-        let popHeight;
-        this.chain = this.chain.then(() => {
-            popHeight = this.hooks.getScrollHeight();
+        this.chain = this.chain
+            .then(() => {
+                popHeight = this.hooks.getScrollHeight();
 
-            return $q.resolve();
-        });
+                return $q.resolve();
+            });
 
         if (overlap && overlap[0] > 0) {
             const pushBackRange = [head - overlap[0], head];
@@ -240,7 +266,7 @@ function SlidingWindowService ($q) {
         return this.chain;
     };
 
-    this.slideDown = (displacement = PAGE_SIZE) => {
+    this.getNext = (displacement = PAGE_SIZE) => {
         const [head, tail] = this.getRange();
 
         const tailRoom = this.getMaxCounter() - tail;
@@ -257,7 +283,7 @@ function SlidingWindowService ($q) {
         return this.move([head + headDisplacement, tail + tailDisplacement]);
     };
 
-    this.slideUp = (displacement = PAGE_SIZE) => {
+    this.getPrevious = (displacement = PAGE_SIZE) => {
         const [head, tail] = this.getRange();
 
         const headRoom = head - 1;

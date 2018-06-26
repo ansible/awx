@@ -14,10 +14,22 @@ function JobEventsApiService ($http, $q) {
         this.endpoint = endpoint;
         this.params = merge(BASE_PARAMS, params);
 
-        this.state = { current: 0, count: 0 };
+        this.state = { count: 0, maxCounter: 0 };
+        this.cache = {};
     };
 
-    this.fetch = () => this.getLast().then(() => this);
+    this.clearCache = () => {
+        Object.keys(this.cache).forEach(key => {
+            delete this.cache[key];
+        });
+    };
+
+    this.fetch = () => this.getLast()
+        .then(results => {
+            this.cache.last = results;
+
+            return this;
+        });
 
     this.getFirst = () => {
         const page = 1;
@@ -26,11 +38,69 @@ function JobEventsApiService ($http, $q) {
         return $http.get(this.endpoint, { params })
             .then(({ data }) => {
                 const { results, count } = data;
+                const maxCounter = Math.max(...results.map(({ counter }) => counter));
 
                 this.state.count = count;
-                this.state.current = page;
+
+                if (maxCounter > this.state.maxCounter) {
+                    this.state.maxCounter = maxCounter;
+                }
 
                 return results;
+            });
+    };
+
+    this.getPage = number => {
+        if (number < 1 || number > this.getLastPageNumber()) {
+            return $q.resolve([]);
+        }
+
+        const params = merge(this.params, { page: number });
+
+        return $http.get(this.endpoint, { params })
+            .then(({ data }) => {
+                const { results, count } = data;
+                const maxCounter = Math.max(...results.map(({ counter }) => counter));
+
+                this.state.count = count;
+
+                if (maxCounter > this.state.maxCounter) {
+                    this.state.maxCounter = maxCounter;
+                }
+
+                return results;
+            });
+    };
+
+    this.getLast = () => {
+        if (this.cache.last) {
+            return $q.resolve(this.cache.last);
+        }
+
+        const params = merge(this.params, { page: 1, order_by: `-${ORDER_BY}` });
+
+        return $http.get(this.endpoint, { params })
+            .then(({ data }) => {
+                const { results, count } = data;
+                const maxCounter = Math.max(...results.map(({ counter }) => counter));
+
+                let rotated = results;
+
+                if (count > PAGE_SIZE) {
+                    rotated = results.splice(count % PAGE_SIZE);
+
+                    if (results.length > 0) {
+                        rotated = results;
+                    }
+                }
+
+                this.state.count = count;
+
+                if (maxCounter > this.state.maxCounter) {
+                    this.state.maxCounter = maxCounter;
+                }
+
+                return rotated;
             });
     };
 
@@ -47,46 +117,18 @@ function JobEventsApiService ($http, $q) {
         return $http.get(this.endpoint, { params })
             .then(({ data }) => {
                 const { results } = data;
-                const maxCounter = Math.max(results.map(({ counter }) => counter));
+                const maxCounter = Math.max(...results.map(({ counter }) => counter));
 
-                this.state.current = Math.ceil(maxCounter / PAGE_SIZE);
+                if (maxCounter > this.state.maxCounter) {
+                    this.state.maxCounter = maxCounter;
+                }
 
                 return results;
             });
     };
 
-    this.getLast = () => {
-        const params = merge(this.params, { page: 1, order_by: `-${ORDER_BY}` });
-
-        return $http.get(this.endpoint, { params })
-            .then(({ data }) => {
-                const { results } = data;
-                const count = Math.max(...results.map(({ counter }) => counter));
-
-                let rotated = results;
-
-                if (count > PAGE_SIZE) {
-                    rotated = results.splice(count % PAGE_SIZE);
-
-                    if (results.length > 0) {
-                        rotated = results;
-                    }
-                }
-                this.state.count = count;
-                this.state.current = Math.ceil(count / PAGE_SIZE);
-
-                return rotated;
-            });
-    };
-
-    this.getCurrentPageNumber = () => this.state.current;
     this.getLastPageNumber = () => Math.ceil(this.state.count / PAGE_SIZE);
-    this.getPreviousPageNumber = () => Math.max(1, this.state.current - 1);
-    this.getNextPageNumber = () => Math.min(this.state.current + 1, this.getLastPageNumber());
-    this.getMaxCounter = () => this.state.count;
-
-    this.getNext = () => this.getPage(this.getNextPageNumber());
-    this.getPrevious = () => this.getPage(this.getPreviousPageNumber());
+    this.getMaxCounter = () => this.state.maxCounter;
 }
 
 JobEventsApiService.$inject = ['$http', '$q'];

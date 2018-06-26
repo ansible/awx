@@ -77,7 +77,6 @@ function submitSearch () {
     }
 
     const searchInputQueryset = qs.getSearchInputQueryset(vm.value, isFilterable);
-
     const modifiedQueryset = qs.mergeQueryset(currentQueryset, searchInputQueryset);
 
     reloadQueryset(modifiedQueryset, strings.get('search.REJECT_INVALID'));
