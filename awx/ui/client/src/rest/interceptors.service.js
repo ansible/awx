@@ -14,6 +14,10 @@
     [ '$rootScope', '$q', '$injector',
         function ($rootScope, $q, $injector) {
             return {
+                request: function (config) {
+                    config.headers['X-Requested-With'] = 'XMLHttpRequest';
+                    return config;
+                },
                 response: function(config) {
                     if(config.headers('auth-token-timeout') !== null){
                         $rootScope.loginConfig.promise.then(function () {
