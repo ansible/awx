@@ -21,6 +21,7 @@ const listeners = [];
 const rx = [];
 
 let following = false;
+let attach = true;
 
 function bufferInit () {
     rx.length = 0;
@@ -62,6 +63,10 @@ function onFrames (events) {
         const min = Math.max(1, slide.getHeadCounter(), max - 50);
 
         if (minCounter > max || minCounter < min) {
+            return $q.resolve();
+        }
+
+        if (!attach) {
             return $q.resolve();
         }
 
@@ -117,23 +122,39 @@ function last () {
             stream.setMissingCounterThreshold(slide.getTailCounter() + 1);
             scroll.setScrollPosition(scroll.getScrollHeight());
 
+            attach = true;
             scroll.resume();
 
             return $q.resolve();
         });
 }
 
+function down () {
+    scroll.moveDown();
+}
+
+function up () {
+    if (following) {
+        unfollow();
+    } else {
+        scroll.moveUp();
+    }
+}
+
 function follow () {
     scroll.pause();
-    // scroll.hide();
+    scroll.hide();
 
     following = true;
+    vm.isFollowing = following;
 }
 
 function unfollow () {
+    attach = false;
     following = false;
+    vm.isFollowing = following;
 
-    // scroll.unhide();
+    scroll.unhide();
     scroll.resume();
 }
 
@@ -288,13 +309,9 @@ function OutputIndexController (
     vm.togglePanelExpand = togglePanelExpand;
 
     // Stdout Navigation
-    vm.menu = {
-        end: last,
-        home: first,
-        up: previous,
-        down: next,
-    };
+    vm.menu = { last, first, down, up };
     vm.isMenuExpanded = true;
+    vm.isFollowing = following;
     vm.toggleMenuExpand = toggleMenuExpand;
     vm.toggleLineExpand = toggleLineExpand;
     vm.showHostDetails = showHostDetails;
