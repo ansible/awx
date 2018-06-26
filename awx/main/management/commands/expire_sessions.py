@@ -31,6 +31,7 @@ class Command(BaseCommand):
         sessions = Session.objects.filter(expire_date__gte=start).iterator()
         request = HttpRequest()
         for session in sessions:
-            if (user is None) or (user.id == int(session.get_decoded().get('_auth_user_id'))):
+            user_id = session.get_decoded().get('_auth_user_id')
+            if (user is None) or (user_id and user.id == int(user_id)):
                 request.session = request.session = import_module(settings.SESSION_ENGINE).SessionStore(session.session_key)
                 logout(request)
