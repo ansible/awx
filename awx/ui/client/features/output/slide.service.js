@@ -102,6 +102,8 @@ function SlidingWindowService ($q) {
         this.records = {};
         this.uuids = {};
         this.chain = $q.resolve();
+
+        api.clearCache();
     };
 
     this.pushFront = events => {

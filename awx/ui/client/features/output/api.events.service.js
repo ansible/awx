@@ -15,9 +15,21 @@ function JobEventsApiService ($http, $q) {
         this.params = merge(BASE_PARAMS, params);
 
         this.state = { count: 0, maxCounter: 0 };
+        this.cache = {};
     };
 
-    this.fetch = () => this.getLast().then(() => this);
+    this.clearCache = () => {
+        Object.keys(this.cache).forEach(key => {
+            delete this.cache[key];
+        });
+    };
+
+    this.fetch = () => this.getLast()
+        .then(results => {
+            this.cache.last = results;
+
+            return this;
+        });
 
     this.getFirst = () => {
         const page = 1;
@@ -61,6 +73,10 @@ function JobEventsApiService ($http, $q) {
     };
 
     this.getLast = () => {
+        if (this.cache.last) {
+            return $q.resolve(this.cache.last);
+        }
+
         const params = merge(this.params, { page: 1, order_by: `-${ORDER_BY}` });
 
         return $http.get(this.endpoint, { params })
