@@ -89,7 +89,7 @@ function first () {
 }
 
 function next () {
-    return slide.slideDown();
+    return slide.getNext();
 }
 
 function previous () {
@@ -97,7 +97,7 @@ function previous () {
 
     const initialPosition = scroll.getScrollPosition();
 
-    return slide.slideUp()
+    return slide.getPrevious()
         .then(popHeight => {
             const currentHeight = scroll.getScrollHeight();
             scroll.setScrollPosition(currentHeight - popHeight + initialPosition);
@@ -245,6 +245,7 @@ function OutputIndexController (
     _$state_,
     _resource_,
     _scroll_,
+    _page_,
     _render_,
     _status_,
     _slide_,
@@ -253,6 +254,8 @@ function OutputIndexController (
     strings,
     $stateParams,
 ) {
+    const { isPanelExpanded } = $stateParams;
+
     $compile = _$compile_;
     $q = _$q_;
     $scope = _$scope_;
@@ -261,9 +264,9 @@ function OutputIndexController (
     resource = _resource_;
     scroll = _scroll_;
     render = _render_;
-    slide = _slide_;
     status = _status_;
     stream = _stream_;
+    slide = resource.model.get('event_processing_finished') ? _page_ : _slide_;
 
     vm = this || {};
 
@@ -271,8 +274,6 @@ function OutputIndexController (
     vm.title = $filter('sanitize')(resource.model.get('name'));
     vm.strings = strings;
     vm.resource = resource;
-
-    const { isPanelExpanded } = $stateParams;
     vm.reloadState = reloadState;
     vm.isPanelExpanded = isPanelExpanded;
     vm.togglePanelExpand = togglePanelExpand;
@@ -324,6 +325,7 @@ OutputIndexController.$inject = [
     '$state',
     'resource',
     'OutputScrollService',
+    'OutputPageService',
     'OutputRenderService',
     'OutputStatusService',
     'OutputSlideService',

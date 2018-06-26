@@ -9,6 +9,7 @@ import StreamService from '~features/output/stream.service';
 import StatusService from '~features/output/status.service';
 import MessageService from '~features/output/message.service';
 import EventsApiService from '~features/output/api.events.service';
+import PageService from '~features/output/page.service';
 import SlideService from '~features/output/slide.service';
 import LegacyRedirect from '~features/output/legacy.route';
 
@@ -108,11 +109,6 @@ function resolveResource (
                 status: `${WS_PREFIX}-${name}`,
                 summary: `${WS_PREFIX}-${name}-summary`,
             },
-            page: {
-                cache: PAGE_CACHE,
-                size: PAGE_SIZE,
-                pageLimit: PAGE_LIMIT
-            }
         }));
 
     if (!handleErrors) {
@@ -250,6 +246,7 @@ angular
     .service('OutputStatusService', StatusService)
     .service('OutputMessageService', MessageService)
     .service('JobEventsApiService', EventsApiService)
+    .service('OutputPageService', PageService)
     .service('OutputSlideService', SlideService)
     .component('atJobSearch', SearchComponent)
     .component('atJobStats', StatsComponent)
