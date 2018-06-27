@@ -22,13 +22,8 @@
                 ng-if="state._lookupTags"
                 ng-disabled="state._disabled || form.disabled">
                 <div class="LabelList-tagContainer" ng-repeat="tag in state._value track by $index">
-                    <div class="LabelList-tag LabelList-tag--deletable">
-                        <span ng-if="tag.hostname" class="LabelList-name">{{ tag.hostname }}</span>
-                        <span ng-if="!tag.hostname" class="LabelList-name">{{ tag }}</span>
-                    </div>
-                    <div class="LabelList-deleteContainer" ng-click="vm.removeTag(tag)">
-                        <i class="fa fa-times LabelList-tagDelete"></i>
-                    </div>
+                    <at-tag ng-if="!tag.hostname" tag="tag" remove-tag="vm.removeTag(tag)"></at-tag>
+                    <at-tag ng-if="tag.hostname" tag="tag.hostname" remove-tag="vm.removeTag(tag)"></at-tag>
                 </div>
             </span>
         </div>
