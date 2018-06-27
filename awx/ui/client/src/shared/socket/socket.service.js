@@ -5,8 +5,8 @@
  *************************************************/
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log','$state', '$q', 'i18n',
-    function ($rootScope, $location, $log, $state, $q, i18n) {
+['$rootScope', '$location', '$log','$state', '$q', 'i18n', 'GetBasePath', 'Rest',
+    function ($rootScope, $location, $log, $state, $q, i18n, GetBasePath, Rest) {
         var needsResubscribing = false,
         socketPromise = $q.defer(),
         needsRefreshAfterBlur;
@@ -130,13 +130,20 @@ export default
                 else if(data.group_name==="inventory_update_events"){
                     str = `ws-${data.group_name}-${data.inventory_update}`;
                 }
-                else if(data.group_name==="control"){
-                    // As of v. 3.1.0, there is only 1 "control"
-                    // message, which is for expiring the session if the
-                    // session limit is breached.
+                else if(data.group_name === "control" && data.reason === "limit_reached"){
+                    // If we got a `limit_reached_<user_pk>` message, determine
+                    // if the current session is still valid (it may have been
+                    // invalidated)
+                    // If so, log the user out and show a meaningful error
                     $log.debug(data.reason);
-                    $rootScope.sessionTimer.expireSession('session_limit');
-                    $state.go('signOut');
+                    let url = GetBasePath('me'); 
+                    Rest.get(url)
+                    .catch(function(resp) {
+                        if (resp.status === 401) {
+                            $rootScope.sessionTimer.expireSession('session_limit');
+                            $state.go('signOut');
+                        }
+                    });
                 }
                 else {
                     // The naming scheme is "ws" then a
@@ -158,6 +165,7 @@ export default
                 // listen for specific messages. A subscription object could
                 // look like {"groups":{"jobs": ["status_changed", "summary"]}.
                 // This is used by all socket-enabled $states
+                state.data.socket.groups.control = ['limit_reached_' + $rootScope.current_user.id];
                 this.emit(JSON.stringify(state.data.socket));
                 this.setLast(state);
             },
