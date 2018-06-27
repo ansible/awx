@@ -3,11 +3,43 @@ import logging
 
 from mock import PropertyMock
 
+from awx.api.urls import urlpatterns as api_patterns
+
+# Django
+from django.core.urlresolvers import RegexURLResolver, RegexURLPattern
+
 
 @pytest.fixture(autouse=True)
 def _disable_database_settings(mocker):
     m = mocker.patch('awx.conf.settings.SettingsWrapper.all_supported_settings', new_callable=PropertyMock)
     m.return_value = []
+
+
+@pytest.fixture()
+def all_views():
+    '''
+    returns a set of all views in the app
+    '''
+    patterns = set([])
+    url_views = set([])
+    # Add recursive URL patterns
+    unprocessed = set(api_patterns)
+    while unprocessed:
+        to_process = unprocessed.copy()
+        unprocessed = set([])
+        for pattern in to_process:
+            if hasattr(pattern, 'lookup_str') and not pattern.lookup_str.startswith('awx.api'):
+                continue
+            patterns.add(pattern)
+            if isinstance(pattern, RegexURLResolver):
+                for sub_pattern in pattern.url_patterns:
+                    if sub_pattern not in patterns:
+                        unprocessed.add(sub_pattern)
+    # Get view classes
+    for pattern in patterns:
+        if isinstance(pattern, RegexURLPattern) and hasattr(pattern.callback, 'view_class'):
+            url_views.add(pattern.callback.view_class)
+    return url_views
 
 
 @pytest.fixture()
