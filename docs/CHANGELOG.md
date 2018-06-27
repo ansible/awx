@@ -49,7 +49,7 @@
 * Impose stricter criteria to admin users - organization admin role now
   necessary for all organizations target user is member of.
 * Remove unused `admin_role` associated with users.
-* Enforce max value for `AUTH_TIMEOUT_EXPIRATION`
+* Enforce max value for `SESSION_COOKIE_AGE`
   [[#1651](https://github.com/ansible/awx/issues/1651)].
 * Add stricter validation to `order_by` query params
   [[#776](https://github.com/ansible/awx/issues/776)].
@@ -71,6 +71,8 @@
 * Implemented OAuth2 support for token based authentication [[#21](https://github.com/ansible/awx/issues/21)].
 * Added the ability to forcibly expire sessions through `awx-manage expire_sessions`.
 * Disallowed using HTTP PUT/PATCH methods to modify existing jobs in Job Details API endpoint.
+* Changed the name of the session length setting from `AUTH_TOKEN_EXPIRATION` to `SESSION_COOKIE_AGE`.
+* Changed the name of the session length setting from `AUTH_TOKEN_PER_USER` to `SESSIONS_PER_USER`.
 
 3.2.0
 =====

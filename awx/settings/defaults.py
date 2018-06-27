@@ -200,8 +200,7 @@ SESSION_COOKIE_SECURE = True
 
 # Seconds before sessions expire.
 # Note: This setting may be overridden by database settings.
-AUTH_TOKEN_EXPIRATION = 1800
-SESSION_COOKIE_AGE = AUTH_TOKEN_EXPIRATION
+SESSION_COOKIE_AGE = 1800
 
 # Maximum number of per-user valid, concurrent sessions.
 # -1 is unlimited

@@ -5,20 +5,18 @@ from django.utils.translation import ugettext_lazy as _
 from awx.conf import fields, register
 from awx.api.fields import OAuth2ProviderField
 from oauth2_provider.settings import oauth2_settings
-from django.conf import settings
+
 
 register(
-    'AUTH_TOKEN_EXPIRATION',
-    field_class=fields.AuthTokenField,
+    'SESSION_COOKIE_AGE',
+    field_class=fields.IntegerField,
     min_value=60,
     max_value=30000000000,  # approx 1,000 years, higher values give OverflowError
-    default={'AUTH_TOKEN_EXPIRATION': settings.AUTH_TOKEN_EXPIRATION},
     label=_('Idle Time Force Log Out'),
     help_text=_('Number of seconds that a user is inactive before they will need to login again.'),
     category=_('Authentication'),
     category_slug='authentication',
 )
-
 register(
     'SESSIONS_PER_USER',
     field_class=fields.IntegerField,

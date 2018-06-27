@@ -6,7 +6,6 @@ from collections import OrderedDict
 # Django
 from django.core.validators import URLValidator
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 
 # Django REST Framework
 from rest_framework.fields import *  # noqa
@@ -43,13 +42,6 @@ class IntegerField(IntegerField):
         if ret == '' and self.allow_null and not getattr(self, 'allow_blank', False):
             return None
         return ret
-        
-        
-class AuthTokenField(IntegerField):
-    
-    def to_internal_value(self, data):
-        settings.SESSION_COOKIE_AGE = data
-        return super(AuthTokenField, self).to_internal_value(data)
 
 
 class StringListField(ListField):

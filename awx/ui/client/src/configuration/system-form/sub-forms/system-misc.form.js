@@ -24,11 +24,11 @@ export default ['i18n', function(i18n) {
             MANAGE_ORGANIZATION_AUTH: {
                 type: 'toggleSwitch',
             },
-            AUTH_TOKEN_EXPIRATION: {
+            SESSION_COOKIE_AGE: {
                 type: 'number',
                 integer: true,
                 min: 60,
-                reset: 'AUTH_TOKEN_EXPIRATION',
+                reset: 'SESSION_COOKIE_AGE',
             },
             SESSIONS_PER_USER: {
                 type: 'number',
