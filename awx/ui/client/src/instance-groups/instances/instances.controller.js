@@ -1,11 +1,16 @@
-function InstancesController ($scope, $state, $http, models, Instance, strings, Dataset, ProcessErrors) {
+function InstancesController ($scope, $state, $http, models, strings, Dataset, ProcessErrors) {
     const { instanceGroup } = models;
     const vm = this || {};
     vm.strings = strings;
     vm.panelTitle = instanceGroup.get('name');
-    vm.instances = instanceGroup.get('related.instances.results');
     vm.instance_group_id = instanceGroup.get('id');
+    vm.policy_instance_list = instanceGroup.get('policy_instance_list');
     vm.isSuperuser = $scope.$root.user_is_superuser;
+
+    vm.instances = instanceGroup.get('related.instances.results').map(instance => {
+        instance.is_manual = vm.policy_instance_list.includes(instance.hostname);
+        return instance;
+    });
 
     init();
 
@@ -102,7 +107,6 @@ InstancesController.$inject = [
     '$state',
     '$http',
     'resolvedModels',
-    'InstanceModel',
     'InstanceGroupsStrings',
     'Dataset',
     'ProcessErrors'

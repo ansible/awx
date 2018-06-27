@@ -7,7 +7,6 @@ import instanceGroupsModal from '../shared/instance-groups-multiselect/instance-
 import AddEditTemplate from './add-edit/add-edit-instance-groups.view.html';
 import AddInstanceGroupController from './add-edit/add-instance-group.controller';
 import EditInstanceGroupController from './add-edit/edit-instance-group.controller';
-import InstanceListPolicy from './add-edit/instance-list-policy.directive.js';
 
 import InstanceGroupsTemplate from './list/instance-groups-list.partial.html';
 import InstanceGroupsListController from './list/instance-groups-list.controller';
@@ -139,32 +138,6 @@ function InstanceGroupsRun ($stateExtender, strings) {
     });
 
     $stateExtender.addState({
-        name: 'instanceGroups.add.modal',
-        abstract: true,
-        ncyBreadcrumb: {
-            skip: true,
-        },
-        views: {
-            "modal": {
-                template: `<div class="Modal-backdrop"></div>
-                <div class="Modal-holder" ui-view="modal" autoscroll="false"></div>`,
-            }
-        }
-    });
-
-    $stateExtender.addState({
-        name: 'instanceGroups.add.modal.instances',
-        ncyBreadcrumb: {
-            skip: true,
-        },
-        views: {
-            "modal": {
-                template: '<instance-list-policy></instance-list-policy>',
-            }
-        }
-    });
-
-    $stateExtender.addState({
         name: 'instanceGroups.edit',
         route: '/:instance_group_id',
         ncyBreadcrumb: {
@@ -197,33 +170,6 @@ function InstanceGroupsRun ($stateExtender, strings) {
                     return qs.search(searchPath, searchParams);
                 }
             ]
-        }
-    });
-
-
-    $stateExtender.addState({
-        name: 'instanceGroups.edit.modal',
-        abstract: true,
-        ncyBreadcrumb: {
-            skip: true,
-        },
-        views: {
-            "modal": {
-                template: `<div class="Modal-backdrop"></div>
-                <div class="Modal-holder" ui-view="modal" autoscroll="false"></div>`,
-            }
-        }
-    });
-
-    $stateExtender.addState({
-        name: 'instanceGroups.edit.modal.instances',
-        ncyBreadcrumb: {
-            skip: true,
-        },
-        views: {
-            "modal": {
-                template: '<instance-list-policy></instance-list-policy>',
-            }
         }
     });
 
@@ -304,7 +250,6 @@ angular.module(MODULE_NAME, [])
     .factory('InstanceGroupList', list)
     .controller('InstanceGroupsListController', InstanceGroupsListController)
     .controller('InstanceListController', InstanceListController)
-    .directive('instanceListPolicy', InstanceListPolicy)
     .directive('instanceGroupsMultiselect', instanceGroupsMultiselect)
     .directive('instanceGroupsModal', instanceGroupsModal)
     .directive('capacityAdjuster', CapacityAdjuster)
