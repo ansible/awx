@@ -12,6 +12,7 @@ function InstanceGroupsStrings (BaseString) {
     };
 
     ns.list = {
+        MANUAL: t.s('MANUAL'),
         PANEL_TITLE: t.s('INSTANCE GROUPS'),
         ROW_ITEM_LABEL_INSTANCES: t.s('Instances'),
         ROW_ITEM_LABEL_RUNNING_JOBS: t.s('Running Jobs'),

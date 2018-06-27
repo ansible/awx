@@ -59,7 +59,10 @@
                 </div>
 
                 <div class="at-Row-items at-Row-items--instances">
-                    <at-row-item header-value="{{ instance.hostname }}"></at-row-item>
+                    <at-row-item
+                        header-value="{{ instance.hostname }}"
+                        header-tag="{{ instance.is_manual ? vm.strings.get('list.MANUAL') : '' }}">
+                    </at-row-item>
                     <at-row-item
                         label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
                         label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}, job_search: {status__in: ['running,waiting']}})"
