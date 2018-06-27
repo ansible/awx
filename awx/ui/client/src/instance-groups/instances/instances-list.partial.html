@@ -14,12 +14,12 @@
             <smart-search
                 class="at-List-search"
                 django-model="instances"
-                base-path="{{list.basePath}}"
+                base-path="{{vm.list.basePath}}"
                 iterator="instance"
-                list="list"
-                dataset="instance_dataset"
-                collection="collection"
-                search-tags="searchTags">
+                list="vm.list"
+                collection="vm.instances"
+                dataset="vm.dataset"
+                search-tags="vm.searchTags">
             </smart-search>
 
             <div class="at-List-toolbarAction">

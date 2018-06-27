@@ -17,12 +17,13 @@
                 <smart-search
                     class="at-List-search"
                     django-model="instances"
-                    base-path="instances"
+                    base-path="{{vm.list.basePath}}"
                     iterator="instance"
-                    list="list"
-                    dataset="vm.instances"
-                    collection="collection"
-                    search-tags="searchTags">
+                    list="vm.list"
+                    collection="vm.instances"
+                    dataset="vm.dataset"
+                    search-tags="vm.searchTags"
+                    query-set="vm.querySet">
                 </smart-search>
             </div>
             <at-list results='vm.instances'>
@@ -32,10 +33,10 @@
                     <input type="checkbox"
                         class="at-Row-checkbox"
                         ng-class="{ 'at-Input--rejected': state.rejected }"
-                        ng-model="instance.isSelected"
                         ng-checked="instance.isSelected"
                         ng-attr-tabindex="{{ tab || undefined }}"
-                        ng-disabled="state._disabled" />
+                        ng-disabled="state._disabled"
+                        ng-click="vm.toggleRow(instance)" />
 
                     <div class="at-Row-items" style="flex: 1">
                         <at-row-item
