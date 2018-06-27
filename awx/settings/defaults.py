@@ -207,6 +207,8 @@ SESSION_COOKIE_AGE = 1209600
 # Note: This setting may be overridden by database settings.
 SESSIONS_PER_USER = -1
 
+CSRF_USE_SESSIONS = False
+
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = True
 

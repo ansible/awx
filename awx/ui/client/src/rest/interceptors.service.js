@@ -11,11 +11,14 @@
   *************************************************/
 
  export default
-    [ '$rootScope', '$q', '$injector',
-        function ($rootScope, $q, $injector) {
+    [ '$rootScope', '$q', '$injector', '$cookies',
+        function ($rootScope, $q, $injector, $cookies) {
             return {
                 request: function (config) {
                     config.headers['X-Requested-With'] = 'XMLHttpRequest';
+                    if (['GET', 'HEAD', 'OPTIONS'].indexOf(config.method)===-1) {
+                        config.headers['X-CSRFToken'] = $cookies.get('csrftoken');
+                    }
                     return config;
                 },
                 response: function(config) {

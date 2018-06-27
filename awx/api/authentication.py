@@ -39,9 +39,6 @@ class SessionAuthentication(authentication.SessionAuthentication):
     def authenticate_header(self, request):
         return 'Session'
 
-    def enforce_csrf(self, request):
-        return None
-
 
 class LoggedOAuth2Authentication(OAuth2Authentication):
 
