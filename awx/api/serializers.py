@@ -3048,6 +3048,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
         all_creds = []
         # Organize credential data into multitude of deprecated fields
+        # TODO: remove most of this as v1 is removed
         vault_credential = None
         credential = None
         extra_creds = []
@@ -3186,9 +3187,13 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = super(JobSerializer, self).get_summary_fields(obj)
-        if self.is_detail_view:  # TODO: remove version check in 3.3
-            all_creds = []
-            extra_creds = []
+        all_creds = []
+        # Organize credential data into multitude of deprecated fields
+        # TODO: remove most of this as v1 is removed
+        vault_credential = None
+        credential = None
+        extra_creds = []
+        if obj.pk:
             for cred in obj.credentials.all():
                 summarized_cred = {
                     'id': cred.pk,
@@ -3202,13 +3207,25 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                 all_creds.append(summarized_cred)
                 if cred.credential_type.kind in ('cloud', 'net'):
                     extra_creds.append(summarized_cred)
-                elif cred.credential_type.kind == 'ssh':
-                    summary_fields['credential'] = summarized_cred
-                elif cred.credential_type.kind == 'vault':
-                    summary_fields['vault_credential'] = summarized_cred
-            if self.version > 1:
+                elif summarized_cred['kind'] == 'ssh':
+                    credential = summarized_cred
+                elif summarized_cred['kind'] == 'vault':
+                    vault_credential = summarized_cred
+        # Selectively apply those fields, depending on view deetails
+        if (self.is_detail_view or self.version == 1) and credential:
+            summary_fields['credential'] = credential
+        else:
+            # Credential could be an empty dictionary in this case
+            summary_fields.pop('credential', None)
+        if (self.is_detail_view or self.version == 1) and vault_credential:
+            summary_fields['vault_credential'] = vault_credential
+        else:
+            # vault credential could be empty dictionary
+            summary_fields.pop('vault_credential', None)
+        if self.version > 1:
+            if self.is_detail_view:
                 summary_fields['extra_credentials'] = extra_creds
-                summary_fields['credentials'] = all_creds
+            summary_fields['credentials'] = all_creds
         return summary_fields
 
 
