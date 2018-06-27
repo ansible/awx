@@ -1,14 +1,14 @@
+from importlib import import_module
 import pytest
-from datetime import timedelta
 import re
 
-from django.utils.timezone import now as tz_now
+from django.conf import settings
 from django.test.utils import override_settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.sessions.models import Session
 from django.contrib.auth import SESSION_KEY
+import mock
 
-from awx.main.models import UserSessionMembership
 from awx.api.versioning import reverse
 
 
@@ -63,33 +63,40 @@ def test_session_create_delete(admin, post, get):
         assert not Session.objects.filter(session_key=session_key).exists()
 
 
-@pytest.mark.skip(reason="Needs Update - CA")
 @pytest.mark.django_db
-def test_session_overlimit(admin, post):
-    AlwaysPassBackend.user = admin
-    with override_settings(
-        AUTHENTICATION_BACKENDS=(AlwaysPassBackend.get_backend_path(),),
-        SESSION_COOKIE_NAME='session_id', SESSIONS_PER_USER=3
-    ):
-        sessions_to_deprecate = []
-        for _ in range(5):
-            response = post(
-                '/api/login/',
-                data={'username': admin.username, 'password': admin.password, 'next': '/api/'},
-                expect=302, middleware=SessionMiddleware(), format='multipart'
-            )
-            session_key = re.findall(
-                r'session_id=[a-zA-z0-9]+',
-                str(response.cookies['session_id'])
-            )[0][len('session_id=') :]
-            sessions_to_deprecate.append(Session.objects.get(session_key=session_key))
-        sessions_to_deprecate[0].expire_date = tz_now() - timedelta(seconds=1000)
-        sessions_to_deprecate[0].save()
-        sessions_overlimit = [x.session for x in UserSessionMembership.get_memberships_over_limit(admin)]
-        assert sessions_to_deprecate[0] not in sessions_overlimit
-        assert sessions_to_deprecate[1] in sessions_overlimit
-        for session in sessions_to_deprecate[2 :]:
-            assert session not in sessions_overlimit
+@mock.patch('awx.main.consumers.emit_channel_notification')
+def test_sessions_unlimited(emit, admin):
+    assert Session.objects.count() == 0
+    for i in range(5):
+        store = import_module(settings.SESSION_ENGINE).SessionStore()
+        store.create_model_instance({SESSION_KEY: admin.pk}).save()
+        assert Session.objects.count() == i + 1
+    assert emit.call_count == 0
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.consumers.emit_channel_notification')
+def test_session_overlimit(emit, admin, alice):
+    # If SESSIONS_PER_USER=3, only persist the three most recently created sessions
+    assert Session.objects.count() == 0
+    with override_settings(SESSIONS_PER_USER=3):
+        created = []
+        for i in range(5):
+            store = import_module(settings.SESSION_ENGINE).SessionStore()
+            session = store.create_model_instance({SESSION_KEY: admin.pk})
+            session.save()
+            created.append(session.session_key)
+    assert [s.pk for s in Session.objects.all()] == created[-3:]
+    assert emit.call_count == 2  # 2 of 5 sessions were evicted
+    emit.assert_called_with(
+        'control-limit_reached_{}'.format(admin.pk),
+        {'reason': 'limit_reached', 'group_name': 'control'}
+    )
+
+    # Allow sessions for a different user to be saved
+    store = import_module(settings.SESSION_ENGINE).SessionStore()
+    store.create_model_instance({SESSION_KEY: alice.pk}).save()
+    assert Session.objects.count() == 4
 
 
 @pytest.mark.skip(reason="Needs Update - CA")

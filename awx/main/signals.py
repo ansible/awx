@@ -6,6 +6,7 @@ import contextlib
 import logging
 import threading
 import json
+import pkg_resources
 import sys
 
 # Django
@@ -18,6 +19,7 @@ from django.db.models.signals import (
 )
 from django.dispatch import receiver
 from django.contrib.auth import SESSION_KEY
+from django.contrib.sessions.models import Session
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -29,7 +31,6 @@ import six
 
 # AWX
 from awx.main.models import * # noqa
-from django.contrib.sessions.models import Session
 from awx.api.serializers import * # noqa
 from awx.main.constants import TOKEN_CENSOR
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
@@ -600,6 +601,16 @@ def delete_inventory_for_org(sender, instance, **kwargs):
 @receiver(post_save, sender=Session)
 def save_user_session_membership(sender, **kwargs):
     session = kwargs.get('instance', None)
+    if pkg_resources.get_distribution('channels').version >= '2':
+        # If you get into this code block, it means we upgraded channels, but
+        # didn't make the settings.SESSIONS_PER_USER feature work
+        raise RuntimeError(
+            'save_user_session_membership must be updated for channels>=2: '
+            'http://channels.readthedocs.io/en/latest/one-to-two.html#requirements'
+        )
+    if 'runworker' in sys.argv:
+        # don't track user session membership for websocket per-channel sessions
+        return
     if not session:
         return
     user = session.get_decoded().get(SESSION_KEY, None)
@@ -608,13 +619,15 @@ def save_user_session_membership(sender, **kwargs):
     user = User.objects.get(pk=user)
     if UserSessionMembership.objects.filter(user=user, session=session).exists():
         return
-    UserSessionMembership.objects.create(user=user, session=session, created=timezone.now())
-    for membership in UserSessionMembership.get_memberships_over_limit(user):
+    UserSessionMembership(user=user, session=session, created=timezone.now()).save()
+    expired = UserSessionMembership.get_memberships_over_limit(user)
+    for membership in expired:
+        Session.objects.filter(session_key__in=[membership.session_id]).delete()
+        membership.delete()
+    if len(expired):
         consumers.emit_channel_notification(
-            'control-limit_reached',
-            dict(group_name='control',
-                 reason=unicode(_('limit_reached')),
-                 session_key=membership.session.session_key)
+            'control-limit_reached_{}'.format(user.pk),
+            dict(group_name='control', reason=unicode(_('limit_reached')))
         )
 
 
