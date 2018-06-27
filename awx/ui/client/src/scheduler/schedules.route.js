@@ -313,12 +313,14 @@ const jobsSchedulesRoute = {
     views: {
         '@': {
             templateProvider: function(ScheduleList, generateList){
-                ScheduleList.well = true;
+                
                 let html = generateList.build({
                     list: ScheduleList,
-                    mode: 'edit',
-                    title: false
+                    mode: 'edit'
                 });
+                html = generateList.wrapPanel(html);
+                let formPlaceholder = generateList.insertFormView();
+                html = formPlaceholder + html;
                 return html;
             },
             controller: 'schedulerListController'
@@ -346,7 +348,7 @@ const jobsSchedulesEditRoute = {
         label: "{{breadcrumb.schedule_name}}"
     },
     views: {
-        '@': {
+        'form': {
             controller: 'schedulerEditController',
             templateUrl: templateUrl("scheduler/schedulerForm"),
         }

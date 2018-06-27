@@ -11,8 +11,8 @@ export default ['i18n', function(i18n) {
         name: 'schedules',
         iterator: 'schedule',
         editTitle: i18n._('SCHEDULED JOBS'),
+        listTitle: i18n._('SCHEDULED JOBS'),
         hover: true,
-        well: false,
         emptyListText: i18n._('No schedules exist'),
 
         fields: {
