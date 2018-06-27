@@ -133,6 +133,8 @@
     grid-template-columns: 120px 1fr;
     align-items: center;
     line-height: @at-height-list-row-item;
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 .at-RowItem-status {
@@ -184,6 +186,7 @@
     margin: @at-space;
     padding: @at-padding-list-row-item-tag;
     line-height: @at-line-height-list-row-item-tag;
+    word-break: keep-all;
 }
 
 .at-RowItem-tag--primary {
@@ -192,7 +195,6 @@
 }
 
 .at-RowItem-tag--header {
-    height: @at-height-list-row-item-tag;
     line-height: inherit;
 }
 
