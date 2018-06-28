@@ -389,9 +389,17 @@ function getResultTracebackDetails () {
 }
 
 function getCredentialDetails () {
-    const credentials = resource.model.get('summary_fields.credentials');
-
+    let credentials = [];
     let credentialTags = [];
+
+    if (resource.model.get('type') === 'job') {
+        credentials = resource.model.get('summary_fields.credentials');
+    } else {
+        const credential = resource.model.get('summary_fields.credential');
+        if (credential) {
+            credentials.push(credential);
+        }
+    }
 
     if (!credentials || credentials.length < 1) {
         return null;
