@@ -23,18 +23,19 @@
                     ng-class="{ 'fa-minus': vm.isMenuExpanded, 'fa-plus': !vm.isMenuExpanded }"></i>
             </div>
 
-            <div class="pull-right" ng-click="vm.menu.end()">
+            <div class="pull-right" ng-click="vm.menu.last()">
                 <i class="at-Stdout-menuIcon--lg fa fa-angle-double-down"
                     ng-class=" { 'at-Stdout-menuIcon--active': vm.menu.isLocked }"></i>
             </div>
-            <div class="pull-right" ng-click="vm.menu.home()">
+            <div class="pull-right" ng-click="vm.menu.first()">
                 <i class="at-Stdout-menuIcon--lg fa fa-angle-double-up"></i>
             </div>
             <div class="pull-right" ng-click="vm.menu.down()">
                 <i class="at-Stdout-menuIcon--lg fa fa-angle-down"></i>
             </div>
             <div class="pull-right" ng-click="vm.menu.up()">
-                <i class="at-Stdout-menuIcon--lg fa fa-angle-up"></i>
+                <i class="at-Stdout-menuIcon--lg fa fa-angle-up"
+                    ng-class=" { 'at-Stdout-menuIcon--active': vm.isFollowing }"></i>
             </div>
 
             <div class="at-u-clear"></div>

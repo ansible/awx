@@ -86,22 +86,20 @@ function JobScrollService ($q, $timeout) {
         return false;
     };
 
-    this.pageUp = () => {
-        if (this.isPaused()) {
-            return;
-        }
-
+    /**
+     * Move scroll position up by one page of visible content.
+     */
+    this.moveUp = () => {
         const top = this.getScrollPosition();
         const height = this.getViewableHeight();
 
         this.setScrollPosition(top - height);
     };
 
-    this.pageDown = () => {
-        if (this.isPaused()) {
-            return;
-        }
-
+    /**
+     * Move scroll position down by one page of visible content.
+     */
+    this.moveDown = () => {
         const top = this.getScrollPosition();
         const height = this.getViewableHeight();
 
@@ -110,6 +108,12 @@ function JobScrollService ($q, $timeout) {
 
     this.getScrollHeight = () => this.el[0].scrollHeight;
     this.getViewableHeight = () => this.el[0].offsetHeight;
+
+    /**
+     * Get the vertical scroll position.
+     *
+     * @returns {Number} - The number of pixels that are hidden from view above the scrollable area.
+     */
     this.getScrollPosition = () => this.el[0].scrollTop;
 
     this.setScrollPosition = position => {
