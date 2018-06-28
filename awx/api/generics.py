@@ -23,7 +23,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import views as auth_views
 
 # Django REST Framework
-from rest_framework.authentication import get_authorization_header
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError, NotAcceptable
 from rest_framework import generics
 from rest_framework.response import Response
@@ -195,7 +194,7 @@ class APIView(views.APIView):
             request.drf_request_user = getattr(drf_request, 'user', False)
         except AuthenticationFailed:
             request.drf_request_user = None
-        except ParseError as exc:
+        except (PermissionDenied, ParseError) as exc:
             request.drf_request_user = None
             self.__init_request_error__ = exc
         return drf_request
@@ -210,6 +209,7 @@ class APIView(views.APIView):
             if hasattr(self, '__init_request_error__'):
                 response = self.handle_exception(self.__init_request_error__)
             if response.status_code == 401:
+                response.data['detail'] += ' To establish a login session, visit /api/login/.'
                 logger.info(status_msg)
             else:
                 logger.warn(status_msg)
@@ -228,31 +228,35 @@ class APIView(views.APIView):
         return response
 
     def get_authenticate_header(self, request):
-        """
-        Determine the WWW-Authenticate header to use for 401 responses.  Try to
-        use the request header as an indication for which authentication method
-        was attempted.
-        """
-        if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
-            return 'Bearer realm=api'
-        for authenticator in self.get_authenticators():
-            try: 
-                resp_hdr = authenticator.authenticate_header(request)
-                if not resp_hdr:
-                    continue
-            except AttributeError:
-                continue
-            req_hdr = get_authorization_header(request)
-            if not req_hdr:
-                continue
-            if resp_hdr.split()[0] and resp_hdr.split()[0] == req_hdr.split()[0]:
-                return resp_hdr
-        # If it can't be determined from the request, use the last
-        # authenticator (should be Basic).
-        try:
-            return authenticator.authenticate_header(request)
-        except NameError:
-            pass
+        # HTTP Basic auth is insecure by default, because the basic auth
+        # backend does not provide CSRF protection.
+        #
+        # If you visit `/api/v2/job_templates/` and we return
+        # `WWW-Authenticate: Basic ...`, your browser will prompt you for an
+        # HTTP basic auth username+password and will store it _in the browser_
+        # for subsequent requests.  Because basic auth does not require CSRF
+        # validation (because it's commonly used with e.g., tower-cli and other
+        # non-browser clients), browsers that save basic auth in this way are
+        # vulnerable to cross-site request forgery:
+        #
+        # 1. Visit `/api/v2/job_templates/` and specify a user+pass for basic auth.
+        # 2. Visit a nefarious website and submit a
+        #    `<form action='POST' method='https://tower.example.org/api/v2/job_templates/N/launch/'>`
+        # 3. The browser will use your persisted user+pass and your login
+        #    session is effectively hijacked.
+        #
+        # To prevent this, we will _no longer_ send `WWW-Authenticate: Basic ...`
+        # headers in responses; this means that unauthenticated /api/v2/... requests
+        # will now return HTTP 401 in-browser, rather than popping up an auth dialog.
+        #
+        # This means that people who wish to use the interactive API browser
+        # must _first_ login in via `/api/login/` to establish a session (which
+        # _does_ enforce CSRF).
+        #
+        # CLI users can _still_ specify basic auth credentials explicitly via
+        # a header or in the URL e.g.,
+        # `curl https://user:pass@tower.example.org/api/v2/job_templates/N/launch/`
+        return 'Bearer realm=api authorization_url=/api/o/authorize/'
 
     def get_view_description(self, html=False):
         """
