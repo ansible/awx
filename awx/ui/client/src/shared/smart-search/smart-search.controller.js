@@ -152,8 +152,11 @@ function SmartSearchController (
                         $scope.$emit(optionsKey, data.options);
                     }
                 });
-
-            $scope.$on('$destroy', transitionSuccessListener);
+            $scope.$on('$destroy', () => {
+                if (transitionSuccessListener) {
+                    transitionSuccessListener();
+                }
+            });
             $scope.$watch('disableSearch', disableSearch => {
                 if (disableSearch) {
                     $scope.searchPlaceholder = i18n._('Cannot search running job');
