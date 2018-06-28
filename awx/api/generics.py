@@ -195,7 +195,7 @@ class APIView(views.APIView):
             request.drf_request_user = getattr(drf_request, 'user', False)
         except AuthenticationFailed:
             request.drf_request_user = None
-        except ParseError as exc:
+        except (PermissionDenied, ParseError) as exc:
             request.drf_request_user = None
             self.__init_request_error__ = exc
         return drf_request
