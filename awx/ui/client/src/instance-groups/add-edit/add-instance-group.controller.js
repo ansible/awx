@@ -6,6 +6,11 @@ function AddController ($state, models, strings) {
     vm.strings = strings;
     vm.panelTitle = strings.get('state.ADD_BREADCRUMB_LABEL');
 
+    vm.docs = {
+        url: 'https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html',
+        help_text: vm.strings.get('tooltips.DOCS_HELP_TEXT')
+    };
+
     vm.tab = {
         details: { _active: true },
         instances: {_disabled: true },

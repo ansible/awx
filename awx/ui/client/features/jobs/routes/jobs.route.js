@@ -58,7 +58,12 @@ export default {
     },
     views: {
         '@': {
-            templateUrl: indexTemplate
+            templateUrl: indexTemplate,
+            controller: ['JobsStrings', function (strings) {
+                const vm = this || {};
+                vm.strings = strings;
+            }],
+            controllerAs: 'vm'
         },
         'jobsList@jobs': {
             templateUrl: jobsListTemplate,

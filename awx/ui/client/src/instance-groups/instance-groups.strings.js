@@ -28,7 +28,8 @@ function InstanceGroupsStrings (BaseString) {
 
     ns.tooltips = {
         ADD_INSTANCE_GROUP: t.s('Create a new Instance Group'),
-        ASSOCIATE_INSTANCES: t.s('Associate an existing Instance')
+        ASSOCIATE_INSTANCES: t.s('Associate an existing Instance'),
+        DOCS_HELP_TEXT: t.s('Instance Groups Help')
     };
 
     ns.instance = {

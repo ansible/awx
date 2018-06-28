@@ -1,7 +1,5 @@
 <at-panel>
-    <at-panel-heading>
-        {{ vm.panelTitle }}
-    </at-panel-heading>
+    <at-panel-heading title="{{:: vm.panelTitle }}"></at-panel-heading>
 
     <at-tab-group class="at-TabGroup--padBelow">
         <at-tab state="vm.tab.details">{{:: vm.strings.get('tab.DETAILS') }}</at-tab>
