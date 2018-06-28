@@ -15,26 +15,13 @@ function InstancesController ($scope, $state, $http, models, strings, Dataset, P
     init();
 
     function init() {
-        $scope.list = {
+        vm.list = {
             name: 'instances',
             iterator: 'instance',
             basePath: `/api/v2/instance_groups/${vm.instance_group_id}/instances/`
         };
 
-        $scope.collection = {
-            iterator: 'instance',
-            basePath: `/api/v2/instance_groups/${vm.instance_group_id}/instances/`
-        };
-
-        $scope[`${$scope.list.iterator}_dataset`] = Dataset.data;
-        $scope[$scope.list.name] = $scope[`${$scope.list.iterator}_dataset`].results;
-        $scope.instances = vm.instances;
-
-        $scope.$on('updateDataset', function(e, dataset) {
-            $scope[`${$scope.list.iterator}_dataset`] = dataset;
-            $scope[$scope.list.name] = dataset.results;
-            vm.instances = dataset.results;
-        });
+        vm.dataset = Dataset.data;
     }
 
     vm.tab = {
