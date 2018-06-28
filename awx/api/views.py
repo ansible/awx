@@ -4233,7 +4233,6 @@ class JobRelaunch(RetrieveAPIView):
                 data.pop('credential_passwords', None)
         return data
 
-    @csrf_exempt
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(JobRelaunch, self).dispatch(*args, **kwargs)
@@ -4479,7 +4478,6 @@ class AdHocCommandList(ListCreateAPIView):
     serializer_class = AdHocCommandListSerializer
     always_allow_superuser = False
 
-    @csrf_exempt
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(AdHocCommandList, self).dispatch(*args, **kwargs)
@@ -4577,7 +4575,6 @@ class AdHocCommandRelaunch(GenericAPIView):
 
     # FIXME: Figure out why OPTIONS request still shows all fields.
 
-    @csrf_exempt
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(AdHocCommandRelaunch, self).dispatch(*args, **kwargs)
