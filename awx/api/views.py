@@ -24,7 +24,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
-from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
@@ -229,6 +230,7 @@ class ApiRootView(APIView):
     versioning_class = None
     swagger_topic = 'Versioning'
 
+    @method_decorator(ensure_csrf_cookie)
     def get(self, request, format=None):
         ''' List supported API versions '''
 
