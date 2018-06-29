@@ -7,6 +7,7 @@ const TASK_START = 'playbook_on_task_start';
 const HOST_STATUS_KEYS = ['dark', 'failures', 'changed', 'ok', 'skipped'];
 const COMPLETE = ['successful', 'failed'];
 const INCOMPLETE = ['canceled', 'error'];
+const UNSUCCESSFUL = ['failed'].concat(INCOMPLETE);
 const FINISHED = COMPLETE.concat(INCOMPLETE);
 
 function JobStatusService (moment, message) {
@@ -61,12 +62,12 @@ function JobStatusService (moment, message) {
     };
 
     this.createHostStatusCounts = status => {
-        if (_.includes(COMPLETE, status)) {
-            return { ok: 1 };
+        if (UNSUCCESSFUL.includes(status)) {
+            return { failures: 1 };
         }
 
-        if (_.includes(INCOMPLETE, status)) {
-            return { failures: 1 };
+        if (COMPLETE.includes(status)) {
+            return { ok: 1 };
         }
 
         return null;
