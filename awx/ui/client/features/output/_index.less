@@ -135,27 +135,23 @@
 
     &-wrapper {
         display: flex;
+        flex-flow: column nowrap;
         height: 100%;
-        max-height: 644px;
-        flex-direction: column;
     }
 
     &-container {
-        flex: 1;
+        background-color: @at-gray-f2;
+        border-radius: 0 0 4px 4px;
+        border: 1px solid @at-gray-b7;
+        color: @at-gray-161b1f;
         display: flex;
         flex-direction: column;
+        flex: 1;
         font-family: monospace;
-        height: auto;
-        overflow-y: scroll;
         font-size: 15px;
-        border: 1px solid @at-gray-b7;
-        background-color: @at-gray-f2;
-        color: @at-gray-161b1f;
-        padding: 0;
         margin: 0;
-        border-radius: 0;
-        border-bottom-right-radius: 4px;
-        border-bottom-left-radius: 4px;
+        overflow-y: scroll;
+        padding: 0;
     }
 
     &-borderHeader {
