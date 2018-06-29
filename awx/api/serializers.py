@@ -671,7 +671,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
         else:
             return super(UnifiedJobTemplateSerializer, self).get_types()
 
-    def to_representation(self, obj):
+    def get_sub_serializer(self, obj):
         serializer_class = None
         if type(self) is UnifiedJobTemplateSerializer:
             if isinstance(obj, Project):
@@ -684,6 +684,10 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer_class = SystemJobTemplateSerializer
             elif isinstance(obj, WorkflowJobTemplate):
                 serializer_class = WorkflowJobTemplateSerializer
+        return serializer_class
+
+    def to_representation(self, obj):
+        serializer_class = self.get_sub_serializer(obj)
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
             # preserve links for list view
@@ -766,7 +770,7 @@ class UnifiedJobSerializer(BaseSerializer):
 
         return summary_fields
 
-    def to_representation(self, obj):
+    def get_sub_serializer(self, obj):
         serializer_class = None
         if type(self) is UnifiedJobSerializer:
             if isinstance(obj, ProjectUpdate):
@@ -781,6 +785,10 @@ class UnifiedJobSerializer(BaseSerializer):
                 serializer_class = SystemJobSerializer
             elif isinstance(obj, WorkflowJob):
                 serializer_class = WorkflowJobSerializer
+        return serializer_class
+
+    def to_representation(self, obj):
+        serializer_class = self.get_sub_serializer(obj)
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
             # preserve links for list view
@@ -818,7 +826,7 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
         else:
             return super(UnifiedJobListSerializer, self).get_types()
 
-    def to_representation(self, obj):
+    def get_sub_serializer(self, obj):
         serializer_class = None
         if type(self) is UnifiedJobListSerializer:
             if isinstance(obj, ProjectUpdate):
@@ -832,7 +840,11 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
             elif isinstance(obj, SystemJob):
                 serializer_class = SystemJobListSerializer
             elif isinstance(obj, WorkflowJob):
-                serializer_class = WorkflowJobSerializer
+                serializer_class = WorkflowJobListSerializer
+        return serializer_class
+
+    def to_representation(self, obj):
+        serializer_class = self.get_sub_serializer(obj)
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
             ret = serializer.to_representation(obj)
@@ -1480,7 +1492,9 @@ class ProjectUpdateDetailSerializer(ProjectUpdateSerializer):
 
 class ProjectUpdateListSerializer(ProjectUpdateSerializer, UnifiedJobListSerializer):
 
-    pass
+    class Meta:
+        model = ProjectUpdate
+        fields = ('*', '-controller_node')  # field removal undone by UJ serializer
 
 
 class ProjectUpdateCancelSerializer(ProjectUpdateSerializer):
@@ -2200,7 +2214,9 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
 class InventoryUpdateListSerializer(InventoryUpdateSerializer, UnifiedJobListSerializer):
 
-    pass
+    class Meta:
+        model = InventoryUpdate
+        fields = ('*', '-controller_node')  # field removal undone by UJ serializer
 
 
 class InventoryUpdateCancelSerializer(InventoryUpdateSerializer):
@@ -3564,12 +3580,6 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
         return vars_validate_or_raise(value)
 
 
-# TODO:
-class WorkflowJobTemplateListSerializer(WorkflowJobTemplateSerializer):
-    pass
-
-
-# TODO:
 class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
 
     class Meta:
@@ -3600,7 +3610,6 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
         return ret
 
 
-# TODO:
 class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer):
 
     class Meta:
@@ -3883,7 +3892,10 @@ class AdHocCommandListSerializer(AdHocCommandSerializer, UnifiedJobListSerialize
 
 
 class SystemJobListSerializer(SystemJobSerializer, UnifiedJobListSerializer):
-    pass
+
+    class Meta:
+        model = SystemJob
+        fields = ('*', '-controller_node')  # field removal undone by UJ serializer
 
 
 class JobHostSummarySerializer(BaseSerializer):

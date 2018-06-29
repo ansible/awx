@@ -644,7 +644,7 @@ class InstanceUnifiedJobsList(SubListAPIView):
 
     view_name = _("Instance Jobs")
     model = UnifiedJob
-    serializer_class = UnifiedJobSerializer
+    serializer_class = UnifiedJobListSerializer
     parent_model = Instance
 
     def get_queryset(self):
@@ -691,7 +691,7 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
 
     view_name = _("Instance Group Running Jobs")
     model = UnifiedJob
-    serializer_class = UnifiedJobSerializer
+    serializer_class = UnifiedJobListSerializer
     parent_model = InstanceGroup
     relationship = "unifiedjob_set"
 
@@ -802,7 +802,7 @@ class ScheduleCredentialsList(LaunchConfigCredentialsBase):
 class ScheduleUnifiedJobsList(SubListAPIView):
 
     model = UnifiedJob
-    serializer_class = UnifiedJobSerializer
+    serializer_class = UnifiedJobListSerializer
     parent_model = Schedule
     relationship = 'unifiedjob_set'
     view_name = _('Schedule Jobs List')
@@ -1060,7 +1060,7 @@ class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
 class OrganizationWorkflowJobTemplatesList(SubListCreateAttachDetachAPIView):
 
     model = WorkflowJobTemplate
-    serializer_class = WorkflowJobTemplateListSerializer
+    serializer_class = WorkflowJobTemplateSerializer
     parent_model = Organization
     relationship = 'workflows'
     parent_key = 'organization'
@@ -1382,7 +1382,7 @@ class ProjectNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
 class ProjectUpdatesList(SubListAPIView):
 
     model = ProjectUpdate
-    serializer_class = ProjectUpdateSerializer
+    serializer_class = ProjectUpdateListSerializer
     parent_model = Project
     relationship = 'project_updates'
 
@@ -1493,7 +1493,7 @@ class ProjectUpdateScmInventoryUpdates(SubListCreateAPIView):
 
     view_name = _("Project Update SCM Inventory Updates")
     model = InventoryUpdate
-    serializer_class = InventoryUpdateSerializer
+    serializer_class = InventoryUpdateListSerializer
     parent_model = ProjectUpdate
     relationship = 'scm_inventory_updates'
     parent_key = 'source_project_update'
@@ -2832,7 +2832,7 @@ class InventorySourceGroupsList(SubListDestroyAPIView):
 class InventorySourceUpdatesList(SubListAPIView):
 
     model = InventoryUpdate
-    serializer_class = InventoryUpdateSerializer
+    serializer_class = InventoryUpdateListSerializer
     parent_model = InventorySource
     relationship = 'inventory_updates'
 
@@ -3703,7 +3703,7 @@ class WorkflowJobNodeAlwaysNodesList(WorkflowJobNodeChildrenBaseList):
 class WorkflowJobTemplateList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJobTemplate
-    serializer_class = WorkflowJobTemplateListSerializer
+    serializer_class = WorkflowJobTemplateSerializer
     always_allow_superuser = False
 
 
