@@ -375,7 +375,10 @@ class BaseSerializer(serializers.ModelSerializer):
                                         isinstance(obj, Project)):
                     continue
 
-                fkval = getattr(obj, fk, None)
+                try:
+                    fkval = getattr(obj, fk, None)
+                except ObjectDoesNotExist:
+                    continue
                 if fkval is None:
                     continue
                 if fkval == obj:
@@ -3430,10 +3433,10 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
 
     def get_related(self, obj):
         res = super(AdHocCommandSerializer, self).get_related(obj)
-        if obj.inventory:
-            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
-        if obj.credential:
-            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential.pk})
+        if obj.inventory_id:
+            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory_id})
+        if obj.credential_id:
+            res['credential'] = self.reverse('api:credential_detail', kwargs={'pk': obj.credential_id})
         res.update(dict(
             events  = self.reverse('api:ad_hoc_command_ad_hoc_command_events_list', kwargs={'pk': obj.pk}),
             activity_stream = self.reverse('api:ad_hoc_command_activity_stream_list', kwargs={'pk': obj.pk}),
@@ -3445,9 +3448,9 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
 
     def to_representation(self, obj):
         ret = super(AdHocCommandSerializer, self).to_representation(obj)
-        if 'inventory' in ret and not obj.inventory:
+        if 'inventory' in ret and not obj.inventory_id:
             ret['inventory'] = None
-        if 'credential' in ret and not obj.credential:
+        if 'credential' in ret and not obj.credential_id:
             ret['credential'] = None
         # For the UI, only module_name is returned for name, instead of the
         # longer module name + module_args format.
