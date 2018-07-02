@@ -2,11 +2,11 @@ import os
 import signal
 import subprocess
 import sys
-import socket
 import time
 
 from celery import Celery
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 
 class Command(BaseCommand):
@@ -38,12 +38,10 @@ class Command(BaseCommand):
         app.config_from_object('django.conf:settings')
         while True:
             try:
-                pongs = app.control.ping(['celery@{}'.format(socket.gethostname())])
+                pongs = app.control.ping(['celery@{}'.format(settings.CLUSTER_HOST_ID)])
             except Exception:
                 pongs = []
-            if len(pongs):
-                sys.stderr.write(str(pongs) + '\n')
-            else:
+            if not pongs:
                 sys.stderr.write('celery is not responsive to ping over local AMQP\n')
                 pid = self.getpid()
                 if pid:
