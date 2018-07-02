@@ -5,6 +5,7 @@
 import os
 import sys
 import logging
+import six
 
 # Django
 from django.conf import settings
@@ -519,20 +520,24 @@ class UserAccess(BaseAccess):
             return False
         return bool(self.user == obj or self.can_admin(obj, data))
 
-    def user_membership_roles(self, u):
-        return Role.objects.filter(
-            content_type=ContentType.objects.get_for_model(Organization),
-            role_field__in=Organization.member_role.field.parent_role + ['member_role'],
-            members=u
-        )
+    @staticmethod
+    def user_organizations(u):
+        '''
+        Returns all organizations that count `u` as a member
+        '''
+        return Organization.accessible_objects(u, 'member_role')
 
     def is_all_org_admin(self, u):
-        return not self.user_membership_roles(u).exclude(
-            ancestors__in=self.user.roles.filter(role_field='admin_role')
+        '''
+        returns True if `u` is member of any organization that is
+        not also an organization that `self.user` admins
+        '''
+        return not self.user_organizations(u).exclude(
+            pk__in=Organization.accessible_pk_qs(self.user, 'admin_role')
         ).exists()
 
     def user_is_orphaned(self, u):
-        return not self.user_membership_roles(u).exists()
+        return not self.user_organizations(u).exists()
 
     @check_superuser
     def can_admin(self, obj, data, allow_orphans=False, check_setting=True):
@@ -2550,6 +2555,9 @@ class RoleAccess(BaseAccess):
         # to admin the user being added to the role.
         if (isinstance(obj.content_object, Organization) and
                 obj.role_field in (Organization.member_role.field.parent_role + ['member_role'])):
+            if not isinstance(sub_obj, User):
+                logger.error(six.text_type('Unexpected attempt to associate {} with organization role.').format(sub_obj))
+                return False
             if not UserAccess(self.user).can_admin(sub_obj, None, allow_orphans=True):
                 return False
 
