@@ -51,7 +51,7 @@ const watch = {
         stats: 'minimal',
         publicPath: '/static/',
         host: '127.0.0.1',
-        https: false,
+        https: true,
         port: 3000,
         clientLogLevel: 'none',
         proxy: [{

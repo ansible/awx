@@ -28,7 +28,7 @@
     "unit": "karma start test/unit/karma.unit.js",
     "lint": "eslint .",
     "dev": "webpack --config build/webpack.development.js --progress",
-    "watch": "webpack-dev-server --config build/webpack.watch.js --progress",
+    "watch": "webpack-dev-server --config build/webpack.watch.js --progress --https",
     "production": "webpack --config build/webpack.production.js"
   },
   "devDependencies": {
