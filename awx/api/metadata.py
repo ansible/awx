@@ -67,6 +67,8 @@ class Metadata(metadata.SimpleMetadata):
                 if field.field_name == model_field.name:
                     field_info['filterable'] = True
                     break
+            else:
+                field_info['filterable'] = False
 
         # Indicate if a field has a default value.
         # FIXME: Still isn't showing all default values?

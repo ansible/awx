@@ -106,7 +106,7 @@ def test_filterable_fields(options, instance, admin_user):
     assert 'filterable' in filterable_info
     assert filterable_info['filterable'] is True
 
-    assert 'filterable' not in non_filterable_info
+    assert not non_filterable_info['filterable']
 
 
 @pytest.mark.django_db
