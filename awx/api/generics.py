@@ -23,7 +23,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import views as auth_views
 
 # Django REST Framework
-from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError, NotAcceptable
+from rest_framework.exceptions import PermissionDenied, AuthenticationFailed, ParseError, NotAcceptable, UnsupportedMediaType
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
@@ -196,6 +196,10 @@ class APIView(views.APIView):
             request.drf_request_user = None
         except (PermissionDenied, ParseError) as exc:
             request.drf_request_user = None
+            self.__init_request_error__ = exc
+        except UnsupportedMediaType as exc:
+            exc.detail = _('You did not use correct content_type in your HTTP request. \
+                            If you are using our REST API, the content_type must be application/json')
             self.__init_request_error__ = exc
         return drf_request
 
