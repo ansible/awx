@@ -1085,7 +1085,6 @@ var NetworkUIController = function($scope,
         $scope.topology_id = data.topology_id;
         $scope.panX = data.panX;
         $scope.panY = data.panX;
-        $scope.current_scale = data.scale;
         $scope.$emit('awxNet-UpdateZoomWidget', $scope.current_scale, true);
         $scope.link_id_seq = util.natural_numbers(data.link_id_seq);
         $scope.device_id_seq = util.natural_numbers(data.device_id_seq);
@@ -1215,7 +1214,6 @@ var NetworkUIController = function($scope,
             $scope.current_scale = Math.min(2, Math.max(0.10, Math.min((window.innerWidth-200)/diff_x, (window.innerHeight-300)/diff_y)));
             $scope.$emit('awxNet-UpdateZoomWidget', $scope.current_scale, true);
             $scope.updateScaledXY();
-            $scope.updatePanAndScale();
         }
         // Calculate the new panX and panY to show the entire diagram
         if (min_x !== null && min_y !== null) {
@@ -1224,7 +1222,6 @@ var NetworkUIController = function($scope,
             $scope.panX = $scope.current_scale * (-min_x - diff_x/2) + window.innerWidth/2;
             $scope.panY = $scope.current_scale * (-min_y - diff_y/2) + window.innerHeight/2;
             $scope.updateScaledXY();
-            $scope.updatePanAndScale();
         }
 
         //Update the device_id_seq to be greater than all device ids to prevent duplicate ids.
@@ -1261,6 +1258,7 @@ var NetworkUIController = function($scope,
         }
 
         $scope.updateInterfaceDots();
+        $scope.updatePanAndScale(); // Update the canvas element scale to the correct initial scale
         $scope.$emit('awxNet-instatiateSelect', $scope.devices);
     };
 

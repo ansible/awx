@@ -3720,7 +3720,11 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, CopyAPIView):
     copy_return_serializer_class = WorkflowJobTemplateSerializer
 
     def get(self, request, *args, **kwargs):
+        if get_request_version(request) < 2:
+            return self.v1_not_allowed()
         obj = self.get_object()
+        if not request.user.can_access(obj.__class__, 'read', obj):
+            raise PermissionDenied()
         can_copy, messages = request.user.can_access_with_errors(self.model, 'copy', obj)
         data = OrderedDict([
             ('can_copy', can_copy), ('can_copy_without_user_input', can_copy),
