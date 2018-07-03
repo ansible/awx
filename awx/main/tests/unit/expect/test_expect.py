@@ -1,4 +1,6 @@
-import cStringIO
+# -*- coding: utf-8 -*-
+
+import StringIO
 import mock
 import os
 import pytest
@@ -16,6 +18,7 @@ from cryptography.hazmat.primitives import serialization
 from awx.main.expect import run, isolated_manager
 
 from django.conf import settings
+import six
 
 HERE, FILENAME = os.path.split(__file__)
 
@@ -55,7 +58,7 @@ def mock_sleep(request):
 
 
 def test_simple_spawn():
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
     status, rc = run.run_pexpect(
         ['ls', '-la'],
         HERE,
@@ -69,7 +72,7 @@ def test_simple_spawn():
 
 
 def test_error_rc():
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
     status, rc = run.run_pexpect(
         ['ls', '-nonsense'],
         HERE,
@@ -83,7 +86,7 @@ def test_error_rc():
 
 
 def test_cancel_callback_error():
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
 
     def bad_callback():
         raise Exception('unique exception')
@@ -102,22 +105,24 @@ def test_cancel_callback_error():
     assert extra_fields['job_explanation'] == "System error during job execution, check system logs"
 
 
-def test_env_vars():
-    stdout = cStringIO.StringIO()
+@pytest.mark.timeout(3)  # https://github.com/ansible/tower/issues/2391#issuecomment-401946895
+@pytest.mark.parametrize('value', ['abc123', six.u('Iñtërnâtiônàlizætiøn')])
+def test_env_vars(value):
+    stdout = StringIO.StringIO()
     status, rc = run.run_pexpect(
         ['python', '-c', 'import os; print os.getenv("X_MY_ENV")'],
         HERE,
-        {'X_MY_ENV': 'abc123'},
+        {'X_MY_ENV': value},
         stdout,
         cancelled_callback=lambda: False,
     )
     assert status == 'successful'
     assert rc == 0
-    assert 'abc123' in stdout.getvalue()
+    assert value in stdout.getvalue()
 
 
 def test_password_prompt():
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
     expect_passwords = OrderedDict()
     expect_passwords[re.compile(r'Password:\s*?$', re.M)] = 'secret123'
     status, rc = run.run_pexpect(
@@ -134,7 +139,7 @@ def test_password_prompt():
 
 
 def test_job_timeout():
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
     extra_update_fields={}
     status, rc = run.run_pexpect(
         ['python', '-c', 'import time; time.sleep(5)'],
@@ -151,7 +156,7 @@ def test_job_timeout():
 
 
 def test_manual_cancellation():
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
     status, rc = run.run_pexpect(
         ['python', '-c', 'print raw_input("Password: ")'],
         HERE,
@@ -167,7 +172,7 @@ def test_manual_cancellation():
 def test_build_isolated_job_data(private_data_dir, rsa_key):
     pem, passphrase = rsa_key
     mgr = isolated_manager.IsolatedManager(
-        ['ls', '-la'], HERE, {}, cStringIO.StringIO(), ''
+        ['ls', '-la'], HERE, {}, StringIO.StringIO(), ''
     )
     mgr.private_data_dir = private_data_dir
     mgr.build_isolated_job_data()
@@ -204,7 +209,7 @@ def test_run_isolated_job(private_data_dir, rsa_key):
     env = {'JOB_ID': '1'}
     pem, passphrase = rsa_key
     mgr = isolated_manager.IsolatedManager(
-        ['ls', '-la'], HERE, env, cStringIO.StringIO(), ''
+        ['ls', '-la'], HERE, env, StringIO.StringIO(), ''
     )
     mgr.private_data_dir = private_data_dir
     secrets = {
@@ -215,7 +220,7 @@ def test_run_isolated_job(private_data_dir, rsa_key):
         'ssh_key_data': pem
     }
     mgr.build_isolated_job_data()
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
     # Mock environment variables for callback module
     with mock.patch('os.getenv') as env_mock:
         env_mock.return_value = '/path/to/awx/lib'
@@ -234,7 +239,7 @@ def test_run_isolated_adhoc_command(private_data_dir, rsa_key):
     env = {'AD_HOC_COMMAND_ID': '1'}
     pem, passphrase = rsa_key
     mgr = isolated_manager.IsolatedManager(
-        ['pwd'], HERE, env, cStringIO.StringIO(), ''
+        ['pwd'], HERE, env, StringIO.StringIO(), ''
     )
     mgr.private_data_dir = private_data_dir
     secrets = {
@@ -245,7 +250,7 @@ def test_run_isolated_adhoc_command(private_data_dir, rsa_key):
         'ssh_key_data': pem
     }
     mgr.build_isolated_job_data()
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
     # Mock environment variables for callback module
     with mock.patch('os.getenv') as env_mock:
         env_mock.return_value = '/path/to/awx/lib'
@@ -265,7 +270,7 @@ def test_run_isolated_adhoc_command(private_data_dir, rsa_key):
 
 def test_check_isolated_job(private_data_dir, rsa_key):
     pem, passphrase = rsa_key
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
     mgr = isolated_manager.IsolatedManager(['ls', '-la'], HERE, {}, stdout, '')
     mgr.private_data_dir = private_data_dir
     mgr.instance = mock.Mock(id=123, pk=123, verbosity=5, spec_set=['id', 'pk', 'verbosity'])
@@ -315,7 +320,7 @@ def test_check_isolated_job(private_data_dir, rsa_key):
 
 def test_check_isolated_job_timeout(private_data_dir, rsa_key):
     pem, passphrase = rsa_key
-    stdout = cStringIO.StringIO()
+    stdout = StringIO.StringIO()
     extra_update_fields = {}
     mgr = isolated_manager.IsolatedManager(['ls', '-la'], HERE, {}, stdout, '',
                                            job_timeout=1,
