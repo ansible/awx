@@ -12,7 +12,11 @@ function atPanelHeading () {
         replace: true,
         transclude: true,
         templateUrl,
-        link
+        link,
+        scope: {
+            title: '@',
+            badge: '@?'
+        }
     };
 }
 

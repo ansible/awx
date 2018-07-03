@@ -1,9 +1,8 @@
 <at-panel>
-    <at-panel-heading hide-dismiss="true">
-        APPLICATIONS
-        <span class="badge List-titleBadge">
-            {{ vm.applicationsCount }}
-        </span>
+    <at-panel-heading
+        title="{{:: vm.strings.get('list.PANEL_TITLE') }}"
+        badge="{{ vm.applicationsCount }}"
+        hide-dismiss="true">
     </at-panel-heading>
 
     <at-panel-body>

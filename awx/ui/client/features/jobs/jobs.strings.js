@@ -5,6 +5,7 @@ function JobsStrings (BaseString) {
     const ns = this.jobs;
 
     ns.list = {
+        PANEL_TITLE: t.s('JOBS'),
         ROW_ITEM_LABEL_STARTED: t.s('Started'),
         ROW_ITEM_LABEL_FINISHED: t.s('Finished'),
         ROW_ITEM_LABEL_WORKFLOW_JOB: t.s('Workflow Job'),

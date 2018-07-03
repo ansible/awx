@@ -1,9 +1,8 @@
 <at-panel>
-    <at-panel-heading hide-dismiss="true">
-        {{ vm.strings.get('list.PANEL_TITLE') }}
-        <span class="badge List-titleBadge">
-            {{ instanceGroupCount }}
-        </span>
+    <at-panel-heading
+        title="{{:: vm.strings.get('list.PANEL_TITLE') }}"
+        hide-dismiss="true"
+        badge="{{ instanceGroupCount }}">
     </at-panel-heading>
 
     <at-panel-body>

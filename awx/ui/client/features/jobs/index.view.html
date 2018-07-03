@@ -3,16 +3,9 @@
     <at-panel ng-cloak id="htmlTemplate">
         <div>
             <div ng-hide="$state.includes('schedules')">
-                <at-panel-heading hide-dismiss="true">
-                    <translate>JOBS</translate>
+                <at-panel-heading title="{{:: vm.strings.get('list.PANEL_TITLE') }}" hide-dismiss="true">
                 </at-panel-heading>
                 <div ui-view="jobsList"></div>
-            </div>
-            <div ng-hide="!$state.includes('schedules')">
-                <at-panel-heading hide-dismiss="true">
-                    <translate>SCHEDULES</translate>
-                </at-panel-heading>
-                <div ui-view="schedulesList"></div>
             </div>
         </div>
     </at-panel>

@@ -8,6 +8,11 @@ function EditController ($rootScope, $state, models, strings) {
     vm.strings = strings;
     vm.panelTitle = instanceGroup.get('name');
 
+    vm.docs = {
+        url: 'https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html',
+        help_text: vm.strings.get('tooltips.DOCS_HELP_TEXT')
+    };
+
     vm.tab = {
         details: {
             _active: true,
