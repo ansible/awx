@@ -371,23 +371,28 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return workflow_job
 
     def _accept_or_ignore_job_kwargs(self, _exclude_errors=(), **kwargs):
-        prompted_fields = {}
-        rejected_fields = {}
-        accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(kwargs.get('extra_vars', {}))
+        exclude_errors = kwargs.pop('_exclude_errors', [])
+        prompted_data = {}
+        rejected_data = {}
+        accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(
+            kwargs.get('extra_vars', {}),
+            _exclude_errors=exclude_errors,
+            extra_passwords=kwargs.get('survey_passwords', {}))
         if accepted_vars:
-            prompted_fields['extra_vars'] = accepted_vars
+            prompted_data['extra_vars'] = accepted_vars
         if rejected_vars:
-            rejected_fields['extra_vars'] = rejected_vars
+            rejected_data['extra_vars'] = rejected_vars
 
         # WFJTs do not behave like JTs, it can not accept inventory, credential, etc.
         bad_kwargs = kwargs.copy()
         bad_kwargs.pop('extra_vars', None)
+        bad_kwargs.pop('survey_passwords', None)
         if bad_kwargs:
-            rejected_fields.update(bad_kwargs)
+            rejected_data.update(bad_kwargs)
             for field in bad_kwargs:
                 errors_dict[field] = _('Field is not allowed for use in workflows.')
 
-        return prompted_fields, rejected_fields, errors_dict
+        return prompted_data, rejected_data, errors_dict
 
     def can_start_without_user_input(self):
         return not bool(self.variables_needed_to_start)
