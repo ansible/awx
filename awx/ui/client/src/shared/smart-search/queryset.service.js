@@ -44,38 +44,39 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
         replaceEncodedTokens(value) {
             return decodeURIComponent(value).replace(/"|'/g, "");
         },
-        encodeTerms (values, key) {
+        encodeTerms(value, key){
             key = this.replaceDefaultFlags(key);
-
-            if (!Array.isArray(values)) {
-                values = [values];
-            }
-
-            return values
-                .map(value => {
-                    value = this.replaceDefaultFlags(value);
-                    value = this.replaceEncodedTokens(value);
-                    return [key, value];
+            value = this.replaceDefaultFlags(value);
+            var that = this;
+            if (Array.isArray(value)){
+                value = _.uniq(_.flattenDeep(value));
+                let concated = '';
+                angular.forEach(value, function(item){
+                    if(item && typeof item === 'string') {
+                        item = that.replaceEncodedTokens(item);
+                    }
+                    concated += `${key}=${item}&`;
                 });
 
+                return concated;
+            }
+            else {
+                if(value && typeof value === 'string') {
+                    value = this.replaceEncodedTokens(value);
+                }
+
+                return `${key}=${value}&`;
+            }
         },
         // encodes ui-router params from {operand__key__comparator: value} pairs to API-consumable URL
         encodeQueryset(params) {
-            if (typeof params !== 'object') {
-                return '';
-            }
+            let queryset;
+            queryset = _.reduce(params, (result, value, key) => {
+                return result + this.encodeTerms(value, key);
+            }, '');
+            queryset = queryset.substring(0, queryset.length - 1);
+            return angular.isObject(params) ? `?${queryset}` : '';
 
-            return _.reduce(params, (result, value, key) => {
-                if (result !== '?') {
-                    result += '&';
-                }
-
-                const encodedTermString = this.encodeTerms(value, key)
-                    .map(([key, value]) => `${key}=${value}`)
-                    .join('&');
-
-                return result += encodedTermString;
-            }, '?');
         },
         // like encodeQueryset, but return an actual unstringified API-consumable http param object
         encodeQuerysetObject(params) {
