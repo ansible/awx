@@ -1,19 +1,20 @@
 <div class="tab-pane Configuration-container" id="configuration_edit">
 
-    <div class="Form-nav--dropdownContainer">
-        <div class="Form-nav--dropdownLabel" translate>Sub Category</div>
-        <div class="Form-nav--dropdown">
-            <select
-                id="configure-dropdown-nav"
-                class="form-control"
-                ng-model="authVm.dropdownValue"
-                ng-options="opt.value as opt.label for opt in authVm.dropdownOptions"
-                ng-change="authVm.changeAuthDropdown('{{authVm.dropdownValue}}')">
-            </select>
+    <div class="row Form-tabRow">
+        <div class="col-lg-12">
+            <div class="Form-tabHolder">
+                <div ng-repeat="opt in authVm.dropdownOptions"
+                        class="Form-tab"
+                        ng-click="authVm.activeForm(opt.value)"
+                        ng-class="{'is-selected': authVm.activeTab === opt.value }"
+                        translate>
+                    {{opt.label}}
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="Form-nav--ldapDropdownContainer" ng-show="authVm.dropdownValue === 'ldap'">
+    <div class="Form-nav--dropdownContainer" ng-show="authVm.activeTab === 'ldap'">
         <div class="Form-nav--dropdownLabel" translate>LDAP Server</div>
         <div class="Form-nav--dropdown">
             <select
@@ -21,12 +22,23 @@
                 class="form-control"
                 ng-model="authVm.ldapDropdownValue"
                 ng-options="opt.value as opt.label for opt in authVm.ldapDropdownOptions"
-                ng-change="authVm.changeLdapDropdown('{{authVm.ldapDropdownValue}}')">
+                ng-change="authVm.activeForm('ldap')">
             </select>
         </div>
     </div>
 
-    <hr ng-show="authVm.dropdownValue === 'ldap'"/>
+    <div class="Form-nav--dropdownContainer" ng-show="authVm.activeTab === 'github'">
+        <div class="Form-nav--dropdownLabel" translate>GitHub Category</div>
+        <div class="Form-nav--dropdown">
+            <select
+                id="configure-github-dropdown"
+                class="form-control"
+                ng-model="authVm.githubDropdownValue"
+                ng-options="opt.value as opt.label for opt in authVm.githubDropdownOptions"
+                ng-change="authVm.activeForm('github')">
+            </select>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-lg-12">

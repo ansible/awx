@@ -254,3 +254,42 @@
         }
     }
 }
+
+/* Tower Sub Nav Dropdown */
+.twr-nav-dropdown {
+    position: relative;
+    // display: inline-block;
+}
+.twr-nav-dropdown-content {
+    display: none;
+    position: fixed;
+    background-color: #848992;
+    min-width: 140px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    bottom: 0px;
+    left: @at-width-collapsed-side-nav;
+    z-index: 2000;
+}
+
+.at-Layout-side--expanded {
+    .twr-nav-dropdown-content {
+        left: @at-width-expanded-side-nav;
+    }
+}
+
+.twr-nav-dropdown-content a {
+    color: #ffffff;
+    font-size: 0.85em;
+    padding: 10px 20px;
+    text-decoration: none;
+    display: block;
+}
+.twr-nav-dropdown-content a:hover {
+    background-color: #b7b7b7;
+}
+.twr-nav-dropdown:hover .twr-nav-dropdown-content {
+    display: block;
+}
+.twr-nav-dropdown:hover .nav-button {
+    background-color: #b7b7b7;
+}

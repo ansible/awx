@@ -86,8 +86,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities'])
 // Accepts image and returns base64 information with basic validation
 // Can eventually expand to handle all uploads with different endpoints and handlers
 //
-.directive('imageUpload', ['ConfigurationUtils', 'i18n', '$rootScope',
-function(ConfigurationUtils, i18n, $rootScope) {
+.directive('imageUpload', ['SettingsUtils', 'i18n', '$rootScope',
+function(SettingsUtils, i18n, $rootScope) {
     var browseText = i18n._('BROWSE'),
     placeholderText = i18n._('Choose file'),
     uploadedText = i18n._('Current Image: '),
@@ -157,7 +157,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
             scope.fileChange = function(file) {
                 filePickerError.html('');
 
-                ConfigurationUtils.imageProcess(file[0])
+                SettingsUtils.imageProcess(file[0])
                     .then(function(result) {
                         scope.$parent[fieldKey] = result;
                         filePickerText.val(file[0].name);
