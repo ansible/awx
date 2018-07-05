@@ -29,7 +29,7 @@
             </at-row-item>
             <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION') }}"
-                value="{{ token.description }}">
+                value="{{ token.description | sanitize }}">
             </at-row-item>
             <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_SCOPE') }}"
