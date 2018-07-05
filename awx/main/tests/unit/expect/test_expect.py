@@ -318,6 +318,48 @@ def test_check_isolated_job(private_data_dir, rsa_key):
         )
 
 
+def test_check_isolated_job_with_multibyte_unicode(private_data_dir):
+    """
+    Ensure that multibyte unicode is properly synced when stdout only
+    contains the first part of the multibyte character
+
+    see: https://github.com/ansible/tower/issues/2315
+    """
+    def raw_output():
+        yield ('failed', '\xe8\xb5\xb7\xe5')  # 起 <partial byte>
+        yield ('successful', '\xe8\xb5\xb7\xe5\x8b\x95')  # 起動
+    raw_output = raw_output()
+    stdout = StringIO.StringIO()
+    mgr = isolated_manager.IsolatedManager(['ls', '-la'], HERE, {}, stdout, '')
+    mgr.private_data_dir = private_data_dir
+    mgr.instance = mock.Mock(id=123, pk=123, verbosity=5, spec_set=['id', 'pk', 'verbosity'])
+    mgr.started_at = time.time()
+    mgr.host = 'isolated-host'
+
+    os.mkdir(os.path.join(private_data_dir, 'artifacts'))
+    with mock.patch('awx.main.expect.run.run_pexpect') as run_pexpect:
+
+        def _synchronize_job_artifacts(args, cwd, env, buff, **kw):
+            buff.write('checking job status...')
+            status, out = next(raw_output)
+            for filename, data in (
+                ['status', status],
+                ['rc', '0'],
+                ['stdout', out]
+            ):
+                with open(os.path.join(private_data_dir, 'artifacts', filename), 'w') as f:
+                    f.write(data)
+                    f.flush()
+            return (status, 0)
+
+        run_pexpect.side_effect = _synchronize_job_artifacts
+        with mock.patch.object(mgr, '_missing_artifacts') as missing_artifacts:
+            missing_artifacts.return_value = False
+            status, rc = mgr.check(interval=0)
+
+        assert stdout.getvalue() == '起動'
+
+
 def test_check_isolated_job_timeout(private_data_dir, rsa_key):
     pem, passphrase = rsa_key
     stdout = StringIO.StringIO()
