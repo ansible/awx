@@ -51,6 +51,19 @@ export default function BuildAnchor($log, $filter) {
                          throw {name : 'NotImplementedError', message : 'activity.summary_fields to build this url not implemented yet'};
                      }
                      break;
+                case 'setting':
+                    if (activity.summary_fields.setting[0].category === 'jobs' ||
+                        activity.summary_fields.setting[0].category === 'ui') {
+                        url += `configuration/${activity.summary_fields.setting[0].category}`;
+                    }
+                    else if (activity.summary_fields.setting[0].category === 'system' ||
+                        activity.summary_fields.setting[0].category === 'logging') {
+                        url += `configuration/system`;
+                    }
+                    else {
+                        url += `configuration/auth`;
+                    }
+                     break;
                  case 'notification_template':
                      url += `notification_templates/${obj.id}`;
                      break;
