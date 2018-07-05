@@ -7,12 +7,8 @@
 export default [
     '$scope',
     '$rootScope',
-    '$state',
     '$stateParams',
-    '$timeout',
     'ConfigurationJobsForm',
-    'ConfigurationService',
-    'ConfigurationUtils',
     'CreateSelect2',
     'GenerateForm',
     'ParseTypeChange',
@@ -20,26 +16,27 @@ export default [
     function(
         $scope,
         $rootScope,
-        $state,
         $stateParams,
-        $timeout,
         ConfigurationJobsForm,
-        ConfigurationService,
-        ConfigurationUtils,
         CreateSelect2,
         GenerateForm,
         ParseTypeChange,
         i18n
     ) {
-        var generator = GenerateForm;
+        const generator = GenerateForm;
         var form = ConfigurationJobsForm;
+        const formTracker = $scope.$parent.vm.formTracker;
+
+        if ($stateParams.form === 'jobs') {
+            formTracker.setCurrentAuth('jobs');
+        }
 
         let tab;
         let codeInputInitialized = false;
 
-        $scope.$parent.AD_HOC_COMMANDS_options = [];
-        _.each($scope.$parent.configDataResolve.AD_HOC_COMMANDS.default, function(command) {
-            $scope.$parent.AD_HOC_COMMANDS_options.push({
+        $scope.$parent.$parent.AD_HOC_COMMANDS_options = [];
+        _.each($scope.$parent.configDataResolve.AD_HOC_COMMANDS.default, function (command) {
+            $scope.$parent.$parent.AD_HOC_COMMANDS_options.push({
                 name: command,
                 label: command,
                 value: command
@@ -74,18 +71,20 @@ export default [
         generator.inject(form, {
             id: 'configure-jobs-form',
             mode: 'edit',
-            scope: $scope.$parent,
+            scope: $scope.$parent.$parent,
             related: false,
             noPanel: true
         });
+
+        $scope.$parent.$parent.parseType = 'json';
 
         function initializeCodeInput () {
             let name = 'AWX_TASK_ENV';
 
             ParseTypeChange({
-               scope: $scope.$parent,
+               scope: $scope.$parent.$parent,
                variable: name,
-               parseType: 'application/json',
+               parse_variable: 'parseType',
                field_id: `configuration_jobs_template_${name}`
              });
 
@@ -93,15 +92,14 @@ export default [
         }
 
         function loadAdHocCommands () {
-            $scope.$parent.AD_HOC_COMMANDS_values = $scope.$parent.AD_HOC_COMMANDS.map(value => value);
-            $scope.$parent.AD_HOC_COMMANDS = $scope.$parent.AD_HOC_COMMANDS.map(value => ({
+            $scope.$parent.$parent.AD_HOC_COMMANDS_values = $scope.$parent.$parent.AD_HOC_COMMANDS.map(value => value);
+            $scope.$parent.$parent.AD_HOC_COMMANDS = $scope.$parent.$parent.AD_HOC_COMMANDS.map(value => ({
                 value,
                 name: value,
                 label: value
             }));
 
-            $scope.$parent.AD_HOC_COMMANDS_options = $scope.$parent.AD_HOC_COMMANDS.map(tag => tag);
-
+            $scope.$parent.$parent.AD_HOC_COMMANDS_options = $scope.$parent.$parent.AD_HOC_COMMANDS.map(tag => tag);
             CreateSelect2({
                 element: '#configuration_jobs_template_AD_HOC_COMMANDS',
                 multiple: true,
@@ -112,7 +110,7 @@ export default [
         }
 
         function revertAdHocCommands () {
-            $scope.$parent.AD_HOC_COMMANDS = $scope.$parent.configDataResolve.AD_HOC_COMMANDS.default.map(value => ({
+            $scope.$parent.$parent.AD_HOC_COMMANDS = $scope.$parent.configDataResolve.AD_HOC_COMMANDS.default.map(value => ({
                 value,
                 name: value,
                 label: value
@@ -125,59 +123,35 @@ export default [
                 }
             });
 
-            $scope.$parent.AD_HOC_COMMANDS_options = $scope.$parent.AD_HOC_COMMANDS.map(tag => tag);
-            $scope.$parent.AD_HOC_COMMANDS_values = $scope.$parent.AD_HOC_COMMANDS.map(tag => tag.value);
+            $scope.$parent.$parent.AD_HOC_COMMANDS_options = $scope.$parent.$parent.AD_HOC_COMMANDS.map(tag => tag);
+            $scope.$parent.$parent.AD_HOC_COMMANDS_values = $scope.$parent.$parent.AD_HOC_COMMANDS.map(tag => tag.value);
             CreateSelect2({
                 element: '#configuration_jobs_template_AD_HOC_COMMANDS',
                 multiple: true,
                 addNew: true,
                 placeholder: i18n._('Select commands'),
-                options: $scope.$parent.AD_HOC_COMMANDS_options
+                options: $scope.$parent.$parent.AD_HOC_COMMANDS_options
             });
-
         }
-
-        // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
-        // TODO Find better solution for this bug
-        $timeout(function(){
-            $scope.$parent.configuration_jobs_template_form.$setPristine();
-        }, 1000);
-
 
         // Managing the state of select2's tags since the behavior is unpredictable otherwise.
         let commandsElement = $('#configuration_jobs_template_AD_HOC_COMMANDS');
 
         commandsElement.on('select2:select', event => {
             let command = event.params.data.text;
-            let commands = $scope.$parent.AD_HOC_COMMANDS_values;
+            let commands = $scope.$parent.$parent.AD_HOC_COMMANDS_values;
 
             commands.push(command);
         });
 
         commandsElement.on('select2:unselect', event => {
             let command = event.params.data.text;
-            let commands = $scope.$parent.AD_HOC_COMMANDS_values;
+            let commands = $scope.$parent.$parent.AD_HOC_COMMANDS_values;
 
-            $scope.$parent.AD_HOC_COMMANDS_values = commands.filter(value => value !== command);
+            $scope.$parent.$parent.AD_HOC_COMMANDS_values = commands.filter(value => value !== command);
         });
 
         $scope.$on('AD_HOC_COMMANDS_reverted', () => revertAdHocCommands());
-
-        /*
-         * Controllers for each tab are initialized when configuration is opened. A listener
-         * on the URL itself is necessary to determine which tab is active. If a non-active
-         * tab initializes a codemirror, it doesn't display properly until the user navigates
-         * to the tab and it's been clicked.
-         */
-        $scope.$on('$locationChangeStart', (event, url) => {
-            let parts = url.split('/');
-            tab = parts[parts.length - 1];
-
-            if (tab === 'jobs' && !codeInputInitialized) {
-                initializeCodeInput();
-                codeInputInitialized = true;
-            }
-        });
 
         /*
          * Necessary to listen for revert clicks and relaunch the codemirror instance.
@@ -194,8 +168,7 @@ export default [
          * direct load of this tab or if the user comes from a different tab.
          */
         $scope.$on('populated', () => {
-            tab = $stateParams.currentTab;
-
+            tab = $stateParams.form;
             if (tab === 'jobs') {
                 initializeCodeInput();
                 codeInputInitialized = true;

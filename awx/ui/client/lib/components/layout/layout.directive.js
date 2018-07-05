@@ -1,7 +1,11 @@
+import defaultStrings from '~assets/default.strings.json';
+
 const templateUrl = require('~components/layout/layout.partial.html');
 
 function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions) {
     const vm = this || {};
+
+    vm.product = defaultStrings.BRAND_NAME;
 
     $transitions.onSuccess({}, (transition) => {
         vm.currentState = transition.to().name;
