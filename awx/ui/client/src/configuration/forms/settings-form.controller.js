@@ -1,14 +1,9 @@
-/*************************************************
- * Copyright (c) 2015 Ansible, Inc.
- *
- * All Rights Reserved
- *************************************************/
 import defaultStrings from '~assets/default.strings.json';
 
 export default [
-    '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert',
-    'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'i18n', 'ParseTypeChange', 'ProcessErrors', 'Store',
-    'Wait', 'configDataResolve', 'ToJSON', 'ConfigService', 'ngToast',
+    '$scope', '$rootScope', '$state', '$stateParams', '$q',
+    'SettingsService', 'SettingsUtils', 'CreateDialog', 'i18n', 'ProcessErrors', 'Store',
+    'Wait', 'configDataResolve', 'ToJSON', 'ConfigService',
     //Form definitions
     'configurationAzureForm',
     'configurationGithubForm',
@@ -30,9 +25,9 @@ export default [
     'ConfigurationJobsForm',
     'ConfigurationUiForm',
     function(
-        $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert,
-        ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, i18n, ParseTypeChange, ProcessErrors, Store,
-        Wait, configDataResolve, ToJSON, ConfigService, ngToast,
+        $scope, $rootScope, $state, $stateParams, $q,
+        SettingsService, SettingsUtils, CreateDialog, i18n, ProcessErrors, Store,
+        Wait, configDataResolve, ToJSON, ConfigService,
         //Form definitions
         configurationAzureForm,
         configurationGithubForm,
@@ -54,11 +49,12 @@ export default [
         ConfigurationJobsForm,
         ConfigurationUiForm
     ) {
-        var vm = this;
+        const vm = this;
 
         vm.product = defaultStrings.BRAND_NAME;
+        vm.activeTab = $stateParams.form;
 
-        var formDefs = {
+        const formDefs = {
             'azure': configurationAzureForm,
             'github': configurationGithubForm,
             'github_org': configurationGithubOrgForm,
@@ -80,8 +76,19 @@ export default [
             'ui': ConfigurationUiForm
         };
 
+        $scope.configDataResolve = configDataResolve;
+        $scope.formDefs = formDefs;
+
+        // check if it's auditor, show messageBar 
+        $scope.show_auditor_bar = false;
+        if($rootScope.user_is_system_auditor && Store('show_auditor_bar') !== false) {
+            $scope.show_auditor_bar = true;
+        } else {
+            $scope.show_auditor_bar = false;
+        }  
+
         var populateFromApi = function() {
-            ConfigurationService.getCurrentValues()
+            SettingsService.getCurrentValues()
                 .then(function(data) {
                     var currentKeys = _.keys(data);
                     $scope.requiredLogValues = {};
@@ -113,12 +120,12 @@ export default [
                                 } else if (isLdapUserSearch || isLdapGroupSearch) {
                                     $scope[key] = JSON.stringify(data[key]);
                                 } else {
-                                    $scope[key] = ConfigurationUtils.arrayToList(data[key], key);
+                                    $scope[key] = SettingsUtils.arrayToList(data[key], key);
                                 }
 
                             } else {
                                 //handle nested objects
-                                if(ConfigurationUtils.isEmpty(data[key])) {
+                                if(SettingsUtils.isEmpty(data[key])) {
                                     $scope[key] = '{}';
                                 } else {
                                     $scope[key] = JSON.stringify(data[key]);
@@ -172,31 +179,6 @@ export default [
             },
         };
 
-        // Default to auth form and tab
-        if ($stateParams.currentTab === '') {
-            $state.go('configuration', {
-                currentTab: 'auth'
-            }, {
-                location: true,
-                inherit: false,
-                notify: false,
-                reload: false
-            });
-        }
-
-        var currentForm = '';
-        var currentTab = function() {
-            if ($stateParams.currentTab === '' || $stateParams.currentTab === 'auth') {
-                return 'auth';
-            } else if ($stateParams.currentTab !== '' && $stateParams.currentTab !== 'auth') {
-                formTracker.setCurrent($stateParams.currentTab);
-                return $stateParams.currentTab;
-            }
-        };
-        var activeTab = currentTab();
-
-        $scope.configDataResolve = configDataResolve;
-
         var triggerModal = function(msg, title, buttons) {
             if ($scope.removeModalReady) {
                 $scope.removeModalReady();
@@ -219,127 +201,6 @@ export default [
                 resizable: false,
                 callback: 'ModalReady'
             });
-        };
-
-        function activeTabCheck(setForm) {
-            if(!$scope[formTracker.currentFormName()] || !$scope[formTracker.currentFormName()].$dirty) {
-                active(setForm);
-            } else {
-                    var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
-                    var title = i18n._('Warning: Unsaved Changes');
-                    var buttons = [{
-                        label: i18n._("Discard changes"),
-                        "class": "btn Form-cancelButton",
-                        "id": "formmodal-cancel-button",
-                        onClick: function() {
-                            clearApiErrors();
-                            populateFromApi();
-                            $scope[formTracker.currentFormName()].$setPristine();
-                            $('#FormModal-dialog').dialog('close');
-                            active(setForm);
-                        }
-                    }, {
-                        label: i18n._("Save changes"),
-                        onClick: function() {
-                            vm.formSave().then(() => {
-                                $scope[formTracker.currentFormName()].$setPristine();
-                                $('#FormModal-dialog').dialog('close');
-                                active(setForm);
-                            }).catch(()=> {
-                                event.preventDefault();
-                                $('#FormModal-dialog').dialog('close');
-                            });
-
-                        },
-                        "class": "btn btn-primary",
-                        "id": "formmodal-save-button"
-                    }];
-                    triggerModal(msg, title, buttons);
-            }
-        }
-
-        function active(setForm) {
-            // Authentication and System's sub-module dropdowns handled first:
-            if (setForm === 'auth') {
-                // Default to 'azure' on first load
-                if (formTracker.currentAuth === '') {
-                    formTracker.setCurrentAuth('azure');
-                } else {
-                    // If returning to auth tab reset current form to previously viewed
-                    formTracker.setCurrentAuth(formTracker.currentAuth);
-                }
-            } else if (setForm === 'system') {
-                if (formTracker.currentSystem === '') {
-                    formTracker.setCurrentSystem('misc');
-                } else {
-                    // If returning to system tab reset current form to previously viewed
-                    formTracker.setCurrentSystem(formTracker.currentSystem);
-                }
-            }
-
-            vm.activeTab = setForm;
-
-            if (setForm !== 'license') {
-                if (setForm === 'auth') {
-                    formTracker.setCurrentAuth(formTracker.currentAuth);
-                } else if (setForm === 'system') {
-                    formTracker.setCurrentSystem(formTracker.currentSystem);
-                } else {
-                    formTracker.setCurrent(setForm);
-                }
-
-                $state.go('configuration', {
-                    currentTab: setForm
-                }, {
-                    location: true,
-                    inherit: false,
-                    notify: false,
-                    reload: false
-                });
-            } else {
-                $state.go('configuration.license', {
-                    currentTab: setForm
-                }, {
-                    location: true,
-                    inherit: false,
-                    notify: false,
-                    reload: false
-                });
-            }
-        }
-
-        var formCancel = function() {
-            if ($scope[formTracker.currentFormName()].$dirty === true) {
-                var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
-                var title = i18n._('Warning: Unsaved Changes');
-                var buttons = [{
-                    label: i18n._("Discard changes"),
-                    "class": "btn Form-cancelButton",
-                    "id": "formmodal-cancel-button",
-                    onClick: function() {
-                        clearApiErrors();
-                        populateFromApi();
-                        $scope[formTracker.currentFormName()].$setPristine();
-                        $('#FormModal-dialog').dialog('close');
-                    }
-                }, {
-                    label: i18n._("Save changes"),
-                    onClick: function() {
-                        vm.formSave().then(() => {
-                            $scope[formTracker.currentFormName()].$setPristine();
-                            $('#FormModal-dialog').dialog('close');
-                        }).catch(()=> {
-                            event.preventDefault();
-                            $('#FormModal-dialog').dialog('close');
-                        });
-                    },
-                    "class": "btn btn-primary",
-                    "id": "formmodal-save-button"
-                }];
-                triggerModal(msg, title, buttons);
-            } else {
-                $state.go('setup');
-            }
         };
 
         function loginUpdate() {
@@ -370,7 +231,7 @@ export default [
             Wait('start');
             var payload = {};
             payload[key] = $scope.configDataResolve[key].default;
-            ConfigurationService.patchConfiguration(payload)
+            SettingsService.patchConfiguration(payload)
                 .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
 
@@ -446,7 +307,6 @@ export default [
         var getFormPayload = function() {
             var keys = _.keys(formDefs[formTracker.getCurrent()].fields);
             var payload = {};
-
             _.each(keys, function(key) {
                 if($scope.configDataResolve[key].type === 'choice' || multiselectDropdowns.indexOf(key) !== -1) {
                     //Parse dropdowns and dropdowns labeled as lists
@@ -471,10 +331,10 @@ export default [
                     }
                 } else if($scope.configDataResolve[key].type === 'list' && $scope[key] !== null) {
                     // Parse lists
-                    payload[key] = ConfigurationUtils.listToArray($scope[key], key);
+                    payload[key] = SettingsUtils.listToArray($scope[key], key);
                 }
                 else if($scope.configDataResolve[key].type === 'nested object') {
-                    if($scope[key] === '') {
+                    if(!$scope[key]) {
                         payload[key] = {};
                     } else {
                         // payload[key] = JSON.parse($scope[key]);
@@ -494,11 +354,11 @@ export default [
             return payload;
         };
 
-        var formSave = function() {
+        vm.formSave = function() {
             var saveDeferred = $q.defer();
             clearApiErrors();
             Wait('start');
-            ConfigurationService.patchConfiguration(getFormPayload())
+            SettingsService.patchConfiguration(getFormPayload())
                 .then(function(data) {
                     loginUpdate();
 
@@ -532,7 +392,94 @@ export default [
             return saveDeferred.promise;
         };
 
+        vm.formCancel = function() {
+            if ($scope[formTracker.currentFormName()].$dirty === true) {
+                var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
+                var title = i18n._('Warning: Unsaved Changes');
+                var buttons = [{
+                    label: i18n._("Discard changes"),
+                    "class": "btn Form-cancelButton",
+                    "id": "formmodal-cancel-button",
+                    onClick: function() {
+                        $('#FormModal-dialog').dialog('close');
+                        $state.go('settings');
+                    }
+                }, {
+                    label: i18n._("Save changes"),
+                    onClick: function() {
+                        vm.formSave()
+                        .then(function() {
+                            $('#FormModal-dialog').dialog('close');
+                            $state.go('settings');
+                        })
+                    },
+                    "class": "btn btn-primary",
+                    "id": "formmodal-save-button"
+                }];
+                triggerModal(msg, title, buttons);
+            } else {
+                $state.go('settings');
+            }
+        };
 
+        vm.resetAllConfirm = function() {
+            var buttons = [{
+                label: i18n._("Cancel"),
+                "class": "btn btn-default",
+                "id": "formmodal-cancel-button",
+                onClick: function() {
+                    $('#FormModal-dialog').dialog('close');
+                }
+            }, {
+                label: i18n._("Confirm Reset"),
+                onClick: function() {
+                    resetAll();
+                    $('#FormModal-dialog').dialog('close');
+                },
+                "class": "btn btn-primary",
+                "id": "formmodal-reset-button"
+            }];
+            var msg = i18n._('This will reset all configuration values to their factory defaults. Are you sure you want to proceed?');
+            var title = i18n._('Confirm factory reset');
+            triggerModal(msg, title, buttons);
+        };
+
+        vm.closeMessageBar = function() {
+            var msg = 'Are you sure you want to hide the notification bar?';
+            var title = 'Warning: Closing notification bar';
+            var buttons = [{
+                label: "Cancel",
+                "class": "btn Form-cancelButton",
+                "id": "formmodal-cancel-button",
+                onClick: function() {
+                    $('#FormModal-dialog').dialog('close');
+                }
+            }, {
+                label: "OK",
+                onClick: function() {
+                    $('#FormModal-dialog').dialog('close');
+                    updateMessageBarPrefs();
+                },
+                "class": "btn btn-primary",
+                "id": "formmodal-save-button"
+            }];
+            triggerModal(msg, title, buttons);
+        };
+
+        vm.getCurrentFormTitle = function() {
+            switch($stateParams.form) {
+                case 'auth':
+                    return 'AUTHENTICATION';
+                case 'jobs':
+                    return 'JOBS';
+                case 'system':
+                    return 'SYSTEM';
+                case 'ui':
+                    return 'USER INTERFACE';
+                case 'license':
+                    return 'LICENSE';
+            }
+        }
 
         $scope.toggleForm = function(key) {
             if($rootScope.user_is_system_auditor) {
@@ -545,7 +492,7 @@ export default [
             Wait('start');
             var payload = {};
             payload[key] = $scope[key];
-            ConfigurationService.patchConfiguration(payload)
+            SettingsService.patchConfiguration(payload)
                 .then(function() {
                     //TODO consider updating form values with returned data here
                 })
@@ -564,7 +511,7 @@ export default [
                 });
         };
 
-        var resetAll = function() {
+        function resetAll () {
             var keys = _.keys(formDefs[formTracker.getCurrent()].fields);
             var payload = {};
             clearApiErrors();
@@ -573,7 +520,7 @@ export default [
             });
 
             Wait('start');
-            ConfigurationService.patchConfiguration(payload)
+            SettingsService.patchConfiguration(payload)
                 .then(function() {
                     populateFromApi();
                     $scope[formTracker.currentFormName()].$setPristine();
@@ -610,76 +557,17 @@ export default [
                 .finally(function() {
                     Wait('stop');
                 });
-        };
-
-        var resetAllConfirm = function() {
-            var buttons = [{
-                label: i18n._("Cancel"),
-                "class": "btn btn-default",
-                "id": "formmodal-cancel-button",
-                onClick: function() {
-                    $('#FormModal-dialog').dialog('close');
-                }
-            }, {
-                label: i18n._("Confirm Reset"),
-                onClick: function() {
-                    resetAll();
-                    $('#FormModal-dialog').dialog('close');
-                },
-                "class": "btn btn-primary",
-                "id": "formmodal-reset-button"
-            }];
-            var msg = i18n._('This will reset all configuration values to their factory defaults. Are you sure you want to proceed?');
-            var title = i18n._('Confirm factory reset');
-            triggerModal(msg, title, buttons);
-        };
-
-        var show_auditor_bar;
-        if($rootScope.user_is_system_auditor && Store('show_auditor_bar') !== false) {
-            show_auditor_bar = true;
-        } else {
-            show_auditor_bar = false;
         }
 
-        var updateMessageBarPrefs = function() {
-            vm.show_auditor_bar = false;
-            Store('show_auditor_bar', vm.show_auditor_bar);
-        };
-
-        var closeMessageBar = function() {
-            var msg = 'Are you sure you want to hide the notification bar?';
-            var title = 'Warning: Closing notification bar';
-            var buttons = [{
-                label: "Cancel",
-                "class": "btn Form-cancelButton",
-                "id": "formmodal-cancel-button",
-                onClick: function() {
-                    $('#FormModal-dialog').dialog('close');
-                }
-            }, {
-                label: "OK",
-                onClick: function() {
-                    $('#FormModal-dialog').dialog('close');
-                    updateMessageBarPrefs();
-                },
-                "class": "btn btn-primary",
-                "id": "formmodal-save-button"
-            }];
-            triggerModal(msg, title, buttons);
-        };
+        function updateMessageBarPrefs () {
+            $scope.show_auditor_bar = false;
+            Store('show_auditor_bar', $scope.show_auditor_bar);
+        }
 
         angular.extend(vm, {
-            activeTab: activeTab,
-            activeTabCheck: activeTabCheck,
-            closeMessageBar: closeMessageBar,
-            currentForm: currentForm,
-            formCancel: formCancel,
             formTracker: formTracker,
-            formSave: formSave,
             getFormPayload: getFormPayload,
             populateFromApi: populateFromApi,
-            resetAllConfirm: resetAllConfirm,
-            show_auditor_bar: show_auditor_bar,
             triggerModal: triggerModal,
         });
     }

@@ -42,6 +42,7 @@ function atSideNavItem () {
         controller: AtSideNavItemController,
         controllerAs: 'vm',
         link: atSideNavItemLink,
+        transclude: true,
         scope: {
             iconClass: '@',
             name: '@',
