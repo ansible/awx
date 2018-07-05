@@ -119,6 +119,20 @@ class ActivityStreamMiddleware(threading.local):
                     self.instance_ids.append(instance.id)
 
 
+class SessionTimeoutMiddleware(object):
+    """
+    Resets the session timeout for both the UI and the actual session for the API
+    to the value of SESSION_COOKIE_AGE on every request if there is a valid session.
+    """
+
+    def process_response(self, request, response):
+        
+        if request.session:
+            request.session.set_expiry(request.session.get_expiry_age())
+            response['Session-Timeout'] = int(settings.SESSION_COOKIE_AGE)
+        return response
+
+
 def _customize_graph():
     from awx.main.models import Instance, Schedule, UnifiedJobTemplate
     for model in [Schedule, UnifiedJobTemplate]:
