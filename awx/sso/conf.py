@@ -977,7 +977,7 @@ register(
     'SOCIAL_AUTH_SAML_SP_PUBLIC_CERT',
     field_class=fields.CharField,
     allow_blank=True,
-    default='',
+    required=True,
     validators=[validate_certificate],
     label=_('SAML Service Provider Public Certificate'),
     help_text=_('Create a keypair for Tower to use as a service provider (SP) '
@@ -991,7 +991,7 @@ register(
     'SOCIAL_AUTH_SAML_SP_PRIVATE_KEY',
     field_class=fields.CharField,
     allow_blank=True,
-    default='',
+    required=True,
     validators=[validate_private_key],
     label=_('SAML Service Provider Private Key'),
     help_text=_('Create a keypair for Tower to use as a service provider (SP) '
