@@ -317,15 +317,21 @@ export default [
                     "class": "btn Form-cancelButton",
                     "id": "formmodal-cancel-button",
                     onClick: function() {
+                        clearApiErrors();
+                        populateFromApi();
+                        $scope[formTracker.currentFormName()].$setPristine();
                         $('#FormModal-dialog').dialog('close');
-                        $state.go('setup');
                     }
                 }, {
                     label: i18n._("Save changes"),
                     onClick: function() {
-                        $scope.formSave();
-                        $('#FormModal-dialog').dialog('close');
-                        $state.go('setup');
+                        vm.formSave().then(() => {
+                            $scope[formTracker.currentFormName()].$setPristine();
+                            $('#FormModal-dialog').dialog('close');
+                        }).catch(()=> {
+                            event.preventDefault();
+                            $('#FormModal-dialog').dialog('close');
+                        });
                     },
                     "class": "btn btn-primary",
                     "id": "formmodal-save-button"
