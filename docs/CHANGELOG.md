@@ -71,6 +71,8 @@
 * Implemented OAuth2 support for token based authentication [[#21](https://github.com/ansible/awx/issues/21)].
 * Added the ability to forcibly expire sessions through `awx-manage expire_sessions`.
 * Disallowed using HTTP PUT/PATCH methods to modify existing jobs in Job Details API endpoint.
+* Changed the name of the session length setting from `AUTH_TOKEN_EXPIRATION` to `SESSION_COOKIE_AGE`.
+* Changed the name of the session length setting from `AUTH_TOKEN_PER_USER` to `SESSIONS_PER_USER`.
 
 3.2.0
 =====
