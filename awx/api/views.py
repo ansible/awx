@@ -189,6 +189,11 @@ class InstanceGroupMembershipMixin(object):
                 ig_obj.save()
         return response
 
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.is_isolated():
+            return {'error': _('Isolated instances may not be added or removed from instances groups via the API.')}
+        return None
+
     def unattach(self, request, *args, **kwargs):
         response = super(InstanceGroupMembershipMixin, self).unattach(request, *args, **kwargs)
         sub_id, res = self.attach_validate(request)
