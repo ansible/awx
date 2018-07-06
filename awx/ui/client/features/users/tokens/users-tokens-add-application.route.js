@@ -42,14 +42,19 @@ export default {
                 name: {
                     key: true,
                     label: 'Name',
-                    columnClass: 'col-lg-4 col-md-6 col-sm-8 col-xs-8',
+                    columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
                     awToolTip: '{{application.description | sanitize}}',
                     dataPlacement: 'top'
                 },
-            },
-            actions: {
-            },
-            fieldActions: {
+                organization: {
+                    label: 'Organization',
+                    columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
+                    modalColumnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
+                    key: false,
+                    ngBind: 'application.summary_fields.organization.name',
+                    sourceModel: 'organization',
+                    includeModal: true
+                }
             }
         })],
         Dataset: ['QuerySet', 'GetBasePath', '$stateParams', 'ListDefinition',

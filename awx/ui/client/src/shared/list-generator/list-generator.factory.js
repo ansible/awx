@@ -545,22 +545,27 @@ export default ['$compile', 'Attr', 'Icon',
                     }
                 }
                 if (options.mode === 'lookup') {
-                    let customClass = list.fields.name.modalColumnClass || '';
-                    html += `<th
-                            base-path="${list.basePath || list.name}"
-                            collection="${list.name}"
-                            dataset="${list.iterator}_dataset"
-                            column-sort
-                            column-field="name"
-                            column-iterator="${list.iterator}"
-                            column-no-sort="${list.fields.name.nosort}"
-                            column-label="${list.fields.name.label}"
-                            column-custom-class="${customClass}"
-                            query-set="${list.iterator}_queryset">
-                        </th>`;
+                    for (fld in list.fields) {
+                        if(fld === 'name' || _.has(list.fields[fld], 'includeModal')){
+                            let customClass = list.fields.name.modalColumnClass || '';
+                            html += `<th
+                                base-path="${list.basePath || list.name}"
+                                collection="${list.name}"
+                                dataset="${list.iterator}_dataset"
+                                column-sort
+                                column-field="name"
+                                column-iterator="${list.iterator}"
+                                column-no-sort="${list.fields.name.nosort}"
+                                column-label="${list.fields[fld].label}"
+                                column-custom-class="${customClass}"
+                                query-set="${list.iterator}_queryset">
+                            </th>`;
+                        }
+                        
+                    }
 
                     if(list.fields.info) {
-                        customClass = list.fields.name.modalColumnClass || '';
+                        let customClass = list.fields.name.modalColumnClass || '';
                         const infoHeaderClass = _.get(list.fields.info, 'infoHeaderClass', 'List-tableHeader--info');
                         html += `<th
                                     class="${infoHeaderClass}"
