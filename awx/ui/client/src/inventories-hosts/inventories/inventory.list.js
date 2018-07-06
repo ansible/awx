@@ -101,13 +101,6 @@ export default ['i18n', 'awxNetStrings' , function(i18n, awxNetStrings) {
                 dataPlacement: 'top',
                 ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.edit'
             },
-            network: {
-                label: awxNetStrings.get('feature.ACTION_BUTTON'),
-                ngClick: 'goToGraph(inventory)',
-                awToolTip: awxNetStrings.get('feature.ACTION_BUTTON'),
-                dataPlacement: 'top',
-                ngShow: '!inventory.pending_deletion'
-            },
             copy: {
                 label: i18n._('Copy'),
                 ngClick: 'copyInventory(inventory)',
@@ -122,6 +115,13 @@ export default ['i18n', 'awxNetStrings' , function(i18n, awxNetStrings) {
                 awToolTip: i18n._('View inventory'),
                 dataPlacement: 'top',
                 ngShow: '!inventory.summary_fields.user_capabilities.edit'
+            },
+            network: {
+                label: awxNetStrings.get('feature.ACTION_BUTTON'),
+                ngClick: 'goToGraph(inventory)',
+                awToolTip: awxNetStrings.get('feature.ACTION_BUTTON'),
+                dataPlacement: 'top',
+                ngShow: '!inventory.pending_deletion'
             },
             "delete": {
                 label: i18n._('Delete'),

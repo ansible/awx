@@ -74,7 +74,6 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             project.statusIcon = GetProjectIcon(project.status);
             project.statusTip = GetProjectToolTip(project.status);
             project.scm_update_tooltip = i18n._("Get latest SCM revision");
-            project.scm_schedule_tooltip = i18n._("Schedule SCM revision updates");
             project.scm_type_class = "";
 
             if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
@@ -88,7 +87,6 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             }
             if (project.scm_type === 'manual') {
                 project.scm_update_tooltip = i18n._('Manual projects do not require an SCM update');
-                project.scm_schedule_tooltip = i18n._('Manual projects do not require a schedule');
                 project.scm_type_class = 'btn-disabled';
                 project.statusTip = i18n._('Not configured for SCM');
                 project.statusIcon = 'none';
@@ -327,13 +325,6 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                     }
                 }
             });
-        };
-
-        $scope.editSchedules = function(id) {
-            var project = Find({ list: $scope.projects, key: 'id', val: id });
-            if (!(project.scm_type === "Manual" || Empty(project.scm_type)) && !(project.status === 'updating' || project.status === 'running' || project.status === 'pending')) {
-                $state.go('projects.edit.schedules', { project_id: id });
-            }
         };
     }
 ];

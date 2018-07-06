@@ -89,13 +89,6 @@ export default ['i18n', function(i18n) {
                 // The submit key lets the list generator know that we want to use the
                 // at-launch-template directive
             },
-            schedule: {
-                label: i18n._('Schedule'),
-                mode: 'all',
-                ngClick: 'scheduleJob(template)',
-                awToolTip: i18n._('Schedule job template runs'),
-                dataPlacement: 'top',
-            },
             copy: {
                 label: i18n._('Copy'),
                 ngClick: 'copyTemplate(template)',
