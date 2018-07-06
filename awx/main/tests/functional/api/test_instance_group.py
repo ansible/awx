@@ -125,10 +125,19 @@ def test_prevent_delete_iso_and_control_groups(delete, isolated_instance_group, 
 
 
 @pytest.mark.django_db
-def test_prevent_isolated_instance_in_non_isolated_instance_group(post, admin, instance, instance_group, isolated_instance_group):
+def test_prevent_isolated_instance_added_to_non_isolated_instance_group(post, admin, instance, instance_group, isolated_instance_group):
     url = reverse("api:instance_group_instance_list", kwargs={'pk': instance_group.pk})
 
     assert True is instance.is_isolated()
     resp = post(url, {'associate': True, 'id': instance.id}, admin, expect=400)
+    assert u"Isolated instances may not be added or removed from instances groups via the API." == resp.data['error']
+
+
+@pytest.mark.django_db
+def test_prevent_isolated_instance_removal_from_isolated_instance_group(post, admin, instance, instance_group, isolated_instance_group):
+    url = reverse("api:instance_group_instance_list", kwargs={'pk': isolated_instance_group.pk})
+
+    assert True is instance.is_isolated()
+    resp = post(url, {'disassociate': True, 'id': instance.id}, admin, expect=400)
     assert u"Isolated instances may not be added or removed from instances groups via the API." == resp.data['error']
 
