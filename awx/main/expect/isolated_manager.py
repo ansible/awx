@@ -318,7 +318,7 @@ class IsolatedManager(object):
 
             path = self.path_to('artifacts', 'stdout')
             if os.path.exists(path):
-                with codecs.open(path, 'r', encoding='utf-8') as f:
+                with open(path, 'r') as f:
                     f.seek(seek)
                     for line in f:
                         self.stdout_handle.write(line)
