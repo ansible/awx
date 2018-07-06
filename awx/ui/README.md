@@ -41,6 +41,28 @@ When using Docker for Mac or native Docker on Linux:
 $ make ui-docker
 ```
 
+If you normally run awx on an external host/server (in this example, `awx.local`),
+you'll need to reconfigure the webpack proxy slightly for `make ui-docker` to
+work:
+
+```javascript
+/awx/settings/development.py
++
++CSRF_TRUSTED_ORIGINS = ['awx.local:8043']
+
+awx/ui/build/webpack.watch.js
+-        host: '127.0.0.1',
++        host: '0.0.0.0',
++        disableHostCheck: true,
+
+/awx/ui/package.json
+@@ -7,7 +7,7 @@
+   "config": {
+     ...
++    "django_host": "awx.local"
+   },
+```
+
 When using Docker Machine:
 
 ```
