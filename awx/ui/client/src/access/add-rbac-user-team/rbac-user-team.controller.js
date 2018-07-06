@@ -78,7 +78,7 @@ function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors) {
     // aggregate name/descriptions for each available role, based on resource type
     // reasoning:
     function aggregateKey(item, type){
-        _.merge(scope.keys[type], _.omit(item.summary_fields.object_roles, 'read_role'));
+        _.merge(scope.keys[type], item.summary_fields.object_roles);
     }
 
     scope.closeModal = function() {
