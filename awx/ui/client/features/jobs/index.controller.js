@@ -1,4 +1,4 @@
-function IndexTemplatesController ($scope, strings, dataset) {
+function IndexJobsController ($scope, strings, dataset) {
     const vm = this;
     vm.strings = strings;
     vm.count = dataset.data.count;
@@ -10,10 +10,10 @@ function IndexTemplatesController ($scope, strings, dataset) {
     });
 }
 
-IndexTemplatesController.$inject = [
+IndexJobsController.$inject = [
     '$scope',
-    'TemplatesStrings',
+    'JobsStrings',
     'Dataset'
 ];
 
-export default IndexTemplatesController;
+export default IndexJobsController;
