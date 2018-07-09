@@ -73,6 +73,7 @@
 * Disallowed using HTTP PUT/PATCH methods to modify existing jobs in Job Details API endpoint.
 * Changed the name of the session length setting from `AUTH_TOKEN_EXPIRATION` to `SESSION_COOKIE_AGE`.
 * Changed the name of the session length setting from `AUTH_TOKEN_PER_USER` to `SESSIONS_PER_USER`.
+* External logging now defaults to HTTPS (instead of HTTP) *unless* http:// is explicitly specified in the log aggregator hostname [[#2048](https://github.com/ansible/awx/issues/2048)]
 
 3.2.0
 =====
