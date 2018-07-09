@@ -2163,7 +2163,7 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
                 cred
             )
             if cred_error:
-                raise serializers.ValidationError({"detail": cred_error})
+                raise serializers.ValidationError({"credential": cred_error})
 
         return attrs
 
