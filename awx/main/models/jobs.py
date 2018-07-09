@@ -343,11 +343,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         # not block a provisioning callback from creating/launching jobs.
         if callback_extra_vars is None:
             for ask_field_name in set(self.get_ask_mapping().values()):
-                if ask_field_name == 'ask_credential_on_launch':
-                    # if ask_credential_on_launch is True, it just means it can
-                    # optionally be specified at launch time, not that it's *required*
-                    # to launch
-                    continue
                 if getattr(self, ask_field_name):
                     prompting_needed = True
                     break
