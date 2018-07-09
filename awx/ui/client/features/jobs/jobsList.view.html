@@ -9,7 +9,8 @@
             dataset="job_dataset"
             collection="collection"
             search-tags="searchTags"
-            query-set="querySet">
+            query-set="querySet"
+            search-bar-full-width="vm.isPortalMode">
         </smart-search>
     </div>
     <at-list results="jobs" empty-list-reason="{{ vm.emptyListReason }}">
@@ -74,7 +75,7 @@
                     ng-show="job.summary_fields.user_capabilities.start">
                 </at-relaunch>
                 <at-row-action icon="fa-minus-circle" ng-click="vm.cancelJob(job)"
-                    ng-show="(job.summary_fields.user_capabilities.start &&
+                    ng-show="!vm.isPortalMode && (job.summary_fields.user_capabilities.start &&
                              (job.status === 'pending' ||
                              job.status === 'waiting' ||
                              job.status === 'running')) || ($root.user_is_superuser && job.type === 'system_job' &&
@@ -83,7 +84,7 @@
                              job.status === 'running'))">
                 </at-row-action>
                 <at-row-action icon="fa-trash" ng-click="vm.deleteJob(job)"
-                    ng-show="job.summary_fields.user_capabilities.delete &&
+                    ng-show="!vm.isPortalMode && job.summary_fields.user_capabilities.delete &&
                              !(job.status === 'pending' ||
                              job.status === 'waiting' ||
                              job.status === 'running')">

@@ -61,6 +61,7 @@ function ListTemplatesController(
     };
     $scope.template_dataset = Dataset.data;
     $scope.templates = Dataset.data.results;
+    $scope.$emit('updateCount', Dataset.data.count, 'templates');
 
     $scope.$watch('$state.params', function(newValue, oldValue) {
         const job_template_id = _.get($state.params, 'job_template_id');
@@ -74,6 +75,7 @@ function ListTemplatesController(
     $scope.$on('updateDataset', (e, dataset) => {
         $scope.template_dataset = dataset;
         $scope.templates = dataset.results;
+        $scope.$emit('updateCount', dataset.count, 'templates');
     });
 
     $scope.$on(`ws-jobs`, () => {
@@ -100,6 +102,8 @@ function ListTemplatesController(
             return false;
         }
     };
+
+    vm.isPortalMode = $state.includes('portalMode');
 
     vm.scheduleTemplate = template => {
         if (!template) {

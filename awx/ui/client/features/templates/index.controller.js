@@ -3,7 +3,7 @@ function IndexTemplatesController ($scope, strings, dataset) {
     vm.strings = strings;
     vm.count = dataset.data.count;
 
-    $scope.$on('updateDataset', (e, { count }) => {
+    $scope.$on('updateCount', (e, count) => {
         if (count) {
             vm.count = count;
         }

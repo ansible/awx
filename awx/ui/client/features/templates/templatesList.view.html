@@ -9,9 +9,10 @@
             dataset="template_dataset"
             collection="collection"
             search-tags="searchTags"
-            query-set="querySet">
+            query-set="querySet"
+            search-bar-full-width="vm.isPortalMode">
         </smart-search>
-        <div class="at-List-toolbarAction" ng-show="canAdd">
+        <div class="at-List-toolbarAction" ng-show="!vm.isPortalMode && canAdd">
             <button
                 type="button"
                 class="at-Button--add"
@@ -90,13 +91,13 @@
                     ng-show="template.summary_fields.user_capabilities.start">
                 </at-launch-template>
                 <at-row-action icon="fa-calendar" ng-click="vm.scheduleTemplate(template)"
-                    ng-show="template.summary_fields.user_capabilities.schedule">
+                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.schedule">
                 </at-row-action>
                 <at-row-action icon="fa-copy" ng-click="vm.copyTemplate(template)"
-                    ng-show="template.summary_fields.user_capabilities.copy">
+                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.copy">
                 </at-row-action>
                 <at-row-action icon="fa-trash" ng-click="vm.deleteTemplate(template)"
-                    ng-show="template.summary_fields.user_capabilities.delete">
+                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.delete">
                 </at-row-action>
             </div>
         </at-row>
