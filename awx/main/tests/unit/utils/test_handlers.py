@@ -22,8 +22,8 @@ from awx.main.utils.formatters import LogstashFormatter
 
 
 @pytest.fixture()
-def http_adapter():
-    class FakeHTTPAdapter(requests.adapters.HTTPAdapter):
+def https_adapter():
+    class FakeHTTPSAdapter(requests.adapters.HTTPAdapter):
         requests = []
         status = 200
         reason = None
@@ -36,7 +36,7 @@ def http_adapter():
             resp.request = request
             return resp
 
-    return FakeHTTPAdapter()
+    return FakeHTTPSAdapter()
 
 
 @pytest.fixture()
@@ -194,17 +194,22 @@ def test_base_logging_handler_host_format(host, port, normalized, hostname_only)
     'status, reason, exc',
     [(200, '200 OK', None), (404, 'Not Found', LoggingConnectivityException)]
 )
-def test_https_logging_handler_connectivity_test(http_adapter, status, reason, exc):
-    http_adapter.status = status
-    http_adapter.reason = reason
+@pytest.mark.parametrize('protocol', ['http', 'https', None])
+def test_https_logging_handler_connectivity_test(https_adapter, status, reason, exc, protocol):
+    host = 'example.org'
+    if protocol:
+        host = '://'.join([protocol, host])
+    https_adapter.status = status
+    https_adapter.reason = reason
     settings = LazySettings()
     settings.configure(**{
-        'LOG_AGGREGATOR_HOST': 'example.org',
+        'LOG_AGGREGATOR_HOST': host,
         'LOG_AGGREGATOR_PORT': 8080,
         'LOG_AGGREGATOR_TYPE': 'logstash',
         'LOG_AGGREGATOR_USERNAME': 'user',
         'LOG_AGGREGATOR_PASSWORD': 'password',
         'LOG_AGGREGATOR_LOGGERS': ['awx', 'activity_stream', 'job_events', 'system_tracking'],
+        'LOG_AGGREGATOR_PROTOCOL': 'https',
         'CLUSTER_HOST_ID': '',
         'LOG_AGGREGATOR_TOWER_UUID': str(uuid4()),
         'LOG_AGGREGATOR_LEVEL': 'DEBUG',
@@ -214,7 +219,7 @@ def test_https_logging_handler_connectivity_test(http_adapter, status, reason, e
 
         def __init__(self, *args, **kwargs):
             super(FakeHTTPSHandler, self).__init__(*args, **kwargs)
-            self.session.mount('http://', http_adapter)
+            self.session.mount('{}://'.format(protocol or 'https'), https_adapter)
 
         def emit(self, record):
             return super(FakeHTTPSHandler, self).emit(record)
@@ -270,17 +275,17 @@ def test_https_logging_handler_connection_error(connection_error_adapter,
 
 
 @pytest.mark.parametrize('message_type', ['logstash', 'splunk'])
-def test_https_logging_handler_emit_without_cred(http_adapter, dummy_log_record,
+def test_https_logging_handler_emit_without_cred(https_adapter, dummy_log_record,
                                                  message_type):
     handler = HTTPSHandler(host='127.0.0.1', message_type=message_type)
     handler.setFormatter(LogstashFormatter())
-    handler.session.mount('http://', http_adapter)
+    handler.session.mount('https://', https_adapter)
     async_futures = handler.emit(dummy_log_record)
     [future.result() for future in async_futures]
 
-    assert len(http_adapter.requests) == 1
-    request = http_adapter.requests[0]
-    assert request.url == 'http://127.0.0.1/'
+    assert len(https_adapter.requests) == 1
+    request = https_adapter.requests[0]
+    assert request.url == 'https://127.0.0.1/'
     assert request.method == 'POST'
 
     if message_type == 'logstash':
@@ -291,32 +296,32 @@ def test_https_logging_handler_emit_without_cred(http_adapter, dummy_log_record,
         assert request.headers['Authorization'] == 'Splunk None'
 
 
-def test_https_logging_handler_emit_logstash_with_creds(http_adapter,
+def test_https_logging_handler_emit_logstash_with_creds(https_adapter,
                                                         dummy_log_record):
     handler = HTTPSHandler(host='127.0.0.1',
                            username='user', password='pass',
                            message_type='logstash')
     handler.setFormatter(LogstashFormatter())
-    handler.session.mount('http://', http_adapter)
+    handler.session.mount('https://', https_adapter)
     async_futures = handler.emit(dummy_log_record)
     [future.result() for future in async_futures]
 
-    assert len(http_adapter.requests) == 1
-    request = http_adapter.requests[0]
+    assert len(https_adapter.requests) == 1
+    request = https_adapter.requests[0]
     assert request.headers['Authorization'] == 'Basic %s' % base64.b64encode("user:pass")
 
 
-def test_https_logging_handler_emit_splunk_with_creds(http_adapter,
+def test_https_logging_handler_emit_splunk_with_creds(https_adapter,
                                                       dummy_log_record):
     handler = HTTPSHandler(host='127.0.0.1',
                            password='pass', message_type='splunk')
     handler.setFormatter(LogstashFormatter())
-    handler.session.mount('http://', http_adapter)
+    handler.session.mount('https://', https_adapter)
     async_futures = handler.emit(dummy_log_record)
     [future.result() for future in async_futures]
 
-    assert len(http_adapter.requests) == 1
-    request = http_adapter.requests[0]
+    assert len(https_adapter.requests) == 1
+    request = https_adapter.requests[0]
     assert request.headers['Authorization'] == 'Splunk pass'
 
 

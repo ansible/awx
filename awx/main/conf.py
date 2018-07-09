@@ -473,10 +473,12 @@ register(
 register(
     'LOG_AGGREGATOR_PROTOCOL',
     field_class=fields.ChoiceField,
-    choices=[('https', 'HTTPS'), ('tcp', 'TCP'), ('udp', 'UDP')],
+    choices=[('https', 'HTTPS/HTTP'), ('tcp', 'TCP'), ('udp', 'UDP')],
     default='https',
     label=_('Logging Aggregator Protocol'),
-    help_text=_('Protocol used to communicate with log aggregator.'),
+    help_text=_('Protocol used to communicate with log aggregator.  '
+                'HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in '
+                'the Logging Aggregator hostname.'),
     category=_('Logging'),
     category_slug='logging',
 )

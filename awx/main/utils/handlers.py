@@ -203,7 +203,7 @@ class BaseHTTPSHandler(BaseHandler):
             https://docs.python.org/3/library/concurrent.futures.html#future-objects
             http://pythonhosted.org/futures/
         """
-        return self.session.post(self._get_host(scheme='http'),
+        return self.session.post(self._get_host(scheme='https'),
                                  **self._get_post_kwargs(payload))
 
 
