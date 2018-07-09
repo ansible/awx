@@ -7,6 +7,7 @@ const TASK_START = 'playbook_on_task_start';
 const HOST_STATUS_KEYS = ['dark', 'failures', 'changed', 'ok', 'skipped'];
 const COMPLETE = ['successful', 'failed'];
 const INCOMPLETE = ['canceled', 'error'];
+const UNSUCCESSFUL = ['failed'].concat(INCOMPLETE);
 const FINISHED = COMPLETE.concat(INCOMPLETE);
 
 function JobStatusService (moment, message) {
@@ -41,18 +42,17 @@ function JobStatusService (moment, message) {
             },
         };
 
-        if (model.get('type') === 'job' || model.get('type') === 'project_update') {
-            if (model.has('playbook_counts')) {
-                this.setPlaybookCounts(model.get('playbook_counts'));
-            }
-
-            if (model.has('host_status_counts')) {
-                this.setHostStatusCounts(model.get('host_status_counts'));
-            }
+        if (model.has('host_status_counts')) {
+            this.setHostStatusCounts(model.get('host_status_counts'));
         } else {
             const hostStatusCounts = this.createHostStatusCounts(this.state.status);
 
             this.setHostStatusCounts(hostStatusCounts);
+        }
+
+        if (model.has('playbook_counts')) {
+            this.setPlaybookCounts(model.get('playbook_counts'));
+        } else {
             this.setPlaybookCounts({ task_count: 1, play_count: 1 });
         }
 
@@ -61,12 +61,12 @@ function JobStatusService (moment, message) {
     };
 
     this.createHostStatusCounts = status => {
-        if (_.includes(COMPLETE, status)) {
-            return { ok: 1 };
+        if (UNSUCCESSFUL.includes(status)) {
+            return { failures: 1 };
         }
 
-        if (_.includes(INCOMPLETE, status)) {
-            return { failures: 1 };
+        if (COMPLETE.includes(status)) {
+            return { ok: 1 };
         }
 
         return null;
@@ -130,14 +130,25 @@ function JobStatusService (moment, message) {
     };
 
     this.isExpectingStatsEvent = () => (this.jobType === 'job') ||
-        (this.jobType === 'project_update');
+        (this.jobType === 'project_update') ||
+        (this.jobType === 'ad_hoc_command');
 
     this.updateStats = () => {
         this.updateHostCounts();
 
         if (this.statsEvent) {
             this.setFinished(this.statsEvent.created);
-            this.setJobStatus(this.statsEvent.failed ? 'failed' : 'successful');
+
+            const failures = _.get(this.statsEvent, ['event_data', 'failures'], {});
+            const dark = _.get(this.statsEvent, ['event_data', 'dark'], {});
+
+            if (this.statsEvent.failed ||
+                Object.keys(failures).length > 0 ||
+                Object.keys(dark).length > 0) {
+                this.setJobStatus('failed');
+            } else {
+                this.setJobStatus('successful');
+            }
         }
     };
 
@@ -173,9 +184,9 @@ function JobStatusService (moment, message) {
 
     this.setJobStatus = status => {
         const isExpectingStats = this.isExpectingStatsEvent();
-        const isIncomplete = _.includes(INCOMPLETE, status);
-        const isFinished = _.includes(FINISHED, status);
-        const isAlreadyFinished = _.includes(FINISHED, this.state.status);
+        const isIncomplete = INCOMPLETE.includes(status);
+        const isFinished = FINISHED.includes(status);
+        const isAlreadyFinished = FINISHED.includes(this.state.status);
 
         if (isAlreadyFinished) {
             return;
