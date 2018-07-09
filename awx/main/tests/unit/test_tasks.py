@@ -1890,6 +1890,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             )
             return cred
         self.instance.get_cloud_credential = get_cred
+        self.instance.source_vars = {
+            'include_powerstate': 'yes',
+            'group_by_resource_group': 'no'
+        }
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -1902,8 +1906,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             config = ConfigParser.ConfigParser()
             config.read(env['AZURE_INI_PATH'])
             assert config.get('azure', 'include_powerstate') == 'yes'
-            assert config.get('azure', 'group_by_resource_group') == 'yes'
+            assert config.get('azure', 'group_by_resource_group') == 'no'
             assert config.get('azure', 'group_by_location') == 'yes'
+            assert 'group_by_security_group' not in config.items('azure')
             assert config.get('azure', 'group_by_tag') == 'yes'
             assert config.get('azure', 'locations') == 'north,south,east,west'
             return ['successful', 0]
@@ -1930,6 +1935,11 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             )
             return cred
         self.instance.get_cloud_credential = get_cred
+        self.instance.source_vars = {
+            'include_powerstate': 'yes',
+            'group_by_resource_group': 'no',
+            'group_by_security_group': 'no'
+        }
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -1941,8 +1951,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             config = ConfigParser.ConfigParser()
             config.read(env['AZURE_INI_PATH'])
             assert config.get('azure', 'include_powerstate') == 'yes'
-            assert config.get('azure', 'group_by_resource_group') == 'yes'
+            assert config.get('azure', 'group_by_resource_group') == 'no'
             assert config.get('azure', 'group_by_location') == 'yes'
+            assert config.get('azure', 'group_by_security_group') == 'no'
             assert config.get('azure', 'group_by_tag') == 'yes'
             assert 'locations' not in config.items('azure')
             return ['successful', 0]
@@ -2055,7 +2066,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             return cred
         self.instance.get_cloud_credential = get_cred
 
-        self.instance.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_"}'
+        self.instance.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_", "satellite6_want_hostcollections": True}'
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -2066,6 +2077,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('foreman', 'password') == 'secret'
             assert config.get('ansible', 'group_patterns') == '[a,b,c]'
             assert config.get('ansible', 'group_prefix') == 'hey_'
+            assert config.get('ansible', 'want_hostcollections') == 'True'
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect

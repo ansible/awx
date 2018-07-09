@@ -66,7 +66,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             if (source === 'ec2' || source === 'custom' ||
                 source === 'vmware' || source === 'openstack' ||
                 source === 'scm' || source === 'cloudforms'  ||
-                source === 'satellite6') {
+                source === 'satellite6' || source === 'azure_rm') {
 
                 var varName;
                 if (source === 'scm') {
