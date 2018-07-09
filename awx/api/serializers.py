@@ -3443,6 +3443,25 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         return vars_validate_or_raise(value)
 
 
+class AdHocCommandDetailSerializer(AdHocCommandSerializer):
+
+    host_status_counts = serializers.SerializerMethodField(
+        help_text=_('A count of hosts uniquely assigned to each status.'),
+    )
+
+    class Meta:
+        model = AdHocCommand
+        fields = ('*', 'host_status_counts',)
+
+    def get_host_status_counts(self, obj):
+        try:
+            counts = obj.ad_hoc_command_events.only('event_data').get(event='playbook_on_stats').get_host_status_counts()
+        except AdHocCommandEvent.DoesNotExist:
+            counts = {}
+
+        return counts
+
+
 class AdHocCommandCancelSerializer(AdHocCommandSerializer):
 
     can_cancel = serializers.BooleanField(read_only=True)

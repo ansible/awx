@@ -607,6 +607,9 @@ class BaseCommandEvent(CreatedModifiedModel):
         '''
         return self.event
 
+    def get_host_status_counts(self):
+        return create_host_status_counts(getattr(self, 'event_data', {}))
+
 
 class AdHocCommandEvent(BaseCommandEvent):
 
