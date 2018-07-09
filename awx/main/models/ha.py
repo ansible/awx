@@ -120,6 +120,8 @@ class Instance(BaseModel):
     def is_controller(self):
         return Instance.objects.filter(rampart_groups__controller__instances=self).exists()
 
+    def is_isolated(self):
+        return self.rampart_groups.filter(controller__isnull=False).exists()
 
     def refresh_capacity(self):
         cpu = get_cpu_capacity()
