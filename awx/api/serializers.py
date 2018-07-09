@@ -9,7 +9,7 @@ import operator
 import re
 import six
 import urllib
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 from datetime import timedelta
 
 # OAuth2
@@ -1474,23 +1474,11 @@ class ProjectUpdateDetailSerializer(ProjectUpdateSerializer):
 
     def get_host_status_counts(self, obj):
         try:
-            event_data = obj.project_update_events.only('event_data').get(event='playbook_on_stats').event_data
+            counts = obj.project_update_events.only('event_data').get(event='playbook_on_stats').get_host_status_counts()
         except ProjectUpdateEvent.DoesNotExist:
-            event_data = {}
+            counts = {}
 
-        host_status = {}
-        host_status_keys = ['skipped', 'ok', 'changed', 'failures', 'dark']
-
-        for key in host_status_keys:
-            for host in event_data.get(key, {}):
-                host_status[host] = key
-
-        host_status_counts = defaultdict(lambda: 0)
-
-        for value in host_status.values():
-            host_status_counts[value] += 1
-
-        return host_status_counts
+        return counts
 
 
 class ProjectUpdateListSerializer(ProjectUpdateSerializer, UnifiedJobListSerializer):
@@ -3271,23 +3259,11 @@ class JobDetailSerializer(JobSerializer):
 
     def get_host_status_counts(self, obj):
         try:
-            event_data = obj.job_events.only('event_data').get(event='playbook_on_stats').event_data
+            counts = obj.job_events.only('event_data').get(event='playbook_on_stats').get_host_status_counts()
         except JobEvent.DoesNotExist:
-            event_data = {}
+            counts = {}
 
-        host_status = {}
-        host_status_keys = ['skipped', 'ok', 'changed', 'failures', 'dark']
-
-        for key in host_status_keys:
-            for host in event_data.get(key, {}):
-                host_status[host] = key
-
-        host_status_counts = defaultdict(lambda: 0)
-
-        for value in host_status.values():
-            host_status_counts[value] += 1
-
-        return host_status_counts
+        return counts
 
 
 class JobCancelSerializer(BaseSerializer):
