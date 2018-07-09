@@ -108,7 +108,10 @@ def read_tower_inventory(tower_host, tower_user, tower_pass, inventory, license_
                                 verify=not ignore_ssl)
         if not response.ok:
             # If the GET /api/v2/inventories/N/script is not HTTP 200, print the error code
-            raise RuntimeError("Connection to remote host failed: {}".format(response))
+            msg = "Connection to remote host failed: {}".format(response)
+            if response.text:
+                msg += " with message: {}".format(response.text)
+            raise RuntimeError(msg)
         try:
             # Attempt to parse JSON
             return response.json()
