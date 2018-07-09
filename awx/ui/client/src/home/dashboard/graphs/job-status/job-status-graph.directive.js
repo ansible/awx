@@ -32,11 +32,11 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
                 scope.jobType="all";
                 scope.status="both";
 
-                scope.$watch('data', function(value) {
+                scope.$watchCollection('data', function(value) {
                     if (value) {
                         createGraph(scope.period, scope.jobType, value, scope.status);
                     }
-                }, true);
+                });
 
                 function recreateGraph(period, jobType, status) {
                     graphDataService.get(period, jobType, status)
@@ -130,7 +130,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
                     });
 
                     // when the Period drop down filter is used, create a new graph based on the
-                    $('.n').on("click", function(){
+                    $('.n').off('click').on("click", function(){
                         period = this.getAttribute("id");
 
                         $('#period-dropdown')
@@ -147,7 +147,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
                     });
 
                     //On click, update with new data
-                    $('.m').on("click", function(){
+                    $('.m').off('click').on("click", function(){
                         job_type = this.getAttribute("id");
 
                         $('#type-dropdown')
@@ -163,7 +163,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
                         recreateGraph(period, job_type);
                     });
 
-                    $('.o').on('click', function() {
+                    $('.o').off('click').on('click', function() {
                         var job_status = this.getAttribute('id');
 
                         $('#status-dropdown')
