@@ -67,8 +67,44 @@ def test_org_user_role_attach(user, organization, inventory):
 
     role_access = RoleAccess(admin)
     assert not role_access.can_attach(organization.member_role, nonmember, 'members', None)
-    assert not role_access.can_attach(organization.notification_admin_role, nonmember, 'members', None)
     assert not role_access.can_attach(organization.admin_role, nonmember, 'members', None)
+
+
+# Permissions when adding users/teams to org special-purpose roles
+@pytest.mark.django_db
+def test_user_org_object_roles(organization, org_admin, org_member):
+    '''
+    Unlike admin & member roles, the special-purpose organization roles do not
+    confer any permissions related to user management,
+    Normal rules about role delegation should apply, only admin to org needed.
+    '''
+    assert RoleAccess(org_admin).can_attach(
+        organization.notification_admin_role, org_member, 'members', None
+    )
+    assert not RoleAccess(org_member).can_attach(
+        organization.notification_admin_role, org_member, 'members', None
+    )
+
+
+@pytest.mark.django_db
+def test_team_org_object_roles(organization, team, org_admin, org_member):
+    '''
+    the special-purpose organization roles are not ancestors of any
+    team roles, and can be delegated en masse through teams,
+    following normal admin rules
+    '''
+    assert RoleAccess(org_admin).can_attach(
+        organization.notification_admin_role, team, 'member_role.parents', {'id': 68}
+    )
+    # Obviously team admin isn't enough to assign organization roles to the team
+    team.admin_role.members.add(org_member)
+    assert not RoleAccess(org_member).can_attach(
+        organization.notification_admin_role, team, 'member_role.parents', {'id': 68}
+    )
+    # Cannot make a team member of an org
+    assert not RoleAccess(org_admin).can_attach(
+        organization.member_role, team, 'member_role.parents', {'id': 68}
+    )
 
 
 # Singleton user editing restrictions

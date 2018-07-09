@@ -107,6 +107,30 @@ def test_team_admin_member_access(team, user, project):
 
 
 @pytest.mark.django_db
+def test_team_member_org_role_access_project(team, rando, project, organization):
+    team.member_role.members.add(rando)
+    assert rando not in project.read_role
+    team.member_role.children.add(organization.project_admin_role)
+    assert rando in project.admin_role
+
+
+@pytest.mark.django_db
+def test_team_member_org_role_access_workflow(team, rando, workflow_job_template, organization):
+    team.member_role.members.add(rando)
+    assert rando not in workflow_job_template.read_role
+    team.member_role.children.add(organization.workflow_admin_role)
+    assert rando in workflow_job_template.admin_role
+
+
+@pytest.mark.django_db
+def test_team_member_org_role_access_inventory(team, rando, inventory, organization):
+    team.member_role.members.add(rando)
+    assert rando not in inventory.read_role
+    team.member_role.children.add(organization.inventory_admin_role)
+    assert rando in inventory.admin_role
+
+
+@pytest.mark.django_db
 def test_org_admin_team_access(organization, team, user, project):
     u = user('team_admin', False)
     organization.admin_role.members.add(u)

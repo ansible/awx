@@ -684,7 +684,7 @@ def job_template_labels(organization, job_template):
 
 @pytest.fixture
 def workflow_job_template(organization):
-    wjt = WorkflowJobTemplate(name='test-workflow_job_template')
+    wjt = WorkflowJobTemplate(name='test-workflow_job_template', organization=organization)
     wjt.save()
 
     return wjt

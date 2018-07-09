@@ -1204,8 +1204,8 @@ class TeamRolesList(SubListAttachDetachAPIView):
 
         role = get_object_or_400(Role, pk=sub_id)
         org_content_type = ContentType.objects.get_for_model(Organization)
-        if role.content_type == org_content_type:
-            data = dict(msg=_("You cannot assign an Organization role as a child role for a Team."))
+        if role.content_type == org_content_type and role.role_field in ['member_role', 'admin_role']:
+            data = dict(msg=_("You cannot assign an Organization participation role as a child role for a Team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if role.is_singleton():
@@ -5071,8 +5071,8 @@ class RoleTeamsList(SubListAttachDetachAPIView):
         role = Role.objects.get(pk=self.kwargs['pk'])
 
         organization_content_type = ContentType.objects.get_for_model(Organization)
-        if role.content_type == organization_content_type:
-            data = dict(msg=_("You cannot assign an Organization role as a child role for a Team."))
+        if role.content_type == organization_content_type and role.role_field in ['member_role', 'admin_role']:
+            data = dict(msg=_("You cannot assign an Organization participation role as a child role for a Team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         credential_content_type = ContentType.objects.get_for_model(Credential)
