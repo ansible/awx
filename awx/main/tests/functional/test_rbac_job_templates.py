@@ -81,11 +81,14 @@ def test_job_template_access_use_level(jt_linked, rando):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("role_names", [("admin_role",), ("inventory_admin_role", "project_admin_role")])
+@pytest.mark.parametrize("role_names", [("admin_role",), ("job_template_admin_role", "inventory_admin_role", "project_admin_role")])
 def test_job_template_access_admin(role_names, jt_linked, rando):
     access = JobTemplateAccess(rando)
     # Appoint this user as admin of the organization
     #jt_linked.inventory.organization.admin_role.members.add(rando)
+    assert not access.can_read(jt_linked)
+    assert not access.can_delete(jt_linked)
+
     for role_name in role_names:
         role = getattr(jt_linked.inventory.organization, role_name)
         role.members.add(rando)
