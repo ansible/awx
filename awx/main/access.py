@@ -737,12 +737,13 @@ class InventoryAccess(BaseAccess):
         # If no data is specified, just checking for generic add permission?
         if not data:
             return Organization.accessible_objects(self.user, 'inventory_admin_role').exists()
-
-        return self.check_related('organization', Organization, data, role_field='inventory_admin_role')
+        return (self.check_related('organization', Organization, data, role_field='inventory_admin_role') and
+                self.check_related('insights_credential', Credential, data, role_field='use_role'))
 
     @check_superuser
     def can_change(self, obj, data):
-        return self.can_admin(obj, data)
+        return (self.can_admin(obj, data) and
+                self.check_related('insights_credential', Credential, data, obj=obj, role_field='use_role'))
 
     @check_superuser
     def can_admin(self, obj, data):
@@ -1195,14 +1196,15 @@ class ProjectAccess(BaseAccess):
     @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
-            return Organization.accessible_objects(self.user, 'project_admin_role').exists()
-        return self.check_related('organization', Organization, data, role_field='project_admin_role', mandatory=True)
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
+        return (self.check_related('organization', Organization, data, mandatory=True) and
+                self.check_related('credential', Credential, data, role_field='use_role'))
 
     @check_superuser
     def can_change(self, obj, data):
-        if not self.check_related('organization', Organization, data, obj=obj, role_field='project_admin_role'):
-            return False
-        return self.user in obj.admin_role
+        return (self.check_related('organization', Organization, data, obj=obj, role_field='project_admin_role') and
+                self.user in obj.admin_role and
+                self.check_related('credential', Credential, data, obj=obj, role_field='use_role'))
 
     @check_superuser
     def can_start(self, obj, validate_license=True):

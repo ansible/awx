@@ -209,6 +209,25 @@ def test_create_project(post, organization, org_admin, org_member, admin, rando,
         assert Project.objects.filter(name='Project', organization=organization).exists()
 
 
+@pytest.mark.django_db
+def test_project_credential_protection(post, put, project, organization, scm_credential, org_admin):
+    project.save()
+    project.admin_role.members.add(org_admin)
+    put(
+        reverse('api:project_detail', kwargs={'pk':project.id}), {
+            'name': 'should not change',
+            'credential': scm_credential.id
+        }, org_admin, expect=403
+    )
+    post(
+        reverse('api:project_list'), { 
+            'name': 'should not create', 
+            'organization':organization.id, 
+            'credential': scm_credential.id
+        }, org_admin, expect=403
+    )
+
+
 @pytest.mark.django_db()
 def test_create_project_null_organization(post, organization, admin):
     post(reverse('api:project_list'), { 'name': 't', 'organization': None}, admin, expect=201)

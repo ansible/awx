@@ -52,6 +52,7 @@ def test_project_copy(post, get, project, organization, scm_credential, alice):
         reverse('api:project_copy', kwargs={'pk': project.pk}), alice, expect=200
     ).data['can_copy'] is False
     project.organization.admin_role.members.add(alice)
+    scm_credential.use_role.members.add(alice)
     assert get(
         reverse('api:project_copy', kwargs={'pk': project.pk}), alice, expect=200
     ).data['can_copy'] is True
