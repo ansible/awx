@@ -980,4 +980,5 @@ class CopyAPIView(GenericAPIView):
                 permission_check_func=permission_check_func
             )
         serializer = self._get_copy_return_serializer(new_obj)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        headers = {'Location': new_obj.get_absolute_url(request=request)}
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
