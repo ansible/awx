@@ -21,7 +21,7 @@ export default
 
                     });
                     scope.promptData.prompts.credentials.value.forEach((selectedCredential) => {
-                        if (_.has(selectedCredential, 'inputs.vault_id') || _.has(selectedCredential, 'vault_id')) {
+                        if (_.get(selectedCredential, 'inputs.vault_id') || _.get(selectedCredential, 'vault_id')) {
                             const vaultId = selectedCredential.vault_id ? selectedCredential.vault_id : _.get(selectedCredential, 'inputs.vault_id');
                             selectedCredential.tag = `${selectedCredential.name } | ${vaultId}`;
                         } else {
