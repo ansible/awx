@@ -1,4 +1,4 @@
-import jobsListController from '../jobsList.controller';
+import jobsListController from '../../jobs/jobsList.controller';
 
 const jobsListTemplate = require('~features/jobs/jobsList.view.html');
 

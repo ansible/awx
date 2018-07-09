@@ -35,9 +35,11 @@ function ListJobsController (
     $scope.collection = { iterator, basePath: 'unified_jobs' };
     $scope[key] = Dataset.data;
     $scope[name] = Dataset.data.results;
+    $scope.$emit('updateCount', Dataset.data.count, 'jobs');
     $scope.$on('updateDataset', (e, dataset) => {
         $scope[key] = dataset;
         $scope[name] = dataset.results;
+        $scope.$emit('updateCount', dataset.count, 'jobs');
     });
     $scope.$on('ws-jobs', () => {
         if (!launchModalOpen) {
@@ -59,6 +61,8 @@ function ListJobsController (
     if ($state.includes('instanceGroups')) {
         vm.emptyListReason = strings.get('list.NO_RUNNING');
     }
+
+    vm.isPortalMode = $state.includes('portalMode');
 
     vm.jobTypes = mapChoices(unifiedJob.options('actions.GET.type.choices'));
 

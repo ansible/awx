@@ -10,7 +10,6 @@ if ($basePath) {
 }
 
 import start from './app.start';
-import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventoriesHosts from './inventories-hosts/main';
 import inventoryScripts from './inventory-scripts/main';
@@ -86,7 +85,6 @@ angular
         jobSubmission.name,
         notifications.name,
         Templates.name,
-        portalMode.name,
         teams.name,
         users.name,
         projects.name,
