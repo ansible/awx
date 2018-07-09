@@ -391,21 +391,24 @@ class BaseAccess(object):
         return user_capabilities
 
     def get_method_capability(self, method, obj, parent_obj):
-        if method in ['change']: # 3 args
-            return self.can_change(obj, {})
-        elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
-            access_method = getattr(self, "can_%s" % method)
-            return access_method(obj)
-        elif method in ['start']:
-            return self.can_start(obj, validate_license=False)
-        elif method in ['attach', 'unattach']: # parent/sub-object call
-            access_method = getattr(self, "can_%s" % method)
-            if type(parent_obj) == Team:
-                relationship = 'parents'
-                parent_obj = parent_obj.member_role
-            else:
-                relationship = 'members'
-            return access_method(obj, parent_obj, relationship, skip_sub_obj_read_check=True, data={})
+        try:
+            if method in ['change']: # 3 args
+                return self.can_change(obj, {})
+            elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
+                access_method = getattr(self, "can_%s" % method)
+                return access_method(obj)
+            elif method in ['start']:
+                return self.can_start(obj, validate_license=False)
+            elif method in ['attach', 'unattach']: # parent/sub-object call
+                access_method = getattr(self, "can_%s" % method)
+                if type(parent_obj) == Team:
+                    relationship = 'parents'
+                    parent_obj = parent_obj.member_role
+                else:
+                    relationship = 'members'
+                return access_method(obj, parent_obj, relationship, skip_sub_obj_read_check=True, data={})
+        except (ParseError, ObjectDoesNotExist):
+            return False
         return False
 
 
