@@ -3098,7 +3098,8 @@ class JobTemplateLaunch(RetrieveAPIView):
             data['job'] = new_job.id
             data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
             data.update(JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-            return Response(data, status=status.HTTP_201_CREATED)
+            headers = {'Location': new_job.get_absolute_url(request)}
+            return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
     def sanitize_for_response(self, data):
@@ -3800,7 +3801,8 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
         data['workflow_job'] = new_job.id
         data['ignored_fields'] = ignored_fields
         data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-        return Response(data, status=status.HTTP_201_CREATED)
+        headers = {'Location': new_job.get_absolute_url(request)}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
@@ -4016,7 +4018,8 @@ class SystemJobTemplateLaunch(GenericAPIView):
         data = OrderedDict()
         data['system_job'] = new_job.id
         data.update(SystemJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-        return Response(data, status=status.HTTP_201_CREATED)
+        headers = {'Location': new_job.get_absolute_url(request)}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class SystemJobTemplateSchedulesList(SubListCreateAPIView):
