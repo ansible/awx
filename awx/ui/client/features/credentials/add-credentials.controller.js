@@ -115,6 +115,18 @@ function AddCredentialsController (models, $state, $scope, strings, componentsSt
 
         return { obj, error };
     };
+
+    $scope.$watch('organization', () => {
+        if ($scope.organization) {
+            vm.form.organization._idFromModal = $scope.organization;
+        }
+    });
+
+    $scope.$watch('credential_type', () => {
+        if ($scope.credential_type) {
+            vm.form.credential_type._idFromModal = $scope.credential_type;
+        }
+    });
 }
 
 AddCredentialsController.$inject = [

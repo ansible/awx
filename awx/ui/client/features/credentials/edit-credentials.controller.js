@@ -32,6 +32,18 @@ function EditCredentialsController (models, $state, $scope, strings, componentsS
         }
     });
 
+    $scope.$watch('organization', () => {
+        if ($scope.organization) {
+            vm.form.organization._idFromModal = $scope.organization;
+        }
+    });
+
+    $scope.$watch('credential_type', () => {
+        if ($scope.credential_type) {
+            vm.form.credential_type._idFromModal = $scope.credential_type;
+        }
+    });
+
     // Only exists for permissions compatibility
     $scope.credential_obj = credential.get();
 
