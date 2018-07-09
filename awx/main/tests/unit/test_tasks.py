@@ -2055,7 +2055,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             return cred
         self.instance.get_cloud_credential = get_cred
 
-        self.instance.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_"}'
+        self.instance.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_", "satellite6_want_hostcollections": True}'
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -2066,6 +2066,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('foreman', 'password') == 'secret'
             assert config.get('ansible', 'group_patterns') == '[a,b,c]'
             assert config.get('ansible', 'group_prefix') == 'hey_'
+            assert config.get('ansible', 'want_hostcollections') == 'True'
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
