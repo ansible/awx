@@ -535,6 +535,9 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                             case "error":
                                                 statusClass += "workflowChart-nodeStatus--failed";
                                                 break;
+                                            case "canceled":
+                                                statusClass += "workflowChart-nodeStatus--canceled";
+                                                break;
                                         }
                                     }
 
@@ -784,6 +787,9 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                         break;
                                     case "error":
                                         statusClass += "workflowChart-nodeStatus--failed";
+                                        break;
+                                    case "canceled":
+                                        statusClass += "workflowChart-nodeStatus--canceled";
                                         break;
                                 }
                             }

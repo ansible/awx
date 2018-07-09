@@ -221,7 +221,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
                     }
 
-                    if(data.status === "successful" || data.status === "failed" || data.status === "error"){
+                    if(data.status === "successful" || data.status === "failed" || data.status === "canceled" || data.status === "error"){
                         $state.go('.', null, { reload: true });
                     }
             }
@@ -234,7 +234,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     // can happen if the GET request on the workflow job returns "waiting" and
                     // the sockets aren't established yet so we miss the event that indicates
                     // the workflow job has moved into a running state.
-                    if (!_.includes(['running', 'successful', 'failed', 'error'], $scope.workflow.status)){
+                    if (!_.includes(['running', 'successful', 'failed', 'error', 'canceled'], $scope.workflow.status)){
                         $scope.workflow.status = 'running';
                         runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
                     }
