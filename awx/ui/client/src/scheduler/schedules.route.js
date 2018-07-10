@@ -9,7 +9,6 @@ const jobTemplatesSchedulesListRoute = {
     data: {
         activityStream: true,
         activityStreamTarget: 'job_template',
-        activityStreamId: 'id'
     },
     ncyBreadcrumb: {
         label: N_('SCHEDULES')
@@ -97,8 +96,7 @@ const workflowSchedulesRoute = {
     route: '/schedules',
     data: {
         activityStream: true,
-        activityStreamTarget: 'job_template',
-        activityStreamId: 'id'
+        activityStreamTarget: 'workflow_job_template',
     },
     ncyBreadcrumb: {
         label: N_('SCHEDULES')
@@ -186,7 +184,6 @@ const projectsSchedulesListRoute = {
     data: {
         activityStream: true,
         activityStreamTarget: 'project',
-        activityStreamId: 'id'
     },
     ncyBreadcrumb: {
         label: N_('SCHEDULES')
