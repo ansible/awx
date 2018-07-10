@@ -134,7 +134,7 @@ class JobOptions(BaseModel):
     allow_simultaneous = models.BooleanField(
         default=False,
     )
-    timeout = models.IntegerField(
+    timeout = models.PositiveIntegerField(
         blank=True,
         default=0,
         help_text=_("The amount of time (in seconds) to run before the task is canceled."),
