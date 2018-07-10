@@ -197,15 +197,17 @@ class InstanceGroupMembershipMixin(object):
     def unattach_validate(self, request):
         (sub_id, res) = super(InstanceGroupMembershipMixin, self).unattach_validate(request)
         if res:
-            return res
+            return (sub_id, res)
         sub = get_object_or_400(self.model, pk=sub_id)
         attach_errors = self.is_valid_relation(None, sub)
         if attach_errors:
             return (sub_id, Response(attach_errors, status=status.HTTP_400_BAD_REQUEST))
+        return (sub_id, res)
 
     def unattach(self, request, *args, **kwargs):
         response = super(InstanceGroupMembershipMixin, self).unattach(request, *args, **kwargs)
         if status.is_success(response.status_code):
+            sub_id = request.data.get('id', None)
             if self.parent_model is Instance:
                 ig_obj = get_object_or_400(self.model, pk=sub_id)
                 inst_name = self.get_parent_object().hostname
