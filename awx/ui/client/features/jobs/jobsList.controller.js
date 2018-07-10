@@ -66,6 +66,15 @@ function ListJobsController (
 
     vm.jobTypes = mapChoices(unifiedJob.options('actions.GET.type.choices'));
 
+    vm.buildCredentialTags = (credentials) =>
+        credentials.map(credential => {
+            const icon = `${credential.kind}`;
+            const link = `/#/credentials/${credential.id}`;
+            const value = $filter('sanitize')(credential.name);
+
+            return { icon, link, value };
+        });
+
     vm.getSref = ({ type, id }) => {
         let sref;
 

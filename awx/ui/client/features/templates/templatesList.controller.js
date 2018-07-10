@@ -174,7 +174,7 @@ function ListTemplatesController(
             const icon = `${credential.kind}`;
             const link = `/#/credentials/${credential.id}`;
             const tooltip = strings.get('tooltips.VIEW_THE_CREDENTIAL');
-            const value = credential.name;
+            const value = $filter('sanitize')(credential.name);
 
             return { icon, link, tooltip, value };
         });
