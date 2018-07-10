@@ -112,6 +112,10 @@ class OAuth2AccessToken(AbstractAccessToken):
         default='write',
         help_text=_('Allowed scopes, further restricts user\'s permissions. Must be a simple space-separated string with allowed scopes [\'read\', \'write\'].')
     )
+    modified = models.DateTimeField(
+        editable=False,
+        auto_now=True
+    )
 
     def is_valid(self, scopes=None):
         valid = super(OAuth2AccessToken, self).is_valid(scopes)
@@ -119,4 +123,3 @@ class OAuth2AccessToken(AbstractAccessToken):
             self.last_used = now()
             self.save(update_fields=['last_used'])
         return valid
-
