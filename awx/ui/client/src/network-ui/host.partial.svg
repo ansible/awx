@@ -77,13 +77,15 @@
             		c-0.4,0-0.6-0.2-0.6-0.6c0-0.4,0.2-0.6,0.6-0.6h0.9c0.4,0,0.6,0.2,0.6,0.6C34.2,14.7,33.9,14.9,33.6,14.9z"/>
             </g>
         </g>
-        <g>
+        <g ng-show="item.icon || current_scale > 0.5">
             <text ng-attr-class="{{item.selected && ! item.edit_label ? 'NetworkUI__host-text--selected' : 'NetworkUI--hidden'}}"
                   filter="url(#background)"
                   text-anchor="middle"
                   x="0"
-                  y="50"> {{item.name}}
+                  y="50"> <tspan x="0" dy="20" ng-repeat="chunk in item.name|chunk:25">{{chunk}}</tspan>
             </text>
-            <text class="NetworkUI__host-text" filter="url(#background)" text-anchor="middle" x="0" y="50">{{item.name}}{{item.edit_label?'_':''}}</text>
+            <text class="NetworkUI__host-text" filter="url(#background)" text-anchor="middle" x="0" y="50">
+                 <tspan x="0" dy="20" ng-repeat="chunk in item.name|chunk:25">{{chunk}}</tspan>
+            </text>
         </g>
     </g>
