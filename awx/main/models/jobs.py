@@ -963,11 +963,22 @@ class JobLaunchConfig(LaunchTimeConfig):
         editable=False,
     )
 
+    def has_user_prompts(self, template):
+        '''
+        Returns True if any fields exist in the launch config that are
+        not permissions exclusions
+        (has to exist because of callback relaunch exception)
+        '''
+        return self._has_user_prompts(template, only_unprompted=False)
+
     def has_unprompted(self, template):
         '''
-        returns False if the template has set ask_ fields to False after
+        returns True if the template has set ask_ fields to False after
         launching with those prompts
         '''
+        return self._has_user_prompts(template, only_unprompted=True)
+
+    def _has_user_prompts(self, template, only_unprompted=True):
         prompts = self.prompts_dict()
         ask_mapping = template.get_ask_mapping()
         if template.survey_enabled and (not template.ask_variables_on_launch):
@@ -977,10 +988,10 @@ class JobLaunchConfig(LaunchTimeConfig):
                 element.get('variable') for element in
                 template.survey_spec.get('spec', {}) if 'variable' in element
             )
-            if provided_vars - survey_vars:
+            if (provided_vars and not only_unprompted) or (provided_vars - survey_vars):
                 return True
         for field_name, ask_field_name in ask_mapping.items():
-            if field_name in prompts and not getattr(template, ask_field_name):
+            if field_name in prompts and not (getattr(template, ask_field_name) and only_unprompted):
                 if field_name == 'limit' and self.job and self.job.launch_type == 'callback':
                     continue  # exception for relaunching callbacks
                 return True

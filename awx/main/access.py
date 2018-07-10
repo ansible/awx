@@ -1504,7 +1504,7 @@ class JobAccess(BaseAccess):
         if obj.job_template is not None:
             if config is None:
                 prompts_access = False
-            elif config.prompts_dict() == {}:
+            elif not config.has_user_prompts(obj.job_template):
                 prompts_access = True
             elif obj.created_by_id != self.user.pk:
                 prompts_access = False
