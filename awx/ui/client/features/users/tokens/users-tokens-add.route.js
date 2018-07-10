@@ -30,7 +30,7 @@ export default {
         label: N_('CREATE TOKEN')
     },
     views: {
-        'preFormView@users.edit': {
+        'preFormView@users': {
             templateUrl: addTemplate,
             controller: AddController,
             controllerAs: 'vm'

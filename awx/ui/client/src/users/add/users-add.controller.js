@@ -14,10 +14,10 @@ const user_type_options = [
 
 export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
     'Alert', 'ProcessErrors', 'ReturnToCaller', 'GetBasePath',
-    'Wait', 'CreateSelect2', '$state', '$location', 'i18n',
+    'Wait', 'CreateSelect2', '$state', '$location', 'i18n', 'canAdd',
     function($scope, $rootScope, UserForm, GenerateForm, Rest, Alert,
     ProcessErrors, ReturnToCaller, GetBasePath, Wait, CreateSelect2,
-    $state, $location, i18n) {
+    $state, $location, i18n, canAdd) {
 
         var defaultUrl = GetBasePath('organizations'),
             form = UserForm;
@@ -28,6 +28,7 @@ export default ['$scope', '$rootScope', 'UserForm', 'GenerateForm', 'Rest',
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
 
+            $scope.canAdd = canAdd;
             $scope.isAddForm = true;
             $scope.ldap_user = false;
             $scope.not_ldap_user = !$scope.ldap_user;

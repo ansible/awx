@@ -13,8 +13,7 @@ export default {
         }
     },
     data: {
-        basePath: 'applications',
-        formChildState: true
+        basePath: 'applications'
     },
     ncyBreadcrumb: {
         skip: true
