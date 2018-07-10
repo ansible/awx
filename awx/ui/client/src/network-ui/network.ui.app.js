@@ -19,6 +19,7 @@ var inventoryToolbox = require('./inventory.toolbox.directive.js');
 var debug = require('./debug.directive.js');
 var test_results = require('./test_results.directive.js');
 var awxNetworkUI = require('./network.ui.directive.js');
+var util = require('./util.js');
 
 export default
     angular.module('networkUI', [
@@ -27,6 +28,11 @@ export default
         networkDetailsDirective.name,
         networkZoomWidget.name
     ])
+    .filter('chunk', function () {
+        return function(input, size) {
+            return util.chunkSubstr(input, size);
+        };
+    })
     .controller('NetworkUIController', NetworkUIController.NetworkUIController)
     .directive('awxNetCursor', cursor.cursor)
     .directive('awxNetDebug', debug.debug)
