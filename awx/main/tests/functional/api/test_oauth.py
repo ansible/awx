@@ -3,12 +3,14 @@ import base64
 import json
 
 from django.db import connection
+from django.test.utils import override_settings
 
 from awx.main.utils.encryption import decrypt_value, get_encryption_key
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.models.oauth import (OAuth2Application as Application, 
                                    OAuth2AccessToken as AccessToken, 
                                    )
+from awx.sso.models import UserEnterpriseAuth
 from oauth2_provider.models import RefreshToken
 
 
@@ -27,6 +29,29 @@ def test_personal_access_token_creation(oauth_application, post, alice):
     assert 'access_token' in resp_json
     assert 'scope' in resp_json
     assert 'refresh_token' in resp_json
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('allow_oauth, status', [(True, 201), (False, 403)])
+def test_token_creation_disabled_for_external_accounts(oauth_application, post, alice, allow_oauth, status):
+    UserEnterpriseAuth(user=alice, provider='radius').save()
+    url = drf_reverse('api:oauth_authorization_root_view') + 'token/'
+
+    with override_settings(RADIUS_SERVER='example.org', ALLOW_OAUTH2_FOR_EXTERNAL_USERS=allow_oauth):
+        resp = post(
+            url,
+            data='grant_type=password&username=alice&password=alice&scope=read',
+            content_type='application/x-www-form-urlencoded',
+            HTTP_AUTHORIZATION='Basic ' + base64.b64encode(':'.join([
+                oauth_application.client_id, oauth_application.client_secret
+            ])),
+            status=status
+        )
+        if allow_oauth:
+            assert AccessToken.objects.count() == 1
+        else:
+            assert 'OAuth2 Tokens cannot be created by users associated with an external authentication provider' in resp.content
+            assert AccessToken.objects.count() == 0
 
 
 @pytest.mark.django_db

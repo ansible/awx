@@ -40,6 +40,9 @@ export default ['i18n', function(i18n) {
             AUTH_BASIC_ENABLED: {
                 type: 'toggleSwitch',
             },
+            ALLOW_OAUTH2_FOR_EXTERNAL_USERS: {
+                type: 'toggleSwitch',
+            },
             REMOTE_HOST_HEADERS: {
                 type: 'textarea',
                 reset: 'REMOTE_HOST_HEADERS'

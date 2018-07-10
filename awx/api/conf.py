@@ -47,3 +47,14 @@ register(
     category=_('Authentication'),
     category_slug='authentication',
 )
+register(
+    'ALLOW_OAUTH2_FOR_EXTERNAL_USERS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Allow External Users to Create OAuth2 Tokens'),
+    help_text=_('For security reasons, users from external auth providers (LDAP, SAML, '
+                'SSO, Radius, and others) are not allowed to create OAuth2 tokens. '
+                'To change this behavior, enable this setting.'),
+    category=_('Authentication'),
+    category_slug='authentication',
+)

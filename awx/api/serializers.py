@@ -13,6 +13,7 @@ from collections import OrderedDict
 from datetime import timedelta
 
 # OAuth2
+from oauthlib import oauth2
 from oauthlib.common import generate_token
 
 # Django
@@ -54,7 +55,7 @@ from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
     has_model_field_prefetched, extract_ansible_vars, encrypt_dict,
-    prefetch_page_capabilities)
+    prefetch_page_capabilities, get_external_account)
 from awx.main.utils.filters import SmartFilter
 from awx.main.redact import REPLACE_STR
 
@@ -932,23 +933,7 @@ class UserSerializer(BaseSerializer):
             obj.save(update_fields=['password'])
 
     def get_external_account(self, obj):
-        account_type = None
-        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
-            try:
-                if obj.pk and obj.profile.ldap_dn and not obj.has_usable_password():
-                    account_type = "ldap"
-            except AttributeError:
-                pass
-        if (getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None) or
-                getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None) or
-                getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None) or
-                getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
-                getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and obj.social_auth.all():
-            account_type = "social"
-        if (getattr(settings, 'RADIUS_SERVER', None) or
-                getattr(settings, 'TACACSPLUS_HOST', None)) and obj.enterprise_auth.all():
-            account_type = "enterprise"
-        return account_type
+        return get_external_account(obj)
 
     def create(self, validated_data):
         new_password = validated_data.pop('password', None)
@@ -1082,7 +1067,13 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
                 'Must be a simple space-separated string with allowed scopes {}.'
             ).format(self.ALLOWED_SCOPES))
         return value
-            
+
+    def create(self, validated_data):
+        try:
+            return super(BaseOAuth2TokenSerializer, self).create(validated_data)
+        except oauth2.AccessDeniedError as e:
+            raise PermissionDenied(str(e))
+
 
 class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):  
 
