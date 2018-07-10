@@ -30,6 +30,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.signals import disable_activity_stream
+from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
 
@@ -82,7 +83,10 @@ class AnsibleInventoryLoader(object):
         env = dict(os.environ.items())
         env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
         env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
-        env['ANSIBLE_INVENTORY_UNPARSED_FAILED'] = '1'
+        # Set configuration items that should always be used for updates
+        for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
+            if key not in env:
+                env[key] = value
         venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
         if os.path.isdir(os.path.join(venv_libdir, "python2.7")):
