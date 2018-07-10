@@ -49,7 +49,7 @@ from crum import impersonate
 
 # AWX
 from awx import __version__ as awx_application_version
-from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS
+from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.access import access_registry
 from awx.main.models import * # noqa
 from awx.main.constants import ACTIVE_STATES
@@ -2002,8 +2002,7 @@ class RunInventoryUpdate(BaseTask):
         # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
-        # Always use the --export option for ansible-inventory
-        env['ANSIBLE_INVENTORY_EXPORT'] = str(True)
+        env.update(STANDARD_INVENTORY_UPDATE_ENV)
         plugin_name = inventory_update.get_inventory_plugin_name()
         if plugin_name is not None:
             env['ANSIBLE_INVENTORY_ENABLED'] = plugin_name
