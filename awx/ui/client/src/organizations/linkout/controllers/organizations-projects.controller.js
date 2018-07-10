@@ -36,7 +36,6 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                         $scope.projects[i].statusIcon = GetProjectIcon(project.status);
                         $scope.projects[i].statusTip = GetProjectToolTip(project.status);
                         $scope.projects[i].scm_update_tooltip = "Get latest SCM revision";
-                        $scope.projects[i].scm_schedule_tooltip = "Schedule SCM revision updates";
                         $scope.projects[i].scm_type_class = "";
 
                         if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
@@ -53,7 +52,6 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                                 $scope.projects[i].scm_type = type.label;
                                 if (type.label === 'Manual') {
                                     $scope.projects[i].scm_update_tooltip = 'Manual projects do not require an SCM update';
-                                    $scope.projects[i].scm_schedule_tooltip = 'Manual projects do not require a schedule';
                                     $scope.projects[i].scm_type_class = 'btn-disabled';
                                     $scope.projects[i].statusTip = 'Not configured for SCM';
                                     $scope.projects[i].statusIcon = 'none';
@@ -296,13 +294,6 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
                     }
                 }
             });
-        };
-
-        $scope.editSchedules = function(id) {
-            var project = Find({ list: $scope.projects, key: 'id', val: id });
-            if (!(project.scm_type === "Manual" || Empty(project.scm_type)) && !(project.status === 'updating' || project.status === 'running' || project.status === 'pending')) {
-                $state.go('projects.edit.schedules', { project_id: id });
-            }
         };
 
         $scope.formCancel = function() {
