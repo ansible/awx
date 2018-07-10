@@ -170,10 +170,13 @@
 }
 
 .HostEvent-stdoutColumn{
-    white-space: pre;
-    overflow-y: scroll;
+    overflow-y: hidden;
+    overflow-x: auto;
     margin-left: 46px;
     padding-top: 4px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
 }
 
 .HostEvent-noJson{
