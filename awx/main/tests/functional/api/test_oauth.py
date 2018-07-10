@@ -126,7 +126,7 @@ def test_oauth_token_create(oauth_application, get, post, admin):
         reverse('api:o_auth2_application_token_list', kwargs={'pk': oauth_application.pk}),
         {'scope': 'read'}, admin, expect=201
     )
-    assert 'modified' in response.data
+    assert 'modified' in response.data and response.data['modified'] is not None
     assert 'updated' not in response.data
     token = AccessToken.objects.get(token=response.data['token'])
     refresh_token = RefreshToken.objects.get(token=response.data['refresh_token'])
