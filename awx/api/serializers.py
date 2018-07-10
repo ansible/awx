@@ -1873,7 +1873,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
     script = serializers.CharField(trim_whitespace=False)
     show_capabilities = ['edit', 'delete', 'copy']
     capabilities_prefetch = [
-        {'edit': 'organization.admin'}
+        {'edit': 'admin'}
     ]
 
     class Meta:
