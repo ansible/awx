@@ -105,21 +105,6 @@ function ListTemplatesController(
 
     vm.isPortalMode = $state.includes('portalMode');
 
-    vm.scheduleTemplate = template => {
-        if (!template) {
-            Alert(strings.get('error.SCHEDULE'), strings.get('alert.MISSING_PARAMETER'));
-            return;
-        }
-
-        if (isJobTemplate(template)) {
-            $state.go('templates.editJobTemplate.schedules', { job_template_id: template.id });
-        } else if (isWorkflowTemplate(template)) {
-            $state.go('templates.editWorkflowJobTemplate.schedules', { workflow_job_template_id: template.id });
-        } else {
-            Alert(strings.get('error.UNKNOWN'), strings.get('alert.UNKNOWN_SCHEDULE'));
-        }
-    };
-
     vm.deleteTemplate = template => {
         if (!template) {
             Alert(strings.get('error.DELETE'), strings.get('alert.MISSING_PARAMETER'));
