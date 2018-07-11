@@ -983,7 +983,7 @@ class JobLaunchConfig(LaunchTimeConfig):
         ask_mapping = template.get_ask_mapping()
         if template.survey_enabled and (not template.ask_variables_on_launch):
             ask_mapping.pop('extra_vars')
-            provided_vars = set(prompts['extra_vars'].keys())
+            provided_vars = set(prompts.get('extra_vars', {}).keys())
             survey_vars = set(
                 element.get('variable') for element in
                 template.survey_spec.get('spec', {}) if 'variable' in element
