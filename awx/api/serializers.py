@@ -925,7 +925,8 @@ class UserSerializer(BaseSerializer):
         if new_password:
             obj.set_password(new_password)
             obj.save(update_fields=['password'])
-            UserSessionMembership.clear_session_for_user(obj)
+            if self.context['request'].user != obj:
+                UserSessionMembership.clear_session_for_user(obj)
         elif not obj.password:
             obj.set_unusable_password()
             obj.save(update_fields=['password'])
