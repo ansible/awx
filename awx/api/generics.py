@@ -196,8 +196,8 @@ class APIView(views.APIView):
             request.drf_request_user = None
             self.__init_request_error__ = exc
         except UnsupportedMediaType as exc:
-            exc.detail = _('You did not use correct content_type in your HTTP request. \
-                            If you are using our REST API, the content_type must be application/json')
+            exc.detail = _('You did not use correct Content-Type in your HTTP request. '
+                           'If you are using our REST API, the Content-Type must be application/json')
             self.__init_request_error__ = exc
         return drf_request
 
