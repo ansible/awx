@@ -134,10 +134,19 @@ def test_prevent_isolated_instance_added_to_non_isolated_instance_group(post, ad
 
 
 @pytest.mark.django_db
+def test_prevent_isolated_instance_added_to_non_isolated_instance_group_via_policy_list(patch, admin, instance, instance_group, isolated_instance_group):
+    url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
+
+    assert True is instance.is_isolated()
+    resp = patch(url, {'policy_instance_list': [instance.hostname]}, admin)
+    assert [u"Isolated instances may not be added or removed from instances groups via the API."] == resp.data['policy_instance_list']
+    assert instance_group.policy_instance_list == []
+
+
+@pytest.mark.django_db
 def test_prevent_isolated_instance_removal_from_isolated_instance_group(post, admin, instance, instance_group, isolated_instance_group):
     url = reverse("api:instance_group_instance_list", kwargs={'pk': isolated_instance_group.pk})
 
     assert True is instance.is_isolated()
     resp = post(url, {'disassociate': True, 'id': instance.id}, admin, expect=400)
     assert u"Isolated instances may not be added or removed from instances groups via the API." == resp.data['error']
-
