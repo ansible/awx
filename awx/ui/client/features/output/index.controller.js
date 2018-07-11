@@ -303,6 +303,7 @@ function OutputIndexController (
 
     // Panel
     vm.title = $filter('sanitize')(resource.model.get('name'));
+    vm.status = resource.model.get('status');
     vm.strings = strings;
     vm.resource = resource;
     vm.reloadState = reloadState;
@@ -340,6 +341,7 @@ function OutputIndexController (
         });
 
         startListening();
+        status.subscribe(data => { vm.status = data.status; });
 
         return last();
     });
