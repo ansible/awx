@@ -167,7 +167,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
             wrapPanel(html, ignorePanel){
                 if(ignorePanel) {
                     return `
-                    <div ui-view="preFormView"></div>
                     <div>
                     ${html}
                     <div ui-view="related"></div>
@@ -176,7 +175,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
                 else {
                     return `
-                    <div ui-view="preFormView"></div>
                     ${MessageBar(this.form)}
                     <div class="Panel">
                     ${html}

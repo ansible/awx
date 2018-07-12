@@ -1,6 +1,6 @@
 function AddTokensController (
     models, $state, strings, Rest, Alert, Wait, GetBasePath,
-    $filter, ProcessErrors
+    $filter, ProcessErrors, $scope
 ) {
     const vm = this || {};
     const { application } = models;
@@ -94,6 +94,12 @@ function AddTokensController (
     vm.form.onSaveSuccess = () => {
         $state.go('^', { user_id: $state.params.user_id }, { reload: true });
     };
+
+    $scope.$watch('application', () => {
+        if ($scope.application) {
+            vm.form.application._idFromModal = $scope.application;
+        }
+    });
 }
 
 AddTokensController.$inject = [
@@ -105,7 +111,8 @@ AddTokensController.$inject = [
     'Wait',
     'GetBasePath',
     '$filter',
-    'ProcessErrors'
+    'ProcessErrors',
+    '$scope'
 ];
 
 export default AddTokensController;

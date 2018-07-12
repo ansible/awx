@@ -16,6 +16,21 @@ TokensDetailResolve.$inject = [
     'ApplicationModel'
 ];
 
+function isMeResolve ($rootScope, $stateParams, $state) {
+    // The user should not be able to add tokens for users other than
+    // themselves. Adding this redirect so that a user is not able to
+    // visit the add-token URL directly for a different user.
+    if (_.has($stateParams, 'user_id') && Number($stateParams.user_id) !== $rootScope.current_user.id) {
+        $state.go('users');
+    }
+}
+
+isMeResolve.$inject = [
+    '$rootScope',
+    '$stateParams',
+    '$state'
+];
+
 export default {
     url: '/add-token',
     name: 'users.edit.tokens.add',
@@ -30,13 +45,14 @@ export default {
         label: N_('CREATE TOKEN')
     },
     views: {
-        'preFormView@users.edit': {
+        'preFormView@users': {
             templateUrl: addTemplate,
             controller: AddController,
             controllerAs: 'vm'
         }
     },
     resolve: {
-        resolvedModels: TokensDetailResolve
+        resolvedModels: TokensDetailResolve,
+        isMe: isMeResolve
     }
 };

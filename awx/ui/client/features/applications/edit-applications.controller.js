@@ -43,6 +43,12 @@ function EditApplicationsController (models, $state, strings, $scope) {
         }
     });
 
+    $scope.$watch('organization', () => {
+        if ($scope.organization) {
+            vm.form.organization._idFromModal = $scope.organization;
+        }
+    });
+
     if (isEditable) {
         vm.form = application.createFormSchema('put', { omit });
     } else {
