@@ -9,6 +9,8 @@
     <at-panel class="at-Stdout" ng-class="{'at-Stdout--fullscreen': vm.isPanelExpanded}">
       <div class="at-Stdout-wrapper">
         <div class="at-Panel-headingTitle">
+            <i ng-show="vm.isPanelExpanded && vm.status"
+                class="JobResults-statusResultIcon fa icon-job-{{ vm.status }}"></i>
             {{ vm.title }}
         </div>
         <at-job-stats
