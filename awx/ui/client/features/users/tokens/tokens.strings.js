@@ -28,7 +28,8 @@ function TokensStrings (BaseString) {
         DELETE_ACTION_LABEL: t.s('DELETE'),
         SCOPE_PLACEHOLDER: t.s('Select a scope'),
         SCOPE_READ_LABEL: t.s('Read'),
-        SCOPE_WRITE_LABEL: t.s('Write')
+        SCOPE_WRITE_LABEL: t.s('Write'),
+        APPLICATION_HELP_TEXT: t.s('Leaving this field blank will result in the creation of a Personal Access Token which is not linked to an Application.')
     };
 
     ns.list = {
