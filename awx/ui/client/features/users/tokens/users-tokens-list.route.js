@@ -4,6 +4,19 @@ import ListController from './users-tokens-list.controller';
 
 const listTemplate = require('~features/users/tokens/users-tokens-list.partial.html');
 
+function TokensListResolve ($q, Token) {
+    const promises = {};
+
+    promises.token = new Token('options');
+
+    return $q.all(promises);
+}
+
+TokensListResolve.$inject = [
+    '$q',
+    'TokenModel',
+];
+
 export default {
     url: '/tokens',
     name: 'users.edit.tokens',
@@ -32,6 +45,7 @@ export default {
         }
     },
     resolve: {
+        resolvedModels: TokensListResolve,
         Dataset: [
             '$stateParams',
             'Wait',

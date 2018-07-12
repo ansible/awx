@@ -38,6 +38,7 @@ function TokensStrings (BaseString) {
         ROW_ITEM_LABEL_USED: t.s('LAST USED'),
         ROW_ITEM_LABEL_SCOPE: t.s('SCOPE'),
         ROW_ITEM_LABEL_APPLICATION: t.s('APPLICATION'),
+        PERSONAL_ACCESS_TOKEN: t.s('Personal Access Token'),
         HEADER: appName => t.s('{{ appName }} Token', { appName }),
     };
 }
