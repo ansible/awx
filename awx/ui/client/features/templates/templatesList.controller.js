@@ -51,17 +51,16 @@ function ListTemplatesController(
     $scope.canAdd = ($scope.canAddJobTemplate || $scope.canAddWorkflowJobTemplate);
 
     // smart-search
-    $scope.list = {
+    vm.list = {
         iterator: 'template',
         name: 'templates'
     };
-    $scope.collection = {
-        iterator: 'template',
-        basePath: 'unified_job_templates'
-    };
-    $scope.template_dataset = Dataset.data;
-    $scope.templates = Dataset.data.results;
-    $scope.$emit('updateCount', Dataset.data.count, 'templates');
+    vm.dataset = Dataset.data;
+    vm.templates = Dataset.data.results;
+    
+    $scope.$watch('vm.dataset.count', () => {
+        $scope.$emit('updateCount', vm.dataset.count, 'templates');
+    });
 
     $scope.$watch('$state.params', function(newValue, oldValue) {
         const job_template_id = _.get($state.params, 'job_template_id');
@@ -71,12 +70,6 @@ function ListTemplatesController(
             vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_job_template_id);
         }
     }, true);
-
-    $scope.$on('updateDataset', (e, dataset) => {
-        $scope.template_dataset = dataset;
-        $scope.templates = dataset.results;
-        $scope.$emit('updateCount', dataset.count, 'templates');
-    });
 
     $scope.$on(`ws-jobs`, () => {
         if (!launchModalOpen) {
@@ -188,8 +181,8 @@ function ListTemplatesController(
         let path = GetBasePath('unified_job_templates');
         qs.search(path, $state.params.template_search)
             .then(function(searchResponse) {
-                $scope.template_dataset = searchResponse.data;
-                $scope.templates = $scope.template_dataset.results;
+                vm.dataset = searchResponse.data;
+                vm.templates = vm.dataset.results;
             });
     }
 
@@ -254,7 +247,7 @@ function ListTemplatesController(
         const { page } = _.get($state.params, 'template_search');
         let reloadListStateParams = null;
 
-        if ($scope.templates.length === 1 && page && page !== '1') {
+        if (vm.templates.length === 1 && page && page !== '1') {
             reloadListStateParams = _.cloneDeep($state.params);
             const pageNumber = (parseInt(reloadListStateParams.template_search.page, 0) - 1);
             reloadListStateParams.template_search.page = pageNumber.toString();

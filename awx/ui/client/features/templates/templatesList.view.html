@@ -5,11 +5,10 @@
             django-model="templates"
             base-path="unified_job_templates"
             iterator="template"
-            list="list"
-            dataset="template_dataset"
-            collection="collection"
-            search-tags="searchTags"
-            query-set="querySet"
+            list="vm.list"
+            collection="vm.templates"
+            dataset="vm.dataset"
+            search-tags="vm.searchTags"
             search-bar-full-width="vm.isPortalMode">
         </smart-search>
         <div class="at-List-toolbarAction" ng-show="!vm.isPortalMode && canAdd">
@@ -37,7 +36,7 @@
         </div>
     </div>
     <at-list results="templates" id="templates_list">
-        <at-row ng-repeat="template in templates"
+        <at-row ng-repeat="template in vm.templates"
             ng-class="{'at-Row--active': (template.id === vm.activeId)}"
             template-id="{{ template.id }}"
             invalid="vm.isInvalid(template)"
@@ -100,10 +99,9 @@
         </at-row>
     </at-list>
     <paginate
-        collection="collection"
-        dataset="template_dataset"
+        collection="vm.templates"
+        dataset="vm.dataset"
         iterator="template"
-        base-path="unified_job_templates"
-        query-set="querySet">
+        base-path="unified_job_templates">
     </paginate>
 </at-panel-body>
