@@ -446,6 +446,8 @@ def awx_periodic_scheduler(self):
         try:
             job_kwargs = schedule.get_job_kwargs()
             new_unified_job = schedule.unified_job_template.create_unified_job(**job_kwargs)
+            logger.info(six.text_type('Spawned {} from schedule {}-{}.').format(
+                new_unified_job.log_format, schedule.name, schedule.pk))
 
             if invalid_license:
                 new_unified_job.status = 'failed'
