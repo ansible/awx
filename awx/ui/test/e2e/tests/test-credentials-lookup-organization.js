@@ -54,9 +54,6 @@ module.exports = {
         const { table } = lookupModal.section;
 
         details.section.organization.expect.element('@lookup').visible;
-        details.section.organization.expect.element('@lookup').enabled;
-
-        details.section.organization.click('@lookup');
 
         credentials.expect.section('@lookupModal').present;
 
