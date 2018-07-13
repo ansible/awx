@@ -148,9 +148,9 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                         if (vm.promptDataClone.launchConf.ask_credential_on_launch ||
                             (_.has(vm, 'promptDataClone.prompts.credentials.passwords.vault') &&
                             vm.promptDataClone.prompts.credentials.passwords.vault.length > 0) ||
-                            _.has(vm.promptDataClone.prompts.credentials.passwords.ssh_key_unlock) ||
-                            _.has(vm.promptDataClone.prompts.credentials.passwords.become_password) ||
-                            _.has(vm.promptDataClone.prompts.credentials.passwords.ssh_password)
+                            _.has(vm, 'promptDataClone.prompts.credentials.passwords.ssh_key_unlock') ||
+                            _.has(vm, 'promptDataClone.prompts.credentials.passwords.become_password') ||
+                            _.has(vm, 'promptDataClone.prompts.credentials.passwords.ssh_password')
                         ) {
                             vm.steps.credential.includeStep = true;
                             vm.steps.credential.tab = {
@@ -207,7 +207,7 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
         };
 
         vm.next = (currentTab) => {
-            if(_.has(vm.steps.other_prompts, 'tab._active') && vm.steps.other_prompts.tab._active === true){
+            if(_.has(vm, 'steps.other_prompts.tab._active') && vm.steps.other_prompts.tab._active === true){
                 try {
                     if (vm.codeMirror.validate) {
                         vm.codeMirror.validate();
