@@ -1,3 +1,4 @@
+import itertools
 import pytest
 import mock
 
@@ -113,6 +114,27 @@ class TestMetaVars:
     Extension of unit tests with same class name
     '''
 
+    def test_deleted_user(self, admin_user):
+        job = Job.objects.create(
+            name='job',
+            created_by=admin_user
+        )
+        job.save()
+
+        user_vars = ['_'.join(x) for x in itertools.product(
+            ['tower', 'awx'],
+            ['user_name', 'user_id', 'user_email', 'user_first_name', 'user_last_name']
+        )]
+
+        for key in user_vars:
+            assert key in job.awx_meta_vars()
+
+        # deleted user is hard to simulate as this test occurs within one transaction
+        job = Job.objects.get(pk=job.id)
+        job.created_by_id = 999999999
+        for key in user_vars:
+            assert key not in job.awx_meta_vars()
+
     def test_workflow_job_metavars(self, admin_user):
         workflow_job = WorkflowJob.objects.create(
             name='workflow-job',
@@ -124,6 +146,7 @@ class TestMetaVars:
         )
         workflow_job.workflow_nodes.create(job=job)
         data = job.awx_meta_vars()
+        assert data['awx_user_id'] == admin_user.id
         assert data['awx_user_name'] == admin_user.username
         assert data['awx_workflow_job_id'] == workflow_job.pk
 
@@ -141,6 +164,7 @@ class TestMetaVars:
         )
         data = job.awx_meta_vars()
         assert data['awx_schedule_id'] == schedule.pk
+        assert 'awx_user_name' not in data
 
 
 @pytest.mark.django_db

@@ -36,7 +36,7 @@ from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
     encrypt_dict, decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships,
-    get_type_for_model, parse_yaml_or_json
+    get_type_for_model, parse_yaml_or_json, getattr_dne
 )
 from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
@@ -1376,27 +1376,30 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         for name in ('awx', 'tower'):
             r['{}_job_id'.format(name)] = self.pk
             r['{}_job_launch_type'.format(name)] = self.launch_type
-        if self.created_by:
-            for name in ('awx', 'tower'):
-                r['{}_user_id'.format(name)] = self.created_by.pk
-                r['{}_user_name'.format(name)] = self.created_by.username
-                r['{}_user_email'.format(name)] = self.created_by.email
-                r['{}_user_first_name'.format(name)] = self.created_by.first_name
-                r['{}_user_last_name'.format(name)] = self.created_by.last_name
-        else:
+
+        created_by = getattr_dne(self, 'created_by')
+
+        if not created_by:
             wj = self.get_workflow_job()
             if wj:
                 for name in ('awx', 'tower'):
                     r['{}_workflow_job_id'.format(name)] = wj.pk
                     r['{}_workflow_job_name'.format(name)] = wj.name
-                if wj.created_by:
-                    for name in ('awx', 'tower'):
-                        r['{}_user_id'.format(name)] = wj.created_by.pk
-                        r['{}_user_name'.format(name)] = wj.created_by.username
-            if self.schedule:
+                created_by = getattr_dne(wj, 'created_by')
+
+            schedule = getattr_dne(self, 'schedule')
+            if schedule:
                 for name in ('awx', 'tower'):
-                    r['{}_schedule_id'.format(name)] = self.schedule.pk
-                    r['{}_schedule_name'.format(name)] = self.schedule.name
+                    r['{}_schedule_id'.format(name)] = schedule.pk
+                    r['{}_schedule_name'.format(name)] = schedule.name
+
+        if created_by:
+            for name in ('awx', 'tower'):
+                r['{}_user_id'.format(name)] = created_by.pk
+                r['{}_user_name'.format(name)] = created_by.username
+                r['{}_user_email'.format(name)] = created_by.email
+                r['{}_user_first_name'.format(name)] = created_by.first_name
+                r['{}_user_last_name'.format(name)] = created_by.last_name
         return r
 
     def get_celery_queue_name(self):
