@@ -119,7 +119,8 @@ function TemplatesStrings (BaseString) {
         EDGE_CONFLICT: t.s('EDGE CONFLICT'),
         DELETED: t.s('DELETED'),
         START: t.s('START'),
-        DETAILS: t.s('DETAILS')
+        DETAILS: t.s('DETAILS'),
+        TITLE: t.s('WORKFLOW VISUALIZER')
     }
 
 }
