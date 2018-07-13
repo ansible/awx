@@ -258,6 +258,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         .getCounts($scope.workflow_nodes);
                     $scope.$broadcast("refreshWorkflowChart");
             }
+            getLabelsAndTooltips();
         });
 
         $scope.$on('$destroy', function() {
