@@ -84,11 +84,9 @@ class LoggedLoginView(auth_views.LoginView):
         return super(LoggedLoginView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        original_user = getattr(request, 'user', None)
         ret = super(LoggedLoginView, self).post(request, *args, **kwargs)
         current_user = getattr(request, 'user', None)
-        
-        if request.user.is_authenticated and current_user != original_user:
+        if request.user.is_authenticated:
             logger.info(smart_text(u"User {} logged in.".format(self.request.user.username)))
             ret.set_cookie('userLoggedIn', 'true')
             current_user = UserSerializer(self.request.user)
