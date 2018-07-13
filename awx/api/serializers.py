@@ -4294,7 +4294,7 @@ class JobLaunchSerializer(BaseSerializer):
                 errors.setdefault('credentials', []).append(_(
                     'Removing {} credential at launch time without replacement is not supported. '
                     'Provided list lacked credential(s): {}.'
-                ).format(cred.unique_hash(display=True), ', '.join([str(c) for c in removed_creds])))
+                ).format(cred.unique_hash(display=True), ', '.join([six.text_type(c) for c in removed_creds])))
 
         # verify that credentials (either provided or existing) don't
         # require launch-time passwords that have not been provided
