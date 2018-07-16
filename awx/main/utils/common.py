@@ -47,7 +47,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'get_type_for_model', 'get_model_for_type', 'copy_model_by_class', 'region_sorting',
            'copy_m2m_relationships', 'prefetch_page_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
-           '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
+           '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'getattr_dne', 'NoDefaultProvided',
            'get_current_apps', 'set_current_apps', 'OutputEventFilter', 'OutputVerboseFilter',
            'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity', 'get_cpu_capacity', 'get_mem_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
@@ -906,6 +906,13 @@ def getattrd(obj, name, default=NoDefaultProvided):
         if default != NoDefaultProvided:
             return default
         raise
+
+
+def getattr_dne(obj, name, notfound=ObjectDoesNotExist):
+    try:
+        return getattr(obj, name)
+    except notfound:
+        return None
 
 
 current_apps = apps
