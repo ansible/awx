@@ -433,10 +433,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                         .then(function() {
                             $scope.closeDialog();
                         }).catch(({data, status}) => {
-                            ProcessErrors($scope, data, status, null);
+                            ProcessErrors($scope, data, status, null, {});
                         });
                     }).catch(({data, status}) => {
-                        ProcessErrors($scope, data, status, null);
+                        ProcessErrors($scope, data, status, null, {});
                     });
                 };
 
@@ -1026,6 +1026,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
         $scope.templateManuallySelected = function(selectedTemplate) {
 
+            if (promptWatcher) {
+                promptWatcher();
+            }
+
             if (surveyQuestionWatcher) {
                 surveyQuestionWatcher();
             }
@@ -1033,6 +1037,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             if (credentialsWatcher) {
                 credentialsWatcher();
             }
+
+            $scope.promptData = null;
 
             if (selectedTemplate.type === "job_template") {
                 let jobTemplate = new JobTemplate();
