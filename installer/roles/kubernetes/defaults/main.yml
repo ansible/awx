@@ -24,3 +24,5 @@ openshift_pg_emptydir: no
 openshift_pg_pvc_name: postgresql
 
 kubernetes_deployment_name: awx
+
+tiller_namespace: kube-system
