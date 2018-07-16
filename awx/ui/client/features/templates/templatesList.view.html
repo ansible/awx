@@ -35,7 +35,7 @@
             </ul>
         </div>
     </div>
-    <at-list results="templates" id="templates_list">
+    <at-list results="vm.templates" id="templates_list">
         <at-row ng-repeat="template in vm.templates"
             ng-class="{'at-Row--active': (template.id === vm.activeId)}"
             template-id="{{ template.id }}"
