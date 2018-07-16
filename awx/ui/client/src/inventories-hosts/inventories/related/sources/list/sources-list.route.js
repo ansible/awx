@@ -17,7 +17,8 @@ export default {
     data: {
         socket: {
             groups: {
-                jobs: ["status_changed"]
+                jobs: ["status_changed"],
+                inventories: ["status_changed"]
             }
         }
     },
