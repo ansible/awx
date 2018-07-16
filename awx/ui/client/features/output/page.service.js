@@ -27,6 +27,7 @@ function PageService ($q) {
 
         this.records = {};
         this.uuids = {};
+
         this.state = {
             head: 0,
             tail: 0,
@@ -35,16 +36,18 @@ function PageService ($q) {
         this.chain = $q.resolve();
     };
 
-    this.pushFront = results => {
+    this.pushFront = (results, key) => {
         if (!results) {
             return $q.resolve();
         }
 
         return this.storage.append(results)
             .then(() => {
-                this.records[++this.state.tail] = {};
+                const tail = key || ++this.state.tail;
+
+                this.records[tail] = {};
                 results.forEach(({ counter, start_line, end_line, uuid }) => {
-                    this.records[this.state.tail][counter] = { start_line, end_line };
+                    this.records[tail][counter] = { start_line, end_line };
                     this.uuids[counter] = uuid;
                 });
 
@@ -52,16 +55,18 @@ function PageService ($q) {
             });
     };
 
-    this.pushBack = results => {
+    this.pushBack = (results, key) => {
         if (!results) {
             return $q.resolve();
         }
 
         return this.storage.prepend(results)
             .then(() => {
-                this.records[--this.state.head] = {};
+                const head = key || --this.state.head;
+
+                this.records[head] = {};
                 results.forEach(({ counter, start_line, end_line, uuid }) => {
-                    this.records[this.state.head][counter] = { start_line, end_line };
+                    this.records[head][counter] = { start_line, end_line };
                     this.uuids[counter] = uuid;
                 });
 
@@ -216,7 +221,7 @@ function PageService ($q) {
             this.state.head = lastPage;
             this.state.tail = lastPage;
 
-            return this.pushBack(events);
+            return this.pushBack(events, lastPage);
         })
         .then(() => this.getPrevious());
 
@@ -226,7 +231,7 @@ function PageService ($q) {
             this.state.head = 1;
             this.state.tail = 1;
 
-            return this.pushBack(events);
+            return this.pushBack(events, 1);
         })
         .then(() => this.getNext());
 

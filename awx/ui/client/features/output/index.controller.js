@@ -97,11 +97,15 @@ function first () {
 }
 
 function next () {
-    return slide.getNext();
+    scroll.pause();
+
+    return slide.getNext()
+        .finally(() => scroll.resume());
 }
 
 function previous () {
     unfollow();
+    scroll.pause();
 
     const initialPosition = scroll.getScrollPosition();
 
@@ -111,7 +115,8 @@ function previous () {
             scroll.setScrollPosition(currentHeight - popHeight + initialPosition);
 
             return $q.resolve();
-        });
+        })
+        .finally(() => scroll.resume());
 }
 
 function last () {
