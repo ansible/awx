@@ -419,7 +419,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             else:
                 fmt_str = six.text_type('{}_{}')
             return fmt_str.format(type_alias, self.inputs.get('vault_id'))
-        return str(type_alias)
+        return six.text_type(type_alias)
 
     @staticmethod
     def unique_dict(cred_qs):
