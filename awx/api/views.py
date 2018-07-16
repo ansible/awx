@@ -1163,11 +1163,6 @@ class TeamList(ListCreateAPIView):
     model = Team
     serializer_class = TeamSerializer
 
-    def get_queryset(self):
-        qs = Team.accessible_objects(self.request.user, 'read_role').order_by()
-        qs = qs.select_related('admin_role', 'read_role', 'member_role', 'organization')
-        return qs
-
 
 class TeamDetail(RetrieveUpdateDestroyAPIView):
 
