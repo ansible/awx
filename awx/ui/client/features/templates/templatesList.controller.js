@@ -66,8 +66,10 @@ function ListTemplatesController(
         const job_template_id = _.get($state.params, 'job_template_id');
         const workflow_job_template_id = _.get($state.params, 'workflow_job_template_id');
 
-        if((job_template_id || workflow_job_template_id) && (newValue !== oldValue)) {
+        if((job_template_id || workflow_job_template_id)) {
             vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_job_template_id);
+        } else {
+            vm.activeId = "";
         }
     }, true);
 
