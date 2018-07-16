@@ -1,5 +1,5 @@
 - name: Set the Kubernetes Context
-  shell: "kubectl config set-context {{ kubernetes_context }}"
+  shell: "kubectl config use-context {{ kubernetes_context }}"
 
 - name: Get Namespace Detail
   shell: "kubectl get namespace {{ kubernetes_namespace }}"
