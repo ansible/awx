@@ -79,7 +79,7 @@ class TestOAuth2Application:
             can_access_list = [True, True, False, False]
             for user, can_access in zip(user_list, can_access_list):
                 app = Application.objects.create(
-                    name='test app for {}'.format(org_admin.username), user=org_admin,
+                    name='test app for {}'.format(user.username), user=org_admin,
                     client_type='confidential', authorization_grant_type='password', organization=organization
                 )
                 access = OAuth2ApplicationAccess(user)
@@ -94,7 +94,7 @@ class TestOAuth2Application:
             can_access_list = [True, True, False, False]
             for user, can_access in zip(user_list, can_access_list):
                 app = Application.objects.create(
-                    name='test app for {}'.format(admin.username), user=admin,
+                    name='test app for {}'.format(user.username), user=admin,
                     client_type='confidential', authorization_grant_type='password', organization=organization
                 )
                 access = OAuth2ApplicationAccess(user)
