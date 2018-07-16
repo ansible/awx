@@ -273,7 +273,7 @@ supervisor:
 	supervisord --configuration /supervisor.conf --pidfile=/tmp/supervisor_pid
 
 # Alternate approach to tmux to run all development tasks specified in
-# Procfile.  https://youtu.be/OPMgaibszjk
+# Procfile.
 honcho:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
