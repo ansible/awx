@@ -216,7 +216,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                              });
 
                              let credentialsToAdd = credentialsNotInPriorCredentials.filter(function(credNotInPrior) {
-                                 return !params.node.promptData.prompts.credentials.previousOverrides.some(function(priorCred) {
+                                 let previousOverrides = params.node.promptData.prompts.credentials.previousOverrides ? params.node.promptData.prompts.credentials.previousOverrides : [];
+                                 return !previousOverrides.some(function(priorCred) {
                                      return credNotInPrior.id === priorCred.id;
                                  });
                              });
