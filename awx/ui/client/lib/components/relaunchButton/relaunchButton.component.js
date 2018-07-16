@@ -81,7 +81,7 @@ function atRelaunchCtrl (
                             },
                             launchOptions: launchOptions.data,
                             job: vm.job.id,
-                            relaunchHostType: option ? (option.name).toLowerCase() : null,
+                            relaunchHostType: option ? (option.value) : null,
                             prompts: {
                                 credentials: {
                                     value: populatedJob.summary_fields.credentials ?
@@ -125,9 +125,9 @@ function atRelaunchCtrl (
                     id: vm.job.id,
                 };
 
-                if (_.has(option, 'name')) {
+                if (_.has(option, 'value')) {
                     launchParams.relaunchData = {
-                        hosts: (option.name).toLowerCase()
+                        hosts: option.value
                     };
                 }
 
@@ -155,11 +155,13 @@ function atRelaunchCtrl (
         vm.dropdownOptions = [
             {
                 name: strings.get('relaunch.ALL'),
-                icon: 'icon-host-all'
+                icon: 'icon-host-all',
+                value: 'all'
             },
             {
                 name: strings.get('relaunch.FAILED'),
-                icon: 'icon-host-failed'
+                icon: 'icon-host-failed',
+                value: 'failed'
             }
         ];
 
