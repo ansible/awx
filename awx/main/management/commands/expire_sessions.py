@@ -33,5 +33,5 @@ class Command(BaseCommand):
         for session in sessions:
             user_id = session.get_decoded().get('_auth_user_id')
             if (user is None) or (user_id and user.id == int(user_id)):
-                request.session = request.session = import_module(settings.SESSION_ENGINE).SessionStore(session.session_key)
+                request.session = import_module(settings.SESSION_ENGINE).SessionStore(session.session_key)
                 logout(request)
