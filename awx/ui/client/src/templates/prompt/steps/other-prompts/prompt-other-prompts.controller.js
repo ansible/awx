@@ -55,6 +55,16 @@ export default
                 }
 
                 if(scope.promptData.launchConf.ask_tags_on_launch) {
+                    // Ensure that the options match the currently selected tags.  These two things
+                    // might get out of sync if the user re-opens the prompts before saving the
+                    // schedule/wf node
+                    scope.promptData.prompts.tags.options = _.map(scope.promptData.prompts.tags.value, function(tag){
+                        return {
+                            value: tag.value,
+                            name: tag.name,
+                            label: tag.label
+                        };
+                    });
                     CreateSelect2({
                         element: '#job_launch_job_tags',
                         multiple: true,
@@ -63,6 +73,16 @@ export default
                 }
 
                 if(scope.promptData.launchConf.ask_skip_tags_on_launch) {
+                    // Ensure that the options match the currently selected tags.  These two things
+                    // might get out of sync if the user re-opens the prompts before saving the
+                    // schedule/wf node
+                    scope.promptData.prompts.skipTags.options = _.map(scope.promptData.prompts.skipTags.value, function(tag){
+                        return {
+                            value: tag.value,
+                            name: tag.name,
+                            label: tag.label
+                        };
+                    });
                     CreateSelect2({
                         element: '#job_launch_skip_tags',
                         multiple: true,
