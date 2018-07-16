@@ -3010,12 +3010,12 @@ class JobTemplateLaunch(RetrieveAPIView):
             if fd not in modern_data and id_fd in modern_data:
                 modern_data[fd] = modern_data[id_fd]
 
-        # This block causes `extra_credentials` to _always_ be ignored for
+        # This block causes `extra_credentials` to _always_ raise error if
         # the launch endpoint if we're accessing `/api/v1/`
         if get_request_version(self.request) == 1 and 'extra_credentials' in modern_data:
-            extra_creds = modern_data.pop('extra_credentials', None)
-            if extra_creds is not None:
-                ignored_fields['extra_credentials'] = extra_creds
+            raise ParseError({"extra_credentials": _(
+                "Field is not allowed for use with v1 API."
+            )})
 
         # Automatically convert legacy launch credential arguments into a list of `.credentials`
         if 'credentials' in modern_data and (

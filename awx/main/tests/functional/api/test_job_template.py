@@ -567,16 +567,9 @@ def test_v1_launch_with_extra_credentials(get, post, organization_factory,
             credential=machine_credential.pk,
             extra_credentials=[credential.pk, net_credential.pk]
         ),
-        objs.superusers.admin, expect=201
+        objs.superusers.admin, expect=400
     )
-    job_pk = resp.data.get('id')
-    assert resp.data.get('ignored_fields').keys() == ['extra_credentials']
-
-    resp = get(reverse('api:job_extra_credentials_list', kwargs={'pk': job_pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 0
-
-    resp = get(reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 0
+    assert 'Field is not allowed for use with v1 API' in resp.data.get('extra_credentials')
 
 
 @pytest.mark.django_db
