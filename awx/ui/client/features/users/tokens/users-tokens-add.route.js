@@ -3,17 +3,21 @@ import AddController from './users-tokens-add.controller';
 
 const addTemplate = require('~features/users/tokens/users-tokens-add.partial.html');
 
-function TokensDetailResolve ($q, Application) {
+function TokensDetailResolve ($q, Application, Token, User) {
     const promises = {};
 
     promises.application = new Application('options');
+    promises.token = new Token('options');
+    promises.user = new User('options');
 
     return $q.all(promises);
 }
 
 TokensDetailResolve.$inject = [
     '$q',
-    'ApplicationModel'
+    'ApplicationModel',
+    'TokenModel',
+    'UserModel'
 ];
 
 function isMeResolve ($rootScope, $stateParams, $state) {

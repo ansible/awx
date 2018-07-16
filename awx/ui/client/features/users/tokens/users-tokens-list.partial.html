@@ -25,7 +25,10 @@
     <at-row ng-repeat="token in tokens">
         <div class="at-Row-items">
             <at-row-item
-                header-value="{{ vm.strings.get('list.HEADER', token.summary_fields.application.name) }}">
+                header-value="{{ token.summary_fields.application.name ?
+                    vm.strings.get('list.HEADER', token.summary_fields.application.name) :
+                    vm.strings.get('list.PERSONAL_ACCESS_TOKEN')
+                }}">
             </at-row-item>
             <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION') }}"

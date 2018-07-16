@@ -1,59 +1,72 @@
 function AddTokensController (
-    models, $state, strings, Rest, Alert, Wait, GetBasePath,
+    models, $state, strings, Alert, Wait,
     $filter, ProcessErrors, $scope
 ) {
     const vm = this || {};
-    const { application } = models;
+    const { application, token, user } = models;
 
     vm.mode = 'add';
     vm.strings = strings;
     vm.panelTitle = strings.get('add.PANEL_TITLE');
 
-    vm.form = {};
-
-    vm.form.application = {
-        type: 'field',
-        label: 'Application',
-        id: 'application'
-    };
-    vm.form.description = {
-        type: 'String',
-        label: 'Description',
-        id: 'description'
-    };
-
-    vm.form.application._resource = 'application';
-    vm.form.application._route = 'users.edit.tokens.add.application';
-    vm.form.application._model = application;
-    vm.form.application._placeholder = strings.get('add.APP_PLACEHOLDER');
-    vm.form.application.required = true;
-
-    vm.form.description.required = false;
-
-    vm.form.scope = {
-        choices: [
-            [null, ''],
-            ['read', strings.get('add.SCOPE_READ_LABEL')],
-            ['write', strings.get('add.SCOPE_WRITE_LABEL')]
-        ],
-        help_text: strings.get('add.SCOPE_HELP_TEXT'),
-        id: 'scope',
-        label: 'Scope',
-        required: true,
-        _component: 'at-input-select',
-        _data: [
-            [null, ''],
-            ['read', strings.get('add.SCOPE_READ_LABEL')],
-            ['write', strings.get('add.SCOPE_WRITE_LABEL')]
-        ],
-        _exp: 'choice[1] for (index, choice) in state._data',
-        _format: 'selectFromOptions'
+    vm.form = {
+        application: {
+            type: 'field',
+            label: 'Application',
+            id: 'application',
+            required: false,
+            help_text: strings.get('add.APPLICATION_HELP_TEXT'),
+            _resource: 'application',
+            _route: 'users.edit.tokens.add.application',
+            _model: application,
+            _placeholder: strings.get('add.APP_PLACEHOLDER')
+        },
+        description: {
+            type: 'String',
+            label: 'Description',
+            id: 'description',
+            required: false
+        },
+        scope: {
+            choices: [
+                [null, ''],
+                ['read', strings.get('add.SCOPE_READ_LABEL')],
+                ['write', strings.get('add.SCOPE_WRITE_LABEL')]
+            ],
+            help_text: strings.get('add.SCOPE_HELP_TEXT'),
+            id: 'scope',
+            label: 'Scope',
+            required: true,
+            _component: 'at-input-select',
+            _data: [
+                [null, ''],
+                ['read', strings.get('add.SCOPE_READ_LABEL')],
+                ['write', strings.get('add.SCOPE_WRITE_LABEL')]
+            ],
+            _exp: 'choice[1] for (index, choice) in state._data',
+            _format: 'selectFromOptions'
+        }
     };
 
     vm.form.save = payload => {
-        Rest.setUrl(`${GetBasePath('users')}${$state.params.user_id}/authorized_tokens`);
-        return Rest.post(payload)
+        const postToken = _.has(payload, 'application') ?
+            user.postAuthorizedTokens({
+                id: $state.params.user_id,
+                payload
+            }) : token.request('post', { data: payload });
+
+        return postToken
             .then(({ data }) => {
+                const refreshHTML = data.refresh_token ?
+                    `<div class="TokenModal">
+                        <div class="TokenModal-label">
+                            ${strings.get('add.REFRESH_TOKEN_LABEL')}
+                        </div>
+                        <div class="TokenModal-value">
+                            ${data.refresh_token}
+                        </div>
+                    </div>` : '';
+
                 Alert(strings.get('add.TOKEN_MODAL_HEADER'), `
                   <div class="TokenModal">
                       <div class="TokenModal-label">
@@ -63,14 +76,7 @@ function AddTokensController (
                           ${data.token}
                       </div>
                   </div>
-                  <div class="TokenModal">
-                      <div class="TokenModal-label">
-                          ${strings.get('add.REFRESH_TOKEN_LABEL')}
-                      </div>
-                      <div class="TokenModal-value">
-                          ${data.refresh_token}
-                      </div>
-                  </div>
+                  ${refreshHTML}
                   <div class="TokenModal">
                       <div class="TokenModal-label">
                           ${strings.get('add.TOKEN_EXPIRES_LABEL')}
@@ -106,10 +112,8 @@ AddTokensController.$inject = [
     'resolvedModels',
     '$state',
     'TokensStrings',
-    'Rest',
     'Alert',
     'Wait',
-    'GetBasePath',
     '$filter',
     'ProcessErrors',
     '$scope'
