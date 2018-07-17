@@ -1,20 +1,26 @@
 import uuid from 'uuid';
 
-const id = uuid().substr(0, 8);
+const data = {};
 
-const INVENTORY_NAME = `inventory-${id}`;
-const MACHINE_CREDENTIAL_NAME = `credential-machine-${id}`;
-const ORGANIZATION_NAME = `organization-${id}`;
-const PROJECT_NAME = `project-${id}`;
-const PROJECT_URL = 'https://github.com/jlaska/ansible-playbooks';
-const PROJECT_BRANCH = 'master';
-const PLAYBOOK_NAME = 'multivault.yml';
-const TEMPLATE_NAME = `template-${id}`;
-const VAULT_CREDENTIAL_NAME_1 = `credential-vault-${id}-1`;
-const VAULT_CREDENTIAL_NAME_2 = `credential-vault-${id}-2`;
+const initializeData = () => {
+    const id = uuid().substr(0, 8);
+
+    data.INVENTORY_NAME = `inventory-${id}`;
+    data.MACHINE_CREDENTIAL_NAME = `credential-machine-${id}`;
+    data.ORGANIZATION_NAME = `organization-${id}`;
+    data.PROJECT_NAME = `project-${id}`;
+    data.PROJECT_URL = 'https://github.com/jlaska/ansible-playbooks';
+    data.PROJECT_BRANCH = 'master';
+    data.PLAYBOOK_NAME = 'multivault.yml';
+    data.TEMPLATE_NAME = `template-${id}`;
+    data.VAULT_CREDENTIAL_NAME_1 = `credential-vault-${id}-1`;
+    data.VAULT_CREDENTIAL_NAME_2 = `credential-vault-${id}-2`;
+};
 
 module.exports = {
     'login to awx': client => {
+        initializeData();
+
         client.login();
         client.resizeWindow(1200, 800);
         client.waitForAngular();
@@ -37,7 +43,7 @@ module.exports = {
         details.waitForElementVisible('@name');
         details.expect.element('@name').enabled;
 
-        details.setValue('@name', ORGANIZATION_NAME);
+        details.setValue('@name', data.ORGANIZATION_NAME);
 
         organizations.waitForElementVisible('@save');
         organizations.expect.element('@save').enabled;
@@ -65,17 +71,17 @@ module.exports = {
         projects.waitForElementVisible('label[for="organization"] + div input');
         projects.waitForElementPresent('label[for="scm_type"] + div > div select option[value="git"]');
 
-        projects.setValue('label[for="name"] + div input', PROJECT_NAME);
+        projects.setValue('label[for="name"] + div input', data.PROJECT_NAME);
         projects.clearValue('label[for="organization"] + div input');
-        projects.setValue('label[for="organization"] + div input', ORGANIZATION_NAME);
+        projects.setValue('label[for="organization"] + div input', data.ORGANIZATION_NAME);
         projects.click('label[for="scm_type"] + div > div select option[value="git"]');
 
         projects.waitForElementVisible('.sourceSubForm');
         projects.waitForElementVisible('label[for="scm_url"] + div input');
         projects.waitForElementVisible('label[for="scm_branch"] + div input');
 
-        projects.setValue('label[for="scm_url"] + div input', PROJECT_URL);
-        projects.setValue('label[for="scm_branch"] + div input', PROJECT_BRANCH);
+        projects.setValue('label[for="scm_url"] + div input', data.PROJECT_URL);
+        projects.setValue('label[for="scm_branch"] + div input', data.PROJECT_BRANCH);
 
         projects.expect.element('#project_save_btn').enabled;
         projects.click('#project_save_btn');
@@ -84,7 +90,7 @@ module.exports = {
         projects.waitForElementNotVisible('div.spinny');
 
         projects.expect.element('smart-search input').enabled;
-        projects.sendKeys('smart-search input', `${PROJECT_NAME}${client.Keys.ENTER}`);
+        projects.sendKeys('smart-search input', `${data.PROJECT_NAME}${client.Keys.ENTER}`);
 
         projects.waitForElementVisible('div.spinny');
         projects.waitForElementNotVisible('div.spinny');
@@ -112,8 +118,8 @@ module.exports = {
         details.expect.element('@name').enabled;
         details.expect.element('@organization').enabled;
 
-        details.setValue('@name', INVENTORY_NAME);
-        details.setValue('@organization', ORGANIZATION_NAME);
+        details.setValue('@name', data.INVENTORY_NAME);
+        details.setValue('@organization', data.ORGANIZATION_NAME);
 
         inventories.waitForElementVisible('@save');
         inventories.expect.element('@save').enabled;
@@ -164,8 +170,8 @@ module.exports = {
 
         details.waitForElementVisible('@save');
         details.clearAndSelectType('Vault');
-        details.setValue('@organization', ORGANIZATION_NAME);
-        details.setValue('@name', VAULT_CREDENTIAL_NAME_1);
+        details.setValue('@organization', data.ORGANIZATION_NAME);
+        details.setValue('@name', data.VAULT_CREDENTIAL_NAME_1);
 
         details.section.vault.setValue('@vaultPassword', 'secret1');
         details.section.vault.setValue('@vaultIdentifier', 'first');
@@ -180,8 +186,8 @@ module.exports = {
 
         details.waitForElementVisible('@save');
         details.clearAndSelectType('Vault');
-        details.setValue('@organization', ORGANIZATION_NAME);
-        details.setValue('@name', VAULT_CREDENTIAL_NAME_2);
+        details.setValue('@organization', data.ORGANIZATION_NAME);
+        details.setValue('@name', data.VAULT_CREDENTIAL_NAME_2);
 
         details.section.vault.setValue('@vaultPassword', 'secret2');
         details.section.vault.setValue('@vaultIdentifier', 'second');
@@ -200,8 +206,8 @@ module.exports = {
 
         details.waitForElementVisible('@save');
         details.clearAndSelectType('Machine');
-        details.setValue('@organization', ORGANIZATION_NAME);
-        details.setValue('@name', MACHINE_CREDENTIAL_NAME);
+        details.setValue('@organization', data.ORGANIZATION_NAME);
+        details.setValue('@name', data.MACHINE_CREDENTIAL_NAME);
 
         details.expect.element('@save').enabled;
         details.click('@save');
@@ -215,13 +221,13 @@ module.exports = {
         client.navigateTo(templates.url());
 
         templates.selectAdd('Job Template');
-        templates.selectInventory(INVENTORY_NAME);
-        templates.selectProject(PROJECT_NAME);
-        templates.selectVaultCredential(VAULT_CREDENTIAL_NAME_1);
-        templates.selectVaultCredential(VAULT_CREDENTIAL_NAME_2);
-        templates.selectMachineCredential(MACHINE_CREDENTIAL_NAME);
-        templates.selectPlaybook(PLAYBOOK_NAME);
-        templates.sendKeys('label[for="name"] + div input', TEMPLATE_NAME);
+        templates.selectInventory(data.INVENTORY_NAME);
+        templates.selectProject(data.PROJECT_NAME);
+        templates.selectVaultCredential(data.VAULT_CREDENTIAL_NAME_1);
+        templates.selectVaultCredential(data.VAULT_CREDENTIAL_NAME_2);
+        templates.selectMachineCredential(data.MACHINE_CREDENTIAL_NAME);
+        templates.selectPlaybook(data.PLAYBOOK_NAME);
+        templates.sendKeys('label[for="name"] + div input', data.TEMPLATE_NAME);
 
         templates.expect.element('#job_template_save_btn').enabled;
         templates.click('#job_template_save_btn');
@@ -238,11 +244,11 @@ module.exports = {
         templates.expect.element('smart-search input').enabled;
 
         client.pause(1000).waitForElementNotVisible('div.spinny');
-        templates.sendKeys('smart-search input', `${TEMPLATE_NAME}${client.Keys.ENTER}`);
+        templates.sendKeys('smart-search input', `${data.TEMPLATE_NAME}${client.Keys.ENTER}`);
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
 
-        templates.sendKeys('smart-search input', `${TEMPLATE_NAME}${client.Keys.ENTER}`);
+        templates.sendKeys('smart-search input', `${data.TEMPLATE_NAME}${client.Keys.ENTER}`);
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
 
