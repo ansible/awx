@@ -53,21 +53,9 @@ export default
             $scope.time.expiresOn = calcExpiresOn($scope.license.license_info.license_date);
             $scope.valid = CheckLicense.valid($scope.license.license_info);
             $scope.compliant = $scope.license.license_info.compliant;
-            $scope.newLicense = {};
-
-            Rest.setUrl(`${GetBasePath('settings')}ui`);
-            Rest.get()
-                .then(({data}) => {
-                    if (data.PENDO_TRACKING_STATE === 'off' && !$rootScope.licenseMissing) {
-                        $scope.newLicense.pendo = false;
-                    } else {
-                        $scope.newLicense.pendo = true;
-                    }
-                })
-                .catch(() => {
-                    // default pendo tracking to true when settings is not accessible
-                    $scope.newLicense.pendo = true;
-                });
+            $scope.newLicense = {
+                pendo: true
+            };
         };
 
         init(config);
@@ -113,34 +101,33 @@ export default
       				  .then(() => {
         				    reset();
 
-                    ConfigService.delete();
-                    ConfigService.getConfig()
-                        .then(function(config) {
-                            delete($rootScope.features);
-                            FeaturesService.get();
+                            ConfigService.delete();
+                            ConfigService.getConfig()
+                                .then(function(config) {
+                                    delete($rootScope.features);
+                                    FeaturesService.get();
 
-                            if ($scope.newLicense.pendo) {
-                                pendoService.updatePendoTrackingState('detailed');
-                                pendoService.issuePendoIdentity();
-                            } else {
-                                pendoService.updatePendoTrackingState('off');
-                            }
-
-                            if ($rootScope.licenseMissing === true) {
-                                $state.go('dashboard', {
-                        	          licenseMissing: false
+                                    if ($rootScope.licenseMissing === true) {
+                                        if ($scope.newLicense.pendo) {
+                                            pendoService.updatePendoTrackingState('detailed');
+                                            pendoService.issuePendoIdentity();
+                                        } else {
+                                            pendoService.updatePendoTrackingState('off');
+                                        }
+                                        $state.go('dashboard', {
+                                	          licenseMissing: false
+                                        });
+                                    } else {
+                                        init(config);
+                                        $scope.success = true;
+                                        $rootScope.licenseMissing = false;
+                                        // for animation purposes
+                                        const successTimeout = setTimeout(function() {
+                                	          $scope.success = false;
+                                	          clearTimeout(successTimeout);
+                                        }, 4000);
+                                    }
                                 });
-                            } else {
-                                init(config);
-                                $scope.success = true;
-                                $rootScope.licenseMissing = false;
-                                // for animation purposes
-                                const successTimeout = setTimeout(function() {
-                        	          $scope.success = false;
-                        	          clearTimeout(successTimeout);
-                                }, 4000);
-                            }
                         });
-      			    });
     		};
 }];
