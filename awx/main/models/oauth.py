@@ -27,6 +27,7 @@ class OAuth2Application(AbstractApplication):
     class Meta:
         app_label = 'main'
         verbose_name = _('application')
+        unique_together = (("name", "organization"),)
     
     CLIENT_CONFIDENTIAL = "confidential"
     CLIENT_PUBLIC = "public"
