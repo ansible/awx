@@ -82,6 +82,33 @@ def _update_m2m_from_expression(user, rel, expr, remove=True):
         rel.remove(user)
 
 
+def _update_org_from_attr(user, rel, attr, remove, remove_admins):
+    from awx.main.models import Organization
+    multiple_orgs = feature_enabled('multiple_organizations')
+
+    org_ids = []
+
+    for org_name in attr:
+        if multiple_orgs:
+            org = Organization.objects.get_or_create(name=org_name)[0]
+        else:
+            try:
+                org = Organization.objects.order_by('pk')[0]
+            except IndexError:
+                continue
+
+        org_ids.append(org.id)
+        getattr(org, rel).members.add(user)
+
+    if remove:
+        [o.member_role.members.remove(user) for o in
+            Organization.objects.filter(Q(member_role__members=user) & ~Q(id__in=org_ids))]
+
+    if remove_admins:
+        [o.admin_role.members.remove(user) for o in
+            Organization.objects.filter(Q(admin_role__members=user) & ~Q(id__in=org_ids))]
+
+
 def update_user_orgs(backend, details, user=None, *args, **kwargs):
     '''
     Update organization memberships for the given user based on mapping rules
@@ -150,32 +177,19 @@ def update_user_teams(backend, details, user=None, *args, **kwargs):
 def update_user_orgs_by_saml_attr(backend, details, user=None, *args, **kwargs):
     if not user:
         return
-    from awx.main.models import Organization
     from django.conf import settings
-    multiple_orgs = feature_enabled('multiple_organizations')
     org_map = settings.SOCIAL_AUTH_SAML_ORGANIZATION_ATTR
-    if org_map.get('saml_attr') is None:
+    if org_map.get('saml_attr') is None and org_map.get('saml_admin_attr') is None:
         return
 
+    remove = bool(org_map.get('remove', True))
+    remove_admins = bool(org_map.get('remove_admins', True))
+
     attr_values = kwargs.get('response', {}).get('attributes', {}).get(org_map['saml_attr'], [])
+    attr_admin_values = kwargs.get('response', {}).get('attributes', {}).get(org_map['saml_admin_attr'], [])
 
-    org_ids = []
-
-    for org_name in attr_values:
-        if multiple_orgs:
-            org = Organization.objects.get_or_create(name=org_name)[0]
-        else:
-            try:
-                org = Organization.objects.order_by('pk')[0]
-            except IndexError:
-                continue
-
-        org_ids.append(org.id)
-        org.member_role.members.add(user)
-
-    if org_map.get('remove', True):
-        [o.member_role.members.remove(user) for o in
-            Organization.objects.filter(Q(member_role__members=user) & ~Q(id__in=org_ids))]
+    _update_org_from_attr(user, "member_role", attr_values, remove, False)
+    _update_org_from_attr(user, "admin_role", attr_admin_values, False, remove_admins)
 
 
 def update_user_teams_by_saml_attr(backend, details, user=None, *args, **kwargs):

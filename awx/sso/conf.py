@@ -1196,7 +1196,9 @@ register(
     category_slug='saml',
     placeholder=collections.OrderedDict([
         ('saml_attr', 'organization'),
+        ('saml_admin_attr', 'organization_admin'),
         ('remove', True),
+        ('remove_admins', True),
     ]),
     feature_required='enterprise_auth',
 )
