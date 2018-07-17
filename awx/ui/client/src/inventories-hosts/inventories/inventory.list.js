@@ -104,10 +104,11 @@ export default ['i18n', 'awxNetStrings' , function(i18n, awxNetStrings) {
             copy: {
                 label: i18n._('Copy'),
                 ngClick: 'copyInventory(inventory)',
-                "class": 'btn-danger btn-xs',
-                awToolTip: i18n._('Copy inventory'),
+                awToolTip: "{{ inventory.copyTip }}",
+                dataTipWatch: "inventory.copyTip",
                 dataPlacement: 'top',
-                ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.copy'
+                ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.copy',
+                ngClass: 'inventory.copyClass'
             },
             view: {
                 label: i18n._('View'),

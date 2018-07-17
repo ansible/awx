@@ -40,6 +40,8 @@ function InventoriesList($scope,
         inventory.host_status_class = "Inventories-hostStatus";
 
         if (inventory.has_inventory_sources) {
+            inventory.copyTip = i18n._('Inventories with sources cannot be copied');
+            inventory.copyClass = "btn-disabled";
             if (inventory.inventory_sources_with_failures > 0) {
                 inventory.syncStatus = 'error';
                 inventory.syncTip = inventory.inventory_sources_with_failures + i18n._(' sources with sync failures. Click for details');
@@ -50,6 +52,8 @@ function InventoriesList($scope,
             }
         }
         else {
+            inventory.copyTip = i18n._('Copy Inventory');
+            inventory.copyClass = "";
             inventory.syncStatus = 'na';
             inventory.syncTip = i18n._('Not configured for inventory sync.');
             inventory.launch_class = "btn-disabled";
@@ -74,15 +78,17 @@ function InventoriesList($scope,
     }
 
     $scope.copyInventory = inventory => {
-        Wait('start');
-        new Inventory('get', inventory.id)
-            .then(model => model.copy())
-            .then(copy => $scope.editInventory(copy, true))
-            .catch(({ data, status }) => {
-                const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
-                ProcessErrors($scope, data, status, null, params);
-            })
-            .finally(() => Wait('stop'));
+        if (!inventory.has_inventory_sources) {
+            Wait('start');
+            new Inventory('get', inventory.id)
+                .then(model => model.copy())
+                .then(copy => $scope.editInventory(copy, true))
+                .catch(({ data, status }) => {
+                    const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
+                    ProcessErrors($scope, data, status, null, params);
+                })
+                .finally(() => Wait('stop'));
+        }
     };
 
     $scope.goToGraph = function(inventory){
