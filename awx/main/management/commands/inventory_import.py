@@ -1062,6 +1062,8 @@ class Command(BaseCommand):
                 self.inventory_update.result_traceback = tb
                 self.inventory_update.status = status
                 self.inventory_update.save(update_fields=['status', 'result_traceback'])
+                self.inventory_source.status = status
+                self.inventory_source.save(update_fields=['status'])
 
         if exc and isinstance(exc, CommandError):
             sys.exit(1)
