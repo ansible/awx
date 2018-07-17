@@ -81,6 +81,10 @@ export default function BuildAnchor($log, $filter) {
                  case 'label':
                      url = null;
                      break;
+                 case 'inventory_source':
+                     const inventoryId = _.get(obj, 'inventory', '').split('-').reverse()[0];
+                     url += `inventories/inventory/${inventoryId}/inventory_sources/edit/${obj.id}`;
+                     break;
                  default:
                      url += resource + 's/' + obj.id + '/';
              }
