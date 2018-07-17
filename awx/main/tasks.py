@@ -1039,6 +1039,9 @@ class BaseTask(Task):
         instance = self.update_model(pk)
         if instance.cancel_flag:
             status = 'canceled'
+            cancel_wait = (now() - instance.modified).seconds if instance.modified else 0
+            if cancel_wait > 5:
+                logger.warn(six.text_type('Request to cancel {} took {} seconds to complete.').format(instance.log_format, cancel_wait))
 
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements,
