@@ -13,6 +13,7 @@
 # scm_accept_hostkey: true/false (only for git, set automatically)
 # scm_revision: current revision in tower
 # scm_revision_output: where to store gathered revision (temporary file)
+# roles_enabled: Allow us to pull roles from a requirements.yml file
 
 - hosts: all
   connection: local
@@ -152,4 +153,4 @@
           chdir: "{{project_path|quote}}/roles"
         when: doesRequirementsExist.stat.exists and scm_result is defined
 
-      when: scm_full_checkout|bool
+      when: scm_full_checkout|bool and roles_enabled|bool

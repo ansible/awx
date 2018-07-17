@@ -278,6 +278,16 @@ register(
 )
 
 register(
+    'AWX_ROLES_ENABLED',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable Role Download'),
+    help_text=_('Allows roles to be dynamically downlaoded from a requirements.yml file for SCM projects.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
     'STDOUT_MAX_BYTES_DISPLAY',
     field_class=fields.IntegerField,
     min_value=0,
