@@ -38,8 +38,8 @@ function PromptService (Empty, $filter)  {
         prompts.jobType.choices = _.get(params, 'launchOptions.actions.POST.job_type.choices', []).map(c => ({label: c[1], value: c[0]}));
         prompts.jobType.value = _.has(params, 'currentValues.job_type') && params.currentValues.job_type ? _.find(prompts.jobType.choices, item => item.value === params.currentValues.job_type) : _.find(prompts.jobType.choices, item => item.value === params.launchConf.defaults.job_type);
         prompts.limit.value = _.has(params, 'currentValues.limit') && params.currentValues.limit ? params.currentValues.limit : (_.has(params, 'launchConf.defaults.limit') ? params.launchConf.defaults.limit : "");
-        prompts.tags.options = prompts.tags.value = (jobTags && jobTags !== "") ? jobTags.split(',').map((i) => ({name: i, label: i, value: i})) : [];
-        prompts.skipTags.options = prompts.skipTags.value = (skipTags && skipTags !== "") ? skipTags.split(',').map((i) => ({name: i, label: i, value: i})) : [];
+        prompts.tags.value = (jobTags && jobTags !== "") ? jobTags.split(',').map((i) => ({name: i, label: i, value: i})) : [];
+        prompts.skipTags.value = (skipTags && skipTags !== "") ? skipTags.split(',').map((i) => ({name: i, label: i, value: i})) : [];
         prompts.diffMode.value = _.has(params, 'currentValues.diff_mode') && typeof params.currentValues.diff_mode === 'boolean' ? params.currentValues.diff_mode : (_.has(params, 'launchConf.defaults.diff_mode') ? params.launchConf.defaults.diff_mode : null);
 
         return prompts;
