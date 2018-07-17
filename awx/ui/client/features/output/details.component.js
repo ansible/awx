@@ -133,51 +133,6 @@ function getJobTemplateDetails () {
     return { label, link, value, tooltip };
 }
 
-function getInventoryJobNameDetails () {
-    if (resource.model.get('type') !== 'inventory_update') {
-        return null;
-    }
-
-    const jobArgs = resource.model.get('job_args');
-
-    if (!jobArgs) {
-        return null;
-    }
-
-    let parsedJobArgs;
-
-    try {
-        parsedJobArgs = JSON.parse(jobArgs);
-    } catch (e) {
-        return null;
-    }
-
-    if (!Array.isArray(parsedJobArgs)) {
-        return null;
-    }
-
-    const jobArgIndex = parsedJobArgs.indexOf('--inventory-id');
-    const inventoryId = parsedJobArgs[jobArgIndex + 1];
-
-    if (jobArgIndex < 0) {
-        return null;
-    }
-
-    if (!Number.isInteger(parseInt(inventoryId, 10))) {
-        return null;
-    }
-
-    const name = resource.model.get('name');
-    const id = resource.model.get('id');
-
-    const label = strings.get('labels.NAME');
-    const tooltip = strings.get('tooltips.INVENTORY');
-    const value = `${id} - ${$filter('sanitize')(name)}`;
-    const link = `/#/inventories/inventory/${inventoryId}`;
-
-    return { label, link, tooltip, value };
-}
-
 function getInventorySourceDetails () {
     if (!resource.model.has('summary_fields.inventory_source.source')) {
         return null;
@@ -726,7 +681,6 @@ function JobDetailsController (
         vm.skipTags = getSkipTagDetails();
         vm.extraVars = getExtraVarsDetails();
         vm.labels = getLabelDetails();
-        vm.inventoryJobName = getInventoryJobNameDetails();
         vm.inventorySource = getInventorySourceDetails();
         vm.overwrite = getOverwriteDetails();
         vm.overwriteVars = getOverwriteVarsDetails();

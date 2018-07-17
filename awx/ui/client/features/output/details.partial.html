@@ -41,18 +41,6 @@
 </div>
 
 <!-- LEFT PANE DETAILS GROUP -->
-<!-- INVENTORY JOB NAME  DETAIL -->
-<div class="JobResults-resultRow" ng-if="vm.inventoryJobName">
-    <label class="JobResults-resultRowLabel">{{ vm.inventoryJobName.label }}</label>
-    <div class="JobResults-resultRowText">
-        <a href="{{ vm.inventoryJobName.link }}"
-           aw-tool-tip="{{ vm.inventoryJobName.tooltip }}"
-           data-placement="top">
-            {{ vm.inventoryJobName.value }}
-        </a>
-    </div>
-</div>
-
 <!-- STATUS DETAIL -->
 <div class="JobResults-resultRow">
     <label class="JobResults-resultRowLabel">{{ vm.status.label }}</label>

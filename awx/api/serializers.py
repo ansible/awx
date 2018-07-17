@@ -2172,7 +2172,7 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
     class Meta:
         model = InventoryUpdate
-        fields = ('*', 'inventory_source', 'license_error', 'source_project_update',
+        fields = ('*', 'inventory', 'inventory_source', 'license_error', 'source_project_update',
                   '-controller_node',)
 
     def get_related(self, obj):
@@ -2193,8 +2193,12 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
         if obj.source_project_update_id:
             res['source_project_update'] = self.reverse('api:project_update_detail',
                                                         kwargs={'pk': obj.source_project_update.pk})
+        if obj.inventory:
+            res['inventory'] = self.reverse('api:inventory_detail', kwargs={'pk': obj.inventory.pk})
+
         if self.version > 1:
             res['credentials'] = self.reverse('api:inventory_update_credentials_list', kwargs={'pk': obj.pk})
+
         return res
 
 
