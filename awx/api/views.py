@@ -3036,10 +3036,10 @@ class JobTemplateLaunch(RetrieveAPIView):
             existing_credentials = obj.credentials.all()
             template_credentials = list(existing_credentials)  # save copy of existing
             new_credentials = []
-            for key, conditional in (
-                ('credential', lambda cred: cred.credential_type.kind != 'ssh'),
-                ('vault_credential', lambda cred: cred.credential_type.kind != 'vault'),
-                ('extra_credentials', lambda cred: cred.credential_type.kind not in ('cloud', 'net'))
+            for key, conditional, _type, type_repr in (
+                ('credential', lambda cred: cred.credential_type.kind != 'ssh', int, 'pk value'),
+                ('vault_credential', lambda cred: cred.credential_type.kind != 'vault', int, 'pk value'),
+                ('extra_credentials', lambda cred: cred.credential_type.kind not in ('cloud', 'net'), Iterable, 'a list')
             ):
                 if key in modern_data:
                     # if a specific deprecated key is specified, remove all
@@ -3047,6 +3047,13 @@ class JobTemplateLaunch(RetrieveAPIView):
                     # credentials
                     existing_credentials = filter(conditional, existing_credentials)
                     prompted_value = modern_data.pop(key)
+
+                    # validate type, since these are not covered by a serializer
+                    if not isinstance(prompted_value, _type):
+                        msg = _(
+                            "Incorrect type. Expected {}, received {}."
+                        ).format(type_repr, prompted_value.__class__.__name__)
+                        raise ParseError({key: [msg], 'credentials': [msg]})
 
                     # add the deprecated credential specified in the request
                     if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, basestring):
