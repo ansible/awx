@@ -441,7 +441,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                         searchParamParts[paramPartIndex] = decodeURIComponent(paramPart);
                     });
 
-                    const paramPartIndex = searchParamParts.indexOf(value);
+                    const paramPartIndex = searchParamParts.indexOf(decodeURIComponent(value));
 
                     if (paramPartIndex !== -1) {
                         searchParamParts.splice(paramPartIndex, 1);
