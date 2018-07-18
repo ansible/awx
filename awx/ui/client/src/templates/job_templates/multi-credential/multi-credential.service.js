@@ -38,14 +38,11 @@ function MultiCredentialService (Rest, ProcessErrors, $q, GetBasePath)  {
                     .filter(id => selected.indexOf(id) < 0)
                     .map(id => disassociate({ related }, id));
 
-                const associationPromises = selected
-                    .filter(id => currentlyAssociated.indexOf(id) < 0)
-                    .map(id => associate({ related }, id));
-
-                const promises = disassociationPromises
-                    .concat(associationPromises);
-
-                return $q.all(promises);
+                return $q.all(disassociationPromises).then(() => {
+                    _.each(selected.filter(id => currentlyAssociated.indexOf(id) < 0), (id) => {
+                        associate({related}, id);
+                    });
+                });
             });
     };
 
