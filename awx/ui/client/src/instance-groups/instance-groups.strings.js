@@ -44,7 +44,8 @@ function InstanceGroupsStrings (BaseString) {
 
     ns.capacityAdjuster = {
         CPU: t.s('CPU'),
-        RAM: t.s('RAM')
+        RAM: t.s('RAM'),
+        FORKS: t.s('Forks')
     };
 
     ns.jobs = {

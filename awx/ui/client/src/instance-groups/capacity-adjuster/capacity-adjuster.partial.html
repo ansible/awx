@@ -1,5 +1,7 @@
 <div class="CapacityAdjuster">
-    <span class="CapacityAdjuster-valueLabel">{{ state.capacity_adjustment }}</span>
+    <span class="CapacityAdjuster-valueLabel">
+        {{ forks }} {{:: vm.strings.get('capacityAdjuster.FORKS')}}
+    </span>
     <div class="at-InputSlider">
         <p>{{min_capacity.label}} {{min_capacity.value}}</p>
             <input string-to-number
