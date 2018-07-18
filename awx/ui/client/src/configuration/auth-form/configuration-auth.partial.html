@@ -8,7 +8,7 @@
                 class="form-control"
                 ng-model="authVm.dropdownValue"
                 ng-options="opt.value as opt.label for opt in authVm.dropdownOptions"
-                ng-change="authVm.activeForm()">
+                ng-change="authVm.changeAuthDropdown('{{authVm.dropdownValue}}')">
             </select>
         </div>
     </div>
@@ -21,7 +21,7 @@
                 class="form-control"
                 ng-model="authVm.ldapDropdownValue"
                 ng-options="opt.value as opt.label for opt in authVm.ldapDropdownOptions"
-                ng-change="authVm.activeForm()">
+                ng-change="authVm.changeLdapDropdown('{{authVm.ldapDropdownValue}}')">
             </select>
         </div>
     </div>
