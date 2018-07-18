@@ -6,7 +6,7 @@
 
 AWX currently requires the 6.x LTS version of Node and NPM.
 
-macOS installer: [https://nodejs.org/dist/latest-v6.x/node-v6.9.4.pkg](https://nodejs.org/dist/latest-v6.x/node-v6.9.4.pkg)
+macOS installer: [https://nodejs.org/dist/latest-v6.x/](https://nodejs.org/dist/latest-v6.x/)
 
 RHEL / CentOS / Fedora:
 
