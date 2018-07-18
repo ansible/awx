@@ -70,7 +70,7 @@ function PromptService (Empty, $filter)  {
                 } else {
                     question.model = question.default.split(/\n/);
                 }
-                question.choices = question.choices.split(/\n/);
+                question.choices = typeof question.choices.split === 'function' ? question.choices.split(/\n/) : question.choices;
             }
             else if(question.type === "multiplechoice") {
                 if(params.extra_data && params.extra_data[question.variable]) {
@@ -80,7 +80,7 @@ function PromptService (Empty, $filter)  {
                     question.model = question.default ? angular.copy(question.default) : "";
                 }
 
-                question.choices = question.choices.split(/\n/);
+                question.choices = typeof question.choices.split === 'function' ? question.choices.split(/\n/) : question.choices;
 
                 // Add a default empty string option to the choices array.  If this choice is
                 // selected then the extra var will not be sent when we POST to the launch

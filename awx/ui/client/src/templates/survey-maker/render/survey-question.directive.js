@@ -99,7 +99,7 @@ function link($sce, $filter, Empty, scope, element, attrs) {
 
     // Split out choices to be consumed by the multiple-choice directive
     if (!_.isUndefined(scope.question.choices)) {
-        scope.choices = scope.question.choices.split('\n');
+        scope.choices = typeof scope.question.choices.split === 'function' ? scope.question.choices.split('\n') : scope.question.choices;
     }
 
     sanitizeDefault();
