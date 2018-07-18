@@ -111,6 +111,8 @@
       MEMCACHED_PORT: "11211"
       AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
       AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
+    labels:
+      traefik.frontend.rule: "Host:{{ awx_fqdn|default('awx.local') }}"
 
 - name: Activate AWX Task Container
   docker_container:
@@ -147,3 +149,26 @@
       MEMCACHED_PORT: "11211"
       AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
       AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
+
+- name: traefik block
+  block:
+    - name: Copy traefik.toml to host
+      copy:
+        src: files/traefik.toml
+        dest: /etc/traefik.toml
+
+    - name: Activate traefik container
+      docker_container:
+        name: traefik
+        state: started
+        restart_policy: unless-stopped
+        image: traefik
+        volumes:
+          - /var/run/docker.sock:/tmp/docker.sock:ro
+          - "{{ ssl_cert }}:/certs/cert.pem:ro"
+          - "{{ ssl_key }}:/certs/key.key:ro"
+          - files/traefik.toml:/etc/traefik/traefik.toml:ro
+        ports:
+          - 80:80
+          - 443:443
+  when: ssl_cert is defined and ssl_cert != ''
