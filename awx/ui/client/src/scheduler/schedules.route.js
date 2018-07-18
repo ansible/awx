@@ -345,9 +345,26 @@ const jobsSchedulesEditRoute = {
         label: "{{breadcrumb.schedule_name}}"
     },
     views: {
-        'form': {
-            controller: 'schedulerEditController',
-            templateUrl: templateUrl("scheduler/schedulerForm"),
+        'form':{
+            templateProvider: function(ParentObject, Rest){
+                let path;
+                if(ParentObject.type === 'system_job_template'){
+                    path = templateUrl('management-jobs/scheduler/schedulerForm');
+                }
+                else {
+                    path = templateUrl('scheduler/schedulerForm');
+                }
+                Rest.setUrl(path);
+                return Rest.get(path).then(response => response.data);
+            },
+            controllerProvider: function(ParentObject){
+                if (ParentObject.type === 'system_job_template') {
+                    return 'managementJobEditController';
+                }
+                else {
+                    return 'schedulerEditController';
+                }
+            }
         }
     },
     resolve: _.merge(editScheduleResolve(), parentResolve)
