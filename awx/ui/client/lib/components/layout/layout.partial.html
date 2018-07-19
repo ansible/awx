@@ -16,7 +16,7 @@
         </at-top-nav-item>
         <at-top-nav-item>
             <a ui-sref="about">
-                <i class="fa fa-info" alt="{{ vm.getString('FOOTER_ABOUT') }}"></i>
+                <i class="fa fa-info" alt="{{ vm.getString('ABOUT') }}"></i>
             </a>
         </at-top-nav-item>
         <at-top-nav-item>
@@ -102,10 +102,6 @@
     <div class="at-Layout-main" ng-class="{'at-Layout-main--noLicense': vm.licenseIsMissing}">
         <div class="at-Layout-content">
             <ng-transclude></ng-transclude>
-        </div>
-        <div class="at-Layout-footer" ng-show="vm.isLoggedIn">
-            <a ui-sref="about">{{ vm.getString('FOOTER_ABOUT') }} {{ vm.getString('BRAND_NAME') }}</a>|
-                {{ vm.getString('FOOTER_COPYRIGHT') }}
         </div>
     </div>
 </div>
