@@ -7,7 +7,7 @@ const actions = {
         edit: 'i[class="fa icon-pencil"]',
         delete: 'i[class="fa icon-trash-o"]',
         view: 'i[class="fa fa-search-plus"]',
-        sync: 'i[class="fa fa-cloud-download"]',
+        sync: 'i[class="fa fa-refresh"]',
         test: 'i[class="fa fa-bell-o'
     }
 };
