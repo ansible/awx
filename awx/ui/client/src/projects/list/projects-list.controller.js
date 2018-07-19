@@ -8,11 +8,11 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
     'ProjectList', 'Prompt', 'ProcessErrors', 'GetBasePath', 'ProjectUpdate',
     'Wait', 'Empty', 'Find', 'GetProjectIcon', 'GetProjectToolTip', '$filter',
     '$state', 'rbacUiControlService', 'Dataset', 'i18n', 'QuerySet', 'ProjectModel',
-    'ProjectsStrings',
+    'ProjectsStrings', 'ngToast',
     function($scope, $rootScope, $log, Rest, Alert, ProjectList,
     Prompt, ProcessErrors, GetBasePath, ProjectUpdate, Wait, Empty, Find,
     GetProjectIcon, GetProjectToolTip, $filter, $state, rbacUiControlService,
-    Dataset, i18n, qs, Project, ProjectsStrings) {
+    Dataset, i18n, qs, Project, ProjectsStrings, ngToast) {
 
         let project = new Project();
 
@@ -156,9 +156,21 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
             Wait('start');
             new Project('get', project.id)
                 .then(model => model.copy())
-                .then(({ id }) => {
-                    const params = { project_id: id };
-                    $state.go('projects.edit', params, { reload: true });
+                .then((copiedProj) => {
+                    ngToast.success({
+                        content: `
+                            <div class="Toast-wrapper">
+                                <div class="Toast-icon">
+                                    <i class="fa fa-check-circle Toast-successIcon"></i>
+                                </div>
+                                <div>
+                                    ${ProjectsStrings.get('SUCCESSFUL_CREATION', copiedProj.name)}
+                                </div>
+                            </div>`,
+                        dismissButton: false,
+                        dismissOnTimeout: true
+                    });
+                    $state.go('.', null, { reload: true });
                 })
                 .catch(({ data, status }) => {
                     const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };

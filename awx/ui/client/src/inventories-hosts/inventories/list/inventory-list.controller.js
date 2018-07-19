@@ -13,7 +13,8 @@
 function InventoriesList($scope,
     $filter, Rest, InventoryList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state,
-    Dataset, canAdd, i18n, Inventory, InventoryHostsStrings) {
+    Dataset, canAdd, i18n, Inventory, InventoryHostsStrings,
+    ngToast) {
 
     let inventory = new Inventory();
 
@@ -82,7 +83,22 @@ function InventoriesList($scope,
             Wait('start');
             new Inventory('get', inventory.id)
                 .then(model => model.copy())
-                .then(copy => $scope.editInventory(copy, true))
+                .then(copiedInv => {
+                    ngToast.success({
+                        content: `
+                            <div class="Toast-wrapper">
+                                <div class="Toast-icon">
+                                    <i class="fa fa-check-circle Toast-successIcon"></i>
+                                </div>
+                                <div>
+                                    ${InventoryHostsStrings.get('SUCCESSFUL_CREATION', copiedInv.name)}
+                                </div>
+                            </div>`,
+                        dismissButton: false,
+                        dismissOnTimeout: true
+                    });
+                    $state.go('.', null, { reload: true });
+                })
                 .catch(({ data, status }) => {
                     const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
                     ProcessErrors($scope, data, status, null, params);
@@ -182,5 +198,5 @@ export default ['$scope',
     '$filter', 'Rest', 'InventoryList', 'Prompt',
     'ProcessErrors', 'GetBasePath', 'Wait',
     '$state', 'Dataset', 'canAdd', 'i18n', 'InventoryModel',
-    'InventoryHostsStrings', InventoriesList
+    'InventoryHostsStrings', 'ngToast', InventoriesList
 ];
