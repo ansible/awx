@@ -1,5 +1,5 @@
-export default ['$rootScope', '$scope', '$state', 'ConfigService',
-    ($rootScope, $scope, $state, ConfigService) => {
+export default ['$rootScope', '$scope', '$location', 'ConfigService', 'lastPath',
+    ($rootScope, $scope, $location, ConfigService, lastPath) => {
 
     ConfigService.getConfig()
         .then(function(config){
@@ -10,7 +10,7 @@ export default ['$rootScope', '$scope', '$state', 'ConfigService',
             $('#about-modal').modal('show');
         });
 
-    $('#about-modal').on('hidden.bs.modal', () => $state.go('dashboard'));
+    $('#about-modal').on('hidden.bs.modal', () => $location.url(lastPath));
 
     function createSpeechBubble (brand, version) {
         let text = `${brand} ${version}`;

@@ -9,6 +9,11 @@ export default {
     ncyBreadcrumb: {
         label: N_("ABOUT")
     },
+    resolve: {
+        lastPath: function($location) {
+            return $location.url();
+        }
+    },
     onExit: function(){
         // hacky way to handle user browsing away via URL bar
         $('.modal-backdrop').remove();
