@@ -20,6 +20,7 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                 vm.actionButtonClicked = false;
                 if(vm.promptData && vm.promptData.triggerModalOpen) {
 
+                    scope.$emit('launchModalOpen', true);
                     vm.promptDataClone = _.cloneDeep(vm.promptData);
 
                     vm.steps = {
@@ -193,8 +194,6 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                         modal.onClose = () => {
                             scope.$emit('launchModalOpen', false);
                         };
-
-                        scope.$emit('launchModalOpen', true);
                     })
                     .catch(({data, status}) => {
                         ProcessErrors(scope, data, status, null, {
