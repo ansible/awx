@@ -78,7 +78,7 @@ function MultiCredentialModal(
 
 function multiCredentialModalController(GetBasePath, qs, MultiCredentialService) {
     const vm = this;
-    const { createTag, isReadOnly } = MultiCredentialService;
+    const { createTag } = MultiCredentialService;
 
     const types = {};
     const unwatch = [];
@@ -109,7 +109,6 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
         });
         scope.$watchCollection('modalSelectedCredentials', updateListView);
         scope.$watchCollection('modalSelectedCredentials', updateTagView);
-        scope.$watchCollection('modalSelectedCredentials', updateDisplayedCredentialTypes);
         scope.$watchCollection('credentials', updateListView);
 
         unwatch.push(watchType);
@@ -137,30 +136,11 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
         });
     }
 
-    function updateDisplayedCredentialTypes() {
-        const displayedCredentialTypes = _.cloneDeep(scope.credentialTypes);
-
-        scope.modalSelectedCredentials.forEach(credential => {
-            const credentialTypeId = credential.credential_type || credential.credential_type_id;
-
-            if(isReadOnly(credential) && credentialTypeId !== types.Vault) {
-                const index = displayedCredentialTypes
-                    .map(t => t.id).indexOf(credentialTypeId);
-
-                if (index > -1) {
-                    displayedCredentialTypes.splice(index, 1);
-                }
-            }
-        });
-
-        scope.displayedCredentialTypes = displayedCredentialTypes;
-    }
-
     function getInitialCredentialType () {
         const selectedMachineCredential = scope.modalSelectedCredentials
             .find(c => c.id === types.Machine);
 
-        if (selectedMachineCredential && isReadOnly(selectedMachineCredential)) {
+        if (selectedMachineCredential) {
             return `${types.Vault}`;
         }
 
@@ -176,12 +156,6 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
 
         return qs.search(endpoint, scope.credential_default_params)
             .then(({ data }) => {
-                const results = data.results.filter(c => !isReadOnly(c));
-                const readOnlyCount = data.results.length - results.length;
-
-                data.results = results;
-                data.count = data.count - readOnlyCount;
-
                 scope.credential_dataset = data;
                 scope.credentials = data.results;
 
@@ -211,7 +185,7 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
 
     vm.toggle_credential = credential => {
         // This is called only when a checkbox input is clicked directly. Clicks anywhere else
-        // on the row or direct radio button clicks invoke the toggle_row handler instead. We 
+        // on the row or direct radio button clicks invoke the toggle_row handler instead. We
         // pass this through to the other function so that the behavior is consistent.
         vm.toggle_row(credential);
     };
