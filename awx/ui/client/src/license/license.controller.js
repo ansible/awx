@@ -9,9 +9,9 @@ import {N_} from "../i18n";
 export default
     ['Wait', '$state', '$scope', '$rootScope',
     'ProcessErrors', 'CheckLicense', 'moment','$window',
-    'ConfigService', 'FeaturesService', 'pendoService', 'i18n', 'config', 'Rest', 'GetBasePath',
+    'ConfigService', 'FeaturesService', 'pendoService', 'i18n', 'config',
     function(Wait, $state, $scope, $rootScope, ProcessErrors, CheckLicense, moment,
-    $window, ConfigService, FeaturesService, pendoService, i18n, config, Rest, GetBasePath) {
+    $window, ConfigService, FeaturesService, pendoService, i18n, config) {
 
         const calcDaysRemaining = function(seconds) {
       	 		// calculate the number of days remaining on the license
