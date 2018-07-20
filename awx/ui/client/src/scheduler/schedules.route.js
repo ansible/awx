@@ -346,7 +346,7 @@ const jobsSchedulesEditRoute = {
     },
     views: {
         'form':{
-            templateProvider: function(ParentObject, Rest){
+            templateProvider: function(ParentObject, $http){
                 let path;
                 if(ParentObject.type === 'system_job_template'){
                     path = templateUrl('management-jobs/scheduler/schedulerForm');
@@ -354,8 +354,7 @@ const jobsSchedulesEditRoute = {
                 else {
                     path = templateUrl('scheduler/schedulerForm');
                 }
-                Rest.setUrl(path);
-                return Rest.get(path).then(response => response.data);
+                return $http.get(path).then(response => response.data);
             },
             controllerProvider: function(ParentObject){
                 if (ParentObject.type === 'system_job_template') {
