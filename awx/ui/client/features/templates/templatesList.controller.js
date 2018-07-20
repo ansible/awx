@@ -181,12 +181,14 @@ function ListTemplatesController(
     };
 
     function refreshTemplates() {
+        Wait('start');
         let path = GetBasePath('unified_job_templates');
         qs.search(path, $state.params.template_search)
             .then(function(searchResponse) {
                 vm.dataset = searchResponse.data;
                 vm.templates = vm.dataset.results;
-            });
+            })
+            .finally(() => Wait('stop'));
     }
 
     function createErrorHandler(path, action) {
