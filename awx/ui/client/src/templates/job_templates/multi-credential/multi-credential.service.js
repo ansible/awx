@@ -67,13 +67,6 @@ function MultiCredentialService (Rest, ProcessErrors, $q, GetBasePath)  {
             .catch(handleError('GET', 'credential types'));
     };
 
-    this.isReadOnly = credential => {
-        const canEdit = _.get(credential, 'summary_fields.user_capabilities.edit');
-        const canDelete = _.get(credential, 'summary_fields.user_capabilities.delete');
-
-        return !(canEdit || canDelete);
-    };
-
     this.createTag = (credential, credential_types) => {
         const credentialTypeId = credential.credential_type || credential.credential_type_id;
         const credentialType = credential_types.find(t => t.id === credentialTypeId);
@@ -83,8 +76,7 @@ function MultiCredentialService (Rest, ProcessErrors, $q, GetBasePath)  {
             name: credential.name,
             kind: _.get(credentialType, 'kind'),
             typeName: _.get(credentialType, 'name'),
-            info: _.get(credential, 'inputs.vault_id'),
-            readOnly: this.isReadOnly(credential),
+            info: _.get(credential, 'inputs.vault_id')
         };
     };
 }
