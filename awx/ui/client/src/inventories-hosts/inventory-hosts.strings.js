@@ -31,7 +31,7 @@ function InventoryHostsStrings (BaseString) {
 
     ns.smartinventorybutton = {
         DISABLED_INSTRUCTIONS: "Please enter at least one search term to create a new Smart Inventory.",
-        ENABLED_INSTRUCTIONS: "Create a new Smart Inventory from search results.<br /><br />Note: changing the organization of the smart inventory could change the hosts included in the smart inventory"
+        ENABLED_INSTRUCTIONS: "Create a new Smart Inventory from search results.<br /><br />Note: changing the organization of the Smart Inventory could change the hosts included in the Smart Inventory."
     };
 }
 
