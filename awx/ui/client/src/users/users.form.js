@@ -29,14 +29,14 @@ export default ['i18n', function(i18n) {
                     label: i18n._('First Name'),
                     type: 'text',
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)',
-                    required: true,
+                    required: false,
                     capitalize: true
                 },
                 last_name: {
                     label: i18n._('Last Name'),
                     type: 'text',
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)',
-                    required: true
+                    required: false,
                 },
                 organization: {
                     label: i18n._('Organization'),
