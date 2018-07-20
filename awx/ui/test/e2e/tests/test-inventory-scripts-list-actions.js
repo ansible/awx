@@ -38,6 +38,24 @@ module.exports = {
         inventoryScripts.waitForElementVisible('div.spinny');
         inventoryScripts.waitForElementNotVisible('div.spinny');
 
+        const activityStream = 'bread-crumb > div i[class$="icon-activity-stream"]';
+        const activityRow = '#activities_table tr td[class*="description-column"] a';
+        const toast = 'div[class="Toast-icon"]';
+
+        inventoryScripts.waitForElementNotPresent(toast);
+        inventoryScripts.expect.element(activityStream).visible;
+        inventoryScripts.expect.element(activityStream).enabled;
+        inventoryScripts.click(activityStream);
+        inventoryScripts.waitForElementVisible('div.spinny');
+        inventoryScripts.waitForElementNotVisible('div.spinny');
+
+        client
+            .waitForElementVisible(activityRow)
+            .click(activityRow);
+
+        inventoryScripts.waitForElementVisible('div.spinny');
+        inventoryScripts.waitForElementNotVisible('div.spinny');
+
         inventoryScripts.expect.element('#inventory_script_form').visible;
         inventoryScripts.section.edit.expect.element('@title').visible;
         inventoryScripts.section.edit.expect.element('@title').text.contain(data.inventoryScript.name);
