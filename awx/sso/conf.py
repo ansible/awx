@@ -1213,7 +1213,7 @@ register(
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict([
-        ('saml_attr', 'organization'),
+        ('saml_attr', 'team'),
         ('remove', True),
         ('team_org_map', [
             collections.OrderedDict([
