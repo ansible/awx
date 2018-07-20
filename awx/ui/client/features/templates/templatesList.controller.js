@@ -22,7 +22,8 @@ function ListTemplatesController(
     strings,
     Wait,
     qs,
-    GetBasePath
+    GetBasePath,
+    ngToast
 ) {
     const vm = this || {};
     const [jobTemplate, workflowTemplate] = resolvedModels;
@@ -57,7 +58,7 @@ function ListTemplatesController(
     };
     vm.dataset = Dataset.data;
     vm.templates = Dataset.data.results;
-    
+
     $scope.$watch('vm.dataset.count', () => {
         $scope.$emit('updateCount', vm.dataset.count, 'templates');
     });
@@ -201,9 +202,21 @@ function ListTemplatesController(
         jobTemplate
             .create('get', template.id)
             .then(model => model.copy())
-            .then(({ id }) => {
-                const params = { job_template_id: id };
-                $state.go('templates.editJobTemplate', params, { reload: true });
+            .then((copiedJT) => {
+                ngToast.success({
+                    content: `
+                        <div class="Toast-wrapper">
+                            <div class="Toast-icon">
+                                <i class="fa fa-check-circle Toast-successIcon"></i>
+                            </div>
+                            <div>
+                                ${strings.get('SUCCESSFUL_CREATION', copiedJT.name)}
+                            </div>
+                        </div>`,
+                    dismissButton: false,
+                    dismissOnTimeout: true
+                });
+                $state.go('.', null, { reload: true });
             })
             .catch(createErrorHandler('copy job template', 'POST'))
             .finally(() => Wait('stop'));
@@ -219,9 +232,21 @@ function ListTemplatesController(
                     $('#prompt-modal').modal('hide');
                     Wait('start');
                     model.copy()
-                        .then(({ id }) => {
-                            const params = { workflow_job_template_id: id };
-                            $state.go('templates.editWorkflowJobTemplate', params, { reload: true });
+                        .then((copiedWFJT) => {
+                            ngToast.success({
+                                content: `
+                                    <div class="Toast-wrapper">
+                                        <div class="Toast-icon">
+                                            <i class="fa fa-check-circle Toast-successIcon"></i>
+                                        </div>
+                                        <div>
+                                            ${strings.get('SUCCESSFUL_CREATION', copiedWFJT.name)}
+                                        </div>
+                                    </div>`,
+                                dismissButton: false,
+                                dismissOnTimeout: true
+                            });
+                            $state.go('.', null, { reload: true });
                         })
                         .catch(createErrorHandler('copy workflow', 'POST'))
                         .finally(() => Wait('stop'));
@@ -360,7 +385,8 @@ ListTemplatesController.$inject = [
     'TemplatesStrings',
     'Wait',
     'QuerySet',
-    'GetBasePath'
+    'GetBasePath',
+    'ngToast'
 ];
 
 export default ListTemplatesController;
