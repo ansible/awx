@@ -1729,12 +1729,10 @@ class RunProjectUpdate(BaseTask):
         # re-create root project folder if a natural disaster has destroyed it
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.mkdir(settings.PROJECTS_ROOT)
-        if instance.launch_type == 'sync':
-            self.acquire_lock(instance)
+        self.acquire_lock(instance)
 
     def post_run_hook(self, instance, status, **kwargs):
-        if instance.launch_type == 'sync':
-            self.release_lock(instance)
+        self.release_lock(instance)
         p = instance.project
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             fd = open(self.revision_path, 'r')

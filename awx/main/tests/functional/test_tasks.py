@@ -32,16 +32,18 @@ class TestDependentInventoryUpdate:
         task.revision_path = scm_revision_file
         proj_update = ProjectUpdate.objects.create(project=scm_inventory_source.source_project)
         with mock.patch.object(RunProjectUpdate, '_update_dependent_inventories') as inv_update_mck:
-            task.post_run_hook(proj_update, 'successful')
-            inv_update_mck.assert_called_once_with(proj_update, mock.ANY)
+            with mock.patch.object(RunProjectUpdate, 'release_lock'):
+                task.post_run_hook(proj_update, 'successful')
+                inv_update_mck.assert_called_once_with(proj_update, mock.ANY)
 
     def test_no_unwanted_dependent_inventory_updates(self, project, scm_revision_file):
         task = RunProjectUpdate()
         task.revision_path = scm_revision_file
         proj_update = ProjectUpdate.objects.create(project=project)
         with mock.patch.object(RunProjectUpdate, '_update_dependent_inventories') as inv_update_mck:
-            task.post_run_hook(proj_update, 'successful')
-            assert not inv_update_mck.called
+            with mock.patch.object(RunProjectUpdate, 'release_lock'):
+                task.post_run_hook(proj_update, 'successful')
+                assert not inv_update_mck.called
 
     def test_dependent_inventory_updates(self, scm_inventory_source):
         task = RunProjectUpdate()
