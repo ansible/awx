@@ -18,6 +18,8 @@ def test_job_template_copy(post, get, project, inventory, machine_credential, va
     job_template_with_survey_passwords.credentials.add(machine_credential)
     job_template_with_survey_passwords.credentials.add(vault_credential)
     job_template_with_survey_passwords.admin_role.members.add(alice)
+    project.admin_role.members.add(alice)
+    inventory.admin_role.members.add(alice)
     assert get(
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         alice, expect=200
@@ -26,6 +28,10 @@ def test_job_template_copy(post, get, project, inventory, machine_credential, va
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         admin, expect=200
     ).data['can_copy'] is True
+    post(
+        reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
+        {'name': 'new jt name'}, alice, expect=403
+    )
     jt_copy_pk = post(
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         {'name': 'new jt name'}, admin, expect=201
