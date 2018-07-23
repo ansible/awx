@@ -4694,6 +4694,8 @@ class InstanceGroupSerializer(BaseSerializer):
                 raise serializers.ValidationError(_('{} is not a valid hostname of an existing instance.').format(instance_name))
             if Instance.objects.get(hostname=instance_name).is_isolated():
                 raise serializers.ValidationError(_('Isolated instances may not be added or removed from instances groups via the API.'))
+            if self.instance and self.instance.controller_id is not None:
+                raise serializers.ValidationError(_('Isolated instance group membership may not be managed via the API.'))
         return value
 
     def validate_name(self, value):
