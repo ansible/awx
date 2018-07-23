@@ -33,7 +33,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import parse_yaml_or_json
+from awx.main.utils import parse_yaml_or_json, getattr_dne
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -1038,7 +1038,8 @@ class JobHostSummary(CreatedModifiedModel):
     failed = models.BooleanField(default=False, editable=False)
 
     def __unicode__(self):
-        hostname = self.host.name if self.host else 'N/A'
+        host = getattr_dne(self, 'host')
+        hostname = host.name if host else 'N/A'
         return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \
             (hostname, self.changed, self.dark, self.failures, self.ok,
              self.processed, self.skipped)
