@@ -22,6 +22,11 @@ def instance():
 
 
 @pytest.fixture
+def non_iso_instance():
+    return Instance.objects.create(hostname='iamnotanisolatedinstance')
+
+
+@pytest.fixture
 def instance_group(job_factory):
     ig = InstanceGroup(name="east")
     ig.save()
@@ -138,7 +143,7 @@ def test_prevent_isolated_instance_added_to_non_isolated_instance_group_via_poli
     url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
 
     assert True is instance.is_isolated()
-    resp = patch(url, {'policy_instance_list': [instance.hostname]}, admin)
+    resp = patch(url, {'policy_instance_list': [instance.hostname]}, user=admin, expect=400)
     assert [u"Isolated instances may not be added or removed from instances groups via the API."] == resp.data['policy_instance_list']
     assert instance_group.policy_instance_list == []
 
@@ -150,3 +155,24 @@ def test_prevent_isolated_instance_removal_from_isolated_instance_group(post, ad
     assert True is instance.is_isolated()
     resp = post(url, {'disassociate': True, 'id': instance.id}, admin, expect=400)
     assert u"Isolated instances may not be added or removed from instances groups via the API." == resp.data['error']
+
+
+@pytest.mark.django_db
+def test_prevent_non_isolated_instance_added_to_isolated_instance_group(
+        post, admin, non_iso_instance, isolated_instance_group):
+    url = reverse("api:instance_group_instance_list", kwargs={'pk': isolated_instance_group.pk})
+
+    assert False is non_iso_instance.is_isolated()
+    resp = post(url, {'associate': True, 'id': non_iso_instance.id}, admin, expect=400)
+    assert u"Isolated instance group membership may not be managed via the API." == resp.data['error']
+
+
+@pytest.mark.django_db
+def test_prevent_non_isolated_instance_added_to_isolated_instance_group_via_policy_list(
+        patch, admin, non_iso_instance, isolated_instance_group):
+    url = reverse("api:instance_group_detail", kwargs={'pk': isolated_instance_group.pk})
+
+    assert False is non_iso_instance.is_isolated()
+    resp = patch(url, {'policy_instance_list': [non_iso_instance.hostname]}, user=admin, expect=400)
+    assert [u"Isolated instance group membership may not be managed via the API."] == resp.data['policy_instance_list']
+    assert isolated_instance_group.policy_instance_list == []
