@@ -55,7 +55,7 @@
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INVENTORY') }}"
                     value="{{ job.summary_fields.inventory.name }}"
-                    value-link="/#/inventories/{{ job.summary_fields.inventory.id }}">
+                    value-link="/#/inventories/{{job.summary_fields.inventory.kind === 'smart' ? 'smart' : 'inventory'}}/{{ job.summary_fields.inventory.id }}">
                 </at-row-item>
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_PROJECT') }}"
