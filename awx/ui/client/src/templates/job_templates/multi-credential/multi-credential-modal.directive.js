@@ -100,7 +100,14 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
         scope.credentials = scope.credential_dataset.results;
 
         scope.credentialType = getInitialCredentialType();
-        scope.displayedCredentialTypes = scope.credentialTypes;
+        scope.displayedCredentialTypes = [];
+
+        scope.credentialTypes.forEach((credentialType => {
+            if(credentialType.kind
+                .match(/^(machine|cloud|net|ssh|vault)$/)) {
+                    scope.displayedCredentialTypes.push(credentialType);
+            }
+        }));
 
         const watchType = scope.$watch('credentialType', (newValue, oldValue) => {
             if (newValue !== oldValue) {
