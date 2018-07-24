@@ -3,7 +3,9 @@ import logging
 
 from channels import Group
 from channels.auth import channel_session_user_from_http, channel_session_user
+from channels.exceptions import DenyConnection
 
+from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 
 
@@ -18,6 +20,10 @@ def discard_groups(message):
 
 @channel_session_user_from_http
 def ws_connect(message):
+    origin = dict(message.content.get('headers', {})).get('origin')
+    if settings.DEBUG is False and origin != settings.TOWER_URL_BASE:
+        logger.error("ws:// origin header mismatch {} != {}".format(origin, settings.TOWER_URL_BASE))
+        raise DenyConnection()
     message.reply_channel.send({"accept": True})
     message.content['method'] = 'FAKE'
     if message.user.is_authenticated():
