@@ -4791,11 +4791,21 @@ class ActivityStreamSerializer(BaseSerializer):
         return {}
 
     def get_object_association(self, obj):
+        if not obj.object_relationship_type:
+            return ""
+        elif obj.object_relationship_type.endswith('_role'):
+            # roles: these values look like
+            # "awx.main.models.inventory.Inventory.admin_role"
+            # due to historical reasons the UI expects just "role" here
+            return "role"
+        # default case: these values look like
+        # "awx.main.models.organization.Organization_notification_templates_success"
+        # so instead of splitting on period we have to take after the first underscore
         try:
-            return obj.object_relationship_type.split(".")[-1].split("_")[1]
+            return obj.object_relationship_type.split(".")[-1].split("_", 1)[1]
         except Exception:
-            pass
-        return ""
+            logger.debug('Failed to parse activity stream relationship type {}'.format(obj.object_relationship_type))
+            return ""
 
     def get_related(self, obj):
         rel = {}
