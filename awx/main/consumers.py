@@ -27,7 +27,8 @@ def origin_is_valid(message, trusted_values):
             client = urlparse(origin)
             trusted = urlparse(trusted)
         except (AttributeError, ValueError):
-            # if we can't parse the origin header, fall back to the else block
+            # if we can't parse a hostname, consider it invalid and try the
+            # next one
             pass
         else:
             # if we _can_ parse the origin header, verify that it's trusted
@@ -36,15 +37,13 @@ def origin_is_valid(message, trusted_values):
                 is_same_domain(client.netloc, trusted.netloc)
             ):
                 # the provided Origin matches at least _one_ whitelisted host,
-                # break out and accept the connection
-                break
-    else:
-        logger.error((
-            "ws:// origin header mismatch {} not in {}; consider adding {} to "
-            "settings.WEBSOCKET_ORIGIN_WHITELIST if it's a trusted host."
-        ).format(origin, trusted_values, origin))
-        return False
-    return True
+                # return True
+                return True
+    logger.error((
+        "ws:// origin header mismatch {} not in {}; consider adding {} to "
+        "settings.WEBSOCKET_ORIGIN_WHITELIST if it's a trusted host."
+    ).format(origin, trusted_values, origin))
+    return False
 
 
 
