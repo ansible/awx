@@ -745,6 +745,8 @@ class SAMLOrgAttrField(BaseDictWithChildField):
     child_fields = {
         'remove': fields.BooleanField(required=False),
         'saml_attr': fields.CharField(required=False, allow_null=True),
+        'remove_admins': fields.BooleanField(required=False),
+        'saml_admin_attr': fields.CharField(required=False, allow_null=True),
     }
 
 

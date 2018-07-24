@@ -20,6 +20,11 @@ class TestSAMLOrgAttrField():
         ({'remove': True, 'saml_attr': 3.14}, {'remove': True, 'saml_attr': '3.14'}),
         ({'saml_attr': 'foobar'}, {'saml_attr': 'foobar'}),
         ({'remove': True}, {'remove': True}),
+        ({'remove': True, 'saml_admin_attr': 'foobar'}, {'remove': True, 'saml_admin_attr': 'foobar'}),
+        ({'saml_admin_attr': 'foobar'}, {'saml_admin_attr': 'foobar'}),
+        ({'remove_admins': True, 'saml_admin_attr': 'foobar'}, {'remove_admins': True, 'saml_admin_attr': 'foobar'}),
+        ({'remove': True, 'saml_attr': 'foo', 'remove_admins': True, 'saml_admin_attr': 'bar'},
+            {'remove': True, 'saml_attr': 'foo', 'remove_admins': True, 'saml_admin_attr': 'bar'}),
     ])
     def test_internal_value_valid(self, data, expected):
         field = SAMLOrgAttrField()
@@ -33,6 +38,10 @@ class TestSAMLOrgAttrField():
             ValidationError('Not a valid string.')),
         ({'remove': True, 'saml_attr': False, 'foo': 'bar', 'gig': 'ity'},
             ValidationError('Invalid key(s): "gig", "foo".')),
+        ({'remove_admins': True, 'saml_admin_attr': False},
+            ValidationError('Not a valid string.')),
+        ({'remove_admins': 'blah', 'saml_admin_attr': 'foobar'},
+            ValidationError('"blah" is not a valid boolean.')),
     ])
     def test_internal_value_invalid(self, data, expected):
         field = SAMLOrgAttrField()
