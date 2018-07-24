@@ -374,7 +374,7 @@ awx-link:
 	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
 	cp /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
 
-TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests awx/network_ui/tests/unit
+TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 
 # Run all API unit tests.
 test:
@@ -389,7 +389,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit awx/network_ui/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
 
 test_ansible:
 	@if [ "$(VENV_BASE)" ]; then \
