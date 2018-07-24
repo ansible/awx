@@ -4,7 +4,9 @@ import logging
 from channels import Group
 from channels.auth import channel_session_user_from_http, channel_session_user
 from channels.exceptions import DenyConnection
+from six.moves.urllib.parse import urlparse
 
+from django.utils.http import is_same_domain
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 
@@ -18,12 +20,42 @@ def discard_groups(message):
             Group(group).discard(message.reply_channel)
 
 
+def origin_is_valid(message, trusted_values):
+    origin = dict(message.content.get('headers', {})).get('origin', '')
+    for trusted in trusted_values:
+        try:
+            client = urlparse(origin)
+            trusted = urlparse(trusted)
+        except (AttributeError, ValueError):
+            # if we can't parse the origin header, fall back to the else block
+            pass
+        else:
+            # if we _can_ parse the origin header, verify that it's trusted
+            if (
+                trusted.scheme == client.scheme and
+                is_same_domain(client.netloc, trusted.netloc)
+            ):
+                # the provided Origin matches at least _one_ whitelisted host,
+                # break out and accept the connection
+                break
+    else:
+        logger.error((
+            "ws:// origin header mismatch {} not in {}; consider adding {} to "
+            "settings.WEBSOCKET_ORIGIN_WHITELIST if it's a trusted host."
+        ).format(origin, trusted_values, origin))
+        return False
+    return True
+
+
+
 @channel_session_user_from_http
 def ws_connect(message):
-    origin = dict(message.content.get('headers', {})).get('origin')
-    if settings.DEBUG is False and origin != settings.TOWER_URL_BASE:
-        logger.error("ws:// origin header mismatch {} != {}".format(origin, settings.TOWER_URL_BASE))
+    if not origin_is_valid(
+        message,
+        [settings.TOWER_URL_BASE] + settings.WEBSOCKET_ORIGIN_WHITELIST
+    ):
         raise DenyConnection()
+
     message.reply_channel.send({"accept": True})
     message.content['method'] = 'FAKE'
     if message.user.is_authenticated():
