@@ -158,3 +158,5 @@ try:
     os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.internal'
 except Exception:
     os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
+
+WEBSOCKET_ORIGIN_WHITELIST = ['https://localhost:8043', 'https://localhost:3000']
