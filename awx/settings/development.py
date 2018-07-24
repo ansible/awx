@@ -77,6 +77,11 @@ CELERYD_LOG_COLOR = True
 
 CALLBACK_QUEUE = "callback_tasks"
 
+# Enable dynamically pulling roles from a requirement.yml file
+# when updating SCM projects
+# Note: This setting may be overridden by database settings.
+AWX_ROLES_ENABLED = True
+
 # Enable PROOT for tower-qa integration tests.
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True

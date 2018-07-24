@@ -58,6 +58,9 @@ export default ['i18n', function(i18n) {
                 type: 'text',
                 reset: 'ANSIBLE_FACT_CACHE_TIMEOUT',
             },
+            AWX_ROLES_ENABLED: {
+                type: 'toggleSwitch',
+            },
             AWX_TASK_ENV: {
                 type: 'textarea',
                 reset: 'AWX_TASK_ENV',

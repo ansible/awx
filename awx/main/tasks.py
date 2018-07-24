@@ -1521,6 +1521,7 @@ class RunProjectUpdate(BaseTask):
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
             'scm_revision_output': self.revision_path,
             'scm_revision': project_update.project.scm_revision,
+            'roles_enabled': getattr(settings, 'AWX_ROLES_ENABLED', True)
         })
         extra_vars_path = self.build_extra_vars_file(vars=extra_vars, **kwargs)
         args.extend(['-e', '@%s' % (extra_vars_path)])
