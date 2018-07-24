@@ -75,7 +75,7 @@ function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, moment, gra
                     });
 
                     if(period === "day") {
-                        timeFormat="H:M";
+                        timeFormat="H:mm";
                     }
                     else {
                         timeFormat = "MMM D";
