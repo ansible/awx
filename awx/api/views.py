@@ -179,14 +179,22 @@ class InstanceGroupMembershipMixin(object):
         sub_id, res = self.attach_validate(request)
         if status.is_success(response.status_code):
             if self.parent_model is Instance:
-                ig_obj = get_object_or_400(self.model, pk=sub_id)
                 inst_name = ig_obj.hostname
             else:
-                ig_obj = self.get_parent_object()
                 inst_name = get_object_or_400(self.model, pk=sub_id).hostname
-            if inst_name not in ig_obj.policy_instance_list:
-                ig_obj.policy_instance_list.append(inst_name)
-                ig_obj.save()
+            with transaction.atomic():
+                ig_qs = InstanceGroup.objects.select_for_update()
+                if self.parent_model is Instance:
+                    ig_obj = get_object_or_400(ig_qs, pk=sub_id)
+                else:
+                    # similar to get_parent_object, but selected for update
+                    parent_filter = {
+                        self.lookup_field: self.kwargs.get(self.lookup_field, None),
+                    }
+                    ig_obj = get_object_or_404(ig_qs, **parent_filter)
+                if inst_name not in ig_obj.policy_instance_list:
+                    ig_obj.policy_instance_list.append(inst_name)
+                    ig_obj.save(update_fields=['policy_instance_list'])
         return response
 
     def is_valid_relation(self, parent, sub, created=False):
@@ -213,14 +221,22 @@ class InstanceGroupMembershipMixin(object):
         if status.is_success(response.status_code):
             sub_id = request.data.get('id', None)
             if self.parent_model is Instance:
-                ig_obj = get_object_or_400(self.model, pk=sub_id)
                 inst_name = self.get_parent_object().hostname
             else:
-                ig_obj = self.get_parent_object()
                 inst_name = get_object_or_400(self.model, pk=sub_id).hostname
-            if inst_name in ig_obj.policy_instance_list:
-                ig_obj.policy_instance_list.pop(ig_obj.policy_instance_list.index(inst_name))
-                ig_obj.save()
+            with transaction.atomic():
+                ig_qs = InstanceGroup.objects.select_for_update()
+                if self.parent_model is Instance:
+                    ig_obj = get_object_or_400(ig_qs, pk=sub_id)
+                else:
+                    # similar to get_parent_object, but selected for update
+                    parent_filter = {
+                        self.lookup_field: self.kwargs.get(self.lookup_field, None),
+                    }
+                    ig_obj = get_object_or_404(ig_qs, **parent_filter)
+                if inst_name in ig_obj.policy_instance_list:
+                    ig_obj.policy_instance_list.pop(ig_obj.policy_instance_list.index(inst_name))
+                    ig_obj.save(update_fields=['policy_instance_list'])
         return response
 
 
