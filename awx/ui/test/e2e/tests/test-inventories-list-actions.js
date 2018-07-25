@@ -96,7 +96,7 @@ module.exports = {
 
         inventories.expect.element(`#inventories_table tr[id="${data.inventory.id}"]`).visible;
         inventories.expect.element('#copy-action').visible;
-        inventories.expect.element('#copy-action[class$="btn-disabled"]').present;
+        inventories.expect.element('#copy-action[class*="btn-disabled"]').present;
 
         client.end();
     }
