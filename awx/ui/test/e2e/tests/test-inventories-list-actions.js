@@ -1,4 +1,8 @@
-import { getInventory, getInventoryNoSource } from '../fixtures';
+import {
+    getInventory,
+    getInventoryNoSource,
+    getInventorySource,
+} from '../fixtures';
 
 let data;
 
@@ -7,6 +11,7 @@ module.exports = {
         const resources = [
             getInventory('test-actions'),
             getInventoryNoSource('test-actions'),
+            getInventorySource('test-actions'),
         ];
 
         Promise.all(resources)
