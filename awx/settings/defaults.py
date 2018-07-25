@@ -166,11 +166,6 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 # REMOTE_HOST_HEADERS will be trusted unconditionally')
 PROXY_IP_WHITELIST = []
 
-# If Tower is behind a reverse proxy/load balancer, use this setting
-# to whitelist hostnames which represent trusted Origin hostnames from which
-# Tower should allow websocket connections.
-WEBSOCKET_ORIGIN_WHITELIST = []
-
 # Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
 

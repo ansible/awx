@@ -5,8 +5,8 @@
  *************************************************/
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log','$state', '$q', 'i18n', 'GetBasePath', 'Rest',
-    function ($rootScope, $location, $log, $state, $q, i18n, GetBasePath, Rest) {
+['$rootScope', '$location', '$log','$state', '$q', 'i18n', 'GetBasePath', 'Rest', '$cookies',
+    function ($rootScope, $location, $log, $state, $q, i18n, GetBasePath, Rest, $cookies) {
         var needsResubscribing = false,
         socketPromise = $q.defer(),
         needsRefreshAfterBlur;
@@ -166,6 +166,7 @@ export default
                 // look like {"groups":{"jobs": ["status_changed", "summary"]}.
                 // This is used by all socket-enabled $states
                 state.data.socket.groups.control = ['limit_reached_' + $rootScope.current_user.id];
+                state.data.socket.xrftoken = $cookies.get('csrftoken');
                 this.emit(JSON.stringify(state.data.socket));
                 this.setLast(state);
             },
@@ -174,6 +175,7 @@ export default
                 // on a socket-enabled page, and sends an empty groups object
                 // to the API: {"groups": {}}.
                 // This is used for all pages that are socket-disabled
+                state.data.socket.xrftoken = $cookies.get('csrftoken');
                 if(this.requiresNewSubscribe(state)){
                     this.emit(JSON.stringify(state.data.socket) || JSON.stringify({"groups": {}}));
                 }
