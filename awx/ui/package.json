@@ -57,7 +57,7 @@
     "grunt-concurrent": "^2.3.0",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-newer": "^1.2.0",
-    "hard-source-webpack-plugin": "^0.4.9",
+    "hard-source-webpack-plugin": "^0.5.8",
     "html-loader": "^0.5.1",
     "html-webpack-harddisk-plugin": "^0.1.0",
     "html-webpack-plugin": "^2.30.1",
@@ -94,7 +94,7 @@
     "webpack-merge": "^4.1.0"
   },
   "dependencies": {
-    "@uirouter/angularjs": "^1.0.7",
+    "@uirouter/angularjs": "1.0.18",
     "angular": "~1.6.6",
     "angular-breadcrumb": "git+https://git@github.com/ansible/angular-breadcrumb#0.4.1",
     "angular-codemirror": "git+https://git@github.com/ansible/angular-codemirror#v1.1.2",
