@@ -101,17 +101,6 @@ register(
     category_slug='system',
 )
 
-register(
-    'WEBSOCKET_ORIGIN_WHITELIST',
-    field_class=fields.StringListField,
-    label=_('Websocket Origin Whitelist'),
-    help_text=_("If Tower is behind a reverse proxy/load balancer, use this setting "
-                "to whitelist hostnames which represent trusted Origin hostnames from which "
-                "Tower should allow websocket connections."),
-    category=_('System'),
-    category_slug='system',
-)
-
 
 def _load_default_license_from_file():
     try:
