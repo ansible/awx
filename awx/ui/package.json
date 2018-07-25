@@ -94,7 +94,7 @@
     "webpack-merge": "^4.1.0"
   },
   "dependencies": {
-    "@uirouter/angularjs": "^1.0.7",
+    "@uirouter/angularjs": "1.0.18",
     "angular": "~1.6.6",
     "angular-breadcrumb": "git+https://git@github.com/ansible/angular-breadcrumb#0.4.1",
     "angular-codemirror": "git+https://git@github.com/ansible/angular-codemirror#v1.1.2",
