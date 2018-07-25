@@ -26,10 +26,18 @@ function getStatusDetails (jobStatus) {
     }
 
     const choices = mapChoices(resource.model.options('actions.GET.status.choices'));
-
     const label = strings.get('labels.STATUS');
-    const icon = `fa icon-job-${unmapped}`;
-    const value = choices[unmapped];
+
+    let icon;
+    let value;
+
+    if (unmapped === 'unknown') {
+        icon = 'fa icon-job-pending';
+        value = strings.get('details.UNKNOWN');
+    } else {
+        icon = `fa icon-job-${unmapped}`;
+        value = choices[unmapped];
+    }
 
     return { label, icon, value };
 }

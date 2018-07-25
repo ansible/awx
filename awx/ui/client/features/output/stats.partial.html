@@ -10,7 +10,7 @@
 
     <span class="at-Panel-label">{{:: vm.strings.get('stats.HOSTS')}}</span>
     <span ng-show="vm.running" class="at-Panel-headingTitleBadge">...</span>
-    <span ng-show="!vm.running" class="at-Panel-headingTitleBadge">{{ vm.hosts || 0 }}</span>
+    <span ng-show="!vm.running" class="at-Panel-headingTitleBadge">{{ vm.hosts || 1 }}</span>
 
     <span class="at-Panel-label">{{:: vm.strings.get('stats.ELAPSED') }}</span>
     <span ng-show="vm.running" class="at-Panel-headingTitleBadge">...</span>

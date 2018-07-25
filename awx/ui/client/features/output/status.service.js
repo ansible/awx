@@ -5,7 +5,7 @@ const PLAY_START = 'playbook_on_play_start';
 const TASK_START = 'playbook_on_task_start';
 
 const HOST_STATUS_KEYS = ['dark', 'failures', 'changed', 'ok', 'skipped'];
-const COMPLETE = ['successful', 'failed'];
+const COMPLETE = ['successful', 'failed', 'unknown'];
 const INCOMPLETE = ['canceled', 'error'];
 const UNSUCCESSFUL = ['failed'].concat(INCOMPLETE);
 const FINISHED = COMPLETE.concat(INCOMPLETE);
@@ -26,10 +26,11 @@ function JobStatusService (moment, message) {
 
         this.state = {
             running: false,
+            anyFailed: false,
             counts: {
                 plays: 0,
                 tasks: 0,
-                hosts: 0,
+                hosts: 1,
             },
             hosts: {},
             status: model.get('status'),
@@ -124,6 +125,10 @@ function JobStatusService (moment, message) {
             changed = true;
         }
 
+        if (data.failed) {
+            this.state.anyFailed = true;
+        }
+
         if (changed) {
             this.dispatch();
         }
@@ -149,6 +154,10 @@ function JobStatusService (moment, message) {
             } else {
                 this.setJobStatus('successful');
             }
+        } else if (this.state.counter > -1) {
+            this.setJobStatus(this.state.anyFailed ? 'failed' : 'unknown');
+        } else {
+            this.setJobStatus('unknown');
         }
     };
 
