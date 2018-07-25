@@ -136,18 +136,16 @@ def inform_cluster_of_shutdown(*args, **kwargs):
 @shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
 def apply_cluster_membership_policies(self):
     with advisory_lock('cluster_policy_lock', wait=True):
-        considered_instances = Instance.objects.all().order_by('id')
+        considered_instances = Instance.objects.all_non_isolated().order_by('id')
         total_instances = considered_instances.count()
-        filtered_instances = []
         actual_groups = []
         actual_instances = []
         Group = namedtuple('Group', ['obj', 'instances'])
         Node = namedtuple('Instance', ['obj', 'groups'])
 
-        # Process policy instance list first, these will represent manually managed instances
-        # that will not go through automatic policy determination
+        # Process policy instance list first, these will represent manually managed memberships
         for ig in InstanceGroup.objects.all():
-            logger.info(six.text_type("Applying cluster membership policies to Group {}").format(ig.name))
+            logger.info(six.text_type("Applying cluster policy instance list to Group {}").format(ig.name))
             ig.instances.clear()
             group_actual = Group(obj=ig, instances=[])
             for i in ig.policy_instance_list:
@@ -158,11 +156,11 @@ def apply_cluster_membership_policies(self):
                 logger.info(six.text_type("Policy List, adding Instance {} to Group {}").format(inst.hostname, ig.name))
                 group_actual.instances.append(inst.id)
                 ig.instances.add(inst)
-                filtered_instances.append(inst)
             actual_groups.append(group_actual)
+
         # Process Instance minimum policies next, since it represents a concrete lower bound to the
         # number of instances to make available to instance groups
-        actual_instances = [Node(obj=i, groups=[]) for i in filter(lambda x: x not in filtered_instances, considered_instances)]
+        actual_instances = [Node(obj=i, groups=[]) for i in considered_instances if i.managed_by_policy]
         logger.info("Total instances not directly associated: {}".format(total_instances))
         for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
             for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
@@ -172,7 +170,8 @@ def apply_cluster_membership_policies(self):
                 g.obj.instances.add(i.obj)
                 g.instances.append(i.obj.id)
                 i.groups.append(g.obj.id)
-        # Finally process instance policy percentages
+
+        # Finally, process instance policy percentages
         for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
             for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
                 if i.obj.id in g.instances:

@@ -155,9 +155,28 @@ def test_policy_instance_distribution_simultaneous(mock, instance_factory, insta
 
 @pytest.mark.django_db
 @mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_list_manually_managed(mock, instance_factory, instance_group_factory):
+def test_policy_instance_list_manually_assigned(mock, instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
+    ig_1 = instance_group_factory("ig1", percentage=100, minimum=2)
+    ig_2 = instance_group_factory("ig2")
+    ig_2.policy_instance_list = [i2.hostname]
+    ig_2.save()
+    apply_cluster_membership_policies()
+    assert len(ig_1.instances.all()) == 2
+    assert i1 in ig_1.instances.all()
+    assert i2 in ig_1.instances.all()
+    assert len(ig_2.instances.all()) == 1
+    assert i2 in ig_2.instances.all()
+
+
+@pytest.mark.django_db
+@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
+def test_policy_instance_list_explicitly_pinned(mock, instance_factory, instance_group_factory):
+    i1 = instance_factory("i1")
+    i2 = instance_factory("i2")
+    i2.managed_by_policy = False
+    i2.save()
     ig_1 = instance_group_factory("ig1", percentage=100, minimum=2)
     ig_2 = instance_group_factory("ig2")
     ig_2.policy_instance_list = [i2.hostname]
