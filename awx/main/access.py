@@ -6,6 +6,7 @@ import os
 import sys
 import logging
 import six
+from functools import reduce
 
 # Django
 from django.conf import settings
@@ -217,6 +218,15 @@ class BaseAccess(object):
 
     def can_copy(self, obj):
         return self.can_add({'reference_obj': obj})
+
+    def can_copy_related(self, obj):
+        '''
+        can_copy_related() should only be used to check if the user have access to related
+        many to many credentials in when copying the object. It does not check if the user
+        has permission for any other related objects. Therefore, when checking if the user
+        can copy an object, it should always be used in conjunction with can_add()
+        '''
+        return True
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
@@ -1328,6 +1338,17 @@ class JobTemplateAccess(BaseAccess):
             return self.user in project.use_role
         else:
             return False
+    
+    @check_superuser
+    def can_copy_related(self, obj):
+        '''
+        Check if we have access to all the credentials related to Job Templates.
+        Does not verify the user's permission for any other related fields (projects, inventories, etc).
+        '''
+
+        # obj.credentials.all() is accessible ONLY when object is saved (has valid id)
+        credential_manager = getattr(obj, 'credentials', None) if getattr(obj, 'id', False) else Credentials.objects.none()
+        return reduce(lambda prev, cred: prev and self.user in cred.use_role, credential_manager.all(), True)
 
     def can_start(self, obj, validate_license=True):
         # Check license.

@@ -93,7 +93,7 @@ class LoggedLoginView(auth_views.LoginView):
             current_user = JSONRenderer().render(current_user.data)
             current_user = urllib.quote('%s' % current_user, '')
             ret.set_cookie('current_user', current_user)
-            
+
             return ret
         else:
             ret.status_code = 401
@@ -755,6 +755,7 @@ class DeleteLastUnattachLabelMixin(object):
     when the last disassociate is called should inherit from this class. Further,
     the model should implement is_detached()
     '''
+
     def unattach(self, request, *args, **kwargs):
         (sub_id, res) = super(DeleteLastUnattachLabelMixin, self).unattach_validate(request)
         if res:
@@ -945,7 +946,9 @@ class CopyAPIView(GenericAPIView):
         create_kwargs = self._build_create_dict(obj)
         for key in create_kwargs:
             create_kwargs[key] = getattr(create_kwargs[key], 'pk', None) or create_kwargs[key]
-        return Response({'can_copy': request.user.can_access(self.model, 'add', create_kwargs)})
+        can_copy = request.user.can_access(self.model, 'add', create_kwargs) and \
+            request.user.can_access(self.model, 'copy_related', obj)
+        return Response({'can_copy': can_copy})
 
     def post(self, request, *args, **kwargs):
         if get_request_version(request) < 2:
@@ -956,6 +959,8 @@ class CopyAPIView(GenericAPIView):
         for key in create_kwargs:
             create_kwargs_check[key] = getattr(create_kwargs[key], 'pk', None) or create_kwargs[key]
         if not request.user.can_access(self.model, 'add', create_kwargs_check):
+            raise PermissionDenied()
+        if not request.user.can_access(self.model, 'copy_related', obj):
             raise PermissionDenied()
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
