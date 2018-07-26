@@ -1,3 +1,4 @@
+import datetime
 import os
 import signal
 import subprocess
@@ -33,19 +34,25 @@ class Command(BaseCommand):
 
     INTERVAL = 60
 
+    def _log(self, msg):
+        sys.stderr.write(datetime.datetime.utcnow().isoformat())
+        sys.stderr.write(' ')
+        sys.stderr.write(msg)
+        sys.stderr.write('\n')
+
     def handle(self, **options):
         app = Celery('awx')
         app.config_from_object('django.conf:settings')
         while True:
             try:
-                pongs = app.control.ping(['celery@{}'.format(settings.CLUSTER_HOST_ID)])
+                pongs = app.control.ping(['celery@{}'.format(settings.CLUSTER_HOST_ID)], timeout=30)
             except Exception:
                 pongs = []
             if not pongs:
-                sys.stderr.write('celery is not responsive to ping over local AMQP\n')
+                self._log('celery is not responsive to ping over local AMQP')
                 pid = self.getpid()
                 if pid:
-                    sys.stderr.write('sending SIGHUP to {}\n'.format(pid))
+                    self._log('sending SIGHUP to {}'.format(pid))
                     os.kill(pid, signal.SIGHUP)
             time.sleep(self.INTERVAL)
 
@@ -56,4 +63,4 @@ class Command(BaseCommand):
         try:
             return int(subprocess.check_output(cmd, shell=True))
         except Exception:
-            sys.stderr.write('could not detect celery pid\n')
+            self._log('could not detect celery pid')
