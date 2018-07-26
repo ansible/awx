@@ -56,6 +56,10 @@ export default {
                     .finally(() => Wait('stop'));
             }
         ],
+        SearchBasePath: [
+            'GetBasePath',
+            (GetBasePath) => GetBasePath('unified_jobs')
+        ]
     },
     views: {
         '@': {

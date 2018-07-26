@@ -3,19 +3,19 @@
         <smart-search
             class="at-List-search"
             django-model="jobs"
-            base-path="unified_jobs"
+            base-path="{{vm.searchBasePath}}"
             iterator="job"
-            list="list"
-            dataset="job_dataset"
-            collection="collection"
+            list="vm.list"
+            dataset="vm.job_dataset"
+            collection="vm.jobs"
             search-tags="searchTags"
-            query-set="querySet"
+            query-set="vm.querySet"
             search-bar-full-width="vm.isPortalMode">
         </smart-search>
     </div>
-    <at-list results="jobs" empty-list-reason="{{ vm.emptyListReason }}">
+    <at-list results="vm.jobs" empty-list-reason="{{ vm.emptyListReason }}">
         <!-- TODO: implement resources are missing red indicator as present in mockup -->
-        <at-row ng-repeat="job in jobs" job-id="{{ job.id }}">
+        <at-row ng-repeat="job in vm.jobs" job-id="{{ job.id }}">
             <div class="at-Row-items">
                 <!-- TODO: include workflow tab as well -->
                 <at-row-item
@@ -94,10 +94,10 @@
         </at-row>
     </at-list>
     <paginate
-        collection="collection"
-        dataset="job_dataset"
+        collection="vm.jobs"
+        dataset="vm.job_dataset"
         iterator="job"
-        base-path="unified_jobs"
-        query-set="querySet">
+        base-path="{{vm.searchBasePath}}"
+        query-set="vm.querySet">
     </paginate>
 </at-panel-body>

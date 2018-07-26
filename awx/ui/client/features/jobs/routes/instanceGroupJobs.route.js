@@ -59,6 +59,10 @@ export default {
                 return qs.search(searchPath, searchParam)
                     .finally(() => Wait('stop'));
             }
+        ],
+        SearchBasePath: [
+            '$stateParams',
+            ($stateParams) => `api/v2/instance_groups/${$stateParams.instance_group_id}/jobs`
         ]
     }
 };
