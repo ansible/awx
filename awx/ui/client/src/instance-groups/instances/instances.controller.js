@@ -8,7 +8,7 @@ function InstancesController ($scope, $state, $http, models, strings, Dataset, P
     vm.isSuperuser = $scope.$root.user_is_superuser;
 
     vm.instances = instanceGroup.get('related.instances.results').map(instance => {
-        instance.is_manual = vm.policy_instance_list.includes(instance.hostname);
+        instance.is_manual = instance.managed_by_policy === false;
         return instance;
     });
 
