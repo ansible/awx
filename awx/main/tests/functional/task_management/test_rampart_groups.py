@@ -175,6 +175,8 @@ def test_failover_group_run(instance_factory, default_instance_group, mocker,
 @pytest.mark.django_db
 def test_instance_group_basic_policies(instance_factory, instance_group_factory):
     i0 = instance_factory("i0")
+    i0.managed_by_policy = False
+    i0.save()
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")

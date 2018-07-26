@@ -64,6 +64,9 @@ class Instance(BaseModel):
     enabled = models.BooleanField(
         default=True
     )
+    managed_by_policy = models.BooleanField(
+        default=True
+    )
     cpu = models.IntegerField(
         default=0,
         editable=False,

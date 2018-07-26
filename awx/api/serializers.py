@@ -4617,7 +4617,7 @@ class InstanceSerializer(BaseSerializer):
         read_only_fields = ('uuid', 'hostname', 'version')
         fields = ("id", "type", "url", "related", "uuid", "hostname", "created", "modified", 'capacity_adjustment',
                   "version", "capacity", "consumed_capacity", "percent_capacity_remaining", "jobs_running", "jobs_total",
-                  "cpu", "memory", "cpu_capacity", "mem_capacity", "enabled")
+                  "cpu", "memory", "cpu_capacity", "mem_capacity", "enabled", "managed_by_policy")
 
     def get_related(self, obj):
         res = super(InstanceSerializer, self).get_related(obj)
