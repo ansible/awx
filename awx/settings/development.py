@@ -154,8 +154,8 @@ SERVICE_NAME_DICT = {
     "nginx": "nginx"}
 
 try:
-    socket.gethostbyname('docker.for.mac.internal')
-    os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.internal'
+    socket.gethostbyname('docker.for.mac.host.internal')
+    os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.host.internal'
 except Exception:
     os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
 
