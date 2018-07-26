@@ -37,6 +37,7 @@ function OutputStrings (BaseString) {
         NOT_STARTED: t.s('Not Started'),
         SHOW_LESS: t.s('Show Less'),
         SHOW_MORE: t.s('Show More'),
+        UNKNOWN: t.s('Finished'),
     };
 
     ns.labels = {
