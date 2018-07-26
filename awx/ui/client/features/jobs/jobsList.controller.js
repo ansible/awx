@@ -16,7 +16,8 @@ function ListJobsController (
     $filter,
     ProcessErrors,
     Wait,
-    Rest
+    Rest,
+    SearchBasePath
 ) {
     const vm = this || {};
     const [unifiedJob] = resolvedModels;
@@ -26,21 +27,21 @@ function ListJobsController (
     // smart-search
     const name = 'jobs';
     const iterator = 'job';
-    const key = 'job_dataset';
 
     let launchModalOpen = false;
     let refreshAfterLaunchClose = false;
 
-    $scope.list = { iterator, name };
-    $scope.collection = { iterator, basePath: 'unified_jobs' };
-    $scope[key] = Dataset.data;
-    $scope[name] = Dataset.data.results;
-    $scope.$emit('updateCount', Dataset.data.count, 'jobs');
-    $scope.$on('updateDataset', (e, dataset) => {
-        $scope[key] = dataset;
-        $scope[name] = dataset.results;
-        $scope.$emit('updateCount', dataset.count, 'jobs');
+    vm.searchBasePath = SearchBasePath;
+
+    vm.list = { iterator, name };
+    vm.job_dataset = Dataset.data;
+    vm.jobs = Dataset.data.results;
+    vm.querySet = $state.params.job_search;
+
+    $scope.$watch('vm.job_dataset.count', () => {
+        $scope.$emit('updateCount', vm.job_dataset.count, 'jobs');
     });
+
     $scope.$on('ws-jobs', () => {
         if (!launchModalOpen) {
             refreshJobs();
@@ -114,7 +115,7 @@ function ListJobsController (
                 .then(() => {
                     let reloadListStateParams = null;
 
-                    if ($scope.jobs.length === 1 && $state.params.job_search &&
+                    if (vm.jobs.length === 1 && $state.params.job_search &&
                     _.has($state, 'params.job_search.page') &&
                     $state.params.job_search.page !== '1') {
                         reloadListStateParams = _.cloneDeep($state.params);
@@ -155,7 +156,7 @@ function ListJobsController (
                 .then(() => {
                     let reloadListStateParams = null;
 
-                    if ($scope.jobs.length === 1 && $state.params.job_search &&
+                    if (vm.jobs.length === 1 && $state.params.job_search &&
                     !_.isEmpty($state.params.job_search.page) &&
                     $state.params.job_search.page !== '1') {
                         const page = `${(parseInt(reloadListStateParams
@@ -190,9 +191,10 @@ function ListJobsController (
     };
 
     function refreshJobs () {
-        qs.search(unifiedJob.path, $state.params.job_search)
+        qs.search(SearchBasePath, $state.params.job_search)
             .then(({ data }) => {
-                $scope.$emit('updateDataset', data);
+                vm.jobs = data.results;
+                vm.job_dataset = data;
             });
     }
 }
@@ -208,7 +210,8 @@ ListJobsController.$inject = [
     '$filter',
     'ProcessErrors',
     'Wait',
-    'Rest'
+    'Rest',
+    'SearchBasePath'
 ];
 
 export default ListJobsController;
