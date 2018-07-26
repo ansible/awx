@@ -21,7 +21,7 @@
                 <at-row-item
                     status="{{ job.status }}"
                     status-tip="Job {{job.status}}. Click for details."
-                    header-value="{{ job.name }}"
+                    header-value="{{ job.id }} - {{ job.name }}"
                     header-state="{{ vm.getSref(job) }}"
                     header-tag="{{ vm.jobTypes[job.type] }}">
                 </at-row-item>
