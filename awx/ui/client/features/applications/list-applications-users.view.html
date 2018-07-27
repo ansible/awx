@@ -23,17 +23,8 @@
                 value="{{ user.description }}">
             </at-row-item>
             <at-row-item
-                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION') }}"
-                value="{{ user.summary_fields.organization.name }}"
-                value-link="/#/organizations/{{ user.summary_fields.organization.id }}">
-            </at-row-item>
-            <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_EXPIRED') }}"
-                value="{{ user.expriation | longDate }}">
-            </at-row-item>
-            <at-row-item
-                label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
-                value="{{ vm.getLastUsed(user) }}">
+                value="{{ user.expires | longDate }}">
             </at-row-item>
         </div>
     </at-row>
