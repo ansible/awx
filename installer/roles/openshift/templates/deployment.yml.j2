@@ -150,7 +150,7 @@ spec:
   port:
     targetPort: http
   tls:
-    insecureEdgeTerminationPolicy: Allow
+    insecureEdgeTerminationPolicy: Redirect
     termination: edge
   to:
     kind: Service
