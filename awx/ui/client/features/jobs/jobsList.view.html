@@ -15,7 +15,7 @@
     </div>
     <at-list results="vm.jobs" empty-list-reason="{{ vm.emptyListReason }}">
         <!-- TODO: implement resources are missing red indicator as present in mockup -->
-        <at-row ng-repeat="job in vm.jobs" job-id="{{ job.id }}">
+        <at-row ng-repeat="job in vm.jobs" id="job-{{ job.id }}">
             <div class="at-Row-items">
                 <!-- TODO: include workflow tab as well -->
                 <at-row-item
