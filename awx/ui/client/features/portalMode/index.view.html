@@ -26,12 +26,14 @@
                                     <button ng-class="{'btn-primary': $state.is('portalMode.myJobs'), 'Button-primary--hollow': $state.is('portalMode.allJobs')}"
                                             ng-click='filterUser()'
                                             class="btn btn-xs"
+                                            id="my-jobs-btn"
                                             translate>
                                         My Jobs
                                     </button>
                                     <button ng-class="{'btn-primary': $state.is('portalMode.allJobs'), 'Button-primary--hollow': $state.is('portalMode.myJobs')}"
                                             ng-click='filterAll()'
                                             class="btn btn-xs"
+                                            id="all-jobs-btn"
                                             translate>
                                         All Jobs
                                     </button>
