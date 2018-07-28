@@ -61,7 +61,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # AWX
-from awx.main.tasks import send_notifications, handle_ha_toplogy_changes
+from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.filters import V1CredentialFilterBackend
@@ -669,7 +669,6 @@ class InstanceDetail(RetrieveUpdateAPIView):
             else:
                 obj.capacity = 0
             obj.save()
-            handle_ha_toplogy_changes.apply_async()
             r.data = InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
         return r
 
