@@ -13,11 +13,13 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 from django.core.signals import setting_changed
+from django.utils.translation import ugettext_lazy as _
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
 from django_auth_ldap.backend import LDAPBackend as BaseLDAPBackend
 from django_auth_ldap.backend import populate_user
+from django.core.exceptions import ImproperlyConfigured
 
 # radiusauth
 from radiusauth.backends import RADIUSBackend as BaseRADIUSBackend
@@ -107,7 +109,14 @@ class LDAPBackend(BaseLDAPBackend):
         except User.DoesNotExist:
             pass
         try:
-            return super(LDAPBackend, self).authenticate(username, password)
+            user = super(LDAPBackend, self).authenticate(username, password)
+            try:
+                user.ldap_user._get_groups().get_group_dns()
+            except ImproperlyConfigured:
+                logger.exception(_("Encountered an error populating user {} from LDAP").format(user.username))
+                user.delete()
+                raise
+            return user
         except Exception:
             logger.exception("Encountered an error authenticating to LDAP")
             return None
