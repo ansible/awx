@@ -160,6 +160,8 @@ function OutputStream ($q) {
             this.counters.ready.length = 0;
             return $q.resolve();
         });
+
+    this.getMaxCounter = () => this.counters.max;
 }
 
 OutputStream.$inject = ['$q'];

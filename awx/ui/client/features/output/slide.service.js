@@ -77,15 +77,15 @@ function getBoundedRange (range, other) {
 }
 
 function SlidingWindowService ($q) {
-    this.init = (storage, api, { getScrollHeight }) => {
+    this.init = (storage, api, { getScrollHeight }, { getMaxCounter }) => {
         const { prepend, append, shift, pop, deleteRecord } = storage;
-        const { getMaxCounter, getRange, getFirst, getLast } = api;
+        const { getRange, getFirst, getLast } = api;
 
         this.api = {
-            getMaxCounter,
             getRange,
             getFirst,
             getLast,
+            getMaxCounter,
         };
 
         this.storage = {
@@ -352,13 +352,8 @@ function SlidingWindowService ($q) {
         return Number.isFinite(head) ? head : 0;
     };
 
-    this.getMaxCounter = () => {
-        const counter = this.api.getMaxCounter();
-        const tail = this.getTailCounter();
-
-        return Number.isFinite(counter) ? Math.max(tail, counter) : tail;
-    };
-
+    this.isOnLastPage = () => this.getTailCounter() >= (this.getMaxCounter() - OUTPUT_PAGE_SIZE);
+    this.getMaxCounter = () => this.api.getMaxCounter();
     this.getRange = () => [this.getHeadCounter(), this.getTailCounter()];
     this.getRecordCount = () => Object.keys(this.records).length;
     this.getCapacity = () => OUTPUT_EVENT_LIMIT - this.getRecordCount();

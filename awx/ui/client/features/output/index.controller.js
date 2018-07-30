@@ -22,9 +22,6 @@ const bufferState = [0, 0]; // [length, count]
 const listeners = [];
 const rx = [];
 
-let following = false;
-let attach = true;
-
 function bufferInit () {
     rx.length = 0;
 
@@ -57,59 +54,91 @@ function bufferEmpty (min, max) {
     return removed;
 }
 
+let attached = false;
+let noframes = false;
+let isOnLastPage = false;
+
 function onFrames (events) {
-    if (!following) {
+    if (noframes) {
+        return $q.resolve();
+    }
+
+    if (!attached) {
         const minCounter = Math.min(...events.map(({ counter }) => counter));
-        // attachment range
-        const max = slide.getTailCounter() + 1;
-        const min = Math.max(1, slide.getHeadCounter(), max - 50);
 
-        if (minCounter > max || minCounter < min) {
+        if (minCounter > slide.getTailCounter() + 1) {
             return $q.resolve();
         }
 
-        if (!attach) {
-            return $q.resolve();
-        }
+        attached = true;
+    }
 
-        follow();
+    if (vm.isInFollowMode) {
+        vm.isFollowing = true;
     }
 
     const capacity = slide.getCapacity();
 
+    if (capacity <= 0 && !isOnLastPage) {
+        attached = false;
+
+        return $q.resolve();
+    }
+
     return slide.popBack(events.length - capacity)
         .then(() => slide.pushFront(events))
         .then(() => {
-            scroll.setScrollPosition(scroll.getScrollHeight());
+            if (vm.isFollowing && scroll.isBeyondLowerThreshold()) {
+                scroll.scrollToBottom();
+            }
 
             return $q.resolve();
         });
 }
 
 function first () {
-    unfollow();
     scroll.pause();
+    unfollow();
 
-    return slide.getFirst()
+    attached = false;
+    noframes = true;
+    isOnLastPage = false;
+
+    slide.getFirst()
         .then(() => {
             scroll.resume();
+            noframes = false;
 
             return $q.resolve();
         });
 }
 
 function next () {
+    if (vm.isFollowing) {
+        return $q.resolve();
+    }
+
     scroll.pause();
 
     return slide.getNext()
+        .then(() => {
+            isOnLastPage = slide.isOnLastPage();
+            if (isOnLastPage) {
+                stream.setMissingCounterThreshold(slide.getTailCounter() + 1);
+                if (scroll.isBeyondLowerThreshold()) {
+                    scroll.scrollToBottom();
+                    follow();
+                }
+            }
+        })
         .finally(() => scroll.resume());
 }
 
 function previous () {
-    unfollow();
     scroll.pause();
 
     const initialPosition = scroll.getScrollPosition();
+    isOnLastPage = false;
 
     return slide.getPrevious()
         .then(popHeight => {
@@ -121,6 +150,22 @@ function previous () {
         .finally(() => scroll.resume());
 }
 
+function menuLast () {
+    if (vm.isFollowing) {
+        unfollow();
+
+        return $q.resolve();
+    }
+
+    if (isOnLastPage) {
+        scroll.scrollToBottom();
+
+        return $q.resolve();
+    }
+
+    return last();
+}
+
 function last () {
     scroll.pause();
 
@@ -129,7 +174,8 @@ function last () {
             stream.setMissingCounterThreshold(slide.getTailCounter() + 1);
             scroll.setScrollPosition(scroll.getScrollHeight());
 
-            attach = true;
+            isOnLastPage = true;
+            follow();
             scroll.resume();
 
             return $q.resolve();
@@ -141,28 +187,21 @@ function down () {
 }
 
 function up () {
-    if (following) {
-        unfollow();
-    } else {
-        scroll.moveUp();
-    }
+    scroll.moveUp();
 }
 
 function follow () {
-    scroll.pause();
-    scroll.hide();
+    isOnLastPage = slide.isOnLastPage();
 
-    following = true;
-    vm.isFollowing = following;
+    if (resource.model.get('event_processing_finished')) return;
+    if (!isOnLastPage) return;
+
+    vm.isInFollowMode = true;
 }
 
 function unfollow () {
-    attach = false;
-    following = false;
-    vm.isFollowing = following;
-
-    scroll.unhide();
-    scroll.resume();
+    vm.isInFollowMode = false;
+    vm.isFollowing = false;
 }
 
 function togglePanelExpand () {
@@ -276,6 +315,13 @@ function reloadState (params) {
     return $state.transitionTo($state.current, params, { inherit: false, location: 'replace' });
 }
 
+function getMaxCounter () {
+    const apiMax = resource.events.getMaxCounter();
+    const wsMax = stream.getMaxCounter();
+
+    return Math.max(apiMax, wsMax);
+}
+
 function OutputIndexController (
     _$compile_,
     _$q_,
@@ -318,9 +364,10 @@ function OutputIndexController (
     vm.togglePanelExpand = togglePanelExpand;
 
     // Stdout Navigation
-    vm.menu = { last, first, down, up };
+    vm.menu = { last: menuLast, first, down, up };
     vm.isMenuExpanded = true;
-    vm.isFollowing = following;
+    vm.isFollowing = false;
+    vm.isInFollowMode = false;
     vm.toggleMenuExpand = toggleMenuExpand;
     vm.toggleLineExpand = toggleLineExpand;
     vm.showHostDetails = showHostDetails;
@@ -330,10 +377,21 @@ function OutputIndexController (
         bufferInit();
 
         status.init(resource);
-        slide.init(render, resource.events, scroll);
-
+        slide.init(render, resource.events, scroll, { getMaxCounter });
         render.init({ compile, toggles: vm.toggleLineEnabled });
-        scroll.init({ previous, next });
+
+        scroll.init({
+            next,
+            previous,
+            onLeaveLower () {
+                unfollow();
+                return $q.resolve();
+            },
+            onEnterLower () {
+                follow();
+                return $q.resolve();
+            },
+        });
 
         stream.init({
             bufferAdd,

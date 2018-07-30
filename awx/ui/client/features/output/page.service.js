@@ -235,6 +235,7 @@ function PageService ($q) {
         })
         .then(() => this.getNext());
 
+    this.isOnLastPage = () => this.api.getLastPageNumber() === this.state.tail;
     this.getRecordCount = () => Object.keys(this.records).length;
     this.getTailCounter = () => this.state.tail;
 }
