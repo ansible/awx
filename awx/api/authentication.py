@@ -11,7 +11,7 @@ from django.utils.encoding import smart_text
 # Django REST Framework
 from rest_framework import authentication
 
-# Django OAuth Toolkit
+# Django-OAuth-Toolkit
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 
 logger = logging.getLogger('awx.api.authentication')
@@ -48,7 +48,7 @@ class LoggedOAuth2Authentication(OAuth2Authentication):
             user, token = ret
             username = user.username if user else '<none>'
             logger.info(smart_text(
-                u"User {} performed a {} to {} through the API using OAuth token {}.".format(
+                u"User {} performed a {} to {} through the API using OAuth 2 token {}.".format(
                     username, request.method, request.path, token.pk
                 )
             ))
