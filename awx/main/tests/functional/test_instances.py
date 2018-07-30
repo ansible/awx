@@ -1,5 +1,4 @@
 import pytest
-import mock
 
 from awx.main.models import AdHocCommand, InventoryUpdate, Job, JobTemplate, ProjectUpdate, Instance
 from awx.main.tasks import apply_cluster_membership_policies
@@ -32,8 +31,7 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_few_instances(mock, instance_factory, instance_group_factory):
+def test_policy_instance_few_instances(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     ig_1 = instance_group_factory("ig1", percentage=25)
     ig_2 = instance_group_factory("ig2", percentage=25)
@@ -61,8 +59,7 @@ def test_policy_instance_few_instances(mock, instance_factory, instance_group_fa
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_distribution_round_up(mock, instance_factory, instance_group_factory):
+def test_policy_instance_distribution_round_up(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
@@ -76,8 +73,7 @@ def test_policy_instance_distribution_round_up(mock, instance_factory, instance_
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_distribution_uneven(mock, instance_factory, instance_group_factory):
+def test_policy_instance_distribution_uneven(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
@@ -97,8 +93,7 @@ def test_policy_instance_distribution_uneven(mock, instance_factory, instance_gr
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_distribution_even(mock, instance_factory, instance_group_factory):
+def test_policy_instance_distribution_even(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
@@ -131,8 +126,7 @@ def test_policy_instance_distribution_even(mock, instance_factory, instance_grou
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_distribution_simultaneous(mock, instance_factory, instance_group_factory):
+def test_policy_instance_distribution_simultaneous(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
@@ -154,8 +148,7 @@ def test_policy_instance_distribution_simultaneous(mock, instance_factory, insta
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_list_manually_assigned(mock, instance_factory, instance_group_factory):
+def test_policy_instance_list_manually_assigned(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     ig_1 = instance_group_factory("ig1", percentage=100, minimum=2)
@@ -171,8 +164,7 @@ def test_policy_instance_list_manually_assigned(mock, instance_factory, instance
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_list_explicitly_pinned(mock, instance_factory, instance_group_factory):
+def test_policy_instance_list_explicitly_pinned(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i2.managed_by_policy = False
@@ -213,8 +205,7 @@ def test_inherited_instance_group_membership(instance_group_factory, default_ins
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_mixed_group_membership(mock, instance_factory, instance_group_factory):
+def test_mixed_group_membership(instance_factory, instance_group_factory):
     for i in range(5):
         instance_factory("i{}".format(i))
     ig_1 = instance_group_factory("ig1", percentage=60)

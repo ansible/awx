@@ -212,6 +212,8 @@ class InstanceGroup(BaseModel, RelatedJobsMixin):
     def fit_task_to_most_remaining_capacity_instance(self, task):
         instance_most_capacity = None
         for i in self.instances.filter(capacity__gt=0).order_by('hostname'):
+            if not i.enabled:
+                continue
             if i.remaining_capacity >= task.task_impact and \
                     (instance_most_capacity is None or
                      i.remaining_capacity > instance_most_capacity.remaining_capacity):

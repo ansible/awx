@@ -6,11 +6,9 @@
 # python
 import pytest
 import mock
-from contextlib import nested
 
 # AWX
 from awx.main.utils.ha import (
-    _add_remove_celery_worker_queues,
     AWXCeleryRouter,
 )
 
@@ -40,30 +38,6 @@ class TestAddRemoveCeleryWorkerQueues():
         app.control = mocker.MagicMock()
         app.control.cancel_consumer = mocker.MagicMock()
         return app
-
-    @pytest.mark.parametrize("broadcast_queues,static_queues,_worker_queues,hostname,added_expected,removed_expected", [
-        (['tower_broadcast_all'], ['east', 'west'], ['east', 'west', 'east-1'], 'east-1', ['tower_broadcast_all_east-1'], []),
-        ([], [], ['east', 'west', 'east-1'], 'east-1', [], ['east', 'west']),
-        ([], [], ['east', 'west'], 'east-1', ['east-1'], ['east', 'west']),
-        ([], [], [], 'east-1', ['east-1'], []),
-        ([], [], ['china', 'russia'], 'east-1', [ 'east-1'], ['china', 'russia']),
-    ])
-    def test__add_remove_celery_worker_queues_noop(self, mock_app,
-                                                   instance_generator,
-                                                   worker_queues_generator,
-                                                   broadcast_queues,
-                                                   static_queues, _worker_queues,
-                                                   hostname,
-                                                   added_expected, removed_expected):
-        instance = instance_generator(hostname=hostname)
-        worker_queues = worker_queues_generator(_worker_queues)
-        with nested(
-                mock.patch('awx.main.utils.ha.settings.AWX_CELERY_QUEUES_STATIC', static_queues),
-                mock.patch('awx.main.utils.ha.settings.AWX_CELERY_BCAST_QUEUES_STATIC', broadcast_queues),
-                mock.patch('awx.main.utils.ha.settings.CLUSTER_HOST_ID', hostname)):
-            (added_queues, removed_queues) = _add_remove_celery_worker_queues(mock_app, instance, worker_queues, hostname)
-            assert set(added_expected) == set(added_queues)
-            assert set(removed_expected) == set(removed_queues)
 
 
 class TestUpdateCeleryWorkerRouter():

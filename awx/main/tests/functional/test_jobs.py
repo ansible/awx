@@ -21,7 +21,6 @@ def test_orphan_unified_job_creation(instance, inventory):
 @pytest.mark.django_db
 @mock.patch('awx.main.utils.common.get_cpu_capacity', lambda: (2,8))
 @mock.patch('awx.main.utils.common.get_mem_capacity', lambda: (8000,62))
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes.apply_async', lambda: True)
 def test_job_capacity_and_with_inactive_node():
     i = Instance.objects.create(hostname='test-1')
     i.refresh_capacity()
