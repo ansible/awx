@@ -491,8 +491,5 @@ class IsolatedManager(object):
         status, rc = self.dispatch()
         if status == 'successful':
             status, rc = self.check()
-        else:
-            # If dispatch fails, attempt to consume artifacts that *might* exist
-            self.check()
         self.cleanup()
         return status, rc
