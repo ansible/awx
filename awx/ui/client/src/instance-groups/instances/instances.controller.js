@@ -7,10 +7,6 @@ function InstancesController ($scope, $state, $http, models, strings, Dataset, P
     vm.policy_instance_list = instanceGroup.get('policy_instance_list');
     vm.isSuperuser = $scope.$root.user_is_superuser;
 
-    vm.instances = instanceGroup.get('related.instances.results').map(instance => {
-        instance.is_manual = instance.managed_by_policy === false;
-        return instance;
-    });
 
     init();
 
@@ -22,6 +18,7 @@ function InstancesController ($scope, $state, $http, models, strings, Dataset, P
         };
 
         vm.dataset = Dataset.data;
+        vm.instances = instanceGroup.get('related.instances.results');
     }
 
     vm.tab = {

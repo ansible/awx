@@ -46,8 +46,6 @@ function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance) {
     promises.instanceGroup = new InstanceGroup(['get', 'options'], [instanceGroupId, instanceGroupId])
             .then((instanceGroup) =>  instanceGroup.extend('get', 'jobs', {params: {page_size: "10", order_by: "-finished"}}))
             .then((instanceGroup) =>  instanceGroup.extend('get', 'instances'));
-    promises.instance = new Instance('get');
-
 
     return $q.all(promises)
         .then(models => models);
@@ -226,6 +224,15 @@ function InstanceGroupsRun ($stateExtender, strings) {
         ncyBreadcrumb: {
             skip: true,
         },
+        params: {
+            instance_search: {
+                value: {
+                    page_size: '10',
+                    order_by: 'hostname'
+                },
+                dynamic: true
+            }
+        },
         views: {
             "modal": {
                 templateUrl: InstanceModalTemplate,
@@ -233,7 +240,15 @@ function InstanceGroupsRun ($stateExtender, strings) {
                 controllerAs: 'vm'
             }
         },
-        resolvedModels: InstanceGroupsResolve
+        resolve: {
+            resolvedModels: InstanceGroupsResolve,
+            Dataset: ['GetBasePath', 'QuerySet', '$stateParams',
+                function(GetBasePath, qs, $stateParams) {
+                    let path = `${GetBasePath('instances')}`;
+                    return qs.search(path, $stateParams[`instance_search`]);
+                }
+            ]
+        }
     });
 
     $stateExtender.addState(instanceJobsRoute);

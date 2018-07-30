@@ -1,27 +1,17 @@
-function InstanceModalController ($scope, $state, models, strings, ProcessErrors, Wait) {
-    const { instance, instanceGroup } = models;
+function InstanceModalController ($scope, $state, Dataset, models, strings, ProcessErrors, Wait) {
+    const { instanceGroup } = models;
     const vm = this || {};
     let relatedInstanceIds = [];
 
-    vm.setInstances = () => {
-        vm.relatedInstances = [];
-        vm.selectedRows = [];
-        vm.instances = instance.get('results').map(instance => {
-            instance.isSelected = false;
-            return instance;
-        });
-    };
-
-    vm.setRelatedInstances = () => {
-        vm.instanceGroupName = instanceGroup.get('name');
+    function setRelatedInstances () {
         vm.relatedInstances = instanceGroup.get('related.instances.results');
         vm.selectedRows = _.cloneDeep(vm.relatedInstances);
         relatedInstanceIds = vm.relatedInstances.map(instance => instance.id);
-        vm.instances = instance.get('results').map(instance => {
+        vm.instances = vm.instances.map(instance => {
             instance.isSelected = relatedInstanceIds.includes(instance.id);
             return instance;
         });
-    };
+    }
 
     init();
 
@@ -29,9 +19,9 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
         vm.strings = strings;
         vm.panelTitle = strings.get('instance.PANEL_TITLE');
         vm.instanceGroupId = instanceGroup.get('id');
+        vm.instanceGroupName = instanceGroup.get('name');
 
-        vm.dataset = instance.get();
-        vm.querySet = { order_by: 'hostname', page_size: '5' };
+        vm.querySet = $state.params.instance_search;
 
         vm.list = {
             name: 'instances',
@@ -39,11 +29,10 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
             basePath: `/api/v2/instances/`
         };
 
-        if (vm.instanceGroupId === undefined) {
-            vm.setInstances();
-        } else {
-            vm.setRelatedInstances();
-        }
+        vm.instances = Dataset.data.results;
+        vm.instance_dataset = Dataset.data;
+
+        setRelatedInstances();
 
         $scope.$watch('vm.instances', function() {
             angular.forEach(vm.instances, function(instance) {
@@ -115,6 +104,7 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
 InstanceModalController.$inject = [
     '$scope',
     '$state',
+    'Dataset',
     'resolvedModels',
     'InstanceGroupsStrings',
     'ProcessErrors',
