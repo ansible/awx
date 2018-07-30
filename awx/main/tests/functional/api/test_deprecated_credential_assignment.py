@@ -2,7 +2,7 @@ import json
 import mock
 import pytest
 
-from awx.main.models import Credential, Job
+from awx.main.models import Credential, CredentialType, Job
 from awx.api.versioning import reverse
 
 
@@ -149,6 +149,27 @@ def test_prevent_multiple_machine_creds(get, post, job_template, admin, machine_
 
     resp = post(url, _new_cred('Second Cred'), admin, expect=400)
     assert 'Cannot assign multiple Machine credentials.' in resp.content
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('kind', ['scm', 'insights'])
+def test_invalid_credential_type_at_launch(get, post, job_template, admin, kind):
+    cred_type = CredentialType.defaults[kind]()
+    cred_type.save()
+    cred = Credential(
+        name='Some Cred',
+        credential_type=cred_type,
+        inputs={
+            'username': 'bob',
+            'password': 'secret',
+        }
+    )
+    cred.save()
+    url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
+
+    resp = post(url, {'credentials': [cred.pk]}, admin, expect=400)
+    assert 'Cannot assign a Credential of kind `{}`'.format(kind) in resp.data.get('credentials', [])
+    assert Job.objects.count() == 0
 
 
 @pytest.mark.django_db
