@@ -1,7 +1,8 @@
 /* eslint camelcase: 0 */
-const PAGE_SIZE = 50;
-const PAGE_LIMIT = 5;
-const EVENT_LIMIT = PAGE_LIMIT * PAGE_SIZE;
+import {
+    OUTPUT_EVENT_LIMIT,
+    OUTPUT_PAGE_SIZE,
+} from './constants';
 
 /**
  * Check if a range overlaps another range
@@ -266,7 +267,7 @@ function SlidingWindowService ($q) {
         return this.chain;
     };
 
-    this.getNext = (displacement = PAGE_SIZE) => {
+    this.getNext = (displacement = OUTPUT_PAGE_SIZE) => {
         const [head, tail] = this.getRange();
 
         const tailRoom = this.getMaxCounter() - tail;
@@ -276,14 +277,14 @@ function SlidingWindowService ($q) {
 
         let headDisplacement = 0;
 
-        if (newTail - head > EVENT_LIMIT) {
-            headDisplacement = (newTail - EVENT_LIMIT) - head;
+        if (newTail - head > OUTPUT_EVENT_LIMIT) {
+            headDisplacement = (newTail - OUTPUT_EVENT_LIMIT) - head;
         }
 
         return this.move([head + headDisplacement, tail + tailDisplacement]);
     };
 
-    this.getPrevious = (displacement = PAGE_SIZE) => {
+    this.getPrevious = (displacement = OUTPUT_PAGE_SIZE) => {
         const [head, tail] = this.getRange();
 
         const headRoom = head - 1;
@@ -293,8 +294,8 @@ function SlidingWindowService ($q) {
 
         let tailDisplacement = 0;
 
-        if (tail - newHead > EVENT_LIMIT) {
-            tailDisplacement = tail - (newHead + EVENT_LIMIT);
+        if (tail - newHead > OUTPUT_EVENT_LIMIT) {
+            tailDisplacement = tail - (newHead + OUTPUT_EVENT_LIMIT);
         }
 
         return this.move([newHead, tail - tailDisplacement]);
@@ -332,12 +333,12 @@ function SlidingWindowService ($q) {
     this.getFirst = () => this.clear()
         .then(() => this.api.getFirst())
         .then(events => this.pushFront(events))
-        .then(() => this.moveTail(PAGE_SIZE));
+        .then(() => this.moveTail(OUTPUT_PAGE_SIZE));
 
     this.getLast = () => this.clear()
         .then(() => this.api.getLast())
         .then(events => this.pushBack(events))
-        .then(() => this.moveHead(-PAGE_SIZE));
+        .then(() => this.moveHead(-OUTPUT_PAGE_SIZE));
 
     this.getTailCounter = () => {
         const tail = Math.max(...Object.keys(this.records));
@@ -360,7 +361,7 @@ function SlidingWindowService ($q) {
 
     this.getRange = () => [this.getHeadCounter(), this.getTailCounter()];
     this.getRecordCount = () => Object.keys(this.records).length;
-    this.getCapacity = () => EVENT_LIMIT - this.getRecordCount();
+    this.getCapacity = () => OUTPUT_EVENT_LIMIT - this.getRecordCount();
 }
 
 SlidingWindowService.$inject = ['$q'];

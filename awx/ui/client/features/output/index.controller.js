@@ -1,6 +1,8 @@
 /* eslint camelcase: 0 */
-const EVENT_START_TASK = 'playbook_on_task_start';
-const EVENT_START_PLAY = 'playbook_on_play_start';
+import {
+    EVENT_START_PLAY,
+    EVENT_START_TASK,
+} from './constants';
 
 let $compile;
 let $q;

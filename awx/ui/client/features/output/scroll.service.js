@@ -1,11 +1,13 @@
-const ELEMENT_CONTAINER = '.at-Stdout-container';
-const ELEMENT_TBODY = '#atStdoutResultTable';
-const DELAY = 100;
-const THRESHOLD = 0.1;
+import {
+    OUTPUT_ELEMENT_CONTAINER,
+    OUTPUT_ELEMENT_TBODY,
+    OUTPUT_SCROLL_DELAY,
+    OUTPUT_SCROLL_THRESHOLD,
+} from './constants';
 
 function JobScrollService ($q, $timeout) {
     this.init = ({ next, previous }) => {
-        this.el = $(ELEMENT_CONTAINER);
+        this.el = $(OUTPUT_ELEMENT_CONTAINER);
         this.timer = null;
 
         this.position = {
@@ -37,7 +39,7 @@ function JobScrollService ($q, $timeout) {
             $timeout.cancel(this.timer);
         }
 
-        this.timer = $timeout(this.register, DELAY);
+        this.timer = $timeout(this.register, OUTPUT_SCROLL_DELAY);
     };
 
     this.register = () => {
@@ -76,10 +78,10 @@ function JobScrollService ($q, $timeout) {
         if (downward) {
             current += this.getViewableHeight();
 
-            if (current >= height || ((height - current) / height) < THRESHOLD) {
+            if (current >= height || ((height - current) / height) < OUTPUT_SCROLL_THRESHOLD) {
                 return true;
             }
-        } else if (current <= 0 || (current / height) < THRESHOLD) {
+        } else if (current <= 0 || (current / height) < OUTPUT_SCROLL_THRESHOLD) {
             return true;
         }
 
@@ -177,7 +179,7 @@ function JobScrollService ($q, $timeout) {
     };
 
     this.isLocked = () => this.state.locked;
-    this.isMissing = () => $(ELEMENT_TBODY)[0].clientHeight < this.getViewableHeight();
+    this.isMissing = () => $(OUTPUT_ELEMENT_TBODY)[0].clientHeight < this.getViewableHeight();
 }
 
 JobScrollService.$inject = ['$q', '$timeout'];

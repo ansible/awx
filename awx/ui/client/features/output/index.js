@@ -18,16 +18,15 @@ import SearchComponent from '~features/output/search.component';
 import StatsComponent from '~features/output/stats.component';
 import HostEvent from './host-event/index';
 
-const Template = require('~features/output/index.view.html');
+import {
+    API_ROOT,
+    OUTPUT_ORDER_BY,
+    OUTPUT_PAGE_SIZE,
+    WS_PREFIX,
+} from './constants';
 
 const MODULE_NAME = 'at.features.output';
-
-const PAGE_CACHE = true;
-const PAGE_LIMIT = 5;
-const PAGE_SIZE = 50;
-const ORDER_BY = 'counter';
-const WS_PREFIX = 'ws';
-const API_ROOT = '/api/v2/';
+const Template = require('~features/output/index.view.html');
 
 function resolveResource (
     $state,
@@ -80,23 +79,16 @@ function resolveResource (
     }
 
     const params = {
-        page_size: PAGE_SIZE,
-        order_by: ORDER_BY,
-    };
-
-    const config = {
-        params,
-        pageCache: PAGE_CACHE,
-        pageLimit: PAGE_LIMIT,
+        page_size: OUTPUT_PAGE_SIZE,
+        order_by: OUTPUT_ORDER_BY,
     };
 
     if (job_event_search) { // eslint-disable-line camelcase
         const query = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
-
-        Object.assign(config.params, query);
+        Object.assign(params, query);
     }
 
-    Events.init(`${API_ROOT}${related}`, config.params);
+    Events.init(`${API_ROOT}${related}`, params);
 
     Wait('start');
     const promise = Promise.all([new Resource(['get', 'options'], [id, id]), Events.fetch()])

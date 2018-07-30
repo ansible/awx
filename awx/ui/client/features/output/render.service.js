@@ -1,20 +1,22 @@
 import Ansi from 'ansi-to-html';
 import Entities from 'html-entities';
 
-const ELEMENT_TBODY = '#atStdoutResultTable';
-const EVENT_START_TASK = 'playbook_on_task_start';
-const EVENT_START_PLAY = 'playbook_on_play_start';
-const EVENT_STATS_PLAY = 'playbook_on_stats';
+import {
+    EVENT_START_PLAY,
+    EVENT_STATS_PLAY,
+    EVENT_START_TASK,
+    OUTPUT_ELEMENT_TBODY,
+} from './constants';
 
 const EVENT_GROUPS = [
     EVENT_START_TASK,
-    EVENT_START_PLAY
+    EVENT_START_PLAY,
 ];
 
 const TIME_EVENTS = [
     EVENT_START_TASK,
     EVENT_START_PLAY,
-    EVENT_STATS_PLAY
+    EVENT_STATS_PLAY,
 ];
 
 const ansi = new Ansi();
@@ -33,7 +35,7 @@ function JobRenderService ($q, $sce, $window) {
     this.init = ({ compile, toggles }) => {
         this.parent = null;
         this.record = {};
-        this.el = $(ELEMENT_TBODY);
+        this.el = $(OUTPUT_ELEMENT_TBODY);
         this.hooks = { compile };
 
         this.createToggles = toggles;

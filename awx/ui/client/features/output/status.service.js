@@ -1,14 +1,15 @@
 /* eslint camelcase: 0 */
-const JOB_START = 'playbook_on_start';
-const JOB_END = 'playbook_on_stats';
-const PLAY_START = 'playbook_on_play_start';
-const TASK_START = 'playbook_on_task_start';
-
-const HOST_STATUS_KEYS = ['dark', 'failures', 'changed', 'ok', 'skipped'];
-const COMPLETE = ['successful', 'failed', 'unknown'];
-const INCOMPLETE = ['canceled', 'error'];
-const UNSUCCESSFUL = ['failed'].concat(INCOMPLETE);
-const FINISHED = COMPLETE.concat(INCOMPLETE);
+import {
+    EVENT_START_PLAYBOOK,
+    EVENT_STATS_PLAY,
+    EVENT_START_PLAY,
+    EVENT_START_TASK,
+    HOST_STATUS_KEYS,
+    JOB_STATUS_COMPLETE,
+    JOB_STATUS_INCOMPLETE,
+    JOB_STATUS_UNSUCCESSFUL,
+    JOB_STATUS_FINISHED,
+} from './constants';
 
 function JobStatusService (moment, message) {
     this.dispatch = () => message.dispatch('status', this.state);
@@ -62,11 +63,11 @@ function JobStatusService (moment, message) {
     };
 
     this.createHostStatusCounts = status => {
-        if (UNSUCCESSFUL.includes(status)) {
+        if (JOB_STATUS_UNSUCCESSFUL.includes(status)) {
             return { failures: 1 };
         }
 
-        if (COMPLETE.includes(status)) {
+        if (JOB_STATUS_COMPLETE.includes(status)) {
             return { ok: 1 };
         }
 
@@ -92,7 +93,7 @@ function JobStatusService (moment, message) {
 
         let changed = false;
 
-        if (!this.active && !(data.event === JOB_END)) {
+        if (!this.active && !(data.event === EVENT_STATS_PLAY)) {
             this.active = true;
             this.setJobStatus('running');
             changed = true;
@@ -105,22 +106,22 @@ function JobStatusService (moment, message) {
             changed = true;
         }
 
-        if (data.event === JOB_START) {
+        if (data.event === EVENT_START_PLAYBOOK) {
             this.setStarted(this.state.started || data.created);
             changed = true;
         }
 
-        if (data.event === PLAY_START) {
+        if (data.event === EVENT_START_PLAY) {
             this.state.counts.plays++;
             changed = true;
         }
 
-        if (data.event === TASK_START) {
+        if (data.event === EVENT_START_TASK) {
             this.state.counts.tasks++;
             changed = true;
         }
 
-        if (data.event === JOB_END) {
+        if (data.event === EVENT_STATS_PLAY) {
             this.setStatsEvent(data);
             changed = true;
         }
@@ -193,9 +194,9 @@ function JobStatusService (moment, message) {
 
     this.setJobStatus = status => {
         const isExpectingStats = this.isExpectingStatsEvent();
-        const isIncomplete = INCOMPLETE.includes(status);
-        const isFinished = FINISHED.includes(status);
-        const isAlreadyFinished = FINISHED.includes(this.state.status);
+        const isIncomplete = JOB_STATUS_INCOMPLETE.includes(status);
+        const isFinished = JOB_STATUS_FINISHED.includes(status);
+        const isAlreadyFinished = JOB_STATUS_FINISHED.includes(this.state.status);
 
         if (isAlreadyFinished) {
             return;

@@ -1,5 +1,5 @@
 /* eslint camelcase: 0 */
-const PAGE_LIMIT = 5;
+import { OUTPUT_PAGE_LIMIT } from './constants';
 
 function PageService ($q) {
     this.init = (storage, api, { getScrollHeight }) => {
@@ -150,7 +150,7 @@ function PageService ($q) {
 
         const pageCount = this.state.head - this.state.tail;
 
-        if (pageCount >= PAGE_LIMIT) {
+        if (pageCount >= OUTPUT_PAGE_LIMIT) {
             this.chain = this.chain
                 .then(() => this.popBack())
                 .then(() => {
@@ -185,7 +185,7 @@ function PageService ($q) {
 
         const pageCount = this.state.head - this.state.tail;
 
-        if (pageCount >= PAGE_LIMIT) {
+        if (pageCount >= OUTPUT_PAGE_LIMIT) {
             this.chain = this.chain
                 .then(() => this.popFront())
                 .then(() => {

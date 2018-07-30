@@ -1,7 +1,9 @@
 /* eslint camelcase: 0 */
-const PAGE_SIZE = 50;
-const MAX_LAG = 120;
-const JOB_END = 'playbook_on_stats';
+import {
+    EVENT_STATS_PLAY,
+    OUTPUT_MAX_LAG,
+    OUTPUT_PAGE_SIZE,
+} from './constants';
 
 function OutputStream ($q) {
     this.init = ({ bufferAdd, bufferEmpty, onFrames, onStop }) => {
@@ -28,7 +30,7 @@ function OutputStream ($q) {
         this.lag = 0;
         this.chain = $q.resolve();
 
-        this.factors = this.calcFactors(PAGE_SIZE);
+        this.factors = this.calcFactors(OUTPUT_PAGE_SIZE);
         this.setFramesPerRender();
     };
 
@@ -47,7 +49,7 @@ function OutputStream ($q) {
     };
 
     this.setFramesPerRender = () => {
-        const index = Math.floor((this.lag / MAX_LAG) * this.factors.length);
+        const index = Math.floor((this.lag / OUTPUT_MAX_LAG) * this.factors.length);
         const boundedIndex = Math.min(this.factors.length - 1, index);
 
         this.framesPerRender = this.factors[boundedIndex];
@@ -96,7 +98,7 @@ function OutputStream ($q) {
 
         this.chain = this.chain
             .then(() => {
-                if (data.event === JOB_END) {
+                if (data.event === EVENT_STATS_PLAY) {
                     this.state.ending = true;
                     this.counters.final = data.counter;
                 }
@@ -104,7 +106,7 @@ function OutputStream ($q) {
                 const [minReady, maxReady] = this.updateCounterState(data);
                 const count = this.hooks.bufferAdd(data);
 
-                if (count % PAGE_SIZE === 0) {
+                if (count % OUTPUT_PAGE_SIZE === 0) {
                     this.setFramesPerRender();
                 }
 
