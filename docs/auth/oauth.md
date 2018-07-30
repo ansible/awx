@@ -231,10 +231,10 @@ implies 'read' as well.
 
 ## Application Functions
 
-This page lists OAuth utility endpoints used for authorization, token refresh and revoke.
+This page lists OAuth 2 utility endpoints used for authorization, token refresh and revoke.
 Note endpoints other than `/api/o/authorize/` are not meant to be used in browsers and do not
 support HTTP GET. The endpoints here strictly follow
-[RFC specs for OAuth2](https://tools.ietf.org/html/rfc6749), so please use that for detailed
+[RFC specs for OAuth 2](https://tools.ietf.org/html/rfc6749), so please use that for detailed
 reference. The `implicit` grant type can only be used to acquire a access token if the user is already logged in via session authentication, as that confirms that the user is authorized to create an access token. Here we give some examples to demonstrate the typical usage of these endpoints in
 AWX context (Note AWX net location default to `http://localhost:8013` in examples):
 
@@ -434,7 +434,7 @@ at /api/v2/tokens/.
 
 ## Acceptance Criteria
 * All CRUD operations for OAuth 2 applications and tokens should function as described.
-* RBAC rules applied to OAuth applications and tokens should behave as described.
+* RBAC rules applied to OAuth 2 applications and tokens should behave as described.
 * A default application should be auto-created for each new user.
 * Incoming requests using unexpired OAuth 2 token correctly in authentication header should be able
   to successfully authenticate themselves.
