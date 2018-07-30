@@ -174,43 +174,45 @@ function SmartSearchController (
     };
 
     $scope.addTerms = terms => {
-        const { singleSearchParam } = $scope;
-        const unmodifiedQueryset = _.clone(queryset);
+        if (terms && terms !== "") {
+            const { singleSearchParam } = $scope;
+            const unmodifiedQueryset = _.clone(queryset);
 
-        const searchInputQueryset = qs.getSearchInputQueryset(terms, isFilterableBaseField, isRelatedField, isAnsibleFactField, singleSearchParam);
-        queryset = qs.mergeQueryset(queryset, searchInputQueryset, singleSearchParam);
+            const searchInputQueryset = qs.getSearchInputQueryset(terms, isFilterableBaseField, isRelatedField, isAnsibleFactField, singleSearchParam);
+            queryset = qs.mergeQueryset(queryset, searchInputQueryset, singleSearchParam);
 
-        // Go back to the first page after a new search
-        delete queryset.page;
+            // Go back to the first page after a new search
+            delete queryset.page;
 
-        // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
-        // This transition will not reload controllers/resolves/views but will register new
-        // $stateParams[searchKey] terms.
-        if (!$scope.querySet) {
-            transitionSuccessListener();
-            $state.go('.', { [searchKey]: queryset })
-                .then(() => {
-                    // same as above in $scope.remove.  For some reason deleting the page
-                    // from the queryset works for all lists except lists in modals.
-                    delete $stateParams[searchKey].page;
-                    listenForTransitionSuccess();
-                });
+            // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
+            // This transition will not reload controllers/resolves/views but will register new
+            // $stateParams[searchKey] terms.
+            if (!$scope.querySet) {
+                transitionSuccessListener();
+                $state.go('.', { [searchKey]: queryset })
+                    .then(() => {
+                        // same as above in $scope.remove.  For some reason deleting the page
+                        // from the queryset works for all lists except lists in modals.
+                        delete $stateParams[searchKey].page;
+                        listenForTransitionSuccess();
+                    });
+            }
+
+            qs.search(path, queryset)
+                .then(({ data }) => {
+                    if ($scope.querySet) {
+                        $scope.querySet = queryset;
+                    }
+                    $scope.dataset = data;
+                    $scope.collection = data.results;
+                    $scope.$emit('updateDataset', data);
+                })
+                .catch(() => revertSearch(unmodifiedQueryset));
+
+            $scope.searchTerm = null;
+
+            generateSearchTags();
         }
-
-        qs.search(path, queryset)
-            .then(({ data }) => {
-                if ($scope.querySet) {
-                    $scope.querySet = queryset;
-                }
-                $scope.dataset = data;
-                $scope.collection = data.results;
-                $scope.$emit('updateDataset', data);
-            })
-            .catch(() => revertSearch(unmodifiedQueryset));
-
-        $scope.searchTerm = null;
-
-        generateSearchTags();
     };
     // remove tag, merge new queryset, $state.go
     $scope.removeTerm = index => {
