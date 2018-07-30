@@ -59,7 +59,7 @@
                 <div class="at-Row-items at-Row-items--instances">
                     <at-row-item
                         header-value="{{ instance.hostname }}"
-                        header-tag="{{ instance.is_manual ? vm.strings.get('list.MANUAL') : '' }}">
+                        header-tag="{{ instance.managed_by_policy ? '' : vm.strings.get('list.MANUAL') }}">
                     </at-row-item>
                     <at-row-item
                         label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
