@@ -3346,6 +3346,9 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
         if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
             return {"error": _("Cannot assign multiple {credential_type} credentials.".format(
                 credential_type=sub.unique_hash(display=True)))}
+        kind = sub.credential_type.kind
+        if kind not in ('ssh', 'vault', 'cloud', 'net'):
+            return {'error': _('Cannot assign a Credential of kind `{}`.').format(kind)}
 
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
 

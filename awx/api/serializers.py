@@ -4285,6 +4285,10 @@ class JobLaunchSerializer(BaseSerializer):
                 errors.setdefault('credentials', []).append(_(
                     'Cannot assign multiple {} credentials.'
                 ).format(cred.unique_hash(display=True)))
+            if cred.credential_type.kind not in ('ssh', 'vault', 'cloud', 'net'):
+                errors.setdefault('credentials', []).append(_(
+                    'Cannot assign a Credential of kind `{}`'
+                ).format(cred.credential_type.kind))
             distinct_cred_kinds.append(cred.unique_hash())
 
         # Prohibit removing credentials from the JT list (unsupported for now)
