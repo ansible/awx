@@ -180,6 +180,14 @@ function ListTemplatesController(
         return html;
     };
 
+    vm.getType = template => {
+        if(isJobTemplate(template)) {
+            return strings.get('list.ADD_DD_JT_LABEL');
+        } else {
+            return strings.get('list.ADD_DD_WF_LABEL');;
+        }
+    };
+    
     function refreshTemplates() {
         Wait('start');
         let path = GetBasePath('unified_job_templates');

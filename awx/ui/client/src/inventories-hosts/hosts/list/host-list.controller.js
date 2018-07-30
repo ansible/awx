@@ -17,6 +17,7 @@ function HostsList($scope, HostsList, $rootScope, GetBasePath,
         $scope.canAdd = canAdd;
         $scope.enableSmartInventoryButton = false;
         $scope.smartInventoryButtonTooltip = InventoryHostsStrings.get('smartinventorybutton.DISABLED_INSTRUCTIONS');
+        $scope.strings = InventoryHostsStrings;
 
         // Search init
         $scope.list = list;

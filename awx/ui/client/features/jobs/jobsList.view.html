@@ -20,7 +20,7 @@
                 <!-- TODO: include workflow tab as well -->
                 <at-row-item
                     status="{{ job.status }}"
-                    status-tip="Job {{job.status}}. Click for details."
+                    status-tip="{{ vm.strings.get('list.STATUS_TOOLTIP', job.status) }}"
                     header-value="{{ job.id }} - {{ job.name }}"
                     header-state="{{ vm.getSref(job) }}"
                     header-tag="{{ vm.jobTypes[job.type] }}">
@@ -76,6 +76,7 @@
                     ng-show="job.summary_fields.user_capabilities.start">
                 </at-relaunch>
                 <at-row-action icon="fa-minus-circle" ng-click="vm.cancelJob(job)"
+                    tooltip="{{ vm.strings.get('listActions.CANCEL', vm.strings.get('list.JOB')) }}"
                     ng-show="!vm.isPortalMode && (job.summary_fields.user_capabilities.start &&
                              (job.status === 'pending' ||
                              job.status === 'waiting' ||
@@ -85,6 +86,7 @@
                              job.status === 'running'))">
                 </at-row-action>
                 <at-row-action icon="fa-trash" ng-click="vm.deleteJob(job)"
+                    tooltip="{{ vm.strings.get('listActions.DELETE', vm.strings.get('list.JOB')) }}"
                     ng-show="!vm.isPortalMode && job.summary_fields.user_capabilities.delete &&
                              !(job.status === 'pending' ||
                              job.status === 'waiting' ||

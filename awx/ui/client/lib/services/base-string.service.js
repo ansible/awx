@@ -93,6 +93,12 @@ function BaseStringService (namespace) {
         CALL: ({ path, action, status }) => t.s('Call to {{ path }} failed. {{ action }} returned status: {{ status }}.', { path, action, status }),
     };
 
+    this.listActions = {
+        COPY: resourceType => t.s('Copy {{resourceType}}', { resourceType }),
+        DELETE: resourceType => t.s('Delete the {{resourceType}}', { resourceType }),
+        CANCEL: resourceType => t.s('Cancel the {{resourceType}}', { resourceType })
+    };
+
     this.ALERT = ({ header, body }) => t.s('{{ header }} {{ body }}', { header, body });
 
     /**

@@ -155,7 +155,7 @@ let lists = [{
             list.title = true;
             list.listTitle = N_('Inventories') + ` | {{ name }}`;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/inventories`;
-            list.emptyListText = "This list is populated by inventories added from the&nbsp;<a ui-sref='inventories.add'>Inventories</a>&nbsp;section";
+            list.emptyListText = `${N_("This list is populated by inventories added from the")}&nbsp;<a ui-sref='inventories.add'>${N_("Inventories")}</a>&nbsp;${N_("section")}`;
             return list;
         }],
         OrgInventoryDataset: ['OrgInventoryList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -206,7 +206,7 @@ let lists = [{
             delete list.fieldActions.delete;
             list.listTitle = N_('Projects') + ` | {{ name }}`;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/projects`;
-            list.emptyListText = "This list is populated by projects added from the&nbsp;<a ui-sref='projects.add'>Projects</a>&nbsp;section";
+            list.emptyListText = `${N_("This list is populated by projects added from the")}&nbsp;<a ui-sref='projects.add'>${N_("Projects")}</a>&nbsp;${N_("section")}`;
             return list;
         }],
         OrgProjectDataset: ['OrgProjectList', 'QuerySet', '$stateParams', 'GetBasePath',

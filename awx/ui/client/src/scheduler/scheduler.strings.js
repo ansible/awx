@@ -9,6 +9,14 @@ function SchedulerStrings (BaseString) {
         EDIT_SCHEDULE: t.s('EDIT SCHEDULE')
     };
 
+    ns.list = {
+        CLICK_TO_EDIT: t.s('Click to edit schedule.'),
+        SCHEDULE_IS_ACTIVE: t.s('Schedule is active.'),
+        SCHEDULE_IS_ACTIVE_CLICK_TO_STOP: t.s('Schedule is active. Click to stop.'),
+        SCHEDULE_IS_STOPPED: t.s('Schedule is stopped.'),
+        SCHEDULE_IS_STOPPED_CLICK_TO_STOP: t.s('Schedule is stopped. Click to activate.')
+    }; 
+
     ns.form = {
         NAME: t.s('Name'),
         NAME_REQUIRED_MESSAGE: t.s('A schedule name is required.'),
