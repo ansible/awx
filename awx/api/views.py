@@ -2251,6 +2251,12 @@ class HostDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUp
     model = Host
     serializer_class = HostSerializer
 
+    def delete(self, request, *args, **kwargs):
+        if self.get_object().inventory.pending_deletion:
+            return Response({"error": _("The inventory for this host is already being deleted.")},
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super(HostDetail, self).delete(request, *args, **kwargs)
+
 
 class HostAnsibleFactsDetail(RetrieveAPIView):
 
