@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['i18n', 'awxNetStrings', function(i18n, awxNetStrings) {
+export default ['i18n', function(i18n) {
         return {
 
             addTitle: i18n._('NEW SMART INVENTORY'),
@@ -155,14 +155,6 @@ export default ['i18n', 'awxNetStrings', function(i18n, awxNetStrings) {
                     title: i18n._('Completed Jobs'),
                     skipGenerator: true,
                     ngClick: "$state.go('inventories.editSmartInventory.completed_jobs')"
-                }
-            }, 
-            relatedButtons: {
-                network: {
-                    ngClick: 'goToGraph()',
-                    label: awxNetStrings.get('feature.ACTION_BUTTON'),
-                    class: 'Form-primaryButton',
-                    ngShow: "$state.is('inventories.editSmartInventory')"
                 }
             }
 

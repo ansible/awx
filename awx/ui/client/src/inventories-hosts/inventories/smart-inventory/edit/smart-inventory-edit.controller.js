@@ -95,10 +95,6 @@ function SmartInventoryEdit($scope, $location,
             });
     };
 
-    $scope.goToGraph = function(){
-        $state.go('inventories.editSmartInventory.networking', {smartinventory_id: $scope.inventory_obj.id, inventory_name: $scope.inventory_obj.name});
-    };
-
     $scope.formCancel = function() {
         $state.go('inventories');
     };

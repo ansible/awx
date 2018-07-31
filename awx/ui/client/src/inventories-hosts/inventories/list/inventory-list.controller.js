@@ -107,15 +107,6 @@ function InventoriesList($scope,
         }
     };
 
-    $scope.goToGraph = function(inventory){
-        if(inventory.kind && inventory.kind === 'smart') {
-            $state.go('inventories.editSmartInventory.networking', {smartinventory_id: inventory.id, inventory_name: inventory.name});
-        }
-        else {
-            $state.go('inventories.edit.networking', {inventory_id: inventory.id, inventory_name: inventory.name});
-        }
-    };
-
     $scope.editInventory = function (inventory, reload) {
         const goOptions = reload ? { reload: true } : null;
         if(inventory.kind && inventory.kind === 'smart') {

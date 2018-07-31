@@ -99,10 +99,6 @@ function InventoriesEdit($scope, $location,
             });
     };
 
-    $scope.goToGraph = function(){
-        $state.go('inventories.edit.networking', {inventory_id: $scope.inventory_obj.id, inventory_name: $scope.inventory_obj.name});
-    };
-
     $scope.formCancel = function() {
         $state.go('inventories');
     };

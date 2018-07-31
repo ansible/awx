@@ -77,12 +77,6 @@ const watch = {
             target: TARGET,
             secure: false,
             ws: true
-        },
-        {
-            context: '/network_ui',
-            target: TARGET,
-            secure: false,
-            ws: true
         }]
     }
 };
