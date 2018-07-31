@@ -2387,9 +2387,7 @@ class LabelAccess(BaseAccess):
     prefetch_related = ('modified_by', 'created_by', 'organization',)
 
     def filtered_queryset(self):
-        return self.model.objects.filter(
-            organization__in=Organization.accessible_pk_qs(self.user, 'read_role')
-        )
+        return self.model.objects.all()
 
     @check_superuser
     def can_read(self, obj):
