@@ -61,6 +61,15 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         self.assertTrue(is_done)
         self.assertFalse(has_failed)
 
+        # verify that relaunched WFJ fails if a JT leaf is deleted
+        for jt in JobTemplate.objects.all():
+            jt.delete()
+        relaunched = wfj.create_relaunch_workflow_job()
+        dag = WorkflowDAG(workflow_job=relaunched)
+        is_done, has_failed = dag.is_workflow_done()
+        self.assertTrue(is_done)
+        self.assertTrue(has_failed)
+
     def test_workflow_fails_for_unfinished_node(self):
         wfj = self.workflow_job(states=['error', None, None, None, None])
         dag = WorkflowDAG(workflow_job=wfj)

@@ -69,6 +69,7 @@ class WorkflowDAG(SimpleDAG):
             job = obj.job
 
             if obj.unified_job_template is None:
+                is_failed = True
                 continue
             elif not job:
                 return False, False
