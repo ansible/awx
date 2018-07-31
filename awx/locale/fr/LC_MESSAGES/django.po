@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-14 18:15+0000\n"
-"PO-Revision-Date: 2018-06-13 11:37+0000\n"
+"POT-Creation-Date: 2018-06-14 18:30+0000\n"
+"PO-Revision-Date: 2018-06-20 10:37+0000\n"
 "Last-Translator: croe <croe@redhat.com>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
-"X-Generator: Zanata 4.4.3\n"
+"X-Generator: Zanata 4.6.0\n"
 
 #: awx/api/conf.py:15
 msgid "Idle Time Force Log Out"
@@ -214,7 +214,7 @@ msgstr "Modèle  de workflow"
 
 #: awx/api/serializers.py:302
 msgid "Job Template"
-msgstr ""
+msgstr "Modèle de job"
 
 #: awx/api/serializers.py:697
 msgid ""
@@ -249,23 +249,23 @@ msgstr ""
 
 #: awx/api/serializers.py:1151
 msgid "Authorization Grant Type"
-msgstr ""
+msgstr "Type d'autorisation"
 
-#: awx/api/serializers.py:1153 awx/main/models/credential/__init__.py:1059
+#: awx/api/serializers.py:1153 awx/main/models/credential/__init__.py:1064
 msgid "Client Secret"
 msgstr "Question secrète du client"
 
 #: awx/api/serializers.py:1156
 msgid "Client Type"
-msgstr ""
+msgstr "Type de client"
 
 #: awx/api/serializers.py:1159
 msgid "Redirect URIs"
-msgstr ""
+msgstr "Redirection d'URIs."
 
 #: awx/api/serializers.py:1162
 msgid "Skip Authorization"
-msgstr ""
+msgstr "Sauter l'étape d'autorisation"
 
 #: awx/api/serializers.py:1264
 msgid "This path is already being used by another manual project."
@@ -299,11 +299,11 @@ msgstr ""
 
 #: awx/api/serializers.py:1426 awx/api/serializers.py:3194
 msgid "A count of hosts uniquely assigned to each status."
-msgstr ""
+msgstr "Un nombre d'hôtes assignés exclusivement à chaque statut."
 
 #: awx/api/serializers.py:1429 awx/api/serializers.py:3197
 msgid "A count of all plays and tasks for the job run."
-msgstr ""
+msgstr "Le nombre de lectures et de tâches liées à l'exécution d'un job."
 
 #: awx/api/serializers.py:1554
 msgid "Smart inventories must specify host_filter"
@@ -701,21 +701,23 @@ msgstr ""
 
 #: awx/api/serializers.py:4546
 msgid "Count of all jobs that target this instance"
-msgstr ""
+msgstr "Le nombre de jobs qui ciblent cette instance."
 
 #: awx/api/serializers.py:4579
 msgid ""
 "Count of jobs in the running or waiting state that are targeted for this "
 "instance group"
 msgstr ""
+"Le nombre de jobs en cours d'exécution ou en attente qui sont ciblés pour ce"
+" groupe d'instances."
 
 #: awx/api/serializers.py:4584
 msgid "Count of all jobs that target this instance group"
-msgstr ""
+msgstr "Le nombre de jobs qui ciblent ce groupe d'instances"
 
 #: awx/api/serializers.py:4592
 msgid "Policy Instance Percentage"
-msgstr ""
+msgstr "Pourcentage d'instances de stratégie"
 
 #: awx/api/serializers.py:4593
 msgid ""
@@ -727,7 +729,7 @@ msgstr ""
 
 #: awx/api/serializers.py:4598
 msgid "Policy Instance Minimum"
-msgstr ""
+msgstr "Instances de stratégies minimum"
 
 #: awx/api/serializers.py:4599
 msgid ""
@@ -739,7 +741,7 @@ msgstr ""
 
 #: awx/api/serializers.py:4604
 msgid "Policy Instance List"
-msgstr ""
+msgstr "Listes d'instances de stratégie"
 
 #: awx/api/serializers.py:4605
 msgid "List of exact-match Instances that will be assigned to this group"
@@ -1347,7 +1349,7 @@ msgstr ""
 
 #: awx/api/views.py:4100 awx/api/views.py:4106
 msgid "PUT not allowed for Job Details in version 2 of the API"
-msgstr ""
+msgstr "PUT non autorisé pour le détail des tâches dans la version 2 de l'API"
 
 #: awx/api/views.py:4267
 #, python-brace-format
@@ -1847,6 +1849,9 @@ msgid ""
 "Controls whether any Organization Admin can view all users and teams, even "
 "those not associated with their Organization."
 msgstr ""
+"Contrôle si un administrateur d'organisation peut ou non afficher tous les "
+"utilisateurs et les équipes, même ceux qui ne sont pas associés à son "
+"organisation."
 
 #: awx/main/conf.py:50
 msgid "Organization Admins Can Manage Users and Teams"
@@ -1898,6 +1903,11 @@ msgid ""
 "behind a reverse proxy. See the \"Proxy Support\" section of the "
 "Adminstrator guide for more details."
 msgstr ""
+"En-têtes HTTP et méta-clés à rechercher afin de déterminer le nom ou "
+"l'adresse IP d'un hôte distant. Ajoutez des éléments supplémentaires à cette"
+" liste, tels que \"HTTP_X_FORWARDED_FOR\", en présence d'un proxy inverse. "
+"Voir la section \"Support Proxy\" du Guide de l'administrateur pour obtenir "
+"des détails supplémentaires."
 
 #: awx/main/conf.py:94
 msgid "Proxy IP Whitelist"
@@ -2651,17 +2661,17 @@ msgid "The hostname or IP address to use."
 msgstr "Nom d'hôte ou adresse IP à utiliser."
 
 #: awx/main/models/credential/__init__.py:117
-#: awx/main/models/credential/__init__.py:681
-#: awx/main/models/credential/__init__.py:736
-#: awx/main/models/credential/__init__.py:801
-#: awx/main/models/credential/__init__.py:879
-#: awx/main/models/credential/__init__.py:925
-#: awx/main/models/credential/__init__.py:953
-#: awx/main/models/credential/__init__.py:982
-#: awx/main/models/credential/__init__.py:1046
-#: awx/main/models/credential/__init__.py:1087
-#: awx/main/models/credential/__init__.py:1120
-#: awx/main/models/credential/__init__.py:1172
+#: awx/main/models/credential/__init__.py:686
+#: awx/main/models/credential/__init__.py:741
+#: awx/main/models/credential/__init__.py:806
+#: awx/main/models/credential/__init__.py:884
+#: awx/main/models/credential/__init__.py:930
+#: awx/main/models/credential/__init__.py:958
+#: awx/main/models/credential/__init__.py:987
+#: awx/main/models/credential/__init__.py:1051
+#: awx/main/models/credential/__init__.py:1092
+#: awx/main/models/credential/__init__.py:1125
+#: awx/main/models/credential/__init__.py:1177
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
@@ -2670,16 +2680,16 @@ msgid "Username for this credential."
 msgstr "Nom d'utilisateur pour ces informations d'identification."
 
 #: awx/main/models/credential/__init__.py:124
-#: awx/main/models/credential/__init__.py:685
-#: awx/main/models/credential/__init__.py:740
-#: awx/main/models/credential/__init__.py:805
-#: awx/main/models/credential/__init__.py:929
-#: awx/main/models/credential/__init__.py:957
-#: awx/main/models/credential/__init__.py:986
-#: awx/main/models/credential/__init__.py:1050
-#: awx/main/models/credential/__init__.py:1091
-#: awx/main/models/credential/__init__.py:1124
-#: awx/main/models/credential/__init__.py:1176
+#: awx/main/models/credential/__init__.py:690
+#: awx/main/models/credential/__init__.py:745
+#: awx/main/models/credential/__init__.py:810
+#: awx/main/models/credential/__init__.py:934
+#: awx/main/models/credential/__init__.py:962
+#: awx/main/models/credential/__init__.py:991
+#: awx/main/models/credential/__init__.py:1055
+#: awx/main/models/credential/__init__.py:1096
+#: awx/main/models/credential/__init__.py:1129
+#: awx/main/models/credential/__init__.py:1181
 msgid "Password"
 msgstr "Mot de passe"
 
@@ -2797,22 +2807,22 @@ msgstr ""
 "pour avoir un exemple de syntaxe."
 
 #: awx/main/models/credential/__init__.py:457
-#: awx/main/models/credential/__init__.py:676
+#: awx/main/models/credential/__init__.py:681
 msgid "Machine"
 msgstr "Machine"
 
 #: awx/main/models/credential/__init__.py:458
-#: awx/main/models/credential/__init__.py:767
+#: awx/main/models/credential/__init__.py:772
 msgid "Vault"
 msgstr "Coffre-fort"
 
 #: awx/main/models/credential/__init__.py:459
-#: awx/main/models/credential/__init__.py:796
+#: awx/main/models/credential/__init__.py:801
 msgid "Network"
 msgstr "Réseau"
 
 #: awx/main/models/credential/__init__.py:460
-#: awx/main/models/credential/__init__.py:731
+#: awx/main/models/credential/__init__.py:736
 msgid "Source Control"
 msgstr "Contrôle de la source"
 
@@ -2821,7 +2831,7 @@ msgid "Cloud"
 msgstr "Cloud"
 
 #: awx/main/models/credential/__init__.py:462
-#: awx/main/models/credential/__init__.py:1082
+#: awx/main/models/credential/__init__.py:1087
 msgid "Insights"
 msgstr "Insights"
 
@@ -2840,22 +2850,22 @@ msgstr ""
 msgid "adding %s credential type"
 msgstr "ajout type d'identifiants %s"
 
-#: awx/main/models/credential/__init__.py:691
-#: awx/main/models/credential/__init__.py:810
+#: awx/main/models/credential/__init__.py:696
+#: awx/main/models/credential/__init__.py:815
 msgid "SSH Private Key"
 msgstr "Clé privée SSH"
 
-#: awx/main/models/credential/__init__.py:698
-#: awx/main/models/credential/__init__.py:752
-#: awx/main/models/credential/__init__.py:817
+#: awx/main/models/credential/__init__.py:703
+#: awx/main/models/credential/__init__.py:757
+#: awx/main/models/credential/__init__.py:822
 msgid "Private Key Passphrase"
 msgstr "Phrase de passe pour la clé privée"
 
-#: awx/main/models/credential/__init__.py:704
+#: awx/main/models/credential/__init__.py:709
 msgid "Privilege Escalation Method"
 msgstr "Méthode d'escalade privilégiée"
 
-#: awx/main/models/credential/__init__.py:706
+#: awx/main/models/credential/__init__.py:711
 msgid ""
 "Specify a method for \"become\" operations. This is equivalent to specifying"
 " the --become-method Ansible parameter."
@@ -2863,27 +2873,27 @@ msgstr ""
 "Spécifiez une méthode pour les opérations « become ». Cela équivaut à "
 "définir le paramètre Ansible  --become-method."
 
-#: awx/main/models/credential/__init__.py:711
+#: awx/main/models/credential/__init__.py:716
 msgid "Privilege Escalation Username"
 msgstr "Nom d’utilisateur pour l’élévation des privilèges"
 
-#: awx/main/models/credential/__init__.py:715
+#: awx/main/models/credential/__init__.py:720
 msgid "Privilege Escalation Password"
 msgstr "Mot de passe pour l’élévation des privilèges"
 
-#: awx/main/models/credential/__init__.py:745
+#: awx/main/models/credential/__init__.py:750
 msgid "SCM Private Key"
 msgstr "Clé privée SCM"
 
-#: awx/main/models/credential/__init__.py:772
+#: awx/main/models/credential/__init__.py:777
 msgid "Vault Password"
 msgstr "Mot de passe de l'archivage sécurisé"
 
-#: awx/main/models/credential/__init__.py:778
+#: awx/main/models/credential/__init__.py:783
 msgid "Vault Identifier"
 msgstr "Identifiant Archivage sécurisé"
 
-#: awx/main/models/credential/__init__.py:781
+#: awx/main/models/credential/__init__.py:786
 msgid ""
 "Specify an (optional) Vault ID. This is equivalent to specifying the "
 "--vault-id Ansible parameter for providing multiple Vault passwords.  Note: "
@@ -2894,31 +2904,31 @@ msgstr ""
 "d'archivage sécurisé.  Remarque : cette fonctionnalité ne fonctionne que "
 "dans Ansible 2.4+."
 
-#: awx/main/models/credential/__init__.py:822
+#: awx/main/models/credential/__init__.py:827
 msgid "Authorize"
 msgstr "Autoriser"
 
-#: awx/main/models/credential/__init__.py:826
+#: awx/main/models/credential/__init__.py:831
 msgid "Authorize Password"
 msgstr "Mot de passe d’autorisation"
 
-#: awx/main/models/credential/__init__.py:843
+#: awx/main/models/credential/__init__.py:848
 msgid "Amazon Web Services"
 msgstr "Amazon Web Services"
 
-#: awx/main/models/credential/__init__.py:848
+#: awx/main/models/credential/__init__.py:853
 msgid "Access Key"
 msgstr "Clé d’accès"
 
-#: awx/main/models/credential/__init__.py:852
+#: awx/main/models/credential/__init__.py:857
 msgid "Secret Key"
 msgstr "Clé secrète"
 
-#: awx/main/models/credential/__init__.py:857
+#: awx/main/models/credential/__init__.py:862
 msgid "STS Token"
 msgstr "Jeton STS"
 
-#: awx/main/models/credential/__init__.py:860
+#: awx/main/models/credential/__init__.py:865
 msgid ""
 "Security Token Service (STS) is a web service that enables you to request "
 "temporary, limited-privilege credentials for AWS Identity and Access "
@@ -2928,20 +2938,20 @@ msgstr ""
 "demander des informations d’identification provisoires avec des privilèges "
 "limités pour les utilisateurs d’AWS Identity and Access Management (IAM)."
 
-#: awx/main/models/credential/__init__.py:874 awx/main/models/inventory.py:990
+#: awx/main/models/credential/__init__.py:879 awx/main/models/inventory.py:990
 msgid "OpenStack"
 msgstr "OpenStack"
 
-#: awx/main/models/credential/__init__.py:883
+#: awx/main/models/credential/__init__.py:888
 msgid "Password (API Key)"
 msgstr "Mot de passe (clé API)"
 
-#: awx/main/models/credential/__init__.py:888
-#: awx/main/models/credential/__init__.py:1115
+#: awx/main/models/credential/__init__.py:893
+#: awx/main/models/credential/__init__.py:1120
 msgid "Host (Authentication URL)"
 msgstr "Hôte (URL d’authentification)"
 
-#: awx/main/models/credential/__init__.py:890
+#: awx/main/models/credential/__init__.py:895
 msgid ""
 "The host to authenticate with.  For example, "
 "https://openstack.business.com/v2.0/"
@@ -2949,15 +2959,15 @@ msgstr ""
 "Hôte avec lequel s’authentifier. Exemple,\n"
 "https://openstack.business.com/v2.0/"
 
-#: awx/main/models/credential/__init__.py:894
+#: awx/main/models/credential/__init__.py:899
 msgid "Project (Tenant Name)"
 msgstr "Projet (nom du client)"
 
-#: awx/main/models/credential/__init__.py:898
+#: awx/main/models/credential/__init__.py:903
 msgid "Domain Name"
 msgstr "Nom de domaine"
 
-#: awx/main/models/credential/__init__.py:900
+#: awx/main/models/credential/__init__.py:905
 msgid ""
 "OpenStack domains define administrative boundaries. It is only needed for "
 "Keystone v3 authentication URLs. Refer to Ansible Tower documentation for "
@@ -2967,29 +2977,29 @@ msgstr ""
 "nécessaires uniquement pour les URL d’authentification Keystone v3. Voir la "
 "documentation Ansible Tower pour les scénarios courants."
 
-#: awx/main/models/credential/__init__.py:914 awx/main/models/inventory.py:987
+#: awx/main/models/credential/__init__.py:919 awx/main/models/inventory.py:987
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
-#: awx/main/models/credential/__init__.py:919
+#: awx/main/models/credential/__init__.py:924
 msgid "VCenter Host"
 msgstr "Hôte vCenter"
 
-#: awx/main/models/credential/__init__.py:921
+#: awx/main/models/credential/__init__.py:926
 msgid ""
 "Enter the hostname or IP address that corresponds to your VMware vCenter."
 msgstr ""
 "Saisir le nom d’hôte ou l’adresse IP qui correspond à votre VMware vCenter."
 
-#: awx/main/models/credential/__init__.py:942 awx/main/models/inventory.py:988
+#: awx/main/models/credential/__init__.py:947 awx/main/models/inventory.py:988
 msgid "Red Hat Satellite 6"
 msgstr "Red Hat Satellite 6"
 
-#: awx/main/models/credential/__init__.py:947
+#: awx/main/models/credential/__init__.py:952
 msgid "Satellite 6 URL"
 msgstr "URL Satellite 6"
 
-#: awx/main/models/credential/__init__.py:949
+#: awx/main/models/credential/__init__.py:954
 msgid ""
 "Enter the URL that corresponds to your Red Hat Satellite 6 server. For "
 "example, https://satellite.example.org"
@@ -2997,15 +3007,15 @@ msgstr ""
 "Veuillez saisir l’URL qui correspond à votre serveur Red Hat Satellite 6. "
 "Par exemple, https://satellite.example.org"
 
-#: awx/main/models/credential/__init__.py:970 awx/main/models/inventory.py:989
+#: awx/main/models/credential/__init__.py:975 awx/main/models/inventory.py:989
 msgid "Red Hat CloudForms"
 msgstr "Red Hat CloudForms"
 
-#: awx/main/models/credential/__init__.py:975
+#: awx/main/models/credential/__init__.py:980
 msgid "CloudForms URL"
 msgstr "URL CloudForms"
 
-#: awx/main/models/credential/__init__.py:977
+#: awx/main/models/credential/__init__.py:982
 msgid ""
 "Enter the URL for the virtual machine that corresponds to your CloudForm "
 "instance. For example, https://cloudforms.example.org"
@@ -3013,21 +3023,22 @@ msgstr ""
 "Veuillez saisir l’URL de la machine virtuelle qui correspond à votre "
 "instance de CloudForm. Par exemple, https://cloudforms.example.org"
 
-#: awx/main/models/credential/__init__.py:999 awx/main/models/inventory.py:985
+#: awx/main/models/credential/__init__.py:1004
+#: awx/main/models/inventory.py:985
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
-#: awx/main/models/credential/__init__.py:1004
+#: awx/main/models/credential/__init__.py:1009
 msgid "Service Account Email Address"
 msgstr "Adresse électronique du compte de service"
 
-#: awx/main/models/credential/__init__.py:1006
+#: awx/main/models/credential/__init__.py:1011
 msgid ""
 "The email address assigned to the Google Compute Engine service account."
 msgstr ""
 "Adresse électronique attribuée au compte de service Google Compute Engine."
 
-#: awx/main/models/credential/__init__.py:1012
+#: awx/main/models/credential/__init__.py:1017
 msgid ""
 "The Project ID is the GCE assigned identification. It is often constructed "
 "as three words or two words followed by a three-digit number. Examples: "
@@ -3037,11 +3048,11 @@ msgstr ""
 "deux ou trois mots suivis d’un nombre à trois chiffres. Exemples : project-"
 "id-000 and another-project-id"
 
-#: awx/main/models/credential/__init__.py:1018
+#: awx/main/models/credential/__init__.py:1023
 msgid "RSA Private Key"
 msgstr "Clé privée RSA"
 
-#: awx/main/models/credential/__init__.py:1023
+#: awx/main/models/credential/__init__.py:1028
 msgid ""
 "Paste the contents of the PEM file associated with the service account "
 "email."
@@ -3049,33 +3060,33 @@ msgstr ""
 "Collez le contenu du fichier PEM associé à l’adresse électronique du compte "
 "de service."
 
-#: awx/main/models/credential/__init__.py:1035
+#: awx/main/models/credential/__init__.py:1040
 #: awx/main/models/inventory.py:986
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
-#: awx/main/models/credential/__init__.py:1040
+#: awx/main/models/credential/__init__.py:1045
 msgid "Subscription ID"
 msgstr "ID d’abonnement"
 
-#: awx/main/models/credential/__init__.py:1042
+#: awx/main/models/credential/__init__.py:1047
 msgid "Subscription ID is an Azure construct, which is mapped to a username."
 msgstr ""
 "L’ID d’abonnement est une construction Azure mappée à un nom d’utilisateur."
 
-#: awx/main/models/credential/__init__.py:1055
+#: awx/main/models/credential/__init__.py:1060
 msgid "Client ID"
 msgstr "ID du client"
 
-#: awx/main/models/credential/__init__.py:1064
+#: awx/main/models/credential/__init__.py:1069
 msgid "Tenant ID"
 msgstr "ID Tenant"
 
-#: awx/main/models/credential/__init__.py:1068
+#: awx/main/models/credential/__init__.py:1073
 msgid "Azure Cloud Environment"
 msgstr "Environnement Cloud Azure"
 
-#: awx/main/models/credential/__init__.py:1070
+#: awx/main/models/credential/__init__.py:1075
 msgid ""
 "Environment variable AZURE_CLOUD_ENVIRONMENT when using Azure GovCloud or "
 "Azure stack."
@@ -3083,37 +3094,37 @@ msgstr ""
 "Variable d'environnement AZURE_CLOUD_ENVIRONMENT avec Azure GovCloud ou une "
 "pile Azure."
 
-#: awx/main/models/credential/__init__.py:1110
+#: awx/main/models/credential/__init__.py:1115
 #: awx/main/models/inventory.py:991
 msgid "Red Hat Virtualization"
 msgstr "Red Hat Virtualization"
 
-#: awx/main/models/credential/__init__.py:1117
+#: awx/main/models/credential/__init__.py:1122
 msgid "The host to authenticate with."
 msgstr "Hôte avec lequel s’authentifier."
 
-#: awx/main/models/credential/__init__.py:1129
+#: awx/main/models/credential/__init__.py:1134
 msgid "CA File"
 msgstr "Fichier CA"
 
-#: awx/main/models/credential/__init__.py:1131
+#: awx/main/models/credential/__init__.py:1136
 msgid "Absolute file path to the CA file to use (optional)"
 msgstr "Chemin d'accès absolu vers le fichier CA à utiliser (en option)"
 
-#: awx/main/models/credential/__init__.py:1162
+#: awx/main/models/credential/__init__.py:1167
 #: awx/main/models/inventory.py:992
 msgid "Ansible Tower"
 msgstr "Ansible Tower"
 
-#: awx/main/models/credential/__init__.py:1167
+#: awx/main/models/credential/__init__.py:1172
 msgid "Ansible Tower Hostname"
 msgstr "Nom d'hôte Ansible Tower"
 
-#: awx/main/models/credential/__init__.py:1169
+#: awx/main/models/credential/__init__.py:1174
 msgid "The Ansible Tower base URL to authenticate with."
 msgstr "L'URL basé Ansible Tower avec lequel s'authentifier."
 
-#: awx/main/models/credential/__init__.py:1181
+#: awx/main/models/credential/__init__.py:1186
 msgid "Verify SSL"
 msgstr "Vérifier SSL"
 
@@ -4241,7 +4252,7 @@ msgstr "Nœud sur lequel la tâche s'est exécutée."
 
 #: awx/main/models/unified_jobs.py:579
 msgid "The instance that managed the isolated execution environment."
-msgstr ""
+msgstr "L'instance qui gère l'environnement d'exécution isolé."
 
 #: awx/main/models/unified_jobs.py:605
 msgid "The date and time the job was queued for starting."
@@ -5804,7 +5815,7 @@ msgstr "Redimensionner"
 
 #: awx/templates/rest_framework/base.html:37
 msgid "navbar"
-msgstr "navbar"
+msgstr "barnav"
 
 #: awx/templates/rest_framework/base.html:75
 msgid "content"
