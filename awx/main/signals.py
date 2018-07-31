@@ -12,6 +12,7 @@ import sys
 # Django
 from django.conf import settings
 from django.db.models.signals import (
+    pre_save,
     post_save,
     pre_delete,
     post_delete,
@@ -389,6 +390,7 @@ model_serializer_mapping = {
     Inventory: InventorySerializer,
     Host: HostSerializer,
     Group: GroupSerializer,
+    InstanceGroup: InstanceGroupSerializer,
     InventorySource: InventorySourceSerializer,
     CustomInventoryScript: CustomInventoryScriptSerializer,
     Credential: CredentialSerializer,
@@ -641,3 +643,7 @@ def create_access_token_user_if_missing(sender, **kwargs):
         post_save.connect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
 
 
+# Connect the Instance Group to Activity Stream receivers. 
+post_save.connect(activity_stream_create, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_create")
+pre_save.connect(activity_stream_update, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_update")
+pre_delete.connect(activity_stream_delete, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_delete")
