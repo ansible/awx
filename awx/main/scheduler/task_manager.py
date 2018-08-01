@@ -482,6 +482,12 @@ class TaskManager():
             found_acceptable_queue = False
             idle_instance_that_fits = None
             if isinstance(task, WorkflowJob):
+                running_workflow_templates = [wf.workflow_job_template.pk for wf in self.get_running_workflow_jobs()]
+                running = task.workflow_job_template.pk in running_workflow_templates
+                if running:
+                    if not task.allow_simultaneous:
+                        logger.debug(six.text_type("{} is blocked from running, workflow already running").format(task.log_format, task.workflow_job_template.pk))
+                        continue
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
             for rampart_group in preferred_instance_groups:
