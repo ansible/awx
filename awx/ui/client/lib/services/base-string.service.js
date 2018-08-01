@@ -70,6 +70,7 @@ function BaseStringService (namespace) {
     this.DELETE = t.s('DELETE');
     this.COPY = t.s('COPY');
     this.YES = t.s('YES');
+    this.SUCCESSFUL_CREATION = resource => t.s('{{ resource }} successfully created', { resource });
 
     this.deleteResource = {
         HEADER: t.s('Delete'),

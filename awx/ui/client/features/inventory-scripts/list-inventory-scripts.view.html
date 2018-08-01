@@ -1,0 +1,76 @@
+<at-panel>
+    <at-panel-heading hide-dismiss="true">
+        {{:: vm.strings.get('state.TITLE') }}
+        <span class="at-Panel-headingTitleBadge">
+            {{ vm.dataset.count }}
+        </span>
+    </at-panel-heading>
+
+    <at-panel-body>
+        <div class="at-List-toolbar">
+            <smart-search
+                class="at-List-search"
+                django-model="inventory_scripts"
+                base-path="inventory_scripts"
+                iterator="inventory_script"
+                list="vm.list"
+                dataset="vm.dataset"
+                collection="vm.inventoryScripts"
+                search-tags="searchTags">
+            </smart-search>
+            <div class="at-List-toolbarAction">
+                <button
+                    type="button"
+                    ui-sref="inventoryScripts.add"
+                    class="at-Button--add"
+                    id="button-add"
+                    aw-tool-tip="{{vm.tooltips.add}}"
+                    data-placement="top"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+                </button>
+            </div>
+        </div>
+
+        <at-list results="vm.inventoryScripts">
+            <at-row ng-repeat="inventoryScript in vm.inventoryScripts"
+                ng-class="{'at-Row--active': (inventoryScript.id === vm.activeId)}">
+                <div class="at-Row-items">
+                    <at-row-item
+                        header-value="{{ inventoryScript.name }}"
+                        header-link="/#/inventory_scripts/{{ inventoryScript.id }}">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ORGANIZATION') }}"
+                        value="{{ inventoryScript.summary_fields.organization.name }}"
+                        value-link="/#/organizations/{{ inventoryScript.summary_fields.organization.id }}">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
+                        value="{{:: vm.getModified(inventoryScript) }}">
+                    </at-row-item>
+                </div>
+                <div class="at-Row-actions">
+                    <at-row-action icon="fa-copy"
+                        ng-click="vm.copyInventoryScript(inventoryScript)"
+                        ng-show="inventoryScript.summary_fields.user_capabilities.copy"
+                        aw-tool-tip="{{:: vm.strings.get('list.COPY_TOOLTIP') }}"
+                        data-placement="top">
+                    </at-row-action>
+                    <at-row-action icon="fa-trash"
+                        ng-click="vm.deleteInventoryScript(inventoryScript)"
+                        ng-show="inventoryScript.summary_fields.user_capabilities.delete"
+                        aw-tool-tip="{{:: vm.strings.get('list.DELETE_TOOLTIP') }}"
+                        data-placement="top">
+                    </at-row-action>
+                </div>
+            </at-row>
+        </at-list>
+    </at-panel-body>
+    <paginate
+        base-path="inventory_scripts"
+        iterator="inventory_script"
+        dataset="vm.dataset"
+        collection="vm.inventoryScripts">
+    </paginate>
+</at-panel>
