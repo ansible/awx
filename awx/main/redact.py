@@ -1,12 +1,13 @@
 import re
 import urlparse
+from six import u
 
 REPLACE_STR = '$encrypted$'
 
 
 class UriCleaner(object):
     REPLACE_STR = REPLACE_STR
-    SENSITIVE_URI_PATTERN = re.compile(ur'(\w+:(\/?\/?)[^\s]+)', re.MULTILINE)  # NOQA
+    SENSITIVE_URI_PATTERN = re.compile(u(r'(\w+:(\/?\/?)[^\s]+)'), re.MULTILINE)  # NOQA
 
     @staticmethod
     def remove_sensitive(cleartext):
