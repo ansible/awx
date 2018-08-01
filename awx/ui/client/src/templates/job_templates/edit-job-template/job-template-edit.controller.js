@@ -588,6 +588,19 @@ export default
                             .then(function() {
                                 Wait('stop');
                                 saveCompleted();
+                            })
+                            .catch(err => {
+                                // Handle any potential errors
+                                let { data, status, config } = err;
+                                const { url } = config;
+                                
+                                // Handle edge case for LABELS endpoint
+                                const labelName = "labels";
+                                if (url.match(labelName)) {
+                                    data = { [labelName]: [data['name'][0]] };
+                                }
+                                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                                msg: 'Failed to update job template. PUT returned status: ' + status });
                             });
                     });
                 });
