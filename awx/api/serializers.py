@@ -2497,6 +2497,12 @@ class V2CredentialFields(BaseSerializer):
         model = Credential
         fields = ('*', 'credential_type', 'inputs')
 
+        extra_kwargs = {
+            'credential_type': {
+                'label': _('Credential Type'),
+            },
+        }
+
 
 class CredentialSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete', 'copy']
