@@ -19,7 +19,7 @@ from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.fields import JSONField
-from awx.main.models.base import BaseModel
+from awx.main.models.base import BaseModel, HasEditsMixin
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
@@ -39,7 +39,28 @@ def validate_queuename(v):
             raise ValidationError(_(six.text_type('{} contains unsupported characters')).format(v))
 
 
-class Instance(BaseModel):
+class HasPolicyEditsMixin(HasEditsMixin):
+
+    class Meta:
+        abstract = True
+
+    def __init__(self, *args, **kwargs):
+        r = super(BaseModel, self).__init__(*args, **kwargs)
+        self._prior_values_store = self._get_fields_snapshot()
+        return r
+
+    def save(self, *args, **kwargs):
+        super(BaseModel, self).save(*args, **kwargs)
+        self._prior_values_store = self._get_fields_snapshot()
+
+    def has_policy_changes(self):
+        if not hasattr(self, 'POLICY_FIELDS'):
+            raise RuntimeError('HasPolicyEditsMixin Model needs to set POLICY_FIELDS')
+        new_values = self._get_fields_snapshot(fields_set=self.POLICY_FIELDS)
+        return self._values_have_edits(new_values)
+
+
+class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""
     objects = InstanceManager()
 
@@ -86,6 +107,8 @@ class Instance(BaseModel):
 
     class Meta:
         app_label = 'main'
+
+    POLICY_FIELDS = frozenset(('managed_by_policy', 'hostname', 'capacity_adjustment'))
 
     def get_absolute_url(self, request=None):
         return reverse('api:instance_detail', kwargs={'pk': self.pk}, request=request)
@@ -144,7 +167,7 @@ class Instance(BaseModel):
 
     
 
-class InstanceGroup(BaseModel, RelatedJobsMixin):
+class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     """A model representing a Queue/Group of AWX Instances."""
     objects = InstanceGroupManager()
 
@@ -178,6 +201,10 @@ class InstanceGroup(BaseModel, RelatedJobsMixin):
         blank=True,
         help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )
+
+    POLICY_FIELDS = frozenset((
+        'policy_instance_list', 'policy_instance_minimum', 'policy_instance_percentage', 'controller'
+    ))
 
     def get_absolute_url(self, request=None):
         return reverse('api:instance_group_detail', kwargs={'pk': self.pk}, request=request)
@@ -259,29 +286,31 @@ class JobOrigin(models.Model):
         app_label = 'main'
 
 
-@receiver(post_save, sender=InstanceGroup)
-def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
+def schedule_policy_task():
     from awx.main.tasks import apply_cluster_membership_policies
     connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+
+
+@receiver(post_save, sender=InstanceGroup)
+def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
+    if created or instance.has_policy_changes():
+        schedule_policy_task()
 
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
-    if created:
-        from awx.main.tasks import apply_cluster_membership_policies
-        connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+    if created or instance.has_policy_changes():
+        schedule_policy_task()
 
 
 @receiver(post_delete, sender=InstanceGroup)
 def on_instance_group_deleted(sender, instance, using, **kwargs):
-    from awx.main.tasks import apply_cluster_membership_policies
-    connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+    schedule_policy_task()
 
 
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
-    from awx.main.tasks import apply_cluster_membership_policies
-    connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+    schedule_policy_task()
 
 
 # Unfortunately, the signal can't just be connected against UnifiedJob; it
