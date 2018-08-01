@@ -18,7 +18,7 @@ const common = createFormSection({
         name: 'Name',
         description: 'Description',
         organization: 'Organization',
-        type: 'Credential type'
+        type: 'Credential Type'
     }
 });
 
