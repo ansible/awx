@@ -2415,7 +2415,7 @@ msgstr "Geen"
 #: awx/main/fields.py:62
 #, python-brace-format
 msgid "'{value}' is not one of ['{allowed_values}']"
-msgstr "'{value}' behoort niet tot {'{allowed_values}']"
+msgstr "'{value}' behoort niet tot ['{allowed_values}']"
 
 #: awx/main/fields.py:421
 #, python-brace-format
