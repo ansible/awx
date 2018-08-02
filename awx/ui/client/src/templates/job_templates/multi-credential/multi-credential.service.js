@@ -40,7 +40,7 @@ function MultiCredentialService (Rest, ProcessErrors, $q, GetBasePath)  {
 
                 return $q.all(disassociationPromises).then(() => {
                     _.each(selected.filter(id => currentlyAssociated.indexOf(id) < 0), (id) => {
-                        associate({related}, id);
+                        return associate({related}, id);
                     });
                 });
             });

@@ -500,7 +500,7 @@ export default
                         null, true);
                 }
 
-                MultiCredentialService
+                var credDefer = MultiCredentialService
                     .saveRelated(jobTemplateData, $scope.multiCredential.selectedCredentials);
 
                 InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
@@ -580,7 +580,7 @@ export default
 
                         Rest.setUrl(data.related.labels);
 
-                        var defers = [];
+                        var defers = [credDefer];
                         for (var i = 0; i < toPost.length; i++) {
                             defers.push(Rest.post(toPost[i]));
                         }
