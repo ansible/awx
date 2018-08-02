@@ -80,16 +80,15 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
         },
         // like encodeQueryset, but return an actual unstringified API-consumable http param object
         encodeQuerysetObject(params) {
-            console.log(params);
             return _.reduce(params, (obj, value, key) => {
-                const encodedTerms = this.encodeTerms(value, key);
-                console.log(encodedTerms);
-                for (let encodedIndex in encodedTerms) {
-                    const [encodedKey, encodedValue] = encodedTerms[encodedIndex];
-                    obj[encodedKey] = obj[encodedKey] || [];
-                    obj[encodedKey].push(encodedValue);
-                }
-                console.log(obj);
+                const encodedKey = this.replaceDefaultFlags(key);
+                const values = Array.isArray(value) ? value : [value];
+
+                obj[encodedKey] = values
+                    .map(value => this.replaceDefaultFlags(value))
+                    .map(value => this.replaceEncodedTokens(value))
+                    .join(',');
+
                 return obj;
             }, {});
         },
