@@ -15,6 +15,7 @@ function atRowItem () {
             headerTag: '@',
             status: '@',
             statusTip: '@',
+            statusClick: '&?',
             labelValue: '@',
             labelLink: '@',
             labelState: '@',
