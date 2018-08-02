@@ -110,12 +110,13 @@ class LDAPBackend(BaseLDAPBackend):
             pass
         try:
             user = super(LDAPBackend, self).authenticate(username, password)
-            try:
-                user.ldap_user._get_groups().get_group_dns()
-            except ImproperlyConfigured:
-                logger.exception(_("Encountered an error populating user {} from LDAP").format(user.username))
-                user.delete()
-                raise
+            if user and getattr(user, 'ldap_user', None):
+                try:
+                    user.ldap_user._get_groups().get_group_dns()
+                except ImproperlyConfigured:
+                    logger.exception(_("Encountered an error populating user {} from LDAP").format(user.username))
+                    user.delete()
+                    raise
             return user
         except Exception:
             logger.exception("Encountered an error authenticating to LDAP")
