@@ -473,6 +473,7 @@ class TaskManager():
                 logger.debug(six.text_type("Dependent {} couldn't be scheduled on graph, waiting for next cycle").format(task.log_format))
 
     def process_pending_tasks(self, pending_tasks):
+        running_workflow_templates = set([wf.workflow_job_template_id for wf in self.get_running_workflow_jobs()])
         for task in pending_tasks:
             self.process_dependencies(task, self.generate_dependencies(task))
             if self.is_job_blocked(task):
@@ -482,6 +483,10 @@ class TaskManager():
             found_acceptable_queue = False
             idle_instance_that_fits = None
             if isinstance(task, WorkflowJob):
+                if task.workflow_job_template_id in running_workflow_templates:
+                    if not task.allow_simultaneous:
+                        logger.debug(six.text_type("{} is blocked from running, workflow already running").format(task.log_format))
+                        continue
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
             for rampart_group in preferred_instance_groups:
