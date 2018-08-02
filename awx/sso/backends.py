@@ -13,7 +13,6 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 from django.core.signals import setting_changed
-from django.utils.translation import ugettext_lazy as _
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
@@ -108,16 +107,17 @@ class LDAPBackend(BaseLDAPBackend):
                 return None
         except User.DoesNotExist:
             pass
+
         try:
-            user = super(LDAPBackend, self).authenticate(username, password)
-            if user and getattr(user, 'ldap_user', None):
-                try:
-                    user.ldap_user._get_groups().get_group_dns()
-                except ImproperlyConfigured:
-                    logger.exception(_("Encountered an error populating user {} from LDAP").format(user.username))
-                    user.delete()
-                    raise
-            return user
+            for setting_name, type_ in [
+                ('GROUP_SEARCH', 'LDAPSearch'),
+                ('GROUP_TYPE', 'LDAPGroupType'),
+            ]:
+                if getattr(self.settings, setting_name) is None:
+                    raise ImproperlyConfigured(
+                        "{} must be an {} instance.".format(setting_name, type_)
+                    )
+            return super(LDAPBackend, self).authenticate(username, password)
         except Exception:
             logger.exception("Encountered an error authenticating to LDAP")
             return None
