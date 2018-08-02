@@ -4,6 +4,7 @@
 # Python
 import re
 import json
+from functools import reduce
 
 # Django
 from django.core.exceptions import FieldError, ValidationError
@@ -238,7 +239,11 @@ class FieldLookupBackend(BaseFilterBackend):
             or_filters = []
             chain_filters = []
             role_filters = []
-            search_filters = []
+            search_filters = {}
+            # Can only have two values: 'AND', 'OR'
+            # If 'AND' is used, an iterm must satisfy all condition to show up in the results.
+            # If 'OR' is used, an item just need to satisfy one condition to appear in results.
+            search_filter_relation = 'OR'
             for key, values in request.query_params.lists():
                 if key in self.RESERVED_NAMES:
                     continue
@@ -262,11 +267,13 @@ class FieldLookupBackend(BaseFilterBackend):
 
                 # Search across related objects.
                 if key.endswith('__search'):
+                    if values and ',' in values[0]:
+                        search_filter_relation = 'AND'
+                        values = reduce(lambda list1, list2: list1 + list2, [i.split(',') for i in values])
                     for value in values:
                         search_value, new_keys = self.value_to_python(queryset.model, key, force_text(value))
                         assert isinstance(new_keys, list)
-                        for new_key in new_keys:
-                            search_filters.append((new_key, search_value))
+                        search_filters[search_value] = new_keys
                     continue
 
                 # Custom chain__ and or__ filters, mutually exclusive (both can
@@ -355,11 +362,18 @@ class FieldLookupBackend(BaseFilterBackend):
                         else:
                             q |= Q(**{k:v})
                     args.append(q)
-                if search_filters:
+                if search_filters and search_filter_relation == 'OR':
                     q = Q()
-                    for k,v in search_filters:
-                        q |= Q(**{k:v})
+                    for term, constrains in search_filters.iteritems():
+                        for constrain in constrains:
+                            q |= Q(**{constrain: term})
                     args.append(q)
+                elif search_filters and search_filter_relation == 'AND':
+                    for term, constrains in search_filters.iteritems():
+                        q_chain = Q()
+                        for constrain in constrains:
+                            q_chain |= Q(**{constrain: term})
+                        queryset = queryset.filter(q_chain)
                 for n,k,v in chain_filters:
                     if n:
                         q = ~Q(**{k:v})

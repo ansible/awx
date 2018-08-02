@@ -92,6 +92,7 @@ function resolveResource (
 
     if (job_event_search) { // eslint-disable-line camelcase
         const query = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
+
         Object.assign(config.params, query);
     }
 
