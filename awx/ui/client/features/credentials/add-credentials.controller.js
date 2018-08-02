@@ -16,6 +16,8 @@ function AddCredentialsController (models, $state, $scope, strings, componentsSt
         omit: ['user', 'team', 'inputs']
     });
 
+    vm.form._formName = 'credential';
+
     vm.form.disabled = !credential.isCreatable();
 
     vm.form.organization._resource = 'organization';
