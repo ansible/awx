@@ -1005,37 +1005,43 @@ class Command(BaseCommand):
                 self.all_group.debug_tree()
 
             with batch_role_ancestor_rebuilding():
-                # Ensure that this is managed as an atomic SQL transaction,
-                # and thus properly rolled back if there is an issue.
-                with transaction.atomic():
-                    # Merge/overwrite inventory into database.
-                    if settings.SQL_DEBUG:
-                        logger.warning('loading into database...')
-                    with ignore_inventory_computed_fields():
-                        if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
-                            self.load_into_database()
-                        else:
-                            with disable_activity_stream():
+                # If using with transaction.atomic() with try ... catch,
+                # with transaction.atomic() must be inside the try section of the code as per Django docs
+                try:
+                    # Ensure that this is managed as an atomic SQL transaction,
+                    # and thus properly rolled back if there is an issue.
+                    with transaction.atomic():
+                        # Merge/overwrite inventory into database.
+                        if settings.SQL_DEBUG:
+                            logger.warning('loading into database...')
+                        with ignore_inventory_computed_fields():
+                            if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
                                 self.load_into_database()
-                        if settings.SQL_DEBUG:
-                            queries_before2 = len(connection.queries)
-                        self.inventory.update_computed_fields()
-                        if settings.SQL_DEBUG:
-                            logger.warning('update computed fields took %d queries',
-                                           len(connection.queries) - queries_before2)
-                    try:
+                            else:
+                                with disable_activity_stream():
+                                    self.load_into_database()
+                            if settings.SQL_DEBUG:
+                                queries_before2 = len(connection.queries)
+                            self.inventory.update_computed_fields()
+                            if settings.SQL_DEBUG:
+                                logger.warning('update computed fields took %d queries',
+                                               len(connection.queries) - queries_before2)
+                        # Check if the license is valid. 
+                        # If the license is not valid, a CommandError will be thrown, 
+                        # and inventory update will be marked as invalid.
+                        # with transaction.atomic() will roll back the changes.
                         self.check_license()
-                    except CommandError as e:
-                        self.mark_license_failure(save=True)
-                        raise e
+                except CommandError as e:
+                    self.mark_license_failure()
+                    raise e
 
-                    if settings.SQL_DEBUG:
-                        logger.warning('Inventory import completed for %s in %0.1fs',
-                                       self.inventory_source.name, time.time() - begin)
-                    else:
-                        logger.info('Inventory import completed for %s in %0.1fs',
-                                    self.inventory_source.name, time.time() - begin)
-                    status = 'successful'
+                if settings.SQL_DEBUG:
+                    logger.warning('Inventory import completed for %s in %0.1fs',
+                                   self.inventory_source.name, time.time() - begin)
+                else:
+                    logger.info('Inventory import completed for %s in %0.1fs',
+                                self.inventory_source.name, time.time() - begin)
+                status = 'successful'
 
             # If we're in debug mode, then log the queries and time
             # used to do the operation.
