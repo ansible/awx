@@ -308,7 +308,8 @@ class BaseCallbackModule(CallbackBase):
         if custom_artifact_data:
             # create the directory for custom stats artifacts to live in (if it doesn't exist)
             custom_artifacts_dir = os.path.join(os.getenv('AWX_PRIVATE_DATA_DIR'), 'artifacts')
-            os.makedirs(custom_artifacts_dir, mode=stat.S_IXUSR + stat.S_IWUSR + stat.S_IRUSR)
+            if not os.path.isdir(custom_artifacts_dir):
+                os.makedirs(custom_artifacts_dir, mode=stat.S_IXUSR + stat.S_IWUSR + stat.S_IRUSR)
 
             custom_artifacts_path = os.path.join(custom_artifacts_dir, 'custom')
             with codecs.open(custom_artifacts_path, 'w', encoding='utf-8') as f:
