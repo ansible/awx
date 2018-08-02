@@ -24,7 +24,7 @@ function AtInputGroupController ($scope, $compile) {
         element = _element_;
         state = scope.state || {};
         source = state._source;
-        formId = scope.formId;
+        ({ formId } = scope);
 
         $scope.$watch('state._source._value', vm.update);
     };
