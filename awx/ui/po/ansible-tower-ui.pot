@@ -73,7 +73,7 @@ msgid "<p>Pass extra command line variables to the playbook. This is the -e or -
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:33
-#: client/src/scheduler/scheduler.strings.js:14
+#: client/src/scheduler/scheduler.strings.js:22
 msgid "A schedule name is required."
 msgstr ""
 
@@ -111,7 +111,7 @@ msgstr ""
 msgid "ADD A NEW TEMPLATE"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:111
+#: client/features/templates/templates.strings.js:107
 msgid "ADD A TEMPLATE"
 msgstr ""
 
@@ -320,9 +320,13 @@ msgstr ""
 msgid "Allow Provisioning Callbacks"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:106
+#: client/features/templates/templates.strings.js:102
 #: client/src/workflow-results/workflow-results.controller.js:66
 msgid "Always"
+msgstr ""
+
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:270
+msgid "An SCM update does not appear to be running for project:"
 msgstr ""
 
 #: client/src/projects/list/projects-list.controller.js:311
@@ -365,7 +369,7 @@ msgstr ""
 msgid "Are you sure you want to delete this user?"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:102
+#: client/features/templates/templates.strings.js:98
 msgid "Are you sure you want to delete this workflow node?"
 msgstr ""
 
@@ -513,7 +517,7 @@ msgstr ""
 msgid "CHANGES"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:117
+#: client/features/templates/templates.strings.js:113
 msgid "CHECK"
 msgstr ""
 
@@ -543,7 +547,7 @@ msgid "CONFIGURE {{ BRAND_NAME }}"
 msgstr ""
 
 #: client/features/templates/templates.strings.js:31
-#: client/src/scheduler/scheduler.strings.js:55
+#: client/src/scheduler/scheduler.strings.js:63
 msgid "CONFIRM"
 msgstr ""
 
@@ -698,7 +702,7 @@ msgstr ""
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:105
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:188
 #: client/src/configuration/configuration.controller.js:617
-#: client/src/scheduler/scheduler.strings.js:48
+#: client/src/scheduler/scheduler.strings.js:56
 #: client/src/shared/form-generator.js:1706
 #: client/src/shared/lookup/lookup-modal.partial.html:19
 #: client/src/workflow-results/workflow-results.controller.js:38
@@ -709,6 +713,7 @@ msgstr ""
 msgid "Cancel Job"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:244
 #: client/src/projects/list/projects-list.controller.js:286
 msgid "Cancel Not Allowed"
 msgstr ""
@@ -721,6 +726,11 @@ msgstr ""
 msgid "Cancel the SCM update"
 msgstr ""
 
+#: client/lib/services/base-string.service.js:99
+msgid "Cancel the {{resourceType}}"
+msgstr ""
+
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:42
 #: client/src/projects/list/projects-list.controller.js:80
 msgid "Canceled. Click for details"
 msgstr ""
@@ -813,6 +823,14 @@ msgstr ""
 msgid "Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, or choose"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:270
+msgid "Click the"
+msgstr ""
+
+#: client/src/scheduler/scheduler.strings.js:13
+msgid "Click to edit schedule."
+msgstr ""
+
 #: client/src/credentials/credentials.form.js:321
 msgid "Client ID"
 msgstr ""
@@ -825,7 +843,7 @@ msgstr ""
 msgid "Client Secret"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:47
+#: client/src/scheduler/scheduler.strings.js:55
 #: client/src/shared/form-generator.js:1710
 msgid "Close"
 msgstr ""
@@ -911,10 +929,6 @@ msgstr ""
 msgid "Copy Inventory"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:77
-msgid "Copy Workflow"
-msgstr ""
-
 #: client/src/credentials/credentials.list.js:76
 msgid "Copy credential"
 msgstr ""
@@ -939,6 +953,10 @@ msgstr ""
 msgid "Copy template"
 msgstr ""
 
+#: client/lib/services/base-string.service.js:97
+msgid "Copy {{resourceType}}"
+msgstr ""
+
 #: client/src/about/about.partial.html:27
 msgid ""
 "Copyright &copy; 2018 Red Hat, Inc. <br>\n"
@@ -959,6 +977,10 @@ msgstr ""
 
 #: client/src/instance-groups/instance-groups.strings.js:30
 msgid "Create a new Instance Group"
+msgstr ""
+
+#: client/src/inventories-hosts/inventory-hosts.strings.js:47
+msgid "Create a new Smart Inventory from search results.<br /><br />Note: changing the organization of the Smart Inventory could change the hosts included in the Smart Inventory."
 msgstr ""
 
 #: client/src/credentials/credentials.list.js:52
@@ -1085,7 +1107,7 @@ msgstr ""
 msgid "DELETE SURVEY"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:120
+#: client/features/templates/templates.strings.js:116
 msgid "DELETED"
 msgstr ""
 
@@ -1093,7 +1115,7 @@ msgstr ""
 msgid "DESCRIPTION"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:122
+#: client/features/templates/templates.strings.js:118
 #: client/src/instance-groups/instance-groups.strings.js:24
 #: client/src/workflow-results/workflow-results.controller.js:55
 msgid "DETAILS"
@@ -1114,7 +1136,7 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:44
+#: client/src/scheduler/scheduler.strings.js:52
 msgid "Date format"
 msgstr ""
 
@@ -1240,6 +1262,10 @@ msgstr ""
 
 #: client/src/scheduler/scheduled-jobs.list.js:81
 msgid "Delete the schedule"
+msgstr ""
+
+#: client/lib/services/base-string.service.js:98
+msgid "Delete the {{resourceType}}"
 msgstr ""
 
 #: client/src/users/users.list.js:83
@@ -1393,7 +1419,7 @@ msgstr ""
 msgid "Drop question here to reorder"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:119
+#: client/features/templates/templates.strings.js:115
 msgid "EDGE CONFLICT"
 msgstr ""
 
@@ -1425,7 +1451,7 @@ msgstr ""
 msgid "EDIT SURVEY PROMPT"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:112
+#: client/features/templates/templates.strings.js:108
 msgid "EDIT TEMPLATE"
 msgstr ""
 
@@ -1511,6 +1537,7 @@ msgstr ""
 #: client/src/inventories-hosts/hosts/host.list.js:83
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.list.js:73
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:79
+#: client/src/inventories-hosts/inventory-hosts.strings.js:25
 msgid "Edit host"
 msgstr ""
 
@@ -1563,6 +1590,10 @@ msgstr ""
 msgid "Edit user"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:244
+msgid "Either you do not have access or the SCM update process completed. Click the"
+msgstr ""
+
 #: client/src/projects/list/projects-list.controller.js:286
 msgid "Either you do not have access or the SCM update process completed. Click the %sRefresh%s button to view the latest status."
 msgstr ""
@@ -1606,15 +1637,15 @@ msgstr ""
 msgid "Encrypted credentials are not supported."
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:36
+#: client/src/scheduler/scheduler.strings.js:44
 msgid "End"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:38
+#: client/src/scheduler/scheduler.strings.js:46
 msgid "End Date"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:40
+#: client/src/scheduler/scheduler.strings.js:48
 msgid "End Time"
 msgstr ""
 
@@ -1732,7 +1763,7 @@ msgstr ""
 msgid "Event summary not available"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:21
+#: client/src/scheduler/scheduler.strings.js:29
 msgid "Every"
 msgstr ""
 
@@ -1783,7 +1814,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:145
 #: client/src/job-submission/job-submission.partial.html:165
 #: client/src/partials/logviewer.html:8
-#: client/src/scheduler/scheduler.strings.js:45
+#: client/src/scheduler/scheduler.strings.js:53
 #: client/src/templates/job_templates/job-template.form.js:353
 #: client/src/templates/job_templates/job-template.form.js:360
 #: client/src/templates/workflows.form.js:83
@@ -1924,6 +1955,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.list.js:32
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:35
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:31
+#: client/src/inventories-hosts/inventory-hosts.strings.js:33
 msgid "For hosts that are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process."
 msgstr ""
 
@@ -1941,11 +1973,11 @@ msgid "Forks"
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:173
-#: client/src/scheduler/scheduler.strings.js:20
+#: client/src/scheduler/scheduler.strings.js:28
 msgid "Frequency Details"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:33
+#: client/src/scheduler/scheduler.strings.js:41
 msgid "Fri"
 msgstr ""
 
@@ -1958,6 +1990,7 @@ msgstr ""
 msgid "GROUPS"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:38
 #: client/src/projects/edit/projects-edit.controller.js:136
 #: client/src/projects/list/projects-list.controller.js:76
 msgid "Get latest SCM revision"
@@ -2279,6 +2312,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.list.js:30
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:33
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:29
+#: client/src/inventories-hosts/inventory-hosts.strings.js:32
 msgid "Indicates if a host is available and should be included in running jobs."
 msgstr ""
 
@@ -2387,6 +2421,7 @@ msgstr ""
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:28
 #: client/src/home/dashboard/counts/dashboard-counts.directive.js:50
 #: client/src/organizations/linkout/organizations-linkout.route.js:156
+#: client/src/organizations/linkout/organizations-linkout.route.js:158
 msgid "Inventories"
 msgstr ""
 
@@ -2423,7 +2458,7 @@ msgstr ""
 msgid "Inventory Sources"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:108
+#: client/features/templates/templates.strings.js:104
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:46
 #: client/src/workflow-results/workflow-results.controller.js:68
 msgid "Inventory Sync"
@@ -2474,7 +2509,7 @@ msgstr ""
 #: client/features/jobs/routes/inventoryCompletedJobs.route.js:22
 #: client/features/jobs/routes/jobs.route.js:13
 #: client/features/portalMode/portalMode.strings.js:9
-#: client/features/templates/templates.strings.js:113
+#: client/features/templates/templates.strings.js:109
 #: client/src/activity-stream/get-target-title.factory.js:32
 #: client/src/home/dashboard/graphs/job-status/job-status-graph.directive.js:119
 #: client/src/instance-groups/instance-groups.strings.js:26
@@ -2494,6 +2529,7 @@ msgstr ""
 msgid "JSON:"
 msgstr ""
 
+#: client/features/jobs/jobs.strings.js:18
 #: client/src/workflow-results/workflow-results.controller.js:86
 msgid "Job"
 msgstr ""
@@ -2529,12 +2565,8 @@ msgstr ""
 msgid "Job Type"
 msgstr ""
 
-#: client/src/home/dashboard/lists/jobs/jobs-list.directive.js:45
-msgid "Job failed. Click for details."
-msgstr ""
-
-#: client/src/home/dashboard/lists/jobs/jobs-list.directive.js:42
-msgid "Job successful. Click for details."
+#: client/features/jobs/jobs.strings.js:19
+msgid "Job {{status}}. Click for details."
 msgstr ""
 
 #: client/lib/components/components.strings.js:69
@@ -2545,7 +2577,7 @@ msgid "Jobs"
 msgstr ""
 
 #: client/features/output/output.strings.js:82
-#: client/features/templates/templates.strings.js:103
+#: client/features/templates/templates.strings.js:99
 #: client/src/workflow-results/workflow-results.controller.js:69
 msgid "KEY"
 msgstr ""
@@ -2725,7 +2757,7 @@ msgstr ""
 msgid "Limit to hosts where the Name tag begins with"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:43
+#: client/src/scheduler/scheduler.strings.js:51
 msgid "Limited to first 10"
 msgstr ""
 
@@ -2746,7 +2778,7 @@ msgid "Loading..."
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:133
-#: client/src/scheduler/scheduler.strings.js:18
+#: client/src/scheduler/scheduler.strings.js:26
 msgid "Local Time Zone"
 msgstr ""
 
@@ -2805,6 +2837,7 @@ msgstr ""
 msgid "Management Jobs"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:54
 #: client/src/projects/edit/projects-edit.controller.js:143
 #: client/src/projects/list/projects-list.controller.js:89
 msgid "Manual projects do not require an SCM update"
@@ -2835,7 +2868,7 @@ msgstr ""
 msgid "Module Args"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:29
+#: client/src/scheduler/scheduler.strings.js:37
 msgid "Mon"
 msgstr ""
 
@@ -2979,7 +3012,7 @@ msgstr ""
 #: client/src/projects/projects.form.js:30
 #: client/src/projects/projects.list.js:37
 #: client/src/scheduler/scheduled-jobs.list.js:31
-#: client/src/scheduler/scheduler.strings.js:13
+#: client/src/scheduler/scheduler.strings.js:21
 #: client/src/scheduler/schedules.list.js:41
 #: client/src/teams/teams.form.js:127
 #: client/src/teams/teams.form.js:28
@@ -3036,6 +3069,7 @@ msgstr ""
 msgid "No Remediation Playbook Available"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:199
 #: client/src/projects/list/projects-list.controller.js:186
 msgid "No SCM Configuration"
 msgstr ""
@@ -3048,6 +3082,7 @@ msgstr ""
 msgid "No Teams exist"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:191
 #: client/src/projects/list/projects-list.controller.js:150
 msgid "No Updates Available"
 msgstr ""
@@ -3232,7 +3267,7 @@ msgstr ""
 msgid "ORGANIZATIONS"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:37
+#: client/src/scheduler/scheduler.strings.js:45
 msgid "Occurrences"
 msgstr ""
 
@@ -3240,11 +3275,11 @@ msgstr ""
 msgid "On Fail"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:105
+#: client/features/templates/templates.strings.js:101
 msgid "On Failure"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:104
+#: client/features/templates/templates.strings.js:100
 #: client/src/workflow-results/workflow-results.controller.js:64
 msgid "On Success"
 msgstr ""
@@ -3550,11 +3585,11 @@ msgstr ""
 msgid "Please click the button below to visit Ansible's website to get a Tower license key."
 msgstr ""
 
-#: client/src/inventories-hosts/inventory-hosts.strings.js:27
+#: client/src/inventories-hosts/inventory-hosts.strings.js:40
 msgid "Please click the icon to edit the host filter."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:114
+#: client/features/templates/templates.strings.js:110
 msgid "Please click the start button to build your workflow."
 msgstr ""
 
@@ -3632,7 +3667,11 @@ msgstr ""
 msgid "Please enter an answer."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:115
+#: client/src/inventories-hosts/inventory-hosts.strings.js:46
+msgid "Please enter at least one search term to create a new Smart Inventory."
+msgstr ""
+
+#: client/features/templates/templates.strings.js:111
 msgid "Please hover over a template for additional options."
 msgstr ""
 
@@ -3640,11 +3679,11 @@ msgstr ""
 msgid "Please input a number greater than 1."
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:39
+#: client/src/scheduler/scheduler.strings.js:47
 msgid "Please provide a valid date."
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:22
+#: client/src/scheduler/scheduler.strings.js:30
 msgid "Please provide a value between 1 and 999."
 msgstr ""
 
@@ -3756,7 +3795,7 @@ msgstr ""
 msgid "Please select an Inventory or check the Prompt on launch option."
 msgstr ""
 
-#: client/src/inventories-hosts/inventory-hosts.strings.js:26
+#: client/src/inventories-hosts/inventory-hosts.strings.js:39
 msgid "Please select an organization before editing the host filter."
 msgstr ""
 
@@ -3764,7 +3803,7 @@ msgstr ""
 msgid "Please select at least one value."
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:35
+#: client/src/scheduler/scheduler.strings.js:43
 msgid "Please select one or more days."
 msgstr ""
 
@@ -3840,7 +3879,7 @@ msgstr ""
 msgid "Project Path"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:107
+#: client/features/templates/templates.strings.js:103
 #: client/src/workflow-results/workflow-results.controller.js:67
 msgid "Project Sync"
 msgstr ""
@@ -3860,6 +3899,7 @@ msgstr ""
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:33
 #: client/src/home/dashboard/counts/dashboard-counts.directive.js:61
 #: client/src/organizations/linkout/organizations-linkout.route.js:207
+#: client/src/organizations/linkout/organizations-linkout.route.js:209
 msgid "Projects"
 msgstr ""
 
@@ -3891,7 +3931,7 @@ msgstr ""
 msgid "Promote {{ group }} and {{ host }}"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:46
+#: client/src/scheduler/scheduler.strings.js:54
 #: client/src/templates/survey-maker/shared/question-definition.form.js:27
 msgid "Prompt"
 msgstr ""
@@ -4026,7 +4066,7 @@ msgstr ""
 msgid "RSA Private Key"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:116
+#: client/features/templates/templates.strings.js:112
 msgid "RUN"
 msgstr ""
 
@@ -4076,6 +4116,11 @@ msgstr ""
 
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:47
 msgid "Refer to the Ansible Tower documentation for further syntax and examples."
+msgstr ""
+
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:245
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:270
+msgid "Refresh"
 msgstr ""
 
 #: client/src/activity-stream/streams.list.js:51
@@ -4134,7 +4179,7 @@ msgid "Remove any local modifications prior to performing an update."
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:149
-#: client/src/scheduler/scheduler.strings.js:19
+#: client/src/scheduler/scheduler.strings.js:27
 msgid "Repeat frequency"
 msgstr ""
 
@@ -4154,7 +4199,7 @@ msgstr ""
 msgid "Resources"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:89
+#: client/features/templates/templates.strings.js:85
 #: client/src/scheduler/schedules.list.js:24
 msgid "Resources are missing from this template."
 msgstr ""
@@ -4283,11 +4328,16 @@ msgstr ""
 msgid "SCM Type"
 msgstr ""
 
+#: client/src/projects/projects.form.js:107
+msgid "SCM URL"
+msgstr ""
+
 #: client/src/home/dashboard/graphs/dashboard-graphs.partial.html:49
 #: client/src/projects/projects.form.js:181
 msgid "SCM Update"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:224
 #: client/src/projects/list/projects-list.controller.js:267
 msgid "SCM Update Cancel"
 msgstr ""
@@ -4296,7 +4346,10 @@ msgstr ""
 msgid "SCM Update Options"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:119
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:46
 #: client/src/projects/edit/projects-edit.controller.js:139
+#: client/src/projects/list/projects-list.controller.js:118
 #: client/src/projects/list/projects-list.controller.js:85
 msgid "SCM update currently running"
 msgstr ""
@@ -4309,7 +4362,7 @@ msgstr ""
 msgid "SEARCH"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:118
+#: client/features/templates/templates.strings.js:114
 #: client/src/templates/job_templates/multi-credential/multi-credential-modal.partial.html:74
 msgid "SELECT"
 msgstr ""
@@ -4397,7 +4450,7 @@ msgstr ""
 msgid "SSL Connection"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:121
+#: client/features/templates/templates.strings.js:117
 msgid "START"
 msgstr ""
 
@@ -4426,7 +4479,7 @@ msgstr ""
 msgid "SYSTEM TRACKING"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:34
+#: client/src/scheduler/scheduler.strings.js:42
 msgid "Sat"
 msgstr ""
 
@@ -4438,7 +4491,7 @@ msgstr ""
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:110
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:193
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:158
-#: client/src/scheduler/scheduler.strings.js:49
+#: client/src/scheduler/scheduler.strings.js:57
 #: client/src/shared/form-generator.js:1698
 msgid "Save"
 msgstr ""
@@ -4458,7 +4511,7 @@ msgstr ""
 msgid "Save successful!"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:42
+#: client/src/scheduler/scheduler.strings.js:50
 msgid "Schedule Description"
 msgstr ""
 
@@ -4470,19 +4523,19 @@ msgstr ""
 msgid "Schedule inventory syncs"
 msgstr ""
 
-#: client/src/scheduler/schedulerList.controller.js:122
+#: client/src/scheduler/scheduler.strings.js:14
 msgid "Schedule is active."
 msgstr ""
 
-#: client/src/scheduler/schedulerList.controller.js:122
+#: client/src/scheduler/scheduler.strings.js:15
 msgid "Schedule is active. Click to stop."
 msgstr ""
 
-#: client/src/scheduler/schedulerList.controller.js:127
+#: client/src/scheduler/scheduler.strings.js:16
 msgid "Schedule is stopped."
 msgstr ""
 
-#: client/src/scheduler/schedulerList.controller.js:127
+#: client/src/scheduler/scheduler.strings.js:17
 msgid "Schedule is stopped. Click to activate."
 msgstr ""
 
@@ -4799,12 +4852,12 @@ msgid "Standard Out"
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:41
-#: client/src/scheduler/scheduler.strings.js:15
+#: client/src/scheduler/scheduler.strings.js:23
 msgid "Start Date"
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:56
-#: client/src/scheduler/scheduler.strings.js:16
+#: client/src/scheduler/scheduler.strings.js:24
 msgid "Start Time"
 msgstr ""
 
@@ -4861,7 +4914,7 @@ msgstr ""
 msgid "Successful"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:28
+#: client/src/scheduler/scheduler.strings.js:36
 msgid "Sun"
 msgstr ""
 
@@ -4977,7 +5030,7 @@ msgstr ""
 msgid "TOKENS"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:110
+#: client/features/templates/templates.strings.js:106
 msgid "TOTAL TEMPLATES"
 msgstr ""
 
@@ -5085,7 +5138,7 @@ msgstr ""
 msgid "The SCM update process is running."
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:24
+#: client/src/scheduler/scheduler.strings.js:32
 msgid "The day must be between 1 and 31."
 msgstr ""
 
@@ -5122,12 +5175,16 @@ msgstr ""
 msgid "The project value"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:41
+#: client/src/scheduler/scheduler.strings.js:49
 msgid "The scheduler options are invalid, incomplete, or a date is in the past."
 msgstr ""
 
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:210
 msgid "The selected project has a status of"
+msgstr ""
+
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:199
+msgid "The selected project is not configured for SCM. To configure for SCM, edit the project and provide SCM settings and then run an update."
 msgstr ""
 
 #: client/src/projects/list/projects-list.controller.js:186
@@ -5139,7 +5196,7 @@ msgid "The suggested format for variable names is lowercase and underscore-separ
 msgstr ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:124
-#: client/src/scheduler/scheduler.strings.js:17
+#: client/src/scheduler/scheduler.strings.js:25
 msgid "The time must be in HH24:MM:SS format."
 msgstr ""
 
@@ -5157,6 +5214,10 @@ msgstr ""
 
 #: client/src/projects/list/projects-list.controller.js:150
 msgid "There is no SCM update information available for this project. An update has not yet been  completed.  If you have not already done so, start an update for this project."
+msgstr ""
+
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:191
+msgid "There is no SCM update information available for this project. An update has not yet been completed. If you have not already done so, start an update for this project."
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/sources/list/sources-list.controller.js:141
@@ -5191,15 +5252,15 @@ msgstr ""
 msgid "These are the modules that {{BRAND_NAME}} supports running commands against."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:98
+#: client/features/templates/templates.strings.js:94
 msgid "This Job Template has a credential that requires a password.  Credentials requiring passwords on launch are not permitted on workflow nodes."
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:51
+#: client/src/scheduler/scheduler.strings.js:59
 msgid "This Job Template has a default credential that requires a password before launch.  Adding or editing schedules is prohibited while this credential is selected.  To add or edit a schedule, credentials that require a password must be removed from the Job Template."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:97
+#: client/features/templates/templates.strings.js:93
 msgid "This Job Template is missing a default inventory or project. This must be addressed in the Job Template form before this node can be saved."
 msgstr ""
 
@@ -5229,8 +5290,16 @@ msgstr ""
 msgid "This job template has a default {{typeLabel}} credential which must be included or replaced before proceeding."
 msgstr ""
 
+#: client/src/organizations/linkout/organizations-linkout.route.js:158
+msgid "This list is populated by inventories added from the"
+msgstr ""
+
 #: client/src/notifications/notifications.list.js:21
 msgid "This list is populated by notification templates added from the %sNotifications%s section"
+msgstr ""
+
+#: client/src/organizations/linkout/organizations-linkout.route.js:209
+msgid "This list is populated by projects added from the"
 msgstr ""
 
 #: client/src/organizations/linkout/organizations-linkout.route.js:111
@@ -5258,7 +5327,7 @@ msgstr ""
 msgid "This will reset all configuration values to their factory defaults. Are you sure you want to proceed?"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:32
+#: client/src/scheduler/scheduler.strings.js:40
 msgid "Thu"
 msgstr ""
 
@@ -5312,7 +5381,7 @@ msgstr ""
 msgid "Traceback"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:30
+#: client/src/scheduler/scheduler.strings.js:38
 msgid "Tue"
 msgstr ""
 
@@ -5359,7 +5428,7 @@ msgstr ""
 msgid "Unable to Submit"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:88
+#: client/features/templates/templates.strings.js:84
 msgid "Unable to copy template."
 msgstr ""
 
@@ -5367,11 +5436,11 @@ msgstr ""
 msgid "Unable to delete instance group."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:84
+#: client/features/templates/templates.strings.js:80
 msgid "Unable to delete template."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:86
+#: client/features/templates/templates.strings.js:82
 msgid "Unable to determine template type."
 msgstr ""
 
@@ -5395,7 +5464,7 @@ msgstr ""
 msgid "Unable to determine this template's type while scheduling."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:83
+#: client/features/templates/templates.strings.js:79
 msgid "Unable to edit template."
 msgstr ""
 
@@ -5403,11 +5472,11 @@ msgstr ""
 msgid "Unable to get resource:"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:85
+#: client/features/templates/templates.strings.js:81
 msgid "Unable to launch template."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:87
+#: client/features/templates/templates.strings.js:83
 msgid "Unable to schedule job."
 msgstr ""
 
@@ -5435,6 +5504,7 @@ msgstr ""
 msgid "Unsupported input type"
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:270
 #: client/src/projects/list/projects-list.controller.js:311
 msgid "Update Not Found"
 msgstr ""
@@ -5664,6 +5734,7 @@ msgid "View Documentation"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:86
+#: client/src/inventories-hosts/inventory-hosts.strings.js:27
 msgid "View Insights Data"
 msgstr ""
 
@@ -5734,6 +5805,7 @@ msgstr ""
 #: client/src/inventories-hosts/hosts/host.list.js:89
 #: client/src/inventories-hosts/inventories/related/groups/related/nested-hosts/group-nested-hosts.list.js:79
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.list.js:93
+#: client/src/inventories-hosts/inventory-hosts.strings.js:26
 msgid "View host"
 msgstr ""
 
@@ -5819,12 +5891,12 @@ msgstr ""
 msgid "WORKFLOW"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:123
+#: client/features/templates/templates.strings.js:119
 msgid "WORKFLOW VISUALIZER"
 msgstr ""
 
-#: client/features/templates/templates.strings.js:109
-#: client/src/scheduler/scheduler.strings.js:50
+#: client/features/templates/templates.strings.js:105
+#: client/src/scheduler/scheduler.strings.js:58
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:214
 msgid "Warning"
 msgstr ""
@@ -5836,7 +5908,7 @@ msgstr ""
 msgid "Warning: Unsaved Changes"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:31
+#: client/src/scheduler/scheduler.strings.js:39
 msgid "Wed"
 msgstr ""
 
@@ -5909,7 +5981,7 @@ msgstr ""
 msgid "You can create a job template <a href=\"#/templates/add_job_template\">here</a>."
 msgstr ""
 
-#: client/features/templates/templates.strings.js:93
+#: client/features/templates/templates.strings.js:89
 msgid "You do not have access to all resources used by this workflow. Resources that you don't have access to will not be copied and will result in an incomplete workflow."
 msgstr ""
 
@@ -5933,7 +6005,7 @@ msgstr ""
 msgid "You do not have permission to perform this action."
 msgstr ""
 
-#: client/src/inventories-hosts/inventory-hosts.strings.js:28
+#: client/src/inventories-hosts/inventory-hosts.strings.js:41
 msgid "You do not have sufficient permissions to edit the host filter."
 msgstr ""
 
@@ -5949,6 +6021,7 @@ msgstr ""
 msgid "You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook."
 msgstr ""
 
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:224
 #: client/src/projects/list/projects-list.controller.js:267
 msgid "Your request to cancel the update was submitted to the task manager."
 msgstr ""
@@ -5962,6 +6035,11 @@ msgstr ""
 #: client/src/shared/form-generator.js:1200
 #: client/src/templates/prompt/steps/survey/prompt-survey.partial.html:42
 msgid "and"
+msgstr ""
+
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:245
+#: client/src/organizations/linkout/controllers/organizations-projects.controller.js:270
+msgid "button to view the latest status."
 msgstr ""
 
 #: client/features/users/tokens/tokens.strings.js:27
@@ -6046,19 +6124,19 @@ msgstr ""
 msgid "of the filters match."
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:26
+#: client/src/scheduler/scheduler.strings.js:34
 msgid "on"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:23
+#: client/src/scheduler/scheduler.strings.js:31
 msgid "on day"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:27
+#: client/src/scheduler/scheduler.strings.js:35
 msgid "on days"
 msgstr ""
 
-#: client/src/scheduler/scheduler.strings.js:25
+#: client/src/scheduler/scheduler.strings.js:33
 msgid "on the"
 msgstr ""
 
@@ -6071,6 +6149,8 @@ msgid "playbook"
 msgstr ""
 
 #: client/src/organizations/linkout/organizations-linkout.route.js:111
+#: client/src/organizations/linkout/organizations-linkout.route.js:158
+#: client/src/organizations/linkout/organizations-linkout.route.js:209
 msgid "section"
 msgstr ""
 
@@ -6151,12 +6231,16 @@ msgstr ""
 msgid "{{ appName }} Token"
 msgstr ""
 
-#: client/lib/services/base-string.service.js:96
+#: client/lib/services/base-string.service.js:102
 msgid "{{ header }} {{ body }}"
 msgstr ""
 
 #: client/lib/services/base-string.service.js:75
 msgid "{{ resource }} successfully created"
+msgstr ""
+
+#: client/src/inventories-hosts/inventory-hosts.strings.js:31
+msgid "{{ str1 }}</p><p>{{ str2 }}</p>"
 msgstr ""
 
 #: client/src/templates/prompt/steps/other-prompts/prompt-other-prompts.partial.html:5
