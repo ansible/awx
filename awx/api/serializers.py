@@ -78,7 +78,7 @@ DEFAULT_SUMMARY_FIELDS = ('id', 'name', 'description')# , 'created_by', 'modifie
 SUMMARIZABLE_FK_FIELDS = {
     'organization': DEFAULT_SUMMARY_FIELDS,
     'user': ('id', 'username', 'first_name', 'last_name'),
-    'application': ('id', 'name', 'client_id'),
+    'application': ('id', 'name'),
     'team': DEFAULT_SUMMARY_FIELDS,
     'inventory': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
                                            'total_hosts',
