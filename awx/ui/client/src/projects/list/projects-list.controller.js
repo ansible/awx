@@ -115,7 +115,7 @@ export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
                     if (data.status === 'successful' || data.status === 'failed' || data.status === 'canceled') {
                         $scope.reloadList();
                     } else {
-                        project.scm_update_tooltip = "SCM update currently running";
+                        project.scm_update_tooltip = i18n._("SCM update currently running");
                         project.scm_type_class = "btn-disabled";
                     }
                     project.status = data.status;

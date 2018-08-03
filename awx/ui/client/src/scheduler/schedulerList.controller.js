@@ -14,10 +14,10 @@
 export default [
     '$filter', '$scope', '$location', '$stateParams', 'ScheduleList', 'Rest',
     'rbacUiControlService', 'JobTemplateModel', 'ToggleSchedule', 'DeleteSchedule',
-    '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions', 'i18n',
+    '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions', 'i18n', 'SchedulerStrings',
     function($filter, $scope, $location, $stateParams, ScheduleList, Rest,
         rbacUiControlService, JobTemplate, ToggleSchedule, DeleteSchedule,
-        $q, $state, Dataset, ParentObject, UnifiedJobsOptions, i18n
+        $q, $state, Dataset, ParentObject, UnifiedJobsOptions, i18n, strings
     ) {
 
         var base, scheduleEndpoint,
@@ -119,12 +119,12 @@ export default [
         function buildTooltips(schedule) {
             var job = schedule.summary_fields.unified_job_template;
             if (schedule.enabled) {
-                const tip = (schedule.summary_fields.user_capabilities.edit || $scope.credentialRequiresPassword) ? i18n._('Schedule is active.') : i18n._('Schedule is active. Click to stop.');
+                const tip = (schedule.summary_fields.user_capabilities.edit || $scope.credentialRequiresPassword) ? strings.get('list.SCHEDULE_IS_ACTIVE') : strings.get('list.SCHEDULE_IS_ACTIVE_CLICK_TO_STOP');
                 schedule.play_tip = tip;
                 schedule.status = 'active';
                 schedule.status_tip = tip;
             } else {
-                const tip = (schedule.summary_fields.user_capabilities.edit || $scope.credentialRequiresPassword) ? i18n._('Schedule is stopped.') : i18n._('Schedule is stopped. Click to activate.');
+                const tip = (schedule.summary_fields.user_capabilities.edit || $scope.credentialRequiresPassword) ? strings.get('list.SCHEDULE_IS_STOPPED') : strings.get('list.SCHEDULE_IS_STOPPED_CLICK_TO_STOP');//i18n._('Schedule is stopped.') : i18n._('Schedule is stopped. Click to activate.');
                 schedule.play_tip = tip;
                 schedule.status = 'stopped';
                 schedule.status_tip = tip;
@@ -140,7 +140,7 @@ export default [
                 schedule.nameTip += "job ";
             }
             schedule.nameTip += $filter('sanitize')(job.name);
-            schedule.nameTip += ". Click to edit schedule.";
+            schedule.nameTip += `. ${strings.get('list.CLICK_TO_EDIT')}`;
         }
 
         $scope.refreshSchedules = function() {

@@ -90,10 +90,12 @@
                     ng-show="template.summary_fields.user_capabilities.start">
                 </at-launch-template>
                 <at-row-action icon="fa-copy" ng-click="vm.copyTemplate(template)"
-                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.copy">
+                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.copy"
+                    tooltip="{{:: vm.strings.get('listActions.COPY', vm.getType(template)) }}">
                 </at-row-action>
                 <at-row-action icon="fa-trash" ng-click="vm.deleteTemplate(template)"
-                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.delete">
+                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.delete"
+                    tooltip="{{:: vm.strings.get('listActions.DELETE', vm.getType(template)) }}">
                 </at-row-action>
             </div>
         </at-row>

@@ -4,7 +4,8 @@ export default
         'templateUrl',
         '$location',
         'i18n',
-        function JobsList($filter, templateUrl, $location, i18n) {
+        'JobsStrings',
+        function JobsList($filter, templateUrl, $location, i18n, strings) {
         return {
             restrict: 'E',
             link: link,
@@ -15,6 +16,7 @@ export default
         };
 
         function link(scope, element, attr) {
+            scope.strings = strings;
             scope.$watch("data", function(data) {
                 if (data) {
                     if (data.length > 0) {
@@ -37,14 +39,7 @@ export default
                 } else {
                     detailsUrl = `/#/jobs/playbook/${job.id}`;
                 }
-
-                if(_.has(job, 'status') && job.status === 'successful'){
-                    tooltip = i18n._('Job successful. Click for details.');
-                }
-                else if(_.has(job, 'status') && job.status === 'failed'){
-                    tooltip = i18n._('Job failed. Click for details.');
-                }
-
+                
                 return {
                     detailsUrl,
                     status: job.status,

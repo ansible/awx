@@ -73,10 +73,6 @@ function TemplatesStrings (BaseString) {
         UNKNOWN_SCHEDULE:  t.s('Unable to determine this template\'s type while scheduling.'),
     };
 
-    ns.actions = {
-        COPY_WORKFLOW: t.s('Copy Workflow')
-    };
-
     ns.error = {
         HEADER: this.error.HEADER,
         CALL: this.error.CALL,
