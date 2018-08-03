@@ -684,6 +684,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += createCheckbox(options.checkbox);
                         }
 
+                        if (options && options.helpertext) {
+                            html += createHelpertext(options.helpertext);
+                        }
+
                         if (field.labelAction) {
                             let action = field.labelAction;
                             let href = action.href || "";
@@ -1038,6 +1042,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 ngChange: field.subCheckbox.ngChange,
                                 ngDisabled: field.subCheckbox.ngDisabled || field.ngDisabled,
                                 text: field.subCheckbox.text
+                            };
+                        }
+
+                        if (field.helperText) {
+                            labelOptions.helpertext = {
+                                id: `${this.form.name}_${fld}_sub_text`,
+                                ngShow: field.helperText.ngShow,
+                                ngModel: field.helperText.variable,
+                                ngClass: field.helperText.ngClass,
+                                classCondition: field.helperText.classCondition,
+                                text: field.helperText.text
                             };
                         }
 
@@ -2018,6 +2033,18 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
             return `
                 <label class="checkbox-inline Form-checkbox Form-checkbox--subCheckbox" ${ngShow}>
                     <input type="checkbox" id="${options.id}" ${ngModel} ${ngChange} ${ngDisabled} />
+                    ${options.text}
+                </label> `;
+        }
+
+        function createHelpertext (options) {
+            let ngModel = options.ngModel ? `ng-model="${options.ngModel}"` : '';
+            let ngShow = options.ngShow ? `ng-show="${options.ngShow}"` : '';
+            let ngClass = options.ngClass ? options.ngClass : '';
+            let classCondition = options.classCondition ? options.classCondition : '';
+
+            return `
+                <label class="at-InputLabel--helpertext" ng-class="!${classCondition} ? '${ngClass}' : ''"  ${ngShow} id="${options.id}" ${ngModel}>
                     ${options.text}
                 </label> `;
         }
