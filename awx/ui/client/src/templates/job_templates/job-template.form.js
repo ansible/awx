@@ -232,7 +232,8 @@ function(NotificationsList, i18n) {
                     helperText: {
                         classCondition: 'job_template_labels_isValid === true',
                         ngClass: 'at-InputLabel--error',
-                        text: i18n._('Max 512 Char'),
+                        ngShow: 'job_template_labels_isValid !== true',
+                        text: i18n._('Max 512 Characters'),
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
