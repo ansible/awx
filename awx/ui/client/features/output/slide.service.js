@@ -1,85 +1,42 @@
 /* eslint camelcase: 0 */
 import {
+    API_MAX_PAGE_SIZE,
     OUTPUT_EVENT_LIMIT,
     OUTPUT_PAGE_SIZE,
 } from './constants';
 
-/**
- * Check if a range overlaps another range
- *
- * @arg {Array} range - A [low, high] range array.
- * @arg {Array} other - A [low, high] range array to be compared with the first.
- *
- * @returns {Boolean} - Indicating that the ranges overlap.
- */
-function checkRangeOverlap (range, other) {
-    const span = Math.max(range[1], other[1]) - Math.min(range[0], other[0]);
+function getContinuous (events, reverse = false) {
+    const counters = events.map(({ counter }) => counter);
 
-    return (range[1] - range[0]) + (other[1] - other[0]) >= span;
-}
+    const min = Math.min(...counters);
+    const max = Math.max(...counters);
 
-/**
- * Get an array that describes the overlap of two ranges.
- *
- * @arg {Array} range - A [low, high] range array.
- * @arg {Array} other - A [low, high] range array to be compared with the first.
- *
- * @returns {(Array|Boolean)} - Returns false if the ranges aren't overlapping.
- * For overlapping ranges, a length-2 array describing the nature of the overlap
- * is returned. The overlap array describes the position of the second range in
- * terms of how many steps inward (negative) or outward (positive) its sides are
- * relative to the first range.
- *
- *  ++45678
- *  234---- => getOverlapArray([4, 8], [2, 4]) = [2, -4]
- *
- *  45678
- *  45---   => getOverlapArray([4, 8], [4, 5]) = [0, -3]
- *
- *  45678
- *  -56--   => getOverlapArray([4, 8], [5, 6]) = [-1, -2]
- *
- *  45678
- *  --678   => getOverlapArray([4, 8], [6, 8]) = [-2, 0]
- *
- *  456++
- *  --678   => getOverlapArray([4, 6], [6, 8]) = [-2, 2]
- *
- * +++456++
- * 12345678 => getOverlapArray([4, 6], [1, 8]) = [3, 2]
- ^
- * 12345678
- * ---456-- => getOverlapArray([1, 8], [4, 6]) = [-3, -2]
- */
-function getOverlapArray (range, other) {
-    if (!checkRangeOverlap(range, other)) {
-        return false;
+    const missing = [];
+    for (let i = min; i <= max; i++) {
+        if (counters.indexOf(i) < 0) {
+            missing.push(i);
+        }
     }
 
-    return [range[0] - other[0], other[1] - range[1]];
-}
+    if (missing.length === 0) {
+        return events;
+    }
 
-/**
- * Apply a minimum and maximum boundary to a range.
- *
- * @arg {Array} range - A [low, high] range array.
- * @arg {Array} other - A [low, high] range array to be applied as a boundary.
- *
- * @returns {(Array)} - Returns a new range array by applying the second range
- * as a boundary to the first.
- *
- * getBoundedRange([2, 6], [2, 8]) = [2, 6]
- * getBoundedRange([1, 9], [2, 8]) = [2, 8]
- * getBoundedRange([4, 9], [2, 8]) = [4, 8]
- */
-function getBoundedRange (range, other) {
-    return [Math.max(range[0], other[0]), Math.min(range[1], other[1])];
+    if (reverse) {
+        const threshold = Math.max(...missing);
+
+        return events.filter(({ counter }) => counter > threshold);
+    }
+
+    const threshold = Math.min(...missing);
+
+    return events.filter(({ counter }) => counter < threshold);
 }
 
 function SlidingWindowService ($q) {
-    this.init = (storage, api, { getScrollHeight }, { getMaxCounter }) => {
-        const { prepend, append, shift, pop, deleteRecord } = storage;
-        const { getRange, getFirst, getLast } = api;
+    this.init = (storage, api, { getScrollHeight }) => {
+        const { prepend, append, shift, pop, getRecord, deleteRecord, clear } = storage;
+        const { getRange, getFirst, getLast, getMaxCounter } = api;
 
         this.api = {
             getRange,
@@ -89,10 +46,12 @@ function SlidingWindowService ($q) {
         };
 
         this.storage = {
+            clear,
             prepend,
             append,
             shift,
             pop,
+            getRecord,
             deleteRecord,
         };
 
@@ -100,11 +59,79 @@ function SlidingWindowService ($q) {
             getScrollHeight,
         };
 
-        this.records = {};
+        this.lines = {};
         this.uuids = {};
         this.chain = $q.resolve();
 
-        api.clearCache();
+        this.state = { head: null, tail: null };
+        this.cache = { first: null };
+
+        this.buffer = {
+            events: [],
+            min: 0,
+            max: 0,
+            count: 0,
+        };
+    };
+
+    this.getBoundedRange = range => {
+        const bounds = [1, this.getMaxCounter()];
+
+        return [Math.max(range[0], bounds[0]), Math.min(range[1], bounds[1])];
+    };
+
+    this.getNextRange = displacement => {
+        const tail = this.getTailCounter();
+
+        return this.getBoundedRange([tail + 1, tail + 1 + displacement]);
+    };
+
+    this.getPreviousRange = displacement => {
+        const head = this.getHeadCounter();
+
+        return this.getBoundedRange([head - 1 - displacement, head - 1]);
+    };
+
+    this.createRecord = ({ counter, uuid, start_line, end_line }) => {
+        this.lines[counter] = end_line - start_line;
+        this.uuids[counter] = uuid;
+
+        if (this.state.tail === null) {
+            this.state.tail = counter;
+        }
+
+        if (counter > this.state.tail) {
+            this.state.tail = counter;
+        }
+
+        if (this.state.head === null) {
+            this.state.head = counter;
+        }
+
+        if (counter < this.state.head) {
+            this.state.head = counter;
+        }
+    };
+
+    this.deleteRecord = counter => {
+        this.storage.deleteRecord(this.uuids[counter]);
+
+        delete this.uuids[counter];
+        delete this.lines[counter];
+    };
+
+    this.getLineCount = counter => {
+        const record = this.storage.getRecord(counter);
+
+        if (record && record.lineCount) {
+            return record.lineCount;
+        }
+
+        if (this.lines[counter]) {
+            return this.lines[counter];
+        }
+
+        return 0;
     };
 
     this.pushFront = events => {
@@ -113,10 +140,7 @@ function SlidingWindowService ($q) {
 
         return this.storage.append(newEvents)
             .then(() => {
-                newEvents.forEach(({ counter, start_line, end_line, uuid }) => {
-                    this.records[counter] = { start_line, end_line };
-                    this.uuids[counter] = uuid;
-                });
+                newEvents.forEach(event => this.createRecord(event));
 
                 return $q.resolve();
             });
@@ -129,10 +153,7 @@ function SlidingWindowService ($q) {
 
         return this.storage.prepend(newEvents)
             .then(() => {
-                newEvents.forEach(({ counter, start_line, end_line, uuid }) => {
-                    this.records[counter] = { start_line, end_line };
-                    this.uuids[counter] = uuid;
-                });
+                newEvents.forEach(event => this.createRecord(event));
 
                 return $q.resolve();
             });
@@ -149,18 +170,14 @@ function SlidingWindowService ($q) {
         let lines = 0;
 
         for (let i = max; i >= min; --i) {
-            if (this.records[i]) {
-                lines += (this.records[i].end_line - this.records[i].start_line);
-            }
+            lines += this.getLineCount(i);
         }
 
         return this.storage.pop(lines)
             .then(() => {
                 for (let i = max; i >= min; --i) {
-                    delete this.records[i];
-
-                    this.storage.deleteRecord(this.uuids[i]);
-                    delete this.uuids[i];
+                    this.deleteRecord(i);
+                    this.state.tail--;
                 }
 
                 return $q.resolve();
@@ -178,184 +195,219 @@ function SlidingWindowService ($q) {
         let lines = 0;
 
         for (let i = min; i <= max; ++i) {
-            if (this.records[i]) {
-                lines += (this.records[i].end_line - this.records[i].start_line);
-            }
+            lines += this.getLineCount(i);
         }
 
         return this.storage.shift(lines)
             .then(() => {
                 for (let i = min; i <= max; ++i) {
-                    delete this.records[i];
-
-                    this.storage.deleteRecord(this.uuids[i]);
-                    delete this.uuids[i];
+                    this.deleteRecord(i);
+                    this.state.head++;
                 }
 
                 return $q.resolve();
             });
     };
 
-    this.move = ([low, high]) => {
-        const bounds = [1, this.getMaxCounter()];
-        const [newHead, newTail] = getBoundedRange([low, high], bounds);
+    this.clear = () => this.storage.clear()
+        .then(() => {
+            const [head, tail] = this.getRange();
 
-        let popHeight = this.hooks.getScrollHeight();
+            for (let i = head; i <= tail; ++i) {
+                this.deleteRecord(i);
+            }
 
-        if (newHead > newTail) {
-            this.chain = this.chain
-                .then(() => $q.resolve(popHeight));
+            this.state.head = null;
+            this.state.tail = null;
 
-            return this.chain;
-        }
-
-        if (!Number.isFinite(newHead) || !Number.isFinite(newTail)) {
-            this.chain = this.chain
-                .then(() => $q.resolve(popHeight));
-
-            return this.chain;
-        }
-
-        const [head, tail] = this.getRange();
-        const overlap = getOverlapArray([head, tail], [newHead, newTail]);
-
-        if (!overlap) {
-            this.chain = this.chain
-                .then(() => this.clear())
-                .then(() => this.api.getRange([newHead, newTail]))
-                .then(events => this.pushFront(events));
-        }
-
-        if (overlap && overlap[0] < 0) {
-            const popBackCount = Math.abs(overlap[0]);
-
-            this.chain = this.chain.then(() => this.popBack(popBackCount));
-        }
-
-        if (overlap && overlap[1] < 0) {
-            const popFrontCount = Math.abs(overlap[1]);
-
-            this.chain = this.chain.then(() => this.popFront(popFrontCount));
-        }
-
-        this.chain = this.chain
-            .then(() => {
-                popHeight = this.hooks.getScrollHeight();
-
-                return $q.resolve();
-            });
-
-        if (overlap && overlap[0] > 0) {
-            const pushBackRange = [head - overlap[0], head];
-
-            this.chain = this.chain
-                .then(() => this.api.getRange(pushBackRange))
-                .then(events => this.pushBack(events));
-        }
-
-        if (overlap && overlap[1] > 0) {
-            const pushFrontRange = [tail, tail + overlap[1]];
-
-            this.chain = this.chain
-                .then(() => this.api.getRange(pushFrontRange))
-                .then(events => this.pushFront(events));
-        }
-
-        this.chain = this.chain
-            .then(() => $q.resolve(popHeight));
-
-        return this.chain;
-    };
+            return $q.resolve();
+        });
 
     this.getNext = (displacement = OUTPUT_PAGE_SIZE) => {
+        const next = this.getNextRange(displacement);
         const [head, tail] = this.getRange();
 
-        const tailRoom = this.getMaxCounter() - tail;
-        const tailDisplacement = Math.min(tailRoom, displacement);
+        this.chain = this.chain
+            .then(() => this.api.getRange(next))
+            .then(events => {
+                const results = getContinuous(events);
+                const min = Math.min(...results.map(({ counter }) => counter));
 
-        const newTail = tail + tailDisplacement;
+                if (min > tail + 1) {
+                    return $q.resolve([]);
+                }
 
-        let headDisplacement = 0;
+                return $q.resolve(results);
+            })
+            .then(results => {
+                const count = (tail - head + results.length);
+                const excess = count - OUTPUT_EVENT_LIMIT;
 
-        if (newTail - head > OUTPUT_EVENT_LIMIT) {
-            headDisplacement = (newTail - OUTPUT_EVENT_LIMIT) - head;
-        }
+                return this.popBack(excess)
+                    .then(() => {
+                        const popHeight = this.hooks.getScrollHeight();
 
-        return this.move([head + headDisplacement, tail + tailDisplacement]);
+                        return this.pushFront(results).then(() => $q.resolve(popHeight));
+                    });
+            });
+
+        return this.chain;
     };
 
     this.getPrevious = (displacement = OUTPUT_PAGE_SIZE) => {
+        const previous = this.getPreviousRange(displacement);
         const [head, tail] = this.getRange();
 
-        const headRoom = head - 1;
-        const headDisplacement = Math.min(headRoom, displacement);
+        this.chain = this.chain
+            .then(() => this.api.getRange(previous))
+            .then(events => {
+                const results = getContinuous(events, true);
+                const max = Math.max(...results.map(({ counter }) => counter));
 
-        const newHead = head - headDisplacement;
+                if (head > max + 1) {
+                    return $q.resolve([]);
+                }
 
-        let tailDisplacement = 0;
+                return $q.resolve(results);
+            })
+            .then(results => {
+                const count = (tail - head + results.length);
+                const excess = count - OUTPUT_EVENT_LIMIT;
 
-        if (tail - newHead > OUTPUT_EVENT_LIMIT) {
-            tailDisplacement = tail - (newHead + OUTPUT_EVENT_LIMIT);
-        }
+                return this.popFront(excess)
+                    .then(() => {
+                        const popHeight = this.hooks.getScrollHeight();
 
-        return this.move([newHead, tail - tailDisplacement]);
-    };
-
-    this.moveHead = displacement => {
-        const [head, tail] = this.getRange();
-
-        const headRoom = head - 1;
-        const headDisplacement = Math.min(headRoom, displacement);
-
-        return this.move([head + headDisplacement, tail]);
-    };
-
-    this.moveTail = displacement => {
-        const [head, tail] = this.getRange();
-
-        const tailRoom = this.getMaxCounter() - tail;
-        const tailDisplacement = Math.max(tailRoom, displacement);
-
-        return this.move([head, tail + tailDisplacement]);
-    };
-
-    this.clear = () => {
-        const count = this.getRecordCount();
-
-        if (count > 0) {
-            this.chain = this.chain
-                .then(() => this.popBack(count));
-        }
+                        return this.pushBack(results).then(() => $q.resolve(popHeight));
+                    });
+            });
 
         return this.chain;
     };
 
-    this.getFirst = () => this.clear()
-        .then(() => this.api.getFirst())
-        .then(events => this.pushFront(events))
-        .then(() => this.moveTail(OUTPUT_PAGE_SIZE));
+    this.getFirst = () => {
+        this.chain = this.chain
+            .then(() => this.clear())
+            .then(() => {
+                if (this.cache.first) {
+                    return $q.resolve(this.cache.first);
+                }
 
-    this.getLast = () => this.clear()
-        .then(() => this.api.getLast())
-        .then(events => this.pushBack(events))
-        .then(() => this.moveHead(-OUTPUT_PAGE_SIZE));
+                return this.api.getFirst();
+            })
+            .then(events => {
+                if (events.length === OUTPUT_PAGE_SIZE) {
+                    this.cache.first = events;
+                }
+
+                return this.pushFront(events);
+            });
+
+        return this.chain
+            .then(() => this.getNext());
+    };
+
+    this.getLast = () => {
+        this.chain = this.chain
+            .then(() => this.getFrames())
+            .then(frames => {
+                if (frames.length > 0) {
+                    return $q.resolve(frames);
+                }
+
+                return this.api.getLast();
+            })
+            .then(events => {
+                const min = Math.min(...events.map(({ counter }) => counter));
+
+                if (min <= this.getTailCounter() + 1) {
+                    return this.pushFront(events);
+                }
+
+                return this.clear()
+                    .then(() => this.pushBack(events));
+            });
+
+        return this.chain
+            .then(() => this.getPrevious());
+    };
 
     this.getTailCounter = () => {
-        const tail = Math.max(...Object.keys(this.records));
+        if (this.state.tail === null) {
+            return 0;
+        }
 
-        return Number.isFinite(tail) ? tail : 0;
+        if (this.state.tail < 0) {
+            return 0;
+        }
+
+        return this.state.tail;
     };
 
     this.getHeadCounter = () => {
-        const head = Math.min(...Object.keys(this.records));
+        if (this.state.head === null) {
+            return 0;
+        }
 
-        return Number.isFinite(head) ? head : 0;
+        if (this.state.head < 0) {
+            return 0;
+        }
+
+        return this.state.head;
+    };
+
+    this.pushFrames = events => {
+        const frames = this.buffer.events.concat(events);
+        const [head, tail] = this.getRange();
+
+        let min;
+        let max;
+        let count = 0;
+
+        for (let i = frames.length - 1; i >= 0; i--) {
+            count++;
+
+            if (count > API_MAX_PAGE_SIZE) {
+                frames.splice(i, 1);
+
+                count--;
+                continue;
+            }
+
+            if (!min || frames[i].counter < min) {
+                min = frames[i].counter;
+            }
+
+            if (!max || frames[i].counter > max) {
+                max = frames[i].counter;
+            }
+        }
+
+        this.buffer.events = frames;
+        this.buffer.min = min;
+        this.buffer.max = max;
+        this.buffer.count = count;
+
+        if (min >= head && min <= tail + 1) {
+            return frames.filter(({ counter }) => counter > tail);
+        }
+
+        return [];
+    };
+
+    this.getFrames = () => $q.resolve(this.buffer.events);
+
+    this.getMaxCounter = () => {
+        if (this.buffer.min) {
+            return this.buffer.min;
+        }
+
+        return this.api.getMaxCounter();
     };
 
     this.isOnLastPage = () => this.getTailCounter() >= (this.getMaxCounter() - OUTPUT_PAGE_SIZE);
-    this.getMaxCounter = () => this.api.getMaxCounter();
     this.getRange = () => [this.getHeadCounter(), this.getTailCounter()];
-    this.getRecordCount = () => Object.keys(this.records).length;
+    this.getRecordCount = () => Object.keys(this.lines).length;
     this.getCapacity = () => OUTPUT_EVENT_LIMIT - this.getRecordCount();
 }
 

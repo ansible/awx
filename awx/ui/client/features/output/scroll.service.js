@@ -5,9 +5,12 @@ import {
     OUTPUT_SCROLL_THRESHOLD,
 } from './constants';
 
+const MAX_THRASH = 20;
+
 function JobScrollService ($q, $timeout) {
-    this.init = ({ next, previous, onLeaveLower, onEnterLower }) => {
+    this.init = ({ next, previous, onThresholdLeave }) => {
         this.el = $(OUTPUT_ELEMENT_CONTAINER);
+        this.chain = $q.resolve();
         this.timer = null;
 
         this.position = {
@@ -23,20 +26,64 @@ function JobScrollService ($q, $timeout) {
         this.hooks = {
             next,
             previous,
-            onLeaveLower,
-            onEnterLower,
+            onThresholdLeave,
         };
 
         this.state = {
             paused: false,
+            locked: false,
+            hover: false,
+            running: true,
+            thrash: 0,
         };
 
-        this.chain = $q.resolve();
         this.el.scroll(this.listen);
+        this.el.mouseenter(this.onMouseEnter);
+        this.el.mouseleave(this.onMouseLeave);
+    };
+
+    this.onMouseEnter = () => {
+        this.state.hover = true;
+
+        if (this.state.thrash >= MAX_THRASH) {
+            this.state.thrash = MAX_THRASH - 1;
+        }
+
+        this.unlock();
+        this.unhide();
+    };
+
+    this.onMouseLeave = () => {
+        this.state.hover = false;
     };
 
     this.listen = () => {
         if (this.isPaused()) {
+            return;
+        }
+
+        if (this.state.thrash > 0) {
+            if (this.isLocked() || this.state.hover) {
+                this.state.thrash--;
+            }
+        }
+
+        if (!this.state.hover) {
+            this.state.thrash++;
+        }
+
+        if (this.state.thrash >= MAX_THRASH) {
+            if (this.isRunning()) {
+                this.lock();
+                this.hide();
+            }
+        }
+
+        if (this.isLocked()) {
+            return;
+        }
+
+        if (!this.state.hover) {
             return;
         }
 
@@ -47,17 +94,7 @@ function JobScrollService ($q, $timeout) {
         this.timer = $timeout(this.register, OUTPUT_SCROLL_DELAY);
     };
 
-    this.isBeyondThreshold = () => {
-        const position = this.getScrollPosition();
-        const viewport = this.getScrollHeight() - this.getViewableHeight();
-        const threshold = position / viewport;
-
-        return (1 - threshold) < OUTPUT_SCROLL_THRESHOLD;
-    };
-
     this.register = () => {
-        this.pause();
-
         const position = this.getScrollPosition();
         const viewport = this.getScrollHeight() - this.getViewableHeight();
 
@@ -70,20 +107,22 @@ function JobScrollService ($q, $timeout) {
         const wasBeyondUpperThreshold = this.threshold.previous < OUTPUT_SCROLL_THRESHOLD;
         const wasBeyondLowerThreshold = (1 - this.threshold.previous) < OUTPUT_SCROLL_THRESHOLD;
 
+        const enteredUpperThreshold = isBeyondUpperThreshold && !wasBeyondUpperThreshold;
+        const enteredLowerThreshold = isBeyondLowerThreshold && !wasBeyondLowerThreshold;
+        const leftLowerThreshold = !isBeyondLowerThreshold && wasBeyondLowerThreshold;
+
         const transitions = [];
 
-        if (position <= 0 || (isBeyondUpperThreshold && !wasBeyondUpperThreshold)) {
+        if (position <= 0 || enteredUpperThreshold) {
+            transitions.push(this.hooks.onThresholdLeave);
             transitions.push(this.hooks.previous);
         }
 
-        if (!isBeyondLowerThreshold && wasBeyondLowerThreshold) {
-            transitions.push(this.hooks.onLeaveLower);
+        if (leftLowerThreshold) {
+            transitions.push(this.hooks.onThresholdLeave);
         }
 
-        if (isBeyondLowerThreshold && !wasBeyondLowerThreshold) {
-            transitions.push(this.hooks.onEnterLower);
-            transitions.push(this.hooks.next);
-        } else if (threshold >= 1) {
+        if (threshold >= 1 || enteredLowerThreshold) {
             transitions.push(this.hooks.next);
         }
 
@@ -100,7 +139,6 @@ function JobScrollService ($q, $timeout) {
 
         return this.chain
             .then(() => {
-                this.resume();
                 this.setScrollPosition(this.getScrollPosition());
 
                 return $q.resolve();
@@ -157,16 +195,70 @@ function JobScrollService ($q, $timeout) {
         this.setScrollPosition(this.getScrollHeight());
     };
 
-    this.resume = () => {
-        this.state.paused = false;
+    this.start = () => {
+        this.state.running = true;
+    };
+
+    this.stop = () => {
+        this.unlock();
+        this.unhide();
+        this.state.running = false;
+    };
+
+    this.lock = () => {
+        this.state.locked = true;
+    };
+
+    this.unlock = () => {
+        this.state.locked = false;
     };
 
     this.pause = () => {
         this.state.paused = true;
     };
 
-    this.isMissing = () => $(OUTPUT_ELEMENT_TBODY)[0].clientHeight < this.getViewableHeight();
+    this.resume = () => {
+        this.state.paused = false;
+    };
+
+    this.hide = () => {
+        if (this.state.hidden) {
+            return;
+        }
+
+        this.state.hidden = true;
+        this.el.css('overflow-y', 'hidden');
+    };
+
+    this.unhide = () => {
+        if (!this.state.hidden) {
+            return;
+        }
+
+        this.state.hidden = false;
+        this.el.css('overflow-y', 'auto');
+    };
+
+    this.isBeyondLowerThreshold = () => {
+        const position = this.getScrollPosition();
+        const viewport = this.getScrollHeight() - this.getViewableHeight();
+        const threshold = position / viewport;
+
+        return (1 - threshold) < OUTPUT_SCROLL_THRESHOLD;
+    };
+
+    this.isBeyondUpperThreshold = () => {
+        const position = this.getScrollPosition();
+        const viewport = this.getScrollHeight() - this.getViewableHeight();
+        const threshold = position / viewport;
+
+        return threshold < OUTPUT_SCROLL_THRESHOLD;
+    };
+
     this.isPaused = () => this.state.paused;
+    this.isRunning = () => this.state.running;
+    this.isLocked = () => this.state.locked;
+    this.isMissing = () => $(OUTPUT_ELEMENT_TBODY)[0].clientHeight < this.getViewableHeight();
 }
 
 JobScrollService.$inject = ['$q', '$timeout'];

@@ -2,6 +2,7 @@
 import {
     EVENT_START_PLAY,
     EVENT_START_TASK,
+    OUTPUT_PAGE_SIZE,
 } from './constants';
 
 let $compile;
@@ -54,91 +55,111 @@ function bufferEmpty (min, max) {
     return removed;
 }
 
-let attached = false;
-let noframes = false;
-let isOnLastPage = false;
-
+let lockFrames;
 function onFrames (events) {
-    if (noframes) {
+    if (lockFrames) {
+        events.forEach(bufferAdd);
         return $q.resolve();
     }
 
-    if (!attached) {
-        const minCounter = Math.min(...events.map(({ counter }) => counter));
+    events = slide.pushFrames(events);
+    const popCount = events.length - slide.getCapacity();
+    const isAttached = events.length > 0;
 
-        if (minCounter > slide.getTailCounter() + 1) {
-            return $q.resolve();
-        }
-
-        attached = true;
-    }
-
-    if (vm.isInFollowMode) {
-        vm.isFollowing = true;
-    }
-
-    const capacity = slide.getCapacity();
-
-    if (capacity <= 0 && !isOnLastPage) {
-        attached = false;
-
+    if (!isAttached) {
+        stopFollowing();
         return $q.resolve();
     }
 
-    return slide.popBack(events.length - capacity)
-        .then(() => slide.pushFront(events))
+    if (!vm.isFollowing && canStartFollowing()) {
+        startFollowing();
+    }
+
+    if (!vm.isFollowing && popCount > 0) {
+        return $q.resolve();
+    }
+
+    scroll.pause();
+
+    if (vm.isFollowing) {
+        scroll.scrollToBottom();
+    }
+
+    return slide.popBack(popCount)
         .then(() => {
-            if (vm.isFollowing && scroll.isBeyondLowerThreshold()) {
+            if (vm.isFollowing) {
                 scroll.scrollToBottom();
             }
+
+            return slide.pushFront(events);
+        })
+        .then(() => {
+            if (vm.isFollowing) {
+                scroll.scrollToBottom();
+            }
+
+            scroll.resume();
 
             return $q.resolve();
         });
 }
 
 function first () {
+    if (scroll.isPaused()) {
+        return $q.resolve();
+    }
+
     scroll.pause();
-    unfollow();
+    lockFrames = true;
 
-    attached = false;
-    noframes = true;
-    isOnLastPage = false;
+    stopFollowing();
 
-    slide.getFirst()
+    return slide.getFirst()
         .then(() => {
+            scroll.resetScrollPosition();
+        })
+        .finally(() => {
             scroll.resume();
-            noframes = false;
-
-            return $q.resolve();
+            lockFrames = false;
         });
 }
 
 function next () {
     if (vm.isFollowing) {
+        scroll.scrollToBottom();
+
+        return $q.resolve();
+    }
+
+    if (scroll.isPaused()) {
+        return $q.resolve();
+    }
+
+    if (slide.getTailCounter() >= slide.getMaxCounter()) {
         return $q.resolve();
     }
 
     scroll.pause();
+    lockFrames = true;
 
     return slide.getNext()
-        .then(() => {
-            isOnLastPage = slide.isOnLastPage();
-            if (isOnLastPage) {
-                stream.setMissingCounterThreshold(slide.getTailCounter() + 1);
-                if (scroll.isBeyondLowerThreshold()) {
-                    scroll.scrollToBottom();
-                    follow();
-                }
-            }
-        })
-        .finally(() => scroll.resume());
+        .finally(() => {
+            scroll.resume();
+            lockFrames = false;
+        });
 }
 
 function previous () {
+    if (scroll.isPaused()) {
+        return $q.resolve();
+    }
+
     scroll.pause();
+    lockFrames = true;
+
+    stopFollowing();
 
     const initialPosition = scroll.getScrollPosition();
-    isOnLastPage = false;
 
     return slide.getPrevious()
         .then(popHeight => {
@@ -147,17 +168,87 @@ function previous () {
 
             return $q.resolve();
         })
-        .finally(() => scroll.resume());
+        .finally(() => {
+            scroll.resume();
+            lockFrames = false;
+        });
+}
+
+function last () {
+    if (scroll.isPaused()) {
+        return $q.resolve();
+    }
+
+    scroll.pause();
+    lockFrames = true;
+
+    return slide.getLast()
+        .then(() => {
+            stream.setMissingCounterThreshold(slide.getTailCounter() + 1);
+            scroll.scrollToBottom();
+
+            return $q.resolve();
+        })
+        .finally(() => {
+            scroll.resume();
+            lockFrames = false;
+        });
+}
+
+let followOnce;
+let lockFollow;
+function canStartFollowing () {
+    if (lockFollow) {
+        return false;
+    }
+
+    if (slide.isOnLastPage() && scroll.isBeyondLowerThreshold()) {
+        followOnce = false;
+
+        return true;
+    }
+
+    if (followOnce && // one-time activation from top of first page
+        scroll.isBeyondUpperThreshold() &&
+        slide.getHeadCounter() === 1 &&
+        slide.getTailCounter() >= OUTPUT_PAGE_SIZE) {
+        followOnce = false;
+
+        return true;
+    }
+
+    return false;
+}
+
+function startFollowing () {
+    if (vm.isFollowing) {
+        return;
+    }
+
+    vm.isFollowing = true;
+    vm.followTooltip = vm.strings.get('tooltips.MENU_FOLLOWING');
+}
+
+function stopFollowing () {
+    if (!vm.isFollowing) {
+        return;
+    }
+
+    vm.isFollowing = false;
+    vm.followTooltip = vm.strings.get('tooltips.MENU_LAST');
 }
 
 function menuLast () {
     if (vm.isFollowing) {
-        unfollow();
+        lockFollow = true;
+        stopFollowing();
 
         return $q.resolve();
     }
 
-    if (isOnLastPage) {
+    lockFollow = false;
+
+    if (slide.isOnLastPage()) {
         scroll.scrollToBottom();
 
         return $q.resolve();
@@ -166,42 +257,12 @@ function menuLast () {
     return last();
 }
 
-function last () {
-    scroll.pause();
-
-    return slide.getLast()
-        .then(() => {
-            stream.setMissingCounterThreshold(slide.getTailCounter() + 1);
-            scroll.setScrollPosition(scroll.getScrollHeight());
-
-            isOnLastPage = true;
-            follow();
-            scroll.resume();
-
-            return $q.resolve();
-        });
-}
-
 function down () {
     scroll.moveDown();
 }
 
 function up () {
     scroll.moveUp();
-}
-
-function follow () {
-    isOnLastPage = slide.isOnLastPage();
-
-    if (resource.model.get('event_processing_finished')) return;
-    if (!isOnLastPage) return;
-
-    vm.isInFollowMode = true;
-}
-
-function unfollow () {
-    vm.isInFollowMode = false;
-    vm.isFollowing = false;
 }
 
 function togglePanelExpand () {
@@ -276,7 +337,10 @@ function showHostDetails (id, uuid) {
     $state.go('output.host-event.json', { eventId: id, taskUuid: uuid });
 }
 
+let streaming;
 function stopListening () {
+    streaming = null;
+
     listeners.forEach(deregister => deregister());
     listeners.length = 0;
 }
@@ -293,13 +357,46 @@ function startListening () {
     listeners.push($scope.$on(resource.ws.summary, (scope, data) => handleSummaryEvent(data)));
 }
 
-function handleStatusEvent (data) {
-    status.pushStatusEvent(data);
+function handleJobEvent (data) {
+    streaming = streaming || resource.events
+        .getRange([Math.max(1, data.counter - 50), data.counter + 50])
+        .then(results => {
+            results = results.concat(data);
+
+            const counters = results.map(({ counter }) => counter);
+            const min = Math.min(...counters);
+            const max = Math.max(...counters);
+
+            const missing = [];
+            for (let i = min; i <= max; i++) {
+                if (counters.indexOf(i) < 0) {
+                    missing.push(i);
+                }
+            }
+
+            if (missing.length > 0) {
+                const maxMissing = Math.max(...missing);
+                results = results.filter(({ counter }) => counter > maxMissing);
+            }
+
+            stream.setMissingCounterThreshold(max + 1);
+            results.forEach(item => {
+                stream.pushJobEvent(item);
+                status.pushJobEvent(item);
+            });
+
+            return $q.resolve();
+        });
+
+    streaming
+        .then(() => {
+            stream.pushJobEvent(data);
+            status.pushJobEvent(data);
+        });
 }
 
-function handleJobEvent (data) {
-    stream.pushJobEvent(data);
-    status.pushJobEvent(data);
+function handleStatusEvent (data) {
+    status.pushStatusEvent(data);
 }
 
 function handleSummaryEvent (data) {
@@ -313,13 +410,6 @@ function reloadState (params) {
     params.isPanelExpanded = vm.isPanelExpanded;
 
     return $state.transitionTo($state.current, params, { inherit: false, location: 'replace' });
-}
-
-function getMaxCounter () {
-    const apiMax = resource.events.getMaxCounter();
-    const wsMax = stream.getMaxCounter();
-
-    return Math.max(apiMax, wsMax);
 }
 
 function OutputIndexController (
@@ -367,28 +457,27 @@ function OutputIndexController (
     vm.menu = { last: menuLast, first, down, up };
     vm.isMenuExpanded = true;
     vm.isFollowing = false;
-    vm.isInFollowMode = false;
     vm.toggleMenuExpand = toggleMenuExpand;
     vm.toggleLineExpand = toggleLineExpand;
     vm.showHostDetails = showHostDetails;
     vm.toggleLineEnabled = resource.model.get('type') === 'job';
+    vm.followTooltip = vm.strings.get('tooltips.MENU_LAST');
 
     render.requestAnimationFrame(() => {
         bufferInit();
 
         status.init(resource);
-        slide.init(render, resource.events, scroll, { getMaxCounter });
+        slide.init(render, resource.events, scroll);
         render.init({ compile, toggles: vm.toggleLineEnabled });
 
         scroll.init({
             next,
             previous,
-            onLeaveLower () {
-                unfollow();
-                return $q.resolve();
-            },
-            onEnterLower () {
-                follow();
+            onThresholdLeave () {
+                followOnce = false;
+                lockFollow = false;
+                stopFollowing();
+
                 return $q.resolve();
             },
         });
@@ -398,15 +487,29 @@ function OutputIndexController (
             bufferEmpty,
             onFrames,
             onStop () {
+                lockFollow = true;
+                stopFollowing();
                 stopListening();
                 status.updateStats();
                 status.dispatch();
-                unfollow();
+                status.sync();
+                scroll.stop();
             }
         });
 
-        startListening();
-        status.subscribe(data => { vm.status = data.status; });
+        if (resource.model.get('event_processing_finished')) {
+            followOnce = false;
+            lockFollow = true;
+            lockFrames = true;
+            stopListening();
+        } else {
+            followOnce = true;
+            lockFollow = false;
+            lockFrames = false;
+            resource.events.clearCache();
+            status.subscribe(data => { vm.status = data.status; });
+            startListening();
+        }
 
         return last();
     });

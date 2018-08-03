@@ -24,7 +24,7 @@ function OutputStream ($q) {
 
         this.state = {
             ending: false,
-            ended: false
+            ended: false,
         };
 
         this.lag = 0;

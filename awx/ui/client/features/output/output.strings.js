@@ -20,7 +20,7 @@ function OutputStrings (BaseString) {
         DOWNLOAD_OUTPUT: t.s('Download Output'),
         CREDENTIAL: t.s('View the Credential'),
         EXPAND_OUTPUT: t.s('Expand Output'),
-        EXTRA_VARS: t.s('Read-only view of extra variables added to the job template.'),
+        EXTRA_VARS: t.s('Read-only view of extra variables added to the job template'),
         INVENTORY: t.s('View the Inventory'),
         JOB_TEMPLATE: t.s('View the Job Template'),
         PROJECT: t.s('View the Project'),
@@ -28,6 +28,11 @@ function OutputStrings (BaseString) {
         SCHEDULE: t.s('View the Schedule'),
         SOURCE_WORKFLOW_JOB: t.s('View the source Workflow Job'),
         USER: t.s('View the User'),
+        MENU_FIRST: t.s('Go to first page'),
+        MENU_DOWN: t.s('Get next page'),
+        MENU_UP: t.s('Get previous page'),
+        MENU_LAST: t.s('Go to last page of available output'),
+        MENU_FOLLOWING: t.s('Currently following output as it arrives. Click to unfollow'),
     };
 
     ns.details = {

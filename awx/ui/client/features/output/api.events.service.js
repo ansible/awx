@@ -109,6 +109,11 @@ function JobEventsApiService ($http, $q) {
         }
 
         const [low, high] = range;
+
+        if (low > high) {
+            return $q.resolve([]);
+        }
+
         const params = merge(this.params, { counter__gte: [low], counter__lte: [high] });
 
         params.page_size = API_MAX_PAGE_SIZE;

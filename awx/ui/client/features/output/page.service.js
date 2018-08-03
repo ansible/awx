@@ -4,13 +4,14 @@ import { OUTPUT_PAGE_LIMIT } from './constants';
 function PageService ($q) {
     this.init = (storage, api, { getScrollHeight }) => {
         const { prepend, append, shift, pop, deleteRecord } = storage;
-        const { getPage, getFirst, getLast, getLastPageNumber } = api;
+        const { getPage, getFirst, getLast, getLastPageNumber, getMaxCounter } = api;
 
         this.api = {
             getPage,
             getFirst,
             getLast,
             getLastPageNumber,
+            getMaxCounter,
         };
 
         this.storage = {
@@ -238,6 +239,7 @@ function PageService ($q) {
     this.isOnLastPage = () => this.api.getLastPageNumber() === this.state.tail;
     this.getRecordCount = () => Object.keys(this.records).length;
     this.getTailCounter = () => this.state.tail;
+    this.getMaxCounter = () => this.api.getMaxCounter();
 }
 
 PageService.$inject = ['$q'];

@@ -1,3 +1,4 @@
+/* eslint camelcase: 0 */
 import atLibModels from '~models';
 import atLibComponents from '~components';
 
@@ -41,9 +42,7 @@ function resolveResource (
     Wait,
     Events,
 ) {
-    const { id, type, handleErrors } = $stateParams;
-    const { job_event_search } = $stateParams; // eslint-disable-line camelcase
-
+    const { id, type, handleErrors, job_event_search } = $stateParams;
     const { name, key } = getWebSocketResource(type);
 
     let Resource;

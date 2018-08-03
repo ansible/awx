@@ -69,6 +69,10 @@ function JobRenderService ($q, $sce, $window) {
     };
 
     this.transformEvent = event => {
+        if (this.record[event.uuid]) {
+            return { html: '', count: 0 };
+        }
+
         if (!event || !event.stdout) {
             return { html: '', count: 0 };
         }
@@ -127,6 +131,7 @@ function JobRenderService ($q, $sce, $window) {
             start: event.start_line,
             end: event.end_line,
             isTruncated: (event.end_line - event.start_line) > lines.length,
+            lineCount: lines.length,
             isHost: this.isHostEvent(event),
         };
 
@@ -166,6 +171,8 @@ function JobRenderService ($q, $sce, $window) {
 
         return info;
     };
+
+    this.getRecord = uuid => this.record[uuid];
 
     this.deleteRecord = uuid => {
         delete this.record[uuid];
