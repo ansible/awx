@@ -90,7 +90,7 @@ export default
                         if(streamConfig && streamConfig.activityStream) {
                             if(streamConfig.activityStreamTarget) {
                                 stateGoParams.target = streamConfig.activityStreamTarget;
-                                let isTemplateTarget = _.contains(['template', 'job_template', 'workflow_job_template'], streamConfig.activityStreamTarget);
+                                let isTemplateTarget = _.includes(['template', 'job_template', 'workflow_job_template'], streamConfig.activityStreamTarget);
                                 stateGoParams.activity_search = {
                                     or__object1__in: isTemplateTarget ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,
                                     or__object2__in: isTemplateTarget ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,

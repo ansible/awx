@@ -25,7 +25,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
         // the object permissions are being added to
         scope.object = scope.resourceData.data;
         // array for all possible roles for the object
-        scope.roles = _.omit(scope.object.summary_fields.object_roles, (key) => {
+        scope.roles = _.omitBy(scope.object.summary_fields.object_roles, (key) => {
             return key.name === 'Read';
         });
 
@@ -90,7 +90,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
     };
 
     scope.hasSelectedRows = function(){
-        return _.any(scope.allSelected, (type) => Object.keys(type).length > 0);
+        return _.some(scope.allSelected, (type) => Object.keys(type).length > 0);
     };
 
     scope.selectTab = function(selected){

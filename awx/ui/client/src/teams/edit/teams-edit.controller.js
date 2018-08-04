@@ -23,7 +23,9 @@ export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
             Rest.setUrl(defaultUrl);
             Wait('start');
             Rest.get(defaultUrl).then(({data}) => {
-                setScopeFields(data);
+                _.forEach(form.fields, (value, key) => {
+                    $scope[key] = data[key];
+                });
                 $scope.organization_name = data.summary_fields.organization.name;
 
                 OrgAdminLookup.checkForAdminAccess({organization: data.organization})
@@ -38,21 +40,6 @@ export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
             $scope.$watch('team_obj.summary_fields.user_capabilities.edit', function(val) {
                 $scope.canAdd = (val === false) ? false : true;
             });
-
-
-        }
-
-        // @issue I think all this really want to do is _.forEach(form.fields, (field) =>{ $scope[field] = data[field]})
-        function setScopeFields(data) {
-            _(data)
-                .pick(function(value, key) {
-                    return form.fields.hasOwnProperty(key) === true;
-                })
-                .forEach(function(value, key) {
-                    $scope[key] = value;
-                })
-                .value();
-            return;
         }
 
         // prepares a data payload for a PUT request to the API
