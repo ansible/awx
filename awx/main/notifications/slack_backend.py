@@ -9,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 from awx.main.notifications.base import AWXBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.slack_backend')
-WEBSOCKET_TIMEOUT = 30
 
 
 class SlackBackend(AWXBaseEmailBackend):
@@ -34,22 +33,28 @@ class SlackBackend(AWXBaseEmailBackend):
                 for r in m.recipients():
                     if r.startswith('#'):
                         r = r[1:]
+                    thread = None
+                    if ',' in r:
+                        thread = r.split(',')[1]
+
                     if self.color:
                         ret = connection.api_call("chat.postMessage",
-                                                  channel=r,
+                                                  channel=r.split(',')[0],
+                                                  thread_ts=thread,
                                                   attachments=[{
                                                       "color": self.color,
                                                       "text": m.subject
                                                   }])
                     else:
                         ret = connection.api_call("chat.postMessage",
-                                                  channel=r,
+                                                  channel=r.split(',')[0],
+                                                  thread_ts=thread,
                                                   text=m.subject)
                     logger.debug(ret)
                     if ret['ok']:
                         sent_messages += 1
                     else:
-                        raise RuntimeError("Slack Notification unable to send {}: {}".format(r, m.subject))
+                        raise RuntimeError("Slack Notification unable to send {}: {}: {}".format(r, m.subject, ret['error']))
             except Exception as e:
                 logger.error(smart_text(_("Exception sending messages: {}").format(e)))
                 if not self.fail_silently:

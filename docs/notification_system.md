@@ -66,7 +66,7 @@ Either setup a local smtp mail service here are some options:
 
 ## Slack
 
-Slack is pretty easy to configure, it just needs a token which you can get from creating a bot in the integrations settings for the slack team.
+Slack deprecated their [custom integrations feature](https://api.slack.com/custom-integrations) and recommended Slack Apps. To integrate with AWX, you need a _Bot User OAuth Access Token_ which is generated after [creating a bot user](https://api.slack.com/bot-users) as part of a Slack app.
 
 ### Testing considerations
 
@@ -76,7 +76,7 @@ The following should be performed for good acceptance:
 
 ### Test Service
 
-Any user of the Ansible slack service can create a bot integration (which is how this notification is implemented).   Remember to invite the bot to the channel first.
+Any user of Slack can create a Slack App. Remember to invite the bot to the channel first if the channel is private.
 
 ## Hipchat
 
