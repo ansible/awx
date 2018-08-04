@@ -34,7 +34,8 @@ dockerhub_version=latest
 
 # Common Docker parameters
 postgres_data_dir=/tmp/pgdocker
-host_port=80
+host_port=443
+#ssl_certificate=
 
 # Docker Compose Install
 # use_docker_compose=false
