@@ -86,6 +86,7 @@
       {{
         ([project_data_dir + ':/var/lib/awx/projects:z'] if project_data_dir is defined else [])
         + ([ca_trust_dir + ':/etc/pki/ca-trust/source/anchors:ro'] if ca_trust_dir is defined else [])
+        + ([ssl_certificate + ':/etc/nginx/awxweb.pem:ro'] if ssl_certificate is defined else [])
       }}
     user: root
     ports:
