@@ -33,6 +33,8 @@ dockerhub_version=latest
 # task_mem_request=2
 
 # Common Docker parameters
+awx_task_hostname=awx
+awx_web_hostname=awxweb
 postgres_data_dir=/tmp/pgdocker
 host_port=80
 

@@ -89,7 +89,7 @@
     ports:
       - "{{ host_port }}:8052"
     links: "{{ awx_web_container_links|list }}"
-    hostname: awxweb
+    hostname: "{{ awx_web_hostname }}"
     dns_search_domains: "{{ awx_container_search_domains.split(',') if awx_container_search_domains is defined else omit }}"
     dns_servers: "{{ awx_alternate_dns_servers.split(',') if awx_alternate_dns_servers is defined else omit }}"
     env:
@@ -125,7 +125,7 @@
       }}
     links: "{{ awx_task_container_links|list }}"
     user: root
-    hostname: awx
+    hostname: "{{ awx_task_hostname }}"
     dns_search_domains: "{{ awx_container_search_domains.split(',') if awx_container_search_domains is defined else omit }}"
     dns_servers: "{{ awx_alternate_dns_servers.split(',') if awx_alternate_dns_servers is defined else omit }}"
     env:
