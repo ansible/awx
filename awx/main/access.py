@@ -98,8 +98,6 @@ def check_user_access(user, model_class, action, *args, **kwargs):
     Return True if user can perform action against model_class with the
     provided parameters.
     '''
-    if 'write' not in getattr(user, 'oauth_scopes', ['write']) and action != 'read':
-        return False
     access_class = access_registry[model_class]
     access_instance = access_class(user)
     access_method = getattr(access_instance, 'can_%s' % action)
