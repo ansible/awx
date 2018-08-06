@@ -1093,7 +1093,7 @@ class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
         )
         obj = super(UserAuthorizedTokenSerializer, self).create(validated_data)
         obj.save()
-        if obj.application is not None:
+        if obj.application and obj.application.authorization_grant_type != 'implicit':
             RefreshToken.objects.create(
                 user=current_user,
                 token=generate_token(),
@@ -1116,7 +1116,7 @@ class OAuth2TokenSerializer(BaseOAuth2TokenSerializer):
         if obj.application and obj.application.user:
             obj.user = obj.application.user
         obj.save()
-        if obj.application is not None:
+        if obj.application and obj.application.authorization_grant_type != 'implicit':
             RefreshToken.objects.create(
                 user=current_user,
                 token=generate_token(),
