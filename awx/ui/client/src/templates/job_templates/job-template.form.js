@@ -231,7 +231,7 @@ function(NotificationsList, i18n) {
                     dataContainer: 'body',
                     onError: {
                         ngShow: 'job_template_labels_isValid !== true',
-                        text: i18n._('Max 512 Characters'),
+                        text: i18n._('Max 512 characters per label.'),
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
