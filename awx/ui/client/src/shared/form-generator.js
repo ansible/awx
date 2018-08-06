@@ -684,10 +684,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += createCheckbox(options.checkbox);
                         }
 
-                        if (options && options.helpertext) {
-                            html += createHelpertext(options.helpertext);
-                        }
-
                         if (field.labelAction) {
                             let action = field.labelAction;
                             let href = action.href || "";
@@ -1045,14 +1041,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             };
                         }
 
-                        if (field.helperText) {
-                            labelOptions.helpertext = {
-                                id: `${this.form.name}_${fld}_sub_text`,
-                                ngShow: field.helperText.ngShow,
-                                ngModel: field.helperText.variable,
-                                ngClass: field.helperText.ngClass,
-                                classCondition: field.helperText.classCondition,
-                                text: field.helperText.text
+                        if (field.onError) {
+                            labelOptions.onError = {
+                                id: `${this.form.name}_${fld}_error_text`,
+                                ngShow: field.onError.ngShow,
+                                ngModel: field.onError.variable,
+                                text: field.onError.text
                             };
                         }
 
@@ -1106,7 +1100,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 }
                                 html += "</div>\n";
                         }
-                        html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+                        if (field.label === "Labels") {
+                            html += `<div class="error" id="${field.onError.id}" ng-show="${field.onError.ngShow}">${field.onError.text}</div>`;
+                        }
+                        
 
                         // Add help panel(s)
                         html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
@@ -2037,16 +2034,5 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 </label> `;
         }
 
-        function createHelpertext (options) {
-            let ngModel = options.ngModel ? `ng-model="${options.ngModel}"` : '';
-            let ngShow = options.ngShow ? `ng-show="${options.ngShow}"` : '';
-            let ngClass = options.ngClass ? options.ngClass : '';
-            let classCondition = options.classCondition ? options.classCondition : '';
-
-            return `
-                <label class="at-InputLabel--helpertext" ng-class="!${classCondition} ? '${ngClass}' : ''"  ${ngShow} id="${options.id}" ${ngModel}>
-                    ${options.text}
-                </label> `;
-        }
     }
 ]);
