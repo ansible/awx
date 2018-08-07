@@ -201,8 +201,8 @@ module.exports = {
         templates.expect.element(promptActionButton).enabled;
         templates.expect.element(promptCloseButton).enabled;
 
-        templates.expect.element(promptHeader).text.contain('COPY WORKFLOW');
-        templates.expect.element(promptWarning).text.contain('Unified Job Templates');
+        templates.expect.element(promptHeader).text.contain('COPY');
+        templates.expect.element(promptHeader).text.contain(`${data.workflow.name.toUpperCase()}`);
         templates.expect.element(promptWarning).text.contain(`${data.source.name}`);
 
         templates.click(promptCancelButton);
