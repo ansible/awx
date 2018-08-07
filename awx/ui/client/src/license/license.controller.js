@@ -98,11 +98,11 @@ export default
     		$scope.submit = function() {
       			Wait('start');
       			CheckLicense.post($scope.newLicense.file, $scope.newLicense.eula)
-      				  .then(() => {
+                        .then((licenseInfo) => {
         				    reset();
 
                             ConfigService.delete();
-                            ConfigService.getConfig()
+                            ConfigService.getConfig(licenseInfo)
                                 .then(function(config) {
                                     delete($rootScope.features);
                                     FeaturesService.get();
