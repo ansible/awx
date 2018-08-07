@@ -187,7 +187,7 @@ function ListTemplatesController(
             return strings.get('list.ADD_DD_WF_LABEL');;
         }
     };
-    
+
     function refreshTemplates() {
         Wait('start');
         let path = GetBasePath('unified_job_templates');
@@ -270,7 +270,7 @@ function ListTemplatesController(
                         actionText: strings.get('COPY'),
                         body: buildWorkflowCopyPromptHTML(model.get('related.copy')),
                         class: 'Modal-primaryButton',
-                        hdr: strings.get('actions.COPY_WORKFLOW'),
+                        hdr: strings.get('listActions.COPY', template.name),
                     });
                 } else {
                     Alert(strings.get('error.COPY'), strings.get('alert.NO_PERMISSION'));
