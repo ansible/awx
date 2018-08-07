@@ -246,6 +246,15 @@ class TaskManager():
         }
         dependencies = [{'type': get_type_for_model(type(t)), 'id': t.id} for t in dependent_tasks]
 
+        controller_node = None
+        if task.supports_isolation() and rampart_group.controller_id:
+            try:
+                controller_node = rampart_group.choose_online_controller_node()
+            except IndexError:
+                logger.debug(six.text_type("No controllers available in group {} to run {}").format(
+                             rampart_group.name, task.log_format))
+                return
+
         error_handler = handle_work_error.s(subtasks=[task_actual] + dependencies)
         success_handler = handle_work_success.s(task_actual=task_actual)
 
@@ -269,12 +278,12 @@ class TaskManager():
                 task.execution_node = random.choice(list(rampart_group.controller.instances.all().values_list('hostname', flat=True)))
                 logger.info(six.text_type('Submitting isolated {} to queue {}.').format(
                             task.log_format, task.instance_group.name, task.execution_node))
-            elif task.supports_isolation() and rampart_group.controller_id:
+            elif controller_node:
                 task.instance_group = rampart_group
                 task.execution_node = instance.hostname
-                task.controller_node = rampart_group.choose_online_controller_node()
+                task.controller_node = controller_node
                 logger.info(six.text_type('Submitting isolated {} to queue {} controlled by {}.').format(
-                            task.log_format, task.execution_node, task.controller_node))
+                            task.log_format, task.execution_node, controller_node))
             else:
                 task.instance_group = rampart_group
                 if instance is not None:
