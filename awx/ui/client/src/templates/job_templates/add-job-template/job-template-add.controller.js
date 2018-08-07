@@ -528,7 +528,6 @@
 
                 // Detect when a label is removed
                 $(`#${jt_label_id}`).on('select2:unselect', (e) => {
-                    const maxCount = 512;
                     const { text } = e.params.data;
 
                     /* If the character count of a removed label is greater than 512 AND the field is currently marked
