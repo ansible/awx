@@ -178,5 +178,45 @@ export default [
          $scope.formCancel = function () {
              $state.transitionTo('templates');
          };
+
+         let handleLabelCount = () => {
+             /**
+              * This block of code specifically handles the client-side validation of the `labels` field.
+              * Due to it's detached nature in relation to the other job template fields, we must
+              * validate this field client-side in order to avoid the edge case where a user can make a
+              * successful POST to the `workflow_job_templates` endpoint but however encounter a 200 error from
+              * the `labels` endpoint due to a character limit.
+              *
+              * We leverage two of select2's available events, `select` and `unselect`, to detect when the user
+              * has either added or removed a label. From there, we set a flag and do simple string length
+              * checks to make sure a label's chacacter count remains under 512. Otherwise, we disable the "Save" button
+              * by invalidating the field and inform the user of the error.
+             */
+
+             $scope.workflow_job_template_labels_isValid = true;
+             const maxCount = 512;
+             const wfjt_label_id = 'workflow_job_template_labels';
+              // Detect when a new label is added
+             $(`#${wfjt_label_id}`).on('select2:select', (e) => {
+                 const { text } = e.params.data;
+                  // If the character count of an added label is greater than 512, we set `labels` field as invalid
+                 if (text.length > maxCount) {
+                     $scope.workflow_job_template_form.labels.$setValidity(`${wfjt_label_id}`, false);
+                     $scope.workflow_job_template_labels_isValid = false;
+                 }
+             });
+              // Detect when a label is removed
+             $(`#${wfjt_label_id}`).on('select2:unselect', (e) => {
+                 const { text } = e.params.data;
+                  /* If the character count of a removed label is greater than 512 AND the field is currently marked
+                    as invalid, we set it back to valid */
+                 if (text.length > maxCount && $scope.workflow_job_template_form.labels.$error) {
+                     $scope.workflow_job_template_form.labels.$setValidity(`${wfjt_label_id}`, true);
+                     $scope.workflow_job_template_labels_isValid = true;
+                 }
+             });
+         };
+
+         handleLabelCount();
      }
     ];

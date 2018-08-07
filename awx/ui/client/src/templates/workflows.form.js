@@ -77,6 +77,10 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     dataPlacement: 'right',
                     awPopOver: "<p>" + i18n._("Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.") + "</p>",
                     dataContainer: 'body',
+                    onError: {
+                        ngShow: 'workflow_job_template_labels_isValid !== true',
+                        text: i18n._('Max 512 characters per label.'),
+                    },
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 variables: {
