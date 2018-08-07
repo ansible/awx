@@ -27,7 +27,7 @@ import instanceJobsRoute from '~features/jobs/routes/instanceJobs.route.js';
 
 const MODULE_NAME = 'instanceGroups';
 
-function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance) {
+function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance, ProcessErrors, strings) {
     const instanceGroupId = $stateParams.instance_group_id;
     const instanceId = $stateParams.instance_id;
     let promises = {};
@@ -48,14 +48,23 @@ function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance) {
             .then((instanceGroup) =>  instanceGroup.extend('get', 'instances'));
 
     return $q.all(promises)
-        .then(models => models);
+        .then(models => models)
+        .catch(({ data, status, config }) => {
+            ProcessErrors(null, data, status, null, {
+                hdr: strings.get('error.HEADER'),
+                msg: strings.get('error.CALL', { path: `${config.url}`, status })
+            });
+            return $q.reject();
+        });
 }
 
 InstanceGroupsResolve.$inject = [
     '$q',
     '$stateParams',
     'InstanceGroupModel',
-    'InstanceModel'
+    'InstanceModel',
+    'ProcessErrors',
+    'InstanceGroupsStrings'
 ];
 
 function InstanceGroupsRun ($stateExtender, strings) {
