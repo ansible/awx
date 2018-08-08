@@ -1,6 +1,7 @@
 import defaults from '~assets/default.strings.json';
 
 let i18n;
+let $filter;
 
 function BaseStringService (namespace) {
     const ERROR_NO_NAMESPACE = 'BaseString cannot be extended without providing a namespace';
@@ -72,7 +73,7 @@ function BaseStringService (namespace) {
     this.COPY = t.s('COPY');
     this.YES = t.s('YES');
     this.CLOSE = t.s('CLOSE');
-    this.SUCCESSFUL_CREATION = resource => t.s('{{ resource }} successfully created', { resource });
+    this.SUCCESSFUL_CREATION = resource => t.s('{{ resource }} successfully created', { resource: $filter('sanitize')(resource) });
 
     this.deleteResource = {
         HEADER: t.s('Delete'),
@@ -135,12 +136,13 @@ function BaseStringService (namespace) {
     };
 }
 
-function BaseStringServiceLoader (_i18n_) {
+function BaseStringServiceLoader (_i18n_, _$filter_) {
     i18n = _i18n_;
+    $filter = _$filter_;
 
     return BaseStringService;
 }
 
-BaseStringServiceLoader.$inject = ['i18n'];
+BaseStringServiceLoader.$inject = ['i18n', '$filter'];
 
 export default BaseStringServiceLoader;
