@@ -1027,7 +1027,10 @@ LOGGING = {
         'timed_import': {
             '()': 'awx.main.utils.formatters.TimeFormatter',
             'format': '%(relativeSeconds)9.3f %(levelname)-8s %(message)s'
-        }
+        },
+        'dispatcher': {
+            'format': '%(asctime)s %(levelname)-8s %(name)s PID:%(process)d %(message)s',
+        },
     },
     'handlers': {
         'console': {
@@ -1068,14 +1071,14 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'simple',
         },
-        'callback_receiver': {
+        'dispatcher': {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'callback_receiver.log'),
+            'filename': os.path.join(LOG_ROOT, 'dispatcher.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
-            'formatter':'simple',
+            'formatter':'dispatcher',
         },
         'inventory_import': {
             'level': 'DEBUG',
@@ -1158,8 +1161,9 @@ LOGGING = {
         },
         'awx.main': {
             'handlers': ['null']
-        }, 'awx.main.commands.run_callback_receiver': {
-            'handlers': ['callback_receiver'],
+        },
+        'awx.main.dispatch': {
+            'handlers': ['dispatcher'],
         },
         'awx.isolated.manager.playbooks': {
             'handlers': ['management_playbooks'],

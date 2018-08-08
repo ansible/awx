@@ -197,7 +197,6 @@ LOGGING['handlers']['syslog'] = {
 LOGGING['loggers']['django.request']['handlers'] = ['console']
 LOGGING['loggers']['rest_framework.request']['handlers'] = ['console']
 LOGGING['loggers']['awx']['handlers'] = ['console', 'external_logger']
-LOGGING['loggers']['awx.main.commands.run_callback_receiver']['handlers'] = ['console']
 LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console', 'external_logger']
 LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console', 'external_logger']
 LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
