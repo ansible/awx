@@ -39,13 +39,13 @@ if is_testing(sys.argv):
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
             'TEST': {
-                # Test database cannot be :memory: for celery/inventory tests.
+                # Test database cannot be :memory: for tests.
                 'NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
             },
         }
     }
     
-# Celery AMQP configuration.
+# AMQP configuration.
 BROKER_URL = 'amqp://guest:guest@localhost:5672'
 
 # Set True to enable additional logging from the job_event_callback plugin
@@ -94,8 +94,7 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 # REMOTE_HOST_HEADERS will be trusted unconditionally')
 PROXY_IP_WHITELIST = []
 
-# Define additional environment variables to be passed to subprocess started by
-# the celery task.
+# Define additional environment variables to be passed to ansible subprocesses
 #AWX_TASK_ENV['FOO'] = 'BAR'
 
 # If set, use -vvv for project updates instead of -v for more output.

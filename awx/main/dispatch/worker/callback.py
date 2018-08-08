@@ -1,83 +1,30 @@
-# Copyright (c) 2018 Ansible by Red Hat
-# All Rights Reserved.
-
 import logging
+import time
 import os
 import signal
-import time
 import traceback
-from uuid import UUID
-from Queue import Empty as QueueEmpty
 
-from kombu.mixins import ConsumerMixin
 from django.conf import settings
 from django.db import DatabaseError, OperationalError, connection as django_connection
 from django.db.utils import InterfaceError, InternalError
 
+from awx.main.consumers import emit_channel_notification
 from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
                              InventoryUpdateEvent, SystemJobEvent, UnifiedJob)
-from awx.main.consumers import emit_channel_notification
-from awx.main.dispatch.pool import WorkerPool
+
+from .base import BaseWorker
 
 logger = logging.getLogger('awx.main.dispatch')
 
 
-class WorkerSignalHandler:
-
-    def __init__(self):
-        self.kill_now = False
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
-
-    def exit_gracefully(self, *args, **kwargs):
-        self.kill_now = True
-
-
-class AWXConsumer(ConsumerMixin):
-
-    def __init__(self, connection, worker, queues=[]):
-        self.connection = connection
-        self.total_messages = 0
-        self.queues = queues
-        self.pool = WorkerPool()
-        self.pool.init_workers(worker.work_loop)
-
-    def get_consumers(self, Consumer, channel):
-        return [Consumer(queues=self.queues, accept=['json'],
-                         callbacks=[self.process_task])]
-
-    def process_task(self, body, message):
-        if "uuid" in body and body['uuid']:
-            try:
-                queue = UUID(body['uuid']).int % len(self.pool)
-            except Exception:
-                queue = self.total_messages % len(self.pool)
-        else:
-            queue = self.total_messages % len(self.pool)
-        self.pool.write(queue, body)
-        self.total_messages += 1
-        message.ack()
-
-
-class BaseWorker(object):
-
-    def work_loop(self, queue, idx, *args):
-        signal_handler = WorkerSignalHandler()
-        while not signal_handler.kill_now:
-            try:
-                body = queue.get(block=True, timeout=1)
-            except QueueEmpty:
-                continue
-            except Exception as e:
-                logger.error("Exception on worker, restarting: " + str(e))
-                continue
-            self.perform_work(body, *args)
-
-    def perform_work(self, body):
-        raise NotImplemented()
-
-
 class CallbackBrokerWorker(BaseWorker):
+    '''
+    A worker implementation that deserializes callback event data and persists
+    it into the database.
+
+    The code that *builds* these types of messages is found in the AWX display
+    callback (`awx.lib.awx_display_callback`).
+    '''
 
     MAX_RETRIES = 2
 
@@ -151,7 +98,7 @@ class CallbackBrokerWorker(BaseWorker):
                 try:
                     _save_event_data()
                     break
-                except (OperationalError, InterfaceError, InternalError) as e:
+                except (OperationalError, InterfaceError, InternalError):
                     if retries >= self.MAX_RETRIES:
                         logger.exception('Worker could not re-establish database connectivity, shutting down gracefully: Job {}'.format(job_identifier))
                         os.kill(os.getppid(), signal.SIGINT)
@@ -164,7 +111,7 @@ class CallbackBrokerWorker(BaseWorker):
                     django_connection.close()
                     time.sleep(delay)
                     retries += 1
-                except DatabaseError as e:
+                except DatabaseError:
                     logger.exception('Database Error Saving Job Event for Job {}'.format(job_identifier))
                     break
         except Exception as exc:

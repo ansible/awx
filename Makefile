@@ -59,7 +59,7 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 I18N_FLAG_FILE = .i18n_built
 
 .PHONY: awx-link clean clean-tmp clean-venv requirements requirements_dev \
-	develop refresh adduser migrate dbchange dbshell runserver celeryd \
+	develop refresh adduser migrate dbchange dbshell runserver \
 	receiver test test_unit test_ansible test_coverage coverage_html \
 	dev_build release_build release_clean sdist \
 	ui-docker-machine ui-docker ui-release ui-devel \
@@ -233,7 +233,7 @@ server_noattach:
 	tmux new-session -d -s awx 'exec make uwsgi'
 	tmux rename-window 'AWX'
 	tmux select-window -t awx:0
-	tmux split-window -v 'exec make celeryd'
+	tmux split-window -v 'exec make dispatcher'
 	tmux new-window 'exec make daphne'
 	tmux select-window -t awx:1
 	tmux rename-window 'WebSockets'
@@ -265,12 +265,6 @@ honcho:
 	fi; \
 	honcho start -f tools/docker-compose/Procfile
 
-flower:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/awx/bin/activate; \
-	fi; \
-	celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
-
 collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -281,7 +275,7 @@ uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-    uwsgi -b 32768 --socket 127.0.0.1:8050 --module=awx.wsgi:application --home=/venv/awx --chdir=/awx_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --lazy-apps --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" --hook-accepting1-once="exec:/bin/sh -c '[ -f /tmp/celery_pid ] && kill -1 `cat /tmp/celery_pid` || true'"
+    uwsgi -b 32768 --socket 127.0.0.1:8050 --module=awx.wsgi:application --home=/venv/awx --chdir=/awx_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --lazy-apps --logformat "%(addr) %(method) %(uri) - %(proto) %(status)" --hook-accepting1-once="exec:awx-manage run_dispatcher --reload"
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -302,13 +296,13 @@ runserver:
 	fi; \
 	$(PYTHON) manage.py runserver
 
-# Run to start the background celery worker for development.
-celeryd:
-	rm -f /tmp/celery_pid
+# Run to start the background task dispatcher for development.
+dispatcher:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	celery worker -A awx -l DEBUG -B -Ofair --autoscale=100,4 --schedule=$(CELERY_SCHEDULE_FILE) -n celery@$(COMPOSE_HOST) --pidfile /tmp/celery_pid
+	$(PYTHON) manage.py run_dispatcher
+
 
 # Run to start the zeromq callback receiver
 receiver:

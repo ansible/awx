@@ -1,81 +1,260 @@
-import errno
 import logging
 import os
-import signal
+import random
 import traceback
+from uuid import uuid4
 
+import collections
 from multiprocessing import Process
 from multiprocessing import Queue as MPQueue
-from Queue import Full as QueueFull
+from Queue import Full as QueueFull, Empty as QueueEmpty
 
 from django.conf import settings
 from django.db import connection as django_connection
 from django.core.cache import cache as django_cache
+from jinja2 import Template
+import psutil
+
+from awx.main.models import UnifiedJob
+from awx.main.dispatch import reaper
 
 logger = logging.getLogger('awx.main.dispatch')
 
 
-def signame(sig):
-    return dict(
-        (k, v) for v, k in signal.__dict__.items()
-        if v.startswith('SIG') and not v.startswith('SIG_')
-    )[sig]
+class PoolWorker(object):
+    '''
+    Used to track a worker child process and its pending and finished messages.
+
+    This class makes use of two distinct multiprocessing.Queues to track state:
+
+    - self.queue: this is a queue which represents pending messages that should
+                  be handled by this worker process; as new AMQP messages come
+                  in, a pool will put() them into this queue; the child
+                  process that is forked will get() from this queue and handle
+                  received messages in an endless loop
+    - self.finished: this is a queue which the worker process uses to signal
+                     that it has finished processing a message
+
+    When a message is put() onto this worker, it is tracked in
+    self.managed_tasks.
+
+    Periodically, the worker will call .calculate_managed_tasks(), which will
+    cause messages in self.finished to be removed from self.managed_tasks.
+
+    In this way, self.managed_tasks represents a view of the messages assigned
+    to a specific process.  The message at [0] is the least-recently inserted
+    message, and it represents what the worker is running _right now_
+    (self.current_task).
+
+    A worker is "busy" when it has at least one message in self.managed_tasks.
+    It is "idle" when self.managed_tasks is empty.
+    '''
+
+    def __init__(self, queue_size, target, args):
+        self.messages_sent = 0
+        self.messages_finished = 0
+        self.managed_tasks = collections.OrderedDict()
+        self.finished = MPQueue(queue_size)
+        self.queue = MPQueue(queue_size)
+        self.process = Process(target=target, args=(self.queue, self.finished) + args)
+        self.process.daemon = True
+
+    def start(self):
+        self.process.start()
+
+    def put(self, body):
+        uuid = '?'
+        if isinstance(body, dict):
+            if not body.get('uuid'):
+                body['uuid'] = str(uuid4())
+            uuid = body['uuid']
+        logger.debug('delivered {} to worker[{}] qsize {}'.format(
+            uuid, self.pid, self.qsize
+        ))
+        self.managed_tasks[uuid] = body
+        self.queue.put(body, block=True, timeout=5)
+        self.messages_sent += 1
+        self.calculate_managed_tasks()
+
+    def quit(self):
+        '''
+        Send a special control message to the worker that tells it to exit
+        gracefully.
+        '''
+        self.queue.put('QUIT')
+
+    @property
+    def pid(self):
+        return self.process.pid
+
+    @property
+    def qsize(self):
+        return self.queue.qsize()
+
+    @property
+    def alive(self):
+        return self.process.is_alive()
+
+    @property
+    def mb(self):
+        if self.alive:
+            return '{:0.3f}'.format(
+                psutil.Process(self.pid).memory_info().rss / 1024.0 / 1024.0
+            )
+        return '0'
+
+    @property
+    def exitcode(self):
+        return str(self.process.exitcode)
+
+    def calculate_managed_tasks(self):
+        # look to see if any tasks were finished
+        finished = []
+        for _ in range(self.finished.qsize()):
+            try:
+                finished.append(self.finished.get(block=False))
+            except QueueEmpty:
+                break  # qsize is not always _totally_ up to date
+
+        # if any tasks were finished, removed them from the managed tasks for
+        # this worker
+        for uuid in finished:
+            self.messages_finished += 1
+            del self.managed_tasks[uuid]
+
+    @property
+    def current_task(self):
+        self.calculate_managed_tasks()
+        # the task at [0] is the one that's running right now (or is about to
+        # be running)
+        if len(self.managed_tasks):
+            return self.managed_tasks[self.managed_tasks.keys()[0]]
+
+        return None
+
+    @property
+    def orphaned_tasks(self):
+        orphaned = []
+        if not self.alive:
+            # if this process had a running task that never finished,
+            # requeue its error callbacks
+            current_task = self.current_task
+            if isinstance(current_task, dict):
+                orphaned.extend(current_task.get('errbacks', []))
+
+            # if this process has any pending messages requeue them
+            for _ in range(self.qsize):
+                try:
+                    orphaned.append(self.queue.get(block=False))
+                except QueueEmpty:
+                    break  # qsize is not always _totally_ up to date
+            if len(orphaned):
+                logger.error(
+                    'requeuing {} messages from gone worker pid:{}'.format(
+                        len(orphaned), self.pid
+                    )
+                )
+        return orphaned
+
+    @property
+    def busy(self):
+        self.calculate_managed_tasks()
+        return len(self.managed_tasks) > 0
+
+    @property
+    def idle(self):
+        return not self.busy
 
 
 class WorkerPool(object):
+    '''
+    Creates a pool of forked PoolWorkers.
+
+    As WorkerPool.write(...) is called (generally, by a kombu consumer
+    implementation when it receives an AMQP message), messages are passed to
+    one of the multiprocessing Queues where some work can be done on them.
+
+    class MessagePrinter(awx.main.dispatch.worker.BaseWorker):
+
+        def perform_work(self, body):
+            print body
+
+    pool = WorkerPool(min_workers=4)  # spawn four worker processes
+    pool.init_workers(MessagePrint().work_loop)
+    pool.write(
+        0,  # preferred worker 0
+        'Hello, World!'
+    )
+    '''
+
+    debug_meta = ''
 
     def __init__(self, min_workers=None, queue_size=None):
+        self.name = settings.CLUSTER_HOST_ID
+        self.pid = os.getpid()
         self.min_workers = min_workers or settings.JOB_EVENT_WORKERS
         self.queue_size = queue_size or settings.JOB_EVENT_MAX_QUEUE_SIZE
-
-        # self.workers tracks the state of worker running worker processes:
-        # [
-        #   (total_messages_consumed, multiprocessing.Queue, multiprocessing.Process),
-        #   (total_messages_consumed, multiprocessing.Queue, multiprocessing.Process),
-        #   (total_messages_consumed, multiprocessing.Queue, multiprocessing.Process),
-        #   (total_messages_consumed, multiprocessing.Queue, multiprocessing.Process)
-        # ]
         self.workers = []
 
     def __len__(self):
         return len(self.workers)
 
     def init_workers(self, target, *target_args):
-        def shutdown_handler(active_workers):
-            def _handler(signum, frame):
-                logger.debug('received shutdown {}'.format(signame(signum)))
-                try:
-                    for active_worker in active_workers:
-                        logger.debug('terminating worker')
-                    signal.signal(signum, signal.SIG_DFL)
-                    os.kill(os.getpid(), signum) # Rethrow signal, this time without catching it
-                except Exception:
-                    logger.exception('error in shutdown_handler')
-            return _handler
+        self.target = target
+        self.target_args = target_args
+        for idx in range(self.min_workers):
+            self.up()
 
+    def up(self):
+        idx = len(self.workers)
+        # It's important to close these because we're _about_ to fork, and we
+        # don't want the forked processes to inherit the open sockets
+        # for the DB and memcached connections (that way lies race conditions)
         django_connection.close()
         django_cache.close()
-        for idx in range(self.min_workers):
-            queue_actual = MPQueue(self.queue_size)
-            w = Process(target=target, args=(queue_actual, idx,) + target_args)
-            w.start()
-            logger.debug('started {}[{}]'.format(target.im_self.__class__.__name__, idx))
-            self.workers.append([0, queue_actual, w])
+        worker = PoolWorker(self.queue_size, self.target, (idx,) + self.target_args)
+        self.workers.append(worker)
+        try:
+            worker.start()
+        except Exception:
+            logger.exception('could not fork')
+        else:
+            logger.warn('scaling up worker pid:{}'.format(worker.pid))
+        return idx, worker
 
-        signal.signal(signal.SIGINT, shutdown_handler([p[2] for p in self.workers]))
-        signal.signal(signal.SIGTERM, shutdown_handler([p[2] for p in self.workers]))
+    def debug(self, *args, **kwargs):
+        self.cleanup()
+        tmpl = Template(
+            '{{ pool.name }}[pid:{{ pool.pid }}] workers total={{ workers|length }} {{ meta }} \n'
+            '{% for w in workers %}'
+            '.  worker[pid:{{ w.pid }}]{% if not w.alive %} GONE exit={{ w.exitcode }}{% endif %}'
+            ' sent={{ w.messages_sent }}'
+            ' finished={{ w.messages_finished }}'
+            ' qsize={{ w.managed_tasks|length }}'
+            ' rss={{ w.mb }}MB'
+            '{% for task in w.managed_tasks.values() %}'
+            '\n     - {% if loop.index0 == 0 %}running {% else %}queued {% endif %}'
+            '{{ task["uuid"] }} '
+            '{% if "task" in task %}'
+            '{{ task["task"].rsplit(".", 1)[-1] }}'
+            # don't print kwargs, they often contain launch-time secrets
+            '(*{{ task.get("args", []) }})'
+            '{% endif %}'
+            '{% endfor %}'
+            '{% if not w.managed_tasks|length %}'
+            ' [IDLE]'
+            '{% endif %}'
+            '\n'
+            '{% endfor %}'
+        )
+        return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta)
 
     def write(self, preferred_queue, body):
-        queue_order = sorted(range(self.min_workers), cmp=lambda x, y: -1 if x==preferred_queue else 0)
+        queue_order = sorted(range(len(self.workers)), cmp=lambda x, y: -1 if x==preferred_queue else 0)
         write_attempt_order = []
         for queue_actual in queue_order:
             try:
-                worker_actual = self.workers[queue_actual]
-                worker_actual[1].put(body, block=True, timeout=5)
-                logger.debug('delivered to Worker[{}] qsize {}'.format(
-                    queue_actual, worker_actual[1].qsize()
-                ))
-                worker_actual[0] += 1
+                self.workers[queue_actual].put(body)
                 return queue_actual
             except QueueFull:
                 pass
@@ -87,11 +266,113 @@ class WorkerPool(object):
         logger.warn("could not write payload to any queue, attempted order: {}".format(write_attempt_order))
         return None
 
-    def stop(self):
-        for worker in self.workers:
-            messages, queue, process = worker
-            try:
-                os.kill(process.pid, signal.SIGTERM)
-            except OSError as e:
-                if e.errno != errno.ESRCH:
-                    raise
+    def stop(self, signum):
+        try:
+            for worker in self.workers:
+                os.kill(worker.pid, signum)
+        except Exception:
+            logger.exception('could not kill {}'.format(worker.pid))
+
+
+class AutoscalePool(WorkerPool):
+    '''
+    An extended pool implementation that automatically scales workers up and
+    down based on demand
+    '''
+
+    def __init__(self, *args, **kwargs):
+        self.max_workers = kwargs.pop('max_workers', None)
+        super(AutoscalePool, self).__init__(*args, **kwargs)
+
+        if self.max_workers is None:
+            settings_absmem = getattr(settings, 'SYSTEM_TASK_ABS_MEM', None)
+            if settings_absmem is not None:
+                total_memory_gb = int(settings_absmem)
+            else:
+                total_memory_gb = (psutil.virtual_memory().total >> 30) + 1  # noqa: round up
+            # 5 workers per GB of total memory
+            self.max_workers = (total_memory_gb * 5)
+
+    @property
+    def should_grow(self):
+        if len(self.workers) < self.min_workers:
+            # If we don't have at least min_workers, add more
+            return True
+        # If every worker is busy doing something, add more
+        return all([w.busy for w in self.workers])
+
+    @property
+    def full(self):
+        return len(self.workers) == self.max_workers
+
+    @property
+    def debug_meta(self):
+        return 'min={} max={}'.format(self.min_workers, self.max_workers)
+
+    def cleanup(self):
+        """
+        Perform some internal account and cleanup.  This is run on
+        every cluster node heartbeat:
+
+        1.  Discover worker processes that exited, and recover messages they
+            were handling.
+        2.  Clean up unnecessary, idle workers.
+        """
+        orphaned = []
+        for w in self.workers[::]:
+            if not w.alive:
+                # the worker process has exited
+                # 1. take the task it was running and enqueue the error
+                #    callbacks
+                # 2. take any pending tasks delivered to its queue and
+                #    send them to another worker
+                logger.error('worker pid:{} is gone (exit={})'.format(w.pid, w.exitcode))
+                if w.current_task:
+                    try:
+                        for j in UnifiedJob.objects.filter(celery_task_id=w.current_task['uuid']):
+                            reaper.reap_job(j, 'failed')
+                    except Exception:
+                        logger.exception('failed to reap job UUID {}'.format(w.current_task['uuid']))
+                orphaned.extend(w.orphaned_tasks)
+                self.workers.remove(w)
+            elif w.idle and len(self.workers) > self.min_workers:
+                # the process has an empty queue (it's idle) and we have
+                # more processes in the pool than we need (> min)
+                # send this process a message so it will exit gracefully
+                # at the next opportunity
+                logger.warn('scaling down worker pid:{}'.format(w.pid))
+                w.quit()
+                self.workers.remove(w)
+
+        for m in orphaned:
+            # if all the workers are dead, spawn at least one
+            if not len(self.workers):
+                self.up()
+            idx = random.choice(range(len(self.workers)))
+            self.write(idx, m)
+
+    def up(self):
+        if self.full:
+            # if we can't spawn more workers, just toss this message into a
+            # random worker's backlog
+            idx = random.choice(range(len(self.workers)))
+            return idx, self.workers[idx]
+        else:
+            return super(AutoscalePool, self).up()
+
+    def write(self, preferred_queue, body):
+        # when the cluster heartbeat occurs, clean up internally
+        if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:
+            self.cleanup()
+        if self.should_grow:
+            self.up()
+        # we don't care about "preferred queue" round robin distribution, just
+        # find the first non-busy worker and claim it
+        workers = self.workers[:]
+        random.shuffle(workers)
+        for w in workers:
+            if not w.busy:
+                w.put(body)
+                break
+        else:
+            return super(AutoscalePool, self).write(preferred_queue, body)

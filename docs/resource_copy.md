@@ -102,7 +102,7 @@ available fields.
 ```
 
 `CopyAPIView` will automatically detect sub objects of an object, and do a deep copy of all sub objects
-as a background celery task. There are sometimes permission issues with sub object copy. For example,
+as a background task. There are sometimes permission issues with sub object copy. For example,
 when copying nodes of a workflow job template, there are cases where the user performing copy has no use
 permission of related credential and inventory of some nodes, and it is desired those fields will be
 `None`. In order to do that, developer should provide a static method `deep_copy_permission_check_func`

@@ -67,7 +67,7 @@ def test_work_success_callback_missing_job():
     task_data = {'type': 'project_update', 'id': 9999}
     with mock.patch('django.db.models.query.QuerySet.get') as get_mock:
         get_mock.side_effect = ProjectUpdate.DoesNotExist()
-        assert tasks.handle_work_success(None, task_data) is None
+        assert tasks.handle_work_success(task_data) is None
 
 
 def test_send_notifications_list(mocker):

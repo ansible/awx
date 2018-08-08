@@ -41,6 +41,7 @@ RUN yum -y install epel-release && \
     rm -rf /root/.cache
 
 RUN mkdir -p /var/log/tower
+RUN chmod -R g+w /var/log/tower
 RUN mkdir -p /etc/tower
 COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
 RUN OFFICIAL=yes pip install /tmp/{{ awx_sdist_file }}

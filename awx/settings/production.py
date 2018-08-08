@@ -54,20 +54,12 @@ AWX_ISOLATED_USERNAME = 'awx'
 
 LOGGING['handlers']['tower_warnings']['filename'] = '/var/log/tower/tower.log'
 LOGGING['handlers']['callback_receiver']['filename'] = '/var/log/tower/callback_receiver.log'
+LOGGING['handlers']['dispatcher']['filename'] = '/var/log/tower/dispatcher.log'
 LOGGING['handlers']['task_system']['filename'] = '/var/log/tower/task_system.log'
 LOGGING['handlers']['fact_receiver']['filename'] = '/var/log/tower/fact_receiver.log'
 LOGGING['handlers']['management_playbooks']['filename'] = '/var/log/tower/management_playbooks.log'
 LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'
 LOGGING['handlers']['rbac_migrations']['filename'] = '/var/log/tower/tower_rbac_migrations.log'
-
-# Supervisor service name dictionary used for programatic restart
-SERVICE_NAME_DICT = {
-    "beat": "awx-celery-beat",
-    "celery": "awx-celery",
-    "callback": "awx-callback-receiver",
-    "channels": "awx-channels-worker",
-    "uwsgi": "awx-uwsgi",
-    "daphne": "awx-daphne"}
 
 # Store a snapshot of default settings at this point before loading any
 # customizable config files.

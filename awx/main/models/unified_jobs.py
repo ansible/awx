@@ -27,9 +27,6 @@ from rest_framework.exceptions import ParseError
 # Django-Polymorphic
 from polymorphic.models import PolymorphicModel
 
-# Django-Celery
-from djcelery.models import TaskMeta
-
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
@@ -1112,14 +1109,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 pass
         return None
 
-    @property
-    def celery_task(self):
-        try:
-            if self.celery_task_id:
-                return TaskMeta.objects.get(task_id=self.celery_task_id)
-        except TaskMeta.DoesNotExist:
-            pass
-
     def get_passwords_needed_to_start(self):
         return []
 
@@ -1224,29 +1213,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         return (True, opts)
 
-    def start_celery_task(self, opts, error_callback, success_callback, queue):
-        kwargs = {
-            'link_error': error_callback,
-            'link': success_callback,
-            'queue': None,
-            'task_id': None,
-        }
-        if not self.celery_task_id:
-            raise RuntimeError("Expected celery_task_id to be set on model.")
-        kwargs['task_id'] = self.celery_task_id
-        task_class = self._get_task_class()
-        kwargs['queue'] = queue
-        task_class().apply_async([self.pk], opts, **kwargs)
-
-    def start(self, error_callback, success_callback, **kwargs):
-        '''
-        Start the task running via Celery.
-        '''
-        (res, opts) = self.pre_start(**kwargs)
-        if res:
-            self.start_celery_task(opts, error_callback, success_callback)
-        return res
-
     def signal_start(self, **kwargs):
         """Notify the task runner system to begin work on this task."""
 
@@ -1286,42 +1252,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def can_cancel(self):
         return bool(self.status in CAN_CANCEL)
 
-    def _force_cancel(self):
-        # Update the status to 'canceled' if we can detect that the job
-        # really isn't running (i.e. celery has crashed or forcefully
-        # killed the worker).
-        task_statuses = ('STARTED', 'SUCCESS', 'FAILED', 'RETRY', 'REVOKED')
-        try:
-            taskmeta = self.celery_task
-            if not taskmeta or taskmeta.status not in task_statuses:
-                return
-            from celery import current_app
-            i = current_app.control.inspect()
-            for v in (i.active() or {}).values():
-                if taskmeta.task_id in [x['id'] for x in v]:
-                    return
-            for v in (i.reserved() or {}).values():
-                if taskmeta.task_id in [x['id'] for x in v]:
-                    return
-            for v in (i.revoked() or {}).values():
-                if taskmeta.task_id in [x['id'] for x in v]:
-                    return
-            for v in (i.scheduled() or {}).values():
-                if taskmeta.task_id in [x['id'] for x in v]:
-                    return
-            instance = self.__class__.objects.get(pk=self.pk)
-            if instance.can_cancel:
-                instance.status = 'canceled'
-                update_fields = ['status']
-                if not instance.job_explanation:
-                    instance.job_explanation = 'Forced cancel'
-                    update_fields.append('job_explanation')
-                instance.save(update_fields=update_fields)
-                self.websocket_emit_status("canceled")
-        except Exception: # FIXME: Log this exception!
-            if settings.DEBUG:
-                raise
-
     def _build_job_explanation(self):
         if not self.job_explanation:
             return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
@@ -1345,8 +1275,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     cancel_fields.append('job_explanation')
                 self.save(update_fields=cancel_fields)
                 self.websocket_emit_status("canceled")
-            if settings.BROKER_URL.startswith('amqp://'):
-                self._force_cancel()
         return self.cancel_flag
 
     @property
@@ -1402,7 +1330,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 r['{}_user_last_name'.format(name)] = created_by.last_name
         return r
 
-    def get_celery_queue_name(self):
+    def get_queue_name(self):
         return self.controller_node or self.execution_node or settings.CELERY_DEFAULT_QUEUE
 
     def is_isolated(self):

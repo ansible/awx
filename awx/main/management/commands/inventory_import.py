@@ -938,7 +938,7 @@ class Command(BaseCommand):
         self.exclude_empty_groups = bool(options.get('exclude_empty_groups', False))
         self.instance_id_var = options.get('instance_id_var', None)
 
-        self.celery_invoked = False if os.getenv('INVENTORY_SOURCE_ID', None) is None else True
+        self.invoked_from_dispatcher = False if os.getenv('INVENTORY_SOURCE_ID', None) is None else True
 
         # Load inventory and related objects from database.
         if self.inventory_name and self.inventory_id:
@@ -1062,7 +1062,7 @@ class Command(BaseCommand):
                 exc = e
             transaction.rollback()
 
-        if self.celery_invoked is False:
+        if self.invoked_from_dispatcher is False:
             with ignore_inventory_computed_fields():
                 self.inventory_update = InventoryUpdate.objects.get(pk=self.inventory_update.pk)
                 self.inventory_update.result_traceback = tb

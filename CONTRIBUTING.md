@@ -145,7 +145,7 @@ Start the development containers by running the following:
 (host)$ make docker-compose
 ```
     
-The above utilizes the image built in the previous step, and will automatically start all required services and dependent containers. Once the containers launch, your session will be attached to the *awx* container, and you'll be able to watch log messages and events in real time. You will see messages from Django, celery, and the front end build process.
+The above utilizes the image built in the previous step, and will automatically start all required services and dependent containers. Once the containers launch, your session will be attached to the *awx* container, and you'll be able to watch log messages and events in real time. You will see messages from Django and the front end build process.
 
 If you start a second terminal session, you can take a look at the running containers using the `docker ps` command. For example:
 
@@ -174,7 +174,7 @@ The first time you start the environment, database migrations need to run in ord
 ```bash
 awx_1        | Operations to perform:
 awx_1        |   Synchronize unmigrated apps: solo, api, staticfiles, debug_toolbar, messages, channels, django_extensions, ui, rest_framework, polymorphic
-awx_1        |   Apply all migrations: sso, taggit, sessions, djcelery, sites, kombu_transport_django, social_auth, contenttypes, auth, conf, main
+awx_1        |   Apply all migrations: sso, taggit, sessions, sites, kombu_transport_django, social_auth, contenttypes, auth, conf, main
 awx_1        | Synchronizing apps without migrations:
 awx_1        |   Creating tables...
 awx_1        |     Running deferred SQL...

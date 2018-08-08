@@ -101,7 +101,9 @@ class UnifiedJobDeletionMixin(object):
 
 class InstanceGroupMembershipMixin(object):
     '''
-    Manages signaling celery to reload its queue configuration on Instance Group membership changes
+    This mixin overloads attach/detach so that it calls InstanceGroup.save(),
+    triggering a background recalculation of policy-based instance group
+    membership.
     '''
     def attach(self, request, *args, **kwargs):
         response = super(InstanceGroupMembershipMixin, self).attach(request, *args, **kwargs)

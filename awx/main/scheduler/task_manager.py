@@ -2,7 +2,7 @@
 # All Rights Reserved
 
 # Python
-from datetime import datetime, timedelta
+from datetime import timedelta
 import logging
 import uuid
 import json
@@ -11,18 +11,13 @@ import random
 from sets import Set
 
 # Django
-from django.conf import settings
-from django.core.cache import cache
-from django.db import transaction, connection, DatabaseError
+from django.db import transaction, connection
 from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import now as tz_now, utc
-from django.db.models import Q
-from django.contrib.contenttypes.models import ContentType
+from django.utils.timezone import now as tz_now
 
 # AWX
 from awx.main.models import (
     AdHocCommand,
-    Instance,
     InstanceGroup,
     InventorySource,
     InventoryUpdate,
@@ -30,20 +25,14 @@ from awx.main.models import (
     Project,
     ProjectUpdate,
     SystemJob,
-    UnifiedJob,
     WorkflowJob,
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
 from awx.main.utils import get_type_for_model
 from awx.main.signals import disable_activity_stream
-
 from awx.main.scheduler.dependency_graph import DependencyGraph
 from awx.main.utils import decrypt_field
-
-# Celery
-from celery import Celery
-from celery.app.control import Inspect
 
 
 logger = logging.getLogger('awx.main.scheduler')
@@ -85,79 +74,6 @@ class TaskManager():
                            key=lambda task: task.created)
         return all_tasks
 
-    '''
-    Tasks that are running and SHOULD have a celery task.
-    {
-        'execution_node': [j1, j2,...],
-        'execution_node': [j3],
-        ...
-    }
-    '''
-    def get_running_tasks(self):
-        execution_nodes = {}
-        waiting_jobs = []
-        now = tz_now()
-        workflow_ctype_id = ContentType.objects.get_for_model(WorkflowJob).id
-        jobs = UnifiedJob.objects.filter((Q(status='running') |
-                                         Q(status='waiting', modified__lte=now - timedelta(seconds=60))) &
-                                         ~Q(polymorphic_ctype_id=workflow_ctype_id))
-        for j in jobs:
-            if j.execution_node:
-                execution_nodes.setdefault(j.execution_node, []).append(j)
-            else:
-                waiting_jobs.append(j)
-        return (execution_nodes, waiting_jobs)
-
-    '''
-    Tasks that are currently running in celery
-
-    Transform:
-    {
-        "celery@ec2-54-204-222-62.compute-1.amazonaws.com": [],
-        "celery@ec2-54-163-144-168.compute-1.amazonaws.com": [{
-            ...
-            "id": "5238466a-f8c7-43b3-9180-5b78e9da8304",
-            ...
-        }, {
-            ...,
-        }, ...]
-    }
-
-    to:
-    {
-        "ec2-54-204-222-62.compute-1.amazonaws.com": [
-            "5238466a-f8c7-43b3-9180-5b78e9da8304",
-            "5238466a-f8c7-43b3-9180-5b78e9da8306",
-            ...
-        ]
-    }
-    '''
-    def get_active_tasks(self):
-        if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
-            app = Celery('awx')
-            app.config_from_object('django.conf:settings')
-            inspector = Inspect(app=app)
-            active_task_queues = inspector.active()
-        else:
-            logger.warn("Ignoring celery task inspector")
-            active_task_queues = None
-
-        queues = None
-
-        if active_task_queues is not None:
-            queues = {}
-            for queue in active_task_queues:
-                active_tasks = set()
-                map(lambda at: active_tasks.add(at['id']), active_task_queues[queue])
-
-                # celery worker name is of the form celery@myhost.com
-                queue_name = queue.split('@')
-                queue_name = queue_name[1 if len(queue_name) > 1 else 0]
-                queues[queue_name] = active_tasks
-        else:
-            return (None, None)
-
-        return (active_task_queues, queues)
 
     def get_latest_project_update_tasks(self, all_sorted_tasks):
         project_ids = Set()
@@ -256,9 +172,6 @@ class TaskManager():
                              rampart_group.name, task.log_format))
                 return
 
-        error_handler = handle_work_error.s(subtasks=[task_actual] + dependencies)
-        success_handler = handle_work_success.s(task_actual=task_actual)
-
         task.status = 'waiting'
 
         (start_status, opts) = task.pre_start()
@@ -300,11 +213,23 @@ class TaskManager():
 
         def post_commit():
             task.websocket_emit_status(task.status)
-            if task.status != 'failed':
-                task.start_celery_task(opts,
-                                       error_callback=error_handler,
-                                       success_callback=success_handler,
-                                       queue=task.get_celery_queue_name())
+            if task.status != 'failed' and type(task) is not WorkflowJob:
+                task_cls = task._get_task_class()
+                task_cls.apply_async(
+                    [task.pk],
+                    opts,
+                    queue=task.get_queue_name(),
+                    uuid=task.celery_task_id,
+                    callbacks=[{
+                        'task': handle_work_success.name,
+                        'kwargs': {'task_actual': task_actual}
+                    }],
+                    errbacks=[{
+                        'task': handle_work_error.name,
+                        'args': [task.celery_task_id],
+                        'kwargs': {'subtasks': [task_actual] + dependencies}
+                    }],
+                )
 
         connection.on_commit(post_commit)
 
@@ -529,105 +454,6 @@ class TaskManager():
             if not found_acceptable_queue:
                 logger.debug(six.text_type("{} couldn't be scheduled on graph, waiting for next cycle").format(task.log_format))
 
-    def fail_jobs_if_not_in_celery(self, node_jobs, active_tasks, celery_task_start_time,
-                                   isolated=False):
-        for task in node_jobs:
-            if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
-                if isinstance(task, WorkflowJob):
-                    continue
-                if task.modified > celery_task_start_time:
-                    continue
-                new_status = 'failed'
-                if isolated:
-                    new_status = 'error'
-                task.status = new_status
-                task.start_args = ''  # blank field to remove encrypted passwords
-                if isolated:
-                    # TODO: cancel and reap artifacts of lost jobs from heartbeat
-                    task.job_explanation += ' '.join((
-                        'Task was marked as running in Tower but its ',
-                        'controller management daemon was not present in',
-                        'the job queue, so it has been marked as failed.',
-                        'Task may still be running, but contactability is unknown.'
-                    ))
-                else:
-                    task.job_explanation += ' '.join((
-                        'Task was marked as running in Tower but was not present in',
-                        'the job queue, so it has been marked as failed.',
-                    ))
-                try:
-                    task.save(update_fields=['status', 'start_args', 'job_explanation'])
-                except DatabaseError:
-                    logger.error("Task {} DB error in marking failed. Job possibly deleted.".format(task.log_format))
-                    continue
-                if hasattr(task, 'send_notification_templates'):
-                    task.send_notification_templates('failed')
-                task.websocket_emit_status(new_status)
-                logger.error("{}Task {} has no record in celery. Marking as failed".format(
-                    'Isolated ' if isolated else '', task.log_format))
-
-    def cleanup_inconsistent_celery_tasks(self):
-        '''
-        Rectify tower db <-> celery inconsistent view of jobs state
-        '''
-        last_cleanup = cache.get('last_celery_task_cleanup') or datetime.min.replace(tzinfo=utc)
-        if (tz_now() - last_cleanup).seconds < settings.AWX_INCONSISTENT_TASK_INTERVAL:
-            return
-
-        logger.debug("Failing inconsistent running jobs.")
-        celery_task_start_time = tz_now()
-        active_task_queues, active_queues = self.get_active_tasks()
-        cache.set('last_celery_task_cleanup', tz_now())
-
-        if active_queues is None:
-            logger.error('Failed to retrieve active tasks from celery')
-            return None
-
-        '''
-        Only consider failing tasks on instances for which we obtained a task
-        list from celery for.
-        '''
-        running_tasks, waiting_tasks = self.get_running_tasks()
-        all_celery_task_ids = []
-        for node, node_jobs in active_queues.iteritems():
-            all_celery_task_ids.extend(node_jobs)
-
-        self.fail_jobs_if_not_in_celery(waiting_tasks, all_celery_task_ids, celery_task_start_time)
-
-        for node, node_jobs in running_tasks.iteritems():
-            isolated = False
-            if node in active_queues:
-                active_tasks = active_queues[node]
-            else:
-                '''
-                Node task list not found in celery. We may branch into cases:
-                 - instance is unknown to tower, system is improperly configured
-                 - instance is reported as down, then fail all jobs on the node
-                 - instance is an isolated node, then check running tasks
-                   among all allowed controller nodes for management process
-                 - valid healthy instance not included in celery task list
-                   probably a netsplit case, leave it alone
-                '''
-                instance = Instance.objects.filter(hostname=node).first()
-
-                if instance is None:
-                    logger.error("Execution node Instance {} not found in database. "
-                                 "The node is currently executing jobs {}".format(
-                                     node, [j.log_format for j in node_jobs]))
-                    active_tasks = []
-                elif instance.capacity == 0:
-                    active_tasks = []
-                elif instance.rampart_groups.filter(controller__isnull=False).exists():
-                    active_tasks = all_celery_task_ids
-                    isolated = True
-                else:
-                    continue
-
-            self.fail_jobs_if_not_in_celery(
-                node_jobs, active_tasks, celery_task_start_time,
-                isolated=isolated
-            )
-
     def calculate_capacity_consumed(self, tasks):
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
 
@@ -687,7 +513,6 @@ class TaskManager():
                     return
                 logger.debug("Starting Scheduler")
 
-                self.cleanup_inconsistent_celery_tasks()
                 finished_wfjs = self._schedule()
 
                 # Operations whose queries rely on modifications made during the atomic scheduling session
