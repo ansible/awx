@@ -496,6 +496,8 @@ class TaskManager():
                     if not task.allow_simultaneous:
                         logger.debug(six.text_type("{} is blocked from running, workflow already running").format(task.log_format))
                         continue
+                else:
+                    running_workflow_templates.add(task.workflow_job_template_id)
                 self.start_task(task, None, task.get_jobs_fail_chain(), None)
                 continue
             for rampart_group in preferred_instance_groups:
