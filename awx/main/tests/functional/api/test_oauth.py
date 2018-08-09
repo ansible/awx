@@ -4,6 +4,7 @@ import json
 
 from django.db import connection
 from django.test.utils import override_settings
+from django.test import Client
 
 from awx.main.utils.encryption import decrypt_value, get_encryption_key
 from awx.api.versioning import reverse, drf_reverse
@@ -174,6 +175,27 @@ def test_oauth_token_create(oauth_application, get, post, admin):
     assert response.data['summary_fields']['tokens']['results'][0] == {
         'id': token.pk, 'scope': token.scope, 'token': '************'
     }
+    # If the application is implicit grant type, no new refresb tokens should be created.
+    # The following tests check for that.
+    oauth_application.authorization_grant_type = 'implicit'
+    oauth_application.save()
+    token_count = RefreshToken.objects.count()
+    response = post(
+        reverse('api:o_auth2_token_list'),
+        {'scope': 'read', 'application': oauth_application.pk}, admin, expect=201
+    )
+    assert response.data['refresh_token'] is None
+    response = post(
+        reverse('api:user_authorized_token_list', kwargs={'pk': admin.pk}),
+        {'scope': 'read', 'application': oauth_application.pk}, admin, expect=201
+    )
+    assert response.data['refresh_token'] is None
+    response = post(
+        reverse('api:application_o_auth2_token_list', kwargs={'pk': oauth_application.pk}),
+        {'scope': 'read'}, admin, expect=201
+    )
+    assert response.data['refresh_token'] is None
+    assert token_count == RefreshToken.objects.count()
 
 
 @pytest.mark.django_db
@@ -268,3 +290,27 @@ def test_refresh_accesstoken(oauth_application, post, get, delete, admin):
     assert RefreshToken.objects.get(token=new_refresh_token) != 0
     refresh_token = RefreshToken.objects.get(token=refresh_token)
     assert refresh_token.revoked
+
+
+@pytest.mark.django_db
+def test_implicit_authorization(oauth_application, admin):
+    oauth_application.client_type = 'confidential'
+    oauth_application.authorization_grant_type = 'implicit'
+    oauth_application.redirect_uris = 'http://test.com'
+    oauth_application.save()
+    data = {
+        'response_type': 'token',
+        'client_id': oauth_application.client_id,
+        'client_secret': oauth_application.client_secret,
+        'scope': 'read',
+        'redirect_uri': 'http://test.com', 
+        'allow': True
+    }
+
+    request_client = Client()
+    request_client.force_login(admin, 'django.contrib.auth.backends.ModelBackend')
+    refresh_token_count = RefreshToken.objects.count()
+    response = request_client.post(drf_reverse('api:authorize'), data)
+    assert 'http://test.com' in response.url and 'access_token' in response.url
+    # Make sure no refresh token is created for app with implicit grant type.
+    assert refresh_token_count == RefreshToken.objects.count()
