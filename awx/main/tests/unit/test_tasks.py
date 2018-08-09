@@ -792,7 +792,7 @@ class TestJobCredentials(TestJobExecution):
         for i in range(3):
             net = CredentialType.defaults['net']()
             credential = Credential(
-                pk=1,
+                pk=i,
                 credential_type=net,
                 inputs = {'ssh_key_unlock': 'secret{}'.format(i)}
             )
@@ -816,7 +816,7 @@ class TestJobCredentials(TestJobExecution):
 
         ssh = CredentialType.defaults['ssh']()
         ssh_credential = Credential(
-            pk=1,
+            pk=2,
             credential_type=ssh,
             inputs = {'ssh_key_unlock': 'ssh_secret'}
         )
