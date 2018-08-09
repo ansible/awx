@@ -1601,6 +1601,10 @@ class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = OAuth2ApplicationSerializer
     swagger_topic = 'Authentication'
 
+    def update_raw_data(self, data):
+        data.pop('client_secret', None)
+        return super(OAuth2ApplicationDetail, self).update_raw_data(data)
+
 
 class ApplicationOAuth2TokenList(SubListCreateAPIView):
 

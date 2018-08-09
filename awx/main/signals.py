@@ -33,7 +33,7 @@ import six
 # AWX
 from awx.main.models import * # noqa
 from awx.api.serializers import * # noqa
-from awx.main.constants import TOKEN_CENSOR
+from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
@@ -428,7 +428,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
         if type(instance) == OAuth2AccessToken:
-            changes['token'] = TOKEN_CENSOR
+            changes['token'] = CENSOR_VALUE
         activity_entry = get_activity_stream_class()(
             operation='create',
             object1=object1,
@@ -495,7 +495,7 @@ def activity_stream_delete(sender, instance, **kwargs):
     changes = model_to_dict(instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     if type(instance) == OAuth2AccessToken:
-        changes['token'] = TOKEN_CENSOR
+        changes['token'] = CENSOR_VALUE
     activity_entry = get_activity_stream_class()(
         operation='delete',
         changes=json.dumps(changes),
