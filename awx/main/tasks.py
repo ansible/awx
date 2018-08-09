@@ -1164,6 +1164,7 @@ class RunJob(BaseTask):
                         'ssh_key_unlock',
                         decrypt_field(cred, 'ssh_key_unlock')
                     )
+                    break
 
         return passwords
 
