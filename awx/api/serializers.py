@@ -44,7 +44,7 @@ from awx.main.constants import (
     SCHEDULEABLE_PROVIDERS,
     ANSI_SGR_PATTERN,
     ACTIVE_STATES,
-    TOKEN_CENSOR,
+    CENSOR_VALUE,
     CHOICES_PRIVILEGE_ESCALATION_METHODS,
 )
 from awx.main.models import * # noqa
@@ -1021,7 +1021,7 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
             if request.method == 'POST':
                 return obj.token
             else:
-                return TOKEN_CENSOR
+                return CENSOR_VALUE
         except ObjectDoesNotExist:
             return ''
             
@@ -1033,7 +1033,7 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
             elif request.method == 'POST':
                 return getattr(obj.refresh_token, 'token', '')
             else:
-                return TOKEN_CENSOR
+                return CENSOR_VALUE
         except ObjectDoesNotExist:
             return None
 
@@ -1181,6 +1181,9 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         
     def to_representation(self, obj):
         ret = super(OAuth2ApplicationSerializer, self).to_representation(obj)
+        request = self.context.get('request', None)
+        if request.method != 'POST' and obj.client_type == 'confidential':
+            ret['client_secret'] = CENSOR_VALUE
         if obj.client_type == 'public':
             ret.pop('client_secret', None)
         return ret
@@ -1201,7 +1204,7 @@ class OAuth2ApplicationSerializer(BaseSerializer):
         return obj.updated
 
     def _summary_field_tokens(self, obj):
-        token_list = [{'id': x.pk, 'token': TOKEN_CENSOR, 'scope': x.scope} for x in obj.oauth2accesstoken_set.all()[:10]]
+        token_list = [{'id': x.pk, 'token': CENSOR_VALUE, 'scope': x.scope} for x in obj.oauth2accesstoken_set.all()[:10]]
         if has_model_field_prefetched(obj, 'oauth2accesstoken_set'):
             token_count = len(obj.oauth2accesstoken_set.all())
         else:

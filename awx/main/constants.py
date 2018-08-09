@@ -28,4 +28,4 @@ STANDARD_INVENTORY_UPDATE_ENV = {
 }
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
-TOKEN_CENSOR = '************'
+CENSOR_VALUE = '************'
