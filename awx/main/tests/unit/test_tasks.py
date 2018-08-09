@@ -781,6 +781,23 @@ class TestJobCredentials(TestJobExecution):
 
         assert 'secret' in call_kwargs.get('expect_passwords').values()
 
+    def test_net_first_ssh_key_unlock_wins(self):
+        for i in range(3):
+            net = CredentialType.defaults['net']()
+            credential = Credential(
+                pk=1,
+                credential_type=net,
+                inputs = {'ssh_key_unlock': 'secret{}'.format(i)}
+            )
+            credential.inputs['ssh_key_unlock'] = encrypt_field(credential, 'ssh_key_unlock')
+            self.instance.credentials.add(credential)
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+
+        assert 'secret0' in call_kwargs.get('expect_passwords').values()
+
     def test_prefer_ssh_over_net_ssh_key_unlock(self):
         net = CredentialType.defaults['net']()
         net_credential = Credential(
