@@ -1,8 +1,10 @@
-const templateUrl = require('~features/output/search.partial.html');
+import {
+    OUTPUT_SEARCH_DOCLINK,
+    OUTPUT_SEARCH_FIELDS,
+    OUTPUT_SEARCH_KEY_EXAMPLES,
+} from './constants';
 
-const searchKeyExamples = ['host_name:localhost', 'task:set', 'created:>=2000-01-01'];
-const searchKeyFields = ['changed', 'created', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
-const searchKeyDocLink = 'https://docs.ansible.com/ansible-tower/3.3.0/html/userguide/search_sort.html';
+const templateUrl = require('~features/output/search.partial.html');
 
 let $state;
 let qs;
@@ -50,7 +52,7 @@ function reloadQueryset (queryset, rejection = strings.get('search.REJECT_DEFAUL
 
 const isFilterable = term => {
     const field = term[0].split('.')[0].replace(/^-/, '');
-    return (searchKeyFields.indexOf(field) > -1);
+    return (OUTPUT_SEARCH_FIELDS.indexOf(field) > -1);
 };
 
 function removeSearchTag (index) {
@@ -94,9 +96,9 @@ function JobSearchController (_$state_, _qs_, _strings_, { subscribe }) {
     vm = this || {};
     vm.strings = strings;
 
-    vm.examples = searchKeyExamples;
-    vm.fields = searchKeyFields;
-    vm.docLink = searchKeyDocLink;
+    vm.examples = OUTPUT_SEARCH_KEY_EXAMPLES;
+    vm.fields = OUTPUT_SEARCH_FIELDS;
+    vm.docLink = OUTPUT_SEARCH_DOCLINK;
     vm.relatedFields = [];
 
     vm.clearSearch = clearSearch;

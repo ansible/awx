@@ -1,10 +1,12 @@
-const API_PAGE_SIZE = 200;
-const PAGE_SIZE = 50;
-const ORDER_BY = 'counter';
+import {
+    API_MAX_PAGE_SIZE,
+    OUTPUT_ORDER_BY,
+    OUTPUT_PAGE_SIZE,
+} from './constants';
 
 const BASE_PARAMS = {
-    page_size: PAGE_SIZE,
-    order_by: ORDER_BY,
+    page_size: OUTPUT_PAGE_SIZE,
+    order_by: OUTPUT_ORDER_BY,
 };
 
 const merge = (...objs) => _.merge({}, ...objs);
@@ -18,12 +20,6 @@ function JobEventsApiService ($http, $q) {
         this.cache = {};
     };
 
-    this.clearCache = () => {
-        Object.keys(this.cache).forEach(key => {
-            delete this.cache[key];
-        });
-    };
-
     this.fetch = () => this.getLast()
         .then(results => {
             this.cache.last = results;
@@ -31,20 +27,31 @@ function JobEventsApiService ($http, $q) {
             return this;
         });
 
+    this.clearCache = () => {
+        Object.keys(this.cache).forEach(key => {
+            delete this.cache[key];
+        });
+    };
+
+    this.pushMaxCounter = events => {
+        const maxCounter = Math.max(...events.map(({ counter }) => counter));
+
+        if (maxCounter > this.state.maxCounter) {
+            this.state.maxCounter = maxCounter;
+        }
+
+        return maxCounter;
+    };
+
     this.getFirst = () => {
-        const page = 1;
-        const params = merge(this.params, { page });
+        const params = merge(this.params, { page: 1 });
 
         return $http.get(this.endpoint, { params })
             .then(({ data }) => {
                 const { results, count } = data;
-                const maxCounter = Math.max(...results.map(({ counter }) => counter));
 
                 this.state.count = count;
-
-                if (maxCounter > this.state.maxCounter) {
-                    this.state.maxCounter = maxCounter;
-                }
+                this.pushMaxCounter(results);
 
                 return results;
             });
@@ -60,13 +67,9 @@ function JobEventsApiService ($http, $q) {
         return $http.get(this.endpoint, { params })
             .then(({ data }) => {
                 const { results, count } = data;
-                const maxCounter = Math.max(...results.map(({ counter }) => counter));
 
                 this.state.count = count;
-
-                if (maxCounter > this.state.maxCounter) {
-                    this.state.maxCounter = maxCounter;
-                }
+                this.pushMaxCounter(results);
 
                 return results;
             });
@@ -77,17 +80,16 @@ function JobEventsApiService ($http, $q) {
             return $q.resolve(this.cache.last);
         }
 
-        const params = merge(this.params, { page: 1, order_by: `-${ORDER_BY}` });
+        const params = merge(this.params, { page: 1, order_by: `-${OUTPUT_ORDER_BY}` });
 
         return $http.get(this.endpoint, { params })
             .then(({ data }) => {
                 const { results, count } = data;
-                const maxCounter = Math.max(...results.map(({ counter }) => counter));
 
                 let rotated = results;
 
-                if (count > PAGE_SIZE) {
-                    rotated = results.splice(count % PAGE_SIZE);
+                if (count > OUTPUT_PAGE_SIZE) {
+                    rotated = results.splice(count % OUTPUT_PAGE_SIZE);
 
                     if (results.length > 0) {
                         rotated = results;
@@ -95,10 +97,7 @@ function JobEventsApiService ($http, $q) {
                 }
 
                 this.state.count = count;
-
-                if (maxCounter > this.state.maxCounter) {
-                    this.state.maxCounter = maxCounter;
-                }
+                this.pushMaxCounter(results);
 
                 return rotated;
             });
@@ -110,24 +109,26 @@ function JobEventsApiService ($http, $q) {
         }
 
         const [low, high] = range;
+
+        if (low > high) {
+            return $q.resolve([]);
+        }
+
         const params = merge(this.params, { counter__gte: [low], counter__lte: [high] });
 
-        params.page_size = API_PAGE_SIZE;
+        params.page_size = API_MAX_PAGE_SIZE;
 
         return $http.get(this.endpoint, { params })
             .then(({ data }) => {
                 const { results } = data;
-                const maxCounter = Math.max(...results.map(({ counter }) => counter));
 
-                if (maxCounter > this.state.maxCounter) {
-                    this.state.maxCounter = maxCounter;
-                }
+                this.pushMaxCounter(results);
 
                 return results;
             });
     };
 
-    this.getLastPageNumber = () => Math.ceil(this.state.count / PAGE_SIZE);
+    this.getLastPageNumber = () => Math.ceil(this.state.count / OUTPUT_PAGE_SIZE);
     this.getMaxCounter = () => this.state.maxCounter;
 }
 

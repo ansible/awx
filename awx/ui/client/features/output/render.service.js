@@ -1,20 +1,22 @@
 import Ansi from 'ansi-to-html';
 import Entities from 'html-entities';
 
-const ELEMENT_TBODY = '#atStdoutResultTable';
-const EVENT_START_TASK = 'playbook_on_task_start';
-const EVENT_START_PLAY = 'playbook_on_play_start';
-const EVENT_STATS_PLAY = 'playbook_on_stats';
+import {
+    EVENT_START_PLAY,
+    EVENT_STATS_PLAY,
+    EVENT_START_TASK,
+    OUTPUT_ELEMENT_TBODY,
+} from './constants';
 
 const EVENT_GROUPS = [
     EVENT_START_TASK,
-    EVENT_START_PLAY
+    EVENT_START_PLAY,
 ];
 
 const TIME_EVENTS = [
     EVENT_START_TASK,
     EVENT_START_PLAY,
-    EVENT_STATS_PLAY
+    EVENT_STATS_PLAY,
 ];
 
 const ansi = new Ansi();
@@ -33,7 +35,7 @@ function JobRenderService ($q, $sce, $window) {
     this.init = ({ compile, toggles }) => {
         this.parent = null;
         this.record = {};
-        this.el = $(ELEMENT_TBODY);
+        this.el = $(OUTPUT_ELEMENT_TBODY);
         this.hooks = { compile };
 
         this.createToggles = toggles;
@@ -67,6 +69,10 @@ function JobRenderService ($q, $sce, $window) {
     };
 
     this.transformEvent = event => {
+        if (this.record[event.uuid]) {
+            return { html: '', count: 0 };
+        }
+
         if (!event || !event.stdout) {
             return { html: '', count: 0 };
         }
@@ -125,6 +131,7 @@ function JobRenderService ($q, $sce, $window) {
             start: event.start_line,
             end: event.end_line,
             isTruncated: (event.end_line - event.start_line) > lines.length,
+            lineCount: lines.length,
             isHost: this.isHostEvent(event),
         };
 
@@ -164,6 +171,8 @@ function JobRenderService ($q, $sce, $window) {
 
         return info;
     };
+
+    this.getRecord = uuid => this.record[uuid];
 
     this.deleteRecord = uuid => {
         delete this.record[uuid];
