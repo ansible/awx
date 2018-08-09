@@ -765,6 +765,22 @@ class TestJobCredentials(TestJobExecution):
         if expected_flag:
             assert expected_flag in ' '.join(args)
 
+    def test_net_password(self):
+        net = CredentialType.defaults['net']()
+        credential = Credential(
+            pk=1,
+            credential_type=net,
+            inputs = {'username': 'bob', 'ssh_key_unlock': 'secret'}
+        )
+        credential.inputs['ssh_key_unlock'] = encrypt_field(credential, 'ssh_key_unlock')
+        self.instance.credentials.add(credential)
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+
+        assert 'secret' in call_kwargs.get('expect_passwords').values()
+
     def test_vault_password(self):
         vault = CredentialType.defaults['vault']()
         credential = Credential(
