@@ -412,6 +412,22 @@ function reloadState (params) {
     return $state.transitionTo($state.current, params, { inherit: false, location: 'replace' });
 }
 
+function clear () {
+    stopListening();
+    render.clear();
+
+    followOnce = true;
+    lockFollow = false;
+    lockFrames = false;
+
+    bufferInit();
+    status.init(resource);
+    slide.init(render, resource.events, scroll);
+    status.subscribe(data => { vm.status = data.status; });
+
+    startListening();
+}
+
 function OutputIndexController (
     _$compile_,
     _$q_,
@@ -428,7 +444,8 @@ function OutputIndexController (
     strings,
     $stateParams,
 ) {
-    const { isPanelExpanded } = $stateParams;
+    const { isPanelExpanded, _debug } = $stateParams;
+    const isProcessingFinished = !_debug && _resource_.model.get('event_processing_finished');
 
     $compile = _$compile_;
     $q = _$q_;
@@ -440,7 +457,7 @@ function OutputIndexController (
     render = _render_;
     status = _status_;
     stream = _stream_;
-    slide = resource.model.get('event_processing_finished') ? _page_ : _slide_;
+    slide = isProcessingFinished ? _page_ : _slide_;
 
     vm = this || {};
 
@@ -454,7 +471,7 @@ function OutputIndexController (
     vm.togglePanelExpand = togglePanelExpand;
 
     // Stdout Navigation
-    vm.menu = { last: menuLast, first, down, up };
+    vm.menu = { last: menuLast, first, down, up, clear };
     vm.isMenuExpanded = true;
     vm.isFollowing = false;
     vm.toggleMenuExpand = toggleMenuExpand;
@@ -462,6 +479,7 @@ function OutputIndexController (
     vm.showHostDetails = showHostDetails;
     vm.toggleLineEnabled = resource.model.get('type') === 'job';
     vm.followTooltip = vm.strings.get('tooltips.MENU_LAST');
+    vm.debug = _debug;
 
     render.requestAnimationFrame(() => {
         bufferInit();
@@ -497,7 +515,7 @@ function OutputIndexController (
             }
         });
 
-        if (resource.model.get('event_processing_finished')) {
+        if (isProcessingFinished) {
             followOnce = false;
             lockFollow = true;
             lockFrames = true;
@@ -509,6 +527,10 @@ function OutputIndexController (
             resource.events.clearCache();
             status.subscribe(data => { vm.status = data.status; });
             startListening();
+        }
+
+        if (_debug) {
+            return render.clear();
         }
 
         return last();
