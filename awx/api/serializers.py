@@ -1067,10 +1067,8 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
             ).format(self.ALLOWED_SCOPES))
         return value
 
-    def create(self, validated_data, from_command_line=False):
-        if not from_command_line:
-            current_user = self.context['request'].user
-            validated_data['user'] = current_user
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
         try:
             return super(BaseOAuth2TokenSerializer, self).create(validated_data)
         except oauth2.AccessDeniedError as e:
@@ -1088,7 +1086,6 @@ class UserAuthorizedTokenSerializer(BaseOAuth2TokenSerializer):
 
     def create(self, validated_data):
         current_user = self.context['request'].user
-        validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
             seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
@@ -1109,7 +1106,6 @@ class OAuth2TokenSerializer(BaseOAuth2TokenSerializer):
 
     def create(self, validated_data):
         current_user = self.context['request'].user
-        validated_data['user'] = current_user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
             seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
@@ -1140,7 +1136,6 @@ class UserPersonalTokenSerializer(BaseOAuth2TokenSerializer):
         read_only_fields = ('user', 'token', 'expires', 'application')
 
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
         validated_data['token'] = generate_token()
         validated_data['expires'] = now() + timedelta(
             seconds=settings.OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
