@@ -57,7 +57,7 @@ from awx.main.utils import (
     has_model_field_prefetched, extract_ansible_vars, encrypt_dict,
     prefetch_page_capabilities, get_external_account)
 from awx.main.utils.filters import SmartFilter
-from awx.main.redact import REPLACE_STR
+from awx.main.redact import UriCleaner, REPLACE_STR
 
 from awx.main.validators import vars_validate_or_raise
 
@@ -4026,6 +4026,8 @@ class JobEventWebSocketSerializer(JobEventSerializer):
 
 
 class ProjectUpdateEventSerializer(JobEventSerializer):
+    stdout = serializers.SerializerMethodField()
+    event_data = serializers.SerializerMethodField()
 
     class Meta:
         model = ProjectUpdateEvent
@@ -4038,6 +4040,20 @@ class ProjectUpdateEventSerializer(JobEventSerializer):
             'api:project_update_detail', kwargs={'pk': obj.project_update_id}
         )
         return res
+
+    def get_stdout(self, obj):
+        return UriCleaner.remove_sensitive(obj.stdout)
+
+    def get_event_data(self, obj):
+        try:
+            return json.loads(
+                UriCleaner.remove_sensitive(
+                    json.dumps(obj.event_data)
+                )
+            )
+        except Exception:
+            logger.exception("Failed to sanitize event_data")
+            return {}
 
 
 class ProjectUpdateEventWebSocketSerializer(ProjectUpdateEventSerializer):
