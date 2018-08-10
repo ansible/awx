@@ -43,46 +43,50 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
             Rest.setUrl(defaultUrl);
             Wait('start');
             Rest.get(defaultUrl).then(({data}) => {
-                    $scope.user_id = id;
-                    $scope.ldap_user = (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') ? true : false;
-                    $scope.not_ldap_user = !$scope.ldap_user;
-                    master.ldap_user = $scope.ldap_user;
-                    $scope.socialAuthUser = (data.auth.length > 0) ? true : false;
-                    $scope.external_account = data.external_account;
 
-                    $scope.user_type = $scope.user_type_options[0];
-                    $scope.is_system_auditor = false;
-                    $scope.is_superuser = false;
-                    if (data.is_system_auditor) {
-                        $scope.user_type = $scope.user_type_options[1];
-                        $scope.is_system_auditor = true;
-                    }
-                    if (data.is_superuser) {
-                        $scope.user_type = $scope.user_type_options[2];
-                        $scope.is_superuser = true;
-                    }
-
-                    $scope.user_obj = data;
-                    $scope.name = data.username;
-
-                    CreateSelect2({
-                        element: '#user_user_type',
-                        multiple: false
-                    });
-
-                    $scope.$watch('user_obj.summary_fields.user_capabilities.edit', function(val) {
-                        $scope.canAdd = (val === false) ? false : true;
-                    });
-
-                    setScopeFields(data);
-                    Wait('stop');
-                })
-                .catch(({data, status}) => {
-                    ProcessErrors($scope, data, status, null, {
-                        hdr: i18n._('Error!'),
-                        msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
-                    });
+                _.forEach(form.fields, (value, key) => {
+                    $scope[key] = data[key];
                 });
+
+                $scope.user_id = id;
+                $scope.ldap_user = (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') ? true : false;
+                $scope.not_ldap_user = !$scope.ldap_user;
+                master.ldap_user = $scope.ldap_user;
+                $scope.socialAuthUser = (data.auth.length > 0) ? true : false;
+                $scope.external_account = data.external_account;
+
+                $scope.user_type = $scope.user_type_options[0];
+                $scope.is_system_auditor = false;
+                $scope.is_superuser = false;
+                if (data.is_system_auditor) {
+                    $scope.user_type = $scope.user_type_options[1];
+                    $scope.is_system_auditor = true;
+                }
+                if (data.is_superuser) {
+                    $scope.user_type = $scope.user_type_options[2];
+                    $scope.is_superuser = true;
+                }
+
+                $scope.user_obj = data;
+                $scope.name = data.username;
+
+                CreateSelect2({
+                    element: '#user_user_type',
+                    multiple: false
+                });
+
+                $scope.$watch('user_obj.summary_fields.user_capabilities.edit', function(val) {
+                    $scope.canAdd = (val === false) ? false : true;
+                });
+
+                Wait('stop');
+            })
+            .catch(({data, status}) => {
+                ProcessErrors($scope, data, status, null, {
+                    hdr: i18n._('Error!'),
+                    msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
+                });
+            });
         }
 
         function user_type_sync($scope) {
@@ -112,19 +116,6 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
                     scope.hideSmartSearch = false;
                 }
             };
-        }
-
-
-        function setScopeFields(data) {
-            _(data)
-                .pick(function(value, key) {
-                    return form.fields.hasOwnProperty(key) === true;
-                })
-                .forEach(function(value, key) {
-                    $scope[key] = value;
-                })
-                .value();
-            return;
         }
 
         $scope.redirectToResource = function(resource) {

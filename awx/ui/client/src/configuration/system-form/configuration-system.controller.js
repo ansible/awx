@@ -106,7 +106,7 @@ export default [
             id: 'system-misc-form'
         }];
 
-        var forms = _.pluck(systemForms, 'formDef');
+        var forms = _.map(systemForms, 'formDef');
         _.each(forms, function(form) {
             var keys = _.keys(form.fields);
             _.each(keys, function(key) {
