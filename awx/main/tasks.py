@@ -1119,6 +1119,19 @@ class RunJob(BaseTask):
             if value not in ('', 'ASK'):
                 passwords[field] = value
 
+        '''
+        Only 1 value can be provided for a unique prompt string. Prefer ssh
+        key unlock over network key unlock.
+        '''
+        if 'ssh_key_unlock' not in passwords:
+            for cred in job.network_credentials:
+                if cred.inputs.get('ssh_key_unlock'):
+                    passwords['ssh_key_unlock'] = kwargs.get(
+                        'ssh_key_unlock',
+                        decrypt_field(cred, 'ssh_key_unlock')
+                    )
+                    break
+
         return passwords
 
     def build_env(self, job, **kwargs):
