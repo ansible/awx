@@ -58,30 +58,30 @@ function AddTokensController (
         return postToken
             .then(({ data }) => {
                 const refreshHTML = data.refresh_token ?
-                    `<div class="TokenModal">
-                        <div class="TokenModal-label">
+                    `<div class="PopupModal">
+                        <div class="PopupModal-label">
                             ${strings.get('add.REFRESH_TOKEN_LABEL')}
                         </div>
-                        <div class="TokenModal-value">
+                        <div class="PopupModal-value">
                             ${data.refresh_token}
                         </div>
                     </div>` : '';
 
                 Alert(strings.get('add.TOKEN_MODAL_HEADER'), `
-                  <div class="TokenModal">
-                      <div class="TokenModal-label">
+                  <div class="PopupModal">
+                      <div class="PopupModal-label">
                           ${strings.get('add.TOKEN_LABEL')}
                       </div>
-                      <div class="TokenModal-value">
+                      <div class="PopupModal-value">
                           ${data.token}
                       </div>
                   </div>
                   ${refreshHTML}
-                  <div class="TokenModal">
-                      <div class="TokenModal-label">
+                  <div class="PopupModal">
+                      <div class="PopupModal-label">
                           ${strings.get('add.TOKEN_EXPIRES_LABEL')}
                       </div>
-                      <div class="TokenModal-value">
+                      <div class="PopupModal-value">
                           ${$filter('longDate')(data.expires)}
                       </div>
                   </div>
