@@ -25,17 +25,15 @@ about: Create a report to help us improve
 
 ##### STEPS TO REPRODUCE
 
-<!-- For bugs, please show exactly how to reproduce the problem. For new
-features, show how the feature would be used.  -->
+<!-- Please describe exactly how to reproduce the problem. -->
 
 ##### EXPECTED RESULTS
 
-<!-- For bug reports, what did you expect to happen when running the steps
-above? -->
+<!-- What did you expect to happen when running the steps above? -->
 
 ##### ACTUAL RESULTS
 
-<!-- For bug reports, what actually happened? -->
+<!-- What actually happened? -->
 
 ##### ADDITIONAL INFORMATION
 
