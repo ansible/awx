@@ -641,6 +641,31 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                     if (!_.isEmpty($scope.nodeBeingEdited.promptData)) {
                         $scope.promptData = _.cloneDeep($scope.nodeBeingEdited.promptData);
+                        const launchConf = $scope.promptData.launchConf;
+
+                        if (!launchConf.survey_enabled &&
+                            !launchConf.ask_inventory_on_launch &&
+                            !launchConf.ask_credential_on_launch &&
+                            !launchConf.ask_verbosity_on_launch &&
+                            !launchConf.ask_job_type_on_launch &&
+                            !launchConf.ask_limit_on_launch &&
+                            !launchConf.ask_tags_on_launch &&
+                            !launchConf.ask_skip_tags_on_launch &&
+                            !launchConf.ask_diff_mode_on_launch &&
+                            !launchConf.survey_enabled &&
+                            !launchConf.credential_needed_to_start &&
+                            launchConf.variables_needed_to_start.length === 0) {
+                                $scope.showPromptButton = false;
+                                $scope.promptModalMissingReqFields = false;
+                        } else {
+                            $scope.showPromptButton = true;
+
+                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeBeingEdited.originalNodeObj.summary_fields.inventory')) {
+                                $scope.promptModalMissingReqFields = true;
+                            } else {
+                                $scope.promptModalMissingReqFields = false;
+                            }
+                        }
                     } else if (
                         _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'job_template' ||
                         _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === 'job_template'
