@@ -1,14 +1,64 @@
 import pytest
 import mock
 
-from awx.main.models import AdHocCommand, InventoryUpdate, Job, JobTemplate, ProjectUpdate, Instance
+from awx.main.models import AdHocCommand, InventoryUpdate, Job, JobTemplate, ProjectUpdate
+from awx.main.models.ha import Instance, InstanceGroup
 from awx.main.tasks import apply_cluster_membership_policies
 from awx.api.versioning import reverse
+
+from django.utils.timezone import now
 
 
 @pytest.mark.django_db
 def test_default_tower_instance_group(default_instance_group, job_factory):
     assert default_instance_group in job_factory().preferred_instance_groups
+
+
+@pytest.mark.django_db
+class TestPolicyTaskScheduling:
+    """Tests make assertions about when the policy task gets scheduled"""
+
+    @pytest.mark.parametrize('field, value, expect', [
+        ('name', 'foo-bar-foo-bar', False),
+        ('policy_instance_percentage', 35, True),
+        ('policy_instance_minimum', 3, True),
+        ('policy_instance_list', ['bar?'], True),
+        ('modified', now(), False)
+    ])
+    def test_policy_task_ran_for_ig_when_needed(self, instance_group_factory, field, value, expect):
+        # always run on instance group creation
+        with mock.patch('awx.main.models.ha.schedule_policy_task') as mock_policy:
+            ig = InstanceGroup.objects.create(name='foo')
+        mock_policy.assert_called_once()
+        # selectively run on instance group modification
+        with mock.patch('awx.main.models.ha.schedule_policy_task') as mock_policy:
+            setattr(ig, field, value)
+            ig.save()
+        if expect:
+            mock_policy.assert_called_once()
+        else:
+            mock_policy.assert_not_called()
+
+    @pytest.mark.parametrize('field, value, expect', [
+        ('hostname', 'foo-bar-foo-bar', True),
+        ('managed_by_policy', False, True),
+        ('enabled', False, False),
+        ('capacity_adjustment', 0.42, True),
+        ('capacity', 42, False)
+    ])
+    def test_policy_task_ran_for_instance_when_needed(self, instance_group_factory, field, value, expect):
+        # always run on instance group creation
+        with mock.patch('awx.main.models.ha.schedule_policy_task') as mock_policy:
+            inst = Instance.objects.create(hostname='foo')
+        mock_policy.assert_called_once()
+        # selectively run on instance group modification
+        with mock.patch('awx.main.models.ha.schedule_policy_task') as mock_policy:
+            setattr(inst, field, value)
+            inst.save()
+        if expect:
+            mock_policy.assert_called_once()
+        else:
+            mock_policy.assert_not_called()
 
 
 @pytest.mark.django_db
@@ -32,8 +82,7 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_few_instances(mock, instance_factory, instance_group_factory):
+def test_policy_instance_few_instances(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     ig_1 = instance_group_factory("ig1", percentage=25)
     ig_2 = instance_group_factory("ig2", percentage=25)
@@ -61,8 +110,7 @@ def test_policy_instance_few_instances(mock, instance_factory, instance_group_fa
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_distribution_round_up(mock, instance_factory, instance_group_factory):
+def test_policy_instance_distribution_round_up(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
@@ -76,8 +124,7 @@ def test_policy_instance_distribution_round_up(mock, instance_factory, instance_
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_distribution_uneven(mock, instance_factory, instance_group_factory):
+def test_policy_instance_distribution_uneven(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
@@ -97,8 +144,7 @@ def test_policy_instance_distribution_uneven(mock, instance_factory, instance_gr
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_distribution_even(mock, instance_factory, instance_group_factory):
+def test_policy_instance_distribution_even(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
@@ -131,8 +177,7 @@ def test_policy_instance_distribution_even(mock, instance_factory, instance_grou
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_distribution_simultaneous(mock, instance_factory, instance_group_factory):
+def test_policy_instance_distribution_simultaneous(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     i3 = instance_factory("i3")
@@ -154,8 +199,7 @@ def test_policy_instance_distribution_simultaneous(mock, instance_factory, insta
 
 
 @pytest.mark.django_db
-@mock.patch('awx.main.tasks.handle_ha_toplogy_changes', return_value=None)
-def test_policy_instance_list_manually_managed(mock, instance_factory, instance_group_factory):
+def test_policy_instance_list_manually_assigned(instance_factory, instance_group_factory):
     i1 = instance_factory("i1")
     i2 = instance_factory("i2")
     ig_1 = instance_group_factory("ig1", percentage=100, minimum=2)
@@ -163,11 +207,34 @@ def test_policy_instance_list_manually_managed(mock, instance_factory, instance_
     ig_2.policy_instance_list = [i2.hostname]
     ig_2.save()
     apply_cluster_membership_policies()
-    assert len(ig_1.instances.all()) == 1
+    assert len(ig_1.instances.all()) == 2
     assert i1 in ig_1.instances.all()
-    assert i2 not in ig_1.instances.all()
+    assert i2 in ig_1.instances.all()
     assert len(ig_2.instances.all()) == 1
     assert i2 in ig_2.instances.all()
+
+
+@pytest.mark.django_db
+def test_policy_instance_list_explicitly_pinned(instance_factory, instance_group_factory):
+    i1 = instance_factory("i1")
+    i2 = instance_factory("i2")
+    ig_1 = instance_group_factory("ig1", percentage=100, minimum=2)
+    ig_2 = instance_group_factory("ig2")
+    ig_2.policy_instance_list = [i2.hostname]
+    ig_2.save()
+
+    # without being marked as manual, i2 will be picked up by ig_1
+    apply_cluster_membership_policies()
+    assert set(ig_1.instances.all()) == set([i1, i2])
+    assert set(ig_2.instances.all()) == set([i2])
+
+    i2.managed_by_policy = False
+    i2.save()
+
+    # after marking as manual, i2 no longer available for ig_1
+    apply_cluster_membership_policies()
+    assert set(ig_1.instances.all()) == set([i1])
+    assert set(ig_2.instances.all()) == set([i2])
 
 
 @pytest.mark.django_db
@@ -191,6 +258,18 @@ def test_inherited_instance_group_membership(instance_group_factory, default_ins
     assert ig_org in j.preferred_instance_groups
     assert ig_inv in j.preferred_instance_groups
     assert default_instance_group not in j.preferred_instance_groups
+
+
+@pytest.mark.django_db
+def test_mixed_group_membership(instance_factory, instance_group_factory):
+    for i in range(5):
+        instance_factory("i{}".format(i))
+    ig_1 = instance_group_factory("ig1", percentage=60)
+    ig_2 = instance_group_factory("ig2", minimum=3)
+    ig_3 = instance_group_factory("ig3", minimum=1, percentage=60)
+    apply_cluster_membership_policies()
+    for group in (ig_1, ig_2, ig_3):
+        assert len(group.instances.all()) == 3
 
 
 @pytest.mark.django_db

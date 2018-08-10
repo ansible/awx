@@ -24,7 +24,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
-from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
@@ -60,7 +61,7 @@ import pytz
 from wsgiref.util import FileWrapper
 
 # AWX
-from awx.main.tasks import send_notifications, handle_ha_toplogy_changes
+from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.filters import V1CredentialFilterBackend
@@ -104,6 +105,8 @@ def api_exception_handler(exc, context):
         exc = ParseError(exc.args[0])
     if isinstance(exc, FieldError):
         exc = ParseError(exc.args[0])
+    if isinstance(context['view'], UnifiedJobStdout):
+        context['view'].renderer_classes = [BrowsableAPIRenderer, renderers.JSONRenderer]
     return exception_handler(exc, context)
 
 
@@ -176,29 +179,64 @@ class InstanceGroupMembershipMixin(object):
         sub_id, res = self.attach_validate(request)
         if status.is_success(response.status_code):
             if self.parent_model is Instance:
-                ig_obj = get_object_or_400(self.model, pk=sub_id)
                 inst_name = ig_obj.hostname
             else:
-                ig_obj = self.get_parent_object()
                 inst_name = get_object_or_400(self.model, pk=sub_id).hostname
-            if inst_name not in ig_obj.policy_instance_list:
-                ig_obj.policy_instance_list.append(inst_name)
-                ig_obj.save()
+            with transaction.atomic():
+                ig_qs = InstanceGroup.objects.select_for_update()
+                if self.parent_model is Instance:
+                    ig_obj = get_object_or_400(ig_qs, pk=sub_id)
+                else:
+                    # similar to get_parent_object, but selected for update
+                    parent_filter = {
+                        self.lookup_field: self.kwargs.get(self.lookup_field, None),
+                    }
+                    ig_obj = get_object_or_404(ig_qs, **parent_filter)
+                if inst_name not in ig_obj.policy_instance_list:
+                    ig_obj.policy_instance_list.append(inst_name)
+                    ig_obj.save(update_fields=['policy_instance_list'])
         return response
+
+    def is_valid_relation(self, parent, sub, created=False):
+        if sub.is_isolated():
+            return {'error': _('Isolated instances may not be added or removed from instances groups via the API.')}
+        if self.parent_model is InstanceGroup:
+            ig_obj = self.get_parent_object()
+            if ig_obj.controller_id is not None:
+                return {'error': _('Isolated instance group membership may not be managed via the API.')}
+        return None
+
+    def unattach_validate(self, request):
+        (sub_id, res) = super(InstanceGroupMembershipMixin, self).unattach_validate(request)
+        if res:
+            return (sub_id, res)
+        sub = get_object_or_400(self.model, pk=sub_id)
+        attach_errors = self.is_valid_relation(None, sub)
+        if attach_errors:
+            return (sub_id, Response(attach_errors, status=status.HTTP_400_BAD_REQUEST))
+        return (sub_id, res)
 
     def unattach(self, request, *args, **kwargs):
         response = super(InstanceGroupMembershipMixin, self).unattach(request, *args, **kwargs)
-        sub_id, res = self.attach_validate(request)
         if status.is_success(response.status_code):
+            sub_id = request.data.get('id', None)
             if self.parent_model is Instance:
-                ig_obj = get_object_or_400(self.model, pk=sub_id)
                 inst_name = self.get_parent_object().hostname
             else:
-                ig_obj = self.get_parent_object()
                 inst_name = get_object_or_400(self.model, pk=sub_id).hostname
-            if inst_name in ig_obj.policy_instance_list:
-                ig_obj.policy_instance_list.pop(ig_obj.policy_instance_list.index(inst_name))
-                ig_obj.save()
+            with transaction.atomic():
+                ig_qs = InstanceGroup.objects.select_for_update()
+                if self.parent_model is Instance:
+                    ig_obj = get_object_or_400(ig_qs, pk=sub_id)
+                else:
+                    # similar to get_parent_object, but selected for update
+                    parent_filter = {
+                        self.lookup_field: self.kwargs.get(self.lookup_field, None),
+                    }
+                    ig_obj = get_object_or_404(ig_qs, **parent_filter)
+                if inst_name in ig_obj.policy_instance_list:
+                    ig_obj.policy_instance_list.pop(ig_obj.policy_instance_list.index(inst_name))
+                    ig_obj.save(update_fields=['policy_instance_list'])
         return response
 
 
@@ -227,20 +265,20 @@ class ApiRootView(APIView):
     versioning_class = None
     swagger_topic = 'Versioning'
 
+    @method_decorator(ensure_csrf_cookie)
     def get(self, request, format=None):
         ''' List supported API versions '''
 
         v1 = reverse('api:api_v1_root_view', kwargs={'version': 'v1'})
         v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
-        data = dict(
-            description = _('AWX REST API'),
-            current_version = v2,
-            available_versions = dict(v1 = v1, v2 = v2),
-        )
+        data = OrderedDict()
+        data['description'] = _('AWX REST API')
+        data['current_version'] = v2
+        data['available_versions'] = dict(v1 = v1, v2 = v2)
+        data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
         if feature_enabled('rebranding'):
             data['custom_logo'] = settings.CUSTOM_LOGO
             data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
-        data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
         return Response(data)
 
 
@@ -631,7 +669,6 @@ class InstanceDetail(RetrieveUpdateAPIView):
             else:
                 obj.capacity = 0
             obj.save()
-            handle_ha_toplogy_changes.apply_async()
             r.data = InstanceSerializer(obj, context=self.get_serializer_context()).to_representation(obj)
         return r
 
@@ -640,7 +677,7 @@ class InstanceUnifiedJobsList(SubListAPIView):
 
     view_name = _("Instance Jobs")
     model = UnifiedJob
-    serializer_class = UnifiedJobSerializer
+    serializer_class = UnifiedJobListSerializer
     parent_model = Instance
 
     def get_queryset(self):
@@ -687,7 +724,7 @@ class InstanceGroupUnifiedJobsList(SubListAPIView):
 
     view_name = _("Instance Group Running Jobs")
     model = UnifiedJob
-    serializer_class = UnifiedJobSerializer
+    serializer_class = UnifiedJobListSerializer
     parent_model = InstanceGroup
     relationship = "unifiedjob_set"
 
@@ -720,6 +757,7 @@ class SchedulePreview(GenericAPIView):
     model = Schedule
     view_name = _('Schedule Recurrence Rule Preview')
     serializer_class = SchedulePreviewSerializer
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -797,7 +835,7 @@ class ScheduleCredentialsList(LaunchConfigCredentialsBase):
 class ScheduleUnifiedJobsList(SubListAPIView):
 
     model = UnifiedJob
-    serializer_class = UnifiedJobSerializer
+    serializer_class = UnifiedJobListSerializer
     parent_model = Schedule
     relationship = 'unifiedjob_set'
     view_name = _('Schedule Jobs List')
@@ -1055,7 +1093,7 @@ class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
 class OrganizationWorkflowJobTemplatesList(SubListCreateAttachDetachAPIView):
 
     model = WorkflowJobTemplate
-    serializer_class = WorkflowJobTemplateListSerializer
+    serializer_class = WorkflowJobTemplateSerializer
     parent_model = Organization
     relationship = 'workflows'
     parent_key = 'organization'
@@ -1144,11 +1182,6 @@ class TeamList(ListCreateAPIView):
     model = Team
     serializer_class = TeamSerializer
 
-    def get_queryset(self):
-        qs = Team.accessible_objects(self.request.user, 'read_role').order_by()
-        qs = qs.select_related('admin_role', 'read_role', 'member_role', 'organization')
-        return qs
-
 
 class TeamDetail(RetrieveUpdateDestroyAPIView):
 
@@ -1186,8 +1219,8 @@ class TeamRolesList(SubListAttachDetachAPIView):
 
         role = get_object_or_400(Role, pk=sub_id)
         org_content_type = ContentType.objects.get_for_model(Organization)
-        if role.content_type == org_content_type:
-            data = dict(msg=_("You cannot assign an Organization role as a child role for a Team."))
+        if role.content_type == org_content_type and role.role_field in ['member_role', 'admin_role']:
+            data = dict(msg=_("You cannot assign an Organization participation role as a child role for a Team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if role.is_singleton():
@@ -1377,7 +1410,7 @@ class ProjectNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
 class ProjectUpdatesList(SubListAPIView):
 
     model = ProjectUpdate
-    serializer_class = ProjectUpdateSerializer
+    serializer_class = ProjectUpdateListSerializer
     parent_model = Project
     relationship = 'project_updates'
 
@@ -1415,7 +1448,7 @@ class ProjectUpdateList(ListAPIView):
 class ProjectUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = ProjectUpdate
-    serializer_class = ProjectUpdateSerializer
+    serializer_class = ProjectUpdateDetailSerializer
 
 
 class ProjectUpdateEventsList(SubListAPIView):
@@ -1488,7 +1521,7 @@ class ProjectUpdateScmInventoryUpdates(SubListCreateAPIView):
 
     view_name = _("Project Update SCM Inventory Updates")
     model = InventoryUpdate
-    serializer_class = InventoryUpdateSerializer
+    serializer_class = InventoryUpdateListSerializer
     parent_model = ProjectUpdate
     relationship = 'scm_inventory_updates'
     parent_key = 'source_project_update'
@@ -1568,6 +1601,10 @@ class OAuth2ApplicationDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = OAuth2ApplicationSerializer
     swagger_topic = 'Authentication'
 
+    def update_raw_data(self, data):
+        data.pop('client_secret', None)
+        return super(OAuth2ApplicationDetail, self).update_raw_data(data)
+
 
 class ApplicationOAuth2TokenList(SubListCreateAPIView):
 
@@ -1610,29 +1647,14 @@ class OAuth2UserTokenList(SubListCreateAPIView):
     relationship = 'main_oauth2accesstoken'
     parent_key = 'user'
     swagger_topic = 'Authentication'
-    
-    
-class OAuth2AuthorizedTokenList(SubListCreateAPIView):
 
-    view_name = _("OAuth2 Authorized Access Tokens")
-    
-    model = OAuth2AccessToken
-    serializer_class = OAuth2AuthorizedTokenSerializer
-    parent_model = OAuth2Application
-    relationship = 'oauth2accesstoken_set'
-    parent_key = 'application'
-    swagger_topic = 'Authentication'
 
-    def get_queryset(self):
-        return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
-        
-        
 class UserAuthorizedTokenList(SubListCreateAPIView):
 
     view_name = _("OAuth2 User Authorized Access Tokens")
-    
+
     model = OAuth2AccessToken
-    serializer_class = OAuth2AuthorizedTokenSerializer
+    serializer_class = UserAuthorizedTokenSerializer
     parent_model = User
     relationship = 'oauth2accesstoken_set'
     parent_key = 'user'
@@ -1640,12 +1662,12 @@ class UserAuthorizedTokenList(SubListCreateAPIView):
 
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=False, user=self.request.user)
-        
+
 
 class OrganizationApplicationList(SubListCreateAPIView):
 
     view_name = _("Organization OAuth2 Applications")
-    
+
     model = OAuth2Application
     serializer_class = OAuth2ApplicationSerializer
     parent_model = Organization
@@ -1654,17 +1676,17 @@ class OrganizationApplicationList(SubListCreateAPIView):
     swagger_topic = 'Authentication'
 
 
-class OAuth2PersonalTokenList(SubListCreateAPIView):
-    
+class UserPersonalTokenList(SubListCreateAPIView):
+
     view_name = _("OAuth2 Personal Access Tokens")
-    
+
     model = OAuth2AccessToken
-    serializer_class = OAuth2PersonalTokenSerializer
+    serializer_class = UserPersonalTokenSerializer
     parent_model = User
     relationship = 'main_oauth2accesstoken'
     parent_key = 'user'
     swagger_topic = 'Authentication'
-    
+
     def get_queryset(self):
         return get_access_token_model().objects.filter(application__isnull=True, user=self.request.user)
 
@@ -2232,6 +2254,12 @@ class HostDetail(RelatedJobsPreventDeleteMixin, ControlledByScmMixin, RetrieveUp
     always_allow_superuser = False
     model = Host
     serializer_class = HostSerializer
+
+    def delete(self, request, *args, **kwargs):
+        if self.get_object().inventory.pending_deletion:
+            return Response({"error": _("The inventory for this host is already being deleted.")},
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super(HostDetail, self).delete(request, *args, **kwargs)
 
 
 class HostAnsibleFactsDetail(RetrieveAPIView):
@@ -2842,7 +2870,7 @@ class InventorySourceGroupsList(SubListDestroyAPIView):
 class InventorySourceUpdatesList(SubListAPIView):
 
     model = InventoryUpdate
-    serializer_class = InventoryUpdateSerializer
+    serializer_class = InventoryUpdateListSerializer
     parent_model = InventorySource
     relationship = 'inventory_updates'
 
@@ -3011,12 +3039,12 @@ class JobTemplateLaunch(RetrieveAPIView):
             if fd not in modern_data and id_fd in modern_data:
                 modern_data[fd] = modern_data[id_fd]
 
-        # This block causes `extra_credentials` to _always_ be ignored for
+        # This block causes `extra_credentials` to _always_ raise error if
         # the launch endpoint if we're accessing `/api/v1/`
         if get_request_version(self.request) == 1 and 'extra_credentials' in modern_data:
-            extra_creds = modern_data.pop('extra_credentials', None)
-            if extra_creds is not None:
-                ignored_fields['extra_credentials'] = extra_creds
+            raise ParseError({"extra_credentials": _(
+                "Field is not allowed for use with v1 API."
+            )})
 
         # Automatically convert legacy launch credential arguments into a list of `.credentials`
         if 'credentials' in modern_data and (
@@ -3037,10 +3065,10 @@ class JobTemplateLaunch(RetrieveAPIView):
             existing_credentials = obj.credentials.all()
             template_credentials = list(existing_credentials)  # save copy of existing
             new_credentials = []
-            for key, conditional in (
-                ('credential', lambda cred: cred.credential_type.kind != 'ssh'),
-                ('vault_credential', lambda cred: cred.credential_type.kind != 'vault'),
-                ('extra_credentials', lambda cred: cred.credential_type.kind not in ('cloud', 'net'))
+            for key, conditional, _type, type_repr in (
+                ('credential', lambda cred: cred.credential_type.kind != 'ssh', int, 'pk value'),
+                ('vault_credential', lambda cred: cred.credential_type.kind != 'vault', int, 'pk value'),
+                ('extra_credentials', lambda cred: cred.credential_type.kind not in ('cloud', 'net'), Iterable, 'a list')
             ):
                 if key in modern_data:
                     # if a specific deprecated key is specified, remove all
@@ -3048,6 +3076,13 @@ class JobTemplateLaunch(RetrieveAPIView):
                     # credentials
                     existing_credentials = filter(conditional, existing_credentials)
                     prompted_value = modern_data.pop(key)
+
+                    # validate type, since these are not covered by a serializer
+                    if not isinstance(prompted_value, _type):
+                        msg = _(
+                            "Incorrect type. Expected {}, received {}."
+                        ).format(type_repr, prompted_value.__class__.__name__)
+                        raise ParseError({key: [msg], 'credentials': [msg]})
 
                     # add the deprecated credential specified in the request
                     if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, basestring):
@@ -3108,7 +3143,8 @@ class JobTemplateLaunch(RetrieveAPIView):
             data['job'] = new_job.id
             data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
             data.update(JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-            return Response(data, status=status.HTTP_201_CREATED)
+            headers = {'Location': new_job.get_absolute_url(request)}
+            return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
     def sanitize_for_response(self, data):
@@ -3320,6 +3356,9 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
         if sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
             return {"error": _("Cannot assign multiple {credential_type} credentials.".format(
                 credential_type=sub.unique_hash(display=True)))}
+        kind = sub.credential_type.kind
+        if kind not in ('ssh', 'vault', 'cloud', 'net'):
+            return {'error': _('Cannot assign a Credential of kind `{}`.').format(kind)}
 
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
 
@@ -3713,7 +3752,7 @@ class WorkflowJobNodeAlwaysNodesList(WorkflowJobNodeChildrenBaseList):
 class WorkflowJobTemplateList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJobTemplate
-    serializer_class = WorkflowJobTemplateListSerializer
+    serializer_class = WorkflowJobTemplateSerializer
     always_allow_superuser = False
 
 
@@ -3730,7 +3769,11 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, CopyAPIView):
     copy_return_serializer_class = WorkflowJobTemplateSerializer
 
     def get(self, request, *args, **kwargs):
+        if get_request_version(request) < 2:
+            return self.v1_not_allowed()
         obj = self.get_object()
+        if not request.user.can_access(obj.__class__, 'read', obj):
+            raise PermissionDenied()
         can_copy, messages = request.user.can_access_with_errors(self.model, 'copy', obj)
         data = OrderedDict([
             ('can_copy', can_copy), ('can_copy_without_user_input', can_copy),
@@ -3806,7 +3849,8 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
         data['workflow_job'] = new_job.id
         data['ignored_fields'] = ignored_fields
         data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-        return Response(data, status=status.HTTP_201_CREATED)
+        headers = {'Location': new_job.get_absolute_url(request)}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
@@ -4022,7 +4066,8 @@ class SystemJobTemplateLaunch(GenericAPIView):
         data = OrderedDict()
         data['system_job'] = new_job.id
         data.update(SystemJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-        return Response(data, status=status.HTTP_201_CREATED)
+        headers = {'Location': new_job.get_absolute_url(request)}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class SystemJobTemplateSchedulesList(SubListCreateAPIView):
@@ -4094,7 +4139,30 @@ class JobDetail(UnifiedJobDeletionMixin, RetrieveUpdateDestroyAPIView):
 
     model = Job
     metadata_class = JobTypeMetadata
-    serializer_class = JobSerializer
+    serializer_class = JobDetailSerializer
+
+    # NOTE: When removing the V1 API in 3.4, delete the following four methods,
+    # and let this class inherit from RetrieveDestroyAPIView instead of
+    # RetrieveUpdateDestroyAPIView.
+    @property
+    def allowed_methods(self):
+        methods = super(JobDetail, self).allowed_methods
+        if get_request_version(getattr(self, 'request', None)) > 1:
+            methods.remove('PUT')
+            methods.remove('PATCH')
+        return methods
+
+    def put(self, request, *args, **kwargs):
+        if get_request_version(self.request) > 1:
+            return Response({"error": _("PUT not allowed for Job Details in version 2 of the API")},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super(JobDetail, self).put(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        if get_request_version(self.request) > 1:
+            return Response({"error": _("PUT not allowed for Job Details in version 2 of the API")},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super(JobDetail, self).patch(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -4220,7 +4288,6 @@ class JobRelaunch(RetrieveAPIView):
                 data.pop('credential_passwords', None)
         return data
 
-    @csrf_exempt
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(JobRelaunch, self).dispatch(*args, **kwargs)
@@ -4466,7 +4533,6 @@ class AdHocCommandList(ListCreateAPIView):
     serializer_class = AdHocCommandListSerializer
     always_allow_superuser = False
 
-    @csrf_exempt
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(AdHocCommandList, self).dispatch(*args, **kwargs)
@@ -4538,7 +4604,7 @@ class HostAdHocCommandsList(AdHocCommandList, SubListCreateAPIView):
 class AdHocCommandDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = AdHocCommand
-    serializer_class = AdHocCommandSerializer
+    serializer_class = AdHocCommandDetailSerializer
 
 
 class AdHocCommandCancel(RetrieveAPIView):
@@ -4564,7 +4630,6 @@ class AdHocCommandRelaunch(GenericAPIView):
 
     # FIXME: Figure out why OPTIONS request still shows all fields.
 
-    @csrf_exempt
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(AdHocCommandRelaunch, self).dispatch(*args, **kwargs)
@@ -5041,8 +5106,8 @@ class RoleTeamsList(SubListAttachDetachAPIView):
         role = Role.objects.get(pk=self.kwargs['pk'])
 
         organization_content_type = ContentType.objects.get_for_model(Organization)
-        if role.content_type == organization_content_type:
-            data = dict(msg=_("You cannot assign an Organization role as a child role for a Team."))
+        if role.content_type == organization_content_type and role.role_field in ['member_role', 'admin_role']:
+            data = dict(msg=_("You cannot assign an Organization participation role as a child role for a Team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         credential_content_type = ContentType.objects.get_for_model(Credential)

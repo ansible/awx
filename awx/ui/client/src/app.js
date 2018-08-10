@@ -10,7 +10,6 @@ if ($basePath) {
 }
 
 import start from './app.start';
-import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventoriesHosts from './inventories-hosts/main';
 import inventoryScripts from './inventory-scripts/main';
@@ -42,8 +41,6 @@ import atFeatures from '~features';
 import atLibComponents from '~components';
 import atLibModels from '~models';
 import atLibServices from '~services';
-
-import networkUI from '~network-ui/network.ui.app';
 
 start.bootstrap(() => {
     angular.bootstrap(document.body, ['awApp']);
@@ -86,12 +83,10 @@ angular
         jobSubmission.name,
         notifications.name,
         Templates.name,
-        portalMode.name,
         teams.name,
         users.name,
         projects.name,
         scheduler.name,
-        networkUI.name,
 
         'Utilities',
         'templates',
@@ -352,6 +347,10 @@ angular
                         $rootScope.$broadcast("RemoveIndicator");
                     } else {
                         $rootScope.$broadcast("RemoveIndicator");
+                    }
+
+                    if(_.contains(trans.from().name, 'output') && trans.to().name === 'jobs'){
+                        $state.reload();
                     }
                 });
 

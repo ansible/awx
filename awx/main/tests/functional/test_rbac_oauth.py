@@ -79,7 +79,7 @@ class TestOAuth2Application:
             can_access_list = [True, True, False, False]
             for user, can_access in zip(user_list, can_access_list):
                 app = Application.objects.create(
-                    name='test app for {}'.format(org_admin.username), user=org_admin,
+                    name='test app for {}'.format(user.username), user=org_admin,
                     client_type='confidential', authorization_grant_type='password', organization=organization
                 )
                 access = OAuth2ApplicationAccess(user)
@@ -94,7 +94,7 @@ class TestOAuth2Application:
             can_access_list = [True, True, False, False]
             for user, can_access in zip(user_list, can_access_list):
                 app = Application.objects.create(
-                    name='test app for {}'.format(admin.username), user=admin,
+                    name='test app for {}'.format(user.username), user=admin,
                     client_type='confidential', authorization_grant_type='password', organization=organization
                 )
                 access = OAuth2ApplicationAccess(user)
@@ -200,7 +200,7 @@ class TestOAuth2Token:
         user_list = [admin, org_admin, org_member, alice]
         can_access_list = [True, False, True, False]
         response = post(
-            reverse('api:o_auth2_personal_token_list', kwargs={'pk': org_member.pk}),
+            reverse('api:user_personal_token_list', kwargs={'pk': org_member.pk}),
             {'scope': 'read'}, org_member, expect=201
         )
         token = AccessToken.objects.get(token=response.data['token'])
@@ -220,7 +220,7 @@ class TestOAuth2Token:
 
         for user, can_access in zip(user_list, can_access_list):
             response = post(
-                reverse('api:o_auth2_personal_token_list', kwargs={'pk': user.pk}),
+                reverse('api:user_personal_token_list', kwargs={'pk': user.pk}),
                 {'scope': 'read', 'application':None}, user, expect=201
             )
             token = AccessToken.objects.get(token=response.data['token'])

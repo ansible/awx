@@ -26,7 +26,7 @@ export default ['i18n', function(i18n) {
                 ngShow: '!isValid(schedule)'
             },
             toggleSchedule: {
-                ngDisabled: "!schedule.summary_fields.user_capabilities.edit",
+                ngDisabled: "!schedule.summary_fields.user_capabilities.edit || credentialRequiresPassword",
                 label: '',
                 columnClass: 'List-staticColumn--toggle',
                 type: "toggle",
@@ -70,11 +70,13 @@ export default ['i18n', function(i18n) {
             },
             add: {
                 mode: 'all',
-                ngClick: 'addSchedule()',
+                ngClick: 'credentialRequiresPassword || addSchedule()',
                 awToolTip: i18n._('Add a new schedule'),
+                dataTipWatch: 'addTooltip',
                 actionClass: 'at-Button--add',
                 actionId: 'button-add',
-                ngShow: 'canAdd'
+                ngShow: 'canAdd',
+                ngClass: "{ 'Form-tab--disabled': credentialRequiresPassword }"
             }
         },
 
@@ -85,14 +87,14 @@ export default ['i18n', function(i18n) {
                 icon: 'icon-edit',
                 awToolTip: i18n._('Edit schedule'),
                 dataPlacement: 'top',
-                ngShow: 'schedule.summary_fields.user_capabilities.edit'
+                ngShow: 'schedule.summary_fields.user_capabilities.edit && !credentialRequiresPassword'
             },
             view: {
                 label: i18n._('View'),
                 ngClick: "editSchedule(schedule)",
                 awToolTip: i18n._('View schedule'),
                 dataPlacement: 'top',
-                ngShow: '!schedule.summary_fields.user_capabilities.edit'
+                ngShow: '!schedule.summary_fields.user_capabilities.edit || credentialRequiresPassword'
             },
             "delete": {
                 label: i18n._('Delete'),

@@ -62,7 +62,8 @@ export default
                 $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
                 $scope.job_tag_options = [];
                 $scope.skip_tag_options = [];
-                $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+                const virtualEnvs = ConfigData.custom_virtualenvs || [];
+                $scope.custom_virtualenvs_options = virtualEnvs;
 
                 SurveyControllerInit({
                     scope: $scope,
@@ -499,7 +500,7 @@ export default
                         null, true);
                 }
 
-                MultiCredentialService
+                var credDefer = MultiCredentialService
                     .saveRelated(jobTemplateData, $scope.multiCredential.selectedCredentials);
 
                 InstanceGroupsService.editInstanceGroups(instance_group_url, $scope.instance_groups)
@@ -579,7 +580,7 @@ export default
 
                         Rest.setUrl(data.related.labels);
 
-                        var defers = [];
+                        var defers = [credDefer];
                         for (var i = 0; i < toPost.length; i++) {
                             defers.push(Rest.post(toPost[i]));
                         }
@@ -643,22 +644,7 @@ export default
                     data.ask_credential_on_launch = $scope.ask_credential_on_launch ? $scope.ask_credential_on_launch : false;
                     data.job_tags = (Array.isArray($scope.job_tags)) ? $scope.job_tags.join() : "";
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ? $scope.skip_tags.join() : "";
-                    if ($scope.selectedCredentials && $scope.selectedCredentials
-                        .machine && $scope.selectedCredentials
-                            .machine.id) {
-                                data.credential = $scope.selectedCredentials
-                                    .machine.id;
-                    } else {
-                        data.credential = null;
-                    }
-                    if ($scope.selectedCredentials && $scope.selectedCredentials
-                        .vault && $scope.selectedCredentials
-                            .vault.id) {
-                                data.vault_credential = $scope.selectedCredentials
-                                    .vault.id;
-                    } else {
-                        data.vault_credential = null;
-                    }
+
                     data.extra_vars = ToJSON($scope.parseType,
                         $scope.extra_vars, true);
 
@@ -699,13 +685,8 @@ export default
                     data.job_tags = (Array.isArray($scope.job_tags)) ? _.uniq($scope.job_tags).join() : "";
                     data.skip_tags = (Array.isArray($scope.skip_tags)) ?  _.uniq($scope.skip_tags).join() : "";
 
-                    // drop legacy 'credential' and 'vault_credential' keys from the update request as they will
-                    // be provided to the related credentials endpoint by the template save success handler.
-                    delete data.credential;
-                    delete data.vault_credential;
-
                     Rest.setUrl(defaultUrl + $state.params.job_template_id);
-                    Rest.put(data)
+                    Rest.patch(data)
                         .then(({data}) => {
                             $scope.$emit('templateSaveSuccess', data);
                         })
@@ -723,5 +704,49 @@ export default
             $scope.formCancel = function () {
                 $state.go('templates');
             };
+
+            let handleLabelCount = () => {
+                /**
+                 * This block of code specifically handles the client-side validation of the `labels` field.
+                 * Due to it's detached nature in relation to the other job template fields, we must
+                 * validate this field client-side in order to avoid the edge case where a user can make a
+                 * successful POST to the `job_templates` endpoint but however encounter a 200 error from
+                 * the `labels` endpoint due to a character limit.
+                 *
+                 * We leverage two of select2's available events, `select` and `unselect`, to detect when the user
+                 * has either added or removed a label. From there, we set a flag and do simple string length
+                 * checks to make sure a label's chacacter count remains under 512. Otherwise, we disable the "Save" button
+                 * by invalidating the field and inform the user of the error.
+                */
+
+                $scope.job_template_labels_isValid = true;
+                const maxCount = 512;
+                const jt_label_id = 'job_template_labels';
+
+                // Detect when a new label is added
+                $(`#${jt_label_id}`).on('select2:select', (e) => {
+                    const { text } = e.params.data;
+
+                    // If the character count of an added label is greater than 512, we set `labels` field as invalid
+                    if (text.length > maxCount) {
+                        $scope.job_template_form.labels.$setValidity(`${jt_label_id}`, false);
+                        $scope.job_template_labels_isValid = false;
+                    }
+                });
+
+                // Detect when a label is removed
+                $(`#${jt_label_id}`).on('select2:unselect', (e) => {
+                    const { text } = e.params.data;
+
+                    /* If the character count of a removed label is greater than 512 AND the field is currently marked
+                       as invalid, we set it back to valid */
+                    if (text.length > maxCount && $scope.job_template_form.labels.$error) {
+                        $scope.job_template_form.labels.$setValidity(`${jt_label_id}`, true);
+                        $scope.job_template_labels_isValid = true;
+                    }
+                });
+            };
+
+            handleLabelCount();
         }
     ];

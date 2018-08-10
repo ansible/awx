@@ -31,9 +31,47 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.scheduled_by_link = getLink('schedule');
             $scope.cloud_credential_link = getLink('cloud_credential');
             $scope.network_credential_link = getLink('network_credential');
+
+            $scope.strings = {
+                tooltips: {
+                    RELAUNCH: i18n._('Relaunch using the same parameters'),
+                    CANCEL: i18n._('Cancel'),
+                    DELETE: i18n._('Delete'),
+                    EDIT_USER: i18n._('Edit the user'),
+                    EDIT_WORKFLOW: i18n._('Edit the workflow job template'),
+                    EDIT_SCHEDULE: i18n._('Edit the schedule'),
+                    TOGGLE_STDOUT_FULLSCREEN: i18n._('Expand Output'),
+                    STATUS: '' // re-assigned elsewhere
+                },
+                labels: {
+                    TEMPLATE: i18n._('Template'),
+                    LAUNCHED_BY: i18n._('Launched By'),
+                    STARTED: i18n._('Started'),
+                    FINISHED: i18n._('Finished'),
+                    LABELS: i18n._('Labels'),
+                    STATUS: i18n._('Status')
+                },
+                details: {
+                    HEADER: i18n._('DETAILS'),
+                    NOT_FINISHED: i18n._('Not Finished'),
+                    NOT_STARTED: i18n._('Not Started'),
+                },
+                results: {
+                    TOTAL_JOBS: i18n._('Total Jobs'),
+                    ELAPSED: i18n._('Elapsed'),
+                },
+                legend: {
+                    ON_SUCCESS: i18n._('On Success'),
+                    ON_FAIL: i18n._('On Fail'),
+                    ALWAYS: i18n._('Always'),
+                    PROJECT_SYNC: i18n._('Project Sync'),
+                    INVENTORY_SYNC: i18n._('Inventory Sync'),
+                    KEY: i18n._('KEY'),
+                }
+            };
         };
 
-        var getLabels = function() {
+        var getLabelsAndTooltips = function() {
             var getLabel = function(key) {
                 if ($scope.workflowOptions && $scope.workflowOptions[key]) {
                     return $scope.workflowOptions[key].choices
@@ -44,9 +82,8 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                 }
             };
 
-            $scope.status_label = getLabel('status');
-            $scope.type_label = getLabel('job_type');
-            $scope.verbosity_label = getLabel('verbosity');
+            $scope.workflow.statusLabel = i18n._(getLabel('status'));
+            $scope.strings.tooltips.STATUS = `${i18n._('Job')} ${$scope.workflow.statusLabel}`;
         };
 
         var updateWorkflowJobElapsedTimer = function(time) {
@@ -72,14 +109,11 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     $scope.workflow_job_template_link = `/#/templates/workflow_job_template/${$scope.workflow.summary_fields.workflow_job_template.id}`;
             }
 
-            // stdout full screen toggle tooltip text
-            $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
-
             // turn related api browser routes into front end routes
             getLinks();
 
             // use options labels to manipulate display of details
-            getLabels();
+            getLabelsAndTooltips();
 
             // set up a read only code mirror for extra vars
             $scope.variables = ParseVariableString($scope.workflow.extra_vars);
@@ -187,7 +221,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
                     }
 
-                    if(data.status === "successful" || data.status === "failed" || data.status === "error"){
+                    if(data.status === "successful" || data.status === "failed" || data.status === "canceled" || data.status === "error"){
                         $state.go('.', null, { reload: true });
                     }
             }
@@ -200,7 +234,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     // can happen if the GET request on the workflow job returns "waiting" and
                     // the sockets aren't established yet so we miss the event that indicates
                     // the workflow job has moved into a running state.
-                    if (!_.includes(['running', 'successful', 'failed', 'error'], $scope.workflow.status)){
+                    if (!_.includes(['running', 'successful', 'failed', 'error', 'canceled'], $scope.workflow.status)){
                         $scope.workflow.status = 'running';
                         runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
                     }
@@ -224,6 +258,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         .getCounts($scope.workflow_nodes);
                     $scope.$broadcast("refreshWorkflowChart");
             }
+            getLabelsAndTooltips();
         });
 
         $scope.$on('$destroy', function() {

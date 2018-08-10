@@ -1,20 +1,22 @@
 import Ansi from 'ansi-to-html';
 import Entities from 'html-entities';
 
-const ELEMENT_TBODY = '#atStdoutResultTable';
-const EVENT_START_TASK = 'playbook_on_task_start';
-const EVENT_START_PLAY = 'playbook_on_play_start';
-const EVENT_STATS_PLAY = 'playbook_on_stats';
+import {
+    EVENT_START_PLAY,
+    EVENT_STATS_PLAY,
+    EVENT_START_TASK,
+    OUTPUT_ELEMENT_TBODY,
+} from './constants';
 
 const EVENT_GROUPS = [
     EVENT_START_TASK,
-    EVENT_START_PLAY
+    EVENT_START_PLAY,
 ];
 
 const TIME_EVENTS = [
     EVENT_START_TASK,
     EVENT_START_PLAY,
-    EVENT_STATS_PLAY
+    EVENT_STATS_PLAY,
 ];
 
 const ansi = new Ansi();
@@ -30,11 +32,13 @@ const re = new RegExp(pattern);
 const hasAnsi = input => re.test(input);
 
 function JobRenderService ($q, $sce, $window) {
-    this.init = ({ compile, isStreamActive }) => {
+    this.init = ({ compile, toggles }) => {
         this.parent = null;
         this.record = {};
-        this.el = $(ELEMENT_TBODY);
-        this.hooks = { isStreamActive, compile };
+        this.el = $(OUTPUT_ELEMENT_TBODY);
+        this.hooks = { compile };
+
+        this.createToggles = toggles;
     };
 
     this.sortByLineNumber = (a, b) => {
@@ -55,17 +59,20 @@ function JobRenderService ($q, $sce, $window) {
 
         events.sort(this.sortByLineNumber);
 
-        events.forEach(event => {
-            const line = this.transformEvent(event);
-
+        for (let i = 0; i < events.length; ++i) {
+            const line = this.transformEvent(events[i]);
             html += line.html;
             lines += line.count;
-        });
+        }
 
         return { html, lines };
     };
 
     this.transformEvent = event => {
+        if (this.record[event.uuid]) {
+            return { html: '', count: 0 };
+        }
+
         if (!event || !event.stdout) {
             return { html: '', count: 0 };
         }
@@ -118,11 +125,13 @@ function JobRenderService ($q, $sce, $window) {
         const info = {
             id: event.id,
             line: ln + 1,
+            name: event.event,
             uuid: event.uuid,
             level: event.event_level,
             start: event.start_line,
             end: event.end_line,
             isTruncated: (event.end_line - event.start_line) > lines.length,
+            lineCount: lines.length,
             isHost: this.isHostEvent(event),
         };
 
@@ -163,6 +172,24 @@ function JobRenderService ($q, $sce, $window) {
         return info;
     };
 
+    this.getRecord = uuid => this.record[uuid];
+
+    this.deleteRecord = uuid => {
+        delete this.record[uuid];
+    };
+
+    this.getParentEvents = (uuid, list) => {
+        list = list || [];
+        // always push its parent if exists
+        list.push(uuid);
+        // if we can get grandparent in current visible lines, we also push it
+        if (this.record[uuid] && this.record[uuid].parents) {
+            list = list.concat(this.record[uuid].parents);
+        }
+
+        return list;
+    };
+
     this.createRow = (current, ln, content) => {
         let id = '';
         let timestamp = '';
@@ -177,13 +204,13 @@ function JobRenderService ($q, $sce, $window) {
         }
 
         if (current) {
-            if (!this.hooks.isStreamActive() && current.isParent && current.line === ln) {
+            if (this.createToggles && current.isParent && current.line === ln) {
                 id = current.uuid;
-                tdToggle = `<td class="at-Stdout-toggle" ng-click="vm.toggle('${id}')"><i class="fa fa-angle-down can-toggle"></i></td>`;
+                tdToggle = `<div class="at-Stdout-toggle" ng-click="vm.toggleLineExpand('${id}')"><i class="fa fa-angle-down can-toggle"></i></div>`;
             }
 
             if (current.isHost) {
-                tdEvent = `<td class="at-Stdout-event--host" ui-sref="output.host-event.json({eventId: ${current.id},  taskUuid: '${current.uuid}' })"><span ng-non-bindable>${content}</span></td>`;
+                tdEvent = `<div class="at-Stdout-event--host" ng-click="vm.showHostDetails('${current.id}', '${current.uuid}')"><span ng-non-bindable>${content}</span></div>`;
             }
 
             if (current.time && current.line === ln) {
@@ -196,11 +223,11 @@ function JobRenderService ($q, $sce, $window) {
         }
 
         if (!tdEvent) {
-            tdEvent = `<td class="at-Stdout-event">${content}</td>`;
+            tdEvent = `<div class="at-Stdout-event"><span ng-non-bindable>${content}</span></div>`;
         }
 
         if (!tdToggle) {
-            tdToggle = '<td class="at-Stdout-toggle"></td>';
+            tdToggle = '<div class="at-Stdout-toggle"></div>';
         }
 
         if (!ln) {
@@ -208,12 +235,12 @@ function JobRenderService ($q, $sce, $window) {
         }
 
         return `
-            <tr id="${id}" class="${classList}">
+            <div id="${id}" class="at-Stdout-row ${classList}">
                 ${tdToggle}
-                <td class="at-Stdout-line">${ln}</td>
+                <div class="at-Stdout-line">${ln}</div>
                 ${tdEvent}
-                <td class="at-Stdout-time">${timestamp}</td>
-            </tr>`;
+                <div class="at-Stdout-time">${timestamp}</div>
+            </div>`;
     };
 
     this.getTimestamp = created => {
@@ -225,32 +252,7 @@ function JobRenderService ($q, $sce, $window) {
         return `${hour}:${minute}:${second}`;
     };
 
-    this.getParentEvents = (uuid, list) => {
-        list = list || [];
-
-        if (this.record[uuid]) {
-            list.push(uuid);
-
-            if (this.record[uuid].parents) {
-                list = list.concat(this.record[uuid].parents);
-            }
-        }
-
-        return list;
-    };
-
-    this.insert = (events, insert) => {
-        const result = this.transformEventGroup(events);
-        const html = this.trustHtml(result.html);
-
-        return this.requestAnimationFrame(() => insert(html))
-            .then(() => this.compile(html))
-            .then(() => result.lines);
-    };
-
-    this.remove = elements => this.requestAnimationFrame(() => {
-        elements.remove();
-    });
+    this.remove = elements => this.requestAnimationFrame(() => elements.remove());
 
     this.requestAnimationFrame = fn => $q(resolve => {
         $window.requestAnimationFrame(() => {
@@ -262,9 +264,8 @@ function JobRenderService ($q, $sce, $window) {
         });
     });
 
-    this.compile = html => {
-        html = $(this.el);
-        this.hooks.compile(html);
+    this.compile = content => {
+        this.hooks.compile(content);
 
         return this.requestAnimationFrame();
     };
@@ -286,9 +287,35 @@ function JobRenderService ($q, $sce, $window) {
         return this.remove(elements);
     };
 
-    this.prepend = events => this.insert(events, html => this.el.prepend(html));
+    this.prepend = events => {
+        if (events.length < 1) {
+            return $q.resolve();
+        }
 
-    this.append = events => this.insert(events, html => this.el.append(html));
+        const result = this.transformEventGroup(events);
+        const html = this.trustHtml(result.html);
+
+        const newElements = angular.element(html);
+
+        return this.requestAnimationFrame(() => this.el.prepend(newElements))
+            .then(() => this.compile(newElements))
+            .then(() => result.lines);
+    };
+
+    this.append = events => {
+        if (events.length < 1) {
+            return $q.resolve();
+        }
+
+        const result = this.transformEventGroup(events);
+        const html = this.trustHtml(result.html);
+
+        const newElements = angular.element(html);
+
+        return this.requestAnimationFrame(() => this.el.append(newElements))
+            .then(() => this.compile(newElements))
+            .then(() => result.lines);
+    };
 
     this.trustHtml = html => $sce.getTrustedHtml($sce.trustAsHtml(html));
 

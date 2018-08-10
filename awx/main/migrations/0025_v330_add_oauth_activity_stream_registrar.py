@@ -13,6 +13,12 @@ class Migration(migrations.Migration):
     dependencies = [
         ('main', '0024_v330_create_user_session_membership'),
     ]
+    run_before = [
+        # As of this migration, OAuth2Application and OAuth2AccessToken are models in main app
+        # Grant and RefreshToken models are still in the oauth2_provider app and reference
+        # the app and token models, so these must be created before the oauth2_provider models
+        ('oauth2_provider', '0001_initial')
+    ]
 
     operations = [
 

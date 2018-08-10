@@ -1,5 +1,6 @@
 import datetime
 import logging
+from collections import defaultdict
 
 from django.conf import settings
 from django.db import models, DatabaseError
@@ -38,6 +39,21 @@ def sanitize_event_keys(kwargs, valid_keys):
             if len(kwargs[key]) > 1024:
                 kwargs[key] = Truncator(kwargs[key]).chars(1024)
 
+
+def create_host_status_counts(event_data):
+    host_status = {}
+    host_status_keys = ['skipped', 'ok', 'changed', 'failures', 'dark']
+
+    for key in host_status_keys:
+        for host in event_data.get(key, {}):
+            host_status[host] = key
+
+    host_status_counts = defaultdict(lambda: 0)
+
+    for value in host_status.values():
+        host_status_counts[value] += 1
+
+    return dict(host_status_counts)
 
 
 class BasePlaybookEvent(CreatedModifiedModel):
@@ -193,6 +209,9 @@ class BasePlaybookEvent(CreatedModifiedModel):
     @property
     def event_level(self):
         return self.LEVEL_FOR_EVENT.get(self.event, 0)
+
+    def get_host_status_counts(self):
+        return create_host_status_counts(getattr(self, 'event_data', {}))
 
     def get_event_display2(self):
         msg = self.get_event_display()
@@ -587,6 +606,9 @@ class BaseCommandEvent(CreatedModifiedModel):
         Needed for __unicode__
         '''
         return self.event
+
+    def get_host_status_counts(self):
+        return create_host_status_counts(getattr(self, 'event_data', {}))
 
 
 class AdHocCommandEvent(BaseCommandEvent):

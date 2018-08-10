@@ -15,6 +15,11 @@
             </a>
         </at-top-nav-item>
         <at-top-nav-item>
+            <a ui-sref="about">
+                <i class="fa fa-info-circle" alt="{{ vm.getString('ABOUT') }}"></i>
+            </a>
+        </at-top-nav-item>
+        <at-top-nav-item>
             <a href="http://docs.ansible.com/ansible-tower/" target="_blank">
                 <i class="fa fa-book" alt="{{ $parent.layoutVm.getString('VIEW_DOCS') }}"></i>
             </a>
@@ -40,9 +45,9 @@
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-spinner" route="jobs" name="JOBS">
         </at-side-nav-item>
-        <at-side-nav-item icon-class="fa-calendar" route="jobs.schedules" name="SCHEDULES">
+        <at-side-nav-item icon-class="fa-calendar" route="schedules" name="SCHEDULES">
         </at-side-nav-item>
-        <at-side-nav-item icon-class="fa-columns" route="portalMode.myJobs" name="PORTAL_MODE">
+        <at-side-nav-item icon-class="fa-columns" route="portalMode.myJobs" name="MY_VIEW">
         </at-side-nav-item>
         <div class="at-Layout-sideNavSpacer">
             <span class="at-Layout-sideNavHeader">
@@ -70,7 +75,7 @@
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-users" route="teams" name="TEAMS">
         </at-side-nav-item>
-        <div class="at-Layout-sideNavSpacer" ng-show="$parent.layoutVm.isSuperUser">
+        <div class="at-Layout-sideNavSpacer" ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
             <span class="at-Layout-sideNavHeader">
                 {{:: $parent.layoutVm.getString('ADMINISTRATION_HEADER') }}
             <span>
@@ -88,19 +93,15 @@
             ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-cubes" route="applications" name="APPLICATIONS"
-            system-admin-only="true">
+            ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-cog" route="configuration" name="SETTINGS"
             system-admin-only="true">
         </at-side-nav-item>
     </at-side-nav>
-    <div class="at-Layout-main">
+    <div class="at-Layout-main" ng-class="{'at-Layout-main--noLicense': vm.licenseIsMissing}">
         <div class="at-Layout-content">
             <ng-transclude></ng-transclude>
-        </div>
-        <div class="at-Layout-footer" ng-show="vm.isLoggedIn">
-            <a ui-sref="about">{{ vm.getString('FOOTER_ABOUT') }} {{ vm.getString('BRAND_NAME') }}</a>|
-                {{ vm.getString('FOOTER_COPYRIGHT') }}
         </div>
     </div>
 </div>

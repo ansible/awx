@@ -25,6 +25,7 @@ function ApplicationsStrings (BaseString) {
     };
 
     ns.list = {
+        PANEL_TITLE: t.s('APPLICATIONS'),
         ROW_ITEM_LABEL_EXPIRED: t.s('EXPIRATION'),
         ROW_ITEM_LABEL_ORGANIZATION: t.s('ORG'),
         ROW_ITEM_LABEL_MODIFIED: t.s('LAST MODIFIED')

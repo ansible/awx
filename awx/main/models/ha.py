@@ -1,8 +1,11 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import six
+import random
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -16,6 +19,7 @@ from awx import __version__ as awx_application_version
 from awx.api.versioning import reverse
 from awx.main.managers import InstanceManager, InstanceGroupManager
 from awx.main.fields import JSONField
+from awx.main.models.base import BaseModel, HasEditsMixin
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
@@ -26,7 +30,37 @@ from awx.main.models.mixins import RelatedJobsMixin
 __all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
 
 
-class Instance(models.Model):
+def validate_queuename(v):
+    # celery and kombu don't play nice with unicode in queue names
+    if v:
+        try:
+            '{}'.format(v.decode('utf-8'))
+        except UnicodeEncodeError:
+            raise ValidationError(_(six.text_type('{} contains unsupported characters')).format(v))
+
+
+class HasPolicyEditsMixin(HasEditsMixin):
+
+    class Meta:
+        abstract = True
+
+    def __init__(self, *args, **kwargs):
+        r = super(BaseModel, self).__init__(*args, **kwargs)
+        self._prior_values_store = self._get_fields_snapshot()
+        return r
+
+    def save(self, *args, **kwargs):
+        super(BaseModel, self).save(*args, **kwargs)
+        self._prior_values_store = self._get_fields_snapshot()
+
+    def has_policy_changes(self):
+        if not hasattr(self, 'POLICY_FIELDS'):
+            raise RuntimeError('HasPolicyEditsMixin Model needs to set POLICY_FIELDS')
+        new_values = self._get_fields_snapshot(fields_set=self.POLICY_FIELDS)
+        return self._values_have_edits(new_values)
+
+
+class Instance(HasPolicyEditsMixin, BaseModel):
     """A model representing an AWX instance running against this database."""
     objects = InstanceManager()
 
@@ -37,7 +71,6 @@ class Instance(models.Model):
     last_isolated_check = models.DateTimeField(
         null=True,
         editable=False,
-        auto_now_add=True
     )
     version = models.CharField(max_length=24, blank=True)
     capacity = models.PositiveIntegerField(
@@ -50,6 +83,9 @@ class Instance(models.Model):
         decimal_places=2,
     )
     enabled = models.BooleanField(
+        default=True
+    )
+    managed_by_policy = models.BooleanField(
         default=True
     )
     cpu = models.IntegerField(
@@ -72,6 +108,8 @@ class Instance(models.Model):
     class Meta:
         app_label = 'main'
 
+    POLICY_FIELDS = frozenset(('managed_by_policy', 'hostname', 'capacity_adjustment'))
+
     def get_absolute_url(self, request=None):
         return reverse('api:instance_detail', kwargs={'pk': self.pk}, request=request)
 
@@ -81,6 +119,10 @@ class Instance(models.Model):
                                                                     status__in=('running', 'waiting')))
 
     @property
+    def remaining_capacity(self):
+        return self.capacity - self.consumed_capacity
+
+    @property
     def role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "awx"
@@ -88,6 +130,10 @@ class Instance(models.Model):
     @property
     def jobs_running(self):
         return UnifiedJob.objects.filter(execution_node=self.hostname, status__in=('running', 'waiting',)).count()
+
+    @property
+    def jobs_total(self):
+        return UnifiedJob.objects.filter(execution_node=self.hostname).count()
 
     def is_lost(self, ref_time=None, isolated=False):
         if ref_time is None:
@@ -100,6 +146,8 @@ class Instance(models.Model):
     def is_controller(self):
         return Instance.objects.filter(rampart_groups__controller__instances=self).exists()
 
+    def is_isolated(self):
+        return self.rampart_groups.filter(controller__isnull=False).exists()
 
     def refresh_capacity(self):
         cpu = get_cpu_capacity()
@@ -113,9 +161,13 @@ class Instance(models.Model):
         self.save(update_fields=['capacity', 'version', 'modified', 'cpu',
                                  'memory', 'cpu_capacity', 'mem_capacity'])
 
+    def clean_hostname(self):
+        validate_queuename(self.hostname)
+        return self.hostname
+
     
 
-class InstanceGroup(models.Model, RelatedJobsMixin):
+class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     """A model representing a Queue/Group of AWX Instances."""
     objects = InstanceGroupManager()
 
@@ -150,12 +202,25 @@ class InstanceGroup(models.Model, RelatedJobsMixin):
         help_text=_("List of exact-match Instances that will always be automatically assigned to this group")
     )
 
+    POLICY_FIELDS = frozenset((
+        'policy_instance_list', 'policy_instance_minimum', 'policy_instance_percentage', 'controller'
+    ))
+
     def get_absolute_url(self, request=None):
         return reverse('api:instance_group_detail', kwargs={'pk': self.pk}, request=request)
 
     @property
     def capacity(self):
         return sum([inst.capacity for inst in self.instances.all()])
+
+    @property
+    def jobs_running(self):
+        return UnifiedJob.objects.filter(status__in=('running', 'waiting'),
+                                         instance_group=self).count()
+
+    @property
+    def jobs_total(self):
+        return UnifiedJob.objects.filter(instance_group=self).count()
 
     '''
     RelatedJobsMixin
@@ -166,6 +231,37 @@ class InstanceGroup(models.Model, RelatedJobsMixin):
 
     class Meta:
         app_label = 'main'
+
+    def clean_name(self):
+        validate_queuename(self.name)
+        return self.name
+
+    def fit_task_to_most_remaining_capacity_instance(self, task):
+        instance_most_capacity = None
+        for i in self.instances.filter(capacity__gt=0).order_by('hostname'):
+            if not i.enabled:
+                continue
+            if i.remaining_capacity >= task.task_impact and \
+                    (instance_most_capacity is None or
+                     i.remaining_capacity > instance_most_capacity.remaining_capacity):
+                instance_most_capacity = i
+        return instance_most_capacity
+
+    def find_largest_idle_instance(self):
+        largest_instance = None
+        for i in self.instances.filter(capacity__gt=0).order_by('hostname'):
+            if i.jobs_running == 0:
+                if largest_instance is None:
+                    largest_instance = i
+                elif i.capacity > largest_instance.capacity:
+                    largest_instance = i
+        return largest_instance
+
+    def choose_online_controller_node(self):
+        return random.choice(list(self.controller
+                                      .instances
+                                      .filter(capacity__gt=0)
+                                      .values_list('hostname', flat=True)))
 
 
 class TowerScheduleState(SingletonModel):
@@ -190,29 +286,31 @@ class JobOrigin(models.Model):
         app_label = 'main'
 
 
-@receiver(post_save, sender=InstanceGroup)
-def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
+def schedule_policy_task():
     from awx.main.tasks import apply_cluster_membership_policies
     connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+
+
+@receiver(post_save, sender=InstanceGroup)
+def on_instance_group_saved(sender, instance, created=False, raw=False, **kwargs):
+    if created or instance.has_policy_changes():
+        schedule_policy_task()
 
 
 @receiver(post_save, sender=Instance)
 def on_instance_saved(sender, instance, created=False, raw=False, **kwargs):
-    if created:
-        from awx.main.tasks import apply_cluster_membership_policies
-        connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+    if created or instance.has_policy_changes():
+        schedule_policy_task()
 
 
 @receiver(post_delete, sender=InstanceGroup)
 def on_instance_group_deleted(sender, instance, using, **kwargs):
-    from awx.main.tasks import apply_cluster_membership_policies
-    connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+    schedule_policy_task()
 
 
 @receiver(post_delete, sender=Instance)
 def on_instance_deleted(sender, instance, using, **kwargs):
-    from awx.main.tasks import apply_cluster_membership_policies
-    connection.on_commit(lambda: apply_cluster_membership_policies.apply_async())
+    schedule_policy_task()
 
 
 # Unfortunately, the signal can't just be connected against UnifiedJob; it

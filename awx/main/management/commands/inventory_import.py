@@ -30,6 +30,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.signals import disable_activity_stream
+from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
 
@@ -82,7 +83,10 @@ class AnsibleInventoryLoader(object):
         env = dict(os.environ.items())
         env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
         env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
-        env['ANSIBLE_INVENTORY_UNPARSED_FAILED'] = '1'
+        # Set configuration items that should always be used for updates
+        for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
+            if key not in env:
+                env[key] = value
         venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
         if os.path.isdir(os.path.join(venv_libdir, "python2.7")):
@@ -1001,37 +1005,43 @@ class Command(BaseCommand):
                 self.all_group.debug_tree()
 
             with batch_role_ancestor_rebuilding():
-                # Ensure that this is managed as an atomic SQL transaction,
-                # and thus properly rolled back if there is an issue.
-                with transaction.atomic():
-                    # Merge/overwrite inventory into database.
-                    if settings.SQL_DEBUG:
-                        logger.warning('loading into database...')
-                    with ignore_inventory_computed_fields():
-                        if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
-                            self.load_into_database()
-                        else:
-                            with disable_activity_stream():
+                # If using with transaction.atomic() with try ... catch,
+                # with transaction.atomic() must be inside the try section of the code as per Django docs
+                try:
+                    # Ensure that this is managed as an atomic SQL transaction,
+                    # and thus properly rolled back if there is an issue.
+                    with transaction.atomic():
+                        # Merge/overwrite inventory into database.
+                        if settings.SQL_DEBUG:
+                            logger.warning('loading into database...')
+                        with ignore_inventory_computed_fields():
+                            if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
                                 self.load_into_database()
-                        if settings.SQL_DEBUG:
-                            queries_before2 = len(connection.queries)
-                        self.inventory.update_computed_fields()
-                        if settings.SQL_DEBUG:
-                            logger.warning('update computed fields took %d queries',
-                                           len(connection.queries) - queries_before2)
-                    try:
+                            else:
+                                with disable_activity_stream():
+                                    self.load_into_database()
+                            if settings.SQL_DEBUG:
+                                queries_before2 = len(connection.queries)
+                            self.inventory.update_computed_fields()
+                            if settings.SQL_DEBUG:
+                                logger.warning('update computed fields took %d queries',
+                                               len(connection.queries) - queries_before2)
+                        # Check if the license is valid. 
+                        # If the license is not valid, a CommandError will be thrown, 
+                        # and inventory update will be marked as invalid.
+                        # with transaction.atomic() will roll back the changes.
                         self.check_license()
-                    except CommandError as e:
-                        self.mark_license_failure(save=True)
-                        raise e
+                except CommandError as e:
+                    self.mark_license_failure()
+                    raise e
 
-                    if settings.SQL_DEBUG:
-                        logger.warning('Inventory import completed for %s in %0.1fs',
-                                       self.inventory_source.name, time.time() - begin)
-                    else:
-                        logger.info('Inventory import completed for %s in %0.1fs',
-                                    self.inventory_source.name, time.time() - begin)
-                    status = 'successful'
+                if settings.SQL_DEBUG:
+                    logger.warning('Inventory import completed for %s in %0.1fs',
+                                   self.inventory_source.name, time.time() - begin)
+                else:
+                    logger.info('Inventory import completed for %s in %0.1fs',
+                                self.inventory_source.name, time.time() - begin)
+                status = 'successful'
 
             # If we're in debug mode, then log the queries and time
             # used to do the operation.
@@ -1058,6 +1068,8 @@ class Command(BaseCommand):
                 self.inventory_update.result_traceback = tb
                 self.inventory_update.status = status
                 self.inventory_update.save(update_fields=['status', 'result_traceback'])
+                self.inventory_source.status = status
+                self.inventory_source.save(update_fields=['status'])
 
         if exc and isinstance(exc, CommandError):
             sys.exit(1)

@@ -31,9 +31,8 @@ export default {
         }
     },
     resolve: {
-        ListDefinition: ['CredentialList', 'i18n', function(CredentialList, i18n) {
+        ListDefinition: ['CredentialList', function(CredentialList) {
             let list = _.cloneDeep(CredentialList);
-            list.lookupConfirmText = i18n._('SELECT');
             return list;
         }],
         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',

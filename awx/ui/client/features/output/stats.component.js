@@ -11,6 +11,7 @@ function createStatsBarTooltip (key, count) {
 
 function JobStatsController (strings, { subscribe }) {
     vm = this || {};
+    vm.strings = strings;
 
     let unsubscribe;
 
@@ -21,15 +22,17 @@ function JobStatsController (strings, { subscribe }) {
 
     vm.$onInit = () => {
         vm.download = vm.resource.model.get('related.stdout');
-        vm.toggleStdoutFullscreenTooltip = strings.get('expandCollapse.EXPAND');
+        vm.tooltips.toggleExpand = vm.expanded ?
+            strings.get('tooltips.COLLAPSE_OUTPUT') :
+            strings.get('tooltips.EXPAND_OUTPUT');
 
-        unsubscribe = subscribe(({ running, elapsed, counts, stats, hosts }) => {
+        unsubscribe = subscribe(({ running, elapsed, counts, hosts }) => {
             vm.plays = counts.plays;
             vm.tasks = counts.tasks;
             vm.hosts = counts.hosts;
             vm.elapsed = elapsed;
             vm.running = running;
-            vm.setHostStatusCounts(stats, hosts);
+            vm.setHostStatusCounts(hosts);
         });
     };
 
@@ -37,7 +40,9 @@ function JobStatsController (strings, { subscribe }) {
         unsubscribe();
     };
 
-    vm.setHostStatusCounts = (stats, counts) => {
+    vm.setHostStatusCounts = counts => {
+        let statsAreAvailable;
+
         Object.keys(counts).forEach(key => {
             const count = counts[key];
             const statusBarElement = $(`.HostStatusBar-${key}`);
@@ -45,22 +50,24 @@ function JobStatsController (strings, { subscribe }) {
             statusBarElement.css('flex', `${count} 0 auto`);
 
             vm.tooltips[key] = createStatsBarTooltip(key, count);
+
+            if (count) statsAreAvailable = true;
         });
 
-        vm.statsAreAvailable = stats;
+        vm.statsAreAvailable = statsAreAvailable;
     };
 
     vm.toggleExpanded = () => {
         vm.expanded = !vm.expanded;
-        vm.toggleStdoutFullscreenTooltip = vm.expanded ?
-            strings.get('expandCollapse.COLLAPSE') :
-            strings.get('expandCollapse.EXPAND');
+        vm.tooltips.toggleExpand = vm.expanded ?
+            strings.get('tooltips.COLLAPSE_OUTPUT') :
+            strings.get('tooltips.EXPAND_OUTPUT');
     };
 }
 
 JobStatsController.$inject = [
-    'JobStrings',
-    'JobStatusService',
+    'OutputStrings',
+    'OutputStatusService',
 ];
 
 export default {

@@ -1,0 +1,11 @@
+---
+- name: Setup minishift dev environment
+  hosts: localhost
+  gather_facts: false
+  vars:
+    - ansible_connection: local
+    - awx_dev_project: awx
+    - awx_task_cpu_request: 500
+    - awx_task_mem_request: 512
+  roles:
+    - { role: minishift }

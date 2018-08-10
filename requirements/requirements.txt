@@ -114,10 +114,9 @@ django-celery==3.2.2
 django-crum==0.7.2
 django-extensions==2.0.0
 django-jsonfield==1.0.1
-django-oauth-toolkit==1.0.0
 django-pglocks==1.0.2
 django-polymorphic==2.0.2
-django-radius==1.3.3
+django-radius==1.1.0
 django-solo==1.1.3
 django-split-settings==0.3.0
 django-taggit==0.22.2
@@ -127,7 +126,6 @@ djangorestframework==3.7.7
 dogpile.cache==0.6.5      # via openstacksdk
 enum34==1.1.6             # via cryptography, msrest
 functools32==3.2.3.post2  # via jsonschema
-future==0.16.0            # via django-radius
 futures==3.2.0            # via azure-cosmosdb-table, azure-datalake-store, azure-storage-blob, azure-storage-file, openstacksdk, requests-futures, s3transfer
 hyperlink==18.0.0         # via twisted
 idna==2.6                 # via cryptography, hyperlink, requests
@@ -170,7 +168,7 @@ os-service-types==1.2.0   # via openstacksdk
 packaging==17.1           # via deprecation
 pathlib2==2.3.0           # via azure-datalake-store
 pbr==3.1.1                # via keystoneauth1, openstacksdk, os-service-types, shade, stevedore
-pexpect==4.5.0
+pexpect==4.6.0
 psphere==0.5.2
 psutil==5.4.3
 psycopg2==2.7.3.2
@@ -183,7 +181,7 @@ pygerduty==0.37.0
 pyjwt==1.6.0              # via adal, social-auth-core, twilio
 pyopenssl==17.5.0
 pyparsing==2.2.0
-pyrad==2.1                # via django-radius
+pyrad==1.2                # via django-radius
 python-dateutil==2.7.2
 python-ldap==2.5.2        # via django-auth-ldap
 python-logstash==0.4.6

@@ -13,13 +13,12 @@
 
 export default [
     '$filter', '$scope', '$location', '$stateParams', 'ScheduleList', 'Rest',
-    'rbacUiControlService',
-    'ToggleSchedule', 'DeleteSchedule', '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions',
-    function($filter, $scope, $location, $stateParams,
-        ScheduleList, Rest,
-        rbacUiControlService,
-        ToggleSchedule, DeleteSchedule,
-        $q, $state, Dataset, ParentObject, UnifiedJobsOptions) {
+    'rbacUiControlService', 'JobTemplateModel', 'ToggleSchedule', 'DeleteSchedule',
+    '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions', 'i18n', 'SchedulerStrings',
+    function($filter, $scope, $location, $stateParams, ScheduleList, Rest,
+        rbacUiControlService, JobTemplate, ToggleSchedule, DeleteSchedule,
+        $q, $state, Dataset, ParentObject, UnifiedJobsOptions, i18n, strings
+    ) {
 
         var base, scheduleEndpoint,
             list = ScheduleList;
@@ -35,6 +34,19 @@ export default [
                     .then(function(params) {
                         $scope.canAdd = params.canAdd;
                     });
+                if (_.has(ParentObject, 'type') && ParentObject.type === 'job_template') {
+                    const jobTemplate = new JobTemplate();
+                    jobTemplate.getLaunch(ParentObject.id)
+                        .then(({data}) => {
+                            if (data.passwords_needed_to_start &&
+                                data.passwords_needed_to_start.length > 0 &&
+                                !ParentObject.ask_credential_on_launch
+                            ) {
+                                $scope.credentialRequiresPassword = true;
+                                $scope.addTooltip = i18n._("Using a credential that requires a password on launch is prohibited when creating a Job Template schedule");
+                            }
+                        });
+                }
             }
 
             // search init
@@ -89,7 +101,7 @@ export default [
                 }
                 buildTooltips(itm);
 
-                if (!$state.is('jobs.schedules')){
+                if (!$state.is('schedules')){
                     if($state.current.name.endsWith('.add')) {
                         itm.linkToDetails = `^.edit({schedule_id:schedule.id})`;
                     }
@@ -107,13 +119,15 @@ export default [
         function buildTooltips(schedule) {
             var job = schedule.summary_fields.unified_job_template;
             if (schedule.enabled) {
-                schedule.play_tip = 'Schedule is active. Click to stop.';
+                const tip = (schedule.summary_fields.user_capabilities.edit || $scope.credentialRequiresPassword) ? strings.get('list.SCHEDULE_IS_ACTIVE') : strings.get('list.SCHEDULE_IS_ACTIVE_CLICK_TO_STOP');
+                schedule.play_tip = tip;
                 schedule.status = 'active';
-                schedule.status_tip = 'Schedule is active. Click to stop.';
+                schedule.status_tip = tip;
             } else {
-                schedule.play_tip = 'Schedule is stopped. Click to activate.';
+                const tip = (schedule.summary_fields.user_capabilities.edit || $scope.credentialRequiresPassword) ? strings.get('list.SCHEDULE_IS_STOPPED') : strings.get('list.SCHEDULE_IS_STOPPED_CLICK_TO_STOP');//i18n._('Schedule is stopped.') : i18n._('Schedule is stopped. Click to activate.');
+                schedule.play_tip = tip;
                 schedule.status = 'stopped';
-                schedule.status_tip = 'Schedule is stopped. Click to activate.';
+                schedule.status_tip = tip;
             }
 
             schedule.nameTip = $filter('sanitize')(schedule.name);
@@ -126,7 +140,7 @@ export default [
                 schedule.nameTip += "job ";
             }
             schedule.nameTip += $filter('sanitize')(job.name);
-            schedule.nameTip += ". Click to edit schedule.";
+            schedule.nameTip += `. ${strings.get('list.CLICK_TO_EDIT')}`;
         }
 
         $scope.refreshSchedules = function() {
@@ -143,8 +157,8 @@ export default [
         };
 
         $scope.editSchedule = function(schedule) {
-            if ($state.is('jobs.schedules')){
-                $state.go('jobs.schedules.edit', {schedule_id: schedule.id});
+            if ($state.is('schedules')){
+                $state.go('schedules.edit', {schedule_id: schedule.id});
             }
             else {
                 if($state.current.name.endsWith('.add')) {

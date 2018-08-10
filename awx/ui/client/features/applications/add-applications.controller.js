@@ -1,4 +1,4 @@
-function AddApplicationsController (models, $state, strings) {
+function AddApplicationsController (models, $state, strings, $scope) {
     const vm = this || {};
 
     const { application, me, organization } = models;
@@ -62,12 +62,19 @@ function AddApplicationsController (models, $state, strings) {
     vm.form.onSaveSuccess = res => {
         $state.go('applications.edit', { application_id: res.data.id }, { reload: true });
     };
+
+    $scope.$watch('organization', () => {
+        if ($scope.organization) {
+            vm.form.organization._idFromModal = $scope.organization;
+        }
+    });
 }
 
 AddApplicationsController.$inject = [
     'resolvedModels',
     '$state',
-    'ApplicationsStrings'
+    'ApplicationsStrings',
+    '$scope'
 ];
 
 export default AddApplicationsController;

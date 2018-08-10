@@ -30,6 +30,8 @@ DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
 
+CURWD = $(shell pwd)
+
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -219,7 +221,7 @@ init:
 	if [ "$(AWX_GROUP_QUEUES)" == "tower,thepentagon" ]; then \
 		$(MANAGEMENT_COMMAND) provision_instance --hostname=isolated; \
 		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
-		$(MANAGEMENT_COMMAND) generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat > /root/.ssh/authorized_keys'; \
+		$(MANAGEMENT_COMMAND) generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat >> /root/.ssh/authorized_keys'; \
 	fi;
 
 # Refresh development environment after pulling new code.
@@ -372,7 +374,7 @@ awx-link:
 	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
 	cp /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
 
-TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests awx/network_ui/tests/unit
+TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 
 # Run all API unit tests.
 test:
@@ -387,7 +389,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit awx/network_ui/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
 
 test_ansible:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -560,7 +562,7 @@ docker-isolated:
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
 	docker start tools_awx_1
 	docker start tools_isolated_1
-	echo "__version__ = '`python setup.py --version`'" | docker exec -i tools_isolated_1 /bin/bash -c "cat > /venv/awx/lib/python2.7/site-packages/awx.py"
+	echo "__version__ = '`git describe --long | cut -d - -f 1-1`'" | docker exec -i tools_isolated_1 /bin/bash -c "cat > /venv/awx/lib/python2.7/site-packages/awx.py"
 	if [ "`docker exec -i -t tools_isolated_1 cat /root/.ssh/authorized_keys`" == "`docker exec -t tools_awx_1 cat /root/.ssh/id_rsa.pub`" ]; then \
 		echo "SSH keys already copied to isolated instance"; \
 	else \
@@ -606,6 +608,10 @@ docker-compose-elk: docker-auth
 
 docker-compose-cluster-elk: docker-auth
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+
+minishift-dev:
+	ansible-playbook -i localhost, -e devtree_directory=$(CURWD) tools/clusterdevel/start_minishift_dev.yml
+
 
 clean-elk:
 	docker stop tools_kibana_1

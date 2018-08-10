@@ -11,7 +11,7 @@
 
     <form action="{% url 'api:login' %}" role="form" method="post">
       {% csrf_token %}
-      <input type="hidden" name="next" value={% if request.GET.next %}"{{ request.GET.next }}"{% else %}"{% url 'api:api_root_view' %}"{% endif %} />
+      <input type="hidden" name="next" value={% if request.GET.next %}"{{ request.GET.next }}"{% elif request.POST.next %}"{{ request.POST.next }}"{% else %}"{% url 'api:api_root_view' %}"{% endif %} />
       <div class="clearfix control-group {% if form.username.errors %}error{% endif %}"
           id="div_id_username">
         <div class="form-group">

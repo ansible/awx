@@ -8,6 +8,7 @@ import atFeaturesOutput from '~features/output';
 import atFeaturesTemplates from '~features/templates';
 import atFeaturesUsers from '~features/users';
 import atFeaturesJobs from '~features/jobs';
+import atFeaturesPortalMode from '~features/portalMode';
 
 const MODULE_NAME = 'at.features';
 
@@ -21,7 +22,8 @@ angular.module(MODULE_NAME, [
     atFeaturesUsers,
     atFeaturesJobs,
     atFeaturesOutput,
-    atFeaturesTemplates
+    atFeaturesTemplates,
+    atFeaturesPortalMode,
 ]);
 
 export default MODULE_NAME;

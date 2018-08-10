@@ -16,8 +16,7 @@ export default {
         job_search: {
             value: {
                 page_size: '10',
-                order_by: '-id',
-                status: 'running'
+                order_by: '-finished'
             },
             dynamic: true
         }
@@ -60,6 +59,10 @@ export default {
                 return qs.search(searchPath, searchParam)
                     .finally(() => Wait('stop'));
             }
+        ],
+        SearchBasePath: [
+            '$stateParams',
+            ($stateParams) => `api/v2/instance_groups/${$stateParams.instance_group_id}/jobs`
         ]
     }
 };

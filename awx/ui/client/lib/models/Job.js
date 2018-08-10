@@ -23,31 +23,6 @@ function postRelaunch (params) {
     return $http(req);
 }
 
-function getStats () {
-    if (!this.has('GET', 'id')) {
-        return Promise.reject(new Error('No property, id, exists'));
-    }
-
-    if (!this.has('GET', 'related.job_events')) {
-        return Promise.reject(new Error('No related property, job_events, exists'));
-    }
-
-    const req = {
-        method: 'GET',
-        url: `${this.path}${this.get('id')}/job_events/`,
-        params: { event: 'playbook_on_stats' },
-    };
-
-    return $http(req)
-        .then(({ data }) => {
-            if (data.results.length > 0) {
-                return data.results[0];
-            }
-
-            return null;
-        });
-}
-
 function getCredentials (id) {
     const req = {
         method: 'GET',
@@ -64,7 +39,6 @@ function JobModel (method, resource, config) {
 
     this.postRelaunch = postRelaunch.bind(this);
     this.getRelaunch = getRelaunch.bind(this);
-    this.getStats = getStats.bind(this);
     this.getCredentials = getCredentials.bind(this);
 
     return this.create(method, resource, config);

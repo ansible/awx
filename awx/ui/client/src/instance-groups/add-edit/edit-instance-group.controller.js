@@ -1,12 +1,17 @@
 function EditController ($rootScope, $state, models, strings) {
     const vm = this || {};
-    const { instanceGroup, instance } = models;
+    const { instanceGroup } = models;
 
     $rootScope.breadcrumb.instance_group_name = instanceGroup.get('name');
 
     vm.mode = 'edit';
     vm.strings = strings;
     vm.panelTitle = instanceGroup.get('name');
+
+    vm.docs = {
+        url: 'https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html',
+        help_text: vm.strings.get('tooltips.DOCS_HELP_TEXT')
+    };
 
     vm.tab = {
         details: {
@@ -29,16 +34,8 @@ function EditController ($rootScope, $state, models, strings) {
     vm.form.disabled = !instanceGroup.has('options', 'actions.PUT');
 
     vm.form.name._disabled = instanceGroup.get('name') === 'tower';
-    vm.form.policy_instance_list._lookupTags = true;
-    vm.form.policy_instance_list._model = instance;
-    vm.form.policy_instance_list._placeholder = "Policy Instance List";
-    vm.form.policy_instance_list._resource = 'instances';
-    vm.form.policy_instance_list._route = 'instanceGroups.edit.modal.instances';
-    vm.form.policy_instance_list._value = instanceGroup.get('policy_instance_list');
 
     vm.form.save = data => {
-        instanceGroup.unset('policy_instance_list');
-        data.policy_instance_list = data.policy_instance_list.map(instance => instance.hostname || instance);
         return instanceGroup.request('put', { data });
     };
 

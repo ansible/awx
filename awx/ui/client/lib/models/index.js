@@ -22,11 +22,13 @@ import Project from '~models/Project';
 import Schedule from '~models/Schedule';
 import ProjectUpdate from '~models/ProjectUpdate';
 import SystemJob from '~models/SystemJob';
+import Token from '~models/Token';
 import UnifiedJobTemplate from '~models/UnifiedJobTemplate';
 import WorkflowJob from '~models/WorkflowJob';
 import WorkflowJobTemplate from '~models/WorkflowJobTemplate';
 import WorkflowJobTemplateNode from '~models/WorkflowJobTemplateNode';
 import UnifiedJob from '~models/UnifiedJob';
+import User from '~models/User';
 
 import ModelsStrings from '~models/models.strings';
 
@@ -59,10 +61,12 @@ angular
     .service('UnifiedJobModel', UnifiedJob)
     .service('ProjectUpdateModel', ProjectUpdate)
     .service('SystemJobModel', SystemJob)
+    .service('TokenModel', Token)
     .service('UnifiedJobTemplateModel', UnifiedJobTemplate)
     .service('WorkflowJobModel', WorkflowJob)
     .service('WorkflowJobTemplateModel', WorkflowJobTemplate)
     .service('WorkflowJobTemplateNodeModel', WorkflowJobTemplateNode)
+    .service('UserModel', User)
     .service('ModelsStrings', ModelsStrings);
 
 export default MODULE_NAME;

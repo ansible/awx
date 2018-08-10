@@ -147,6 +147,14 @@ table, tbody {
     color: @list-actn-icn-hov;
 }
 
+.List-actionButton + .btn-disabled {
+    &:hover {
+        color: @default-icon-hov;
+        background-color: @list-actn-bg !important;
+    }
+    color: @default-icon-hov;
+}
+
 .List-actionButton--delete:hover {
     background-color: @list-actn-del-bg-hov !important;
 }
@@ -214,9 +222,11 @@ table, tbody {
 }
 
 .List-actionHolder--leftAlign {
-    width: 50%;
-    margin-left: 50%;
+    margin-left: 52%;
     justify-content: flex-start;
+    button {
+       height: 34px;
+    }
 }
 
 .List-actions {
@@ -388,7 +398,7 @@ table, tbody {
 }
 
 .List-staticColumn--mediumStatus {
-    width: 51px;
+    width: 52px;
     padding-right: 0px!important;
 }
 

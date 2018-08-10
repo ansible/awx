@@ -8,13 +8,7 @@
     <span id="InstanceGroups" class="form-control Form-textInput Form-textInput--variableHeight input-medium lookup LabelList-lookupTags"
         ng-disabled="fieldIsDisabled">
         <div class="LabelList-tagContainer" ng-repeat="tag in instanceGroupsTags">
-            <div class="LabelList-tag LabelList-tag--deletable">
-                <span class="LabelList-name">{{ tag.name }}</span>
-            </div>
-            <div class="LabelList-deleteContainer"
-                ng-click="deleteTag(tag)">
-                <i class="fa fa-times LabelList-tagDelete"></i>
-            </div>
+            <at-tag tag="tag.name" remove-tag="deleteTag(tag)"></at-tag>
         </div>
     </span>
 </div>

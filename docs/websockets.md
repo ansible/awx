@@ -27,7 +27,7 @@ Once you've connected, you are not subscribed to any event groups. You subscribe
             'project_update_events': [ids...],
             'inventory_update_events': [ids...],
             'system_job_events': [ids...],
-            'control': ['limit_reached'],
+            'control': ['limit_reached_<user_id>'],
     }
 
 These map to the event group and event type you are interested in. Sending in a new groups dictionary will clear all of your previously

@@ -220,6 +220,18 @@ class LDAPDNField(fields.CharField):
         return None if value == '' else value
 
 
+class LDAPDNListField(fields.StringListField):
+
+    def __init__(self, **kwargs):
+        super(LDAPDNListField, self).__init__(**kwargs)
+        self.validators.append(lambda dn: map(validate_ldap_dn, dn))
+
+    def run_validation(self, data=empty):
+        if not isinstance(data, (list, tuple)):
+            data = [data]
+        return super(LDAPDNListField, self).run_validation(data)
+
+
 class LDAPDNWithUserField(fields.CharField):
 
     def __init__(self, **kwargs):
@@ -431,7 +443,7 @@ class LDAPUserFlagsField(fields.DictField):
         'invalid_flag': _('Invalid user flag: "{invalid_flag}".'),
     }
     valid_user_flags = {'is_superuser', 'is_system_auditor'}
-    child = LDAPDNField()
+    child = LDAPDNListField()
 
     def to_internal_value(self, data):
         data = super(LDAPUserFlagsField, self).to_internal_value(data)

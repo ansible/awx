@@ -185,6 +185,32 @@ def test_annon_user_action():
 
 
 @pytest.mark.django_db
+def test_activity_stream_deleted_actor(alice, bob):
+    alice.first_name = 'Alice'
+    alice.last_name = 'Doe'
+    alice.save()
+    with impersonate(alice):
+        o = Organization.objects.create(name='test organization')
+    entry = o.activitystream_set.get(operation='create')
+    assert entry.actor == alice
+
+    alice.delete()
+    entry = o.activitystream_set.get(operation='create')
+    assert entry.actor is None
+    deleted = entry.deleted_actor
+    assert deleted['username'] == 'alice'
+    assert deleted['first_name'] == 'Alice'
+    assert deleted['last_name'] == 'Doe'
+
+    entry.actor = bob
+    entry.save(update_fields=['actor'])
+    deleted = entry.deleted_actor
+
+    entry = ActivityStream.objects.get(id=entry.pk)
+    assert entry.deleted_actor['username'] == 'bob'
+
+
+@pytest.mark.django_db
 def test_modified_not_allowed_field(somecloud_type):
     '''
     If this test fails, that means that read-only fields are showing

@@ -229,19 +229,24 @@ function(NotificationsList, i18n) {
                     dataPlacement: 'right',
                     awPopOver: "<p>" + i18n._("Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs.") + "</p>",
                     dataContainer: 'body',
+                    onError: {
+                        ngShow: 'job_template_labels_isValid !== true',
+                        text: i18n._('Max 512 characters per label.'),
+                    },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 custom_virtualenv: {
                     label: i18n._('Ansible Environment'),
                     type: 'select',
-                    defaultText: i18n._('Default Environment'),
+                    defaultText: i18n._('Use Default Environment'),
                     ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
+
                     awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this job template to run on.") + "</p>",
                     dataTitle: i18n._('Ansible Environment'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)',
-                    ngShow: 'custom_virtualenvs_options.length > 0'
+                    ngShow: 'custom_virtualenvs_options.length > 1'
                 },
                 instance_groups: {
                     label: i18n._('Instance Groups'),

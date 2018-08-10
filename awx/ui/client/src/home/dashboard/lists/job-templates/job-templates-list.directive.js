@@ -32,7 +32,8 @@ export default
                         can_start: template.summary_fields.user_capabilities.start,
                         name: template.name,
                         id: template.id,
-                        type: template.type
+                        type: template.type,
+                        can_edit: template.summary_fields.user_capabilities.edit
                     }; });
                 }
 

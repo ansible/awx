@@ -21,7 +21,7 @@ export default
                 delete(this.config);
             },
 
-            getConfig: function () {
+            getConfig: function (licenseInfo) {
                 var config = this.get(),
                 that = this,
                 deferred = $q.defer();
@@ -31,6 +31,11 @@ export default
                     Wait('start');
                     var promise = Rest.get();
                     promise.then(function (response) {
+                        // if applicable, use the license POSTs response if the config GET request is not returned due to a
+                        // cluster cache update race condition
+                        if (_.isEmpty(response.data.license_info) && !_.isEmpty(licenseInfo)) {
+                            response.data.license_info = licenseInfo;
+                        }
                         var config = response.data;
                         $rootScope.configReady = true;
                         Wait('stop');

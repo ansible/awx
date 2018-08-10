@@ -6,10 +6,10 @@
 
 export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', 'GetBasePath',
         'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'credentialType', 'i18n',
-        'CredentialModel', 'CredentialsStrings',
+        'CredentialModel', 'CredentialsStrings', 'ngToast',
     function($scope, Rest, CredentialList, Prompt,
     ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
-    credentialType, i18n, Credential, CredentialsStrings) {
+    credentialType, i18n, Credential, CredentialsStrings, ngToast) {
 
         const credential = new Credential();
 
@@ -93,9 +93,21 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
             Wait('start');
             new Credential('get', credential.id)
                 .then(model => model.copy())
-                .then(({ id }) => {
-                    const params = { credential_id: id };
-                    $state.go('credentials.edit', params, { reload: true });
+                .then((copiedCred) => {
+                    ngToast.success({
+                        content: `
+                            <div class="Toast-wrapper">
+                                <div class="Toast-icon">
+                                    <i class="fa fa-check-circle Toast-successIcon"></i>
+                                </div>
+                                <div>
+                                    ${CredentialsStrings.get('SUCCESSFUL_CREATION', copiedCred.name)}
+                                </div>
+                            </div>`,
+                        dismissButton: false,
+                        dismissOnTimeout: true
+                    });
+                    $state.go('.', null, { reload: true });
                 })
                 .catch(({ data, status }) => {
                     const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
@@ -122,7 +134,7 @@ export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ProcessErrors', '
 
                         let reloadListStateParams = null;
 
-                        if($scope.credentials.length === 1 && $state.params.credential_search && !_.isEmpty($state.params.credential_search.page) && $state.params.credential_search.page !== '1') {
+                        if($scope.credentials.length === 1 && $state.params.credential_search && _.has($state, 'params.credential_search.page') && $state.params.credential_search.page !== '1') {
                             reloadListStateParams = _.cloneDeep($state.params);
                             reloadListStateParams.credential_search.page = (parseInt(reloadListStateParams.credential_search.page)-1).toString();
                         }

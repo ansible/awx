@@ -1,0 +1,56 @@
+<div class="tab-pane PortalMode">
+    <div ng-cloak id="portal-landing">
+        <div class="PortalMode-container">
+            <at-panel class="PortalMode-panel PortalMode-panel--left">
+                <div id="portal-container-job-templates">
+                    <at-panel-heading
+                        title="{{:: vm.strings.get('list.TEMPLATES_PANEL_TITLE') }}"
+                        badge="{{ vm.templatesCount }}"
+                        hide-dismiss="true">
+                    </at-panel-heading>
+                    <div ui-view="templates">
+                    </div>
+                </div>
+            </at-panel>
+            <at-panel class="PortalMode-panel PortalMode-panel--right">
+                <div id="portal-container-jobs">
+                    <div class="PortalMode-headerContainer">
+                        <at-panel-heading
+                            title="{{:: vm.strings.get('list.JOBS_PANEL_TITLE') }}"
+                            badge="{{ vm.jobsCount }}"
+                            hide-dismiss="true">
+                        </at-panel-heading>
+                        <div class="PortalMode-filterHolder">
+                            <div class="FormToggle-container">
+                                <div class="btn-group">
+                                    <button ng-class="{'btn-primary': $state.is('portalMode.myJobs'), 'Button-primary--hollow': $state.is('portalMode.allJobs')}"
+                                            ng-click='filterUser()'
+                                            class="btn btn-xs"
+                                            id="my-jobs-btn"
+                                            translate>
+                                        My Jobs
+                                    </button>
+                                    <button ng-class="{'btn-primary': $state.is('portalMode.allJobs'), 'Button-primary--hollow': $state.is('portalMode.myJobs')}"
+                                            ng-click='filterAll()'
+                                            class="btn btn-xs"
+                                            id="all-jobs-btn"
+                                            translate>
+                                        All Jobs
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="PortalMode-refresh">
+                                <button id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" class="btn List-buttonDefault"
+                                        ng-click="refresh()" ng-show="socketStatus == 'error'">
+                                    <span>REFRESH</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div ui-view="jobs">
+                    </div>
+                </div>
+            </at-panel>
+        </div>
+    </div>
+</div>

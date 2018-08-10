@@ -19,6 +19,7 @@ export default ['i18n', function(i18n) {
         basePath: 'inventory',
         title: false,
         disableRow: "{{ inventory.pending_deletion }}",
+        disableRowValue: 'inventory.pending_deletion',
 
         fields: {
             status: {
@@ -100,20 +101,14 @@ export default ['i18n', function(i18n) {
                 dataPlacement: 'top',
                 ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.edit'
             },
-            network: {
-                label: i18n._('Network Visualization'),
-                ngClick: 'goToGraph(inventory)',
-                awToolTip: i18n._('Network Visualization'),
-                dataPlacement: 'top',
-                ngShow: '!inventory.pending_deletion'
-            },
             copy: {
                 label: i18n._('Copy'),
                 ngClick: 'copyInventory(inventory)',
-                "class": 'btn-danger btn-xs',
-                awToolTip: i18n._('Copy inventory'),
+                awToolTip: "{{ inventory.copyTip }}",
+                dataTipWatch: "inventory.copyTip",
                 dataPlacement: 'top',
-                ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.copy'
+                ngShow: '!inventory.pending_deletion && inventory.summary_fields.user_capabilities.copy',
+                ngClass: 'inventory.copyClass'
             },
             view: {
                 label: i18n._('View'),

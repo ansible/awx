@@ -22,6 +22,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='organization',
+            name='job_template_admin_role',
+            field=awx.main.fields.ImplicitRoleField(editable=False, null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=b'admin_role', related_name='+', to='main.Role'),
+        ),
+        migrations.AddField(
+            model_name='organization',
             name='credential_admin_role',
             field=awx.main.fields.ImplicitRoleField(null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=b'admin_role', related_name='+', to='main.Role'),
         ),
@@ -73,7 +78,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jobtemplate',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=[b'project.organization.project_admin_role', b'inventory.organization.inventory_admin_role'], related_name='+', to='main.Role'),
+            field=awx.main.fields.ImplicitRoleField(editable=False, null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=[b'project.organization.job_template_admin_role', b'inventory.organization.job_template_admin_role'], related_name='+', to='main.Role'),
         ),
         migrations.AlterField(
             model_name='jobtemplate',
@@ -83,6 +88,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='organization',
             name='member_role',
-            field=awx.main.fields.ImplicitRoleField(null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=[b'admin_role', b'project_admin_role', b'inventory_admin_role', b'workflow_admin_role', b'notification_admin_role', b'credential_admin_role', b'execute_role'], related_name='+', to='main.Role'),
+            field=awx.main.fields.ImplicitRoleField(editable=False, null=b'True', on_delete=django.db.models.deletion.CASCADE, parent_role=[b'admin_role', b'execute_role', b'project_admin_role', b'inventory_admin_role', b'workflow_admin_role', b'notification_admin_role', b'credential_admin_role', b'job_template_admin_role'], related_name='+', to='main.Role'),
         ),
+
     ]

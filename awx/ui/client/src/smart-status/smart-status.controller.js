@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$filter',
-    function ($scope, $filter) {
+export default ['$scope', '$filter', 'i18n',
+    function ($scope, $filter, i18n) {
 
         function isFailureState(status) {
             return status === 'failed' || status === 'error' || status === 'canceled';
@@ -40,7 +40,7 @@ export default ['$scope', '$filter',
                     jobId: job.id,
                     sortDate: job.finished || "running" + job.id,
                     finished: finished,
-                    status_tip: "JOB ID: " + job.id + "<br>STATUS: " + job.status.toUpperCase() + "<br>FINISHED: " + finished,
+                    status_tip: `${i18n._('JOB ID')}: ${job.id} <br>${i18n._('STATUS')}: ${job.status.toUpperCase()} <br>${i18n._('FINISHED')}: ${finished}`,
                     detailsUrl: detailsBaseUrl + job.id
                 };
 

@@ -53,8 +53,12 @@ export default ['$scope', '$state', 'subTitle', 'GetTargetTitle',
             $scope.activities.forEach(function(activity, i) {
                 // build activity.user
                 if ($scope.activities[i].summary_fields.actor) {
-                    $scope.activities[i].user = "<a href=\"/#/users/" + $scope.activities[i].summary_fields.actor.id  + "\">" +
-                        $scope.activities[i].summary_fields.actor.username + "</a>";
+                    if ($scope.activities[i].summary_fields.actor.id) {
+                        $scope.activities[i].user = "<a href=\"/#/users/" + $scope.activities[i].summary_fields.actor.id  + "\">" +
+                            $scope.activities[i].summary_fields.actor.username + "</a>";
+                    } else {
+                        $scope.activities[i].user = $scope.activities[i].summary_fields.actor.username + ' (deleted)';
+                    }
                 } else {
                     $scope.activities[i].user = 'system';
                 }

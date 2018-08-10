@@ -450,6 +450,17 @@ class TestInsightsCredential:
               {'insights_credential': insights_credential.id}, admin_user,
               expect=200)
 
+    def test_insights_credential_protection(self, post, patch, insights_inventory, alice, insights_credential):
+        insights_inventory.organization.admin_role.members.add(alice)
+        insights_inventory.admin_role.members.add(alice)
+        post(reverse('api:inventory_list'), {
+            "name": "test",
+            "organization": insights_inventory.organization.id,
+            "insights_credential": insights_credential.id
+        }, alice, expect=403)
+        patch(insights_inventory.get_absolute_url(),
+              {'insights_credential': insights_credential.id}, alice, expect=403)
+
     def test_non_insights_credential(self, patch, insights_inventory, admin_user, scm_credential):
         patch(insights_inventory.get_absolute_url(),
               {'insights_credential': scm_credential.id}, admin_user,

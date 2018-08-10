@@ -34,7 +34,11 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
 
             $scope.$emit("HideOrgListHeader");
             $scope.instance_groups = InstanceGroupsData;
-            $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+            const virtualEnvs = ConfigData.custom_virtualenvs || [];
+            $scope.custom_virtualenvs_visible = virtualEnvs.length > 1;
+            $scope.custom_virtualenvs_options = virtualEnvs.filter(
+                v => !/\/ansible\/$/.test(v)
+            );
         }
 
 

@@ -149,7 +149,7 @@ export default ['$stateParams', '$scope', '$rootScope',
 
                         let reloadListStateParams = null;
 
-                        if($scope.organizations.length === 1 && $state.params.organization_search && !_.isEmpty($state.params.organization_search.page) && $state.params.organization_search.page !== '1') {
+                        if($scope.organizations.length === 1 && $state.params.organization_search && _.has($state, 'params.organization_search.page') && parseInt($state.params.organization_search.page).toString() !== '1') {
                             reloadListStateParams = _.cloneDeep($state.params);
                             reloadListStateParams.organization_search.page = (parseInt(reloadListStateParams.organization_search.page)-1).toString();
                         }

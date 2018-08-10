@@ -7,11 +7,18 @@ import sys
 import warnings
 
 from pkg_resources import get_distribution
-from .celery import app as celery_app # noqa
 
 __version__ = get_distribution('awx').version
+__all__ = ['__version__']
 
-__all__ = ['__version__', 'celery_app']
+
+# Isolated nodes do not have celery installed
+try:
+    from .celery import app as celery_app # noqa
+    __all__.append('celery_app')
+except ImportError:
+    pass
+
 
 # Check for the presence/absence of "devonly" module to determine if running
 # from a source code checkout or release packaage.

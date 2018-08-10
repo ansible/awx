@@ -11,7 +11,9 @@ from django.conf import settings
 # Django OAuth Toolkit
 from oauth2_provider.models import AbstractApplication, AbstractAccessToken
 from oauth2_provider.generators import generate_client_secret
+from oauthlib import oauth2
 
+from awx.main.utils import get_external_account
 from awx.main.fields import OAuth2ClientSecretField
 
 
@@ -25,6 +27,7 @@ class OAuth2Application(AbstractApplication):
     class Meta:
         app_label = 'main'
         verbose_name = _('application')
+        unique_together = (("name", "organization"),)
     
     CLIENT_CONFIDENTIAL = "confidential"
     CLIENT_PUBLIC = "public"
@@ -36,12 +39,10 @@ class OAuth2Application(AbstractApplication):
     GRANT_AUTHORIZATION_CODE = "authorization-code"
     GRANT_IMPLICIT = "implicit"
     GRANT_PASSWORD = "password"
-    GRANT_CLIENT_CREDENTIALS = "client-credentials"
     GRANT_TYPES = (
         (GRANT_AUTHORIZATION_CODE, _("Authorization code")),
         (GRANT_IMPLICIT, _("Implicit")),
         (GRANT_PASSWORD, _("Resource owner password-based")),
-        (GRANT_CLIENT_CREDENTIALS, _("Client credentials")),
     )
 
     description = models.TextField(
@@ -109,7 +110,12 @@ class OAuth2AccessToken(AbstractAccessToken):
     )
     scope = models.TextField(
         blank=True,
+        default='write',
         help_text=_('Allowed scopes, further restricts user\'s permissions. Must be a simple space-separated string with allowed scopes [\'read\', \'write\'].')
+    )
+    modified = models.DateTimeField(
+        editable=False,
+        auto_now=True
     )
 
     def is_valid(self, scopes=None):
@@ -119,3 +125,11 @@ class OAuth2AccessToken(AbstractAccessToken):
             self.save(update_fields=['last_used'])
         return valid
 
+    def save(self, *args, **kwargs):
+        if self.user and settings.ALLOW_OAUTH2_FOR_EXTERNAL_USERS is False:
+            external_account = get_external_account(self.user)
+            if external_account is not None:
+                raise oauth2.AccessDeniedError(_(
+                    'OAuth2 Tokens cannot be created by users associated with an external authentication provider ({})'
+                ).format(external_account))
+        super(OAuth2AccessToken, self).save(*args, **kwargs)

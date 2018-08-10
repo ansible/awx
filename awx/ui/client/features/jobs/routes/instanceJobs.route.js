@@ -9,7 +9,7 @@ export default {
     name: 'instanceGroups.instanceJobs',
     url: '/:instance_group_id/instances/:instance_id/jobs',
     ncyBreadcrumb: {
-        parent: 'instanceGroups.edit',
+        parent: 'instanceGroups.instances',
         label: N_('JOBS')
     },
     views: {
@@ -59,6 +59,10 @@ export default {
                 return qs.search(searchPath, searchParam)
                     .finally(() => Wait('stop'));
             }
+        ],
+        SearchBasePath: [
+            '$stateParams',
+            ($stateParams) => `api/v2/instances/${$stateParams.instance_id}/jobs`
         ]
     }
 };

@@ -1420,7 +1420,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMix
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in InventorySourceOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'credentials']
+            ['name', 'description', 'schedule', 'credentials', 'inventory']
         )
 
     def save(self, *args, **kwargs):
@@ -1599,6 +1599,13 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
     class Meta:
         app_label = 'main'
 
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='inventory_updates',
+        null=True,
+        default=None,
+        on_delete=models.DO_NOTHING,
+    )
     inventory_source = models.ForeignKey(
         'InventorySource',
         related_name='inventory_updates',

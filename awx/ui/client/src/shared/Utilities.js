@@ -165,8 +165,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 Alert('Conflict', data.conflict || "Resource currently in use.");
             } else if (status === 410) {
                 Alert('Deleted Object', 'The requested object was previously deleted and can no longer be accessed.');
-            } else if ((status === 'Session is expired') || (status === 401 && data.detail && data.detail === 'Token is expired') ||
-                (status === 401 && data && data.detail && data.detail === 'Invalid token')) {
+            } else if ((status === 'Session is expired') || (status === 401)) {
                 if ($rootScope.sessionTimer) {
                     $rootScope.sessionTimer.expireSession('idle');
                 }
@@ -209,14 +208,17 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     } else {
                         if (data[field]) {
                             scope[field + '_api_error'] = data[field][0];
-                            //scope[form.name + '_form'][field].$setValidity('apiError', false);
                             $('[name="' + field + '"]').addClass('ng-invalid');
+                            $('label[for="' + field + '"] span').addClass('error-color');
                             $('html, body').animate({scrollTop: $('[name="' + field + '"]').offset().top}, 0);
                             fieldErrors = true;
+                            if(form.fields[field].codeMirror){
+                                $(`#cm-${field}-container .CodeMirror`).addClass('error-border');
+                            }
                         }
                     }
                 }
-                if ((!fieldErrors) && defaultMsg) {
+                if (defaultMsg) {
                     Alert(defaultMsg.hdr, defaultMsg.msg);
                 }
             } else if (typeof data === 'object' && data !== null) {

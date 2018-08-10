@@ -38,6 +38,24 @@ module.exports = {
         notifications.waitForElementVisible('div.spinny');
         notifications.waitForElementNotVisible('div.spinny');
 
+        const activityStream = 'bread-crumb > div i[class$="icon-activity-stream"]';
+        const activityRow = '#activities_table tr td[class*="description-column"] a';
+        const toast = 'div[class="Toast-icon"]';
+
+        notifications.waitForElementNotPresent(toast);
+        notifications.expect.element(activityStream).visible;
+        notifications.expect.element(activityStream).enabled;
+        notifications.click(activityStream);
+        notifications.waitForElementVisible('div.spinny');
+        notifications.waitForElementNotVisible('div.spinny');
+
+        client
+            .waitForElementVisible(activityRow)
+            .click(activityRow);
+
+        notifications.waitForElementVisible('div.spinny');
+        notifications.waitForElementNotVisible('div.spinny');
+
         notifications.expect.element('#notification_template_form').visible;
         notifications.section.edit.expect.element('@title').visible;
         notifications.section.edit.expect.element('@title').text.contain(data.notification.name);

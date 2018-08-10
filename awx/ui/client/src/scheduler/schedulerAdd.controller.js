@@ -8,12 +8,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
     'Rest', 'ParentObject', 'JobTemplateModel', '$q', 'Empty', 'SchedulePost',
     'ProcessErrors', 'SchedulerInit', '$location', 'PromptService', 'RRuleToAPI', 'moment',
-    'WorkflowJobTemplateModel', 'TemplatesStrings', 'rbacUiControlService',
+    'WorkflowJobTemplateModel', 'SchedulerStrings', 'rbacUiControlService', 'Alert',
     function($filter, $state, $stateParams, $http, Wait,
         $scope, $rootScope, CreateSelect2, ParseTypeChange, GetBasePath,
         Rest, ParentObject, JobTemplate, $q, Empty, SchedulePost,
         ProcessErrors, SchedulerInit, $location, PromptService, RRuleToAPI, moment,
-        WorkflowJobTemplate, TemplatesStrings, rbacUiControlService
+        WorkflowJobTemplate, SchedulerStrings, rbacUiControlService, Alert
     ) {
 
     var base = $scope.base || $location.path().replace(/^\//, '').split('/')[0],
@@ -30,7 +30,12 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                 $scope.canAdd = params.canAdd;
             });
     }
-    let processSchedulerEndDt = function(){
+
+    /*
+    * Keep processSchedulerEndDt method on the $scope
+    * because angular-scheduler references it
+    */
+    $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);
         // increment date by 1 day
@@ -41,7 +46,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     };
 
     $scope.preventCredsWithPasswords = true;
-    $scope.strings = TemplatesStrings;
+    $scope.strings = SchedulerStrings;
 
     /*
      * This is a workaround for the angular-scheduler library inserting `ll` into fields after an
@@ -107,6 +112,14 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
             .then((responses) => {
                 let launchConf = responses[1].data;
 
+                if (launchConf.passwords_needed_to_start &&
+                    launchConf.passwords_needed_to_start.length > 0 &&
+                    !launchConf.ask_credential_on_launch
+                ) {
+                    Alert(SchedulerStrings.get('form.WARNING'), SchedulerStrings.get('form.CREDENTIAL_REQUIRES_PASSWORD_WARNING'), 'alert-info');
+                    $state.go('^', { reload: true });
+                }
+
                 let watchForPromptChanges = () => {
                     let promptValuesToWatch = [
                         'promptData.prompts.inventory.value',
@@ -151,7 +164,6 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     !launchConf.survey_enabled &&
                     !launchConf.credential_needed_to_start &&
                     !launchConf.inventory_needed_to_start &&
-                    launchConf.passwords_needed_to_start.length === 0 &&
                     launchConf.variables_needed_to_start.length === 0) {
                         $scope.showPromptButton = false;
                 } else {
@@ -329,7 +341,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     });
     if ($scope.schedulerUTCTime) {
         // The UTC time is already set
-        processSchedulerEndDt();
+        $scope.processSchedulerEndDt();
     } else {
         // We need to wait for it to be set by angular-scheduler because the following function depends
         // on it
@@ -337,7 +349,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
             if (newVal) {
                 // Remove the watcher
                 schedulerUTCTimeWatcher();
-                processSchedulerEndDt();
+                $scope.processSchedulerEndDt();
             }
         });
     }
@@ -370,9 +382,6 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     scheduler.clear();
     $scope.$on("htmlDetailReady", function() {
         $scope.hideForm = false;
-        $scope.$on("formUpdated", function() {
-            $rootScope.$broadcast("loadSchedulerDetailPane");
-        });
         $scope.$watchGroup(["schedulerName",
             "schedulerStartDt",
             "schedulerStartHour",
@@ -398,11 +407,11 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
             "schedulerEndMinute",
             "schedularEndSecond"
         ], function() {
-            $scope.$emit("formUpdated");
+            $rootScope.$broadcast("loadSchedulerDetailPane");
         }, true);
 
         $scope.$watch("weekDays", function() {
-            $scope.$emit("formUpdated");
+            $rootScope.$broadcast("loadSchedulerDetailPane");
         }, true);
 
         Wait('stop');

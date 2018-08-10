@@ -4,7 +4,7 @@ import argparse
 import base64
 import codecs
 import collections
-import cStringIO
+import StringIO
 import logging
 import json
 import os
@@ -18,6 +18,7 @@ import time
 
 import pexpect
 import psutil
+import six
 
 
 logger = logging.getLogger('awx.main.utils.expect')
@@ -98,6 +99,12 @@ def run_pexpect(args, cwd, env, logfile,
         expect_passwords = collections.OrderedDict(expect_passwords)
     password_patterns = expect_passwords.keys()
     password_values = expect_passwords.values()
+
+    # pexpect needs all env vars to be utf-8 encoded strings
+    # https://github.com/pexpect/pexpect/issues/512
+    for k, v in env.items():
+        if isinstance(v, six.text_type):
+            env[k] = v.encode('utf-8')
 
     child = pexpect.spawn(
         args[0], args[1:], cwd=cwd, env=env, ignore_sighup=True,
@@ -240,7 +247,7 @@ def handle_termination(pid, args, proot_cmd, is_cancel=True):
 
 
 def __run__(private_data_dir):
-    buff = cStringIO.StringIO()
+    buff = StringIO.StringIO()
     with open(os.path.join(private_data_dir, 'env'), 'r') as f:
         for line in f:
             buff.write(line)

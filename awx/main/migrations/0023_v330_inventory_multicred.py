@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
 
     operations = [
         # Run data migration before removing the old credential field
-        migrations.RunPython(migration_utils.set_current_apps_for_migrations, migrations.RunPython.noop),
-        migrations.RunPython(migrate_inventory_source_cred, migrate_inventory_source_cred_reverse),
+        migrations.RunPython(migration_utils.set_current_apps_for_migrations, migrate_inventory_source_cred_reverse),
+        migrations.RunPython(migrate_inventory_source_cred, migration_utils.set_current_apps_for_migrations),
         migrations.RemoveField(
             model_name='inventorysource',
             name='credential',

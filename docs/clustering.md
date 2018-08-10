@@ -253,9 +253,7 @@ Instance Group Policies are controlled by 3 optional fields on an `Instance Grou
   is less than the given percentage then new ones will be added until the percentage condition is satisfied.
 * `policy_instance_minimum`: This policy attempts to keep at least this many `Instances` in the `Instance Group`. If the number of
   available instances is lower than this minimum then all `Instances` will be placed in this `Instance Group`.
-* `policy_instance_list`: This is a fixed list of `Instance` names. These `Instances` will *always* be added to this `Instance Group`.
-  Further, by adding Instances to this list you are declaring that you will manually manage those Instances and they will not be eligible under any other
-  policy. This means they will not be automatically added to any other `Instance Group` even if the policy would cause them to be matched.
+* `policy_instance_list`: This is a fixed list of `Instance` names to always include in this `Instance Group`.
 
 > NOTES
 
@@ -268,6 +266,26 @@ Instance Group Policies are controlled by 3 optional fields on an `Instance Grou
   bound on the amount of available resources.
 * Policies don't actively prevent `Instances` from being associated with multiple `Instance Groups` but this can effectively be achieved by making the percentages
   sum to 100. If you have 4 `Instance Groups` assign each a percentage value of 25 and the `Instances` will be distributed among them with no overlap.
+
+### Manually Pinning Instances to Specific Groups
+If you have a special `Instance` which needs to be _exclusively_ assigned to a specific `Instance Group` but don't want it to automatically join _other_ groups via "percentage" or "minimum" policies:
+
+1. Add the `Instance` to one or more `Instance Group`s' `policy_instance_list`
+2. Update the `Instance`'s `managed_by_policy` property to be `False`.
+
+This will prevent the `Instance` from being automatically added to other groups based on percentage and minimum policy; it will **only** belong to the groups you've manually assigned it to:
+
+```
+HTTP PATCH /api/v2/instance_groups/N/
+{
+    "policy_instance_list": ["special-instance"]
+}
+
+HTTP PATCH /api/v2/instances/X/
+{
+    "managed_by_policy": False
+}
+```
 
 ### Status and Monitoring
 

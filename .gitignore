@@ -67,6 +67,7 @@ pep8.txt
 scratch
 testem.log
 awx/awx_test.sqlite3-journal
+.pytest_cache/
 
 # Mac OS X
 *.DS_Store

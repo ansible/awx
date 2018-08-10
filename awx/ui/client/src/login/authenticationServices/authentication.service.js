@@ -42,21 +42,13 @@ export default
                 return $rootScope.userLoggedIn;
             },
             retrieveToken: function (username, password) {
-                var getCSRFToken = $http({
-                    method: 'GET',
-                    url: `/api/login/`
-                });
-
-                return getCSRFToken.then(function({data}) {
-                    var csrfmiddlewaretoken = /name='csrfmiddlewaretoken' value='([0-9a-zA-Z]+)' \//.exec(data)[1];
-                    return $http({
-                        method: 'POST',
-                        url: `/api/login/`,
-                        data: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&csrfmiddlewaretoken=${csrfmiddlewaretoken}&next=%2fapi%2f`,
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        }
-                    });
+                return $http({
+                    method: 'POST',
+                    url: `/api/login/`,
+                    data: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&next=%2fapi%2f`,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
                 });
             },
             deleteToken: function () {

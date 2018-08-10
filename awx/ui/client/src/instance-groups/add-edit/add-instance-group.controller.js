@@ -1,10 +1,15 @@
-function AddController ($scope, $state, models, strings) {
+function AddController ($state, models, strings) {
     const vm = this || {};
-    const { instanceGroup, instance } = models;
+    const { instanceGroup } = models;
 
     vm.mode = 'add';
     vm.strings = strings;
     vm.panelTitle = strings.get('state.ADD_BREADCRUMB_LABEL');
+
+    vm.docs = {
+        url: 'https://docs.ansible.com/ansible-tower/latest/html/administration/clustering.html',
+        help_text: vm.strings.get('tooltips.DOCS_HELP_TEXT')
+    };
 
     vm.tab = {
         details: { _active: true },
@@ -17,15 +22,7 @@ function AddController ($scope, $state, models, strings) {
     // Default policy instance percentage value is 0
     vm.form.policy_instance_percentage._value = 0;
 
-    vm.form.policy_instance_list._lookupTags = true;
-    vm.form.policy_instance_list._model = instance;
-    vm.form.policy_instance_list._placeholder = "Policy Instance List";
-    vm.form.policy_instance_list._resource = 'instances';
-    vm.form.policy_instance_list._route = 'instanceGroups.add.modal.instances';
-    vm.form.policy_instance_list._value = [];
-
     vm.form.save = data => {
-        data.policy_instance_list = data.policy_instance_list.map(instance => instance.hostname);
         return instanceGroup.request('post', { data });
     };
 
@@ -35,7 +32,6 @@ function AddController ($scope, $state, models, strings) {
 }
 
 AddController.$inject = [
-    '$scope',
     '$state',
     'resolvedModels',
     'InstanceGroupsStrings'

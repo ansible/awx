@@ -318,7 +318,7 @@ class IsolatedManager(object):
 
             path = self.path_to('artifacts', 'stdout')
             if os.path.exists(path):
-                with codecs.open(path, 'r', encoding='utf-8') as f:
+                with open(path, 'r') as f:
                     f.seek(seek)
                     for line in f:
                         self.stdout_handle.write(line)
@@ -434,6 +434,7 @@ class IsolatedManager(object):
                 task_result = {}
             if 'capacity_cpu' in task_result and 'capacity_mem' in task_result:
                 cls.update_capacity(instance, task_result, awx_application_version)
+                logger.debug('Isolated instance {} successful heartbeat'.format(instance.hostname))
             elif instance.capacity == 0:
                 logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
                     instance.hostname))
@@ -468,13 +469,11 @@ class IsolatedManager(object):
 
         return OutputEventFilter(job_event_callback)
 
-    def run(self, instance, host, private_data_dir, proot_temp_dir):
+    def run(self, instance, private_data_dir, proot_temp_dir):
         """
         Run a job on an isolated host.
 
         :param instance:         a `model.Job` instance
-        :param host:             the hostname (or IP address) to run the
-                                 isolated job on
         :param private_data_dir: an absolute path on the local file system
                                  where job-specific data should be written
                                  (i.e., `/tmp/ansible_awx_xyz/`)
@@ -486,14 +485,11 @@ class IsolatedManager(object):
         `ansible-playbook` run.
         """
         self.instance = instance
-        self.host = host
+        self.host = instance.execution_node
         self.private_data_dir = private_data_dir
         self.proot_temp_dir = proot_temp_dir
         status, rc = self.dispatch()
         if status == 'successful':
             status, rc = self.check()
-        else:
-            # If dispatch fails, attempt to consume artifacts that *might* exist
-            self.check()
         self.cleanup()
         return status, rc
