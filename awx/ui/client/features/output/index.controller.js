@@ -359,9 +359,9 @@ function startListening () {
 
 function handleJobEvent (data) {
     streaming = streaming || resource.events
-        .getRange([Math.max(1, data.counter - 50), data.counter + 50])
+        .getRange([Math.max(0, data.counter - 50), data.counter + 50])
         .then(results => {
-            results = results.concat(data);
+            results.push(data);
 
             const counters = results.map(({ counter }) => counter);
             const min = Math.min(...counters);
@@ -379,7 +379,7 @@ function handleJobEvent (data) {
                 results = results.filter(({ counter }) => counter > maxMissing);
             }
 
-            stream.setMissingCounterThreshold(max + 1);
+            stream.setMissingCounterThreshold(max);
             results.forEach(item => {
                 stream.pushJobEvent(item);
                 status.pushJobEvent(item);
