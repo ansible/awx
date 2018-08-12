@@ -19,8 +19,9 @@ azure-mgmt-rdbms>=0.2.0rc1,<0.3.0
 azure-mgmt-containerinstance>=0.3.1
 backports.ssl-match-hostname==3.5.0.1
 boto==2.47.0    # last which does not break ec2 scripts
-boto3==1.6.2
+boto3==1.7.33
 netaddr
+openshift==0.6.0
 ovirt-engine-sdk-python==4.2.4    # minimum set inside Ansible facts module requirements
 pexpect==4.5.0    # same as AWX requirement
 python-memcached==1.59    # same as AWX requirement
