@@ -2,6 +2,7 @@
 import {
     EVENT_START_PLAY,
     EVENT_START_TASK,
+    OUTPUT_ELEMENT_LAST,
     OUTPUT_PAGE_SIZE,
 } from './constants';
 
@@ -485,6 +486,7 @@ function OutputIndexController (
             },
         });
 
+        let showFollowTip = true;
         const rates = [];
         stream.init({
             bufferAdd,
@@ -494,12 +496,19 @@ function OutputIndexController (
                 rates.push(rate);
                 rates.splice(0, rates.length - 5);
 
+                if (rates.every(value => value === 1)) {
+                    scroll.unlock();
+                    scroll.unhide();
+                }
+
                 if (rate > 1 && vm.isFollowing) {
                     scroll.lock();
                     scroll.hide();
-                } else if (rates.every(value => value === 1)) {
-                    scroll.unlock();
-                    scroll.unhide();
+
+                    if (showFollowTip) {
+                        showFollowTip = false;
+                        $(OUTPUT_ELEMENT_LAST).trigger('mouseenter');
+                    }
                 }
             },
             onStop () {
