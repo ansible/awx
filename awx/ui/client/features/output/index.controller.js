@@ -234,6 +234,9 @@ function stopFollowing () {
         return;
     }
 
+    scroll.unlock();
+    scroll.unhide();
+
     vm.isFollowing = false;
     vm.followTooltip = vm.strings.get('tooltips.MENU_LAST');
 }
@@ -482,10 +485,23 @@ function OutputIndexController (
             },
         });
 
+        const rates = [];
         stream.init({
             bufferAdd,
             bufferEmpty,
             onFrames,
+            onFrameRate (rate) {
+                rates.push(rate);
+                rates.splice(0, rates.length - 5);
+
+                if (rate > 1 && vm.isFollowing) {
+                    scroll.lock();
+                    scroll.hide();
+                } else if (rates.every(value => value === 1)) {
+                    scroll.unlock();
+                    scroll.unhide();
+                }
+            },
             onStop () {
                 lockFollow = true;
                 stopFollowing();
@@ -493,7 +509,8 @@ function OutputIndexController (
                 status.updateStats();
                 status.dispatch();
                 status.sync();
-                scroll.stop();
+                scroll.unlock();
+                scroll.unhide();
             }
         });
 
@@ -533,3 +550,4 @@ OutputIndexController.$inject = [
 ];
 
 module.exports = OutputIndexController;
+
