@@ -6,11 +6,12 @@ import {
 } from './constants';
 
 function OutputStream ($q) {
-    this.init = ({ bufferAdd, bufferEmpty, onFrames, onStop }) => {
+    this.init = ({ bufferAdd, bufferEmpty, onFrames, onFrameRate, onStop }) => {
         this.hooks = {
             bufferAdd,
             bufferEmpty,
             onFrames,
+            onFrameRate,
             onStop,
         };
 
@@ -53,6 +54,7 @@ function OutputStream ($q) {
         const boundedIndex = Math.min(this.factors.length - 1, index);
 
         this.framesPerRender = this.factors[boundedIndex];
+        this.hooks.onFrameRate(this.framesPerRender);
     };
 
     this.setMissingCounterThreshold = counter => {
@@ -111,7 +113,8 @@ function OutputStream ($q) {
                 }
 
                 const isReady = maxReady && (this.state.ending ||
-                    (maxReady - minReady) % this.framesPerRender === 0);
+                    count % this.framesPerRender === 0 ||
+                    count < OUTPUT_PAGE_SIZE && (maxReady - minReady) % this.framesPerRender === 0);
 
                 if (!isReady) {
                     return $q.resolve();
