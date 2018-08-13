@@ -133,6 +133,21 @@ spec:
         - name: {{ kubernetes_deployment_name }}-web
           image: {{ kubernetes_web_image | default(dockerhub_web_image) }}
           imagePullPolicy: Always
+          env:
+            - name: DATABASE_USER
+              value: {{ pg_username }}
+            - name: DATABASE_NAME
+              value: {{ pg_database }}
+            - name: DATABASE_HOST
+              value: {{ pg_hostname|default('postgresql') }}
+            - name: DATABASE_PORT
+              value: "{{ pg_port|default('5432') }}"
+            - name: DATABASE_PASSWORD
+              value: {{ pg_password }}
+            - name: MEMCACHED_HOST
+              value: {{ memcached_hostname|default('localhost') }}
+            - name: RABBITMQ_HOST
+              value: {{ rabbitmq_hostname|default('localhost') }}
           ports:
             - containerPort: 8052
           volumeMounts:
