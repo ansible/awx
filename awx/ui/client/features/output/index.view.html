@@ -47,6 +47,9 @@
                     <i class="at-Stdout-menuIcon--lg fa fa-angle-up"
                         data-placement="top" aw-tool-tip="{{:: vm.strings.get('tooltips.MENU_UP') }}"></i>
                 </div>
+                <div class="pull-right" ng-if="vm.debug" ng-click="vm.menu.clear()">
+                    <i class="at-Stdout-menuIcon--md fa fa-undo"></i>
+                </div>
                 <div class="at-u-clear"></div>
             </div>
             <div class="at-Stdout-container">
