@@ -1,3 +1,5 @@
+import { OUTPUT_NO_COUNT_JOB_TYPES } from './constants';
+
 const templateUrl = require('~features/output/stats.partial.html');
 
 let vm;
@@ -21,6 +23,7 @@ function JobStatsController (strings, { subscribe }) {
     };
 
     vm.$onInit = () => {
+        vm.hideCounts = OUTPUT_NO_COUNT_JOB_TYPES.includes(vm.resource.model.get('type'));
         vm.download = vm.resource.model.get('related.stdout');
         vm.tooltips.toggleExpand = vm.expanded ?
             strings.get('tooltips.COLLAPSE_OUTPUT') :

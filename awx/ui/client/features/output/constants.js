@@ -17,6 +17,7 @@ export const OUTPUT_ELEMENT_CONTAINER = '.at-Stdout-container';
 export const OUTPUT_ELEMENT_TBODY = '#atStdoutResultTable';
 export const OUTPUT_ELEMENT_LAST = '#atStdoutMenuLast';
 export const OUTPUT_MAX_LAG = 120;
+export const OUTPUT_NO_COUNT_JOB_TYPES = ['ad_hoc_command', 'system_job', 'inventory_update'];
 export const OUTPUT_ORDER_BY = 'counter';
 export const OUTPUT_PAGE_CACHE = true;
 export const OUTPUT_PAGE_LIMIT = 5;
