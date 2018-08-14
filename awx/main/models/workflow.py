@@ -433,6 +433,14 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         default=None,
         on_delete=models.SET_NULL,
     )
+    job_template = models.ForeignKey(
+        'JobTemplate',
+        related_name='sharded_jobs',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
 
     @property
     def workflow_nodes(self):

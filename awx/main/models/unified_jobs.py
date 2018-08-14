@@ -328,6 +328,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         '''
         Create a new unified job based on this unified job template.
         '''
+        from awx.main.models import JobTemplate, WorkflowJob
+        
         new_job_passwords = kwargs.pop('survey_passwords', {})
         eager_fields = kwargs.pop('_eager_fields', None)
 
@@ -336,8 +338,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             password_list = self.survey_password_variables()
             encrypt_dict(kwargs.get('extra_vars', {}), password_list)
 
-        unified_job_class = self._get_unified_job_class()
-        fields = self._get_unified_job_field_names()
+        unified_job_class = kwargs.pop("_unified_job_class", self._get_unified_job_class())
+        fields = kwargs.pop("_unified_job_field_names", self._get_unified_job_field_names())
+        print("UJC: {}".format(unified_job_class))
+        print("fields: {}".format(fields))
         unallowed_fields = set(kwargs.keys()) - set(fields)
         if unallowed_fields:
             logger.warn('Fields {} are not allowed as overrides.'.format(unallowed_fields))
@@ -350,7 +354,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
                 setattr(unified_job, fd, val)
 
         # Set the unified job template back-link on the job
-        parent_field_name = unified_job_class._get_parent_field_name()
+        # TODO: fix this hack properly before merge matburt
+        if isinstance(self, JobTemplate) and isinstance(unified_job, WorkflowJob):
+            parent_field_name = "job_template"
+        else:
+            parent_field_name = unified_job_class._get_parent_field_name()
         setattr(unified_job, parent_field_name, self)
 
         # For JobTemplate-based jobs with surveys, add passwords to list for perma-redaction

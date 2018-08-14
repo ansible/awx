@@ -2903,7 +2903,7 @@ class JobTemplateLaunch(RetrieveAPIView):
             raise PermissionDenied()
 
         passwords = serializer.validated_data.pop('credential_passwords', {})
-        new_job = obj.create_unified_job(**serializer.validated_data)
+        new_job = obj.create_job(**serializer.validated_data)
         result = new_job.signal_start(**passwords)
 
         if not result:
@@ -2914,7 +2914,10 @@ class JobTemplateLaunch(RetrieveAPIView):
             data = OrderedDict()
             data['job'] = new_job.id
             data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
-            data.update(JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
+            if isinstance(new_job, WorkflowJob):
+                data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
+            else:
+                data.update(JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             headers = {'Location': new_job.get_absolute_url(request)}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 

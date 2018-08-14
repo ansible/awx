@@ -3011,7 +3011,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         fields = ('*', 'host_config_key', 'ask_diff_mode_on_launch', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'diff_mode',
-                  'allow_simultaneous', 'custom_virtualenv')
+                  'allow_simultaneous', 'custom_virtualenv', 'job_shard_count')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)

@@ -277,6 +277,12 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         default=False,
         allows_field='credentials'
     )
+    job_shard_count = models.IntegerField(
+        blank=True,
+        default=0,
+        help_text=_("The number of jobs to split into at runtime. Will cause the Job Template to launch a workflow."),
+    )
+
     admin_role = ImplicitRoleField(
         parent_role=['project.organization.job_template_admin_role', 'inventory.organization.job_template_admin_role']
     )
@@ -318,6 +324,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         '''
         Create a new job based on this template.
         '''
+        if self.job_shard_count > 1:
+            # A sharded Job Template will generate a WorkflowJob rather than a Job
+            from awx.main.models.workflow import WorkflowJobTemplate
+            kwargs['_unified_job_class'] = WorkflowJobTemplate._get_unified_job_class()
+            kwargs['_unified_job_field_names'] = WorkflowJobTemplate._get_unified_job_field_names()
         return self.create_unified_job(**kwargs)
 
     def get_absolute_url(self, request=None):
