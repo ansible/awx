@@ -10,8 +10,7 @@ data:
     import socket
     ADMINS = ()
 
-    # Container environments don't like chroots
-    AWX_PROOT_ENABLED = False
+    AWX_PROOT_ENABLED = True
 
     # Automatically deprovision pods that go offline
     AWX_AUTO_DEPROVISION_INSTANCES = True
@@ -51,10 +50,11 @@ data:
 
     LOGGING['loggers']['django.request']['handlers'] = ['console']
     LOGGING['loggers']['rest_framework.request']['handlers'] = ['console']
-    LOGGING['loggers']['awx']['handlers'] = ['console', 'external_logger']
+    LOGGING['loggers']['awx']['handlers'] = ['console']
     LOGGING['loggers']['awx.main.commands.run_callback_receiver']['handlers'] = ['console']
-    LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console', 'external_logger']
-    LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console', 'external_logger']
+    LOGGING['loggers']['awx.main.commands.inventory_import']['handlers'] = ['console']
+    LOGGING['loggers']['awx.main.tasks']['handlers'] = ['console']
+    LOGGING['loggers']['awx.main.scheduler']['handlers'] = ['console']
     LOGGING['loggers']['django_auth_ldap']['handlers'] = ['console']
     LOGGING['loggers']['social']['handlers'] = ['console']
     LOGGING['loggers']['system_tracking_migrations']['handlers'] = ['console']
@@ -68,28 +68,6 @@ data:
     LOGGING['handlers']['system_tracking_migrations'] = {'class': 'logging.NullHandler'}
     LOGGING['handlers']['management_playbooks'] = {'class': 'logging.NullHandler'}
 
-    DATABASES = {
-        'default': {
-            'ATOMIC_REQUESTS': True,
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': "{{ pg_database }}",
-            'USER': "{{ pg_username }}",
-            'PASSWORD': "{{ pg_password }}",
-            'HOST': "{{ pg_hostname|default('postgresql') }}",
-            'PORT': "{{ pg_port }}",
-        }
-    }
-    BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
-        "awx",
-        "abcdefg",
-        "localhost",
-        "5672",
-        "awx")
-    CHANNEL_LAYERS = {
-        'default': {'BACKEND': 'asgi_amqp.AMQPChannelLayer',
-                    'ROUTING': 'awx.main.routing.channel_routing',
-                    'CONFIG': {'url': BROKER_URL}}
-    }
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
@@ -99,3 +77,5 @@ data:
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         },
     }
+
+    USE_X_FORWARDED_PORT = True
