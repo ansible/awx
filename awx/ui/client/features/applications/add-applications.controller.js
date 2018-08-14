@@ -67,7 +67,7 @@ function AddApplicationsController (models, $state, strings, $scope, Alert, $fil
                         ${strings.get('add.NAME_LABEL')}
                     </div>
                     <div class="PopupModal-value">
-                        ${res.data.name}
+                        ${$filter('sanitize')(res.data.name)}
                     </div>
                 </div>` : '';
             const clientId = res.data.client_id ?
@@ -90,7 +90,7 @@ function AddApplicationsController (models, $state, strings, $scope, Alert, $fil
                 </div>` : '';
 
             Alert(strings.get('add.MODAL_HEADER'), `
-                ${$filter('sanitize')(name)}
+                ${name}
                 ${clientId}
                 ${clientSecret}
             `, null, null, null, null, null, true);
