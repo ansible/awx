@@ -27,7 +27,7 @@ export default ['i18n', function(i18n) {
             SESSION_COOKIE_AGE: {
                 type: 'number',
                 integer: true,
-                min: 60,
+                min: 61,
                 reset: 'SESSION_COOKIE_AGE',
             },
             SESSIONS_PER_USER: {
