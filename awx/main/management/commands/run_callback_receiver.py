@@ -64,15 +64,22 @@ class CallbackBrokerWorker(ConsumerMixin):
             return _handler
 
         if use_workers:
-            django_connection.close()
-            django_cache.close()
             for idx in range(settings.JOB_EVENT_WORKERS):
                 queue_actual = MPQueue(settings.JOB_EVENT_MAX_QUEUE_SIZE)
                 w = Process(target=self.callback_worker, args=(queue_actual, idx,))
-                w.start()
                 if settings.DEBUG:
-                    logger.info('Started worker %s' % str(idx))
+                    logger.info('Starting worker %s' % str(idx))
                 self.worker_queues.append([0, queue_actual, w])
+
+            # It's important to close these _right before_ we fork; we
+            # don't want the forked processes to inherit the open sockets
+            # for the DB and memcached connections (that way lies race
+            # conditions)
+            django_connection.close()
+            django_cache.close()
+            for _, _, w in self.worker_queues:
+                w.start()
+
         elif settings.DEBUG:
             logger.warn('Started callback receiver (no workers)')
 
