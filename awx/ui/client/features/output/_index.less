@@ -148,6 +148,10 @@
         margin: 0;
         overflow-y: scroll;
         padding: 0;
+
+        @media screen and (max-width: @breakpoint-md) {
+            max-height: 2500px;
+        }
     }
 
     &-borderHeader {
