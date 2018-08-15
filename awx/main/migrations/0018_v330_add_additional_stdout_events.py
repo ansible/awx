@@ -78,6 +78,18 @@ class Migration(migrations.Migration):
                 'ordering': ('-pk',),
             },
         ),
+        migrations.AlterIndexTogether(
+            name='inventoryupdateevent',
+            index_together=set([('inventory_update', 'start_line'), ('inventory_update', 'uuid'), ('inventory_update', 'end_line')]),
+        ),
+        migrations.AlterIndexTogether(
+            name='projectupdateevent',
+            index_together=set([('project_update', 'event'), ('project_update', 'end_line'), ('project_update', 'start_line'), ('project_update', 'uuid')]),
+        ),
+        migrations.AlterIndexTogether(
+            name='systemjobevent',
+            index_together=set([('system_job', 'end_line'), ('system_job', 'uuid'), ('system_job', 'start_line')]),
+        ),
         migrations.RemoveField(
             model_name='unifiedjob',
             name='result_stdout_file',
