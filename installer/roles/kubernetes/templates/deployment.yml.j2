@@ -1,4 +1,11 @@
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: awx
+  namespace: {{ kubernetes_namespace }}
+
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -31,8 +38,8 @@ data:
   enabled_plugins: |
       [rabbitmq_management,rabbitmq_peer_discovery_k8s].
   rabbitmq.conf: |
-      default_user = awx
-      default_pass = abcdefg
+      default_user = {{ rabbitmq_user }}
+      default_pass = {{ rabbitmq_password }}
       default_vhost = awx
 
       ## Clustering
@@ -46,13 +53,6 @@ data:
       queue_master_locator=min-masters
       ## enable guest user
       loopback_users.guest = false
-
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: rabbitmq
-  namespace: {{ kubernetes_namespace }}
 
 {% if kubernetes_context is defined %}
 ---
@@ -73,7 +73,7 @@ metadata:
   namespace: {{ kubernetes_namespace }}
 subjects:
 - kind: ServiceAccount
-  name: rabbitmq
+  name: awx
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -102,10 +102,10 @@ roleRef:
   namespace: {{ kubernetes_namespace }}
 subjects:
   - kind: ServiceAccount
-    name: rabbitmq
+    name: awx
     namespace: {{ kubernetes_namespace }}
 userNames:
-  - system:serviceaccount:{{ kubernetes_namespace }}:rabbitmq
+  - system:serviceaccount:{{ kubernetes_namespace }}:awx
 {% endif %}
 
 ---
@@ -128,10 +128,10 @@ spec:
         service: django
         app: rabbitmq
     spec:
-      serviceAccountName: rabbitmq
+      serviceAccountName: awx
       containers:
         - name: {{ kubernetes_deployment_name }}-web
-          image: {{ kubernetes_web_image | default(dockerhub_web_image) }}
+          image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"
           imagePullPolicy: Always
           env:
             - name: DATABASE_USER
@@ -143,7 +143,10 @@ spec:
             - name: DATABASE_PORT
               value: "{{ pg_port|default('5432') }}"
             - name: DATABASE_PASSWORD
-              value: {{ pg_password }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ kubernetes_deployment_name }}-secrets"
+                  key: pg_password
             - name: MEMCACHED_HOST
               value: {{ memcached_hostname|default('localhost') }}
             - name: RABBITMQ_HOST
@@ -151,19 +154,35 @@ spec:
           ports:
             - containerPort: 8052
           volumeMounts:
-            - mountPath: /etc/tower
-              name: {{ kubernetes_deployment_name }}-application-config
+            - name: {{ kubernetes_deployment_name }}-application-config
+              mountPath: "/etc/tower"
+              readOnly: true
+
+            - name: "{{ kubernetes_deployment_name }}-confd"
+              mountPath: "/etc/tower/conf.d/"
+              readOnly: true
           resources:
             requests:
               memory: "{{ web_mem_request }}Gi"
               cpu: "{{ web_cpu_request }}m"
         - name: {{ kubernetes_deployment_name }}-celery
-          image: {{ kubernetes_task_image | default(dockerhub_task_image) }}
+          securityContext:
+            privileged: true
+          image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
+          command:
+            - /usr/bin/launch_awx_task.sh
           imagePullPolicy: Always
           volumeMounts:
-            - mountPath: /etc/tower
-              name: {{ kubernetes_deployment_name }}-application-config
+            - name: {{ kubernetes_deployment_name }}-application-config
+              mountPath: "/etc/tower"
+              readOnly: true
+
+            - name: "{{ kubernetes_deployment_name }}-confd"
+              mountPath: "/etc/tower/conf.d/"
+              readOnly: true
           env:
+            - name: AWX_SKIP_MIGRATIONS
+              value: "1"
             - name: DATABASE_USER
               value: {{ pg_username }}
             - name: DATABASE_NAME
@@ -173,15 +192,21 @@ spec:
             - name: DATABASE_PORT
               value: "{{ pg_port|default('5432') }}"
             - name: DATABASE_PASSWORD
-              value: {{ pg_password }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ kubernetes_deployment_name }}-secrets"
+                  key: pg_password
             - name: MEMCACHED_HOST
               value: {{ memcached_hostname|default('localhost') }}
             - name: RABBITMQ_HOST
               value: {{ rabbitmq_hostname|default('localhost') }}
             - name: AWX_ADMIN_USER
-              value: {{ default_admin_user|default('admin') }}
+              value: {{ admin_user }}
             - name: AWX_ADMIN_PASSWORD
-              value: {{ default_admin_password|default('password') }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ kubernetes_deployment_name }}-secrets"
+                  key: admin_password
           resources:
             requests:
               memory: "{{ task_mem_request }}Gi"
@@ -215,10 +240,13 @@ spec:
               value: "true"
             - name: RABBITMQ_NODENAME
               value: "rabbit@$(MY_POD_IP)"
+            - name: RABBITMQ_ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ kubernetes_deployment_name }}-secrets"
+                  key: rabbitmq_erlang_cookie
             - name: K8S_SERVICE_NAME
               value: "rabbitmq"
-            - name: RABBITMQ_ERLANG_COOKIE
-              value: "cookiemonster"
           volumeMounts:
             - name: rabbitmq-config
               mountPath: /etc/rabbitmq
@@ -242,6 +270,14 @@ spec:
                 path: settings.py
               - key: secret_key
                 path: SECRET_KEY
+
+        - name: "{{ kubernetes_deployment_name }}-confd"
+          secret:
+            secretName: "{{ kubernetes_deployment_name }}-secrets"
+            items:
+              - key: confd_contents
+                path: 'secrets.py'
+
         - name: rabbitmq-config
           configMap:
             name: rabbitmq-config

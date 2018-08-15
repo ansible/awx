@@ -1,6 +1,4 @@
-- name: Set the Kubernetes Context
-  shell: "kubectl config use-context {{ kubernetes_context }}"
-
+---
 - name: Get Namespace Detail
   shell: "kubectl get namespace {{ kubernetes_namespace }}"
   register: namespace_details
@@ -14,3 +12,4 @@
   set_fact:
     postgresql_service_name: "{{ kubernetes_deployment_name }}-postgresql"
   when: "pg_hostname is not defined or pg_hostname == ''"
+
