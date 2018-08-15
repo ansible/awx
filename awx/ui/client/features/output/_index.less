@@ -148,6 +148,10 @@
         margin: 0;
         overflow-y: scroll;
         padding: 0;
+
+        @media screen and (max-width: @breakpoint-md) {
+            max-height: calc(100vh - 30px);
+        }
     }
 
     &-borderHeader {
