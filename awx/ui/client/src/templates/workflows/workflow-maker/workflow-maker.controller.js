@@ -652,8 +652,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             !launchConf.ask_tags_on_launch &&
                             !launchConf.ask_skip_tags_on_launch &&
                             !launchConf.ask_diff_mode_on_launch &&
-                            !launchConf.survey_enabled &&
                             !launchConf.credential_needed_to_start &&
+                            !launchConf.ask_variables_on_launch &&
                             launchConf.variables_needed_to_start.length === 0) {
                                 $scope.showPromptButton = false;
                                 $scope.promptModalMissingReqFields = false;
@@ -752,7 +752,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                     !launchConf.ask_tags_on_launch &&
                                     !launchConf.ask_skip_tags_on_launch &&
                                     !launchConf.ask_diff_mode_on_launch &&
-                                    !launchConf.survey_enabled &&
                                     !launchConf.credential_needed_to_start &&
                                     !launchConf.ask_variables_on_launch &&
                                     launchConf.variables_needed_to_start.length === 0) {
@@ -1097,7 +1096,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             !launchConf.ask_tags_on_launch &&
                             !launchConf.ask_skip_tags_on_launch &&
                             !launchConf.ask_diff_mode_on_launch &&
-                            !launchConf.survey_enabled &&
                             !launchConf.credential_needed_to_start &&
                             !launchConf.ask_variables_on_launch &&
                             launchConf.variables_needed_to_start.length === 0) {
