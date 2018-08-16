@@ -261,7 +261,7 @@ export default
                 scope.maxTextError = false;
 
                 if(scope.type.type==="text"){
-                    if(scope.default.trim() !== ""){
+                    if(scope.default && scope.default.trim() !== ""){
                         if(scope.default.trim().length < scope.text_min && scope.text_min !== "" ){
                             scope.minTextError = true;
                         }
@@ -272,7 +272,7 @@ export default
                 }
 
                 if(scope.type.type==="textarea"){
-                    if(scope.default_textarea.trim() !== ""){
+                    if(scope.default_textarea && scope.default_textarea.trim() !== ""){
                         if(scope.default_textarea.trim().length < scope.textarea_min && scope.textarea_min !== "" ){
                             scope.minTextError = true;
                         }
@@ -283,7 +283,7 @@ export default
                 }
 
                 if(scope.type.type==="password"){
-                    if(scope.default_password.trim() !== ""){
+                    if(scope.default_password && scope.default_password.trim() !== ""){
                         if(scope.default_password.trim().length < scope.password_min && scope.password_min !== "" ){
                             scope.minTextError = true;
                         }
@@ -293,7 +293,7 @@ export default
                     }
                 }
 
-                if(scope.type.type==="multiselect" && scope.default_multiselect.trim() !== ""){
+                if(scope.type.type==="multiselect" && scope.default_multiselect && scope.default_multiselect.trim() !== ""){
                     choiceArray = scope.choices.split(/\n/);
                     answerArray = scope.default_multiselect.split(/\n/);
 
@@ -306,7 +306,7 @@ export default
                     }
                 }
 
-                if(scope.type.type==="multiplechoice" && scope.default.trim() !== ""){
+                if(scope.type.type==="multiplechoice" && scope.default && scope.default.trim() !== ""){
                     choiceArray = scope.choices.split(/\n/);
                     if($.inArray(scope.default, choiceArray)===-1){
                         scope.invalidChoice = true;
