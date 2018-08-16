@@ -64,12 +64,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='activitystream',
             name='o_auth2_access_token',
-            field=models.ManyToManyField(to='main.OAuth2AccessToken', blank=True, related_name='main_o_auth2_accesstoken'),
+            field=models.ManyToManyField(to='main.OAuth2AccessToken', blank=True),
         ),
         migrations.AddField(
             model_name='activitystream',
             name='o_auth2_application',
-            field=models.ManyToManyField(to='main.OAuth2Application', blank=True, related_name='main_o_auth2_application'),
+            field=models.ManyToManyField(to='main.OAuth2Application', blank=True),
         ),
 
     ]

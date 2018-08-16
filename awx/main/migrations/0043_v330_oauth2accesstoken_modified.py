@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='oauth2accesstoken',
             name='modified',
-            field=models.DateTimeField(editable=False),
+            field=models.DateTimeField(editable=False, auto_now=True),
         ),
     ]
