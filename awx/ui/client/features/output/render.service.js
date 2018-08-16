@@ -39,6 +39,13 @@ function JobRenderService ($q, $sce, $window) {
         this.hooks = { compile };
 
         this.createToggles = toggles;
+        this.state = {
+            collapseAll: false
+        };
+    };
+
+    this.setCollapseAll = value => {
+        this.state.collapseAll = value;
     };
 
     this.sortByLineNumber = (a, b) => {
@@ -133,10 +140,14 @@ function JobRenderService ($q, $sce, $window) {
             isTruncated: (event.end_line - event.start_line) > lines.length,
             lineCount: lines.length,
             isHost: this.isHostEvent(event),
+            isCollapsed: this.state.collapseAll,
         };
 
         if (event.parent_uuid) {
             info.parents = this.getParentEvents(event.parent_uuid);
+            if (this.record[event.parent_uuid]) {
+                info.isCollapsed = this.record[event.parent_uuid].isCollapsed;
+            }
         }
 
         if (info.isTruncated) {
@@ -192,6 +203,7 @@ function JobRenderService ($q, $sce, $window) {
 
     this.createRow = (current, ln, content) => {
         let id = '';
+        let icon = '';
         let timestamp = '';
         let tdToggle = '';
         let tdEvent = '';
@@ -206,7 +218,14 @@ function JobRenderService ($q, $sce, $window) {
         if (current) {
             if (this.createToggles && current.isParent && current.line === ln) {
                 id = current.uuid;
-                tdToggle = `<div class="at-Stdout-toggle" ng-click="vm.toggleLineExpand('${id}')"><i class="fa fa-angle-down can-toggle"></i></div>`;
+
+                if (current.isCollapsed) {
+                    icon = 'fa-angle-right';
+                } else {
+                    icon = 'fa-angle-down';
+                }
+
+                tdToggle = `<div class="at-Stdout-toggle" ng-click="vm.toggleCollapse('${id}')"><i class="fa ${icon} can-toggle"></i></div>`;
             }
 
             if (current.isHost) {
@@ -232,6 +251,12 @@ function JobRenderService ($q, $sce, $window) {
 
         if (!ln) {
             ln = '...';
+        }
+
+        if (current && current.isCollapsed) {
+            if (current.level === 3 || current.level === 0) {
+                classList += ' hidden';
+            }
         }
 
         return `
