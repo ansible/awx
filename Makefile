@@ -1,3 +1,5 @@
+SHELL = bash
+.SHELLFLAGS = -ec
 PYTHON ?= python
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
