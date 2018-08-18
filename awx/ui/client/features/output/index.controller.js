@@ -20,50 +20,16 @@ let stream;
 
 let vm;
 
-const bufferState = [0, 0]; // [length, count]
 const listeners = [];
-const rx = [];
-
-function bufferInit () {
-    rx.length = 0;
-
-    bufferState[0] = 0;
-    bufferState[1] = 0;
-}
-
-function bufferAdd (event) {
-    rx.push(event);
-
-    bufferState[0] += 1;
-    bufferState[1] += 1;
-
-    return bufferState[1];
-}
-
-function bufferEmpty (min, max) {
-    let count = 0;
-    let removed = [];
-
-    for (let i = bufferState[0] - 1; i >= 0; i--) {
-        if (rx[i].counter <= max) {
-            removed = removed.concat(rx.splice(i, 1));
-            count++;
-        }
-    }
-
-    bufferState[0] -= count;
-
-    return removed;
-}
 
 let lockFrames;
 function onFrames (events) {
+    events = slide.pushFrames(events);
+
     if (lockFrames) {
-        events.forEach(bufferAdd);
         return $q.resolve();
     }
 
-    events = slide.pushFrames(events);
     const popCount = events.length - slide.getCapacity();
     const isAttached = events.length > 0;
 
@@ -481,7 +447,7 @@ function clear () {
     lockFollow = false;
     lockFrames = false;
 
-    bufferInit();
+    stream.bufferInit();
     status.init(resource);
     slide.init(render, resource.events, scroll);
     status.subscribe(data => { vm.status = data.status; });
@@ -543,8 +509,6 @@ function OutputIndexController (
     vm.debug = _debug;
 
     render.requestAnimationFrame(() => {
-        bufferInit();
-
         status.init(resource);
         slide.init(render, resource.events, scroll);
         render.init({ compile, toggles: vm.toggleLineEnabled });
@@ -564,8 +528,6 @@ function OutputIndexController (
         let showFollowTip = true;
         const rates = [];
         stream.init({
-            bufferAdd,
-            bufferEmpty,
             onFrames,
             onFrameRate (rate) {
                 rates.push(rate);

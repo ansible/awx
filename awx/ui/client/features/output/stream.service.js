@@ -5,22 +5,14 @@ import {
     OUTPUT_PAGE_SIZE,
 } from './constants';
 
+const rx = [];
+
 function OutputStream ($q) {
-    this.init = ({ bufferAdd, bufferEmpty, onFrames, onFrameRate, onStop }) => {
+    this.init = ({ onFrames, onFrameRate, onStop }) => {
         this.hooks = {
-            bufferAdd,
-            bufferEmpty,
             onFrames,
             onFrameRate,
             onStop,
-        };
-
-        this.counters = {
-            used: [],
-            ready: [],
-            min: 1,
-            max: 0,
-            final: null,
         };
 
         this.state = {
@@ -30,9 +22,44 @@ function OutputStream ($q) {
 
         this.lag = 0;
         this.chain = $q.resolve();
-
         this.factors = this.calcFactors(OUTPUT_PAGE_SIZE);
+
         this.setFramesPerRender();
+        this.bufferInit();
+    };
+
+    this.bufferInit = () => {
+        rx.length = 0;
+
+        this.counters = {
+            total: 0,
+            min: 0,
+            max: null,
+            final: null,
+            ready: [],
+            used: [],
+            missing: [],
+        };
+    };
+
+    this.bufferEmpty = (minReady, maxReady) => {
+        let removed = [];
+
+        for (let i = rx.length - 1; i >= 0; i--) {
+            if (rx[i].counter <= maxReady) {
+                removed = removed.concat(rx.splice(i, 1));
+            }
+        }
+
+        return removed;
+    };
+
+    this.bufferAdd = event => {
+        rx.push(event);
+
+        this.counters.total += 1;
+
+        return this.counters.total;
     };
 
     this.calcFactors = size => {
@@ -63,34 +90,32 @@ function OutputStream ($q) {
         }
     };
 
-    this.updateCounterState = ({ counter }) => {
+    this.checkCounter = ({ counter }) => {
         this.counters.used.push(counter);
 
-        if (counter > this.counters.max) {
+        if (!this.counters.max || this.counters.max < counter) {
             this.counters.max = counter;
         }
 
+        let ready;
         const missing = [];
-        let minReady;
-        let maxReady;
 
         for (let i = this.counters.min; i <= this.counters.max; i++) {
             if (this.counters.used.indexOf(i) === -1) {
                 missing.push(i);
-            } else if (missing.length === 0) {
-                maxReady = i;
             }
         }
 
-        if (maxReady) {
-            minReady = this.counters.min;
-
-            this.counters.min = maxReady + 1;
-            this.counters.used = this.counters.used.filter(c => c > maxReady);
+        if (missing.length === 0) {
+            ready = this.counters.max;
+        } else {
+            ready = missing[0] - 1;
         }
 
+        this.counters.ready = [this.counters.min, ready];
+        this.counters.min = ready + 1;
+        this.counters.used = this.counters.used.filter(c => c > ready);
         this.counters.missing = missing;
-        this.counters.ready = [minReady, maxReady];
 
         return this.counters.ready;
     };
@@ -105,8 +130,8 @@ function OutputStream ($q) {
                     this.counters.final = data.counter;
                 }
 
-                const [minReady, maxReady] = this.updateCounterState(data);
-                const count = this.hooks.bufferAdd(data);
+                const [minReady, maxReady] = this.checkCounter(data);
+                const count = this.bufferAdd(data);
 
                 if (count % OUTPUT_PAGE_SIZE === 0) {
                     this.setFramesPerRender();
@@ -121,7 +146,7 @@ function OutputStream ($q) {
                 }
 
                 const isLastFrame = this.state.ending && (maxReady >= this.counters.final);
-                const events = this.hooks.bufferEmpty(minReady, maxReady);
+                const events = this.bufferEmpty(minReady, maxReady);
 
                 return this.emitFrames(events, isLastFrame);
             })
@@ -142,7 +167,7 @@ function OutputStream ($q) {
 
                 let events = [];
                 if (this.counters.ready.length > 0) {
-                    events = this.hooks.bufferEmpty(...this.counters.ready);
+                    events = this.bufferEmpty(...this.counters.ready);
                 }
 
                 return this.emitFrames(events, true);
