@@ -177,8 +177,7 @@ function canStartFollowing () {
 
     if (followOnce && // one-time activation from top of first page
         scroll.isBeyondUpperThreshold() &&
-        slide.getHeadCounter() === 1 &&
-        slide.getTailCounter() >= OUTPUT_PAGE_SIZE) {
+        slide.getTailCounter() - slide.getHeadCounter() >= OUTPUT_PAGE_SIZE) {
         followOnce = false;
 
         return true;
@@ -386,7 +385,7 @@ function startListening () {
 
 function handleJobEvent (data) {
     streaming = streaming || resource.events
-        .getRange([Math.max(0, data.counter - 50), data.counter + 50])
+        .getRange([Math.max(1, data.counter - 50), data.counter + 50])
         .then(results => {
             results.push(data);
 
@@ -406,11 +405,12 @@ function handleJobEvent (data) {
                 results = results.filter(({ counter }) => counter > maxMissing);
             }
 
-            stream.setMissingCounterThreshold(max);
             results.forEach(item => {
                 stream.pushJobEvent(item);
                 status.pushJobEvent(item);
             });
+
+            stream.setMissingCounterThreshold(min);
 
             return $q.resolve();
         });

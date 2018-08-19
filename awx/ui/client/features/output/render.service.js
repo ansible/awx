@@ -31,6 +31,8 @@ const pattern = [
 const re = new RegExp(pattern);
 const hasAnsi = input => re.test(input);
 
+const MISSING_EVENT_GROUP = 'MISSING_EVENT_GROUP';
+
 function JobRenderService ($q, $sce, $window) {
     this.init = ({ compile, toggles }) => {
         this.parent = null;
@@ -39,6 +41,7 @@ function JobRenderService ($q, $sce, $window) {
         this.hooks = { compile };
 
         this.createToggles = toggles;
+        this.lastMissing = false;
         this.state = {
             collapseAll: false
         };
@@ -76,9 +79,20 @@ function JobRenderService ($q, $sce, $window) {
     };
 
     this.transformEvent = event => {
-        if (this.record[event.uuid]) {
+        if (event.uuid && this.record[event.uuid]) {
             return { html: '', count: 0 };
         }
+
+        if (event.event === MISSING_EVENT_GROUP) {
+            if (this.lastMissing) {
+                return { html: '', count: 0 };
+            }
+
+            this.lastMissing = true;
+            return this.transformMissingEvent(event);
+        }
+
+        this.lastMissing = false;
 
         if (!event || !event.stdout) {
             return { html: '', count: 0 };
@@ -106,6 +120,13 @@ function JobRenderService ($q, $sce, $window) {
 
             return `${concat}${row}`;
         }, '');
+
+        return { html, count };
+    };
+
+    this.transformMissingEvent = () => {
+        const html = '<div class="at-Stdout-row"><div class="at-Stdout-line">...</div></div>';
+        const count = 1;
 
         return { html, count };
     };

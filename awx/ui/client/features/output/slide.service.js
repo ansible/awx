@@ -75,7 +75,7 @@ function SlidingWindowService ($q) {
     };
 
     this.getBoundedRange = range => {
-        const bounds = [1, this.getMaxCounter()];
+        const bounds = [0, this.getMaxCounter()];
 
         return [Math.max(range[0], bounds[0]), Math.min(range[1], bounds[1])];
     };
@@ -388,6 +388,10 @@ function SlidingWindowService ($q) {
         this.buffer.max = max;
         this.buffer.count = count;
 
+        if (tail - head === 0) {
+            return frames;
+        }
+
         if (min >= head && min <= tail + 1) {
             return frames.filter(({ counter }) => counter > tail);
         }
@@ -398,14 +402,21 @@ function SlidingWindowService ($q) {
     this.getFrames = () => $q.resolve(this.buffer.events);
 
     this.getMaxCounter = () => {
-        if (this.buffer.min) {
-            return this.buffer.min;
+        if (this.buffer.min && this.buffer.min > 1) {
+            return this.buffer.min - 1;
         }
 
         return this.api.getMaxCounter();
     };
 
-    this.isOnLastPage = () => this.getTailCounter() >= (this.getMaxCounter() - OUTPUT_PAGE_SIZE);
+    this.isOnLastPage = () => {
+        if (this.getTailCounter() === 0) {
+            return true;
+        }
+
+        return this.getTailCounter() >= (this.getMaxCounter() - OUTPUT_PAGE_SIZE);
+    };
+
     this.getRange = () => [this.getHeadCounter(), this.getTailCounter()];
     this.getRecordCount = () => Object.keys(this.lines).length;
     this.getCapacity = () => OUTPUT_EVENT_LIMIT - this.getRecordCount();
