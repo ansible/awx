@@ -161,7 +161,7 @@ requirements_ansible: virtualenv_ansible
 	else \
 	    cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | $(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
-	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt || true
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
@@ -184,7 +184,7 @@ requirements_awx: virtualenv_awx
 	else \
 	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
-	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
+	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt || true
 
 requirements_awx_dev:
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt
@@ -198,10 +198,10 @@ requirements_test: requirements
 # "Install" awx package in development mode.
 develop:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
-	    pip uninstall -y awx; \
+	    pip uninstall -y awx || true; \
 	    $(PYTHON) setup.py develop; \
 	else \
-	    pip uninstall -y awx; \
+	    pip uninstall -y awx || true; \
 	    $(PYTHON) setup.py develop; \
 	fi
 
