@@ -25,8 +25,8 @@ export const OUTPUT_PAGE_SIZE = 50;
 export const OUTPUT_SCROLL_DELAY = 100;
 export const OUTPUT_SCROLL_THRESHOLD = 0.1;
 export const OUTPUT_SEARCH_DOCLINK = 'https://docs.ansible.com/ansible-tower/3.3.0/html/userguide/search_sort.html';
-export const OUTPUT_SEARCH_FIELDS = ['changed', 'created', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play'];
-export const OUTPUT_SEARCH_KEY_EXAMPLES = ['host_name:localhost', 'task:set', 'created:>=2000-01-01'];
+export const OUTPUT_SEARCH_FIELDS = ['changed', 'created', 'failed', 'host_name', 'stdout', 'task', 'role', 'playbook', 'play', 'start_line', 'end_line'];
+export const OUTPUT_SEARCH_KEY_EXAMPLES = ['host_name:localhost', 'task:set', 'created:>=2000-01-01', 'start_line:>=9000'];
 export const OUTPUT_EVENT_LIMIT = OUTPUT_PAGE_LIMIT * OUTPUT_PAGE_SIZE;
 
 export const WS_PREFIX = 'ws';
