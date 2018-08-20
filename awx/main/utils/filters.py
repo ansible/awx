@@ -147,6 +147,10 @@ class SmartFilter(object):
                 q = reduce(lambda x, y: x | y, [models.Q(**{u'%s__icontains' % _k:_v}) for _k, _v in kwargs.items()])
                 self.result = Host.objects.filter(q)
             else:
+                # detect loops and restrict access to sensitive fields
+                # this import is intentional here to avoid a circular import
+                from awx.api.filters import FieldLookupBackend
+                FieldLookupBackend().get_field_from_lookup(Host, k)
                 kwargs[k] = v
                 self.result = Host.objects.filter(**kwargs)
 

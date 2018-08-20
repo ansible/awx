@@ -238,11 +238,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         app_label = 'main'
         ordering = ('name',)
 
-    host_config_key = models.CharField(
+    host_config_key = prevent_search(models.CharField(
         max_length=1024,
         blank=True,
         default='',
-    )
+    ))
     ask_diff_mode_on_launch = AskForField(
         blank=True,
         default=False,
