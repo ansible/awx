@@ -17,12 +17,12 @@ let scroll;
 let status;
 let slide;
 let stream;
+let page;
 
 let vm;
-
 const listeners = [];
+let lockFrames = false;
 
-let lockFrames;
 function onFrames (events) {
     events = slide.pushFrames(events);
 
@@ -30,7 +30,7 @@ function onFrames (events) {
         return $q.resolve();
     }
 
-    const popCount = events.length - slide.getCapacity();
+    const popCount = events.length - render.getCapacity();
     const isAttached = events.length > 0;
 
     if (!isAttached) {
@@ -52,13 +52,13 @@ function onFrames (events) {
         scroll.scrollToBottom();
     }
 
-    return slide.popBack(popCount)
+    return render.popBack(popCount)
         .then(() => {
             if (vm.isFollowing) {
                 scroll.scrollToBottom();
             }
 
-            return slide.pushFront(events);
+            return render.pushFrames(events);
         })
         .then(() => {
             if (vm.isFollowing) {
@@ -71,7 +71,11 @@ function onFrames (events) {
         });
 }
 
-function first () {
+//
+// Menu Controls (Running)
+//
+
+function firstRange () {
     if (scroll.isPaused()) {
         return $q.resolve();
     }
@@ -81,9 +85,15 @@ function first () {
 
     stopFollowing();
 
-    return slide.getFirst()
-        .then(() => {
-            scroll.resetScrollPosition();
+    return render.clear()
+        .then(() => slide.getFirst())
+        .then(results => render.pushFront(results))
+        .then(() => slide.getNext())
+        .then(results => {
+            const popCount = results.length - render.getCapacity();
+
+            return render.popBack(popCount)
+                .then(() => render.pushFront(results));
         })
         .finally(() => {
             scroll.resume();
@@ -91,7 +101,7 @@ function first () {
         });
 }
 
-function next () {
+function nextRange () {
     if (vm.isFollowing) {
         scroll.scrollToBottom();
 
@@ -110,26 +120,43 @@ function next () {
     lockFrames = true;
 
     return slide.getNext()
+        .then(results => {
+            const popCount = results.length - render.getCapacity();
+
+            return render.popBack(popCount)
+                .then(() => render.pushFront(results));
+        })
         .finally(() => {
             scroll.resume();
             lockFrames = false;
         });
 }
 
-function previous () {
+function previousRange () {
     if (scroll.isPaused()) {
         return $q.resolve();
     }
 
     scroll.pause();
     lockFrames = true;
-
     stopFollowing();
 
-    const initialPosition = scroll.getScrollPosition();
+    let initialPosition;
+    let popHeight;
 
     return slide.getPrevious()
-        .then(popHeight => {
+        .then(results => {
+            const popCount = results.length - render.getCapacity();
+            initialPosition = scroll.getScrollPosition();
+
+            return render.popFront(popCount)
+                .then(() => {
+                    popHeight = scroll.getScrollHeight();
+
+                    return render.pushBack(results);
+                });
+        })
+        .then(() => {
             const currentHeight = scroll.getScrollHeight();
             scroll.setScrollPosition(currentHeight - popHeight + initialPosition);
 
@@ -138,10 +165,12 @@ function previous () {
         .finally(() => {
             scroll.resume();
             lockFrames = false;
+
+            return $q.resolve();
         });
 }
 
-function last () {
+function lastRange () {
     if (scroll.isPaused()) {
         return $q.resolve();
     }
@@ -149,9 +178,10 @@ function last () {
     scroll.pause();
     lockFrames = true;
 
-    return slide.getLast()
+    return render.clear()
+        .then(() => slide.getLast())
+        .then(results => render.pushFront(results))
         .then(() => {
-            stream.setMissingCounterThreshold(slide.getTailCounter() + 1);
             scroll.scrollToBottom();
 
             return $q.resolve();
@@ -159,7 +189,28 @@ function last () {
         .finally(() => {
             scroll.resume();
             lockFrames = false;
+
+            return $q.resolve();
         });
+}
+
+function menuLastRange () {
+    if (vm.isFollowing) {
+        lockFollow = true;
+        stopFollowing();
+
+        return $q.resolve();
+    }
+
+    lockFollow = false;
+
+    if (slide.isOnLastPage()) {
+        scroll.scrollToBottom();
+
+        return $q.resolve();
+    }
+
+    return last();
 }
 
 let followOnce;
@@ -207,23 +258,159 @@ function stopFollowing () {
     vm.followTooltip = vm.strings.get('tooltips.MENU_LAST');
 }
 
+//
+// Menu Controls (Page Mode)
+//
+
+function firstPage () {
+    if (scroll.isPaused()) {
+        return $q.resolve();
+    }
+
+    scroll.pause();
+
+    return render.clear()
+        .then(() => page.getFirst())
+        .then(results => render.pushFront(results))
+        .then(() => page.getNext())
+        .then(results => {
+            const popCount = page.trimHead();
+
+            return render.popBack(popCount)
+                .then(() => render.pushFront(results));
+        })
+        .finally(() => {
+            scroll.resume();
+
+            return $q.resolve();
+        });
+}
+
+function lastPage () {
+    if (scroll.isPaused()) {
+        return $q.resolve();
+    }
+
+    scroll.pause();
+
+    return render.clear()
+        .then(() => page.getLast())
+        .then(results => render.pushBack(results))
+        .then(() => page.getPrevious())
+        .then(results => {
+            const popCount = page.trimTail();
+
+            return render.popFront(popCount)
+                .then(() => render.pushBack(results));
+        })
+        .then(() => {
+            scroll.scrollToBottom();
+
+            return $q.resolve();
+        })
+        .finally(() => {
+            scroll.resume();
+
+            return $q.resolve();
+        });
+}
+
+function nextPage () {
+    if (scroll.isPaused()) {
+        return $q.resolve();
+    }
+
+    scroll.pause();
+
+    return page.getNext()
+        .then(results => {
+            const popCount = page.trimHead();
+
+            return render.popBack(popCount)
+                .then(() => render.pushFront(results));
+        })
+        .finally(() => {
+            scroll.resume();
+        });
+}
+
+function previousPage () {
+    if (scroll.isPaused()) {
+        return $q.resolve();
+    }
+
+    scroll.pause();
+
+    let initialPosition;
+    let popHeight;
+
+    return page.getPrevious()
+        .then(results => {
+            const popCount = page.trimTail();
+            initialPosition = scroll.getScrollPosition();
+
+            return render.popFront(popCount)
+                .then(() => {
+                    popHeight = scroll.getScrollHeight();
+
+                    return render.pushBack(results);
+                });
+        })
+        .then(() => {
+            const currentHeight = scroll.getScrollHeight();
+            scroll.setScrollPosition(currentHeight - popHeight + initialPosition);
+
+            return $q.resolve();
+        })
+        .finally(() => {
+            scroll.resume();
+
+            return $q.resolve();
+        });
+}
+
+//
+// Menu Controls
+//
+
+function first () {
+    if (vm.isProcessingFinished) {
+        return firstPage();
+    }
+
+    return firstRange();
+}
+
+function last () {
+    if (vm.isProcessingFinished) {
+        return lastPage();
+    }
+
+    return lastRange();
+}
+
+function next () {
+    if (vm.isProcessingFinished) {
+        return nextPage();
+    }
+
+    return nextRange();
+}
+
+function previous () {
+    if (vm.isProcessingFinished) {
+        return previousPage();
+    }
+
+    return previousRange();
+}
+
 function menuLast () {
-    if (vm.isFollowing) {
-        lockFollow = true;
-        stopFollowing();
-
-        return $q.resolve();
+    if (vm.isProcessingFinished) {
+        return lastPage();
     }
 
-    lockFollow = false;
-
-    if (slide.isOnLastPage()) {
-        scroll.scrollToBottom();
-
-        return $q.resolve();
-    }
-
-    return last();
+    return menuLastRange();
 }
 
 function down () {
@@ -238,6 +425,10 @@ function togglePanelExpand () {
     vm.isPanelExpanded = !vm.isPanelExpanded;
 }
 
+//
+// Line Interaction
+//
+
 const iconCollapsed = 'fa-angle-right';
 const iconExpanded = 'fa-angle-down';
 const iconSelector = '.at-Stdout-toggle > i';
@@ -246,7 +437,7 @@ const lineCollapsed = 'hidden';
 function toggleCollapseAll () {
     if (scroll.isPaused()) return;
 
-    const records = Object.keys(render.record).map(key => render.record[key]);
+    const records = Object.keys(render.records).map(key => render.records[key]);
     const plays = records.filter(({ name }) => name === EVENT_START_PLAY);
     const tasks = records.filter(({ name }) => name === EVENT_START_TASK);
 
@@ -286,7 +477,7 @@ function toggleCollapseAll () {
 function toggleCollapse (uuid) {
     if (scroll.isPaused()) return;
 
-    const record = render.record[uuid];
+    const record = render.records[uuid];
 
     if (record.name === EVENT_START_PLAY) {
         togglePlayCollapse(uuid);
@@ -298,7 +489,7 @@ function toggleCollapse (uuid) {
 }
 
 function togglePlayCollapse (uuid) {
-    const record = render.record[uuid];
+    const record = render.records[uuid];
     const descendants = record.children || [];
 
     const icon = $(`#${uuid} ${iconSelector}`);
@@ -329,11 +520,11 @@ function togglePlayCollapse (uuid) {
     }
 
     descendants
-        .map(item => render.record[item])
+        .map(item => render.records[item])
         .filter(({ name }) => name === EVENT_START_TASK)
-        .forEach(rec => { render.record[rec.uuid].isCollapsed = true; });
+        .forEach(rec => { render.records[rec.uuid].isCollapsed = true; });
 
-    render.record[uuid].isCollapsed = !isCollapsed;
+    render.records[uuid].isCollapsed = !isCollapsed;
 }
 
 function toggleTaskCollapse (uuid) {
@@ -352,7 +543,7 @@ function toggleTaskCollapse (uuid) {
         lines.addClass(lineCollapsed);
     }
 
-    render.record[uuid].isCollapsed = !isCollapsed;
+    render.records[uuid].isCollapsed = !isCollapsed;
 }
 
 function compile (html) {
@@ -362,6 +553,14 @@ function compile (html) {
 function showHostDetails (id, uuid) {
     $state.go('output.host-event.json', { eventId: id, taskUuid: uuid });
 }
+
+function showMissingEvents (uuid) {
+    console.log(`expandMissingEvents: ${uuid}`);
+}
+
+//
+// Event Handling
+//
 
 let streaming;
 function stopListening () {
@@ -433,11 +632,19 @@ function handleSummaryEvent (data) {
     stream.setFinalCounter(data.final_counter);
 }
 
+//
+// Search
+//
+
 function reloadState (params) {
     params.isPanelExpanded = vm.isPanelExpanded;
 
     return $state.transitionTo($state.current, params, { inherit: false, location: 'replace' });
 }
+
+//
+// Debug Mode
+//
 
 function clear () {
     stopListening();
@@ -449,7 +656,7 @@ function clear () {
 
     stream.bufferInit();
     status.init(resource);
-    slide.init(render, resource.events, scroll);
+    slide.init(resource.events, render);
     status.subscribe(data => { vm.status = data.status; });
 
     startListening();
@@ -484,7 +691,8 @@ function OutputIndexController (
     render = _render_;
     status = _status_;
     stream = _stream_;
-    slide = isProcessingFinished ? _page_ : _slide_;
+    slide = _slide_;
+    page = _page_;
 
     vm = this || {};
 
@@ -495,6 +703,7 @@ function OutputIndexController (
     vm.resource = resource;
     vm.reloadState = reloadState;
     vm.isPanelExpanded = isPanelExpanded;
+    vm.isProcessingFinished = isProcessingFinished;
     vm.togglePanelExpand = togglePanelExpand;
 
     // Stdout Navigation
@@ -504,14 +713,17 @@ function OutputIndexController (
     vm.toggleCollapseAll = toggleCollapseAll;
     vm.toggleCollapse = toggleCollapse;
     vm.showHostDetails = showHostDetails;
+    vm.showMissingEvents = showMissingEvents;
     vm.toggleLineEnabled = resource.model.get('type') === 'job';
     vm.followTooltip = vm.strings.get('tooltips.MENU_LAST');
     vm.debug = _debug;
 
     render.requestAnimationFrame(() => {
-        status.init(resource);
-        slide.init(render, resource.events, scroll);
         render.init({ compile, toggles: vm.toggleLineEnabled });
+
+        status.init(resource);
+        page.init(resource.events);
+        slide.init(resource.events, render);
 
         scroll.init({
             next,
@@ -600,4 +812,3 @@ OutputIndexController.$inject = [
 ];
 
 module.exports = OutputIndexController;
-

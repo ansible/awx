@@ -1,6 +1,5 @@
 /* eslint camelcase: 0 */
 import {
-    API_MAX_PAGE_SIZE,
     OUTPUT_EVENT_LIMIT,
     OUTPUT_PAGE_SIZE,
 } from './constants';
@@ -34,9 +33,8 @@ function getContinuous (events, reverse = false) {
 }
 
 function SlidingWindowService ($q) {
-    this.init = (storage, api, { getScrollHeight }) => {
-        const { prepend, append, shift, pop, getRecord, deleteRecord, clear } = storage;
-        const { getRange, getFirst, getLast, getMaxCounter } = api;
+    this.init = ({ getRange, getFirst, getLast, getMaxCounter }, storage) => {
+        const { getHeadCounter, getTailCounter } = storage;
 
         this.api = {
             getRange,
@@ -46,25 +44,9 @@ function SlidingWindowService ($q) {
         };
 
         this.storage = {
-            clear,
-            prepend,
-            append,
-            shift,
-            pop,
-            getRecord,
-            deleteRecord,
+            getHeadCounter,
+            getTailCounter,
         };
-
-        this.hooks = {
-            getScrollHeight,
-        };
-
-        this.lines = {};
-        this.uuids = {};
-        this.chain = $q.resolve();
-
-        this.state = { head: null, tail: null };
-        this.cache = { first: null };
 
         this.buffer = {
             events: [],
@@ -72,10 +54,14 @@ function SlidingWindowService ($q) {
             max: 0,
             count: 0,
         };
+
+        this.cache = {
+            first: null
+        };
     };
 
     this.getBoundedRange = range => {
-        const bounds = [0, this.getMaxCounter()];
+        const bounds = [1, this.getMaxCounter()];
 
         return [Math.max(range[0], bounds[0]), Math.min(range[1], bounds[1])];
     };
@@ -92,273 +78,48 @@ function SlidingWindowService ($q) {
         return this.getBoundedRange([head - 1 - displacement, head - 1]);
     };
 
-    this.createRecord = ({ counter, uuid, start_line, end_line }) => {
-        this.lines[counter] = end_line - start_line;
-        this.uuids[counter] = uuid;
-
-        if (this.state.tail === null) {
-            this.state.tail = counter;
-        }
-
-        if (counter > this.state.tail) {
-            this.state.tail = counter;
-        }
-
-        if (this.state.head === null) {
-            this.state.head = counter;
-        }
-
-        if (counter < this.state.head) {
-            this.state.head = counter;
-        }
-    };
-
-    this.deleteRecord = counter => {
-        this.storage.deleteRecord(this.uuids[counter]);
-
-        delete this.uuids[counter];
-        delete this.lines[counter];
-    };
-
-    this.getLineCount = counter => {
-        const record = this.storage.getRecord(counter);
-
-        if (record && record.lineCount) {
-            return record.lineCount;
-        }
-
-        if (this.lines[counter]) {
-            return this.lines[counter];
-        }
-
-        return 0;
-    };
-
-    this.pushFront = events => {
-        const tail = this.getTailCounter();
-        const newEvents = events.filter(({ counter }) => counter > tail);
-
-        return this.storage.append(newEvents)
-            .then(() => {
-                newEvents.forEach(event => this.createRecord(event));
-
-                return $q.resolve();
-            });
-    };
-
-    this.pushBack = events => {
-        const [head, tail] = this.getRange();
-        const newEvents = events
-            .filter(({ counter }) => counter < head || counter > tail);
-
-        return this.storage.prepend(newEvents)
-            .then(() => {
-                newEvents.forEach(event => this.createRecord(event));
-
-                return $q.resolve();
-            });
-    };
-
-    this.popFront = count => {
-        if (!count || count <= 0) {
-            return $q.resolve();
-        }
-
-        const max = this.getTailCounter();
-        const min = max - count;
-
-        let lines = 0;
-
-        for (let i = max; i >= min; --i) {
-            lines += this.getLineCount(i);
-        }
-
-        return this.storage.pop(lines)
-            .then(() => {
-                for (let i = max; i >= min; --i) {
-                    this.deleteRecord(i);
-                    this.state.tail--;
-                }
-
-                return $q.resolve();
-            });
-    };
-
-    this.popBack = count => {
-        if (!count || count <= 0) {
-            return $q.resolve();
-        }
-
-        const min = this.getHeadCounter();
-        const max = min + count;
-
-        let lines = 0;
-
-        for (let i = min; i <= max; ++i) {
-            lines += this.getLineCount(i);
-        }
-
-        return this.storage.shift(lines)
-            .then(() => {
-                for (let i = min; i <= max; ++i) {
-                    this.deleteRecord(i);
-                    this.state.head++;
-                }
-
-                return $q.resolve();
-            });
-    };
-
-    this.clear = () => this.storage.clear()
-        .then(() => {
-            const [head, tail] = this.getRange();
-
-            for (let i = head; i <= tail; ++i) {
-                this.deleteRecord(i);
-            }
-
-            this.state.head = null;
-            this.state.tail = null;
-
-            return $q.resolve();
-        });
-
     this.getNext = (displacement = OUTPUT_PAGE_SIZE) => {
         const next = this.getNextRange(displacement);
-        const [head, tail] = this.getRange();
 
-        this.chain = this.chain
-            .then(() => this.api.getRange(next))
-            .then(events => {
-                const results = getContinuous(events);
-                const min = Math.min(...results.map(({ counter }) => counter));
-
-                if (min > tail + 1) {
-                    return $q.resolve([]);
-                }
-
-                return $q.resolve(results);
-            })
-            .then(results => {
-                const count = (tail - head + results.length);
-                const excess = count - OUTPUT_EVENT_LIMIT;
-
-                return this.popBack(excess)
-                    .then(() => {
-                        const popHeight = this.hooks.getScrollHeight();
-
-                        return this.pushFront(results).then(() => $q.resolve(popHeight));
-                    });
-            });
-
-        return this.chain;
+        return this.api.getRange(next)
+            .then(results => getContinuous(results));
     };
 
     this.getPrevious = (displacement = OUTPUT_PAGE_SIZE) => {
         const previous = this.getPreviousRange(displacement);
-        const [head, tail] = this.getRange();
 
-        this.chain = this.chain
-            .then(() => this.api.getRange(previous))
-            .then(events => {
-                const results = getContinuous(events, true);
-                const max = Math.max(...results.map(({ counter }) => counter));
-
-                if (head > max + 1) {
-                    return $q.resolve([]);
-                }
-
-                return $q.resolve(results);
-            })
-            .then(results => {
-                const count = (tail - head + results.length);
-                const excess = count - OUTPUT_EVENT_LIMIT;
-
-                return this.popFront(excess)
-                    .then(() => {
-                        const popHeight = this.hooks.getScrollHeight();
-
-                        return this.pushBack(results).then(() => $q.resolve(popHeight));
-                    });
-            });
-
-        return this.chain;
+        return this.api.getRange(previous)
+            .then(results => getContinuous(results, true));
     };
 
     this.getFirst = () => {
-        this.chain = this.chain
-            .then(() => this.clear())
-            .then(() => {
-                if (this.cache.first) {
-                    return $q.resolve(this.cache.first);
-                }
+        if (this.cache.first) {
+            return $q.resolve(this.cache.first);
+        }
 
-                return this.api.getFirst();
-            })
+        return this.api.getFirst()
             .then(events => {
                 if (events.length === OUTPUT_PAGE_SIZE) {
                     this.cache.first = events;
                 }
 
-                return this.pushFront(events);
+                return $q.resolve(events);
             });
-
-        return this.chain
-            .then(() => this.getNext());
     };
 
-    this.getLast = () => {
-        this.chain = this.chain
-            .then(() => this.getFrames())
-            .then(frames => {
-                if (frames.length > 0) {
-                    return $q.resolve(frames);
-                }
+    this.getLast = () => this.getFrames()
+        .then(frames => {
+            if (frames.length > 0) {
+                return $q.resolve(frames);
+            }
 
-                return this.api.getLast();
-            })
-            .then(events => {
-                const min = Math.min(...events.map(({ counter }) => counter));
-
-                if (min <= this.getTailCounter() + 1) {
-                    return this.pushFront(events);
-                }
-
-                return this.clear()
-                    .then(() => this.pushBack(events));
-            });
-
-        return this.chain
-            .then(() => this.getPrevious());
-    };
-
-    this.getTailCounter = () => {
-        if (this.state.tail === null) {
-            return 0;
-        }
-
-        if (this.state.tail < 0) {
-            return 0;
-        }
-
-        return this.state.tail;
-    };
-
-    this.getHeadCounter = () => {
-        if (this.state.head === null) {
-            return 0;
-        }
-
-        if (this.state.head < 0) {
-            return 0;
-        }
-
-        return this.state.head;
-    };
+            return this.api.getLast();
+        });
 
     this.pushFrames = events => {
+        const head = this.getHeadCounter();
+        const tail = this.getTailCounter();
         const frames = this.buffer.events.concat(events);
-        const [head, tail] = this.getRange();
 
         let min;
         let max;
@@ -367,7 +128,7 @@ function SlidingWindowService ($q) {
         for (let i = frames.length - 1; i >= 0; i--) {
             count++;
 
-            if (count > API_MAX_PAGE_SIZE) {
+            if (count > OUTPUT_EVENT_LIMIT) {
                 frames.splice(i, 1);
 
                 count--;
@@ -417,9 +178,9 @@ function SlidingWindowService ($q) {
         return this.getTailCounter() >= (this.getMaxCounter() - OUTPUT_PAGE_SIZE);
     };
 
-    this.getRange = () => [this.getHeadCounter(), this.getTailCounter()];
-    this.getRecordCount = () => Object.keys(this.lines).length;
-    this.getCapacity = () => OUTPUT_EVENT_LIMIT - this.getRecordCount();
+    this.isOnFirstPage = () => this.getHeadCounter() === 1;
+    this.getTailCounter = () => this.storage.getTailCounter();
+    this.getHeadCounter = () => this.storage.getHeadCounter();
 }
 
 SlidingWindowService.$inject = ['$q'];
