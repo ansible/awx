@@ -1262,6 +1262,11 @@ class InventorySourceOptions(BaseModel):
                 'Credentials of type machine, source control, insights and vault are '
                 'disallowed for custom inventory sources.'
             )
+        elif source == 'scm' and cred and cred.credential_type.kind in ('insights', 'vault'):
+            return _(
+                'Credentials of type insights and vault are '
+                'disallowed for scm inventory sources.'
+            )
         return None
 
     def get_inventory_plugin_name(self):

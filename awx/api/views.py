@@ -2883,17 +2883,14 @@ class InventorySourceCredentialsList(SubListAttachDetachAPIView):
     relationship = 'credentials'
 
     def is_valid_relation(self, parent, sub, created=False):
+        # Inventory source credentials are exclusive with all other credentials
+        # subject to change for https://github.com/ansible/awx/issues/277
+        # or https://github.com/ansible/awx/issues/223
+        if parent.credentials.exists():
+            return {'msg': _("Source already has credential assigned.")}
         error = InventorySource.cloud_credential_validation(parent.source, sub)
         if error:
             return {'msg': error}
-        if sub.credential_type == 'vault':
-            # TODO: support this
-            return {"msg": _("Vault credentials are not yet supported for inventory sources.")}
-        else:
-            # Cloud credentials are exclusive with all other cloud credentials
-            cloud_cred_qs = parent.credentials.exclude(credential_type__kind='vault')
-            if cloud_cred_qs.exists():
-                return {'msg': _("Source already has cloud credential assigned.")}
         return None
 
 
