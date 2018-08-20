@@ -273,64 +273,121 @@ function togglePanelExpand () {
     vm.isPanelExpanded = !vm.isPanelExpanded;
 }
 
-function toggleMenuExpand () {
+const iconCollapsed = 'fa-angle-right';
+const iconExpanded = 'fa-angle-down';
+const iconSelector = '.at-Stdout-toggle > i';
+const lineCollapsed = 'hidden';
+
+function toggleCollapseAll () {
     if (scroll.isPaused()) return;
 
-    const recordList = Object.keys(render.record).map(key => render.record[key]);
-    const playRecords = recordList.filter(({ name }) => name === EVENT_START_PLAY);
-    const playIds = playRecords.map(({ uuid }) => uuid);
+    const records = Object.keys(render.record).map(key => render.record[key]);
+    const plays = records.filter(({ name }) => name === EVENT_START_PLAY);
+    const tasks = records.filter(({ name }) => name === EVENT_START_TASK);
 
-    // get any task record that does not have a parent play record
-    const orphanTaskRecords = recordList
-        .filter(({ name }) => name === EVENT_START_TASK)
-        .filter(({ parents }) => !parents.some(uuid => playIds.indexOf(uuid) >= 0));
+    const orphanLines = records
+        .filter(({ level }) => level === 3)
+        .filter(({ parents }) => !records[parents[0]]);
 
-    const toggled = playRecords.concat(orphanTaskRecords)
-        .map(({ uuid }) => getToggleElements(uuid))
-        .filter(({ icon }) => icon.length > 0)
-        .map(({ icon, lines }) => setExpanded(icon, lines, !vm.isMenuExpanded));
+    const orphanLineParents = orphanLines
+        .map(({ parents }) => ({ uuid: parents[0] }));
 
-    if (toggled.length > 0) {
-        vm.isMenuExpanded = !vm.isMenuExpanded;
+    plays.concat(tasks).forEach(({ uuid }) => {
+        const icon = $(`#${uuid} ${iconSelector}`);
+
+        if (vm.isMenuCollapsed) {
+            icon.removeClass(iconCollapsed);
+            icon.addClass(iconExpanded);
+        } else {
+            icon.removeClass(iconExpanded);
+            icon.addClass(iconCollapsed);
+        }
+    });
+
+    tasks.concat(orphanLineParents).forEach(({ uuid }) => {
+        const lines = $(`.child-of-${uuid}`);
+
+        if (vm.isMenuCollapsed) {
+            lines.removeClass(lineCollapsed);
+        } else {
+            lines.addClass(lineCollapsed);
+        }
+    });
+
+    vm.isMenuCollapsed = !vm.isMenuCollapsed;
+    render.setCollapseAll(vm.isMenuCollapsed);
+}
+
+function toggleCollapse (uuid) {
+    if (scroll.isPaused()) return;
+
+    const record = render.record[uuid];
+
+    if (record.name === EVENT_START_PLAY) {
+        togglePlayCollapse(uuid);
+    }
+
+    if (record.name === EVENT_START_TASK) {
+        toggleTaskCollapse(uuid);
     }
 }
 
-function toggleLineExpand (uuid) {
-    if (scroll.isPaused()) return;
+function togglePlayCollapse (uuid) {
+    const record = render.record[uuid];
+    const descendants = record.children || [];
 
-    const { icon, lines } = getToggleElements(uuid);
-    const isExpanded = icon.hasClass('fa-angle-down');
+    const icon = $(`#${uuid} ${iconSelector}`);
+    const lines = $(`.child-of-${uuid}`);
+    const taskIcons = $(`#${descendants.join(', #')}`).find(iconSelector);
 
-    setExpanded(icon, lines, !isExpanded);
+    const isCollapsed = icon.hasClass(iconCollapsed);
 
-    vm.isMenuExpanded = !isExpanded;
+    if (isCollapsed) {
+        icon.removeClass(iconCollapsed);
+        icon.addClass(iconExpanded);
+
+        taskIcons.removeClass(iconExpanded);
+        taskIcons.addClass(iconCollapsed);
+        lines.removeClass(lineCollapsed);
+
+        descendants
+            .map(item => $(`.child-of-${item}`))
+            .forEach(line => line.addClass(lineCollapsed));
+    } else {
+        icon.removeClass(iconExpanded);
+        icon.addClass(iconCollapsed);
+
+        taskIcons.removeClass(iconExpanded);
+        taskIcons.addClass(iconCollapsed);
+
+        lines.addClass(lineCollapsed);
+    }
+
+    descendants
+        .map(item => render.record[item])
+        .filter(({ name }) => name === EVENT_START_TASK)
+        .forEach(rec => { render.record[rec.uuid].isCollapsed = true; });
+
+    render.record[uuid].isCollapsed = !isCollapsed;
 }
 
-function getToggleElements (uuid) {
-    const record = render.record[uuid];
+function toggleTaskCollapse (uuid) {
+    const icon = $(`#${uuid} ${iconSelector}`);
     const lines = $(`.child-of-${uuid}`);
 
-    const iconSelector = '.at-Stdout-toggle > i';
-    const additionalSelector = `#${(record.children || []).join(', #')}`;
+    const isCollapsed = icon.hasClass(iconCollapsed);
 
-    let icon = $(`#${uuid} ${iconSelector}`);
-    if (additionalSelector) {
-        icon = icon.add($(additionalSelector).find(iconSelector));
-    }
-
-    return { icon, lines };
-}
-
-function setExpanded (icon, lines, expanded) {
-    if (expanded) {
-        icon.removeClass('fa-angle-right');
-        icon.addClass('fa-angle-down');
-        lines.removeClass('hidden');
+    if (isCollapsed) {
+        icon.removeClass(iconCollapsed);
+        icon.addClass(iconExpanded);
+        lines.removeClass(lineCollapsed);
     } else {
-        icon.removeClass('fa-angle-down');
-        icon.addClass('fa-angle-right');
-        lines.addClass('hidden');
+        icon.removeClass(iconExpanded);
+        icon.addClass(iconCollapsed);
+        lines.addClass(lineCollapsed);
     }
+
+    render.record[uuid].isCollapsed = !isCollapsed;
 }
 
 function compile (html) {
@@ -476,10 +533,10 @@ function OutputIndexController (
 
     // Stdout Navigation
     vm.menu = { last: menuLast, first, down, up, clear };
-    vm.isMenuExpanded = true;
+    vm.isMenuCollapsed = false;
     vm.isFollowing = false;
-    vm.toggleMenuExpand = toggleMenuExpand;
-    vm.toggleLineExpand = toggleLineExpand;
+    vm.toggleCollapseAll = toggleCollapseAll;
+    vm.toggleCollapse = toggleCollapse;
     vm.showHostDetails = showHostDetails;
     vm.toggleLineEnabled = resource.model.get('type') === 'job';
     vm.followTooltip = vm.strings.get('tooltips.MENU_LAST');
