@@ -1172,16 +1172,13 @@ LOGGING = {
             'propagate': False
         },
         'awx.main.access': {
-            'handlers': ['null'],
-            'propagate': False,
+            'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.main.signals': {
-            'handlers': ['null'],
-            'propagate': False,
+            'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.api.permissions': {
-            'handlers': ['null'],
-            'propagate': False,
+            'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.analytics': {
             'handlers': ['external_logger'],
