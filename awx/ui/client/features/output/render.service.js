@@ -58,6 +58,9 @@ function JobRenderService ($q, $sce, $window) {
 
     this.setCollapseAll = value => {
         this.state.collapseAll = value;
+        Object.keys(this.records).forEach(key => {
+            this.records[key].isCollapsed = value;
+        });
     };
 
     this.sortByCounter = (a, b) => {
@@ -76,7 +79,7 @@ function JobRenderService ($q, $sce, $window) {
     // Event Data Transformation / HTML Building
     //
 
-    this.transformEventGroup = (events, streaming = false) => {
+    this.appendEventGroup = events => {
         let lines = 0;
         let html = '';
 
@@ -84,16 +87,13 @@ function JobRenderService ($q, $sce, $window) {
 
         for (let i = 0; i <= events.length - 1; i++) {
             const current = events[i];
+            const tailCounter = this.getTailCounter();
 
-            if (streaming) {
-                const tailCounter = this.getTailCounter();
+            if (tailCounter && (current.counter !== tailCounter + 1)) {
+                const missing = this.appendMissingEventGroup(current);
 
-                if (tailCounter && (current.counter !== tailCounter + 1)) {
-                    const missing = this.transformMissingEventGroup(current);
-
-                    html += missing.html;
-                    lines += missing.count;
-                }
+                html += missing.html;
+                lines += missing.count;
             }
 
             const line = this.transformEvent(current);
@@ -105,19 +105,37 @@ function JobRenderService ($q, $sce, $window) {
         return { html, lines };
     };
 
-    this.transformMissingEventGroup = event => {
-        const tail = this.lookupRecord(this.getTailCounter());
+    this.appendMissingEventGroup = event => {
+        const tailCounter = this.getTailCounter();
+        const tail = this.lookupRecord(tailCounter);
+        const tailMissing = this.isCounterMissing(tailCounter);
 
-        if (!tail || !tail.counter) {
+        if (!tailMissing && (!tail || !tail.counter)) {
             return { html: '', count: 0 };
         }
 
-        const uuid = getUUID();
+        let uuid;
+
+        if (tailMissing) {
+            uuid = this.missingCounterUUIDs[tailCounter];
+        } else {
+            uuid = getUUID();
+        }
+
         const counters = [];
 
-        for (let i = tail.counter + 1; i < event.counter; i++) {
-            counters.push(i);
+        for (let i = tailCounter + 1; i < event.counter; i++) {
+            if (tailMissing) {
+                this.missingCounterRecords[uuid].counters.push(i);
+            } else {
+                counters.push(i);
+            }
+
             this.missingCounterUUIDs[i] = uuid;
+        }
+
+        if (tailMissing) {
+            return { html: '', count: 0 };
         }
 
         const record = {
@@ -126,6 +144,90 @@ function JobRenderService ($q, $sce, $window) {
             start: tail.end,
             end: event.start_line,
         };
+
+        if (record.start === record.end) {
+            return { html: '', count: 0 };
+        }
+
+        this.missingCounterRecords[uuid] = record;
+
+        const html = `<div id="${uuid}" class="at-Stdout-row">
+            <div class="at-Stdout-toggle"></div>
+            <div class="at-Stdout-line-clickable" ng-click="vm.showMissingEvents('${uuid}')">...</div></div>`;
+        const count = 1;
+
+        return { html, count };
+    };
+
+    this.prependEventGroup = events => {
+        let lines = 0;
+        let html = '';
+
+        events.sort(this.sortByCounter);
+
+        for (let i = events.length - 1; i >= 0; i--) {
+            const current = events[i];
+            const headCounter = this.getHeadCounter();
+
+            if (headCounter && (current.counter !== headCounter - 1)) {
+                const missing = this.prependMissingEventGroup(current);
+
+                html = missing.html + html;
+                lines += missing.count;
+            }
+
+            const line = this.transformEvent(current);
+
+            html = line.html + html;
+            lines += line.count;
+        }
+
+        return { html, lines };
+    };
+
+    this.prependMissingEventGroup = event => {
+        const headCounter = this.getHeadCounter();
+        const head = this.lookupRecord(headCounter);
+        const headMissing = this.isCounterMissing(headCounter);
+
+        if (!headMissing && (!head || !head.counter)) {
+            return { html: '', count: 0 };
+        }
+
+        let uuid;
+
+        if (headMissing) {
+            uuid = this.missingCounterUUIDs[headCounter];
+        } else {
+            uuid = getUUID();
+        }
+
+        const counters = [];
+
+        for (let i = headCounter - 1; i > event.counter; i--) {
+            if (headMissing) {
+                this.missingCounterRecords[uuid].counters.unshift(i);
+            } else {
+                counters.unshift(i);
+            }
+
+            this.missingCounterUUIDs[i] = uuid;
+        }
+
+        if (headMissing) {
+            return { html: '', count: 0 };
+        }
+
+        const record = {
+            counters,
+            uuid,
+            start: event.end_line,
+            end: head.start,
+        };
+
+        if (record.start === record.end) {
+            return { html: '', count: 0 };
+        }
 
         this.missingCounterRecords[uuid] = record;
 
@@ -401,7 +503,7 @@ function JobRenderService ($q, $sce, $window) {
             return $q.resolve();
         }
 
-        const result = this.transformEventGroup(events);
+        const result = this.prependEventGroup(events);
         const html = this.trustHtml(result.html);
 
         const newElements = angular.element(html);
@@ -411,12 +513,12 @@ function JobRenderService ($q, $sce, $window) {
             .then(() => result.lines);
     };
 
-    this.append = (events, streaming = false) => {
+    this.append = events => {
         if (events.length < 1) {
             return $q.resolve();
         }
 
-        const result = this.transformEventGroup(events, streaming);
+        const result = this.appendEventGroup(events);
         const html = this.trustHtml(result.html);
 
         const newElements = angular.element(html);
@@ -498,10 +600,10 @@ function JobRenderService ($q, $sce, $window) {
             return $q.resolve();
         });
 
-    this.pushFront = (events, streaming = false) => {
+    this.pushFront = events => {
         const tail = this.getTailCounter();
 
-        return this.append(events.filter(({ counter }) => counter > tail), streaming);
+        return this.append(events.filter(({ counter }) => counter > tail));
     };
 
     this.pushBack = events => {
@@ -510,8 +612,6 @@ function JobRenderService ($q, $sce, $window) {
 
         return this.prepend(events.filter(({ counter }) => counter < head || counter > tail));
     };
-
-    this.pushFrames = events => this.pushFront(events, true);
 
     this.popMissing = counter => {
         const uuid = this.missingCounterUUIDs[counter];

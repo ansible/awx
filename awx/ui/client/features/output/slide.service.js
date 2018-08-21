@@ -1,36 +1,8 @@
 /* eslint camelcase: 0 */
 import {
-    OUTPUT_EVENT_LIMIT,
+    OUTPUT_MAX_BUFFER_LENGTH,
     OUTPUT_PAGE_SIZE,
 } from './constants';
-
-function getContinuous (events, reverse = false) {
-    const counters = events.map(({ counter }) => counter);
-
-    const min = Math.min(...counters);
-    const max = Math.max(...counters);
-
-    const missing = [];
-    for (let i = min; i <= max; i++) {
-        if (counters.indexOf(i) < 0) {
-            missing.push(i);
-        }
-    }
-
-    if (missing.length === 0) {
-        return events;
-    }
-
-    if (reverse) {
-        const threshold = Math.max(...missing);
-
-        return events.filter(({ counter }) => counter > threshold);
-    }
-
-    const threshold = Math.min(...missing);
-
-    return events.filter(({ counter }) => counter < threshold);
-}
 
 function SlidingWindowService ($q) {
     this.init = ({ getRange, getFirst, getLast, getMaxCounter }, storage) => {
@@ -81,15 +53,13 @@ function SlidingWindowService ($q) {
     this.getNext = (displacement = OUTPUT_PAGE_SIZE) => {
         const next = this.getNextRange(displacement);
 
-        return this.api.getRange(next)
-            .then(results => getContinuous(results));
+        return this.api.getRange(next);
     };
 
     this.getPrevious = (displacement = OUTPUT_PAGE_SIZE) => {
         const previous = this.getPreviousRange(displacement);
 
-        return this.api.getRange(previous)
-            .then(results => getContinuous(results, true));
+        return this.api.getRange(previous);
     };
 
     this.getFirst = () => {
@@ -128,7 +98,7 @@ function SlidingWindowService ($q) {
         for (let i = frames.length - 1; i >= 0; i--) {
             count++;
 
-            if (count > OUTPUT_EVENT_LIMIT) {
+            if (count > OUTPUT_MAX_BUFFER_LENGTH) {
                 frames.splice(i, 1);
 
                 count--;
@@ -153,29 +123,25 @@ function SlidingWindowService ($q) {
             return frames;
         }
 
-        if (min >= head && min <= tail + 1) {
-            return frames.filter(({ counter }) => counter > tail);
-        }
-
-        return [];
+        return frames.filter(({ counter }) => counter > tail);
     };
 
     this.getFrames = () => $q.resolve(this.buffer.events);
 
     this.getMaxCounter = () => {
-        if (this.buffer.min && this.buffer.min > 1) {
-            return this.buffer.min - 1;
+        if (this.buffer.max && this.buffer.max > 1) {
+            return this.buffer.max;
         }
 
         return this.api.getMaxCounter();
     };
 
     this.isOnLastPage = () => {
-        if (this.getTailCounter() === 0) {
-            return true;
+        if (this.buffer.min) {
+            return this.getTailCounter() >= this.buffer.min - 1;
         }
 
-        return this.getTailCounter() >= (this.getMaxCounter() - OUTPUT_PAGE_SIZE);
+        return this.getTailCounter() >= this.getMaxCounter() - OUTPUT_PAGE_SIZE;
     };
 
     this.isOnFirstPage = () => this.getHeadCounter() === 1;

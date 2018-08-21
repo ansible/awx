@@ -31,12 +31,6 @@ function onFrames (events) {
     }
 
     const popCount = events.length - render.getCapacity();
-    const isAttached = events.length > 0;
-
-    if (!isAttached) {
-        stopFollowing();
-        return $q.resolve();
-    }
 
     if (!vm.isFollowing && canStartFollowing()) {
         startFollowing();
@@ -58,7 +52,7 @@ function onFrames (events) {
                 scroll.scrollToBottom();
             }
 
-            return render.pushFrames(events);
+            return render.pushFront(events);
         })
         .then(() => {
             if (vm.isFollowing) {
@@ -80,10 +74,17 @@ function firstRange () {
         return $q.resolve();
     }
 
+    stopFollowing();
+    lockFollow = true;
+
+    if (slide.isOnFirstPage()) {
+        scroll.resetScrollPosition();
+
+        return $q.resolve();
+    }
+
     scroll.pause();
     lockFrames = true;
-
-    stopFollowing();
 
     return render.clear()
         .then(() => slide.getFirst())
@@ -97,7 +98,7 @@ function firstRange () {
         })
         .finally(() => {
             scroll.resume();
-            lockFrames = false;
+            lockFollow = false;
         });
 }
 
@@ -109,10 +110,6 @@ function nextRange () {
     }
 
     if (scroll.isPaused()) {
-        return $q.resolve();
-    }
-
-    if (slide.getTailCounter() >= slide.getMaxCounter()) {
         return $q.resolve();
     }
 
@@ -129,6 +126,8 @@ function nextRange () {
         .finally(() => {
             scroll.resume();
             lockFrames = false;
+
+            return $q.resolve();
         });
 }
 
@@ -138,8 +137,8 @@ function previousRange () {
     }
 
     scroll.pause();
-    lockFrames = true;
     stopFollowing();
+    lockFrames = true;
 
     let initialPosition;
     let popHeight;
@@ -182,13 +181,15 @@ function lastRange () {
         .then(() => slide.getLast())
         .then(results => render.pushFront(results))
         .then(() => {
+            stream.setMissingCounterThreshold(slide.getTailCounter() + 1);
+
             scroll.scrollToBottom();
+            lockFrames = false;
 
             return $q.resolve();
         })
         .finally(() => {
             scroll.resume();
-            lockFrames = false;
 
             return $q.resolve();
         });
@@ -204,13 +205,12 @@ function menuLastRange () {
 
     lockFollow = false;
 
-    if (slide.isOnLastPage()) {
-        scroll.scrollToBottom();
+    return lastRange()
+        .then(() => {
+            startFollowing();
 
-        return $q.resolve();
-    }
-
-    return last();
+            return $q.resolve();
+        });
 }
 
 let followOnce;
