@@ -69,6 +69,7 @@ class SlackBackend(AWXBaseEmailBackend):
                         r = r[1:]
                     ret = connection.api_call("chat.postMessage",
                                               channel=r,
+                                              as_user=True,
                                               attachments=[{
                                                   "color": self.color,
                                                   "text": m.subject
