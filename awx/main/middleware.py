@@ -128,8 +128,9 @@ class SessionTimeoutMiddleware(object):
     def process_response(self, request, response):
         req_session = getattr(request, 'session', None)
         if req_session and not req_session.is_empty():
-                request.session.set_expiry(request.session.get_expiry_age())
-                response['Session-Timeout'] = int(settings.SESSION_COOKIE_AGE)
+            expiry = int(settings.SESSION_COOKIE_AGE)
+            request.session.set_expiry(expiry)
+            response['Session-Timeout'] = expiry
         return response
 
 
