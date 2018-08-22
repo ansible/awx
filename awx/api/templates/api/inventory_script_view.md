@@ -23,6 +23,11 @@ are enabled in the inventory.  This feature allows disabled hosts to be skipped
 when running jobs without removing them from the inventory.  Specify a query
 string of `?all=1` to return all hosts, including disabled ones.
 
+_(Added in Tower 3.2.3)_ Specify a query string of `?towervars=1` to add variables
+to the hostvars of each host that specifies its enabled state and database ID.
+
+To apply multiple query strings, join them with the `&` character, like `?hostvars=1&all=1`.
+
 ## Host Response
 
 Make a GET request to this resource with a query string similar to
