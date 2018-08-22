@@ -326,10 +326,21 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         '''
         if self.job_shard_count > 1:
             # A sharded Job Template will generate a WorkflowJob rather than a Job
-            from awx.main.models.workflow import WorkflowJobTemplate
+            from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobNode
             kwargs['_unified_job_class'] = WorkflowJobTemplate._get_unified_job_class()
             kwargs['_unified_job_field_names'] = WorkflowJobTemplate._get_unified_job_field_names()
-        return self.create_unified_job(**kwargs)
+        job = self.create_unified_job(**kwargs)
+        if self.job_shard_count > 1:
+            for idx in xrange(self.job_shard_count):
+                create_kwargs = dict(workflow_job=job,
+                                     unified_job_template=self,
+                                     #survey_passwords=self.survey_passwords,
+                                     inventory=self.inventory)
+                                     #char_prompts=self.char_prompts)
+                wfjn = WorkflowJobNode.objects.create(**create_kwargs)
+                for cred in self.credentials.all():
+                    wfjn.credentials.add(cred)
+        return job
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_template_detail', kwargs={'pk': self.pk}, request=request)
