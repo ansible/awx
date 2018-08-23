@@ -555,7 +555,41 @@ function showHostDetails (id, uuid) {
 }
 
 function showMissingEvents (uuid) {
-    console.log(`expandMissingEvents: ${uuid}`);
+    const { counters } = render.records[uuid];
+
+    const min = Math.min(...counters);
+    const max = Math.min(Math.max(...counters), min + OUTPUT_PAGE_SIZE);
+
+    const selector = `#${uuid}`;
+    const clicked = $(selector);
+
+    return resource.events.getRange([min, max])
+        .then(results => {
+            let lines = 0;
+            let untrusted = '';
+
+            for (let i = 0; i <= results.length - 1; i++) {
+                const { html, count } = render.transformEvent(results[i]);
+
+                lines += count;
+                untrusted += html;
+                render.records[uuid].counters.shift();
+            }
+
+            const trusted = render.trustHtml(untrusted);
+            const elements = angular.element(trusted);
+
+            return render
+                .requestAnimationFrame(() => {
+                    elements.insertBefore(clicked);
+
+                    if (render.records[uuid].counters.length === 0) {
+                        clicked.remove();
+                    }
+                })
+                .then(() => render.compile(elements))
+                .then(() => lines);
+        });
 }
 
 //
