@@ -331,11 +331,17 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             kwargs['_unified_job_field_names'] = WorkflowJobTemplate._get_unified_job_field_names()
         job = self.create_unified_job(**kwargs)
         if self.job_shard_count > 1:
-            for idx in xrange(self.job_shard_count):
+            if 'inventory' in kwargs:
+                actual_inventory = kwargs['inventory']
+            else:
+                actual_inventory = self.inventory
+            for idx in xrange(min(self.job_shard_count,
+                                  actual_inventory.hosts.count())):
                 create_kwargs = dict(workflow_job=job,
                                      unified_job_template=self,
                                      #survey_passwords=self.survey_passwords,
-                                     inventory=self.inventory)
+                                     inventory=actual_inventory,
+                                     ancestor_artifacts=dict(job_shard=idx))
                                      #char_prompts=self.char_prompts)
                 wfjn = WorkflowJobNode.objects.create(**create_kwargs)
                 for cred in self.credentials.all():
