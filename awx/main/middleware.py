@@ -219,7 +219,7 @@ class DeprecatedAuthTokenMiddleware(object):
     2.  Rewrites `request.path` to `/api/v2/users/N/personal_tokens/`
     3.  Detects the username and password in the request body (either in JSON,
         or form-encoded variables) and builds an appropriate HTTP_AUTHORIZATION
-        Bearer header
+        Basic header
     """
 
     def process_request(self, request):
