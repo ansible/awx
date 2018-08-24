@@ -261,6 +261,7 @@ MIDDLEWARE_CLASSES = (  # NOQA
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'awx.main.middleware.URLModificationMiddleware',
+    'awx.main.middleware.DeprecatedAuthTokenMiddleware',
     'awx.main.middleware.SessionTimeoutMiddleware',
 )
 

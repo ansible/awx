@@ -5,7 +5,10 @@ import json
 from django.db import connection
 from django.test.utils import override_settings
 from django.test import Client
+from django.core.urlresolvers import resolve
+from rest_framework.test import APIRequestFactory
 
+from awx.main.middleware import DeprecatedAuthTokenMiddleware
 from awx.main.utils.encryption import decrypt_value, get_encryption_key
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.models.oauth import (OAuth2Application as Application, 
@@ -358,3 +361,43 @@ def test_revoke_refreshtoken(oauth_application, post, get, delete, admin):
     new_refresh_token = RefreshToken.objects.all().first()
     assert refresh_token == new_refresh_token
     assert new_refresh_token.revoked
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('fmt', ['json', 'multipart'])
+def test_deprecated_authtoken_support(alice, fmt):
+    kwargs = {
+        'data': {'username': 'alice', 'password': 'alice'},
+        'format': fmt
+    }
+    request = getattr(APIRequestFactory(), 'post')('/api/v2/authtoken/', **kwargs)
+    DeprecatedAuthTokenMiddleware().process_request(request)
+    assert request.path == request.path_info == '/api/v2/users/{}/personal_tokens/'.format(alice.pk)
+    view, view_args, view_kwargs = resolve(request.path)
+    resp = view(request, *view_args, **view_kwargs)
+    assert resp.status_code == 201
+    assert 'token' in resp.data
+    assert resp.data['refresh_token'] is None
+    assert resp.data['scope'] == 'write'
+
+
+@pytest.mark.django_db
+def test_deprecated_authtoken_invalid_username(alice):
+    kwargs = {
+        'data': {'username': 'nobody', 'password': 'nobody'},
+        'format': 'json'
+    }
+    request = getattr(APIRequestFactory(), 'post')('/api/v2/authtoken/', **kwargs)
+    resp = DeprecatedAuthTokenMiddleware().process_request(request)
+    assert resp.status_code == 401
+
+
+@pytest.mark.django_db
+def test_deprecated_authtoken_missing_credentials(alice):
+    kwargs = {
+        'data': {},
+        'format': 'json'
+    }
+    request = getattr(APIRequestFactory(), 'post')('/api/v2/authtoken/', **kwargs)
+    resp = DeprecatedAuthTokenMiddleware().process_request(request)
+    assert resp.status_code == 401
