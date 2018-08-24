@@ -102,7 +102,7 @@ function SmartSearchController (
         const listName = $scope.list.name;
         const baseRelatedTypePath = `models.${listName}.base.${rootField}.type`;
 
-        const isRelatedSearchTermField = (_.contains($scope.models[listName].related, rootField));
+        const isRelatedSearchTermField = (_.includes($scope.models[listName].related, rootField));
         const isBaseModelRelatedSearchTermField = (_.get($scope, baseRelatedTypePath) === 'field');
 
         return (isRelatedSearchTermField || isBaseModelRelatedSearchTermField);
@@ -254,7 +254,7 @@ function SmartSearchController (
                 defaults[key] = queryset[key];
             }
         });
-        const cleared = _(defaults).omit(_.isNull).value();
+        const cleared = _(defaults).omitBy(_.isNull).value();
         delete cleared.page;
         queryset = cleared;
 

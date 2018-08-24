@@ -310,12 +310,12 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                 return [];
             }
             if(defaultParams) {
-                let stripped =_.pick(params, (value, key) => {
+                let stripped =_.pickBy(params, (value, key) => {
                     // setting the default value of a term to null in a state definition is a very explicit way to ensure it will NEVER generate a search tag, even with a non-default value
                     return defaultParams[key] !== value && key !== 'order_by' && key !== 'page' && key !== 'page_size' && defaultParams[key] !== null;
                 });
                 let strippedCopy = _.cloneDeep(stripped);
-                if(_.keys(_.pick(defaultParams, _.keys(strippedCopy))).length > 0){
+                if(_.keys(_.pickBy(defaultParams, _.keys(strippedCopy))).length > 0){
                     for (var key in strippedCopy) {
                         if (strippedCopy.hasOwnProperty(key)) {
                             let value = strippedCopy[key];
@@ -418,7 +418,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                     termParams = searchWithoutKey(term, singleSearchParam);
                 }
 
-                params = _.merge(params, termParams, combineSameSearches);
+                params = _.mergeWith(params, termParams, combineSameSearches);
             });
 
             return params;

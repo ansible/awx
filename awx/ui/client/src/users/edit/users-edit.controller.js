@@ -17,7 +17,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
     '$state', 'i18n', 'resolvedModels', 'resourceData',
     function($scope, $rootScope, $stateParams, UserForm, Rest, ProcessErrors,
     GetBasePath, Wait, CreateSelect2, $state, i18n, models, resourceData) {
-        
+
         for (var i = 0; i < user_type_options.length; i++) {
             user_type_options[i].label = i18n._(user_type_options[i].label);
         }
@@ -28,12 +28,16 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
             id = $stateParams.user_id,
             defaultUrl = GetBasePath('users') + id,
             user_obj = resourceData.data;
-            
+
         $scope.breadcrumb.user_name = user_obj.username;
 
         init();
 
         function init() {
+            _.forEach(form.fields, (value, key) => {
+                $scope[key] = user_obj[key];
+            });
+
             $scope.canEdit = me.get('summary_fields.user_capabilities.edit');
             $scope.isOrgAdmin = me.get('related.admin_of_organizations.count') > 0;
             $scope.isCurrentlyLoggedInUser = (parseInt(id) === $rootScope.current_user.id);
@@ -73,9 +77,6 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
             $scope.$watch('user_obj.summary_fields.user_capabilities.edit', function(val) {
                 $scope.canAdd = (val === false) ? false : true;
             });
-
-            setScopeFields(user_obj);
-               
         }
 
         function user_type_sync($scope) {
@@ -105,19 +106,6 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
                     scope.hideSmartSearch = false;
                 }
             };
-        }
-
-
-        function setScopeFields(data) {
-            _(data)
-                .pick(function(value, key) {
-                    return form.fields.hasOwnProperty(key) === true;
-                })
-                .forEach(function(value, key) {
-                    $scope[key] = value;
-                })
-                .value();
-            return;
         }
 
         $scope.redirectToResource = function(resource) {
