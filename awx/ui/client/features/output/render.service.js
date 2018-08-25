@@ -1,6 +1,5 @@
 import Ansi from 'ansi-to-html';
 import Entities from 'html-entities';
-import getUUID from 'uuid';
 
 import {
     EVENT_START_PLAY,
@@ -36,24 +35,18 @@ const hasAnsi = input => re.test(input);
 function JobRenderService ($q, $sce, $window) {
     this.init = ({ compile, toggles }) => {
         this.hooks = { compile };
-
         this.el = $(OUTPUT_ELEMENT_TBODY);
         this.parent = null;
 
         this.state = {
-            head: null,
-            tail: null,
+            head: 0,
+            tail: 0,
             collapseAll: false,
             toggleMode: toggles,
         };
 
-        this.counters = {};
-        this.lines = {};
         this.records = {};
         this.uuids = {};
-
-        this.missingCounterRecords = {};
-        this.missingCounterUUIDs = {};
     };
 
     this.setCollapseAll = value => {
@@ -87,73 +80,54 @@ function JobRenderService ($q, $sce, $window) {
 
         for (let i = 0; i <= events.length - 1; i++) {
             const current = events[i];
-            const tailCounter = this.getTailCounter();
 
-            if (tailCounter && (current.counter !== tailCounter + 1)) {
+            if (this.state.tail && current.counter !== this.state.tail + 1) {
                 const missing = this.appendMissingEventGroup(current);
 
                 html += missing.html;
                 lines += missing.count;
             }
 
-            const line = this.transformEvent(current);
+            const eventLines = this.transformEvent(current);
 
-            html += line.html;
-            lines += line.count;
+            html += eventLines.html;
+            lines += eventLines.count;
         }
 
         return { html, lines };
     };
 
     this.appendMissingEventGroup = event => {
-        const tailCounter = this.getTailCounter();
-        const tail = this.lookupRecord(tailCounter);
-        const tailMissing = this.isCounterMissing(tailCounter);
+        const tailUUID = this.uuids[this.state.tail];
+        const tailRecord = this.records[tailUUID];
 
-        if (!tailMissing && (!tail || !tail.counter)) {
+        if (!tailRecord) {
             return { html: '', count: 0 };
         }
 
         let uuid;
 
-        if (tailMissing) {
-            uuid = this.missingCounterUUIDs[tailCounter];
+        if (tailRecord.isMissing) {
+            uuid = tailUUID;
         } else {
-            uuid = getUUID();
+            uuid = `${event.counter}-${tailUUID}`;
+            this.records[uuid] = { uuid, counters: [], lineCount: 1, isMissing: true };
         }
 
-        const counters = [];
-
-        for (let i = tailCounter + 1; i < event.counter; i++) {
-            if (tailMissing) {
-                this.missingCounterRecords[uuid].counters.push(i);
-            } else {
-                counters.push(i);
-            }
-
-            this.missingCounterUUIDs[i] = uuid;
+        for (let i = this.state.tail + 1; i < event.counter; i++) {
+            this.records[uuid].counters.push(i);
+            this.uuids[i] = uuid;
         }
 
-        if (tailMissing) {
+        if (tailRecord.isMissing) {
             return { html: '', count: 0 };
         }
 
-        const record = {
-            counters,
-            uuid,
-            start: tail.end,
-            end: event.start_line,
-        };
-
-        if (record.start === record.end) {
+        if (tailRecord.end === event.start_line) {
             return { html: '', count: 0 };
         }
 
-        this.missingCounterRecords[uuid] = record;
-
-        const html = `<div id="${uuid}" class="at-Stdout-row">
-            <div class="at-Stdout-toggle"></div>
-            <div class="at-Stdout-line-clickable" ng-click="vm.showMissingEvents('${uuid}')">...</div></div>`;
+        const html = this.buildRowHTML(this.records[uuid]);
         const count = 1;
 
         return { html, count };
@@ -167,84 +141,65 @@ function JobRenderService ($q, $sce, $window) {
 
         for (let i = events.length - 1; i >= 0; i--) {
             const current = events[i];
-            const headCounter = this.getHeadCounter();
 
-            if (headCounter && (current.counter !== headCounter - 1)) {
+            if (this.state.head && current.counter !== this.state.head - 1) {
                 const missing = this.prependMissingEventGroup(current);
 
                 html = missing.html + html;
                 lines += missing.count;
             }
 
-            const line = this.transformEvent(current);
+            const eventLines = this.transformEvent(current);
 
-            html = line.html + html;
-            lines += line.count;
+            html = eventLines.html + html;
+            lines += eventLines.count;
         }
 
         return { html, lines };
     };
 
     this.prependMissingEventGroup = event => {
-        const headCounter = this.getHeadCounter();
-        const head = this.lookupRecord(headCounter);
-        const headMissing = this.isCounterMissing(headCounter);
+        const headUUID = this.uuids[this.state.head];
+        const headRecord = this.records[headUUID];
 
-        if (!headMissing && (!head || !head.counter)) {
+        if (!headRecord) {
             return { html: '', count: 0 };
         }
 
         let uuid;
 
-        if (headMissing) {
-            uuid = this.missingCounterUUIDs[headCounter];
+        if (headRecord.isMissing) {
+            uuid = headUUID;
         } else {
-            uuid = getUUID();
+            uuid = `${headUUID}-${event.counter}`;
+            this.records[uuid] = { uuid, counters: [], lineCount: 1, isMissing: true };
         }
 
-        const counters = [];
-
-        for (let i = headCounter - 1; i > event.counter; i--) {
-            if (headMissing) {
-                this.missingCounterRecords[uuid].counters.unshift(i);
-            } else {
-                counters.unshift(i);
-            }
-
-            this.missingCounterUUIDs[i] = uuid;
+        for (let i = this.state.head - 1; i > event.counter; i--) {
+            this.records[uuid].counters.unshift(i);
+            this.uuids[i] = uuid;
         }
 
-        if (headMissing) {
+        if (headRecord.isMissing) {
             return { html: '', count: 0 };
         }
 
-        const record = {
-            counters,
-            uuid,
-            start: event.end_line,
-            end: head.start,
-        };
-
-        if (record.start === record.end) {
+        if (event.end_line === headRecord.start) {
             return { html: '', count: 0 };
         }
 
-        this.missingCounterRecords[uuid] = record;
-
-        const html = `<div id="${uuid}" class="at-Stdout-row">
-            <div class="at-Stdout-toggle"></div>
-            <div class="at-Stdout-line-clickable" ng-click="vm.showMissingEvents('${uuid}')">...</div></div>`;
+        const html = this.buildRowHTML(this.records[uuid]);
         const count = 1;
 
         return { html, count };
     };
 
     this.transformEvent = event => {
-        if (event.uuid && this.records[event.uuid]) {
+        if (!event || !event.stdout) {
             return { html: '', count: 0 };
         }
 
-        if (!event || !event.stdout) {
+        if (event.uuid && this.records[event.uuid]) {
             return { html: '', count: 0 };
         }
 
@@ -262,10 +217,10 @@ function JobRenderService ($q, $sce, $window) {
             const line = lines[i];
             const isLastLine = i === lines.length - 1;
 
-            let row = this.createRow(record, ln, line);
+            let row = this.buildRowHTML(record, ln, line);
 
             if (record && record.isTruncated && isLastLine) {
-                row += this.createRow(record);
+                row += this.buildRowHTML(record);
                 count++;
             }
 
@@ -280,20 +235,19 @@ function JobRenderService ($q, $sce, $window) {
             return null;
         }
 
-        this.lines[event.counter] = event.end_line - event.start_line;
-
-        if (this.state.tail === null ||
-            this.state.tail < event.counter) {
-            this.state.tail = event.counter;
-        }
-
-        if (this.state.head === null ||
-            this.state.head > event.counter) {
+        if (!this.state.head || event.counter < this.state.head) {
             this.state.head = event.counter;
         }
 
+        if (!this.state.tail || event.counter > this.state.tail) {
+            this.state.tail = event.counter;
+        }
+
         if (!event.uuid) {
-            return null;
+            this.uuids[event.counter] = event.counter;
+            this.records[event.counter] = { counters: [event.counter], lineCount: lines.length };
+
+            return this.records[event.counter];
         }
 
         let isHost = false;
@@ -317,7 +271,7 @@ function JobRenderService ($q, $sce, $window) {
             isTruncated: (event.end_line - event.start_line) > lines.length,
             lineCount: lines.length,
             isCollapsed: this.state.collapseAll,
-            counter: event.counter,
+            counters: [event.counter],
         };
 
         if (event.parent_uuid) {
@@ -355,9 +309,8 @@ function JobRenderService ($q, $sce, $window) {
             record.line++;
         }
 
-        this.uuids[event.counter] = record.uuid;
-        this.counters[event.uuid] = record.counter;
         this.records[event.uuid] = record;
+        this.uuids[event.counter] = event.uuid;
 
         return record;
     };
@@ -374,31 +327,19 @@ function JobRenderService ($q, $sce, $window) {
         return list;
     };
 
-    this.deleteRecord = counter => {
-        const uuid = this.uuids[counter];
-
-        delete this.records[uuid];
-        delete this.counters[uuid];
-        delete this.uuids[counter];
-        delete this.lines[counter];
-    };
-
-    this.getTimestamp = created => {
-        const date = new Date(created);
-        const hour = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours();
-        const minute = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
-        const second = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds();
-
-        return `${hour}:${minute}:${second}`;
-    };
-
-    this.createRow = (record, ln, content) => {
+    this.buildRowHTML = (record, ln, content) => {
         let id = '';
         let icon = '';
         let timestamp = '';
         let tdToggle = '';
         let tdEvent = '';
         let classList = '';
+
+        if (record.isMissing) {
+            return `<div id="${record.uuid}" class="at-Stdout-row">
+                <div class="at-Stdout-toggle"></div>
+                <div class="at-Stdout-line-clickable" ng-click="vm.showMissingEvents('${record.uuid}')">...</div></div>`;
+        }
 
         content = content || '';
 
@@ -457,6 +398,15 @@ function JobRenderService ($q, $sce, $window) {
                 ${tdEvent}
                 <div class="at-Stdout-time">${timestamp}</div>
             </div>`;
+    };
+
+    this.getTimestamp = created => {
+        const date = new Date(created);
+        const hour = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours();
+        const minute = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
+        const second = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds();
+
+        return `${hour}:${minute}:${second}`;
     };
 
     //
@@ -532,57 +482,8 @@ function JobRenderService ($q, $sce, $window) {
     this.sanitize = html => entities.encode(html);
 
     //
-    // Event Counter Methods - External code should use these.
+    // Event Counter Methods - External code should prefer these.
     //
-
-    this.getTailCounter = () => {
-        if (this.state.tail === null) {
-            return 0;
-        }
-
-        if (this.state.tail < 0) {
-            return 0;
-        }
-
-        return this.state.tail;
-    };
-
-    this.getHeadCounter = () => {
-        if (this.state.head === null) {
-            return 0;
-        }
-
-        if (this.state.head < 0) {
-            return 0;
-        }
-
-        return this.state.head;
-    };
-
-    this.getCapacity = () => OUTPUT_EVENT_LIMIT - Object.keys(this.lines).length;
-
-    this.lookupRecord = counter => this.records[this.uuids[counter]];
-
-    this.getLineCount = counter => {
-        const record = this.lookupRecord(counter);
-
-        if (record && record.lineCount) {
-            return record.lineCount;
-        }
-
-        if (this.lines[counter]) {
-            return this.lines[counter];
-        }
-
-        return 0;
-    };
-
-    this.deleteMissingCounterRecord = counter => {
-        const uuid = this.missingCounterUUIDs[counter];
-
-        delete this.missingCounterRecords[counter];
-        delete this.missingCounterUUIDs[uuid];
-    };
 
     this.clear = () => this.removeAll()
         .then(() => {
@@ -590,12 +491,16 @@ function JobRenderService ($q, $sce, $window) {
             const tail = this.getTailCounter();
 
             for (let i = head; i <= tail; ++i) {
-                this.deleteRecord(i);
-                this.deleteMissingCounterRecord(i);
+                const uuid = this.uuids[i];
+
+                if (uuid) {
+                    delete this.records[uuid];
+                    delete this.uuids[i];
+                }
             }
 
-            this.state.head = null;
-            this.state.tail = null;
+            this.state.head = 0;
+            this.state.tail = 0;
 
             return $q.resolve();
         });
@@ -613,73 +518,35 @@ function JobRenderService ($q, $sce, $window) {
         return this.prepend(events.filter(({ counter }) => counter < head || counter > tail));
     };
 
-    this.popMissing = counter => {
-        const uuid = this.missingCounterUUIDs[counter];
-
-        if (!this.missingCounterRecords[uuid]) {
-            return 0;
-        }
-
-        this.missingCounterRecords[uuid].counters.pop();
-
-        if (this.missingCounterRecords[uuid].counters.length > 0) {
-            return 0;
-        }
-
-        delete this.missingCounterRecords[uuid];
-        delete this.missingCounterUUIDs[counter];
-
-        return 1;
-    };
-
-    this.shiftMissing = counter => {
-        const uuid = this.missingCounterUUIDs[counter];
-
-        if (!this.missingCounterRecords[uuid]) {
-            return 0;
-        }
-
-        this.missingCounterRecords[uuid].counters.shift();
-
-        if (this.missingCounterRecords[uuid].counters.length > 0) {
-            return 0;
-        }
-
-        delete this.missingCounterRecords[uuid];
-        delete this.missingCounterUUIDs[counter];
-
-        return 1;
-    };
-
-    this.isCounterMissing = counter => this.missingCounterUUIDs[counter];
-
     this.popFront = count => {
         if (!count || count <= 0) {
             return $q.resolve();
         }
 
-        const max = this.getTailCounter();
+        const max = this.state.tail;
         const min = max - count;
 
         let lines = 0;
 
         for (let i = max; i >= min; --i) {
-            if (this.isCounterMissing(i)) {
-                lines += this.popMissing(i);
-            } else {
-                lines += this.getLineCount(i);
+            const uuid = this.uuids[i];
+
+            if (!uuid) {
+                continue;
+            }
+
+            this.records[uuid].counters.pop();
+            delete this.uuids[i];
+
+            if (this.records[uuid].counters.length === 0) {
+                lines += this.records[uuid].lineCount;
+
+                delete this.records[uuid];
+                this.state.tail--;
             }
         }
 
-        return this.pop(lines)
-            .then(() => {
-                for (let i = max; i >= min; --i) {
-                    this.deleteRecord(i);
-                    this.state.tail--;
-                }
-
-                return $q.resolve();
-            });
+        return this.pop(lines);
     };
 
     this.popBack = count => {
@@ -687,29 +554,35 @@ function JobRenderService ($q, $sce, $window) {
             return $q.resolve();
         }
 
-        const min = this.getHeadCounter();
+        const min = this.state.head;
         const max = min + count;
 
         let lines = 0;
 
         for (let i = min; i <= max; ++i) {
-            if (this.isCounterMissing(i)) {
-                lines += this.popMissing(i);
-            } else {
-                lines += this.getLineCount(i);
+            const uuid = this.uuids[i];
+
+            if (!uuid) {
+                continue;
+            }
+
+            this.records[uuid].counters.shift();
+            delete this.uuids[i];
+
+            if (this.records[uuid].counters.length === 0) {
+                lines += this.records[uuid].lineCount;
+
+                delete this.records[uuid];
+                this.state.head++;
             }
         }
 
-        return this.shift(lines)
-            .then(() => {
-                for (let i = min; i <= max; ++i) {
-                    this.deleteRecord(i);
-                    this.state.head++;
-                }
-
-                return $q.resolve();
-            });
+        return this.shift(lines);
     };
+
+    this.getHeadCounter = () => this.state.head;
+    this.getTailCounter = () => this.state.tail;
+    this.getCapacity = () => OUTPUT_EVENT_LIMIT - (this.getTailCounter() - this.getHeadCounter());
 }
 
 JobRenderService.$inject = ['$q', '$sce', '$window'];
