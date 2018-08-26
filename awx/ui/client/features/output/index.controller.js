@@ -555,16 +555,25 @@ function showHostDetails (id, uuid) {
 }
 
 function showMissingEvents (uuid) {
-    const { counters } = render.records[uuid];
+    const record = render.records[uuid];
 
-    const min = Math.min(...counters);
-    const max = Math.min(Math.max(...counters), min + OUTPUT_PAGE_SIZE);
+    const min = Math.min(...record.counters);
+    const max = Math.min(Math.max(...record.counters), min + OUTPUT_PAGE_SIZE);
 
     const selector = `#${uuid}`;
     const clicked = $(selector);
 
     return resource.events.getRange([min, max])
         .then(results => {
+            const counters = results.map(({ counter }) => counter);
+
+            for (let i = min; i <= max; i++) {
+                if (counters.indexOf(i) < 0) {
+                    results = results.filter(({ counter }) => counter < i);
+                    break;
+                }
+            }
+
             let lines = 0;
             let untrusted = '';
 
@@ -573,7 +582,9 @@ function showMissingEvents (uuid) {
 
                 lines += count;
                 untrusted += html;
-                render.records[uuid].counters.shift();
+
+                const shifted = render.records[uuid].counters.shift();
+                delete render.uuids[shifted];
             }
 
             const trusted = render.trustHtml(untrusted);
@@ -585,6 +596,7 @@ function showMissingEvents (uuid) {
 
                     if (render.records[uuid].counters.length === 0) {
                         clicked.remove();
+                        delete render.records[uuid];
                     }
                 })
                 .then(() => render.compile(elements))
