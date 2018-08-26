@@ -95,7 +95,7 @@ class ReplayJobEvents():
             raise RuntimeError("Job is of type {} and replay is not yet supported.".format(type(job)))
             sys.exit(1)
 
-    def run(self, job_id, speed=1.0, verbosity=0, skip=0):
+    def run(self, job_id, speed=1.0, verbosity=0, skip_range=[]):
         stats = {
             'events_ontime': {
                 'total': 0,
@@ -127,7 +127,7 @@ class ReplayJobEvents():
 
         je_previous = None
         for n, je_current in enumerate(job_events):
-            if n < skip:
+            if je_current.counter in skip_range:
                 continue
 
             if not je_previous:
@@ -193,19 +193,29 @@ class Command(BaseCommand):
 
     help = 'Replay job events over websockets ordered by created on date.'
 
+    def _parse_slice_range(self, slice_arg):
+        slice_arg = tuple([int(n) for n in slice_arg.split(':')])
+        slice_obj = slice(*slice_arg)
+
+        start = slice_obj.start or 0
+        stop = slice_obj.stop or -1
+        step = slice_obj.step or 1
+
+        return range(start, stop, step)
+
     def add_arguments(self, parser):
         parser.add_argument('--job_id', dest='job_id', type=int, metavar='j',
                             help='Id of the job to replay (job or adhoc)')
         parser.add_argument('--speed', dest='speed', type=int, metavar='s',
                             help='Speedup factor.')
-        parser.add_argument('--skip', dest='skip', type=int, metavar='k',
-                            help='Number of events to skip.')
+        parser.add_argument('--skip-range', dest='skip_range', type=str, metavar='k',
+                            default='0:-1:1', help='Range of events to skip')
 
     def handle(self, *args, **options):
         job_id = options.get('job_id')
         speed = options.get('speed') or 1
         verbosity = options.get('verbosity') or 0
-        skip = options.get('skip') or 0
+        skip = self._parse_slice_range(options.get('skip_range'))
 
         replayer = ReplayJobEvents()
         replayer.run(job_id, speed, verbosity, skip)
