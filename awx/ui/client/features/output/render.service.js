@@ -338,7 +338,7 @@ function JobRenderService ($q, $sce, $window) {
         if (record.isMissing) {
             return `<div id="${record.uuid}" class="at-Stdout-row">
                 <div class="at-Stdout-toggle"></div>
-                <div class="at-Stdout-line-clickable" ng-click="vm.showMissingEvents('${record.uuid}')">...</div></div>`;
+                <div class="at-Stdout-line at-Stdout-line--clickable" ng-click="vm.showMissingEvents('${record.uuid}')">...</div></div>`;
         }
 
         content = content || '';
