@@ -53,9 +53,9 @@ def test_really_long_event_fields(field):
     with mock.patch.object(JobEvent, 'objects') as manager:
         JobEvent.create_from_data(**{
             'job_id': 123,
-            field: 'X' * 4096
+            'event_data': {field: 'X' * 4096}
         })
         manager.create.assert_called_with(**{
             'job_id': 123,
-            field: 'X' * 1021 + '...'
+            'event_data': {field: 'X' * 1021 + '...'}
         })
