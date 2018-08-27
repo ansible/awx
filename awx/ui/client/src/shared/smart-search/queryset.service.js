@@ -336,7 +336,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
         mergeQueryset (queryset, additional, singleSearchParam) {
             const space = '%20and%20';
 
-            const merged = _.merge({}, queryset, additional, (objectValue, sourceValue, key, object) => {
+            const merged = _.mergeWith({}, queryset, additional, (objectValue, sourceValue, key, object) => {
                 if (!(object[key] && object[key] !== sourceValue)) {
                     // // https://lodash.com/docs/3.10.1#each
                     // If this returns undefined merging is handled by default _.merge algorithm
