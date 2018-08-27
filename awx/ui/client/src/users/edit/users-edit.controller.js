@@ -140,7 +140,11 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
         var processNewData = function(fields) {
             var data = {};
             _.forEach(fields, function(value, key) {
-                if ($scope[key] !== '' && $scope[key] !== null && $scope[key] !== undefined) {
+                if (value.type === 'sensitive') {
+                    if ($scope[key] !== '' && $scope[key] !== null && $scope[key] !== undefined) {
+                        data[key] = $scope[key];
+                    }
+                } else {
                     data[key] = $scope[key];
                 }
             });
