@@ -16,6 +16,7 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
 
             if (!vm.isSuperUser) {
                 checkOrgAdmin();
+                checkNotificationAdmin();
             }
         }
     });
@@ -45,6 +46,25 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
                     vm.isOrgAdmin = true;
                 } else {
                     vm.isOrgAdmin = false;
+                }
+            })
+            .catch(({ data, status }) => {
+                ProcessErrors(null, data, status, null, {
+                    hdr: strings.get('error.HEADER'),
+                    msg: strings.get('error.CALL', { path: usersPath, action: 'GET', status })
+                });
+            });
+    }
+
+    function checkNotificationAdmin () {
+        const usersPath = `/api/v2/users/${vm.currentUserId}/roles/?role_field=notification_admin_role`;
+        $http.get(usersPath)
+            .then(({ data }) => {
+                console.log(data);
+                if (data.count > 0) {
+                    vm.isNotificationAdmin = true;
+                } else {
+                    vm.isNotificationAdmin = false;
                 }
             })
             .catch(({ data, status }) => {
