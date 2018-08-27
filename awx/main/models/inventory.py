@@ -19,6 +19,9 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from django.db.models import Q
 
+# REST Framework
+from rest_framework.exceptions import ParseError
+
 # AWX
 from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
@@ -217,67 +220,87 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             group_children.add(from_group_id)
         return group_children_map
 
-    def get_script_data(self, hostvars=False, towervars=False, show_all=False):
-        if show_all:
-            hosts_q = dict()
-        else:
-            hosts_q = dict(enabled=True)
+    @staticmethod
+    def parse_shard_params(shard_str):
+        m = re.match(r"shard(?P<offset>\d+)of(?P<step>\d+)", shard_str)
+        if not m:
+            raise ParseError(_('Could not parse subset as shard specification.'))
+        offset = int(m.group('offset'))
+        step = int(m.group('step'))
+        if offset > step:
+            raise ParseError(_('Shard offset must be greater than total number of shards.'))
+        return (offset, step)
+
+    def get_script_data(self, hostvars=False, towervars=False, show_all=False, subset=None):
+        hosts_kw = dict()
+        if not show_all:
+            hosts_kw['enabled'] = True
+        fetch_fields = ['name', 'id', 'variables']
+        if towervars:
+            fetch_fields.append('enabled')
+        hosts = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
+        if subset:
+            if not isinstance(subset, six.string_types):
+                raise ParseError(_('Inventory subset argument must be a string.'))
+            if subset.startswith('shard'):
+                offset, step = Inventory.parse_shard_params(subset)
+                hosts = hosts[offset::step]
+            else:
+                raise ParseError(_('Subset does not use any supported syntax.'))
+
         data = dict()
+        all_group = data.setdefault('all', dict())
 
         if self.variables_dict:
-            all_group = data.setdefault('all', dict())
             all_group['vars'] = self.variables_dict
+
         if self.kind == 'smart':
-            if len(self.hosts.all()) == 0:
-                return {}
-            else:
-                all_group = data.setdefault('all', dict())
-                smart_hosts_qs = self.hosts.filter(**hosts_q).all()
-                smart_hosts = list(smart_hosts_qs.values_list('name', flat=True))
-                all_group['hosts'] = smart_hosts
+            all_group['hosts'] = [host.name for host in hosts]
         else:
-            # Add hosts without a group to the all group.
-            groupless_hosts_qs = self.hosts.filter(groups__isnull=True, **hosts_q)
-            groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
-            if groupless_hosts:
-                all_group = data.setdefault('all', dict())
-                all_group['hosts'] = groupless_hosts
+            # Keep track of hosts that are members of a group
+            grouped_hosts = set([])
 
             # Build in-memory mapping of groups and their hosts.
-            group_hosts_kw = dict(group__inventory_id=self.id, host__inventory_id=self.id)
-            if 'enabled' in hosts_q:
-                group_hosts_kw['host__enabled'] = hosts_q['enabled']
-            group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
-            group_hosts_qs = group_hosts_qs.values_list('group_id', 'host_id', 'host__name')
+            group_hosts_qs = Group.hosts.through.objects.filter(
+                group__inventory_id=self.id,
+                host__inventory_id=self.id
+            ).values_list('group_id', 'host_id', 'host__name')
             group_hosts_map = {}
             for group_id, host_id, host_name in group_hosts_qs:
                 group_hostnames = group_hosts_map.setdefault(group_id, [])
                 group_hostnames.append(host_name)
+                grouped_hosts.add(host_name)
 
             # Build in-memory mapping of groups and their children.
             group_parents_qs = Group.parents.through.objects.filter(
                 from_group__inventory_id=self.id,
                 to_group__inventory_id=self.id,
-            )
-            group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name',
-                                                            'to_group_id')
+            ).values_list('from_group_id', 'from_group__name', 'to_group_id')
             group_children_map = {}
             for from_group_id, from_group_name, to_group_id in group_parents_qs:
                 group_children = group_children_map.setdefault(to_group_id, [])
                 group_children.append(from_group_name)
 
             # Now use in-memory maps to build up group info.
-            for group in self.groups.all():
+            for group in self.groups.only('name', 'id', 'variables'):
                 group_info = dict()
                 group_info['hosts'] = group_hosts_map.get(group.id, [])
                 group_info['children'] = group_children_map.get(group.id, [])
                 group_info['vars'] = group.variables_dict
                 data[group.name] = group_info
 
+            # Add ungrouped hosts to all group
+            all_group['hosts'] = [host.name for host in hosts if host.name not in grouped_hosts]
+
+        # Remove any empty groups
+        for group_name in list(data.keys()):
+            if not data.get(group_name, {}).get('hosts', []):
+                data.pop(group_name)
+
         if hostvars:
             data.setdefault('_meta', dict())
             data['_meta'].setdefault('hostvars', dict())
-            for host in self.hosts.filter(**hosts_q):
+            for host in hosts:
                 data['_meta']['hostvars'][host.name] = host.variables_dict
                 if towervars:
                     tower_dict = dict(remote_tower_enabled=str(host.enabled).lower(),

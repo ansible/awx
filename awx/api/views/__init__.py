@@ -2452,6 +2452,7 @@ class InventoryScriptView(RetrieveAPIView):
         hostvars = bool(request.query_params.get('hostvars', ''))
         towervars = bool(request.query_params.get('towervars', ''))
         show_all = bool(request.query_params.get('all', ''))
+        subset = request.query_params.get('subset', '')
         if hostname:
             hosts_q = dict(name=hostname)
             if not show_all:
@@ -2461,7 +2462,8 @@ class InventoryScriptView(RetrieveAPIView):
         return Response(obj.get_script_data(
             hostvars=hostvars,
             towervars=towervars,
-            show_all=show_all
+            show_all=show_all,
+            subset=subset
         ))
 
 
@@ -3394,6 +3396,15 @@ class JobTemplateJobsList(SubListCreateAPIView):
         if get_request_version(getattr(self, 'request', None)) > 1:
             methods.remove('POST')
         return methods
+
+
+class JobTemplateShardedJobsList(SubListCreateAPIView):
+
+    model = WorkflowJob
+    serializer_class = WorkflowJobListSerializer
+    parent_model = JobTemplate
+    relationship = 'sharded_jobs'
+    parent_key = 'job_template'
 
 
 class JobTemplateInstanceGroupsList(SubListAttachDetachAPIView):

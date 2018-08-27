@@ -3028,6 +3028,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
+            sharded_jobs = self.reverse('api:job_template_sharded_jobs_list', kwargs={'pk': obj.pk}),
         ))
         if self.version > 1:
             res['copy'] = self.reverse('api:job_template_copy', kwargs={'pk': obj.pk})
