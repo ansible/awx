@@ -60,7 +60,6 @@ function AtLayoutController ($scope, $http, strings, ProcessErrors, $transitions
         const usersPath = `/api/v2/users/${vm.currentUserId}/roles/?role_field=notification_admin_role`;
         $http.get(usersPath)
             .then(({ data }) => {
-                console.log(data);
                 if (data.count > 0) {
                     vm.isNotificationAdmin = true;
                 } else {
