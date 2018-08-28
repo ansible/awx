@@ -270,7 +270,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                     }
                     switch ($scope.scm_type.value) {
                         case 'git':
-                            $scope.credentialLabel = "SCM Credential";
+                            $scope.credentialLabel = "SCM " + i18n._("Credential");
                             $scope.urlPopover = '<p>' + i18n._('Example URLs for GIT SCM include:') + '</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
                                 '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
                                 '<p>' + i18n.sprintf(i18n._('%sNote:%s When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
@@ -281,7 +281,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                             $scope.scmBranchLabel = i18n._('SCM Branch/Tag/Commit');
                             break;
                         case 'svn':
-                            $scope.credentialLabel = "SCM Credential";
+                            $scope.credentialLabel = "SCM " + i18n._("Credential");
                             $scope.urlPopover = '<p>' + i18n._('Example URLs for Subversion SCM include:') + '</p>' +
                                 '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
                                 '<li>svn+ssh://servername.example.com/path</li></ul>';
@@ -290,7 +290,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                             $scope.scmBranchLabel = i18n._('Revision #');
                             break;
                         case 'hg':
-                            $scope.credentialLabel = "SCM Credential";
+                            $scope.credentialLabel = "SCM " + i18n._("Credential");
                             $scope.urlPopover = '<p>' + i18n._('Example URLs for Mercurial SCM include:') + '</p>' +
                                 '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                                 '<li>ssh://server.example.com/path</li></ul>' +
@@ -309,7 +309,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
                             $scope.lookupType = 'insights_credential';
                             break;
                         default:
-                            $scope.credentialLabel = "SCM Credential";
+                            $scope.credentialLabel = "SCM " + i18n._("Credential");
                             $scope.urlPopover = '<p> ' + i18n._('URL popover text');
                             $scope.credRequired = false;
                             $scope.lookupType = 'scm_credential';
