@@ -29,7 +29,6 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
             Rest.setUrl(GetBasePath('users') + $rootScope.current_user.id + '/roles/?role_field=notification_admin_role');
             Rest.get()
                 .then(({data}) => {
-                    console.log(data);
                     $scope.isNotificationAdmin = (data.count && data.count > 0);
                 });
 
