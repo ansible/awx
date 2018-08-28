@@ -117,9 +117,6 @@ class TaskManager():
                     continue
                 kv = spawn_node.get_job_kwargs()
                 job = spawn_node.unified_job_template.create_unified_job(**kv)
-                if 'job_shard' in spawn_node.ancestor_artifacts:
-                    job.name = six.text_type("{} - {}").format(job.name, spawn_node.ancestor_artifacts['job_shard'] + 1)
-                    job.save()
                 spawn_node.job = job
                 spawn_node.save()
                 logger.info('Spawned %s in %s for node %s', job.log_format, workflow_job.log_format, spawn_node.pk)

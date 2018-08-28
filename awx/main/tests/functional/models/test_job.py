@@ -1,7 +1,7 @@
 import pytest
 import six
 
-from awx.main.models import JobTemplate, Job, JobHostSummary
+from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob
 from crum import impersonate
 
 
@@ -81,3 +81,22 @@ def test_job_host_summary_representation(host):
     jhs = JobHostSummary.objects.get(pk=jhs.id)
     host.delete()
     assert 'N/A changed=1 dark=2 failures=3 ok=4 processed=5 skipped=6' == six.text_type(jhs)
+
+@pytest.mark.django_db
+class TestShardingModels:
+
+    def test_shard_workflow_spawn(self, shard_jt_factory):
+        shard_jt = shard_jt_factory(3)
+        job = shard_jt.create_unified_job()
+        assert isinstance(job, WorkflowJob)
+        assert job.job_template == shard_jt
+        assert job.unified_job_template == shard_jt
+        assert job.workflow_nodes.count() == 3
+
+    def test_shards_with_JT_and_prompts(self, shard_job_factory):
+        job = shard_job_factory(3, jt_kwargs={'ask_limit_on_launch': True}, prompts={'limit': 'foobar'}, spawn=True)
+        assert job.launch_config.prompts_dict() == {'limit': 'foobar'}
+        for node in job.workflow_nodes.all():
+            assert node.limit == None  # data not saved in node prompts
+            job = node.job
+            assert job.limit == 'foobar'

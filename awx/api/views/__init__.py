@@ -2905,7 +2905,7 @@ class JobTemplateLaunch(RetrieveAPIView):
             raise PermissionDenied()
 
         passwords = serializer.validated_data.pop('credential_passwords', {})
-        new_job = obj.create_job(**serializer.validated_data)
+        new_job = obj.create_unified_job(**serializer.validated_data)
         result = new_job.signal_start(**passwords)
 
         if not result:

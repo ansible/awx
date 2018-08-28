@@ -1789,7 +1789,7 @@ class WorkflowJobNodeAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(
-            workflow_job__workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
+            workflow_job__unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(
                 self.user, 'read_role'))
 
     @check_superuser
@@ -1915,7 +1915,7 @@ class WorkflowJobAccess(BaseAccess):
 
     def filtered_queryset(self):
         return WorkflowJob.objects.filter(
-            workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
+            unified_job_template__in=UnifiedJobTemplate.accessible_pk_qs(
                 self.user, 'read_role'))
 
     def can_add(self, data):
@@ -1947,9 +1947,11 @@ class WorkflowJobAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        wfjt = obj.workflow_job_template
+        template = obj.workflow_job_template
+        if not template and obj.job_template_id:
+            template = obj.job_template
         # only superusers can relaunch orphans
-        if not wfjt:
+        if not template:
             return False
 
         # If job was launched by another user, it could have survey passwords
@@ -1967,7 +1969,7 @@ class WorkflowJobAccess(BaseAccess):
                 return False
 
         # execute permission to WFJT is mandatory for any relaunch
-        return (self.user in wfjt.execute_role)
+        return (self.user in template.execute_role)
 
     def can_recreate(self, obj):
         node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credentials', 'unified_job_template')

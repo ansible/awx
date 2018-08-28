@@ -1647,8 +1647,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
         null=True
     )
 
-    @classmethod
-    def _get_parent_field_name(cls):
+    def _get_parent_field_name(self):
         return 'inventory_source'
 
     @classmethod

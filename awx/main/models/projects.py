@@ -496,8 +496,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
         default='check',
     )
 
-    @classmethod
-    def _get_parent_field_name(cls):
+    def _get_parent_field_name(self):
         return 'project'
 
     @classmethod

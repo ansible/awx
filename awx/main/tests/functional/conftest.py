@@ -776,3 +776,37 @@ def sqlite_copy_expert(request):
 def disable_database_settings(mocker):
     m = mocker.patch('awx.conf.settings.SettingsWrapper.all_supported_settings', new_callable=PropertyMock)
     m.return_value = []
+
+
+@pytest.fixture
+def shard_jt_factory(inventory):
+    def r(N, jt_kwargs=None):
+        for i in range(N):
+            inventory.hosts.create(name='foo{}'.format(i))
+        if not jt_kwargs:
+            jt_kwargs = {}
+        return JobTemplate.objects.create(
+            name='shard-jt-from-factory',
+            job_shard_count=N,
+            inventory=inventory,
+            **jt_kwargs
+        )
+    return r
+
+
+@pytest.fixture
+def shard_job_factory(shard_jt_factory):
+    def r(N, jt_kwargs=None, prompts=None, spawn=False):
+        shard_jt = shard_jt_factory(N, jt_kwargs=jt_kwargs)
+        if not prompts:
+            prompts = {}
+        shard_job = shard_jt.create_unified_job(**prompts)
+        if spawn:
+            for node in shard_job.workflow_nodes.all():
+                # does what the task manager does for spawning workflow jobs
+                kv = node.get_job_kwargs()
+                job = node.unified_job_template.create_unified_job(**kv)
+                node.job = job
+                node.save()
+        return shard_job
+    return r

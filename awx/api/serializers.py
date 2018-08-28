@@ -3590,7 +3590,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
 
     class Meta:
         model = WorkflowJob
-        fields = ('*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous',
+        fields = ('*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous', 'job_template',
                   '-execution_node', '-event_processing_finished', '-controller_node',)
 
     def get_related(self, obj):
