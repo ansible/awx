@@ -744,10 +744,20 @@ function($injector, $stateExtender, $log, i18n) {
                 // search will think they need to be set as search tags.
                 var params;
                 if(field.sourceModel === "organization"){
-                    params = {
-                        page_size: '5',
-                        role_level: 'admin_role'
-                    };
+                    if (form.name === "notification_template") {
+                        // Users with admin_role role level should also have
+                        // notification_admin_role so this should handle regular admin
+                        // users as well as notification admin users
+                        params = {
+                            page_size: '5',
+                            role_level: 'notification_admin_role'
+                        };
+                    } else {
+                        params = {
+                            page_size: '5',
+                            role_level: 'admin_role'
+                        };
+                    }
                 }
                 else if(field.sourceModel === "inventory_script"){
                     params = {

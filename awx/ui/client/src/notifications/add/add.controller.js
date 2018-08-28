@@ -22,7 +22,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
         init();
 
         function init() {
-            Rest.setUrl(GetBasePath('projects'));
+            Rest.setUrl(GetBasePath('notification_templates'));
             Rest.options()
                 .then(({data}) => {
                     if (!data.actions.POST) {
