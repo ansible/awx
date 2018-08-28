@@ -20,7 +20,7 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
         hover: false,
         emptyListText: i18n.sprintf(i18n._("This list is populated by notification templates added from the %sNotifications%s section"), "&nbsp;<a ui-sref='notifications.add'>", "</a>&nbsp;"),
         basePath: 'notification_templates',
-        ngIf: 'current_user.is_superuser || isOrgAdmin',
+        ngIf: 'current_user.is_superuser || isOrgAdmin || isNotificationAdmin',
         fields: {
             name: {
                 key: true,
@@ -40,6 +40,7 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
                 flag: 'notification_templates_success',
                 type: "toggle",
                 ngClick: "toggleNotification($event, notification.id, \"notification_templates_success\")",
+                ngDisabled: "!(current_user.is_superuser || isOrgAdmin)",
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
@@ -51,6 +52,7 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
                 flag: 'notification_templates_error',
                 type: "toggle",
                 ngClick: "toggleNotification($event, notification.id, \"notification_templates_error\")",
+                ngDisabled: "!(current_user.is_superuser || isOrgAdmin)",
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
