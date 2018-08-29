@@ -4,6 +4,7 @@ import {
     OUTPUT_MAX_BUFFER_LENGTH,
     OUTPUT_MAX_LAG,
     OUTPUT_PAGE_SIZE,
+    OUTPUT_EVENT_LIMIT,
 } from './constants';
 
 const rx = [];
@@ -42,7 +43,7 @@ function OutputStream ($q) {
         this.lag = 0;
         this.chain = $q.resolve();
 
-        this.factors = this.calcFactors(OUTPUT_PAGE_SIZE);
+        this.factors = this.calcFactors(OUTPUT_EVENT_LIMIT);
         this.setFramesPerRender();
     };
 
@@ -105,8 +106,7 @@ function OutputStream ($q) {
         if (missing.length === 0) {
             ready = this.counters.max;
         } else if (this.state.overflow) {
-            const removed = Math.min(missing.length, excess);
-            ready = missing[removed - 1] - 1;
+            ready = this.counters.min + this.framesPerRender;
         } else {
             ready = missing[0] - 1;
         }
