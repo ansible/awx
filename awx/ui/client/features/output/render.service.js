@@ -5,6 +5,7 @@ import {
     EVENT_START_PLAY,
     EVENT_STATS_PLAY,
     EVENT_START_TASK,
+    OUTPUT_ANSI_COLORMAP,
     OUTPUT_ELEMENT_TBODY,
     OUTPUT_EVENT_LIMIT,
 } from './constants';
@@ -20,7 +21,7 @@ const TIME_EVENTS = [
     EVENT_STATS_PLAY,
 ];
 
-const ansi = new Ansi();
+const ansi = new Ansi({ stream: true, colors: OUTPUT_ANSI_COLORMAP });
 const entities = new Entities.AllHtmlEntities();
 
 // https://github.com/chalk/ansi-regex
