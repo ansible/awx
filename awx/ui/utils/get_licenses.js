@@ -5,6 +5,8 @@ const { lstatSync, readdirSync, readFileSync, existsSync, writeFileSync, mkdirSy
 const { join } = require('path');
 const licenseTexts = require('./license_texts');
 
+// path to shrinkwrap file
+const SHRINKWRAP_PATH = `${__dirname}/../npm-shrinkwrap.json`;
 // folder that npm install node_modules to
 const NODE_MODULES_FOLDER = `${__dirname}/../node_modules`;
 // the folder which we will put the ui license files
@@ -18,12 +20,17 @@ const LICENSE_HEADER_NAMES = ['LICENSE', 'License', 'Licence'];
 // all the ways in which deps with license info included in readme have readme files named
 const README_FILE_NAMES = ['README', 'README.md', 'README.markdown'];
 // deps that we need to manually grab the license info (and that info)
-const MANUAL_NODE_MODULES_LICENSE_INFO = [
-    {
-        module_name: 'cycle',
-        license_info: 'cycle was released as JSON-js under the public domain (original repo here: https://github.com/douglascrockford/JSON-js) and published to npm as cycle (repo here: https://github.com/dscape/cycle)'
-    }
-];
+const MANUAL_NODE_MODULES_LICENSE_INFO = [];
+//     commenting out for now as cycle is a dev dependency,
+//     leaving in to show the format expected for this array
+//     {
+//         module_name: 'cycle',
+//         license_info: 'cycle was released as JSON-js
+// under the public domain (original repo here: https://github.com/douglascrockford/JSON-js)
+// and published to npm as cycle (repo here: https://github.com/dscape/cycle)'
+//     }
+// ];
+
 // texts of the licenses when the license attr is grabbed from package.json
 const LICENSE_TEXTS = licenseTexts;
 
@@ -33,10 +40,33 @@ const isDirectory = source => lstatSync(source).isDirectory();
 
 const manualNodeModulesSubDirectories = source => [join(source, '@uirouter/angularjs'), join(source, '@uirouter/core')];
 
+const getNonDevDependencyModulesFromShrinkwrap = () => {
+    const getModDeps = (deps) => {
+        const depNamesArr = Object.keys(deps);
+        let arr = [];
+        depNamesArr.forEach(name => {
+            if (deps[name].dependecies) {
+                arr = arr.concat(getModDeps(deps[name].dependecies));
+            }
+            if (!deps[name].dev) {
+                arr.push(name);
+            }
+        });
+        return arr;
+    };
+
+    const shrinkwrap = JSON.parse(readFileSync(SHRINKWRAP_PATH).toString());
+
+    return getModDeps(shrinkwrap.dependencies);
+};
+
 const getSubdirectories = source => {
+    const listOfNonDevDependencyModules = getNonDevDependencyModulesFromShrinkwrap();
     const fromNodeModsDir = readdirSync(source)
         .filter(name => OMITTED_NODE_MODULES_FOLDERS.indexOf(name) === -1)
-        .map(name => join(source, name)).filter(isDirectory);
+        .filter(name => listOfNonDevDependencyModules.indexOf(name) !== -1)
+        .map(name => join(source, name))
+        .filter(isDirectory);
     return fromNodeModsDir.concat(manualNodeModulesSubDirectories(source));
 };
 
