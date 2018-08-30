@@ -13,6 +13,24 @@ export const JOB_STATUS_INCOMPLETE = ['canceled', 'error'];
 export const JOB_STATUS_UNSUCCESSFUL = ['failed'].concat(JOB_STATUS_INCOMPLETE);
 export const JOB_STATUS_FINISHED = JOB_STATUS_COMPLETE.concat(JOB_STATUS_INCOMPLETE);
 
+export const OUTPUT_ANSI_COLORMAP = {
+    0: '#000',
+    1: '#A00',
+    2: '#0A0',
+    3: '#F0AD4E',
+    4: '#00A',
+    5: '#A0A',
+    6: '#0AA',
+    7: '#AAA',
+    8: '#555',
+    9: '#F55',
+    10: '#5F5',
+    11: '#FF5',
+    12: '#55F',
+    13: '#F5F',
+    14: '#5FF',
+    15: '#FFF'
+};
 export const OUTPUT_ELEMENT_CONTAINER = '.at-Stdout-container';
 export const OUTPUT_ELEMENT_TBODY = '#atStdoutResultTable';
 export const OUTPUT_ELEMENT_LAST = '#atStdoutMenuLast';
