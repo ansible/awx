@@ -679,9 +679,9 @@ class TaskManager():
         return finished_wfjs
 
     def schedule(self):
-        with transaction.atomic():
-            # Lock
-            with advisory_lock('task_manager_lock', wait=False) as acquired:
+        # Lock
+        with advisory_lock('task_manager_lock', wait=False) as acquired:
+            with transaction.atomic():
                 if acquired is False:
                     logger.debug("Not running scheduler, another task holds lock")
                     return
