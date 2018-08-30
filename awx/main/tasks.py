@@ -2163,8 +2163,7 @@ class RunInventoryUpdate(BaseTask):
         elif src == 'scm':
             args.append(inventory_update.get_actual_source_path())
         elif src == 'custom':
-            runpath = tempfile.mkdtemp(prefix='awx_inventory_', dir=settings.AWX_PROOT_BASE_PATH)
-            handle, path = tempfile.mkstemp(dir=runpath)
+            handle, path = tempfile.mkstemp(dir=kwargs['private_data_dir'])
             f = os.fdopen(handle, 'w')
             if inventory_update.source_script is None:
                 raise RuntimeError('Inventory Script does not exist')
@@ -2173,7 +2172,6 @@ class RunInventoryUpdate(BaseTask):
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             args.append(path)
             args.append("--custom")
-            self.cleanup_paths.append(runpath)
         args.append('-v%d' % inventory_update.verbosity)
         if settings.DEBUG:
             args.append('--traceback')
