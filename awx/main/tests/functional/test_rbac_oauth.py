@@ -34,8 +34,17 @@ class TestOAuth2Application:
                     client_type='confidential', authorization_grant_type='password', organization=organization
                 )
                 assert access.can_read(app) is can_access    
-                
-        
+
+        def test_admin_only_can_read(self, user, organization):
+            user = user('org-admin', False)
+            organization.admin_role.members.add(user)
+            access = OAuth2ApplicationAccess(user)
+            app = Application.objects.create(
+                name='test app for {}'.format(user.username), user=user,
+                client_type='confidential', authorization_grant_type='password', organization=organization
+            )
+            assert access.can_read(app) is True
+
         def test_app_activity_stream(self, org_admin, alice, organization):
             app = Application.objects.create(
                 name='test app for {}'.format(org_admin.username), user=org_admin,
