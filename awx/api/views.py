@@ -115,9 +115,10 @@ class ActivityStreamEnforcementMixin(object):
     Mixin to check that license supports activity streams.
     '''
     def check_permissions(self, request):
+        ret = super(ActivityStreamEnforcementMixin, self).check_permissions(request)
         if not feature_enabled('activity_streams'):
             raise LicenseForbids(_('Your license does not allow use of the activity stream.'))
-        return super(ActivityStreamEnforcementMixin, self).check_permissions(request)
+        return ret
 
 
 class SystemTrackingEnforcementMixin(object):
@@ -125,9 +126,10 @@ class SystemTrackingEnforcementMixin(object):
     Mixin to check that license supports system tracking.
     '''
     def check_permissions(self, request):
+        ret = super(SystemTrackingEnforcementMixin, self).check_permissions(request)
         if not feature_enabled('system_tracking'):
             raise LicenseForbids(_('Your license does not permit use of system tracking.'))
-        return super(SystemTrackingEnforcementMixin, self).check_permissions(request)
+        return ret
 
 
 class WorkflowsEnforcementMixin(object):
