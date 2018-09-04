@@ -433,18 +433,24 @@ function JobRenderService ($q, $sce, $window) {
     };
 
     this.removeAll = () => {
-        const elements = this.el.children();
+        const elements = this.el.contents();
         return this.remove(elements);
     };
 
     this.shift = lines => {
-        const elements = this.el.children().slice(0, lines);
+        // We multiply by two here under the assumption that one element and one text node
+        // is generated for each line of output.
+        const count = 2 * lines;
+        const elements = this.el.contents().slice(0, count);
 
         return this.remove(elements);
     };
 
     this.pop = lines => {
-        const elements = this.el.children().slice(-lines);
+        // We multiply by two here under the assumption that one element and one text node
+        // is generated for each line of output.
+        const count = 2 * lines;
+        const elements = this.el.contents().slice(-count);
 
         return this.remove(elements);
     };
