@@ -228,6 +228,10 @@ function JobRenderService ($q, $sce, $window) {
             html += row;
         }
 
+        if (this.records[event.uuid]) {
+            this.records[event.uuid].lineCount = count;
+        }
+
         return { html, count };
     };
 

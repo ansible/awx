@@ -126,6 +126,13 @@ function SlidingWindowService ($q) {
         return frames.filter(({ counter }) => counter > tail);
     };
 
+    this.clear = () => {
+        this.buffer.events.length = 0;
+        this.buffer.min = 0;
+        this.buffer.max = 0;
+        this.buffer.count = 0;
+    };
+
     this.getFrames = () => $q.resolve(this.buffer.events);
 
     this.getMaxCounter = () => {

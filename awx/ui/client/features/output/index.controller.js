@@ -838,6 +838,15 @@ function OutputIndexController (
 
         return last();
     });
+
+    $scope.$on('$destroy', () => {
+        stopListening();
+
+        render.clear();
+        render.el.remove();
+        slide.clear();
+        stream.bufferInit();
+    });
 }
 
 OutputIndexController.$inject = [
