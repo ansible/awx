@@ -196,7 +196,7 @@ function JobRenderService ($q, $sce, $window) {
     };
 
     this.transformEvent = event => {
-        if (!event || !event.stdout) {
+        if (!event || event.stdout === null || event.stdout === undefined) {
             return { html: '', count: 0 };
         }
 
