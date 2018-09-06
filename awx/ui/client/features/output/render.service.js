@@ -3,6 +3,7 @@ import Entities from 'html-entities';
 
 import {
     EVENT_START_PLAY,
+    EVENT_START_PLAYBOOK,
     EVENT_STATS_PLAY,
     EVENT_START_TASK,
     OUTPUT_ANSI_COLORMAP,
@@ -208,6 +209,10 @@ function JobRenderService ($q, $sce, $window) {
         const lines = stdout.split('\r\n');
         const record = this.createRecord(event, lines);
 
+        if (event.event === EVENT_START_PLAYBOOK) {
+            return { html: '', count: 0 };
+        }
+
         let html = '';
         let count = lines.length;
         let ln = event.start_line;
@@ -226,6 +231,10 @@ function JobRenderService ($q, $sce, $window) {
             }
 
             html += row;
+        }
+
+        if (this.records[event.uuid]) {
+            this.records[event.uuid].lineCount = count;
         }
 
         return { html, count };
@@ -433,18 +442,24 @@ function JobRenderService ($q, $sce, $window) {
     };
 
     this.removeAll = () => {
-        const elements = this.el.children();
+        const elements = this.el.contents();
         return this.remove(elements);
     };
 
     this.shift = lines => {
-        const elements = this.el.children().slice(0, lines);
+        // We multiply by two here under the assumption that one element and one text node
+        // is generated for each line of output.
+        const count = 2 * lines;
+        const elements = this.el.contents().slice(0, count);
 
         return this.remove(elements);
     };
 
     this.pop = lines => {
-        const elements = this.el.children().slice(-lines);
+        // We multiply by two here under the assumption that one element and one text node
+        // is generated for each line of output.
+        const count = 2 * lines;
+        const elements = this.el.contents().slice(-count);
 
         return this.remove(elements);
     };
