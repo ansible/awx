@@ -3,6 +3,7 @@ import Entities from 'html-entities';
 
 import {
     EVENT_START_PLAY,
+    EVENT_START_PLAYBOOK,
     EVENT_STATS_PLAY,
     EVENT_START_TASK,
     OUTPUT_ANSI_COLORMAP,
@@ -207,6 +208,10 @@ function JobRenderService ($q, $sce, $window) {
         const stdout = this.sanitize(event.stdout);
         const lines = stdout.split('\r\n');
         const record = this.createRecord(event, lines);
+
+        if (event.event === EVENT_START_PLAYBOOK) {
+            return { html: '', count: 0 };
+        }
 
         let html = '';
         let count = lines.length;
