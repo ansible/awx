@@ -4,7 +4,7 @@
     name: postgres
     state: started
     restart_policy: unless-stopped
-    image: postgres:9.6
+    image: "{{ postgresql_image }}"
     volumes:
       - "{{ postgres_data_dir }}:/var/lib/postgresql/data:Z"
     env:
@@ -22,8 +22,10 @@
     restart_policy: unless-stopped
     image: "{{ rabbitmq_image }}"
     env:
-      RABBITMQ_DEFAULT_VHOST: "awx"
-      RABBITMQ_ERLANG_COOKIE: "cookiemonster"
+      RABBITMQ_DEFAULT_VHOST: "{{ rabbitmq_default_vhost }}"
+      RABBITMQ_ERLANG_COOKIE: "{{ rabbitmq_erlang_cookie }}"
+      RABBITMQ_DEFAULT_USER: "{{ rabbitmq_default_username }}"
+      RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_default_password }}"
   register: rabbitmq_container_activate
 
 - name: Activate memcached container
@@ -102,11 +104,11 @@
       DATABASE_PASSWORD: "{{ pg_password }}"
       DATABASE_PORT: "{{ pg_port }}"
       DATABASE_HOST: "{{ pg_hostname_actual }}"
-      RABBITMQ_USER: "guest"
-      RABBITMQ_PASSWORD: "guest"
+      RABBITMQ_USER: "{{ rabbitmq_default_username }}"
+      RABBITMQ_PASSWORD: "{{ rabbitmq_default_password }}"
       RABBITMQ_HOST: "rabbitmq"
-      RABBITMQ_PORT: "5672"
-      RABBITMQ_VHOST: "awx"
+      RABBITMQ_PORT: "{{ rabbitmq_port }}"
+      RABBITMQ_VHOST: "{{ rabbitmq_default_vhost }}"
       MEMCACHED_HOST: "memcached"
       MEMCACHED_PORT: "11211"
       AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
@@ -138,11 +140,11 @@
       DATABASE_PASSWORD: "{{ pg_password }}"
       DATABASE_HOST: "{{ pg_hostname_actual }}"
       DATABASE_PORT: "{{ pg_port }}"
-      RABBITMQ_USER: "guest"
-      RABBITMQ_PASSWORD: "guest"
+      RABBITMQ_USER: "{{ rabbitmq_default_username }}"
+      RABBITMQ_PASSWORD: "{{ rabbitmq_default_password }}"
       RABBITMQ_HOST: "rabbitmq"
-      RABBITMQ_PORT: "5672"
-      RABBITMQ_VHOST: "awx"
+      RABBITMQ_PORT: "{{ rabbitmq_port }}"
+      RABBITMQ_VHOST: "{{ rabbitmq_default_vhost }}"
       MEMCACHED_HOST: "memcached"
       MEMCACHED_PORT: "11211"
       AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
