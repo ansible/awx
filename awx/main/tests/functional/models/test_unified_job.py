@@ -58,9 +58,7 @@ class TestCreateUnifiedJob:
         job_with_links.save()
         job_with_links.credentials.add(machine_credential)
         job_with_links.credentials.add(net_credential)
-        with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names',
-                          return_value=['inventory', 'credential', 'limit']):
-            second_job = job_with_links.copy_unified_job()
+        second_job = job_with_links.copy_unified_job()
 
         # Check that job data matches the original variables
         assert second_job.credential == job_with_links.credential

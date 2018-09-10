@@ -321,8 +321,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         '''
         Create a new unified job based on this unified job template.
         '''
-        from awx.main.models import JobTemplate, WorkflowJob
-        
         new_job_passwords = kwargs.pop('survey_passwords', {})
         eager_fields = kwargs.pop('_eager_fields', None)
 
@@ -553,7 +551,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default=None,
         editable=False,
         related_name='%(class)s_unified_jobs',
-        on_delete=models.SET_NULL,
+        on_delete=polymorphic.SET_NULL,
     )
     launch_type = models.CharField(
         max_length=20,
@@ -834,7 +832,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         '''
         unified_job_class = self.__class__
         unified_jt_class = self._get_unified_job_template_class()
-        parent_field_name = unified_job_class._get_parent_field_name()
+        parent_field_name = self._get_parent_field_name()
         fields = unified_jt_class._get_unified_job_field_names() | set([parent_field_name])
 
         create_data = {}
@@ -881,6 +879,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         config = JobLaunchConfig(job=self)
         if parent is None:
             parent = getattr(self, self._get_parent_field_name())
+        if parent is None:
+            return
         valid_fields = parent.get_ask_mapping().keys()
         # Special cases allowed for workflows
         if hasattr(self, 'extra_vars'):

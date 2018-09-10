@@ -320,10 +320,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     def resources_needed_to_start(self):
         return [fd for fd in ['project', 'inventory'] if not getattr(self, '{}_id'.format(fd))]
 
-    def create_unified_job(self, **kwargs):
+    def create_job(self, **kwargs):
         '''
         Create a new job based on this template.
         '''
+        return self.create_unified_job(**kwargs)
+
+    def create_unified_job(self, **kwargs):
         split_event = bool(
             self.job_shard_count > 1 and
             not kwargs.pop('_prevent_sharding', False)
@@ -345,7 +348,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 create_kwargs = dict(workflow_job=job,
                                      unified_job_template=self,
                                      ancestor_artifacts=dict(job_shard=idx))
-                wfjn = WorkflowJobNode.objects.create(**create_kwargs)
+                WorkflowJobNode.objects.create(**create_kwargs)
         return job
 
     def get_absolute_url(self, request=None):
@@ -480,7 +483,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     RelatedJobsMixin
     '''
     def _get_related_jobs(self):
-        return Job.objects.filter(job_template=self)
+        return UnifiedJob.objects.filter(unified_job_template=self)
 
 
 class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin):
