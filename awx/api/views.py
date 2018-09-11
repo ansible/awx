@@ -2358,6 +2358,7 @@ class HostFactVersionsList(SystemTrackingEnforcementMixin, ParentMixin, ListAPIV
     serializer_class = FactVersionSerializer
     parent_model = Host
     search_fields = ('facts',)
+    deprecated = True
 
     def get_queryset(self):
         from_spec = self.request.query_params.get('from', None)
@@ -2383,6 +2384,7 @@ class HostFactCompareView(SystemTrackingEnforcementMixin, SubDetailAPIView):
     model = Fact
     parent_model = Host
     serializer_class = FactSerializer
+    deprecated = True
 
     def retrieve(self, request, *args, **kwargs):
         datetime_spec = request.query_params.get('datetime', None)
