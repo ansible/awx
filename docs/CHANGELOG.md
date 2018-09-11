@@ -36,8 +36,6 @@
   [[#196](https://github.com/ansible/awx/issues/196)].
 * Add additional organization roles [[#166](https://github.com/ansible/awx/issues/166)].
 * Support fact caching for isolated instances [[#198](https://github.com/ansible/awx/issues/198)].
-* Graphical UI for network inventory [[#611](https://github.com/ansible/awx/issues/611)].
-* Restrict viewing and editing network UI canvas to users with inventory `admin_role`.
 * Implement per-template, project, organization `custom_virtualenv`, a field that
   allows users to select one of multiple virtual environments set up on the filesystem
   [[#34](https://github.com/ansible/awx/issues/34)].
@@ -68,6 +66,7 @@
   queue for the specific instance job is targeted to run on
   [[#1873](https://github.com/ansible/awx/issues/1873)].
 * Switched authentication to Django sessions.
+* Deprecated AuthToken endpoint, will be removed in 3.4.0.
 * Implemented OAuth2 support for token based authentication [[#21](https://github.com/ansible/awx/issues/21)].
 * Added the ability to forcibly expire sessions through `awx-manage expire_sessions`.
 * Disallowed using HTTP PUT/PATCH methods to modify existing jobs in Job Details API endpoint.
