@@ -1,6 +1,6 @@
 // Theme
 require('~assets/custom-theme/jquery-ui-1.10.3.custom.min.css');
-require('~assets/ansible-bootstrap.min.css');
+require('~node_modules/bootstrap/dist/css/bootstrap.min.css');
 require('~assets/fontcustom/fontcustom.css');
 require('~node_modules/components-font-awesome/css/font-awesome.min.css');
 require('~node_modules/select2/dist/css/select2.css');
@@ -23,6 +23,7 @@ require('jquery-ui/ui/widgets/dialog');
 require('jquery-ui/ui/widgets/slider');
 require('jquery-ui/ui/widgets/spinner');
 require('bootstrap');
+require('popper.js');
 require('bootstrap-datepicker');
 
 // jquery-ui and bootstrap both define $.fn.button

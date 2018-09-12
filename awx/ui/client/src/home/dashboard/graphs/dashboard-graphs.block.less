@@ -122,6 +122,10 @@
     border-color: @d7grey;
     min-width: 115px;
 
+    a:not([href]):not([tabindex]) {
+        color: @default-interface-txt;
+    }
+
     a > span {
         float: none;
     }
@@ -145,7 +149,6 @@
 
 .DashboardGraphs-statusFilters{
     padding-top: 5px;
-
 }
 
 .DashboardGraphs-statusFilter{

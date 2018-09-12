@@ -10,7 +10,7 @@
             ng-attr-placeholder="{{ vm.running ?
                 vm.strings.get('search.PLACEHOLDER_RUNNING') :
                 vm.strings.get('search.PLACEHOLDER_DEFAULT') }}">
-        <span class="input-group-btn">
+        <span class="input-group-btn input-group-append">
             <button class="btn at-ButtonHollow--default at-Input-button"
                 ng-click="vm.submitSearch()"
                 ng-disabled="vm.disabled || !vm.value || vm.value === ''"

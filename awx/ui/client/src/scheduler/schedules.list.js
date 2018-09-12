@@ -14,48 +14,55 @@ export default ['i18n', function(i18n) {
         listTitle: '{{parentObject | sanitize}} || SCHEDULES',
         index: false,
         hover: true,
+        layoutClass: 'List-staticColumnLayout--schedules',
+        staticColumns: [
+            {
+                field: 'invalid',
+                content: {
+                    label: '',
+                    type: 'invalid',
+                    nosort: true,
+                    awToolTip: i18n._("Resources are missing from this template."),
+                    dataPlacement: 'right',
+                    ngShow: '!isValid(schedule)'
+                }
+            },
+            {
+                field: 'toggleSchedule',
+                content: {
+                    ngDisabled: "!schedule.summary_fields.user_capabilities.edit || credentialRequiresPassword",
+                    label: '',
+                    type: "toggle",
+                    ngClick: "toggleSchedule($event, schedule.id)",
+                    awToolTip: "{{ schedule.play_tip }}",
+                    dataTipWatch: "schedule.play_tip",
+                    dataPlacement: "right",
+                    nosort: true,
+                }
+            }
+        ],
 
         fields: {
-            invalid: {
-                columnClass: "List-staticColumn--invalidBar",
-                label: '',
-                type: 'invalid',
-                nosort: true,
-                awToolTip: i18n._("Resources are missing from this template."),
-                dataPlacement: 'right',
-                ngShow: '!isValid(schedule)'
-            },
-            toggleSchedule: {
-                ngDisabled: "!schedule.summary_fields.user_capabilities.edit || credentialRequiresPassword",
-                label: '',
-                columnClass: 'List-staticColumn--toggle',
-                type: "toggle",
-                ngClick: "toggleSchedule($event, schedule.id)",
-                awToolTip: "{{ schedule.play_tip }}",
-                dataTipWatch: "schedule.play_tip",
-                dataPlacement: "right",
-                nosort: true,
-            },
             name: {
                 key: true,
                 label: i18n._('Name'),
                 uiSref: "{{schedule.linkToDetails}}",
-                columnClass: "col-md-3 col-sm-3 col-xs-6"
+                columnClass: "col-sm-3 col-xs-6"
             },
             dtstart: {
                 label: i18n._('First Run'),
                 filter: "longDate",
-                columnClass: "List-staticColumn--schedulerTime hidden-sm hidden-xs"
+                columnClass: "d-none d-sm-flex col-sm-2"
             },
             next_run: {
                 label: i18n._('Next Run'),
                 filter: "longDate",
-                columnClass: "List-staticColumn--schedulerTime hidden-xs"
+                columnClass: "d-none d-sm-flex col-sm-2"
             },
             dtend: {
                 label: i18n._('Final Run'),
                 filter: "longDate",
-                columnClass: "List-staticColumn--schedulerTime hidden-xs"
+                columnClass: "d-none d-sm-flex col-sm-2"
             },
         },
 
@@ -81,6 +88,7 @@ export default ['i18n', function(i18n) {
         },
 
         fieldActions: {
+            columnClass: 'col-sm-3 col-xs-6',
             edit: {
                 label: i18n._('Edit'),
                 ngClick: "editSchedule(schedule)",

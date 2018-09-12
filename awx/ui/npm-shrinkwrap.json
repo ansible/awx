@@ -233,7 +233,7 @@
     "angular-tz-extensions": {
       "version": "0.5.2",
       "from": "git+https://git@github.com/ansible/angular-tz-extensions.git#v0.5.2",
-      "resolved": "git+https://git@github.com/ansible/angular-tz-extensions.git#9cabb05d58079092bfb29ccae721b35b46f28af6",
+      "resolved": "git://github.com/ansible/angular-tz-extensions.git#9cabb05d58079092bfb29ccae721b35b46f28af6",
       "dependencies": {
         "jquery": {
           "version": "3.3.1",
@@ -1232,9 +1232,9 @@
       "dev": true
     },
     "bootstrap": {
-      "version": "3.3.7",
-      "from": "bootstrap@>=3.3.7 <4.0.0",
-      "resolved": "https://registry.npmjs.org/bootstrap/-/bootstrap-3.3.7.tgz"
+      "version": "4.1.3",
+      "from": "bootstrap@>=4.1.3 <4.2.0",
+      "resolved": "https://registry.npmjs.org/bootstrap/-/bootstrap-4.1.3.tgz"
     },
     "bootstrap-datepicker": {
       "version": "1.8.0",
@@ -5272,9 +5272,9 @@
       "resolved": "https://registry.npmjs.org/javascript-detect-element-resize/-/javascript-detect-element-resize-0.5.3.tgz"
     },
     "jquery": {
-      "version": "2.2.4",
-      "from": "jquery@>=2.2.4 <2.3.0",
-      "resolved": "https://registry.npmjs.org/jquery/-/jquery-2.2.4.tgz"
+      "version": "3.3.1",
+      "from": "jquery@>=3.3.1 <3.4.0",
+      "resolved": "https://registry.npmjs.org/jquery/-/jquery-3.3.1.tgz"
     },
     "jquery-mousewheel": {
       "version": "3.1.13",
@@ -7083,6 +7083,11 @@
       "from": "pofile@>=1.0.0 <1.1.0",
       "resolved": "https://registry.npmjs.org/pofile/-/pofile-1.0.11.tgz",
       "dev": true
+    },
+    "popper.js": {
+      "version": "1.14.4",
+      "from": "popper.js@>=1.14.4 <1.15.0",
+      "resolved": "https://registry.npmjs.org/popper.js/-/popper.js-1.14.4.tgz"
     },
     "portfinder": {
       "version": "1.0.15",

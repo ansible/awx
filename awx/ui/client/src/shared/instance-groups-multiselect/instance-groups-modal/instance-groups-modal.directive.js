@@ -58,7 +58,8 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
                             let html = `${GenerateList.build({
                                 list: instanceGroupList,
                                 input_type: 'instance-groups-modal-body',
-                                hideViewPerPage: true
+                                hideViewPerPage: true,
+                                mode: 'lookup'
                             })}`;
 
                             $scope.list = instanceGroupList;

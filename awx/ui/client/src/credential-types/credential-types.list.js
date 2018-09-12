@@ -22,7 +22,7 @@ export default ['i18n', function(i18n){
             name: {
                 key: true,
                 label: i18n._('Name'),
-                columnClass: 'col-md-3 col-sm-9 col-xs-9',
+                columnClass: 'col-md-4 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-11',
                 awToolTip: '{{credential_type.description | sanitize}}',
                 dataPlacement: 'top'
@@ -31,7 +31,7 @@ export default ['i18n', function(i18n){
                 label: i18n._('Kind'),
                 ngBind: 'credential_type.kind_label',
                 excludeModal: true,
-                columnClass: 'col-md-2 hidden-sm hidden-xs'
+                columnClass: 'd-none d-md-flex col-md-4'
             },
         },
 
@@ -48,7 +48,7 @@ export default ['i18n', function(i18n){
 
         fieldActions: {
 
-            columnClass: 'col-md-2 col-sm-3 col-xs-3',
+            columnClass: 'col-md-4 col-sm-3 col-xs-3',
 
             edit: {
                 ngClick: "editCredentialType(credential_type.id)",

@@ -30,11 +30,11 @@ export default ['i18n', function(i18n) {
             type: {
                 label: i18n._('Type'),
                 ngBind: 'template.type_label',
-                columnClass: 'col-lg-2 col-md-2 col-sm-4 hidden-xs'
+                columnClass: 'd-none d-sm-flex col-lg-2 col-md-2 col-sm-4'
             },
             smart_status: {
               label: i18n._('Activity'),
-              columnClass: 'List-tableCell col-lg-2 col-md-3 hidden-sm hidden-xs',
+              columnClass: 'd-none d-md-flex List-tableCell col-lg-2 col-md-3',
               nosort: true,
               ngInclude: "'/static/partials/job-template-smart-status.html'",
               type: 'template'
@@ -44,7 +44,7 @@ export default ['i18n', function(i18n) {
                 type: 'labels',
                 nosort: true,
                 showDelete: true,
-                columnClass: 'List-tableCell col-lg-2 col-md-3 hidden-sm hidden-xs'
+                columnClass: 'd-none d-md-flex List-tableCell col-lg-2 col-md-3'
             }
         },
 

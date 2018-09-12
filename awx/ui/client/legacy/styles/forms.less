@@ -216,12 +216,6 @@
     }
 }
 
-.Form-checkbox--stacked {
-    label {
-        display: block;
-    }
-}
-
 .Form-checkbox--subCheckbox {
     font-size: 10px;
     color: @default-stdout-txt;
@@ -424,13 +418,12 @@
     width: 100%;
 }
 
-.Form-passwordButton {
+.Form-browseButton, .Form-passwordButton {
     height: 30px;
     color: @default-interface-txt;
     text-transform: uppercase;
-    line-height: 1;
-    padding-left: 7px;
-    padding-right: 7px;
+    line-height: 1.2;
+    padding: 6px 12px;
     background-color: @default-bg;
     border:1px solid @b7grey;
 }
@@ -582,7 +575,6 @@ input[type='radio']:checked:before {
     color: @default-interface-txt;
     font-weight: normal;
     font-size: small;
-    padding-right:5px;
     width: 100%;
     .noselect;
 }
@@ -789,7 +781,8 @@ input[type='radio']:checked:before {
     background-color: @ebgrey;
 }
 
-.Form-checkboxRow {
-    display: flex;
-    clear: left;
+.Form-checkbox {
+    label {
+        font-weight: 400;
+    }
 }

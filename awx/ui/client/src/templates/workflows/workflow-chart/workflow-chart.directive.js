@@ -90,7 +90,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 }
                 else {
                     // This is the workflow details view
-                    let panel = $('.WorkflowResults-rightSide').children('.Panel')[0];
+                    let panel = $('.WorkflowResults-rightSide').children('.card')[0];
                     let panelWidth = $(panel).width();
                     let panelHeight = $(panel).height();
                     let headerHeight = $('.StandardOut-panelHeader').outerHeight();

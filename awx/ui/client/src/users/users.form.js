@@ -141,10 +141,12 @@ export default ['i18n', function(i18n) {
                     fields: {
                         name: {
                             key: true,
-                            label: i18n._('Name')
+                            label: i18n._('Name'),
+                            columnClass: "col-sm-6"
                         },
                         description: {
-                            label: i18n._('Description')
+                            label: i18n._('Description'),
+                            columnClass: "col-sm-6"
                         }
                     },
                     //hideOnSuperuser: true // RBAC defunct
@@ -167,10 +169,12 @@ export default ['i18n', function(i18n) {
                     fields: {
                         name: {
                             key: true,
-                            label: i18n._('Name')
+                            label: i18n._('Name'),
+                            columnClass: "col-sm-6"
                         },
                         description: {
-                            label: i18n._('Description')
+                            label: i18n._('Description'),
+                            columnClass: "col-sm-6"
                         }
                     },
                     //hideOnSuperuser: true // RBAC defunct
@@ -196,17 +200,20 @@ export default ['i18n', function(i18n) {
                             label: i18n._('Name'),
                             ngBind: 'permission.summary_fields.resource_name',
                             ngClick: "redirectToResource(permission)",
-                            nosort: true
+                            nosort: true,
+                            columnClass: "col-sm-4"
                         },
                         type: {
                             label: i18n._('Type'),
                             ngBind: 'permission.summary_fields.resource_type_display_name',
-                            nosort: true
+                            nosort: true,
+                            columnClass: "col-sm-3"
                         },
                         role: {
                             label: i18n._('Role'),
                             ngBind: 'permission.name',
-                            nosort: true
+                            nosort: true,
+                            columnClass: "col-sm-3"
                         },
                     },
                     actions: {
@@ -220,6 +227,7 @@ export default ['i18n', function(i18n) {
                         }
                     },
                     fieldActions: {
+                        columnClass: 'col-sm-2',
                         "delete": {
                             label: i18n._('Remove'),
                             ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',

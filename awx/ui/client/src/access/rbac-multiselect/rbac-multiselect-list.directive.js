@@ -36,6 +36,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             list.multiSelect = true;
             list.multiSelectExtended = true;
             list.listTitleBadge = false;
+            list.layoutClass = 'List-staticColumnLayout--statusOrCheckbox';
             delete list.actions;
             delete list.fieldActions;
 
@@ -46,10 +47,11 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         name: list.fields.name,
                         scm_type: list.fields.scm_type
                     };
+                    delete list.staticColumns;
                     delete list.fields.name.ngClick;
                     list.fields.name.ngHref = "#/projects/{{project.id}}";
-                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
-                    list.fields.scm_type.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                    list.fields.name.columnClass = 'col-sm-6';
+                    list.fields.scm_type.columnClass = 'col-sm-6';
                     break;
 
                 case 'Inventories':
@@ -57,10 +59,11 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         name: list.fields.name,
                         organization: list.fields.organization
                     };
+                    delete list.staticColumns;
                     delete list.fields.name.ngClick;
                     list.fields.name.ngHref = '{{inventory.linkToDetails}}';
-                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
-                    list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                    list.fields.name.columnClass = 'col-sm-6';
+                    list.fields.organization.columnClass = 'col-sm-6';
                     delete list.disableRow;
                     break;
 
@@ -73,7 +76,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     };
                     delete list.fields.name.ngClick;
                     list.fields.name.ngHref = "#/templates/job_template/{{job_template.id}}";
-                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.name.columnClass = 'col-sm-12';
                     break;
 
                 case 'WorkflowTemplates':
@@ -85,7 +88,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     };
                     delete list.fields.name.ngClick;
                     list.fields.name.ngHref = "#/templates/workflow_job_template/{{workflow_template.id}}";
-                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.name.columnClass = 'col-sm-12';
                     break;
                 case 'Users':
                     list.querySet = { order_by: 'username', page_size: '5' };
@@ -96,9 +99,9 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     };
                     delete list.fields.username.ngClick;
                     list.fields.username.ngHref = "#/users/{{user.id}}";
-                    list.fields.username.columnClass = 'col-md-5 col-sm-5 col-xs-11';
-                    list.fields.first_name.columnClass = 'col-md-3 col-sm-3 hidden-xs';
-                    list.fields.last_name.columnClass = 'col-md-3 col-sm-3 hidden-xs';
+                    list.fields.username.columnClass = 'col-sm-4 col-xs-11';
+                    list.fields.first_name.columnClass = 'd-none d-sm-flex col-sm-4';
+                    list.fields.last_name.columnClass = 'd-none d-sm-flex col-sm-4';
                     break;
                 case 'Teams':
                     list.fields = {
@@ -107,8 +110,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     };
                     delete list.fields.name.ngClick;
                     list.fields.name.ngHref = "#/teams/{{team.id}}";
-                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
-                    list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                    list.fields.name.columnClass = 'col-sm-6';
+                    list.fields.organization.columnClass = 'col-sm-6';
                     break;
                 case 'Organizations':
                     list.fields = {
@@ -116,7 +119,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     };
                     delete list.fields.name.ngClick;
                     list.fields.name.ngHref = "#/organizations/{{organization.id}}";
-                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.name.columnClass = 'col-sm-12';
                     break;
                 case 'Credentials':
                     list.fields = {
@@ -124,15 +127,15 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     };
                     delete list.fields.name.ngClick;
                     list.fields.name.ngHref = "#/credentials/{{credential.id}}";
-                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.name.columnClass = 'col-sm-12';
                     break;
                 default:
                     list.fields = {
                         name: list.fields.name,
                         description: list.fields.description
                     };
-                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
-                    list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                    list.fields.name.columnClass = 'col-sm-6';
+                    list.fields.description.columnClass = 'col-sm-6';
             }
 
             list_html = generateList.build({

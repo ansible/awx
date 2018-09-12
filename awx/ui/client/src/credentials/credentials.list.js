@@ -24,7 +24,7 @@ export default ['i18n', function(i18n) {
             name: {
                 key: true,
                 label: i18n._('Name'),
-                columnClass: 'col-md-3 col-sm-9 col-xs-9',
+                columnClass: 'col-md-4 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-12',
                 awToolTip: '{{credential.description | sanitize}}',
                 dataPlacement: 'top'
@@ -34,14 +34,14 @@ export default ['i18n', function(i18n) {
                 ngBind: 'credential.kind',
                 excludeModal: true,
                 nosort: true,
-                columnClass: 'col-md-2 hidden-sm hidden-xs'
+                columnClass: 'd-none d-md-flex col-md-2'
             },
             owners: {
                 label: i18n._('Owners'),
                 type: 'owners',
                 nosort: true,
                 excludeModal: true,
-                columnClass: 'col-md-2 hidden-sm hidden-xs'
+                columnClass: 'd-none d-md-flex col-md-2 List-tableCell'
             }
         },
 
@@ -58,7 +58,7 @@ export default ['i18n', function(i18n) {
 
         fieldActions: {
 
-            columnClass: 'col-md-2 col-sm-3 col-xs-3',
+            columnClass: 'col-md-4 col-sm-3 col-xs-3',
 
             edit: {
                 ngClick: "editCredential(credential.id)",

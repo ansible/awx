@@ -16,18 +16,24 @@
         multiSelect: true,
         trackBy: 'group.id',
         basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/groups/',
+        layoutClass: 'List-staticColumnLayout--groups',
+        staticColumns: [
+            {
+                field: 'failed_hosts',
+                content: {
+                    label: '',
+                    nosort: true,
+                    mode: 'all',
+                    iconOnly: true,
+                    awToolTip: "{{ group.hosts_status_tip }}",
+                    dataPlacement: "top",
+                    icon: "{{ 'fa icon-job-' + group.hosts_status_class }}",
+                    columnClass: 'status-column'
+                }
+            }
+        ],
 
         fields: {
-            failed_hosts: {
-                label: '',
-                nosort: true,
-                mode: 'all',
-                iconOnly: true,
-                awToolTip: "{{ group.hosts_status_tip }}",
-                dataPlacement: "top",
-                icon: "{{ 'fa icon-job-' + group.hosts_status_class }}",
-                columnClass: 'status-column List-staticColumn--smallStatus'
-            },
             name: {
                 label: i18n._('Groups'),
                 key: true,
