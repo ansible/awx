@@ -20,33 +20,37 @@ export default ['i18n', function(i18n) {
         title: false,
         disableRow: "{{ inventory.pending_deletion }}",
         disableRowValue: 'inventory.pending_deletion',
+        layoutClass: 'List-staticColumnLayout--toggleOnOff',
+        staticColumns: [
+            {
+                field: 'status',
+                content: {
+                    label: '',
+                    nosort: true,
+                    ngClick: "null",
+                    iconOnly: true,
+                    excludeModal: true,
+                    template: `<source-summary-popover inventory="inventory" ng-hide="inventory.pending_deletion" ng-if="inventory.kind === ''"></source-summary-popover><host-summary-popover inventory="inventory" ng-hide="inventory.pending_deletion" ng-class="{'HostSummaryPopover-noSourceSummary': inventory.kind !== ''}"></host-summary-popover>`,
+                    icons: [{
+                        icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
+                        awToolTip: "{{ inventory.syncTip }}",
+                        awTipPlacement: "right",
+                        ngClick: "showSourceSummary($event, inventory.id)",
+                        ngClass: "inventory.launch_class"
+                    },{
+                        icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
+                        awToolTip: false,
+                        ngClick: "showHostSummary($event, inventory.id)"
+                    }]
+                }
+            }
+        ],
 
         fields: {
-            status: {
-                label: '',
-                columnClass: 'List-staticColumn--mediumStatus',
-                nosort: true,
-                ngClick: "null",
-                iconOnly: true,
-                excludeModal: true,
-                template: `<source-summary-popover inventory="inventory" ng-hide="inventory.pending_deletion" ng-if="inventory.kind === ''"></source-summary-popover><host-summary-popover inventory="inventory" ng-hide="inventory.pending_deletion" ng-class="{'HostSummaryPopover-noSourceSummary': inventory.kind !== ''}"></host-summary-popover>`,
-                icons: [{
-                    icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
-                    awToolTip: "{{ inventory.syncTip }}",
-                    awTipPlacement: "right",
-                    ngClick: "showSourceSummary($event, inventory.id)",
-                    ngClass: "inventory.launch_class"
-                },{
-                    icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
-                    awToolTip: false,
-                    ngClick: "showHostSummary($event, inventory.id)",
-                    ngClass: "inventory.host_status_class"
-                }]
-            },
             name: {
                 key: true,
                 label: i18n._('Name'),
-                columnClass: 'col-md-4 col-sm-3 col-xs-6 List-staticColumnAdjacent',
+                columnClass: 'col-md-4 col-sm-4 col-xs-8',
                 modalColumnClass: 'col-md-12',
                 awToolTip: "{{ inventory.description | sanitize }}",
                 awTipPlacement: "top",
@@ -55,7 +59,7 @@ export default ['i18n', function(i18n) {
             kind: {
                 label: i18n._('Type'),
                 ngBind: 'inventory.kind_label',
-                columnClass: 'col-md-2 col-sm-2 hidden-xs'
+                columnClass: 'd-none d-sm-flex col-sm-2'
             },
             organization: {
                 label: i18n._('Organization'),
@@ -64,7 +68,7 @@ export default ['i18n', function(i18n) {
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true,
-                columnClass: 'col-md-3 col-sm-2 hidden-xs'
+                columnClass: 'd-none d-sm-flex col-md-3 col-sm-2'
             }
         },
 
@@ -93,7 +97,7 @@ export default ['i18n', function(i18n) {
         },
 
         fieldActions: {
-            columnClass: 'col-md-2 col-sm-3 col-xs-4',
+            columnClass: 'col-md-3 col-sm-4 col-xs-4',
             edit: {
                 label: i18n._('Edit'),
                 ngClick: 'editInventory(inventory)',

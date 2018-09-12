@@ -164,19 +164,6 @@ export default
                 scope.authorize = false;
                 scope.authorize_password = null;
             }
-
-            // Collapse or open help widget based on whether scm value is selected
-            collapse = $('#credential_kind').parent().find('.panel-collapse').first();
-            id = collapse.attr('id');
-            if (!Empty(scope.kind) && scope.kind.value !== '') {
-                if ($('#' + id + '-icon').hasClass('icon-minus')) {
-                    scope.accordionToggle('#' + id);
-                }
-            } else {
-                if ($('#' + id + '-icon').hasClass('icon-plus')) {
-                    scope.accordionToggle('#' + id);
-                }
-            }
         };
     }
 

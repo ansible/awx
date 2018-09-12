@@ -129,7 +129,7 @@ export default ['$compile', 'Attr', 'Icon',
 
                 var html = '',
                     list = this.list,
-                    base, action, fld, cnt, field_action, fAction, itm;
+                    base, action, fld, field_action, fAction, itm;
 
                 if (options.mode !== 'lookup') {
                     // Don't display an empty <div> if there is no listTitle
@@ -270,13 +270,12 @@ export default ['$compile', 'Attr', 'Icon',
                         extraClasses += ' table-summary';
                     }
 
-                    return $('<table>')
+                    return $('<div>')
                         .attr('id', list.name + '_table')
                         .addClass('List-table')
                         .addClass(extraClasses)
                         .attr('multi-select-list', multiSelect)
                         .attr('is-extended', multiSelectExtended);
-
                 }
 
                 var table = buildTable();
@@ -286,13 +285,25 @@ export default ['$compile', 'Attr', 'Icon',
                     innerTable += this.buildHeader(options);
                 }
 
+                const layoutClass = options.mode === 'lookup' ? "List-lookupLayout" : (_.has(list, 'layoutClass') ? list.layoutClass : "List-defaultLayout");
+
                 // table body
                 // gotcha: transcluded elements require custom scope linking - binding to $parent models assumes a very rigid DOM hierarchy
                 // see: lookup-modal.directive.js for example
-                innerTable += options.mode === 'lookup' ? `<tbody ng-init="selection.${list.iterator} = {id: $parent.${list.iterator}, name: $parent.${list.iterator}_name}">` : `"<tbody>\n"`;
+                innerTable += options.mode === 'lookup' ? `<div ng-init="selection.${list.iterator} = {id: $parent.${list.iterator}, name: $parent.${list.iterator}_name}">` : `<div>`;
 
-                innerTable += "<tr ng-class=\"[" + list.iterator;
-                innerTable += (options.mode === 'lookup' || options.mode === 'select') ? ".success_class" : ".active_class";
+                innerTable += "<div id=\"{{ " + list.iterator + ".id }}\" ";
+                innerTable += `class="${layoutClass} List-tableRow ${list.iterator}_class" `;
+                innerTable += (list.disableRow) ? " disable-row=\"" + list.disableRow + "\" " : "";
+                if(_.has(list, 'disableTooltip')){
+                    let { placement, tipWatch } = list.disableTooltip;
+                    innerTable += `aw-tool-tip="{{tipWatch}}" data-placement="${placement}" data-tip-watch="${tipWatch}"`;
+                }
+                innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
+                innerTable += (list.trackBy) ? " track by " + list.trackBy : "";
+                innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
+                innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
+                innerTable += "\">";
 
                 let handleEditStateParams = function(stateParams){
                     let matchingConditions = [];
@@ -303,61 +314,64 @@ export default ['$compile', 'Attr', 'Icon',
                     return matchingConditions;
                 };
 
-                if(list && list.fieldActions && list.fieldActions.edit && list.fieldActions.edit.editStateParams) {
-                    let matchingConditions = handleEditStateParams(list.fieldActions.edit.editStateParams);
-                    innerTable += `, {'List-tableRow--selected' : ${matchingConditions.join(' || ')}}`;
-                }
-                else if (list.iterator === 'inventory') {
-                    innerTable += `, {'List-tableRow--selected': ($stateParams['${list.iterator}_id'] == ${list.iterator}.id) || ($stateParams['smartinventory_id'] == ${list.iterator}.id)}`;
-                }
-                else {
-                    innerTable += `, {'List-tableRow--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}`;
+                if (options.mode !== 'lookup') {
+                    let activeRowClass;
+                    if(list && list.fieldActions && list.fieldActions.edit && list.fieldActions.edit.editStateParams) {
+                        let matchingConditions = handleEditStateParams(list.fieldActions.edit.editStateParams);
+                        activeRowClass = `ng-class="{'List-tableRow--selected' : ${matchingConditions.join(' || ')}}"`;
+                    }
+                    else if (list.iterator === 'inventory') {
+                        activeRowClass = `ng-class="{'List-tableRow--selected': ($stateParams['${list.iterator}_id'] == ${list.iterator}.id) || ($stateParams['smartinventory_id'] == ${list.iterator}.id)}"`;
+                    }
+                    else {
+                        activeRowClass = `ng-class="{'List-tableRow--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}"`;
+                    }
+                    innerTable += `<div ${activeRowClass}></div>`;
+                    if (list.multiSelect) {
+                        innerTable +=
+                            `<div class="List-centerEnd">
+                                <select-list-item item="${list.iterator}" disabled="${list.disableRowValue}"></select-list-item>
+                            </div>`;
+                    }
+                    if(list.staticColumns) {
+                        angular.forEach(list.staticColumns, function(staticColumn) {
+                            innerTable += `<div>`;
+                            innerTable += Column({
+                                list: list,
+                                fld: staticColumn.field,
+                                field: staticColumn.content,
+                                options: options,
+                                base: base
+                            });
+                            innerTable += `</div>`;
+                        });
+                    }
+                } else {
+                    innerTable += `<div class="List-centerEnd select-column">`;
+                    if (list.multiSelect) {
+                        innerTable += '<select-list-item item=\"' + list.iterator + '\" disabled="'+list.disableRowValue+'"></select-list-item>';
+                    } else {
+                        if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
+                            innerTable += `<input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator})" ng-disabled="${list.disableRowValue}">`;
+                        }
+                        else { // its assumed that options.input_type = checkbox
+                            innerTable += "<input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                                list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ", true)\" ng-true-value=\"1\" " +
+                                "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" />";
+                        }
+                    }
+                    innerTable += `</div>`;
                 }
 
-                innerTable += (list.disableRow) ? `, {'List-tableRow--disabled': ${list.disableRowValue}}` : "";
+                innerTable += `<div class='d-flex h-100'>`;
 
-                if (list.multiSelect) {
-                    innerTable += ", " + list.iterator + ".isSelected ? 'is-selected-row' : ''";
-                }
-                //innerTable += `, (${list.iterator}_selected == ${list.iterator}selected ? 'List-tableRow--selected' : '')`;
-                innerTable += "]\" ";
-                innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
-                innerTable += "class=\"List-tableRow " + list.iterator + "_class\" ";
-                innerTable += (list.disableRow) ? " disable-row=\"" + list.disableRow + "\" " : "";
-                if(_.has(list, 'disableTooltip')){
-                    let { placement, tipWatch } = list.disableTooltip;
-                    innerTable += `aw-tool-tip="{{tipWatch}}" data-placement="${placement}" data-tip-watch="${tipWatch}"`;
-                }
-                innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
-                innerTable += (list.trackBy) ? " track by " + list.trackBy : "";
-                innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
-                innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
-                innerTable += "\">\n";
                 if (list.index) {
-                    innerTable += "<td class=\"index-column hidden-xs List-tableCell\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</td>\n";
+                    innerTable += "<div class=\"d-none d-sm-flex index-column List-tableCell\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</div>\n";
                 }
 
-                if (list.multiSelect) {
-                    innerTable += '<td class="col-xs-1 select-column List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\" disabled="'+list.disableRowValue+'"></select-list-item></td>';
-                }
-
-                // Change layout if a lookup list, place radio buttons before labels
-                if (options.mode === 'lookup') {
-                    if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
-                        innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator})" ng-disabled="${list.disableRowValue}"></td>`;
-                    }
-                    else { // its assumed that options.input_type = checkbox
-                        innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
-                            list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ", true)\" ng-true-value=\"1\" " +
-                            "ng-false-value=\"0\" id=\"check_" + list.iterator + "_{{" + list.iterator + ".id}}\" /></td>";
-                    }
-                }
-
-                cnt = 2;
                 base = (list.base) ? list.base : list.name;
                 base = base.replace(/^\//, '');
                 for (fld in list.fields) {
-                    cnt++;
                     if ((list.fields[fld].searchOnly === undefined || list.fields[fld].searchOnly === false) &&
                         !(options.mode === 'lookup' && list.fields[fld].excludeModal === true)) {
                         innerTable += Column({
@@ -371,19 +385,19 @@ export default ['$compile', 'Attr', 'Icon',
 
                 if (options.mode === 'select') {
                     if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
-                        innerTable += "<td class=\"List-tableCell\"><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                        innerTable += "<div class=\"List-tableCell\"><input type=\"radio\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ", true)\" ng-value=\"1\" " +
-                            "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+                            "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></div>";
                     } else { // its assumed that options.input_type = checkbox
-                        innerTable += "<td class=\"List-tableCell\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
+                        innerTable += "<div class=\"List-tableCell\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ", true)\" ng-true-value=\"1\" " +
-                            "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+                            "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></div>";
                     }
                 } else if ((options.mode === 'edit' || options.mode === 'summary') && list.fieldActions) {
 
                     // Row level actions
 
-                    innerTable += "<td class=\"List-actionsContainer\"><div class=\"List-actionButtonCell List-tableCell\">";
+                    innerTable += `<div class="List-actionsContainer ${list.fieldActions.columnClass}"><div class="List-actionButtonCell List-tableCell">`;
 
                     for (field_action in list.fieldActions) {
                         if (field_action !== 'columnClass') {
@@ -462,12 +476,13 @@ export default ['$compile', 'Attr', 'Icon',
                             }
                         }
                     }
-                    innerTable += "</div></td>\n";
+                    innerTable += "</div></div>\n";
                 }
 
-                innerTable += "</tr>\n";
+                // might need to wrap this in lookup logic
+                // innerTable += "</div>\n";
                 // End List
-                innerTable += "</tbody>\n";
+                innerTable += "</div>\n";
 
                 table.html(innerTable);
                 html += table.prop('outerHTML');
@@ -502,107 +517,68 @@ export default ['$compile', 'Attr', 'Icon',
             },
 
             buildHeader: function(options) {
-                var list = this.list,
-                    fld, html;
-
-                function buildSelectAll() {
-                    return $('<th>')
-                        .addClass('col-xs-1 select-column List-tableHeader List-staticColumn--smallStatus')
-                        .append(
-                            $('<select-all>')
-                            .attr('selections-empty', 'selectedItems.length === 0')
-                            .attr('items-length', list.name + '.length')
-                            .attr('label', ''));
-                }
+                const list = this.list;
+                let fld;
+                let html = '';
 
                 if (options === undefined) {
                     options = this.options;
                 }
 
-                html = "<thead>\n";
-                html += "<tr class=\"List-tableHeaderRow\">\n";
-                if (list.index) {
-                    html += "<th class=\"col-lg-1 col-md-1 col-sm-2 hidden-xs List-tableHeader\" translate>#</th>\n";
-                }
+                // will probably need some different classes for handling different layouts here
+                const layoutClass = options.mode === 'lookup' ? "List-lookupLayout" : (_.has(list, 'layoutClass') ? list.layoutClass : "List-defaultLayout");
+                html += `<div class="${layoutClass} List-tableHeaderRow">`;
+
+                html += `<div></div>`;
 
                 if (list.multiSelect) {
-                    html += buildSelectAll().prop('outerHTML');
-                } else if (options.mode === 'lookup') {
-                    html += "<th class=\"List-tableHeader select-column List-staticColumn--smallStatus\" translate></th>";
+                    html += `<div></div>`;
                 }
 
-                if (options.mode !== 'lookup'){
-                    for (fld in list.fields) {
+                if (options.mode !== 'lookup' && list.staticColumns) {
+                    angular.forEach(list.staticColumns, function() {
+                        html += `<div></div>`;
+                    });
+                }
+
+                html += `<div class='d-flex h-100'>`;
+
+                for (fld in list.fields) {
+                    if (options.mode !== 'lookup' || (options.mode === 'lookup' && (fld === 'name' || _.has(list.fields[fld], 'includeModal')))){
                         let customClass = list.fields[fld].columnClass || '';
-                        html += `<th
-                                base-path="${list.basePath || list.name}"
-                                collection="${list.name}"
-                                dataset="${list.iterator}_dataset"
-                                column-sort
-                                column-field="${list.fields[fld].searchField || fld}"
-                                column-iterator="${list.iterator}"
-                                column-no-sort="${list.fields[fld].nosort}"
-                                column-label="${list.fields[fld].label}"
-                                column-custom-class="${customClass}"
-                                query-set="${list.iterator}_queryset">
-                            </th>`;
+                        html += `<div
+                            base-path="${list.basePath || list.name}"
+                            collection="${list.name}"
+                            dataset="${list.iterator}_dataset"
+                            column-sort
+                            column-field="${list.fields[fld].searchField || fld}"
+                            column-iterator="${list.iterator}"
+                            column-no-sort="${list.fields[fld].nosort}"
+                            column-label="${list.fields[fld].label}"
+                            column-custom-class="${customClass}"
+                            query-set="${list.iterator}_queryset">
+                        </div>`;
                     }
                 }
-                if (options.mode === 'lookup') {
-                    for (fld in list.fields) {
-                        if(fld === 'name' || _.has(list.fields[fld], 'includeModal')){
-                            let customClass = list.fields.name.modalColumnClass || '';
-                            html += `<th
-                                base-path="${list.basePath || list.name}"
-                                collection="${list.name}"
-                                dataset="${list.iterator}_dataset"
-                                column-sort
-                                column-field="name"
-                                column-iterator="${list.iterator}"
-                                column-no-sort="${list.fields.name.nosort}"
-                                column-label="${list.fields[fld].label}"
-                                column-custom-class="${customClass}"
-                                query-set="${list.iterator}_queryset">
-                            </th>`;
-                        }
-                        
-                    }
 
-                    if(list.fields.info) {
-                        let customClass = list.fields.name.modalColumnClass || '';
-                        const infoHeaderClass = _.get(list.fields.info, 'infoHeaderClass', 'List-tableHeader--info');
-                        html += `<th
-                                    class="${infoHeaderClass}"
-                                    base-path="${list.basePath || list.name}"
-                                    collection="${list.name}"
-                                    dataset="${list.iterator}_dataset"
-                                    column-sort
-                                    column-field="info"
-                                    column-iterator="${list.iterator}"
-                                    column-no-sort="${list.fields.info.nosort}"
-                                    column-label="${list.fields.info.label}"
-                                    column-custom-class="${customClass}"
-                                    query-set="${list.iterator}_queryset">
-                                </th>`;
-                    }
-                }
-                if (options.mode === 'select') {
-                    html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\" translate>Select</th>";
-                } else if (options.mode === 'edit' && list.fieldActions) {
-                    html += "<th class=\"List-tableHeader List-tableHeader--actions actions-column";
+                if(options.mode === 'edit' && list.fieldActions) {
+                    html += "<div class=\"List-tableHeader List-tableHeader--actions actions-column";
                     html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : "";
                     html += "\" translate>";
                     html += (list.fieldActions.label === undefined || list.fieldActions.label) ? i18n._("Actions") : "";
-                    html += "</th>\n";
+                    html += "</div>";
                 }
-                html += "</tr>\n";
-                html += "</thead>\n";
+
+                html += "</div>";
+
+                html += `</div>`;
+
                 return html;
             },
 
             wrapPanel: function(html){
                 return `
-                <div class="Panel">${html}</div>`;
+                <div class="card at-Panel">${html}</div>`;
             },
 
             insertFormView: function(){

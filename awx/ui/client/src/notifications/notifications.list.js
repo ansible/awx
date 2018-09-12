@@ -25,7 +25,7 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
             name: {
                 key: true,
                 label: i18n._('Name'),
-                columnClass: 'col-md-3 col-sm-9 col-xs-9',
+                columnClass: 'col-md-4 col-sm-9 col-xs-9',
                 linkTo: '/#/notification_templates/{{notification.id}}'
             },
             notification_type: {
@@ -33,7 +33,7 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
                 searchType: 'select',
                 searchOptions: [],
                 excludeModal: true,
-                columnClass: 'col-md-4 hidden-sm hidden-xs'
+                columnClass: 'd-none d-sm-flex col-md-4 col-sm-3'
             },
             notification_templates_success: {
                 label: i18n._('Success'),
@@ -44,11 +44,12 @@ export default ['i18n', 'templateUrl', function(i18n, templateUrl){
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
-                nosort: true
+                nosort: true,
+                columnClass: 'd-none d-md-flex justify-content-start col-md-2'
             },
             notification_templates_error: {
                 label: i18n._('Failure'),
-                columnClass: 'NotifierList-lastColumn',
+                columnClass: 'd-none d-md-flex justify-content-start col-md-2 NotifierList-lastColumn',
                 flag: 'notification_templates_error',
                 type: "toggle",
                 ngClick: "toggleNotification($event, notification.id, \"notification_templates_error\")",

@@ -16,7 +16,7 @@
     </multiple-choice>
 </div>
 <div ng-if="question.type === 'password'" class="input_area input-group">
-    <span class="input-group-btn">
+    <span class="input-group-btn input-group-prepend">
         <button type="button" class="btn btn-default SurveyMaker-previewPasswordButton" id="{{ question.variable + '_show_input_button' }}" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="toggleInput('#' + question.variable)" data-container="#survey-modal-dialog" data-original-title="" title="">SHOW</button>
     </span>
     <input id="{{question.variable}}" type="password" name="" class="form-control ng-pristine ng-valid-api-error ng-invalid" autocomplete="false" ng-model="defaultValue" readonly>

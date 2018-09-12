@@ -22,27 +22,20 @@ table, tbody {
 }
 
 .List-tableHeader{
-    height: 30px;
+    height: 34px;
     font-size: 14px;
     font-weight: normal;
     text-transform: uppercase;
     color: @list-header-txt;
-    background-color: @list-header-bg;
     padding-left: 15px;
     padding-right: 15px;
     border-bottom-width:0px!important;
-}
-
-.List-tableHeader:first-of-type {
-    border-top-left-radius: 5px;
-}
-
-.List-tableHeader:last-of-type {
-    border-top-right-radius: 5px;
+    align-items: center;
+    display: flex;
 }
 
 .List-tableHeader--info, .List-tableHeader--actions {
-    text-align: right;
+    justify-content: flex-end;
 }
 
 .List-tableHeader:not([ng-click]) {
@@ -54,7 +47,7 @@ table, tbody {
 }
 
 .List-tableRow {
-    height: 40px;
+    min-height: 44px;
     font-size: 14px;
     color: @list-item;
     border-bottom: 1px solid @default-border;
@@ -69,7 +62,7 @@ table, tbody {
 }
 
 .List-tableRow--selected {
-    border-left: 5px solid @list-row-select-bord;
+    background-color: @list-row-select-bord;
 }
 
 .List-tableRow--disabled {
@@ -117,6 +110,9 @@ table, tbody {
     padding: 7px 15px;
     border-top:0px!important;
     word-wrap: break-word;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .List-tableCell.description-column {
@@ -126,7 +122,7 @@ table, tbody {
 
 .List-actionButtonCell {
     padding-top:5px;
-    padding-right: 15px;
+    padding-right: 0px;
     display:flex;
     justify-content: flex-end;
 }
@@ -178,6 +174,7 @@ table, tbody {
     margin: 0;
     background-color: @list-title-badge;
     border-radius: 5px;
+    color: @at-white;
 }
 
 .List-titleBadge--selected {
@@ -398,7 +395,7 @@ table, tbody {
 }
 
 .List-staticColumn--mediumStatus {
-    width: 52px;
+    width: 53px;
     padding-right: 0px!important;
 }
 
@@ -456,10 +453,6 @@ table, tbody {
 .List-action--notificationAdd {
     text-align: right;
     font-size: 11px;
-}
-
-.List-dropdownButton {
-    border: none;
 }
 
 .List-dropdownSuccess {
@@ -563,4 +556,60 @@ table, tbody {
     .SmartSearch-searchTermContainer {
         width: 100%;
     }
+}
+
+.List-defaultLayout {
+    display: grid;
+    grid-template-columns: 5px auto;
+}
+
+.List-lookupLayout {
+    display: grid;
+    grid-template-columns: 26px auto;
+}
+
+.List-staticColumnLayout--statusOrCheckbox {
+    display: grid;
+    grid-template-columns: 5px 25px auto;
+}
+
+.List-staticColumnLayout--groups {
+    display: grid;
+    grid-template-columns: 5px 25px 25px auto;
+}
+
+.List-staticColumnLayout--hosts {
+    display: grid;
+    grid-template-columns: 5px 55px 25px auto;
+}
+
+.List-staticColumnLayout--hostsWithCheckbox {
+    display: grid;
+    grid-template-columns: 5px 25px 55px 25px auto;
+}
+
+.List-staticColumnLayout--schedules {
+    display: grid;
+    grid-template-columns: 5px 15px 55px auto;
+}
+
+.List-staticColumnLayout--toggleOnOff {
+    display: grid;
+    grid-template-columns: 5px 55px auto;
+}
+
+.List-table {
+    margin-top: 20px;
+}
+
+.List-tableHeaderRow {
+    background-color: @list-header-bg;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.List-centerEnd {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }

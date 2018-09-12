@@ -1,4 +1,4 @@
-<div id="htmlTemplate" class=" SchedulerFormPanel Panel" ng-hide="hideForm">
+<div id="htmlTemplate" class="card at-Panel" ng-hide="hideForm">
     <div class="Form-header">
         <div class="Form-title" ng-show="!isEdit">{{ schedulerName || strings.get('state.CREATE_SCHEDULE') }}</div>
         <div class="Form-title" ng-show="isEdit">{{ schedulerName || strings.get('state.EDIT_SCHEDULE') }}</div>
@@ -40,11 +40,10 @@
                     <span class="red-text">*</span>
                     {{ strings.get('form.START_DATE') }}
                 </label>
-                <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
-                    <scheduler-date-picker date="schedulerStartDt"
-                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
-                    </scheduler-date-picker>
-                </div>
+                <scheduler-date-picker date="schedulerStartDt"
+                    class="input-group Form-inputGroup SchedulerForm-inputGroup--date"
+                    disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
+                </scheduler-date-picker>
                 <div class="error"
                     ng-show="scheduler_form_schedulerStartDt_error"
                     ng-bind="scheduler_form_schedulerStartDt_error">
@@ -490,11 +489,10 @@
                         <span class="red-text">*</span>
                         {{ strings.get('form.END_DATE') }}
                     </label>
-                    <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
-                        <scheduler-date-picker date="$parent.schedulerEndDt"
-                          disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
-                        </scheduler-date-picker>
-                    </div>
+                    <scheduler-date-picker date="$parent.schedulerEndDt"
+                        class="input-group Form-inputGroup SchedulerForm-inputGroup--date"
+                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword">
+                    </scheduler-date-picker>
                     <div class="error"
                         ng-show="$parent.scheduler_endDt_error">
                         {{ strings.get('form.PROVIDE_VALID_DATE') }}
@@ -600,8 +598,7 @@
                         class="SchedulerFormDetail-dateFormatsLabel">
                         {{ strings.get('form.DATE_FORMAT') }}
                     </label>
-                    <label class="radio-inline
-                        SchedulerFormDetail-radioLabel">
+                    <label class="SchedulerFormDetail-radioLabel">
                         <input type="radio"
                             class="SchedulerFormDetail-radioButton"
                             ng-model="dateChoice"
@@ -609,8 +606,7 @@
                             value="local" >
                         {{ strings.get('form.LOCAL_TIME_ZONE') }}
                     </label>
-                    <label class="radio-inline
-                        SchedulerFormDetail-radioLabel">
+                    <label class="SchedulerFormDetail-radioLabel">
                         <input type="radio"
                             class="SchedulerFormDetail-radioButton"
                             ng-model="dateChoice"
