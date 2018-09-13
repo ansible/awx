@@ -39,6 +39,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     DELETE: i18n._('Delete'),
                     EDIT_USER: i18n._('Edit the user'),
                     EDIT_WORKFLOW: i18n._('Edit the workflow job template'),
+                    EDIT_SHARD_TEMPLATE: i18n._('Edit the shard job template'),
                     EDIT_SCHEDULE: i18n._('Edit the schedule'),
                     TOGGLE_STDOUT_FULLSCREEN: i18n._('Expand Output'),
                     STATUS: '' // re-assigned elsewhere
@@ -49,6 +50,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     STARTED: i18n._('Started'),
                     FINISHED: i18n._('Finished'),
                     LABELS: i18n._('Labels'),
+                    SHARD_TEMPLATE: i18n._('Shard Template'),
                     STATUS: i18n._('Status')
                 },
                 details: {
@@ -107,6 +109,11 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             if(workflowData.summary_fields && workflowData.summary_fields.workflow_job_template &&
                 workflowData.summary_fields.workflow_job_template.id){
                     $scope.workflow_job_template_link = `/#/templates/workflow_job_template/${$scope.workflow.summary_fields.workflow_job_template.id}`;
+            }
+
+            if(workflowData.summary_fields && workflowData.summary_fields.job_template &&
+                workflowData.summary_fields.job_template.id){
+                    $scope.shard_job_template_link = `/#/templates/job_template/${$scope.workflow.summary_fields.job_template.id}`;
             }
 
             // turn related api browser routes into front end routes

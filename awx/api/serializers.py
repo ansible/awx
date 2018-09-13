@@ -3199,6 +3199,13 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = super(JobSerializer, self).get_summary_fields(obj)
+        if obj.internal_limit:
+            summary_fields['internal_limit'] = {}
+            if obj.internal_limit.startswith('shard'):
+                offset, step = Inventory.parse_shard_params(obj.internal_limit)
+                summary_fields['internal_limit']['shard'] = {'offset': offset, 'step': step}
+            else:
+                summary_fields['internal_limit']['unknown'] = self.internal_limit
         all_creds = []
         # Organize credential data into multitude of deprecated fields
         # TODO: remove most of this as v1 is removed

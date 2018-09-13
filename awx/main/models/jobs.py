@@ -280,7 +280,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     job_shard_count = models.IntegerField(
         blank=True,
         default=0,
-        help_text=_("The number of jobs to split into at runtime. Will cause the Job Template to launch a workflow."),
+        help_text=_("The number of jobs to split into at runtime. "
+                    "Will cause the Job Template to launch a workflow if value is non-zero."),
     )
 
     admin_role = ImplicitRoleField(
@@ -301,7 +302,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials']
+            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials', 'internal_limit']
         )
 
     @property
@@ -327,10 +328,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         return self.create_unified_job(**kwargs)
 
     def create_unified_job(self, **kwargs):
-        split_event = bool(
-            self.job_shard_count > 1 and
-            not kwargs.pop('_prevent_sharding', False)
-        )
+        prevent_sharding = kwargs.pop('_prevent_sharding', False)
+        split_event = bool(self.job_shard_count > 1 and (not prevent_sharding))
         if split_event:
             # A sharded Job Template will generate a WorkflowJob rather than a Job
             from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobNode
@@ -532,6 +531,11 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         on_delete=models.SET_NULL,
         help_text=_('The SCM Refresh task used to make sure the playbooks were available for the job run'),
     )
+    internal_limit = models.CharField(
+        max_length=1024,
+        default='',
+        editable=False,
+    )
 
 
     def _get_parent_field_name(self):
@@ -574,6 +578,13 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     @property
     def event_class(self):
         return JobEvent
+
+    def copy_unified_job(self, **new_prompts):
+        new_prompts['_prevent_sharding'] = True
+        if self.internal_limit:
+            new_prompts.setdefault('_eager_fields', {})
+            new_prompts['_eager_fields']['internal_limit'] = self.internal_limit  # oddball, not from JT or prompts
+        return super(Job, self).copy_unified_job(**new_prompts)
 
     @property
     def ask_diff_mode_on_launch(self):

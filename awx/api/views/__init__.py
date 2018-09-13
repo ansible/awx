@@ -2914,11 +2914,13 @@ class JobTemplateLaunch(RetrieveAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             data = OrderedDict()
-            data['job'] = new_job.id
-            data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
             if isinstance(new_job, WorkflowJob):
+                data['workflow_job'] = new_job.id
+                data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
                 data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             else:
+                data['job'] = new_job.id
+                data['ignored_fields'] = self.sanitize_for_response(ignored_fields)
                 data.update(JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             headers = {'Location': new_job.get_absolute_url(request)}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)

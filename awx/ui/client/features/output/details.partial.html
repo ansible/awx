@@ -151,6 +151,12 @@
     <div class="JobResults-resultRowText">{{ vm.jobType.value }}</div>
 </div>
 
+<!-- SHAAAAAARD -->
+<div class="JobResults-resultRow" ng-if="vm.shardDetails">
+    <label class="JobResults-resultRowLabel">{{ vm.shardDetails.label }}</label>
+    <div class="JobResults-resultRowText">{{ vm.shardDetails.offset }}</div>
+</div>
+
 <!-- LAUNCHED BY DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.launchedBy">
     <label class="JobResults-resultRowLabel">{{ vm.launchedBy.label }}</label>

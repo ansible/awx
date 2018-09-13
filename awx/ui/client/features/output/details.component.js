@@ -126,6 +126,26 @@ function getSourceWorkflowJobDetails () {
     return { link, tooltip };
 }
 
+function getShardDetails () {
+    const internalLimitDetails = resource.model.get('summary_fields.internal_limit');
+
+    if (!internalLimitDetails) {
+        return null;
+    }
+
+    const shardDetails = resource.model.get('summary_fields.internal_limit.shard');
+
+    if (!shardDetails) {
+        return null;
+    }
+
+    const label = strings.get('labels.SHARD_DETAILS');
+    const offset = `${shardDetails.offset} of ${shardDetails.step} shards`;
+    const tooltip = strings.get('tooltips.SHARD_DETAILS');
+
+    return { label, offset, tooltip };
+}
+
 function getJobTemplateDetails () {
     const jobTemplate = resource.model.get('summary_fields.job_template');
 
@@ -671,6 +691,7 @@ function JobDetailsController (
         vm.jobType = getJobTypeDetails();
         vm.jobTemplate = getJobTemplateDetails();
         vm.sourceWorkflowJob = getSourceWorkflowJobDetails();
+        vm.shardDetails = getShardDetails();
         vm.inventory = getInventoryDetails();
         vm.project = getProjectDetails();
         vm.projectUpdate = getProjectUpdateDetails();

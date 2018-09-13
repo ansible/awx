@@ -271,6 +271,20 @@ function(NotificationsList, i18n) {
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
+                job_shard_count: {
+                    label: i18n._('Number of job shards to use'),
+                    type: 'number',
+                    integer: true,
+                    min: 0,
+                    spinner: true,
+                    // 'class': "input-small",
+                    // toggleSource: 'diff_mode',
+                    dataTitle: i18n._('Job Shard Count'),
+                    dataPlacement: 'right',
+                    dataContainer: 'body',
+                    awPopOver: "<p>" + i18n._("If non-zero, split into multiple jobs that run on mutually exclusive slices of the inventory.") + "</p>",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                },
                 checkbox_group: {
                     label: i18n._('Options'),
                     type: 'checkbox_group',
