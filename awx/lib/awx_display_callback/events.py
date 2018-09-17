@@ -148,7 +148,7 @@ class EventContext(object):
         if event not in ('playbook_on_stats',) and "res" in event_data and len(str(event_data['res'])) > max_res:
             event_data['res'] = {}
         event_dict = dict(event=event, event_data=event_data)
-        for key in event_data.keys():
+        for key in list(event_data.keys()):
             if key in ('job_id', 'ad_hoc_command_id', 'project_update_id', 'uuid', 'parent_uuid', 'created',):
                 event_dict[key] = event_data.pop(key)
             elif key in ('verbosity', 'pid'):
@@ -159,12 +159,12 @@ class EventContext(object):
         return {}
 
     def dump(self, fileobj, data, max_width=78, flush=False):
-        b64data = base64.b64encode(json.dumps(data))
+        b64data = base64.b64encode(json.dumps(data).encode('utf-8'))
         with self.display_lock:
             # pattern corresponding to OutputEventFilter expectation
             fileobj.write(u'\x1b[K')
             for offset in xrange(0, len(b64data), max_width):
-                chunk = b64data[offset:offset + max_width]
+                chunk = b64data[offset:offset + max_width].decode('ascii')
                 escaped_chunk = u'{}\x1b[{}D'.format(chunk, len(chunk))
                 fileobj.write(escaped_chunk)
             fileobj.write(u'\x1b[K')
