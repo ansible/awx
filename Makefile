@@ -338,6 +338,12 @@ pyflakes: reports
 pylint: reports
 	@(set -o pipefail && $@ | reports/$@.report)
 
+genschema: reports
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/awx/bin/activate; \
+	fi; \
+	(set -o pipefail && py.test --genschema awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
+
 swagger: reports
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \

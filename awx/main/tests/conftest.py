@@ -15,6 +15,12 @@ from awx.main.tests.factories import (
 )
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--genschema", action="store_true", default=False, help="execute schema validator"
+    )
+
+
 def pytest_configure(config):
     import sys
     sys._called_from_test = True
