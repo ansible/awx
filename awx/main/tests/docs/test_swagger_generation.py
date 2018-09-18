@@ -49,7 +49,8 @@ class TestSwaggerGeneration():
             data.update(response.accepted_renderer.get_customizations() or {})
 
             data['host'] = None
-            data['modified'] = datetime.datetime.utcnow().isoformat()
+            if not pytest.config.getoption("--genschema"):
+                data['modified'] = datetime.datetime.utcnow().isoformat()
             data['schemes'] = ['https']
             data['consumes'] = ['application/json']
 
@@ -139,11 +140,14 @@ class TestSwaggerGeneration():
                                 for param in node[method].get('parameters'):
                                     if param['in'] == 'body':
                                         node[method]['parameters'].remove(param)
-                                node[method].setdefault('parameters', []).append({
-                                    'name': 'data',
-                                    'in': 'body',
-                                    'schema': {'example': request_data},
-                                })
+                                if pytest.config.getoption("--genschema"):
+                                    pytest.skip("In schema generator skipping swagger generator", allow_module_level=True)
+                                else:
+                                    node[method].setdefault('parameters', []).append({
+                                        'name': 'data',
+                                        'in': 'body',
+                                        'schema': {'example': request_data},
+                                    })
 
                             # Build response examples
                             if resp:
@@ -166,6 +170,11 @@ class TestSwaggerGeneration():
             data = re.sub(
                 '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+Z',
                 '2018-02-01T08:00:00.000000Z',
+                data
+            )
+            data = re.sub(
+                '''(\s+"client_id": ")([a-zA-Z0-9]{40})("\,\s*)''',
+                '\\1xxxx\\3',
                 data
             )
             f.write(data)
