@@ -40,14 +40,6 @@ class CallbackBrokerWorker(BaseWorker):
 
             if not any([key in body for key in event_map]):
                 raise Exception('Payload does not have a job identifier')
-            if settings.DEBUG:
-                from pygments import highlight
-                from pygments.lexers import PythonLexer
-                from pygments.formatters import Terminal256Formatter
-                from pprint import pformat
-                logger.info('Body: {}'.format(
-                    highlight(pformat(body, width=160), PythonLexer(), Terminal256Formatter(style='friendly'))
-                )[:1024 * 4])
 
             def _save_event_data():
                 for key, cls in event_map.items():
@@ -55,10 +47,28 @@ class CallbackBrokerWorker(BaseWorker):
                         cls.create_from_data(**body)
 
             job_identifier = 'unknown job'
+            job_key = 'unknown'
             for key in event_map.keys():
                 if key in body:
                     job_identifier = body[key]
+                    job_key = key
                     break
+
+            if settings.DEBUG:
+                from pygments import highlight
+                from pygments.lexers import PythonLexer
+                from pygments.formatters import Terminal256Formatter
+                from pprint import pformat
+                if body.get('event') == 'EOF':
+                    event_thing = 'EOF event'
+                else:
+                    event_thing = 'event {}'.format(body.get('counter', 'unknown'))
+                logger.info('Callback worker received {} for {} {}'.format(
+                    event_thing, job_key[:-len('_id')], job_identifier
+                ))
+                logger.debug('Body: {}'.format(
+                    highlight(pformat(body, width=160), PythonLexer(), Terminal256Formatter(style='friendly'))
+                )[:1024 * 4])
 
             if body.get('event') == 'EOF':
                 try:

@@ -1142,6 +1142,7 @@ LOGGING = {
         },
         'awx.main.commands.run_callback_receiver': {
             'handlers': ['callback_receiver'],
+            'level': 'INFO'  # in debug mode, includes full callback data
         },
         'awx.main.dispatch': {
             'handlers': ['dispatcher'],
