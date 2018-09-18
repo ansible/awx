@@ -15,6 +15,34 @@ EXAMPLE_ENCRYPTED_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nProc-Type: 4,ENCRY
 
 
 @pytest.mark.django_db
+def test_public_display_generate_private_ssh(post, get, admin_user, credentialtype_ssh):
+    r = post(
+        url=reverse('api:credential_list'),
+        data=dict(
+            name='fooo',
+            credential_type=credentialtype_ssh.pk,
+            user=admin_user.pk,
+            inputs=dict(
+                ssh_key_data={
+                    "$generate$": {}
+                }
+            )
+        ),
+        user=admin_user,
+        expect=201
+    )
+    cred = Credential.objects.first()
+    assert decrypt_field(cred, 'ssh_key_data', 'inputs').startswith('-----BEGIN PRIVATE KEY-----')
+    assert 'public_data' in r.data['related']
+    r = get(
+        url=reverse('api:credential_public_data', kwargs={'pk': cred.pk}),
+        user=admin_user,
+        expect=200
+    )
+    assert r.data['ssh_key_data'].startswith('ssh-rsa ')
+
+
+@pytest.mark.django_db
 def test_idempotent_credential_type_setup():
     assert CredentialType.objects.count() == 0
     CredentialType.setup_tower_managed_defaults()

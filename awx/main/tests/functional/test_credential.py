@@ -8,6 +8,8 @@ from django.core.exceptions import ValidationError
 
 from awx.main.utils import decrypt_field
 from awx.main.models import Credential, CredentialType, V1Credential
+from awx.main.validators import validate_pem
+from awx.main.models.credential.asymmetric import MachineRSA
 
 from rest_framework import serializers
 
@@ -264,3 +266,24 @@ def test_credential_update_with_prior(organization_factory, credentialtype_ssh):
     assert cred.inputs['username'] == 'joe'
     assert cred.inputs['password'].startswith('$encrypted$')
     assert decrypt_field(cred, 'password') == 'testing123'
+
+
+@pytest.mark.django_db
+class TestPrivatePublicData:
+    defaults = {'key_size': 2048, 'public_exponent': 65537}
+
+    def test_generate_rsa_key(self):
+        ssh_key = MachineRSA().generate_private_key(**self.defaults)
+        assert ssh_key.startswith('-----BEGIN PRIVATE KEY-----')
+        # check that it passes our very own validator
+        validate_pem(ssh_key)
+
+    def test_get_public_data(self):
+        ssh_key = MachineRSA().generate_private_key(**self.defaults)
+        public_key = MachineRSA().get_public_data(ssh_key)
+        assert public_key.startswith('ssh-rsa ')
+
+    def test_get_managers(self, machine_credential):
+        managers = machine_credential.credential_type.data_managers()
+        assert managers.keys() == ['ssh_key_data']
+        assert isinstance(managers['ssh_key_data'], MachineRSA)
