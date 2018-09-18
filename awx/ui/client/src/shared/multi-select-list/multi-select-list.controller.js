@@ -36,10 +36,10 @@ export default ['$scope',
             $scope.selection.selectedItems =
                 _items.filter(function(item) {
                     return item.isSelected;
-                }).pluck('value').value();
+                }).map('value').value();
 
             $scope.selection.deselectedItems =
-                _items.pluck('value').difference($scope.selection.selectedItems)
+                _items.map('value').difference($scope.selection.selectedItems)
                     .value();
 
             /**

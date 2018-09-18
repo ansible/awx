@@ -24,7 +24,12 @@ import os
 import pwd
 
 # PSUtil
-import psutil
+try:
+    import psutil
+except ImportError:
+    raise ImportError('psutil is missing; {}bin/pip install psutil'.format(
+        os.environ['VIRTUAL_ENV']
+    ))
 
 __all__ = []
 

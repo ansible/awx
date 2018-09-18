@@ -21,13 +21,14 @@
                 reload="vm.reloadState">
             </at-job-search>
             <div class="at-Stdout-menuTop">
-                <div class="pull-left" ng-click="vm.toggleMenuExpand()">
+                <div class="pull-left" ng-click="vm.toggleCollapseAll()">
                     <i class="at-Stdout-menuIcon fa" ng-if="vm.toggleLineEnabled"
-                        ng-class="{ 'fa-minus': vm.isMenuExpanded, 'fa-plus': !vm.isMenuExpanded }"></i>
+                        ng-class="{ 'fa-minus': !vm.isMenuCollapsed, 'fa-plus': vm.isMenuCollapsed }"></i>
                 </div>
                 <div class="pull-right" ng-click="vm.menu.last()">
                     <i class="at-Stdout-menuIcon--lg fa fa-angle-double-down"
                         ng-class="{ 'at-Stdout-menuIcon--active': vm.isFollowing }"
+                        id="atStdoutMenuLast"
                         data-placement="top"
                         data-trigger="hover"
                         data-tip-watch="vm.followTooltip"
@@ -45,6 +46,9 @@
                 <div class="pull-right" ng-click="vm.menu.up()">
                     <i class="at-Stdout-menuIcon--lg fa fa-angle-up"
                         data-placement="top" aw-tool-tip="{{:: vm.strings.get('tooltips.MENU_UP') }}"></i>
+                </div>
+                <div class="pull-right" ng-if="vm.debug" ng-click="vm.menu.clear()">
+                    <i class="at-Stdout-menuIcon--md fa fa-undo"></i>
                 </div>
                 <div class="at-u-clear"></div>
             </div>

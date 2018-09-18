@@ -119,7 +119,7 @@ export default [
             }));
 
             $('.select2-selection__choice').each(function(i, element){
-                if(!_.contains($scope.$parent.configDataResolve.AD_HOC_COMMANDS.default, element.title)){
+                if(!_.includes($scope.$parent.configDataResolve.AD_HOC_COMMANDS.default, element.title)){
                     $(`#configuration_jobs_template_AD_HOC_COMMANDS option[value='${element.title}']`).remove();
                     element.remove();
                 }

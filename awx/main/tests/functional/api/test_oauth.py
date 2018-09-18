@@ -5,7 +5,10 @@ import json
 from django.db import connection
 from django.test.utils import override_settings
 from django.test import Client
+from django.core.urlresolvers import resolve
+from rest_framework.test import APIRequestFactory
 
+from awx.main.middleware import DeprecatedAuthTokenMiddleware
 from awx.main.utils.encryption import decrypt_value, get_encryption_key
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.models.oauth import (OAuth2Application as Application, 
@@ -260,36 +263,6 @@ def test_oauth_list_user_tokens(oauth_application, post, get, admin, alice):
         post(url, {'scope': 'read'}, user, expect=201)
         response = get(url, admin, expect=200)
         assert response.data['count'] == 1
-        
-        
-@pytest.mark.django_db
-def test_refresh_accesstoken(oauth_application, post, get, delete, admin):
-    response = post(
-        reverse('api:o_auth2_application_token_list', kwargs={'pk': oauth_application.pk}),
-        {'scope': 'read'}, admin, expect=201
-    )    
-    token = AccessToken.objects.get(token=response.data['token'])
-    refresh_token = RefreshToken.objects.get(token=response.data['refresh_token'])
-    assert AccessToken.objects.count() == 1
-    assert RefreshToken.objects.count() == 1
-    
-    refresh_url = drf_reverse('api:oauth_authorization_root_view') + 'token/'    
-    response = post(
-        refresh_url,
-        data='grant_type=refresh_token&refresh_token=' + refresh_token.token,
-        content_type='application/x-www-form-urlencoded',
-        HTTP_AUTHORIZATION='Basic ' + base64.b64encode(':'.join([
-            oauth_application.client_id, oauth_application.client_secret
-        ]))
-    )
-
-    new_token = json.loads(response._container[0])['access_token']
-    new_refresh_token = json.loads(response._container[0])['refresh_token']
-    assert token not in AccessToken.objects.all()
-    assert AccessToken.objects.get(token=new_token) != 0
-    assert RefreshToken.objects.get(token=new_refresh_token) != 0
-    refresh_token = RefreshToken.objects.get(token=refresh_token)
-    assert refresh_token.revoked
 
 
 @pytest.mark.django_db
@@ -314,3 +287,117 @@ def test_implicit_authorization(oauth_application, admin):
     assert 'http://test.com' in response.url and 'access_token' in response.url
     # Make sure no refresh token is created for app with implicit grant type.
     assert refresh_token_count == RefreshToken.objects.count()
+    
+
+@pytest.mark.django_db
+def test_refresh_accesstoken(oauth_application, post, get, delete, admin):
+    response = post(
+        reverse('api:o_auth2_application_token_list', kwargs={'pk': oauth_application.pk}),
+        {'scope': 'read'}, admin, expect=201
+    )    
+    assert AccessToken.objects.count() == 1
+    assert RefreshToken.objects.count() == 1
+    token = AccessToken.objects.get(token=response.data['token'])
+    refresh_token = RefreshToken.objects.get(token=response.data['refresh_token'])
+    
+    refresh_url = drf_reverse('api:oauth_authorization_root_view') + 'token/'    
+    response = post(
+        refresh_url,
+        data='grant_type=refresh_token&refresh_token=' + refresh_token.token,
+        content_type='application/x-www-form-urlencoded',
+        HTTP_AUTHORIZATION='Basic ' + base64.b64encode(':'.join([
+            oauth_application.client_id, oauth_application.client_secret
+        ]))
+    )
+    assert RefreshToken.objects.filter(token=refresh_token).exists()
+    original_refresh_token = RefreshToken.objects.get(token=refresh_token)
+    assert token not in AccessToken.objects.all()
+    assert AccessToken.objects.count() == 1
+    # the same RefreshToken remains but is marked revoked
+    assert RefreshToken.objects.count() == 2
+    new_token = json.loads(response._container[0])['access_token']
+    new_refresh_token = json.loads(response._container[0])['refresh_token']
+    assert AccessToken.objects.filter(token=new_token).count() == 1
+    # checks that RefreshTokens are rotated (new RefreshToken issued)
+    assert RefreshToken.objects.filter(token=new_refresh_token).count() == 1
+    assert original_refresh_token.revoked # is not None
+
+
+
+@pytest.mark.django_db
+def test_revoke_access_then_refreshtoken(oauth_application, post, get, delete, admin):
+    response = post(
+        reverse('api:o_auth2_application_token_list', kwargs={'pk': oauth_application.pk}),
+        {'scope': 'read'}, admin, expect=201
+    )    
+    token = AccessToken.objects.get(token=response.data['token'])
+    refresh_token = RefreshToken.objects.get(token=response.data['refresh_token'])
+    assert AccessToken.objects.count() == 1
+    assert RefreshToken.objects.count() == 1
+    
+    token.revoke()
+    assert AccessToken.objects.count() == 0
+    assert RefreshToken.objects.count() == 1
+    assert not refresh_token.revoked
+    
+    refresh_token.revoke()
+    assert AccessToken.objects.count() == 0
+    assert RefreshToken.objects.count() == 1
+    
+    
+@pytest.mark.django_db
+def test_revoke_refreshtoken(oauth_application, post, get, delete, admin):
+    response = post(
+        reverse('api:o_auth2_application_token_list', kwargs={'pk': oauth_application.pk}),
+        {'scope': 'read'}, admin, expect=201
+    )    
+    refresh_token = RefreshToken.objects.get(token=response.data['refresh_token'])
+    assert AccessToken.objects.count() == 1
+    assert RefreshToken.objects.count() == 1
+    
+    refresh_token.revoke()
+    assert AccessToken.objects.count() == 0
+    # the same RefreshToken is recycled
+    new_refresh_token = RefreshToken.objects.all().first()
+    assert refresh_token == new_refresh_token
+    assert new_refresh_token.revoked
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('fmt', ['json', 'multipart'])
+def test_deprecated_authtoken_support(alice, fmt):
+    kwargs = {
+        'data': {'username': 'alice', 'password': 'alice'},
+        'format': fmt
+    }
+    request = getattr(APIRequestFactory(), 'post')('/api/v2/authtoken/', **kwargs)
+    DeprecatedAuthTokenMiddleware().process_request(request)
+    assert request.path == request.path_info == '/api/v2/users/{}/personal_tokens/'.format(alice.pk)
+    view, view_args, view_kwargs = resolve(request.path)
+    resp = view(request, *view_args, **view_kwargs)
+    assert resp.status_code == 201
+    assert 'token' in resp.data
+    assert resp.data['refresh_token'] is None
+    assert resp.data['scope'] == 'write'
+
+
+@pytest.mark.django_db
+def test_deprecated_authtoken_invalid_username(alice):
+    kwargs = {
+        'data': {'username': 'nobody', 'password': 'nobody'},
+        'format': 'json'
+    }
+    request = getattr(APIRequestFactory(), 'post')('/api/v2/authtoken/', **kwargs)
+    resp = DeprecatedAuthTokenMiddleware().process_request(request)
+    assert resp.status_code == 401
+
+
+@pytest.mark.django_db
+def test_deprecated_authtoken_missing_credentials(alice):
+    kwargs = {
+        'data': {},
+        'format': 'json'
+    }
+    request = getattr(APIRequestFactory(), 'post')('/api/v2/authtoken/', **kwargs)
+    resp = DeprecatedAuthTokenMiddleware().process_request(request)
+    assert resp.status_code == 401

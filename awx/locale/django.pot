@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-03 19:04+0000\n"
+"POT-Creation-Date: 2018-08-14 13:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -125,15 +125,15 @@ msgid ""
 "our REST API, the Content-Type must be application/json"
 msgstr ""
 
-#: awx/api/generics.py:629 awx/api/generics.py:691
+#: awx/api/generics.py:635 awx/api/generics.py:697
 msgid "\"id\" field must be an integer."
 msgstr ""
 
-#: awx/api/generics.py:688
+#: awx/api/generics.py:694
 msgid "\"id\" is required to disassociate"
 msgstr ""
 
-#: awx/api/generics.py:739
+#: awx/api/generics.py:745
 msgid "{} 'id' field is missing."
 msgstr ""
 
@@ -1642,86 +1642,86 @@ msgstr ""
 msgid "Bad data found in related field %s."
 msgstr ""
 
-#: awx/main/access.py:304
+#: awx/main/access.py:302
 msgid "License is missing."
 msgstr ""
 
-#: awx/main/access.py:306
+#: awx/main/access.py:304
 msgid "License has expired."
 msgstr ""
 
-#: awx/main/access.py:314
+#: awx/main/access.py:312
 #, python-format
 msgid "License count of %s instances has been reached."
 msgstr ""
 
-#: awx/main/access.py:316
+#: awx/main/access.py:314
 #, python-format
 msgid "License count of %s instances has been exceeded."
 msgstr ""
 
-#: awx/main/access.py:318
+#: awx/main/access.py:316
 msgid "Host count exceeds available instances."
 msgstr ""
 
-#: awx/main/access.py:322
+#: awx/main/access.py:320
 #, python-format
 msgid "Feature %s is not enabled in the active license."
 msgstr ""
 
-#: awx/main/access.py:324
+#: awx/main/access.py:322
 msgid "Features not found in active license."
 msgstr ""
 
-#: awx/main/access.py:837
+#: awx/main/access.py:835
 msgid "Unable to change inventory on a host."
 msgstr ""
 
-#: awx/main/access.py:854 awx/main/access.py:899
+#: awx/main/access.py:852 awx/main/access.py:897
 msgid "Cannot associate two items from different inventories."
 msgstr ""
 
-#: awx/main/access.py:887
+#: awx/main/access.py:885
 msgid "Unable to change inventory on a group."
 msgstr ""
 
-#: awx/main/access.py:1148
+#: awx/main/access.py:1146
 msgid "Unable to change organization on a team."
 msgstr ""
 
-#: awx/main/access.py:1165
+#: awx/main/access.py:1163
 msgid "The {} role cannot be assigned to a team"
 msgstr ""
 
-#: awx/main/access.py:1167
+#: awx/main/access.py:1165
 msgid "The admin_role for a User cannot be assigned to a team"
 msgstr ""
 
-#: awx/main/access.py:1533 awx/main/access.py:1967
+#: awx/main/access.py:1531 awx/main/access.py:1965
 msgid "Job was launched with prompts provided by another user."
 msgstr ""
 
-#: awx/main/access.py:1553
+#: awx/main/access.py:1551
 msgid "Job has been orphaned from its job template."
 msgstr ""
 
-#: awx/main/access.py:1555
+#: awx/main/access.py:1553
 msgid "Job was launched with unknown prompted fields."
 msgstr ""
 
-#: awx/main/access.py:1557
+#: awx/main/access.py:1555
 msgid "Job was launched with prompted fields."
 msgstr ""
 
-#: awx/main/access.py:1559
+#: awx/main/access.py:1557
 msgid " Organization level permissions required."
 msgstr ""
 
-#: awx/main/access.py:1561
+#: awx/main/access.py:1559
 msgid " You do not have permission to related resources."
 msgstr ""
 
-#: awx/main/access.py:1981
+#: awx/main/access.py:1979
 msgid ""
 "You do not have permission to the workflow job resources required for "
 "relaunch."

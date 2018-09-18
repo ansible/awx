@@ -6,6 +6,7 @@ import random
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models, connection
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -81,6 +82,7 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         default=Decimal(1.0),
         max_digits=3,
         decimal_places=2,
+        validators=[MinValueValidator(0)]
     )
     enabled = models.BooleanField(
         default=True

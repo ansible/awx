@@ -252,7 +252,7 @@ export default [
             },
         ];
 
-        var forms = _.pluck(authForms, 'formDef');
+        var forms = _.map(authForms, 'formDef');
         _.each(forms, function(form) {
             var keys = _.keys(form.fields);
             _.each(keys, function(key) {

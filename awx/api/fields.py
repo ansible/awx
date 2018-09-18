@@ -97,7 +97,7 @@ class DeprecatedCredentialField(serializers.IntegerField):
         kwargs['allow_null'] = True
         kwargs['default'] = None
         kwargs['min_value'] = 1
-        kwargs['help_text'] = 'This resource has been deprecated and will be removed in a future release'
+        kwargs.setdefault('help_text', 'This resource has been deprecated and will be removed in a future release')
         super(DeprecatedCredentialField, self).__init__(**kwargs)
 
     def to_internal_value(self, pk):

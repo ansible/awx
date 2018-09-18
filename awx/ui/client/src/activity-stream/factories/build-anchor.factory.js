@@ -85,6 +85,9 @@ export default function BuildAnchor($log, $filter) {
                      const inventoryId = _.get(obj, 'inventory', '').split('-').reverse()[0];
                      url += `inventories/inventory/${inventoryId}/inventory_sources/edit/${obj.id}`;
                      break;
+                 case 'o_auth2_application':
+                     url += `applications/${obj.id}`;
+                     break;
                  default:
                      url += resource + 's/' + obj.id + '/';
              }

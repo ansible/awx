@@ -32,7 +32,7 @@ except Exception:
 from kombu import Queue, Exchange
 from kombu.common import Broadcast
 from celery import Task, shared_task
-from celery.signals import celeryd_init, worker_shutdown, celeryd_after_setup
+from celery.signals import celeryd_init, worker_shutdown
 
 # Django
 from django.conf import settings
@@ -108,6 +108,31 @@ def log_celery_failure(self, exc, task_id, args, kwargs, einfo):
 
 @celeryd_init.connect
 def celery_startup(conf=None, **kwargs):
+    #
+    # When celeryd starts, if the instance cannot be found in the database,
+    # automatically register it.  This is mostly useful for openshift-based
+    # deployments where:
+    #
+    # 2 Instances come online
+    # Instance B encounters a network blip, Instance A notices, and
+    # deprovisions it
+    # Instance B's connectivity is restored, celeryd starts, and it
+    # re-registers itself
+    #
+    # In traditional container-less deployments, instances don't get
+    # deprovisioned when they miss their heartbeat, so this code is mostly a
+    # no-op.
+    #
+    if kwargs['instance'].hostname != 'celery@{}'.format(settings.CLUSTER_HOST_ID):
+        error = six.text_type('celery -n {} does not match settings.CLUSTER_HOST_ID={}').format(
+            instance.hostname, settings.CLUSTER_HOST_ID
+        )
+        logger.error(error)
+        raise RuntimeError(error)
+    (changed, tower_instance) = Instance.objects.get_or_register()
+    if changed:
+        logger.info(six.text_type("Registered tower node '{}'").format(tower_instance.hostname))
+
     startup_logger = logging.getLogger('awx.main.tasks')
     startup_logger.info("Syncing Schedules")
     for sch in Schedule.objects.all():
@@ -147,9 +172,17 @@ def inform_cluster_of_shutdown(*args, **kwargs):
 
 @shared_task(bind=True, queue=settings.CELERY_DEFAULT_QUEUE)
 def apply_cluster_membership_policies(self):
+    started_waiting = time.time()
     with advisory_lock('cluster_policy_lock', wait=True):
+        lock_time = time.time() - started_waiting
+        if lock_time > 1.0:
+            to_log = logger.info
+        else:
+            to_log = logger.debug
+        to_log('Waited {} seconds to obtain lock name: cluster_policy_lock'.format(lock_time))
+        started_compute = time.time()
         all_instances = list(Instance.objects.order_by('id'))
-        all_groups = list(InstanceGroup.objects.all())
+        all_groups = list(InstanceGroup.objects.prefetch_related('instances'))
         iso_hostnames = set([])
         for ig in all_groups:
             if ig.controller_id is not None:
@@ -159,28 +192,32 @@ def apply_cluster_membership_policies(self):
         total_instances = len(considered_instances)
         actual_groups = []
         actual_instances = []
-        Group = namedtuple('Group', ['obj', 'instances'])
+        Group = namedtuple('Group', ['obj', 'instances', 'prior_instances'])
         Node = namedtuple('Instance', ['obj', 'groups'])
 
         # Process policy instance list first, these will represent manually managed memberships
         instance_hostnames_map = {inst.hostname: inst for inst in all_instances}
         for ig in all_groups:
-            group_actual = Group(obj=ig, instances=[])
+            group_actual = Group(obj=ig, instances=[], prior_instances=[
+                instance.pk for instance in ig.instances.all()  # obtained in prefetch
+            ])
             for hostname in ig.policy_instance_list:
                 if hostname not in instance_hostnames_map:
+                    logger.info(six.text_type("Unknown instance {} in {} policy list").format(hostname, ig.name))
                     continue
                 inst = instance_hostnames_map[hostname]
-                logger.info(six.text_type("Policy List, adding Instance {} to Group {}").format(inst.hostname, ig.name))
                 group_actual.instances.append(inst.id)
                 # NOTE: arguable behavior: policy-list-group is not added to
                 # instance's group count for consideration in minimum-policy rules
+            if group_actual.instances:
+                logger.info(six.text_type("Policy List, adding Instances {} to Group {}").format(group_actual.instances, ig.name))
 
             if ig.controller_id is None:
                 actual_groups.append(group_actual)
             else:
                 # For isolated groups, _only_ apply the policy_instance_list
                 # do not add to in-memory list, so minimum rules not applied
-                logger.info('Committing instances {} to isolated group {}'.format(group_actual.instances, ig.name))
+                logger.info('Committing instances to isolated group {}'.format(ig.name))
                 ig.instances.set(group_actual.instances)
 
         # Process Instance minimum policies next, since it represents a concrete lower bound to the
@@ -189,6 +226,7 @@ def apply_cluster_membership_policies(self):
         logger.info("Total non-isolated instances:{} available for policy: {}".format(
             total_instances, len(actual_instances)))
         for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+            policy_min_added = []
             for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
                 if len(g.instances) >= g.obj.policy_instance_minimum:
                     break
@@ -196,12 +234,15 @@ def apply_cluster_membership_policies(self):
                     # If the instance is already _in_ the group, it was
                     # applied earlier via the policy list
                     continue
-                logger.info(six.text_type("Policy minimum, adding Instance {} to Group {}").format(i.obj.hostname, g.obj.name))
                 g.instances.append(i.obj.id)
                 i.groups.append(g.obj.id)
+                policy_min_added.append(i.obj.id)
+            if policy_min_added:
+                logger.info(six.text_type("Policy minimum, adding Instances {} to Group {}").format(policy_min_added, g.obj.name))
 
         # Finally, process instance policy percentages
         for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+            policy_per_added = []
             for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
                 if i.obj.id in g.instances:
                     # If the instance is already _in_ the group, it was
@@ -209,15 +250,34 @@ def apply_cluster_membership_policies(self):
                     continue
                 if 100 * float(len(g.instances)) / len(actual_instances) >= g.obj.policy_instance_percentage:
                     break
-                logger.info(six.text_type("Policy percentage, adding Instance {} to Group {}").format(i.obj.hostname, g.obj.name))
                 g.instances.append(i.obj.id)
                 i.groups.append(g.obj.id)
+                policy_per_added.append(i.obj.id)
+            if policy_per_added:
+                logger.info(six.text_type("Policy percentage, adding Instances {} to Group {}").format(policy_per_added, g.obj.name))
+
+        # Determine if any changes need to be made
+        needs_change = False
+        for g in actual_groups:
+            if set(g.instances) != set(g.prior_instances):
+                needs_change = True
+                break
+        if not needs_change:
+            logger.info('Cluster policy no-op finished in {} seconds'.format(time.time() - started_compute))
+            return
 
         # On a differential basis, apply instances to non-isolated groups
         with transaction.atomic():
             for g in actual_groups:
-                logger.info('Committing instances {} to group {}'.format(g.instances, g.obj.name))
-                g.obj.instances.set(g.instances)
+                instances_to_add = set(g.instances) - set(g.prior_instances)
+                instances_to_remove = set(g.prior_instances) - set(g.instances)
+                if instances_to_add:
+                    logger.info('Adding instances {} to group {}'.format(list(instances_to_add), g.obj.name))
+                    g.obj.instances.add(*instances_to_add)
+                if instances_to_remove:
+                    logger.info('Removing instances {} from group {}'.format(list(instances_to_remove), g.obj.name))
+                    g.obj.instances.remove(*instances_to_remove)
+        logger.info('Cluster policy computation finished in {} seconds'.format(time.time() - started_compute))
 
 
 @shared_task(exchange='tower_broadcast_all', bind=True)
@@ -231,34 +291,6 @@ def handle_setting_changes(self, setting_keys):
     cache_keys = set(setting_keys)
     logger.debug('cache delete_many(%r)', cache_keys)
     cache.delete_many(cache_keys)
-
-
-@celeryd_after_setup.connect
-def auto_register_ha_instance(sender, instance, **kwargs):
-    #
-    # When celeryd starts, if the instance cannot be found in the database,
-    # automatically register it.  This is mostly useful for openshift-based
-    # deployments where:
-    #
-    # 2 Instances come online
-    # Instance B encounters a network blip, Instance A notices, and
-    # deprovisions it
-    # Instance B's connectivity is restored, celeryd starts, and it
-    # re-registers itself
-    #
-    # In traditional container-less deployments, instances don't get
-    # deprovisioned when they miss their heartbeat, so this code is mostly a
-    # no-op.
-    #
-    if instance.hostname != 'celery@{}'.format(settings.CLUSTER_HOST_ID):
-        error = six.text_type('celery -n {} does not match settings.CLUSTER_HOST_ID={}').format(
-            instance.hostname, settings.CLUSTER_HOST_ID
-        )
-        logger.error(error)
-        raise RuntimeError(error)
-    (changed, tower_instance) = Instance.objects.get_or_register()
-    if changed:
-        logger.info(six.text_type("Registered tower node '{}'").format(tower_instance.hostname))
 
 
 @shared_task(queue=settings.CELERY_DEFAULT_QUEUE)
@@ -761,12 +793,12 @@ class BaseTask(Task):
         os.chmod(path, stat.S_IRUSR)
         return path
 
-    def add_ansible_venv(self, venv_path, env, add_awx_lib=True):
+    def add_ansible_venv(self, venv_path, env, add_awx_lib=True, **kwargs):
         env['VIRTUAL_ENV'] = venv_path
         env['PATH'] = os.path.join(venv_path, "bin") + ":" + env['PATH']
         venv_libdir = os.path.join(venv_path, "lib")
 
-        if not os.path.exists(venv_libdir):
+        if not kwargs.get('isolated', False) and not os.path.exists(venv_libdir):
             raise RuntimeError(
                 'a valid Python virtualenv does not exist at {}'.format(venv_path)
             )
@@ -1179,7 +1211,7 @@ class RunJob(BaseTask):
             plugin_dirs.extend(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
-        env = self.add_ansible_venv(job.ansible_virtualenv_path, env, add_awx_lib=kwargs.get('isolated', False))
+        env = self.add_ansible_venv(job.ansible_virtualenv_path, env, add_awx_lib=kwargs.get('isolated', False), **kwargs)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
@@ -2129,8 +2161,7 @@ class RunInventoryUpdate(BaseTask):
         elif src == 'scm':
             args.append(inventory_update.get_actual_source_path())
         elif src == 'custom':
-            runpath = tempfile.mkdtemp(prefix='awx_inventory_', dir=settings.AWX_PROOT_BASE_PATH)
-            handle, path = tempfile.mkstemp(dir=runpath)
+            handle, path = tempfile.mkstemp(dir=kwargs['private_data_dir'])
             f = os.fdopen(handle, 'w')
             if inventory_update.source_script is None:
                 raise RuntimeError('Inventory Script does not exist')
@@ -2139,7 +2170,6 @@ class RunInventoryUpdate(BaseTask):
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             args.append(path)
             args.append("--custom")
-            self.cleanup_paths.append(runpath)
         args.append('-v%d' % inventory_update.verbosity)
         if settings.DEBUG:
             args.append('--traceback')

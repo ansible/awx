@@ -88,7 +88,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
     };
 
     scope.hasSelectedRows = function(){
-        return _.any(scope.allSelected, (type) => Object.keys(type).length > 0);
+        return _.some(scope.allSelected, (type) => Object.keys(type).length > 0);
     };
 
     scope.selectTab = function(selected){

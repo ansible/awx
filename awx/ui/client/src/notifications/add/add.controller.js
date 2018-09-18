@@ -22,7 +22,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
         init();
 
         function init() {
-            Rest.setUrl(GetBasePath('projects'));
+            Rest.setUrl(GetBasePath('notification_templates'));
             Rest.options()
                 .then(({data}) => {
                     if (!data.actions.POST) {
@@ -205,7 +205,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 return $scope[i];
             }
 
-            params.notification_configuration = _.object(Object.keys(form.fields)
+            params.notification_configuration = _.fromPairs(Object.keys(form.fields)
                 .filter(i => (form.fields[i].ngShow && form.fields[i].ngShow.indexOf(v) > -1))
                 .map(i => [i, processValue($scope[i], i, form.fields[i])]));
 
