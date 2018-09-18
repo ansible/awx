@@ -25,7 +25,7 @@ export default
                 if(expandedBreadcrumbWidth > availableWidth) {
                     let widthToTrim = expandedBreadcrumbWidth - availableWidth;
                     // Sort the crumbs from biggest to smallest
-                    let sortedCrumbs = _.sortByOrder(crumbs, ["origWidth"], ["desc"]);
+                    let sortedCrumbs = _.orderBy(crumbs, ["origWidth"], ["desc"]);
                     let maxWidth;
                     for(let i=0; i<sortedCrumbs.length; i++) {
                         if(sortedCrumbs[i+1]) {

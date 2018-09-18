@@ -16,6 +16,8 @@ function AddCredentialsController (models, $state, $scope, strings, componentsSt
         omit: ['user', 'team', 'inputs']
     });
 
+    vm.form._formName = 'credential';
+
     vm.form.disabled = !credential.isCreatable();
 
     vm.form.organization._resource = 'organization';
@@ -61,6 +63,9 @@ function AddCredentialsController (models, $state, $scope, strings, componentsSt
         if (_.get(data.inputs, gceFileInputSchema.id)) {
             delete data.inputs[gceFileInputSchema.id];
         }
+
+        const filteredInputs = _.omit(data.inputs, (value) => value === '');
+        data.inputs = filteredInputs;
 
         return credential.request('post', { data });
     };
@@ -112,6 +117,18 @@ function AddCredentialsController (models, $state, $scope, strings, componentsSt
 
         return { obj, error };
     };
+
+    $scope.$watch('organization', () => {
+        if ($scope.organization) {
+            vm.form.organization._idFromModal = $scope.organization;
+        }
+    });
+
+    $scope.$watch('credential_type', () => {
+        if ($scope.credential_type) {
+            vm.form.credential_type._idFromModal = $scope.credential_type;
+        }
+    });
 }
 
 AddCredentialsController.$inject = [

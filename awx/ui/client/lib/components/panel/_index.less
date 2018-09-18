@@ -5,12 +5,14 @@
 }
 
 .at-Panel-heading {
-    margin: 0;
+    margin-bottom: 20px;
     padding: 0;
 }
 
 .at-Panel-headingRow {
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .at-Panel-dismiss {
@@ -42,7 +44,18 @@
     vertical-align: middle;
     white-space: nowrap;
     text-align: center;
-    margin-left: 5px;
+    margin-left: 10px;
+    margin-right: auto;
+
+    &--inline {
+        margin-right: @at-space-2x;
+        margin-left: 0;
+    }
+}
+
+.at-Panel-headingCustomContent {
+    display: flex;
+    flex: 1;
 }
 
 .at-Panel-label {
@@ -51,6 +64,7 @@
     font-size: 12px;
     font-weight: normal!important;
     width: 30%;
+    margin: @at-space-2x;
 
     @media screen and (max-width: @breakpoint-md) {
         flex: 2.5 0 auto;

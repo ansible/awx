@@ -10,7 +10,6 @@ if ($basePath) {
 }
 
 import start from './app.start';
-import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventoriesHosts from './inventories-hosts/main';
 import inventoryScripts from './inventory-scripts/main';
@@ -42,8 +41,6 @@ import atFeatures from '~features';
 import atLibComponents from '~components';
 import atLibModels from '~models';
 import atLibServices from '~services';
-
-import networkUI from '~network-ui/network.ui.app';
 
 start.bootstrap(() => {
     angular.bootstrap(document.body, ['awApp']);
@@ -86,12 +83,10 @@ angular
         jobSubmission.name,
         notifications.name,
         Templates.name,
-        portalMode.name,
         teams.name,
         users.name,
         projects.name,
         scheduler.name,
-        networkUI.name,
 
         'Utilities',
         'templates',
@@ -353,6 +348,10 @@ angular
                     } else {
                         $rootScope.$broadcast("RemoveIndicator");
                     }
+
+                    if(_.includes(trans.from().name, 'output') && trans.to().name === 'jobs'){
+                        $state.reload();
+                    }
                 });
 
                 if (!Authorization.isUserLoggedIn()) {
@@ -376,7 +375,7 @@ angular
                     $rootScope.user_is_system_auditor = Authorization.getUserInfo('is_system_auditor');
 
                     // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
-                    if (!_.contains($location.$$url, '/login')) {
+                    if (!_.includes($location.$$url, '/login')) {
                         ConfigService.getConfig().then(function() {
                             Timer.init().then(function(timer) {
                                 $rootScope.sessionTimer = timer;

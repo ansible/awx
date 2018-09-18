@@ -196,7 +196,7 @@ def parse_extra_vars(args):
     return extra_vars
 
 
-class TestJobExecution:
+class TestJobExecution(object):
     """
     For job runs, test that `ansible-playbook` is invoked with the proper
     arguments, environment variables, and pexpect passwords for a variety of
@@ -440,7 +440,7 @@ class TestGenericRun(TestJobExecution):
         with pytest.raises(Exception):
             self.task.run(self.pk)
         for c in [
-            mock.call(self.pk, execution_node=settings.CLUSTER_HOST_ID, status='running', start_args=''),
+            mock.call(self.pk, status='running', start_args=''),
             mock.call(self.pk, status='canceled')
         ]:
             assert c in self.task.update_model.call_args_list
@@ -448,7 +448,7 @@ class TestGenericRun(TestJobExecution):
     def test_event_count(self):
         with mock.patch.object(self.task, 'get_stdout_handle') as mock_stdout:
             handle = OutputEventFilter(lambda event_data: None)
-            handle._event_ct = 334
+            handle._counter = 334
             mock_stdout.return_value = handle
             self.task.run(self.pk)
 
@@ -626,7 +626,14 @@ class TestAdhocRun(TestJobExecution):
 
 class TestIsolatedExecution(TestJobExecution):
 
-    REMOTE_HOST = 'some-isolated-host'
+    ISOLATED_HOST = 'some-isolated-host'
+    ISOLATED_CONTROLLER_HOST = 'some-isolated-controller-host'
+
+    def get_instance(self):
+        instance = super(TestIsolatedExecution, self).get_instance()
+        instance.controller_node = self.ISOLATED_CONTROLLER_HOST
+        instance.execution_node = self.ISOLATED_HOST
+        return instance
 
     def test_with_ssh_credentials(self):
         ssh = CredentialType.defaults['ssh']()
@@ -659,12 +666,12 @@ class TestIsolatedExecution(TestJobExecution):
                         f.write(data)
             return ('successful', 0)
         self.run_pexpect.side_effect = _mock_job_artifacts
-        self.task.run(self.pk, self.REMOTE_HOST)
+        self.task.run(self.pk)
 
         playbook_run = self.run_pexpect.call_args_list[0][0]
         assert ' '.join(playbook_run[0]).startswith(' '.join([
             'ansible-playbook', 'run_isolated.yml', '-u', settings.AWX_ISOLATED_USERNAME,
-            '-T', str(settings.AWX_ISOLATED_CONNECTION_TIMEOUT), '-i', self.REMOTE_HOST + ',',
+            '-T', str(settings.AWX_ISOLATED_CONNECTION_TIMEOUT), '-i', self.ISOLATED_HOST + ',',
             '-e',
         ]))
         extra_vars = playbook_run[0][playbook_run[0].index('-e') + 1]
@@ -705,7 +712,7 @@ class TestIsolatedExecution(TestJobExecution):
             with mock.patch('requests.get') as mock_get:
                 mock_get.return_value = mock.Mock(content=inventory)
                 with pytest.raises(Exception):
-                    self.task.run(self.pk, self.REMOTE_HOST)
+                    self.task.run(self.pk, self.ISOLATED_HOST)
 
 
 class TestJobCredentials(TestJobExecution):
@@ -764,6 +771,65 @@ class TestJobCredentials(TestJobExecution):
         assert '-u bob' in ' '.join(args)
         if expected_flag:
             assert expected_flag in ' '.join(args)
+
+    def test_net_ssh_key_unlock(self):
+        net = CredentialType.defaults['net']()
+        credential = Credential(
+            pk=1,
+            credential_type=net,
+            inputs = {'ssh_key_unlock': 'secret'}
+        )
+        credential.inputs['ssh_key_unlock'] = encrypt_field(credential, 'ssh_key_unlock')
+        self.instance.credentials.add(credential)
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+
+        assert 'secret' in call_kwargs.get('expect_passwords').values()
+
+    def test_net_first_ssh_key_unlock_wins(self):
+        for i in range(3):
+            net = CredentialType.defaults['net']()
+            credential = Credential(
+                pk=i,
+                credential_type=net,
+                inputs = {'ssh_key_unlock': 'secret{}'.format(i)}
+            )
+            credential.inputs['ssh_key_unlock'] = encrypt_field(credential, 'ssh_key_unlock')
+            self.instance.credentials.add(credential)
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+
+        assert 'secret0' in call_kwargs.get('expect_passwords').values()
+
+    def test_prefer_ssh_over_net_ssh_key_unlock(self):
+        net = CredentialType.defaults['net']()
+        net_credential = Credential(
+            pk=1,
+            credential_type=net,
+            inputs = {'ssh_key_unlock': 'net_secret'}
+        )
+        net_credential.inputs['ssh_key_unlock'] = encrypt_field(net_credential, 'ssh_key_unlock')
+
+        ssh = CredentialType.defaults['ssh']()
+        ssh_credential = Credential(
+            pk=2,
+            credential_type=ssh,
+            inputs = {'ssh_key_unlock': 'ssh_secret'}
+        )
+        ssh_credential.inputs['ssh_key_unlock'] = encrypt_field(ssh_credential, 'ssh_key_unlock')
+
+        self.instance.credentials.add(net_credential)
+        self.instance.credentials.add(ssh_credential)
+        self.task.run(self.pk)
+
+        assert self.run_pexpect.call_count == 1
+        call_args, call_kwargs = self.run_pexpect.call_args_list[0]
+
+        assert 'ssh_secret' in call_kwargs.get('expect_passwords').values()
 
     def test_vault_password(self):
         vault = CredentialType.defaults['vault']()
@@ -1115,19 +1181,22 @@ class TestJobCredentials(TestJobExecution):
         self.run_pexpect.side_effect = run_pexpect_side_effect
         self.task.run(self.pk)
 
-    def test_net_credentials(self):
+    @pytest.mark.parametrize('authorize, expected_authorize', [
+        [True, '1'],
+        [False, '0'],
+        [None, '0'],
+    ])
+    def test_net_credentials(self, authorize, expected_authorize):
         net = CredentialType.defaults['net']()
-        credential = Credential(
-            pk=1,
-            credential_type=net,
-            inputs = {
-                'username': 'bob',
-                'password': 'secret',
-                'ssh_key_data': self.EXAMPLE_PRIVATE_KEY,
-                'authorize': True,
-                'authorize_password': 'authorizeme'
-            }
-        )
+        inputs = {
+            'username': 'bob',
+            'password': 'secret',
+            'ssh_key_data': self.EXAMPLE_PRIVATE_KEY,
+            'authorize_password': 'authorizeme'
+        }
+        if authorize is not None:
+            inputs['authorize'] = authorize
+        credential = Credential(pk=1,credential_type=net, inputs = inputs)
         for field in ('password', 'ssh_key_data', 'authorize_password'):
             credential.inputs[field] = encrypt_field(credential, field)
         self.instance.credentials.add(credential)
@@ -1136,8 +1205,9 @@ class TestJobCredentials(TestJobExecution):
             args, cwd, env, stdout = args
             assert env['ANSIBLE_NET_USERNAME'] == 'bob'
             assert env['ANSIBLE_NET_PASSWORD'] == 'secret'
-            assert env['ANSIBLE_NET_AUTHORIZE'] == '1'
-            assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
+            assert env['ANSIBLE_NET_AUTHORIZE'] == expected_authorize
+            if authorize:
+                assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
             assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'rb').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
@@ -1879,6 +1949,10 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             )
             return cred
         self.instance.get_cloud_credential = get_cred
+        self.instance.source_vars = {
+            'include_powerstate': 'yes',
+            'group_by_resource_group': 'no'
+        }
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -1891,8 +1965,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             config = ConfigParser.ConfigParser()
             config.read(env['AZURE_INI_PATH'])
             assert config.get('azure', 'include_powerstate') == 'yes'
-            assert config.get('azure', 'group_by_resource_group') == 'yes'
+            assert config.get('azure', 'group_by_resource_group') == 'no'
             assert config.get('azure', 'group_by_location') == 'yes'
+            assert 'group_by_security_group' not in config.items('azure')
             assert config.get('azure', 'group_by_tag') == 'yes'
             assert config.get('azure', 'locations') == 'north,south,east,west'
             return ['successful', 0]
@@ -1919,6 +1994,11 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             )
             return cred
         self.instance.get_cloud_credential = get_cred
+        self.instance.source_vars = {
+            'include_powerstate': 'yes',
+            'group_by_resource_group': 'no',
+            'group_by_security_group': 'no'
+        }
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -1930,8 +2010,9 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             config = ConfigParser.ConfigParser()
             config.read(env['AZURE_INI_PATH'])
             assert config.get('azure', 'include_powerstate') == 'yes'
-            assert config.get('azure', 'group_by_resource_group') == 'yes'
+            assert config.get('azure', 'group_by_resource_group') == 'no'
             assert config.get('azure', 'group_by_location') == 'yes'
+            assert config.get('azure', 'group_by_security_group') == 'no'
             assert config.get('azure', 'group_by_tag') == 'yes'
             assert 'locations' not in config.items('azure')
             return ['successful', 0]
@@ -2044,7 +2125,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             return cred
         self.instance.get_cloud_credential = get_cred
 
-        self.instance.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_"}'
+        self.instance.source_vars = '{"satellite6_group_patterns": "[a,b,c]", "satellite6_group_prefix": "hey_", "satellite6_want_hostcollections": True}'
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
@@ -2055,6 +2136,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert config.get('foreman', 'password') == 'secret'
             assert config.get('ansible', 'group_patterns') == '[a,b,c]'
             assert config.get('ansible', 'group_prefix') == 'hey_'
+            assert config.get('ansible', 'want_hostcollections') == 'True'
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
@@ -2095,6 +2177,64 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             cache_path = config.get('cache', 'path')
             assert cache_path.startswith(env['AWX_PRIVATE_DATA_DIR'])
             assert os.path.isdir(cache_path)
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+
+    @pytest.mark.parametrize('verify', [True, False])
+    def test_tower_source(self, verify):
+        tower = CredentialType.defaults['tower']()
+        self.instance.source = 'tower'
+        self.instance.instance_filters = '12345'
+        inputs = {
+            'host': 'https://tower.example.org',
+            'username': 'bob',
+            'password': 'secret',
+            'verify_ssl': verify
+        }
+
+        def get_cred():
+            cred = Credential(pk=1, credential_type=tower, inputs = inputs)
+            cred.inputs['password'] = encrypt_field(cred, 'password')
+            return cred
+        self.instance.get_cloud_credential = get_cred
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert env['TOWER_HOST'] == 'https://tower.example.org'
+            assert env['TOWER_USERNAME'] == 'bob'
+            assert env['TOWER_PASSWORD'] == 'secret'
+            assert env['TOWER_INVENTORY'] == '12345'
+            if verify:
+                assert env['TOWER_VERIFY_SSL'] == 'True'
+            else:
+                assert env['TOWER_VERIFY_SSL'] == 'False'
+            return ['successful', 0]
+
+        self.run_pexpect.side_effect = run_pexpect_side_effect
+        self.task.run(self.pk)
+        assert self.instance.job_env['TOWER_PASSWORD'] == tasks.HIDDEN_PASSWORD
+
+    def test_tower_source_ssl_verify_empty(self):
+        tower = CredentialType.defaults['tower']()
+        self.instance.source = 'tower'
+        self.instance.instance_filters = '12345'
+        inputs = {
+            'host': 'https://tower.example.org',
+            'username': 'bob',
+            'password': 'secret',
+        }
+
+        def get_cred():
+            cred = Credential(pk=1, credential_type=tower, inputs = inputs)
+            cred.inputs['password'] = encrypt_field(cred, 'password')
+            return cred
+        self.instance.get_cloud_credential = get_cred
+
+        def run_pexpect_side_effect(*args, **kwargs):
+            args, cwd, env, stdout = args
+            assert env['TOWER_VERIFY_SSL'] == 'False'
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
@@ -2171,6 +2311,7 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_
 
     instance = mock.Mock()
     instance.get_lock_file.return_value = 'this_file_does_not_exist'
+    instance.cancel_flag = False
 
     os_open.return_value = 3
 
@@ -2180,7 +2321,6 @@ def test_aquire_lock_acquisition_fail_logged(fcntl_flock, logging_getLogger, os_
     fcntl_flock.side_effect = err
 
     ProjectUpdate = tasks.RunProjectUpdate()
-
     with pytest.raises(IOError, message='dummy message'):
         ProjectUpdate.acquire_lock(instance)
     os_close.assert_called_with(3)

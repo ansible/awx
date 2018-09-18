@@ -4,10 +4,12 @@ import logging
 from channels import Group
 from channels.auth import channel_session_user_from_http, channel_session_user
 
+from django.http.cookie import parse_cookie
 from django.core.serializers.json import DjangoJSONEncoder
 
 
 logger = logging.getLogger('awx.main.consumers')
+XRF_KEY = '_auth_user_xrf'
 
 
 def discard_groups(message):
@@ -18,12 +20,20 @@ def discard_groups(message):
 
 @channel_session_user_from_http
 def ws_connect(message):
+    headers = dict(message.content.get('headers', ''))
     message.reply_channel.send({"accept": True})
     message.content['method'] = 'FAKE'
     if message.user.is_authenticated():
         message.reply_channel.send(
             {"text": json.dumps({"accept": True, "user": message.user.id})}
         )
+        # store the valid CSRF token from the cookie so we can compare it later
+        # on ws_receive
+        cookie_token = parse_cookie(
+            headers.get('cookie')
+        ).get('csrftoken')
+        if cookie_token:
+            message.channel_session[XRF_KEY] = cookie_token
     else:
         logger.error("Request user is not authenticated to use websocket.")
         message.reply_channel.send({"close": True})
@@ -41,6 +51,20 @@ def ws_receive(message):
     user = message.user
     raw_data = message.content['text']
     data = json.loads(raw_data)
+
+    xrftoken = data.get('xrftoken')
+    if (
+        not xrftoken or
+        XRF_KEY not in message.channel_session or
+        xrftoken != message.channel_session[XRF_KEY]
+    ):
+        logger.error(
+            "access denied to channel, XRF mismatch for {}".format(user.username)
+        )
+        message.reply_channel.send({
+            "text": json.dumps({"error": "access denied to channel"})
+        })
+        return
 
     if 'groups' in data:
         discard_groups(message)

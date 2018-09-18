@@ -36,8 +36,11 @@ export default {
         ListDefinition: ['CredentialList', function(list) {
             return list;
         }],
-        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
-            (list, qs, $stateParams, GetBasePath) => {
+        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$transition$',
+            (list, qs, $stateParams, GetBasePath, $transition$) => {
+                const toState = $transition$.to();
+                toState.params.credential_search.value.kind = _.get($stateParams, 'credential_search.kind', null);
+                toState.params.credential_search.value.credential_type__kind = _.get($stateParams, 'credential_search.credential_type__kind', null);
                 return qs.search(GetBasePath('credentials'), $stateParams[`${list.iterator}_search`]);
             }
         ]

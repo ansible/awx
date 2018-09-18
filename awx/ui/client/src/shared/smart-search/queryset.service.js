@@ -44,49 +44,50 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
         replaceEncodedTokens(value) {
             return decodeURIComponent(value).replace(/"|'/g, "");
         },
-        encodeTerms (values, key) {
+        encodeTerms(value, key){
             key = this.replaceDefaultFlags(key);
-
-            if (!Array.isArray(values)) {
-                values = [values];
-            }
-
-            return values
-                .map(value => {
-                    value = this.replaceDefaultFlags(value);
-                    value = this.replaceEncodedTokens(value);
-                    return [key, value];
+            value = this.replaceDefaultFlags(value);
+            var that = this;
+            if (Array.isArray(value)){
+                value = _.uniq(_.flattenDeep(value));
+                let concated = '';
+                angular.forEach(value, function(item){
+                    if(item && typeof item === 'string') {
+                        item = that.replaceEncodedTokens(item);
+                    }
+                    concated += `${key}=${item}&`;
                 });
 
+                return concated;
+            }
+            else {
+                if(value && typeof value === 'string') {
+                    value = this.replaceEncodedTokens(value);
+                }
+
+                return `${key}=${value}&`;
+            }
         },
         // encodes ui-router params from {operand__key__comparator: value} pairs to API-consumable URL
         encodeQueryset(params) {
-            if (typeof params !== 'object') {
-                return '';
-            }
+            let queryset;
+            queryset = _.reduce(params, (result, value, key) => {
+                return result + this.encodeTerms(value, key);
+            }, '');
+            queryset = queryset.substring(0, queryset.length - 1);
+            return angular.isObject(params) ? `?${queryset}` : '';
 
-            return _.reduce(params, (result, value, key) => {
-                if (result !== '?') {
-                    result += '&';
-                }
-
-                const encodedTermString = this.encodeTerms(value, key)
-                    .map(([key, value]) => `${key}=${value}`)
-                    .join('&');
-
-                return result += encodedTermString;
-            }, '?');
         },
         // like encodeQueryset, but return an actual unstringified API-consumable http param object
         encodeQuerysetObject(params) {
             return _.reduce(params, (obj, value, key) => {
-                const encodedTerms = this.encodeTerms(value, key);
+                const encodedKey = this.replaceDefaultFlags(key);
+                const values = Array.isArray(value) ? value : [value];
 
-                for (let encodedIndex in encodedTerms) {
-                    const [encodedKey, encodedValue] = encodedTerms[encodedIndex];
-                    obj[encodedKey] = obj[encodedKey] || [];
-                    obj[encodedKey].push(encodedValue);
-                }
+                obj[encodedKey] = values
+                    .map(value => this.replaceDefaultFlags(value))
+                    .map(value => this.replaceEncodedTokens(value))
+                    .join(',');
 
                 return obj;
             }, {});
@@ -309,12 +310,12 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                 return [];
             }
             if(defaultParams) {
-                let stripped =_.pick(params, (value, key) => {
+                let stripped =_.pickBy(params, (value, key) => {
                     // setting the default value of a term to null in a state definition is a very explicit way to ensure it will NEVER generate a search tag, even with a non-default value
                     return defaultParams[key] !== value && key !== 'order_by' && key !== 'page' && key !== 'page_size' && defaultParams[key] !== null;
                 });
                 let strippedCopy = _.cloneDeep(stripped);
-                if(_.keys(_.pick(defaultParams, _.keys(strippedCopy))).length > 0){
+                if(_.keys(_.pickBy(defaultParams, _.keys(strippedCopy))).length > 0){
                     for (var key in strippedCopy) {
                         if (strippedCopy.hasOwnProperty(key)) {
                             let value = strippedCopy[key];
@@ -335,7 +336,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
         mergeQueryset (queryset, additional, singleSearchParam) {
             const space = '%20and%20';
 
-            const merged = _.merge({}, queryset, additional, (objectValue, sourceValue, key, object) => {
+            const merged = _.mergeWith({}, queryset, additional, (objectValue, sourceValue, key, object) => {
                 if (!(object[key] && object[key] !== sourceValue)) {
                     // // https://lodash.com/docs/3.10.1#each
                     // If this returns undefined merging is handled by default _.merge algorithm
@@ -417,7 +418,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                     termParams = searchWithoutKey(term, singleSearchParam);
                 }
 
-                params = _.merge(params, termParams, combineSameSearches);
+                params = _.mergeWith(params, termParams, combineSameSearches);
             });
 
             return params;
@@ -441,7 +442,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                         searchParamParts[paramPartIndex] = decodeURIComponent(paramPart);
                     });
 
-                    const paramPartIndex = searchParamParts.indexOf(value);
+                    const paramPartIndex = searchParamParts.indexOf(decodeURIComponent(value));
 
                     if (paramPartIndex !== -1) {
                         searchParamParts.splice(paramPartIndex, 1);

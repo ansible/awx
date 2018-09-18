@@ -109,26 +109,15 @@
             color: @at-color-side-nav-content;
             display: flex;
             cursor: pointer;
-            text-transform: uppercase;
-            font-size: 12px;
+            font-size: 13px;
                 i {
                     cursor: pointer;
                     color: @at-color-side-nav-item-icon;
                     font-size: @at-font-size-side-nav-icon;
                     padding: @at-padding-side-nav-item-icon;
                     padding-left: @at-padding-left-side-nav-item-icon;
-                }
-
-                i.fa-cubes {
-                    margin-left: -4px;
-                }
-
-                i.fa-user {
-                    margin-left: 1px;
-                }
-
-                i.fa-users {
-                    margin-left: -1px;
+                    text-align: center;
+                    width: 50px;
                 }
 
                 &:hover,
@@ -139,18 +128,6 @@
                     i {
                         color: @at-color-side-nav-content;
                         margin-left: @at-highlight-left-border-margin-makeup;
-                    }
-
-                    i.fa-cubes {
-                        margin-left: -9px;
-                    }
-
-                    i.fa-user {
-                        margin-left: -4px;
-                    }
-
-                    i.fa-users {
-                        margin-left: -6px;
                     }
                 }
         }
@@ -195,6 +172,10 @@
                 padding-left: @at-width-expanded-side-nav;
             }
 
+            + .at-Layout-main--noLicense {
+                padding-left: 0;
+            }
+
             .at-Layout-sideNavSpacer--first {
                 display: inherit;
             }
@@ -221,29 +202,12 @@
         width: 100%;
         flex-direction: column;
         padding-left: @at-width-collapsed-side-nav;
+        padding-bottom: @at-space-4x;
         overflow-x: hidden;
     }
 
     &-content {
         flex: 1px;
-    }
-
-    &-footer {
-        background-color: @at-color-footer-background;
-        color: @at-color-footer;
-        position: relative;
-        padding-right: @at-padding-footer-right;
-        padding-bottom: @at-padding-footer-bottom;
-        margin-top: @at-margin-footer-top;
-        flex: 0;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-
-        a {
-            cursor: pointer;
-            margin-right: @at-margin-after-footer-link;
-        }
     }
 }
 

@@ -36,7 +36,7 @@ from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
     encrypt_dict, decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships,
-    get_type_for_model, parse_yaml_or_json
+    get_type_for_model, parse_yaml_or_json, getattr_dne
 )
 from awx.main.utils import polymorphic
 from awx.main.constants import ACTIVE_STATES, CAN_CANCEL
@@ -507,7 +507,8 @@ class StdoutMaxBytesExceeded(Exception):
         self.supported = supported
 
 
-class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
+class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique,
+                 UnifiedJobTypeStringMixin, TaskManagerUnifiedJobMixin):
     '''
     Concrete base class for unified job run by the task engine.
     '''
@@ -570,6 +571,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default='',
         editable=False,
         help_text=_("The node the job executed on."),
+    )
+    controller_node = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+        help_text=_("The instance that managed the isolated execution environment."),
     )
     notifications = models.ManyToManyField(
         'Notification',
@@ -814,7 +821,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         # Done.
         return result
 
-    def copy_unified_job(self, limit=None):
+    def copy_unified_job(self, _eager_fields=None, **new_prompts):
         '''
         Returns saved object, including related fields.
         Create a copy of this unified job for the purpose of relaunch
@@ -824,12 +831,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         parent_field_name = unified_job_class._get_parent_field_name()
         fields = unified_jt_class._get_unified_job_field_names() | set([parent_field_name])
 
-        create_data = {"launch_type": "relaunch"}
-        if limit:
-            create_data["limit"] = limit
+        create_data = {}
+        if _eager_fields:
+            create_data = _eager_fields.copy()
+        create_data["launch_type"] = "relaunch"
 
         prompts = self.launch_prompts()
-        if self.unified_job_template and prompts:
+        if self.unified_job_template and (prompts is not None):
+            prompts.update(new_prompts)
             prompts['_eager_fields'] = create_data
             unified_job = self.unified_job_template.create_unified_job(**prompts)
         else:
@@ -1226,17 +1235,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             raise RuntimeError("Expected celery_task_id to be set on model.")
         kwargs['task_id'] = self.celery_task_id
         task_class = self._get_task_class()
-        from awx.main.models.ha import InstanceGroup
-        ig = InstanceGroup.objects.get(name=queue)
-        args = [self.pk]
-        if ig.controller_id:
-            if self.supports_isolation():  # case of jobs and ad hoc commands
-                isolated_instance = ig.instances.order_by('-capacity').first()
-                args.append(isolated_instance.hostname)
-            else:  # proj & inv updates, system jobs run on controller
-                queue = ig.controller.name
         kwargs['queue'] = queue
-        task_class().apply_async(args, opts, **kwargs)
+        task_class().apply_async([self.pk], opts, **kwargs)
 
     def start(self, error_callback, success_callback, **kwargs):
         '''
@@ -1376,25 +1376,34 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         for name in ('awx', 'tower'):
             r['{}_job_id'.format(name)] = self.pk
             r['{}_job_launch_type'.format(name)] = self.launch_type
-        if self.created_by:
-            for name in ('awx', 'tower'):
-                r['{}_user_id'.format(name)] = self.created_by.pk
-                r['{}_user_name'.format(name)] = self.created_by.username
-                r['{}_user_email'.format(name)] = self.created_by.email
-                r['{}_user_first_name'.format(name)] = self.created_by.first_name
-                r['{}_user_last_name'.format(name)] = self.created_by.last_name
-        else:
+
+        created_by = getattr_dne(self, 'created_by')
+
+        if not created_by:
             wj = self.get_workflow_job()
             if wj:
                 for name in ('awx', 'tower'):
                     r['{}_workflow_job_id'.format(name)] = wj.pk
                     r['{}_workflow_job_name'.format(name)] = wj.name
-                if wj.created_by:
-                    for name in ('awx', 'tower'):
-                        r['{}_user_id'.format(name)] = wj.created_by.pk
-                        r['{}_user_name'.format(name)] = wj.created_by.username
-            if self.schedule:
+                created_by = getattr_dne(wj, 'created_by')
+
+            schedule = getattr_dne(self, 'schedule')
+            if schedule:
                 for name in ('awx', 'tower'):
-                    r['{}_schedule_id'.format(name)] = self.schedule.pk
-                    r['{}_schedule_name'.format(name)] = self.schedule.name
+                    r['{}_schedule_id'.format(name)] = schedule.pk
+                    r['{}_schedule_name'.format(name)] = schedule.name
+
+        if created_by:
+            for name in ('awx', 'tower'):
+                r['{}_user_id'.format(name)] = created_by.pk
+                r['{}_user_name'.format(name)] = created_by.username
+                r['{}_user_email'.format(name)] = created_by.email
+                r['{}_user_first_name'.format(name)] = created_by.first_name
+                r['{}_user_last_name'.format(name)] = created_by.last_name
         return r
+
+    def get_celery_queue_name(self):
+        return self.controller_node or self.execution_node or settings.CELERY_DEFAULT_QUEUE
+
+    def is_isolated(self):
+        return bool(self.controller_node)

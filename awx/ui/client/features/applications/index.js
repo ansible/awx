@@ -12,7 +12,15 @@ const listTemplate = require('~features/applications/list-applications.view.html
 const indexTemplate = require('~features/applications/index.view.html');
 const userListTemplate = require('~features/applications/list-applications-users.view.html');
 
-function ApplicationsDetailResolve ($q, $stateParams, Me, Application, Organization) {
+function ApplicationsDetailResolve (
+    $q,
+    $stateParams,
+    Me,
+    Application,
+    Organization,
+    ProcessErrors,
+    strings
+) {
     const id = $stateParams.application_id;
 
     const promises = {
@@ -42,6 +50,13 @@ function ApplicationsDetailResolve ($q, $stateParams, Me, Application, Organizat
 
                     return models;
                 });
+        })
+        .catch(({ data, status, config }) => {
+            ProcessErrors(null, data, status, null, {
+                hdr: strings.get('error.HEADER'),
+                msg: strings.get('error.CALL', { path: `${config.url}`, status })
+            });
+            return $q.reject();
         });
 }
 
@@ -50,7 +65,9 @@ ApplicationsDetailResolve.$inject = [
     '$stateParams',
     'MeModel',
     'ApplicationModel',
-    'OrganizationModel'
+    'OrganizationModel',
+    'ProcessErrors',
+    'ApplicationsStrings'
 ];
 
 function ApplicationsRun ($stateExtender, strings) {

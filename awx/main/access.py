@@ -5,6 +5,8 @@
 import os
 import sys
 import logging
+import six
+from functools import reduce
 
 # Django
 from django.conf import settings
@@ -96,8 +98,6 @@ def check_user_access(user, model_class, action, *args, **kwargs):
     Return True if user can perform action against model_class with the
     provided parameters.
     '''
-    if 'write' not in getattr(user, 'oauth_scopes', ['write']) and action != 'read':
-        return False
     access_class = access_registry[model_class]
     access_instance = access_class(user)
     access_method = getattr(access_instance, 'can_%s' % action)
@@ -216,6 +216,15 @@ class BaseAccess(object):
 
     def can_copy(self, obj):
         return self.can_add({'reference_obj': obj})
+
+    def can_copy_related(self, obj):
+        '''
+        can_copy_related() should only be used to check if the user have access to related
+        many to many credentials in when copying the object. It does not check if the user
+        has permission for any other related objects. Therefore, when checking if the user
+        can copy an object, it should always be used in conjunction with can_add()
+        '''
+        return True
 
     def can_attach(self, obj, sub_obj, relationship, data,
                    skip_sub_obj_read_check=False):
@@ -391,21 +400,24 @@ class BaseAccess(object):
         return user_capabilities
 
     def get_method_capability(self, method, obj, parent_obj):
-        if method in ['change']: # 3 args
-            return self.can_change(obj, {})
-        elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
-            access_method = getattr(self, "can_%s" % method)
-            return access_method(obj)
-        elif method in ['start']:
-            return self.can_start(obj, validate_license=False)
-        elif method in ['attach', 'unattach']: # parent/sub-object call
-            access_method = getattr(self, "can_%s" % method)
-            if type(parent_obj) == Team:
-                relationship = 'parents'
-                parent_obj = parent_obj.member_role
-            else:
-                relationship = 'members'
-            return access_method(obj, parent_obj, relationship, skip_sub_obj_read_check=True, data={})
+        try:
+            if method in ['change']: # 3 args
+                return self.can_change(obj, {})
+            elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
+                access_method = getattr(self, "can_%s" % method)
+                return access_method(obj)
+            elif method in ['start']:
+                return self.can_start(obj, validate_license=False)
+            elif method in ['attach', 'unattach']: # parent/sub-object call
+                access_method = getattr(self, "can_%s" % method)
+                if type(parent_obj) == Team:
+                    relationship = 'parents'
+                    parent_obj = parent_obj.member_role
+                else:
+                    relationship = 'members'
+                return access_method(obj, parent_obj, relationship, skip_sub_obj_read_check=True, data={})
+        except (ParseError, ObjectDoesNotExist):
+            return False
         return False
 
 
@@ -516,29 +528,28 @@ class UserAccess(BaseAccess):
             return False
         return bool(self.user == obj or self.can_admin(obj, data))
 
-    def user_membership_roles(self, u):
-        return Role.objects.filter(
-            content_type=ContentType.objects.get_for_model(Organization),
-            role_field__in=[
-                'admin_role', 'member_role',
-                'execute_role', 'project_admin_role', 'inventory_admin_role',
-                'credential_admin_role', 'workflow_admin_role',
-                'notification_admin_role'
-            ],
-            members=u
-        )
+    @staticmethod
+    def user_organizations(u):
+        '''
+        Returns all organizations that count `u` as a member
+        '''
+        return Organization.accessible_objects(u, 'member_role')
 
     def is_all_org_admin(self, u):
-        return not self.user_membership_roles(u).exclude(
-            ancestors__in=self.user.roles.filter(role_field='admin_role')
+        '''
+        returns True if `u` is member of any organization that is
+        not also an organization that `self.user` admins
+        '''
+        return not self.user_organizations(u).exclude(
+            pk__in=Organization.accessible_pk_qs(self.user, 'admin_role')
         ).exists()
 
     def user_is_orphaned(self, u):
-        return not self.user_membership_roles(u).exists()
+        return not self.user_organizations(u).exists()
 
     @check_superuser
-    def can_admin(self, obj, data, allow_orphans=False):
-        if not settings.MANAGE_ORGANIZATION_AUTH:
+    def can_admin(self, obj, data, allow_orphans=False, check_setting=True):
+        if check_setting and (not settings.MANAGE_ORGANIZATION_AUTH):
             return False
         if obj.is_superuser or obj.is_system_auditor:
             # must be superuser to admin users with system roles
@@ -600,7 +611,8 @@ class OAuth2ApplicationAccess(BaseAccess):
     select_related = ('user',)
 
     def filtered_queryset(self):
-        return self.model.objects.filter(organization__in=self.user.organizations)
+        org_access_qs = Organization.accessible_objects(self.user, 'member_role')
+        return self.model.objects.filter(organization__in=org_access_qs)
 
     def can_change(self, obj, data):
         return self.user.is_superuser or self.check_related('organization', Organization, data, obj=obj, 
@@ -742,12 +754,13 @@ class InventoryAccess(BaseAccess):
         # If no data is specified, just checking for generic add permission?
         if not data:
             return Organization.accessible_objects(self.user, 'inventory_admin_role').exists()
-
-        return self.check_related('organization', Organization, data, role_field='inventory_admin_role')
+        return (self.check_related('organization', Organization, data, role_field='inventory_admin_role') and
+                self.check_related('insights_credential', Credential, data, role_field='use_role'))
 
     @check_superuser
     def can_change(self, obj, data):
-        return self.can_admin(obj, data)
+        return (self.can_admin(obj, data) and
+                self.check_related('insights_credential', Credential, data, obj=obj, role_field='use_role'))
 
     @check_superuser
     def can_admin(self, obj, data):
@@ -1071,7 +1084,7 @@ class CredentialAccess(BaseAccess):
             return True
         if data and data.get('user', None):
             user_obj = get_object_from_data('user', User, data)
-            return check_user_access(self.user, User, 'change', user_obj, None)
+            return bool(self.user == user_obj or UserAccess(self.user).can_admin(user_obj, None, check_setting=False))
         if data and data.get('team', None):
             team_obj = get_object_from_data('team', Team, data)
             return check_user_access(self.user, Team, 'change', team_obj, None)
@@ -1114,6 +1127,9 @@ class TeamAccess(BaseAccess):
     select_related = ('created_by', 'modified_by', 'organization',)
 
     def filtered_queryset(self):
+        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
+                (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
+            return self.model.objects.all()
         return self.model.accessible_objects(self.user, 'read_role')
 
     @check_superuser
@@ -1197,14 +1213,15 @@ class ProjectAccess(BaseAccess):
     @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
-            return Organization.accessible_objects(self.user, 'project_admin_role').exists()
-        return self.check_related('organization', Organization, data, role_field='project_admin_role', mandatory=True)
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
+        return (self.check_related('organization', Organization, data, role_field='project_admin_role', mandatory=True) and
+                self.check_related('credential', Credential, data, role_field='use_role'))
 
     @check_superuser
     def can_change(self, obj, data):
-        if not self.check_related('organization', Organization, data, obj=obj, role_field='project_admin_role'):
-            return False
-        return self.user in obj.admin_role
+        return (self.check_related('organization', Organization, data, obj=obj, role_field='project_admin_role') and
+                self.user in obj.admin_role and
+                self.check_related('credential', Credential, data, obj=obj, role_field='use_role'))
 
     @check_superuser
     def can_start(self, obj, validate_license=True):
@@ -1320,6 +1337,17 @@ class JobTemplateAccess(BaseAccess):
             return self.user in project.use_role
         else:
             return False
+    
+    @check_superuser
+    def can_copy_related(self, obj):
+        '''
+        Check if we have access to all the credentials related to Job Templates.
+        Does not verify the user's permission for any other related fields (projects, inventories, etc).
+        '''
+
+        # obj.credentials.all() is accessible ONLY when object is saved (has valid id)
+        credential_manager = getattr(obj, 'credentials', None) if getattr(obj, 'id', False) else Credentials.objects.none()
+        return reduce(lambda prev, cred: prev and self.user in cred.use_role, credential_manager.all(), True)
 
     def can_start(self, obj, validate_license=True):
         # Check license.
@@ -1488,7 +1516,7 @@ class JobAccess(BaseAccess):
         # Obtain prompts used to start original job
         JobLaunchConfig = obj._meta.get_field('launch_config').related_model
         try:
-            config = obj.launch_config
+            config = JobLaunchConfig.objects.prefetch_related('credentials').get(job=obj)
         except JobLaunchConfig.DoesNotExist:
             config = None
 
@@ -1496,6 +1524,12 @@ class JobAccess(BaseAccess):
         if obj.job_template is not None:
             if config is None:
                 prompts_access = False
+            elif not config.has_user_prompts(obj.job_template):
+                prompts_access = True
+            elif obj.created_by_id != self.user.pk:
+                prompts_access = False
+                if self.save_messages:
+                    self.messages['detail'] = _('Job was launched with prompts provided by another user.')
             else:
                 prompts_access = (
                     JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}) and
@@ -1507,13 +1541,13 @@ class JobAccess(BaseAccess):
             elif not jt_access:
                 return False
 
-        org_access = obj.inventory and self.user in obj.inventory.organization.inventory_admin_role
+        org_access = bool(obj.inventory) and self.user in obj.inventory.organization.inventory_admin_role
         project_access = obj.project is None or self.user in obj.project.admin_role
         credential_access = all([self.user in cred.use_role for cred in obj.credentials.all()])
 
         # job can be relaunched if user could make an equivalent JT
         ret = org_access and credential_access and project_access
-        if not ret and self.save_messages:
+        if not ret and self.save_messages and not self.messages:
             if not obj.job_template:
                 pretext = _('Job has been orphaned from its job template.')
             elif config is None:
@@ -1918,12 +1952,22 @@ class WorkflowJobAccess(BaseAccess):
         if not wfjt:
             return False
 
-        # execute permission to WFJT is mandatory for any relaunch
-        if self.user not in wfjt.execute_role:
-            return False
+        # If job was launched by another user, it could have survey passwords
+        if obj.created_by_id != self.user.pk:
+            # Obtain prompts used to start original job
+            JobLaunchConfig = obj._meta.get_field('launch_config').related_model
+            try:
+                config = JobLaunchConfig.objects.get(job=obj)
+            except JobLaunchConfig.DoesNotExist:
+                config = None
 
-        # user's WFJT access doesn't guarentee permission to launch, introspect nodes
-        return self.can_recreate(obj)
+            if config is None or config.prompts_dict():
+                if self.save_messages:
+                    self.messages['detail'] = _('Job was launched with prompts provided by another user.')
+                return False
+
+        # execute permission to WFJT is mandatory for any relaunch
+        return (self.user in wfjt.execute_role)
 
     def can_recreate(self, obj):
         node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credentials', 'unified_job_template')
@@ -2342,9 +2386,7 @@ class LabelAccess(BaseAccess):
     prefetch_related = ('modified_by', 'created_by', 'organization',)
 
     def filtered_queryset(self):
-        return self.model.objects.filter(
-            organization__in=Organization.accessible_pk_qs(self.user, 'read_role')
-        )
+        return self.model.objects.all()
 
     @check_superuser
     def can_read(self, obj):
@@ -2531,7 +2573,11 @@ class RoleAccess(BaseAccess):
         # administrators of that Organization the ability to edit that user. To prevent
         # unwanted escalations lets ensure that the Organization administartor has the abilty
         # to admin the user being added to the role.
-        if isinstance(obj.content_object, Organization) and obj.role_field in ['member_role', 'admin_role']:
+        if (isinstance(obj.content_object, Organization) and
+                obj.role_field in (Organization.member_role.field.parent_role + ['member_role'])):
+            if not isinstance(sub_obj, User):
+                logger.error(six.text_type('Unexpected attempt to associate {} with organization role.').format(sub_obj))
+                return False
             if not UserAccess(self.user).can_admin(sub_obj, None, allow_orphans=True):
                 return False
 

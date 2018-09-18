@@ -1,23 +1,17 @@
-function InstanceModalController ($scope, $state, models, strings, ProcessErrors, Wait) {
-    const { instance, instanceGroup } = models;
+function InstanceModalController ($scope, $state, Dataset, models, strings, ProcessErrors, Wait) {
+    const { instanceGroup } = models;
     const vm = this || {};
+    let relatedInstanceIds = [];
 
-    vm.setInstances = () => {
-        vm.instances = instance.get('results').map(instance => {
-            instance.isSelected = false;
-            return instance;
-        });
-    };
-
-    vm.setRelatedInstances = () => {
-        vm.instanceGroupName = instanceGroup.get('name');
+    function setRelatedInstances () {
         vm.relatedInstances = instanceGroup.get('related.instances.results');
-        vm.relatedInstanceIds = vm.relatedInstances.map(instance => instance.id);
-        vm.instances = instance.get('results').map(instance => {
-            instance.isSelected = vm.relatedInstanceIds.includes(instance.id);
+        vm.selectedRows = _.cloneDeep(vm.relatedInstances);
+        relatedInstanceIds = vm.relatedInstances.map(instance => instance.id);
+        vm.instances = vm.instances.map(instance => {
+            instance.isSelected = relatedInstanceIds.includes(instance.id);
             return instance;
         });
-    };
+    }
 
     init();
 
@@ -25,25 +19,38 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
         vm.strings = strings;
         vm.panelTitle = strings.get('instance.PANEL_TITLE');
         vm.instanceGroupId = instanceGroup.get('id');
+        vm.instanceGroupName = instanceGroup.get('name');
 
-        if (vm.instanceGroupId === undefined) {
-            vm.setInstances();
-        } else {
-            vm.setRelatedInstances();
-        }
+        vm.querySet = $state.params.instance_search;
+
+        vm.list = {
+            name: 'instances',
+            iterator: 'instance',
+            basePath: `/api/v2/instances/`
+        };
+
+        vm.instances = Dataset.data.results;
+        vm.instance_dataset = Dataset.data;
+
+        setRelatedInstances();
+
+        $scope.$watch('vm.instances', function() {
+            angular.forEach(vm.instances, function(instance) {
+                instance.isSelected = _.filter(vm.selectedRows, 'id', instance.id).length > 0;
+            });
+        });
     }
-
-    $scope.$watch('vm.instances', function() {
-        vm.selectedRows = _.filter(vm.instances, 'isSelected');
-        vm.deselectedRows = _.filter(vm.instances, 'isSelected', false);
-     }, true);
 
     vm.submit = () => {
         Wait('start');
-        const associate = vm.selectedRows
-            .map(instance => ({id: instance.id}));
-        const disassociate = vm.deselectedRows
-            .map(instance => ({id: instance.id, disassociate: true}));
+        const selectedRowIds = vm.selectedRows.map(instance => instance.id);
+
+        const associate = selectedRowIds.filter(instanceId => {
+            return !relatedInstanceIds.includes(instanceId);
+        }).map(id => ({id}));
+        const disassociate = relatedInstanceIds.filter(instanceId => {
+            return !selectedRowIds.includes(instanceId);
+        }).map(id => ({id, disassociate: true}));
 
         const all = associate.concat(disassociate);
         const defers = all.map((data) => {
@@ -70,11 +77,34 @@ function InstanceModalController ($scope, $state, models, strings, ProcessErrors
     vm.onSaveSuccess = () => {
         $state.go('instanceGroups.instances', {}, {reload: 'instanceGroups.instances'});
     };
+
+    vm.dismiss = () => {
+        $state.go('instanceGroups.instances');
+    };
+
+    vm.toggleRow = (row) => {
+        if (row.isSelected) {
+            let matchingIndex;
+            angular.forEach(vm.selectedRows, function(value, index) {
+                if(row.id === vm.selectedRows[index].id) {
+                    matchingIndex = index;
+                }
+            });
+
+            vm.selectedRows.splice(matchingIndex, 1);
+            row.isSelected = false;
+        } else {
+            row.isSelected = true;
+            vm.selectedRows.push(row);
+        }
+
+    };
 }
 
 InstanceModalController.$inject = [
     '$scope',
     '$state',
+    'Dataset',
     'resolvedModels',
     'InstanceGroupsStrings',
     'ProcessErrors',

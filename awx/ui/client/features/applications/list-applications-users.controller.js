@@ -8,7 +8,9 @@ function ListApplicationsUsersController (
     $scope,
     Dataset,
     resolvedModels,
-    strings
+    strings,
+    $stateParams,
+    GetBasePath
 ) {
     const vm = this || {};
     // const application = resolvedModels;
@@ -21,9 +23,15 @@ function ListApplicationsUsersController (
 
     $scope.list = { iterator, name, basePath: 'applications' };
     $scope.collection = { iterator };
+    $scope.tokenBasePath = `${GetBasePath('applications')}${$stateParams.application_id}/tokens`;
     $scope[key] = Dataset.data;
     vm.usersCount = Dataset.data.count;
     $scope[name] = Dataset.data.results;
+    $scope.$on('updateDataset', (e, dataset) => {
+        $scope[key] = dataset;
+        $scope[name] = dataset.results;
+        vm.usersCount = dataset.count;
+    });
 
     vm.getLastUsed = user => {
         const lastUsed = _.get(user, 'last_used');
@@ -49,7 +57,9 @@ ListApplicationsUsersController.$inject = [
     '$scope',
     'Dataset',
     'resolvedModels',
-    'ApplicationsStrings'
+    'ApplicationsStrings',
+    '$stateParams',
+    'GetBasePath'
 ];
 
 export default ListApplicationsUsersController;

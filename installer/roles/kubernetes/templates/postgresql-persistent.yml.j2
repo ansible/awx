@@ -35,11 +35,13 @@ objects:
     annotations:
       template.openshift.io/expose-database_name: '{.data[''database-name'']}'
       template.openshift.io/expose-password: '{.data[''database-password'']}'
+      template.openshift.io/expose-admin_password: '{.data[''database-admin-password'']}'
       template.openshift.io/expose-username: '{.data[''database-user'']}'
     name: ${DATABASE_SERVICE_NAME}
   stringData:
     database-name: ${POSTGRESQL_DATABASE}
     database-password: ${POSTGRESQL_PASSWORD}
+    database-admin-password: ${POSTGRESQL_PASSWORD}
     database-user: ${POSTGRESQL_USER}
 - apiVersion: v1
   kind: Service
@@ -90,6 +92,11 @@ objects:
               secretKeyRef:
                 key: database-password
                 name: ${DATABASE_SERVICE_NAME}
+          - name: POSTGRESQL_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database-admin-password
+                name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_DATABASE
             valueFrom:
               secretKeyRef:
@@ -97,7 +104,7 @@ objects:
                 name: ${DATABASE_SERVICE_NAME}
           - name: POSTGRESQL_MAX_CONNECTIONS
             value: ${POSTGRESQL_MAX_CONNECTIONS}
-          image: ' '
+          image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
           imagePullPolicy: IfNotPresent
           livenessProbe:
             initialDelaySeconds: 30
@@ -114,7 +121,7 @@ objects:
               - /bin/sh
               - -i
               - -c
-              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE
+              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d template1
                 -c 'SELECT 1'
             initialDelaySeconds: 5
             timeoutSeconds: 1
@@ -139,16 +146,6 @@ objects:
             claimName: {{ openshift_pg_pvc_name }}
 {% endif %}
     triggers:
-    - imageChangeParams:
-        automatic: true
-        containerNames:
-        - postgresql
-        from:
-          kind: ImageStreamTag
-          name: postgresql:${POSTGRESQL_VERSION}
-          namespace: ${NAMESPACE}
-        lastTriggeredImage: ""
-      type: ImageChange
     - type: ConfigChange
   status: {}
 parameters:
@@ -179,13 +176,14 @@ parameters:
   generate: expression
   name: POSTGRESQL_PASSWORD
   required: true
+- description: Password for the PostgreSQL connection admin user.
+  displayName: PostgreSQL Connection Admin Password
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+  name: POSTGRESQL_ADMIN_PASSWORD
+  required: true
 - description: Name of the PostgreSQL database accessed.
   displayName: PostgreSQL Database Name
   name: POSTGRESQL_DATABASE
   required: true
   value: sampledb
-- description: Version of PostgreSQL image to be used (9.2, 9.4, 9.5 or latest).
-  displayName: Version of PostgreSQL Image
-  name: POSTGRESQL_VERSION
-  required: true
-  value: "9.5"

@@ -14,9 +14,9 @@ const user_type_options = [
 
 export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
     'ProcessErrors', 'GetBasePath', 'Wait', 'CreateSelect2',
-    '$state', 'i18n', 'resolvedModels',
+    '$state', 'i18n', 'resolvedModels', 'resourceData',
     function($scope, $rootScope, $stateParams, UserForm, Rest, ProcessErrors,
-    GetBasePath, Wait, CreateSelect2, $state, i18n, models) {
+    GetBasePath, Wait, CreateSelect2, $state, i18n, models, resourceData) {
 
         for (var i = 0; i < user_type_options.length; i++) {
             user_type_options[i].label = i18n._(user_type_options[i].label);
@@ -26,11 +26,18 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
         var form = UserForm,
             master = {},
             id = $stateParams.user_id,
-            defaultUrl = GetBasePath('users') + id;
+            defaultUrl = GetBasePath('users') + id,
+            user_obj = resourceData.data;
+
+        $scope.breadcrumb.user_name = user_obj.username;
 
         init();
 
         function init() {
+            _.forEach(form.fields, (value, key) => {
+                $scope[key] = user_obj[key];
+            });
+
             $scope.canEdit = me.get('summary_fields.user_capabilities.edit');
             $scope.isOrgAdmin = me.get('related.admin_of_organizations.count') > 0;
             $scope.isCurrentlyLoggedInUser = (parseInt(id) === $rootScope.current_user.id);
@@ -40,49 +47,36 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
             $scope.user_type = user_type_options[0];
             $scope.$watch('user_type', user_type_sync($scope));
             $scope.$watch('is_superuser', hidePermissionsTabSmartSearchAndPaginationIfSuperUser($scope));
-            Rest.setUrl(defaultUrl);
-            Wait('start');
-            Rest.get(defaultUrl).then(({data}) => {
-                    $scope.user_id = id;
-                    $scope.ldap_user = (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') ? true : false;
-                    $scope.not_ldap_user = !$scope.ldap_user;
-                    master.ldap_user = $scope.ldap_user;
-                    $scope.socialAuthUser = (data.auth.length > 0) ? true : false;
-                    $scope.external_account = data.external_account;
+            $scope.user_id = id;
+            $scope.ldap_user = (user_obj.ldap_dn !== null && user_obj.ldap_dn !== undefined && user_obj.ldap_dn !== '') ? true : false;
+            $scope.not_ldap_user = !$scope.ldap_user;
+            master.ldap_user = $scope.ldap_user;
+            $scope.socialAuthUser = (user_obj.auth.length > 0) ? true : false;
+            $scope.external_account = user_obj.external_account;
 
-                    $scope.user_type = $scope.user_type_options[0];
-                    $scope.is_system_auditor = false;
-                    $scope.is_superuser = false;
-                    if (data.is_system_auditor) {
-                        $scope.user_type = $scope.user_type_options[1];
-                        $scope.is_system_auditor = true;
-                    }
-                    if (data.is_superuser) {
-                        $scope.user_type = $scope.user_type_options[2];
-                        $scope.is_superuser = true;
-                    }
+            $scope.user_type = $scope.user_type_options[0];
+            $scope.is_system_auditor = false;
+            $scope.is_superuser = false;
+            if (user_obj.is_system_auditor) {
+                $scope.user_type = $scope.user_type_options[1];
+                $scope.is_system_auditor = true;
+            }
+            if (user_obj.is_superuser) {
+                $scope.user_type = $scope.user_type_options[2];
+                $scope.is_superuser = true;
+            }
 
-                    $scope.user_obj = data;
-                    $scope.name = data.username;
+            $scope.user_obj = user_obj;
+            $scope.name = user_obj.username;
 
-                    CreateSelect2({
-                        element: '#user_user_type',
-                        multiple: false
-                    });
+            CreateSelect2({
+                element: '#user_user_type',
+                multiple: false
+            });
 
-                    $scope.$watch('user_obj.summary_fields.user_capabilities.edit', function(val) {
-                        $scope.canAdd = (val === false) ? false : true;
-                    });
-
-                    setScopeFields(data);
-                    Wait('stop');
-                })
-                .catch(({data, status}) => {
-                    ProcessErrors($scope, data, status, null, {
-                        hdr: i18n._('Error!'),
-                        msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
-                    });
-                });
+            $scope.$watch('user_obj.summary_fields.user_capabilities.edit', function(val) {
+                $scope.canAdd = (val === false) ? false : true;
+            });
         }
 
         function user_type_sync($scope) {
@@ -112,19 +106,6 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
                     scope.hideSmartSearch = false;
                 }
             };
-        }
-
-
-        function setScopeFields(data) {
-            _(data)
-                .pick(function(value, key) {
-                    return form.fields.hasOwnProperty(key) === true;
-                })
-                .forEach(function(value, key) {
-                    $scope[key] = value;
-                })
-                .value();
-            return;
         }
 
         $scope.redirectToResource = function(resource) {
@@ -159,7 +140,11 @@ export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'Rest',
         var processNewData = function(fields) {
             var data = {};
             _.forEach(fields, function(value, key) {
-                if ($scope[key] !== '' && $scope[key] !== null && $scope[key] !== undefined) {
+                if (value.type === 'sensitive') {
+                    if ($scope[key] !== '' && $scope[key] !== null && $scope[key] !== undefined) {
+                        data[key] = $scope[key];
+                    }
+                } else {
                     data[key] = $scope[key];
                 }
             });

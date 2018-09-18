@@ -2,14 +2,12 @@
     <div class="form-group at-u-flat">
         <at-input-label></at-input-label>
 
-        <div class="input-group">
-            <span class="input-group-btn">
-                <button class="btn at-ButtonHollow--default at-Input-button"
-                        ng-disabled="state._disabled || form.disabled"
-                        ng-click="vm.lookup()">
-                    <i class="fa fa-search"></i>
-                </button>
-            </span>
+        <div class="at-InputLookup">
+            <button class="at-InputLookup-button"
+                    ng-disabled="state._disabled || form.disabled"
+                    ng-click="vm.lookup()">
+                <i class="fa fa-search"></i>
+            </button>
             <input type="text"
                 class="form-control at-Input"
                 ng-class="{ 'at-Input--rejected': state._rejected }"
@@ -20,23 +18,16 @@
                 ng-hide="state._lookupTags"
                 ng-disabled="state._disabled || form.disabled">
 
-            <span class="form-control Form-textInput Form-textInput--variableHeight LabelList-lookupTags"
+            <span class="at-InputLookup-tagContainer LabelList-lookupTags"
                 ng-if="state._lookupTags"
                 ng-disabled="state._disabled || form.disabled">
                 <div class="LabelList-tagContainer" ng-repeat="tag in state._value track by $index">
-                    <div class="LabelList-tag LabelList-tag--deletable">
-                        <span ng-if="tag.hostname" class="LabelList-name">{{ tag.hostname }}</span>
-                        <span ng-if="!tag.hostname" class="LabelList-name">{{ tag }}</span>
-                    </div>
-                    <div class="LabelList-deleteContainer" ng-click="vm.removeTag(tag)">
-                        <i class="fa fa-times LabelList-tagDelete"></i>
-                    </div>
+                    <at-tag ng-if="!tag.hostname" tag="tag" remove-tag="vm.removeTag(tag)"></at-tag>
+                    <at-tag ng-if="tag.hostname" tag="tag.hostname" remove-tag="vm.removeTag(tag)"></at-tag>
                 </div>
             </span>
         </div>
 
         <at-input-message></at-input-message>
     </div>
-
-    <div ui-view="{{ state._resource }}"></div>
-    </div>
+</div>

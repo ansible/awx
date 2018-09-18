@@ -5,12 +5,19 @@ function InstanceGroupsStrings (BaseString) {
     const ns = this.instanceGroups;
 
     ns.state = {
+        INSTANCE_GROUPS_BREADCRUMB_LABEL: t.s('INSTANCE GROUPS'),
+        INSTANCES_BREADCRUMB_LABEL: t.s('INSTANCES'),
         ADD_BREADCRUMB_LABEL: t.s('CREATE INSTANCE GROUP'),
         EDIT_BREADCRUMB_LABEL: t.s('EDIT INSTANCE GROUP')
     };
 
     ns.list = {
-        PANEL_TITLE: t.s('INSTANCE GROUPS')
+        MANUAL: t.s('MANUAL'),
+        PANEL_TITLE: t.s('INSTANCE GROUPS'),
+        ROW_ITEM_LABEL_INSTANCES: t.s('Instances'),
+        ROW_ITEM_LABEL_RUNNING_JOBS: t.s('Running Jobs'),
+        ROW_ITEM_LABEL_TOTAL_JOBS: t.s('Total Jobs'),
+        ROW_ITEM_LABEL_USED_CAPACITY: t.s('Used Capacity')
     };
 
     ns.tab = {
@@ -21,7 +28,8 @@ function InstanceGroupsStrings (BaseString) {
 
     ns.tooltips = {
         ADD_INSTANCE_GROUP: t.s('Create a new Instance Group'),
-        ASSOCIATE_INSTANCES: t.s('Associate an existing Instance')
+        ASSOCIATE_INSTANCES: t.s('Associate an existing Instance'),
+        DOCS_HELP_TEXT: t.s('Instance Groups Help')
     };
 
     ns.instance = {
@@ -30,11 +38,19 @@ function InstanceGroupsStrings (BaseString) {
 
     ns.capacityBar = {
         IS_OFFLINE: t.s('Unavailable to run jobs.'),
-        IS_OFFLINE_LABEL: t.s('Unavailable')
+        IS_OFFLINE_LABEL: t.s('Unavailable'),
+        USED_CAPACITY: t.s('Used Capacity')
+    };
+
+    ns.capacityAdjuster = {
+        CPU: t.s('CPU'),
+        RAM: t.s('RAM'),
+        FORKS: t.s('Forks')
     };
 
     ns.jobs = {
-        PANEL_TITLE: t.s('Jobs')
+        PANEL_TITLE: t.s('Jobs'),
+        RUNNING_JOBS: t.s('Running Jobs')
     };
 
     ns.error = {

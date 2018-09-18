@@ -9,7 +9,6 @@ const jobTemplatesSchedulesListRoute = {
     data: {
         activityStream: true,
         activityStreamTarget: 'job_template',
-        activityStreamId: 'id'
     },
     ncyBreadcrumb: {
         label: N_('SCHEDULES')
@@ -97,8 +96,7 @@ const workflowSchedulesRoute = {
     route: '/schedules',
     data: {
         activityStream: true,
-        activityStreamTarget: 'job_template',
-        activityStreamId: 'id'
+        activityStreamTarget: 'workflow_job_template',
     },
     ncyBreadcrumb: {
         label: N_('SCHEDULES')
@@ -186,7 +184,6 @@ const projectsSchedulesListRoute = {
     data: {
         activityStream: true,
         activityStreamTarget: 'project',
-        activityStreamId: 'id'
     },
     ncyBreadcrumb: {
         label: N_('SCHEDULES')
@@ -269,7 +266,7 @@ const projectsSchedulesEditRoute = {
 
 const jobsSchedulesRoute = {
     searchPrefix: 'schedule',
-    name: 'jobs.schedules',
+    name: 'schedules',
     route: '/schedules',
     params: {
         schedule_search: {
@@ -284,7 +281,6 @@ const jobsSchedulesRoute = {
         activityStream: false,
     },
     ncyBreadcrumb: {
-        parent: 'jobs',
         label: N_('SCHEDULES')
     },
     resolve: {
@@ -312,13 +308,16 @@ const jobsSchedulesRoute = {
             }]
     },
     views: {
-        'schedulesList@jobs': {
+        '@': {
             templateProvider: function(ScheduleList, generateList){
+                
                 let html = generateList.build({
                     list: ScheduleList,
-                    mode: 'edit',
-                    title: false
+                    mode: 'edit'
                 });
+                html = generateList.wrapPanel(html);
+                let formPlaceholder = generateList.insertFormView();
+                html = formPlaceholder + html;
                 return html;
             },
             controller: 'schedulerListController'
@@ -339,16 +338,32 @@ const parentResolve = {
 };
 
 const jobsSchedulesEditRoute = {
-    name: 'jobs.schedules.edit',
+    name: 'schedules.edit',
     route: '/:schedule_id',
     ncyBreadcrumb: {
-        parent: 'jobs.schedules',
+        parent: 'schedules',
         label: "{{breadcrumb.schedule_name}}"
     },
     views: {
-        'scheduler@jobs': {
-            controller: 'schedulerEditController',
-            templateUrl: templateUrl("scheduler/schedulerForm"),
+        'form':{
+            templateProvider: function(ParentObject, $http){
+                let path;
+                if(ParentObject.type === 'system_job_template'){
+                    path = templateUrl('management-jobs/scheduler/schedulerForm');
+                }
+                else {
+                    path = templateUrl('scheduler/schedulerForm');
+                }
+                return $http.get(path).then(response => response.data);
+            },
+            controllerProvider: function(ParentObject){
+                if (ParentObject.type === 'system_job_template') {
+                    return 'managementJobEditController';
+                }
+                else {
+                    return 'schedulerEditController';
+                }
+            }
         }
     },
     resolve: _.merge(editScheduleResolve(), parentResolve)

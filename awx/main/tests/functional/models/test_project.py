@@ -2,6 +2,7 @@ import pytest
 import mock
 
 from awx.main.models import Project
+from awx.main.models.organization import Organization
 
 
 @pytest.mark.django_db
@@ -31,3 +32,10 @@ def test_sensitive_change_triggers_update(project):
         project.scm_url = 'https://foo2.invalid'
         project.save()
     mock_update.assert_called_once_with()
+
+
+@pytest.mark.django_db
+def test_foreign_key_change_changes_modified_by(project, organization):
+    assert project._get_fields_snapshot()['organization_id'] == organization.id
+    project.organization = Organization(name='foo', pk=41)
+    assert project._get_fields_snapshot()['organization_id'] == 41

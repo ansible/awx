@@ -12,7 +12,7 @@ export default {
         activityStreamTarget: 'inventory',
         socket: {
             "groups": {
-                "inventories": ["status_changed"]
+                inventories: ["status_changed"]
             }
         }
     },

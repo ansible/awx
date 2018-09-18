@@ -15,7 +15,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
     var notifications_object = {
         name: 'notifications',
         index: false,
-        basePath: "notifications",
+        basePath: "notification_templates",
         include: "NotificationsList",
         title: i18n._('Notifications'),
         iterator: 'notification',
@@ -300,6 +300,30 @@ return {
             awPopOver: i18n._(`Override variables found in foreman.ini and used by the inventory update script. For an example variable configuration
                 <a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/foreman.ini\" target=\"_blank\">
                 view foreman.ini in the Ansible github repo.</a> Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two. Refer to the Ansible Tower documentation for example syntax.`),
+            dataContainer: 'body',
+            subForm: 'sourceSubForm'
+        },
+        azure_rm_variables: {
+            id: 'azure_rm_variables',
+            label: i18n._('Source Variables'), //"{{vars_label}}" ,
+            ngShow: "source && source.value == 'azure_rm'",
+            type: 'textarea',
+            class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            rows: 6,
+            'default': '---',
+            parseTypeName: 'envParseType',
+            dataTitle: i18n._("Source Variables"),
+            dataPlacement: 'right',
+            awPopOver: "<p>" + i18n._("Override variables found in azure_rm.ini and used by the inventory update script. For a detailed description of these variables ") +
+                "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/azure_rm.ini\" target=\"_blank\">" +
+                i18n._("view azure_rm.ini in the Ansible github repo.") + "</a></p>" +
+                "<p>" + i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
+                i18n._("JSON:") + "<br />\n" +
+                "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                i18n._("YAML:") + "<br />\n" +
+                "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                "<p>" + i18n._("View JSON examples at ") + '<a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                "<p>" + i18n._("View YAML examples at ") + '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
             dataContainer: 'body',
             subForm: 'sourceSubForm'
         },

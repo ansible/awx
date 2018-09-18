@@ -64,15 +64,22 @@ class CallbackBrokerWorker(ConsumerMixin):
             return _handler
 
         if use_workers:
-            django_connection.close()
-            django_cache.close()
             for idx in range(settings.JOB_EVENT_WORKERS):
                 queue_actual = MPQueue(settings.JOB_EVENT_MAX_QUEUE_SIZE)
                 w = Process(target=self.callback_worker, args=(queue_actual, idx,))
-                w.start()
                 if settings.DEBUG:
-                    logger.info('Started worker %s' % str(idx))
+                    logger.info('Starting worker %s' % str(idx))
                 self.worker_queues.append([0, queue_actual, w])
+
+            # It's important to close these _right before_ we fork; we
+            # don't want the forked processes to inherit the open sockets
+            # for the DB and memcached connections (that way lies race
+            # conditions)
+            django_connection.close()
+            django_cache.close()
+            for _, _, w in self.worker_queues:
+                w.start()
+
         elif settings.DEBUG:
             logger.warn('Started callback receiver (no workers)')
 
@@ -162,6 +169,7 @@ class CallbackBrokerWorker(ConsumerMixin):
 
                 if body.get('event') == 'EOF':
                     try:
+                        final_counter = body.get('final_counter', 0)
                         logger.info('Event processing is finished for Job {}, sending notifications'.format(job_identifier))
                         # EOF events are sent when stdout for the running task is
                         # closed. don't actually persist them to the database; we
@@ -169,7 +177,7 @@ class CallbackBrokerWorker(ConsumerMixin):
                         # approximation for when a job is "done"
                         emit_channel_notification(
                             'jobs-summary',
-                            dict(group_name='jobs', unified_job_id=job_identifier)
+                            dict(group_name='jobs', unified_job_id=job_identifier, final_counter=final_counter)
                         )
                         # Additionally, when we've processed all events, we should
                         # have all the data we need to send out success/failure

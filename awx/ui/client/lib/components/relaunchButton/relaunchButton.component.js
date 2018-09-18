@@ -23,6 +23,13 @@ function atRelaunchCtrl (
     const jobObj = new Job();
     const jobTemplate = new JobTemplate();
 
+    const transitionOptions = { reload: true };
+
+    if ($state.includes('output')) {
+        transitionOptions.inherit = false;
+        transitionOptions.location = 'replace';
+    }
+
     const updateTooltip = () => {
         if (vm.job.type === 'job' && vm.job.status === 'failed') {
             vm.tooltip = strings.get('relaunch.HOSTS');
@@ -74,7 +81,7 @@ function atRelaunchCtrl (
                             },
                             launchOptions: launchOptions.data,
                             job: vm.job.id,
-                            relaunchHostType: option ? (option.name).toLowerCase() : null,
+                            relaunchHostType: option ? (option.value) : null,
                             prompts: {
                                 credentials: {
                                     value: populatedJob.summary_fields.credentials ?
@@ -118,9 +125,9 @@ function atRelaunchCtrl (
                     id: vm.job.id,
                 };
 
-                if (_.has(option, 'name')) {
+                if (_.has(option, 'value')) {
                     launchParams.relaunchData = {
-                        hosts: (option.name).toLowerCase()
+                        hosts: option.value
                     };
                 }
 
@@ -128,7 +135,7 @@ function atRelaunchCtrl (
                     .then((launchRes) => {
                         if (!$state.is('jobs')) {
                             const relaunchType = launchRes.data.type === 'job' ? 'playbook' : launchRes.data.type;
-                            $state.go('output', { id: launchRes.data.id, type: relaunchType }, { reload: true });
+                            $state.go('output', { id: launchRes.data.id, type: relaunchType }, transitionOptions);
                         }
                     }).catch(({ data, status, config }) => {
                         ProcessErrors($scope, data, status, null, {
@@ -148,11 +155,13 @@ function atRelaunchCtrl (
         vm.dropdownOptions = [
             {
                 name: strings.get('relaunch.ALL'),
-                icon: 'icon-host-all'
+                icon: 'icon-host-all',
+                value: 'all'
             },
             {
                 name: strings.get('relaunch.FAILED'),
-                icon: 'icon-host-failed'
+                icon: 'icon-host-failed',
+                value: 'failed'
             }
         ];
 
@@ -173,7 +182,7 @@ function atRelaunchCtrl (
                         inventorySource.postUpdate(vm.job.inventory_source)
                             .then((postUpdateRes) => {
                                 if (!$state.is('jobs')) {
-                                    $state.go('output', { id: postUpdateRes.data.id, type: 'inventory' }, { reload: true });
+                                    $state.go('output', { id: postUpdateRes.data.id, type: 'inventory' }, transitionOptions);
                                 }
                             }).catch(({ data, status, config }) => {
                                 ProcessErrors($scope, data, status, null, {
@@ -197,7 +206,7 @@ function atRelaunchCtrl (
                         project.postUpdate(vm.job.project)
                             .then((postUpdateRes) => {
                                 if (!$state.is('jobs')) {
-                                    $state.go('output', { id: postUpdateRes.data.id, type: 'project' }, { reload: true });
+                                    $state.go('output', { id: postUpdateRes.data.id, type: 'project' }, transitionOptions);
                                 }
                             }).catch(({ data, status, config }) => {
                                 ProcessErrors($scope, data, status, null, {
@@ -219,7 +228,7 @@ function atRelaunchCtrl (
                 id: vm.job.id
             }).then((launchRes) => {
                 if (!$state.is('jobs')) {
-                    $state.go('workflowResults', { id: launchRes.data.id }, { reload: true });
+                    $state.go('workflowResults', { id: launchRes.data.id }, transitionOptions);
                 }
             }).catch(({ data, status, config }) => {
                 ProcessErrors($scope, data, status, null, {
@@ -243,7 +252,7 @@ function atRelaunchCtrl (
                         id: vm.job.id
                     }).then((launchRes) => {
                         if (!$state.is('jobs')) {
-                            $state.go('output', { id: launchRes.data.id, type: 'command' }, { reload: true });
+                            $state.go('output', { id: launchRes.data.id, type: 'command' }, transitionOptions);
                         }
                     }).catch(({ data, status, config }) => {
                         ProcessErrors($scope, data, status, null, {
@@ -268,7 +277,7 @@ function atRelaunchCtrl (
             relaunchData: PromptService.bundlePromptDataForRelaunch(vm.promptData)
         }).then((launchRes) => {
             if (!$state.is('jobs')) {
-                $state.go('output', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
+                $state.go('output', { id: launchRes.data.job, type: 'playbook' }, transitionOptions);
             }
         }).catch(({ data, status }) => {
             ProcessErrors($scope, data, status, null, {

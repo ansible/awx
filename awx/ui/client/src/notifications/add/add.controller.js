@@ -22,7 +22,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
         init();
 
         function init() {
-            Rest.setUrl(GetBasePath('projects'));
+            Rest.setUrl(GetBasePath('notification_templates'));
             Rest.options()
                 .then(({data}) => {
                     if (!data.actions.POST) {
@@ -75,7 +75,14 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 multiple: false
             });
 
-            $scope.hipchatColors = [i18n._('Gray'), i18n._('Green'), i18n._('Purple'), i18n._('Red'), i18n._('Yellow'), i18n._('Random')];
+            $scope.hipchatColors = [
+                {'id': 'gray', 'name': i18n._('Gray')},
+                {'id': 'green', 'name': i18n._('Green')},
+                {'id': 'purple', 'name': i18n._('Purple')},
+                {'id': 'red', 'name': i18n._('Red')},
+                {'id': 'yellow', 'name': i18n._('Yellow')},
+                {'id': 'random', 'name': i18n._('Random')}
+            ];
             CreateSelect2({
                 element: '#notification_template_color',
                 multiple: false
@@ -198,7 +205,7 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 return $scope[i];
             }
 
-            params.notification_configuration = _.object(Object.keys(form.fields)
+            params.notification_configuration = _.fromPairs(Object.keys(form.fields)
                 .filter(i => (form.fields[i].ngShow && form.fields[i].ngShow.indexOf(v) > -1))
                 .map(i => [i, processValue($scope[i], i, form.fields[i])]));
 

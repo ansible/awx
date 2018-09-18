@@ -1,20 +1,31 @@
 <div id="instance-modal" class="modal-dialog">
-    <at-panel on-dismiss="instanceGroups.instances">
-        <at-panel-heading>
-            {{ vm.panelTitle }} | {{ vm.instanceGroupName}}
-        </at-panel-heading>
+    <div class="modal-content">
+        <div class="row at-Panel-headingRow">
+            <div class="col-xs-10">
+                <h3 class="at-Panel-headingTitle">{{ vm.panelTitle }} | {{ vm.instanceGroupName}}</h3>
+            </div>
+            <div class="col-xs-2">
+                <div class="at-Panel-dismiss">
+                    <i class="fa fa-times-circle fa-lg" ng-click="vm.dismiss()"></i>
+                </div>
+            </div>
+        </div>
+
         <multi-select-preview selected-rows='vm.selectedRows' available-rows='vm.instances'></multi-select-preview>
         <at-panel-body>
             <div class="at-List-toolbar">
                 <smart-search
                     class="at-List-search"
                     django-model="instances"
-                    base-path="instances"
+                    base-path="{{vm.list.basePath}}"
                     iterator="instance"
-                    list="list"
-                    dataset="vm.instances"
-                    collection="collection"
-                    search-tags="searchTags">
+                    list="vm.list"
+                    collection="vm.instances"
+                    dataset="vm.instance_dataset"
+                    search-tags="vm.searchTags"
+                    default-params="vm.querySet"
+                    query-set="vm.querySet"
+                    search-bar-full-width="true">
                 </smart-search>
             </div>
             <at-list results='vm.instances'>
@@ -24,10 +35,10 @@
                     <input type="checkbox"
                         class="at-Row-checkbox"
                         ng-class="{ 'at-Input--rejected': state.rejected }"
-                        ng-model="instance.isSelected"
                         ng-checked="instance.isSelected"
                         ng-attr-tabindex="{{ tab || undefined }}"
-                        ng-disabled="state._disabled" />
+                        ng-disabled="state._disabled"
+                        ng-click="vm.toggleRow(instance)" />
 
                     <div class="at-Row-items" style="flex: 1">
                         <at-row-item
@@ -36,8 +47,14 @@
                         </at-row-item>
                     </div>
                 </at-row>
-
             </at-list>
+            <paginate
+                collection="vm.instances"
+                dataset="vm.instance_dataset"
+                iterator="instance"
+                base-path="{{vm.list.basePath}}"
+                query-set="vm.querySet">
+            </paginate>
             <div class="at-ActionGroup">
                 <div class="pull-right">
                     <button class="btn at-ButtonHollow--default"
@@ -51,5 +68,5 @@
                 </div>
             </div>
         </at-panel-body>
-    </at-panel>
+    </div>
 </div>

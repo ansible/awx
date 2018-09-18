@@ -27,7 +27,13 @@ import os
 import stat
 import threading
 import uuid
-import memcache
+
+try:
+    import memcache
+except ImportError:
+    raise ImportError('python-memcached is missing; {}bin/pip install python-memcached'.format(
+        os.environ['VIRTUAL_ENV']
+    ))
 
 from six.moves import xrange
 

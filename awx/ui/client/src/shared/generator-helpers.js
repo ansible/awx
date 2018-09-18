@@ -139,7 +139,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 icon = 'fa-refresh';
                 break;
             case 'scm_update':
-                icon = 'fa-cloud-download';
+                icon = 'fa-refresh';
                 break;
             case 'run':
             case 'rerun':

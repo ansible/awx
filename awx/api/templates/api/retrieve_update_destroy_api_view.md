@@ -1,7 +1,3 @@
-{% if has_named_url %}
-### Note: starting from api v2, this resource object can be accessed via its named URL.
-{% endif %}
-
 {% ifmeth GET %}
 # Retrieve {{ model_verbose_name|title|anora }}:
 

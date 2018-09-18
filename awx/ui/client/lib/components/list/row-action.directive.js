@@ -7,7 +7,8 @@ function atRowAction () {
         transclude: true,
         templateUrl,
         scope: {
-            icon: '@'
+            icon: '@',
+            tooltip: '@'
         }
     };
 }

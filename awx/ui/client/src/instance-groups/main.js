@@ -7,7 +7,6 @@ import instanceGroupsModal from '../shared/instance-groups-multiselect/instance-
 import AddEditTemplate from './add-edit/add-edit-instance-groups.view.html';
 import AddInstanceGroupController from './add-edit/add-instance-group.controller';
 import EditInstanceGroupController from './add-edit/edit-instance-group.controller';
-import InstanceListPolicy from './add-edit/instance-list-policy.directive.js';
 
 import InstanceGroupsTemplate from './list/instance-groups-list.partial.html';
 import InstanceGroupsListController from './list/instance-groups-list.controller';
@@ -28,7 +27,7 @@ import instanceJobsRoute from '~features/jobs/routes/instanceJobs.route.js';
 
 const MODULE_NAME = 'instanceGroups';
 
-function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance) {
+function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance, ProcessErrors, strings) {
     const instanceGroupId = $stateParams.instance_group_id;
     const instanceId = $stateParams.instance_id;
     let promises = {};
@@ -47,27 +46,34 @@ function InstanceGroupsResolve ($q, $stateParams, InstanceGroup, Instance) {
     promises.instanceGroup = new InstanceGroup(['get', 'options'], [instanceGroupId, instanceGroupId])
             .then((instanceGroup) =>  instanceGroup.extend('get', 'jobs', {params: {page_size: "10", order_by: "-finished"}}))
             .then((instanceGroup) =>  instanceGroup.extend('get', 'instances'));
-    promises.instance = new Instance('get');
-
 
     return $q.all(promises)
-        .then(models => models);
+        .then(models => models)
+        .catch(({ data, status, config }) => {
+            ProcessErrors(null, data, status, null, {
+                hdr: strings.get('error.HEADER'),
+                msg: strings.get('error.CALL', { path: `${config.url}`, status })
+            });
+            return $q.reject();
+        });
 }
 
 InstanceGroupsResolve.$inject = [
     '$q',
     '$stateParams',
     'InstanceGroupModel',
-    'InstanceModel'
+    'InstanceModel',
+    'ProcessErrors',
+    'InstanceGroupsStrings'
 ];
 
-function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
+function InstanceGroupsRun ($stateExtender, strings) {
     $stateExtender.addState({
         name: 'instanceGroups',
         url: '/instance_groups',
         searchPrefix: 'instance_group',
         ncyBreadcrumb: {
-            label: ComponentsStrings.get('layout.INSTANCE_GROUPS')
+            label: strings.get('state.INSTANCE_GROUPS_BREADCRUMB_LABEL')
         },
         params: {
             instance_group_search: {
@@ -139,32 +145,6 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
     });
 
     $stateExtender.addState({
-        name: 'instanceGroups.add.modal',
-        abstract: true,
-        ncyBreadcrumb: {
-            skip: true,
-        },
-        views: {
-            "modal": {
-                template: `<div class="Modal-backdrop"></div>
-                <div class="Modal-holder" ui-view="modal" autoscroll="false"></div>`,
-            }
-        }
-    });
-
-    $stateExtender.addState({
-        name: 'instanceGroups.add.modal.instances',
-        ncyBreadcrumb: {
-            skip: true,
-        },
-        views: {
-            "modal": {
-                template: '<instance-list-policy></instance-list-policy>',
-            }
-        }
-    });
-
-    $stateExtender.addState({
         name: 'instanceGroups.edit',
         route: '/:instance_group_id',
         ncyBreadcrumb: {
@@ -200,44 +180,16 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         }
     });
 
-
-    $stateExtender.addState({
-        name: 'instanceGroups.edit.modal',
-        abstract: true,
-        ncyBreadcrumb: {
-            skip: true,
-        },
-        views: {
-            "modal": {
-                template: `<div class="Modal-backdrop"></div>
-                <div class="Modal-holder" ui-view="modal" autoscroll="false"></div>`,
-            }
-        }
-    });
-
-    $stateExtender.addState({
-        name: 'instanceGroups.edit.modal.instances',
-        ncyBreadcrumb: {
-            skip: true,
-        },
-        views: {
-            "modal": {
-                template: '<instance-list-policy></instance-list-policy>',
-            }
-        }
-    });
-
     $stateExtender.addState({
         name: 'instanceGroups.instances',
         url: '/:instance_group_id/instances',
         ncyBreadcrumb: {
             parent: 'instanceGroups.edit',
-            label: ComponentsStrings.get('layout.INSTANCES')
+            label: strings.get('state.INSTANCES_BREADCRUMB_LABEL')
         },
         params: {
             instance_search: {
                 value: {
-                    page_size: '10',
                     order_by: 'hostname'
                 },
                 dynamic: true
@@ -251,7 +203,13 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
             }
         },
         resolve: {
-            resolvedModels: InstanceGroupsResolve
+            resolvedModels: InstanceGroupsResolve,
+            Dataset: ['GetBasePath', 'QuerySet', '$stateParams',
+                function(GetBasePath, qs, $stateParams) {
+                    let path = `${GetBasePath('instance_groups')}${$stateParams.instance_group_id}/instances`;
+                    return qs.search(path, $stateParams[`instance_search`]);
+                }
+            ]
         }
     });
 
@@ -274,6 +232,15 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
         ncyBreadcrumb: {
             skip: true,
         },
+        params: {
+            instance_search: {
+                value: {
+                    page_size: '10',
+                    order_by: 'hostname'
+                },
+                dynamic: true
+            }
+        },
         views: {
             "modal": {
                 templateUrl: InstanceModalTemplate,
@@ -281,7 +248,15 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
                 controllerAs: 'vm'
             }
         },
-        resolvedModels: InstanceGroupsResolve
+        resolve: {
+            resolvedModels: InstanceGroupsResolve,
+            Dataset: ['GetBasePath', 'QuerySet', '$stateParams',
+                function(GetBasePath, qs, $stateParams) {
+                    let path = `${GetBasePath('instances')}`;
+                    return qs.search(path, $stateParams[`instance_search`]);
+                }
+            ]
+        }
     });
 
     $stateExtender.addState(instanceJobsRoute);
@@ -290,8 +265,7 @@ function InstanceGroupsRun ($stateExtender, strings, ComponentsStrings) {
 
 InstanceGroupsRun.$inject = [
     '$stateExtender',
-    'InstanceGroupsStrings',
-    'ComponentsStrings'
+    'InstanceGroupsStrings'
 ];
 
 angular.module(MODULE_NAME, [])
@@ -299,7 +273,6 @@ angular.module(MODULE_NAME, [])
     .factory('InstanceGroupList', list)
     .controller('InstanceGroupsListController', InstanceGroupsListController)
     .controller('InstanceListController', InstanceListController)
-    .directive('instanceListPolicy', InstanceListPolicy)
     .directive('instanceGroupsMultiselect', instanceGroupsMultiselect)
     .directive('instanceGroupsModal', instanceGroupsModal)
     .directive('capacityAdjuster', CapacityAdjuster)

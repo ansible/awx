@@ -5,13 +5,13 @@
             django-model="templates"
             base-path="unified_job_templates"
             iterator="template"
-            list="list"
-            dataset="template_dataset"
-            collection="collection"
-            search-tags="searchTags"
-            query-set="querySet">
+            list="vm.list"
+            collection="vm.templates"
+            dataset="vm.dataset"
+            search-tags="vm.searchTags"
+            search-bar-full-width="vm.isPortalMode">
         </smart-search>
-        <div class="at-List-toolbarAction" ng-show="canAdd">
+        <div class="at-List-toolbarAction" ng-show="!vm.isPortalMode && canAdd">
             <button
                 type="button"
                 class="at-Button--add"
@@ -35,12 +35,12 @@
             </ul>
         </div>
     </div>
-    <at-list results="templates">
-        <at-row ng-repeat="template in templates"
+    <at-list results="vm.templates" id="templates_list">
+        <at-row ng-repeat="template in vm.templates"
             ng-class="{'at-Row--active': (template.id === vm.activeId)}"
-            template-id="{{ template.id }}"
             invalid="vm.isInvalid(template)"
-            invalid-tooltip="vm.invalidTooltip">
+            invalid-tooltip="vm.invalidTooltip"
+            id="row-{{ template.id }}">
             <div class="at-Row-items">
                 <at-row-item
                     header-value="{{ template.name }}"
@@ -61,18 +61,18 @@
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INVENTORY') }}"
                     value="{{ template.summary_fields.inventory.name }}"
-                    value-link="/#/inventories/inventory/{{ template.summary_fields.inventory.id }}">
+                    value-link="/#/inventories/{{template.summary_fields.inventory.kind === 'smart' ? 'smart' : 'inventory'}}/{{ template.summary_fields.inventory.id }}">
                 </at-row-item>
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_PROJECT') }}"
                     value="{{ template.summary_fields.project.name }}"
                     value-link="/#/projects/{{ template.summary_fields.project.id }}">
                 </at-row-item>
-                <!-- TODO: add see more for creds -->
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_CREDENTIALS') }}"
                     tag-values="template.summary_fields.credentials"
                     tags-are-creds="true">
+                    <at-toggle-tag ng-init="credTags=vm.buildCredentialTags(template.summary_fields.credentials)" tags="credTags"></at-toggle-tag>
                 </at-row-item>
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
@@ -89,23 +89,21 @@
                 <at-launch-template template="template"
                     ng-show="template.summary_fields.user_capabilities.start">
                 </at-launch-template>
-                <at-row-action icon="fa-calendar" ng-click="vm.scheduleTemplate(template)"
-                    ng-show="template.summary_fields.user_capabilities.schedule">
-                </at-row-action>
                 <at-row-action icon="fa-copy" ng-click="vm.copyTemplate(template)"
-                    ng-show="template.summary_fields.user_capabilities.copy">
+                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.copy"
+                    tooltip="{{:: vm.strings.get('listActions.COPY', vm.getType(template)) }}">
                 </at-row-action>
                 <at-row-action icon="fa-trash" ng-click="vm.deleteTemplate(template)"
-                    ng-show="template.summary_fields.user_capabilities.delete">
+                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.delete"
+                    tooltip="{{:: vm.strings.get('listActions.DELETE', vm.getType(template)) }}">
                 </at-row-action>
             </div>
         </at-row>
     </at-list>
     <paginate
-        collection="collection"
-        dataset="template_dataset"
+        collection="vm.templates"
+        dataset="vm.dataset"
         iterator="template"
-        base-path="unified_job_templates"
-        query-set="querySet">
+        base-path="unified_job_templates">
     </paginate>
 </at-panel-body>

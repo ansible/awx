@@ -167,7 +167,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
             wrapPanel(html, ignorePanel){
                 if(ignorePanel) {
                     return `
-                    <div ui-view="preFormView"></div>
                     <div>
                     ${html}
                     <div ui-view="related"></div>
@@ -176,7 +175,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 }
                 else {
                     return `
-                    <div ui-view="preFormView"></div>
                     ${MessageBar(this.form)}
                     <div class="Panel">
                     ${html}
@@ -742,7 +740,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock' && field.type !== 'workflow-chart') {
 
-                    html += "<div class='form-group Form-formGroup ";
+                    html += `<div id='${form.name}_${fld}_group' class='form-group Form-formGroup `;
                     html += (field.disabled) ? `Form-formGroup--disabled ` : ``;
                     html += (field.type === "checkbox") ? "Form-formGroup--checkbox" : "";
                     html += (field['class']) ? (field['class']) : "";
@@ -1043,6 +1041,15 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             };
                         }
 
+                        if (field.onError) {
+                            labelOptions.onError = {
+                                id: `${this.form.name}_${fld}_error_text`,
+                                ngShow: field.onError.ngShow,
+                                ngModel: field.onError.variable,
+                                text: field.onError.text
+                            };
+                        }
+
                         html += label(labelOptions);
 
                         html += "<div ";
@@ -1093,7 +1100,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 }
                                 html += "</div>\n";
                         }
+                        if (field.label === "Labels") {
+                            html += `<div class="error" id="${field.onError.id}" ng-show="${field.onError.ngShow}">${field.onError.text}</div>`;
+                        }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+                        
 
                         // Add help panel(s)
                         html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
@@ -1728,8 +1739,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     button.label = i18n._('View Survey');
                                     button['class'] = 'Form-surveyButton';
                                 }
-                                if (btn === 'workflow_editor') {
-                                    button.label = i18n._('Workflow Editor');
+                                if (btn === 'workflow_visualizer') {
+                                    button.label = i18n._('Workflow Visualizer');
                                     button['class'] = 'Form-primaryButton';
                                 }
 
@@ -2023,5 +2034,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     ${options.text}
                 </label> `;
         }
+
     }
 ]);

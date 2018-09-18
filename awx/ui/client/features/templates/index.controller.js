@@ -1,12 +1,12 @@
 function IndexTemplatesController ($scope, strings, dataset) {
-    let vm = this;
+    const vm = this;
     vm.strings = strings;
     vm.count = dataset.data.count;
 
-    $scope.$on('updateDataset', (e, { count }) => {
-    	if (count) {
-    		vm.count = count;
-    	}
+    $scope.$on('updateCount', (e, count) => {
+        if (typeof count === 'number') {
+            vm.count = count;
+        }
     });
 }
 

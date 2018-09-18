@@ -4,6 +4,7 @@
 from django.core.management.base import BaseCommand
 from crum import impersonate
 from awx.main.models import User, Organization, Project, Inventory, CredentialType, Credential, Host, JobTemplate
+from awx.main.signals import disable_computed_fields
 
 
 class Command(BaseCommand):
@@ -22,33 +23,34 @@ class Command(BaseCommand):
         except IndexError:
             superuser = None
         with impersonate(superuser):
-            o = Organization.objects.create(name='Default')
-            p = Project(name='Demo Project',
-                        scm_type='git',
-                        scm_url='https://github.com/ansible/ansible-tower-samples',
-                        scm_update_on_launch=True,
-                        scm_update_cache_timeout=0,
-                        organization=o)
-            p.save(skip_update=True)
-            ssh_type = CredentialType.from_v1_kind('ssh')
-            c = Credential.objects.create(credential_type=ssh_type,
-                                          name='Demo Credential',
-                                          inputs={
-                                              'username': superuser.username
-                                          },
-                                          created_by=superuser)
-            c.admin_role.members.add(superuser)
-            i = Inventory.objects.create(name='Demo Inventory',
-                                         organization=o,
-                                         created_by=superuser)
-            Host.objects.create(name='localhost',
-                                inventory=i,
-                                variables="ansible_connection: local",
-                                created_by=superuser)
-            jt = JobTemplate.objects.create(name='Demo Job Template',
-                                            playbook='hello_world.yml',
-                                            project=p,
-                                            inventory=i)
-            jt.credentials.add(c)
+            with disable_computed_fields():
+                o = Organization.objects.create(name='Default')
+                p = Project(name='Demo Project',
+                            scm_type='git',
+                            scm_url='https://github.com/ansible/ansible-tower-samples',
+                            scm_update_on_launch=True,
+                            scm_update_cache_timeout=0,
+                            organization=o)
+                p.save(skip_update=True)
+                ssh_type = CredentialType.from_v1_kind('ssh')
+                c = Credential.objects.create(credential_type=ssh_type,
+                                              name='Demo Credential',
+                                              inputs={
+                                                  'username': superuser.username
+                                              },
+                                              created_by=superuser)
+                c.admin_role.members.add(superuser)
+                i = Inventory.objects.create(name='Demo Inventory',
+                                             organization=o,
+                                             created_by=superuser)
+                Host.objects.create(name='localhost',
+                                    inventory=i,
+                                    variables="ansible_connection: local",
+                                    created_by=superuser)
+                jt = JobTemplate.objects.create(name='Demo Job Template',
+                                                playbook='hello_world.yml',
+                                                project=p,
+                                                inventory=i)
+                jt.credentials.add(c)
         print('Default organization added.')
         print('Demo Credential, Inventory, and Job Template added.')

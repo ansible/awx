@@ -23,7 +23,7 @@ Contributing
 Reporting Issues
 ----------------
 
-If you're experiencing a problem, we encourage you to open an issue, and share your feedback. But before opening a new issue, we ask that you please take a look at our [Issues guide](./ISSUES.md).
+If you're experiencing a problem that you feel is a bug in AWX, or have ideas for how to improve AWX, we encourage you to open an issue, and share your feedback. But before opening a new issue, we ask that you please take a look at our [Issues guide](./ISSUES.md).
 
 Code of Conduct
 ---------------
@@ -33,11 +33,10 @@ We ask all of our community members and contributors to adhere to the [Ansible c
 Get Involved
 ------------
 
-We welcome your feedback and ideas. Here's how to reach us:
+We welcome your feedback and ideas. Here's how to reach us with feedback and questions:
 
 - Join the `#ansible-awx` channel on irc.freenode.net
 - Join the [mailing list](https://groups.google.com/forum/#!forum/awx-project) 
-- [Open an Issue](https://github.com/ansible/awx/issues)
 
 License
 -------

@@ -1,0 +1,34 @@
+---
+- include_vars: openshift.yml
+
+- name: Set kubernetes_namespace
+  set_fact:
+    kubernetes_namespace: "{{ openshift_project }}"
+
+- name: Ensure workspace directories exist
+  file:
+    path: "{{ item  }}"
+    state: directory
+  with_items:
+    - "{{ kubernetes_base_path }}"
+    - "{{ openshift_oc_config_file | dirname }}"
+
+- name: Authenticate with OpenShift via user and password
+  shell: |
+    {{ openshift_oc_bin }} login {{ openshift_host }} \
+      -u {{ openshift_user }} \
+      -p {{ openshift_password }} \
+      --insecure-skip-tls-verify={{ openshift_skip_tls_verify | default(false) | bool }}
+  when:
+    - openshift_user is defined
+    - openshift_password is defined
+    - openshift_token is not defined
+  no_log: true
+
+- name: Authenticate with OpenShift via token
+  shell: |
+    {{ openshift_oc_bin }} login {{ openshift_host }} \
+      --token {{ openshift_token }} \
+      --insecure-skip-tls-verify={{ openshift_skip_tls_verify | default(false) | bool }}
+  when: openshift_token is defined
+  no_log: true

@@ -89,7 +89,8 @@
                         }
                     }
                     $scope.job_type = $scope.job_type_options[form.fields.job_type.default];
-                    $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+                    const virtualEnvs = ConfigData.custom_virtualenvs || [];
+                    $scope.custom_virtualenvs_options = virtualEnvs;
 
                     CreateSelect2({
                         element:'#job_template_job_type',
@@ -200,18 +201,17 @@
                             var msg;
                             switch (data.status) {
                             case 'failed':
-                                msg = "<div>The Project selected has a status of \"failed\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
+                                msg = `<div>${i18n._('The Project selected has a status of')} \"${i18n._('failed')}\". ${i18n._('You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.')}</div>`;
                                 break;
                             case 'never updated':
-                                msg = "<div>The Project selected has a status of \"never updated\". You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.";
+                                msg = `<div>${i18n._('The Project selected has a status of')} \"${i18n._('never updated')}\". ${i18n._('You must run a successful update before you can select a playbook. You will not be able to save this Job Template without a valid playbook.')}</div>`;
                                 break;
                             case 'missing':
-                                msg = '<div>The selected project has a status of \"missing\". Please check the server and make sure ' +
-                                    ' the directory exists and file permissions are set correctly.</div>';
+                                msg = `<div>${i18n._('The selected project has a status of')} \"${i18n._('missing')}\". ${i18n._('Please check the server and make sure the directory exists and file permissions are set correctly.')}</div>`;
                                 break;
                             }
                             if (msg) {
-                                Alert('Warning', msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
+                                Alert(i18n._('Warning'), msg, 'alert-info alert-info--noTextTransform', null, null, null, null, true);
                             }
                         })
                         .catch(({data, status}) => {
@@ -495,5 +495,50 @@
             $scope.formCancel = function () {
                 $state.transitionTo('templates');
             };
+
+            let handleLabelCount = () => {
+                /**
+                 * This block of code specifically handles the client-side validation of the `labels` field.
+                 * Due to it's detached nature in relation to the other job template fields, we must
+                 * validate this field client-side in order to avoid the edge case where a user can make a
+                 * successful POST to the `job_templates` endpoint but however encounter a 200 error from
+                 * the `labels` endpoint due to a character limit.
+                 *
+                 * We leverage two of select2's available events, `select` and `unselect`, to detect when the user
+                 * has either added or removed a label. From there, we set a flag and do simple string length
+                 * checks to make sure a label's chacacter count remains under 512. Otherwise, we disable the "Save" button
+                 * by invalidating the field and inform the user of the error.
+                */
+
+
+                $scope.job_template_labels_isValid = true;
+                const maxCount = 512;
+                const jt_label_id = 'job_template_labels';
+
+                // Detect when a new label is added
+                $(`#${jt_label_id}`).on('select2:select', (e) => {
+                    const { text } = e.params.data;
+
+                    // If the character count of an added label is greater than 512, we set `labels` field as invalid
+                    if (text.length > maxCount) {
+                        $scope.job_template_form.labels.$setValidity(`${jt_label_id}`, false);
+                        $scope.job_template_labels_isValid = false;
+                    }
+                });
+
+                // Detect when a label is removed
+                $(`#${jt_label_id}`).on('select2:unselect', (e) => {
+                    const { text } = e.params.data;
+
+                    /* If the character count of a removed label is greater than 512 AND the field is currently marked
+                       as invalid, we set it back to valid */
+                    if (text.length > maxCount && $scope.job_template_form.labels.$error) {
+                        $scope.job_template_form.labels.$setValidity(`${jt_label_id}`, true);
+                        $scope.job_template_labels_isValid = true;
+                    }
+                });
+            };
+
+            handleLabelCount();
         }
     ];

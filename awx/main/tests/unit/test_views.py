@@ -5,9 +5,6 @@ import mock
 from rest_framework import exceptions
 from rest_framework.generics import ListAPIView
 
-# Django
-from django.core.urlresolvers import RegexURLResolver, RegexURLPattern
-
 # AWX
 from awx.main.views import ApiErrorView
 from awx.api.views import JobList, InventorySourceList
@@ -58,33 +55,12 @@ def test_disable_post_on_v1_inventory_source_list(version, supports_post):
         assert ('POST' in inv_source_list.allowed_methods) == supports_post
 
 
-def test_views_have_search_fields():
-    from awx.api.urls import urlpatterns as api_patterns
-    patterns = set([])
-    url_views = set([])
-    # Add recursive URL patterns
-    unprocessed = set(api_patterns)
-    while unprocessed:
-        to_process = unprocessed.copy()
-        unprocessed = set([])
-        for pattern in to_process:
-            if hasattr(pattern, 'lookup_str') and not pattern.lookup_str.startswith('awx.api'):
-                continue
-            patterns.add(pattern)
-            if isinstance(pattern, RegexURLResolver):
-                for sub_pattern in pattern.url_patterns:
-                    if sub_pattern not in patterns:
-                        unprocessed.add(sub_pattern)
-    # Get view classes
-    for pattern in patterns:
-        if isinstance(pattern, RegexURLPattern) and hasattr(pattern.callback, 'view_class'):
-            cls = pattern.callback.view_class
-            if issubclass(cls, ListAPIView):
-                url_views.add(pattern.callback.view_class)
-
+def test_views_have_search_fields(all_views):
     # Gather any views that don't have search fields defined
     views_missing_search = []
-    for View in url_views:
+    for View in all_views:
+        if not issubclass(View, ListAPIView):
+            continue
         view = View()
         if not hasattr(view, 'search_fields') or len(view.search_fields) == 0:
             views_missing_search.append(view)

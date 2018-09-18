@@ -5,10 +5,10 @@
  *************************************************/
 
 export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
-    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt',
+    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', '$rootScope',
     'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', 'ConfigData',
     function($scope, $location, $stateParams, OrgAdminLookup,
-        OrganizationForm, Rest, ProcessErrors, Prompt,
+        OrganizationForm, Rest, ProcessErrors, Prompt, $rootScope,
         GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData, ConfigData) {
 
         let form = OrganizationForm(),
@@ -26,6 +26,12 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
                     $scope.isOrgAdmin = isOrgAdmin;
                 });
 
+            Rest.setUrl(GetBasePath('users') + $rootScope.current_user.id + '/roles/?role_field=notification_admin_role');
+            Rest.get()
+                .then(({data}) => {
+                    $scope.isNotificationAdmin = (data.count && data.count > 0);
+                });
+
             $scope.$watch('organization_obj.summary_fields.user_capabilities.edit', function(val) {
                 if (val === false) {
                     $scope.canAdd = false;
@@ -34,7 +40,11 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
 
             $scope.$emit("HideOrgListHeader");
             $scope.instance_groups = InstanceGroupsData;
-            $scope.custom_virtualenvs_options = ConfigData.custom_virtualenvs;
+            const virtualEnvs = ConfigData.custom_virtualenvs || [];
+            $scope.custom_virtualenvs_visible = virtualEnvs.length > 1;
+            $scope.custom_virtualenvs_options = virtualEnvs.filter(
+                v => !/\/ansible\/$/.test(v)
+            );
         }
 
 

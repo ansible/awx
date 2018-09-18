@@ -9,8 +9,8 @@ function CodeMirrorStrings (BaseString) {
         VARIABLES: t.s('VARIABLES'),
         EXPAND: t.s('EXPAND'),
         YAML: t.s('YAML'),
-        JSON: t.s('JSON')
-
+        JSON: t.s('JSON'),
+        READONLY: t.s('READ ONLY')
     };
 
     ns.tooltip = {

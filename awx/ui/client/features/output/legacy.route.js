@@ -45,6 +45,27 @@ function LegacyRedirect ($stateRegistry) {
                 return { state: destination, params: { type: 'project', id } };
             }
         },
+        {
+            name: 'legacySchedulesList',
+            url: '/jobs/schedules?schedule_search',
+            redirectTo: (trans) => {
+                const {
+                    schedule_search // eslint-disable-line camelcase
+                } = trans.params();
+                return { state: 'schedules', params: { schedule_search } };
+            }
+        },
+        {
+            name: 'legacySchedule',
+            url: '/jobs/schedules/:schedule_id?schedule_search',
+            redirectTo: (trans) => {
+                const {
+                    schedule_id, // eslint-disable-line camelcase
+                    schedule_search // eslint-disable-line camelcase
+                } = trans.params();
+                return { state: 'schedules.edit', params: { schedule_id, schedule_search } };
+            }
+        },
     ];
 
     routes.forEach(state => $stateRegistry.register(state));

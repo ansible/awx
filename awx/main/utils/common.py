@@ -47,12 +47,12 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'get_type_for_model', 'get_model_for_type', 'copy_model_by_class', 'region_sorting',
            'copy_m2m_relationships', 'prefetch_page_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
-           '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
+           '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'getattr_dne', 'NoDefaultProvided',
            'get_current_apps', 'set_current_apps', 'OutputEventFilter', 'OutputVerboseFilter',
            'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity', 'get_cpu_capacity', 'get_mem_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices']
+           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices', 'get_external_account']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -783,7 +783,9 @@ def check_proot_installed():
                                 stderr=subprocess.PIPE)
         proc.communicate()
         return bool(proc.returncode == 0)
-    except (OSError, ValueError):
+    except (OSError, ValueError) as e:
+        if isinstance(e, ValueError) or getattr(e, 'errno', 1) != 2:  # ENOENT, no such file or directory
+            logger.exception('bwrap unavailable for unexpected reason.')
         return False
 
 
@@ -906,6 +908,13 @@ def getattrd(obj, name, default=NoDefaultProvided):
         raise
 
 
+def getattr_dne(obj, name, notfound=ObjectDoesNotExist):
+    try:
+        return getattr(obj, name)
+    except notfound:
+        return None
+
+
 current_apps = apps
 
 
@@ -926,7 +935,7 @@ def get_custom_venv_choices():
         return [
             os.path.join(custom_venv_path, x.decode('utf-8'), '')
             for x in os.listdir(custom_venv_path)
-            if x not in ('awx', 'ansible') and
+            if x != 'awx' and
             os.path.isdir(os.path.join(custom_venv_path, x)) and
             os.path.exists(os.path.join(custom_venv_path, x, 'bin', 'activate'))
         ]
@@ -943,8 +952,7 @@ class OutputEventFilter(object):
 
     def __init__(self, event_callback):
         self._event_callback = event_callback
-        self._event_ct = 0
-        self._counter = 1
+        self._counter = 0
         self._start_line = 0
         self._buffer = StringIO()
         self._last_chunk = ''
@@ -989,7 +997,7 @@ class OutputEventFilter(object):
         if value:
             self._emit_event(value)
             self._buffer = StringIO()
-        self._event_callback(dict(event='EOF'))
+        self._event_callback(dict(event='EOF', final_counter=self._counter))
 
     def _emit_event(self, buffered_stdout, next_event_data=None):
         next_event_data = next_event_data or {}
@@ -1003,8 +1011,8 @@ class OutputEventFilter(object):
             stdout_chunks = []
 
         for stdout_chunk in stdout_chunks:
-            event_data['counter'] = self._counter
             self._counter += 1
+            event_data['counter'] = self._counter
             event_data['stdout'] = stdout_chunk[:-2] if len(stdout_chunk) > 2 else ""
             n_lines = stdout_chunk.count('\n')
             event_data['start_line'] = self._start_line
@@ -1012,7 +1020,6 @@ class OutputEventFilter(object):
             self._start_line += n_lines
             if self._event_callback:
                 self._event_callback(event_data)
-                self._event_ct += 1
 
         if next_event_data.get('uuid', None):
             self._current_event_data = next_event_data
@@ -1073,3 +1080,25 @@ def has_model_field_prefetched(model_obj, field_name):
     # NOTE: Update this function if django internal implementation changes.
     return getattr(getattr(model_obj, field_name, None),
                    'prefetch_cache_name', '') in getattr(model_obj, '_prefetched_objects_cache', {})
+
+
+def get_external_account(user):
+    from django.conf import settings
+    from awx.conf.license import feature_enabled
+    account_type = None
+    if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
+        try:
+            if user.pk and user.profile.ldap_dn and not user.has_usable_password():
+                account_type = "ldap"
+        except AttributeError:
+            pass
+    if (getattr(settings, 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY', None) or
+            getattr(settings, 'SOCIAL_AUTH_GITHUB_KEY', None) or
+            getattr(settings, 'SOCIAL_AUTH_GITHUB_ORG_KEY', None) or
+            getattr(settings, 'SOCIAL_AUTH_GITHUB_TEAM_KEY', None) or
+            getattr(settings, 'SOCIAL_AUTH_SAML_ENABLED_IDPS', None)) and user.social_auth.all():
+        account_type = "social"
+    if (getattr(settings, 'RADIUS_SERVER', None) or
+            getattr(settings, 'TACACSPLUS_HOST', None)) and user.enterprise_auth.all():
+        account_type = "enterprise"
+    return account_type

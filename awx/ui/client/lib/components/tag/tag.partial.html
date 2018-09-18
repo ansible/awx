@@ -1,0 +1,8 @@
+<div class="TagComponent" ng-transclude>
+    <div ng-if="icon" class="fa TagComponent-icon TagComponent-icon--{{icon}}"></div>
+    <a ng-if="link" class="TagComponent-name" href="{{ link }}">{{ tag }}</a>
+    <div ng-if="!link" class="TagComponent-name">{{ tag }}</div>
+    <div ng-if="removeTag" class="TagComponent-button" ng-click="removeTag(index)">
+        <i class="fa fa-times TagComponent-button__delete"></i>
+    </div>
+</div>

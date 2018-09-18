@@ -56,8 +56,7 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Last Updated'),
                 filter: "longDate",
                 columnClass: "col-lg-3 hidden-md hidden-sm hidden-xs",
-                excludeModal: true,
-                nosort: true
+                excludeModal: true
             }
         },
 
@@ -96,14 +95,6 @@ export default ['i18n', function(i18n) {
                 ngClass: "project.scm_type_class",
                 dataPlacement: 'top',
                 ngShow: "project.summary_fields.user_capabilities.start"
-            },
-            schedule: {
-                mode: 'all',
-                ngClick: "editSchedules(project.id)",
-                awToolTip: "{{ project.scm_schedule_tooltip }}",
-                ngClass: "project.scm_type_class",
-                dataPlacement: 'top',
-                ngShow: "project.summary_fields.user_capabilities.schedule"
             },
             copy: {
                 label: i18n._('Copy'),

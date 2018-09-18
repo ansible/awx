@@ -18,6 +18,8 @@ def test_job_template_copy(post, get, project, inventory, machine_credential, va
     job_template_with_survey_passwords.credentials.add(machine_credential)
     job_template_with_survey_passwords.credentials.add(vault_credential)
     job_template_with_survey_passwords.admin_role.members.add(alice)
+    project.admin_role.members.add(alice)
+    inventory.admin_role.members.add(alice)
     assert get(
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         alice, expect=200
@@ -26,6 +28,10 @@ def test_job_template_copy(post, get, project, inventory, machine_credential, va
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         admin, expect=200
     ).data['can_copy'] is True
+    post(
+        reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
+        {'name': 'new jt name'}, alice, expect=403
+    )
     jt_copy_pk = post(
         reverse('api:job_template_copy', kwargs={'pk': job_template_with_survey_passwords.pk}),
         {'name': 'new jt name'}, admin, expect=201
@@ -52,6 +58,7 @@ def test_project_copy(post, get, project, organization, scm_credential, alice):
         reverse('api:project_copy', kwargs={'pk': project.pk}), alice, expect=200
     ).data['can_copy'] is False
     project.organization.admin_role.members.add(alice)
+    scm_credential.use_role.members.add(alice)
     assert get(
         reverse('api:project_copy', kwargs={'pk': project.pk}), alice, expect=200
     ).data['can_copy'] is True
@@ -170,7 +177,7 @@ def test_credential_copy(post, get, machine_credential, credentialtype_ssh, admi
 @pytest.mark.django_db
 def test_notification_template_copy(post, get, notification_template_with_encrypt,
                                     organization, alice):
-    #notification_template_with_encrypt.admin_role.members.add(alice)
+    notification_template_with_encrypt.organization.auditor_role.members.add(alice)
     assert get(
         reverse(
             'api:notification_template_copy', kwargs={'pk': notification_template_with_encrypt.pk}
@@ -197,6 +204,7 @@ def test_notification_template_copy(post, get, notification_template_with_encryp
 
 @pytest.mark.django_db
 def test_inventory_script_copy(post, get, inventory_script, organization, alice):
+    inventory_script.organization.auditor_role.members.add(alice)
     assert get(
         reverse('api:inventory_script_copy', kwargs={'pk': inventory_script.pk}), alice, expect=200
     ).data['can_copy'] is False

@@ -1,15 +1,23 @@
+# Python
 import pytest
 import mock
-
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from crum import impersonate
 
+# Django rest framework
 from rest_framework.exceptions import PermissionDenied
 
+# AWX
 from awx.api.versioning import reverse
 from awx.api.views import RelatedJobsPreventDeleteMixin, UnifiedJobDeletionMixin
-
-from awx.main.models import JobTemplate, User, Job
+from awx.main.models import (
+    JobTemplate,
+    User,
+    Job,
+    AdHocCommand,
+    ProjectUpdate,
+)
 
 
 @pytest.mark.django_db
@@ -33,7 +41,8 @@ def test_job_relaunch_permission_denied_response(
     jt.credentials.add(machine_credential)
     jt_user = User.objects.create(username='jobtemplateuser')
     jt.execute_role.members.add(jt_user)
-    job = jt.create_unified_job()
+    with impersonate(jt_user):
+        job = jt.create_unified_job()
 
     # User capability is shown for this
     r = get(job.get_absolute_url(), jt_user, expect=200)
@@ -44,6 +53,29 @@ def test_job_relaunch_permission_denied_response(
     r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, jt_user, expect=403)
     assert 'launched with prompted fields' in r.data['detail']
     assert 'do not have permission' in r.data['detail']
+
+
+@pytest.mark.django_db
+def test_job_relaunch_permission_denied_response_other_user(get, post, inventory, project, alice, bob):
+    '''
+    Asserts custom permission denied message corresponding to
+    awx/main/tests/functional/test_rbac_job.py::TestJobRelaunchAccess::test_other_user_prompts
+    '''
+    jt = JobTemplate.objects.create(
+        name='testjt', inventory=inventory, project=project,
+        ask_credential_on_launch=True,
+        ask_variables_on_launch=True)
+    jt.execute_role.members.add(alice, bob)
+    with impersonate(bob):
+        job = jt.create_unified_job(extra_vars={'job_var': 'foo2'})
+
+    # User capability is shown for this
+    r = get(job.get_absolute_url(), alice, expect=200)
+    assert r.data['summary_fields']['user_capabilities']['start']
+
+    # Job has prompted data, launch denied w/ message
+    r = post(reverse('api:job_relaunch', kwargs={'pk':job.pk}), {}, alice, expect=403)
+    assert 'Job was launched with prompts provided by another user' in r.data['detail']
 
 
 @pytest.mark.django_db
@@ -75,7 +107,7 @@ def test_job_relaunch_on_failed_hosts(post, inventory, project, machine_credenti
         project=project
     )
     jt.credentials.add(machine_credential)
-    job = jt.create_unified_job(_eager_fields={'status': 'failed', 'limit': 'host1,host2,host3'})
+    job = jt.create_unified_job(_eager_fields={'status': 'failed'}, limit='host1,host2,host3')
     job.job_events.create(event='playbook_on_stats')
     job.job_host_summaries.create(host=h1, failed=False, ok=1, changed=0, failures=0, host_name=h1.name)
     job.job_host_summaries.create(host=h2, failed=False, ok=0, changed=1, failures=0, host_name=h2.name)
@@ -133,3 +165,68 @@ def test_block_related_unprocessed_events(mocker, organization, project, delete,
     with mock.patch('awx.api.views.now', lambda: time_of_request):
         with pytest.raises(PermissionDenied):
             view.perform_destroy(organization)
+
+
+@pytest.mark.django_db
+def test_disallowed_http_update_methods(put, patch, post, inventory, project, admin_user):
+    jt = JobTemplate.objects.create(
+        name='test_disallowed_methods', inventory=inventory,
+        project=project
+    )
+    job = jt.create_unified_job()
+    post(
+        url=reverse('api:job_detail', kwargs={'pk': job.pk, 'version': 'v2'}),
+        data={},
+        user=admin_user,
+        expect=405
+    )
+    put(
+        url=reverse('api:job_detail', kwargs={'pk': job.pk, 'version': 'v2'}),
+        data={},
+        user=admin_user,
+        expect=405
+    )
+    patch(
+        url=reverse('api:job_detail', kwargs={'pk': job.pk, 'version': 'v2'}),
+        data={},
+        user=admin_user,
+        expect=405
+    )
+
+
+class TestControllerNode():
+    @pytest.fixture
+    def project_update(self, project):
+        return ProjectUpdate.objects.create(project=project)
+
+    @pytest.fixture
+    def job(self):
+        return JobTemplate.objects.create().create_unified_job()
+
+    @pytest.fixture
+    def adhoc(self, inventory):
+        return AdHocCommand.objects.create(inventory=inventory)
+
+    @pytest.mark.django_db
+    def test_field_controller_node_exists(self, sqlite_copy_expert,
+                                          admin_user, job, project_update,
+                                          inventory_update, adhoc, get, system_job_factory):
+        system_job = system_job_factory()
+
+        r = get(reverse('api:unified_job_list') + '?id={}'.format(job.id), admin_user, expect=200)
+        assert 'controller_node' in r.data['results'][0]
+
+        r = get(job.get_absolute_url(), admin_user, expect=200)
+        assert 'controller_node' in r.data
+
+        r = get(reverse('api:ad_hoc_command_detail', kwargs={'pk': adhoc.pk}), admin_user, expect=200)
+        assert 'controller_node' in r.data
+
+        r = get(reverse('api:project_update_detail', kwargs={'pk': project_update.pk}), admin_user, expect=200)
+        assert 'controller_node' not in r.data
+
+        r = get(reverse('api:inventory_update_detail', kwargs={'pk': inventory_update.pk}), admin_user, expect=200)
+        assert 'controller_node' not in r.data
+
+        r = get(reverse('api:system_job_detail', kwargs={'pk': system_job.pk}), admin_user, expect=200)
+        assert 'controller_node' not in r.data

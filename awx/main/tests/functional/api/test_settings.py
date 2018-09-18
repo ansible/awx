@@ -101,6 +101,42 @@ def test_ldap_settings(get, put, patch, delete, admin):
     patch(url, user=admin, data={'AUTH_LDAP_BIND_DN': u'cn=暴力膜,dc=大新闻,dc=真的粉丝'}, expect=200)
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize('value', [
+    None, '', 'INVALID', 1, [1], ['INVALID'],
+])
+def test_ldap_user_flags_by_group_invalid_dn(get, patch, admin, value):
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
+    patch(url, user=admin,
+          data={'AUTH_LDAP_USER_FLAGS_BY_GROUP': {'is_superuser': value}},
+          expect=400)
+
+
+@pytest.mark.django_db
+def test_ldap_user_flags_by_group_string(get, patch, admin):
+    expected = 'CN=Admins,OU=Groups,DC=example,DC=com'
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
+    patch(url, user=admin,
+          data={'AUTH_LDAP_USER_FLAGS_BY_GROUP': {'is_superuser': expected}},
+          expect=200)
+    resp = get(url, user=admin)
+    assert resp.data['AUTH_LDAP_USER_FLAGS_BY_GROUP']['is_superuser'] == [expected]
+
+
+@pytest.mark.django_db
+def test_ldap_user_flags_by_group_list(get, patch, admin):
+    expected = [
+        'CN=Admins,OU=Groups,DC=example,DC=com',
+        'CN=Superadmins,OU=Groups,DC=example,DC=com'
+    ]
+    url = reverse('api:setting_singleton_detail', kwargs={'category_slug': 'ldap'})
+    patch(url, user=admin,
+          data={'AUTH_LDAP_USER_FLAGS_BY_GROUP': {'is_superuser': expected}},
+          expect=200)
+    resp = get(url, user=admin)
+    assert resp.data['AUTH_LDAP_USER_FLAGS_BY_GROUP']['is_superuser'] == expected
+
+
 @pytest.mark.parametrize('setting', [
     'AUTH_LDAP_USER_DN_TEMPLATE',
     'AUTH_LDAP_REQUIRE_GROUP',

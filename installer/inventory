@@ -20,6 +20,7 @@ dockerhub_version=latest
 # Kubernetes Install
 # kubernetes_context=test-cluster
 # kubernetes_namespace=awx
+# tiller_namespace=kube-system
 
 # Kubernetes and Openshift Install Resource Requests
 # This is the request value for a pod's "task" container, which is the container

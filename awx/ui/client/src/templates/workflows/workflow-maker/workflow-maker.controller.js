@@ -6,12 +6,13 @@
 
 export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
     '$state', 'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
-    'Empty', 'PromptService', 'Rest', 'TemplatesStrings',
+    'Empty', 'PromptService', 'Rest', 'TemplatesStrings', '$timeout',
+    'i18n',
     function($scope, WorkflowService, GetBasePath, TemplatesService,
     $state, ProcessErrors, CreateSelect2, $q, JobTemplate,
-    Empty, PromptService, Rest, TemplatesStrings) {
+    Empty, PromptService, Rest, TemplatesStrings, $timeout, i18n) {
 
-        let promptWatcher, surveyQuestionWatcher;
+        let promptWatcher, surveyQuestionWatcher, credentialsWatcher;
 
         $scope.strings = TemplatesStrings;
         $scope.preventCredsWithPasswords = true;
@@ -23,10 +24,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
         };
 
         $scope.job_type_options = [{
-            label: "Run",
+            label: $scope.strings.get('workflow_maker.RUN'),
             value: "run"
         }, {
-            label: "Check",
+            label: $scope.strings.get('workflow_maker.CHECK'),
             value: "check"
         }];
 
@@ -36,15 +37,15 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
          $scope.edgeTypeOptions = [
              {
-                 label: 'Always',
+                 label: $scope.strings.get('workflow_maker.ALWAYS'),
                  value: 'always'
              },
              {
-                 label: 'On Success',
+                 label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
                  value: 'success'
              },
              {
-                 label: 'On Failure',
+                 label: $scope.strings.get('workflow_maker.ON_FAILURE'),
                  value: 'failure'
              }
          ];
@@ -216,7 +217,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                              });
 
                              let credentialsToAdd = credentialsNotInPriorCredentials.filter(function(credNotInPrior) {
-                                 return !params.node.promptData.prompts.credentials.previousOverrides.some(function(priorCred) {
+                                 let previousOverrides = params.node.promptData.prompts.credentials.previousOverrides ? params.node.promptData.prompts.credentials.previousOverrides : [];
+                                 return !previousOverrides.some(function(priorCred) {
                                      return credNotInPrior.id === priorCred.id;
                                  });
                              });
@@ -252,8 +254,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                          }
                     }
 
-                    if ((params.node.originalParentId && params.parentId !== params.node.originalParentId) || params.node.originalEdge !== params.node.edgeType) {//beep
-
+                    if (params.node.originalParentId && (params.parentId !== params.node.originalParentId || params.node.originalEdge !== params.node.edgeType)) {
                         let parentIsDeleted = false;
 
                         _.forEach($scope.treeData.data.deletedNodes, function(deletedNode) {
@@ -301,15 +302,15 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             if (!optionsToInclude) {
                 $scope.edgeTypeOptions = [
                     {
-                        label: 'Always',
+                        label: i18n._('Always'),
                         value: 'always'
                     },
                     {
-                        label: 'On Success',
+                        label: i18n._('On Success'),
                         value: 'success'
                     },
                     {
-                        label: 'On Failure',
+                        label: i18n._('On Failure'),
                         value: 'failure'
                     }
                 ];
@@ -319,17 +320,17 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 optionsToInclude.forEach((optionToInclude) => {
                     if (optionToInclude === "always") {
                         $scope.edgeTypeOptions.push({
-                            label: 'Always',
+                            label: $scope.strings.get('workflow_maker.ALWAYS'),
                             value: 'always'
                         });
                     } else if (optionToInclude === "success") {
                         $scope.edgeTypeOptions.push({
-                            label: 'On Success',
+                            label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
                             value: 'success'
                         });
                     } else if (optionToInclude === "failure") {
                         $scope.edgeTypeOptions.push({
-                            label: 'On Failure',
+                            label: $scope.strings.get('workflow_maker.ON_FAILURE'),
                             value: 'failure'
                         });
                     }
@@ -340,6 +341,20 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 element: '#workflow_node_edge',
                 multiple: false
             });
+        };
+
+        let checkCredentialsForRequiredPasswords = () => {
+            let credentialRequiresPassword = false;
+            $scope.promptData.prompts.credentials.value.forEach((credential) => {
+                if ((credential.passwords_needed &&
+                    credential.passwords_needed.length > 0) ||
+                    (_.has(credential, 'inputs.vault_password') &&
+                    credential.inputs.vault_password === "ASK")
+                ) {
+                    credentialRequiresPassword = true;
+                }
+            });
+            $scope.credentialRequiresPassword = credentialRequiresPassword;
         };
 
         let watchForPromptChanges = () => {
@@ -358,6 +373,12 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 }
                 $scope.promptModalMissingReqFields = missingPromptValue;
             });
+
+            if ($scope.promptData.launchConf.ask_credential_on_launch && $scope.credentialRequiresPassword) {
+                credentialsWatcher = $scope.$watch('promptData.prompts.credentials', () => {
+                    checkCredentialsForRequiredPasswords();
+                });
+            }
         };
 
         $scope.closeWorkflowMaker = function() {
@@ -414,10 +435,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                         .then(function() {
                             $scope.closeDialog();
                         }).catch(({data, status}) => {
-                            ProcessErrors($scope, data, status, null);
+                            ProcessErrors($scope, data, status, null, {});
                         });
                     }).catch(({data, status}) => {
-                        ProcessErrors($scope, data, status, null);
+                        ProcessErrors($scope, data, status, null, {});
                     });
                 };
 
@@ -467,20 +488,20 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             });
 
             // Set the default to success
-            let edgeType = {label: "On Success", value: "success"};
+            let edgeType = {label: $scope.strings.get('workflow_maker.ON_SUCCESS'), value: "success"};
 
             if (parent && ((betweenTwoNodes && parent.source.isStartNode) || (!betweenTwoNodes && parent.isStartNode))) {
                 // We don't want to give the user the option to select
                 // a type as this node will always be executed
                 updateEdgeDropdownOptions(["always"]);
-                edgeType = {label: "Always", value: "always"};
+                edgeType = {label: $scope.strings.get('workflow_maker.ALWAYS'), value: "always"};
             } else {
                 if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
                     updateEdgeDropdownOptions(["success", "failure"]);
-                    edgeType = {label: "On Success", value: "success"};
+                    edgeType = {label: $scope.strings.get('workflow_maker.ON_SUCCESS'), value: "success"};
                 } else if (_.includes(siblingConnectionTypes, "always")) {
                     updateEdgeDropdownOptions(["always"]);
-                    edgeType = {label: "Always", value: "always"};
+                    edgeType = {label: $scope.strings.get('workflow_maker.ALWAYS'), value: "always"};
                 } else {
                     updateEdgeDropdownOptions();
                 }
@@ -538,6 +559,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                 surveyQuestionWatcher();
             }
 
+            if (credentialsWatcher) {
+                credentialsWatcher();
+            }
+
             $scope.promptData = null;
 
             // Reset the edgeConflict flag
@@ -563,6 +588,10 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
             if (surveyQuestionWatcher) {
                 surveyQuestionWatcher();
+            }
+
+            if (credentialsWatcher) {
+                credentialsWatcher();
             }
 
             $scope.promptData = null;
@@ -613,7 +642,35 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                     if (!_.isEmpty($scope.nodeBeingEdited.promptData)) {
                         $scope.promptData = _.cloneDeep($scope.nodeBeingEdited.promptData);
-                    } else if ($scope.nodeBeingEdited.unifiedJobTemplate){
+                        const launchConf = $scope.promptData.launchConf;
+
+                        if (!launchConf.survey_enabled &&
+                            !launchConf.ask_inventory_on_launch &&
+                            !launchConf.ask_credential_on_launch &&
+                            !launchConf.ask_verbosity_on_launch &&
+                            !launchConf.ask_job_type_on_launch &&
+                            !launchConf.ask_limit_on_launch &&
+                            !launchConf.ask_tags_on_launch &&
+                            !launchConf.ask_skip_tags_on_launch &&
+                            !launchConf.ask_diff_mode_on_launch &&
+                            !launchConf.credential_needed_to_start &&
+                            !launchConf.ask_variables_on_launch &&
+                            launchConf.variables_needed_to_start.length === 0) {
+                                $scope.showPromptButton = false;
+                                $scope.promptModalMissingReqFields = false;
+                        } else {
+                            $scope.showPromptButton = true;
+
+                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeBeingEdited.originalNodeObj.summary_fields.inventory')) {
+                                $scope.promptModalMissingReqFields = true;
+                            } else {
+                                $scope.promptModalMissingReqFields = false;
+                            }
+                        }
+                    } else if (
+                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'job_template' ||
+                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === 'job_template'
+                    ) {
                         let promises = [jobTemplate.optionsLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id), jobTemplate.getLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id)];
 
                         if (_.has($scope, 'nodeBeingEdited.originalNodeObj.related.credentials')) {
@@ -669,6 +726,24 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                     $scope.selectedTemplateInvalid = false;
                                 }
 
+                                let credentialRequiresPassword = false;
+
+                                prompts.credentials.value.forEach((credential) => {
+                                    if(credential.inputs) {
+                                        if ((credential.inputs.password && credential.inputs.password === "ASK") ||
+                                            (credential.inputs.become_password && credential.inputs.become_password === "ASK") ||
+                                            (credential.inputs.ssh_key_unlock && credential.inputs.ssh_key_unlock === "ASK") ||
+                                            (credential.inputs.vault_password && credential.inputs.vault_password === "ASK")
+                                        ) {
+                                            credentialRequiresPassword = true;
+                                        }
+                                    } else if (credential.passwords_needed && credential.passwords_needed.length > 0) {
+                                        credentialRequiresPassword = true;
+                                    }
+                                });
+
+                                $scope.credentialRequiresPassword = credentialRequiresPassword;
+
                                 if (!launchConf.survey_enabled &&
                                     !launchConf.ask_inventory_on_launch &&
                                     !launchConf.ask_credential_on_launch &&
@@ -678,9 +753,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                     !launchConf.ask_tags_on_launch &&
                                     !launchConf.ask_skip_tags_on_launch &&
                                     !launchConf.ask_diff_mode_on_launch &&
-                                    !launchConf.survey_enabled &&
                                     !launchConf.credential_needed_to_start &&
-                                    launchConf.passwords_needed_to_start.length === 0 &&
+                                    !launchConf.ask_variables_on_launch &&
                                     launchConf.variables_needed_to_start.length === 0) {
                                         $scope.showPromptButton = false;
                                         $scope.promptModalMissingReqFields = false;
@@ -725,6 +799,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                                     $scope.missingSurveyValue = missingSurveyValue;
                                                 }, true);
 
+                                                checkCredentialsForRequiredPasswords();
+
                                                 watchForPromptChanges();
                                             });
                                     } else {
@@ -734,6 +810,9 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                             prompts: prompts,
                                             template: $scope.nodeBeingEdited.unifiedJobTemplate.id
                                         };
+
+                                        checkCredentialsForRequiredPasswords();
+
                                         watchForPromptChanges();
                                     }
                                 }
@@ -786,26 +865,26 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                      switch($scope.nodeBeingEdited.edgeType) {
                         case "always":
-                            $scope.edgeType = {label: "Always", value: "always"};
+                            $scope.edgeType = {label: i18n._("Always"), value: "always"};
                             if (siblingConnectionTypes.length === 1 && _.includes(siblingConnectionTypes, "always") || $scope.nodeBeingEdited.isRoot) {
                                 edgeDropdownOptions = ["always"];
                             }
                             break;
                         case "success":
-                            $scope.edgeType = {label: "On Success", value: "success"};
+                            $scope.edgeType = {label: i18n._("On Success"), value: "success"};
                             if (siblingConnectionTypes.length !== 0 && (!_.includes(siblingConnectionTypes, "always"))) {
                                 edgeDropdownOptions = ["success", "failure"];
                             }
                             break;
                         case "failure":
-                            $scope.edgeType = {label: "On Failure", value: "failure"};
+                            $scope.edgeType = {label: i18n._("On Failure"), value: "failure"};
                             if (siblingConnectionTypes.length !== 0 && (!_.includes(siblingConnectionTypes, "always"))) {
                                 edgeDropdownOptions = ["success", "failure"];
                             }
                             break;
                     }
 
-                    updateEdgeDropdownOptions(edgeDropdownOptions);
+                    $timeout(updateEdgeDropdownOptions(edgeDropdownOptions));
 
                     $scope.$broadcast("refreshWorkflowChart");
                 };
@@ -925,7 +1004,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                     switch($scope.nodeBeingEdited.edgeType) {
                        case "always":
-                           $scope.edgeType = {label: "Always", value: "always"};
+                           $scope.edgeType = {label: i18n._("Always"), value: "always"};
                            if (
                                _.includes(siblingConnectionTypes, "always") &&
                                !_.includes(siblingConnectionTypes, "success") &&
@@ -937,7 +1016,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                            }
                            break;
                        case "success":
-                           $scope.edgeType = {label: "On Success", value: "success"};
+                           $scope.edgeType = {label: i18n._("On Success"), value: "success"};
                            if (
                                (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) &&
                                !_.includes(siblingConnectionTypes, "always")
@@ -948,7 +1027,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                            }
                            break;
                        case "failure":
-                           $scope.edgeType = {label: "On Failure", value: "failure"};
+                           $scope.edgeType = {label: i18n._("On Failure"), value: "failure"};
                            if (
                                (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) &&
                                !_.includes(siblingConnectionTypes, "always")
@@ -974,6 +1053,20 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
         $scope.templateManuallySelected = function(selectedTemplate) {
 
+            if (promptWatcher) {
+                promptWatcher();
+            }
+
+            if (surveyQuestionWatcher) {
+                surveyQuestionWatcher();
+            }
+
+            if (credentialsWatcher) {
+                credentialsWatcher();
+            }
+
+            $scope.promptData = null;
+
             if (selectedTemplate.type === "job_template") {
                 let jobTemplate = new JobTemplate();
 
@@ -987,6 +1080,12 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             $scope.selectedTemplateInvalid = false;
                         }
 
+                        if (launchConf.passwords_needed_to_start && launchConf.passwords_needed_to_start.length > 0) {
+                            $scope.credentialRequiresPassword = true;
+                        } else {
+                            $scope.credentialRequiresPassword = false;
+                        }
+
                         $scope.selectedTemplate = angular.copy(selectedTemplate);
 
                         if (!launchConf.survey_enabled &&
@@ -998,9 +1097,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             !launchConf.ask_tags_on_launch &&
                             !launchConf.ask_skip_tags_on_launch &&
                             !launchConf.ask_diff_mode_on_launch &&
-                            !launchConf.survey_enabled &&
                             !launchConf.credential_needed_to_start &&
-                            launchConf.passwords_needed_to_start.length === 0 &&
+                            !launchConf.ask_variables_on_launch &&
                             launchConf.variables_needed_to_start.length === 0) {
                                 $scope.showPromptButton = false;
                                 $scope.promptModalMissingReqFields = false;
@@ -1063,7 +1161,6 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                         }
                     });
             } else {
-                // TODO - clear out prompt data?
                 $scope.selectedTemplate = angular.copy(selectedTemplate);
                 $scope.selectedTemplateInvalid = false;
                 $scope.showPromptButton = false;

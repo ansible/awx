@@ -977,7 +977,7 @@ register(
     'SOCIAL_AUTH_SAML_SP_PUBLIC_CERT',
     field_class=fields.CharField,
     allow_blank=True,
-    default='',
+    required=True,
     validators=[validate_certificate],
     label=_('SAML Service Provider Public Certificate'),
     help_text=_('Create a keypair for Tower to use as a service provider (SP) '
@@ -991,7 +991,7 @@ register(
     'SOCIAL_AUTH_SAML_SP_PRIVATE_KEY',
     field_class=fields.CharField,
     allow_blank=True,
-    default='',
+    required=True,
     validators=[validate_private_key],
     label=_('SAML Service Provider Private Key'),
     help_text=_('Create a keypair for Tower to use as a service provider (SP) '
@@ -1196,7 +1196,9 @@ register(
     category_slug='saml',
     placeholder=collections.OrderedDict([
         ('saml_attr', 'organization'),
+        ('saml_admin_attr', 'organization_admin'),
         ('remove', True),
+        ('remove_admins', True),
     ]),
     feature_required='enterprise_auth',
 )
@@ -1211,7 +1213,7 @@ register(
     category=_('SAML'),
     category_slug='saml',
     placeholder=collections.OrderedDict([
-        ('saml_attr', 'organization'),
+        ('saml_attr', 'team'),
         ('remove', True),
         ('team_org_map', [
             collections.OrderedDict([

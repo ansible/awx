@@ -7,7 +7,16 @@ const MODULE_NAME = 'at.features.credentials';
 
 const addEditTemplate = require('~features/credentials/add-edit-credentials.view.html');
 
-function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, Organization) {
+function CredentialsResolve (
+    $q,
+    $stateParams,
+    Me,
+    Credential,
+    CredentialType,
+    Organization,
+    ProcessErrors,
+    strings
+) {
     const id = $stateParams.credential_id;
 
     const promises = {
@@ -43,6 +52,12 @@ function CredentialsResolve ($q, $stateParams, Me, Credential, CredentialType, O
 
                     return models;
                 });
+        }).catch(({ data, status, config }) => {
+            ProcessErrors(null, data, status, null, {
+                hdr: strings.get('error.HEADER'),
+                msg: strings.get('error.CALL', { path: `${config.url}`, status })
+            });
+            return $q.reject();
         });
 }
 
@@ -52,7 +67,9 @@ CredentialsResolve.$inject = [
     'MeModel',
     'CredentialModel',
     'CredentialTypeModel',
-    'OrganizationModel'
+    'OrganizationModel',
+    'ProcessErrors',
+    'CredentialsStrings'
 ];
 
 function CredentialsRun ($stateExtender, legacy, strings) {

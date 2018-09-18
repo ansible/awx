@@ -114,6 +114,12 @@ function AtFormController (eventService, strings) {
 
             if (typeof err.data === 'object') {
                 message = JSON.stringify(err.data);
+            } if (_.has(err, 'data.__all__')) {
+                if (typeof err.data.__all__ === 'object' && Array.isArray(err.data.__all__)) {
+                    message = JSON.stringify(err.data.__all__[0]);
+                } else {
+                    message = JSON.stringify(err.data.__all__);
+                }
             } else {
                 message = err.data;
             }

@@ -290,6 +290,7 @@ export default ['$compile', 'Attr', 'Icon',
                 // gotcha: transcluded elements require custom scope linking - binding to $parent models assumes a very rigid DOM hierarchy
                 // see: lookup-modal.directive.js for example
                 innerTable += options.mode === 'lookup' ? `<tbody ng-init="selection.${list.iterator} = {id: $parent.${list.iterator}, name: $parent.${list.iterator}_name}">` : `"<tbody>\n"`;
+
                 innerTable += "<tr ng-class=\"[" + list.iterator;
                 innerTable += (options.mode === 'lookup' || options.mode === 'select') ? ".success_class" : ".active_class";
 
@@ -313,7 +314,7 @@ export default ['$compile', 'Attr', 'Icon',
                     innerTable += `, {'List-tableRow--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}`;
                 }
 
-                innerTable += (list.disableRow) ? `, {true: 'List-tableRow--disabled'}[${list.iterator}.pending_deletion]` : "";
+                innerTable += (list.disableRow) ? `, {'List-tableRow--disabled': ${list.disableRowValue}}` : "";
 
                 if (list.multiSelect) {
                     innerTable += ", " + list.iterator + ".isSelected ? 'is-selected-row' : ''";
@@ -323,24 +324,27 @@ export default ['$compile', 'Attr', 'Icon',
                 innerTable += "id=\"{{ " + list.iterator + ".id }}\" ";
                 innerTable += "class=\"List-tableRow " + list.iterator + "_class\" ";
                 innerTable += (list.disableRow) ? " disable-row=\"" + list.disableRow + "\" " : "";
+                if(_.has(list, 'disableTooltip')){
+                    let { placement, tipWatch } = list.disableTooltip;
+                    innerTable += `aw-tool-tip="{{tipWatch}}" data-placement="${placement}" data-tip-watch="${tipWatch}"`;
+                }
                 innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
                 innerTable += (list.trackBy) ? " track by " + list.trackBy : "";
                 innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
                 innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
                 innerTable += "\">\n";
-
                 if (list.index) {
                     innerTable += "<td class=\"index-column hidden-xs List-tableCell\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</td>\n";
                 }
 
                 if (list.multiSelect) {
-                    innerTable += '<td class="col-xs-1 select-column List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
+                    innerTable += '<td class="col-xs-1 select-column List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\" disabled="'+list.disableRowValue+'"></select-list-item></td>';
                 }
 
                 // Change layout if a lookup list, place radio buttons before labels
                 if (options.mode === 'lookup') {
                     if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
-                        innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator})"></td>`;
+                        innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator})" ng-disabled="${list.disableRowValue}"></td>`;
                     }
                     else { // its assumed that options.input_type = checkbox
                         innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
@@ -541,22 +545,27 @@ export default ['$compile', 'Attr', 'Icon',
                     }
                 }
                 if (options.mode === 'lookup') {
-                    let customClass = list.fields.name.modalColumnClass || '';
-                    html += `<th
-                            base-path="${list.basePath || list.name}"
-                            collection="${list.name}"
-                            dataset="${list.iterator}_dataset"
-                            column-sort
-                            column-field="name"
-                            column-iterator="${list.iterator}"
-                            column-no-sort="${list.fields.name.nosort}"
-                            column-label="${list.fields.name.label}"
-                            column-custom-class="${customClass}"
-                            query-set="${list.iterator}_queryset">
-                        </th>`;
+                    for (fld in list.fields) {
+                        if(fld === 'name' || _.has(list.fields[fld], 'includeModal')){
+                            let customClass = list.fields.name.modalColumnClass || '';
+                            html += `<th
+                                base-path="${list.basePath || list.name}"
+                                collection="${list.name}"
+                                dataset="${list.iterator}_dataset"
+                                column-sort
+                                column-field="name"
+                                column-iterator="${list.iterator}"
+                                column-no-sort="${list.fields.name.nosort}"
+                                column-label="${list.fields[fld].label}"
+                                column-custom-class="${customClass}"
+                                query-set="${list.iterator}_queryset">
+                            </th>`;
+                        }
+                        
+                    }
 
                     if(list.fields.info) {
-                        customClass = list.fields.name.modalColumnClass || '';
+                        let customClass = list.fields.name.modalColumnClass || '';
                         const infoHeaderClass = _.get(list.fields.info, 'infoHeaderClass', 'List-tableHeader--info');
                         html += `<th
                                     class="${infoHeaderClass}"

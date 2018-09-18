@@ -7,6 +7,8 @@ import pytz
 
 from awx.main.models import JobTemplate, Schedule
 
+from crum import impersonate
+
 
 @pytest.fixture
 def job_template(inventory, project):
@@ -16,6 +18,22 @@ def job_template(inventory, project):
         inventory=inventory,
         project=project
     )
+
+
+@pytest.mark.django_db
+def test_computed_fields_modified_by_retained(job_template, admin_user):
+    with impersonate(admin_user):
+        s = Schedule.objects.create(
+            name='Some Schedule',
+            rrule='DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1',
+            unified_job_template=job_template
+        )
+    s.refresh_from_db()
+    assert s.created_by == admin_user
+    assert s.modified_by == admin_user
+    s.update_computed_fields()
+    s.save()
+    assert s.modified_by == admin_user
 
 
 @pytest.mark.django_db
@@ -113,11 +131,11 @@ def test_leap_year_day(job_template):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('until, dtend', [
-    ['20180602T170000Z', '2018-06-02 12:00:00+00:00'],
-    ['20180602T000000Z', '2018-06-01 12:00:00+00:00'],
+    ['20300602T170000Z', '2030-06-02 12:00:00+00:00'],
+    ['20300602T000000Z', '2030-06-01 12:00:00+00:00'],
 ])
 def test_utc_until(job_template, until, dtend):
-    rrule = 'DTSTART:20180601T120000Z RRULE:FREQ=DAILY;INTERVAL=1;UNTIL={}'.format(until)
+    rrule = 'DTSTART:20300601T120000Z RRULE:FREQ=DAILY;INTERVAL=1;UNTIL={}'.format(until)
     s = Schedule(
         name='Some Schedule',
         rrule=rrule,
@@ -125,7 +143,7 @@ def test_utc_until(job_template, until, dtend):
     )
     s.save()
 
-    assert str(s.next_run) == '2018-06-01 12:00:00+00:00'
+    assert str(s.next_run) == '2030-06-01 12:00:00+00:00'
     assert str(s.next_run) == str(s.dtstart)
     assert str(s.dtend) == dtend
 

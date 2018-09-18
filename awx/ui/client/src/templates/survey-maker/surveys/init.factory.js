@@ -1,6 +1,6 @@
 export default
         function Init(DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
-            GetBasePath, Rest, ProcessErrors, EditQuestion, CreateSelect2) {
+            GetBasePath, Rest, ProcessErrors, EditQuestion, CreateSelect2, i18n) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -10,14 +10,18 @@ export default
             scope.sce = sce;
             scope.survey_questions = [];
             scope.answer_types=[
-                {name: 'Text' , type: 'text'},
-                {name: 'Textarea', type: 'textarea'},
-                {name: 'Password', type: 'password'},
-                {name: 'Multiple Choice (single select)', type: 'multiplechoice'},
-                {name: 'Multiple Choice (multiple select)', type: 'multiselect'},
-                {name: 'Integer', type: 'integer'},
-                {name: 'Float', type: 'float'}
+                {name: i18n._('Text'), type: 'text'},
+                {name: i18n._('Textarea'), type: 'textarea'},
+                {name: i18n._('Password'), type: 'password'},
+                {name: i18n._('Multiple Choice (single select)'), type: 'multiplechoice'},
+                {name: i18n._('Multiple Choice (multiple select)'), type: 'multiselect'},
+                {name: i18n._('Integer'), type: 'integer'},
+                {name: i18n._('Float'), type: 'float'}
             ];
+            scope.disableSurveyTooltip = i18n._('Disble Survey');
+            scope.editQuestionTooltip = i18n._('Edit Question');
+            scope.deleteQuestionTooltip = i18n._('Delete Question');
+            scope.dragQuestionTooltip = i18n._('Drag to reorder question');
 
             /* SURVEY RELATED FUNCTIONS */
 
@@ -257,7 +261,7 @@ export default
                 scope.maxTextError = false;
 
                 if(scope.type.type==="text"){
-                    if(scope.default.trim() !== ""){
+                    if(scope.default && scope.default.trim() !== ""){
                         if(scope.default.trim().length < scope.text_min && scope.text_min !== "" ){
                             scope.minTextError = true;
                         }
@@ -268,7 +272,7 @@ export default
                 }
 
                 if(scope.type.type==="textarea"){
-                    if(scope.default_textarea.trim() !== ""){
+                    if(scope.default_textarea && scope.default_textarea.trim() !== ""){
                         if(scope.default_textarea.trim().length < scope.textarea_min && scope.textarea_min !== "" ){
                             scope.minTextError = true;
                         }
@@ -279,7 +283,7 @@ export default
                 }
 
                 if(scope.type.type==="password"){
-                    if(scope.default_password.trim() !== ""){
+                    if(scope.default_password && scope.default_password.trim() !== ""){
                         if(scope.default_password.trim().length < scope.password_min && scope.password_min !== "" ){
                             scope.minTextError = true;
                         }
@@ -289,7 +293,7 @@ export default
                     }
                 }
 
-                if(scope.type.type==="multiselect" && scope.default_multiselect.trim() !== ""){
+                if(scope.type.type==="multiselect" && scope.default_multiselect && scope.default_multiselect.trim() !== ""){
                     choiceArray = scope.choices.split(/\n/);
                     answerArray = scope.default_multiselect.split(/\n/);
 
@@ -302,7 +306,7 @@ export default
                     }
                 }
 
-                if(scope.type.type==="multiplechoice" && scope.default.trim() !== ""){
+                if(scope.type.type==="multiplechoice" && scope.default && scope.default.trim() !== ""){
                     choiceArray = scope.choices.split(/\n/);
                     if($.inArray(scope.default, choiceArray)===-1){
                         scope.invalidChoice = true;
@@ -476,10 +480,10 @@ export default
                     inputId = id,
                     buttonInnerHTML = $(buttonId).html();
                 if (buttonInnerHTML.indexOf("SHOW") > -1) {
-                    $(buttonId).html("HIDE");
+                    $(buttonId).html(i18n._("HIDE"));
                     $(inputId).attr("type", "text");
                 } else {
-                    $(buttonId).html("SHOW");
+                    $(buttonId).html(i18n._("SHOW"));
                     $(inputId).attr("type", "password");
                 }
             };
@@ -511,7 +515,7 @@ export default
 
             // Watcher that updates the survey enabled/disabled tooltip based on scope.survey_enabled
             scope.$watch('survey_enabled', function(newVal) {
-                scope.surveyEnabledTooltip = (newVal) ? "Disable survey" : "Enable survey";
+                scope.surveyEnabledTooltip = (newVal) ? i18n._("Disable survey") : i18n._("Enable survey");
             });
 
         };
@@ -529,5 +533,6 @@ Init.$inject =
         'Rest',
         'ProcessErrors',
         'editQuestion',
-        'CreateSelect2'
+        'CreateSelect2',
+        'i18n'
     ];

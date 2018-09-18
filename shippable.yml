@@ -1,3 +1,6 @@
+runtime:
+  nodePool: awx
+
 language: python
 
 python:

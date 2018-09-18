@@ -6,11 +6,13 @@ import contextlib
 import logging
 import threading
 import json
+import pkg_resources
+import sys
 
 # Django
 from django.conf import settings
 from django.db.models.signals import (
-    post_init,
+    pre_save,
     post_save,
     pre_delete,
     post_delete,
@@ -18,6 +20,7 @@ from django.db.models.signals import (
 )
 from django.dispatch import receiver
 from django.contrib.auth import SESSION_KEY
+from django.contrib.sessions.models import Session
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -29,10 +32,9 @@ import six
 
 # AWX
 from awx.main.models import * # noqa
-from django.contrib.sessions.models import Session
 from awx.api.serializers import * # noqa
-from awx.main.constants import TOKEN_CENSOR
-from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
+from awx.main.constants import CENSOR_VALUE
+from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
 from awx.main.fields import (
@@ -50,6 +52,13 @@ logger = logging.getLogger('awx.main.signals')
 
 # Update has_active_failures for inventory/groups when a Host/Group is deleted,
 # when a Host-Group or Group-Group relationship is updated, or when a Job is deleted
+
+
+def get_activity_stream_class():
+    if 'migrate' in sys.argv:
+        return get_current_apps().get_model('main', 'ActivityStream')
+    else:
+        return ActivityStream
 
 
 def get_current_user_or_none():
@@ -200,14 +209,6 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
             l.delete()
 
 
-def set_original_organization(sender, instance, **kwargs):
-    '''set_original_organization is used to set the original, or
-    pre-save organization, so we can later determine if the organization
-    field is dirty.
-    '''
-    instance.__original_org_id = instance.organization_id
-
-
 def save_related_job_templates(sender, instance, **kwargs):
     '''save_related_job_templates loops through all of the
     job templates that use an Inventory or Project that have had their
@@ -217,7 +218,7 @@ def save_related_job_templates(sender, instance, **kwargs):
     if sender not in (Project, Inventory):
         raise ValueError('This signal callback is only intended for use with Project or Inventory')
 
-    if instance.__original_org_id != instance.organization_id:
+    if instance._prior_values_store.get('organization_id') != instance.organization_id:
         jtq = JobTemplate.objects.filter(**{sender.__name__.lower(): instance})
         for jt in jtq:
             update_role_parentage_for_instance(jt)
@@ -240,8 +241,6 @@ def connect_computed_field_signals():
 
 connect_computed_field_signals()
 
-post_init.connect(set_original_organization, sender=Project)
-post_init.connect(set_original_organization, sender=Inventory)
 post_save.connect(save_related_job_templates, sender=Project)
 post_save.connect(save_related_job_templates, sender=Inventory)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
@@ -391,6 +390,7 @@ model_serializer_mapping = {
     Inventory: InventorySerializer,
     Host: HostSerializer,
     Group: GroupSerializer,
+    InstanceGroup: InstanceGroupSerializer,
     InventorySource: InventorySourceSerializer,
     CustomInventoryScript: CustomInventoryScriptSerializer,
     Credential: CredentialSerializer,
@@ -428,8 +428,8 @@ def activity_stream_create(sender, instance, created, **kwargs):
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
         if type(instance) == OAuth2AccessToken:
-            changes['token'] = TOKEN_CENSOR
-        activity_entry = ActivityStream(
+            changes['token'] = CENSOR_VALUE
+        activity_entry = get_activity_stream_class()(
             operation='create',
             object1=object1,
             changes=json.dumps(changes),
@@ -439,7 +439,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
         #      we don't really use them anyway.
         if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
             activity_entry.save()
-            getattr(activity_entry, object1).add(instance)
+            getattr(activity_entry, object1).add(instance.pk)
         else:
             activity_entry.setting = conf_to_dict(instance)
             activity_entry.save()
@@ -463,14 +463,14 @@ def activity_stream_update(sender, instance, **kwargs):
     if getattr(_type, '_deferred', False):
         return
     object1 = camelcase_to_underscore(instance.__class__.__name__)
-    activity_entry = ActivityStream(
+    activity_entry = get_activity_stream_class()(
         operation='update',
         object1=object1,
         changes=json.dumps(changes),
         actor=get_current_user_or_none())
     if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
         activity_entry.save()
-        getattr(activity_entry, object1).add(instance)
+        getattr(activity_entry, object1).add(instance.pk)
     else:
         activity_entry.setting = conf_to_dict(instance)
         activity_entry.save()
@@ -495,8 +495,8 @@ def activity_stream_delete(sender, instance, **kwargs):
     changes = model_to_dict(instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     if type(instance) == OAuth2AccessToken:
-        changes['token'] = TOKEN_CENSOR
-    activity_entry = ActivityStream(
+        changes['token'] = CENSOR_VALUE
+    activity_entry = get_activity_stream_class()(
         operation='delete',
         changes=json.dumps(changes),
         object1=object1,
@@ -543,7 +543,7 @@ def activity_stream_associate(sender, instance, **kwargs):
                 continue
             if isinstance(obj1, SystemJob) or isinstance(obj2_actual, SystemJob):
                 continue
-            activity_entry = ActivityStream(
+            activity_entry = get_activity_stream_class()(
                 changes=json.dumps(dict(object1=object1,
                                         object1_pk=obj1.pk,
                                         object2=object2,
@@ -556,8 +556,8 @@ def activity_stream_associate(sender, instance, **kwargs):
                 object_relationship_type=obj_rel,
                 actor=get_current_user_or_none())
             activity_entry.save()
-            getattr(activity_entry, object1).add(obj1)
-            getattr(activity_entry, object2).add(obj2_actual)
+            getattr(activity_entry, object1).add(obj1.pk)
+            getattr(activity_entry, object2).add(obj2_actual.pk)
 
             # Record the role for RBAC changes
             if 'role' in kwargs:
@@ -603,6 +603,16 @@ def delete_inventory_for_org(sender, instance, **kwargs):
 @receiver(post_save, sender=Session)
 def save_user_session_membership(sender, **kwargs):
     session = kwargs.get('instance', None)
+    if pkg_resources.get_distribution('channels').version >= '2':
+        # If you get into this code block, it means we upgraded channels, but
+        # didn't make the settings.SESSIONS_PER_USER feature work
+        raise RuntimeError(
+            'save_user_session_membership must be updated for channels>=2: '
+            'http://channels.readthedocs.io/en/latest/one-to-two.html#requirements'
+        )
+    if 'runworker' in sys.argv:
+        # don't track user session membership for websocket per-channel sessions
+        return
     if not session:
         return
     user = session.get_decoded().get(SESSION_KEY, None)
@@ -611,13 +621,15 @@ def save_user_session_membership(sender, **kwargs):
     user = User.objects.get(pk=user)
     if UserSessionMembership.objects.filter(user=user, session=session).exists():
         return
-    UserSessionMembership.objects.create(user=user, session=session, created=timezone.now())
-    for membership in UserSessionMembership.get_memberships_over_limit(user):
+    UserSessionMembership(user=user, session=session, created=timezone.now()).save()
+    expired = UserSessionMembership.get_memberships_over_limit(user)
+    for membership in expired:
+        Session.objects.filter(session_key__in=[membership.session_id]).delete()
+        membership.delete()
+    if len(expired):
         consumers.emit_channel_notification(
-            'control-limit_reached',
-            dict(group_name='control',
-                 reason=unicode(_('limit_reached')),
-                 session_key=membership.session.session_key)
+            'control-limit_reached_{}'.format(user.pk),
+            dict(group_name='control', reason=unicode(_('limit_reached')))
         )
 
 
@@ -631,3 +643,7 @@ def create_access_token_user_if_missing(sender, **kwargs):
         post_save.connect(create_access_token_user_if_missing, sender=OAuth2AccessToken)
 
 
+# Connect the Instance Group to Activity Stream receivers. 
+post_save.connect(activity_stream_create, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_create")
+pre_save.connect(activity_stream_update, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_update")
+pre_delete.connect(activity_stream_delete, sender=InstanceGroup, dispatch_uid=str(InstanceGroup) + "_delete")
