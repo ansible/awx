@@ -223,6 +223,11 @@
             }
           }
         },
+        "lodash": {
+          "version": "3.8.0",
+          "from": "lodash@>=3.8.0 <3.9.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.8.0.tgz"
+        },
         "rrule": {
           "version": "2.2.0-dev",
           "from": "jkbrzt/rrule#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c",
@@ -233,7 +238,7 @@
     "angular-tz-extensions": {
       "version": "0.5.2",
       "from": "git+https://git@github.com/ansible/angular-tz-extensions.git#v0.5.2",
-      "resolved": "git+https://git@github.com/ansible/angular-tz-extensions.git#9cabb05d58079092bfb29ccae721b35b46f28af6",
+      "resolved": "git://github.com/ansible/angular-tz-extensions.git#9cabb05d58079092bfb29ccae721b35b46f28af6",
       "dependencies": {
         "jquery": {
           "version": "3.3.1",
@@ -1496,7 +1501,15 @@
       "version": "0.19.0",
       "from": "cheerio@>=0.19.0 <0.20.0",
       "resolved": "https://registry.npmjs.org/cheerio/-/cheerio-0.19.0.tgz",
-      "dev": true
+      "dev": true,
+      "dependencies": {
+        "lodash": {
+          "version": "3.10.1",
+          "from": "lodash@>=3.2.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "dev": true
+        }
+      }
     },
     "chokidar": {
       "version": "1.7.0",
@@ -5420,6 +5433,12 @@
       "resolved": "https://registry.npmjs.org/karma/-/karma-1.7.1.tgz",
       "dev": true,
       "dependencies": {
+        "lodash": {
+          "version": "3.10.1",
+          "from": "lodash@>=3.8.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "dev": true
+        },
         "source-map": {
           "version": "0.5.7",
           "from": "source-map@>=0.5.3 <0.6.0",
@@ -5723,6 +5742,12 @@
           "from": "inquirer@>=0.8.2 <0.9.0",
           "resolved": "https://registry.npmjs.org/inquirer/-/inquirer-0.8.5.tgz",
           "dev": true
+        },
+        "lodash": {
+          "version": "3.10.1",
+          "from": "lodash@>=3.6.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "dev": true
         }
       }
     },
@@ -5796,9 +5821,9 @@
       "dev": true
     },
     "lodash": {
-      "version": "3.8.0",
-      "from": "lodash@>=3.8.0 <3.9.0",
-      "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.8.0.tgz"
+      "version": "4.17.10",
+      "from": "lodash@>=4.17.10 <4.18.0",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.10.tgz"
     },
     "lodash._arraycopy": {
       "version": "3.0.0",
@@ -6316,6 +6341,12 @@
           "version": "5.0.15",
           "from": "glob@>=5.0.0 <6.0.0",
           "resolved": "https://registry.npmjs.org/glob/-/glob-5.0.15.tgz",
+          "dev": true
+        },
+        "lodash": {
+          "version": "3.10.1",
+          "from": "lodash@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
           "dev": true
         }
       }

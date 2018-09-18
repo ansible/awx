@@ -2,7 +2,6 @@
 # Python
 import pytest
 import mock
-from collections import namedtuple
 
 # AWX
 from awx.main.utils.filters import SmartFilter, ExternalLoggerEnabled
@@ -44,8 +43,26 @@ def test_log_configurable_severity(level, expect, dummy_log_record):
     assert filter.filter(dummy_log_record) is expect
 
 
-Field = namedtuple('Field', 'name')
-Meta = namedtuple('Meta', 'fields')
+class Field(object):
+
+    def __init__(self, name, related_model=None, __prevent_search__=None):
+        self.name = name
+        self.related_model = related_model
+        self.__prevent_search__ = __prevent_search__
+
+
+class Meta(object):
+
+    def __init__(self, fields):
+        self._fields = {
+            f.name: f for f in fields
+        }
+        self.object_name = 'Host'
+        self.fields_map = {}
+        self.fields = self._fields.values()
+
+    def get_field(self, f):
+        return self._fields.get(f)
 
 
 class mockObjects:
@@ -53,15 +70,32 @@ class mockObjects:
         return Q(*args, **kwargs)
 
 
+class mockUser:
+    def __init__(self):
+        print("Host user created")
+        self._meta = Meta(fields=[
+            Field(name='password', __prevent_search__=True)
+        ])
+
+
 class mockHost:
     def __init__(self):
         print("Host mock created")
         self.objects = mockObjects()
-        self._meta = Meta(fields=(Field(name='name'), Field(name='description')))
+        fields = [
+            Field(name='name'),
+            Field(name='description'),
+            Field(name='created_by', related_model=mockUser())
+        ]
+        self._meta = Meta(fields=fields)
 
 
 @mock.patch('awx.main.utils.filters.get_model', return_value=mockHost())
 class TestSmartFilterQueryFromString():
+    @mock.patch(
+        'awx.api.filters.get_field_from_path',
+        lambda model, path: (model, path)  # disable field filtering, because a__b isn't a real Host field
+    )
     @pytest.mark.parametrize("filter_string,q_expected", [
         ('facts__facts__blank=""', Q(**{u"facts__facts__blank": u""})),
         ('"facts__facts__ space "="f"', Q(**{u"facts__facts__ space ": u"f"})),
@@ -87,6 +121,16 @@ class TestSmartFilterQueryFromString():
         with pytest.raises(RuntimeError) as e:
             SmartFilter.query_from_string(filter_string)
         assert e.value.message == u"Invalid query " + filter_string
+
+    @pytest.mark.parametrize("filter_string", [
+        'created_by__password__icontains=pbkdf2'
+        'search=foo or created_by__password__icontains=pbkdf2',
+        'created_by__password__icontains=pbkdf2 or search=foo',
+    ])
+    def test_forbidden_filter_string(self, mock_get_host_model, filter_string):
+        with pytest.raises(Exception) as e:
+            SmartFilter.query_from_string(filter_string)
+        "Filtering on password is not allowed." in str(e)
 
     @pytest.mark.parametrize("filter_string,q_expected", [
         (u'(a=abc\u1F5E3def)', Q(**{u"a": u"abc\u1F5E3def"})),

@@ -390,7 +390,6 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             ]:
                 d[key] = self.metadata_class().get_serializer_info(serializer, method=method)
         d['settings'] = settings
-        d['has_named_url'] = self.model in settings.NAMED_URL_GRAPH
         return d
 
 

@@ -46,6 +46,11 @@
     text-align: center;
     margin-left: 10px;
     margin-right: auto;
+
+    &--inline {
+        margin-right: @at-space-2x;
+        margin-left: 0;
+    }
 }
 
 .at-Panel-headingCustomContent {
@@ -59,6 +64,7 @@
     font-size: 12px;
     font-weight: normal!important;
     width: 30%;
+    margin: @at-space-2x;
 
     @media screen and (max-width: @breakpoint-md) {
         flex: 2.5 0 auto;

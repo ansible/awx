@@ -82,7 +82,7 @@ function resolveResource (
         order_by: OUTPUT_ORDER_BY,
     };
 
-    if (job_event_search) { // eslint-disable-line camelcase
+    if (job_event_search) {
         const query = qs.encodeQuerysetObject(qs.decodeArr(job_event_search));
         Object.assign(params, query);
     }
@@ -173,7 +173,7 @@ function JobsRun ($stateRegistry, $filter, strings) {
     const sanitize = $filter('sanitize');
 
     const state = {
-        url: '/:type/:id?job_event_search',
+        url: '/:type/:id?job_event_search?_debug',
         name: 'output',
         parent,
         ncyBreadcrumb,

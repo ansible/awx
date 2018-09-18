@@ -35,9 +35,9 @@ def sanitize_event_keys(kwargs, valid_keys):
     for key in [
         'play', 'role', 'task', 'playbook'
     ]:
-        if isinstance(kwargs.get(key), six.string_types):
-            if len(kwargs[key]) > 1024:
-                kwargs[key] = Truncator(kwargs[key]).chars(1024)
+        if isinstance(kwargs.get('event_data', {}).get(key), six.string_types):
+            if len(kwargs['event_data'][key]) > 1024:
+                kwargs['event_data'][key] = Truncator(kwargs['event_data'][key]).chars(1024)
 
 
 def create_host_status_counts(event_data):

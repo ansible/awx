@@ -21,7 +21,11 @@ function ApplicationsStrings (BaseString) {
     };
 
     ns.add = {
-        PANEL_TITLE: t.s('NEW APPLICATION')
+        PANEL_TITLE: t.s('NEW APPLICATION'),
+        CLIENT_ID_LABEL: t.s('CLIENT ID'),
+        CLIENT_SECRECT_LABEL: t.s('CLIENT SECRET'),
+        MODAL_HEADER: t.s('APPLICATION INFORMATION'),
+        NAME_LABEL: t.s('NAME'),
     };
 
     ns.list = {

@@ -611,7 +611,8 @@ class OAuth2ApplicationAccess(BaseAccess):
     select_related = ('user',)
 
     def filtered_queryset(self):
-        return self.model.objects.filter(organization__in=self.user.organizations)
+        org_access_qs = Organization.accessible_objects(self.user, 'member_role')
+        return self.model.objects.filter(organization__in=org_access_qs)
 
     def can_change(self, obj, data):
         return self.user.is_superuser or self.check_related('organization', Organization, data, obj=obj, 

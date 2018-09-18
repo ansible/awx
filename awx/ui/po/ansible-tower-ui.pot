@@ -236,8 +236,8 @@ msgstr ""
 msgid "Add Project"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1718
-#: client/src/templates/job_templates/job-template.form.js:464
+#: client/src/shared/form-generator.js:1731
+#: client/src/templates/job_templates/job-template.form.js:468
 #: client/src/templates/workflows.form.js:205
 msgid "Add Survey"
 msgstr ""
@@ -277,12 +277,12 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:115
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:117
 #: client/src/projects/projects.form.js:255
-#: client/src/templates/job_templates/job-template.form.js:407
+#: client/src/templates/job_templates/job-template.form.js:411
 #: client/src/templates/workflows.form.js:148
 msgid "Add a permission"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1453
+#: client/src/shared/form-generator.js:1466
 msgid "Admin"
 msgstr ""
 
@@ -315,8 +315,8 @@ msgstr ""
 msgid "All Jobs"
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:286
-#: client/src/templates/job_templates/job-template.form.js:293
+#: client/src/templates/job_templates/job-template.form.js:290
+#: client/src/templates/job_templates/job-template.form.js:297
 msgid "Allow Provisioning Callbacks"
 msgstr ""
 
@@ -337,8 +337,8 @@ msgstr ""
 #: client/src/organizations/organizations.form.js:52
 #: client/src/projects/projects.form.js:207
 #: client/src/projects/projects.form.js:212
-#: client/src/templates/job_templates/job-template.form.js:235
-#: client/src/templates/job_templates/job-template.form.js:241
+#: client/src/templates/job_templates/job-template.form.js:239
+#: client/src/templates/job_templates/job-template.form.js:245
 msgid "Ansible Environment"
 msgstr ""
 
@@ -434,7 +434,7 @@ msgstr ""
 msgid "Associate this host with a new group"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1455
+#: client/src/shared/form-generator.js:1468
 msgid "Auditor"
 msgstr ""
 
@@ -703,7 +703,7 @@ msgstr ""
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:188
 #: client/src/configuration/configuration.controller.js:617
 #: client/src/scheduler/scheduler.strings.js:56
-#: client/src/shared/form-generator.js:1706
+#: client/src/shared/form-generator.js:1719
 #: client/src/shared/lookup/lookup-modal.partial.html:19
 #: client/src/workflow-results/workflow-results.controller.js:38
 msgid "Cancel"
@@ -759,7 +759,7 @@ msgstr ""
 msgid "Check"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1078
+#: client/src/shared/form-generator.js:1087
 msgid "Choose a %s"
 msgstr ""
 
@@ -844,7 +844,7 @@ msgid "Client Secret"
 msgstr ""
 
 #: client/src/scheduler/scheduler.strings.js:55
-#: client/src/shared/form-generator.js:1710
+#: client/src/shared/form-generator.js:1723
 msgid "Close"
 msgstr ""
 
@@ -870,7 +870,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/related/hosts/related-host.form.js:128
 #: client/src/inventories-hosts/inventories/smart-inventory/smart-inventory.form.js:155
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:172
-#: client/src/templates/job_templates/job-template.form.js:439
+#: client/src/templates/job_templates/job-template.form.js:443
 #: client/src/templates/workflows.form.js:180
 msgid "Completed Jobs"
 msgstr ""
@@ -1338,7 +1338,7 @@ msgstr ""
 #: client/features/output/output.strings.js:34
 #: client/features/users/tokens/tokens.strings.js:14
 #: client/src/license/license.partial.html:5
-#: client/src/shared/form-generator.js:1488
+#: client/src/shared/form-generator.js:1501
 msgid "Details"
 msgstr ""
 
@@ -1514,8 +1514,8 @@ msgstr ""
 msgid "Edit Question"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1722
-#: client/src/templates/job_templates/job-template.form.js:471
+#: client/src/shared/form-generator.js:1735
+#: client/src/templates/job_templates/job-template.form.js:475
 #: client/src/templates/workflows.form.js:212
 msgid "Edit Survey"
 msgstr ""
@@ -1608,8 +1608,8 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:299
-#: client/src/templates/job_templates/job-template.form.js:304
+#: client/src/templates/job_templates/job-template.form.js:303
+#: client/src/templates/job_templates/job-template.form.js:308
 #: client/src/templates/workflows.form.js:100
 #: client/src/templates/workflows.form.js:105
 msgid "Enable Concurrent Jobs"
@@ -1620,8 +1620,8 @@ msgid "Enable External Logging"
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:124
-#: client/src/templates/job_templates/job-template.form.js:275
-#: client/src/templates/job_templates/job-template.form.js:280
+#: client/src/templates/job_templates/job-template.form.js:279
+#: client/src/templates/job_templates/job-template.form.js:284
 msgid "Enable Privilege Escalation"
 msgstr ""
 
@@ -1629,7 +1629,7 @@ msgstr ""
 msgid "Enable survey"
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:290
+#: client/src/templates/job_templates/job-template.form.js:294
 msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact {{BRAND_NAME}} and request a configuration update using this job template."
 msgstr ""
 
@@ -1815,8 +1815,8 @@ msgstr ""
 #: client/src/job-submission/job-submission.partial.html:165
 #: client/src/partials/logviewer.html:8
 #: client/src/scheduler/scheduler.strings.js:53
-#: client/src/templates/job_templates/job-template.form.js:353
-#: client/src/templates/job_templates/job-template.form.js:360
+#: client/src/templates/job_templates/job-template.form.js:357
+#: client/src/templates/job_templates/job-template.form.js:364
 #: client/src/templates/workflows.form.js:83
 #: client/src/templates/workflows.form.js:90
 #: client/src/workflow-results/workflow-results.controller.js:122
@@ -2091,8 +2091,8 @@ msgstr ""
 msgid "Host (Authentication URL)"
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:335
-#: client/src/templates/job_templates/job-template.form.js:344
+#: client/src/templates/job_templates/job-template.form.js:339
+#: client/src/templates/job_templates/job-template.form.js:348
 msgid "Host Config Key"
 msgstr ""
 
@@ -2269,7 +2269,7 @@ msgstr ""
 msgid "If checked, any hosts and groups that were previously present on the external source but are now removed will be removed from the Tower inventory. Hosts and groups that were not managed by the inventory source will be promoted to the next manually created group or if there is no manually created group to promote them into, they will be left in the \"all\" default group for the inventory."
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:278
+#: client/src/templates/job_templates/job-template.form.js:282
 msgid "If enabled, run this playbook as an administrator."
 msgstr ""
 
@@ -2277,11 +2277,11 @@ msgstr ""
 msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible&#x2019;s --diff mode."
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:263
+#: client/src/templates/job_templates/job-template.form.js:267
 msgid "If enabled, show the changes made by Ansible tasks, where supported. This is equivalent to Ansible&#x2019s --diff mode."
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:302
+#: client/src/templates/job_templates/job-template.form.js:306
 msgid "If enabled, simultaneous runs of this job template will be allowed."
 msgstr ""
 
@@ -2289,7 +2289,7 @@ msgstr ""
 msgid "If enabled, simultaneous runs of this workflow job template will be allowed."
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:313
+#: client/src/templates/job_templates/job-template.form.js:317
 msgid "If enabled, use cached facts if available and store discovered facts in the cache."
 msgstr ""
 
@@ -2360,8 +2360,8 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:64
 #: client/src/organizations/organizations.form.js:38
 #: client/src/organizations/organizations.form.js:41
-#: client/src/templates/job_templates/job-template.form.js:248
-#: client/src/templates/job_templates/job-template.form.js:251
+#: client/src/templates/job_templates/job-template.form.js:252
+#: client/src/templates/job_templates/job-template.form.js:255
 msgid "Instance Groups"
 msgstr ""
 
@@ -2679,7 +2679,7 @@ msgstr ""
 msgid "Last Updated"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1714
+#: client/src/shared/form-generator.js:1727
 msgid "Launch"
 msgstr ""
 
@@ -2773,7 +2773,7 @@ msgstr ""
 msgid "Live events: error connecting to the  server."
 msgstr ""
 
-#: client/src/shared/form-generator.js:1992
+#: client/src/shared/form-generator.js:2005
 msgid "Loading..."
 msgstr ""
 
@@ -2841,6 +2841,10 @@ msgstr ""
 #: client/src/projects/edit/projects-edit.controller.js:143
 #: client/src/projects/list/projects-list.controller.js:89
 msgid "Manual projects do not require an SCM update"
+msgstr ""
+
+#: client/src/templates/job_templates/job-template.form.js:234
+msgid "Max 512 characters per label."
 msgstr ""
 
 #: client/src/login/loginModal/loginModal.partial.html:28
@@ -3153,7 +3157,7 @@ msgid "No recent notifications."
 msgstr ""
 
 #: client/src/inventories-hosts/hosts/hosts.partial.html:36
-#: client/src/shared/form-generator.js:1886
+#: client/src/shared/form-generator.js:1899
 #: client/src/shared/list-generator/list-generator.factory.js:240
 msgid "No records matched your search."
 msgstr ""
@@ -3300,7 +3304,7 @@ msgstr ""
 
 #: client/src/notifications/notificationTemplates.form.js:453
 #: client/src/partials/logviewer.html:7
-#: client/src/templates/job_templates/job-template.form.js:271
+#: client/src/templates/job_templates/job-template.form.js:275
 #: client/src/templates/workflows.form.js:96
 msgid "Options"
 msgstr ""
@@ -3414,7 +3418,7 @@ msgid "PLEASE ADD A SURVEY PROMPT."
 msgstr ""
 
 #: client/src/organizations/list/organizations-list.partial.html:37
-#: client/src/shared/form-generator.js:1892
+#: client/src/shared/form-generator.js:1905
 #: client/src/shared/list-generator/list-generator.factory.js:248
 msgid "PLEASE ADD ITEMS TO THIS LIST"
 msgstr ""
@@ -3448,7 +3452,7 @@ msgstr ""
 msgid "Pagerduty subdomain"
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:359
+#: client/src/templates/job_templates/job-template.form.js:363
 msgid "Pass extra command line variables to the playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
 
@@ -3531,7 +3535,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:106
 #: client/src/projects/projects.form.js:247
 #: client/src/teams/teams.form.js:120
-#: client/src/templates/job_templates/job-template.form.js:398
+#: client/src/templates/job_templates/job-template.form.js:402
 #: client/src/templates/workflows.form.js:139
 #: client/src/users/users.form.js:189
 msgid "Permissions"
@@ -3542,7 +3546,7 @@ msgid "Personal Access Token"
 msgstr ""
 
 #: client/features/output/output.strings.js:63
-#: client/src/shared/form-generator.js:1076
+#: client/src/shared/form-generator.js:1085
 #: client/src/templates/job_templates/job-template.form.js:107
 #: client/src/templates/job_templates/job-template.form.js:115
 msgid "Playbook"
@@ -3598,15 +3602,15 @@ msgstr ""
 msgid "Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character."
 msgstr ""
 
-#: client/src/shared/form-generator.js:1165
+#: client/src/shared/form-generator.js:1178
 msgid "Please enter a number greater than %d and less than %d."
 msgstr ""
 
-#: client/src/shared/form-generator.js:1167
+#: client/src/shared/form-generator.js:1180
 msgid "Please enter a number greater than %d."
 msgstr ""
 
-#: client/src/shared/form-generator.js:1159
+#: client/src/shared/form-generator.js:1172
 msgid "Please enter a number."
 msgstr ""
 
@@ -3708,7 +3712,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/standard-inventory/inventory.form.js:102
 #: client/src/projects/projects.form.js:239
 #: client/src/teams/teams.form.js:116
-#: client/src/templates/job_templates/job-template.form.js:391
+#: client/src/templates/job_templates/job-template.form.js:395
 #: client/src/templates/workflows.form.js:132
 msgid "Please save before assigning permissions."
 msgstr ""
@@ -3772,11 +3776,11 @@ msgstr ""
 msgid "Please select Users from the list below."
 msgstr ""
 
-#: client/src/shared/form-generator.js:1200
+#: client/src/shared/form-generator.js:1213
 msgid "Please select a number between"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1196
+#: client/src/shared/form-generator.js:1209
 msgid "Please select a number."
 msgstr ""
 
@@ -3784,10 +3788,10 @@ msgstr ""
 msgid "Please select a value"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1088
-#: client/src/shared/form-generator.js:1156
-#: client/src/shared/form-generator.js:1277
-#: client/src/shared/form-generator.js:1385
+#: client/src/shared/form-generator.js:1097
+#: client/src/shared/form-generator.js:1169
+#: client/src/shared/form-generator.js:1290
+#: client/src/shared/form-generator.js:1398
 msgid "Please select a value."
 msgstr ""
 
@@ -3799,7 +3803,7 @@ msgstr ""
 msgid "Please select an organization before editing the host filter."
 msgstr ""
 
-#: client/src/shared/form-generator.js:1193
+#: client/src/shared/form-generator.js:1206
 msgid "Please select at least one value."
 msgstr ""
 
@@ -3942,8 +3946,8 @@ msgstr ""
 #: client/src/templates/job_templates/job-template.form.js:185
 #: client/src/templates/job_templates/job-template.form.js:202
 #: client/src/templates/job_templates/job-template.form.js:219
-#: client/src/templates/job_templates/job-template.form.js:266
-#: client/src/templates/job_templates/job-template.form.js:366
+#: client/src/templates/job_templates/job-template.form.js:270
+#: client/src/templates/job_templates/job-template.form.js:370
 #: client/src/templates/job_templates/job-template.form.js:60
 #: client/src/templates/job_templates/job-template.form.js:86
 msgid "Prompt on launch"
@@ -3982,8 +3986,8 @@ msgstr ""
 msgid "Provide the named URL encoded name or id of the remote Tower inventory to be imported."
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:322
-#: client/src/templates/job_templates/job-template.form.js:330
+#: client/src/templates/job_templates/job-template.form.js:326
+#: client/src/templates/job_templates/job-template.form.js:334
 msgid "Provisioning Callback URL"
 msgstr ""
 
@@ -4492,7 +4496,7 @@ msgstr ""
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:193
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:158
 #: client/src/scheduler/scheduler.strings.js:57
-#: client/src/shared/form-generator.js:1698
+#: client/src/shared/form-generator.js:1711
 msgid "Save"
 msgstr ""
 
@@ -4543,7 +4547,7 @@ msgstr ""
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
 #: client/src/inventories-hosts/inventories/related/sources/sources.form.js:440
 #: client/src/projects/projects.form.js:290
-#: client/src/templates/job_templates/job-template.form.js:444
+#: client/src/templates/job_templates/job-template.form.js:448
 #: client/src/templates/workflows.form.js:185
 msgid "Schedules"
 msgstr ""
@@ -4566,7 +4570,7 @@ msgstr ""
 msgid "Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users."
 msgstr ""
 
-#: client/src/shared/form-generator.js:1702
+#: client/src/shared/form-generator.js:1715
 #: client/src/shared/lookup/lookup-modal.directive.js:59
 #: client/src/shared/lookup/lookup-modal.partial.html:20
 msgid "Select"
@@ -4634,7 +4638,7 @@ msgstr ""
 msgid "Select the Instance Groups for this Inventory to run on. Refer to the Ansible Tower documentation for more detail."
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:250
+#: client/src/templates/job_templates/job-template.form.js:254
 msgid "Select the Instance Groups for this Job Template to run on."
 msgstr ""
 
@@ -4642,7 +4646,7 @@ msgstr ""
 msgid "Select the Instance Groups for this Organization to run on."
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:240
+#: client/src/templates/job_templates/job-template.form.js:244
 msgid "Select the custom Python virtual environment for this job template to run on."
 msgstr ""
 
@@ -4709,8 +4713,8 @@ msgstr ""
 #: client/features/templates/templates.strings.js:46
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:115
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:118
-#: client/src/templates/job_templates/job-template.form.js:257
-#: client/src/templates/job_templates/job-template.form.js:260
+#: client/src/templates/job_templates/job-template.form.js:261
+#: client/src/templates/job_templates/job-template.form.js:264
 msgid "Show Changes"
 msgstr ""
 
@@ -4757,7 +4761,7 @@ msgstr ""
 #: client/src/inventories-hosts/inventories/inventory.list.js:86
 #: client/src/inventories-hosts/inventories/list/inventory-list.controller.js:76
 #: client/src/organizations/linkout/controllers/organizations-inventories.controller.js:70
-#: client/src/shared/form-generator.js:1463
+#: client/src/shared/form-generator.js:1476
 msgid "Smart Inventory"
 msgstr ""
 
@@ -5111,8 +5115,8 @@ msgstr ""
 msgid "Textarea"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1393
-#: client/src/shared/form-generator.js:1399
+#: client/src/shared/form-generator.js:1406
+#: client/src/shared/form-generator.js:1412
 msgid "That value was not found.  Please enter or select a valid value."
 msgstr ""
 
@@ -5564,12 +5568,12 @@ msgstr ""
 
 #: client/src/organizations/organizations.form.js:48
 #: client/src/projects/projects.form.js:209
-#: client/src/templates/job_templates/job-template.form.js:237
+#: client/src/templates/job_templates/job-template.form.js:241
 msgid "Use Default Environment"
 msgstr ""
 
-#: client/src/templates/job_templates/job-template.form.js:310
-#: client/src/templates/job_templates/job-template.form.js:315
+#: client/src/templates/job_templates/job-template.form.js:314
+#: client/src/templates/job_templates/job-template.form.js:319
 msgid "Use Fact Cache"
 msgstr ""
 
@@ -5764,8 +5768,8 @@ msgstr ""
 msgid "View Project checkout results"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1726
-#: client/src/templates/job_templates/job-template.form.js:455
+#: client/src/shared/form-generator.js:1739
+#: client/src/templates/job_templates/job-template.form.js:459
 #: client/src/templates/workflows.form.js:196
 msgid "View Survey"
 msgstr ""
@@ -5946,7 +5950,7 @@ msgstr ""
 msgid "Workflow Templates"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1730
+#: client/src/shared/form-generator.js:1743
 #: client/src/templates/workflows.form.js:222
 msgid "Workflow Visualizer"
 msgstr ""
@@ -6032,7 +6036,7 @@ msgstr ""
 
 #: client/src/inventories-hosts/inventories/related/groups/list/groups-list.partial.html:24
 #: client/src/job-submission/job-submission.partial.html:317
-#: client/src/shared/form-generator.js:1200
+#: client/src/shared/form-generator.js:1213
 #: client/src/templates/prompt/steps/survey/prompt-survey.partial.html:42
 msgid "and"
 msgstr ""
@@ -6144,7 +6148,7 @@ msgstr ""
 msgid "organization"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1076
+#: client/src/shared/form-generator.js:1085
 msgid "playbook"
 msgstr ""
 

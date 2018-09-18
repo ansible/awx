@@ -76,7 +76,8 @@ class TaskManager():
         inventory_updates_qs = InventoryUpdate.objects.filter(
             status__in=status_list).exclude(source='file').prefetch_related('inventory_source', 'instance_group')
         inventory_updates = [i for i in inventory_updates_qs]
-        project_updates = [p for p in ProjectUpdate.objects.filter(status__in=status_list).prefetch_related('instance_group')]
+        # Notice the job_type='check': we want to prevent implicit project updates from blocking our jobs.
+        project_updates = [p for p in ProjectUpdate.objects.filter(status__in=status_list, job_type='check').prefetch_related('instance_group')]
         system_jobs = [s for s in SystemJob.objects.filter(status__in=status_list).prefetch_related('instance_group')]
         ad_hoc_commands = [a for a in AdHocCommand.objects.filter(status__in=status_list).prefetch_related('instance_group')]
         workflow_jobs = [w for w in WorkflowJob.objects.filter(status__in=status_list)]
@@ -678,9 +679,9 @@ class TaskManager():
         return finished_wfjs
 
     def schedule(self):
-        with transaction.atomic():
-            # Lock
-            with advisory_lock('task_manager_lock', wait=False) as acquired:
+        # Lock
+        with advisory_lock('task_manager_lock', wait=False) as acquired:
+            with transaction.atomic():
                 if acquired is False:
                     logger.debug("Not running scheduler, another task holds lock")
                     return

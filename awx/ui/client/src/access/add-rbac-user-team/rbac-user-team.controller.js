@@ -94,7 +94,7 @@ function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors) {
     };
 
     scope.showSection2Container = function(){
-        return _.any(scope.allSelected, (type) => Object.keys(type).length > 0);
+        return _.some(scope.allSelected, (type) => Object.keys(type).length > 0);
     };
 
     scope.showSection2Tab = function(tab){

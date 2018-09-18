@@ -81,10 +81,10 @@
             <span>
         </div>
         <at-side-nav-item icon-class="fa-list-alt" route="credentialTypes" name="CREDENTIAL_TYPES"
-            system-admin-only="true">
+             system-admin-only="true">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-bell" route="notifications" name="NOTIFICATIONS"
-            system-admin-only="true">
+            ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin || $parent.layoutVm.isNotificationAdmin">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-briefcase" route="managementJobsList" name="MANAGEMENT_JOBS"
             system-admin-only="true">

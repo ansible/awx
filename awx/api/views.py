@@ -115,9 +115,10 @@ class ActivityStreamEnforcementMixin(object):
     Mixin to check that license supports activity streams.
     '''
     def check_permissions(self, request):
+        ret = super(ActivityStreamEnforcementMixin, self).check_permissions(request)
         if not feature_enabled('activity_streams'):
             raise LicenseForbids(_('Your license does not allow use of the activity stream.'))
-        return super(ActivityStreamEnforcementMixin, self).check_permissions(request)
+        return ret
 
 
 class SystemTrackingEnforcementMixin(object):
@@ -125,9 +126,10 @@ class SystemTrackingEnforcementMixin(object):
     Mixin to check that license supports system tracking.
     '''
     def check_permissions(self, request):
+        ret = super(SystemTrackingEnforcementMixin, self).check_permissions(request)
         if not feature_enabled('system_tracking'):
             raise LicenseForbids(_('Your license does not permit use of system tracking.'))
-        return super(SystemTrackingEnforcementMixin, self).check_permissions(request)
+        return ret
 
 
 class WorkflowsEnforcementMixin(object):
@@ -135,9 +137,10 @@ class WorkflowsEnforcementMixin(object):
     Mixin to check that license supports workflows.
     '''
     def check_permissions(self, request):
+        ret = super(WorkflowsEnforcementMixin, self).check_permissions(request)
         if not feature_enabled('workflows') and request.method not in ('GET', 'OPTIONS', 'DELETE'):
             raise LicenseForbids(_('Your license does not allow use of workflows.'))
-        return super(WorkflowsEnforcementMixin, self).check_permissions(request)
+        return ret
 
 
 class UnifiedJobDeletionMixin(object):
@@ -442,9 +445,9 @@ class ApiV1ConfigView(APIView):
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
+                custom_virtualenvs = get_custom_venv_choices()
             ))
-
-        if JobTemplate.accessible_objects(request.user, 'admin_role').exists():
+        elif JobTemplate.accessible_objects(request.user, 'admin_role').exists():
             data['custom_virtualenvs'] = get_custom_venv_choices()
 
         return Response(data)
@@ -2883,17 +2886,14 @@ class InventorySourceCredentialsList(SubListAttachDetachAPIView):
     relationship = 'credentials'
 
     def is_valid_relation(self, parent, sub, created=False):
+        # Inventory source credentials are exclusive with all other credentials
+        # subject to change for https://github.com/ansible/awx/issues/277
+        # or https://github.com/ansible/awx/issues/223
+        if parent.credentials.exists():
+            return {'msg': _("Source already has credential assigned.")}
         error = InventorySource.cloud_credential_validation(parent.source, sub)
         if error:
             return {'msg': error}
-        if sub.credential_type == 'vault':
-            # TODO: support this
-            return {"msg": _("Vault credentials are not yet supported for inventory sources.")}
-        else:
-            # Cloud credentials are exclusive with all other cloud credentials
-            cloud_cred_qs = parent.credentials.exclude(credential_type__kind='vault')
-            if cloud_cred_qs.exists():
-                return {'msg': _("Source already has cloud credential assigned.")}
         return None
 
 

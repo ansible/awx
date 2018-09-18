@@ -261,6 +261,7 @@ MIDDLEWARE_CLASSES = (  # NOQA
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'awx.main.middleware.URLModificationMiddleware',
+    'awx.main.middleware.DeprecatedAuthTokenMiddleware',
     'awx.main.middleware.SessionTimeoutMiddleware',
 )
 
@@ -1177,16 +1178,13 @@ LOGGING = {
             'propagate': False
         },
         'awx.main.access': {
-            'handlers': ['null'],
-            'propagate': False,
+            'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.main.signals': {
-            'handlers': ['null'],
-            'propagate': False,
+            'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.api.permissions': {
-            'handlers': ['null'],
-            'propagate': False,
+            'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.analytics': {
             'handlers': ['external_logger'],
