@@ -8,6 +8,7 @@ from rest_framework.generics import ListAPIView
 # AWX
 from awx.main.views import ApiErrorView
 from awx.api.views import JobList, InventorySourceList
+from awx.api.generics import ListCreateAPIView, SubListAttachDetachAPIView
 
 
 HTTP_METHOD_NAMES = [
@@ -72,4 +73,31 @@ def test_views_have_search_fields(all_views):
                 v.__class__.__name__ + ' (model: {})'.format(getattr(v, 'model', type(None)).__name__)
                 for v in views_missing_search
             ]))
+        )
+
+
+def test_global_creation_always_possible(all_views):
+    """To not make life very difficult for clients, this test
+    asserts that all creatable resources can be created by
+    POSTing to the global resource list
+    """
+    views_by_model = {}
+    for View in all_views:
+        if not getattr(View, 'deprecated', False) and issubclass(View, ListAPIView) and hasattr(View, 'model'):
+            views_by_model.setdefault(View.model, []).append(View)
+    for model, views in views_by_model.items():
+        creatable = False
+        global_view = None
+        creatable_view = None
+        for View in views:
+            if '{}ListView'.format(model.__name__) == View.__name__:
+                global_view = View
+            if issubclass(View, ListCreateAPIView) and not issubclass(View, SubListAttachDetachAPIView):
+                creatable = True
+                creatable_view = View
+        if not creatable or not global_view:
+            continue
+        assert 'POST' in global_view().allowed_methods, (
+            'Resource {} should be creatable in global list view {}. '
+            'Can be created now in {}'.format(model, global_view, creatable_view)
         )
