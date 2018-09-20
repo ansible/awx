@@ -57,7 +57,7 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, OutputEventFilter, OutputVerboseFilter, ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager)
-from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
+from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja, VaultDecoder
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
 from awx.main.consumers import emit_channel_notification
@@ -765,7 +765,7 @@ class BaseTask(object):
         handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
         f = os.fdopen(handle, 'w')
         if settings.ALLOW_JINJA_IN_EXTRA_VARS == 'always':
-            f.write(yaml.safe_dump(vars))
+            f.write(safe_dump(vars, vars))
         else:
             f.write(safe_dump(vars, kwargs.get('safe_dict', {}) or None))
         f.close()
@@ -1310,9 +1310,9 @@ class RunJob(BaseTask):
 
         if job.extra_vars_dict:
             if kwargs.get('display', False) and job.job_template:
-                extra_vars.update(json.loads(job.display_extra_vars()))
+                extra_vars.update(json.loads(job.display_extra_vars(), cls=VaultDecoder))
             else:
-                extra_vars.update(json.loads(job.decrypted_extra_vars()))
+                extra_vars.update(json.loads(job.decrypted_extra_vars(), cls=VaultDecoder))
 
         # By default, all extra vars disallow Jinja2 template usage for
         # security reasons; top level key-values defined in JT.extra_vars, however,

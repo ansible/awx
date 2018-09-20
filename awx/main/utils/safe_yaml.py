@@ -1,9 +1,49 @@
 import re
 import six
 import yaml
+import json
 
 
-__all__ = ['safe_dump', 'SafeLoader']
+__all__ = ['safe_dump', 'SafeLoader', 'VaultDecoder']
+
+
+
+class VaultData:
+    def __init__(self, value):
+        self.value = value
+
+
+class VaultDecoder(json.JSONDecoder):
+    """
+    Use with JSON loader to produce vault objects where __ansible_vault
+    syntax is used by user to indicate encrypted content
+    ex:
+        json.loads(JSON_DATA, cls=VaultDecoder)
+    """
+    def __init__(self, *args, **kwargs):
+        kwargs['object_hook'] = self.object_hook
+        super(VaultDecoder, self).__init__(*args, **kwargs)
+
+    def object_hook(self, pairs):
+        for key in pairs:
+            value = pairs[key]
+            if key == '__ansible_vault':
+                return VaultData(value)
+
+        return pairs
+
+
+class VaultEncoder(json.JSONEncoder):
+    """
+    Use with JSON dumper to produce content with __ansible_vault
+    syntax when given python data that has the vault class in it
+    ex:
+        json.dumps(data, cls=VaultEncoder, indent=4)
+    """
+    def default(self, o):
+        if isinstance(o, VaultData):
+            return {'__ansible_vault': o.value}
+        return json.JSONEncoder.default(self, o)
 
 
 class SafeStringDumper(yaml.SafeDumper):
@@ -12,6 +52,9 @@ class SafeStringDumper(yaml.SafeDumper):
         if isinstance(value, six.string_types):
             return self.represent_scalar('!unsafe', value)
         return super(SafeStringDumper, self).represent_data(value)
+
+    def represent_vault_data(self, data):
+        return self.represent_scalar('!vault', data.value, style='|')
 
 
 class SafeLoader(yaml.Loader):
@@ -22,10 +65,27 @@ class SafeLoader(yaml.Loader):
         node = UnsafeText(self.construct_scalar(node))
         return node
 
+    def construct_yaml_vault(self, node):
+        value = self.construct_scalar(node)
+        return VaultData(value)
+
+
 
 SafeLoader.add_constructor(
     u'!unsafe',
     SafeLoader.construct_yaml_unsafe
+)
+
+
+SafeLoader.add_constructor(
+    u'!vault',
+    SafeLoader.construct_yaml_vault
+)
+
+
+SafeStringDumper.add_representer(
+    VaultData,
+    SafeStringDumper.represent_vault_data
 )
 
 
