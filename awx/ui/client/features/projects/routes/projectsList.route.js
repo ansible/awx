@@ -54,16 +54,15 @@ export default {
             }
         ],
         ConfigData: ['ConfigService', 'ProcessErrors',
-            function (ConfigService, ProcessErrors) {
-                return ConfigService.getConfig()
-                    .then(response => response)
-                    .catch(({ data, status }) => {
-                        ProcessErrors(null, data, status, null, {
-                            hdr: 'Error!',
-                            msg: `Failed to get config. GET returned status: status: ${status}`,
-                        });
+            (ConfigService, ProcessErrors) => ConfigService
+                .getConfig()
+                .then(response => response)
+                .catch(({ data, status }) => {
+                    ProcessErrors(null, data, status, null, {
+                        hdr: 'Error!',
+                        msg: `Failed to get config. GET returned status: status: ${status}`,
                     });
-            }],
+                })],
         Dataset: [
             '$stateParams',
             'Wait',
