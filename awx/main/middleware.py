@@ -257,6 +257,9 @@ class DeprecatedAuthTokenMiddleware(object):
                 'be replaced with OAuth2.0 in the next version of Ansible Tower '
                 '(see /api/o/ for more details).'
             )
+        elif request.environ.get('HTTP_AUTHORIZATION', '').startswith('Token '):
+            token = request.environ['HTTP_AUTHORIZATION'].split(' ', 1)[-1].strip()
+            request.environ['HTTP_AUTHORIZATION'] = six.text_type('Bearer {}').format(token)
 
 
 class MigrationRanCheckMiddleware(object):

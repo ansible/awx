@@ -380,6 +380,15 @@ def test_deprecated_authtoken_support(alice, fmt):
     assert resp.data['refresh_token'] is None
     assert resp.data['scope'] == 'write'
 
+    for _type in ('Token', 'Bearer'):
+        request = getattr(APIRequestFactory(), 'get')(
+            '/api/v2/me/',
+            HTTP_AUTHORIZATION=' '.join([_type, resp.data['token']])
+        )
+        DeprecatedAuthTokenMiddleware().process_request(request)
+        view, view_args, view_kwargs = resolve(request.path)
+        assert view(request, *view_args, **view_kwargs).status_code == 200
+
 
 @pytest.mark.django_db
 def test_deprecated_authtoken_invalid_username(alice):
