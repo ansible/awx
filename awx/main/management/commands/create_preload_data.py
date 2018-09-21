@@ -15,6 +15,8 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Sanity check: Is there already an organization in the system?
         if Organization.objects.count():
+            print('An organization is already in the system, exiting.')
+            print('(changed: False)')
             return
 
         # Create a default organization as the first superuser found.
@@ -54,3 +56,4 @@ class Command(BaseCommand):
                 jt.credentials.add(c)
         print('Default organization added.')
         print('Demo Credential, Inventory, and Job Template added.')
+        print('(changed: True)')
