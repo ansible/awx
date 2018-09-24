@@ -1,0 +1,7 @@
+- project:
+    check:
+      jobs:
+        - flake8
+    gate:
+      jobs:
+        - flake8
