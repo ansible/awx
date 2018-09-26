@@ -35,6 +35,7 @@ from awx.main.models.rbac import (
 from awx.main.utils import encrypt_field
 from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS
 from . import injectors as builtin_injectors
+from .asymmetric import get_type_data_mangers
 
 __all__ = ['Credential', 'CredentialType', 'V1Credential', 'build_safe_env']
 
@@ -365,6 +366,19 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
                 needed.append('vault_password')
         return needed
 
+    def has_public_data(self):
+        return bool(set(self.inputs.keys()) & set(self.credential_type.data_managers().keys()))
+
+    def display_public_data(self):
+        managers = self.credential_type.data_managers()
+        r = {}
+        for key, value in self.inputs.items():
+            manager = managers.get(key)
+            if not manager:
+                continue
+            r[key] = manager.get_public_data(decrypt_field(self, key, 'inputs'))
+        return r
+
     def _password_field_allows_ask(self, field):
         return field in self.credential_type.askable_fields
 
@@ -557,6 +571,21 @@ class CredentialType(CommonModelNameNotUnique):
             requirements['managed_by_tower'] = True
             match = cls.objects.filter(**requirements)[:1].get()
         return match
+
+    def data_managers(self):
+        return get_type_data_mangers(self)
+
+    def perform_generation(self, inputs):
+        """This is used if someone is using the API to auto-create
+        some secrets with the $generate$ keyword inside provided inputs
+        """
+        managers = self.data_managers()
+        for fd_name, manager in managers.items():
+            generatable_fd_val = inputs.get(fd_name, None)
+            print (fd_name, manager, generatable_fd_val)
+            if isinstance(generatable_fd_val, dict) and '$generate$' in generatable_fd_val:
+                inputs[fd_name] = manager.generate(inputs)
+        return inputs
 
     def inject_credential(self, credential, env, safe_env, args, safe_args, private_data_dir):
         """

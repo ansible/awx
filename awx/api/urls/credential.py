@@ -12,6 +12,7 @@ from awx.api.views import (
     CredentialOwnerUsersList,
     CredentialOwnerTeamsList,
     CredentialCopy,
+    CredentialPublicData
 )
 
 
@@ -23,6 +24,7 @@ urls = [
     url(r'^(?P<pk>[0-9]+)/object_roles/$', CredentialObjectRolesList.as_view(), name='credential_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/owner_users/$', CredentialOwnerUsersList.as_view(), name='credential_owner_users_list'),
     url(r'^(?P<pk>[0-9]+)/owner_teams/$', CredentialOwnerTeamsList.as_view(), name='credential_owner_teams_list'),
+    url(r'^(?P<pk>[0-9]+)/public_data/$', CredentialPublicData.as_view(), name='credential_public_data'),
     url(r'^(?P<pk>[0-9]+)/copy/$', CredentialCopy.as_view(), name='credential_copy'),
 ]
 

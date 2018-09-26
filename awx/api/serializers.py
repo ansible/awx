@@ -62,6 +62,7 @@ from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.validators import vars_validate_or_raise
 
 from awx.conf.license import feature_enabled
+from awx.api.metadata import Metadata
 from awx.api.versioning import reverse, get_request_version
 from awx.api.fields import (BooleanNullField, CharNullField, ChoiceNullField,
                             VerbatimField, DeprecatedCredentialField)
@@ -2471,6 +2472,19 @@ class CredentialTypeSerializer(BaseSerializer):
             )
         return fields
 
+    def get_summary_fields(self, obj):
+        summary_dict = super(CredentialTypeSerializer, self).get_summary_fields(obj)
+        managers = obj.data_managers()
+        if managers:
+            summary_dict['allowed_generators'] = {}
+            for input_key, manager in managers.items():
+                generation_options = {}
+                for generator_key, fd in manager.generate_fields.items():
+                    generation_options[generator_key] = Metadata().get_field_info(fd)
+                summary_dict['allowed_generators'][input_key] = generation_options
+
+        return summary_dict
+
 
 # TODO: remove when API v1 is removed
 @six.add_metaclass(BaseSerializerMetaclass)
@@ -2544,6 +2558,9 @@ class CredentialSerializer(BaseSerializer):
 
         if obj.organization:
             res['organization'] = self.reverse('api:organization_detail', kwargs={'pk': obj.organization.pk})
+
+        if obj.has_public_data():
+            res['public_data'] = self.reverse('api:credential_public_data', kwargs={'pk': obj.pk})
 
         res.update(dict(
             activity_stream = self.reverse('api:credential_activity_stream_list', kwargs={'pk': obj.pk}),
@@ -2693,6 +2710,18 @@ class CredentialSerializerCreate(CredentialSerializer):
                     owner_fields.add(field)
                 else:
                     attrs.pop(field)
+        # field generation for generated private-public combinations
+        inputs = {}
+        ct = None
+        if self.instance:
+            ct = self.instance.credential_type
+        if 'credential_type' in attrs:
+            ct = attrs['credential_type']
+        if 'inputs' in attrs:
+            inputs = attrs['inputs']
+        if ct and inputs:
+            ct.perform_generation(inputs)
+
         if not owner_fields:
             raise serializers.ValidationError({"detail": _("Missing 'user', 'team', or 'organization'.")})
 

@@ -1954,6 +1954,17 @@ class CredentialOwnerTeamsList(SubListAPIView):
         return self.model.objects.filter(pk__in=teams)
 
 
+class CredentialPublicData(GenericAPIView):
+
+    model = Credential
+    obj_permission_type = 'use'
+    serializer_class = EmptySerializer
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        return Response(obj.display_public_data())
+
+
 class UserCredentialsList(CredentialViewMixin, SubListCreateAPIView):
 
     model = Credential
