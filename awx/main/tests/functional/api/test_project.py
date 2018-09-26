@@ -5,6 +5,7 @@ from django.conf import settings
 import pytest
 
 from awx.api.versioning import reverse
+from awx.main.models import Project
 
 
 @pytest.mark.django_db
@@ -44,3 +45,20 @@ def test_project_unset_custom_virtualenv(get, patch, project, admin, value):
     url = reverse('api:project_detail', kwargs={'pk': project.id})
     resp = patch(url, {'custom_virtualenv': value}, user=admin, expect=200)
     assert resp.data['custom_virtualenv'] is None
+
+
+@pytest.mark.django_db
+def test_create_project_no_update(post, organization, admin_user):
+    r = post(
+        url=reverse('api:project_list'),
+        user=admin_user,
+        data=dict(
+            name="test-proj",
+            organization=organization.id,
+            scm_url='localhost',
+            scm_type='git',
+            skip_update=True
+        )
+    )
+    project = Project.objects.get(id=r.data['id'])
+    assert project.status == 'never updated'

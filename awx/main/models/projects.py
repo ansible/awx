@@ -324,13 +324,24 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
             ['name', 'description', 'schedule']
         )
 
+    def __init__(self, *args, **kwargs):
+        if 'skip_update' in kwargs:
+            self.skip_update = kwargs.pop('skip_update')
+        r = super(Project, self).__init__(*args, **kwargs)
+        return r
+
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         pre_save_vals = getattr(self, '_prior_values_store', {})
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        skip_update = bool(kwargs.pop('skip_update', False))
+        skip_update = False
+        if kwargs.pop('skip_update', False):
+            skip_update = True
+        if getattr(self, 'skip_update', False):
+            skip_update = True
+            del self.skip_update
         # Check if scm_type or scm_url changes.
         if self.pk:
             project_before = self.__class__.objects.get(pk=self.pk)
@@ -542,9 +553,14 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def get_ui_url(self):
         return urlparse.urljoin(settings.TOWER_URL_BASE, "/#/jobs/project/{}".format(self.pk))
 
+    def should_update_project(self):
+        if not self.project:
+            return False
+        return (self.job_type == 'check' or self.project.status == 'never updated')
+
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()
-        if parent_instance and self.job_type == 'check':
+        if self.should_update_project():
             update_fields = self._update_parent_instance_no_save(parent_instance)
             if self.status in ('successful', 'failed', 'error', 'canceled'):
                 if not self.failed and parent_instance.scm_delete_on_next_update:

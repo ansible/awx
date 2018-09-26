@@ -1380,6 +1380,25 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         return super(ProjectSerializer, self).validate(attrs)
 
 
+class ProjectSerializerCreate(ProjectSerializer):
+
+    skip_update = serializers.BooleanField(
+        required=False, default=False, write_only=True,
+        help_text=_('Skip initial update, and obtain revision on first run. If provided, '
+                    'job templates will not validate playbooks.'))
+
+    class Meta:
+        model = Project
+        fields = ('*', 'skip_update')
+
+    def validate(self, attrs):
+        skip_update = attrs.pop('skip_update', False)
+        r = super(ProjectSerializer, self).validate(attrs)
+        if skip_update:
+            r['skip_update'] = True
+        return r
+
+
 class ProjectPlaybooksSerializer(ProjectSerializer):
 
     playbooks = serializers.SerializerMethodField(help_text=_('Array of playbooks available within this project.'))
@@ -2959,7 +2978,9 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             if not project:
                 raise serializers.ValidationError({'project': _('This field is required.')})
             if project and project.scm_type and playbook and force_text(playbook) not in project.playbook_files:
-                raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
+                # If never updated, don't validate playbook, as a loophole for clients to do faster scripting
+                if project.status != 'never updated':
+                    raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
             if project and not project.scm_type and playbook and force_text(playbook) not in project.playbooks:
                 raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
             if project and not playbook:

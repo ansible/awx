@@ -1730,16 +1730,33 @@ class RunProjectUpdate(BaseTask):
     def post_run_hook(self, instance, status, **kwargs):
         self.release_lock(instance)
         p = instance.project
-        if instance.job_type == 'check' and status not in ('failed', 'canceled',):
+        if instance.should_update_project() and status not in ('failed', 'canceled',):
             fd = open(self.revision_path, 'r')
             lines = fd.readlines()
+            scm_revision = None
             if lines:
-                p.scm_revision = lines[0].strip()
+                scm_revision = lines[0].strip()
             else:
                 logger.info(six.text_type("{} Could not find scm revision in check").format(instance.log_format))
-            p.playbook_files = p.playbooks
-            p.inventory_files = p.inventories
-            p.save()
+            playbook_files = p.playbooks
+            inventory_files = p.inventories
+            if p.status == 'never updated':
+                # Action happens without direction of task manager, so carefully
+                # save in a non-conflicting way with other updates
+                with transaction.atomic():
+                    p = Project.objects.select_for_update().get(id=p.pk)
+                    if p.scm_revision == '':
+                        p.playbook_files = playbook_files
+                        p.inventory_files = inventory_files
+                        if scm_revision is not None:
+                            p.scm_revision = scm_revision
+                        p.save(update_fields=['playbook_files', 'inventory_files', 'scm_revision'])
+            else:
+                p.playbook_files = playbook_files
+                p.inventory_files = inventory_files
+                if scm_revision is not None:
+                    p.scm_revision = scm_revision
+                p.save()
 
         # Update any inventories that depend on this project
         dependent_inventory_sources = p.scm_inventory_sources.filter(update_on_project_update=True)

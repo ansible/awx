@@ -858,7 +858,7 @@ class OrganizationAdminsList(BaseUsersList):
 class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
 
     model = Project
-    serializer_class = ProjectSerializer
+    serializer_class = ProjectSerializerCreate
     parent_model = Organization
     relationship = 'projects'
     parent_key = 'organization'
@@ -1069,7 +1069,7 @@ class TeamAccessList(ResourceAccessList):
 class ProjectList(ListCreateAPIView):
 
     model = Project
-    serializer_class = ProjectSerializer
+    serializer_class = ProjectSerializerCreate
 
     def get_queryset(self):
         projects_qs = Project.accessible_objects(self.request.user, 'read_role')
