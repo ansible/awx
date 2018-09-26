@@ -22,13 +22,8 @@ docdir = "/usr/share/doc/awx"
 def get_version():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     version_file = os.path.join(current_dir, 'VERSION')
-    if os.path.isfile(version_file):
-        with open(version_file, 'r') as file:
-            version = file.read().strip()
-    else:
-        version = subprocess.Popen("git describe --long | cut -d - -f 1-1", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
-    return version
-
+    with open(version_file, 'r') as file:
+        return file.read().strip()
 
 if os.path.exists("/etc/debian_version"):
     sysinit = "/etc/init.d"
