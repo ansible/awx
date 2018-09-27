@@ -174,6 +174,8 @@ class TaskManager():
             else:
                 is_done, has_failed = dag.is_workflow_done()
                 if not is_done:
+                    workflow_nodes = dag.mark_dnr_nodes()
+                    map(lambda n: n.save(update_fields=['do_not_run']), workflow_nodes)
                     continue
                 logger.info('Marking %s as %s.', workflow_job.log_format, 'failed' if has_failed else 'successful')
                 result.append(workflow_job.id)
