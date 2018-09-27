@@ -316,13 +316,13 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         // the extra vars codemirror is ONLY shown if the
                         // schedule is for a JT and the JT has
                         // ask_variables_on_launch = true.
-                        $scope.extraVars = ParentObject.extra_vars === '' ? '---' : ParentObject.extra_vars;
                         $scope.noVars = false;
                         ParseTypeChange({
                             scope: $scope,
                             variable: 'extraVars',
                             parse_variable: 'parseType',
-                            field_id: 'SchedulerForm-extraVars'
+                            field_id: 'SchedulerForm-extraVars',
+                            readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
                         });
                     } else {
                         $scope.noVars = true;
@@ -365,16 +365,6 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                                     });
 
                                     $scope.missingSurveyValue = processed.missingSurveyValue;
-
-                                    $scope.extraVars = (processed.extra_data === '' || _.isEmpty(processed.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(processed.extra_data);
-
-                                    ParseTypeChange({
-                                        scope: $scope,
-                                        variable: 'extraVars',
-                                        parse_variable: 'parseType',
-                                        field_id: 'SchedulerForm-extraVars',
-                                        readOnly: !$scope.schedule_obj.summary_fields.user_capabilities.edit
-                                    });
 
                                     $scope.promptData = {
                                         launchConf: launchConf,
