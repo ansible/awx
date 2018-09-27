@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Button } from '@patternfly/react-core';
+import {
+  Bullseye,
+  Button,
+  TextInput
+} from '@patternfly/react-core';
 
 import api from '../api';
 
@@ -12,7 +16,9 @@ class Login extends Component {
     redirect: false,
   };
 
-  handleChange = event => this.setState({ [event.target.name]: event.target.value });
+  handleUsernameChange = value => this.setState({ username: value });
+
+  handlePasswordChange = value => this.setState({ password: value });
 
   handleSubmit = event => {
     const { username, password } = this.state;
@@ -31,35 +37,31 @@ class Login extends Component {
     }
 
     return (
-      <form onSubmit={this.handleSubmit}>
-        <div className="field">
-          <label htmlFor="username">
-            Username
-            <input
-              id="username"
+      <Bullseye>
+        <form onSubmit={this.handleSubmit}>
+          <div>
+            <TextInput
+              aria-label="Username"
               name="username"
               type="text"
-              onChange={this.handleChange}
+              onChange={this.handleUsernameChange}
               value={username}
             />
-          </label>
-        </div>
-        <div>
-          <label htmlFor="password">
-            Password
-            <input
-              id="password"
+          </div>
+          <div>
+            <TextInput
+              aria-label="Password"
               name="password"
               type="password"
-              onChange={this.handleChange}
+              onChange={this.handlePasswordChange}
               value={password}
             />
-          </label>
-        </div>
-        <Button type="submit">
-          Login
-        </Button>
-      </form>
+          </div>
+          <Button type="submit">
+            Login
+          </Button>
+        </form>
+      </Bullseye>
     );
   }
 }
