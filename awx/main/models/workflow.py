@@ -24,7 +24,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR
 )
-from awx.main.fields import ImplicitRoleField
+from awx.main.fields import ImplicitRoleField, AskForField
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -280,6 +280,15 @@ class WorkflowJobOptions(BaseModel):
     allow_simultaneous = models.BooleanField(
         default=False
     )
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='%(class)ss',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        help_text=_('Inventory applied to all job templates in workflow that prompt for inventory.'),
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -341,6 +350,10 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         null=True,
         on_delete=models.SET_NULL,
         related_name='workflows',
+    )
+    ask_inventory_on_launch = AskForField(
+        blank=True,
+        default=False,
     )
     admin_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,

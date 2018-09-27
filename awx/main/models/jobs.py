@@ -34,7 +34,7 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import parse_yaml_or_json, getattr_dne
-from awx.main.fields import ImplicitRoleField
+from awx.main.fields import ImplicitRoleField, JSONField, AskForField
 from awx.main.models.mixins import (
     ResourceMixin,
     SurveyJobTemplateMixin,
@@ -43,7 +43,6 @@ from awx.main.models.mixins import (
     CustomVirtualEnvMixin,
     RelatedJobsMixin,
 )
-from awx.main.fields import JSONField, AskForField
 
 
 logger = logging.getLogger('awx.main.models.jobs')
