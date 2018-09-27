@@ -3812,9 +3812,6 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             ujt_obj = attrs['unified_job_template']
         elif self.instance:
             ujt_obj = self.instance.unified_job_template
-        if isinstance(ujt_obj, (WorkflowJobTemplate)):
-            raise serializers.ValidationError({
-                "unified_job_template": _("Cannot nest a %s inside a WorkflowJobTemplate") % ujt_obj.__class__.__name__})
         if 'credential' in deprecated_fields:  # TODO: remove when v2 API is deprecated
             cred = deprecated_fields['credential']
             attrs['credential'] = cred
