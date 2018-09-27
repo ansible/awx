@@ -142,6 +142,8 @@ class TaskManager():
             else:
                 is_done, has_failed = dag.is_workflow_done()
                 if not is_done:
+                    workflow_nodes = dag.mark_dnr_nodes()
+                    map(lambda n: n.save(update_fields=['do_not_run']), workflow_nodes)
                     continue
                 result.append(workflow_job.id)
                 workflow_job.status = 'failed' if has_failed else 'successful'
