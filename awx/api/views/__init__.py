@@ -2969,8 +2969,6 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
         if not find:
             sub_node = graph[sub.pk]
             parent_node = graph[parent.pk]
-            if sub_node['metadata']['parent'] is not None:
-                return {"Error": _("Multiple parent relationship not allowed.")}
             sub_node['metadata']['parent'] = parent_node
             iter_node = sub_node
             while iter_node is not None:
