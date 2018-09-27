@@ -5,16 +5,23 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.js --mode development",
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "echo \"No test specified\" && exit 0",
+    "lint": "./node_modules/eslint/bin/eslint.js src/**/*.js src/**/*.jsx"
   },
   "keywords": [],
   "author": "",
   "license": "Apache",
   "devDependencies": {
     "babel-core": "^6.26.3",
+    "babel-eslint": "^10.0.0",
     "babel-loader": "^7.1.5",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
+    "eslint": "^5.6.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.1",
     "react-hot-loader": "^4.3.3",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8",
