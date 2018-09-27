@@ -197,8 +197,6 @@ class TestWorkflowJobTemplate:
         # test mutex validation
         test_view.relationship = 'failure_nodes'
         node_assoc_1 = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt)
-        assert (test_view.is_valid_relation(nodes[2], node_assoc_1) ==
-                {'Error': 'Cannot associate failure_nodes when always_nodes have been associated.'})
 
     def test_wfjt_unique_together_with_org(self, organization):
         wfjt1 = WorkflowJobTemplate(name='foo', organization=organization)

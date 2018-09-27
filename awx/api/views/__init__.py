@@ -3438,10 +3438,6 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
         return getattr(parent, self.relationship).all()
 
     def is_valid_relation(self, parent, sub, created=False):
-        mutex_list = ('success_nodes', 'failure_nodes') if self.relationship == 'always_nodes' else ('always_nodes',)
-        for relation in mutex_list:
-            if getattr(parent, relation).all().exists():
-                return {'Error': _('Cannot associate {0} when {1} have been associated.').format(self.relationship, relation)}
 
         if created:
             return None
