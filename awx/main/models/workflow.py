@@ -184,6 +184,9 @@ class WorkflowJobNode(WorkflowNodeBase):
         default={},
         editable=False,
     )
+    do_not_run = models.BooleanField(
+        default=False
+    )
 
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_node_detail', kwargs={'pk': self.pk}, request=request)
