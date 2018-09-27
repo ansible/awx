@@ -30,8 +30,6 @@ DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
 
-CURWD = $(shell pwd)
-
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -611,7 +609,7 @@ docker-compose-cluster-elk: docker-auth
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 minishift-dev:
-	ansible-playbook -i localhost, -e devtree_directory=$(CURWD) tools/clusterdevel/start_minishift_dev.yml
+	ansible-playbook -i localhost, -e devtree_directory=$(CURDIR) tools/clusterdevel/start_minishift_dev.yml
 
 
 clean-elk:
