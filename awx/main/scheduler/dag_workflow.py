@@ -1,4 +1,7 @@
 
+# Python
+import copy
+
 # AWX
 from awx.main.scheduler.dag_simple import SimpleDAG
 
@@ -30,19 +33,19 @@ class WorkflowDAG(SimpleDAG):
             obj = n['node_object']
             job = obj.job
 
-            if not job:
+            if not job and obj.do_not_run is False:
                 nodes_found.append(n)
             # Job is about to run or is running. Hold our horses and wait for
             # the job to finish. We can't proceed down the graph path until we
             # have the job result.
-            elif job.status not in ['failed', 'successful']:
+            elif job and job.status not in ['failed', 'successful']:
                 continue
-            elif job.status == 'failed':
+            elif job and job.status == 'failed':
                 children_failed = self.get_dependencies(obj, 'failure_nodes')
                 children_always = self.get_dependencies(obj, 'always_nodes')
                 children_all = children_failed + children_always
                 nodes.extend(children_all)
-            elif job.status == 'successful':
+            elif job and job.status == 'successful':
                 children_success = self.get_dependencies(obj, 'success_nodes')
                 children_always = self.get_dependencies(obj, 'always_nodes')
                 children_all = children_success + children_always
@@ -100,3 +103,40 @@ class WorkflowDAG(SimpleDAG):
                 # have the job result.
                 return False, False
         return True, is_failed
+
+    def mark_dnr_nodes(self):
+        root_nodes = self.get_root_nodes()
+        nodes = copy.copy(root_nodes)
+        nodes_marked_do_not_run = []
+
+        for index, n in enumerate(nodes):
+            obj = n['node_object']
+            job = obj.job
+
+            if not job and obj.do_not_run is False and n not in root_nodes:
+                parent_nodes = [p['node_object'] for p in self.get_dependents(obj)]
+                all_parents_dnr = True
+                for p in parent_nodes:
+                    if not p.job and p.do_not_run is False:
+                        all_parents_dnr = False
+                        break
+                #all_parents_dnr = reduce(lambda p: bool(p.do_not_run == True), parent_nodes)
+                if all_parents_dnr:
+                    obj.do_not_run = True
+                    nodes_marked_do_not_run.append(n)
+
+            if obj.do_not_run:
+                children_success = self.get_dependencies(obj, 'success_nodes')
+                children_failed = self.get_dependencies(obj, 'failure_nodes')
+                children_always = self.get_dependencies(obj, 'always_nodes')
+                children_all = children_failed + children_always
+                nodes.extend(children_all)
+            elif job and job.status == 'failed':
+                children_failed = self.get_dependencies(obj, 'success_nodes')
+                children_all = children_failed
+                nodes.extend(children_all)
+            elif job and job.status == 'successful':
+                children_success = self.get_dependencies(obj, 'failure_nodes')
+                children_all = children_success
+                nodes.extend(children_all)
+        return [n['node_object'] for n in nodes_marked_do_not_run]
