@@ -51,7 +51,7 @@ class SimpleDAG(object):
         for n in self.nodes:
             doc += "%s [color = %s]\n" % (
                 short_string_obj(n['node_object']),
-                "red" if n['node_object'].status == 'running' else "black",
+                "red" if getattr(n['node_object'], 'status', 'N/A') == 'running' else "black",
             )
         for from_node, to_node, label in self.edges:
             doc += "%s -> %s [ label=\"%s\" ];\n" % (
