@@ -364,7 +364,7 @@ test:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test -n auto $(TEST_DIRS)
+	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
 	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
 test_combined: test_ansible test
