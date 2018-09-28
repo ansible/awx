@@ -19,7 +19,7 @@ import six
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.db.models import Q, Count, F
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, transaction, connection
 from django.shortcuts import get_object_or_404
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
@@ -4960,7 +4960,7 @@ class NotificationTemplateTest(GenericAPIView):
         if not notification:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            send_notifications.delay([notification.id])
+            connection.on_commit(lambda: send_notifications.delay([notification.id]))
             data = OrderedDict()
             data['notification'] = notification.id
             data.update(NotificationSerializer(notification, context=self.get_serializer_context()).to_representation(notification))
