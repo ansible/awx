@@ -3117,6 +3117,9 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        if not request.user.can_access(JobLaunchConfig, 'add', serializer.validated_data, template=obj):
+            raise PermissionDenied()
+
         new_job = obj.create_unified_job(**serializer.validated_data)
         new_job.signal_start()
 

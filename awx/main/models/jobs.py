@@ -1019,6 +1019,8 @@ class LaunchTimeConfig(LaunchTimeConfigBase):
 
 
 for field_name in JobTemplate.get_ask_mapping().keys():
+    if field_name == 'extra_vars':
+        continue
     try:
         LaunchTimeConfig._meta.get_field(field_name)
     except FieldDoesNotExist:
