@@ -3106,6 +3106,8 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
                 extra_vars.setdefault(v, u'')
             if extra_vars:
                 data['extra_vars'] = extra_vars
+            if obj.ask_inventory_on_launch:
+                data['inventory'] = obj.inventory_id
         return data
 
     def post(self, request, *args, **kwargs):
@@ -3115,14 +3117,12 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        prompted_fields, ignored_fields, errors = obj._accept_or_ignore_job_kwargs(**request.data)
-
-        new_job = obj.create_unified_job(**prompted_fields)
+        new_job = obj.create_unified_job(**serializer.validated_data)
         new_job.signal_start()
 
         data = OrderedDict()
         data['workflow_job'] = new_job.id
-        data['ignored_fields'] = ignored_fields
+        data['ignored_fields'] = serializer._ignored_fields
         data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
         headers = {'Location': new_job.get_absolute_url(request)}
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)

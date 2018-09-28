@@ -31,7 +31,7 @@ from awx.main.models.mixins import (
     SurveyJobMixin,
     RelatedJobsMixin,
 )
-from awx.main.models.jobs import LaunchTimeConfig, JobTemplate
+from awx.main.models.jobs import LaunchTimeConfigBase, LaunchTimeConfig, JobTemplate
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
@@ -188,6 +188,16 @@ class WorkflowJobNode(WorkflowNodeBase):
     def get_absolute_url(self, request=None):
         return reverse('api:workflow_job_node_detail', kwargs={'pk': self.pk}, request=request)
 
+    def prompts_dict(self, *args, **kwargs):
+        r = super(WorkflowJobNode, self).prompts_dict(*args, **kwargs)
+        # Explination - WFJT extra_vars still break pattern, so they are not
+        # put through prompts processing, but inventory is only accepted
+        # if JT prompts for it, so it goes through this mechanism
+        if self.workflow_job and self.workflow_job.inventory_id:
+            # workflow job inventory takes precedence
+            r['inventory'] = self.workflow_job.inventory
+        return r
+
     def get_job_kwargs(self):
         '''
         In advance of creating a new unified job as part of a workflow,
@@ -280,15 +290,6 @@ class WorkflowJobOptions(BaseModel):
     allow_simultaneous = models.BooleanField(
         default=False
     )
-    inventory = models.ForeignKey(
-        'Inventory',
-        related_name='%(class)ss',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-        help_text=_('Inventory applied to all job templates in workflow that prompt for inventory.'),
-    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -299,7 +300,8 @@ class WorkflowJobOptions(BaseModel):
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in WorkflowJobOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels']
+            # NOTE: if other prompts are added to WFJT, put fields in WJOptions, remove inventory
+            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'inventory']
         )
 
     def _create_workflow_nodes(self, old_node_list, user=None):
@@ -350,6 +352,15 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         null=True,
         on_delete=models.SET_NULL,
         related_name='workflows',
+    )
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='%(class)ss',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        help_text=_('Inventory applied to all job templates in workflow that prompt for inventory.'),
     )
     ask_inventory_on_launch = AskForField(
         blank=True,
@@ -413,23 +424,40 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         exclude_errors = kwargs.pop('_exclude_errors', [])
         prompted_data = {}
         rejected_data = {}
-        accepted_vars, rejected_vars, errors_dict = self.accept_or_ignore_variables(
-            kwargs.get('extra_vars', {}),
-            _exclude_errors=exclude_errors,
-            extra_passwords=kwargs.get('survey_passwords', {}))
-        if accepted_vars:
-            prompted_data['extra_vars'] = accepted_vars
-        if rejected_vars:
-            rejected_data['extra_vars'] = rejected_vars
+        errors_dict = {}
 
-        # WFJTs do not behave like JTs, it can not accept inventory, credential, etc.
-        bad_kwargs = kwargs.copy()
-        bad_kwargs.pop('extra_vars', None)
-        bad_kwargs.pop('survey_passwords', None)
-        if bad_kwargs:
-            rejected_data.update(bad_kwargs)
-            for field in bad_kwargs:
-                errors_dict[field] = _('Field is not allowed for use in workflows.')
+        # Handle all the fields that have prompting rules
+        # NOTE: If WFJTs prompt for other things, this logic can be combined with jobs
+        for field_name, ask_field_name in self.get_ask_mapping().items():
+
+            if field_name == 'extra_vars':
+                accepted_vars, rejected_vars, vars_errors = self.accept_or_ignore_variables(
+                    kwargs.get('extra_vars', {}),
+                    _exclude_errors=exclude_errors,
+                    extra_passwords=kwargs.get('survey_passwords', {}))
+                if accepted_vars:
+                    prompted_data['extra_vars'] = accepted_vars
+                if rejected_vars:
+                    rejected_data['extra_vars'] = rejected_vars
+                errors_dict.update(vars_errors)
+
+            if field_name not in kwargs:
+                continue
+            new_value = kwargs[field_name]
+            old_value = getattr(self, field_name)
+
+            if new_value == old_value:
+                continue  # no-op case: Counted as neither accepted or ignored
+            elif getattr(self, ask_field_name):
+                # accepted prompt
+                prompted_data[field_name] = new_value
+            else:
+                # unprompted - template is not configured to accept field on launch
+                rejected_data[field_name] = new_value
+                # Not considered an error for manual launch, to support old
+                # behavior of putting them in ignored_fields and launching anyway
+                if 'prompts' not in exclude_errors:
+                    errors_dict[field_name] = _('Field is not configured to prompt on launch.').format(field_name=field_name)
 
         return prompted_data, rejected_data, errors_dict
 
@@ -459,7 +487,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return WorkflowJob.objects.filter(workflow_job_template=self)
 
 
-class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):
+class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin, LaunchTimeConfigBase):
     class Meta:
         app_label = 'main'
         ordering = ('id',)

@@ -894,19 +894,19 @@ class NullablePromptPsuedoField(object):
             instance.char_prompts[self.field_name] = value
 
 
-class LaunchTimeConfig(BaseModel):
+class LaunchTimeConfigBase(BaseModel):
     '''
-    Common model for all objects that save details of a saved launch config
-    WFJT / WJ nodes, schedules, and job launch configs (not all implemented yet)
+    Needed as separate class from LaunchTimeConfig because some models
+    use `extra_data` and some use `extra_vars`. We cannot change the API,
+    so we force fake it in the model definitions
+     - model defines extra_vars - use this class
+     - model needs to use extra data - use LaunchTimeConfig
+    Use this for models which are SurveyMixins and UnifiedJobs or Templates
     '''
     class Meta:
         abstract = True
 
     # Prompting-related fields that have to be handled as special cases
-    credentials = models.ManyToManyField(
-        'Credential',
-        related_name='%(class)ss'
-    )
     inventory = models.ForeignKey(
         'Inventory',
         related_name='%(class)ss',
@@ -915,15 +915,6 @@ class LaunchTimeConfig(BaseModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    extra_data = JSONField(
-        blank=True,
-        default={}
-    )
-    survey_passwords = prevent_search(JSONField(
-        blank=True,
-        default={},
-        editable=False,
-    ))
     # All standard fields are stored in this dictionary field
     # This is a solution to the nullable CharField problem, specific to prompting
     char_prompts = JSONField(
@@ -933,6 +924,7 @@ class LaunchTimeConfig(BaseModel):
 
     def prompts_dict(self, display=False):
         data = {}
+        # Some types may have different prompts, but always subset of JT prompts
         for prompt_name in JobTemplate.get_ask_mapping().keys():
             try:
                 field = self._meta.get_field(prompt_name)
@@ -945,11 +937,11 @@ class LaunchTimeConfig(BaseModel):
                 if len(prompt_val) > 0:
                     data[prompt_name] = prompt_val
             elif prompt_name == 'extra_vars':
-                if self.extra_data:
+                if self.extra_vars:
                     if display:
-                        data[prompt_name] = self.display_extra_data()
+                        data[prompt_name] = self.display_extra_vars()
                     else:
-                        data[prompt_name] = self.extra_data
+                        data[prompt_name] = self.extra_vars
                 if self.survey_passwords and not display:
                     data['survey_passwords'] = self.survey_passwords
             else:
@@ -958,18 +950,18 @@ class LaunchTimeConfig(BaseModel):
                     data[prompt_name] = prompt_val
         return data
 
-    def display_extra_data(self):
+    def display_extra_vars(self):
         '''
         Hides fields marked as passwords in survey.
         '''
         if self.survey_passwords:
-            extra_data = parse_yaml_or_json(self.extra_data).copy()
+            extra_vars = parse_yaml_or_json(self.extra_vars).copy()
             for key, value in self.survey_passwords.items():
-                if key in extra_data:
-                    extra_data[key] = value
-            return extra_data
+                if key in extra_vars:
+                    extra_vars[key] = value
+            return extra_vars
         else:
-            return self.extra_data
+            return self.extra_vars
 
     @property
     def _credential(self):
@@ -991,6 +983,39 @@ class LaunchTimeConfig(BaseModel):
             return cred.pk
         else:
             return None
+
+
+class LaunchTimeConfig(LaunchTimeConfigBase):
+    '''
+    Common model for all objects that save details of a saved launch config
+    WFJT / WJ nodes, schedules, and job launch configs (not all implemented yet)
+    '''
+    class Meta:
+        abstract = True
+
+    # Special case prompting fields, even more special than the other ones
+    extra_data = JSONField(
+        blank=True,
+        default={}
+    )
+    survey_passwords = prevent_search(JSONField(
+        blank=True,
+        default={},
+        editable=False,
+    ))
+    # Credentials needed for non-unified job / unified JT models
+    credentials = models.ManyToManyField(
+        'Credential',
+        related_name='%(class)ss'
+    )
+
+    @property
+    def extra_vars(self):
+        return self.extra_data
+
+    @extra_vars.setter
+    def extra_vars(self, extra_vars):
+        self.extra_data = extra_vars
 
 
 for field_name in JobTemplate.get_ask_mapping().keys():

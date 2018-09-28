@@ -4421,11 +4421,15 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
     variables_needed_to_start = serializers.ReadOnlyField()
     survey_enabled = serializers.SerializerMethodField()
     extra_vars = VerbatimField(required=False, write_only=True)
+    inventory = serializers.PrimaryKeyRelatedField(
+        queryset=Inventory.objects.all(),
+        required=False, write_only=True
+    )
     workflow_job_template_data = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('can_start_without_user_input', 'extra_vars',
+        fields = ('can_start_without_user_input', 'extra_vars', 'inventory',
                   'survey_enabled', 'variables_needed_to_start',
                   'node_templates_missing', 'node_prompts_rejected',
                   'workflow_job_template_data')
@@ -4444,11 +4448,17 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         accepted, rejected, errors = obj._accept_or_ignore_job_kwargs(
             _exclude_errors=['required'],
             **attrs)
+        self._ignored_fields = rejected
+
+        if errors:
+            raise serializers.ValidationError(errors)
 
         WFJT_extra_vars = obj.extra_vars
-        attrs = super(WorkflowJobLaunchSerializer, self).validate(attrs)
+        WFJT_inventory = obj.inventory
+        super(WorkflowJobLaunchSerializer, self).validate(attrs)
         obj.extra_vars = WFJT_extra_vars
-        return attrs
+        obj.inventory = WFJT_inventory
+        return accepted
 
 
 class NotificationTemplateSerializer(BaseSerializer):
