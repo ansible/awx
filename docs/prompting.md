@@ -64,7 +64,7 @@ actions in the API.
  - POST to `/api/v2/job_templates/N/launch/`
    - can accept all prompt-able fields
  - POST to `/api/v2/workflow_job_templates/N/launch/`
-   - can only accept extra_vars
+   - can accept extra_vars and inventory
  - POST to `/api/v2/system_job_templates/N/launch/`
    - can accept certain fields, with no user configuration
 
@@ -142,6 +142,7 @@ at launch-time that are saved in advance.
  - Workflow nodes
  - Schedules
  - Job relaunch / re-scheduling
+ - (partially) workflow job templates
 
 In the case of workflow nodes and schedules, the prompted fields are saved
 directly on the model. Those models include Workflow Job Template Nodes,
@@ -157,7 +158,7 @@ and only used to prepare the correct launch-time configuration for subsequent
 re-launch and re-scheduling of the job. To see these prompts for a particular
 job, do a GET to `/api/v2/jobs/N/create_schedule/`.
 
-#### Workflow Node Launch Configuration (Changing in Tower 3.3)
+#### Workflow Node Launch Configuration
 
 Workflow job nodes will combine `extra_vars` from their parent
 workflow job with the variables that they provide in
@@ -168,15 +169,26 @@ the node.
 All prompts that a workflow node passes to a spawned job abides by the
 rules of the related template.
 That means that if the node's job template has `ask_variables_on_launch` set
-to false with no survey, neither the workflow JT or the artifacts will take effect
-in the job that is spawned.
+to false with no survey, the workflow node's variables will not
+take effect in the job that is spawned.
 If the node's job template has `ask_inventory_on_launch` set to false and
 the node provides an inventory, this resource will not be used in the spawned
 job. If a user creates a node that would do this, a 400 response will be returned.
 
-Behavior before the 3.3 release cycle was less-restrictive with passing
-workflow variables to the jobs it spawned, allowing variables to take effect
-even when the job template was not configured to allow it.
+#### Workflow Job Template Prompts
+
+Workflow JTs are different than other cases, because they do not have a
+template directly linked, so their prompts are a form of action-at-a-distance.
+When the node's prompts are gathered, any prompts from the workflow job
+can take precedence over the node's value.
+
+As a special exception, `extra_vars` from a workflow will not obey JT survey
+and prompting rules, both both historical and ease-of-understanding reasons.
+This behavior may change in the future.
+
+Other than that exception, JT prompting rules are still adhered to when
+a job is spawned, although so far this only applies to the workflow job's
+`inventory` field.
 
 #### Job Relaunch and Re-scheduling
 
