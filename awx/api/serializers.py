@@ -3676,7 +3676,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
         if obj is None:
             return ret
         if 'extra_data' in ret and obj.survey_passwords:
-            ret['extra_data'] = obj.display_extra_data()
+            ret['extra_data'] = obj.display_extra_vars()
         return ret
 
     def get_summary_fields(self, obj):
@@ -4401,6 +4401,11 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
             _exclude_errors=['required'],
             **attrs)
         self._ignored_fields = rejected
+
+        if template.inventory and template.inventory.pending_deletion is True:
+            errors['inventory'] = _("The inventory associated with this Workflow is being deleted.")
+        elif 'inventory' in accepted and accepted['inventory'].pending_deletion:
+            errors['inventory'] = _("The provided inventory is being deleted.")
 
         if errors:
             raise serializers.ValidationError(errors)
