@@ -7,6 +7,7 @@ from awx.main.models.workflow import WorkflowJob, WorkflowJobNode, WorkflowJobTe
 from awx.main.models.jobs import JobTemplate, Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.scheduler.dag_workflow import WorkflowDAG
+from awx.api.versioning import reverse
 
 # Django
 from django.test import TransactionTestCase
@@ -196,7 +197,15 @@ class TestWorkflowJobTemplate:
         assert test_view.is_valid_relation(node_assoc, nodes[1]) == {'Error': 'Multiple parent relationship not allowed.'}
         # test mutex validation
         test_view.relationship = 'failure_nodes'
-        node_assoc_1 = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt)
+        
+    def test_always_success_failure_creation(self, wfjt, admin, get):
+        wfjt_node = wfjt.workflow_job_template_nodes.all()[1]
+        node = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt)
+        wfjt_node.always_nodes.add(node)
+        assert len(node.get_parent_nodes()) == 1
+        url = reverse('api:workflow_job_template_node_list') + str(wfjt_node.id) + '/'
+        resp = get(url, admin)
+        assert node.id in resp.data['always_nodes']
 
     def test_wfjt_unique_together_with_org(self, organization):
         wfjt1 = WorkflowJobTemplate(name='foo', organization=organization)
