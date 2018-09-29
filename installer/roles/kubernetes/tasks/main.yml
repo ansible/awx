@@ -127,12 +127,11 @@
     - 'secret'
   no_log: yes
 
-- name: Apply Deployment
+- name: Apply Configmap and Secrets
   shell: |
     echo {{ item | quote }} | {{ kubectl_or_oc }} apply -f -
   with_items:
     - "{{ configmap }}"
-    - "{{ deployment }}"
     - "{{ secret }}"
   no_log: yes
 
@@ -196,6 +195,13 @@
   shell: |
     {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
       delete pod ansible-tower-management --grace-period=0 --ignore-not-found
+
+- name: Apply Deployment
+  shell: |
+    echo {{ item | quote }} | {{ kubectl_or_oc }} apply -f -
+  with_items:
+    - "{{ deployment }}"
+  no_log: yes
 
 - name: Scale up deployment
   shell: |
