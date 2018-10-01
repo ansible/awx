@@ -113,6 +113,51 @@ export default ['NotificationsList', 'i18n',
                         }
                     }
                 },
+                permissions: {
+                    name: 'permissions',
+                    awToolTip: i18n._('Please save before assigning permissions.'),
+                    djangoModel: 'access_list',
+                    dataPlacement: 'top',
+                    basePath: 'api/v2/organizations/{{$stateParams.organization_id}}/access_list/',
+                    search: {
+                        order_by: 'username'
+                    },
+                    type: 'collection',
+                    title: i18n._('Permissions'),
+                    iterator: 'permission',
+                    index: false,
+                    open: false,
+                    actions: {
+                        add: {
+                            ngClick: "$state.go('.add')",
+                            label: 'Add',
+                            awToolTip: i18n._('Add a permission'),
+                            actionClass: 'at-Button--add',
+                            actionId: 'button-add',
+                            ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                        }
+                    },
+                    fields: {
+                        username: {
+                            key: true,
+                            label: i18n._('User'),
+                            linkBase: 'users',
+                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                        },
+                        role: {
+                            label: i18n._('Role'),
+                            type: 'role',
+                            nosort: true,
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                        },
+                        team_roles: {
+                            label: i18n._('Team Roles'),
+                            type: 'team_roles',
+                            nosort: true,
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                        }
+                    }
+                },
                 "notifications": {
                     include: "NotificationsList"
 
