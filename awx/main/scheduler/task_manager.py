@@ -32,6 +32,7 @@ from awx.main.models import (
     SystemJob,
     UnifiedJob,
     WorkflowJob,
+    WorkflowJobTemplate
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
@@ -196,15 +197,29 @@ class TaskManager():
                 job = spawn_node.unified_job_template.create_unified_job(**kv)
                 spawn_node.job = job
                 spawn_node.save()
-                if job._resources_sufficient_for_launch():
+                can_start = True
+                if isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
+                    workflow_ancestors = job.get_ancestor_workflows()
+                    if spawn_node.unified_job_template.id in set(workflow_ancestors):
+                        can_start = False
+                        logger.info('Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                            job.id, spawn_node.unified_job_template.id, workflow_ancestors))
+                        job.job_explanation = _(
+                            "Workflow Job spawned from workflow could not start because it "
+                            "would result in recursion (template spawn order {})"
+                        ).format([spawn_node.unified_job_template.id] + workflow_ancestors)
+                    else:
+                        logger.debug('Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                            job.id, spawn_node.unified_job_template.id, workflow_ancestors))
+                if not job._resources_sufficient_for_launch():
+                    can_start = False
+                    job.job_explanation = _("Job spawned from workflow could not start because it "
+                                            "was missing a related resource such as project or inventory")
+                if can_start:
                     can_start = job.signal_start()
                     if not can_start:
                         job.job_explanation = _("Job spawned from workflow could not start because it "
                                                 "was not in the right state or required manual credentials")
-                else:
-                    can_start = False
-                    job.job_explanation = _("Job spawned from workflow could not start because it "
-                                            "was missing a related resource such as project or inventory")
                 if not can_start:
                     job.status = 'failed'
                     job.save(update_fields=['status', 'job_explanation'])
