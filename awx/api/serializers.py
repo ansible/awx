@@ -4443,9 +4443,9 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         return dict(name=obj.name, id=obj.id, description=obj.description)
 
     def validate(self, attrs):
-        obj = self.instance
+        template = self.instance
 
-        accepted, rejected, errors = obj._accept_or_ignore_job_kwargs(
+        accepted, rejected, errors = template._accept_or_ignore_job_kwargs(
             _exclude_errors=['required'],
             **attrs)
         self._ignored_fields = rejected
@@ -4458,11 +4458,11 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         if errors:
             raise serializers.ValidationError(errors)
 
-        WFJT_extra_vars = obj.extra_vars
-        WFJT_inventory = obj.inventory
+        WFJT_extra_vars = template.extra_vars
+        WFJT_inventory = template.inventory
         super(WorkflowJobLaunchSerializer, self).validate(attrs)
-        obj.extra_vars = WFJT_extra_vars
-        obj.inventory = WFJT_inventory
+        template.extra_vars = WFJT_extra_vars
+        template.inventory = WFJT_inventory
         return accepted
 
 
