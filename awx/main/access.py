@@ -1840,8 +1840,10 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if 'survey_enabled' in data and data['survey_enabled']:
             self.check_license(feature='surveys')
 
-        return self.check_related('organization', Organization, data, role_field='workflow_admin_role',
-                                  mandatory=True)
+        return (
+            self.check_related('organization', Organization, data, role_field='workflow_admin_role', mandatory=True) and
+            self.check_related('inventory', Inventory, data, role_field='use_role')
+        )
 
     def can_copy(self, obj):
         if self.save_messages:
@@ -1895,8 +1897,11 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        return (self.check_related('organization', Organization, data, role_field='workflow_admin_role', obj=obj) and
-                self.user in obj.admin_role)
+        return (
+            self.check_related('organization', Organization, data, role_field='workflow_admin_role', obj=obj) and
+            self.check_related('inventory', Inventory, data, role_field='use_role', obj=obj) and
+            self.user in obj.admin_role
+        )
 
     def can_delete(self, obj):
         return self.user.is_superuser or self.user in obj.admin_role
