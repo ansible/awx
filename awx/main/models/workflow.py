@@ -483,8 +483,14 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     def get_ancestor_workflows(self):
         ancestors = []
         wj = self
+        wj_ids = set([])
         while True:
+            wj_ids.add(wj.id)
             wj = wj.get_workflow_job()
+            if wj.id in wj_ids:
+                logger.critical('Cycles detected in the workflow jobs graph, '
+                                'this is not normal and suggests task manager degeneracy.')
+                break
             if (not wj) or (not wj.workflow_job_template_id):
                 break
             ancestors.append(wj.workflow_job_template_id)
