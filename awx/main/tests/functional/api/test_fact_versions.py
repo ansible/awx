@@ -59,7 +59,7 @@ def check_system_tracking_feature_forbidden(response):
     assert 'Your license does not permit use of system tracking.' == response.data['detail']
 
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_disabled)
+@mock.patch('awx.api.views.mixin.feature_enabled', new=mock_feature_disabled)
 @pytest.mark.django_db
 @pytest.mark.license_feature
 def test_system_tracking_license_get(hosts, get, user):
@@ -70,7 +70,7 @@ def test_system_tracking_license_get(hosts, get, user):
     check_system_tracking_feature_forbidden(response)
 
 
-@mock.patch('awx.api.views.feature_enabled', new=mock_feature_disabled)
+@mock.patch('awx.api.views.mixin.feature_enabled', new=mock_feature_disabled)
 @pytest.mark.django_db
 @pytest.mark.license_feature
 def test_system_tracking_license_options(hosts, options, user):
