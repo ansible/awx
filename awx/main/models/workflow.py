@@ -481,19 +481,21 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         return 0
 
     def get_ancestor_workflows(self):
+        """Returns a list of WFJTs that are indirect parents of this workflow job
+        say WFJTs are set up to spawn in order of A->B->C, and this workflow job
+        came from C, then C is the parent and [B, A] will be returned from this.
+        """
         ancestors = []
-        wj = self
-        wj_ids = set([])
-        while True:
-            wj_ids.add(wj.id)
-            wj = wj.get_workflow_job()
-            if wj.id in wj_ids:
+        wj_ids = set([self.pk])
+        wj = self.get_workflow_job()
+        while wj and wj.workflow_job_template_id:
+            if wj.pk in wj_ids:
                 logger.critical('Cycles detected in the workflow jobs graph, '
                                 'this is not normal and suggests task manager degeneracy.')
                 break
-            if (not wj) or (not wj.workflow_job_template_id):
-                break
+            wj_ids.add(wj.pk)
             ancestors.append(wj.workflow_job_template_id)
+            wj = wj.get_workflow_job()
         return ancestors
 
     def get_notification_templates(self):

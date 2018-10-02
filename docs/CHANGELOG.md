@@ -1,3 +1,7 @@
+3.4.0
+=====
+* Removed restriction that workflows cannot be used in workflows.[[#2252](https://github.com/ansible/awx/issues/2252)]
+
 3.3.0
 =====
 * Allow relaunching jobs on a subset of hosts, by status.[[#219](https://github.com/ansible/awx/issues/219)]
