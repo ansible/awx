@@ -215,3 +215,55 @@ class TestWorkflowJobTemplate:
             wfjt2.validate_unique()
         wfjt2 = WorkflowJobTemplate(name='foo', organization=None)
         wfjt2.validate_unique()
+
+
+@pytest.mark.django_db
+def test_workflow_ancestors(organization):
+    # Spawn order of templates grandparent -> parent -> child
+    # create child WFJT and workflow job
+    child = WorkflowJobTemplate.objects.create(organization=organization, name='child')
+    child_job = WorkflowJob.objects.create(
+        workflow_job_template=child,
+        launch_type='workflow'
+    )
+    # create parent WFJT and workflow job, and link it up
+    parent = WorkflowJobTemplate.objects.create(organization=organization, name='parent')
+    parent_job = WorkflowJob.objects.create(
+        workflow_job_template=parent,
+        launch_type='workflow'
+    )
+    WorkflowJobNode.objects.create(
+        workflow_job=parent_job,
+        unified_job_template=child,
+        job=child_job
+    )
+    # create grandparent WFJT and workflow job and link it up
+    grandparent = WorkflowJobTemplate.objects.create(organization=organization, name='grandparent')
+    grandparent_job = WorkflowJob.objects.create(
+        workflow_job_template=grandparent,
+        launch_type='schedule'
+    )
+    WorkflowJobNode.objects.create(
+        workflow_job=grandparent_job,
+        unified_job_template=parent,
+        job=parent_job
+    )
+    # ancestors method gives a list of WFJT ids
+    assert child_job.get_ancestor_workflows() == [parent.pk, grandparent.pk]
+
+
+@pytest.mark.django_db
+def test_workflow_ancestors_recursion_prevention(organization):
+    # This is toxic database data, this tests that it doesn't create an infinite loop
+    wfjt = WorkflowJobTemplate.objects.create(organization=organization, name='child')
+    wfj = WorkflowJob.objects.create(
+        workflow_job_template=wfjt,
+        launch_type='workflow'
+    )
+    WorkflowJobNode.objects.create(
+        workflow_job=wfj,
+        unified_job_template=wfjt,
+        job=wfj  # well, this is a problem
+    )
+    # mostly, we just care that this assertion finishes in finite time
+    assert wfj.get_ancestor_workflows() == []
