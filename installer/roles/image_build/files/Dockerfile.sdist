@@ -1,12 +1,11 @@
 FROM centos:7
 
 RUN yum install -y epel-release
-RUN yum install -y https://centos7.iuscommunity.org/ius-release.rpm
 
 RUN yum install -y bzip2 \
     gcc-c++ \
     gettext \
-    git2u-core \
+    git \
     make \
     python \
     python-pip

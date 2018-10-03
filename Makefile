@@ -12,10 +12,7 @@ MANAGEMENT_COMMAND ?= awx-manage
 IMAGE_REPOSITORY_AUTH ?=
 IMAGE_REPOSITORY_BASE ?= https://gcr.io
 
-VERSION=$(shell git describe --long --first-parent)
-VERSION3=$(shell git describe --long --first-parent | sed 's/\-g.*//')
-VERSION3DOT=$(shell git describe --long --first-parent | sed 's/\-g.*//' | sed 's/\-/\./')
-RELEASE_VERSION=$(shell git describe --long --first-parent | sed 's@\([0-9.]\{1,\}\).*@\1@')
+VERSION := $(shell cat VERSION)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -29,8 +26,6 @@ DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
-
-CURWD = $(shell pwd)
 
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
@@ -48,20 +43,9 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 NAME ?= awx
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 
-ifeq ($(OFFICIAL),yes)
-    VERSION_TARGET ?= $(RELEASE_VERSION)
-else
-    VERSION_TARGET ?= $(VERSION3DOT)
-endif
-
 # TAR build parameters
-ifeq ($(OFFICIAL),yes)
-    SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
-    WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)
-else
-    SDIST_TAR_NAME=$(NAME)-$(VERSION3DOT)
-    WHEEL_NAME=$(NAME)-$(VERSION3DOT)
-endif
+SDIST_TAR_NAME=$(NAME)-$(VERSION)
+WHEEL_NAME=$(NAME)-$(VERSION)
 
 SDIST_COMMAND ?= sdist
 WHEEL_COMMAND ?= bdist_wheel
@@ -112,7 +96,6 @@ clean: clean-ui clean-dist
 	rm -rf requirements/vendor
 	rm -rf tmp
 	rm -rf $(I18N_FLAG_FILE)
-	rm -f VERSION
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -611,7 +594,7 @@ docker-compose-cluster-elk: docker-auth
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 minishift-dev:
-	ansible-playbook -i localhost, -e devtree_directory=$(CURWD) tools/clusterdevel/start_minishift_dev.yml
+	ansible-playbook -i localhost, -e devtree_directory=$(CURDIR) tools/clusterdevel/start_minishift_dev.yml
 
 
 clean-elk:
@@ -626,5 +609,4 @@ psql-container:
 	docker run -it --net tools_default --rm postgres:9.6 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
-	@echo $(VERSION_TARGET) > $@
-	@echo "awx: $(VERSION_TARGET)"
+	@echo "awx: $(VERSION)"
