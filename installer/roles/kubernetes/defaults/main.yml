@@ -1,4 +1,6 @@
 ---
+dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
+
 admin_user: 'admin'
 admin_email: 'root@localhost'
 admin_password: 'password'
