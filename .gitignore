@@ -1,3 +1,4 @@
+
 # Tags
 .tags
 .tags1
@@ -52,6 +53,7 @@ __pycache__
 **/node_modules/**
 /tmp
 **/npm-debug.log*
+**/package-lock.json
 
 # UI build flag files
 awx/ui/.deps_built
