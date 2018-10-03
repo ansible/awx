@@ -126,22 +126,22 @@ function getSourceWorkflowJobDetails () {
     return { link, tooltip };
 }
 
-function getShardDetails () {
+function getSplitJobDetails () {
     const internalLimitDetails = resource.model.get('summary_fields.internal_limit');
 
     if (!internalLimitDetails) {
         return null;
     }
 
-    const shardDetails = resource.model.get('summary_fields.internal_limit.shard');
+    const splitJobDetails = resource.model.get('summary_fields.internal_limit.shard');
 
-    if (!shardDetails) {
+    if (!splitJobDetails) {
         return null;
     }
 
-    const label = strings.get('labels.SHARD_DETAILS');
-    const offset = `${shardDetails.offset} of ${shardDetails.step} shards`;
-    const tooltip = strings.get('tooltips.SHARD_DETAILS');
+    const label = strings.get('labels.SPLIT_JOB');
+    const offset = `${splitJobDetails.offset + 1}/${splitJobDetails.step}`;
+    const tooltip = strings.get('tooltips.SPLIT_JOB_DETAILS');
 
     return { label, offset, tooltip };
 }
@@ -691,7 +691,7 @@ function JobDetailsController (
         vm.jobType = getJobTypeDetails();
         vm.jobTemplate = getJobTemplateDetails();
         vm.sourceWorkflowJob = getSourceWorkflowJobDetails();
-        vm.shardDetails = getShardDetails();
+        vm.splitJobDetails = getSplitJobDetails();
         vm.inventory = getInventoryDetails();
         vm.project = getProjectDetails();
         vm.projectUpdate = getProjectUpdateDetails();

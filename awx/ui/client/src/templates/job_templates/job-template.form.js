@@ -257,6 +257,19 @@ function(NotificationsList, i18n) {
                     dataPlacement: 'right',
                     control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)"></instance-groups-multiselect>',
                 },
+                job_shard_count: {
+                    label: i18n._('Job Splitting'),
+                    type: 'number',
+                    integer: true,
+                    min: 1,
+                    default: 1,
+                    spinner: true,
+                    dataTitle: i18n._('Split Job Count'),
+                    dataPlacement: 'right',
+                    dataContainer: 'body',
+                    awPopOver: "<p>" + i18n._("The number of jobs to split into at runtime. Will cause the Job Template to launch a workflow if value is non-zero.") + "</p>",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                },
                 diff_mode: {
                     label: i18n._('Show Changes'),
                     type: 'toggleSwitch',
@@ -269,20 +282,6 @@ function(NotificationsList, i18n) {
                         variable: 'ask_diff_mode_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
-                },
-                job_shard_count: {
-                    label: i18n._('Number of job shards to use'),
-                    type: 'number',
-                    integer: true,
-                    min: 0,
-                    spinner: true,
-                    // 'class': "input-small",
-                    // toggleSource: 'diff_mode',
-                    dataTitle: i18n._('Job Shard Count'),
-                    dataPlacement: 'right',
-                    dataContainer: 'body',
-                    awPopOver: "<p>" + i18n._("If non-zero, split into multiple jobs that run on mutually exclusive slices of the inventory.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 checkbox_group: {

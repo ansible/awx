@@ -76,6 +76,22 @@ function ListJobsController (
             return { icon, link, value };
         });
 
+    vm.getSplitJobDetails = (details) => {
+        const internalLimitDetails = Object.assign({}, details);
+
+        if (!internalLimitDetails) {
+            return null;
+        }
+
+        const splitJobDetails = internalLimitDetails.shard;
+
+        if (!splitJobDetails) {
+            return null;
+        }
+
+        return `Split Job ${splitJobDetails.offset + 1}/${splitJobDetails.step}`;
+    };
+
     vm.getSref = ({ type, id }) => {
         let sref;
 

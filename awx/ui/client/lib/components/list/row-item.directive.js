@@ -13,6 +13,7 @@ function atRowItem () {
             headerLink: '@',
             headerState: '@',
             headerTag: '@',
+            secondaryTag: '@',
             status: '@',
             statusTip: '@',
             statusClick: '&?',
