@@ -6,7 +6,6 @@
 import os
 import glob
 import sys
-import subprocess
 from setuptools import setup
 from distutils.command.sdist import sdist
 
@@ -24,6 +23,7 @@ def get_version():
     version_file = os.path.join(current_dir, 'VERSION')
     with open(version_file, 'r') as file:
         return file.read().strip()
+
 
 if os.path.exists("/etc/debian_version"):
     sysinit = "/etc/init.d"
