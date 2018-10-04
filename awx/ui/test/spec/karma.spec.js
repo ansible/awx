@@ -1,9 +1,10 @@
 const path = require('path');
+const webpackConfig = require('./webpack.spec');
+
+process.env.CHROME_BIN = require('puppeteer').executablePath();
 
 const SRC_PATH = path.resolve(__dirname, '../../client/src');
 const NODE_MODULES = path.resolve(__dirname, '../../node_modules');
-
-const webpackConfig = require('./webpack.spec');
 
 module.exports = config => {
     config.set({
@@ -14,7 +15,6 @@ module.exports = config => {
         frameworks: ['jasmine'],
         reporters: ['progress', 'junit'],
         files:[
-            'test/spec/polyfills.js',
             'client/src/vendor.js',
             path.join(NODE_MODULES, 'angular-mocks/angular-mocks.js'),
             path.join(SRC_PATH, 'app.js'),
@@ -35,6 +35,18 @@ module.exports = config => {
             outputDir: 'reports',
             outputFile: 'results.spec.xml',
             useBrowserName: false
-        }
+        },
+        customLaunchers: {
+            chromeHeadless: {
+                base: 'Chrome',
+                flags: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--headless',
+                    '--disable-gpu',
+                    '--remote-debugging-port=9222',
+                ],
+            },
+        },
     });
 };

@@ -7,6 +7,7 @@ class Command(MakeMigrations):
 
     def execute(self, *args, **options):
         settings = connections['default'].settings_dict.copy()
-        settings['ENGINE'] = 'sqlite3'
+        settings['ENGINE'] = 'django.db.backends.sqlite3'
+        settings['NAME'] = ':memory:'
         connections['default'] = DatabaseWrapper(settings)
         return MakeMigrations().execute(*args, **options)
