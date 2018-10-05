@@ -15,6 +15,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
             addNode: '&',
             editNode: '&',
             deleteNode: '&',
+            editLink: '&',
             workflowZoomed: '&',
             mode: '@'
         },
@@ -238,6 +239,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     // Declare the nodes
                     let nodes = tree.nodes(scope.treeData),
                         links = tree.links(nodes);
+
                     let node = svgGroup.selectAll("g.node")
                         .data(nodes, function(d) {
                             d.y = d.depth * 240;
@@ -499,6 +501,50 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                     d3.select("#node-" + d.id + "-remove")
                                         .classed("removeHovering", false);
                                 });
+                            // thisNode.append("circle")
+                            //     .attr("id", function(d){return "node-" + d.id + "-link";})
+                            //     .attr("cx", nodeW)
+                            //     .attr("cy", nodeH/2)
+                            //     .attr("r", 10)
+                            //     .attr("class", "linkCircle nodeCircle")
+                            //     .style("display", function(d) { return d.placeholder || !(userCanAddEdit) ? "none" : null; })
+                            //     .call(link_node)
+                            //     .on("mouseover", function(d) {
+                            //         d3.select("#node-" + d.id)
+                            //             .classed("hovering", true);
+                            //         d3.select("#node-" + d.id + "-link")
+                            //             .classed("addHovering", true);
+                            //     })
+                            //     .on("mouseout", function(d){
+                            //         d3.select("#node-" + d.id)
+                            //             .classed("hovering", false);
+                            //         d3.select("#node-" + d.id + "-link")
+                            //             .classed("addHovering", false);
+                            //     });
+                            // // TODO: clean up the placement of this icon... this works but it's not
+                            // // clean
+                            // thisNode.append("foreignObject")
+                            //      .attr("x", nodeW - 6)
+                            //      .attr("y", nodeH/2 - 9)
+                            //      .style("font-size","14px")
+                            //      .html(function () {
+                            //          return `<span class="fa fa-link" />`;
+                            //      })
+                            //      .attr("class", "linkIcon")
+                            //      .style("display", function(d) { return d.placeholder || !(userCanAddEdit) ? "none" : null; })
+                            //      .call(link_node)
+                            //      .on("mouseover", function(d) {
+                            //          d3.select("#node-" + d.id)
+                            //              .classed("hovering", true);
+                            //          d3.select("#node-" + d.id + "-link")
+                            //              .classed("addHovering", true);
+                            //      })
+                            //      .on("mouseout", function(d){
+                            //          d3.select("#node-" + d.id)
+                            //              .classed("hovering", false);
+                            //          d3.select("#node-" + d.id + "-link")
+                            //              .classed("addHovering", false);
+                            //      });
 
                             thisNode.append("circle")
                                 .attr("class", function(d) {
@@ -576,28 +622,71 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                          .attr("class", "link")
                          .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id;});
 
+                     linkEnter.append("polygon", "g")
+                          .attr("class", function(d) {
+                              let linkClasses = ["linkOverlay"];
+                              if (d.source.isLinkEditParent && d.target.isLinkEditChild) {
+                                  linkClasses.push("linkActiveEdit");
+                              }
+                              return linkClasses.join(' ');
+                          })
+                          .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-overlay";})
+                          .attr("points",function(d) {
+                              const pt1 = [d.source.y + nodeW, d.source.x + 10 + nodeH/2].join(",");
+                              const pt2 = [d.target.y,d.target.x + 10 + nodeH/2].join(",");
+                              const pt3 = [d.target.y,d.target.x - 10 + nodeH/2].join(",");
+                              const pt4 = [d.source.y + nodeW,d.source.x - 10 + nodeH/2].join(",");
+                              return [pt1, pt2, pt3, pt4].join(" ");
+                          })
+                          .call(edit_link)
+                          .on("mouseover", function(d) {
+                              if(!d.source.isStartNode && !d.target.placeholder && scope.mode !== 'details') {
+                                  d3.select("#link-" + d.source.id + "-" + d.target.id)
+                                      .classed("overlayHovering", true);
+                              }
+                          })
+                          .on("mouseout", function(d){
+                              if(!d.source.isStartNode && !d.target.placeholder && scope.mode !== 'details') {
+                                  d3.select("#link-" + d.source.id + "-" + d.target.id)
+                                      .classed("overlayHovering", false);
+                              }
+                          });
+
                     // Add entering links in the parent’s old position.
-                    linkEnter.insert("path", "g")
-                             .attr("class", function(d) {
-                                 return (d.source.placeholder || d.target.placeholder) ? "linkPath placeholder" : "linkPath";
-                             })
-                             .attr("d", lineData)
-                             .attr('stroke', function(d) {
-                                 if(d.target.edgeType) {
-                                     if(d.target.edgeType === "failure") {
-                                         return "#d9534f";
-                                     }
-                                     else if(d.target.edgeType === "success") {
-                                         return "#5cb85c";
-                                     }
-                                     else if(d.target.edgeType === "always"){
-                                         return "#337ab7";
-                                     }
+                    linkEnter.append("path", "g")
+                         .attr("class", function(d) {
+                             return (d.source.placeholder || d.target.placeholder) ? "linkPath placeholder" : "linkPath";
+                         })
+                         .attr("d", lineData)
+                         .call(edit_link)
+                         .on("mouseover", function(d) {
+                             if(!d.source.isStartNode && !d.target.placeholder && scope.mode !== 'details') {
+                                 d3.select("#link-" + d.source.id + "-" + d.target.id)
+                                     .classed("overlayHovering", true);
+                             }
+                         })
+                         .on("mouseout", function(d){
+                             if(!d.source.isStartNode && !d.target.placeholder && scope.mode !== 'details') {
+                                 d3.select("#link-" + d.source.id + "-" + d.target.id)
+                                     .classed("overlayHovering", false);
+                             }
+                         })
+                         .attr('stroke', function(d) {
+                             if(d.target.edgeType) {
+                                 if(d.target.edgeType === "failure") {
+                                     return "#d9534f";
                                  }
-                                 else {
-                                     return "#D7D7D7";
+                                 else if(d.target.edgeType === "success") {
+                                     return "#5cb85c";
                                  }
-                             });
+                                 else if(d.target.edgeType === "always"){
+                                     return "#337ab7";
+                                 }
+                             }
+                             else {
+                                 return "#D7D7D7";
+                             }
+                         });
 
                     linkEnter.append("circle")
                          .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
@@ -608,19 +697,15 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                              return (d.source.isStartNode) ? ((d.target.x + startNodeOffsetY + rootH/2) + (d.source.x + nodeH/2)) / 2 : (d.target.x + d.source.x + nodeH) / 2;
                          })
                          .attr("r", 10)
-                         .attr("class", "addCircle linkCircle")
+                         .attr("class", "addCircle betweenNodesCircle")
                          .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || !(userCanAddEdit)) ? "none" : null; })
                          .call(add_node_between)
                          .on("mouseover", function(d) {
                              d3.select("#link-" + d.source.id + "-" + d.target.id)
-                                 .classed("hovering", true);
-                             d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
                                  .classed("addHovering", true);
                          })
                          .on("mouseout", function(d){
                              d3.select("#link-" + d.source.id + "-" + d.target.id)
-                                 .classed("hovering", false);
-                             d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
                                  .classed("addHovering", false);
                          });
 
@@ -645,14 +730,10 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                          .call(add_node_between)
                          .on("mouseover", function(d) {
                              d3.select("#link-" + d.source.id + "-" + d.target.id)
-                                 .classed("hovering", true);
-                             d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
                                  .classed("addHovering", true);
                          })
                          .on("mouseout", function(d){
                              d3.select("#link-" + d.source.id + "-" + d.target.id)
-                                 .classed("hovering", false);
-                             d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
                                  .classed("addHovering", false);
                          });
 
@@ -695,13 +776,28 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 }
                             });
 
-                    t.selectAll(".linkCircle")
-                        .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || !(userCanAddEdit)) ? "none" : null; })
+                    t.selectAll(".betweenNodesCircle")
                         .attr("cx", function(d) {
                             return (d.source.isStartNode) ? (d.target.y + d.source.y + rootW) / 2 : (d.target.y + d.source.y + nodeW) / 2;
                         })
                         .attr("cy", function(d) {
                             return (d.source.isStartNode) ? ((d.target.x + startNodeOffsetY + rootH/2) + (d.source.x + nodeH/2)) / 2 : (d.target.x + d.source.x + nodeH) / 2;
+                        });
+
+                    t.selectAll(".linkOverlay")
+                        .attr("class", function(d) {
+                            let linkClasses = ["linkOverlay"];
+                            if (d.source.isLinkEditParent && d.target.isLinkEditChild) {
+                                linkClasses.push("linkActiveEdit");
+                            }
+                            return linkClasses.join(' ');
+                        })
+                        .attr("points",function(d) {
+                            const pt1 = [d.source.y + nodeW, d.source.x + 10 + nodeH/2].join(",");
+                            const pt2 = [d.target.y,d.target.x + 10 + nodeH/2].join(",");
+                            const pt3 = [d.target.y,d.target.x - 10 + nodeH/2].join(",");
+                            const pt4 = [d.source.y + nodeW,d.source.x - 10 + nodeH/2].join(",");
+                            return [pt1, pt2, pt3, pt4].join(" ");
                         });
 
                     t.selectAll(".linkCross")
@@ -877,6 +973,24 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                             nodeToEdit: d
                         });
                     }
+                });
+            }
+
+            function edit_link() {
+                this.on("click", function(d) {
+                    if(!d.source.isStartNode && !d.target.placeholder && scope.mode !== 'details'){
+                        // What if the node is new?  it won't have a nodeId right?
+                        scope.editLink({
+                            parentId: d.source.nodeId,
+                            childId: d.target.nodeId
+                        });
+                    }
+                });
+            }
+
+            function link_node() {
+                this.on("click", function(d) {
+                    alert('this does not work, don\'t click it');
                 });
             }
 

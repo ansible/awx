@@ -499,7 +499,7 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
 
                                     $scope.$watch('selectedTemplate', () => {
                                         $scope.job_templates.forEach(function(row, i) {
-                                            if(_.has($scope, 'selectedTemplate.id') && row.id === $scope.selectedTemplate.id) {
+                                            if(_.hasIn($scope, 'selectedTemplate.id') && row.id === $scope.selectedTemplate.id) {
                                                 $scope.job_templates[i].checked = 1;
                                             }
                                             else {
@@ -576,7 +576,7 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
 
                                     $scope.$watch('selectedTemplate', () => {
                                         $scope.workflow_inventory_sources.forEach(function(row, i) {
-                                            if(_.has($scope, 'selectedTemplate.id') && row.id === $scope.selectedTemplate.id) {
+                                            if(_.hasIn($scope, 'selectedTemplate.id') && row.id === $scope.selectedTemplate.id) {
                                                 $scope.workflow_inventory_sources[i].checked = 1;
                                             }
                                             else {
@@ -653,7 +653,7 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
 
                                     $scope.$watch('selectedTemplate', () => {
                                         $scope.projects.forEach(function(row, i) {
-                                            if(_.has($scope, 'selectedTemplate.id') && row.id === $scope.selectedTemplate.id) {
+                                            if(_.hasIn($scope, 'selectedTemplate.id') && row.id === $scope.selectedTemplate.id) {
                                                 $scope.projects[i].checked = 1;
                                             }
                                             else {

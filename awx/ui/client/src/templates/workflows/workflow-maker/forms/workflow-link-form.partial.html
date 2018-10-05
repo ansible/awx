@@ -1,0 +1,25 @@
+<div class="WorkflowMaker-formTitle">{{:: strings.get('workflow_maker.EDIT_LINK', {parentName: linkConfig.parent.name, childName: linkConfig.child.name}) }}</div>
+    <div class="WorkflowMaker-form">
+        <div class="form-group Form-formGroup Form-formGroup--singleColumn">
+            <label for="edgeType" class="Form-inputLabelContainer">
+                <span class="Form-requiredAsterisk">*</span>
+                <span class="Form-inputLabel">{{:: strings.get('workflow_maker.RUN') }}</span>
+            </label>
+            <div>
+                <select
+                    id="workflow_node_edge_2"
+                    ng-options="v as v.label for v in edgeTypeOptions track by v.value"
+                    ng-model="edgeType"
+                    class="form-control Form-dropDown"
+                    name="edgeType"
+                    tabindex="-1"
+                    aria-hidden="true">
+                </select>
+            </div>
+        </div>
+        <div class="buttons Form-buttons" id="workflow_maker_controls">
+            <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_link_btn" ng-click="cancel()"> {{:: strings.get('CANCEL') }}</button>
+            <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_link_btn" ng-click="select({parentId: linkConfig.parent.id, childId: linkConfig.child.id, edgeType: edgeType.value})" ng-disabled="!edgeType"> {{:: strings.get('workflow_maker.SELECT') }}</button>
+        </div>
+    </div>
+</div>
