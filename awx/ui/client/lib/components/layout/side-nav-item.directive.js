@@ -2,6 +2,16 @@ const templateUrl = require('~components/layout/side-nav-item.partial.html');
 
 function atSideNavItemLink (scope, element, attrs, ctrl) {
     [scope.navVm, scope.layoutVm] = ctrl;
+
+    if (attrs.showSettingsSubMenu) {
+        element.hover(() => {
+            scope.navVm.showSettingsSubMenu = true;
+        }, () => {
+            // TODO: don't hide when mouse is hovering over the sub menu itself
+            // currently it closes as soon as you nav off of the settings side nav item
+            scope.navVm.showSettingsSubMenu = false;
+        });
+    }
 }
 
 function AtSideNavItemController ($scope, strings) {

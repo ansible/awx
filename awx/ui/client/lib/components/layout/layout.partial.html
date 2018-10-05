@@ -96,15 +96,7 @@
             ng-show="$parent.layoutVm.isSuperUser || $parent.layoutVm.isOrgAdmin">
         </at-side-nav-item>
         <at-side-nav-item icon-class="fa-cog" route="settings" name="SETTINGS"
-            system-admin-only="true">
-            <!-- sub-nav dropdpown popup -->
-                <div class="twr-nav-dropdown-content">
-                    <a ui-sref="settings.form({form: 'auth'})">Authentication</a>
-                    <a ui-sref="settings.form({form: 'jobs'})">Jobs</a>
-                    <a ui-sref="settings.form({form: 'system'})">System</a>
-                    <a ui-sref="settings.form({form: 'ui'})">User Interface</a>
-                    <a ui-sref="settings.form({form: 'license'})" ng-if="vm.product === 'Tower'">License</a>
-                </div>
+            system-admin-only="true" show-settings-sub-menu="true">
         </at-side-nav-item>
     </at-side-nav>
     <div class="at-Layout-main" ng-class="{'at-Layout-main--noLicense': vm.licenseIsMissing}">
