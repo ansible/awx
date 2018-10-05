@@ -1,5 +1,5 @@
 .at-Layout {
-    height: 100vh;
+    min-height: 100vh;
     width: 100vw;
     display: flex;
 
@@ -82,17 +82,21 @@
         }
     }
 
-    &-side {
+    &-sideContainer {
         background: @at-color-side-nav-background;
-        position: fixed;
-        bottom: 0;
-        top: @at-height-top-side-nav-makeup;
-        overflow-y: auto;
-        max-height: 100vh;
-        min-width: @at-width-collapsed-side-nav;
+    }
+
+    &-side {
+        // background: @at-color-side-nav-background;
+        // position: fixed;
+        // bottom: 0;
+        margin-top: @at-height-top-side-nav-makeup;
+        // overflow-y: auto;
+        // max-height: 100vh;
+        // min-width: @at-width-collapsed-side-nav;
         width: @at-width-collapsed-side-nav;
-        overflow-x: hidden;
-        z-index: @at-z-index-side-nav;
+        // overflow-x: hidden;
+        // z-index: @at-z-index-side-nav;
 
         .at-Popover-container {
             margin-top: 2px;
@@ -201,7 +205,6 @@
         height: 100%;
         width: 100%;
         flex-direction: column;
-        padding-left: @at-width-collapsed-side-nav;
         padding-bottom: @at-space-4x;
         overflow-x: hidden;
     }
@@ -262,7 +265,7 @@
 }
 .twr-nav-dropdown-content {
     display: none;
-    position: fixed;
+    position: absolute;
     background-color: #848992;
     min-width: 140px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
@@ -271,7 +274,7 @@
     z-index: 2000;
 }
 
-.at-Layout-side--expanded {
+.at-Layout-side--expanded + .twr-nav-dropdown {
     .twr-nav-dropdown-content {
         left: @at-width-expanded-side-nav;
     }
@@ -284,12 +287,14 @@
     text-decoration: none;
     display: block;
 }
+
+// hover stuff
 .twr-nav-dropdown-content a:hover {
     background-color: #b7b7b7;
 }
-.twr-nav-dropdown:hover .twr-nav-dropdown-content {
+.twr-nav-dropdown.twr-nav-dropdown--visible .twr-nav-dropdown-content {
     display: block;
 }
-.twr-nav-dropdown:hover .nav-button {
+.twr-nav-dropdown.twr-nav-dropdown--visible .nav-button {
     background-color: #b7b7b7;
 }
