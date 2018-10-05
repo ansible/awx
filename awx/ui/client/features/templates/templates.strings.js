@@ -112,7 +112,6 @@ function TemplatesStrings (BaseString) {
         RUN: t.s('RUN'),
         CHECK: t.s('CHECK'),
         SELECT: t.s('SELECT'),
-        EDGE_CONFLICT: t.s('EDGE CONFLICT'),
         DELETED: t.s('DELETED'),
         START: t.s('START'),
         DETAILS: t.s('DETAILS'),

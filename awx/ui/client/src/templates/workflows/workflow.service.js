@@ -290,39 +290,5 @@ export default ['$q', function($q){
             }
 
         },
-        checkForEdgeConflicts: function(params) {
-            //params.treeData
-            //params.edgeFlags
-
-            let hasAlways = false;
-            let hasSuccessFailure = false;
-            let _this = this;
-
-            _.forEach(params.treeData.children, function(child) {
-                // Flip the flag to false for now - we'll set it to true later on
-                // if we detect a conflict
-                child.edgeConflict = false;
-                if(child.edgeType === 'always') {
-                    hasAlways = true;
-                }
-                else if(child.edgeType === 'success' || child.edgeType === 'failure') {
-                    hasSuccessFailure = true;
-                }
-
-                _this.checkForEdgeConflicts({
-                    treeData: child,
-                    edgeFlags: params.edgeFlags
-                });
-            });
-
-            if(hasAlways && hasSuccessFailure) {
-                // We have a conflict
-                _.forEach(params.treeData.children, function(child) {
-                    child.edgeConflict = true;
-                });
-
-                params.edgeFlags.conflict = true;
-            }
-        }
     };
 }];

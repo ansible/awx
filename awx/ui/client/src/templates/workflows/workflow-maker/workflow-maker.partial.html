@@ -139,7 +139,7 @@
     </div>
     <div class="WorkflowMaker-buttonHolder">
         <button type="button" class="btn btn-sm WorkflowMaker-cancelButton" ng-click="closeWorkflowMaker()"> {{:: strings.get('CLOSE') }}</button>
-        <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate" ng-disabled="edgeFlags.conflict || workflowMakerFormConfig.nodeMode === 'add'"> {{:: strings.get('SAVE') }}</button>
+        <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate" ng-disabled="workflowMakerFormConfig.nodeMode === 'add'"> {{:: strings.get('SAVE') }}</button>
     </div>
     <prompt prompt-data="promptData" action-text="{{:: strings.get('prompt.CONFIRM')}}" prevent-creds-with-passwords="preventCredsWithPasswords" read-only-prompts="!(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)"></prompt>
 </div>
