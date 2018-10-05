@@ -115,7 +115,8 @@ function TemplatesStrings (BaseString) {
         DELETED: t.s('DELETED'),
         START: t.s('START'),
         DETAILS: t.s('DETAILS'),
-        TITLE: t.s('WORKFLOW VISUALIZER')
+        TITLE: t.s('WORKFLOW VISUALIZER'),
+        EDIT_LINK: ({ parentName, childName }) => t.s('EDIT LINK | {{parentName}} to {{childName}}', { parentName, childName }),
     }
 
 }
