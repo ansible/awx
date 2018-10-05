@@ -1,4 +1,9 @@
-.link circle, .link .linkCross, .node .addCircle, .node .removeCircle, .node .WorkflowChart-hoverPath {
+.link circle,
+.link polygon,
+.link .linkCross,
+.node circle,
+.node .linkIcon,
+.node .WorkflowChart-hoverPath {
     opacity: 0;
 }
 
@@ -16,6 +21,18 @@
 
 .removeCircle.removeHovering {
     fill: @default-err-hov;
+}
+
+.node .linkCircle {
+    fill: @default-link;
+}
+
+.node .linkIcon {
+    color: @default-bg;
+}
+
+.linkCircle.removeHovering {
+    fill: @default-link-hov;
 }
 
 .node {
@@ -50,8 +67,12 @@
 .WorkflowChart-alwaysShowAdd .linkCross,
 .hovering .addCircle,
 .hovering .removeCircle,
+.addHovering .betweenNodesCircle,
+.hovering .linkCircle,
+.hovering .linkIcon,
 .hovering .WorkflowChart-hoverPath,
-.hovering .linkCross {
+.addHovering .linkCross {
+    cursor: pointer;
     opacity: 1;
 }
 
@@ -135,4 +156,18 @@
 }
 .WorkflowChart-dashedNode {
    stroke-dasharray: 5,5;
+}
+
+.linkOverlay {
+    fill: @default-interface-txt;
+}
+
+.linkActiveEdit.linkOverlay,
+.overlayHovering .linkOverlay {
+    cursor: pointer;
+    opacity: 0.4;
+}
+
+.overlayHovering .linkPath {
+    cursor: pointer;
 }
