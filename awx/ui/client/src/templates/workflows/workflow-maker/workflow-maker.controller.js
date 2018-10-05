@@ -203,7 +203,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         });
                     });
             } else {
-                if (params.node.edited || !params.node.originalParentId || (params.node.originalParentId && params.parentId !== params.node.originalParentId)) {
+                if (params.node.edited || !params.node.originalParentId || (params.node.originalParentId && (params.parentId !== params.node.originalParentId  || params.node.originalEdge !== params.node.edgeType))) {
 
                     if (params.node.edited) {
 
@@ -446,6 +446,10 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                 $scope.cancelNodeForm();
             }
 
+            if ($scope.linkBeingEdited) {
+                $scope.cancelLinkForm();
+            }
+
             $scope.workflowMakerFormConfig.nodeMode = "add";
             $scope.addParent = parent;
             $scope.betweenTwoNodes = betweenTwoNodes;
@@ -571,6 +575,10 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
         $scope.startEditNode = function (nodeToEdit) {
             $scope.editNodeHelpMessage = null;
+
+            if ($scope.linkBeingEdited) {
+                $scope.cancelLinkForm();
+            }
 
             if (!$scope.nodeBeingEdited || ($scope.nodeBeingEdited && $scope.nodeBeingEdited.id !== nodeToEdit.id)) {
                 if ($scope.placeholderNode || $scope.nodeBeingEdited) {
@@ -893,6 +901,91 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
         };
 
+        /* EDIT LINK FUNCTIONS */
+
+        $scope.startEditLink = (parentId, childId) => {
+            const setupLinkEdit = () => {
+                const parentNode = WorkflowService.searchTree({
+                    element: $scope.treeData.data,
+                    matchingId: parentId,
+                    byNodeId: true
+                });
+
+                parentNode.isLinkEditParent = true;
+
+                // Loop across children looking for childId
+                const childNode = _.find(parentNode.children, {'nodeId': childId});
+
+                childNode.isLinkEditChild = true;
+
+                $scope.linkBeingEdited = {
+                    parent: parentNode,
+                    child: childNode
+                }
+
+                $scope.linkConfig = {
+                    parent: {
+                        id: parentId,
+                        name: parentNode.unifiedJobTemplate.name
+                    },
+                    child: {
+                        id: childId,
+                        name: childNode.unifiedJobTemplate.name
+                    },
+                    edgeType: childNode.edgeType
+                }
+                $scope.editLink = true;
+
+                $scope.$broadcast("refreshWorkflowChart");
+            }
+
+            if ($scope.nodeBeingEdited || $scope.placeholderNode) {
+                $scope.cancelNodeForm();
+            }
+
+            if ($scope.linkBeingEdited) {
+                if ($scope.linkBeingEdited.parent.nodeId !== parentId || $scope.linkBeingEdited.child.nodeId !== childId) {
+                    $scope.linkBeingEdited.parent.isLinkEditParent = false;
+                    $scope.linkBeingEdited.child.isLinkEditChild = false;
+                    setupLinkEdit()
+                }
+            } else {
+                setupLinkEdit();
+            }
+
+        };
+
+        $scope.confirmLinkForm = (parentId, childId, edgeType) => {
+            $scope.linkBeingEdited.parent.isLinkEditParent = false;
+            $scope.linkBeingEdited.child.isLinkEditChild = false;
+            const parentNode = WorkflowService.searchTree({
+                element: $scope.treeData.data,
+                matchingId: parentId,
+                byNodeId: true
+            });
+
+            // Loop across children looking for childId
+            const childNode = _.find(parentNode.children, {'nodeId': childId});
+
+            childNode.edgeType = edgeType;
+
+            $scope.linkBeingEdited = null;
+
+            $scope.editLink = false;
+
+            $scope.$broadcast("refreshWorkflowChart");
+        }
+
+        $scope.cancelLinkForm = () => {
+            $scope.linkBeingEdited.parent.isLinkEditParent = false;
+            $scope.linkBeingEdited.child.isLinkEditChild = false;
+            $scope.linkBeingEdited = null;
+
+            $scope.editLink = false;
+
+            $scope.$broadcast("refreshWorkflowChart");
+        };
+
         /* DELETE NODE FUNCTIONS */
 
         function resetDeleteNode() {
@@ -911,6 +1004,10 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
         $scope.confirmDeleteNode = function () {
             if ($scope.nodeToBeDeleted) {
+
+                if ($scope.linkBeingEdited) {
+                    $scope.cancelLinkForm();
+                }
 
                 // TODO: turn this into a promise so that we can handle errors
 
