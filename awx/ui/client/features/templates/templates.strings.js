@@ -122,6 +122,7 @@ function TemplatesStrings (BaseString) {
         INVENTORY_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden by the parent workflow inventory.'),
         INVENTORY_PROMPT_WILL_OVERRIDE: t.s('The inventory of this node will be overridden if a parent workflow inventory is provided at launch.'),
         INVENTORY_PROMPT_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden if a parent workflow inventory is provided at launch.'),
+        EDIT_LINK: ({ parentName, childName }) => t.s('EDIT LINK | {{parentName}} to {{childName}}', { parentName, childName })
     }
 }
 
