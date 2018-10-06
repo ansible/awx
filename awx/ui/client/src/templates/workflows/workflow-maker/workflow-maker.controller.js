@@ -5,10 +5,10 @@
  *************************************************/
 
 export default ['$scope', 'WorkflowService', 'TemplatesService',
-    'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
+    'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel', 'WorkflowJobTemplateModel',
     'Empty', 'PromptService', 'Rest', 'TemplatesStrings', '$timeout',
     function ($scope, WorkflowService, TemplatesService,
-        ProcessErrors, CreateSelect2, $q, JobTemplate,
+        ProcessErrors, CreateSelect2, $q, JobTemplate, WorkflowJobTemplate,
         Empty, PromptService, Rest, TemplatesStrings, $timeout) {
 
         let promptWatcher, surveyQuestionWatcher, credentialsWatcher;
@@ -110,7 +110,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                 // Check to see if the user has provided any prompt values that are different
                 // from the defaults in the job template
 
-                if (params.node.unifiedJobTemplate.type === "job_template" && params.node.promptData) {
+                if ((params.node.unifiedJobTemplate.type === "job_template" || params.node.unifiedJobTemplate.type === "workflow_job_template") && params.node.promptData) {
                     sendableNodeData = PromptService.bundlePromptDataForSaving({
                         promptData: params.node.promptData,
                         dataToSave: sendableNodeData
@@ -188,7 +188,11 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
                         params.node.isNew = false;
                         continueRecursing(data.data.id);
-                    }, function ({ data, config, status }) {
+                    }, function ({
+                        data,
+                        config,
+                        status
+                    }) {
                         ProcessErrors($scope, data, status, null, {
                             hdr: $scope.strings.get('error.HEADER'),
                             msg: $scope.strings.get('error.CALL', {
@@ -339,7 +343,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                 let missingPromptValue = false;
                 if ($scope.missingSurveyValue) {
                     missingPromptValue = true;
-                } else if (!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id) {
+                } else if ($scope.selectedTemplate.type === 'job_template' && (!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id)) {
                     missingPromptValue = true;
                 }
                 $scope.promptModalMissingReqFields = missingPromptValue;
@@ -481,7 +485,8 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
                     $scope.placeholderNode.unifiedJobTemplate = $scope.selectedTemplate;
                     $scope.placeholderNode.edgeType = $scope.edgeType.value;
-                    if ($scope.placeholderNode.unifiedJobTemplate.type === 'job_template') {
+                    if ($scope.placeholderNode.unifiedJobTemplate.type === 'job_template' ||
+                        $scope.placeholderNode.unifiedJobTemplate.type === 'workflow_job_template') {
                         $scope.placeholderNode.promptData = _.cloneDeep($scope.promptData);
                     }
                     $scope.placeholderNode.canEdit = true;
@@ -498,8 +503,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                 if ($scope.selectedTemplate && $scope.edgeType && $scope.edgeType.value) {
                     $scope.nodeBeingEdited.unifiedJobTemplate = $scope.selectedTemplate;
                     $scope.nodeBeingEdited.edgeType = $scope.edgeType.value;
-
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.type === 'job_template') {
+                    if ($scope.nodeBeingEdited.unifiedJobTemplate.type === 'job_template' || $scope.nodeBeingEdited.unifiedJobTemplate.type === 'workflow_job_template') {
                         $scope.nodeBeingEdited.promptData = _.cloneDeep($scope.promptData);
                     }
 
@@ -591,9 +595,8 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                 $scope.nodeBeingEdited.isActiveEdit = true;
 
                 let finishConfiguringEdit = function () {
-
-                    let jobTemplate = new JobTemplate();
-
+                    let templateType = $scope.nodeBeingEdited.unifiedJobTemplate.type;
+                    let jobTemplate = templateType === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();
                     if (!_.isEmpty($scope.nodeBeingEdited.promptData)) {
                         $scope.promptData = _.cloneDeep($scope.nodeBeingEdited.promptData);
                         const launchConf = $scope.promptData.launchConf;
@@ -615,15 +618,17 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         } else {
                             $scope.showPromptButton = true;
 
-                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeBeingEdited.originalNodeObj.summary_fields.inventory')) {
+                            if ($scope.nodeBeingEdited.unifiedJobTemplate.type === 'job_template' && launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeBeingEdited.originalNodeObj.summary_fields.inventory')) {
                                 $scope.promptModalMissingReqFields = true;
                             } else {
                                 $scope.promptModalMissingReqFields = false;
                             }
                         }
                     } else if (
-                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'job_template' ||
-                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === 'job_template'
+                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'job' ||
+                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === 'job_template' ||
+                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'workflow_job' ||
+                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === 'workflow_job_template'
                     ) {
                         let promises = [jobTemplate.optionsLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id), jobTemplate.getLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id)];
 
@@ -674,8 +679,12 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
                                 prompts.credentials.value = workflowNodeCredentials.concat(defaultCredsWithoutOverrides);
 
-                                if ((!$scope.nodeBeingEdited.unifiedJobTemplate.inventory && !launchConf.ask_inventory_on_launch) || !$scope.nodeBeingEdited.unifiedJobTemplate.project) {
-                                    $scope.selectedTemplateInvalid = true;
+                                if ($scope.nodeBeingEdited.unifiedJobTemplate.unified_job_template === 'job') {
+                                    if ((!$scope.nodeBeingEdited.unifiedJobTemplate.inventory && !launchConf.ask_inventory_on_launch) || !$scope.nodeBeingEdited.unifiedJobTemplate.project) {
+                                        $scope.selectedTemplateInvalid = true;
+                                    } else {
+                                        $scope.selectedTemplateInvalid = false;
+                                    }
                                 } else {
                                     $scope.selectedTemplateInvalid = false;
                                 }
@@ -774,7 +783,9 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                     }
 
                     if (_.get($scope, 'nodeBeingEdited.unifiedJobTemplate')) {
-                        if (_.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === "job_template") {
+
+                        if (_.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === "job_template" ||
+                            _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === "workflow_job_template") {
                             $scope.workflowMakerFormConfig.activeTab = "jobs";
                         }
 
@@ -783,6 +794,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         if ($scope.selectedTemplate.unified_job_type) {
                             switch ($scope.selectedTemplate.unified_job_type) {
                                 case "job":
+                                case "workflow_job":
                                     $scope.workflowMakerFormConfig.activeTab = "jobs";
                                     break;
                                 case "project_update":
@@ -795,6 +807,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         } else if ($scope.selectedTemplate.type) {
                             switch ($scope.selectedTemplate.type) {
                                 case "job_template":
+                                case "workflow_job_template":
                                     $scope.workflowMakerFormConfig.activeTab = "jobs";
                                     break;
                                 case "project":
@@ -843,8 +856,9 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
                 // Determine whether or not we need to go out and GET this nodes unified job template
                 // in order to determine whether or not prompt fields are needed
-
-                if (!$scope.nodeBeingEdited.isNew && !$scope.nodeBeingEdited.edited && $scope.nodeBeingEdited.unifiedJobTemplate && $scope.nodeBeingEdited.unifiedJobTemplate.unified_job_type && $scope.nodeBeingEdited.unifiedJobTemplate.unified_job_type === 'job') {
+                if (!$scope.nodeBeingEdited.isNew && !$scope.nodeBeingEdited.edited &&
+                    (_.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'job' ||
+                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'workflow_job')) {
                     // This is a node that we got back from the api with an incomplete
                     // unified job template so we're going to pull down the whole object
 
@@ -852,15 +866,19 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         .then(function (data) {
                             $scope.nodeBeingEdited.unifiedJobTemplate = _.clone(data.data.results[0]);
                             finishConfiguringEdit();
-                        }, function ({ data, status, config }) {
-                          ProcessErrors($scope, data, status, null, {
-                            hdr: $scope.strings.get('error.HEADER'),
-                            msg: $scope.strings.get('error.CALL', {
-                                path: `${config.url}`,
-                                action: `${config.method}`,
-                                status
-                            })
-                        });
+                        }, function ({
+                            data,
+                            status,
+                            config
+                        }) {
+                            ProcessErrors($scope, data, status, null, {
+                                hdr: $scope.strings.get('error.HEADER'),
+                                msg: $scope.strings.get('error.CALL', {
+                                    path: `${config.url}`,
+                                    action: `${config.method}`,
+                                    status
+                                })
+                            });
                         });
                 } else {
                     finishConfiguringEdit();
@@ -982,24 +1000,24 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
             }
 
             $scope.promptData = null;
-
-            if (selectedTemplate.type === "job_template") {
-                let jobTemplate = new JobTemplate();
+            if (selectedTemplate.type === "job_template" || selectedTemplate.type === "workflow_job_template") {
+                let jobTemplate = selectedTemplate.type === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();
 
                 $q.all([jobTemplate.optionsLaunch(selectedTemplate.id), jobTemplate.getLaunch(selectedTemplate.id)])
                     .then((responses) => {
                         let launchConf = responses[1].data;
+                        if (selectedTemplate.type === 'job_template') {
+                            if ((!selectedTemplate.inventory && !launchConf.ask_inventory_on_launch) || !selectedTemplate.project) {
+                                $scope.selectedTemplateInvalid = true;
+                            } else {
+                                $scope.selectedTemplateInvalid = false;
+                            }
 
-                        if ((!selectedTemplate.inventory && !launchConf.ask_inventory_on_launch) || !selectedTemplate.project) {
-                            $scope.selectedTemplateInvalid = true;
-                        } else {
-                            $scope.selectedTemplateInvalid = false;
-                        }
-
-                        if (launchConf.passwords_needed_to_start && launchConf.passwords_needed_to_start.length > 0) {
-                            $scope.credentialRequiresPassword = true;
-                        } else {
-                            $scope.credentialRequiresPassword = false;
+                            if (launchConf.passwords_needed_to_start && launchConf.passwords_needed_to_start.length > 0) {
+                                $scope.credentialRequiresPassword = true;
+                            } else {
+                                $scope.credentialRequiresPassword = false;
+                            }
                         }
 
                         $scope.selectedTemplate = angular.copy(selectedTemplate);
@@ -1021,8 +1039,12 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         } else {
                             $scope.showPromptButton = true;
 
-                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory')) {
-                                $scope.promptModalMissingReqFields = true;
+                            if (selectedTemplate.type === 'job_template') {
+                                if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory')) {
+                                    $scope.promptModalMissingReqFields = true;
+                                } else {
+                                    $scope.promptModalMissingReqFields = false;
+                                }
                             } else {
                                 $scope.promptModalMissingReqFields = false;
                             }
@@ -1156,7 +1178,11 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         // This is the last page
                         buildTreeFromNodes();
                     }
-                }, function ({ data, status, config }) {
+                }, function ({
+                    data,
+                    status,
+                    config
+                }) {
                     ProcessErrors($scope, data, status, null, {
                         hdr: $scope.strings.get('error.HEADER'),
                         msg: $scope.strings.get('error.CALL', {

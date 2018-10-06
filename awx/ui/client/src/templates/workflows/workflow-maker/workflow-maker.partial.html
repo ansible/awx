@@ -63,6 +63,10 @@
                             <p class="Key-listItemContent Key-listItemContent--circle">{{strings.get('workflow_maker.INVENTORY_SYNC')}}</p>
                         </li>
                         <li class="Key-listItem">
+                            <div class="Key-icon Key-icon--circle Key-icon--default">W</div>
+                            <p class="Key-listItemContent Key-listItemContent--circle">{{strings.get('workflow_maker.WORKFLOW')}}</p>
+                        </li>
+                        <li class="Key-listItem">
                             <div class="Key-icon Key-icon--circle Key-icon--warning">!</div>
                             <p class="Key-listItemContent Key-listItemContent--circle">{{strings.get('workflow_maker.WARNING')}}</p>
                         </li>
@@ -95,7 +99,9 @@
                 </div>
                 <span ng-show="selectedTemplate &&
                     ((selectedTemplate.type === 'job_template' || selectedTemplate.type === 'workflow_job_template' && workflowMakerFormConfig.activeTab === 'jobs') ||
+                    (selectedTemplate.unified_job_type === 'job' || selectedTemplate.unified_job_type === 'workflow_job' && workflowMakerFormConfig.activeTab === 'jobs') ||
                     (selectedTemplate.type === 'project' && workflowMakerFormConfig.activeTab === 'project_sync') ||
+                    (selectedTemplate.unified_job_type === 'inventory_update' && workflowMakerFormConfig.activeTab === 'inventory_sync') ||
                     (selectedTemplate.type === 'inventory_source' && workflowMakerFormConfig.activeTab === 'inventory_sync'))">
                     <div ng-if="selectedTemplate && selectedTemplateInvalid">
                         <div class="WorkflowMaker-invalidJobTemplateWarning">
