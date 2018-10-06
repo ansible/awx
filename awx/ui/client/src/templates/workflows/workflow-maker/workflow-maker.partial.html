@@ -94,7 +94,7 @@
                     <div id="workflow-inventory-sync-list" ui-view="inventorySyncList" ng-show="workflowMakerFormConfig.activeTab === 'inventory_sync'"></div>
                 </div>
                 <span ng-show="selectedTemplate &&
-                    ((selectedTemplate.type === 'job_template' && workflowMakerFormConfig.activeTab === 'jobs') ||
+                    ((selectedTemplate.type === 'job_template' || selectedTemplate.type === 'workflow_job_template' && workflowMakerFormConfig.activeTab === 'jobs') ||
                     (selectedTemplate.type === 'project' && workflowMakerFormConfig.activeTab === 'project_sync') ||
                     (selectedTemplate.type === 'inventory_source' && workflowMakerFormConfig.activeTab === 'inventory_sync'))">
                     <div ng-if="selectedTemplate && selectedTemplateInvalid">
