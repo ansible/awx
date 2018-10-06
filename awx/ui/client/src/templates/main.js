@@ -419,7 +419,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                         job_template_search: {
                             value: {
                                 page_size: '5',
-                                order_by: 'name'
+                                order_by: 'name',
+                                role_level: 'execute_role'
                             },
                             squash: false,
                             dynamic: true
@@ -712,7 +713,7 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                 list.disableRowValue = '!workflowJobTemplateObj.summary_fields.user_capabilities.edit';
                                 list.iterator = 'job_template';
                                 list.name = 'job_templates';
-                                list.basePath = "job_templates";
+                                list.basePath = 'unified_job_templates';
                                 list.fields.info = {
                                     ngInclude: "'/static/partials/job-template-details.html'",
                                     type: 'template',
