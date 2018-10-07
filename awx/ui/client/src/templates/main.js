@@ -699,8 +699,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
                         ],
-                        WorkflowMakerJobTemplateList: ['TemplateList',
-                            (TemplateList) => {
+                        WorkflowMakerJobTemplateList: ['TemplateList', 'i18n',
+                            (TemplateList, i18n) => {
                                 let list = _.cloneDeep(TemplateList);
                                 delete list.actions;
                                 delete list.fields.type;
@@ -709,6 +709,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                 delete list.fields.labels;
                                 delete list.fieldActions;
                                 list.fields.name.columnClass = "col-md-8";
+                                list.fields.name.tag = i18n._('WORKFLOW');
+                                list.fields.name.showTag = "{{job_template.type === 'workflow_job_template'}}";
                                 list.disableRow = "{{ !workflowJobTemplateObj.summary_fields.user_capabilities.edit }}";
                                 list.disableRowValue = '!workflowJobTemplateObj.summary_fields.user_capabilities.edit';
                                 list.iterator = 'job_template';

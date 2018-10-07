@@ -696,6 +696,13 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     if (options.mode !== 'lookup' && field.badgeIcon && field.badgePlacement && field.badgePlacement !== 'left') {
                         html += Badge(field);
                     }
+
+                    // Field Tag
+                    if (field.tag) {
+                        html += `<span class="at-RowItem-tag" ng-show="${field.showTag}">
+                                    ${field.tag}
+                                </span>`
+                    }
                 }
 
             }
