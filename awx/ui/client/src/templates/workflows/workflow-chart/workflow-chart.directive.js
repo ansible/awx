@@ -1089,6 +1089,10 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                                     id: d.job.id,
                                     type: 'project'
                                 });
+                            } else if (job_type === 'workflow_job') {
+                                $state.go('workflowResults', {
+                                    id: d.job.id,
+                                })
                             }
                         };
 
