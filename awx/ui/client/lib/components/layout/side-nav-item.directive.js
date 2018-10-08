@@ -5,11 +5,15 @@ function atSideNavItemLink (scope, element, attrs, ctrl) {
 
     if (attrs.showSettingsSubMenu) {
         element.hover(() => {
+            scope.navVm.onSettingsNavItem = true;
             scope.navVm.showSettingsSubMenu = true;
         }, () => {
-            // TODO: don't hide when mouse is hovering over the sub menu itself
-            // currently it closes as soon as you nav off of the settings side nav item
-            scope.navVm.showSettingsSubMenu = false;
+            setTimeout(() => {
+                scope.navVm.onSettingsNavItem = false;
+                if (!scope.navVm.onSettingsSubPane) {
+                    scope.navVm.showSettingsSubMenu = false;
+                }
+            }, 100);
         });
     }
 }
