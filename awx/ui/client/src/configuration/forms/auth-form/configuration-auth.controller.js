@@ -21,7 +21,7 @@ export default [
         CreateSelect2,
         GenerateForm,
         i18n,
-        ParseTypeChange,
+        ParseTypeChange
     ) {
         const authVm = this;
         const generator = GenerateForm;
@@ -76,9 +76,6 @@ export default [
                         }).catch(() => {
                             event.preventDefault();
                             $('#FormModal-dialog').dialog('close');
-                            if (revertDropdown) {
-                                revertDropdown();
-                            }
                         });
                     },
                     "class": "btn btn-primary",
@@ -132,72 +129,72 @@ export default [
 
         var authForms = [
             {
-                formDef: formDefs['azure'],
+                formDef: formDefs.azure,
                 id: 'auth-azure-form',
                 name: 'azure'
             },
             {
-                formDef: formDefs['github'],
+                formDef: formDefs.github,
                 id: 'auth-github-form',
                 name: 'github'
             },
             {
-                formDef: formDefs['github_org'],
+                formDef: formDefs.github_org,
                 id: 'auth-github-org-form',
                 name: 'github_org'
             },
             {
-                formDef: formDefs['github_team'],
+                formDef: formDefs.github_team,
                 id: 'auth-github-team-form',
                 name: 'github_team'
             },
             {
-                formDef: formDefs['google_oauth'],
+                formDef: formDefs.google_oauth,
                 id: 'auth-google-form',
                 name: 'google_oauth'
             },
             {
-                formDef: formDefs['radius'],
+                formDef: formDefs.radius,
                 id: 'auth-radius-form',
                 name: 'radius'
             },
             {
-                formDef: formDefs['tacacs'],
+                formDef: formDefs.tacacs,
                 id: 'auth-tacacs-form',
                 name: 'tacacs'
             },
             {
-                formDef: formDefs['saml'],
+                formDef: formDefs.saml,
                 id: 'auth-saml-form',
                 name: 'saml'
             },
             {
-                formDef: formDefs['ldap'],
+                formDef: formDefs.ldap,
                 id: 'auth-ldap-form',
                 name: 'ldap'
             },
             {
-                formDef: formDefs['ldap1'],
+                formDef: formDefs.ldap1,
                 id: 'auth-ldap1-form',
                 name: 'ldap1'
             },
             {
-                formDef: formDefs['ldap2'],
+                formDef: formDefs.ldap2,
                 id: 'auth-ldap2-form',
                 name: 'ldap2'
             },
             {
-                formDef: formDefs['ldap3'],
+                formDef: formDefs.ldap3,
                 id: 'auth-ldap3-form',
                 name: 'ldap3'
             },
             {
-                formDef: formDefs['ldap4'],
+                formDef: formDefs.ldap4,
                 id: 'auth-ldap4-form',
                 name: 'ldap4'
             },
             {
-                formDef: formDefs['ldap5'],
+                formDef: formDefs.ldap5,
                 id: 'auth-ldap5-form',
                 name: 'ldap5'
             },
@@ -392,7 +389,7 @@ export default [
                 return authVm.githubDropdownValue;
             }
             return tab;
-        };
+        }
 
         angular.extend(authVm, {
             authForms: authForms,

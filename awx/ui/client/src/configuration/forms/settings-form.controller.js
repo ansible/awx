@@ -24,6 +24,7 @@ export default [
     'systemMiscForm',
     'ConfigurationJobsForm',
     'ConfigurationUiForm',
+    'ngToast',
     function(
         $scope, $rootScope, $state, $stateParams, $q,
         SettingsService, SettingsUtils, CreateDialog, i18n, ProcessErrors, Store,
@@ -47,7 +48,8 @@ export default [
         systemLoggingForm,
         systemMiscForm,
         ConfigurationJobsForm,
-        ConfigurationUiForm
+        ConfigurationUiForm,
+        ngToast
     ) {
         const vm = this;
 
@@ -411,7 +413,7 @@ export default [
                         .then(function() {
                             $('#FormModal-dialog').dialog('close');
                             $state.go('settings');
-                        })
+                        });
                     },
                     "class": "btn btn-primary",
                     "id": "formmodal-save-button"
@@ -479,7 +481,7 @@ export default [
                 case 'license':
                     return 'LICENSE';
             }
-        }
+        };
 
         $scope.toggleForm = function(key) {
             if($rootScope.user_is_system_auditor) {
