@@ -8,6 +8,6 @@ export default [ '$state',
 
         vm.goToCard = (card) => {
             $state.go('settings.form', { form: card });
-        }
+        };
     }
 ];

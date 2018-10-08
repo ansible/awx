@@ -19,9 +19,8 @@
         CreateSelect2,
         GenerateForm,
         i18n,
-        $stateParams,
+        $stateParams
      ) {
-         var uiVm = this;
          var generator = GenerateForm;
          var form = ConfigurationUiForm;
 
