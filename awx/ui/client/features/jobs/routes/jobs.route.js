@@ -1,5 +1,4 @@
 import { N_ } from '../../../src/i18n';
-import jobsListController from '../jobsList.controller';
 import indexController from '../index.controller';
 
 const indexTemplate = require('~features/jobs/index.view.html');
@@ -69,7 +68,7 @@ export default {
         },
         'jobsList@jobs': {
             templateUrl: jobsListTemplate,
-            controller: jobsListController,
+            controller: 'jobsListController',
             controllerAs: 'vm'
         }
     }
