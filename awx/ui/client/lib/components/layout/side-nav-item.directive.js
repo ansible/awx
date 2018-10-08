@@ -61,7 +61,8 @@ function atSideNavItem () {
             iconClass: '@',
             name: '@',
             route: '@',
-            systemAdminOnly: '@'
+            systemAdminOnly: '@',
+            noTooltipOnCollapsed: '@'
         }
     };
 }
