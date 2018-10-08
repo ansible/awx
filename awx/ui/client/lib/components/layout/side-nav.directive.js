@@ -14,10 +14,12 @@ function atSideNavLink (scope, element, attrs, ctrl) {
     element.find('.at-SettingsSubPane').hover(() => {
         scope.vm.onSettingsSubPane = true;
     }, () => {
-        if (!scope.vm.onSettingsNavItem) {
-            scope.vm.onSettingsSubPane = false;
-            scope.vm.showSettingsSubMenu = false;
-        }
+        scope.vm.onSettingsSubPane = false;
+        setTimeout(() => {
+            if (!scope.vm.onSettingsNavItem) {
+                scope.vm.showSettingsSubMenu = false;
+            }
+        }, 100);
     });
 }
 

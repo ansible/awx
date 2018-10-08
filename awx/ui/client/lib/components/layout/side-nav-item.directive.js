@@ -8,8 +8,8 @@ function atSideNavItemLink (scope, element, attrs, ctrl) {
             scope.navVm.onSettingsNavItem = true;
             scope.navVm.showSettingsSubMenu = true;
         }, () => {
+            scope.navVm.onSettingsNavItem = false;
             setTimeout(() => {
-                scope.navVm.onSettingsNavItem = false;
                 if (!scope.navVm.onSettingsSubPane) {
                     scope.navVm.showSettingsSubMenu = false;
                 }
