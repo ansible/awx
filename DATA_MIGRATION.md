@@ -38,7 +38,7 @@ Export all objects
 
 Clean up remnants of the old AWX install:
 
-```docker rm -f $(ps -aq)```     # remove all old awx containers
+```docker rm -f $(docker ps -aq)```     # remove all old awx containers
 
 ```make clean-ui```              # clean up ui artifacts
 
