@@ -7,10 +7,9 @@
 export default ['$scope', 'WorkflowService', 'TemplatesService',
     'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
     'Empty', 'PromptService', 'Rest', 'TemplatesStrings', '$timeout',
-    'i18n',
     function ($scope, WorkflowService, TemplatesService,
         ProcessErrors, CreateSelect2, $q, JobTemplate,
-        Empty, PromptService, Rest, TemplatesStrings, $timeout, i18n) {
+        Empty, PromptService, Rest, TemplatesStrings, $timeout) {
 
         let promptWatcher, surveyQuestionWatcher, credentialsWatcher;
 
