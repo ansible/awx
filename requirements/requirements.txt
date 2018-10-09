@@ -10,7 +10,7 @@ anyjson==0.3.3            # via kombu
 apache-libcloud==2.2.1
 appdirs==1.4.2
 argparse==1.4.0           # via uwsgitop
-asgi-amqp==1.1.1
+asgi-amqp==1.1.2
 asgiref==1.1.2
 asn1crypto==0.24.0        # via cryptography
 attrs==17.4.0             # via automat, service-identity
