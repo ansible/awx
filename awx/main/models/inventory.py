@@ -221,14 +221,14 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         return group_children_map
 
     @staticmethod
-    def parse_shard_params(shard_str):
-        m = re.match(r"shard(?P<offset>\d+)of(?P<step>\d+)", shard_str)
+    def parse_split_params(split_str):
+        m = re.match(r"split(?P<offset>\d+)of(?P<step>\d+)", split_str)
         if not m:
-            raise ParseError(_('Could not parse subset as shard specification.'))
+            raise ParseError(_('Could not parse subset as split specification.'))
         offset = int(m.group('offset'))
         step = int(m.group('step'))
         if offset > step:
-            raise ParseError(_('Shard offset must be greater than total number of shards.'))
+            raise ParseError(_('Split offset must be greater than total number of splits.'))
         return (offset, step)
 
     def get_script_data(self, hostvars=False, towervars=False, show_all=False, subset=None):
@@ -242,8 +242,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         if subset:
             if not isinstance(subset, six.string_types):
                 raise ParseError(_('Inventory subset argument must be a string.'))
-            if subset.startswith('shard'):
-                offset, step = Inventory.parse_shard_params(subset)
+            if subset.startswith('split'):
+                offset, step = Inventory.parse_split_params(subset)
                 hosts = hosts[offset::step]
             else:
                 raise ParseError(_('Subset does not use any supported syntax.'))

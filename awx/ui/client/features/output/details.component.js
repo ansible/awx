@@ -133,7 +133,7 @@ function getSplitJobDetails () {
         return null;
     }
 
-    const splitJobDetails = resource.model.get('summary_fields.internal_limit.shard');
+    const splitJobDetails = resource.model.get('summary_fields.internal_limit.split');
 
     if (!splitJobDetails) {
         return null;

@@ -83,7 +83,7 @@ function ListJobsController (
             return null;
         }
 
-        const splitJobDetails = internalLimitDetails.shard;
+        const splitJobDetails = internalLimitDetails.split;
 
         if (!splitJobDetails) {
             return null;

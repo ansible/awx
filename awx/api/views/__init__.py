@@ -3369,7 +3369,7 @@ class JobTemplateCallback(GenericAPIView):
         if extra_vars is not None and job_template.ask_variables_on_launch:
             extra_vars_redacted, removed = extract_ansible_vars(extra_vars)
             kv['extra_vars'] = extra_vars_redacted
-        kv['_prevent_sharding'] = True  # will only run against 1 host, so no point
+        kv['_prevent_splitting'] = True  # will only run against 1 host, so no point
         with transaction.atomic():
             job = job_template.create_job(**kv)
 
@@ -3401,12 +3401,12 @@ class JobTemplateJobsList(SubListCreateAPIView):
         return methods
 
 
-class JobTemplateShardedJobsList(SubListCreateAPIView):
+class JobTemplateSplitJobsList(SubListCreateAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobListSerializer
     parent_model = JobTemplate
-    relationship = 'sharded_jobs'
+    relationship = 'split_jobs'
     parent_key = 'job_template'
 
 

@@ -49,18 +49,18 @@ def test_inventory_use_access(inventory, user):
 
 
 @pytest.mark.django_db
-def test_sharded_job(shard_job_factory, rando):
-    workflow_job = shard_job_factory(2, jt_kwargs={'created_by': rando}, spawn=True)
+def test_split_job(split_job_factory, rando):
+    workflow_job = split_job_factory(2, jt_kwargs={'created_by': rando}, spawn=True)
     workflow_job.job_template.execute_role.members.add(rando)
 
-    # Abilities of user with execute_role for shard workflow job container
+    # Abilities of user with execute_role for split workflow job container
     assert WorkflowJobAccess(rando).can_start(workflow_job)  # relaunch allowed
     for access_cls in (UnifiedJobAccess, WorkflowJobAccess):
         access = access_cls(rando)
         assert access.can_read(workflow_job)
         assert workflow_job in access.get_queryset()
 
-    # Abilities of user with execute_role for all the shards of the job
+    # Abilities of user with execute_role for all the split of the job
     for node in workflow_job.workflow_nodes.all():
         access = WorkflowJobNodeAccess(rando)
         assert access.can_read(node)

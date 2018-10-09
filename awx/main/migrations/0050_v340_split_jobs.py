@@ -16,13 +16,13 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='jobtemplate',
-            name='job_shard_count',
+            name='job_split_count',
             field=models.IntegerField(blank=True, default=0, help_text='The number of jobs to split into at runtime. Will cause the Job Template to launch a workflow if value is non-zero.'),
         ),
         migrations.AddField(
             model_name='workflowjob',
             name='job_template',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sharded_jobs', to='main.JobTemplate'),
+            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='split_jobs', to='main.JobTemplate'),
         ),
         migrations.AlterField(
             model_name='unifiedjob',

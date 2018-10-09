@@ -123,11 +123,11 @@ def test_job_relaunch_on_failed_hosts(post, inventory, project, machine_credenti
 
 
 @pytest.mark.django_db
-def test_shard_jt_recent_jobs(shard_job_factory, admin_user, get):
-    workflow_job = shard_job_factory(3, spawn=True)
-    shard_jt = workflow_job.job_template
+def test_split_jt_recent_jobs(split_job_factory, admin_user, get):
+    workflow_job = split_job_factory(3, spawn=True)
+    split_jt = workflow_job.job_template
     r = get(
-        url=shard_jt.get_absolute_url(),
+        url=split_jt.get_absolute_url(),
         user=admin_user,
         expect=200
     )

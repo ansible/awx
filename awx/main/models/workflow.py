@@ -251,19 +251,19 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['extra_vars'] = extra_vars
         # ensure that unified jobs created by WorkflowJobs are marked
         data['_eager_fields'] = {'launch_type': 'workflow'}
-        # Extra processing in the case that this is a sharded job
-        if 'job_shard' in self.ancestor_artifacts:
-            shard_str = six.text_type(self.ancestor_artifacts['job_shard'] + 1)
+        # Extra processing in the case that this is a split job
+        if 'job_split' in self.ancestor_artifacts:
+            split_str = six.text_type(self.ancestor_artifacts['job_split'] + 1)
             data['_eager_fields']['name'] = six.text_type("{} - {}").format(
-                self.unified_job_template.name[:512 - len(shard_str) - len(' - ')],
-                shard_str
+                self.unified_job_template.name[:512 - len(split_str) - len(' - ')],
+                split_str
             )
             data['_eager_fields']['allow_simultaneous'] = True
-            data['_eager_fields']['internal_limit'] = 'shard{0}of{1}'.format(
-                self.ancestor_artifacts['job_shard'],
+            data['_eager_fields']['internal_limit'] = 'split{0}of{1}'.format(
+                self.ancestor_artifacts['job_split'],
                 self.workflow_job.workflow_job_nodes.count()
             )
-            data['_prevent_sharding'] = True
+            data['_prevent_splitting'] = True
         return data
 
 
@@ -459,7 +459,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     )
     job_template = models.ForeignKey(
         'JobTemplate',
-        related_name='sharded_jobs',
+        related_name='split_jobs',
         blank=True,
         null=True,
         default=None,
@@ -472,7 +472,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
     def _get_parent_field_name(self):
         if self.job_template_id:
-            # This is a workflow job which is a container for sharded jobs
+            # This is a workflow job which is a container for split jobs
             return 'job_template'
         return 'workflow_job_template'
 

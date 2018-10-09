@@ -334,7 +334,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         parent_field_name = None
         if "_unified_job_class" in kwargs:
             # Special case where spawned job is different type than usual
-            # Only used for sharded jobs
+            # Only used for split jobs
             unified_job_class = kwargs.pop("_unified_job_class")
             fields = unified_job_class._get_unified_job_field_names() & fields
             parent_field_name = kwargs.pop('_parent_field_name')
@@ -354,7 +354,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             for fd, val in eager_fields.items():
                 setattr(unified_job, fd, val)
 
-        # NOTE: sharded workflow jobs _get_parent_field_name method
+        # NOTE: split workflow jobs _get_parent_field_name method
         # is not correct until this is set
         if not parent_field_name:
             parent_field_name = unified_job._get_parent_field_name()

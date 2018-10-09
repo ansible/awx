@@ -3008,7 +3008,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         fields = ('*', 'host_config_key', 'ask_diff_mode_on_launch', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'diff_mode',
-                  'allow_simultaneous', 'custom_virtualenv', 'job_shard_count')
+                  'allow_simultaneous', 'custom_virtualenv', 'job_split_count')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -3025,7 +3025,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
-            sharded_jobs = self.reverse('api:job_template_sharded_jobs_list', kwargs={'pk': obj.pk}),
+            split_jobs = self.reverse('api:job_template_split_jobs_list', kwargs={'pk': obj.pk}),
         ))
         if self.version > 1:
             res['copy'] = self.reverse('api:job_template_copy', kwargs={'pk': obj.pk})
@@ -3201,9 +3201,9 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         summary_fields = super(JobSerializer, self).get_summary_fields(obj)
         if obj.internal_limit:
             summary_fields['internal_limit'] = {}
-            if obj.internal_limit.startswith('shard'):
-                offset, step = Inventory.parse_shard_params(obj.internal_limit)
-                summary_fields['internal_limit']['shard'] = {'offset': offset, 'step': step}
+            if obj.internal_limit.startswith('split'):
+                offset, step = Inventory.parse_split_params(obj.internal_limit)
+                summary_fields['internal_limit']['split'] = {'offset': offset, 'step': step}
             else:
                 summary_fields['internal_limit']['unknown'] = self.internal_limit
         all_creds = []

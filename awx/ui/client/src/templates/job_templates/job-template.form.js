@@ -257,7 +257,7 @@ function(NotificationsList, i18n) {
                     dataPlacement: 'right',
                     control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)"></instance-groups-multiselect>',
                 },
-                job_shard_count: {
+                job_split_count: {
                     label: i18n._('Job Splitting'),
                     type: 'number',
                     integer: true,

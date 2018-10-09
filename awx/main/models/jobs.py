@@ -277,7 +277,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         default=False,
         allows_field='credentials'
     )
-    job_shard_count = models.IntegerField(
+    job_split_count = models.IntegerField(
         blank=True,
         default=0,
         help_text=_("The number of jobs to split into at runtime. "
@@ -328,10 +328,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         return self.create_unified_job(**kwargs)
 
     def create_unified_job(self, **kwargs):
-        prevent_sharding = kwargs.pop('_prevent_sharding', False)
-        split_event = bool(self.job_shard_count > 1 and (not prevent_sharding))
+        prevent_splitting = kwargs.pop('_prevent_splitting', False)
+        split_event = bool(self.job_split_count > 1 and (not prevent_splitting))
         if split_event:
-            # A sharded Job Template will generate a WorkflowJob rather than a Job
+            # A Split Job Template will generate a WorkflowJob rather than a Job
             from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobNode
             kwargs['_unified_job_class'] = WorkflowJobTemplate._get_unified_job_class()
             kwargs['_parent_field_name'] = "job_template"
@@ -342,11 +342,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             except JobLaunchConfig.DoesNotExist:
                 wj_config = JobLaunchConfig()
             actual_inventory = wj_config.inventory if wj_config.inventory else self.inventory
-            for idx in xrange(min(self.job_shard_count,
+            for idx in xrange(min(self.job_split_count,
                                   actual_inventory.hosts.count())):
                 create_kwargs = dict(workflow_job=job,
                                      unified_job_template=self,
-                                     ancestor_artifacts=dict(job_shard=idx))
+                                     ancestor_artifacts=dict(job_split=idx))
                 WorkflowJobNode.objects.create(**create_kwargs)
         return job
 
@@ -580,7 +580,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return JobEvent
 
     def copy_unified_job(self, **new_prompts):
-        new_prompts['_prevent_sharding'] = True
+        new_prompts['_prevent_splitting'] = True
         if self.internal_limit:
             new_prompts.setdefault('_eager_fields', {})
             new_prompts['_eager_fields']['internal_limit'] = self.internal_limit  # oddball, not from JT or prompts
