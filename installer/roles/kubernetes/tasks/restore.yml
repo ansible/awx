@@ -26,7 +26,7 @@
     extra_opts: [--strip-components=1]
 
 - set_fact:
-    deployment_object: "{{ 'dc' if openshift_host is defined else 'deployment' }}"
+    deployment_object: "sts"
 
 - name: Record deployment size
   shell: |
@@ -70,6 +70,7 @@
   register: result
   until: result.stdout == "Running"
   retries: 60
+  delay: 10
 
 - name: Temporarily grant createdb role
   shell: |
@@ -79,7 +80,7 @@
         --host={{ pg_hostname | default('postgresql') }} \
         --port={{ pg_port | default('5432') }} \
         --username=postgres \
-        --dbname=template1 -c 'ALTER USER tower CREATEDB;'"
+        --dbname=template1 -c 'ALTER USER {{ pg_username }} CREATEDB;'"
   no_log: true
   when: pg_hostname is not defined or pg_hostname == ''
 
@@ -102,7 +103,7 @@
         --host={{ pg_hostname | default('postgresql') }} \
         --port={{ pg_port | default('5432') }} \
         --username=postgres \
-        --dbname=template1 -c 'ALTER USER tower NOCREATEDB;'"
+        --dbname=template1 -c 'ALTER USER {{ pg_username }} NOCREATEDB;'"
   no_log: true
   when: pg_hostname is not defined or pg_hostname == ''
 
