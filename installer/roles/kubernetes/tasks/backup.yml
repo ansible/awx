@@ -33,6 +33,7 @@
   register: result
   until: result.stdout == "Running"
   retries: 60
+  delay: 10
 
 - name: Create directory for backup
   file:
