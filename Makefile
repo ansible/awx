@@ -355,7 +355,7 @@ check: flake8 pep8 # pyflakes pylint
 awx-link:
 	cp -R /tmp/awx.egg-info /awx_devel/ || true
 	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
-	cp /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
+	cp -f /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 
@@ -565,7 +565,7 @@ docker-compose-test: docker-auth
 	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /bin/bash
 
 docker-compose-runtest:
-	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --user=$(shell id -u) --rm --service-ports awx /start_tests.sh
 
 docker-compose-clean:
 	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm -w /awx_devel --service-ports awx make clean
@@ -575,7 +575,7 @@ docker-compose-build: awx-devel-build
 
 # Base development image build
 awx-devel-build:
-	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
+	docker build -t ansible/awx_devel --build-arg UID=$(shell id -u) -f tools/docker-compose/Dockerfile .
 	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
