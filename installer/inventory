@@ -82,8 +82,8 @@ rabbitmq_erlang_cookie=cookiemonster
 
 # This will create or update a default admin (superuser) account in AWX, if not provided
 # then these default values are used
-# default_admin_user=admin
-# default_admin_password=password
+admin_user=admin
+admin_password=password
 
 # AWX Secret key
 # It's *very* important that this stay the same between upgrades or you will lose the ability to decrypt
