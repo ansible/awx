@@ -466,7 +466,7 @@ $(I18N_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
 ui-deps: $(UI_DEPS_FLAG_FILE)
 
 $(UI_DEPS_FLAG_FILE):
-	$(NPM_BIN) --unsafe-perm --prefix awx/ui install awx/ui
+	$(NPM_BIN) --unsafe-perm --prefix awx/ui install --no-save awx/ui
 	touch $(UI_DEPS_FLAG_FILE)
 
 ui-docker-machine: $(UI_DEPS_FLAG_FILE)
