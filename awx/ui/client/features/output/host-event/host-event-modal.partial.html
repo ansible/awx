@@ -16,23 +16,23 @@
 
 			<div class="HostEvent-details">
 			    <div class="HostEvent-field">
-			        <span class="HostEvent-field--label">CREATED</span>
+			        <span class="HostEvent-field--label">{{strings.get('host_event_modal.CREATED')}}</span>
 			        <span class="HostEvent-field--content">{{(event.created | longDate) || "No result found"}}</span>
 			    </div>
 				<div class="HostEvent-field">
-			        <span class="HostEvent-field--label">ID</span>
+			        <span class="HostEvent-field--label">{{strings.get('host_event_modal.ID')}}</span>
 			        <span class="HostEvent-field--content">{{event.id || "No result found"}}</span>
 			    </div>
 			    <div class="HostEvent-field">
-			        <span class="HostEvent-field--label">PLAY</span>
+			        <span class="HostEvent-field--label">{{strings.get('host_event_modal.PLAY')}}</span>
 			        <span class="HostEvent-field--content">{{event.play || "No result found"}}</span>
 			    </div>
 			    <div class="HostEvent-field">
-			        <span class="HostEvent-field--label">TASK</span>
+			        <span class="HostEvent-field--label">{{strings.get('host_event_modal.TASK')}}</span>
 			        <span class="HostEvent-field--content">{{event.task || "No result found"}}</span>
 			    </div>
 			    <div class="HostEvent-field">
-			        <span class="HostEvent-field--label">MODULE</span>
+			        <span class="HostEvent-field--label">{{strings.get('host_event_modal.MODULE')}}</span>
 			        <span class="HostEvent-field--content HostEvent-field--monospaceContent">{{module_name}}</span>
 			    </div>
 			</div>
@@ -48,12 +48,12 @@
 				<button ng-if="stdout" ui-sref="output.host-event.stdout"
 					type="button" class="btn btn-sm btn-default HostEvent-tab"
 					ng-class="{'HostEvent-tab--selected' : isActiveState('output.host-event.stdout')}">
-					Standard Out
+					{{strings.get('host_event_modal.STANDARD_OUT')}}
 				</button>
 				<button ng-if="stderr" ui-sref="output.host-event.stderr"
 					type="button" class="btn btn-sm btn-default HostEvent-tab"
 					ng-class="{'HostEvent-tab--selected' : isActiveState('output.host-event.stderr')}">
-					Standard Error
+					{{strings.get('host_event_modal.STANDARD_ERROR')}}
 				</button>
 
 			</div>
@@ -64,7 +64,7 @@
 
 			<!-- controls -->
 			<div class="HostEvent-controls">
-				<button ng-click="closeHostEvent()" class="btn btn-sm btn-default HostEvent-close">Close</button>
+				<button ng-click="closeHostEvent()" class="btn btn-sm btn-default HostEvent-close">{{strings.get('CLOSE')}}</button>
 			</div>
 		</div>
 		</div>

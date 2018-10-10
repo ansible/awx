@@ -38,6 +38,24 @@ module.exports = {
         credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
+        const activityStream = 'bread-crumb > div i[class$="icon-activity-stream"]';
+        const activityRow = '#activities_table tr td[class*="description-column"] a';
+        const toast = 'div[class="Toast-icon"]';
+
+        credentials.waitForElementNotPresent(toast);
+        credentials.expect.element(activityStream).visible;
+        credentials.expect.element(activityStream).enabled;
+        credentials.click(activityStream);
+        credentials.waitForElementVisible('div.spinny');
+        credentials.waitForElementNotVisible('div.spinny');
+
+        client
+            .waitForElementVisible(activityRow)
+            .click(activityRow);
+
+        credentials.waitForElementVisible('div.spinny');
+        credentials.waitForElementNotVisible('div.spinny');
+
         credentials.expect.element('div[ui-view="edit"] form').visible;
         credentials.section.edit.expect.element('@title').visible;
         credentials.section.edit.expect.element('@title').text.contain(data.credential.name);

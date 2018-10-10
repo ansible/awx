@@ -1,0 +1,124 @@
+---
+- include_tasks: openshift_auth.yml
+  when: openshift_host is defined
+
+- include_tasks: kubernetes_auth.yml
+  when: kubernetes_context is defined
+
+- name: Use kubectl or oc
+  set_fact:
+    kubectl_or_oc: "{{ openshift_oc_bin if openshift_oc_bin is defined else 'kubectl' }}"
+
+- name: Remove any present restore directories
+  file:
+    state: absent
+    path: "{{ playbook_dir }}/tower-openshift-restore"
+
+- name: Create directory for restore data
+  file:
+    state: directory
+    path: "{{ playbook_dir }}/tower-openshift-restore"
+
+- name: Unarchive Tower backup
+  unarchive:
+    src: tower-openshift-backup-latest.tar.gz
+    dest: "{{ playbook_dir }}/tower-openshift-restore"
+    extra_opts: [--strip-components=1]
+
+- set_fact:
+    deployment_object: "sts"
+
+- name: Record deployment size
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      get {{ deployment_object }} {{ kubernetes_deployment_name }} -o jsonpath="{.status.replicas}"
+  register: deployment_size
+
+- name: Scale deployment down
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas=0
+
+- name: Delete any existing management pod
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      delete pod ansible-tower-management --grace-period=0 --ignore-not-found
+
+- name: Wait for scale down
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} get pods \
+      -o jsonpath='{.items[*].metadata.name}' \
+      | tr -s '[[:space:]]' '\n' \
+      | grep {{ kubernetes_deployment_name }} \
+      | grep -v postgres | wc -l
+  register: tower_pods
+  until: (tower_pods.stdout | trim) == '0'
+  retries: 30
+
+- name: Template management pod
+  set_fact:
+    management_pod: "{{ lookup('template', 'management-pod.yml.j2') }}"
+
+- name: Create management pod
+  shell: |
+    echo {{ management_pod | quote }} | {{ kubectl_or_oc }} apply -f -
+
+- name: Wait for management pod to start
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      get pod ansible-tower-management -o jsonpath="{.status.phase}"
+  register: result
+  until: result.stdout == "Running"
+  retries: 60
+  delay: 10
+
+- name: Temporarily grant createdb role
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password }} \
+        psql \
+        --host={{ pg_hostname | default('postgresql') }} \
+        --port={{ pg_port | default('5432') }} \
+        --username=postgres \
+        --dbname=template1 -c 'ALTER USER {{ pg_username }} CREATEDB;'"
+  no_log: true
+  when: pg_hostname is not defined or pg_hostname == ''
+
+- name: Perform a PostgreSQL restore
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password }} \
+        psql \
+        --host={{ pg_hostname | default('postgresql') }} \
+        --port={{ pg_port | default('5432') }} \
+        --username={{ pg_username }} \
+        --dbname=template1" < {{ playbook_dir }}/tower-openshift-restore/tower.db
+  no_log: true
+
+- name: Revoke createdb role
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      exec -i ansible-tower-management -- bash -c "PGPASSWORD={{ pg_password }} \
+        psql \
+        --host={{ pg_hostname | default('postgresql') }} \
+        --port={{ pg_port | default('5432') }} \
+        --username=postgres \
+        --dbname=template1 -c 'ALTER USER {{ pg_username }} NOCREATEDB;'"
+  no_log: true
+  when: pg_hostname is not defined or pg_hostname == ''
+
+- name: Delete management pod
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      delete pod ansible-tower-management --grace-period=0 --ignore-not-found
+
+- name: Remove restore directory
+  file:
+    state: absent
+    path: "{{ playbook_dir }}/tower-openshift-restore"
+
+- name: Scale deployment back up
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas={{ deployment_size.stdout }}
+  when: deployment_size.stdout != ''

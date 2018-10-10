@@ -209,9 +209,10 @@ function($injector, $stateExtender, $log, i18n) {
                             FormDefinition: [params.form, function(definition) {
                                 return definition;
                             }],
-                            resourceData: ['FormDefinition', 'Rest', '$stateParams', 'GetBasePath',
-                                function(FormDefinition, Rest, $stateParams, GetBasePath) {
+                            resourceData: ['FormDefinition', 'Rest', '$stateParams', 'GetBasePath', '$q', 'ProcessErrors',
+                                function(FormDefinition, Rest, $stateParams, GetBasePath, $q, ProcessErrors) {
                                     let form, path;
+                                    let deferred = $q.defer();
                                     form = typeof(FormDefinition) === 'function' ?
                                         FormDefinition() : FormDefinition;
                                     if (GetBasePath(form.basePath) === undefined && GetBasePath(form.stateTree) === undefined ){
@@ -221,7 +222,18 @@ function($injector, $stateExtender, $log, i18n) {
                                         path = (GetBasePath(form.basePath) || GetBasePath(form.stateTree) || form.basePath) + $stateParams[`${form.name}_id`];
                                     }
                                     Rest.setUrl(path);
-                                    return Rest.get();
+                                    Rest.get()
+                                        .then((response) => deferred.resolve(response))
+                                        .catch(({ data, status }) => {
+                                            ProcessErrors(null, data, status, null,
+                                                {
+                                                    hdr: i18n._('Error!'),
+                                                    msg: i18n._('Unable to get resource: ') + status
+                                                }
+                                            );
+                                            deferred.reject();
+                                        });
+                                    return deferred.promise;
                                 }
                             ]
                         },
@@ -732,10 +744,20 @@ function($injector, $stateExtender, $log, i18n) {
                 // search will think they need to be set as search tags.
                 var params;
                 if(field.sourceModel === "organization"){
-                    params = {
-                        page_size: '5',
-                        role_level: 'admin_role'
-                    };
+                    if (form.name === "notification_template") {
+                        // Users with admin_role role level should also have
+                        // notification_admin_role so this should handle regular admin
+                        // users as well as notification admin users
+                        params = {
+                            page_size: '5',
+                            role_level: 'notification_admin_role'
+                        };
+                    } else {
+                        params = {
+                            page_size: '5',
+                            role_level: 'admin_role'
+                        };
+                    }
                 }
                 else if(field.sourceModel === "inventory_script"){
                     params = {
@@ -868,7 +890,11 @@ function($injector, $stateExtender, $log, i18n) {
                                     $stateParams[`${list.iterator}_search`].role_level = "admin_role";
                                     $stateParams[`${list.iterator}_search`].credential_type = InsightsCredTypePK.toString() ;
                                 }
-
+                                if(list.iterator === 'credential') {
+                                    if($state.current.name.includes('projects.edit') || $state.current.name.includes('projects.add')) {
+                                        state.params[`${list.iterator}_search`].value = _.merge(state.params[`${list.iterator}_search`].value, $stateParams[`${list.iterator}_search`]);
+                                    }
+                                }
 
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }

@@ -30,15 +30,24 @@ describe('Components | Layout', () => {
         let controller;
 
         beforeEach(() => {
-            const mockResponse = {
+            const mockOrgAdminResponse = {
                 data: {
                     count: 3
                 }
             };
 
+            const mockNotificationAdminResponse = {
+                data: {
+                    count: 1
+                }
+            };
+
             controller = element.controller('atLayout');
             $httpBackend.when('GET', /admin_of_organizations/)
-                .respond(mockResponse);
+                .respond(mockOrgAdminResponse);
+
+            $httpBackend.when('GET', /roles\/\?role_field=notification_admin_role/)
+                .respond(mockNotificationAdminResponse);
         });
 
         xit('$scope.$on($stateChangeSuccess) should assign toState name to currentState', () => {

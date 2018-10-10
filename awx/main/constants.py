@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 __all__ = [
     'CLOUD_PROVIDERS', 'SCHEDULEABLE_PROVIDERS', 'PRIVILEGE_ESCALATION_METHODS',
-    'ANSI_SGR_PATTERN', 'CAN_CANCEL', 'ACTIVE_STATES'
+    'ANSI_SGR_PATTERN', 'CAN_CANCEL', 'ACTIVE_STATES', 'STANDARD_INVENTORY_UPDATE_ENV'
 ]
 
 
@@ -20,6 +20,20 @@ PRIVILEGE_ESCALATION_METHODS = [
 ]
 CHOICES_PRIVILEGE_ESCALATION_METHODS = [('', _('None'))] + PRIVILEGE_ESCALATION_METHODS
 ANSI_SGR_PATTERN = re.compile(r'\x1b\[[0-9;]*m')
+STANDARD_INVENTORY_UPDATE_ENV = {
+    # Failure to parse inventory should always be fatal
+    'ANSIBLE_INVENTORY_UNPARSED_FAILED': 'True',
+    # Always use the --export option for ansible-inventory
+    'ANSIBLE_INVENTORY_EXPORT': 'True'
+}
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
-TOKEN_CENSOR = '************'
+CENSOR_VALUE = '************'
+ENV_BLACKLIST = frozenset((
+    'VIRTUAL_ENV', 'PATH', 'PYTHONPATH', 'PROOT_TMP_DIR', 'JOB_ID',
+    'INVENTORY_ID', 'INVENTORY_SOURCE_ID', 'INVENTORY_UPDATE_ID',
+    'AD_HOC_COMMAND_ID', 'REST_API_URL', 'REST_API_TOKEN', 'MAX_EVENT_RES',
+    'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
+    'JOB_CALLBACK_DEBUG', 'INVENTORY_HOSTVARS', 'FACT_QUEUE',
+    'AWX_HOST', 'PROJECT_REVISION'
+))

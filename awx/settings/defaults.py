@@ -200,12 +200,14 @@ SESSION_COOKIE_SECURE = True
 
 # Seconds before sessions expire.
 # Note: This setting may be overridden by database settings.
-SESSION_COOKIE_AGE = 1209600
+SESSION_COOKIE_AGE = 1800
 
 # Maximum number of per-user valid, concurrent sessions.
 # -1 is unlimited
 # Note: This setting may be overridden by database settings.
 SESSIONS_PER_USER = -1
+
+CSRF_USE_SESSIONS = False
 
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = True
@@ -259,6 +261,8 @@ MIDDLEWARE_CLASSES = (  # NOQA
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'awx.main.middleware.URLModificationMiddleware',
+    'awx.main.middleware.DeprecatedAuthTokenMiddleware',
+    'awx.main.middleware.SessionTimeoutMiddleware',
 )
 
 
@@ -286,8 +290,7 @@ INSTALLED_APPS = (
     'awx.api',
     'awx.ui',
     'awx.sso',
-    'solo',
-    'awx.network_ui'
+    'solo'
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -348,9 +351,11 @@ AUTHENTICATION_BACKENDS = (
 # Django OAuth Toolkit settings
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'main.OAuth2Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'main.OAuth2AccessToken'
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
 
 OAUTH2_PROVIDER = {'ACCESS_TOKEN_EXPIRE_SECONDS': 31536000000,
                    'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600}
+ALLOW_OAUTH2_FOR_EXTERNAL_USERS = False
 
 # LDAP server (default to None to skip using LDAP authentication).
 # Note: This setting may be overridden by database settings.
@@ -648,6 +653,11 @@ AWX_REBUILD_SMART_MEMBERSHIP = False
 
 # By default, allow arbitrary Jinja templating in extra_vars defined on a Job Template
 ALLOW_JINJA_IN_EXTRA_VARS = 'template'
+
+# Enable dynamically pulling roles from a requirement.yml file
+# when updating SCM projects 
+# Note: This setting may be overridden by database settings.
+AWX_ROLES_ENABLED = True
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
@@ -1168,16 +1178,13 @@ LOGGING = {
             'propagate': False
         },
         'awx.main.access': {
-            'handlers': ['null'],
-            'propagate': False,
+            'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.main.signals': {
-            'handlers': ['null'],
-            'propagate': False,
+            'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.api.permissions': {
-            'handlers': ['null'],
-            'propagate': False,
+            'level': 'INFO',  # very verbose debug-level logs
         },
         'awx.analytics': {
             'handlers': ['external_logger'],

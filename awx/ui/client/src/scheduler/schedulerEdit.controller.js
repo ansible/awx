@@ -1,11 +1,11 @@
 export default ['$filter', '$state', '$stateParams', 'Wait', '$scope', 'moment',
 '$rootScope', '$http', 'CreateSelect2', 'ParseTypeChange', 'ParentObject', 'ProcessErrors', 'Rest',
 'GetBasePath', 'SchedulerInit', 'SchedulePost', 'JobTemplateModel', '$q', 'Empty', 'PromptService', 'RRuleToAPI',
-'WorkflowJobTemplateModel', 'TemplatesStrings', 'scheduleResolve', 'timezonesResolve',
+'WorkflowJobTemplateModel', 'SchedulerStrings', 'scheduleResolve', 'timezonesResolve', 'Alert',
 function($filter, $state, $stateParams, Wait, $scope, moment,
     $rootScope, $http, CreateSelect2, ParseTypeChange, ParentObject, ProcessErrors, Rest,
     GetBasePath, SchedulerInit, SchedulePost, JobTemplate, $q, Empty, PromptService, RRuleToAPI,
-    WorkflowJobTemplate, TemplatesStrings, scheduleResolve, timezonesResolve
+    WorkflowJobTemplate, SchedulerStrings, scheduleResolve, timezonesResolve, Alert
 ) {
 
     let schedule, scheduler, scheduleCredentials = [];
@@ -21,8 +21,12 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
     $scope.hideForm = true;
     $scope.parseType = 'yaml';
 
-    $scope.strings = TemplatesStrings;
+    $scope.strings = SchedulerStrings;
 
+    /*
+    * Keep processSchedulerEndDt method on the $scope
+    * because angular-scheduler references it
+    */
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);
@@ -245,8 +249,15 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                 .then((responses) => {
                     let launchOptions = responses[0].data,
                         launchConf = responses[1].data;
+                        scheduleCredentials = responses[2].data.results;
 
-                    scheduleCredentials = responses[2].data.results;
+                    if (launchConf.passwords_needed_to_start &&
+                        launchConf.passwords_needed_to_start.length > 0 &&
+                        !launchConf.ask_credential_on_launch
+                    ) {
+                        Alert(SchedulerStrings.get('form.WARNING'), SchedulerStrings.get('form.CREDENTIAL_REQUIRES_PASSWORD_WARNING'), 'alert-info');
+                        $scope.credentialRequiresPassword = true;
+                    }
 
                     let watchForPromptChanges = () => {
                         let promptValuesToWatch = [

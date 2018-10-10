@@ -127,7 +127,7 @@
         $scope.confirmDelete = function(){
             let reloadListStateParams = null;
 
-            if($scope.groups.length === 1 && $state.params.group_search && !_.isEmpty($state.params.group_search.page) && $state.params.group_search.page !== '1') {
+            if($scope.groups.length === 1 && $state.params.group_search && _.has($state, 'params.group_search.page') && $state.params.group_search.page !== '1') {
                 reloadListStateParams = _.cloneDeep($state.params);
                 reloadListStateParams.group_search.page = (parseInt(reloadListStateParams.group_search.page)-1).toString();
             }

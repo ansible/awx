@@ -57,6 +57,18 @@ const getInventory = (namespace = session) => getOrganization(namespace)
         variables: JSON.stringify({ ansible_connection: 'local' }),
     }, ['name', 'inventory']).then(() => inventory)));
 
+const getInventoryNoSource = (namespace = session) => getOrganization(namespace)
+    .then(organization => getOrCreate('/inventories/', {
+        name: `${namespace}-inventory-nosource`,
+        description: namespace,
+        organization: organization.id
+    }).then(inventory => getOrCreate('/hosts/', {
+        name: `${namespace}-host`,
+        description: namespace,
+        inventory: inventory.id,
+        variables: JSON.stringify({ ansible_connection: 'local' }),
+    }, ['name', 'inventory']).then(() => inventory)));
+
 const getHost = (namespace = session) => getInventory(namespace)
     .then(inventory => getOrCreate('/hosts/', {
         name: `${namespace}-host`,
@@ -365,6 +377,7 @@ module.exports = {
     getAuditor,
     getHost,
     getInventory,
+    getInventoryNoSource,
     getInventoryScript,
     getInventorySource,
     getInventorySourceSchedule,

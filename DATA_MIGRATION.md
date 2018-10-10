@@ -13,7 +13,7 @@ This tool does __not__ support export/import of the following:
 
 In terminal, pip install tower-cli (if you do not have pip already, install [here](https://pip.pypa.io/en/stable/installing/)):
 ```
-$ pip install ansible-tower-cli
+$ pip install --upgrade ansible-tower-cli
 ```
 
 The AWX host URL, user, and password must be set for the AWX instance to be exported:
@@ -38,7 +38,7 @@ Export all objects
 
 Clean up remnants of the old AWX install:
 
-```docker rm -f $(ps -aq)```     # remove all old awx containers
+```docker rm -f $(docker ps -aq)```     # remove all old awx containers
 
 ```make clean-ui```              # clean up ui artifacts
 

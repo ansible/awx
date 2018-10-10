@@ -1,6 +1,7 @@
 import pytest
+import six
 
-from awx.main.models import JobTemplate, Job
+from awx.main.models import JobTemplate, Job, JobHostSummary
 from crum import impersonate
 
 
@@ -65,3 +66,18 @@ def test_update_parent_instance(job_template, alice):
         assert job_template.current_job == job
         assert job_template.status == 'pending'
         assert job_template.modified_by is None
+
+
+@pytest.mark.django_db
+def test_job_host_summary_representation(host):
+    job = Job.objects.create(name='foo')
+    jhs = JobHostSummary.objects.create(
+        host=host, job=job,
+        changed=1, dark=2, failures=3, ok=4, processed=5, skipped=6
+    )
+    assert 'single-host changed=1 dark=2 failures=3 ok=4 processed=5 skipped=6' == six.text_type(jhs)
+
+    # Representation should be robust to deleted related items
+    jhs = JobHostSummary.objects.get(pk=jhs.id)
+    host.delete()
+    assert 'N/A changed=1 dark=2 failures=3 ok=4 processed=5 skipped=6' == six.text_type(jhs)

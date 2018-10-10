@@ -34,21 +34,18 @@ function AtInputLookupController (baseInputController, $q, $state) {
             }
         };
 
-        scope.$watch(scope.state._resource, vm.watchResource);
+        // This should get triggered when the user selects something in the lookup modal and
+        // hits save to close the modal.  This won't get triggered when the user types in
+        // a value in the input.
+        scope.$watch('state._idFromModal', () => {
+            if (scope.state._idFromModal &&
+                (scope.state._idFromModal !== scope.state._value)
+            ) {
+                vm.search({ id: scope.state._idFromModal });
+            }
+        });
 
         vm.check();
-    };
-
-    vm.watchResource = () => {
-        if (!scope[scope.state._resource]) {
-            return;
-        }
-
-        if (scope[scope.state._resource] !== scope.state._value) {
-            scope.state._displayValue = scope[`${scope.state._resource}_name`];
-
-            vm.search();
-        }
     };
 
     vm.lookup = () => {
@@ -62,6 +59,7 @@ function AtInputLookupController (baseInputController, $q, $state) {
     };
 
     vm.reset = () => {
+        scope.state._idFromModal = undefined;
         scope.state._value = undefined;
         scope[scope.state._resource] = undefined;
     };
@@ -80,15 +78,20 @@ function AtInputLookupController (baseInputController, $q, $state) {
         vm.searchAfterDebounce();
     };
 
-    vm.search = () => {
+    vm.search = (searchParams) => {
         scope.state._touched = true;
 
-        if (scope.state._displayValue === '' && !scope.state._required) {
+        if (!scope.state._required &&
+            scope.state._displayValue === '' &&
+            !scope.state._idFromModal
+        ) {
             scope.state._value = null;
             return vm.check({ isValid: true });
         }
 
-        return model.search({ [search.key]: scope.state._displayValue }, search.config)
+        searchParams = searchParams || { [search.key]: scope.state._displayValue };
+
+        return model.search(searchParams, search.config)
             .then(found => {
                 if (!found) {
                     vm.reset();
@@ -99,6 +102,7 @@ function AtInputLookupController (baseInputController, $q, $state) {
                 scope[scope.state._resource] = model.get('id');
                 scope.state._value = model.get('id');
                 scope.state._displayValue = model.get('name');
+                scope.state._idFromModal = undefined;
             })
             .catch(() => vm.reset())
             .finally(() => {

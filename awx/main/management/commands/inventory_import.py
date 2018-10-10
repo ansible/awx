@@ -30,6 +30,7 @@ from awx.main.utils import (
 )
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.signals import disable_activity_stream
+from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
 
@@ -82,7 +83,10 @@ class AnsibleInventoryLoader(object):
         env = dict(os.environ.items())
         env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
         env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
-        env['ANSIBLE_INVENTORY_UNPARSED_FAILED'] = '1'
+        # Set configuration items that should always be used for updates
+        for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
+            if key not in env:
+                env[key] = value
         venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
         if os.path.isdir(os.path.join(venv_libdir, "python2.7")):
@@ -487,7 +491,7 @@ class Command(BaseCommand):
             for host in hosts_qs.filter(pk__in=del_pks):
                 host_name = host.name
                 host.delete()
-                logger.info('Deleted host "%s"', host_name)
+                logger.debug('Deleted host "%s"', host_name)
         if settings.SQL_DEBUG:
             logger.warning('host deletions took %d queries for %d hosts',
                            len(connection.queries) - queries_before,
@@ -524,7 +528,7 @@ class Command(BaseCommand):
                 group_name = group.name
                 with ignore_inventory_computed_fields():
                     group.delete()
-                logger.info('Group "%s" deleted', group_name)
+                logger.debug('Group "%s" deleted', group_name)
         if settings.SQL_DEBUG:
             logger.warning('group deletions took %d queries for %d groups',
                            len(connection.queries) - queries_before,
@@ -545,7 +549,7 @@ class Command(BaseCommand):
         db_groups = self.inventory_source.groups
         for db_group in db_groups.all():
             if self.inventory_source.deprecated_group_id == db_group.id:  # TODO: remove in 3.3
-                logger.info(
+                logger.debug(
                     'Group "%s" from v1 API child group/host connections preserved',
                     db_group.name
                 )
@@ -562,8 +566,8 @@ class Command(BaseCommand):
                 for db_child in db_children.filter(pk__in=child_group_pks):
                     group_group_count += 1
                     db_group.children.remove(db_child)
-                    logger.info('Group "%s" removed from group "%s"',
-                                db_child.name, db_group.name)
+                    logger.debug('Group "%s" removed from group "%s"',
+                                 db_child.name, db_group.name)
             # FIXME: Inventory source group relationships
             # Delete group/host relationships not present in imported data.
             db_hosts = db_group.hosts
@@ -590,8 +594,8 @@ class Command(BaseCommand):
                     if db_host not in db_group.hosts.all():
                         continue
                     db_group.hosts.remove(db_host)
-                    logger.info('Host "%s" removed from group "%s"',
-                                db_host.name, db_group.name)
+                    logger.debug('Host "%s" removed from group "%s"',
+                                 db_host.name, db_group.name)
         if settings.SQL_DEBUG:
             logger.warning('group-group and group-host deletions took %d queries for %d relationships',
                            len(connection.queries) - queries_before,
@@ -610,9 +614,9 @@ class Command(BaseCommand):
         if db_variables != all_obj.variables_dict:
             all_obj.variables = json.dumps(db_variables)
             all_obj.save(update_fields=['variables'])
-            logger.info('Inventory variables updated from "all" group')
+            logger.debug('Inventory variables updated from "all" group')
         else:
-            logger.info('Inventory variables unmodified')
+            logger.debug('Inventory variables unmodified')
 
     def _create_update_groups(self):
         '''
@@ -644,11 +648,11 @@ class Command(BaseCommand):
                     group.variables = json.dumps(db_variables)
                     group.save(update_fields=['variables'])
                     if self.overwrite_vars:
-                        logger.info('Group "%s" variables replaced', group.name)
+                        logger.debug('Group "%s" variables replaced', group.name)
                     else:
-                        logger.info('Group "%s" variables updated', group.name)
+                        logger.debug('Group "%s" variables updated', group.name)
                 else:
-                    logger.info('Group "%s" variables unmodified', group.name)
+                    logger.debug('Group "%s" variables unmodified', group.name)
                 existing_group_names.add(group.name)
                 self._batch_add_m2m(self.inventory_source.groups, group)
         for group_name in all_group_names:
@@ -662,7 +666,7 @@ class Command(BaseCommand):
                     'description':'imported'
                 }
             )[0]
-            logger.info('Group "%s" added', group.name)
+            logger.debug('Group "%s" added', group.name)
             self._batch_add_m2m(self.inventory_source.groups, group)
         self._batch_add_m2m(self.inventory_source.groups, flush=True)
         if settings.SQL_DEBUG:
@@ -701,24 +705,24 @@ class Command(BaseCommand):
         if update_fields:
             db_host.save(update_fields=update_fields)
         if 'name' in update_fields:
-            logger.info('Host renamed from "%s" to "%s"', old_name, mem_host.name)
+            logger.debug('Host renamed from "%s" to "%s"', old_name, mem_host.name)
         if 'instance_id' in update_fields:
             if old_instance_id:
-                logger.info('Host "%s" instance_id updated', mem_host.name)
+                logger.debug('Host "%s" instance_id updated', mem_host.name)
             else:
-                logger.info('Host "%s" instance_id added', mem_host.name)
+                logger.debug('Host "%s" instance_id added', mem_host.name)
         if 'variables' in update_fields:
             if self.overwrite_vars:
-                logger.info('Host "%s" variables replaced', mem_host.name)
+                logger.debug('Host "%s" variables replaced', mem_host.name)
             else:
-                logger.info('Host "%s" variables updated', mem_host.name)
+                logger.debug('Host "%s" variables updated', mem_host.name)
         else:
-            logger.info('Host "%s" variables unmodified', mem_host.name)
+            logger.debug('Host "%s" variables unmodified', mem_host.name)
         if 'enabled' in update_fields:
             if enabled:
-                logger.info('Host "%s" is now enabled', mem_host.name)
+                logger.debug('Host "%s" is now enabled', mem_host.name)
             else:
-                logger.info('Host "%s" is now disabled', mem_host.name)
+                logger.debug('Host "%s" is now disabled', mem_host.name)
         self._batch_add_m2m(self.inventory_source.hosts, db_host)
 
     def _create_update_hosts(self):
@@ -792,9 +796,9 @@ class Command(BaseCommand):
                 host_attrs['instance_id'] = instance_id
             db_host = self.inventory.hosts.update_or_create(name=mem_host_name, defaults=host_attrs)[0]
             if enabled is False:
-                logger.info('Host "%s" added (disabled)', mem_host_name)
+                logger.debug('Host "%s" added (disabled)', mem_host_name)
             else:
-                logger.info('Host "%s" added', mem_host_name)
+                logger.debug('Host "%s" added', mem_host_name)
             self._batch_add_m2m(self.inventory_source.hosts, db_host)
 
         self._batch_add_m2m(self.inventory_source.hosts, flush=True)
@@ -823,10 +827,10 @@ class Command(BaseCommand):
                     child_names = all_child_names[offset2:(offset2 + self._batch_size)]
                     db_children_qs = self.inventory.groups.filter(name__in=child_names)
                     for db_child in db_children_qs.filter(children__id=db_group.id):
-                        logger.info('Group "%s" already child of group "%s"', db_child.name, db_group.name)
+                        logger.debug('Group "%s" already child of group "%s"', db_child.name, db_group.name)
                     for db_child in db_children_qs.exclude(children__id=db_group.id):
                         self._batch_add_m2m(db_group.children, db_child)
-                    logger.info('Group "%s" added as child of "%s"', db_child.name, db_group.name)
+                    logger.debug('Group "%s" added as child of "%s"', db_child.name, db_group.name)
                 self._batch_add_m2m(db_group.children, flush=True)
         if settings.SQL_DEBUG:
             logger.warning('Group-group updates took %d queries for %d group-group relationships',
@@ -850,19 +854,19 @@ class Command(BaseCommand):
                     host_names = all_host_names[offset2:(offset2 + self._batch_size)]
                     db_hosts_qs = self.inventory.hosts.filter(name__in=host_names)
                     for db_host in db_hosts_qs.filter(groups__id=db_group.id):
-                        logger.info('Host "%s" already in group "%s"', db_host.name, db_group.name)
+                        logger.debug('Host "%s" already in group "%s"', db_host.name, db_group.name)
                     for db_host in db_hosts_qs.exclude(groups__id=db_group.id):
                         self._batch_add_m2m(db_group.hosts, db_host)
-                        logger.info('Host "%s" added to group "%s"', db_host.name, db_group.name)
+                        logger.debug('Host "%s" added to group "%s"', db_host.name, db_group.name)
                 all_instance_ids = sorted([h.instance_id for h in mem_group.hosts if h.instance_id])
                 for offset2 in xrange(0, len(all_instance_ids), self._batch_size):
                     instance_ids = all_instance_ids[offset2:(offset2 + self._batch_size)]
                     db_hosts_qs = self.inventory.hosts.filter(instance_id__in=instance_ids)
                     for db_host in db_hosts_qs.filter(groups__id=db_group.id):
-                        logger.info('Host "%s" already in group "%s"', db_host.name, db_group.name)
+                        logger.debug('Host "%s" already in group "%s"', db_host.name, db_group.name)
                     for db_host in db_hosts_qs.exclude(groups__id=db_group.id):
                         self._batch_add_m2m(db_group.hosts, db_host)
-                        logger.info('Host "%s" added to group "%s"', db_host.name, db_group.name)
+                        logger.debug('Host "%s" added to group "%s"', db_host.name, db_group.name)
                 self._batch_add_m2m(db_group.hosts, flush=True)
         if settings.SQL_DEBUG:
             logger.warning('Group-host updates took %d queries for %d group-host relationships',
@@ -1001,37 +1005,43 @@ class Command(BaseCommand):
                 self.all_group.debug_tree()
 
             with batch_role_ancestor_rebuilding():
-                # Ensure that this is managed as an atomic SQL transaction,
-                # and thus properly rolled back if there is an issue.
-                with transaction.atomic():
-                    # Merge/overwrite inventory into database.
-                    if settings.SQL_DEBUG:
-                        logger.warning('loading into database...')
-                    with ignore_inventory_computed_fields():
-                        if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
-                            self.load_into_database()
-                        else:
-                            with disable_activity_stream():
+                # If using with transaction.atomic() with try ... catch,
+                # with transaction.atomic() must be inside the try section of the code as per Django docs
+                try:
+                    # Ensure that this is managed as an atomic SQL transaction,
+                    # and thus properly rolled back if there is an issue.
+                    with transaction.atomic():
+                        # Merge/overwrite inventory into database.
+                        if settings.SQL_DEBUG:
+                            logger.warning('loading into database...')
+                        with ignore_inventory_computed_fields():
+                            if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
                                 self.load_into_database()
-                        if settings.SQL_DEBUG:
-                            queries_before2 = len(connection.queries)
-                        self.inventory.update_computed_fields()
-                        if settings.SQL_DEBUG:
-                            logger.warning('update computed fields took %d queries',
-                                           len(connection.queries) - queries_before2)
-                    try:
+                            else:
+                                with disable_activity_stream():
+                                    self.load_into_database()
+                            if settings.SQL_DEBUG:
+                                queries_before2 = len(connection.queries)
+                            self.inventory.update_computed_fields()
+                            if settings.SQL_DEBUG:
+                                logger.warning('update computed fields took %d queries',
+                                               len(connection.queries) - queries_before2)
+                        # Check if the license is valid. 
+                        # If the license is not valid, a CommandError will be thrown, 
+                        # and inventory update will be marked as invalid.
+                        # with transaction.atomic() will roll back the changes.
                         self.check_license()
-                    except CommandError as e:
-                        self.mark_license_failure(save=True)
-                        raise e
+                except CommandError as e:
+                    self.mark_license_failure()
+                    raise e
 
-                    if settings.SQL_DEBUG:
-                        logger.warning('Inventory import completed for %s in %0.1fs',
-                                       self.inventory_source.name, time.time() - begin)
-                    else:
-                        logger.info('Inventory import completed for %s in %0.1fs',
-                                    self.inventory_source.name, time.time() - begin)
-                    status = 'successful'
+                if settings.SQL_DEBUG:
+                    logger.warning('Inventory import completed for %s in %0.1fs',
+                                   self.inventory_source.name, time.time() - begin)
+                else:
+                    logger.info('Inventory import completed for %s in %0.1fs',
+                                self.inventory_source.name, time.time() - begin)
+                status = 'successful'
 
             # If we're in debug mode, then log the queries and time
             # used to do the operation.
@@ -1058,6 +1068,8 @@ class Command(BaseCommand):
                 self.inventory_update.result_traceback = tb
                 self.inventory_update.status = status
                 self.inventory_update.save(update_fields=['status', 'result_traceback'])
+                self.inventory_source.status = status
+                self.inventory_source.save(update_fields=['status'])
 
         if exc and isinstance(exc, CommandError):
             sys.exit(1)

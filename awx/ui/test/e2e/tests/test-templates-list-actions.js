@@ -53,6 +53,24 @@ module.exports = {
         templates.waitForElementVisible('div.spinny');
         templates.waitForElementNotVisible('div.spinny');
 
+        const activityStream = 'bread-crumb > div i[class$="icon-activity-stream"]';
+        const activityRow = '#activities_table tr td[class*="description-column"] a';
+        const toast = 'div[class="Toast-icon"]';
+
+        templates.waitForElementNotPresent(toast);
+        templates.expect.element(activityStream).visible;
+        templates.expect.element(activityStream).enabled;
+        templates.click(activityStream);
+        templates.waitForElementVisible('div.spinny');
+        templates.waitForElementNotVisible('div.spinny');
+
+        client
+            .waitForElementVisible(activityRow)
+            .click(activityRow);
+
+        templates.waitForElementVisible('div.spinny');
+        templates.waitForElementNotVisible('div.spinny');
+
         templates.expect.element('#job_template_form').visible;
         templates.section.addJobTemplate.expect.element('@title').visible;
         templates.section.addJobTemplate.expect.element('@title').text.contain(data.template.name);
@@ -95,6 +113,24 @@ module.exports = {
             .waitForElementNotVisible('div.spinny')
             .waitForAngular();
 
+        const activityStream = 'bread-crumb > div i[class$="icon-activity-stream"]';
+        const activityRow = '#activities_table tr td[class*="description-column"] a';
+        const toast = 'div[class="Toast-icon"]';
+
+        templates.waitForElementNotPresent(toast);
+        templates.expect.element(activityStream).visible;
+        templates.expect.element(activityStream).enabled;
+        templates.click(activityStream);
+        templates.waitForElementVisible('div.spinny');
+        templates.waitForElementNotVisible('div.spinny');
+
+        client
+            .waitForElementVisible(activityRow)
+            .click(activityRow);
+
+        templates.waitForElementVisible('div.spinny');
+        templates.waitForElementNotVisible('div.spinny');
+
         templates.expect.element('#workflow_job_template_form').visible;
         templates.section.editWorkflowJobTemplate.expect.element('@title').visible;
         templates.section.editWorkflowJobTemplate.expect.element('@title').text.contain(data.workflow.name);
@@ -102,13 +138,11 @@ module.exports = {
 
         templates.expect.element('@save').visible;
         templates.expect.element('@save').enabled;
+        client.pause(1000);
 
-        client
-            .useXpath()
-            .pause(1000)
-            .waitForElementVisible('//*[text()=" Workflow Editor"]')
-            .click('//*[text()=" Workflow Editor"]')
-            .useCss()
+        templates.section.editWorkflowJobTemplate
+            .waitForElementVisible('@visualizerButton')
+            .click('@visualizerButton')
             .waitForElementVisible('div.spinny')
             .waitForElementNotVisible('div.spinny')
             .waitForAngular();

@@ -33,7 +33,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import parse_yaml_or_json
+from awx.main.utils import parse_yaml_or_json, getattr_dne
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import (
     ResourceMixin,
@@ -238,11 +238,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         app_label = 'main'
         ordering = ('name',)
 
-    host_config_key = models.CharField(
+    host_config_key = prevent_search(models.CharField(
         max_length=1024,
         blank=True,
         default='',
-    )
+    ))
     ask_diff_mode_on_launch = AskForField(
         blank=True,
         default=False,
@@ -278,7 +278,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         allows_field='credentials'
     )
     admin_role = ImplicitRoleField(
-        parent_role=['project.organization.project_admin_role', 'inventory.organization.inventory_admin_role']
+        parent_role=['project.organization.job_template_admin_role', 'inventory.organization.job_template_admin_role']
     )
     execute_role = ImplicitRoleField(
         parent_role=['admin_role', 'project.organization.execute_role', 'inventory.organization.execute_role'],
@@ -343,11 +343,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         # not block a provisioning callback from creating/launching jobs.
         if callback_extra_vars is None:
             for ask_field_name in set(self.get_ask_mapping().values()):
-                if ask_field_name == 'ask_credential_on_launch':
-                    # if ask_credential_on_launch is True, it just means it can
-                    # optionally be specified at launch time, not that it's *required*
-                    # to launch
-                    continue
                 if getattr(self, ask_field_name):
                     prompting_needed = True
                     break
@@ -402,7 +397,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 if 'prompts' not in exclude_errors:
                     errors_dict[field_name] = _('Field is not configured to prompt on launch.').format(field_name=field_name)
 
-        if 'prompts' not in exclude_errors and self.passwords_needed_to_start:
+        if ('prompts' not in exclude_errors and
+                (not getattr(self, 'ask_credential_on_launch', False)) and
+                self.passwords_needed_to_start):
             errors_dict['passwords_needed_to_start'] = _(
                 'Saved launch configurations cannot provide passwords needed to start.')
 
@@ -772,9 +769,13 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             if not os.path.realpath(filepath).startswith(destination):
                 system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue
-            with codecs.open(filepath, 'w', encoding='utf-8') as f:
-                os.chmod(f.name, 0o600)
-                json.dump(host.ansible_facts, f)
+            try:
+                with codecs.open(filepath, 'w', encoding='utf-8') as f:
+                    os.chmod(f.name, 0o600)
+                    json.dump(host.ansible_facts, f)
+            except IOError:
+                system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
+                continue
             # make note of the time we wrote the file so we can check if it changed later
             modification_times[filepath] = os.path.getmtime(filepath)
 
@@ -957,24 +958,37 @@ class JobLaunchConfig(LaunchTimeConfig):
         editable=False,
     )
 
+    def has_user_prompts(self, template):
+        '''
+        Returns True if any fields exist in the launch config that are
+        not permissions exclusions
+        (has to exist because of callback relaunch exception)
+        '''
+        return self._has_user_prompts(template, only_unprompted=False)
+
     def has_unprompted(self, template):
         '''
-        returns False if the template has set ask_ fields to False after
+        returns True if the template has set ask_ fields to False after
         launching with those prompts
         '''
+        return self._has_user_prompts(template, only_unprompted=True)
+
+    def _has_user_prompts(self, template, only_unprompted=True):
         prompts = self.prompts_dict()
         ask_mapping = template.get_ask_mapping()
         if template.survey_enabled and (not template.ask_variables_on_launch):
             ask_mapping.pop('extra_vars')
-            provided_vars = set(prompts['extra_vars'].keys())
+            provided_vars = set(prompts.get('extra_vars', {}).keys())
             survey_vars = set(
                 element.get('variable') for element in
                 template.survey_spec.get('spec', {}) if 'variable' in element
             )
-            if provided_vars - survey_vars:
+            if (provided_vars and not only_unprompted) or (provided_vars - survey_vars):
                 return True
         for field_name, ask_field_name in ask_mapping.items():
-            if field_name in prompts and not getattr(template, ask_field_name):
+            if field_name in prompts and not (getattr(template, ask_field_name) and only_unprompted):
+                if field_name == 'limit' and self.job and self.job.launch_type == 'callback':
+                    continue  # exception for relaunching callbacks
                 return True
         else:
             return False
@@ -1019,7 +1033,8 @@ class JobHostSummary(CreatedModifiedModel):
     failed = models.BooleanField(default=False, editable=False)
 
     def __unicode__(self):
-        hostname = self.host.name if self.host else 'N/A'
+        host = getattr_dne(self, 'host')
+        hostname = host.name if host else 'N/A'
         return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \
             (hostname, self.changed, self.dark, self.failures, self.ok,
              self.processed, self.skipped)

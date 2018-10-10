@@ -10,12 +10,14 @@ function ListTokensController (
     Dataset,
     strings,
     ProcessErrors,
-    Rest,
     GetBasePath,
     Prompt,
-    Wait
+    Wait,
+    models
 ) {
     const vm = this || {};
+
+    const { token } = models;
 
     vm.strings = strings;
     vm.activeId = $state.params.token_id;
@@ -48,8 +50,8 @@ function ListTokensController (
         return undefined;
     };
 
-    vm.getLastUsed = token => {
-        const lastUsed = _.get(token, 'last_used');
+    vm.getLastUsed = tokenToCheck => {
+        const lastUsed = _.get(tokenToCheck, 'last_used');
 
         if (!lastUsed) {
             return undefined;
@@ -57,7 +59,7 @@ function ListTokensController (
 
         let html = $filter('longDate')(lastUsed);
 
-        const { username, id } = _.get(token, 'summary_fields.last_used', {});
+        const { username, id } = _.get(tokenToCheck, 'summary_fields.last_used', {});
 
         if (username && id) {
             html += ` ${strings.get('add.LAST_USED_LABEL')} <a href="/#/users/${id}">${$filter('sanitize')(username)}</a>`;
@@ -70,8 +72,7 @@ function ListTokensController (
         const action = () => {
             $('#prompt-modal').modal('hide');
             Wait('start');
-            Rest.setUrl(`${GetBasePath('tokens')}${tok.id}`);
-            Rest.destroy()
+            token.request('delete', tok.id)
                 .then(() => {
                     let reloadListStateParams = null;
 
@@ -89,14 +90,12 @@ function ListTokensController (
                     } else {
                         $state.go('.', reloadListStateParams, { reload: true });
                     }
-                })
-                .catch(({ data, status }) => {
+                }).catch(({ data, status }) => {
                     ProcessErrors($scope, data, status, null, {
                         hdr: strings.get('error.HEADER'),
                         msg: strings.get('error.CALL', { path: `${GetBasePath('tokens')}${tok.id}`, status })
                     });
-                })
-                .finally(() => {
+                }).finally(() => {
                     Wait('stop');
                 });
         };
@@ -105,7 +104,9 @@ function ListTokensController (
 
         Prompt({
             hdr: strings.get('deleteResource.HEADER'),
-            resourceName: strings.get('list.HEADER', tok.summary_fields.application.name),
+            resourceName: _.has(tok, 'summary_fields.application.name') ?
+                strings.get('list.HEADER', tok.summary_fields.application.name) :
+                strings.get('list.PERSONAL_ACCESS_TOKEN'),
             body: deleteModalBody,
             action,
             actionText: strings.get('add.DELETE_ACTION_LABEL')
@@ -120,10 +121,10 @@ ListTokensController.$inject = [
     'Dataset',
     'TokensStrings',
     'ProcessErrors',
-    'Rest',
     'GetBasePath',
     'Prompt',
-    'Wait'
+    'Wait',
+    'resolvedModels'
 ];
 
 export default ListTokensController;

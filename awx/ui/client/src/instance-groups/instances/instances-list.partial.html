@@ -1,9 +1,7 @@
 <at-panel>
-    <at-panel-heading>
-        {{ vm.panelTitle }}
-    </at-panel-heading>
+    <at-panel-heading title="{{:: vm.panelTitle }}"></at-panel-heading>
 
-    <at-tab-group>
+    <at-tab-group class="at-TabGroup--padBelow">
         <at-tab state="vm.tab.details">{{:: vm.strings.get('tab.DETAILS') }}</at-tab>
         <at-tab state="vm.tab.instances">{{:: vm.strings.get('tab.INSTANCES') }}</at-tab>
         <at-tab state="vm.tab.jobs" ng-hide="$state.current.name === 'instanceGroups.add'">{{:: vm.strings.get('tab.JOBS') }}</at-tab>
@@ -14,12 +12,12 @@
             <smart-search
                 class="at-List-search"
                 django-model="instances"
-                base-path="{{list.basePath}}"
+                base-path="{{vm.list.basePath}}"
                 iterator="instance"
-                list="list"
-                dataset="instance_dataset"
-                collection="collection"
-                search-tags="searchTags">
+                list="vm.list"
+                collection="vm.instances"
+                dataset="vm.dataset"
+                search-tags="vm.searchTags">
             </smart-search>
 
             <div class="at-List-toolbarAction">
@@ -58,12 +56,22 @@
                     </div>
                 </div>
 
-                <div class="at-Row-items">
-                    <at-row-item header-value="{{ instance.hostname }}"></at-row-item>
+                <div class="at-Row-items at-Row-items--instances">
                     <at-row-item
-                        label-value="Running Jobs"
-                        label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}})"
+                        header-value="{{ instance.hostname }}"
+                        header-tag="{{ instance.managed_by_policy ? '' : vm.strings.get('list.MANUAL') }}">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RUNNING_JOBS') }}"
+                        label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}, job_search: {status__in: ['running,waiting']}})"
                         value="{{ instance.jobs_running }}"
+                        inline="true"
+                        badge="true">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_TOTAL_JOBS') }}"
+                        label-state="instanceGroups.instanceJobs({instance_group_id: {{vm.instance_group_id}}, instance_id: {{instance.id}}})"
+                        value="{{ instance.jobs_total }}"
                         inline="true"
                         badge="true">
                     </at-row-item>
@@ -71,7 +79,7 @@
 
                 <div class="at-Row-actions">
                     <capacity-adjuster state="instance" disabled="{{vm.rowAction.capacity_adjustment._disabled}}"></capacity-adjuster>
-                    <capacity-bar label-value="Used Capacity" capacity="instance.consumed_capacity" total-capacity="instance.capacity"></capacity-bar>
+                    <capacity-bar label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_USED_CAPACITY') }}" capacity="instance.consumed_capacity" total-capacity="instance.capacity"></capacity-bar>
                 </div>
             </at-row>
         </at-list>

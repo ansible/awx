@@ -73,8 +73,6 @@ xdescribe('Directive: lookupModal', () => {
         $parent.mock = 1; // resource id
         $parent.mock_name = 'Mock Resource 1'; // resource name
 
-        console.log($scope);
-
         element = $compile(dom)($scope);
         $scope.$digest();
 

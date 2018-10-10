@@ -359,18 +359,17 @@ def test_create_with_valid_injectors(get, post, admin):
         },
         'injectors': {
             'env': {
-                'ANSIBLE_MY_CLOUD_TOKEN': '{{api_token}}'
+                'AWX_MY_CLOUD_TOKEN': '{{api_token}}'
             }
         }
-    }, admin)
-    assert response.status_code == 201
+    }, admin, expect=201)
 
     response = get(reverse('api:credential_type_list'), admin)
     assert response.data['count'] == 1
     injectors = response.data['results'][0]['injectors']
     assert len(injectors) == 1
     assert injectors['env'] == {
-        'ANSIBLE_MY_CLOUD_TOKEN': '{{api_token}}'
+        'AWX_MY_CLOUD_TOKEN': '{{api_token}}'
     }
 
 
@@ -388,7 +387,7 @@ def test_create_with_undefined_template_variable_xfail(post, admin):
             }]
         },
         'injectors': {
-            'env': {'ANSIBLE_MY_CLOUD_TOKEN': '{{api_tolkien}}'}
+            'env': {'AWX_MY_CLOUD_TOKEN': '{{api_tolkien}}'}
         }
     }, admin)
     assert response.status_code == 400

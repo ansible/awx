@@ -72,9 +72,5 @@ export default ['$scope', '$rootScope',
         $scope.editJobTemplate = function(id) {
             $state.go('templates.editJobTemplate', { job_template_id: id });
         };
-
-        $scope.scheduleJob = function(id) {
-            $state.go('templates.editJobTemplate.schedules', { id: id });
-        };
     }
 ];

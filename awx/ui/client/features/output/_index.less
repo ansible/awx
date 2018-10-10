@@ -13,21 +13,6 @@
         }
     }
 
-    &-menuBottom {
-        color: @at-gray-848992;
-        font-size: 10px;
-        text-transform: uppercase;
-        font-weight: bold;
-        position: absolute;
-        right: 60px;
-        bottom: 24px;
-        cursor: pointer;
-
-        &:hover {
-            color: @at-blue;
-        }
-    }
-
     &-menuIconGroup {
         & > p {
             margin: 0;
@@ -45,6 +30,16 @@
 
     &-menuIcon {
         font-size: 12px;
+        padding: 10px;
+        cursor: pointer;
+
+        &:hover {
+            color: @at-blue;
+        }
+    }
+
+    &-menuIcon--md {
+        font-size: 14px;
         padding: 10px;
         cursor: pointer;
 
@@ -74,28 +69,43 @@
         color: @at-blue;
     }
 
+    &-row {
+        display: flex;
+
+        &:hover div {
+            background-color: white;
+        }
+    }
+
     &-toggle {
-        color: @at-gray-848992;
         background-color: @at-gray-eb;
+        color: @at-gray-848992;
+        display: flex;
+        flex: 0 0 30px;
         font-size: 18px;
+        justify-content: center;
         line-height: 12px;
 
         & > i {
             cursor: pointer;
         }
 
-        padding: 0 10px 0 10px;
         user-select: none;
     }
 
     &-line {
         color: @at-gray-161b1f;
         background-color: @at-gray-eb;
+        flex: 0 0 45px;
         text-align: right;
         vertical-align: top;
         padding-right: 5px;
         border-right: 1px solid @at-gray-b7;
         user-select: none;
+    }
+
+    &-line--clickable {
+        cursor: pointer;
     }
 
     &-event {
@@ -122,28 +132,40 @@
         }
     }
 
-    &-container {
-        font-family: monospace;
+    &-wrapper {
+        display: flex;
+        flex-flow: column nowrap;
         height: 100%;
-        overflow-y: scroll;
-        font-size: 15px;
-        border: 1px solid @at-gray-b7;
+    }
+
+    &-container {
         background-color: @at-gray-f2;
+        border-radius: 0 0 4px 4px;
+        border: 1px solid @at-gray-b7;
         color: @at-gray-161b1f;
-        padding: 0;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        font-family: monospace;
+        font-size: 15px;
+        height: 100%;
         margin: 0;
-        border-radius: 0;
-        border-bottom-right-radius: 4px;
-        border-bottom-left-radius: 4px;
-        max-height: ~"calc(100vh - 350px)";
+        overflow-y: scroll;
+        padding: 0;
 
-        & > table {
-            table-layout: fixed;
-
-            tr:hover > td {
-                background: white;
-            }
+        @media screen and (max-width: @breakpoint-md) {
+            max-height: calc(100vh - 30px);
         }
+    }
+
+    &-borderHeader {
+        .at-mixin-stdoutBorder();
+        height: 10px;
+    }
+
+    &-borderFooter {
+        .at-mixin-stdoutBorder();
+        flex: 1;
     }
 
     &--fullscreen {
@@ -153,10 +175,17 @@
 }
 
 .at-mixin-event() {
+    flex: 1;
     padding: 0 10px;
-    word-wrap: break-word;
     white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
+}
 
+.at-mixin-stdoutBorder() {
+    background-color: @at-gray-eb;
+    border-right: 1px solid @at-gray-b7;
+    width: 75px;
 }
 
 // Search ---------------------------------------------------------------------------------
@@ -178,9 +207,12 @@
     padding: 6px @at-padding-input 6px @at-padding-input;
 }
 
+.jobz-searchClearAllContainer {
+    .at-mixin-VerticallyCenter();
+}
+
 .jobz-searchClearAll {
     font-size: 10px;
-    padding-bottom: @at-space;
 }
 
 .jobz-Button-searchKey {
@@ -206,6 +238,7 @@
     display: flex;
     width: 100%;
     flex-wrap: wrap;
+    margin-left: -5px;
 }
 
 // Status Bar -----------------------------------------------------------------------------
@@ -284,7 +317,7 @@
     background-color: @default-warning;
 }
 
-.HostStatusBar-tooltipBadge--failed {
+.HostStatusBar-tooltipBadge--failures {
     background-color: @default-err;
 
 }
@@ -362,6 +395,8 @@
 }
 
 .JobResults-resultRowText {
+    display: flex;
+    flex-flow: row wrap;
     width: ~"calc(70% - 20px)";
     flex: 1 0 auto;
     text-transform: none;

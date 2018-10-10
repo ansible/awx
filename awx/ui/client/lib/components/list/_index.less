@@ -25,6 +25,10 @@
     margin-bottom: @at-margin-bottom-list-toolbar;
 }
 
+.at-List--toolbar-padAbove{
+    margin-top: @at-margin-above-list-toolbar
+}
+
 .at-List-search {
     flex: auto;
 }
@@ -129,6 +133,8 @@
     grid-template-columns: 120px 1fr;
     align-items: center;
     line-height: @at-height-list-row-item;
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 .at-RowItem-status {
@@ -167,19 +173,20 @@
 .at-RowItem-tagContainer {
     display: flex;
     margin-left: @at-margin-left-list-row-item-tag-container;
+    flex-wrap: wrap;
+    line-height: initial;
 }
 
 .at-RowItem-tag {
-    text-transform: uppercase;
     font-weight: 100;
     background-color: @at-color-list-row-item-tag-background;
     border-radius: @at-border-radius;
     color: @at-color-list-row-item-tag;
     font-size: @at-font-size-list-row-item-tag;
-    margin-left: @at-margin-left-list-row-item-tag;
-    margin-top: @at-margin-top-list-row-item-tag;
+    margin: @at-space;
     padding: @at-padding-list-row-item-tag;
     line-height: @at-line-height-list-row-item-tag;
+    word-break: keep-all;
 }
 
 .at-RowItem-tag--primary {
@@ -188,7 +195,6 @@
 }
 
 .at-RowItem-tag--header {
-    height: @at-height-list-row-item-tag;
     line-height: inherit;
 }
 
@@ -260,6 +266,12 @@
     .at-RowItem-label {
         width: auto;
         margin-right: @at-margin-right-list-row-item-inline-label;
+    }
+}
+
+@media screen and (max-width: @at-breakpoint-instances-wrap) {
+    .at-Row-items--instances {
+        margin-bottom: @at-padding-bottom-instances-wrap;
     }
 }
 

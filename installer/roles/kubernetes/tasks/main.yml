@@ -3,19 +3,47 @@
     msg: "Only set one of kubernetes_context or openshift_host"
   when: openshift_host is defined and kubernetes_context is defined
 
-- name: Set kubernetes base path
-  set_fact:
-    kubernetes_base_path: "{{ local_base_config_path|default('/tmp') }}/{{ kubernetes_deployment_name }}-config"
-
-- include_tasks: openshift.yml
+- include_tasks: "{{ tasks }}"
+  with_items:
+    - openshift_auth.yml
+    - openshift.yml
+  loop_control:
+    loop_var: tasks
   when: openshift_host is defined
 
-- include_tasks: kubernetes.yml
+- include_tasks: "{{ tasks }}"
+  with_items:
+    - kubernetes_auth.yml
+    - kubernetes.yml
+  loop_control:
+    loop_var: tasks
   when: kubernetes_context is defined
 
 - name: Use kubectl or oc
   set_fact:
     kubectl_or_oc: "{{ openshift_oc_bin if openshift_oc_bin is defined else 'kubectl' }}"
+
+- set_fact:
+    deployment_object: "sts"
+
+- name: Record deployment size
+  shell: |
+    {{ kubectl_or_oc }} get {{ deployment_object }} \
+      {{ kubernetes_deployment_name }} \
+      -n {{ kubernetes_namespace }} -o=jsonpath='{.status.replicas}'
+  register: deployment_details
+  ignore_errors: yes
+
+- name: Set expected post-deployment Replicas value
+  set_fact:
+    kubernetes_deployment_replica_size: "{{ deployment_details.stdout | int }}"
+  when: deployment_details.rc == 0
+
+- name: Delete existing Deployment
+  shell: |
+    {{ kubectl_or_oc }} delete {{ deployment_object }} \
+      {{ kubernetes_deployment_name }} -n {{ kubernetes_namespace }}
+  when: deployment_details.rc == 0
 
 - name: Get Postgres Service Detail
   shell: "{{ kubectl_or_oc }} describe svc {{ postgresql_service_name }} -n {{ kubernetes_namespace }}"
@@ -39,10 +67,12 @@
           -e POSTGRESQL_MAX_CONNECTIONS={{ pg_max_connections|default(1024) }} \
           -e POSTGRESQL_USER={{ pg_username }} \
           -e POSTGRESQL_PASSWORD={{ pg_password }} \
+          -e POSTGRESQL_ADMIN_PASSWORD={{ pg_password }} \
           -e POSTGRESQL_DATABASE={{ pg_database }} \
           -e POSTGRESQL_VERSION=9.5 \
           -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
+      no_log: yes
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - postgres_svc_details is defined and postgres_svc_details.rc != 0
@@ -61,6 +91,7 @@
     - postgres_svc_details is defined and postgres_svc_details.rc != 0
     - kubernetes_context is defined
   register: kubernetes_pg_activate
+  no_log: yes
 
 - name: Set postgresql hostname to helm package service
   set_fact:
@@ -73,17 +104,6 @@
   pause:
     seconds: 60
   when: openshift_pg_activate.changed or kubernetes_pg_activate.changed
-
-- name: Ensure directory exists
-  file:
-    path: "{{ kubernetes_base_path }}"
-    state: directory
-
-- name: Template Kubernetes AWX Config
-  template:
-    src: configmap.yml.j2
-    dest: "{{ kubernetes_base_path }}/configmap.yml"
-    mode: '0600'
 
 - name: Set image names if using custom registry
   block:
@@ -98,14 +118,89 @@
       when: kubernetes_web_image is not defined
   when: docker_registry is defined
 
-- name: Template Kubernetes AWX Deployment
-  template:
-    src: deployment.yml.j2
-    dest: "{{ kubernetes_base_path }}/deployment.yml"
-    mode: '0600'
-
-- name: Apply Configmap
-  shell: "{{ kubectl_or_oc }} apply -f {{ kubernetes_base_path }}/configmap.yml"
+- name: Render deployment templates
+  set_fact:
+    "{{ item }}": "{{ lookup('template', item + '.yml.j2') }}"
+  with_items:
+    - 'configmap'
+    - 'deployment'
+    - 'secret'
+  no_log: yes
 
 - name: Apply Deployment
-  shell: "{{ kubectl_or_oc }} apply -f {{ kubernetes_base_path }}/deployment.yml"
+  shell: |
+    echo {{ item | quote }} | {{ kubectl_or_oc }} apply -f -
+  with_items:
+    - "{{ configmap }}"
+    - "{{ deployment }}"
+    - "{{ secret }}"
+  no_log: yes
+
+- name: Delete any existing management pod
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      delete pod ansible-tower-management --grace-period=0 --ignore-not-found
+
+- name: Template management pod
+  set_fact:
+    management_pod: "{{ lookup('template', 'management-pod.yml.j2') }}"
+
+- name: Create management pod
+  shell: |
+    echo {{ management_pod | quote }} | {{ kubectl_or_oc }} apply -f -
+
+- name: Wait for management pod to start
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      get pod ansible-tower-management -o jsonpath="{.status.phase}"
+  register: result
+  until: result.stdout == "Running"
+  retries: 60
+  delay: 10
+
+- name: Migrate database
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
+      bash -c "awx-manage migrate --noinput"
+
+- name: Check for Tower Super users
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
+      bash -c "echo 'from django.contrib.auth.models import User; nsu = User.objects.filter(is_superuser=True).count(); exit(0 if nsu > 0 else 1)' | awx-manage shell"
+  register: super_check
+  ignore_errors: yes
+  changed_when: super_check.rc > 0
+
+- name: create django super user if it does not exist
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
+      bash -c "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('{{ admin_user }}', '{{ admin_email }}', '{{ admin_password }}')\" | awx-manage shell"
+  no_log: yes
+  when: super_check.rc > 0
+
+- name: update django super user password
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
+      bash -c "awx-manage update_password --username='{{ admin_user }}' --password='{{ admin_password }}'"
+  no_log: yes
+  register: result
+  changed_when: "'Password updated' in result.stdout"
+
+- name: Create the default organization if it is needed.
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} exec ansible-tower-management -- \
+      bash -c "awx-manage create_preload_data"
+  register: cdo
+  changed_when: "'added' in cdo.stdout"
+
+- name: Delete management pod
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      delete pod ansible-tower-management --grace-period=0 --ignore-not-found
+
+- name: Scale up deployment
+  shell: |
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas=0
+    {{ kubectl_or_oc }} -n {{ kubernetes_namespace }} \
+      scale {{ deployment_object }} {{ kubernetes_deployment_name }} --replicas={{ kubernetes_deployment_replica_size }}

@@ -22,7 +22,7 @@ class Command(BaseCommand):
         parser.add_argument('--queuename', dest='queuename', type=lambda s: six.text_type(s, 'utf8'),
                             help='Queue to create/update')
         parser.add_argument('--hostnames', dest='hostnames', type=lambda s: six.text_type(s, 'utf8'),
-                            help='Comma-Delimited Hosts to add to the Queue')
+                            help='Comma-Delimited Hosts to add to the Queue (will not remove already assigned instances)')
         parser.add_argument('--controller', dest='controller', type=lambda s: six.text_type(s, 'utf8'),
                             default='', help='The controlling group (makes this an isolated group)')
         parser.add_argument('--instance_percent', dest='instance_percent', type=int, default=0,
@@ -43,6 +43,9 @@ class Command(BaseCommand):
         if ig.policy_instance_minimum != instance_min:
             ig.policy_instance_minimum = instance_min
             changed = True
+
+        if changed:
+            ig.save()
 
         return (ig, created, changed)
 
@@ -72,16 +75,16 @@ class Command(BaseCommand):
             else:
                 raise InstanceNotFound(six.text_type("Instance does not exist: {}").format(inst_name), changed)
 
-        ig.instances = instances
+        ig.instances.add(*instances)
 
-        instance_list_before = set(ig.policy_instance_list)
-        instance_list_after = set(instance_list_unique)
-        if len(instance_list_before) != len(instance_list_after) or \
-                len(set(instance_list_before) - set(instance_list_after)) != 0:
+        instance_list_before = ig.policy_instance_list
+        instance_list_after = instance_list_unique
+        new_instances = set(instance_list_after) - set(instance_list_before)
+        if new_instances:
             changed = True
+            ig.policy_instance_list = ig.policy_instance_list + list(new_instances)
+            ig.save()
 
-        ig.policy_instance_list = list(instance_list_unique)
-        ig.save()
         return (instances, changed)
 
     def handle(self, **options):
@@ -97,25 +100,27 @@ class Command(BaseCommand):
             hostname_list = options.get('hostnames').split(",")
 
         with advisory_lock(six.text_type('instance_group_registration_{}').format(queuename)):
-            (ig, created, changed) = self.get_create_update_instance_group(queuename, inst_per, inst_min)
+            changed2 = False
+            changed3 = False
+            (ig, created, changed1) = self.get_create_update_instance_group(queuename, inst_per, inst_min)
             if created:
                 print(six.text_type("Creating instance group {}".format(ig.name)))
             elif not created:
                 print(six.text_type("Instance Group already registered {}").format(ig.name))
 
             if ctrl:
-                (ig_ctrl, changed) = self.update_instance_group_controller(ig, ctrl)
-                if changed:
+                (ig_ctrl, changed2) = self.update_instance_group_controller(ig, ctrl)
+                if changed2:
                     print(six.text_type("Set controller group {} on {}.").format(ctrl, queuename))
 
             try:
-                (instances, changed) = self.add_instances_to_group(ig, hostname_list)
+                (instances, changed3) = self.add_instances_to_group(ig, hostname_list)
                 for i in instances:
                     print(six.text_type("Added instance {} to {}").format(i.hostname, ig.name))
             except InstanceNotFound as e:
                 instance_not_found_err = e
 
-        if changed:
+        if any([changed1, changed2, changed3]):
             print('(changed: True)')
 
         if instance_not_found_err:

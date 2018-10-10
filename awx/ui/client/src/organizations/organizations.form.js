@@ -41,11 +41,11 @@ export default ['NotificationsList', 'i18n',
                     dataTitle: i18n._('Instance Groups'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(organization_obj.summary_fields.user_capabilities.edit || canAdd)"></instance-groups-multiselect>',
+                    control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(organization_obj.summary_fields.user_capabilities.edit || canAdd) || (!current_user.is_superuser && isOrgAdmin)"></instance-groups-multiselect>',
                 },
                 custom_virtualenv: {
                     label: i18n._('Ansible Environment'),
-                    defaultText: i18n._('Default Environment'),
+                    defaultText: i18n._('Use Default Environment'),
                     type: 'select',
                     ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
                     awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this organization to run on.") + "</p>",
@@ -53,7 +53,7 @@ export default ['NotificationsList', 'i18n',
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)',
-                    ngShow: 'custom_virtualenvs_options.length > 0'
+                    ngShow: 'custom_virtualenvs_visible'
                 }
             },
 

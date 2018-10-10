@@ -77,6 +77,11 @@ CELERYD_LOG_COLOR = True
 
 CALLBACK_QUEUE = "callback_tasks"
 
+# Enable dynamically pulling roles from a requirement.yml file
+# when updating SCM projects
+# Note: This setting may be overridden by database settings.
+AWX_ROLES_ENABLED = True
+
 # Enable PROOT for tower-qa integration tests.
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True
@@ -154,7 +159,9 @@ SERVICE_NAME_DICT = {
     "nginx": "nginx"}
 
 try:
-    socket.gethostbyname('docker.for.mac.internal')
-    os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.internal'
+    socket.gethostbyname('docker.for.mac.host.internal')
+    os.environ['SDB_NOTIFY_HOST'] = 'docker.for.mac.host.internal'
 except Exception:
     os.environ['SDB_NOTIFY_HOST'] = os.popen('ip route').read().split(' ')[2]
+
+WEBSOCKET_ORIGIN_WHITELIST = ['https://localhost:8043', 'https://localhost:3000']

@@ -1,3 +1,5 @@
 ---
+dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
+
 rabbitmq_version: "3.7.4"
 rabbitmq_image: "ansible/awx_rabbitmq:{{rabbitmq_version}}"

@@ -8,7 +8,6 @@ describe('Directive: Smart Search', () => {
         dom,
         $compile,
         $state = {},
-        $stateParams,
         GetBasePath,
         QuerySet,
         ConfigService = {},
@@ -44,6 +43,7 @@ describe('Directive: Smart Search', () => {
         translateFilter = jasmine.createSpy('translateFilter');
         i18n = jasmine.createSpy('i18n');
         $state = jasmine.createSpyObj('$state', ['go']);
+        $state.go.and.callFake(() => { return { then: function(){} }; });
 
         $provide.value('ConfigService', ConfigService);
         $provide.value('QuerySet', QuerySet);

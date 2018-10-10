@@ -58,6 +58,10 @@ export default {
                 return qs.search(searchPath, searchParam)
                     .finally(() => Wait('stop'));
             }
+        ],
+        SearchBasePath: [
+            'GetBasePath',
+            (GetBasePath) => GetBasePath('unified_jobs')
         ]
     }
 };

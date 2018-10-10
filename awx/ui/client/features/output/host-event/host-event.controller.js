@@ -1,14 +1,19 @@
 function HostEventsController (
     $scope,
     $state,
+    $filter,
     HostEventService,
-    hostEvent
+    hostEvent,
+    OutputStrings
 ) {
     $scope.processEventStatus = HostEventService.processEventStatus;
     $scope.processResults = processResults;
     $scope.isActiveState = isActiveState;
     $scope.getActiveHostIndex = getActiveHostIndex;
     $scope.closeHostEvent = closeHostEvent;
+    $scope.strings = OutputStrings;
+
+    const sanitize = $filter('sanitize');
 
     function init () {
         hostEvent.event_name = hostEvent.event;
@@ -30,7 +35,7 @@ function HostEventsController (
             if (hostEvent.event_data.res.stdout === '') {
                 $scope.stdout = ' ';
             } else {
-                $scope.stdout = hostEvent.event_data.res.stdout;
+                $scope.stdout = sanitize(hostEvent.event_data.res.stdout);
             }
         }
 
@@ -38,7 +43,7 @@ function HostEventsController (
             if (hostEvent.event_data.res.stderr === '') {
                 $scope.stderr = ' ';
             } else {
-                $scope.stderr = hostEvent.event_data.res.stderr;
+                $scope.stderr = sanitize(hostEvent.event_data.res.stderr);
             }
         }
 
@@ -48,13 +53,13 @@ function HostEventsController (
 
         if ($scope.module_name === 'debug' &&
             _.has(hostEvent.event_data, 'res.result.stdout')) {
-            $scope.stdout = hostEvent.event_data.res.result.stdout;
+            $scope.stdout = sanitize(hostEvent.event_data.res.result.stdout);
         }
         if ($scope.module_name === 'yum' &&
             _.has(hostEvent.event_data, 'res.results') &&
             _.isArray(hostEvent.event_data.res.results)) {
             const event = hostEvent.event_data.res.results;
-            $scope.stdout = event[0];// eslint-disable-line prefer-destructuring
+            $scope.stdout = sanitize(event[0]);// eslint-disable-line prefer-destructuring
         }
         // instantiate Codemirror
         if ($state.current.name === 'output.host-event.json') {
@@ -163,8 +168,10 @@ function HostEventsController (
 HostEventsController.$inject = [
     '$scope',
     '$state',
+    '$filter',
     'HostEventService',
     'hostEvent',
+    'OutputStrings'
 ];
 
 module.exports = HostEventsController;

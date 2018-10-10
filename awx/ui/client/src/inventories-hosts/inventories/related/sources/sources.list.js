@@ -104,14 +104,6 @@
                 dataPlacement: "top",
                 iconClass: "fa fa-minus-circle"
             },
-            schedule: {
-                mode: 'all',
-                ngClick: "scheduleSource(inventory_source.id)",
-                awToolTip: "{{ inventory_source.group_schedule_tooltip }}",
-                ngClass: "inventory_source.scm_type_class",
-                dataPlacement: 'top',
-                ngShow: "!(inventory_source.summary_fields.inventory_source.source === '') && inventory_source.summary_fields.user_capabilities.schedule"
-            },
             view: {
                 mode: 'all',
                 ngClick: "editSource(inventory_source.id)",

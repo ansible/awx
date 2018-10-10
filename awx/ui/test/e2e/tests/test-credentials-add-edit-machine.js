@@ -197,8 +197,12 @@ module.exports = {
 
         credentials.section.list.section.search
             .waitForElementVisible('@input', AWX_E2E_TIMEOUT_LONG)
-            .setValue('@input', `name:${store.credential.name}`)
-            .click('@searchButton');
+            .waitForElementVisible('@searchButton', AWX_E2E_TIMEOUT_LONG)
+            .sendKeys('@input', `name:${store.credential.name}`)
+            .sendKeys('@input', client.Keys.ENTER);
+
+        client.pause(1000);
+        client.waitForElementNotVisible('div.spinny');
 
         credentials.waitForElementNotPresent(`${row}:nth-of-type(2)`);
         credentials.expect.element(row).text.contain(store.credential.name);

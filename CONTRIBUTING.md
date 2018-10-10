@@ -2,11 +2,11 @@
 
 Hi there! We're excited to have you as a contributor.
 
-Have questions about this document or anything not covered here? Come chat with us at `#ansible-awx` on irc.freenode.net, or submit your question to the [mailing list](https://groups.google.com/forum/#!forum/awx-project) .
+Have questions about this document or anything not covered here? Come chat with us at `#ansible-awx` on irc.freenode.net, or submit your question to the [mailing list](https://groups.google.com/forum/#!forum/awx-project).
 
 ## Table of contents
 
-* [Things to know prior to submitting code](#things-to-know-prior-to-contributing-code)
+* [Things to know prior to submitting code](#things-to-know-prior-to-submitting-code)
 * [Setting up your development environment](#setting-up-your-development-environment)
   * [Prerequisites](#prerequisites)
     * [Docker](#docker)
@@ -17,14 +17,14 @@ Have questions about this document or anything not covered here? Come chat with 
     * [Create local settings](#create-local-settings)
     * [Build the base image](#build-the-base-image)
     * [Build the user interface](#build-the-user-interface)
-  # [Running the environment](#running-the-environment)
+  * [Running the environment](#running-the-environment)
     * [Start the containers](#start-the-containers)
     * [Start from the container shell](#start-from-the-container-shell)
   * [Post Build Steps](#post-build-steps)
-     * [Start a shell](#start-the-shell)
-     * [Create a superuser](#create-a-superuser)
-     * [Load the data](#load-the-data)
-     * [Building API Documentation](#build-documentation)
+    * [Start a shell](#start-a-shell)
+    * [Create a superuser](#create-a-superuser)
+    * [Load the data](#load-the-data)
+    * [Building API Documentation](#build-api-documentation)
   * [Accessing the AWX web interface](#accessing-the-awx-web-interface)
   * [Purging containers and images](#purging-containers-and-images)
 * [What should I work on?](#what-should-i-work-on)
@@ -329,7 +329,7 @@ We like to keep our commit history clean, and will require resubmission of pull 
 
 Sometimes it might take us a while to fully review your PR. We try to keep the `devel` branch in good working order, and so we review requests carefully. Please be patient.
 
-All submitted PRs will have the linter and unit tests run against them, and the status reported in the PR.
+All submitted PRs will have the linter and unit tests run against them via Zuul, and the status reported in the PR.
 
 ## Reporting Issues
 

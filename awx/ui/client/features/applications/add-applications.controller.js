@@ -1,4 +1,4 @@
-function AddApplicationsController (models, $state, strings) {
+function AddApplicationsController (models, $state, strings, $scope, Alert, $filter) {
     const vm = this || {};
 
     const { application, me, organization } = models;
@@ -60,14 +60,58 @@ function AddApplicationsController (models, $state, strings) {
     };
 
     vm.form.onSaveSuccess = res => {
+        if (res.data && res.data.client_id) {
+            const name = res.data.name ?
+                `<div class="PopupModal">
+                    <div class="PopupModal-label">
+                        ${strings.get('add.NAME_LABEL')}
+                    </div>
+                    <div class="PopupModal-value">
+                        ${$filter('sanitize')(res.data.name)}
+                    </div>
+                </div>` : '';
+            const clientId = res.data.client_id ?
+                `<div class="PopupModal">
+                    <div class="PopupModal-label">
+                        ${strings.get('add.CLIENT_ID_LABEL')}
+                    </div>
+                    <div class="PopupModal-value">
+                        ${res.data.client_id}
+                    </div>
+                </div>` : '';
+            const clientSecret = res.data.client_secret ?
+                `<div class="PopupModal">
+                    <div class="PopupModal-label">
+                        ${strings.get('add.CLIENT_SECRECT_LABEL')}
+                    </div>
+                    <div class="PopupModal-value">
+                        ${res.data.client_secret}
+                    </div>
+                </div>` : '';
+
+            Alert(strings.get('add.MODAL_HEADER'), `
+                ${name}
+                ${clientId}
+                ${clientSecret}
+            `, null, null, null, null, null, true);
+        }
         $state.go('applications.edit', { application_id: res.data.id }, { reload: true });
     };
+
+    $scope.$watch('organization', () => {
+        if ($scope.organization) {
+            vm.form.organization._idFromModal = $scope.organization;
+        }
+    });
 }
 
 AddApplicationsController.$inject = [
     'resolvedModels',
     '$state',
-    'ApplicationsStrings'
+    'ApplicationsStrings',
+    '$scope',
+    'Alert',
+    '$filter',
 ];
 
 export default AddApplicationsController;

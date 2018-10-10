@@ -21,17 +21,28 @@ Below is an example SAML attribute that embeds user organization membership in t
    	 <saml2:AttributeValue>HR</saml2:AttributeValue>
    	 <saml2:AttributeValue>Sales</saml2:AttributeValue>
     </saml2:Attribute>
+    <saml2:Attribute FriendlyName="administrator-of" Name="administrator-of" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified">
+   	 <saml2:AttributeValue>IT</saml2:AttributeValue>
+   	 <saml2:AttributeValue>HR</saml2:AttributeValue>
+    </saml2:Attribute>
 </saml2:AttributeStatement> 
 ```
 Below, the corresponding AWX configuration.
 ```
 {
   "saml_attr": "member-of",
-  "remove": true
+  "saml_admin_attr": "administrator-of",
+  "remove": true,
+  'remove_admins': true
 }
 ```
 **saml_attr:** The saml attribute name where the organization array can be found.
+
 **remove:** True to remove user from all organizations before adding the user to the list of Organizations. False to keep the user in whatever Organization(s) they are in while adding the user to the Organization(s) in the SAML attribute.
+
+**saml_admin_attr:** The saml attribute name where the organization administrators array can be found.
+
+**remove_admins:** True to remove user from all organizations that it is admin before adding the user to the list of Organizations admins. False to keep the user in whatever Organization(s) they are in as admin while adding the user as an Organization administrator in the SAML attribute.
 
 **Example SAML Team Map**
 Below is another example of a SAML attribute that contains a Team membership in a list.

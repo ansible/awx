@@ -18,6 +18,7 @@ from django.core.signals import setting_changed
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
 from django_auth_ldap.backend import LDAPBackend as BaseLDAPBackend
 from django_auth_ldap.backend import populate_user
+from django.core.exceptions import ImproperlyConfigured
 
 # radiusauth
 from radiusauth.backends import RADIUSBackend as BaseRADIUSBackend
@@ -106,7 +107,16 @@ class LDAPBackend(BaseLDAPBackend):
                 return None
         except User.DoesNotExist:
             pass
+
         try:
+            for setting_name, type_ in [
+                ('GROUP_SEARCH', 'LDAPSearch'),
+                ('GROUP_TYPE', 'LDAPGroupType'),
+            ]:
+                if getattr(self.settings, setting_name) is None:
+                    raise ImproperlyConfigured(
+                        "{} must be an {} instance.".format(setting_name, type_)
+                    )
             return super(LDAPBackend, self).authenticate(username, password)
         except Exception:
             logger.exception("Encountered an error authenticating to LDAP")
@@ -182,13 +192,13 @@ class RADIUSBackend(BaseRADIUSBackend):
     Custom Radius backend to verify license status
     '''
 
-    def authenticate(self, request, username, password):    
+    def authenticate(self, username, password):    
         if not django_settings.RADIUS_SERVER:
             return None
         if not feature_enabled('enterprise_auth'):
             logger.error("Unable to authenticate, license does not support RADIUS authentication")
             return None
-        return super(RADIUSBackend, self).authenticate(request, username, password)
+        return super(RADIUSBackend, self).authenticate(username, password)
 
     def get_user(self, user_id):
         if not django_settings.RADIUS_SERVER:

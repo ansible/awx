@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ansible-tower-management
+  namespace: {{ kubernetes_namespace }}
+spec:
+  containers:
+    - name: ansible-tower-management
+      image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
+      command: ["sleep", "infinity"]
+      volumeMounts:
+        - name: {{ kubernetes_deployment_name }}-application-config
+          mountPath: "/etc/tower"
+          readOnly: true
+
+        - name: "{{ kubernetes_deployment_name }}-confd"
+          mountPath: "/etc/tower/conf.d/"
+          readOnly: true
+  volumes:
+    - name: {{ kubernetes_deployment_name }}-application-config
+      configMap:
+        name: {{ kubernetes_deployment_name }}-config
+        items:
+          - key: {{ kubernetes_deployment_name }}_settings
+            path: settings.py
+          - key: secret_key
+            path: SECRET_KEY
+
+    - name: "{{ kubernetes_deployment_name }}-confd"
+      secret:
+        secretName: "{{ kubernetes_deployment_name }}-secrets"
+        items:
+          - key: confd_contents
+            path: 'secrets.py'
+
+  restartPolicy: Never

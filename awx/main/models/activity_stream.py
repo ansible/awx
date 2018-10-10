@@ -33,6 +33,7 @@ class ActivityStream(models.Model):
     operation = models.CharField(max_length=13, choices=OPERATION_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
     changes = models.TextField(blank=True)
+    deleted_actor = JSONField(null=True)
 
     object_relationship_type = models.TextField(blank=True)
     object1 = models.TextField()
@@ -65,6 +66,7 @@ class ActivityStream(models.Model):
     notification = models.ManyToManyField("Notification", blank=True)
     label = models.ManyToManyField("Label", blank=True)
     role = models.ManyToManyField("Role", blank=True)
+    instance = models.ManyToManyField("Instance", blank=True)
     instance_group = models.ManyToManyField("InstanceGroup", blank=True)
     o_auth2_application = models.ManyToManyField("OAuth2Application", blank=True)
     o_auth2_access_token = models.ManyToManyField("OAuth2AccessToken", blank=True)
@@ -77,6 +79,18 @@ class ActivityStream(models.Model):
         return reverse('api:activity_stream_detail', kwargs={'pk': self.pk}, request=request)
 
     def save(self, *args, **kwargs):
+        # Store denormalized actor metadata so that we retain it for accounting
+        # purposes when the User row is deleted.
+        if self.actor:
+            self.deleted_actor = {
+                'id': self.actor_id,
+                'username': self.actor.username,
+                'first_name': self.actor.first_name,
+                'last_name': self.actor.last_name,
+            }
+            if 'update_fields' in kwargs and 'deleted_actor' not in kwargs['update_fields']:
+                kwargs['update_fields'].append('deleted_actor')
+
         # For compatibility with Django 1.4.x, attempt to handle any calls to
         # save that pass update_fields.
         try:

@@ -68,7 +68,7 @@ export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
 
                         let reloadListStateParams = null;
 
-                        if($scope.users.length === 1 && $state.params.user_search && !_.isEmpty($state.params.user_search.page) && $state.params.user_search.page !== '1') {
+                        if($scope.users.length === 1 && $state.params.user_search && _.has($state, 'params.user_search.page') && $state.params.user_search.page !== '1') {
                             reloadListStateParams = _.cloneDeep($state.params);
                             reloadListStateParams.user_search.page = (parseInt(reloadListStateParams.user_search.page)-1).toString();
                         }

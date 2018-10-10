@@ -13,8 +13,12 @@ function atCodeMirrorController (
     ParseVariableString
 ) {
     const vm = this;
-
     function init (vars) {
+        if ($scope.disabled === 'true') {
+            $scope.disabled = true;
+        } else if ($scope.disabled === 'false') {
+            $scope.disabled = false;
+        }
         $scope.variables = ParseVariableString(_.cloneDeep(vars));
         $scope.parseType = ParseType;
         const options = {

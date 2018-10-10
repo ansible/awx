@@ -81,7 +81,8 @@ export default [
             return authVm.dropdownValue;
         };
 
-        var activeForm = function() {
+
+        const activeForm = function(revertDropdown) {
             if(!_.get($scope.$parent, [formTracker.currentFormName(), '$dirty'])) {
                 authVm.activeAuthForm = getActiveAuthForm();
                 formTracker.setCurrentAuth(authVm.activeAuthForm);
@@ -110,6 +111,12 @@ export default [
                             authVm.activeAuthForm = getActiveAuthForm();
                             formTracker.setCurrentAuth(authVm.activeAuthForm);
                             $('#FormModal-dialog').dialog('close');
+                        }).catch(() => {
+                            event.preventDefault();
+                            $('#FormModal-dialog').dialog('close');
+                            if (revertDropdown) {
+                                revertDropdown();
+                            }
                         });
                     },
                     "class": "btn btn-primary",
@@ -119,6 +126,26 @@ export default [
             }
             formTracker.setCurrentAuth(authVm.activeAuthForm);
             authVm.ldapSelected = (authVm.activeAuthForm.indexOf('ldap') !== -1);
+        };
+
+        const changeAuthDropdown = (previousVal) => {
+            activeForm(() => {
+                authVm.dropdownValue = previousVal;
+                CreateSelect2({
+                    element: '#configure-dropdown-nav',
+                    multiple: false,
+                });
+            });
+        };
+
+        const changeLdapDropdown = (previousVal) => {
+            activeForm(() => {
+                authVm.ldapDropdownValue = previousVal;
+                CreateSelect2({
+                    element: '#configure-ldap-dropdown',
+                    multiple: false,
+                });
+            });
         };
 
         var dropdownOptions = [
@@ -225,7 +252,7 @@ export default [
             },
         ];
 
-        var forms = _.pluck(authForms, 'formDef');
+        var forms = _.map(authForms, 'formDef');
         _.each(forms, function(form) {
             var keys = _.keys(form.fields);
             _.each(keys, function(key) {
@@ -409,7 +436,8 @@ export default [
 
 
         angular.extend(authVm, {
-            activeForm: activeForm,
+            changeAuthDropdown: changeAuthDropdown,
+            changeLdapDropdown: changeLdapDropdown,
             activeAuthForm: activeAuthForm,
             authForms: authForms,
             dropdownOptions: dropdownOptions,

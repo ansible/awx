@@ -104,7 +104,7 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             scm_url: {
-                label: 'SCM URL',
+                label: i18n._('SCM URL'),
                 type: 'text',
                 ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights' ",
                 awRequiredWhen: {
@@ -206,14 +206,14 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
             custom_virtualenv: {
                 label: i18n._('Ansible Environment'),
                 type: 'select',
-                defaultText: i18n._('Default Environment'),
+                defaultText: i18n._('Use Default Environment'),
                 ngOptions: 'venv for venv in custom_virtualenvs_options track by venv',
                 awPopOver: "<p>" + i18n._("Select the custom Python virtual environment for this project to run on.") + "</p>",
                 dataTitle: i18n._('Ansible Environment'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
-                ngShow: 'custom_virtualenvs_options.length > 0'
+                ngShow: 'custom_virtualenvs_options.length > 1'
             },
         },
 
@@ -261,8 +261,9 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
 
                 fields: {
                     username: {
+                        key: true,
                         label: i18n._('User'),
-                        uiSref: 'users({user_id: field.id})',
+                        linkBase: 'users',
                         class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                     },
                     role: {

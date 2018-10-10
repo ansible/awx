@@ -7,7 +7,7 @@
                 <input class="SmartSearch-input" ng-model="searchTerm" placeholder="{{searchPlaceholder}}"
                 ng-disabled="disableSearch">
             </form>
-            <div type="submit" class="SmartSearch-searchButton" ng-disabled="!searchTerm" ng-click="addTerms(searchTerm)">
+            <div type="submit" class="SmartSearch-searchButton" ng-class="{'SmartSearch-searchButton--disabled': !searchTerm || searchTerm === ''}" ng-click="addTerms(searchTerm)">
                 <i class="fa fa-search"></i>
             </div>
         </div>
@@ -20,14 +20,11 @@
         <div class="SmartSearch-tagSection">
             <div class="SmartSearch-flexContainer">
                 <div class="SmartSearch-tagContainer" ng-repeat="tag in searchTags track by $index">
-                    <div class="SmartSearch-deleteContainer" ng-click="removeTerm($index)">
-                        <i class="fa fa-times SmartSearch-tagDelete"></i>
-                    </div>
-                    <div class="SmartSearch-tag SmartSearch-tag--deletable">
-                        <span class="SmartSearch-name">{{tag}}</span>
-                    </div>
+                    <at-tag tag="tag" remove-tag="removeTerm($index)"></at-tag>
                 </div>
-                <a href class="SmartSearch-clearAll" ng-click="clearAllTerms()" translate>CLEAR ALL</a>
+                <div class="SmartSearch-clearAll-container">
+                    <a href class="SmartSearch-clearAll" ng-click="clearAllTerms()" translate>CLEAR ALL</a>
+                </div>
             </div>
         </div>
     </div>
@@ -49,7 +46,7 @@
         </div>
         <div class="SmartSearch-keyRow">
             <b>{{ 'ADDITIONAL INFORMATION' | translate }}:</b>
-            <span>{{ 'For additional information on advanced search search syntax please see the Ansible Tower' | translate }}
+            <span>{{ 'For additional information on advanced search syntax please see the Ansible Tower' | translate }}
             <a ng-attr-href="{{ documentationLink || undefined }}" target="_blank"> {{ 'documentation' | translate }}</a>.</span>
         </div>
     </div>

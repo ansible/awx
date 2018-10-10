@@ -18,7 +18,7 @@ const common = createFormSection({
         name: 'Name',
         description: 'Description',
         organization: 'Organization',
-        type: 'Credential type'
+        type: 'Credential Type'
     }
 });
 
@@ -233,7 +233,7 @@ module.exports = {
                 details
             },
             elements: {
-                title: 'h3[class="at-Panel-headingTitle"]'
+                title: 'h3[class*="at-Panel-headingTitle"]'
             }
         },
         edit: {
@@ -243,7 +243,7 @@ module.exports = {
                 permissions
             },
             elements: {
-                title: 'h3[class="at-Panel-headingTitle"]'
+                title: 'h3[class*="at-Panel-headingTitle"]'
             }
         },
         list: {

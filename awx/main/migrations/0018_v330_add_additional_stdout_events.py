@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('verbosity', models.PositiveIntegerField(default=0, editable=False)),
                 ('start_line', models.PositiveIntegerField(default=0, editable=False)),
                 ('end_line', models.PositiveIntegerField(default=0, editable=False)),
-                ('inventory_update', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='generic_command_events', to='main.InventoryUpdate')),
+                ('inventory_update', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='inventory_update_events', to='main.InventoryUpdate')),
             ],
             options={
                 'ordering': ('-pk',),
@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
                 ('verbosity', models.PositiveIntegerField(default=0, editable=False)),
                 ('start_line', models.PositiveIntegerField(default=0, editable=False)),
                 ('end_line', models.PositiveIntegerField(default=0, editable=False)),
-                ('project_update', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='generic_command_events', to='main.ProjectUpdate')),
+                ('project_update', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='project_update_events', to='main.ProjectUpdate')),
             ],
             options={
                 'ordering': ('pk',),
@@ -72,11 +72,23 @@ class Migration(migrations.Migration):
                 ('verbosity', models.PositiveIntegerField(default=0, editable=False)),
                 ('start_line', models.PositiveIntegerField(default=0, editable=False)),
                 ('end_line', models.PositiveIntegerField(default=0, editable=False)),
-                ('system_job', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='generic_command_events', to='main.SystemJob')),
+                ('system_job', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='system_job_events', to='main.SystemJob')),
             ],
             options={
                 'ordering': ('-pk',),
             },
+        ),
+        migrations.AlterIndexTogether(
+            name='inventoryupdateevent',
+            index_together=set([('inventory_update', 'start_line'), ('inventory_update', 'uuid'), ('inventory_update', 'end_line')]),
+        ),
+        migrations.AlterIndexTogether(
+            name='projectupdateevent',
+            index_together=set([('project_update', 'event'), ('project_update', 'end_line'), ('project_update', 'start_line'), ('project_update', 'uuid')]),
+        ),
+        migrations.AlterIndexTogether(
+            name='systemjobevent',
+            index_together=set([('system_job', 'end_line'), ('system_job', 'uuid'), ('system_job', 'start_line')]),
         ),
         migrations.RemoveField(
             model_name='unifiedjob',

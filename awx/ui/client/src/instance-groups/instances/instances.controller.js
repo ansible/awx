@@ -1,35 +1,24 @@
-function InstancesController ($scope, $state, $http, models, Instance, strings, Dataset, ProcessErrors) {
+function InstancesController ($scope, $state, $http, models, strings, Dataset, ProcessErrors) {
     const { instanceGroup } = models;
     const vm = this || {};
     vm.strings = strings;
     vm.panelTitle = instanceGroup.get('name');
-    vm.instances = instanceGroup.get('related.instances.results');
     vm.instance_group_id = instanceGroup.get('id');
+    vm.policy_instance_list = instanceGroup.get('policy_instance_list');
     vm.isSuperuser = $scope.$root.user_is_superuser;
+
 
     init();
 
     function init() {
-        $scope.list = {
+        vm.list = {
             name: 'instances',
             iterator: 'instance',
             basePath: `/api/v2/instance_groups/${vm.instance_group_id}/instances/`
         };
 
-        $scope.collection = {
-            iterator: 'instance',
-            basePath: `/api/v2/instance_groups/${vm.instance_group_id}/instances/`
-        };
-
-        $scope[`${$scope.list.iterator}_dataset`] = Dataset.data;
-        $scope[$scope.list.name] = $scope[`${$scope.list.iterator}_dataset`].results;
-        $scope.instances = vm.instances;
-
-        $scope.$on('updateDataset', function(e, dataset) {
-            $scope[`${$scope.list.iterator}_dataset`] = dataset;
-            $scope[$scope.list.name] = dataset.results;
-            vm.instances = dataset.results;
-        });
+        vm.dataset = Dataset.data;
+        vm.instances = instanceGroup.get('related.instances.results');
     }
 
     vm.tab = {
@@ -102,7 +91,6 @@ InstancesController.$inject = [
     '$state',
     '$http',
     'resolvedModels',
-    'InstanceModel',
     'InstanceGroupsStrings',
     'Dataset',
     'ProcessErrors'

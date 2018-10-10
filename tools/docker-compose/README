@@ -8,7 +8,7 @@ authentication set up inside of the logstash configuration file).
 
 ```
 {
-    "LOG_AGGREGATOR_HOST": "logstash",
+    "LOG_AGGREGATOR_HOST": "http://logstash",
     "LOG_AGGREGATOR_PORT": 8085,
     "LOG_AGGREGATOR_TYPE": "logstash",
     "LOG_AGGREGATOR_USERNAME": "awx_logger",
@@ -24,6 +24,8 @@ authentication set up inside of the logstash configuration file).
     "LOG_AGGREGATOR_ENABLED": true
 }
 ```
+
+> Note: HTTP must be specified in the `LOG_AGGREGATOR_HOST` if you are using the docker development environment.  
 
 An example of how to view the most recent logs from the container:
 

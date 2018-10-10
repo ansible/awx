@@ -177,8 +177,6 @@
 @at-color-side-nav-item-icon: @at-white;
 @at-color-side-nav-item-spacer: @at-gray-d7;
 @at-color-side-nav-space-collapsed-border: @at-gray-b7;
-@at-color-footer-background: @at-gray-fc;
-@at-color-footer: @at-gray-70;
 
 @at-color-list-empty-border: @at-gray-d7;
 @at-color-list-empty-background: @at-gray-f6;
@@ -241,12 +239,11 @@
 @at-padding-left-side-nav-item-icon: 10px;
 @at-padding-left-side-nav-item-icon-expanded: 15px;
 @at-padding-between-side-nav-icon-text: @at-space-3x;
-@at-padding-footer-right: @at-space-4x;
-@at-padding-footer-bottom: @at-space-4x;
 @at-padding-list-empty: @at-space-2x;
-@at-padding-list-row-item-tag: 0 @at-space-2x;
+@at-padding-list-row-item-tag: 3px 9px;
 @at-padding-list-row-action: 7px;
 @at-padding-list-row: 10px 20px 10px 10px;
+@at-padding-bottom-instances-wrap: 30px;
 
 @at-margin-input-message: @at-space;
 @at-margin-item-column: @at-space-3x;
@@ -259,13 +256,12 @@
 @at-margin-top-nav-item-between-icon-and-name: @at-space-2x;
 @at-margin-top-nav-item-icon-socket-top-makeup: -3px;
 @at-margin-side-nav-space-collapsed: 5px 0;
-@at-margin-after-footer-link: @at-space;
-@at-margin-footer-top: @at-space-4x;
 
 @at-margin-top-search-key: @at-space-2x;
 
 @at-margin-top-list: @at-space-4x;
 @at-margin-bottom-list-toolbar: @at-space-4x;
+@at-margin-above-list-toolbar: @at-space-4x;
 @at-margin-left-toolbar-action: @at-space-4x;
 @at-margin-left-toolbar-carat: @at-space;
 @at-margin-bottom-list-header: @at-space;
@@ -293,14 +289,13 @@
 @at-height-list-empty: 200px;
 @at-height-toolbar-action: 30px;
 @at-height-list-row-item: 27px;
-@at-height-list-row-item-tag: 15px;
 @at-height-list-row-action: 30px;
 @at-height-side-nav-toggle-mobile: 40px;
 
 @at-width-input-button-sm: 72px;
 @at-width-input-button-md: 84px;
-@at-width-collapsed-side-nav: 50px;
-@at-width-expanded-side-nav: 180px;
+@at-width-collapsed-side-nav: 55px;
+@at-width-expanded-side-nav: 190px;
 @at-width-list-row-item-label: 120px;
 @at-width-list-row-action: 30px;
 @at-width-side-nav-toggle-mobile: 50px;
@@ -315,6 +310,10 @@
 // 5. Misc ----------------------------------------------------------------------------------------
 
 @at-border-radius: 5px;
+@at-border-default-style: solid;
+@at-border-default-width: 1px;
+@at-border-default-color: @at-gray-b7;
+@at-border-style-list-active-indicator: 5px solid @at-color-info;
 @at-popover-maxwidth: 320px;
 @at-line-height-short: 0.9;
 @at-line-height-tall: 2;
@@ -323,12 +322,10 @@
 @at-highlight-left-border-margin-makeup: -5px;
 @at-z-index-nav: 1040;
 @at-z-index-side-nav: 1030;
-@at-z-index-footer: 1020;
-@at-border-default-width: 1px;
-@at-border-style-list-active-indicator: 5px solid @at-color-info;
 @at-line-height-list-row-item-tag: 22px;
 
 // 6. Breakpoints ---------------------------------------------------------------------------------
 
 @at-breakpoint-mobile-layout: @at-breakpoint-sm;
 @at-breakpoint-compact-list: @at-breakpoint-sm;
+@at-breakpoint-instances-wrap: 1036px;

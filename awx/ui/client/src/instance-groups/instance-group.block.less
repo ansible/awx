@@ -48,4 +48,30 @@
     .List-tableRow .List-titleBadge {
             margin: 0 0 0 5px;
     }
+
+    .Panel-docsLink {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px;
+        background: @at-white;
+        border-radius: @at-border-radius;
+        height: 30px;
+        width: 30px;
+        margin: 0 20px 0 auto;
+
+        i {
+            font-size: @at-font-size-icon;
+            color: @at-gray-848992;
+        }
+    }
+
+    .Panel-docsLink:hover {
+        background-color: @at-blue;
+
+        i {
+            color: @at-white;
+        }
+    }
 }

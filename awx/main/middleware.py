@@ -1,6 +1,8 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+import base64
+import json
 import logging
 import threading
 import uuid
@@ -9,12 +11,15 @@ import time
 import cProfile
 import pstats
 import os
+import re
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
 from django.db.migrations.executor import MigrationExecutor
 from django.db import IntegrityError, connection
+from django.http import HttpResponse
 from django.utils.functional import curry
 from django.shortcuts import get_object_or_404, redirect
 from django.apps import apps
@@ -119,6 +124,21 @@ class ActivityStreamMiddleware(threading.local):
                     self.instance_ids.append(instance.id)
 
 
+class SessionTimeoutMiddleware(object):
+    """
+    Resets the session timeout for both the UI and the actual session for the API
+    to the value of SESSION_COOKIE_AGE on every request if there is a valid session.
+    """
+
+    def process_response(self, request, response):
+        req_session = getattr(request, 'session', None)
+        if req_session and not req_session.is_empty():
+            expiry = int(settings.SESSION_COOKIE_AGE)
+            request.session.set_expiry(expiry)
+            response['Session-Timeout'] = expiry
+        return response
+
+
 def _customize_graph():
     from awx.main.models import Instance, Schedule, UnifiedJobTemplate
     for model in [Schedule, UnifiedJobTemplate]:
@@ -187,6 +207,59 @@ class URLModificationMiddleware(object):
         if request.path_info != new_path:
             request.path = request.path.replace(request.path_info, new_path)
             request.path_info = new_path
+
+
+class DeprecatedAuthTokenMiddleware(object):
+    """
+    Used to emulate support for the old Auth Token endpoint to ease the
+    transition to OAuth2.0.  Specifically, this middleware:
+
+    1.  Intercepts POST requests to `/api/v2/authtoken/` (which now no longer
+        _actually_ exists in our urls.py)
+    2.  Rewrites `request.path` to `/api/v2/users/N/personal_tokens/`
+    3.  Detects the username and password in the request body (either in JSON,
+        or form-encoded variables) and builds an appropriate HTTP_AUTHORIZATION
+        Basic header
+    """
+
+    def process_request(self, request):
+        if re.match('^/api/v[12]/authtoken/?$', request.path):
+            if request.method != 'POST':
+                return HttpResponse('HTTP {} is not allowed.'.format(request.method), status=405)
+            try:
+                payload = json.loads(request.body)
+            except (ValueError, TypeError):
+                payload = request.POST
+            if 'username' not in payload or 'password' not in payload:
+                return HttpResponse('Unable to login with provided credentials.', status=401)
+            username = payload['username']
+            password = payload['password']
+            try:
+                pk = User.objects.get(username=username).pk
+            except ObjectDoesNotExist:
+                return HttpResponse('Unable to login with provided credentials.', status=401)
+            new_path = reverse('api:user_personal_token_list', kwargs={
+                'pk': pk,
+                'version': 'v2'
+            })
+            request._body = ''
+            request.META['CONTENT_TYPE'] = 'application/json'
+            request.path = request.path_info = new_path
+            auth = ' '.join([
+                'Basic',
+                base64.b64encode(
+                    six.text_type('{}:{}').format(username, password)
+                )
+            ])
+            request.environ['HTTP_AUTHORIZATION'] = auth
+            logger.warn(
+                'The Auth Token API (/api/v2/authtoken/) is deprecated and will '
+                'be replaced with OAuth2.0 in the next version of Ansible Tower '
+                '(see /api/o/ for more details).'
+            )
+        elif request.environ.get('HTTP_AUTHORIZATION', '').startswith('Token '):
+            token = request.environ['HTTP_AUTHORIZATION'].split(' ', 1)[-1].strip()
+            request.environ['HTTP_AUTHORIZATION'] = six.text_type('Bearer {}').format(token)
 
 
 class MigrationRanCheckMiddleware(object):

@@ -7,12 +7,12 @@
  export default ['$scope', 'Wait', 'NotificationTemplatesList',
      'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state',
      'ngToast', '$filter', 'Dataset', 'rbacUiControlService',
-     'i18n', 'NotificationTemplate',
+     'i18n', 'NotificationTemplate', 'AppStrings',
      function(
          $scope, Wait, NotificationTemplatesList,
          GetBasePath, Rest, ProcessErrors, Prompt, $state,
          ngToast, $filter, Dataset, rbacUiControlService,
-         i18n, NotificationTemplate) {
+         i18n, NotificationTemplate, AppStrings) {
 
          var defaultUrl = GetBasePath('notification_templates'),
              list = NotificationTemplatesList;
@@ -92,12 +92,21 @@
             Wait('start');
             new NotificationTemplate('get', notificationTemplate.id)
                 .then(model => model.copy())
-                .then(({ id }) => {
-                    const params =  {
-                        notification_template_id: id,
-                        notification_template: this.notification_templates
-                    };
-                    $state.go('notifications.edit', params, { reload: true });
+                .then((copiedNotification) => {
+                    ngToast.success({
+                        content: `
+                            <div class="Toast-wrapper">
+                                <div class="Toast-icon">
+                                    <i class="fa fa-check-circle Toast-successIcon"></i>
+                                </div>
+                                <div>
+                                    ${AppStrings.get('SUCCESSFUL_CREATION', copiedNotification.name)}
+                                </div>
+                            </div>`,
+                        dismissButton: false,
+                        dismissOnTimeout: true
+                    });
+                    $state.go('.', null, { reload: true });
                 })
                 .catch(({ data, status }) => {
                     const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
@@ -193,7 +202,7 @@
 
                          let reloadListStateParams = null;
 
-                         if($scope.notification_templates.length === 1 && $state.params.notification_template_search && !_.isEmpty($state.params.notification_template_search.page) && $state.params.notification_template_search.page !== '1') {
+                         if($scope.notification_templates.length === 1 && $state.params.notification_template_search && _.has($state, 'params.notification_template_search.page') && $state.params.notification_template_search.page !== '1') {
                              reloadListStateParams = _.cloneDeep($state.params);
                              reloadListStateParams.notification_template_search.page = (parseInt(reloadListStateParams.notification_template_search.page)-1).toString();
                          }

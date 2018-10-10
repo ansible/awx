@@ -3,24 +3,25 @@
         <smart-search
             class="at-List-search"
             django-model="jobs"
-            base-path="unified_jobs"
+            base-path="{{vm.searchBasePath}}"
             iterator="job"
-            list="list"
-            dataset="job_dataset"
-            collection="collection"
+            list="vm.list"
+            dataset="vm.job_dataset"
+            collection="vm.jobs"
             search-tags="searchTags"
-            query-set="querySet">
+            query-set="vm.querySet"
+            search-bar-full-width="vm.isPortalMode">
         </smart-search>
     </div>
-    <at-list results="jobs" empty-list-reason="{{ vm.emptyListReason }}">
+    <at-list results="vm.jobs" empty-list-reason="{{ vm.emptyListReason }}">
         <!-- TODO: implement resources are missing red indicator as present in mockup -->
-        <at-row ng-repeat="job in jobs" job-id="{{ job.id }}">
+        <at-row ng-repeat="job in vm.jobs" id="job-{{ job.id }}">
             <div class="at-Row-items">
                 <!-- TODO: include workflow tab as well -->
                 <at-row-item
                     status="{{ job.status }}"
-                    status-tip="Job {{job.status}}. Click for details."
-                    header-value="{{ job.name }}"
+                    status-tip="{{ vm.strings.get('list.STATUS_TOOLTIP', job.status) }}"
+                    header-value="{{ job.id }} - {{ job.name }}"
                     header-state="{{ vm.getSref(job) }}"
                     header-tag="{{ vm.jobTypes[job.type] }}">
                 </at-row-item>
@@ -54,7 +55,7 @@
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INVENTORY') }}"
                     value="{{ job.summary_fields.inventory.name }}"
-                    value-link="/#/inventories/{{ job.summary_fields.inventory.id }}">
+                    value-link="/#/inventories/{{job.summary_fields.inventory.kind === 'smart' ? 'smart' : 'inventory'}}/{{ job.summary_fields.inventory.id }}">
                 </at-row-item>
                 <at-row-item
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_PROJECT') }}"
@@ -65,6 +66,7 @@
                     label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_CREDENTIALS') }}"
                     tag-values="job.summary_fields.credentials"
                     tags-are-creds="true">
+                    <at-toggle-tag ng-init="credTags=vm.buildCredentialTags(job.summary_fields.credentials)" tags="credTags"></at-toggle-tag>
                 </at-row-item>
                 <labels-list class="LabelList" show-delete="false" is-row-item="true" state="job">
                 </labels-list>
@@ -74,13 +76,18 @@
                     ng-show="job.summary_fields.user_capabilities.start">
                 </at-relaunch>
                 <at-row-action icon="fa-minus-circle" ng-click="vm.cancelJob(job)"
-                    ng-show="job.summary_fields.user_capabilities.start &&
+                    tooltip="{{ vm.strings.get('listActions.CANCEL', vm.strings.get('list.JOB')) }}"
+                    ng-show="!vm.isPortalMode && (job.summary_fields.user_capabilities.start &&
                              (job.status === 'pending' ||
                              job.status === 'waiting' ||
-                             job.status === 'running')">
+                             job.status === 'running')) || ($root.user_is_superuser && job.type === 'system_job' &&
+                             (job.status === 'pending' ||
+                             job.status === 'waiting' ||
+                             job.status === 'running'))">
                 </at-row-action>
                 <at-row-action icon="fa-trash" ng-click="vm.deleteJob(job)"
-                    ng-show="job.summary_fields.user_capabilities.delete &&
+                    tooltip="{{ vm.strings.get('listActions.DELETE', vm.strings.get('list.JOB')) }}"
+                    ng-show="!vm.isPortalMode && job.summary_fields.user_capabilities.delete &&
                              !(job.status === 'pending' ||
                              job.status === 'waiting' ||
                              job.status === 'running')">
@@ -89,10 +96,10 @@
         </at-row>
     </at-list>
     <paginate
-        collection="collection"
-        dataset="job_dataset"
+        collection="vm.jobs"
+        dataset="vm.job_dataset"
         iterator="job"
-        base-path="unified_jobs"
-        query-set="querySet">
+        base-path="{{vm.searchBasePath}}"
+        query-set="vm.querySet">
     </paginate>
 </at-panel-body>

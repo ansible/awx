@@ -176,7 +176,7 @@ function(i18n) {
         relatedButtons: {
             remediate_inventory: {
                 ngClick: 'remediateInventory(id, insights_credential)',
-                ngShow: 'is_insights && mode !== "add" && canRemediate',
+                ngShow: "is_insights && mode !== 'add' && canRemediate && ($state.is('inventories.edit') || $state.is('inventories.edit.hosts'))",
                 label: i18n._('Remediate Inventory'),
                 class: 'Form-primaryButton'
             }

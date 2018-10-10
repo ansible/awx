@@ -48,7 +48,7 @@ Here is a more comprehensive example showing the various question types and thei
         	"min": 5,
         	"max": "",
         	"required": false,
-        	"default": "yes"
+        	"default": "Leeloo Minai Lekarariba-Laminai-Tchai Ekbat De Sebat"
             },
             {
         	"type": "text",
@@ -57,9 +57,9 @@ Here is a more comprehensive example showing the various question types and thei
         	"variable": "short_answer",
         	"choices": "",
         	"min": "",
-        	"max": 5,
+        	"max": 7,
         	"required": false,
-        	"default": "yes"
+        	"default": "leeloo"
             },
             {
         	"type": "text",
@@ -70,7 +70,7 @@ Here is a more comprehensive example showing the various question types and thei
         	"min": "",
         	"max": "",
         	"required": true,
-        	"default": "yes"
+        	"default": "NOT OPTIONAL"
             },
             {
         	"type": "multiplechoice",
@@ -81,7 +81,7 @@ Here is a more comprehensive example showing the various question types and thei
         	"min": "",
         	"max": "",
         	"required": false,
-        	"default": "yes"
+        	"default": "one"
             },
             {
         	"type": "multiselect",
@@ -92,7 +92,7 @@ Here is a more comprehensive example showing the various question types and thei
         	"min": "",
         	"max": "",
         	"required": false,
-        	"default": "yes"
+        	"default": "one\nthree"
             },
             {
                 "type": "integer",

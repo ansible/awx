@@ -3,3 +3,4 @@ git+https://github.com/ansible/django-qsstats-magic.git@tower_0.7.2#egg=django-q
 git+https://github.com/ansible/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
 git+https://github.com/ansible/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
 git+https://github.com/ansible/docutils.git@master#egg=docutils
+git+https://github.com/ansible/django-oauth-toolkit@stable/1.1#egg=django-oauth-toolkit

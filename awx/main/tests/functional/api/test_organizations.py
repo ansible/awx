@@ -260,12 +260,12 @@ def test_organization_delete(delete, admin, organization, organization_jobs_succ
 @pytest.mark.django_db
 def test_organization_delete_with_active_jobs(delete, admin, organization, organization_jobs_running):
     def sort_keys(x):
-        return (x['type'], x['id'])
+        return (x['type'], str(x['id']))
 
     url = reverse('api:organization_detail', kwargs={'pk': organization.id})
     resp = delete(url, None, user=admin, expect=409)
 
-    expect_transformed = [dict(id=str(j.id), type=j.model_to_str()) for j in organization_jobs_running]
+    expect_transformed = [dict(id=j.id, type=j.model_to_str()) for j in organization_jobs_running]
     resp_sorted = sorted(resp.data['active_jobs'], key=sort_keys)
     expect_sorted = sorted(expect_transformed, key=sort_keys)
 

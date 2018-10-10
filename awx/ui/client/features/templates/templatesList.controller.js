@@ -22,7 +22,8 @@ function ListTemplatesController(
     strings,
     Wait,
     qs,
-    GetBasePath
+    GetBasePath,
+    ngToast
 ) {
     const vm = this || {};
     const [jobTemplate, workflowTemplate] = resolvedModels;
@@ -35,7 +36,7 @@ function ListTemplatesController(
 
     vm.strings = strings;
     vm.templateTypes = mapChoices(choices);
-    vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_template_id);
+    vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_job_template_id);
     vm.invalidTooltip = {
         popover: {
             text: strings.get('error.INVALID'),
@@ -51,20 +52,27 @@ function ListTemplatesController(
     $scope.canAdd = ($scope.canAddJobTemplate || $scope.canAddWorkflowJobTemplate);
 
     // smart-search
-    $scope.list = {
+    vm.list = {
         iterator: 'template',
         name: 'templates'
     };
-    $scope.collection = {
-        iterator: 'template',
-        basePath: 'unified_job_templates'
-    };
-    $scope.template_dataset = Dataset.data;
-    $scope.templates = Dataset.data.results;
-    $scope.$on('updateDataset', (e, dataset) => {
-        $scope.template_dataset = dataset;
-        $scope.templates = dataset.results;
+    vm.dataset = Dataset.data;
+    vm.templates = Dataset.data.results;
+
+    $scope.$watch('vm.dataset.count', () => {
+        $scope.$emit('updateCount', vm.dataset.count, 'templates');
     });
+
+    $scope.$watch('$state.params', function(newValue, oldValue) {
+        const job_template_id = _.get($state.params, 'job_template_id');
+        const workflow_job_template_id = _.get($state.params, 'workflow_job_template_id');
+
+        if((job_template_id || workflow_job_template_id)) {
+            vm.activeId = parseInt($state.params.job_template_id || $state.params.workflow_job_template_id);
+        } else {
+            vm.activeId = "";
+        }
+    }, true);
 
     $scope.$on(`ws-jobs`, () => {
         if (!launchModalOpen) {
@@ -91,20 +99,7 @@ function ListTemplatesController(
         }
     };
 
-    vm.scheduleTemplate = template => {
-        if (!template) {
-            Alert(strings.get('error.SCHEDULE'), strings.get('alert.MISSING_PARAMETER'));
-            return;
-        }
-
-        if (isJobTemplate(template)) {
-            $state.go('templates.editJobTemplate.schedules', { job_template_id: template.id });
-        } else if (isWorkflowTemplate(template)) {
-            $state.go('templates.editWorkflowJobTemplate.schedules', { workflow_job_template_id: template.id });
-        } else {
-            Alert(strings.get('error.UNKNOWN'), strings.get('alert.UNKNOWN_SCHEDULE'));
-        }
-    };
+    vm.isPortalMode = $state.includes('portalMode');
 
     vm.deleteTemplate = template => {
         if (!template) {
@@ -155,6 +150,17 @@ function ListTemplatesController(
         return html;
     };
 
+    vm.buildCredentialTags = (credentials) => {
+        return credentials.map(credential => {
+            const icon = `${credential.kind}`;
+            const link = `/#/credentials/${credential.id}`;
+            const tooltip = strings.get('tooltips.VIEW_THE_CREDENTIAL');
+            const value = $filter('sanitize')(credential.name);
+
+            return { icon, link, tooltip, value };
+        });
+    };
+
     vm.getLastRan = template => {
         const lastJobRun = _.get(template, 'last_job_run');
 
@@ -174,13 +180,23 @@ function ListTemplatesController(
         return html;
     };
 
+    vm.getType = template => {
+        if(isJobTemplate(template)) {
+            return strings.get('list.ADD_DD_JT_LABEL');
+        } else {
+            return strings.get('list.ADD_DD_WF_LABEL');;
+        }
+    };
+
     function refreshTemplates() {
+        Wait('start');
         let path = GetBasePath('unified_job_templates');
         qs.search(path, $state.params.template_search)
             .then(function(searchResponse) {
-                $scope.template_dataset = searchResponse.data;
-                $scope.templates = $scope.template_dataset.results;
-            });
+                vm.dataset = searchResponse.data;
+                vm.templates = vm.dataset.results;
+            })
+            .finally(() => Wait('stop'));
     }
 
     function createErrorHandler(path, action) {
@@ -196,9 +212,21 @@ function ListTemplatesController(
         jobTemplate
             .create('get', template.id)
             .then(model => model.copy())
-            .then(({ id }) => {
-                const params = { job_template_id: id };
-                $state.go('templates.editJobTemplate', params, { reload: true });
+            .then((copiedJT) => {
+                ngToast.success({
+                    content: `
+                        <div class="Toast-wrapper">
+                            <div class="Toast-icon">
+                                <i class="fa fa-check-circle Toast-successIcon"></i>
+                            </div>
+                            <div>
+                                ${strings.get('SUCCESSFUL_CREATION', copiedJT.name)}
+                            </div>
+                        </div>`,
+                    dismissButton: false,
+                    dismissOnTimeout: true
+                });
+                $state.go('.', null, { reload: true });
             })
             .catch(createErrorHandler('copy job template', 'POST'))
             .finally(() => Wait('stop'));
@@ -214,9 +242,21 @@ function ListTemplatesController(
                     $('#prompt-modal').modal('hide');
                     Wait('start');
                     model.copy()
-                        .then(({ id }) => {
-                            const params = { workflow_job_template_id: id };
-                            $state.go('templates.editWorkflowJobTemplate', params, { reload: true });
+                        .then((copiedWFJT) => {
+                            ngToast.success({
+                                content: `
+                                    <div class="Toast-wrapper">
+                                        <div class="Toast-icon">
+                                            <i class="fa fa-check-circle Toast-successIcon"></i>
+                                        </div>
+                                        <div>
+                                            ${strings.get('SUCCESSFUL_CREATION', copiedWFJT.name)}
+                                        </div>
+                                    </div>`,
+                                dismissButton: false,
+                                dismissOnTimeout: true
+                            });
+                            $state.go('.', null, { reload: true });
                         })
                         .catch(createErrorHandler('copy workflow', 'POST'))
                         .finally(() => Wait('stop'));
@@ -230,7 +270,7 @@ function ListTemplatesController(
                         actionText: strings.get('COPY'),
                         body: buildWorkflowCopyPromptHTML(model.get('related.copy')),
                         class: 'Modal-primaryButton',
-                        hdr: strings.get('actions.COPY_WORKFLOW'),
+                        hdr: strings.get('listActions.COPY', template.name),
                     });
                 } else {
                     Alert(strings.get('error.COPY'), strings.get('alert.NO_PERMISSION'));
@@ -244,7 +284,7 @@ function ListTemplatesController(
         const { page } = _.get($state.params, 'template_search');
         let reloadListStateParams = null;
 
-        if ($scope.templates.length === 1 && !_.isEmpty(page) && page !== '1') {
+        if (vm.templates.length === 1 && page && page !== '1') {
             reloadListStateParams = _.cloneDeep($state.params);
             const pageNumber = (parseInt(reloadListStateParams.template_search.page, 0) - 1);
             reloadListStateParams.template_search.page = pageNumber.toString();
@@ -355,7 +395,8 @@ ListTemplatesController.$inject = [
     'TemplatesStrings',
     'Wait',
     'QuerySet',
-    'GetBasePath'
+    'GetBasePath',
+    'ngToast'
 ];
 
 export default ListTemplatesController;

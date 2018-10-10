@@ -38,7 +38,8 @@ register(
     'ORG_ADMINS_CAN_SEE_ALL_USERS',
     field_class=fields.BooleanField,
     label=_('All Users Visible to Organization Admins'),
-    help_text=_('Controls whether any Organization Admin can view all users, even those not associated with their Organization.'),
+    help_text=_('Controls whether any Organization Admin can view all users and teams, '
+                'even those not associated with their Organization.'),
     category=_('System'),
     category_slug='system',
 )
@@ -81,7 +82,7 @@ register(
     help_text=_('HTTP headers and meta keys to search to determine remote host '
                 'name or IP. Add additional items to this list, such as '
                 '"HTTP_X_FORWARDED_FOR", if behind a reverse proxy. '
-                'See the "Proxy Support" section of the Adminstrator guide for'
+                'See the "Proxy Support" section of the Adminstrator guide for '
                 'more details.'),
     category=_('System'),
     category_slug='system',
@@ -275,6 +276,16 @@ register(
     category=_('Jobs'),
     category_slug='jobs',
     placeholder={'HTTP_PROXY': 'myproxy.local:8080'},
+)
+
+register(
+    'AWX_ROLES_ENABLED',
+    field_class=fields.BooleanField,
+    default=True,
+    label=_('Enable Role Download'),
+    help_text=_('Allows roles to be dynamically downlaoded from a requirements.yml file for SCM projects.'),
+    category=_('Jobs'),
+    category_slug='jobs',
 )
 
 register(
@@ -472,10 +483,12 @@ register(
 register(
     'LOG_AGGREGATOR_PROTOCOL',
     field_class=fields.ChoiceField,
-    choices=[('https', 'HTTPS'), ('tcp', 'TCP'), ('udp', 'UDP')],
+    choices=[('https', 'HTTPS/HTTP'), ('tcp', 'TCP'), ('udp', 'UDP')],
     default='https',
     label=_('Logging Aggregator Protocol'),
-    help_text=_('Protocol used to communicate with log aggregator.'),
+    help_text=_('Protocol used to communicate with log aggregator.  '
+                'HTTPS/HTTP assumes HTTPS unless http:// is explicitly used in '
+                'the Logging Aggregator hostname.'),
     category=_('Logging'),
     category_slug='logging',
 )

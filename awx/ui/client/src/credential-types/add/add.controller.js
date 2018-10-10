@@ -6,10 +6,10 @@
 
 export default ['Rest', 'Wait',
     'CredentialTypesForm', 'ProcessErrors', 'GetBasePath',
-    'GenerateForm',  '$scope', '$state', 'Alert', 'GetChoices', 'ParseTypeChange', 'ToJSON', 'CreateSelect2',
+    'GenerateForm',  '$scope', '$state', 'Alert', 'GetChoices', 'ParseTypeChange', 'ToJSON', 'CreateSelect2', 'i18n',
     function(Rest, Wait,
         CredentialTypesForm, ProcessErrors, GetBasePath,
-        GenerateForm, $scope, $state, Alert, GetChoices, ParseTypeChange, ToJSON, CreateSelect2
+        GenerateForm, $scope, $state, Alert, GetChoices, ParseTypeChange, ToJSON, CreateSelect2, i18n
     ) {
         var form = CredentialTypesForm,
             url = GetBasePath('credential_types');
@@ -38,7 +38,7 @@ export default ['Rest', 'Wait',
                     });
 
                     const docs_url = 'https://docs.ansible.com/ansible-tower/latest/html/userguide/credential_types.html#getting-started-with-credential-types';
-                    const docs_help_text = `<br><br><a href=${docs_url}>Getting Started with Credential Types</a>`;
+                    const docs_help_text = `<br><br><a href=${docs_url}>${i18n._('Getting Started with Credential Types')}</a>`;
 
                     const api_inputs_help_text = _.get(options, 'actions.POST.inputs.help_text', "Specification for credential type inputs.");
                     const api_injectors_help_text = _.get(options, 'actions.POST.injectors.help_text', "Specification for credential type injector.");

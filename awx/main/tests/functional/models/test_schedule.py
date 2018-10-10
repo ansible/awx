@@ -7,6 +7,8 @@ import pytz
 
 from awx.main.models import JobTemplate, Schedule
 
+from crum import impersonate
+
 
 @pytest.fixture
 def job_template(inventory, project):
@@ -16,6 +18,22 @@ def job_template(inventory, project):
         inventory=inventory,
         project=project
     )
+
+
+@pytest.mark.django_db
+def test_computed_fields_modified_by_retained(job_template, admin_user):
+    with impersonate(admin_user):
+        s = Schedule.objects.create(
+            name='Some Schedule',
+            rrule='DTSTART:20300112T210000Z RRULE:FREQ=DAILY;INTERVAL=1',
+            unified_job_template=job_template
+        )
+    s.refresh_from_db()
+    assert s.created_by == admin_user
+    assert s.modified_by == admin_user
+    s.update_computed_fields()
+    s.save()
+    assert s.modified_by == admin_user
 
 
 @pytest.mark.django_db

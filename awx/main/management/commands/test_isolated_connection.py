@@ -3,7 +3,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from optparse import make_option
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -15,10 +14,9 @@ class Command(BaseCommand):
     """Tests SSH connectivity between a controller and target isolated node"""
     help = 'Tests SSH connectivity between a controller and target isolated node'
 
-    option_list = BaseCommand.option_list + (
-        make_option('--hostname', dest='hostname', type='string',
-                    help='Hostname of an isolated node'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--hostname', dest='hostname', type=str,
+                            help='Hostname of an isolated node')
 
     def handle(self, *args, **options):
         hostname = options.get('hostname')
@@ -30,7 +28,7 @@ class Command(BaseCommand):
             args = [
                 'ansible', 'all', '-i', '{},'.format(hostname), '-u',
                 settings.AWX_ISOLATED_USERNAME, '-T5', '-m', 'shell',
-                '-a', 'hostname', '-vvv'
+                '-a', 'awx-expect -h', '-vvv'
             ]
             if all([
                 getattr(settings, 'AWX_ISOLATED_KEY_GENERATION', False) is True,

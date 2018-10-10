@@ -7,12 +7,12 @@
 export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
     'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter',
     'Dataset', 'rbacUiControlService', 'InventoryScriptModel', 'InventoryScriptsStrings',
-    'i18n',
+    'i18n', 'ngToast',
     function(
         $rootScope, $scope, Wait, InventoryScriptsList,
         GetBasePath, Rest, ProcessErrors, Prompt, $state, $filter,
         Dataset, rbacUiControlService, InventoryScript, InventoryScriptsStrings,
-        i18n
+        i18n, ngToast
     ) {
         let inventoryScript = new InventoryScript();
         var defaultUrl = GetBasePath('inventory_scripts'),
@@ -51,9 +51,21 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
             Wait('start');
             new InventoryScript('get', inventoryScript.id)
                 .then(model => model.copy())
-                .then(({ id }) => {
-                    const params = { inventory_script_id: id };
-                    $state.go('inventoryScripts.edit', params, { reload: true });
+                .then((copiedInvScript) => {
+                    ngToast.success({
+                        content: `
+                            <div class="Toast-wrapper">
+                                <div class="Toast-icon">
+                                    <i class="fa fa-check-circle Toast-successIcon"></i>
+                                </div>
+                                <div>
+                                    ${InventoryScriptsStrings.get('SUCCESSFUL_CREATION', copiedInvScript.name)}
+                                </div>
+                            </div>`,
+                        dismissButton: false,
+                        dismissOnTimeout: true
+                    });
+                    $state.go('.', null, { reload: true });
                 })
                 .catch(({ data, status }) => {
                     const params = { hdr: 'Error!', msg: `Call to copy failed. Return status: ${status}` };
@@ -73,7 +85,7 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
 
                         let reloadListStateParams = null;
 
-                        if($scope.inventory_scripts.length === 1 && $state.params.inventory_script_search && !_.isEmpty($state.params.inventory_script_search.page) && $state.params.inventory_script_search.page !== '1') {
+                        if($scope.inventory_scripts.length === 1 && $state.params.inventory_script_search && _.has($state, 'params.inventory_script_search.page') && $state.params.inventory_script_search.page !== '1') {
                             reloadListStateParams = _.cloneDeep($state.params);
                             reloadListStateParams.inventory_script_search.page = (parseInt(reloadListStateParams.inventory_script_search.page)-1).toString();
                         }

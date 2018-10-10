@@ -6,7 +6,7 @@ import pytest
 # AWX
 from awx.api.serializers import JobTemplateSerializer
 from awx.api.versioning import reverse
-from awx.main.models.jobs import Job, JobTemplate
+from awx.main.models import Job, JobTemplate, CredentialType
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
@@ -180,6 +180,27 @@ def test_extra_credential_creation(get, post, organization_factory, job_template
 
     response = get(url, user=objs.superusers.admin)
     assert response.data.get('count') == 1
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('kind', ['scm', 'insights'])
+def test_invalid_credential_kind_xfail(get, post, organization_factory, job_template_factory, kind):
+    objs = organization_factory("org", superusers=['admin'])
+    jt = job_template_factory("jt", organization=objs.organization,
+                              inventory='test_inv', project='test_proj').job_template
+
+    url = reverse('api:job_template_credentials_list', kwargs={'version': 'v2', 'pk': jt.pk})
+    cred_type = CredentialType.defaults[kind]()
+    cred_type.save()
+    response = post(url, {
+        'name': 'My Cred',
+        'credential_type': cred_type.pk,
+        'inputs': {
+            'username': 'bob',
+            'password': 'secret',
+        }
+    }, objs.superusers.admin, expect=400)
+    assert 'Cannot assign a Credential of kind `{}`.'.format(kind) in response.data.values()
 
 
 @pytest.mark.django_db
@@ -567,16 +588,9 @@ def test_v1_launch_with_extra_credentials(get, post, organization_factory,
             credential=machine_credential.pk,
             extra_credentials=[credential.pk, net_credential.pk]
         ),
-        objs.superusers.admin, expect=201
+        objs.superusers.admin, expect=400
     )
-    job_pk = resp.data.get('id')
-    assert resp.data.get('ignored_fields').keys() == ['extra_credentials']
-
-    resp = get(reverse('api:job_extra_credentials_list', kwargs={'pk': job_pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 0
-
-    resp = get(reverse('api:job_template_extra_credentials_list', kwargs={'pk': jt.pk}), objs.superusers.admin)
-    assert resp.data.get('count') == 0
+    assert 'Field is not allowed for use with v1 API' in resp.data.get('extra_credentials')
 
 
 @pytest.mark.django_db

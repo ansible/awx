@@ -12,10 +12,7 @@ MANAGEMENT_COMMAND ?= awx-manage
 IMAGE_REPOSITORY_AUTH ?=
 IMAGE_REPOSITORY_BASE ?= https://gcr.io
 
-VERSION=$(shell git describe --long --first-parent)
-VERSION3=$(shell git describe --long --first-parent | sed 's/\-g.*//')
-VERSION3DOT=$(shell git describe --long --first-parent | sed 's/\-g.*//' | sed 's/\-/\./')
-RELEASE_VERSION=$(shell git describe --long --first-parent | sed 's@\([0-9.]\{1,\}\).*@\1@')
+VERSION := $(shell cat VERSION)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -46,20 +43,9 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 NAME ?= awx
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 
-ifeq ($(OFFICIAL),yes)
-    VERSION_TARGET ?= $(RELEASE_VERSION)
-else
-    VERSION_TARGET ?= $(VERSION3DOT)
-endif
-
 # TAR build parameters
-ifeq ($(OFFICIAL),yes)
-    SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
-    WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)
-else
-    SDIST_TAR_NAME=$(NAME)-$(VERSION3DOT)
-    WHEEL_NAME=$(NAME)-$(VERSION3DOT)
-endif
+SDIST_TAR_NAME=$(NAME)-$(VERSION)
+WHEEL_NAME=$(NAME)-$(VERSION)
 
 SDIST_COMMAND ?= sdist
 WHEEL_COMMAND ?= bdist_wheel
@@ -110,7 +96,6 @@ clean: clean-ui clean-dist
 	rm -rf requirements/vendor
 	rm -rf tmp
 	rm -rf $(I18N_FLAG_FILE)
-	rm -f VERSION
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -219,7 +204,7 @@ init:
 	if [ "$(AWX_GROUP_QUEUES)" == "tower,thepentagon" ]; then \
 		$(MANAGEMENT_COMMAND) provision_instance --hostname=isolated; \
 		$(MANAGEMENT_COMMAND) register_queue --queuename='thepentagon' --hostnames=isolated --controller=tower; \
-		$(MANAGEMENT_COMMAND) generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat > /root/.ssh/authorized_keys'; \
+		$(MANAGEMENT_COMMAND) generate_isolated_key | ssh -o "StrictHostKeyChecking no" root@isolated 'cat >> /root/.ssh/authorized_keys'; \
 	fi;
 
 # Refresh development environment after pulling new code.
@@ -273,7 +258,7 @@ supervisor:
 	supervisord --configuration /supervisor.conf --pidfile=/tmp/supervisor_pid
 
 # Alternate approach to tmux to run all development tasks specified in
-# Procfile.  https://youtu.be/OPMgaibszjk
+# Procfile.
 honcho:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
@@ -372,14 +357,15 @@ awx-link:
 	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
 	cp /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
 
-TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests awx/network_ui/tests/unit
+TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 
 # Run all API unit tests.
 test:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test -n auto $(TEST_DIRS)
+	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
+	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
 test_combined: test_ansible test
 
@@ -387,7 +373,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit awx/network_ui/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
 
 test_ansible:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -560,7 +546,7 @@ docker-isolated:
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
 	docker start tools_awx_1
 	docker start tools_isolated_1
-	echo "__version__ = '`python setup.py --version`'" | docker exec -i tools_isolated_1 /bin/bash -c "cat > /venv/awx/lib/python2.7/site-packages/awx.py"
+	echo "__version__ = '`git describe --long | cut -d - -f 1-1`'" | docker exec -i tools_isolated_1 /bin/bash -c "cat > /venv/awx/lib/python2.7/site-packages/awx.py"
 	if [ "`docker exec -i -t tools_isolated_1 cat /root/.ssh/authorized_keys`" == "`docker exec -t tools_awx_1 cat /root/.ssh/id_rsa.pub`" ]; then \
 		echo "SSH keys already copied to isolated instance"; \
 	else \
@@ -577,6 +563,13 @@ docker-compose-cluster: docker-auth
 
 docker-compose-test: docker-auth
 	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /bin/bash
+
+docker-compose-runtest:
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh
+
+docker-compose-clean:
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm -w /awx_devel --service-ports awx make clean
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose rm -sf
 
 docker-compose-build: awx-devel-build
 
@@ -607,6 +600,10 @@ docker-compose-elk: docker-auth
 docker-compose-cluster-elk: docker-auth
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
+minishift-dev:
+	ansible-playbook -i localhost, -e devtree_directory=$(CURDIR) tools/clusterdevel/start_minishift_dev.yml
+
+
 clean-elk:
 	docker stop tools_kibana_1
 	docker stop tools_logstash_1
@@ -619,5 +616,4 @@ psql-container:
 	docker run -it --net tools_default --rm postgres:9.6 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
-	@echo $(VERSION_TARGET) > $@
-	@echo "awx: $(VERSION_TARGET)"
+	@echo "awx: $(VERSION)"

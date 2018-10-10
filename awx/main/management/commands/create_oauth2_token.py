@@ -24,5 +24,11 @@ class Command(BaseCommand):
             raise CommandError('The user does not exist.')
         config = {'user': user, 'scope':'write'}
         serializer_obj = OAuth2TokenSerializer()
-        token_record = serializer_obj.create(config, True)
+
+        class FakeRequest(object):
+            def __init__(self):
+                self.user = user
+
+        serializer_obj.context['request'] = FakeRequest()
+        token_record = serializer_obj.create(config)
         self.stdout.write(token_record.token)

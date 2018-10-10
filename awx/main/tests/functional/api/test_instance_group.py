@@ -2,6 +2,7 @@ import pytest
 
 from awx.api.versioning import reverse
 from awx.main.models import (
+    Instance,
     InstanceGroup,
     ProjectUpdate,
 )
@@ -15,6 +16,17 @@ def tower_instance_group():
 
 
 @pytest.fixture
+def instance():
+    instance = Instance.objects.create(hostname='iso')
+    return instance
+
+
+@pytest.fixture
+def non_iso_instance():
+    return Instance.objects.create(hostname='iamnotanisolatedinstance')
+
+
+@pytest.fixture
 def instance_group(job_factory):
     ig = InstanceGroup(name="east")
     ig.save()
@@ -22,8 +34,10 @@ def instance_group(job_factory):
 
 
 @pytest.fixture
-def isolated_instance_group(instance_group):
+def isolated_instance_group(instance_group, instance):
     ig = InstanceGroup(name="iso", controller=instance_group)
+    ig.save()
+    ig.instances.set([instance])
     ig.save()
     return ig
 
@@ -73,12 +87,12 @@ def test_delete_instance_group_jobs(delete, instance_group_jobs_successful, inst
 @pytest.mark.django_db
 def test_delete_instance_group_jobs_running(delete, instance_group_jobs_running, instance_group_jobs_successful, instance_group, admin):
     def sort_keys(x):
-        return (x['type'], x['id'])
+        return (x['type'], str(x['id']))
 
     url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
     response = delete(url, None, admin, expect=409)
 
-    expect_transformed = [dict(id=str(j.id), type=j.model_to_str()) for j in instance_group_jobs_running]
+    expect_transformed = [dict(id=j.id, type=j.model_to_str()) for j in instance_group_jobs_running]
     response_sorted = sorted(response.data['active_jobs'], key=sort_keys)
     expect_sorted = sorted(expect_transformed, key=sort_keys)
 
@@ -113,3 +127,52 @@ def test_prevent_delete_iso_and_control_groups(delete, isolated_instance_group, 
     controller_url = reverse("api:instance_group_detail", kwargs={'pk': isolated_instance_group.controller.pk})
     delete(iso_url, None, admin, expect=403)
     delete(controller_url, None, admin, expect=403)
+
+
+@pytest.mark.django_db
+def test_prevent_isolated_instance_added_to_non_isolated_instance_group(post, admin, instance, instance_group, isolated_instance_group):
+    url = reverse("api:instance_group_instance_list", kwargs={'pk': instance_group.pk})
+
+    assert True is instance.is_isolated()
+    resp = post(url, {'associate': True, 'id': instance.id}, admin, expect=400)
+    assert u"Isolated instances may not be added or removed from instances groups via the API." == resp.data['error']
+
+
+@pytest.mark.django_db
+def test_prevent_isolated_instance_added_to_non_isolated_instance_group_via_policy_list(patch, admin, instance, instance_group, isolated_instance_group):
+    url = reverse("api:instance_group_detail", kwargs={'pk': instance_group.pk})
+
+    assert True is instance.is_isolated()
+    resp = patch(url, {'policy_instance_list': [instance.hostname]}, user=admin, expect=400)
+    assert [u"Isolated instances may not be added or removed from instances groups via the API."] == resp.data['policy_instance_list']
+    assert instance_group.policy_instance_list == []
+
+
+@pytest.mark.django_db
+def test_prevent_isolated_instance_removal_from_isolated_instance_group(post, admin, instance, instance_group, isolated_instance_group):
+    url = reverse("api:instance_group_instance_list", kwargs={'pk': isolated_instance_group.pk})
+
+    assert True is instance.is_isolated()
+    resp = post(url, {'disassociate': True, 'id': instance.id}, admin, expect=400)
+    assert u"Isolated instances may not be added or removed from instances groups via the API." == resp.data['error']
+
+
+@pytest.mark.django_db
+def test_prevent_non_isolated_instance_added_to_isolated_instance_group(
+        post, admin, non_iso_instance, isolated_instance_group):
+    url = reverse("api:instance_group_instance_list", kwargs={'pk': isolated_instance_group.pk})
+
+    assert False is non_iso_instance.is_isolated()
+    resp = post(url, {'associate': True, 'id': non_iso_instance.id}, admin, expect=400)
+    assert u"Isolated instance group membership may not be managed via the API." == resp.data['error']
+
+
+@pytest.mark.django_db
+def test_prevent_non_isolated_instance_added_to_isolated_instance_group_via_policy_list(
+        patch, admin, non_iso_instance, isolated_instance_group):
+    url = reverse("api:instance_group_detail", kwargs={'pk': isolated_instance_group.pk})
+
+    assert False is non_iso_instance.is_isolated()
+    resp = patch(url, {'policy_instance_list': [non_iso_instance.hostname]}, user=admin, expect=400)
+    assert [u"Isolated instance group membership may not be managed via the API."] == resp.data['policy_instance_list']
+    assert isolated_instance_group.policy_instance_list == []

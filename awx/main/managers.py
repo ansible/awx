@@ -96,7 +96,7 @@ class InstanceManager(models.Manager):
             instance = self.filter(hostname=hostname)
             if instance.exists():
                 return (False, instance[0])
-            instance = self.create(uuid=uuid, hostname=hostname)
+            instance = self.create(uuid=uuid, hostname=hostname, capacity=0)
         return (True, instance)
 
     def get_or_register(self):

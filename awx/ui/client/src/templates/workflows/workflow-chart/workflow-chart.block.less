@@ -66,6 +66,7 @@
 
 .WorkflowChart-svg {
     border-bottom-left-radius: 5px;
+    width: 100%;
 }
 
 .WorkflowResults-rightSide .WorkflowChart-svg {
@@ -86,7 +87,7 @@
 .workflowChart-nodeStatus--success {
     fill: @default-succ;
 }
-.workflowChart-nodeStatus--failed {
+.workflowChart-nodeStatus--failed, .workflowChart-nodeStatus--canceled {
     fill: @default-err;
 }
 .WorkflowChart-detailsLink {

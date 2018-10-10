@@ -1,6 +1,8 @@
 <at-panel>
-    <at-panel-heading>
-        {{ vm.panelTitle }}
+    <at-panel-heading title="{{:: vm.panelTitle }}">
+        <a class="Panel-docsLink" ng-href="{{ vm.docs.url }}" target="_blank" aw-tool-tip="{{:: vm.docs.help_text }}">
+            <i class="fa fa-book"></i>
+        </a>
     </at-panel-heading>
 
     <at-tab-group>
@@ -17,9 +19,6 @@
             <at-input-text col="4" tab="3" state="vm.form.policy_instance_minimum"></at-input-text>
 
             <at-input-slider col="4" tab="3" state="vm.form.policy_instance_percentage"></at-input-slider>
-
-            <at-input-lookup col="4" tab="4" state="vm.form.policy_instance_list"></at-input-lookup>
-            <div ui-view="modal"></div>
 
             <at-action-group col="12" pos="right">
                 <at-form-action type="cancel" to="instanceGroups"></at-form-action>

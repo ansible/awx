@@ -484,7 +484,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='instance',
             name='last_isolated_check',
-            field=models.DateTimeField(auto_now_add=True, null=True),
+            field=models.DateTimeField(editable=False, null=True),
         ),
         # Migrations that don't change db schema but simply to make Django ORM happy.
         # e.g. Choice updates, help_text updates, etc.
