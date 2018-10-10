@@ -1,9 +1,9 @@
 export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
     'jobLabels', 'workflowNodes', '$scope', 'ParseTypeChange',
     'ParseVariableString', 'WorkflowService', 'count', '$state', 'i18n',
-    'moment', function(workflowData, workflowResultsService,
+    'moment', '$filter', function(workflowData, workflowResultsService,
     workflowDataOptions, jobLabels, workflowNodes, $scope, ParseTypeChange,
-    ParseVariableString, WorkflowService, count, $state, i18n, moment) {
+    ParseVariableString, WorkflowService, count, $state, i18n, moment, $filter) {
         var runTimeElapsedTimer = null;
 
         var getLinks = function() {
@@ -49,12 +49,16 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     STARTED: i18n._('Started'),
                     FINISHED: i18n._('Finished'),
                     LABELS: i18n._('Labels'),
-                    STATUS: i18n._('Status')
+                    STATUS: i18n._('Status'),
+                    JOB_EXPLANATION: i18n._('Explanation'),
+                    SOURCE_WORKFLOW_JOB: i18n._('Parent Workflow')
                 },
                 details: {
                     HEADER: i18n._('DETAILS'),
                     NOT_FINISHED: i18n._('Not Finished'),
                     NOT_STARTED: i18n._('Not Started'),
+                    SHOW_LESS: i18n._('Show Less'),
+                    SHOW_MORE: i18n._('Show More'),
                 },
                 results: {
                     TOTAL_JOBS: i18n._('Total Jobs'),
@@ -107,6 +111,27 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             if(workflowData.summary_fields && workflowData.summary_fields.workflow_job_template &&
                 workflowData.summary_fields.workflow_job_template.id){
                     $scope.workflow_job_template_link = `/#/templates/workflow_job_template/${$scope.workflow.summary_fields.workflow_job_template.id}`;
+            }
+
+            if (_.get(workflowData, 'summary_fields.source_workflow_job.id')) {
+                $scope.source_workflow_job_link = `/#/workflows/${workflowData.summary_fields.source_workflow_job.id}`;
+            }
+
+            if (workflowData.job_explanation) {
+                const limit = 150;
+                const more = workflowData.job_explanation;
+                const less = $filter('limitTo')(more, limit);
+                const showMore = false;
+                const hasMoreToShow = more.length > limit;
+
+                const job_explanation = {
+                    more: more,
+                    less: less,
+                    showMore: showMore,
+                    hasMoreToShow: hasMoreToShow
+                };
+
+                $scope.job_explanation = job_explanation;
             }
 
             // turn related api browser routes into front end routes

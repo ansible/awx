@@ -701,7 +701,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     if (field.tag) {
                         html += `<span class="at-RowItem-tag" ng-show="${field.showTag}">
                                     ${field.tag}
-                                </span>`
+                                </span>`;
                     }
                 }
 

@@ -390,8 +390,7 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                                         d.unifiedJobTemplate.type === "inventory_source" ||
                                         d.unifiedJobTemplate.unified_job_type === "inventory_update" ||
                                         d.unifiedJobTemplate.type === "workflow_job_template" ||
-                                        d.unifiedJobTemplate.unified_job_type === "workflow_job")
-                                        ? null : "none";
+                                        d.unifiedJobTemplate.unified_job_type === "workflow_job") ? null : "none";
                                 });
 
                                 thisNode.append("text")
@@ -435,8 +434,7 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                                         d.unifiedJobTemplate.type === "inventory_source" ||
                                         d.unifiedJobTemplate.unified_job_type === "inventory_update" ||
                                         d.unifiedJobTemplate.type === "workflow_job_template" ||
-                                        d.unifiedJobTemplate.unified_job_type === "workflow_job")
-                                        ? null : "none";
+                                        d.unifiedJobTemplate.unified_job_type === "workflow_job") ? null : "none";
                                     });
 
                                 thisNode.append("rect")
@@ -872,8 +870,7 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                                     d.unifiedJobTemplate.type === "inventory_source" ||
                                     d.unifiedJobTemplate.unified_job_type === "inventory_update" ||
                                     d.unifiedJobTemplate.type === "workflow_job_template" ||
-                                    d.unifiedJobTemplate.unified_job_type === "workflow_job")
-                                    ? null : "none";
+                                    d.unifiedJobTemplate.unified_job_type === "workflow_job") ? null : "none";
                             });
 
                         t.selectAll(".WorkflowChart-nodeTypeLetter")
@@ -913,8 +910,7 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                                 d.unifiedJobTemplate.type === "inventory_source" ||
                                 d.unifiedJobTemplate.unified_job_type === "inventory_update" ||
                                 d.unifiedJobTemplate.type === "workflow_job_template" ||
-                                d.unifiedJobTemplate.unified_job_type === "workflow_job")
-                                ? null : "none";
+                                d.unifiedJobTemplate.unified_job_type === "workflow_job") ? null : "none";
                             });
 
                         t.selectAll(".WorkflowChart-nodeStatus")
@@ -1092,7 +1088,7 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                             } else if (job_type === 'workflow_job') {
                                 $state.go('workflowResults', {
                                     id: d.job.id,
-                                })
+                                });
                             }
                         };
 
