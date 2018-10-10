@@ -54,14 +54,14 @@ export default function BuildAnchor($log, $filter) {
                 case 'setting':
                     if (activity.summary_fields.setting[0].category === 'jobs' ||
                         activity.summary_fields.setting[0].category === 'ui') {
-                        url += `configuration/${activity.summary_fields.setting[0].category}`;
+                        url += `settings/${activity.summary_fields.setting[0].category}`;
                     }
                     else if (activity.summary_fields.setting[0].category === 'system' ||
                         activity.summary_fields.setting[0].category === 'logging') {
-                        url += `configuration/system`;
+                        url += `settings/system`;
                     }
                     else {
-                        url += `configuration/auth`;
+                        url += `settings/auth`;
                     }
                      break;
                  case 'notification_template':
