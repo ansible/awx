@@ -86,8 +86,8 @@ If you're not using Docker for Mac, or Docker for Windows, you may need, or choo
 
 The AWX UI requires the following:
 
-- Node 6.x LTS version
-- NPM 3.x LTS
+- Node 8.x LTS
+- NPM 6.x LTS
 
 ### Build the environment
 
