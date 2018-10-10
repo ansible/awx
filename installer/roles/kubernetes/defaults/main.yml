@@ -1,13 +1,11 @@
 ---
-dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
-
 admin_user: 'admin'
 admin_email: 'root@localhost'
-admin_password: 'password'
+admin_password: ''
 
 rabbitmq_user: 'awx'
-rabbitmq_password: 'password'
-rabbitmq_erlang_cookie: 'cookiemonster'
+rabbitmq_password: ''
+rabbitmq_erlang_cookie: ''
 
 kubernetes_base_path: "{{ local_base_config_path|default('/tmp') }}/{{ kubernetes_deployment_name }}-config"
 

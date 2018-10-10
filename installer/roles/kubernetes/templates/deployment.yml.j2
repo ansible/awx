@@ -12,7 +12,7 @@ metadata:
   namespace: {{ kubernetes_namespace }}
   name: rabbitmq
   labels:
-    app: rabbitmq
+    app: {{ kubernetes_deployment_name }}
     type: LoadBalancer
 spec:
   type: NodePort
@@ -26,7 +26,7 @@ spec:
      port: 5672
      targetPort: 5672
   selector:
-    app: rabbitmq
+    app: {{ kubernetes_deployment_name }}
 
 ---
 apiVersion: v1
@@ -109,13 +109,8 @@ userNames:
 {% endif %}
 
 ---
-{% if openshift_host is defined %}
-apiVersion: v1
-kind: DeploymentConfig
-{% else %}
-apiVersion: extensions/v1beta1
-kind: Deployment
-{% endif %}
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
   name: {{ kubernetes_deployment_name }}
   namespace: {{ kubernetes_namespace }}
@@ -126,31 +121,14 @@ spec:
       labels:
         name: {{ kubernetes_deployment_name }}-web-deploy
         service: django
-        app: rabbitmq
+        app: {{ kubernetes_deployment_name }}
     spec:
       serviceAccountName: awx
+      terminationGracePeriodSeconds: 10
       containers:
         - name: {{ kubernetes_deployment_name }}-web
           image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"
           imagePullPolicy: Always
-          env:
-            - name: DATABASE_USER
-              value: {{ pg_username }}
-            - name: DATABASE_NAME
-              value: {{ pg_database }}
-            - name: DATABASE_HOST
-              value: {{ pg_hostname|default('postgresql') }}
-            - name: DATABASE_PORT
-              value: "{{ pg_port|default('5432') }}"
-            - name: DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "{{ kubernetes_deployment_name }}-secrets"
-                  key: pg_password
-            - name: MEMCACHED_HOST
-              value: {{ memcached_hostname|default('localhost') }}
-            - name: RABBITMQ_HOST
-              value: {{ rabbitmq_hostname|default('localhost') }}
           ports:
             - containerPort: 8052
           volumeMounts:
@@ -341,7 +319,7 @@ spec:
   port:
     targetPort: http
   tls:
-    insecureEdgeTerminationPolicy: Allow
+    insecureEdgeTerminationPolicy: Redirect
     termination: edge
   to:
     kind: Service
