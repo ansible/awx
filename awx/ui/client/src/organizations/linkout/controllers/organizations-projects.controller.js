@@ -19,6 +19,41 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
             orgBase = GetBasePath('organizations'),
             projBase = GetBasePath('projects');
 
+
+        function updateStatus() {
+            if ($scope.projects) {
+                $scope.projects.forEach(function(project, i) {
+                    $scope.projects[i].statusIcon = GetProjectIcon(project.status);
+                    $scope.projects[i].statusTip = GetProjectToolTip(project.status);
+                    $scope.projects[i].scm_update_tooltip = i18n._("Get latest SCM revision");
+                    $scope.projects[i].scm_type_class = "";
+
+                    if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
+                        $scope.projects[i].statusTip = i18n._('Canceled. Click for details');
+                    }
+
+                    if (project.status === 'running' || project.status === 'updating') {
+                        $scope.projects[i].scm_update_tooltip = i18n._("SCM update currently running");
+                        $scope.projects[i].scm_type_class = "btn-disabled";
+                    }
+
+                    if ($scope.project_scm_type_options) {
+                        $scope.project_scm_type_options.forEach(function(type) {
+                            if (type.value === project.scm_type) {
+                                $scope.projects[i].scm_type = type.label;
+                                if (type.label === 'Manual') {
+                                    $scope.projects[i].scm_update_tooltip = i18n._('Manual projects do not require an SCM update');
+                                    $scope.projects[i].scm_type_class = 'btn-disabled';
+                                    $scope.projects[i].statusTip = 'Not configured for SCM';
+                                    $scope.projects[i].statusIcon = 'none';
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
         init();
 
         function init() {
@@ -31,35 +66,7 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
 
             $scope.$on('choicesReadyProjectList', function() {
                 Wait('stop');
-                if ($scope.projects) {
-                    $scope.projects.forEach(function(project, i) {
-                        $scope.projects[i].statusIcon = GetProjectIcon(project.status);
-                        $scope.projects[i].statusTip = GetProjectToolTip(project.status);
-                        $scope.projects[i].scm_update_tooltip = i18n._("Get latest SCM revision");
-                        $scope.projects[i].scm_type_class = "";
-
-                        if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
-                            $scope.projects[i].statusTip = i18n._('Canceled. Click for details');
-                        }
-
-                        if (project.status === 'running' || project.status === 'updating') {
-                            $scope.projects[i].scm_update_tooltip = i18n._("SCM update currently running");
-                            $scope.projects[i].scm_type_class = "btn-disabled";
-                        }
-
-                        $scope.project_scm_type_options.forEach(function(type) {
-                            if (type.value === project.scm_type) {
-                                $scope.projects[i].scm_type = type.label;
-                                if (type.label === 'Manual') {
-                                    $scope.projects[i].scm_update_tooltip = i18n._('Manual projects do not require an SCM update');
-                                    $scope.projects[i].scm_type_class = 'btn-disabled';
-                                    $scope.projects[i].statusTip = 'Not configured for SCM';
-                                    $scope.projects[i].statusIcon = 'none';
-                                }
-                            }
-                        });
-                    });
-                }
+                updateStatus();
             });
         }
 
@@ -69,9 +76,9 @@ export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
         });
 
         $scope.$watchCollection(`${$scope.list.name}`, function() {
-                optionsRequestDataProcessing();
-            }
-        );
+            optionsRequestDataProcessing();
+            updateStatus();
+        });
 
         // iterate over the list and add fields like type label, after the
         // OPTIONS request returns, or the list is sorted/paginated/searched

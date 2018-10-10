@@ -7,7 +7,10 @@
 import ProjectsAdd from './add/projects-add.controller';
 import ProjectsEdit from './edit/projects-edit.controller';
 import ProjectsForm from './projects.form';
+import ProjectList from './projects.list';
 import GetProjectPath from './factories/get-project-path.factory';
+import GetProjectIcon from './factories/get-project-icon.factory';
+import GetProjectToolTip from './factories/get-project-tool-tip.factory';
 import {
     projectsSchedulesListRoute,
     projectsSchedulesAddRoute,
@@ -22,7 +25,10 @@ angular.module('Projects', [])
     .controller('ProjectsAdd', ProjectsAdd)
     .controller('ProjectsEdit', ProjectsEdit)
     .factory('GetProjectPath', GetProjectPath)
+    .factory('GetProjectIcon', GetProjectIcon)
+    .factory('GetProjectToolTip', GetProjectToolTip)
     .factory('ProjectsForm', ProjectsForm)
+    .factory('ProjectList', ProjectList)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider,$stateExtenderProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();
