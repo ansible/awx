@@ -1,4 +1,12 @@
+#!/bin/bash
 set +x
+
+if [ `id -u` -ge 500 ]; then
+    echo "awx:x:`id -u`:`id -g`:,,,:/var/lib/awx:/bin/bash" >> /tmp/passwd
+    cat /tmp/passwd > /etc/passwd
+    rm /tmp/passwd
+fi
+
 cd /awx_devel
 make clean
 cp -R /tmp/awx.egg-info /awx_devel/ || true
