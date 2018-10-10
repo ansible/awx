@@ -139,6 +139,24 @@ spec:
             - name: "{{ kubernetes_deployment_name }}-confd"
               mountPath: "/etc/tower/conf.d/"
               readOnly: true
+          env:
+            - name: DATABASE_USER
+              value: {{ pg_username }}
+            - name: DATABASE_NAME
+              value: {{ pg_database }}
+            - name: DATABASE_HOST
+              value: {{ pg_hostname|default('postgresql') }}
+            - name: DATABASE_PORT
+              value: "{{ pg_port|default('5432') }}"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ kubernetes_deployment_name }}-secrets"
+                  key: pg_password
+            - name: MEMCACHED_HOST
+              value: {{ memcached_hostname|default('localhost') }}
+            - name: RABBITMQ_HOST
+              value: {{ rabbitmq_hostname|default('localhost') }}
           resources:
             requests:
               memory: "{{ web_mem_request }}Gi"
