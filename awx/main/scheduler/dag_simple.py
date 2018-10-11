@@ -28,21 +28,13 @@ class SimpleDAG(object):
         return self.nodes.__iter__()
 
     def generate_graphviz_plot(self):
-        def short_string_obj(obj):
-            if type(obj) == Job:
-                type_str = "Job"
-            if type(obj) == AdHocCommand:
-                type_str = "AdHocCommand"
-            elif type(obj) == InventoryUpdate:
-                type_str = "Inventory"
-            elif type(obj) == ProjectUpdate:
-                type_str = "Project"
-            elif type(obj) == WorkflowJob:
-                type_str = "Workflow"
+        def run_status(obj):
+            if obj.do_not_run is True:
+                s = "DNR"
             else:
-                type_str = "Unknown"
-            type_str += "%s" % str(obj.id)
-            return type_str
+                s = "RUN"
+            s += "_{}".format(obj.id)
+            return s
 
         doc = """
         digraph g {
@@ -50,13 +42,13 @@ class SimpleDAG(object):
         """
         for n in self.nodes:
             doc += "%s [color = %s]\n" % (
-                short_string_obj(n['node_object']),
+                run_status(n['node_object']),
                 "red" if getattr(n['node_object'], 'status', 'N/A') == 'running' else "black",
             )
         for from_node, to_node, label in self.edges:
             doc += "%s -> %s [ label=\"%s\" ];\n" % (
-                short_string_obj(self.nodes[from_node]['node_object']),
-                short_string_obj(self.nodes[to_node]['node_object']),
+                run_status(self.nodes[from_node]['node_object']),
+                run_status(self.nodes[to_node]['node_object']),
                 label,
             )
         doc += "}\n"
