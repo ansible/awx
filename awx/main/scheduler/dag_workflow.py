@@ -108,9 +108,13 @@ class WorkflowDAG(SimpleDAG):
         root_nodes = self.get_root_nodes()
         nodes = copy.copy(root_nodes)
         nodes_marked_do_not_run = []
+        node_ids_visited = set()
 
         for index, n in enumerate(nodes):
             obj = n['node_object']
+            if obj.id in node_ids_visited:
+                continue
+            node_ids_visited.add(obj.id)
             job = obj.job
 
             if not job and obj.do_not_run is False and n not in root_nodes:
