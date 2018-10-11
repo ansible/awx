@@ -1,5 +1,4 @@
 const webpack = require('webpack');
-
 const TARGET_PORT = 8043;
 const TARGET = `https://localhost:${TARGET_PORT}`;
 
@@ -11,11 +10,39 @@ module.exports = {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: ['babel-loader']
+      },
+      {
+        test: /\.s?[ac]ss$/,
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+          {
+            loader: 'sass-loader',
+            options: {
+              includePaths: [
+                'node_modules/patternfly/dist/sass',
+                'node_modules/patternfly/node_modules/bootstrap-sass/assets/stylesheet',
+                'node_modules/patternfly/node_modules/font-awesome-sass/assets/stylesheets'
+              ]
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(woff(2)?|ttf|jpg|png|eot|gif|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        use: [{
+            loader: 'file-loader',
+            options: {
+                name: '[name].[ext]',
+                outputPath: 'fonts/',
+                publicPatH: '../'
+            }
+        }]
       }
     ]
   },
   resolve: {
-    extensions: ['*', '.js', '.jsx']
+    extensions: ['*', '.js', '.jsx', '.css']
   },
   output: {
     path: __dirname + '/dist',
