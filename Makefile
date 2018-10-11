@@ -12,10 +12,7 @@ MANAGEMENT_COMMAND ?= awx-manage
 IMAGE_REPOSITORY_AUTH ?=
 IMAGE_REPOSITORY_BASE ?= https://gcr.io
 
-VERSION=$(shell git describe --long --first-parent)
-VERSION3=$(shell git describe --long --first-parent | sed 's/\-g.*//')
-VERSION3DOT=$(shell git describe --long --first-parent | sed 's/\-g.*//' | sed 's/\-/\./')
-RELEASE_VERSION=$(shell git describe --long --first-parent | sed 's@\([0-9.]\{1,\}\).*@\1@')
+VERSION := $(shell cat VERSION)
 
 # NOTE: This defaults the container image version to the branch that's active
 COMPOSE_TAG ?= $(GIT_BRANCH)
@@ -29,8 +26,6 @@ DEV_DOCKER_TAG_BASE ?= gcr.io/ansible-tower-engineering
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
 SRC_ONLY_PKGS ?= cffi,pycparser,psycopg2,twilio
-
-CURWD = $(shell pwd)
 
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
@@ -48,20 +43,9 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 NAME ?= awx
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 
-ifeq ($(OFFICIAL),yes)
-    VERSION_TARGET ?= $(RELEASE_VERSION)
-else
-    VERSION_TARGET ?= $(VERSION3DOT)
-endif
-
 # TAR build parameters
-ifeq ($(OFFICIAL),yes)
-    SDIST_TAR_NAME=$(NAME)-$(RELEASE_VERSION)
-    WHEEL_NAME=$(NAME)-$(RELEASE_VERSION)
-else
-    SDIST_TAR_NAME=$(NAME)-$(VERSION3DOT)
-    WHEEL_NAME=$(NAME)-$(VERSION3DOT)
-endif
+SDIST_TAR_NAME=$(NAME)-$(VERSION)
+WHEEL_NAME=$(NAME)-$(VERSION)
 
 SDIST_COMMAND ?= sdist
 WHEEL_COMMAND ?= bdist_wheel
@@ -112,7 +96,6 @@ clean: clean-ui clean-dist
 	rm -rf requirements/vendor
 	rm -rf tmp
 	rm -rf $(I18N_FLAG_FILE)
-	rm -f VERSION
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
@@ -182,7 +165,7 @@ requirements_awx: virtualenv_awx
 	else \
 	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
-	$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
+	#$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_awx_dev:
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_dev.txt
@@ -372,7 +355,7 @@ check: flake8 pep8 # pyflakes pylint
 awx-link:
 	cp -R /tmp/awx.egg-info /awx_devel/ || true
 	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
-	cp /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
+	cp -f /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 
@@ -381,7 +364,8 @@ test:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	py.test -n auto $(TEST_DIRS)
+	PYTHONDONTWRITEBYTECODE=1 py.test -p no:cacheprovider -n auto $(TEST_DIRS)
+	awx-manage check_migrations --dry-run --check  -n 'vNNN_missing_migration_file'
 
 test_combined: test_ansible test
 
@@ -482,7 +466,7 @@ $(I18N_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
 ui-deps: $(UI_DEPS_FLAG_FILE)
 
 $(UI_DEPS_FLAG_FILE):
-	$(NPM_BIN) --unsafe-perm --prefix awx/ui install awx/ui
+	$(NPM_BIN) --unsafe-perm --prefix awx/ui install --no-save awx/ui
 	touch $(UI_DEPS_FLAG_FILE)
 
 ui-docker-machine: $(UI_DEPS_FLAG_FILE)
@@ -580,11 +564,21 @@ docker-compose-cluster: docker-auth
 docker-compose-test: docker-auth
 	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /bin/bash
 
+docker-compose-runtest:
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --user=$(shell id -u) --rm --service-ports awx /start_tests.sh
+
+docker-compose-build-swagger:
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --user=$(shell id -u) --rm --service-ports awx /start_tests.sh swagger
+
+docker-compose-clean:
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm -w /awx_devel --service-ports awx make clean
+	cd tools && TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose rm -sf
+
 docker-compose-build: awx-devel-build
 
 # Base development image build
 awx-devel-build:
-	docker build -t ansible/awx_devel -f tools/docker-compose/Dockerfile .
+	docker build -t ansible/awx_devel --build-arg UID=$(shell id -u) -f tools/docker-compose/Dockerfile .
 	docker tag ansible/awx_devel $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 	#docker push $(DEV_DOCKER_TAG_BASE)/awx_devel:$(COMPOSE_TAG)
 
@@ -610,7 +604,7 @@ docker-compose-cluster-elk: docker-auth
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
 minishift-dev:
-	ansible-playbook -i localhost, -e devtree_directory=$(CURWD) tools/clusterdevel/start_minishift_dev.yml
+	ansible-playbook -i localhost, -e devtree_directory=$(CURDIR) tools/clusterdevel/start_minishift_dev.yml
 
 
 clean-elk:
@@ -625,5 +619,4 @@ psql-container:
 	docker run -it --net tools_default --rm postgres:9.6 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
 
 VERSION:
-	@echo $(VERSION_TARGET) > $@
-	@echo "awx: $(VERSION_TARGET)"
+	@echo "awx: $(VERSION)"

@@ -208,6 +208,12 @@ def run_isolated_job(private_data_dir, secrets, logfile=sys.stdout):
     env['AWX_ISOLATED_DATA_DIR'] = private_data_dir
     env['PYTHONPATH'] = env.get('PYTHONPATH', '') + callback_dir + ':'
 
+    venv_path = env.get('VIRTUAL_ENV')
+    if venv_path and not os.path.exists(venv_path):
+        raise RuntimeError(
+            'a valid Python virtualenv does not exist at {}'.format(venv_path)
+        )
+
     return run_pexpect(args, cwd, env, logfile,
                        expect_passwords=expect_passwords,
                        idle_timeout=idle_timeout,

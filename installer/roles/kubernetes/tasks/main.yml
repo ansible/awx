@@ -24,7 +24,7 @@
     kubectl_or_oc: "{{ openshift_oc_bin if openshift_oc_bin is defined else 'kubectl' }}"
 
 - set_fact:
-    deployment_object: "{{ 'dc' if openshift_host is defined else 'deployment' }}"
+    deployment_object: "sts"
 
 - name: Record deployment size
   shell: |
@@ -156,6 +156,7 @@
   register: result
   until: result.stdout == "Running"
   retries: 60
+  delay: 10
 
 - name: Migrate database
   shell: |

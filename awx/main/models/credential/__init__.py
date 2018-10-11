@@ -439,15 +439,6 @@ class CredentialType(CommonModelNameNotUnique):
 
     defaults = OrderedDict()
 
-    ENV_BLACKLIST = set((
-        'VIRTUAL_ENV', 'PATH', 'PYTHONPATH', 'PROOT_TMP_DIR', 'JOB_ID',
-        'INVENTORY_ID', 'INVENTORY_SOURCE_ID', 'INVENTORY_UPDATE_ID',
-        'AD_HOC_COMMAND_ID', 'REST_API_URL', 'REST_API_TOKEN', 'MAX_EVENT_RES',
-        'CALLBACK_QUEUE', 'CALLBACK_CONNECTION', 'CACHE',
-        'JOB_CALLBACK_DEBUG', 'INVENTORY_HOSTVARS', 'FACT_QUEUE',
-        'AWX_HOST', 'PROJECT_REVISION'
-    ))
-
     class Meta:
         app_label = 'main'
         ordering = ('kind', 'name')
@@ -648,8 +639,14 @@ class CredentialType(CommonModelNameNotUnique):
                 file_label = file_label.split('.')[1]
                 setattr(tower_namespace.filename, file_label, path)
 
+        injector_field = self._meta.get_field('injectors')
         for env_var, tmpl in self.injectors.get('env', {}).items():
-            if env_var.startswith('ANSIBLE_') or env_var in self.ENV_BLACKLIST:
+            try:
+                injector_field.validate_env_var_allowed(env_var)
+            except ValidationError as e:
+                logger.error(six.text_type(
+                    'Ignoring prohibited env var {}, reason: {}'
+                ).format(env_var, e))
                 continue
             env[env_var] = Template(tmpl).render(**namespace)
             safe_env[env_var] = Template(tmpl).render(**safe_namespace)

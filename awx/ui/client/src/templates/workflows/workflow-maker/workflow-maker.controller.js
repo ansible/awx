@@ -7,9 +7,10 @@
 export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
     '$state', 'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
     'Empty', 'PromptService', 'Rest', 'TemplatesStrings', '$timeout',
+    'i18n',
     function($scope, WorkflowService, GetBasePath, TemplatesService,
     $state, ProcessErrors, CreateSelect2, $q, JobTemplate,
-    Empty, PromptService, Rest, TemplatesStrings, $timeout) {
+    Empty, PromptService, Rest, TemplatesStrings, $timeout, i18n) {
 
         let promptWatcher, surveyQuestionWatcher, credentialsWatcher;
 
@@ -301,15 +302,15 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
             if (!optionsToInclude) {
                 $scope.edgeTypeOptions = [
                     {
-                        label: 'Always',
+                        label: i18n._('Always'),
                         value: 'always'
                     },
                     {
-                        label: 'On Success',
+                        label: i18n._('On Success'),
                         value: 'success'
                     },
                     {
-                        label: 'On Failure',
+                        label: i18n._('On Failure'),
                         value: 'failure'
                     }
                 ];
@@ -641,6 +642,31 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                     if (!_.isEmpty($scope.nodeBeingEdited.promptData)) {
                         $scope.promptData = _.cloneDeep($scope.nodeBeingEdited.promptData);
+                        const launchConf = $scope.promptData.launchConf;
+
+                        if (!launchConf.survey_enabled &&
+                            !launchConf.ask_inventory_on_launch &&
+                            !launchConf.ask_credential_on_launch &&
+                            !launchConf.ask_verbosity_on_launch &&
+                            !launchConf.ask_job_type_on_launch &&
+                            !launchConf.ask_limit_on_launch &&
+                            !launchConf.ask_tags_on_launch &&
+                            !launchConf.ask_skip_tags_on_launch &&
+                            !launchConf.ask_diff_mode_on_launch &&
+                            !launchConf.credential_needed_to_start &&
+                            !launchConf.ask_variables_on_launch &&
+                            launchConf.variables_needed_to_start.length === 0) {
+                                $scope.showPromptButton = false;
+                                $scope.promptModalMissingReqFields = false;
+                        } else {
+                            $scope.showPromptButton = true;
+
+                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeBeingEdited.originalNodeObj.summary_fields.inventory')) {
+                                $scope.promptModalMissingReqFields = true;
+                            } else {
+                                $scope.promptModalMissingReqFields = false;
+                            }
+                        }
                     } else if (
                         _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'job_template' ||
                         _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === 'job_template'
@@ -727,8 +753,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                                     !launchConf.ask_tags_on_launch &&
                                     !launchConf.ask_skip_tags_on_launch &&
                                     !launchConf.ask_diff_mode_on_launch &&
-                                    !launchConf.survey_enabled &&
                                     !launchConf.credential_needed_to_start &&
+                                    !launchConf.ask_variables_on_launch &&
                                     launchConf.variables_needed_to_start.length === 0) {
                                         $scope.showPromptButton = false;
                                         $scope.promptModalMissingReqFields = false;
@@ -839,19 +865,19 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                      switch($scope.nodeBeingEdited.edgeType) {
                         case "always":
-                            $scope.edgeType = {label: "Always", value: "always"};
+                            $scope.edgeType = {label: i18n._("Always"), value: "always"};
                             if (siblingConnectionTypes.length === 1 && _.includes(siblingConnectionTypes, "always") || $scope.nodeBeingEdited.isRoot) {
                                 edgeDropdownOptions = ["always"];
                             }
                             break;
                         case "success":
-                            $scope.edgeType = {label: "On Success", value: "success"};
+                            $scope.edgeType = {label: i18n._("On Success"), value: "success"};
                             if (siblingConnectionTypes.length !== 0 && (!_.includes(siblingConnectionTypes, "always"))) {
                                 edgeDropdownOptions = ["success", "failure"];
                             }
                             break;
                         case "failure":
-                            $scope.edgeType = {label: "On Failure", value: "failure"};
+                            $scope.edgeType = {label: i18n._("On Failure"), value: "failure"};
                             if (siblingConnectionTypes.length !== 0 && (!_.includes(siblingConnectionTypes, "always"))) {
                                 edgeDropdownOptions = ["success", "failure"];
                             }
@@ -978,7 +1004,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
 
                     switch($scope.nodeBeingEdited.edgeType) {
                        case "always":
-                           $scope.edgeType = {label: "Always", value: "always"};
+                           $scope.edgeType = {label: i18n._("Always"), value: "always"};
                            if (
                                _.includes(siblingConnectionTypes, "always") &&
                                !_.includes(siblingConnectionTypes, "success") &&
@@ -990,7 +1016,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                            }
                            break;
                        case "success":
-                           $scope.edgeType = {label: "On Success", value: "success"};
+                           $scope.edgeType = {label: i18n._("On Success"), value: "success"};
                            if (
                                (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) &&
                                !_.includes(siblingConnectionTypes, "always")
@@ -1001,7 +1027,7 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                            }
                            break;
                        case "failure":
-                           $scope.edgeType = {label: "On Failure", value: "failure"};
+                           $scope.edgeType = {label: i18n._("On Failure"), value: "failure"};
                            if (
                                (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) &&
                                !_.includes(siblingConnectionTypes, "always")
@@ -1071,8 +1097,8 @@ export default ['$scope', 'WorkflowService', 'GetBasePath', 'TemplatesService',
                             !launchConf.ask_tags_on_launch &&
                             !launchConf.ask_skip_tags_on_launch &&
                             !launchConf.ask_diff_mode_on_launch &&
-                            !launchConf.survey_enabled &&
                             !launchConf.credential_needed_to_start &&
+                            !launchConf.ask_variables_on_launch &&
                             launchConf.variables_needed_to_start.length === 0) {
                                 $scope.showPromptButton = false;
                                 $scope.promptModalMissingReqFields = false;

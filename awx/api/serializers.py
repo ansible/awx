@@ -1903,7 +1903,9 @@ class CustomInventoryScriptSerializer(BaseSerializer):
 
 
 class InventorySourceOptionsSerializer(BaseSerializer):
-    credential = DeprecatedCredentialField()
+    credential = DeprecatedCredentialField(
+        help_text=_('Cloud credential to use for inventory updates.')
+    )
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',

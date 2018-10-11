@@ -117,10 +117,10 @@ class IsolatedManager(object):
 
     @classmethod
     def awx_playbook_path(cls):
-        return os.path.join(
+        return os.path.abspath(os.path.join(
             os.path.dirname(awx.__file__),
             'playbooks'
-        )
+        ))
 
     def path_to(self, *args):
         return os.path.join(self.private_data_dir, *args)

@@ -12,7 +12,7 @@ metadata:
   namespace: {{ kubernetes_namespace }}
   name: rabbitmq
   labels:
-    app: rabbitmq
+    app: {{ kubernetes_deployment_name }}
     type: LoadBalancer
 spec:
   type: NodePort
@@ -26,7 +26,7 @@ spec:
      port: 5672
      targetPort: 5672
   selector:
-    app: rabbitmq
+    app: {{ kubernetes_deployment_name }}
 
 ---
 apiVersion: v1
@@ -109,13 +109,8 @@ userNames:
 {% endif %}
 
 ---
-{% if openshift_host is defined %}
-apiVersion: v1
-kind: DeploymentConfig
-{% else %}
-apiVersion: extensions/v1beta1
-kind: Deployment
-{% endif %}
+apiVersion: apps/v1beta1
+kind: StatefulSet
 metadata:
   name: {{ kubernetes_deployment_name }}
   namespace: {{ kubernetes_namespace }}
@@ -126,13 +121,24 @@ spec:
       labels:
         name: {{ kubernetes_deployment_name }}-web-deploy
         service: django
-        app: rabbitmq
+        app: {{ kubernetes_deployment_name }}
     spec:
       serviceAccountName: awx
+      terminationGracePeriodSeconds: 10
       containers:
         - name: {{ kubernetes_deployment_name }}-web
           image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"
           imagePullPolicy: Always
+          ports:
+            - containerPort: 8052
+          volumeMounts:
+            - name: {{ kubernetes_deployment_name }}-application-config
+              mountPath: "/etc/tower"
+              readOnly: true
+
+            - name: "{{ kubernetes_deployment_name }}-confd"
+              mountPath: "/etc/tower/conf.d/"
+              readOnly: true
           env:
             - name: DATABASE_USER
               value: {{ pg_username }}
@@ -151,16 +157,6 @@ spec:
               value: {{ memcached_hostname|default('localhost') }}
             - name: RABBITMQ_HOST
               value: {{ rabbitmq_hostname|default('localhost') }}
-          ports:
-            - containerPort: 8052
-          volumeMounts:
-            - name: {{ kubernetes_deployment_name }}-application-config
-              mountPath: "/etc/tower"
-              readOnly: true
-
-            - name: "{{ kubernetes_deployment_name }}-confd"
-              mountPath: "/etc/tower/conf.d/"
-              readOnly: true
           resources:
             requests:
               memory: "{{ web_mem_request }}Gi"
@@ -341,7 +337,7 @@ spec:
   port:
     targetPort: http
   tls:
-    insecureEdgeTerminationPolicy: Allow
+    insecureEdgeTerminationPolicy: Redirect
     termination: edge
   to:
     kind: Service

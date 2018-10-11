@@ -310,12 +310,12 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                 return [];
             }
             if(defaultParams) {
-                let stripped =_.pick(params, (value, key) => {
+                let stripped =_.pickBy(params, (value, key) => {
                     // setting the default value of a term to null in a state definition is a very explicit way to ensure it will NEVER generate a search tag, even with a non-default value
                     return defaultParams[key] !== value && key !== 'order_by' && key !== 'page' && key !== 'page_size' && defaultParams[key] !== null;
                 });
                 let strippedCopy = _.cloneDeep(stripped);
-                if(_.keys(_.pick(defaultParams, _.keys(strippedCopy))).length > 0){
+                if(_.keys(_.pickBy(defaultParams, _.keys(strippedCopy))).length > 0){
                     for (var key in strippedCopy) {
                         if (strippedCopy.hasOwnProperty(key)) {
                             let value = strippedCopy[key];
@@ -336,7 +336,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
         mergeQueryset (queryset, additional, singleSearchParam) {
             const space = '%20and%20';
 
-            const merged = _.merge({}, queryset, additional, (objectValue, sourceValue, key, object) => {
+            const merged = _.mergeWith({}, queryset, additional, (objectValue, sourceValue, key, object) => {
                 if (!(object[key] && object[key] !== sourceValue)) {
                     // // https://lodash.com/docs/3.10.1#each
                     // If this returns undefined merging is handled by default _.merge algorithm
@@ -418,7 +418,7 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                     termParams = searchWithoutKey(term, singleSearchParam);
                 }
 
-                params = _.merge(params, termParams, combineSameSearches);
+                params = _.mergeWith(params, termParams, combineSameSearches);
             });
 
             return params;

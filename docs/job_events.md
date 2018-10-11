@@ -95,6 +95,9 @@ playbook_on_play_start-install
     runner_on_ok_hostA (install_tower)
 ```
 
+## Testing
+A management command for event replay exists for replaying jobs at varying speeds and other parameters. Run `awx-manage replay_job_events --help` for additional usage information. To prepare the UI for event replay, load the page for a finished job and then append `_debug` as a parameter to the url.
+
 ## Code References
 * More comprehensive list of Job Events and the hierarchy they form https://github.com/ansible/awx/blob/devel/awx/main/models/jobs.py#L870
 * Exhaustive list of Job Events in Tower https://github.com/ansible/awx/blob/devel/awx/main/models/jobs.py#L900

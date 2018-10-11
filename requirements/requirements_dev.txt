@@ -5,6 +5,7 @@ ipython==5.2.1
 unittest2
 pep8
 flake8
+pluggy==0.6.0
 pyflakes
 pytest==3.6.0
 pytest-cov
@@ -15,9 +16,9 @@ pytest-timeout
 pytest-xdist
 logutils
 flower
-uwsgitop
 jupyter
 matplotlib
 backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirectory
 mockldap
 sdb
+atomicwrites==1.1.5

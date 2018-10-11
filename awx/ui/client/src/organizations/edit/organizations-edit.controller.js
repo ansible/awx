@@ -5,10 +5,10 @@
  *************************************************/
 
 export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
-    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt',
+    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', '$rootScope',
     'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', 'ConfigData',
     function($scope, $location, $stateParams, OrgAdminLookup,
-        OrganizationForm, Rest, ProcessErrors, Prompt,
+        OrganizationForm, Rest, ProcessErrors, Prompt, $rootScope,
         GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData, ConfigData) {
 
         let form = OrganizationForm(),
@@ -24,6 +24,12 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
             OrgAdminLookup.checkForAdminAccess({organization: id})
                 .then(function(isOrgAdmin){
                     $scope.isOrgAdmin = isOrgAdmin;
+                });
+
+            Rest.setUrl(GetBasePath('users') + $rootScope.current_user.id + '/roles/?role_field=notification_admin_role');
+            Rest.get()
+                .then(({data}) => {
+                    $scope.isNotificationAdmin = (data.count && data.count > 0);
                 });
 
             $scope.$watch('organization_obj.summary_fields.user_capabilities.edit', function(val) {

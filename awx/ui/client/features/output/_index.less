@@ -38,6 +38,16 @@
         }
     }
 
+    &-menuIcon--md {
+        font-size: 14px;
+        padding: 10px;
+        cursor: pointer;
+
+        &:hover {
+            color: @at-blue;
+        }
+    }
+
     &-menuIcon--lg {
         font-size: 22px;
         line-height: 12px;
@@ -94,6 +104,10 @@
         user-select: none;
     }
 
+    &-line--clickable {
+        cursor: pointer;
+    }
+
     &-event {
         .at-mixin-event();
     }
@@ -138,6 +152,10 @@
         margin: 0;
         overflow-y: scroll;
         padding: 0;
+
+        @media screen and (max-width: @breakpoint-md) {
+            max-height: calc(100vh - 30px);
+        }
     }
 
     &-borderHeader {

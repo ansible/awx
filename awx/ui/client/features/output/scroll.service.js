@@ -5,8 +5,6 @@ import {
     OUTPUT_SCROLL_THRESHOLD,
 } from './constants';
 
-const MAX_THRASH = 20;
-
 function JobScrollService ($q, $timeout) {
     this.init = ({ next, previous, onThresholdLeave }) => {
         this.el = $(OUTPUT_ELEMENT_CONTAINER);
@@ -33,7 +31,6 @@ function JobScrollService ($q, $timeout) {
             paused: false,
             locked: false,
             hover: false,
-            running: true,
             thrash: 0,
         };
 
@@ -44,13 +41,6 @@ function JobScrollService ($q, $timeout) {
 
     this.onMouseEnter = () => {
         this.state.hover = true;
-
-        if (this.state.thrash >= MAX_THRASH) {
-            this.state.thrash = MAX_THRASH - 1;
-        }
-
-        this.unlock();
-        this.unhide();
     };
 
     this.onMouseLeave = () => {
@@ -60,23 +50,6 @@ function JobScrollService ($q, $timeout) {
     this.listen = () => {
         if (this.isPaused()) {
             return;
-        }
-
-        if (this.state.thrash > 0) {
-            if (this.isLocked() || this.state.hover) {
-                this.state.thrash--;
-            }
-        }
-
-        if (!this.state.hover) {
-            this.state.thrash++;
-        }
-
-        if (this.state.thrash >= MAX_THRASH) {
-            if (this.isRunning()) {
-                this.lock();
-                this.hide();
-            }
         }
 
         if (this.isLocked()) {
@@ -195,16 +168,6 @@ function JobScrollService ($q, $timeout) {
         this.setScrollPosition(this.getScrollHeight());
     };
 
-    this.start = () => {
-        this.state.running = true;
-    };
-
-    this.stop = () => {
-        this.unlock();
-        this.unhide();
-        this.state.running = false;
-    };
-
     this.lock = () => {
         this.state.locked = true;
     };
@@ -256,7 +219,6 @@ function JobScrollService ($q, $timeout) {
     };
 
     this.isPaused = () => this.state.paused;
-    this.isRunning = () => this.state.running;
     this.isLocked = () => this.state.locked;
     this.isMissing = () => $(OUTPUT_ELEMENT_TBODY)[0].clientHeight < this.getViewableHeight();
 }

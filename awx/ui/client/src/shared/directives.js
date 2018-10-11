@@ -670,6 +670,8 @@ function(ConfigurationUtils, i18n, $rootScope) {
                                     query += '&role_level=workflow_admin_role';
                                 } else if ($state.current.name.includes('projects')) {
                                     query += '&role_level=project_admin_role';
+                                } else if ($state.current.name.includes('notifications')) {
+                                    query += '&role_level=notification_admin_role';
                                 } else {
                                     query += '&role_level=admin_role';
                                 }

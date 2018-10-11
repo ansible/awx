@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import pytest
+import six
 
 from django.core.exceptions import ValidationError
 from rest_framework.serializers import ValidationError as DRFValidationError
@@ -123,6 +125,9 @@ def test_cred_type_input_schema_validity(input_, valid):
     ({'env': {'AWX_SECRET_99': '{{awx_secret}}'}}, True),
     ({'env': {'99': '{{awx_secret}}'}}, False),
     ({'env': {'AWX_SECRET=': '{{awx_secret}}'}}, False),
+    ({'env': {'ANSIBLE_SETTING': '{{awx_secret}}'}}, False),
+    ({'env': {'DRAGON': u'🐉'}}, False),
+    ({'env': {u'🐉': 'DRAGON'}}, False),
     ({'extra_vars': 123}, False),
     ({'extra_vars': {}}, True),
     ({'extra_vars': {'hostname': '{{host}}'}}, True),
@@ -147,7 +152,8 @@ def test_cred_type_injectors_schema(injectors, valid):
     )
     field = CredentialType._meta.get_field('injectors')
     if valid is False:
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, message=six.text_type(
+                "Injector was supposed to throw a validation error, data: {}").format(injectors)):
             field.clean(injectors, type_)
     else:
         field.clean(injectors, type_)

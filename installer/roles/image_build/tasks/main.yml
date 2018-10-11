@@ -1,13 +1,7 @@
 ---
-- name: Get Version from checkout if not provided
-  shell: "git describe --long --first-parent | sed 's/\\-g.*//' | sed 's/\\-/\\./'"
-  delegate_to: localhost
-  register: awx_version_command
-  when: awx_version is not defined
-
 - name: Set global version if not provided
   set_fact:
-    awx_version: "{{ awx_version_command.stdout }}"
+    awx_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
   when: awx_version is not defined
 
 - name: Verify awx-logos directory exists for official install

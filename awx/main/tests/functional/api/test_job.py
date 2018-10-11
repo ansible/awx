@@ -141,7 +141,7 @@ def test_block_unprocessed_events(delete, admin_user, mocker):
     view = MockView()
 
     time_of_request = time_of_finish + relativedelta(seconds=2)
-    with mock.patch('awx.api.views.now', lambda: time_of_request):
+    with mock.patch('awx.api.views.mixin.now', lambda: time_of_request):
         r = view.destroy(request)
         assert r.status_code == 400
 
@@ -162,7 +162,7 @@ def test_block_related_unprocessed_events(mocker, organization, project, delete,
     )
     view = RelatedJobsPreventDeleteMixin()
     time_of_request = time_of_finish + relativedelta(seconds=2)
-    with mock.patch('awx.api.views.now', lambda: time_of_request):
+    with mock.patch('awx.api.views.mixin.now', lambda: time_of_request):
         with pytest.raises(PermissionDenied):
             view.perform_destroy(organization)
 

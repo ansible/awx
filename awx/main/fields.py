@@ -46,7 +46,7 @@ from awx.main.utils.filters import SmartFilter
 from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
-from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS
+from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS, ENV_BLACKLIST
 from awx.main import utils
 
 
@@ -767,7 +767,12 @@ class CredentialTypeInjectorField(JSONSchemaField):
                         # of underscores, digits, and alphabetics from the portable
                         # character set. The first character of a name is not
                         # a digit.
-                        '^[a-zA-Z_]+[a-zA-Z0-9_]*$': {'type': 'string'},
+                        '^[a-zA-Z_]+[a-zA-Z0-9_]*$': {
+                            'type': 'string',
+                            # The environment variable _value_ can be any ascii,
+                            # but pexpect will choke on any unicode
+                            'pattern': '^[\x00-\x7F]*$'
+                        },
                     },
                     'additionalProperties': False,
                 },
@@ -782,6 +787,19 @@ class CredentialTypeInjectorField(JSONSchemaField):
             },
             'additionalProperties': False
         }
+
+    def validate_env_var_allowed(self, env_var):
+        if env_var.startswith('ANSIBLE_'):
+            raise django_exceptions.ValidationError(
+                _('Environment variable {} may affect Ansible configuration so its '
+                  'use is not allowed in credentials.').format(env_var),
+                code='invalid', params={'value': env_var},
+            )
+        if env_var in ENV_BLACKLIST:
+            raise django_exceptions.ValidationError(
+                _('Environment variable {} is blacklisted from use in credentials.').format(env_var),
+                code='invalid', params={'value': env_var},
+            )
 
     def validate(self, value, model_instance):
         super(CredentialTypeInjectorField, self).validate(
@@ -834,6 +852,9 @@ class CredentialTypeInjectorField(JSONSchemaField):
                 setattr(valid_namespace['tower'].filename, template_name, 'EXAMPLE_FILENAME')
 
         for type_, injector in value.items():
+            if type_ == 'env':
+                for key in injector.keys():
+                    self.validate_env_var_allowed(key)
             for key, tmpl in injector.items():
                 try:
                     Environment(

@@ -6,8 +6,8 @@ This is an automated functional test suite for the front end.
 The tests are written in Node.js and use the [Nightwatch](https://github.com/nightwatchjs/nightwatch) test runner.
 
 #### Requirements
-- node.js 6.x LTS
-- npm 3.x LTS
+- node.js 8.x LTS
+- npm 5.x LTS
 
 #### Installation
 A successful invocation of `make ui-devel` will prepare your environment with the software

@@ -17,8 +17,8 @@ function CapacityAdjuster (templateUrl, ProcessErrors, Wait, strings) {
                 value: scope.state.mem_capacity
             }];
 
-            scope.min_capacity = _.min(adjustment_values, 'value');
-            scope.max_capacity = _.max(adjustment_values, 'value');
+            scope.min_capacity = _.minBy(adjustment_values, 'value');
+            scope.max_capacity = _.maxBy(adjustment_values, 'value');
 
             capacityAdjusterController.init();
         },
