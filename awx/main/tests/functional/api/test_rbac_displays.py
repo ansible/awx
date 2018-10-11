@@ -342,3 +342,37 @@ def test_license_check_not_called(mocker, job_template, project, org_admin, get)
     with mocker.patch('awx.main.access.BaseAccess.check_license', mock_license_check):
         get(reverse('api:job_template_detail', kwargs={'pk': job_template.pk}), org_admin, expect=200)
         assert not mock_license_check.called
+
+
+@pytest.mark.django_db
+class TestPermissionMessages:
+    def test_message_on_edit(self, project, scm_credential, patch, rando):
+        project.admin_role.members.add(rando)
+        r = patch(
+            url=project.get_absolute_url(),
+            data={'credential': scm_credential.id},
+            expect=403,
+            user=rando
+        )
+        assert r.data['detail'] == 'You do not have use_role to provided credential.'
+
+    def test_message_on_edit_existing(self, project, scm_credential, patch, rando):
+        project.credential = scm_credential
+        project.save()
+        project.admin_role.members.add(rando)
+        r = patch(
+            url=project.get_absolute_url(),
+            data={'credential': None},
+            expect=403,
+            user=rando
+        )
+        assert r.data['detail'] == 'You do not have use_role to existing credential.'
+
+    def test_edit_superuser(self, admin_user, rando, patch):
+        r = patch(
+            url=admin_user.get_absolute_url(),
+            data={'password': 'hax0r2max'},
+            expect=403,
+            user=rando
+        )
+        assert r.data['detail'] == 'You must be a superuser to modify users with system roles.'

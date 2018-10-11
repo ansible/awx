@@ -9,7 +9,7 @@ from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework import permissions
 
 # AWX
-from awx.main.access import * # noqa
+from awx.main.access import check_user_access, check_user_access_with_errors
 from awx.main.models import * # noqa
 from awx.main.utils import get_object_or_400
 
@@ -17,7 +17,8 @@ logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
            'TaskPermission', 'ProjectUpdatePermission', 'InventoryInventorySourcesUpdatePermission',
-           'UserPermission', 'IsSuperUser', 'InstanceGroupTowerPermission',]
+           'UserPermission', 'IsSuperUser', 'InstanceGroupTowerPermission',
+           'VariableDataPermission']
 
 
 class ModelAccessPermission(permissions.BasePermission):
@@ -60,26 +61,31 @@ class ModelAccessPermission(permissions.BasePermission):
             extra_kwargs = {}
             if view.obj_permission_type == 'admin':
                 extra_kwargs['data'] = {}
-            return check_user_access(
+            has_permission, messages = check_user_access_with_errors(
                 request.user, view.model, view.obj_permission_type, obj,
                 **extra_kwargs
             )
         else:
             if obj:
                 return True
-            return check_user_access(request.user, view.model, 'add', request.data)
+            has_permission, messages = check_user_access_with_errors(request.user, view.model, 'add', request.data)
+        # Add limited explaination for why an action cannot be taken
+        if messages.get('detail', None):
+            self.message = messages['detail']  # picked up by Django view class
+        return has_permission
 
     def check_put_permissions(self, request, view, obj=None):
         if not obj:
             # FIXME: For some reason this needs to return True
             # because it is first called with obj=None?
             return True
-        if getattr(view, 'is_variable_data', False):
-            return check_user_access(request.user, view.model, 'change', obj,
-                                     dict(variables=request.data))
-        else:
-            return check_user_access(request.user, view.model, 'change', obj,
-                                     request.data)
+        has_permission, messages = check_user_access_with_errors(
+            request.user, view.model, 'change', obj, request.data
+        )
+        # Add limited explaination for why an action cannot be taken
+        if messages.get('detail', None):
+            self.message = messages['detail']  # picked up by Django view class
+        return has_permission
 
     def check_patch_permissions(self, request, view, obj=None):
         return self.check_put_permissions(request, view, obj)
@@ -115,11 +121,7 @@ class ModelAccessPermission(permissions.BasePermission):
         # Check permissions for the given view and object, based on the request
         # method used.
         check_method = getattr(self, 'check_%s_permissions' % request.method.lower(), None)
-        result = check_method and check_method(request, view, obj)
-        if not result:
-            raise PermissionDenied()
-
-        return result
+        return bool(check_method and check_method(request, view, obj))
 
     def has_permission(self, request, view, obj=None):
         logger.debug('has_permission(user=%s method=%s data=%r, %s, %r)',
@@ -218,6 +220,14 @@ class UserPermission(ModelAccessPermission):
         elif request.user.is_superuser:
             return True
         raise PermissionDenied()
+
+
+class VariableDataPermission(ModelAccessPermission):
+    def check_put_permissions(self, request, view, obj=None):
+        if not obj:
+            return True
+        return check_user_access(request.user, view.model, 'change', obj,
+                                 dict(variables=request.data))
 
 
 class IsSuperUser(permissions.BasePermission):

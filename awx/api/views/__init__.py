@@ -83,6 +83,7 @@ from awx.api.permissions import (
     InventoryInventorySourcesUpdatePermission,
     UserPermission,
     InstanceGroupTowerPermission,
+    VariableDataPermission
 )
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
@@ -1843,7 +1844,7 @@ class BaseVariableData(RetrieveUpdateAPIView):
 
     parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [YAMLParser]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [YAMLRenderer]
-    is_variable_data = True # Special flag for permissions check.
+    is_variable_data = VariableDataPermission # Special permissions check.
 
 
 class InventoryVariableData(BaseVariableData):
@@ -3141,13 +3142,6 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
     obj_permission_type = 'start'
     serializer_class = EmptySerializer
 
-    def check_object_permissions(self, request, obj):
-        if request.method == 'POST' and obj:
-            relaunch_perm, messages = request.user.can_access_with_errors(self.model, 'start', obj)
-            if not relaunch_perm and 'workflow_job_template' in messages:
-                self.permission_denied(request, message=messages['workflow_job_template'])
-        return super(WorkflowJobRelaunch, self).check_object_permissions(request, obj)
-
     def get(self, request, *args, **kwargs):
         return Response({})
 
@@ -3578,13 +3572,6 @@ class JobRelaunch(RetrieveAPIView):
     @transaction.non_atomic_requests
     def dispatch(self, *args, **kwargs):
         return super(JobRelaunch, self).dispatch(*args, **kwargs)
-
-    def check_object_permissions(self, request, obj):
-        if request.method == 'POST' and obj:
-            relaunch_perm, messages = request.user.can_access_with_errors(self.model, 'start', obj)
-            if not relaunch_perm and 'detail' in messages:
-                self.permission_denied(request, message=messages['detail'])
-        return super(JobRelaunch, self).check_object_permissions(request, obj)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()

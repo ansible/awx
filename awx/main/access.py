@@ -116,7 +116,7 @@ def check_user_access_with_errors(user, model_class, action, *args, **kwargs):
     access_method = getattr(access_instance, 'can_%s' % action, None)
     result = access_method(*args, **kwargs)
     logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
-                 access_method.__name__, args, result)
+                 getattr(access_method, '__name__', 'unknown'), args, result)
     return (result, access_instance.messages)
 
 
@@ -173,6 +173,20 @@ class BaseAccess(object):
         self.save_messages = save_messages
         if save_messages:
             self.messages = {}
+
+    def log(self, message):
+        """Use this to set user-facing messages which may be returned in the
+        response text. These should be general statements of AWX permissions
+        policy, and never divulge information the user shouldn't have.
+        """
+        if self.save_messages:
+            prior_text = self.messages.get('detail', None)
+            if prior_text:
+                self.messages['detail'] = six.text_type(' ').join(
+                    [six.text_type(prior_text), six.text_type(message)]
+                )
+            else:
+                self.messages['detail'] = message
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
@@ -281,10 +295,16 @@ class BaseAccess(object):
             return self.user in role
 
         if new and changed and (not user_has_resource_access(new)):
-            return False  # User lacks access to provided resource
+            self.log(_('You do not have {role} to provided {related_resource}.').format(
+                role=role_field, related_resource=field
+            ))
+            return False
 
         if current and (changed or mandatory) and (not user_has_resource_access(current)):
-            return False  # User lacks access to existing resource
+            self.log(_('You do not have {role} to existing {related_resource}.').format(
+                role=role_field, related_resource=field
+            ))
+            return False
 
         return True  # User has access to both, permission check passed
 
@@ -550,9 +570,10 @@ class UserAccess(BaseAccess):
     @check_superuser
     def can_admin(self, obj, data, allow_orphans=False, check_setting=True):
         if check_setting and (not settings.MANAGE_ORGANIZATION_AUTH):
+            self.log(_('This server is configured to only allow superusers to manager users.'))
             return False
         if obj.is_superuser or obj.is_system_auditor:
-            # must be superuser to admin users with system roles
+            self.log(_('You must be a superuser to modify users with system roles.'))
             return False
         if self.user_is_orphaned(obj):
             if not allow_orphans:
@@ -562,15 +583,19 @@ class UserAccess(BaseAccess):
                 content_type=ContentType.objects.get_for_model(User)
             ).filter(ancestors__in=self.user.roles.all()).exists()
         else:
-            return self.is_all_org_admin(obj)
+            if self.is_all_org_admin(obj):
+                return True
+            else:
+                self.log(_('You must be admin of all organizations user is member of to perform this action.'))
+                return False
 
     def can_delete(self, obj):
         if obj == self.user:
-            # cannot delete yourself
+            self.log(_('You cannot delete yourself.'))
             return False
         super_users = User.objects.filter(is_superuser=True)
         if obj.is_superuser and super_users.count() == 1:
-            # cannot delete the last active superuser
+            self.log(_('You cannot delete the last active superuser.'))
             return False
         if self.user.is_superuser:
             return True
@@ -588,6 +613,7 @@ class UserAccess(BaseAccess):
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
         if not settings.MANAGE_ORGANIZATION_AUTH and not self.user.is_superuser:
+            self.log(_('This server is configured to only allow superusers to manager users.'))
             return False
 
         if relationship == 'roles':
@@ -619,10 +645,11 @@ class OAuth2ApplicationAccess(BaseAccess):
                                                             role_field='admin_role', mandatory=True)
 
     def can_delete(self, obj):
-        return self.user.is_superuser or obj.organization in self.user.admin_of_organizations
+        return self.can_change(obj, {})
 
     def can_add(self, data):
         if self.user.is_superuser:
+            self.log(_('Only superusers can add OAuth2 Applications.'))
             return True    
         if not data:
             return Organization.accessible_objects(self.user, 'admin_role').exists()
@@ -705,6 +732,7 @@ class OrganizationAccess(BaseAccess):
         if relationship == "instance_groups":
             if self.user.is_superuser:
                 return True
+            self.log(_('You must be superuser to attach an instance group to an organization.'))
             return False
         return super(OrganizationAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
@@ -791,6 +819,7 @@ class InventoryAccess(BaseAccess):
         if relationship == "instance_groups":
             if self.user.can_access(type(sub_obj), "read", sub_obj) and self.user in obj.organization.admin_role:
                 return True
+            self.log(_('Organization admin permission needed to attach instance group.'))
             return False
         return super(InventoryAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
 
@@ -833,7 +862,8 @@ class HostAccess(BaseAccess):
         # Prevent moving a host to a different inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         if obj and inventory_pk and obj.inventory.pk != inventory_pk:
-            raise PermissionDenied(_('Unable to change inventory on a host.'))
+            self.log(_('Unable to change inventory on a host.'))
+            return False
 
         # Prevent renaming a host that might exceed license count
         if data and 'name' in data:
@@ -883,7 +913,8 @@ class GroupAccess(BaseAccess):
         # Prevent moving a group to a different inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
         if obj and inventory_pk and obj.inventory.pk != inventory_pk:
-            raise PermissionDenied(_('Unable to change inventory on a group.'))
+            self.log(_('Unable to change inventory on a group.'))
+            return False
         # Checks for admin or change permission on inventory, controls whether
         # the user can attach subgroups or edit variable data.
         return obj and self.user in obj.inventory.admin_role
@@ -928,12 +959,6 @@ class InventorySourceAccess(BaseAccess):
 
     def filtered_queryset(self):
         return self.model.objects.filter(inventory__in=Inventory.accessible_pk_qs(self.user, 'read_role'))
-
-    def can_read(self, obj):
-        if obj and obj.inventory:
-            return self.user.can_access(Inventory, 'read', obj.inventory)
-        else:
-            return False
 
     def can_add(self, data):
         if not data or 'inventory' not in data:
@@ -1000,6 +1025,7 @@ class InventoryUpdateAccess(BaseAccess):
 
     def can_cancel(self, obj):
         if not obj.can_cancel:
+            self.log(_('Update is not in a state which can be canceled.'))
             return False
         if self.user.is_superuser or self.user == obj.created_by:
             return True
@@ -1038,6 +1064,7 @@ class CredentialTypeAccess(BaseAccess):
 
     def get_method_capability(self, method, obj, parent_obj):
         if obj.managed_by_tower:
+            self.log(_('Credential Type is managed by the server.'))
             return False
         return super(CredentialTypeAccess, self).get_method_capability(method, obj, parent_obj)
 
@@ -1084,15 +1111,23 @@ class CredentialAccess(BaseAccess):
             return True
         if data and data.get('user', None):
             user_obj = get_object_from_data('user', User, data)
-            return bool(self.user == user_obj or UserAccess(self.user).can_admin(user_obj, None, check_setting=False))
-        if data and data.get('team', None):
+            ret = bool(self.user == user_obj or UserAccess(self.user).can_admin(user_obj, None, check_setting=False))
+            if not ret:
+                self.log(_('Admin permission to user required.'))
+        elif data and data.get('team', None):
             team_obj = get_object_from_data('team', Team, data)
-            return check_user_access(self.user, Team, 'change', team_obj, None)
-        if data and data.get('organization', None):
+            ret = check_user_access(self.user, Team, 'change', team_obj, None)
+            if not ret:
+                self.log(_('Admin permission to team required.'))
+        elif data and data.get('organization', None):
             organization_obj = get_object_from_data('organization', Organization, data)
-            return any([check_user_access(self.user, Organization, 'change', organization_obj, None),
-                        self.user in organization_obj.credential_admin_role])
-        return False
+            ret = any([check_user_access(self.user, Organization, 'change', organization_obj, None),
+                       self.user in organization_obj.credential_admin_role])
+            if not ret:
+                self.log(_('Credential admin permission to organization required.'))
+        else:
+            ret = False
+        return ret
 
     @check_superuser
     def can_use(self, obj):
@@ -1137,6 +1172,7 @@ class TeamAccess(BaseAccess):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'admin_role').exists()
         if not settings.MANAGE_ORGANIZATION_AUTH:
+            self.log(_('This server is configured to only allow superusers to manager users and teams.'))
             return False
         return self.check_related('organization', Organization, data)
 
@@ -1148,6 +1184,7 @@ class TeamAccess(BaseAccess):
         if self.user.is_superuser:
             return True
         if not settings.MANAGE_ORGANIZATION_AUTH:
+            self.log(_('This server is configured to only allow superusers to manager users and teams.'))
             return False
         return self.user in obj.admin_role
 
@@ -1324,13 +1361,17 @@ class JobTemplateAccess(BaseAccess):
         inventory = get_value(Inventory, 'inventory')
         if inventory:
             if self.user not in inventory.use_role:
+                self.log(_('Use role to related inventory required.'))
                 return False
 
         project = get_value(Project, 'project')
         # If the user has admin access to the project (as an org admin), should
         # be able to proceed without additional checks.
         if project:
-            return self.user in project.use_role
+            if self.user not in project.use_role:
+                self.log(_('Use role to related project required.'))
+                return False
+            return True
         else:
             return False
     
@@ -1524,8 +1565,7 @@ class JobAccess(BaseAccess):
                 prompts_access = True
             elif obj.created_by_id != self.user.pk:
                 prompts_access = False
-                if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with prompts provided by another user.')
+                self.log(_('Job was launched with prompts provided by another user.'))
             else:
                 prompts_access = (
                     JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}) and
@@ -1545,15 +1585,15 @@ class JobAccess(BaseAccess):
         ret = org_access and credential_access and project_access
         if not ret and self.save_messages and not self.messages:
             if not obj.job_template:
-                pretext = _('Job has been orphaned from its job template.')
+                self.log(_('Job has been orphaned from its job template.'))
             elif config is None:
-                pretext = _('Job was launched with unknown prompted fields.')
+                self.log(_('Job was launched with unknown prompted fields.'))
             else:
-                pretext = _('Job was launched with prompted fields.')
+                self.log(_('Job was launched with prompted fields.'))
             if credential_access:
-                self.messages['detail'] = '{} {}'.format(pretext, _(' Organization level permissions required.'))
+                self.log(_(' Organization level permissions required.'))
             else:
-                self.messages['detail'] = '{} {}'.format(pretext, _(' You do not have permission to related resources.'))
+                self.log(_(' You do not have permission to related resources.'))
         return ret
 
     def get_method_capability(self, method, obj, parent_obj):
@@ -1953,6 +1993,7 @@ class WorkflowJobAccess(BaseAccess):
             template = obj.job_template
         # only superusers can relaunch orphans
         if not template:
+            self.log(_('You must be a superuser to relaunch orphaned workflow jobs.'))
             return False
 
         # Obtain prompts used to start original job
@@ -1967,32 +2008,17 @@ class WorkflowJobAccess(BaseAccess):
         # Check if access to prompts to prevent relaunch
         if config.prompts_dict():
             if obj.created_by_id != self.user.pk:
-                if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with prompts provided by another user.')
+                self.log(_('Job was launched with prompts provided by another user.'))
                 return False
             if not JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}):
-                if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with prompts you lack access to.')
+                self.log(_('Job was launched with prompts you lack access to.'))
                 return False
             if config.has_unprompted(template):
-                if self.save_messages:
-                    self.messages['detail'] = _('Job was launched with prompts no longer accepted.')
+                self.log(_('Job was launched with prompts no longer accepted.'))
                 return False
 
         # execute permission to WFJT is mandatory for any relaunch
         return (self.user in template.execute_role)
-
-    def can_recreate(self, obj):
-        node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credentials', 'unified_job_template')
-        node_access = WorkflowJobNodeAccess(user=self.user)
-        wj_add_perm = True
-        for node in node_qs:
-            if not node_access.can_add({'reference_obj': node}):
-                wj_add_perm = False
-        if not wj_add_perm and self.save_messages:
-            self.messages['workflow_job_template'] = _('You do not have permission to the workflow job '
-                                                       'resources required for relaunch.')
-        return wj_add_perm
 
     def can_cancel(self, obj):
         if not obj.can_cancel:

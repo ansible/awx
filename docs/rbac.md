@@ -164,3 +164,59 @@ Now that your model is a resource and has a `Role` defined, you can begin to acc
     >>> user in document.admin_role
     False  # my role does not have admin permission
 ```
+
+# Permission System
+
+This section is concerned with the intersection of the RBAC system with
+the processing of requests.
+
+The _primary_ place where permissions are processed to deny / allow a request
+are in the permission classes (setting `DEFAULT_PERMISSION_CLASSES`).
+For a given view and HTML method (PUT, POST, ...) it will prepare the
+call arguments for the access method.
+
+The file `awx/main/access.py` defines model-specific access classes, which
+can implement custom business logic for a specific model & action. Whenever
+possible, this should be a trivial reference to the aforementioned RBAC logic.
+For instance, a PATCH to the organization detail view should result in
+the class `OrganizationAccess`' method `can_change`
+checking `self.user in obj.admin_role` and returning the True/False result.
+
+## Related Fields
+
+The most common exception to using role membership to determine permission
+is the need to consider a related object.
+
+Some objects do not have direct roles at all. Permissions for hosts,
+for instance, come directly from their linked inventory. The access class
+is where this behavior is defined, specific to the `Host` model.
+
+Some objects have roles, but have 1 or more related object that need
+their permission considered as well. For instance, to edit a project,
+admin role is needed for the project and use role is needed for a related
+credential. The access class defines these rules as well.
+
+The helper method `check_related` can abstract some logical legwork for these cases.
+
+## Documenting Rules
+
+Before returning a result from an access method, you can use the helper
+`self.log('Permission message')` to surface the specific reason to the end
+user. The permissions class will attach all such messages to the detail
+given in the 403 response in the event that permission for the action
+is _denied_.
+
+For permission to related resources, the `check_related` helper method
+will also issue a message about what role is lacking for which related,
+resource. For both trivial cases and related resource cases, a
+log message for permissions policy is not needed in the access method.
+
+In other non-obvious cases, developers should include messages that
+express the general policy. Specific resource names, or other direct use
+of user-generated data should be avoided here.
+
+This means that resolution order matters in some cases. For example,
+if a user does not have permission to either a project or a related credential,
+checking the project's permission first may be preferable, because
+a message about lacking permission to the related credential is the
+less important condition which was violated.
