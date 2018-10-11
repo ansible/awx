@@ -91,5 +91,34 @@ describe('View: Split Jobs List', () => {
         it('has method "getSplitJobDetails"', () => {
             expect(JobList.getSplitJobDetails).toBeDefined();
         });
+        it('returns a string', () => {
+            let data = {
+                shard: {
+                    offset: 1,
+                    step: 2
+                }
+            }
+            const result = JobList.getSplitJobDetails(data);
+            expect(result).toEqual('Split Job 2/2');
+        });
+        it('returns null when there is no data', () => {
+            let data = undefined;
+            const result = JobList.getSplitJobDetails(data);
+            expect(result).toBeNull();
+        });
+        it('returns null when there is no "shard" attribute', () => {
+            let data = {
+                foo: {}
+            };
+            const result = JobList.getSplitJobDetails(data);
+            expect(result).toBeNull();
+        });
+        it('returns null when "shard" is an empty object', () => {
+            let data = {
+                shard: {}
+            };
+            const result = JobList.getSplitJobDetails(data);
+            expect(result).toBeNull();
+        });
     });
 });
