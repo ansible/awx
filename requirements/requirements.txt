@@ -4,10 +4,8 @@
 #
 #    pip-compile --output-file requirements/requirements.txt requirements/requirements.in
 #
-adal==0.5.0               # via azure-datalake-store, msrestazure
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
-apache-libcloud==2.2.1
 appdirs==1.4.2
 argparse==1.4.0           # via uwsgitop
 asgi-amqp==1.1.2
@@ -16,99 +14,19 @@ asn1crypto==0.24.0        # via cryptography
 attrs==17.4.0             # via automat, service-identity
 autobahn==18.3.1          # via daphne
 automat==0.6.0            # via twisted
-azure-batch==4.0.0        # via azure
-azure-common==1.1.8       # via azure-batch, azure-cosmosdb-table, azure-eventgrid, azure-graphrbac, azure-keyvault, azure-mgmt-advisor, azure-mgmt-applicationinsights, azure-mgmt-authorization, azure-mgmt-batch, azure-mgmt-batchai, azure-mgmt-billing, azure-mgmt-cdn, azure-mgmt-cognitiveservices, azure-mgmt-commerce, azure-mgmt-compute, azure-mgmt-consumption, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-datafactory, azure-mgmt-datalake-analytics, azure-mgmt-datalake-store, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-eventgrid, azure-mgmt-eventhub, azure-mgmt-hanaonazure, azure-mgmt-iothub, azure-mgmt-iothubprovisioningservices, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-logic, azure-mgmt-machinelearningcompute, azure-mgmt-managementpartner, azure-mgmt-marketplaceordering, azure-mgmt-media, azure-mgmt-monitor, azure-mgmt-msi, azure-mgmt-network, azure-mgmt-notificationhubs, azure-mgmt-powerbiembedded, azure-mgmt-rdbms, azure-mgmt-recoveryservices, azure-mgmt-recoveryservicesbackup, azure-mgmt-redis, azure-mgmt-relay, azure-mgmt-reservations, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-search, azure-mgmt-servermanager, azure-mgmt-servicebus, azure-mgmt-servicefabric, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-subscription, azure-mgmt-trafficmanager, azure-mgmt-web, azure-servicebus, azure-servicefabric, azure-servicemanagement-legacy, azure-storage-blob, azure-storage-common, azure-storage-file, azure-storage-queue
-azure-cosmosdb-nspkg==2.0.2  # via azure-cosmosdb-table
-azure-cosmosdb-table==1.0.2  # via azure
-azure-datalake-store==0.0.18  # via azure
-azure-eventgrid==0.1.0    # via azure
-azure-graphrbac==0.40.0   # via azure
-azure-keyvault==0.3.7     # via azure
-azure-mgmt-advisor==1.0.1  # via azure-mgmt
-azure-mgmt-applicationinsights==0.1.1  # via azure-mgmt
-azure-mgmt-authorization==0.30.0  # via azure-mgmt
-azure-mgmt-batch==5.0.0   # via azure-mgmt
-azure-mgmt-batchai==0.2.0  # via azure-mgmt
-azure-mgmt-billing==0.1.0  # via azure-mgmt
-azure-mgmt-cdn==2.0.0     # via azure-mgmt
-azure-mgmt-cognitiveservices==2.0.0  # via azure-mgmt
-azure-mgmt-commerce==1.0.1  # via azure-mgmt
-azure-mgmt-compute==3.0.1  # via azure-mgmt
-azure-mgmt-consumption==2.0.0  # via azure-mgmt
-azure-mgmt-containerinstance==0.3.1  # via azure-mgmt
-azure-mgmt-containerregistry==1.0.1  # via azure-mgmt
-azure-mgmt-containerservice==3.0.1  # via azure-mgmt
-azure-mgmt-cosmosdb==0.3.1  # via azure-mgmt
-azure-mgmt-datafactory==0.4.0  # via azure-mgmt
-azure-mgmt-datalake-analytics==0.3.0  # via azure-mgmt
-azure-mgmt-datalake-nspkg==2.0.0  # via azure-mgmt-datalake-analytics, azure-mgmt-datalake-store
-azure-mgmt-datalake-store==0.3.0  # via azure-mgmt
-azure-mgmt-devtestlabs==2.2.0  # via azure-mgmt
-azure-mgmt-dns==1.2.0     # via azure-mgmt
-azure-mgmt-eventgrid==0.4.0  # via azure-mgmt
-azure-mgmt-eventhub==1.2.0  # via azure-mgmt
-azure-mgmt-hanaonazure==0.1.0  # via azure-mgmt
-azure-mgmt-iothub==0.4.0  # via azure-mgmt
-azure-mgmt-iothubprovisioningservices==0.1.0  # via azure-mgmt
-azure-mgmt-keyvault==0.40.0  # via azure-mgmt
-azure-mgmt-loganalytics==0.1.0  # via azure-mgmt
-azure-mgmt-logic==2.1.0   # via azure-mgmt
-azure-mgmt-machinelearningcompute==0.4.0  # via azure-mgmt
-azure-mgmt-managementpartner==0.1.0  # via azure-mgmt
-azure-mgmt-marketplaceordering==0.1.0  # via azure-mgmt
-azure-mgmt-media==0.2.0   # via azure-mgmt
-azure-mgmt-monitor==0.4.0  # via azure-mgmt
-azure-mgmt-msi==0.1.0     # via azure-mgmt
-azure-mgmt-network==1.7.1  # via azure-mgmt
-azure-mgmt-notificationhubs==1.0.0  # via azure-mgmt
-azure-mgmt-nspkg==2.0.0   # via azure-mgmt-advisor, azure-mgmt-applicationinsights, azure-mgmt-authorization, azure-mgmt-batch, azure-mgmt-batchai, azure-mgmt-billing, azure-mgmt-cdn, azure-mgmt-cognitiveservices, azure-mgmt-commerce, azure-mgmt-compute, azure-mgmt-consumption, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-datafactory, azure-mgmt-datalake-nspkg, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-eventgrid, azure-mgmt-eventhub, azure-mgmt-hanaonazure, azure-mgmt-iothub, azure-mgmt-iothubprovisioningservices, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-logic, azure-mgmt-machinelearningcompute, azure-mgmt-managementpartner, azure-mgmt-marketplaceordering, azure-mgmt-media, azure-mgmt-monitor, azure-mgmt-msi, azure-mgmt-network, azure-mgmt-notificationhubs, azure-mgmt-powerbiembedded, azure-mgmt-rdbms, azure-mgmt-recoveryservices, azure-mgmt-recoveryservicesbackup, azure-mgmt-redis, azure-mgmt-relay, azure-mgmt-reservations, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-search, azure-mgmt-servermanager, azure-mgmt-servicebus, azure-mgmt-servicefabric, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-subscription, azure-mgmt-trafficmanager, azure-mgmt-web
-azure-mgmt-powerbiembedded==1.0.0  # via azure-mgmt
-azure-mgmt-rdbms==0.1.0   # via azure-mgmt
-azure-mgmt-recoveryservices==0.2.0  # via azure-mgmt
-azure-mgmt-recoveryservicesbackup==0.1.1  # via azure-mgmt
-azure-mgmt-redis==5.0.0   # via azure-mgmt
-azure-mgmt-relay==0.1.0   # via azure-mgmt
-azure-mgmt-reservations==0.1.0  # via azure-mgmt
-azure-mgmt-resource==1.2.2  # via azure-mgmt
-azure-mgmt-scheduler==1.1.3  # via azure-mgmt
-azure-mgmt-search==1.0.0  # via azure-mgmt
-azure-mgmt-servermanager==1.2.0  # via azure-mgmt
-azure-mgmt-servicebus==0.4.0  # via azure-mgmt
-azure-mgmt-servicefabric==0.1.0  # via azure-mgmt
-azure-mgmt-sql==0.8.5     # via azure-mgmt
-azure-mgmt-storage==1.5.0  # via azure-mgmt
-azure-mgmt-subscription==0.1.0  # via azure-mgmt
-azure-mgmt-trafficmanager==0.40.0  # via azure-mgmt
-azure-mgmt-web==0.34.1    # via azure-mgmt
-azure-mgmt==2.0.0         # via azure
-azure-nspkg==2.0.0        # via azure-batch, azure-common, azure-cosmosdb-nspkg, azure-eventgrid, azure-graphrbac, azure-keyvault, azure-mgmt-nspkg, azure-servicebus, azure-servicefabric, azure-servicemanagement-legacy, azure-storage-nspkg
-azure-servicebus==0.21.1  # via azure
-azure-servicefabric==6.1.2.9  # via azure
-azure-servicemanagement-legacy==0.20.6  # via azure
-azure-storage-blob==1.1.0  # via azure
-azure-storage-common==1.1.0  # via azure-cosmosdb-table, azure-storage-blob, azure-storage-file, azure-storage-queue
-azure-storage-file==1.1.0  # via azure
-azure-storage-nspkg==3.0.0  # via azure-storage-blob, azure-storage-common, azure-storage-file, azure-storage-queue
-azure-storage-queue==1.1.0  # via azure
-azure==3.0.0
 backports.functools-lru-cache==1.5  # via jaraco.functools
 backports.ssl-match-hostname==3.5.0.1
 baron==0.6.6              # via redbaron
 billiard==3.3.0.23        # via celery
-boto3==1.7.6
 boto==2.47.0
-botocore==1.10.6
 celery==3.1.25
-certifi==2018.1.18        # via msrest
-cffi==1.11.5              # via azure-datalake-store, cryptography
+cffi==1.11.5              # via cryptography
 channels==1.1.8
 constantly==15.1.0        # via twisted
-cryptography==2.1.4       # via adal, azure-cosmosdb-table, azure-storage-common, pyopenssl, requests, secretstorage
+cryptography==2.1.4       # via pyopenssl, requests
 daphne==1.3.0
 decorator==4.2.1
-debtcollector==1.15.0     # via oslo.config, oslo.utils, python-designateclient, python-keystoneclient, python-neutronclient
 defusedxml==0.4.1         # via python-saml
-deprecation==2.0          # via openstacksdk
 django-auth-ldap==1.2.8
 django-celery==3.2.2
 django-crum==0.7.2
@@ -123,18 +41,16 @@ django-taggit==0.22.2
 django==1.11.11
 djangorestframework-yaml==1.0.3
 djangorestframework==3.7.7
-dogpile.cache==0.6.5      # via openstacksdk
-enum34==1.1.6             # via cryptography, msrest
+enum34==1.1.6             # via cryptography
 functools32==3.2.3.post2  # via jsonschema
-futures==3.2.0            # via azure-cosmosdb-table, azure-datalake-store, azure-storage-blob, azure-storage-file, openstacksdk, requests-futures, s3transfer
+futures==3.2.0            # via requests-futures
 hyperlink==18.0.0         # via twisted
 idna==2.6                 # via cryptography, hyperlink, requests
 incremental==17.5.0       # via twisted
 inflect==0.2.5            # via jaraco.itertools
-ipaddress==1.0.19         # via cryptography, openstacksdk
+ipaddress==1.0.19         # via cryptography
 irc==16.2
-iso8601==0.1.12           # via keystoneauth1, openstacksdk
-isodate==0.6.0            # via msrest, python-saml
+isodate==0.6.0            # via python-saml
 jaraco.classes==1.4.3     # via jaraco.collections
 jaraco.collections==1.5.3  # via irc, jaraco.text
 jaraco.functools==1.17    # via irc, jaraco.text
@@ -142,34 +58,18 @@ jaraco.itertools==2.1.1   # via irc
 jaraco.logging==1.5.1     # via irc
 jaraco.stream==1.1.2      # via irc
 jaraco.text==1.10         # via irc, jaraco.collections
-jmespath==0.9.3           # via boto3, botocore, openstacksdk
-jsonpatch==1.21           # via openstacksdk
 jsonpickle==0.9.6         # via asgi-amqp
-jsonpointer==2.0          # via jsonpatch
 jsonschema==2.6.0
-keyring==11.0.0           # via msrestazure
-keystoneauth1==3.4.0      # via openstacksdk, os-client-config
 kombu==3.0.37             # via asgi-amqp, celery
-lxml==4.1.1               # via pyvmomi
+lxml==4.2.3
 m2crypto==0.29.0
 markdown==2.6.11
 more-itertools==4.1.0     # via irc, jaraco.functools, jaraco.itertools
 msgpack-python==0.5.5     # via asgi-amqp
-msrest==0.4.27            # via azure-datalake-store, azure-eventgrid, azure-servicefabric, msrestazure
-msrestazure==0.4.22       # via azure-batch, azure-graphrbac, azure-keyvault, azure-mgmt-advisor, azure-mgmt-applicationinsights, azure-mgmt-authorization, azure-mgmt-batch, azure-mgmt-batchai, azure-mgmt-billing, azure-mgmt-cdn, azure-mgmt-cognitiveservices, azure-mgmt-commerce, azure-mgmt-compute, azure-mgmt-consumption, azure-mgmt-containerinstance, azure-mgmt-containerregistry, azure-mgmt-containerservice, azure-mgmt-cosmosdb, azure-mgmt-datafactory, azure-mgmt-datalake-analytics, azure-mgmt-datalake-store, azure-mgmt-devtestlabs, azure-mgmt-dns, azure-mgmt-eventgrid, azure-mgmt-eventhub, azure-mgmt-hanaonazure, azure-mgmt-iothub, azure-mgmt-iothubprovisioningservices, azure-mgmt-keyvault, azure-mgmt-loganalytics, azure-mgmt-logic, azure-mgmt-machinelearningcompute, azure-mgmt-managementpartner, azure-mgmt-marketplaceordering, azure-mgmt-media, azure-mgmt-monitor, azure-mgmt-msi, azure-mgmt-network, azure-mgmt-notificationhubs, azure-mgmt-powerbiembedded, azure-mgmt-rdbms, azure-mgmt-recoveryservices, azure-mgmt-recoveryservicesbackup, azure-mgmt-redis, azure-mgmt-relay, azure-mgmt-reservations, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-search, azure-mgmt-servermanager, azure-mgmt-servicebus, azure-mgmt-servicefabric, azure-mgmt-sql, azure-mgmt-storage, azure-mgmt-subscription, azure-mgmt-trafficmanager, azure-mgmt-web
-munch==2.2.0              # via openstacksdk
 netaddr==0.7.19           # via pyrad
-netifaces==0.10.6         # via openstacksdk
 oauthlib==2.0.6           # via django-oauth-toolkit, requests-oauthlib, social-auth-core
-openstacksdk==0.12.0      # via shade
 ordereddict==1.1
-os-client-config==1.29.0  # via shade
-os-service-types==1.2.0   # via openstacksdk
-packaging==17.1           # via deprecation
-pathlib2==2.3.0           # via azure-datalake-store
-pbr==3.1.1                # via keystoneauth1, openstacksdk, os-service-types, shade, stevedore
 pexpect==4.6.0
-psphere==0.5.2
 psutil==5.4.3
 psycopg2==2.7.3.2
 ptyprocess==0.5.2         # via pexpect
@@ -178,7 +78,7 @@ pyasn1==0.4.2             # via pyasn1-modules, service-identity
 pycparser==2.18           # via cffi
 pycrypto==2.6.1
 pygerduty==0.37.0
-pyjwt==1.6.0              # via adal, social-auth-core, twilio
+pyjwt==1.6.0              # via social-auth-core, twilio
 pyopenssl==17.5.0
 pyparsing==2.2.0
 pyrad==1.2                # via django-radius
@@ -190,26 +90,18 @@ python-openid==2.2.5      # via social-auth-core
 python-radius==1.0
 python-saml==2.4.0
 pytz==2018.3              # via celery, django, irc, tempora, twilio
-pyvmomi==6.5
-pyyaml==3.12              # via djangorestframework-yaml, openstacksdk, os-client-config, psphere
+pyyaml==3.12              # via djangorestframework-yaml
 redbaron==0.6.3
 requests-futures==0.9.7
-requests-oauthlib==0.8.0  # via msrest, social-auth-core
+requests-oauthlib==0.8.0  # via social-auth-core
 requests[security]==2.15.1
-requestsexceptions==1.4.0  # via openstacksdk, os-client-config
 rply==0.7.5               # via baron
-s3transfer==0.1.13        # via boto3
-scandir==1.7              # via pathlib2
-secretstorage==2.3.1      # via keyring
 service-identity==17.0.0
-shade==1.27.0
 simplejson==3.13.2        # via uwsgitop
-six==1.11.0               # via asgi-amqp, asgiref, autobahn, automat, cryptography, django-extensions, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, keystoneauth1, more-itertools, munch, openstacksdk, packaging, pathlib2, pygerduty, pyopenssl, pyrad, python-dateutil, python-memcached, pyvmomi, slackclient, social-auth-app-django, social-auth-core, stevedore, tacacs-plus, tempora, twilio, txaio, websocket-client
+six==1.11.0               # via asgi-amqp, asgiref, autobahn, automat, cryptography, django-extensions, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, more-itertools, pygerduty, pyopenssl, pyrad, python-dateutil, python-memcached, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, tempora, twilio, txaio, websocket-client
 slackclient==1.1.2
 social-auth-app-django==2.1.0
 social-auth-core==1.7.0
-stevedore==1.28.0         # via keystoneauth1
-suds==0.4                 # via psphere
 tacacs_plus==1.0
 tempora==1.10             # via irc, jaraco.logging
 twilio==6.10.4
