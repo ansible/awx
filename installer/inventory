@@ -10,6 +10,7 @@ dockerhub_base=ansible
 
 # Openshift Install
 # Will need to set -e openshift_password=developer -e docker_registry_password=$(oc whoami -t)
+#           or set -e openshift_token=TOKEN
 # openshift_host=127.0.0.1:8443
 # openshift_project=awx
 # openshift_user=developer
