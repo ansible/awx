@@ -11,13 +11,23 @@ const workflowSelector = "//a[contains(text(), 'test-actions-workflow-template')
 const workflowVisualizerBtn = "//button[contains(@id, 'workflow_job_template_workflow_visualizer_btn')]";
 
 const rootNode = "//*[@id='node-2']";
-const childNode = "";
-const leafNode = "//g[contains(@id, 'node-1')]";
-const project = "//td[contains(text(), 'test-actions-project')]";
-const edgeTypeDropdown = "//span[contains(@id, 'select2-workflow_node_edge-container')]";
-const alwaysDropdown = "//*[@id='select2-workflow_node_edge-result-elm7-always']"
-const successDropdown = "//*[@id='select2-workflow_node_edge-result-veyc-success']"
-const failureDropdown = "//*[@id='select2-workflow_node_edge-result-xitr-failure']"
+const childNode = "//*[@id='node-3']";
+const newChildNode = "//*[@id='node-5']";
+const leafNode = "//*[@id='node-6']";
+const nodeAdd = "//*[contains(@class, 'nodeAddCross')]";
+const nodeRemove = "//*[contains(@class, 'nodeRemoveCross')]";
+
+//one of the jobs or projects or inventories
+const testActionsProject = "//td[contains(text(), 'test-actions-project')]";
+const testActionsJob = "//td[contains(text(), 'test-actions-job')]";
+
+// dropdown bar which lets you select edge type
+const edgeTypeDropdownBar = "//span[contains(@id, 'select2-workflow_node_edge-container')]";
+const alwaysDropdown = "//li[contains(@id, 'select2-workflow_node_edge') and text()='Always']";
+const successDropdown = "//li[contains(@id, 'select2-workflow_node_edge') and text()='On Success']";
+const failureDropdown = "//li[contains(@id, 'select2-workflow_node_edge') and text()='On Failure']";
+const selectButton = "//*[@id='workflow_maker_select_btn']";
+const deleteConfirmation = "//button[@ng-click='confirmDeleteNode()']";
 
 module.exports = {
     before: (client, done) => {
@@ -39,7 +49,7 @@ module.exports = {
             .resizeWindow(1200, 1000)
             .useXpath()
             .findThenClick(workflowTemplateNavTab)
-            .pause(1000)
+            .pause(1500)
             .findThenClick(workflowSelector)
             .findThenClick(workflowVisualizerBtn);
     },
@@ -47,7 +57,72 @@ module.exports = {
         client
             .useXpath()
             .findThenClick(rootNode)
-            .findThenClick(project)
-            .findThenClick(edgeTypeDropdown);
+            .findThenClick(testActionsProject)
+            .findThenClick(edgeTypeDropdownBar)
+            .waitForElementNotPresent(successDropdown)
+            .waitForElementNotPresent(failureDropdown)
+            .waitForElementPresent(alwaysDropdown);
     },
+    'verify that a non-root node can be set to always/success/failure': client => {
+        client
+            .useXpath()
+            .findThenClick(childNode)
+            .pause(1000)
+            .findThenClick(edgeTypeDropdownBar)
+            .waitForElementPresent(successDropdown)
+            .waitForElementPresent(failureDropdown)
+            .waitForElementPresent(alwaysDropdown)
+            .findThenClick(edgeTypeDropdownBar);
+    },
+    'verify that a sibling node can be any edge type': client => {
+        client
+            .useXpath()
+            .moveToElement(childNode, 0, 0, function() {
+                client.pause(500);
+                // Concatenating the xpaths lets us click the proper node
+                client.click(childNode+nodeAdd);
+            })
+            .pause(1000)
+            .findThenClick(testActionsJob)
+            .pause(1000)
+            .findThenClick(edgeTypeDropdownBar)
+            .waitForElementPresent(successDropdown)
+            .waitForElementPresent(failureDropdown)
+            .waitForElementPresent(alwaysDropdown)
+            .findThenClick(alwaysDropdown)
+            .click(selectButton);
+    },
+    'Verify node-shifting behavior upon deletion': client => {
+        client
+            .findThenClick(newChildNode)
+            .pause(1000)
+            .findThenClick(edgeTypeDropdownBar)
+            .findThenClick(successDropdown)
+            .click(selectButton)
+            .moveToElement(newChildNode, 0, 0, function() {
+                client.pause(500);
+                client.click(newChildNode+nodeAdd);
+            })
+            .pause(1000)
+            .findThenClick(testActionsJob)
+            .pause(1000)
+            .findThenClick(edgeTypeDropdownBar)
+            .waitForElementPresent(successDropdown)
+            .waitForElementPresent(failureDropdown)
+            .waitForElementPresent(alwaysDropdown)
+            .findThenClick(alwaysDropdown)
+            .click(selectButton)
+            .moveToElement(newChildNode, 0, 0, function() {
+                client.pause(500);
+                client.click(newChildNode+nodeRemove);
+            })
+            .pause(1000)
+            .findThenClick(deleteConfirmation)
+            .findThenClick(leafNode)
+            .pause(1000)
+            .findThenClick(edgeTypeDropdownBar)
+            .waitForElementPresent(successDropdown)
+            .waitForElementPresent(failureDropdown)
+            .waitForElementPresent(alwaysDropdown);
+    }
 };
