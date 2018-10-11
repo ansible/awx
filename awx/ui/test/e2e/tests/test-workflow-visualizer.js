@@ -17,7 +17,7 @@ const leafNode = "//*[@id='node-6']";
 const nodeAdd = "//*[contains(@class, 'nodeAddCross')]";
 const nodeRemove = "//*[contains(@class, 'nodeRemoveCross')]";
 
-//one of the jobs or projects or inventories
+// one of the jobs or projects or inventories
 const testActionsProject = "//td[contains(text(), 'test-actions-project')]";
 const testActionsJob = "//td[contains(text(), 'test-actions-job')]";
 
@@ -77,10 +77,10 @@ module.exports = {
     'verify that a sibling node can be any edge type': client => {
         client
             .useXpath()
-            .moveToElement(childNode, 0, 0, function() {
+            .moveToElement(childNode, 0, 0, () => {
                 client.pause(500);
                 // Concatenating the xpaths lets us click the proper node
-                client.click(childNode+nodeAdd);
+                client.click(childNode + nodeAdd);
             })
             .pause(1000)
             .findThenClick(testActionsJob)
@@ -99,9 +99,9 @@ module.exports = {
             .findThenClick(edgeTypeDropdownBar)
             .findThenClick(successDropdown)
             .click(selectButton)
-            .moveToElement(newChildNode, 0, 0, function() {
+            .moveToElement(newChildNode, 0, 0, () => {
                 client.pause(500);
-                client.click(newChildNode+nodeAdd);
+                client.click(newChildNode + nodeAdd);
             })
             .pause(1000)
             .findThenClick(testActionsJob)
@@ -112,9 +112,9 @@ module.exports = {
             .waitForElementPresent(alwaysDropdown)
             .findThenClick(alwaysDropdown)
             .click(selectButton)
-            .moveToElement(newChildNode, 0, 0, function() {
+            .moveToElement(newChildNode, 0, 0, () => {
                 client.pause(500);
-                client.click(newChildNode+nodeRemove);
+                client.click(newChildNode + nodeRemove);
             })
             .pause(1000)
             .findThenClick(deleteConfirmation)
