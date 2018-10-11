@@ -234,9 +234,7 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
             - name: RABBITMQ_USE_LONGNAME
-              value: "true"
-            - name: RABBITMQ_NODENAME
-              value: "rabbit@$(MY_POD_IP)"
+              value: "false"
             - name: RABBITMQ_ERLANG_COOKIE
               valueFrom:
                 secretKeyRef:
