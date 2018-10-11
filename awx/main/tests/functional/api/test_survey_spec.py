@@ -285,9 +285,7 @@ def test_survey_spec_passwords_with_default_required(job_template_factory, post,
 @pytest.mark.django_db
 @pytest.mark.parametrize('default, status', [
     ('SUPERSECRET', 200),
-    (['some', 'invalid', 'list'], 400),
     ({'some-invalid': 'dict'}, 400),
-    (False, 400)
 ])
 def test_survey_spec_default_passwords_are_encrypted(job_template, post, admin_user, default, status):
     job_template.survey_enabled = True
@@ -317,7 +315,7 @@ def test_survey_spec_default_passwords_are_encrypted(job_template, post, admin_u
             'secret_value': default
         }
     else:
-        assert "for 'secret_value' expected to be a string." in str(resp.data)
+        assert "expected to be string." in str(resp.data)
 
 
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
@@ -344,37 +342,6 @@ def test_survey_spec_default_passwords_encrypted_on_update(job_template, post, p
     post(url=reverse('api:job_template_survey_spec', kwargs={'pk': job_template.id}),
          data=input_data, user=admin_user, expect=200)
     assert updated_jt.survey_spec == JobTemplate.objects.get(pk=job_template.pk).survey_spec
-
-
-# Tests related to survey content validation
-@mock.patch('awx.api.views.feature_enabled', lambda feature: True)
-@pytest.mark.django_db
-@pytest.mark.survey
-def test_survey_spec_non_dict_error(deploy_jobtemplate, post, admin_user):
-    """When a question doesn't follow the standard format, verify error thrown."""
-    response = post(
-        url=reverse('api:job_template_survey_spec', kwargs={'pk': deploy_jobtemplate.id}),
-        data={
-            "description": "Email of the submitter",
-            "spec": ["What is your email?"], "name": "Email survey"
-        },
-        user=admin_user,
-        expect=400
-    )
-    assert response.data['error'] == "Survey question 0 is not a json object."
-
-
-@mock.patch('awx.api.views.feature_enabled', lambda feature: True)
-@pytest.mark.django_db
-@pytest.mark.survey
-def test_survey_spec_dual_names_error(survey_spec_factory, deploy_jobtemplate, post, user):
-    response = post(
-        url=reverse('api:job_template_survey_spec', kwargs={'pk': deploy_jobtemplate.id}),
-        data=survey_spec_factory(['submitter_email', 'submitter_email']),
-        user=user('admin', True),
-        expect=400
-    )
-    assert response.data['error'] == "'variable' 'submitter_email' duplicated in survey question 1."
 
 
 # Test actions that should be allowed with non-survey license
