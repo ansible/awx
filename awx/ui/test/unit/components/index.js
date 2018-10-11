@@ -6,5 +6,6 @@ import './file.unit';
 import './layout.unit';
 import './side-nav.unit';
 import './side-nav-item.unit';
-import './split-jobs.unit';
+import './jobs-list-split-jobs.unit';
+import './job-details-split-jobs.unit';
 

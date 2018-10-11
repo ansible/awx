@@ -143,7 +143,10 @@ function getSliceJobDetails () {
     const offset = `${number}/${count}`;
     const tooltip = strings.get('tooltips.SLICE_JOB_DETAILS');
 
-    return { label, offset, tooltip };
+    if (label && offset && tooltip) {
+        return { label, offset, tooltip };
+    }
+    return null;
 }
 
 function getJobTemplateDetails () {
