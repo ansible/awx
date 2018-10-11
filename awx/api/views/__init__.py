@@ -599,7 +599,7 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
     search_fields = ('hostname',)
 
 
-class ScheduleList(ListAPIView):
+class ScheduleList(ListCreateAPIView):
 
     view_name = _("Schedules")
     model = Schedule
@@ -1291,7 +1291,7 @@ class ProjectUpdateNotificationsList(SubListAPIView):
     search_fields = ('subject', 'notification_type', 'body',)
 
 
-class ProjectUpdateScmInventoryUpdates(SubListCreateAPIView):
+class ProjectUpdateScmInventoryUpdates(SubListAPIView):
 
     view_name = _("Project Update SCM Inventory Updates")
     model = InventoryUpdate
@@ -1484,10 +1484,11 @@ class OAuth2TokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIVi
     search_fields = ('changes',)
 
 
-class UserTeamsList(ListAPIView):
+class UserTeamsList(SubListAPIView):
 
-    model = User
+    model = Team
     serializer_class = TeamSerializer
+    parent_model = User
 
     def get_queryset(self):
         u = get_object_or_404(User, pk=self.kwargs['pk'])
@@ -1665,7 +1666,7 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
         return super(CredentialTypeDetail, self).destroy(request, *args, **kwargs)
 
 
-class CredentialTypeCredentialList(SubListAPIView):
+class CredentialTypeCredentialList(SubListCreateAPIView):
 
     model = Credential
     parent_model = CredentialType
