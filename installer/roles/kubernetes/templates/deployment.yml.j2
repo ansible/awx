@@ -115,6 +115,7 @@ metadata:
   name: {{ kubernetes_deployment_name }}
   namespace: {{ kubernetes_namespace }}
 spec:
+  serviceName: {{ kubernetes_deployment_name }}
   replicas: 1
   template:
     metadata:
