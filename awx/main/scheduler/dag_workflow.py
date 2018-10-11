@@ -133,10 +133,9 @@ class WorkflowDAG(SimpleDAG):
                 nodes.extend(children_all)
             elif job and job.status == 'failed':
                 children_failed = self.get_dependencies(obj, 'success_nodes')
-                children_all = children_failed
-                nodes.extend(children_all)
+                nodes.extend(children_failed)
             elif job and job.status == 'successful':
                 children_success = self.get_dependencies(obj, 'failure_nodes')
-                children_all = children_success
-                nodes.extend(children_all)
+                nodes.extend(children_success)
         return [n['node_object'] for n in nodes_marked_do_not_run]
+
