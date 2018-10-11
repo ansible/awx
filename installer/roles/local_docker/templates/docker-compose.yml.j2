@@ -12,7 +12,7 @@ services:
       {% endif %}
     ports:
       - "{{ host_port }}:8052"
-    hostname: awxweb
+    hostname: {{ awx_web_hostname }}
     user: root
     restart: unless-stopped
     {% if (project_data_dir is defined) or (ca_trust_dir is defined) %}
@@ -71,7 +71,7 @@ services:
       {% if pg_hostname is not defined %}
       - postgres
       {% endif %}
-    hostname: awx
+    hostname: {{ awx_task_hostname }}
     user: root
     restart: unless-stopped
     {% if (project_data_dir is defined) or (ca_trust_dir is defined) %}
