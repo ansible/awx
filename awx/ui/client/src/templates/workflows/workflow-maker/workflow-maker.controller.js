@@ -170,7 +170,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                             // This finds the credentials that were selected in the prompt but don't occur
                             // in the template defaults
                             let credentialsToPost = params.node.promptData.prompts.credentials.value.filter(function (credFromPrompt) {
-                                let defaultCreds = params.node.promptData.launchConf.defaults.credentials ? params.node.promptData.launchConf.defaults.credentials : [];
+                                let defaultCreds = _.get(params, 'node.promptData.launchConf.defaults.credentials', []);
                                 return !defaultCreds.some(function (defaultCred) {
                                     return credFromPrompt.id === defaultCred.id;
                                 });
@@ -188,12 +188,14 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
                         params.node.isNew = false;
                         continueRecursing(data.data.id);
-                    }, function (error) {
-                        ProcessErrors($scope, error.data, error.status, null, {
-                            hdr: 'Error!',
-                            msg: 'Failed to add workflow node. ' +
-                                'POST returned status: ' +
-                                error.status
+                    }, function ({ data, config, status }) {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: $scope.strings.get('error.HEADER'),
+                            msg: $scope.strings.get('error.CALL', {
+                                path: `${config.url}`,
+                                action: `${config.method}`,
+                                status
+                            })
                         });
                     });
             } else {
@@ -208,14 +210,14 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
                         if (_.get(params, 'node.promptData.launchConf.ask_credential_on_launch')) {
                             let credentialsNotInPriorCredentials = params.node.promptData.prompts.credentials.value.filter(function (credFromPrompt) {
-                                let defaultCreds = params.node.promptData.launchConf.defaults.credentials ? params.node.promptData.launchConf.defaults.credentials : [];
+                                let defaultCreds = _.get(params, 'node.promptData.launchConf.defaults.credentials', []);
                                 return !defaultCreds.some(function (defaultCred) {
                                     return credFromPrompt.id === defaultCred.id;
                                 });
                             });
 
                             let credentialsToAdd = credentialsNotInPriorCredentials.filter(function (credNotInPrior) {
-                                let previousOverrides = params.node.promptData.prompts.credentials.previousOverrides ? params.node.promptData.prompts.credentials.previousOverrides : [];
+                                let previousOverrides = _.get(params, 'node.promptData.prompts.credentials.previousOverrides', []);
                                 return !previousOverrides.some(function (priorCred) {
                                     return credNotInPrior.id === priorCred.id;
                                 });
@@ -400,14 +402,9 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                                 });
                             });
 
-                            $q.all(associatePromises.concat(credentialPromises))
+                            return $q.all(associatePromises.concat(credentialPromises))
                                 .then(function () {
                                     $scope.closeDialog();
-                                }).catch(({
-                                    data,
-                                    status
-                                }) => {
-                                    ProcessErrors($scope, data, status, null, {});
                                 });
                         }).catch(({
                             data,
@@ -855,12 +852,15 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         .then(function (data) {
                             $scope.nodeBeingEdited.unifiedJobTemplate = _.clone(data.data.results[0]);
                             finishConfiguringEdit();
-                        }, function (error) {
-                            ProcessErrors($scope, error.data, error.status, null, {
-                                hdr: 'Error!',
-                                msg: 'Failed to get unified job template. GET returned ' +
-                                    'status: ' + error.status
-                            });
+                        }, function ({ data, status, config }) {
+                          ProcessErrors($scope, data, status, null, {
+                            hdr: $scope.strings.get('error.HEADER'),
+                            msg: $scope.strings.get('error.CALL', {
+                                path: `${config.url}`,
+                                action: `${config.method}`,
+                                status
+                            })
+                        });
                         });
                 } else {
                     finishConfiguringEdit();
@@ -1156,11 +1156,14 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         // This is the last page
                         buildTreeFromNodes();
                     }
-                }, function (error) {
-                    ProcessErrors($scope, error.data, error.status, null, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get workflow job template nodes. GET returned ' +
-                            'status: ' + error.status
+                }, function ({ data, status, config }) {
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: $scope.strings.get('error.HEADER'),
+                        msg: $scope.strings.get('error.CALL', {
+                            path: `${config.url}`,
+                            action: `${config.method}`,
+                            status
+                        })
                     });
                 });
         };
