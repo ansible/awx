@@ -3,3 +3,11 @@ dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
 
 rabbitmq_version: "3.7.4"
 rabbitmq_image: "ansible/awx_rabbitmq:{{rabbitmq_version}}"
+rabbitmq_default_vhost: "awx"
+rabbitmq_erlang_cookie: "cookiemonster"
+rabbitmq_port: "5672"
+rabbitmq_default_username: "guest"
+rabbitmq_default_password: "guest"
+
+postgresql_version: "9.6"
+postgresql_image: "postgres:{{postgresql_version}}"
