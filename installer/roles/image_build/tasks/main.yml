@@ -217,5 +217,5 @@
   file:
     path: "{{ docker_base_path }}"
     state: absent
-  when: cleanup_docker_base|default(True)
+  when: cleanup_docker_base|default(True)|bool
   delegate_to: localhost
