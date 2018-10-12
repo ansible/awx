@@ -6,6 +6,7 @@ import {
 } from '../fixtures';
 
 let data;
+const spinny = "//*[contains(@class, 'spinny')]";
 const workflowTemplateNavTab = "//at-side-nav-item[contains(@name, 'TEMPLATES')]";
 const workflowSelector = "//a[contains(text(), 'test-actions-workflow-template')]";
 const workflowVisualizerBtn = "//button[contains(@id, 'workflow_job_template_workflow_visualizer_btn')]";
@@ -50,6 +51,7 @@ module.exports = {
             .useXpath()
             .findThenClick(workflowTemplateNavTab)
             .pause(1500)
+            .waitForElementNotVisible(spinny)
             .findThenClick(workflowSelector)
             .findThenClick(workflowVisualizerBtn);
     },
@@ -68,6 +70,7 @@ module.exports = {
             .useXpath()
             .findThenClick(childNode)
             .pause(1000)
+            .waitForElementNotVisible(spinny)
             .findThenClick(edgeTypeDropdownBar)
             .waitForElementPresent(successDropdown)
             .waitForElementPresent(failureDropdown)
@@ -79,12 +82,15 @@ module.exports = {
             .useXpath()
             .moveToElement(childNode, 0, 0, () => {
                 client.pause(500);
+                client.waitForElementNotVisible(spinny);
                 // Concatenating the xpaths lets us click the proper node
                 client.click(childNode + nodeAdd);
             })
             .pause(1000)
+            .waitForElementNotVisible(spinny)
             .findThenClick(testActionsJob)
             .pause(1000)
+            .waitForElementNotVisible(spinny)
             .findThenClick(edgeTypeDropdownBar)
             .waitForElementPresent(successDropdown)
             .waitForElementPresent(failureDropdown)
@@ -96,16 +102,20 @@ module.exports = {
         client
             .findThenClick(newChildNode)
             .pause(1000)
+            .waitForElementNotVisible(spinny)
             .findThenClick(edgeTypeDropdownBar)
             .findThenClick(successDropdown)
             .click(selectButton)
             .moveToElement(newChildNode, 0, 0, () => {
                 client.pause(500);
+                client.waitForElementNotVisible(spinny);
                 client.click(newChildNode + nodeAdd);
             })
             .pause(1000)
+            .waitForElementNotVisible(spinny)
             .findThenClick(testActionsJob)
             .pause(1000)
+            .waitForElementNotVisible(spinny)
             .findThenClick(edgeTypeDropdownBar)
             .waitForElementPresent(successDropdown)
             .waitForElementPresent(failureDropdown)
@@ -114,15 +124,21 @@ module.exports = {
             .click(selectButton)
             .moveToElement(newChildNode, 0, 0, () => {
                 client.pause(500);
+                client.waitForElementNotVisible(spinny);
                 client.click(newChildNode + nodeRemove);
             })
             .pause(1000)
+            .waitForElementNotVisible(spinny)
             .findThenClick(deleteConfirmation)
             .findThenClick(leafNode)
             .pause(1000)
+            .waitForElementNotVisible(spinny)
             .findThenClick(edgeTypeDropdownBar)
             .waitForElementPresent(successDropdown)
             .waitForElementPresent(failureDropdown)
             .waitForElementPresent(alwaysDropdown);
+    },
+    after: client => {
+        client.end();
     }
 };
