@@ -328,16 +328,6 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 }).each(wrap);
 
                             thisNode.append("foreignObject")
-                                 .attr("x", 54)
-                                 .attr("y", 45)
-                                 .style("font-size","0.7em")
-                                 .attr("class", "WorkflowChart-conflictText")
-                                 .html(function () {
-                                     return `<span class=\"WorkflowChart-conflictIcon\">\uf06a</span><span> ${TemplatesStrings.get('workflow_maker.EDGE_CONFLICT')}</span>`;
-                                 })
-                                 .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
-
-                            thisNode.append("foreignObject")
                                 .attr("x", 62)
                                 .attr("y", 22)
                                 .attr("dy", ".35em")
@@ -830,9 +820,6 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                     t.selectAll(".WorkflowChart-deletedText")
                         .style("display", function(d){ return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
-
-                    t.selectAll(".WorkflowChart-conflictText")
-                        .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
 
                     t.selectAll(".WorkflowChart-activeNode")
                         .style("display", function(d) { return d.isActiveEdit ? null : "none"; });
