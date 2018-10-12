@@ -1,12 +1,4 @@
 
-from awx.main.models import (
-    Job,
-    AdHocCommand,
-    InventoryUpdate,
-    ProjectUpdate,
-    WorkflowJob,
-)
-
 
 class SimpleDAG(object):
     ''' A simple implementation of a directed acyclic graph '''
