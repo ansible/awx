@@ -1,5 +1,8 @@
 # AWX-PF
 
+## Requirements
+- node 8.x LTS, npm 5.x LTS, make, git
+
 ## Usage
 
 * `git clone git@github.com:ansible/awx-pf.git`
