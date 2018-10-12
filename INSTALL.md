@@ -236,7 +236,7 @@ Using /etc/ansible/ansible.cfg as config file
 }
 Operations to perform:
   Synchronize unmigrated apps: solo, api, staticfiles, messages, channels, django_extensions, ui, rest_framework, polymorphic
-  Apply all migrations: sso, taggit, sessions, djcelery, sites, kombu_transport_django, social_auth, contenttypes, auth, conf, main
+  Apply all migrations: sso, taggit, sessions, sites, kombu_transport_django, social_auth, contenttypes, auth, conf, main
 Synchronizing apps without migrations:
   Creating tables...
     Running deferred SQL...
@@ -548,7 +548,7 @@ Using /etc/ansible/ansible.cfg as config file
 }
 Operations to perform:
   Synchronize unmigrated apps: solo, api, staticfiles, messages, channels, django_extensions, ui, rest_framework, polymorphic
-  Apply all migrations: sso, taggit, sessions, djcelery, sites, kombu_transport_django, social_auth, contenttypes, auth, conf, main
+  Apply all migrations: sso, taggit, sessions, sites, kombu_transport_django, social_auth, contenttypes, auth, conf, main
 Synchronizing apps without migrations:
   Creating tables...
     Running deferred SQL...

@@ -9,7 +9,6 @@ daphne==1.3.0   # Last before backwards-incompatible channels 2 upgrade
 decorator==4.2.1
 Django==1.11.11
 django-auth-ldap==1.2.8
-django-celery==3.2.2
 django-crum==0.7.2
 django-extensions==2.0.0
 django-jsonfield==1.0.1

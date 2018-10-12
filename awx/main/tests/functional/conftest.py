@@ -14,7 +14,6 @@ from django.core.urlresolvers import resolve
 from django.utils.six.moves.urllib.parse import urlparse
 from django.utils import timezone
 from django.contrib.auth.models import User
-from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.backends.sqlite3.base import SQLiteCursorWrapper
 from jsonbfield.fields import JSONField
@@ -64,17 +63,6 @@ __SWAGGER_REQUESTS__ = {}
 @pytest.fixture(scope="session")
 def swagger_autogen(requests=__SWAGGER_REQUESTS__):
     return requests
-
-
-@pytest.fixture(scope="session", autouse=True)
-def celery_memory_broker():
-    '''
-    FIXME: Not sure how "far" just setting the BROKER_URL will get us.
-    We may need to incluence CELERY's configuration like we do in the old unit tests (see base.py)
-
-    Allows django signal code to execute without the need for redis
-    '''
-    settings.BROKER_URL='memory://localhost/'
 
 
 @pytest.fixture

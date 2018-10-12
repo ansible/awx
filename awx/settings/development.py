@@ -68,13 +68,6 @@ template['OPTIONS']['loaders'] = (
     'django.template.loaders.app_directories.Loader',
 )
 
-# Disable capturing all SQL queries when running celeryd in development.
-if 'celery' in sys.argv:
-    SQL_DEBUG = False
-
-CELERYD_HIJACK_ROOT_LOGGER = False
-CELERYD_LOG_COLOR = True
-
 CALLBACK_QUEUE = "callback_tasks"
 
 # Enable dynamically pulling roles from a requirement.yml file
@@ -148,15 +141,6 @@ except ImportError:
     sys.exit(1)
 
 CLUSTER_HOST_ID = socket.gethostname()
-
-# Supervisor service name dictionary used for programatic restart
-SERVICE_NAME_DICT = {
-    "celery": "celery",
-    "callback": "receiver",
-    "runworker": "channels",
-    "uwsgi": "uwsgi",
-    "daphne": "daphne",
-    "nginx": "nginx"}
 
 try:
     socket.gethostbyname('docker.for.mac.host.internal')
