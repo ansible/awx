@@ -82,9 +82,11 @@
     state: started
     restart_policy: unless-stopped
     image: "{{ awx_web_docker_actual_image }}"
-    volumes:
-      - "{{ project_data_dir + ':/var/lib/awx/projects:z' if project_data_dir is defined else [] }}"
-      - "{{ ca_trust_dir + ':/etc/pki/ca-trust/source/anchors:ro' if ca_trust_dir is defined else [] }}"
+    volumes: >
+      {{
+        [project_data_dir + ':/var/lib/awx/projects:z'] if project_data_dir is defined else []
+        + [ca_trust_dir + ':/etc/pki/ca-trust/source/anchors:ro'] if ca_trust_dir is defined else []
+      }}
     user: root
     ports:
       - "{{ host_port }}:8052"
