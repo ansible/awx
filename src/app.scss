@@ -1,0 +1,34 @@
+.pf-l-page__header {
+  --pf-l-page__header--MinHeight: 0px;
+  display: flex;
+  align-items: center;
+  height: 60px;
+  background-color: #030303;
+  
+}
+
+.pf-l-page__header-brand {
+  --pf-l-page__header-brand--PaddingBottom: 0px;
+}
+
+.pf-l-page__main-section {
+  --pf-l-page__main-section--PaddingTop: 11px;
+  --pf-l-page__main-section--PaddingLeft: 11px;
+}
+
+.pf-c-nav__section + .pf-c-nav__section {
+  --pf-c-nav__section--MarginTop: 16px;
+}
+
+.pf-l-page__header-brand-toggle {
+  padding-bottom: 4px;
+  padding-right: 0px;
+}
+
+.pf-l-page__header-brand-link {
+  transform: scale(0.75, 0.75);
+}
+
+.pf-l-page__sidebar{
+  --pf-l-page__sidebar--Width--lg: 200px;
+}

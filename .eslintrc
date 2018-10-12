@@ -24,6 +24,7 @@
     "window": true,
   },
   "rules": {
+    "camelcase": "off",
     "arrow-parens": "off",
     "comma-dangle": "off",    
     "indent": ["error", 2, {
@@ -45,5 +46,7 @@
     "object-curly-newline": "off",
     "space-before-function-paren": ["error", "always"],
     "no-trailing-spaces": ["error"],
+    "react/prefer-stateless-function": "off",
+    "react/prop-types": "off",
   }
 }
