@@ -24,7 +24,7 @@ __all__ = ['CallbackQueueDispatcher']
 class AnsibleJSONEncoder(json.JSONEncoder):
 
     def default(self, o):
-        if getattr(o, 'yaml_tag') == '!vault':
+        if getattr(o, 'yaml_tag', None) == '!vault':
             return o.data
         return super(AnsibleJSONEncoder, self).default(o)
 
