@@ -111,7 +111,7 @@
       MEMCACHED_PORT: "11211"
       AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
       AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
-    register: awx_web_container
+  register: awx_web_container
 
 - name: Update CA trust in awx_web container
   command: docker exec awx_web '/usr/bin/update-ca-trust'
