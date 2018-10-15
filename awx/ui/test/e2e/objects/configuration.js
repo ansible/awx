@@ -15,6 +15,17 @@ const commands = [{
     },
     selectSubcategory (name) {
         const spinny = 'div.spinny';
+        const categoryName = `//*[text() = '${name}']`;
+        
+        this.api.useXpath();
+        this.api.waitForElementVisible(categoryName);
+        this.api.click(categoryName);
+        this.api.useCss();
+
+        return this;
+    },
+    selectDropDownContainer (name) {
+        const spinny = 'div.spinny';
         const select = '#configure-dropdown-nav';
         const arrow = `${select} + span span[class$="arrow"]`;
         const option = `//li[contains(text(), "${name}")]`;
