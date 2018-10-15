@@ -10,7 +10,6 @@ if ($basePath) {
 }
 
 import start from './app.start';
-import portalMode from './portal-mode/main';
 import inventoriesHosts from './inventories-hosts/main';
 import inventoryScripts from './inventory-scripts/main';
 import credentials from './credentials/main';
