@@ -219,11 +219,13 @@ class WorkflowJobNode(WorkflowNodeBase):
                 data.update(accepted_fields)
         # build ancestor artifacts, save them to node model for later
         aa_dict = {}
+        is_root_node = True
         for parent_node in self.get_parent_nodes():
+            is_root_node = False
             aa_dict.update(parent_node.ancestor_artifacts)
             if parent_node.job and hasattr(parent_node.job, 'artifacts'):
                 aa_dict.update(parent_node.job.artifacts)
-        if aa_dict:
+        if aa_dict and not is_root_node:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
         # process password list
@@ -252,18 +254,12 @@ class WorkflowJobNode(WorkflowNodeBase):
         # ensure that unified jobs created by WorkflowJobs are marked
         data['_eager_fields'] = {'launch_type': 'workflow'}
         # Extra processing in the case that this is a split job
-        if 'job_split' in self.ancestor_artifacts:
+        if 'job_split' in self.ancestor_artifacts and is_root_node:
             split_str = six.text_type(self.ancestor_artifacts['job_split'] + 1)
-            data['_eager_fields']['name'] = six.text_type("{} - {}").format(
-                self.unified_job_template.name[:512 - len(split_str) - len(' - ')],
-                split_str
-            )
             data['_eager_fields']['allow_simultaneous'] = True
-            data['_eager_fields']['internal_limit'] = 'split{0}of{1}'.format(
-                self.ancestor_artifacts['job_split'],
-                self.workflow_job.workflow_job_nodes.count()
-            )
-            data['_prevent_splitting'] = True
+            data['_eager_fields']['job_slice_number'] = self.ancestor_artifacts['job_split']
+            data['_eager_fields']['job_slice_count'] = self.workflow_job.workflow_job_nodes.count()
+            data['_prevent_slicing'] = True
         return data
 
 
@@ -459,11 +455,16 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     )
     job_template = models.ForeignKey(
         'JobTemplate',
-        related_name='split_jobs',
+        related_name='slice_workflow_jobs',
         blank=True,
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        help_text=_("If automatically created for a sliced job run, the job template "
+                    "the workflow job was created from."),
+    )
+    is_sliced_job = models.BooleanField(
+        default=False
     )
 
     @property

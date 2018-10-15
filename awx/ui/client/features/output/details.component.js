@@ -126,22 +126,18 @@ function getSourceWorkflowJobDetails () {
     return { link, tooltip };
 }
 
-function getSplitJobDetails () {
-    const internalLimitDetails = resource.model.get('summary_fields.internal_limit');
+function getSliceJobDetails () {
+    const count = resource.model.get('job_slice_count');
 
-    if (!internalLimitDetails) {
+    if (count === 1) {
         return null;
     }
 
-    const splitJobDetails = resource.model.get('summary_fields.internal_limit.split');
+    const number = resource.model.get('job_slice_number');
 
-    if (!splitJobDetails) {
-        return null;
-    }
-
-    const label = strings.get('labels.SPLIT_JOB');
-    const offset = `${splitJobDetails.offset + 1}/${splitJobDetails.step}`;
-    const tooltip = strings.get('tooltips.SPLIT_JOB_DETAILS');
+    const label = strings.get('labels.SLICE_JOB');
+    const offset = `${number}/${count}`;
+    const tooltip = strings.get('tooltips.SLICE_JOB_DETAILS');
 
     return { label, offset, tooltip };
 }
@@ -691,7 +687,7 @@ function JobDetailsController (
         vm.jobType = getJobTypeDetails();
         vm.jobTemplate = getJobTemplateDetails();
         vm.sourceWorkflowJob = getSourceWorkflowJobDetails();
-        vm.splitJobDetails = getSplitJobDetails();
+        vm.sliceJobDetails = getSliceJobDetails();
         vm.inventory = getInventoryDetails();
         vm.project = getProjectDetails();
         vm.projectUpdate = getProjectUpdateDetails();

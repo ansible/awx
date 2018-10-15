@@ -76,20 +76,12 @@ function ListJobsController (
             return { icon, link, value };
         });
 
-    vm.getSplitJobDetails = (details) => {
-        const internalLimitDetails = Object.assign({}, details);
-
-        if (!internalLimitDetails) {
+    vm.getSliceJobDetails = (job) => {
+        if (job.job_slice_count === 1) {
             return null;
         }
 
-        const splitJobDetails = internalLimitDetails.split;
-
-        if (!splitJobDetails) {
-            return null;
-        }
-
-        return `Split Job ${splitJobDetails.offset + 1}/${splitJobDetails.step}`;
+        return `Slice Job ${job.job_slice_number}/${job.job_slice_count}`;
     };
 
     vm.getSref = ({ type, id }) => {

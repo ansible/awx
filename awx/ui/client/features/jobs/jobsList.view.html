@@ -24,7 +24,7 @@
                     header-value="{{ job.id }} - {{ job.name }}"
                     header-state="{{ vm.getSref(job) }}"
                     header-tag="{{ vm.jobTypes[job.type] }}"
-                    secondary-tag="{{ vm.getSplitJobDetails(job.summary_fields.internal_limit) }}">
+                    secondary-tag="{{ vm.getSliceJobDetails(job) }}">
                 </at-row-item>
                 <div class="at-Row--inline">
                     <at-row-item

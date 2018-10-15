@@ -826,7 +826,8 @@ class BaseTask(object):
 
     def build_inventory(self, instance, **kwargs):
         script_data = instance.inventory.get_script_data(
-            hostvars=True, subset=getattr(instance, 'internal_limit', '')
+            hostvars=True,
+            slice_number=instance.job_slice_number, slice_count=instance.job_slice_count
         )
         json_data = json.dumps(script_data)
         handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))

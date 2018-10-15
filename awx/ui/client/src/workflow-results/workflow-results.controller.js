@@ -39,7 +39,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     DELETE: i18n._('Delete'),
                     EDIT_USER: i18n._('Edit the user'),
                     EDIT_WORKFLOW: i18n._('Edit the workflow job template'),
-                    EDIT_SPLIT_TEMPLATE: i18n._('Edit the split job template'),
+                    EDIT_SLICE_TEMPLATE: i18n._('Edit the slice job template'),
                     EDIT_SCHEDULE: i18n._('Edit the schedule'),
                     TOGGLE_STDOUT_FULLSCREEN: i18n._('Expand Output'),
                     STATUS: '' // re-assigned elsewhere
@@ -50,7 +50,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     STARTED: i18n._('Started'),
                     FINISHED: i18n._('Finished'),
                     LABELS: i18n._('Labels'),
-                    SPLIT_TEMPLATE: i18n._('Split Template'),
+                    SLICE_TEMPLATE: i18n._('Slice Job Template'),
                     STATUS: i18n._('Status')
                 },
                 details: {

@@ -2453,6 +2453,15 @@ class InventoryScriptView(RetrieveAPIView):
         towervars = bool(request.query_params.get('towervars', ''))
         show_all = bool(request.query_params.get('all', ''))
         subset = request.query_params.get('subset', '')
+        if subset:
+            if not isinstance(subset, six.string_types):
+                raise ParseError(_('Inventory subset argument must be a string.'))
+            if subset.startswith('slice'):
+                slice_number, slice_count = Inventory.parse_slice_params(subset)
+            else:
+                raise ParseError(_('Subset does not use any supported syntax.'))
+        else:
+            slice_number, slice_count = 1, 1
         if hostname:
             hosts_q = dict(name=hostname)
             if not show_all:
@@ -2463,7 +2472,7 @@ class InventoryScriptView(RetrieveAPIView):
             hostvars=hostvars,
             towervars=towervars,
             show_all=show_all,
-            subset=subset
+            slice_number=slice_number, slice_count=slice_count
         ))
 
 
@@ -3369,7 +3378,7 @@ class JobTemplateCallback(GenericAPIView):
         if extra_vars is not None and job_template.ask_variables_on_launch:
             extra_vars_redacted, removed = extract_ansible_vars(extra_vars)
             kv['extra_vars'] = extra_vars_redacted
-        kv['_prevent_splitting'] = True  # will only run against 1 host, so no point
+        kv['_prevent_slicing'] = True  # will only run against 1 host, so no point
         with transaction.atomic():
             job = job_template.create_job(**kv)
 
@@ -3401,12 +3410,12 @@ class JobTemplateJobsList(SubListCreateAPIView):
         return methods
 
 
-class JobTemplateSplitJobsList(SubListCreateAPIView):
+class JobTemplateSliceWorkflowJobsList(SubListCreateAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobListSerializer
     parent_model = JobTemplate
-    relationship = 'split_jobs'
+    relationship = 'slice_workflow_jobs'
     parent_key = 'job_template'
 
 
@@ -3702,6 +3711,8 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
+        if obj.is_sliced_job and not obj.job_template_id:
+            raise ParseError(_('Cannot relaunch slice workflow job orphaned from job template.'))
         new_workflow_job = obj.create_relaunch_workflow_job()
         new_workflow_job.signal_start()
 

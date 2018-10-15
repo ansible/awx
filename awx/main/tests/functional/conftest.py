@@ -779,15 +779,15 @@ def disable_database_settings(mocker):
 
 
 @pytest.fixture
-def split_jt_factory(inventory):
+def slice_jt_factory(inventory):
     def r(N, jt_kwargs=None):
         for i in range(N):
             inventory.hosts.create(name='foo{}'.format(i))
         if not jt_kwargs:
             jt_kwargs = {}
         return JobTemplate.objects.create(
-            name='split-jt-from-factory',
-            job_split_count=N,
+            name='slice-jt-from-factory',
+            job_slice_count=N,
             inventory=inventory,
             **jt_kwargs
         )
@@ -795,18 +795,18 @@ def split_jt_factory(inventory):
 
 
 @pytest.fixture
-def split_job_factory(split_jt_factory):
+def slice_job_factory(slice_jt_factory):
     def r(N, jt_kwargs=None, prompts=None, spawn=False):
-        split_jt = split_jt_factory(N, jt_kwargs=jt_kwargs)
+        slice_jt = slice_jt_factory(N, jt_kwargs=jt_kwargs)
         if not prompts:
             prompts = {}
-        split_job = split_jt.create_unified_job(**prompts)
+        slice_job = slice_jt.create_unified_job(**prompts)
         if spawn:
-            for node in split_job.workflow_nodes.all():
+            for node in slice_job.workflow_nodes.all():
                 # does what the task manager does for spawning workflow jobs
                 kv = node.get_job_kwargs()
                 job = node.unified_job_template.create_unified_job(**kv)
                 node.job = job
                 node.save()
-        return split_job
+        return slice_job
     return r

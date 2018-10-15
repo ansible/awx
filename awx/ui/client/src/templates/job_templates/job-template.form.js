@@ -257,17 +257,17 @@ function(NotificationsList, i18n) {
                     dataPlacement: 'right',
                     control: '<instance-groups-multiselect instance-groups="instance_groups" field-is-disabled="!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)"></instance-groups-multiselect>',
                 },
-                job_split_count: {
-                    label: i18n._('Job Splitting'),
+                job_slice_count: {
+                    label: i18n._('Job Slicing'),
                     type: 'number',
                     integer: true,
                     min: 1,
                     default: 1,
                     spinner: true,
-                    dataTitle: i18n._('Split Job Count'),
+                    dataTitle: i18n._('Slice Job Count'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    awPopOver: "<p>" + i18n._("The number of jobs to split into at runtime. Will cause the Job Template to launch a workflow if value is non-zero.") + "</p>",
+                    awPopOver: "<p>" + i18n._("The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 diff_mode: {

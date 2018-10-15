@@ -41,7 +41,7 @@ function atLaunchTemplateCtrl (
                         selectedJobTemplate
                             .postLaunch({ id: vm.template.id })
                             .then(({ data }) => {
-                                /* Split Jobs: Redirect to WF Details page if returned
+                                /* Slice Jobs: Redirect to WF Details page if returned
                                 job type is a WF job */
                                 if (data.type === 'workflow_job' && data.workflow_job !== null) {
                                     $state.go('workflowResults', { id: data.workflow_job }, { reload: true });

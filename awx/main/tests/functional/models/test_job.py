@@ -84,18 +84,18 @@ def test_job_host_summary_representation(host):
 
 
 @pytest.mark.django_db
-class TestSplittingModels:
+class TestSlicingModels:
 
-    def test_split_workflow_spawn(self, split_jt_factory):
-        split_jt = split_jt_factory(3)
-        job = split_jt.create_unified_job()
+    def test_slice_workflow_spawn(self, slice_jt_factory):
+        slice_jt = slice_jt_factory(3)
+        job = slice_jt.create_unified_job()
         assert isinstance(job, WorkflowJob)
-        assert job.job_template == split_jt
-        assert job.unified_job_template == split_jt
+        assert job.job_template == slice_jt
+        assert job.unified_job_template == slice_jt
         assert job.workflow_nodes.count() == 3
 
-    def test_splits_with_JT_and_prompts(self, split_job_factory):
-        job = split_job_factory(3, jt_kwargs={'ask_limit_on_launch': True}, prompts={'limit': 'foobar'}, spawn=True)
+    def test_slices_with_JT_and_prompts(self, slice_job_factory):
+        job = slice_job_factory(3, jt_kwargs={'ask_limit_on_launch': True}, prompts={'limit': 'foobar'}, spawn=True)
         assert job.launch_config.prompts_dict() == {'limit': 'foobar'}
         for node in job.workflow_nodes.all():
             assert node.limit is None  # data not saved in node prompts

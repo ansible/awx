@@ -38,11 +38,11 @@ class TestInventoryScript:
             'remote_tower_id': host.id
         }
 
-    def test_split_subset(self, inventory):
+    def test_slice_subset(self, inventory):
         for i in range(3):
             inventory.hosts.create(name='host{}'.format(i))
         for i in range(3):
-            assert inventory.get_script_data(subset='split{}of3'.format(i)) == {
+            assert inventory.get_script_data(slice_number=i + 1, slice_count=3) == {
                 'all': {'hosts': ['host{}'.format(i)]}
             }
 

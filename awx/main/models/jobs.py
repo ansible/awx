@@ -277,11 +277,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         default=False,
         allows_field='credentials'
     )
-    job_split_count = models.IntegerField(
+    job_slice_count = models.PositiveIntegerField(
         blank=True,
-        default=0,
-        help_text=_("The number of jobs to split into at runtime. "
-                    "Will cause the Job Template to launch a workflow if value is non-zero."),
+        default=1,
+        help_text=_("The number of jobs to slice into at runtime. "
+                    "Will cause the Job Template to launch a workflow if value is greater than 1."),
     )
 
     admin_role = ImplicitRoleField(
@@ -302,7 +302,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials', 'internal_limit']
+            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials',
+             'job_slice_number', 'job_slice_count']
         )
 
     @property
@@ -328,13 +329,15 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         return self.create_unified_job(**kwargs)
 
     def create_unified_job(self, **kwargs):
-        prevent_splitting = kwargs.pop('_prevent_splitting', False)
-        split_event = bool(self.job_split_count > 1 and (not prevent_splitting))
+        prevent_splitting = kwargs.pop('_prevent_slicing', False)
+        split_event = bool(self.job_slice_count > 1 and (not prevent_splitting))
         if split_event:
             # A Split Job Template will generate a WorkflowJob rather than a Job
             from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobNode
             kwargs['_unified_job_class'] = WorkflowJobTemplate._get_unified_job_class()
             kwargs['_parent_field_name'] = "job_template"
+            kwargs.setdefault('_eager_fields', {})
+            kwargs['_eager_fields']['is_sliced_job'] = True
         job = super(JobTemplate, self).create_unified_job(**kwargs)
         if split_event:
             try:
@@ -342,11 +345,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             except JobLaunchConfig.DoesNotExist:
                 wj_config = JobLaunchConfig()
             actual_inventory = wj_config.inventory if wj_config.inventory else self.inventory
-            for idx in xrange(min(self.job_split_count,
+            for idx in xrange(min(self.job_slice_count,
                                   actual_inventory.hosts.count())):
                 create_kwargs = dict(workflow_job=job,
                                      unified_job_template=self,
-                                     ancestor_artifacts=dict(job_split=idx))
+                                     ancestor_artifacts=dict(job_split=idx + 1))
                 WorkflowJobNode.objects.create(**create_kwargs)
         return job
 
@@ -531,10 +534,17 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         on_delete=models.SET_NULL,
         help_text=_('The SCM Refresh task used to make sure the playbooks were available for the job run'),
     )
-    internal_limit = models.CharField(
-        max_length=1024,
-        default='',
-        editable=False,
+    job_slice_number = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+        help_text=_("If part of a sliced job, the ID of the inventory slice operated on. "
+                    "If not part of sliced job, parameter is not used."),
+    )
+    job_slice_count = models.PositiveIntegerField(
+        blank=True,
+        default=1,
+        help_text=_("If ran as part of sliced jobs, the total number of slices. "
+                    "If 1, job is not part of a sliced job."),
     )
 
 
@@ -580,10 +590,11 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return JobEvent
 
     def copy_unified_job(self, **new_prompts):
-        new_prompts['_prevent_splitting'] = True
-        if self.internal_limit:
-            new_prompts.setdefault('_eager_fields', {})
-            new_prompts['_eager_fields']['internal_limit'] = self.internal_limit  # oddball, not from JT or prompts
+        # Needed for job slice relaunch consistency, do no re-spawn workflow job
+        # target same slice as original job
+        new_prompts['_prevent_slicing'] = True
+        new_prompts.setdefault('_eager_fields', {})
+        new_prompts['_eager_fields']['job_slice_number'] = self.job_slice_number
         return super(Job, self).copy_unified_job(**new_prompts)
 
     @property
