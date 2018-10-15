@@ -33,14 +33,14 @@
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
+    "@patternfly/patternfly-next": "^1.0.58",
+    "@patternfly/react-core": "1.23.0",
     "axios": "^0.18.0",
     "babel-preset-env": "^1.7.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
-    "redux": "^4.0.0",
-    "@patternfly/patternfly-next": "^1.0.41",
-    "@patternfly/react-core": "1.19.1"
+    "redux": "^4.0.0"
   }
 }
