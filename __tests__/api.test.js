@@ -1,4 +1,3 @@
-
 import mockAxios from 'axios';
 import APIClient from '../src/api';
 import * as endpoints from '../src/endpoints';

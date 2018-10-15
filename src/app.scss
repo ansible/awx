@@ -60,3 +60,53 @@
   padding-top: 16px;
   padding-bottom: 16px;
 }
+
+//
+// toolbar overrides
+//
+
+.pf-l-toolbar {
+  align-self: center;
+  height: 60px;
+}
+
+
+//
+// data list overrides
+//
+
+.pf-c-data-list {
+  --pf-global--target-size--MinHeight: 32px;
+  --pf-global--target-size--MinWidth: 32px;
+  --pf-global--FontSize--md: 14px;
+
+  --pf-c-data-list__item--PaddingTop: 16px;
+  --pf-c-data-list__item--PaddingBottom: 16px;
+}
+
+.pf-c-data-list__item {
+  --pf-c-data-list__item--PaddingLeft: 20px;
+  --pf-c-data-list__item--PaddingRight: 0px;
+}
+
+.pf-c-data-list__check {
+  --pf-c-data-list__check--MarginRight: 0;
+}
+
+.pf-c-data-list__check:after {
+  content: "";
+  background-color: #d7d7d7;
+  width: 1px;
+  height: 25px;
+  display: block;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.pf-c-data-list__cell a {
+  margin-right: 8px;
+}
+
+.pf-c-data-list__cell span {
+  margin-right: 18px;
+}
