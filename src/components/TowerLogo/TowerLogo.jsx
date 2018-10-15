@@ -13,9 +13,13 @@ class TowerLogo extends Component {
   }
 
   onClick = () => {
+    if (!this.props.onClick) return;
+
     const { history } = this.props;
 
     history.push('/');
+
+    this.props.onClick();
   };
 
   onHover = () => {
@@ -29,7 +33,7 @@ class TowerLogo extends Component {
 
     let src = TowerLogoHeader;
 
-    if (hover) {
+    if (hover && this.props.onClick) {
       src = TowerLogoHeaderHover;
     }
 
