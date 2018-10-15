@@ -120,14 +120,29 @@ class WorkflowDAG(SimpleDAG):
             if not job and obj.do_not_run is False and n not in root_nodes:
                 parent_nodes = [p['node_object'] for p in self.get_dependents(obj)]
                 all_parents_dnr = True
+                parent_run_path = False
                 for p in parent_nodes:
                     if not p.job and p.do_not_run is False:
                         all_parents_dnr = False
-                        break
+
+                    elif p.job and p.job.status in ['new', 'pending', 'waiting', 'running']:
+                        parent_run_path = True
+
+                    elif p.job and p.job.status == 'successful':
+                        if n in self.get_dependencies(p, 'success_nodes'):
+                            parent_run_path = True
+
+                    elif p.job and p.job.status == 'failed':
+                        children_failed = self.get_dependencies(p, 'failure_nodes')
+                        children_always = self.get_dependencies(p, 'always_nodes')
+                        if n in children_always or n in children_failed:
+                            parent_run_path = True
+
                 #all_parents_dnr = reduce(lambda p: bool(p.do_not_run == True), parent_nodes)
-                if all_parents_dnr:
+                if all_parents_dnr and parent_run_path is False:
                     obj.do_not_run = True
                     nodes_marked_do_not_run.append(n)
+
 
             if obj.do_not_run:
                 children_success = self.get_dependencies(obj, 'success_nodes')
