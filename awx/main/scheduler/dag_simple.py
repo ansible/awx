@@ -21,21 +21,31 @@ class SimpleDAG(object):
 
     def generate_graphviz_plot(self):
         def run_status(obj):
+            dnr = "RUN"
+            status = "NA"
+            if obj.job:
+                status = obj.job.status
             if obj.do_not_run is True:
-                s = "DNR"
-            else:
-                s = "RUN"
-            s += "_{}".format(obj.id)
-            return s
+                dnr = "DNR"
+            return "{}_{}_{}".format(dnr, status, obj.id)
 
         doc = """
         digraph g {
         rankdir = LR
         """
         for n in self.nodes:
+            obj = n['node_object']
+            status = "NA"
+            if obj.job:
+                status = obj.job.status
+            color = 'black'
+            if status == 'successful':
+                color = 'green'
+            elif status == 'failed':
+                color = 'red'
             doc += "%s [color = %s]\n" % (
                 run_status(n['node_object']),
-                "red" if getattr(n['node_object'], 'status', 'N/A') == 'running' else "black",
+                color
             )
         for from_node, to_node, label in self.edges:
             doc += "%s -> %s [ label=\"%s\" ];\n" % (
@@ -44,7 +54,7 @@ class SimpleDAG(object):
                 label,
             )
         doc += "}\n"
-        gv_file = open('/tmp/graph.gv', 'w')
+        gv_file = open('/awx_devel/graph.gv', 'w')
         gv_file.write(doc)
         gv_file.close()
 
