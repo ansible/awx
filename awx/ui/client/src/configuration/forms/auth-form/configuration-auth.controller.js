@@ -242,8 +242,8 @@ export default [
                 // Attach codemirror to fields that need it
                 _.each(form.formDef.fields, function(field) {
                     // Codemirror balks at empty values so give it one
-                    if($scope.$parent[field.name] === null && field.codeMirror) {
-                      $scope.$parent[field.name] = '{}';
+                    if($scope.$parent.$parent[field.name] === null && field.codeMirror) {
+                      $scope.$parent.$parent[field.name] = '{}';
                     }
                     if(field.codeMirror) {
                         createIt(field.name);
@@ -256,11 +256,11 @@ export default [
 
             function createIt(name){
                 ParseTypeChange({
-                   scope: $scope.$parent,
+                   scope: $scope.$parent.$parent,
                    variable: name,
                    parse_variable: 'parseType',
                    field_id: form.formDef.name + '_' + name,
-                   readOnly: $scope.$parent.configDataResolve[name] && $scope.$parent.configDataResolve[name].disabled ? true : false
+                   readOnly: $scope.configDataResolve[name] && $scope.configDataResolve[name].disabled ? true : false
                  });
                  $scope.parseTypeChange('parseType', name);
             }
