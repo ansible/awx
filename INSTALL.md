@@ -119,12 +119,7 @@ To complete a deployment to OpenShift, you will obviously need access to an Open
 
 You will also need to have the `oc` command in your PATH. The `install.yml` playbook will call out to `oc` when logging into, and creating objects on the cluster.
 
-The default resource requests per-pod requires:
-
-> Memory: 6GB
-> CPU: 3 cores
-
-This can be tuned by overriding the variables found in [/installer/openshift/defaults/main.yml](/installer/openshift/defaults/main.yml). Special care should be taken when doing this as undersized instances will experience crashes and resource exhaustion.
+The default resource requests per-pod can be tuned by overriding the variables found in [/installer/roles/kubernetes/defaults/main.yml](/installer/roles/kubernetes/defaults/main.yml). Special care should be taken when doing this as undersized instances will experience crashes and resource exhaustion.
 
 For more detail on how resource requests are formed see: [https://docs.openshift.com/container-platform/latest/dev_guide/compute_resources.html#dev-compute-resources](https://docs.openshift.com/container-platform/latest/dev_guide/compute_resources.html#dev-compute-resources)
 
