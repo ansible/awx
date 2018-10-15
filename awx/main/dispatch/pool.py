@@ -145,7 +145,9 @@ class PoolWorker(object):
             # if this process has any pending messages requeue them
             for _ in range(self.qsize):
                 try:
-                    orphaned.append(self.queue.get(block=False))
+                    message = self.queue.get(block=False)
+                    if message != 'QUIT':
+                        orphaned.append(message)
                 except QueueEmpty:
                     break  # qsize is not always _totally_ up to date
             if len(orphaned):
@@ -328,11 +330,12 @@ class AutoscalePool(WorkerPool):
                 #    send them to another worker
                 logger.error('worker pid:{} is gone (exit={})'.format(w.pid, w.exitcode))
                 if w.current_task:
-                    try:
-                        for j in UnifiedJob.objects.filter(celery_task_id=w.current_task['uuid']):
-                            reaper.reap_job(j, 'failed')
-                    except Exception:
-                        logger.exception('failed to reap job UUID {}'.format(w.current_task['uuid']))
+                    if w.current_task != 'QUIT':
+                        try:
+                            for j in UnifiedJob.objects.filter(celery_task_id=w.current_task['uuid']):
+                                reaper.reap_job(j, 'failed')
+                        except Exception:
+                            logger.exception('failed to reap job UUID {}'.format(w.current_task['uuid']))
                 orphaned.extend(w.orphaned_tasks)
                 self.workers.remove(w)
             elif w.idle and len(self.workers) > self.min_workers:
