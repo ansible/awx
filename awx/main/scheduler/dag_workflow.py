@@ -129,7 +129,9 @@ class WorkflowDAG(SimpleDAG):
                         parent_run_path = True
 
                     elif p.job and p.job.status == 'successful':
-                        if n in self.get_dependencies(p, 'success_nodes'):
+                        children_success = self.get_dependencies(p, 'success_nodes')
+                        children_always = self.get_dependencies(p, 'always_nodes')
+                        if n in children_success or n in children_always:
                             parent_run_path = True
 
                     elif p.job and p.job.status == 'failed':
