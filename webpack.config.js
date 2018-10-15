@@ -16,26 +16,34 @@ module.exports = {
         use: [
           { loader: 'style-loader' },
           { loader: 'css-loader' },
-          {
-            loader: 'sass-loader',
-            options: {
-              includePaths: [
-                'node_modules/patternfly/dist/sass',
-                'node_modules/patternfly/node_modules/bootstrap-sass/assets/stylesheet',
-                'node_modules/patternfly/node_modules/font-awesome-sass/assets/stylesheets'
-              ]
-            }
-          }
+          { loader: 'sass-loader' },
         ]
       },
       {
-        test: /\.(woff(2)?|ttf|jpg|png|eot|gif|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
         use: [{
             loader: 'file-loader',
             options: {
                 name: '[name].[ext]',
-                outputPath: 'fonts/',
-                publicPatH: '../'
+                outputPath: 'assets/fonts/',
+                publicPatH: '../',
+                includePaths: [
+                  'node_modules/@patternfly/patternfly-next/assets/fonts',
+                ]
+            }
+        }]
+      },
+      {
+        test: /\.(jpg|png|gif|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        use: [{
+            loader: 'file-loader',
+            options: {
+                name: '[name].[ext]',
+                outputPath: 'assets/images/',
+                publicPatH: '../',
+                includePaths: [
+                  'node_modules/@patternfly/patternfly-next/assets/images',
+                ]
             }
         }]
       }
