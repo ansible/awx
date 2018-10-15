@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const API_ROOT = '/api/';
 const API_LOGIN = `${API_ROOT}login/`;
+const API_LOGOUT = `${API_ROOT}logout/`;
 const API_V2 = `${API_ROOT}v2/`;
 const API_CONFIG = `${API_V2}config/`;
 const API_PROJECTS = `${API_V2}projects/`;
@@ -12,7 +13,6 @@ const CSRF_HEADER_NAME = 'X-CSRFToken';
 
 class APIClient {
   constructor () {
-    this.authenticated = false; // temporary
     this.http = axios.create({
       xsrfCookieName: CSRF_COOKIE_NAME,
       xsrfHeaderName: CSRF_HEADER_NAME,
@@ -20,7 +20,15 @@ class APIClient {
   }
 
   isAuthenticated () {
-    return this.authenticated;
+    let authenticated = false;
+
+    const parsed = (`; ${document.cookie}`).split('; userLoggedIn=');
+
+    if (parsed.length === 2) {
+      authenticated = parsed.pop().split(';').shift() === 'true';
+    }
+
+    return authenticated;
   }
 
   login (username, password, redirect = API_CONFIG) {
@@ -32,16 +40,15 @@ class APIClient {
     const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
 
     return this.http.get(API_LOGIN, { headers })
-      .then(() => this.http.post(API_LOGIN, data, { headers }))
-      .then(res => {
-        this.authenticated = true; // temporary
-
-        return res;
-      });
+      .then(() => this.http.post(API_LOGIN, data, { headers }));
   }
 
   logout () {
-    return this.http.delete(API_LOGIN);
+    return this.http.get(API_LOGOUT);
+  }
+
+  getConfig () {
+    return this.http.get(API_CONFIG);
   }
 
   getProjects () {
@@ -50,6 +57,10 @@ class APIClient {
 
   getOrganizations () {
     return this.http.get(API_ORGANIZATIONS);
+  }
+
+  getRoot () {
+    return this.http.get(API_ROOT);
   }
 }
 
