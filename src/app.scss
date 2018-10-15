@@ -1,34 +1,95 @@
+//
+// Header
+//
+
 .pf-l-page__header {
   --pf-l-page__header--MinHeight: 0px;
   display: flex;
   align-items: center;
   height: 60px;
-  background-color: #030303;
-  
 }
 
 .pf-l-page__header-brand {
-  --pf-l-page__header-brand--PaddingBottom: 0px;
+  align-self: center;
+  height: 60px;
+  max-width: 190px;
+  padding: 0px;
+  margin: 0px;
 }
+
+.pf-l-page__header-tools {
+  align-self: center;
+  height: 60px;
+  padding-left: 190px;
+
+  .fa-user:hover {
+    // temporary dev logout
+    cursor: pointer;
+  }
+}
+
+.pf-l-toolbar {
+  align-self: center;
+  height: 60px;
+}
+
+.pf-l-page__header-brand-link {
+  align-self: center;
+}
+
+.pf-l-page__header-brand-link img {
+  transform: scale(1.1, 1.1);
+  position: relative;
+  top: 6px;
+}
+
+.pf-l-page__header-brand-toggle {
+  align-self: center;
+  position: relative;
+  right: 14px;
+  --pf-l-page__header-brand-link--MarginLeft: 0px;
+  --pf-l-page__header-brand-link--MarginLeft: 0px;
+
+  button {
+    --pf-l-page__header-sidebar-toggle--FontSize: 18px;
+  }
+}
+
+//
+// Side Navigation
+//
+
+.pf-c-nav {
+  overflow-y: auto;
+}
+
+.pf-c-nav__section {
+  --pf-c-nav__section--MarginTop: 8px;
+}
+
+.pf-l-page__sidebar{
+  --pf-l-page__sidebar--Width--lg: 190px;
+}
+
+.pf-c-nav__section + .pf-c-nav__section {
+  --pf-c-nav__section--MarginTop: 8px;
+}
+
+.pf-c-nav__simple-list .pf-c-nav__link {
+  --pf-c-nav__simple-list-link--PaddingLeft: 24px;
+  --pf-c-nav__simple-list-link--PaddingBottom: 6px;
+  --pf-c-nav__simple-list-link--PaddingTop: 6px;
+}
+
+.pf-c-nav__section-title {
+  --pf-c-nav__section-title--PaddingLeft: 24px;
+}
+
+//
+// Page
+//
 
 .pf-l-page__main-section {
   --pf-l-page__main-section--PaddingTop: 11px;
   --pf-l-page__main-section--PaddingLeft: 11px;
-}
-
-.pf-c-nav__section + .pf-c-nav__section {
-  --pf-c-nav__section--MarginTop: 16px;
-}
-
-.pf-l-page__header-brand-toggle {
-  padding-bottom: 4px;
-  padding-right: 0px;
-}
-
-.pf-l-page__header-brand-link {
-  transform: scale(0.75, 0.75);
-}
-
-.pf-l-page__sidebar{
-  --pf-l-page__sidebar--Width--lg: 200px;
 }

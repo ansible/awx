@@ -1,69 +1,135 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-
 import {
-  Bullseye,
+  Brand,
   Button,
-  TextInput
+  Level,
+  LevelItem,
+  Login,
+  LoginBox,
+  LoginBoxHeader,
+  LoginBoxBody,
+  LoginFooter,
+  LoginHeaderBrand,
+  TextInput,
 } from '@patternfly/react-core';
 
+import TowerLogo from '../components/TowerLogo';
 import api from '../api';
 
-class Login extends Component {
-  state = {
-    username: '',
-    password: '',
-    redirect: false,
-  };
+const LOGIN_ERROR_MESSAGE = 'Invalid username or password. Please try again.';
 
-  handleUsernameChange = value => this.setState({ username: value });
+class LoginPage extends Component {
+  constructor (props) {
+    super(props);
 
-  handlePasswordChange = value => this.setState({ password: value });
+    this.state = {
+      username: '',
+      password: '',
+      redirect: false,
+      loading: false,
+    };
+  }
+
+  componentWillUnmount () {
+    this.unmounting = true; // todo: state management
+  }
+
+  safeSetState = obj => !this.unmounting && this.setState(obj);
+
+  handleUsernameChange = value => this.safeSetState({ username: value, error: '' });
+
+  handlePasswordChange = value => this.safeSetState({ password: value, error: '' });
 
   handleSubmit = event => {
     const { username, password } = this.state;
 
     event.preventDefault();
 
+    this.safeSetState({ loading: true });
+
     api.login(username, password)
-      .then(() => this.setState({ redirect: true }));
+      .then(() => this.safeSetState({ redirect: true }))
+      .catch(error => {
+        if (error.response.status === 401) {
+          this.safeSetState({ error: LOGIN_ERROR_MESSAGE });
+        }
+      })
+      .finally(() => {
+        this.safeSetState({ loading: false });
+      });
   }
 
   render () {
-    const { username, password, redirect } = this.state;
+    const { username, password, redirect, loading, error } = this.state;
+    const { logo, loginInfo } = this.props;
 
     if (redirect) {
       return (<Redirect to="/" />);
     }
 
     return (
-      <Bullseye>
-        <form onSubmit={this.handleSubmit}>
-          <div>
-            <TextInput
-              aria-label="Username"
-              name="username"
-              type="text"
-              onChange={this.handleUsernameChange}
-              value={username}
-            />
-          </div>
-          <div>
-            <TextInput
-              aria-label="Password"
-              name="password"
-              type="password"
-              onChange={this.handlePasswordChange}
-              value={password}
-            />
-          </div>
-          <Button type="submit">
-            Login
-          </Button>
-        </form>
-      </Bullseye>
+      <Login
+        header={(
+          <LoginHeaderBrand>
+            {logo ? <Brand src={`data:image/jpeg;${logo}`} alt="logo brand" /> : <TowerLogo />}
+          </LoginHeaderBrand>
+        )}
+        footer={<LoginFooter>{ loginInfo }</LoginFooter>}
+      >
+        <LoginBox>
+          <LoginBoxHeader>
+            Welcome to Ansible Tower! Please Sign In.
+          </LoginBoxHeader>
+          <LoginBoxBody>
+            <form className="pf-c-form" onSubmit={this.handleSubmit}>
+              <div className="pf-c-form__group" id="username">
+                <label className="pf-c-form__label" htmlFor="username">
+                  Username
+                  <span className="pf-c-form__label__required" aria-hidden="true">&#42;</span>
+                </label>
+                <TextInput
+                  autoComplete="off"
+                  aria-label="Username"
+                  name="username"
+                  type="text"
+                  isDisabled={loading}
+                  value={username}
+                  onChange={this.handleUsernameChange}
+                />
+              </div>
+              <div className="pf-c-form__group">
+                <label className="pf-c-form__label" htmlFor="pw">
+                  Password
+                  <span className="pf-c-form__label__required" aria-hidden="true">&#42;</span>
+                </label>
+                <TextInput
+                  aria-label="Password"
+                  name="password"
+                  type="password"
+                  isDisabled={loading}
+                  value={password}
+                  onChange={this.handlePasswordChange}
+                />
+              </div>
+              <Level>
+                <LevelItem>
+                  <p className="pf-c-form__helper-text pf-m-error" aria-live="polite">
+                    { error }
+                  </p>
+                </LevelItem>
+                <LevelItem>
+                  <Button type="submit" isDisabled={loading}>
+                    Sign In
+                  </Button>
+                </LevelItem>
+              </Level>
+            </form>
+          </LoginBoxBody>
+        </LoginBox>
+      </Login>
     );
   }
 }
 
-export default Login;
+export default LoginPage;
