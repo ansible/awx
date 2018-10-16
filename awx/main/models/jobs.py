@@ -595,6 +595,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         new_prompts['_prevent_slicing'] = True
         new_prompts.setdefault('_eager_fields', {})
         new_prompts['_eager_fields']['job_slice_number'] = self.job_slice_number
+        new_prompts['_eager_fields']['job_slice_count'] = self.job_slice_count
         return super(Job, self).copy_unified_job(**new_prompts)
 
     @property
@@ -690,6 +691,9 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             count_hosts = 2
         else:
             count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
+            if self.job_slice_count > 1:
+                # Integer division intentional
+                count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) / self.job_slice_count
         return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     @property

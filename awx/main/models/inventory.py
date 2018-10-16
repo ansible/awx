@@ -247,6 +247,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
         data = dict()
         all_group = data.setdefault('all', dict())
+        all_hostnames = set(host.name for host in hosts)
 
         if self.variables_dict:
             all_group['vars'] = self.variables_dict
@@ -264,6 +265,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             ).values_list('group_id', 'host_id', 'host__name')
             group_hosts_map = {}
             for group_id, host_id, host_name in group_hosts_qs:
+                if host_name not in all_hostnames:
+                    continue  # host might not be in current shard
                 group_hostnames = group_hosts_map.setdefault(group_id, [])
                 group_hostnames.append(host_name)
                 grouped_hosts.add(host_name)
