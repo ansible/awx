@@ -73,11 +73,6 @@ def test_invalid_kind_clean_insights_credential():
 
 
 class TestControlledBySCM(): 
-    @pytest.mark.parametrize('source', [
-        'scm',
-        'ec2',
-        'manual',
-    ])
     def test_clean_source_path_valid(self):
         inv_src = InventorySource(source_path='/not_real/',
                                   source='scm')
