@@ -1578,12 +1578,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMix
                                     "Instead, configure the corresponding source project to update on launch."))
         return self.update_on_launch
 
-    def clean_overwrite_vars(self):  # TODO: remove when Ansible 2.4 becomes unsupported, obviously
-        if self.source == 'scm' and not self.overwrite_vars:
-            if get_ansible_version() < LooseVersion('2.5'):
-                raise ValidationError(_("SCM type sources must set `overwrite_vars` to `true` until Ansible 2.5."))
-        return self.overwrite_vars
-
     def clean_source_path(self):
         if self.source != 'scm' and self.source_path:
             raise ValidationError(_("Cannot set source_path if not SCM type."))

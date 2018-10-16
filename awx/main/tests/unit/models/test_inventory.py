@@ -78,12 +78,6 @@ class TestControlledBySCM():
         'ec2',
         'manual',
     ])
-    def test_clean_overwrite_vars_valid(self, source):
-        inv_src = InventorySource(overwrite_vars=True,
-                                  source=source)
-
-        inv_src.clean_overwrite_vars()
-
     def test_clean_source_path_valid(self):
         inv_src = InventorySource(source_path='/not_real/',
                                   source='scm')
