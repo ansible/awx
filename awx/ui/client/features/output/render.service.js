@@ -2,6 +2,8 @@ import Ansi from 'ansi-to-html';
 import Entities from 'html-entities';
 
 import {
+    EVENT_NOTIFY_PLAYBOOK,
+    EVENT_RUNNER_OK,
     EVENT_START_PLAY,
     EVENT_START_PLAYBOOK,
     EVENT_STATS_PLAY,
@@ -210,6 +212,14 @@ function JobRenderService ($q, $sce, $window) {
         const record = this.createRecord(event, lines);
 
         if (event.event === EVENT_START_PLAYBOOK) {
+            return { html: '', count: 0 };
+        }
+
+        if (event.stdout === '' && event.event === EVENT_NOTIFY_PLAYBOOK) {
+            return { html: '', count: 0 };
+        }
+
+        if (event.stdout === '' && event.event === EVENT_RUNNER_OK) {
             return { html: '', count: 0 };
         }
 
