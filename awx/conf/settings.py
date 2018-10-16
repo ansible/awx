@@ -126,7 +126,8 @@ def _ctit_db_wrapper(trans_safe=False):
             bottom_stack.close()
             # Log the combined stack
             if trans_safe:
-                logger.warning('Database settings are not available, using defaults, error:\n{}'.format(tb_string))
+                if 'check_migrations' not in sys.argv:
+                    logger.warning('Database settings are not available, using defaults, error:\n{}'.format(tb_string))
             else:
                 logger.error('Error modifying something related to database settings.\n{}'.format(tb_string))
     finally:
