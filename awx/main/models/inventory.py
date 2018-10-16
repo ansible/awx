@@ -9,7 +9,6 @@ import copy
 from urlparse import urljoin
 import os.path
 import six
-from distutils.version import LooseVersion
 
 # Django
 from django.conf import settings
@@ -42,7 +41,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import _inventory_updates, get_ansible_version, region_sorting
+from awx.main.utils import _inventory_updates, region_sorting
 
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate',
