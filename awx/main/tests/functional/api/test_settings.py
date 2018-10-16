@@ -7,6 +7,7 @@ import pytest
 import os
 
 from django.conf import settings
+from kombu.utils.url import parse_url
 
 # Mock
 import mock
@@ -358,3 +359,25 @@ def test_isolated_key_flag_readonly(get, patch, delete, admin):
 
     delete(url, user=admin)
     assert settings.AWX_ISOLATED_KEY_GENERATION is True
+
+
+@pytest.mark.django_db
+def test_default_broker_url():
+    url = parse_url(settings.BROKER_URL)
+    assert url['transport'] == 'amqp'
+    assert url['hostname'] == 'rabbitmq'
+    assert url['userid'] == 'guest'
+    assert url['password'] == 'guest'
+    assert url['virtual_host'] == '/'
+
+
+@pytest.mark.django_db
+def test_broker_url_with_special_characters():
+    settings.BROKER_URL = 'amqp://guest:a@ns:ibl3#@rabbitmq:5672//'
+    url = parse_url(settings.BROKER_URL)
+    assert url['transport'] == 'amqp'
+    assert url['hostname'] == 'rabbitmq'
+    assert url['port'] == 5672
+    assert url['userid'] == 'guest'
+    assert url['password'] == 'a@ns:ibl3#'
+    assert url['virtual_host'] == '/'
