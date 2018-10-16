@@ -129,6 +129,10 @@ function getSourceWorkflowJobDetails () {
 function getSliceJobDetails () {
     const count = resource.model.get('job_slice_count');
 
+    if (!count) {
+        return null;
+    }
+
     if (count === 1) {
         return null;
     }

@@ -113,7 +113,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
 
             if(workflowData.summary_fields && workflowData.summary_fields.job_template &&
                 workflowData.summary_fields.job_template.id){
-                    $scope.split_job_template_link = `/#/templates/job_template/${$scope.workflow.summary_fields.job_template.id}`;
+                    $scope.slice_job_template_link = `/#/templates/job_template/${$scope.workflow.summary_fields.job_template.id}`;
             }
 
             // turn related api browser routes into front end routes

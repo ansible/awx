@@ -4,7 +4,6 @@
 # Python
 #import urlparse
 import logging
-import six
 
 # Django
 from django.db import models
@@ -253,11 +252,10 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['extra_vars'] = extra_vars
         # ensure that unified jobs created by WorkflowJobs are marked
         data['_eager_fields'] = {'launch_type': 'workflow'}
-        # Extra processing in the case that this is a split job
-        if 'job_split' in self.ancestor_artifacts and is_root_node:
-            split_str = six.text_type(self.ancestor_artifacts['job_split'] + 1)
+        # Extra processing in the case that this is a slice job
+        if 'job_slice' in self.ancestor_artifacts and is_root_node:
             data['_eager_fields']['allow_simultaneous'] = True
-            data['_eager_fields']['job_slice_number'] = self.ancestor_artifacts['job_split']
+            data['_eager_fields']['job_slice_number'] = self.ancestor_artifacts['job_slice']
             data['_eager_fields']['job_slice_count'] = self.workflow_job.workflow_job_nodes.count()
             data['_prevent_slicing'] = True
         return data
@@ -473,7 +471,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
     def _get_parent_field_name(self):
         if self.job_template_id:
-            # This is a workflow job which is a container for split jobs
+            # This is a workflow job which is a container for slice jobs
             return 'job_template'
         return 'workflow_job_template'
 

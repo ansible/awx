@@ -246,6 +246,8 @@ class TestJobExecution(object):
             # If `Job.update_model` is called, we're not actually persisting
             # to the database; just update the status, which is usually
             # the update we care about for testing purposes
+            if kwargs.get('result_traceback'):
+                raise Exception('Task encountered error:\n{}'.format(kwargs['result_traceback']))
             if 'status' in kwargs:
                 self.instance.status = kwargs['status']
             if 'job_env' in kwargs:

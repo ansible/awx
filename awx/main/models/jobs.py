@@ -329,17 +329,17 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         return self.create_unified_job(**kwargs)
 
     def create_unified_job(self, **kwargs):
-        prevent_splitting = kwargs.pop('_prevent_slicing', False)
-        split_event = bool(self.job_slice_count > 1 and (not prevent_splitting))
-        if split_event:
-            # A Split Job Template will generate a WorkflowJob rather than a Job
+        prevent_slicing = kwargs.pop('_prevent_slicing', False)
+        slice_event = bool(self.job_slice_count > 1 and (not prevent_slicing))
+        if slice_event:
+            # A Slice Job Template will generate a WorkflowJob rather than a Job
             from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobNode
             kwargs['_unified_job_class'] = WorkflowJobTemplate._get_unified_job_class()
             kwargs['_parent_field_name'] = "job_template"
             kwargs.setdefault('_eager_fields', {})
             kwargs['_eager_fields']['is_sliced_job'] = True
         job = super(JobTemplate, self).create_unified_job(**kwargs)
-        if split_event:
+        if slice_event:
             try:
                 wj_config = job.launch_config
             except JobLaunchConfig.DoesNotExist:
@@ -349,7 +349,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                                   actual_inventory.hosts.count())):
                 create_kwargs = dict(workflow_job=job,
                                      unified_job_template=self,
-                                     ancestor_artifacts=dict(job_split=idx + 1))
+                                     ancestor_artifacts=dict(job_slice=idx + 1))
                 WorkflowJobNode.objects.create(**create_kwargs)
         return job
 

@@ -825,10 +825,11 @@ class BaseTask(object):
         return False
 
     def build_inventory(self, instance, **kwargs):
-        script_data = instance.inventory.get_script_data(
-            hostvars=True,
-            slice_number=instance.job_slice_number, slice_count=instance.job_slice_count
-        )
+        script_params = dict(hostvars=True)
+        if hasattr(instance, 'job_slice_number'):
+            script_params['slice_number'] = instance.job_slice_number
+            script_params['slice_count'] = instance.job_slice_count
+        script_data = instance.inventory.get_script_data(**script_params)
         json_data = json.dumps(script_data)
         handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
         f = os.fdopen(handle, 'w')

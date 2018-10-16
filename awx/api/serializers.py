@@ -3587,7 +3587,8 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
 
     class Meta:
         model = WorkflowJob
-        fields = ('*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous', 'job_template',
+        fields = ('*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous',
+                  'job_template', 'is_sliced_job',
                   '-execution_node', '-event_processing_finished', '-controller_node',)
 
     def get_related(self, obj):
@@ -3596,6 +3597,8 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             res['workflow_job_template'] = self.reverse('api:workflow_job_template_detail',
                                                         kwargs={'pk': obj.workflow_job_template.pk})
             res['notifications'] = self.reverse('api:workflow_job_notifications_list', kwargs={'pk': obj.pk})
+        if obj.job_template_id:
+            res['job_template'] = self.reverse('api:job_template_detail', kwargs={'pk': obj.job_template_id})
         res['workflow_nodes'] = self.reverse('api:workflow_job_workflow_nodes_list', kwargs={'pk': obj.pk})
         res['labels'] = self.reverse('api:workflow_job_label_list', kwargs={'pk': obj.pk})
         res['activity_stream'] = self.reverse('api:workflow_job_activity_stream_list', kwargs={'pk': obj.pk})

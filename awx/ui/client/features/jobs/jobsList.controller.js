@@ -77,6 +77,10 @@ function ListJobsController (
         });
 
     vm.getSliceJobDetails = (job) => {
+        if (!job.job_slice_count) {
+            return null;
+        }
+
         if (job.job_slice_count === 1) {
             return null;
         }
