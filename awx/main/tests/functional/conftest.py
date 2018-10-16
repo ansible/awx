@@ -8,6 +8,7 @@ import tempfile
 import shutil
 from datetime import timedelta
 from six.moves import xrange
+from mock import PropertyMock
 
 # Django
 from django.core.urlresolvers import resolve
@@ -752,3 +753,8 @@ def sqlite_copy_expert(request):
     request.addfinalizer(lambda: delattr(SQLiteCursorWrapper, 'copy_expert'))
     return path
 
+
+@pytest.fixture
+def disable_database_settings(mocker):
+    m = mocker.patch('awx.conf.settings.SettingsWrapper.all_supported_settings', new_callable=PropertyMock)
+    m.return_value = []
