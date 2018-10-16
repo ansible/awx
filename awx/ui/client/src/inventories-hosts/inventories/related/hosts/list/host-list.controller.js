@@ -73,8 +73,6 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
                     $scope.hostsSelected = null;
                 }
             }
-
-            $scope.systemTrackingDisabled = ($scope.hostsSelected && $scope.hostsSelected.length > 2) ? true : false;
         });
 
     }
@@ -151,15 +149,6 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
 
     $scope.smartInventory = function() {
         $state.go('inventories.addSmartInventory');
-    };
-
-    $scope.systemTracking = function(){
-        var hostIds = _.map($scope.hostsSelected, (host) => host.id);
-        $state.go('systemTracking', {
-            inventoryId: $state.params.inventory_id ? $state.params.inventory_id : $state.params.smartinventory_id,
-            hosts: $scope.hostsSelected,
-            hostIds: hostIds
-        });
     };
 
     $scope.setAdhocPattern = function(){

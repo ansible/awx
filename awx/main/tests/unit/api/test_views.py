@@ -383,7 +383,6 @@ class TestSurveySpecValidation:
         ({'type': 'foo'}, 'allowed question types'),
         ({'type': u'🐉'}, 'allowed question types'),
         ({'type': 'multiplechoice'}, 'multiplechoice must specify choices'),
-        ({'type': 'multiplechoice', 'choices': 45}, 'Choices in survey question 0 expected to be string'),
         ({'type': 'integer', 'min': 'foo'}, 'min limit in survey question 0 expected to be integer'),
         ({'question_name': 42}, "'question_name' in survey question 0 expected to be string.")
     ])

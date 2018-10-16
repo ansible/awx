@@ -3073,11 +3073,6 @@ class JobTemplateSurveySpec(GenericAPIView):
                         return Response(dict(error=_(
                             "The {min_or_max} limit in survey question {idx} expected to be integer."
                         ).format(min_or_max=key, **context)))
-            if 'choices' in survey_item:
-                if not isinstance(survey_item['choices'], six.string_types):
-                    return Response(dict(error=_(
-                        "Choices in survey question {idx} expected to be string."
-                    ).format(**context)))
             if qtype in ['multiplechoice', 'multiselect'] and 'choices' not in survey_item:
                 return Response(dict(error=_(
                     "Survey question {idx} of type {survey_item[type]} must specify choices.".format(**context)
