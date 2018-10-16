@@ -26,7 +26,7 @@ class LoginPage extends Component {
     this.state = {
       username: '',
       password: '',
-      redirect: false,
+      error: '',
       loading: false,
     };
   }
@@ -49,7 +49,6 @@ class LoginPage extends Component {
     this.safeSetState({ loading: true });
 
     api.login(username, password)
-      .then(() => this.safeSetState({ redirect: true }))
       .catch(error => {
         if (error.response.status === 401) {
           this.safeSetState({ error: LOGIN_ERROR_MESSAGE });
@@ -61,10 +60,10 @@ class LoginPage extends Component {
   }
 
   render () {
-    const { username, password, redirect, loading, error } = this.state;
+    const { username, password, loading, error } = this.state;
     const { logo, loginInfo } = this.props;
 
-    if (redirect) {
+    if (api.isAuthenticated()) {
       return (<Redirect to="/" />);
     }
 
