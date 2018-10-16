@@ -122,6 +122,9 @@ class WorkflowDAG(SimpleDAG):
                 all_parents_dnr = True
                 parent_run_path = False
                 for p in parent_nodes:
+                    if p.do_not_run is True:
+                        continue
+
                     if not p.job and p.do_not_run is False:
                         all_parents_dnr = False
 
