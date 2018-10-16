@@ -4,8 +4,7 @@
 #
 #    pip-compile --output-file requirements/requirements.txt requirements/requirements.in
 #
-amqp==1.4.9               # via kombu
-anyjson==0.3.3            # via kombu
+amqp==2.3.2               # via kombu
 appdirs==1.4.2
 argparse==1.4.0           # via uwsgitop
 asgi-amqp==1.1.2
@@ -17,9 +16,9 @@ automat==0.6.0            # via twisted
 backports.functools-lru-cache==1.5  # via jaraco.functools
 backports.ssl-match-hostname==3.5.0.1
 baron==0.6.6              # via redbaron
-billiard==3.3.0.23        # via celery
+billiard==3.5.0.4         # via celery
 boto==2.47.0
-celery==3.1.25
+celery==4.2.1
 cffi==1.11.5              # via cryptography
 channels==1.1.8
 constantly==15.1.0        # via twisted
@@ -60,7 +59,7 @@ jaraco.stream==1.1.2      # via irc
 jaraco.text==1.10         # via irc, jaraco.collections
 jsonpickle==0.9.6         # via asgi-amqp
 jsonschema==2.6.0
-kombu==3.0.37             # via asgi-amqp, celery
+kombu==4.2.1              # via asgi-amqp, celery
 lxml==4.2.3
 m2crypto==0.29.0
 markdown==2.6.11
@@ -89,7 +88,7 @@ python-memcached==1.59
 python-openid==2.2.5      # via social-auth-core
 python-radius==1.0
 python-saml==2.4.0
-pytz==2018.3              # via celery, django, irc, tempora, twilio
+pytz==2018.5              # via celery, django, irc, tempora, twilio
 pyyaml==3.12              # via djangorestframework-yaml
 redbaron==0.6.3
 requests-futures==0.9.7

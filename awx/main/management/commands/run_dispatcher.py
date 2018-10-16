@@ -35,7 +35,7 @@ class Command(BaseCommand):
                                   'running jobs will run to completion first'))
 
     def beat(self):
-        from celery import app
+        from celery import Celery
         from celery.beat import PersistentScheduler
         from celery.apps import beat
 
@@ -56,7 +56,7 @@ class Command(BaseCommand):
                     raise SystemExit()
                 return super(AWXScheduler, self).tick(*args, **kwargs)
 
-            def apply_async(self, entry, publisher, **kwargs):
+            def apply_async(self, entry, producer=None, advance=True, **kwargs):
                 task = TaskWorker.resolve_callable(entry.task)
                 result, queue = task.apply_async()
 
@@ -65,7 +65,7 @@ class Command(BaseCommand):
 
                 return TaskResult()
 
-        app = app.App()
+        app = Celery()
         app.conf.BROKER_URL = settings.BROKER_URL
         app.conf.CELERY_TASK_RESULT_EXPIRES = False
         beat.Beat(
