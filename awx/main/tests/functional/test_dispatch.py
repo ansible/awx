@@ -55,6 +55,7 @@ class SlowResultWriter(BaseWorker):
         super(SlowResultWriter, self).perform_work(body, result_queue)
 
 
+@pytest.mark.usefixtures("disable_database_settings")
 class TestPoolWorker:
 
     def setup_method(self, test_method):
@@ -247,6 +248,7 @@ class TestAutoScaling:
         assert len(self.pool) == 2
 
 
+@pytest.mark.usefixtures("disable_database_settings")
 class TestTaskDispatcher:
 
     @property
