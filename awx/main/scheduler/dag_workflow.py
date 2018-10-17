@@ -135,7 +135,7 @@ class WorkflowDAG(SimpleDAG):
             node_ids_visited.add(obj.id)
             job = obj.job
 
-            if not job and obj.do_not_run is False and n not in root_nodes:
+            if obj.do_not_run is False and not job and n not in root_nodes:
                 parent_nodes = [p['node_object'] for p in self.get_dependents(obj)]
                 all_parents_dnr = True
                 parent_run_path = False
@@ -165,19 +165,14 @@ class WorkflowDAG(SimpleDAG):
                 if all_parents_dnr and parent_run_path is False:
                     obj.do_not_run = True
                     nodes_marked_do_not_run.append(n)
-
-
-            if obj.do_not_run:
-                children_success = self.get_dependencies(obj, 'success_nodes')
-                children_failed = self.get_dependencies(obj, 'failure_nodes')
-                children_always = self.get_dependencies(obj, 'always_nodes')
-                children_all = children_failed + children_always
-                nodes.extend(children_all)
-            elif job and job.status == 'failed':
-                children_failed = self.get_dependencies(obj, 'success_nodes')
-                nodes.extend(children_failed)
-            elif job and job.status == 'successful':
-                children_success = self.get_dependencies(obj, 'failure_nodes')
-                nodes.extend(children_success)
+            elif obj.do_not_run is True:
+                nodes.extend(self.get_dependencies(obj, 'success_nodes') +
+                             self.get_dependencies(obj, 'failure_nodes') +
+                             self.get_dependencies(obj, 'always_nodes'))
+            elif job:
+                if job.status == 'failed':
+                    nodes.extend(self.get_dependencies(obj, 'success_nodes'))
+                elif job.status == 'successful':
+                    nodes.extend(self.get_dependencies(obj, 'failure_nodes'))
         return [n['node_object'] for n in nodes_marked_do_not_run]
 
