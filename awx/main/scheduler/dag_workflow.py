@@ -32,7 +32,7 @@ class WorkflowDAG(SimpleDAG):
 
     Return a boolean
     '''
-    def are_relevant_parents_finished(self, node):
+    def _are_relevant_parents_finished(self, node):
         obj = node['node_object']
         parent_nodes = [p['node_object'] for p in self.get_dependents(obj)]
         for p in parent_nodes:
@@ -66,7 +66,7 @@ class WorkflowDAG(SimpleDAG):
                     nodes.extend(self.get_dependencies(obj, 'success_nodes') +
                                  self.get_dependencies(obj, 'always_nodes'))
             else:
-                if self.are_relevant_parents_finished(n):
+                if self._are_relevant_parents_finished(n):
                     nodes_found.append(n)
         return [n['node_object'] for n in nodes_found]
 
@@ -122,6 +122,50 @@ class WorkflowDAG(SimpleDAG):
                 return False, False
         return True, is_failed
 
+    '''
+    Determine if all nodes have been decided on being marked do_not_run.
+    Nodes that are do_not_run False may become do_not_run True in the future.
+    We know a do_not_run False node will NOT be marked do_not_run True if there
+    is a job run for that node.
+
+    :param workflow_nodes:     list of workflow_nodes
+
+    Return a boolean
+    '''
+    def _are_all_nodes_dnr_decided(self, workflow_nodes):
+        for n in workflow_nodes:
+            if n.do_not_run is False and not n.job:
+                return False
+        return True
+        #return not any((n.do_not_run is False and not n.job) for n in workflow_nodes)
+
+
+    '''
+    Determine if a node (1) is ready to be marked do_not_run and (2) should
+    be marked do_not_run.
+
+    :param node:             SimpleDAG internal node
+    :param parent_nodes:     list of workflow_nodes
+
+    Return a boolean
+    '''
+    def _should_mark_node_dnr(self, node, parent_nodes):
+        for p in parent_nodes:
+            if p.job:
+                if p.job.status == 'successful':
+                    if node in (self.get_dependencies(p, 'success_nodes') +
+                            self.get_dependencies(p, 'always_nodes')):
+                        return False
+                elif p.job.status == 'failed':
+                    if node in (self.get_dependencies(p, 'failure_nodes') +
+                            self.get_dependencies(p, 'always_nodes')):
+                        return False
+                else:
+                    return False
+            else:
+                return False
+        return True
+
     def mark_dnr_nodes(self):
         root_nodes = self.get_root_nodes()
         nodes = copy.copy(root_nodes)
@@ -133,46 +177,23 @@ class WorkflowDAG(SimpleDAG):
             if obj.id in node_ids_visited:
                 continue
             node_ids_visited.add(obj.id)
-            job = obj.job
 
-            if obj.do_not_run is False and not job and n not in root_nodes:
-                parent_nodes = [p['node_object'] for p in self.get_dependents(obj)]
-                all_parents_dnr = True
-                parent_run_path = False
-                for p in parent_nodes:
-                    if p.do_not_run is True:
-                        continue
+            if obj.do_not_run is False and not obj.job and n not in root_nodes:
+                parent_nodes = filter(lambda n: not n.do_not_run,
+                                      [p['node_object'] for p in self.get_dependents(obj)])
+                if self._are_all_nodes_dnr_decided(parent_nodes):
+                    if self._should_mark_node_dnr(n, parent_nodes):
+                        obj.do_not_run = True
+                        nodes_marked_do_not_run.append(n)
 
-                    if not p.job and p.do_not_run is False:
-                        all_parents_dnr = False
-
-                    elif p.job and p.job.status in ['new', 'pending', 'waiting', 'running']:
-                        parent_run_path = True
-
-                    elif p.job and p.job.status == 'successful':
-                        children_success = self.get_dependencies(p, 'success_nodes')
-                        children_always = self.get_dependencies(p, 'always_nodes')
-                        if n in children_success or n in children_always:
-                            parent_run_path = True
-
-                    elif p.job and p.job.status == 'failed':
-                        children_failed = self.get_dependencies(p, 'failure_nodes')
-                        children_always = self.get_dependencies(p, 'always_nodes')
-                        if n in children_always or n in children_failed:
-                            parent_run_path = True
-
-                #all_parents_dnr = reduce(lambda p: bool(p.do_not_run == True), parent_nodes)
-                if all_parents_dnr and parent_run_path is False:
-                    obj.do_not_run = True
-                    nodes_marked_do_not_run.append(n)
-            elif obj.do_not_run is True:
+            if obj.do_not_run is True:
                 nodes.extend(self.get_dependencies(obj, 'success_nodes') +
                              self.get_dependencies(obj, 'failure_nodes') +
                              self.get_dependencies(obj, 'always_nodes'))
-            elif job:
-                if job.status == 'failed':
+            elif obj.job:
+                if obj.job.status == 'failed':
                     nodes.extend(self.get_dependencies(obj, 'success_nodes'))
-                elif job.status == 'successful':
+                elif obj.job.status == 'successful':
                     nodes.extend(self.get_dependencies(obj, 'failure_nodes'))
         return [n['node_object'] for n in nodes_marked_do_not_run]
 
