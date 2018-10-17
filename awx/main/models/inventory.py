@@ -9,7 +9,6 @@ import copy
 from urlparse import urljoin
 import os.path
 import six
-from distutils.version import LooseVersion
 
 # Django
 from django.conf import settings
@@ -42,7 +41,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import _inventory_updates, get_ansible_version, region_sorting
+from awx.main.utils import _inventory_updates, region_sorting
 
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate',
@@ -1577,12 +1576,6 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMix
             raise ValidationError(_("Cannot update SCM-based inventory source on launch if set to update on project update. "
                                     "Instead, configure the corresponding source project to update on launch."))
         return self.update_on_launch
-
-    def clean_overwrite_vars(self):  # TODO: remove when Ansible 2.4 becomes unsupported, obviously
-        if self.source == 'scm' and not self.overwrite_vars:
-            if get_ansible_version() < LooseVersion('2.5'):
-                raise ValidationError(_("SCM type sources must set `overwrite_vars` to `true` until Ansible 2.5."))
-        return self.overwrite_vars
 
     def clean_source_path(self):
         if self.source != 'scm' and self.source_path:

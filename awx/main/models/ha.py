@@ -32,7 +32,7 @@ __all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
 
 
 def validate_queuename(v):
-    # celery and kombu don't play nice with unicode in queue names
+    # kombu doesn't play nice with unicode in queue names
     if v:
         try:
             '{}'.format(v.decode('utf-8'))

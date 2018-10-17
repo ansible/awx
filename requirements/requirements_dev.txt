@@ -15,7 +15,6 @@ pytest-mock
 pytest-timeout
 pytest-xdist
 logutils
-flower
 jupyter
 matplotlib
 backports.tempfile  # support in unit tests for py32+ tempfile.TemporaryDirectory

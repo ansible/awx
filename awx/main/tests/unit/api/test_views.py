@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import mock
 import pytest
 import requests
@@ -293,7 +294,7 @@ class TestSurveySpecValidation:
         new['spec'][0]['default'] = '$encrypted$'
         new['spec'][0]['required'] = False
         resp = view._validate_spec_data(new, old)
-        assert resp is None
+        assert resp is None, resp.data
         assert new == {
             "name": "old survey",
             "description": "foobar",
@@ -357,3 +358,58 @@ class TestSurveySpecValidation:
                 }
             ]
         }
+
+
+    @staticmethod
+    def spec_from_element(survey_item):
+        survey_item.setdefault('name', 'foo')
+        survey_item.setdefault('variable', 'foo')
+        survey_item.setdefault('required', False)
+        survey_item.setdefault('question_name', 'foo')
+        survey_item.setdefault('type', 'text')
+        spec = {
+            'name': 'test survey',
+            'description': 'foo',
+            'spec': [survey_item]
+        }
+        return spec
+
+
+    @pytest.mark.parametrize("survey_item, error_text", [
+        ({'type': 'password', 'default': ['some', 'invalid', 'list']}, 'expected to be string'),
+        ({'type': 'password', 'default': False}, 'expected to be string'),
+        ({'type': 'integer', 'default': 'foo'}, 'expected to be int'),
+        ({'type': 'integer', 'default': u'🐉'}, 'expected to be int'),
+        ({'type': 'foo'}, 'allowed question types'),
+        ({'type': u'🐉'}, 'allowed question types'),
+        ({'type': 'multiplechoice'}, 'multiplechoice must specify choices'),
+        ({'type': 'integer', 'min': 'foo'}, 'min limit in survey question 0 expected to be integer'),
+        ({'question_name': 42}, "'question_name' in survey question 0 expected to be string.")
+    ])
+    def test_survey_question_element_validation(self, survey_item, error_text):
+        spec = self.spec_from_element(survey_item)
+        r = JobTemplateSurveySpec._validate_spec_data(spec, {})
+        assert r is not None, (spec, error_text)
+        assert 'error' in r.data
+        assert error_text in r.data['error']
+
+
+    def test_survey_spec_non_dict_error(self):
+        spec = self.spec_from_element({})
+        spec['spec'][0] = 'foo'
+        r = JobTemplateSurveySpec._validate_spec_data(spec, {})
+        assert 'Survey question 0 is not a json object' in r.data['error']
+
+
+    def test_survey_spec_dual_names_error(self):
+        spec = self.spec_from_element({})
+        spec['spec'].append(spec['spec'][0].copy())
+        r = JobTemplateSurveySpec._validate_spec_data(spec, {})
+        assert "'variable' 'foo' duplicated in survey question 1." in r.data['error']
+
+
+    def test_survey_spec_element_missing_property(self):
+        spec = self.spec_from_element({})
+        spec['spec'][0].pop('type')
+        r = JobTemplateSurveySpec._validate_spec_data(spec, {})
+        assert "'type' missing from survey question 0" in r.data['error']

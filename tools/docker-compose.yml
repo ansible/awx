@@ -14,10 +14,9 @@ services:
     ports:
       - "8888:8888"
       - "8080:8080"
-      - "5555:5555"
       - "8013:8013"
       - "8043:8043"
-      - "6899-6999:6899-6999"  # default port range for celery.contrib.rdb
+      - "6899-6999:6899-6999"  # default port range for sdb-listen
     links:
       - postgres
       - memcached

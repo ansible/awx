@@ -42,7 +42,7 @@ class PosixUIDGroupType(LDAPGroupType):
                 )
 
             search = group_search.search_with_additional_term_string(filterstr)
-            search.attrlist = [self.name_attr]
+            search.attrlist = [str(self.name_attr)]
             groups = search.execute(ldap_user.connection)
         except (KeyError, IndexError):
             pass

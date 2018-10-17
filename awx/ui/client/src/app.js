@@ -10,7 +10,6 @@ if ($basePath) {
 }
 
 import start from './app.start';
-import systemTracking from './system-tracking/main';
 import inventoriesHosts from './inventories-hosts/main';
 import inventoryScripts from './inventory-scripts/main';
 import credentials from './credentials/main';
@@ -36,6 +35,7 @@ import RestServices from './rest/main';
 import access from './access/main';
 import scheduler from './scheduler/main';
 import instanceGroups from './instance-groups/main';
+import shared from './shared/main';
 
 import atFeatures from '~features';
 import atLibComponents from '~components';
@@ -62,13 +62,13 @@ angular
         'gettext',
         'Timezones',
         'lrInfiniteScroll',
+        shared.name,
         about.name,
         access.name,
         license.name,
         RestServices.name,
         browserData.name,
         configuration.name,
-        systemTracking.name,
         inventoriesHosts.name,
         inventoryScripts.name,
         credentials.name,

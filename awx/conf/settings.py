@@ -2,11 +2,13 @@
 from collections import namedtuple
 import contextlib
 import logging
+import re
 import sys
 import threading
 import time
 import StringIO
 import traceback
+import urllib
 
 import six
 
@@ -58,6 +60,15 @@ SETTING_CACHE_TIMEOUT = 60
 SETTING_CACHE_DEFAULTS = True
 
 __all__ = ['SettingsWrapper', 'get_settings_to_cache', 'SETTING_CACHE_NOTSET']
+
+
+def normalize_broker_url(value):
+    parts = value.rsplit('@', 1)
+    match = re.search('(amqp://[^:]+:)(.*)', parts[0])
+    if match:
+        prefix, password = match.group(1), match.group(2)
+        parts[0] = prefix + urllib.quote(password)
+    return '@'.join(parts)
 
 
 @contextlib.contextmanager
@@ -115,7 +126,8 @@ def _ctit_db_wrapper(trans_safe=False):
             bottom_stack.close()
             # Log the combined stack
             if trans_safe:
-                logger.warning('Database settings are not available, using defaults, error:\n{}'.format(tb_string))
+                if 'check_migrations' not in sys.argv:
+                    logger.warning('Database settings are not available, using defaults, error:\n{}'.format(tb_string))
             else:
                 logger.error('Error modifying something related to database settings.\n{}'.format(tb_string))
     finally:
@@ -444,7 +456,16 @@ class SettingsWrapper(UserSettingsHolder):
                 value = self._get_local(name)
         if value is not empty:
             return value
-        return self._get_default(name)
+        value = self._get_default(name)
+        # sometimes users specify RabbitMQ passwords that contain
+        # unescaped : and @ characters that confused urlparse, e.g.,
+        # amqp://guest:a@ns:ibl3#@localhost:5672//
+        #
+        # detect these scenarios, and automatically escape the user's
+        # password so it just works
+        if name == 'BROKER_URL':
+            value = normalize_broker_url(value)
+        return value
 
     def _set_local(self, name, value):
         field = self.registry.get_setting_field(name)

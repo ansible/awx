@@ -10,6 +10,7 @@ dockerhub_base=ansible
 
 # Openshift Install
 # Will need to set -e openshift_password=developer -e docker_registry_password=$(oc whoami -t)
+#           or set -e openshift_token=TOKEN
 # openshift_host=127.0.0.1:8443
 # openshift_project=awx
 # openshift_user=developer
@@ -32,6 +33,8 @@ dockerhub_base=ansible
 # task_mem_request=2
 
 # Common Docker parameters
+awx_task_hostname=awx
+awx_web_hostname=awxweb
 postgres_data_dir=/tmp/pgdocker
 host_port=80
 
@@ -65,6 +68,10 @@ pg_password=awxpass
 pg_database=awx
 pg_port=5432
 
+# RabbitMQ Configuration
+rabbitmq_password=awxpass
+rabbitmq_erlang_cookie=cookiemonster
+
 # Use a local distribution build container image for building the AWX package
 # This is helpful if you don't want to bother installing the build-time dependencies as
 # it is taken care of already.
@@ -78,8 +85,8 @@ pg_port=5432
 
 # This will create or update a default admin (superuser) account in AWX, if not provided
 # then these default values are used
-# default_admin_user=admin
-# default_admin_password=password
+admin_user=admin
+admin_password=password
 
 # AWX Secret key
 # It's *very* important that this stay the same between upgrades or you will lose the ability to decrypt
@@ -111,3 +118,9 @@ secret_key=awxsecret
 # /etc/pki/ca-trust in the awx_task and awx_web containers.
 # NOTE: only obeyed in local_docker install
 #ca_trust_dir=/etc/pki/ca-trust
+
+# Include /etc/nginx/awx_extra.conf
+# Note the use of glob pattern for nginx
+# which makes include "optional" - i.e. not fail
+# if file is absent
+#extra_nginx_include="/etc/nginx/awx_extra[.]conf"

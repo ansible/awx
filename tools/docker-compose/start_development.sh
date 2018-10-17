@@ -1,6 +1,12 @@
 #!/bin/bash
 set +x
 
+if [ `id -u` -ge 500 ]; then
+    echo "awx:x:`id -u`:`id -g`:,,,:/tmp:/bin/bash" >> /tmp/passwd
+    cat /tmp/passwd > /etc/passwd
+    rm /tmp/passwd
+fi
+
 /bootstrap_development.sh
 
 cd /awx_devel

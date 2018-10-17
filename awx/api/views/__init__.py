@@ -599,7 +599,7 @@ class InstanceGroupInstanceList(InstanceGroupMembershipMixin, SubListAttachDetac
     search_fields = ('hostname',)
 
 
-class ScheduleList(ListAPIView):
+class ScheduleList(ListCreateAPIView):
 
     view_name = _("Schedules")
     model = Schedule
@@ -1291,7 +1291,7 @@ class ProjectUpdateNotificationsList(SubListAPIView):
     search_fields = ('subject', 'notification_type', 'body',)
 
 
-class ProjectUpdateScmInventoryUpdates(SubListCreateAPIView):
+class ProjectUpdateScmInventoryUpdates(SubListAPIView):
 
     view_name = _("Project Update SCM Inventory Updates")
     model = InventoryUpdate
@@ -1484,10 +1484,11 @@ class OAuth2TokenActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIVi
     search_fields = ('changes',)
 
 
-class UserTeamsList(ListAPIView):
+class UserTeamsList(SubListAPIView):
 
-    model = User
+    model = Team
     serializer_class = TeamSerializer
+    parent_model = User
 
     def get_queryset(self):
         u = get_object_or_404(User, pk=self.kwargs['pk'])
@@ -1665,7 +1666,7 @@ class CredentialTypeDetail(RetrieveUpdateDestroyAPIView):
         return super(CredentialTypeDetail, self).destroy(request, *args, **kwargs)
 
 
-class CredentialTypeCredentialList(SubListAPIView):
+class CredentialTypeCredentialList(SubListCreateAPIView):
 
     model = Credential
     parent_model = CredentialType
@@ -2959,6 +2960,16 @@ class JobTemplateSurveySpec(GenericAPIView):
     obj_permission_type = 'admin'
     serializer_class = EmptySerializer
 
+    ALLOWED_TYPES = {
+        'text': six.string_types,
+        'textarea': six.string_types,
+        'password': six.string_types,
+        'multiplechoice': six.string_types,
+        'multiselect': six.string_types,
+        'integer': int,
+        'float': float
+    }
+
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         if not feature_enabled('surveys'):
@@ -2985,7 +2996,8 @@ class JobTemplateSurveySpec(GenericAPIView):
         obj.save(update_fields=['survey_spec'])
         return Response()
 
-    def _validate_spec_data(self, new_spec, old_spec):
+    @staticmethod
+    def _validate_spec_data(new_spec, old_spec):
         schema_errors = {}
         for field, expect_type, type_label in [
                 ('name', six.string_types, 'string'),
@@ -3006,40 +3018,75 @@ class JobTemplateSurveySpec(GenericAPIView):
         variable_set = set()
         old_spec_dict = JobTemplate.pivot_spec(old_spec)
         for idx, survey_item in enumerate(new_spec["spec"]):
+            context = dict(
+                idx=six.text_type(idx),
+                survey_item=survey_item
+            )
+            # General element validation
             if not isinstance(survey_item, dict):
                 return Response(dict(error=_("Survey question %s is not a json object.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
-            if "type" not in survey_item:
-                return Response(dict(error=_("'type' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
-            if "question_name" not in survey_item:
-                return Response(dict(error=_("'question_name' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
-            if "variable" not in survey_item:
-                return Response(dict(error=_("'variable' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            for field_name in ['type', 'question_name', 'variable', 'required']:
+                if field_name not in survey_item:
+                    return Response(dict(error=_("'{field_name}' missing from survey question {idx}").format(
+                        field_name=field_name, **context
+                    )), status=status.HTTP_400_BAD_REQUEST)
+                val = survey_item[field_name]
+                allow_types = six.string_types
+                type_label = 'string'
+                if field_name == 'required':
+                    allow_types = bool
+                    type_label = 'boolean'
+                if not isinstance(val, allow_types):
+                    return Response(dict(error=_("'{field_name}' in survey question {idx} expected to be {type_label}.").format(
+                        field_name=field_name, type_label=type_label, **context
+                    )))
             if survey_item['variable'] in variable_set:
                 return Response(dict(error=_("'variable' '%(item)s' duplicated in survey question %(survey)s.") % {
                     'item': survey_item['variable'], 'survey': str(idx)}), status=status.HTTP_400_BAD_REQUEST)
             else:
                 variable_set.add(survey_item['variable'])
-            if "required" not in survey_item:
-                return Response(dict(error=_("'required' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
 
-            if survey_item["type"] == "password" and "default" in survey_item:
-                if not isinstance(survey_item['default'], six.string_types):
+            # Type-specific validation
+            # validate question type <-> default type
+            qtype = survey_item["type"]
+            if qtype not in JobTemplateSurveySpec.ALLOWED_TYPES:
+                return Response(dict(error=_(
+                    "'{survey_item[type]}' in survey question {idx} is not one of '{allowed_types}' allowed question types."
+                ).format(
+                    allowed_types=', '.join(JobTemplateSurveySpec.ALLOWED_TYPES.keys()), **context
+                )))
+            if 'default' in survey_item:
+                if not isinstance(survey_item['default'], JobTemplateSurveySpec.ALLOWED_TYPES[qtype]):
+                    type_label = 'string'
+                    if qtype in ['integer', 'float']:
+                        type_label = qtype
                     return Response(dict(error=_(
-                        "Value {question_default} for '{variable_name}' expected to be a string."
+                        "Default value {survey_item[default]} in survey question {idx} expected to be {type_label}."
                     ).format(
-                        question_default=survey_item["default"], variable_name=survey_item["variable"])
-                    ), status=status.HTTP_400_BAD_REQUEST)
+                        type_label=type_label, **context
+                    )), status=status.HTTP_400_BAD_REQUEST)
+            # additional type-specific properties, the UI provides these even
+            # if not applicable to the question, TODO: request that they not do this
+            for key in ['min', 'max']:
+                if key in survey_item:
+                    if survey_item[key] is not None and (not isinstance(survey_item[key], int)):
+                        return Response(dict(error=_(
+                            "The {min_or_max} limit in survey question {idx} expected to be integer."
+                        ).format(min_or_max=key, **context)))
+            if qtype in ['multiplechoice', 'multiselect'] and 'choices' not in survey_item:
+                return Response(dict(error=_(
+                    "Survey question {idx} of type {survey_item[type]} must specify choices.".format(**context)
+                )))
 
+            # Process encryption substitution
             if ("default" in survey_item and isinstance(survey_item['default'], six.string_types) and
                     survey_item['default'].startswith('$encrypted$')):
                 # Submission expects the existence of encrypted DB value to replace given default
-                if survey_item["type"] != "password":
+                if qtype != "password":
                     return Response(dict(error=_(
                         "$encrypted$ is a reserved keyword for password question defaults, "
-                        "survey question {question_position} is type {question_type}."
-                    ).format(
-                        question_position=str(idx), question_type=survey_item["type"])
-                    ), status=status.HTTP_400_BAD_REQUEST)
+                        "survey question {idx} is type {survey_item[type]}."
+                    ).format(**context)), status=status.HTTP_400_BAD_REQUEST)
                 old_element = old_spec_dict.get(survey_item['variable'], {})
                 encryptedish_default_exists = False
                 if 'default' in old_element:
@@ -3051,10 +3098,10 @@ class JobTemplateSurveySpec(GenericAPIView):
                             encryptedish_default_exists = True
                 if not encryptedish_default_exists:
                     return Response(dict(error=_(
-                        "$encrypted$ is a reserved keyword, may not be used for new default in position {question_position}."
-                    ).format(question_position=str(idx))), status=status.HTTP_400_BAD_REQUEST)
+                        "$encrypted$ is a reserved keyword, may not be used for new default in position {idx}."
+                    ).format(**context)), status=status.HTTP_400_BAD_REQUEST)
                 survey_item['default'] = old_element['default']
-            elif survey_item["type"] == "password" and 'default' in survey_item:
+            elif qtype == "password" and 'default' in survey_item:
                 # Submission provides new encrypted default
                 survey_item['default'] = encrypt_value(survey_item['default'])
 
@@ -3318,7 +3365,7 @@ class JobTemplateCallback(GenericAPIView):
         with transaction.atomic():
             job = job_template.create_job(**kv)
 
-        # Send a signal to celery that the job should be started.
+        # Send a signal to signify that the job should be started.
         result = job.signal_start(inventory_sources_already_updated=inventory_sources_already_updated)
         if not result:
             data = dict(msg=_('Error starting job!'))
@@ -3438,10 +3485,6 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
         return getattr(parent, self.relationship).all()
 
     def is_valid_relation(self, parent, sub, created=False):
-        mutex_list = ('success_nodes', 'failure_nodes') if self.relationship == 'always_nodes' else ('always_nodes',)
-        for relation in mutex_list:
-            if getattr(parent, relation).all().exists():
-                return {'Error': _('Cannot associate {0} when {1} have been associated.').format(self.relationship, relation)}
 
         if created:
             return None
