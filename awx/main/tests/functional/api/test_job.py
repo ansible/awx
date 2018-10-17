@@ -132,7 +132,7 @@ def test_slice_jt_recent_jobs(slice_job_factory, admin_user, get):
         expect=200
     )
     job_ids = [entry['id'] for entry in r.data['summary_fields']['recent_jobs']]
-    assert workflow_job.pk in job_ids
+    assert workflow_job.pk not in job_ids
     for node in workflow_job.workflow_nodes.all():
         job = node.job
         assert job.pk in job_ids
