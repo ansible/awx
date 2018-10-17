@@ -1,21 +1,20 @@
-'use strict';
 import moment from 'moment';
 
 describe('View: Job Details', () => {
-    let JobDetails,
-        scope,
-        state,
-        OutputStrings,
-        Prompt,
-        filter,
-        ProcessErrors,
-        Wait,
-        httpBackend,
-        ParseVariableString,
-        subscribe,
-        OutputStatusService;
+    let JobDetails;
+    let scope;
+    let state;
+    let OutputStrings;
+    let Prompt;
+    let filter;
+    let ProcessErrors;
+    let Wait;
+    let httpBackend;
+    let ParseVariableString;
+    let subscribe;
+    let OutputStatusService;
 
-    var mockData = {
+    let mockData = {
         job_slice_count: 2,
         job_slice_number: 2,
         labels: {
@@ -25,13 +24,11 @@ describe('View: Job Details', () => {
             SLICE_JOB_DETAILS: 'bar'
         }
     };
-    let resource = {
+    const resource = {
         id: '147',
         type: 'playbook',
         model: {
-            get: (obj) => {
-                return obj.split('.').reduce((i,o) => i && i[o] || null, mockData);
-            },
+            get: (obj) => obj.split('.').reduce((i, o) => i && i[o] || null, mockData),
             has: jasmine.createSpy('has'),
             options: jasmine.createSpy('options'),
         },
@@ -46,13 +43,11 @@ describe('View: Job Details', () => {
             },
             go: jasmine.createSpy('go'),
             includes: jasmine.createSpy('includes')
-        }
+        };
 
         OutputStrings = {
-            get: (obj) => {
-                return obj.split('.').reduce((i,o) => i && i[o] || null, mockData);
-            },
-        }
+            get: (obj) => obj.split('.').reduce((i, o) => i && i[o] || null, mockData),
+        };
 
         OutputStatusService = {
             subscribe: jasmine.createSpy('subscribe')
@@ -70,7 +65,7 @@ describe('View: Job Details', () => {
         $provide.value('ParseVariableString', angular.noop);
         $provide.value('OutputStatusService', OutputStatusService);
 
-        $provide.provider('$stateProvider', { '$get': function() { return function() {}; } });
+        $provide.provider('$stateProvider', { $get: jasmine.createSpy('$get'), });
         $provide.value('$stateExtender', { addState: jasmine.createSpy('addState'), });
         $provide.value('$stateRegistry', { register: jasmine.createSpy('regster'), });
         $provide.value('sanitizeFilter', angular.noop);
@@ -79,12 +74,16 @@ describe('View: Job Details', () => {
         $provide.value('longDateFilter', angular.noop);
     }));
 
-    beforeEach(angular.mock.inject(function($injector, $componentController, $rootScope, $httpBackend, _state_, _OutputStrings_, _ParseVariableString_, _Prompt_, _ProcessErrors_, _Wait_, _OutputStatusService_){
+    beforeEach(angular.mock.inject((
+        $injector, $componentController, $rootScope,
+        $httpBackend, _state_, _OutputStrings_, _ParseVariableString_, _Prompt_,
+        _ProcessErrors_, _Wait_, _OutputStatusService_
+    ) => {
         scope = $rootScope.$new();
         state = _state_;
         OutputStrings = _OutputStrings_;
         Prompt = _Prompt_;
-        filter = $injector.get("$filter");
+        filter = $injector.get('$filter');
         ProcessErrors = _ProcessErrors_;
         Wait = _Wait_;
         ParseVariableString = _ParseVariableString_;
@@ -94,16 +93,15 @@ describe('View: Job Details', () => {
         JobDetails = $componentController('atJobDetails', {
             $scope: scope,
             $state: state,
-            OutputStrings: OutputStrings,
-            ProcessErrors: ProcessErrors,
-            Wait: Wait,
-            Prompt: Prompt,
+            OutputStrings,
+            ProcessErrors,
+            Wait,
+            Prompt,
             $filter: filter,
-            Wait: Wait,
-            ParseVariableString: ParseVariableString,
-            httpBackend: httpBackend,
-            OutputStatusService: OutputStatusService,
-        }, {resource: resource});
+            ParseVariableString,
+            httpBackend,
+            OutputStatusService,
+        }, { resource });
         JobDetails.$onInit();
     }));
 
@@ -137,7 +135,7 @@ describe('View: Job Details', () => {
                 const result = JobDetails.sliceJobDetails;
                 expect(result).toBeNull();
             });
-            it('returns null if job_slice_count is undefined or null', () =>  {
+            it('returns null if job_slice_count is undefined or null', () => {
                 mockData = {
                     job_slice_count: null,
                     job_slice_number: 2,
@@ -152,7 +150,7 @@ describe('View: Job Details', () => {
                 const result = JobDetails.sliceJobDetails;
                 expect(result).toBeNull();
             });
-            it('returns null if job_slice_number is undefined or null', () =>  {
+            it('returns null if job_slice_number is undefined or null', () => {
                 mockData = {
                     job_slice_count: 2,
                     job_slice_number: null,
@@ -167,7 +165,7 @@ describe('View: Job Details', () => {
                 const result = JobDetails.sliceJobDetails;
                 expect(result).toBeNull();
             });
-            it('returns null if job is a non-sliced job', () =>  {
+            it('returns null if job is a non-sliced job', () => {
                 mockData = {
                     job_slice_count: 1,
                     job_slice_number: null,

@@ -1,38 +1,36 @@
 describe('View: Split Jobs List', () => {
-    let JobList,
-        scope,
-        state,
-        Dataset,
-        resolvedModels,
-        JobsStrings,
-        QuerySet,
-        Prompt,
-        filter,
-        ProcessErrors,
-        Wait,
-        Rest,
-        SearchBasePath;
+    let JobList;
+    let scope;
+    let state;
+    let Dataset;
+    let resolvedModels;
+    let JobsStrings;
+    let QuerySet;
+    let Prompt;
+    let filter;
+    let ProcessErrors;
+    let Wait;
+    let Rest;
+    let SearchBasePath;
 
     beforeEach(angular.mock.module('at.features.jobs', ($provide) => {
         Dataset = {
             data: {
                 results: {}
             }
-        }
+        };
         state = {
             params: {
                 job_search: {}
             },
             go: jasmine.createSpy('go'),
             includes: jasmine.createSpy('includes')
-        }
+        };
         resolvedModels = [
             {
-                options: () => {
-                    return ["foo", "bar"];
-                }
+                options: () => ['foo', 'bar'],
             }
-        ]
+        ];
 
         ProcessErrors = jasmine.createSpy('ProcessErrors');
         Wait = jasmine.createSpy('Wait');
@@ -49,11 +47,14 @@ describe('View: Split Jobs List', () => {
         $provide.value('JobsStrings', angular.noop);
         $provide.value('QuerySet', angular.noop);
 
-        $provide.provider('$stateProvider', { '$get': function() { return function() {}; } });
+        $provide.provider('$stateProvider', { $get: jasmine.createSpy('$get'), });
         $provide.value('$stateExtender', { addState: jasmine.createSpy('addState'), });
     }));
 
-    beforeEach(angular.mock.inject(function($controller, $rootScope, _state_, _Dataset_, _resolvedModels_, _JobsStrings_, _QuerySet_, _Prompt_, _$filter_, _ProcessErrors_, _Wait_, _Rest_, _SearchBasePath_){
+    beforeEach(angular.mock.inject((
+        $controller, $rootScope, _state_, _Dataset_, _resolvedModels_, _JobsStrings_,
+        _QuerySet_, _Prompt_, _$filter_, _ProcessErrors_, _Wait_, _Rest_, _SearchBasePath_
+    ) => {
         scope = $rootScope.$new();
         state = _state_;
         Dataset = _Dataset_;
@@ -70,17 +71,16 @@ describe('View: Split Jobs List', () => {
         JobList = $controller('jobsListController', {
             $scope: scope,
             $state: state,
-            Dataset: Dataset,
-            resolvedModels: resolvedModels,
-            JobsStrings: JobsStrings,
-            ProcessErrors: ProcessErrors,
-            QuerySet: QuerySet,
-            Wait: Wait,
-            Prompt: Prompt,
+            Dataset,
+            resolvedModels,
+            JobsStrings,
+            ProcessErrors,
+            QuerySet,
+            Wait,
+            Prompt,
             $filter: filter,
-            Wait: Wait,
-            Rest: Rest,
-            SearchBasePath: SearchBasePath,
+            Rest,
+            SearchBasePath,
         });
     }));
 
@@ -92,34 +92,34 @@ describe('View: Split Jobs List', () => {
             expect(JobList.getSliceJobDetails).toBeDefined();
         });
         it('returns a string', () => {
-            let data = {
+            const data = {
                 job_slice_number: 1,
                 job_slice_count: 2
-            }
+            };
             const result = JobList.getSliceJobDetails(data);
             expect(result).toEqual('Slice Job 1/2');
         });
         it('returns null when data is null', () => {
-            let data = {
+            const data = {
                 job_slice_number: null,
                 job_slice_count: null
-            }
+            };
             const result = JobList.getSliceJobDetails(data);
             expect(result).toBeNull();
         });
         it('returns null when data is undefined', () => {
-            let data = {
+            const data = {
                 job_slice_number: undefined,
                 job_slice_count: undefined
-            }
+            };
             const result = JobList.getSliceJobDetails(data);
             expect(result).toBeNull();
         });
         it('returns null when job is not a sliced job', () => {
-            let data = {
+            const data = {
                 job_slice_number: null,
                 job_slice_count: 1
-            }
+            };
             const result = JobList.getSliceJobDetails(data);
             expect(result).toBeNull();
         });
