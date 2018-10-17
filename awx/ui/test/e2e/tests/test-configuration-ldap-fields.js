@@ -12,7 +12,7 @@ module.exports = {
 
         navigation
             .waitForElementVisible('@settings')
-            .moveToElement('@settings',0,0)
+            .moveToElement('@settings', 0, 0)
             .waitForElementVisible('@settingsSubPaneSystem')
             .click('@settingsSubPaneSystem');
 
@@ -20,14 +20,15 @@ module.exports = {
 
         navigation
             .waitForElementVisible('@settings')
-            .moveToElement('@settings',0,0)
+            .moveToElement('@settings', 0, 0)
             .waitForElementVisible('@settingsSubPane')
             .waitForElementVisible('@settingsSubPaneAuth')
             .click('@settingsSubPaneAuth');
 
-        configuration.waitForElementVisible(authView);    
-        
-        // works as xpath const categoryName = `//*[@id="configuration_edit"]/div[1]/div/div/div[4]`;
+        configuration.waitForElementVisible(authView);
+
+        // works as xpath const categoryName =
+        // `//*[@id="configuration_edit"]/div[1]/div/div/div[4]`;
         configuration.selectSubcategory('LDAP');
         configuration.waitForElementVisible(ldapForm);
 

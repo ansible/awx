@@ -16,7 +16,7 @@ const commands = [{
     selectSubcategory (name) {
         const spinny = 'div.spinny';
         const categoryName = `//*[text() = '${name}']`;
-        
+
         this.api.useXpath();
         this.api.waitForElementVisible(categoryName);
         this.api.click(categoryName);
