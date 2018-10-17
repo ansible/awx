@@ -16,19 +16,13 @@ describe('View: Job Details', () => {
         OutputStatusService;
 
     var mockData = {
-        summary_fields: {
-            internal_limit: {
-                shard: {
-                    offset: 1,
-                    step: 2,
-                }
-            }
-        },
+        job_slice_count: 2,
+        job_slice_number: 2,
         labels: {
-            SPLIT_JOB: 'foo'
+            SLICE_JOB: 'foo'
         },
         tooltips: {
-            SPLIT_JOB_DETAILS: 'bar'
+            SLICE_JOB_DETAILS: 'bar'
         }
     };
     let resource = {
@@ -117,12 +111,12 @@ describe('View: Job Details', () => {
         it('is created successfully', () => {
             expect(JobDetails).toBeDefined();
         });
-        it('has method "getSplitJobDetails"', () => {
-            expect(JobDetails.splitJobDetails).toBeDefined();
+        it('has method "sliceJobDetails"', () => {
+            expect(JobDetails.sliceJobDetails).toBeDefined();
         });
         describe('splitJobDetails method', () => {
             it('returned values are strings', () => {
-                const result = JobDetails.splitJobDetails;
+                const result = JobDetails.sliceJobDetails;
                 const { label, offset, tooltip } = result;
                 expect(offset).toEqual('2/2');
                 expect(label).toEqual('foo');
@@ -130,14 +124,8 @@ describe('View: Job Details', () => {
             });
             it('returns null if label, offset, or tooltip is undefined', () => {
                 mockData = {
-                    summary_fields: {
-                        internal_limit: {
-                            shard: {
-                                offset: 1,
-                                step: 2,
-                            }
-                        }
-                    },
+                    job_slice_count: 2,
+                    job_slice_number: 2,
                     labels: {
                         SPLIT_JOB: null
                     },
@@ -146,14 +134,13 @@ describe('View: Job Details', () => {
                     }
                 };
                 JobDetails.$onInit();
-                const result = JobDetails.splitJobDetails;
+                const result = JobDetails.sliceJobDetails;
                 expect(result).toBeNull();
             });
-            it('returns null if summary_fields.internal_limit is undefined or null', () =>  {
+            it('returns null if job_slice_count is undefined or null', () =>  {
                 mockData = {
-                    summary_fields: {
-                        internal_limit: undefined
-                    },
+                    job_slice_count: null,
+                    job_slice_number: 2,
                     labels: {
                         SPLIT_JOB: 'foo'
                     },
@@ -162,16 +149,13 @@ describe('View: Job Details', () => {
                     }
                 };
                 JobDetails.$onInit();
-                const result = JobDetails.splitJobDetails;
+                const result = JobDetails.sliceJobDetails;
                 expect(result).toBeNull();
             });
-            it('returns null if summary_fields.internal_limit.shard is undefined or null', () =>  {
+            it('returns null if job_slice_number is undefined or null', () =>  {
                 mockData = {
-                    summary_fields: {
-                        internal_limit: {
-                            shard: undefined
-                        }
-                    },
+                    job_slice_count: 2,
+                    job_slice_number: null,
                     labels: {
                         SPLIT_JOB: 'foo'
                     },
@@ -180,16 +164,13 @@ describe('View: Job Details', () => {
                     }
                 };
                 JobDetails.$onInit();
-                const result = JobDetails.splitJobDetails;
+                const result = JobDetails.sliceJobDetails;
                 expect(result).toBeNull();
             });
-            it('returns null if summary_fields.internal_limit.shard is an empty object', () =>  {
+            it('returns null if job is a non-sliced job', () =>  {
                 mockData = {
-                    summary_fields: {
-                        internal_limit: {
-                            shard: {}
-                        }
-                    },
+                    job_slice_count: 1,
+                    job_slice_number: null,
                     labels: {
                         SPLIT_JOB: 'foo'
                     },
@@ -198,7 +179,7 @@ describe('View: Job Details', () => {
                     }
                 };
                 JobDetails.$onInit();
-                const result = JobDetails.splitJobDetails;
+                const result = JobDetails.sliceJobDetails;
                 expect(result).toBeNull();
             });
         });

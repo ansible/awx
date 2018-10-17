@@ -89,35 +89,38 @@ describe('View: Split Jobs List', () => {
             expect(JobList).toBeDefined();
         });
         it('has method "getSplitJobDetails"', () => {
-            expect(JobList.getSplitJobDetails).toBeDefined();
+            expect(JobList.getSliceJobDetails).toBeDefined();
         });
         it('returns a string', () => {
             let data = {
-                shard: {
-                    offset: 1,
-                    step: 2
-                }
+                job_slice_number: 1,
+                job_slice_count: 2
             }
-            const result = JobList.getSplitJobDetails(data);
-            expect(result).toEqual('Split Job 2/2');
+            const result = JobList.getSliceJobDetails(data);
+            expect(result).toEqual('Slice Job 1/2');
         });
-        it('returns null when there is no data', () => {
-            let data = undefined;
-            const result = JobList.getSplitJobDetails(data);
+        it('returns null when data is null', () => {
+            let data = {
+                job_slice_number: null,
+                job_slice_count: null
+            }
+            const result = JobList.getSliceJobDetails(data);
             expect(result).toBeNull();
         });
-        it('returns null when there is no "shard" attribute', () => {
+        it('returns null when data is undefined', () => {
             let data = {
-                foo: {}
-            };
-            const result = JobList.getSplitJobDetails(data);
+                job_slice_number: undefined,
+                job_slice_count: undefined
+            }
+            const result = JobList.getSliceJobDetails(data);
             expect(result).toBeNull();
         });
-        it('returns null when "shard" is an empty object', () => {
+        it('returns null when job is not a sliced job', () => {
             let data = {
-                shard: {}
-            };
-            const result = JobList.getSplitJobDetails(data);
+                job_slice_number: null,
+                job_slice_count: 1
+            }
+            const result = JobList.getSliceJobDetails(data);
             expect(result).toBeNull();
         });
     });

@@ -85,7 +85,11 @@ function ListJobsController (
             return null;
         }
 
-        return `Slice Job ${job.job_slice_number}/${job.job_slice_count}`;
+        if (job.job_slice_number && job.job_slice_count) {
+            return `Slice Job ${job.job_slice_number}/${job.job_slice_count}`;
+        }
+
+        return null;
     };
 
     vm.getSref = ({ type, id }) => {
