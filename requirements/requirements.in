@@ -4,7 +4,7 @@ asgiref==1.1.2
 backports.ssl-match-hostname==3.5.0.1
 boto==2.47.0
 channels==1.1.8
-celery==3.1.25
+celery==4.2.1
 daphne==1.3.0   # Last before backwards-incompatible channels 2 upgrade
 decorator==4.2.1
 Django==1.11.11
