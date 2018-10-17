@@ -4339,7 +4339,7 @@ class JobRelaunch(RetrieveAPIView):
             if limit_length > 1024:
                 return Response({'limit': _(
                     'Cannot relaunch because the limit length {limit_length} exceeds the max of {limit_max}.'
-                ).format(limit_length=limit_lengh, limit_max=1024)}, status=status.HTTP_400_BAD_REQUEST)
+                ).format(limit_length=limit_length, limit_max=1024)}, status=status.HTTP_400_BAD_REQUEST)
 
         new_job = obj.copy_unified_job(**copy_kwargs)
         result = new_job.signal_start(**serializer.validated_data['credential_passwords'])
