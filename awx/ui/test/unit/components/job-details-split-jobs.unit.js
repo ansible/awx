@@ -125,10 +125,10 @@ describe('View: Job Details', () => {
                     job_slice_count: 2,
                     job_slice_number: 2,
                     labels: {
-                        SPLIT_JOB: null
+                        SLICE_JOB: null
                     },
                     tooltips: {
-                        SPLIT_JOB_DETAILS: null
+                        SLICE_JOB_DETAILS: null
                     }
                 };
                 JobDetails.$onInit();
@@ -140,10 +140,10 @@ describe('View: Job Details', () => {
                     job_slice_count: null,
                     job_slice_number: 2,
                     labels: {
-                        SPLIT_JOB: 'foo'
+                        SLICE_JOB: 'foo'
                     },
                     tooltips: {
-                        SPLIT_JOB_DETAILS: 'bar'
+                        SLICE_JOB_DETAILS: 'bar'
                     }
                 };
                 JobDetails.$onInit();
@@ -155,10 +155,10 @@ describe('View: Job Details', () => {
                     job_slice_count: 2,
                     job_slice_number: null,
                     labels: {
-                        SPLIT_JOB: 'foo'
+                        SLICE_JOB: 'foo'
                     },
                     tooltips: {
-                        SPLIT_JOB_DETAILS: 'bar'
+                        SLICE_JOB_DETAILS: 'bar'
                     }
                 };
                 JobDetails.$onInit();
@@ -170,10 +170,10 @@ describe('View: Job Details', () => {
                     job_slice_count: 1,
                     job_slice_number: null,
                     labels: {
-                        SPLIT_JOB: 'foo'
+                        SLICE_JOB: 'foo'
                     },
                     tooltips: {
-                        SPLIT_JOB_DETAILS: 'bar'
+                        SLICE_JOB_DETAILS: 'bar'
                     }
                 };
                 JobDetails.$onInit();

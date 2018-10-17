@@ -139,6 +139,10 @@ function getSliceJobDetails () {
 
     const number = resource.model.get('job_slice_number');
 
+    if (!number) {
+        return null;
+    }
+
     const label = strings.get('labels.SLICE_JOB');
     const offset = `${number}/${count}`;
     const tooltip = strings.get('tooltips.SLICE_JOB_DETAILS');
