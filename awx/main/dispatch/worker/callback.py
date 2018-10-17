@@ -14,7 +14,7 @@ from awx.main.models import (JobEvent, AdHocCommandEvent, ProjectUpdateEvent,
 
 from .base import BaseWorker
 
-logger = logging.getLogger('awx.main.dispatch')
+logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
 
 class CallbackBrokerWorker(BaseWorker):
