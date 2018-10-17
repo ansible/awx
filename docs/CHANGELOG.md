@@ -1,3 +1,10 @@
+
+* Replaced celery task runner with custom kombu-based dispatcher.[[#2266](https://github.com/ansible/awx/pull/2266)]
+* Allow creation of schedules from global schedules list.[[#2262](https://github.com/ansible/awx/issues/2262)]
+* Validate survey specs on save, return 400 response in many new cases.[[#1911](https://github.com/ansible/awx/pull/1911)]
+* Allow use of organization roles with teams in UI.[[#2351](https://github.com/ansible/awx/pull/2351)]
+* Allow use of workflow always nodes in conjunction with success and failure.[[#2255](https://github.com/ansible/awx/issues/2255)]
+
 3.3.0
 =====
 * Allow relaunching jobs on a subset of hosts, by status.[[#219](https://github.com/ansible/awx/issues/219)]
