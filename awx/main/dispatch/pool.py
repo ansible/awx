@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import random
 import traceback
 from uuid import uuid4
@@ -10,7 +11,7 @@ from multiprocessing import Queue as MPQueue
 from Queue import Full as QueueFull, Empty as QueueEmpty
 
 from django.conf import settings
-from django.db import connection as django_connection
+from django.db import connection as django_connection, connections
 from django.core.cache import cache as django_cache
 from jinja2 import Template
 import psutil
@@ -319,6 +320,8 @@ class AutoscalePool(WorkerPool):
         1.  Discover worker processes that exited, and recover messages they
             were handling.
         2.  Clean up unnecessary, idle workers.
+        3.  Check to see if the database says this node is running any tasks
+            that aren't actually running.  If so, reap them.
         """
         orphaned = []
         for w in self.workers[::]:
@@ -354,6 +357,20 @@ class AutoscalePool(WorkerPool):
             idx = random.choice(range(len(self.workers)))
             self.write(idx, m)
 
+        # if the database says a job is running on this node, but it's *not*,
+        # then reap it
+        running_uuids = []
+        for worker in self.workers:
+            worker.calculate_managed_tasks()
+            running_uuids.extend(worker.managed_tasks.keys())
+        try:
+            reaper.reap(excluded_uuids=running_uuids)
+        except Exception:
+            # we _probably_ failed here due to DB connectivity issues, so
+            # don't use our logger (it accesses the database for configuration)
+            _, _, tb = sys.exc_info()
+            traceback.print_tb(tb)
+
     def up(self):
         if self.full:
             # if we can't spawn more workers, just toss this message into a
@@ -364,18 +381,25 @@ class AutoscalePool(WorkerPool):
             return super(AutoscalePool, self).up()
 
     def write(self, preferred_queue, body):
-        # when the cluster heartbeat occurs, clean up internally
-        if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:
-            self.cleanup()
-        if self.should_grow:
-            self.up()
-        # we don't care about "preferred queue" round robin distribution, just
-        # find the first non-busy worker and claim it
-        workers = self.workers[:]
-        random.shuffle(workers)
-        for w in workers:
-            if not w.busy:
-                w.put(body)
-                break
-        else:
-            return super(AutoscalePool, self).write(preferred_queue, body)
+        try:
+            # when the cluster heartbeat occurs, clean up internally
+            if isinstance(body, dict) and 'cluster_node_heartbeat' in body['task']:
+                self.cleanup()
+            if self.should_grow:
+                self.up()
+            # we don't care about "preferred queue" round robin distribution, just
+            # find the first non-busy worker and claim it
+            workers = self.workers[:]
+            random.shuffle(workers)
+            for w in workers:
+                if not w.busy:
+                    w.put(body)
+                    break
+            else:
+                return super(AutoscalePool, self).write(preferred_queue, body)
+        except Exception:
+            for conn in connections.all():
+                # If the database connection has a hiccup, re-establish a new
+                # connection
+                conn.close_if_unusable_or_obsolete()
+            logger.exception('failed to write inbound message')
