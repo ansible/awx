@@ -1,0 +1,12 @@
+<div ui-view="scheduler"></div>
+<div ui-view="form"></div>
+<at-panel ng-cloak id="htmlTemplate">
+    <div ng-if="$state.includes('projects')">
+        <at-panel-heading
+            title="{{:: vm.strings.get('list.PANEL_TITLE') }}"
+            hide-dismiss="true"
+            badge="{{ vm.count }}">
+        </at-panel-heading>
+    </div>
+    <div ui-view="projectsList"></div>
+</at-panel>

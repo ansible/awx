@@ -31,7 +31,7 @@ module.exports = {
         projects.waitForElementNotVisible('div.spinny');
 
         projects.section.list.expect.element('@badge').text.equal('1');
-        projects.expect.element(`#projects_table tr[id="${data.project.id}"]`).visible;
+        projects.expect.element(`#row-${data.project.id}`).visible;
         projects.expect.element('i[class*="copy"]').visible;
         projects.expect.element('i[class*="copy"]').enabled;
 

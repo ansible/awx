@@ -139,6 +139,9 @@
 
 .at-RowItem-status {
     margin-right: @at-margin-right-list-row-item-status;
+    & > a {
+        cursor: pointer;
+    }
 }
 
 .at-RowItem--isHeader {
@@ -252,6 +255,12 @@
 
 .at-RowAction--danger:hover {
     background-color: @at-color-list-row-action-hover-danger;
+}
+
+.at-RowAction--disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .at-Row .at-Row-checkbox {
