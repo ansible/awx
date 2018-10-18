@@ -21,5 +21,3 @@ pip-compile requirements/requirements_ansible.in > requirements/requirements_ans
 * As of `pip-tools` `1.8.1` `pip-compile` does not resolve packages specified using a git url. Thus, dependencies for things like `dm.xmlsec.binding` do not get resolved and output to `requirements.txt`. This means that:
   * can't use `pip install --no-deps` because other deps WILL be sucked in
   * all dependencies are NOT captured in our `.txt` files. This means you can't rely on the `.txt` when gathering licenses.
-
-* Package `docutils`, as an upstream of `boto3`, is commented out in both `requirements.txt` and `requirements_ansible.txt` because the official package has a bug that causes RPM build failure. [Here](https://sourceforge.net/p/docutils/bugs/321/) is the bug report. Please do not uncomment it before the bug fix lands. For now we are using [a monkey-patch version of `docutils`](https://github.com/ansible/docutils.git) that comes with the bug fix. It's included in `requirements_git.txt` and `requirements_ansible_git.txt`.
