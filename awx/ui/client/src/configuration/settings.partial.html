@@ -1,0 +1,17 @@
+<at-card-group>
+    <at-card title="Authentication" ng-click="vm.goToCard('auth')">
+        Enable simplified login for your Tower applications
+    </at-card>
+    <at-card title="Jobs" ng-click="vm.goToCard('jobs')">
+        Update settings pertaining to Jobs within Tower
+    </at-card>
+    <at-card title="System" ng-click="vm.goToCard('system')">
+        Define system-level features and functions
+    </at-card>
+    <at-card title="User Interface" ng-click="vm.goToCard('ui')">
+        Set preferences for data collection, logos, and logins
+    </at-card>
+    <at-card title="License" ng-show="vm.product === 'Tower'" ng-click="vm.goToCard('license')">
+        View and edit your license information
+    </at-card>
+</at-card-group>
