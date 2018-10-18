@@ -21,6 +21,12 @@ const nodeRemove = "//*[contains(@class, 'nodeRemoveCross')]";
 // one of the jobs or projects or inventories
 const testActionsProject = "//td[contains(text(), 'test-actions-project')]";
 const testActionsJob = "//td[contains(text(), 'test-actions-job')]";
+const testActionsProjectText = "test-actions-project";
+const testActionsJobText = "test-actions-job";
+
+// search bar for visualizer templates
+const jobSearchBar = "//*[contains(@id, 'workflow-jobs-list')]//input[contains(@class, 'SmartSearch-input')]";
+const projectSearchBar = "//*[contains(@id, 'workflow-project-sync-list')]//input[contains(@class, 'SmartSearch-input')]";
 
 // dropdown bar which lets you select edge type
 const edgeTypeDropdownBar = "//span[contains(@id, 'select2-workflow_node_edge-container')]";
@@ -59,6 +65,9 @@ module.exports = {
         client
             .useXpath()
             .findThenClick(rootNode)
+            .clearValue(projectSearchBar)
+            .setValue(projectSearchBar, [testActionsProjectText, client.Keys.ENTER])
+            .pause(1000)
             .findThenClick(testActionsProject)
             .findThenClick(edgeTypeDropdownBar)
             .waitForElementNotPresent(successDropdown)
@@ -88,6 +97,9 @@ module.exports = {
             })
             .pause(1000)
             .waitForElementNotVisible(spinny)
+            .clearValue(jobSearchBar)
+            .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
+            .pause(1000)
             .findThenClick(testActionsJob)
             .pause(1000)
             .waitForElementNotVisible(spinny)
@@ -113,6 +125,9 @@ module.exports = {
             })
             .pause(1000)
             .waitForElementNotVisible(spinny)
+            .clearValue(jobSearchBar)
+            .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
+            .pause(1000)
             .findThenClick(testActionsJob)
             .pause(1000)
             .waitForElementNotVisible(spinny)
