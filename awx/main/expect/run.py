@@ -28,14 +28,17 @@ def args2cmdline(*args):
     return ' '.join([pipes.quote(a) for a in args])
 
 
-def wrap_args_with_ssh_agent(args, ssh_key_path, ssh_auth_sock=None, silence_ssh_add=False):
-    if ssh_key_path:
-        ssh_add_command = args2cmdline('ssh-add', ssh_key_path)
-        if silence_ssh_add:
-            ssh_add_command = ' '.join([ssh_add_command, '2>/dev/null'])
-        cmd = ' && '.join([ssh_add_command,
-                           args2cmdline('rm', '-f', ssh_key_path),
-                           args2cmdline(*args)])
+def wrap_args_with_ssh_agent(args, ssh_keys_path, ssh_auth_sock=None, silence_ssh_add=False):
+    if ssh_keys_path:
+        tmp = []
+        for ssh_key_path in ssh_keys_path:
+            ssh_add_command = args2cmdline('ssh-add', ssh_key_path)
+            if silence_ssh_add:
+                ssh_add_command = ' '.join([ssh_add_command, '2>/dev/null'])
+            tmp.append(' && '.join([ssh_add_command,
+                            args2cmdline('rm', '-f', ssh_key_path)]))
+        tmp.append(args2cmdline(*args))
+        cmd = ' && '.join(tmp)
         args = ['ssh-agent']
         if ssh_auth_sock:
             args.extend(['-a', ssh_auth_sock])

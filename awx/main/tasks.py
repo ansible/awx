@@ -720,7 +720,7 @@ class BaseTask(object):
                     name = 'credential_%d' % credential.pk
                     path = os.path.join(kwargs['private_data_dir'], name)
                     run.open_fifo_write(path, data)
-                    private_data_files['credentials']['ssh'] = path
+                    private_data_files['credentials'][credential.kind] = path
                 # Ansible network modules do not yet support ssh-agent.
                 # Instead, ssh private key file is explicitly passed via an
                 # env variable.
@@ -971,13 +971,13 @@ class BaseTask(object):
                 args = wrap_args_with_proot(args, cwd, **kwargs)
                 safe_args = wrap_args_with_proot(safe_args, cwd, **kwargs)
             # If there is an SSH key path defined, wrap args with ssh-agent.
-            ssh_key_path = self.get_ssh_key_path(instance, **kwargs)
+            ssh_keys_path = self.get_ssh_key_path(instance, **kwargs)
             # If we're executing on an isolated host, don't bother adding the
             # key to the agent in this environment
-            if ssh_key_path and instance.is_isolated() is False:
+            if ssh_keys_path and instance.is_isolated() is False:
                 ssh_auth_sock = os.path.join(kwargs['private_data_dir'], 'ssh_auth.sock')
-                args = run.wrap_args_with_ssh_agent(args, ssh_key_path, ssh_auth_sock)
-                safe_args = run.wrap_args_with_ssh_agent(safe_args, ssh_key_path, ssh_auth_sock)
+                args = run.wrap_args_with_ssh_agent(args, ssh_keys_path, ssh_auth_sock)
+                safe_args = run.wrap_args_with_ssh_agent(safe_args, ssh_keys_path, ssh_auth_sock)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
                                          job_cwd=cwd, job_env=safe_env)
 
@@ -1053,8 +1053,15 @@ class BaseTask(object):
         If using an SSH key, return the path for use by ssh-agent.
         '''
         private_data_files = kwargs.get('private_data_files', {})
+        keys = []
         if 'ssh' in private_data_files.get('credentials', {}):
-            return private_data_files['credentials']['ssh']
+            keys.append(private_data_files['credentials']['ssh'])
+
+        if 'scm' in private_data_files.get('credentials', {}):
+            keys.append(private_data_files['credentials']['scm'])
+
+        if keys:
+            return keys
         '''
         Note: Don't inject network ssh key data into ssh-agent for network
         credentials because the ansible modules do not yet support it.

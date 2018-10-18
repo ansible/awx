@@ -2840,7 +2840,7 @@ class JobTemplateLaunch(RetrieveAPIView):
             for key, conditional, _type, type_repr in (
                 ('credential', lambda cred: cred.credential_type.kind != 'ssh', int, 'pk value'),
                 ('vault_credential', lambda cred: cred.credential_type.kind != 'vault', int, 'pk value'),
-                ('extra_credentials', lambda cred: cred.credential_type.kind not in ('cloud', 'net'), Iterable, 'a list')
+                ('extra_credentials', lambda cred: cred.credential_type.kind not in ('cloud', 'net', 'scm'), Iterable, 'a list')
             ):
                 if key in modern_data:
                     # if a specific deprecated key is specified, remove all
@@ -3175,7 +3175,7 @@ class JobTemplateCredentialsList(SubListCreateAttachDetachAPIView):
             return {"error": _("Cannot assign multiple {credential_type} credentials.".format(
                 credential_type=sub.unique_hash(display=True)))}
         kind = sub.credential_type.kind
-        if kind not in ('ssh', 'vault', 'cloud', 'net'):
+        if kind not in ('ssh', 'vault', 'cloud', 'net', 'scm'):
             return {'error': _('Cannot assign a Credential of kind `{}`.').format(kind)}
 
         return super(JobTemplateCredentialsList, self).is_valid_relation(parent, sub, created)
@@ -3187,12 +3187,12 @@ class JobTemplateExtraCredentialsList(JobTemplateCredentialsList):
 
     def get_queryset(self):
         sublist_qs = super(JobTemplateExtraCredentialsList, self).get_queryset()
-        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net'])
+        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net', 'scm'])
         return sublist_qs
 
     def is_valid_relation(self, parent, sub, created=False):
         valid = super(JobTemplateExtraCredentialsList, self).is_valid_relation(parent, sub, created)
-        if sub.credential_type.kind not in ('cloud', 'net'):
+        if sub.credential_type.kind not in ('cloud', 'net', 'scm'):
             return {'error': _('Extra credentials must be network or cloud.')}
         return valid
 
@@ -4000,7 +4000,7 @@ class JobExtraCredentialsList(JobCredentialsList):
 
     def get_queryset(self):
         sublist_qs = super(JobExtraCredentialsList, self).get_queryset()
-        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net'])
+        sublist_qs = sublist_qs.filter(credential_type__kind__in=['cloud', 'net', 'scm'])
         return sublist_qs
 
 
