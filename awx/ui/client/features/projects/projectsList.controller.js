@@ -27,6 +27,9 @@ function projectsListController (
     };
     vm.dataset = Dataset.data;
     vm.projects = Dataset.data.results;
+    $scope.$watch('vm.dataset.count', () => {
+        $scope.$emit('updateCount', vm.dataset.count, 'projects');
+    });
     // build tooltips
     _.forEach(vm.projects, buildTooltips);
     $rootScope.flashMessage = null;

@@ -4,7 +4,7 @@ function IndexProjectsController ($scope, strings, dataset) {
     vm.count = dataset.data.count;
 
     $scope.$on('updateCount', (e, count) => {
-        if (count) {
+        if (typeof count === 'number') {
             vm.count = count;
         }
     });

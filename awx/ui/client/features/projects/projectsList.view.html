@@ -21,7 +21,8 @@
     </div>
     <at-list results="vm.projects">
         <at-row ng-repeat="project in vm.projects"
-            ng-class="{'at-Row--active': (project.id === vm.activeId)}">
+            ng-class="{'at-Row--active': (project.id === vm.activeId)}"
+            id="row-{{ project.id }}">
             <div class="at-Row-items">
                 <at-row-item
                     status="{{ project.statusIcon }}"

@@ -508,36 +508,36 @@ module.exports = {
         client.expect.element('#project_form').visible;
     },
     'check project list for unsanitized content': client => {
-        const itemRow = `#projects_table tr[id="${data.project.id}"]`;
-        const itemName = `${itemRow} td[class*="name-"] a`;
+        const itemRow = `#row-${data.project.id}`;
+        const itemName = `${itemRow} .at-RowItem-header`;
 
-        client.expect.element('div[class*="at-Panel"] smart-search').visible;
-        client.expect.element('div[class*="at-Panel"] smart-search input').enabled;
+        client.expect.element('.at-Panel smart-search').visible;
+        client.expect.element('.at-Panel smart-search input').enabled;
 
-        client.sendKeys('div[class*="at-Panel"] smart-search input', `id:>${data.project.id - 1} id:<${data.project.id + 1}`);
-        client.sendKeys('div[class*="at-Panel"] smart-search input', client.Keys.ENTER);
+        client.sendKeys('.at-Panel smart-search input', `id:>${data.project.id - 1} id:<${data.project.id + 1}`);
+        client.sendKeys('.at-Panel smart-search input', client.Keys.ENTER);
 
-        client.expect.element('div.spinny').visible;
         client.expect.element('div.spinny').not.visible;
 
-        client.expect.element('.List-titleBadge').text.equal('1');
+        client.expect.element('.at-Panel-headingTitleBadge').text.equal('1');
         client.expect.element(itemName).visible;
 
-        client.moveToElement(itemName, 0, 0, () => {
-            client.expect.element(itemName).attribute('aria-describedby');
-
-            client.getAttribute(itemName, 'aria-describedby', ({ value }) => {
-                const tooltip = `#${value}`;
-
-                client.expect.element(tooltip).present;
-                client.expect.element(tooltip).visible;
-
-                client.expect.element('#xss').not.present;
-                client.expect.element('[class=xss]').not.present;
-                client.expect.element(tooltip).attribute('innerHTML')
-                    .contains('&lt;div id="xss" class="xss"&gt;test&lt;/div&gt;');
-            });
-        });
+        // TODO: uncomment when tooltips are added
+        // client.moveToElement(itemName, 0, 0, () => {
+        //     client.expect.element(itemName).attribute('aria-describedby');
+        //
+        //     client.getAttribute(itemName, 'aria-describedby', ({ value }) => {
+        //         const tooltip = `#${value}`;
+        //
+        //         client.expect.element(tooltip).present;
+        //         client.expect.element(tooltip).visible;
+        //
+        //         client.expect.element('#xss').not.present;
+        //         client.expect.element('[class=xss]').not.present;
+        //         client.expect.element(tooltip).attribute('innerHTML')
+        //             .contains('&lt;div id="xss" class="xss"&gt;test&lt;/div&gt;');
+        //     });
+        // });
 
         client.click(`${itemRow} i[class*="trash"]`);
 
