@@ -156,11 +156,11 @@ class WorkflowDAG(SimpleDAG):
             if p.job:
                 if p.job.status == 'successful':
                     if node in (self.get_dependencies(p, 'success_nodes') +
-                            self.get_dependencies(p, 'always_nodes')):
+                                self.get_dependencies(p, 'always_nodes')):
                         return False
                 elif p.job.status == 'failed':
                     if node in (self.get_dependencies(p, 'failure_nodes') +
-                            self.get_dependencies(p, 'always_nodes')):
+                                self.get_dependencies(p, 'always_nodes')):
                         return False
                 else:
                     return False
