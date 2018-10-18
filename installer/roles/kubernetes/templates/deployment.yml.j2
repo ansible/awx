@@ -162,6 +162,9 @@ spec:
             requests:
               memory: "{{ web_mem_request }}Gi"
               cpu: "{{ web_cpu_request }}m"
+            limits:
+              memory: "{{ web_mem_limit | default(web_mem_request) }}Gi"
+              cpu: "{{ web_cpu_limit | default(web_cpu_request) }}m"
         - name: {{ kubernetes_deployment_name }}-celery
           securityContext:
             privileged: true
@@ -208,6 +211,9 @@ spec:
             requests:
               memory: "{{ task_mem_request }}Gi"
               cpu: "{{ task_cpu_request }}m"
+            limits:
+              memory: "{{ task_mem_limit | default(task_mem_request) }}Gi"
+              cpu: "{{ task_cpu_limit | default(task_cpu_request) }}m"
         - name: {{ kubernetes_deployment_name }}-rabbit
           image: "{{ kubernetes_rabbitmq_image }}:{{ kubernetes_rabbitmq_version }}"
           imagePullPolicy: Always
@@ -251,6 +257,9 @@ spec:
             requests:
               memory: "{{ rabbitmq_mem_request }}Gi"
               cpu: "{{ rabbitmq_cpu_request }}m"
+            limits:
+              memory: "{{ rabbitmq_mem_limit | default(rabbitmq_mem_request) }}Gi"
+              cpu: "{{ rabbitmq_cpu_limit | default(rabbitmq_cpu_request) }}m"
         - name: {{ kubernetes_deployment_name }}-memcached
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           imagePullPolicy: Always
@@ -258,6 +267,9 @@ spec:
             requests:
               memory: "{{ memcached_mem_request }}Gi"
               cpu: "{{ memcached_cpu_request }}m"
+            limits:
+              memory: "{{ memcached_mem_limit | default(memcached_mem_request) }}Gi"
+              cpu: "{{ memcached_cpu_limit | default(memcached_cpu_request) }}m"
       volumes:
         - name: {{ kubernetes_deployment_name }}-application-config
           configMap:
