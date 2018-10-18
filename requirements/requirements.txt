@@ -40,6 +40,7 @@ django-taggit==0.22.2
 django==1.11.16
 djangorestframework-yaml==1.0.3
 djangorestframework==3.7.7
+docutils==0.14            # via botocore
 enum34==1.1.6             # via cryptography
 functools32==3.2.3.post2  # via jsonschema
 futures==3.2.0            # via requests-futures
