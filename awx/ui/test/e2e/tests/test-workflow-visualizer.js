@@ -21,8 +21,8 @@ const nodeRemove = "//*[contains(@class, 'nodeRemoveCross')]";
 // one of the jobs or projects or inventories
 const testActionsProject = "//td[contains(text(), 'test-actions-project')]";
 const testActionsJob = "//td[contains(text(), 'test-actions-job')]";
-const testActionsProjectText = "test-actions-project";
-const testActionsJobText = "test-actions-job";
+const testActionsProjectText = 'test-actions-project';
+const testActionsJobText = 'test-actions-job';
 
 // search bar for visualizer templates
 const jobSearchBar = "//*[contains(@id, 'workflow-jobs-list')]//input[contains(@class, 'SmartSearch-input')]";
