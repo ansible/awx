@@ -7,84 +7,44 @@
 export default [
     '$scope',
     '$rootScope',
-    '$state',
     '$stateParams',
-    '$timeout',
-    '$q',
-    'configurationAzureForm',
-    'configurationGithubForm',
-    'configurationGithubOrgForm',
-    'configurationGithubTeamForm',
-    'configurationGoogleForm',
-    'configurationLdapForm',
-    'configurationLdap1Form',
-    'configurationLdap2Form',
-    'configurationLdap3Form',
-    'configurationLdap4Form',
-    'configurationLdap5Form',
-    'configurationRadiusForm',
-    'configurationTacacsForm',
-    'configurationSamlForm',
-    'ConfigurationService',
-    'ConfigurationUtils',
+    'SettingsUtils',
     'CreateSelect2',
     'GenerateForm',
     'i18n',
     'ParseTypeChange',
-    function(
+    function (
         $scope,
         $rootScope,
-        $state,
         $stateParams,
-        $timeout,
-        $q,
-        configurationAzureForm,
-        configurationGithubForm,
-        configurationGithubOrgForm,
-        configurationGithubTeamForm,
-        configurationGoogleForm,
-        configurationLdapForm,
-        configurationLdap1Form,
-        configurationLdap2Form,
-        configurationLdap3Form,
-        configurationLdap4Form,
-        configurationLdap5Form,
-        configurationRadiusForm,
-        configurationTacacsForm,
-        configurationSamlForm,
-        ConfigurationService,
-        ConfigurationUtils,
+        SettingsUtils,
         CreateSelect2,
         GenerateForm,
         i18n,
         ParseTypeChange
     ) {
-        var authVm = this;
+        const authVm = this;
+        const generator = GenerateForm;
+        const formTracker = $scope.$parent.vm.formTracker; // track the current active form
 
-        var generator = GenerateForm;
-        var formTracker = $scope.$parent.vm.formTracker;
-        var dropdownValue = 'azure';
-        var activeAuthForm = 'azure';
-        var ldapDropdownValue = '';
+        authVm.activeAuthForm = 'azure';
+        authVm.activeTab = 'azure';
+        authVm.ldapDropdownValue = '';
+        authVm.githubDropdownValue = 'github';
 
         let codeInputInitialized = false;
 
-        // Default active form
-        if ($stateParams.currentTab === '' || $stateParams.currentTab === 'auth') {
-            formTracker.setCurrentAuth(activeAuthForm);
+        const formDefs = $scope.$parent.formDefs;
+
+        // Default active authform
+        if ($stateParams.form === 'auth') {
+            formTracker.setCurrentAuth(authVm.activeAuthForm);
         }
 
-        const getActiveAuthForm = () => {
-            if (authVm.dropdownValue === 'ldap') {
-                return `ldap${authVm.ldapDropdownValue}`;
-            }
-            return authVm.dropdownValue;
-        };
-
-
-        const activeForm = function(revertDropdown) {
+        authVm.activeForm = function(tab) {
             if(!_.get($scope.$parent, [formTracker.currentFormName(), '$dirty'])) {
-                authVm.activeAuthForm = getActiveAuthForm();
+                authVm.activeTab = tab;
+                authVm.activeAuthForm = getActiveAuthForm(tab);
                 formTracker.setCurrentAuth(authVm.activeAuthForm);
                 startCodeMirrors();
             } else {
@@ -97,7 +57,8 @@ export default [
                     onClick: function() {
                         $scope.$parent.vm.populateFromApi();
                         $scope.$parent[formTracker.currentFormName()].$setPristine();
-                        authVm.activeAuthForm = getActiveAuthForm();
+                        authVm.activeTab = tab;
+                        authVm.activeAuthForm = getActiveAuthForm(tab);
                         formTracker.setCurrentAuth(authVm.activeAuthForm);
                         $('#FormModal-dialog').dialog('close');
                     }
@@ -108,15 +69,13 @@ export default [
                         .then(function() {
                             $scope.$parent[formTracker.currentFormName()].$setPristine();
                             $scope.$parent.vm.populateFromApi();
-                            authVm.activeAuthForm = getActiveAuthForm();
+                            authVm.activeTab = tab;
+                            authVm.activeAuthForm = getActiveAuthForm(tab);
                             formTracker.setCurrentAuth(authVm.activeAuthForm);
                             $('#FormModal-dialog').dialog('close');
                         }).catch(() => {
                             event.preventDefault();
                             $('#FormModal-dialog').dialog('close');
-                            if (revertDropdown) {
-                                revertDropdown();
-                            }
                         });
                     },
                     "class": "btn btn-primary",
@@ -128,31 +87,9 @@ export default [
             authVm.ldapSelected = (authVm.activeAuthForm.indexOf('ldap') !== -1);
         };
 
-        const changeAuthDropdown = (previousVal) => {
-            activeForm(() => {
-                authVm.dropdownValue = previousVal;
-                CreateSelect2({
-                    element: '#configure-dropdown-nav',
-                    multiple: false,
-                });
-            });
-        };
-
-        const changeLdapDropdown = (previousVal) => {
-            activeForm(() => {
-                authVm.ldapDropdownValue = previousVal;
-                CreateSelect2({
-                    element: '#configure-ldap-dropdown',
-                    multiple: false,
-                });
-            });
-        };
-
-        var dropdownOptions = [
+        authVm.dropdownOptions = [
             {label: i18n._('Azure AD'), value: 'azure'},
             {label: i18n._('GitHub'), value: 'github'},
-            {label: i18n._('GitHub Org'), value: 'github_org'},
-            {label: i18n._('GitHub Team'), value: 'github_team'},
             {label: i18n._('Google OAuth2'), value: 'google_oauth'},
             {label: i18n._('LDAP'), value: 'ldap'},
             {label: i18n._('RADIUS'), value: 'radius'},
@@ -160,13 +97,19 @@ export default [
             {label: i18n._('TACACS+'), value: 'tacacs'}
         ];
 
-        var ldapDropdownOptions = [
+        authVm.ldapDropdownOptions = [
             {label: i18n._('Default'), value: ''},
             {label: i18n._('LDAP 1 (Optional)'), value: '1'},
             {label: i18n._('LDAP 2 (Optional)'), value: '2'},
             {label: i18n._('LDAP 3 (Optional)'), value: '3'},
             {label: i18n._('LDAP 4 (Optional)'), value: '4'},
             {label: i18n._('LDAP 5 (Optional)'), value: '5'},
+        ];
+
+        authVm.githubDropdownOptions = [
+            {label: i18n._('GitHub (Default)'), value: 'github'},
+            {label: i18n._('GitHub Org'), value: 'github_org'},
+            {label: i18n._('GitHub Team'), value: 'github_team'},
         ];
 
         CreateSelect2({
@@ -179,74 +122,79 @@ export default [
             multiple: false,
         });
 
+        CreateSelect2({
+            element: '#configure-github-dropdown',
+            multiple: false,
+        });
+
         var authForms = [
             {
-                formDef: configurationAzureForm,
+                formDef: formDefs.azure,
                 id: 'auth-azure-form',
                 name: 'azure'
             },
             {
-                formDef: configurationGithubForm,
+                formDef: formDefs.github,
                 id: 'auth-github-form',
                 name: 'github'
             },
             {
-                formDef: configurationGithubOrgForm,
+                formDef: formDefs.github_org,
                 id: 'auth-github-org-form',
                 name: 'github_org'
             },
             {
-                formDef: configurationGithubTeamForm,
+                formDef: formDefs.github_team,
                 id: 'auth-github-team-form',
                 name: 'github_team'
             },
             {
-                formDef: configurationGoogleForm,
+                formDef: formDefs.google_oauth,
                 id: 'auth-google-form',
                 name: 'google_oauth'
             },
             {
-                formDef: configurationRadiusForm,
+                formDef: formDefs.radius,
                 id: 'auth-radius-form',
                 name: 'radius'
             },
             {
-                formDef: configurationTacacsForm,
+                formDef: formDefs.tacacs,
                 id: 'auth-tacacs-form',
                 name: 'tacacs'
             },
             {
-                formDef: configurationSamlForm,
+                formDef: formDefs.saml,
                 id: 'auth-saml-form',
                 name: 'saml'
             },
             {
-                formDef: configurationLdapForm,
+                formDef: formDefs.ldap,
                 id: 'auth-ldap-form',
                 name: 'ldap'
             },
             {
-                formDef: configurationLdap1Form,
+                formDef: formDefs.ldap1,
                 id: 'auth-ldap1-form',
                 name: 'ldap1'
             },
             {
-                formDef: configurationLdap2Form,
+                formDef: formDefs.ldap2,
                 id: 'auth-ldap2-form',
                 name: 'ldap2'
             },
             {
-                formDef: configurationLdap3Form,
+                formDef: formDefs.ldap3,
                 id: 'auth-ldap3-form',
                 name: 'ldap3'
             },
             {
-                formDef: configurationLdap4Form,
+                formDef: formDefs.ldap4,
                 id: 'auth-ldap4-form',
                 name: 'ldap4'
             },
             {
-                formDef: configurationLdap5Form,
+                formDef: formDefs.ldap5,
                 id: 'auth-ldap5-form',
                 name: 'ldap5'
             },
@@ -256,11 +204,11 @@ export default [
         _.each(forms, function(form) {
             var keys = _.keys(form.fields);
             _.each(keys, function(key) {
-                if($scope.$parent.configDataResolve[key].type === 'choice') {
+                if($scope.configDataResolve[key].type === 'choice') {
                     // Create options for dropdowns
                     var optionsGroup = key + '_options';
                     $scope.$parent[optionsGroup] = [];
-                    _.each($scope.$parent.configDataResolve[key].choices, function(choice){
+                    _.each($scope.configDataResolve[key].choices, function(choice){
                         $scope.$parent[optionsGroup].push({
                             name: choice[0],
                             label: choice[1],
@@ -274,15 +222,28 @@ export default [
             form.buttons.save.disabled = $rootScope.user_is_system_auditor;
         });
 
-        function startCodeMirrors(key) {
+        $scope.$parent.$parent.parseType = 'json';
+
+        _.each(authForms, function(form) {
+            // Generate the forms
+            generator.inject(form.formDef, {
+                id: form.id,
+                mode: 'edit',
+                scope: $scope.$parent.$parent,
+                related: true,
+                noPanel: true
+            });
+        });
+
+        function startCodeMirrors (key) {
             var form = _.find(authForms, f => f.name === $scope.authVm.activeAuthForm);
 
             if(!key){
                 // Attach codemirror to fields that need it
                 _.each(form.formDef.fields, function(field) {
                     // Codemirror balks at empty values so give it one
-                    if($scope.$parent[field.name] === null && field.codeMirror) {
-                      $scope.$parent[field.name] = '{}';
+                    if($scope.$parent.$parent[field.name] === null && field.codeMirror) {
+                      $scope.$parent.$parent[field.name] = '{}';
                     }
                     if(field.codeMirror) {
                         createIt(field.name);
@@ -295,11 +256,11 @@ export default [
 
             function createIt(name){
                 ParseTypeChange({
-                   scope: $scope.$parent,
+                   scope: $scope.$parent.$parent,
                    variable: name,
                    parse_variable: 'parseType',
                    field_id: form.formDef.name + '_' + name,
-                   readOnly: $scope.$parent.configDataResolve[name] && $scope.$parent.configDataResolve[name].disabled ? true : false
+                   readOnly: $scope.configDataResolve[name] && $scope.configDataResolve[name].disabled ? true : false
                  });
                  $scope.parseTypeChange('parseType', name);
             }
@@ -307,34 +268,21 @@ export default [
 
         function addFieldInfo(form, key) {
             _.extend(form.fields[key], {
-                awPopOver: ($scope.$parent.configDataResolve[key].defined_in_file) ?
-                    null: $scope.$parent.configDataResolve[key].help_text,
-                label: $scope.$parent.configDataResolve[key].label,
+                awPopOver: ($scope.configDataResolve[key].defined_in_file) ?
+                    null: $scope.configDataResolve[key].help_text,
+                label: $scope.configDataResolve[key].label,
                 name: key,
                 toggleSource: key,
                 dataPlacement: 'top',
-                placeholder: ConfigurationUtils.formatPlaceholder($scope.$parent.configDataResolve[key].placeholder, key) || null,
-                dataTitle: $scope.$parent.configDataResolve[key].label,
-                required: $scope.$parent.configDataResolve[key].required,
+                placeholder: SettingsUtils.formatPlaceholder($scope.configDataResolve[key].placeholder, key) || null,
+                dataTitle: $scope.configDataResolve[key].label,
+                required: $scope.configDataResolve[key].required,
                 ngDisabled: $rootScope.user_is_system_auditor,
-                disabled: $scope.$parent.configDataResolve[key].disabled || null,
-                readonly: $scope.$parent.configDataResolve[key].readonly || null,
-                definedInFile: $scope.$parent.configDataResolve[key].defined_in_file || null
+                disabled: $scope.configDataResolve[key].disabled || null,
+                readonly: $scope.configDataResolve[key].readonly || null,
+                definedInFile: $scope.configDataResolve[key].defined_in_file || null
             });
         }
-
-        $scope.$parent.parseType = 'json';
-
-        _.each(authForms, function(form) {
-            // Generate the forms
-            generator.inject(form.formDef, {
-                id: form.id,
-                mode: 'edit',
-                scope: $scope.$parent,
-                related: true,
-                noPanel: true
-            });
-        });
 
         // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
         var dropdownRendered = false;
@@ -409,7 +357,7 @@ export default [
         });
 
         $scope.$on('populated', function() {
-            let tab = $stateParams.currentTab;
+            let tab = $stateParams.form;
 
             if (tab === 'auth') {
                 startCodeMirrors();
@@ -427,23 +375,24 @@ export default [
         });
 
         $scope.$on('codeMirror_populated', function() {
-            let tab = $stateParams.currentTab;
+            let tab = $stateParams.form;
             if (tab === 'auth') {
                 startCodeMirrors();
                 codeInputInitialized = true;
             }
         });
 
+        function getActiveAuthForm (tab) {
+            if (tab === 'ldap') {
+                return `ldap${authVm.ldapDropdownValue}`;
+            } else if (tab === 'github') {
+                return authVm.githubDropdownValue;
+            }
+            return tab;
+        }
 
         angular.extend(authVm, {
-            changeAuthDropdown: changeAuthDropdown,
-            changeLdapDropdown: changeLdapDropdown,
-            activeAuthForm: activeAuthForm,
             authForms: authForms,
-            dropdownOptions: dropdownOptions,
-            dropdownValue: dropdownValue,
-            ldapDropdownValue: ldapDropdownValue,
-            ldapDropdownOptions: ldapDropdownOptions,
         });
     }
 ];

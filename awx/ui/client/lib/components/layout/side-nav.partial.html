@@ -1,8 +1,18 @@
-<div class="at-Layout-side"
-    ng-class="{'at-Layout-side--expanded': vm.isExpanded && layoutVm.isLoggedIn}" ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing">
-        <div class="at-Layout-sideNavItem at-Layout-sideNavToggle" ng-click="vm.toggleExpansion()"
-            ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing">
-                <i class="fa fa-bars"></i>
+<div class="at-Layout-sideContainer" ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing">
+        <div class="at-Layout-side" ng-class="{'at-Layout-side--expanded': vm.isExpanded && layoutVm.isLoggedIn}">
+            <div class="at-Layout-sideNavItem at-Layout-sideNavToggle" ng-click="vm.toggleExpansion()"
+                ng-show="layoutVm.isLoggedIn && !layoutVm.licenseIsMissing">
+                    <i class="fa fa-bars"></i>
+            </div>
+            <ng-transclude></ng-transclude>
         </div>
-        <ng-transclude></ng-transclude>
+        <div class="at-SettingsSubPane" ng-class="{'at-SettingsSubPane--visible': vm.showSettingsSubMenu}">
+            <div class="at-SettingsSubPane-content">
+                <a ui-sref="settings.form({form: 'auth'})">Authentication</a>
+                <a ui-sref="settings.form({form: 'jobs'})">Jobs</a>
+                <a ui-sref="settings.form({form: 'system'})">System</a>
+                <a ui-sref="settings.form({form: 'ui'})">User Interface</a>
+                <a ui-sref="settings.form({form: 'license'})" ng-if="vm.product === 'Tower'">License</a>
+            </div>
+        </div>
 </div>

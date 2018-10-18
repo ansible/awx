@@ -18,7 +18,10 @@ const navigation = {
         notifications: 'i[class$="fa-bell"]',
         managementJobs: 'i[class$="fa-wrench"]',
         instanceGroups: 'i[class$="fa-server"]',
-        settings: 'i[class$="fa-cog"]',
+        settings: 'i[class*="fa-cog"]',
+        settingsSubPane: '.at-SettingsSubPane',
+        settingsSubPaneSystem: 'a[href="#/settings/system"]',
+        settingsSubPaneAuth: 'a[href="#/settings/auth"]'
     }
 };
 
