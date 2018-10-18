@@ -5,13 +5,11 @@
  *************************************************/
 
 export default [
-    '$rootScope', '$scope', '$state', '$stateParams', '$timeout',
-    'AngularCodeMirror',
+    '$rootScope', '$scope', '$stateParams',
     'systemActivityStreamForm',
     'systemLoggingForm',
     'systemMiscForm',
-    'ConfigurationService',
-    'ConfigurationUtils',
+    'SettingsUtils',
     'CreateSelect2',
     'GenerateForm',
     'i18n',
@@ -20,13 +18,11 @@ export default [
     'ngToast',
     '$filter',
     function(
-        $rootScope, $scope, $state, $stateParams, $timeout,
-        AngularCodeMirror,
+        $rootScope, $scope, $stateParams,
         systemActivityStreamForm,
         systemLoggingForm,
         systemMiscForm,
-        ConfigurationService,
-        ConfigurationUtils,
+        SettingsUtils,
         CreateSelect2,
         GenerateForm,
         i18n,
@@ -39,16 +35,15 @@ export default [
 
         var generator = GenerateForm;
         var formTracker = $scope.$parent.vm.formTracker;
-        var dropdownValue = 'misc';
         var activeSystemForm = 'misc';
 
-        if ($stateParams.currentTab === 'system') {
+        if ($stateParams.form === 'system') {
             formTracker.setCurrentSystem(activeSystemForm);
         }
 
-        var activeForm = function() {
+        var activeForm = function(tab) {
             if(!_.get($scope.$parent, [formTracker.currentFormName(), '$dirty'])) {
-                systemVm.activeSystemForm = systemVm.dropdownValue;
+                systemVm.activeSystemForm = tab;
                 formTracker.setCurrentSystem(systemVm.activeSystemForm);
             } else {
                 var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
@@ -60,7 +55,7 @@ export default [
                     onClick: function() {
                         $scope.$parent.vm.populateFromApi();
                         $scope.$parent[formTracker.currentFormName()].$setPristine();
-                        systemVm.activeSystemForm = systemVm.dropdownValue;
+                        systemVm.activeSystemForm = tab;
                         formTracker.setCurrentSystem(systemVm.activeSystemForm);
                         $('#FormModal-dialog').dialog('close');
                     }
@@ -71,7 +66,7 @@ export default [
                         .then(function() {
                             $scope.$parent[formTracker.currentFormName()].$setPristine();
                             $scope.$parent.vm.populateFromApi();
-                            systemVm.activeSystemForm = systemVm.dropdownValue;
+                            systemVm.activeSystemForm = tab;
                             formTracker.setCurrentSystem(systemVm.activeSystemForm);
                             $('#FormModal-dialog').dialog('close');
                         });
@@ -85,15 +80,10 @@ export default [
         };
 
         var dropdownOptions = [
+            {label: i18n._('Misc. System'), value: 'misc'},
             {label: i18n._('Activity Stream'), value: 'activity_stream'},
             {label: i18n._('Logging'), value: 'logging'},
-            {label: i18n._('Misc. System'), value: 'misc'}
         ];
-
-        CreateSelect2({
-            element: '#system-configure-dropdown-nav',
-            multiple: false,
-        });
 
         var systemForms = [{
             formDef: systemLoggingForm,
@@ -110,12 +100,12 @@ export default [
         _.each(forms, function(form) {
             var keys = _.keys(form.fields);
             _.each(keys, function(key) {
-                if($scope.$parent.configDataResolve[key].type === 'choice') {
+                if($scope.configDataResolve[key].type === 'choice') {
                     // Create options for dropdowns
                     var optionsGroup = key + '_options';
-                    $scope.$parent[optionsGroup] = [];
-                    _.each($scope.$parent.configDataResolve[key].choices, function(choice){
-                        $scope.$parent[optionsGroup].push({
+                    $scope.$parent.$parent[optionsGroup] = [];
+                    _.each($scope.configDataResolve[key].choices, function(choice){
+                        $scope.$parent.$parent[optionsGroup].push({
                             name: choice[0],
                             label: choice[1],
                             value: choice[0]
@@ -130,29 +120,29 @@ export default [
 
         function addFieldInfo(form, key) {
             _.extend(form.fields[key], {
-                awPopOver: ($scope.$parent.configDataResolve[key].defined_in_file) ?
-                    null: $scope.$parent.configDataResolve[key].help_text,
-                label: $scope.$parent.configDataResolve[key].label,
+                awPopOver: ($scope.configDataResolve[key].defined_in_file) ?
+                    null: $scope.configDataResolve[key].help_text,
+                label: $scope.configDataResolve[key].label,
                 name: key,
                 toggleSource: key,
                 dataPlacement: 'top',
-                placeholder: ConfigurationUtils.formatPlaceholder($scope.$parent.configDataResolve[key].placeholder, key) || null,
-                dataTitle: $scope.$parent.configDataResolve[key].label,
-                required: $scope.$parent.configDataResolve[key].required,
+                placeholder: SettingsUtils.formatPlaceholder($scope.configDataResolve[key].placeholder, key) || null,
+                dataTitle: $scope.configDataResolve[key].label,
+                required: $scope.configDataResolve[key].required,
                 ngDisabled: $rootScope.user_is_system_auditor,
-                disabled: $scope.$parent.configDataResolve[key].disabled || null,
-                readonly: $scope.$parent.configDataResolve[key].readonly || null,
-                definedInFile: $scope.$parent.configDataResolve[key].defined_in_file || null
+                disabled: $scope.configDataResolve[key].disabled || null,
+                readonly: $scope.configDataResolve[key].readonly || null,
+                definedInFile: $scope.configDataResolve[key].defined_in_file || null
             });
         }
 
-        $scope.$parent.parseType = 'json';
+        $scope.$parent.$parent.parseType = 'json';
 
         _.each(systemForms, function(form) {
             generator.inject(form.formDef, {
                 id: form.id,
                 mode: 'edit',
-                scope: $scope.$parent,
+                scope: $scope.$parent.$parent,
                 related: true,
                 noPanel: true
             });
@@ -173,16 +163,17 @@ export default [
         });
 
         function populateLogAggregator(flag){
-            if($scope.$parent.LOG_AGGREGATOR_TYPE !== null) {
-                $scope.$parent.LOG_AGGREGATOR_TYPE = _.find($scope.$parent.LOG_AGGREGATOR_TYPE_options, { value: $scope.$parent.LOG_AGGREGATOR_TYPE });
+
+            if($scope.$parent.$parent.LOG_AGGREGATOR_TYPE !== null) {
+                $scope.$parent.$parent.LOG_AGGREGATOR_TYPE = _.find($scope.$parent.$parent.LOG_AGGREGATOR_TYPE_options, { value: $scope.$parent.$parent.LOG_AGGREGATOR_TYPE });
             }
 
-            if($scope.$parent.LOG_AGGREGATOR_PROTOCOL !== null) {
-                $scope.$parent.LOG_AGGREGATOR_PROTOCOL = _.find($scope.$parent.LOG_AGGREGATOR_PROTOCOL_options, { value: $scope.$parent.LOG_AGGREGATOR_PROTOCOL });
+            if($scope.$parent.$parent.LOG_AGGREGATOR_PROTOCOL !== null) {
+                $scope.$parent.$parent.LOG_AGGREGATOR_PROTOCOL = _.find($scope.$parent.$parent.LOG_AGGREGATOR_PROTOCOL_options, { value: $scope.$parent.$parent.LOG_AGGREGATOR_PROTOCOL });
             }
 
-            if($scope.$parent.LOG_AGGREGATOR_LEVEL !== null) {
-                $scope.$parent.LOG_AGGREGATOR_LEVEL = _.find($scope.$parent.LOG_AGGREGATOR_LEVEL_options, { value: $scope.$parent.LOG_AGGREGATOR_LEVEL });
+            if($scope.$parent.$parent.LOG_AGGREGATOR_LEVEL !== null) {
+                $scope.$parent.$parent.LOG_AGGREGATOR_LEVEL = _.find($scope.$parent.$parent.LOG_AGGREGATOR_LEVEL_options, { value: $scope.$parent.$parent.LOG_AGGREGATOR_LEVEL });
             }
 
             if(flag !== undefined){
@@ -196,17 +187,11 @@ export default [
                     multiple: false,
                     placeholder: i18n._('Select types'),
                 });
-                $scope.$parent.configuration_logging_template_form.LOG_AGGREGATOR_TYPE.$setPristine();
-                $scope.$parent.configuration_logging_template_form.LOG_AGGREGATOR_PROTOCOL.$setPristine();
-                $scope.$parent.configuration_logging_template_form.LOG_AGGREGATOR_LEVEL.$setPristine();
+                $scope.$parent.$parent.configuration_logging_template_form.LOG_AGGREGATOR_TYPE.$setPristine();
+                $scope.$parent.$parent.configuration_logging_template_form.LOG_AGGREGATOR_PROTOCOL.$setPristine();
+                $scope.$parent.$parent.configuration_logging_template_form.LOG_AGGREGATOR_LEVEL.$setPristine();
             }
         }
-
-        // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
-        // TODO Find better solution for this bug
-        $timeout(function(){
-            $scope.$parent.configuration_logging_template_form.$setPristine();
-        }, 1000);
 
         $scope.$parent.vm.testLogging = function() {
             Rest.setUrl("/api/v2/settings/logging/test/");
@@ -241,7 +226,6 @@ export default [
             activeForm: activeForm,
             activeSystemForm: activeSystemForm,
             dropdownOptions: dropdownOptions,
-            dropdownValue: dropdownValue,
             systemForms: systemForms
         });
     }

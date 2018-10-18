@@ -2,6 +2,20 @@ const templateUrl = require('~components/layout/side-nav-item.partial.html');
 
 function atSideNavItemLink (scope, element, attrs, ctrl) {
     [scope.navVm, scope.layoutVm] = ctrl;
+
+    if (attrs.showSettingsSubMenu) {
+        element.hover(() => {
+            scope.navVm.onSettingsNavItem = true;
+            scope.navVm.showSettingsSubMenu = true;
+        }, () => {
+            scope.navVm.onSettingsNavItem = false;
+            setTimeout(() => {
+                if (!scope.navVm.onSettingsSubPane) {
+                    scope.navVm.showSettingsSubMenu = false;
+                }
+            }, 100);
+        });
+    }
 }
 
 function AtSideNavItemController ($scope, strings) {
@@ -42,11 +56,13 @@ function atSideNavItem () {
         controller: AtSideNavItemController,
         controllerAs: 'vm',
         link: atSideNavItemLink,
+        transclude: true,
         scope: {
             iconClass: '@',
             name: '@',
             route: '@',
-            systemAdminOnly: '@'
+            systemAdminOnly: '@',
+            noTooltipOnCollapsed: '@'
         }
     };
 }

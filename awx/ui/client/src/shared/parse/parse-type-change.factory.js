@@ -48,7 +48,6 @@ export default
                         scrollbarStyle: null
                     }
                 };
-
                 scope[fld + 'codeMirror'] = AngularCodeMirror(readOnly);
                 scope[fld + 'codeMirror'].addModes(variableEditModes);
                 scope[fld + 'codeMirror'].showTextArea({
@@ -61,7 +60,6 @@ export default
                     onChange: onChange
                 });
             }
-
             // Hide the textarea and show a CodeMirror editor
             createField(onChange, onReady, fld);
 

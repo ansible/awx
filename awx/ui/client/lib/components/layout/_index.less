@@ -1,5 +1,5 @@
 .at-Layout {
-    height: 100vh;
+    min-height: 100vh;
     width: 100vw;
     display: flex;
 
@@ -82,17 +82,13 @@
         }
     }
 
-    &-side {
+    &-sideContainer {
         background: @at-color-side-nav-background;
-        position: fixed;
-        bottom: 0;
-        top: @at-height-top-side-nav-makeup;
-        overflow-y: auto;
-        max-height: 100vh;
-        min-width: @at-width-collapsed-side-nav;
+    }
+
+    &-side {
+        margin-top: @at-height-top-side-nav-makeup;
         width: @at-width-collapsed-side-nav;
-        overflow-x: hidden;
-        z-index: @at-z-index-side-nav;
 
         .at-Popover-container {
             margin-top: 2px;
@@ -118,6 +114,10 @@
                     padding-left: @at-padding-left-side-nav-item-icon;
                     text-align: center;
                     width: 50px;
+                }
+
+                i.is-no-tooltip {
+                    padding-left: @at-padding-left-side-nav-item-icon-no-tooltip;
                 }
 
                 &:hover,
@@ -201,7 +201,6 @@
         height: 100%;
         width: 100%;
         flex-direction: column;
-        padding-left: @at-width-collapsed-side-nav;
         padding-bottom: @at-space-4x;
         overflow-x: hidden;
     }
@@ -253,4 +252,45 @@
             }
         }
     }
+}
+
+/* Tower Sub Nav Dropdown */
+.at-SettingsSubPane {
+    position: relative;
+}
+.at-SettingsSubPane-content {
+    display: none;
+    position: absolute;
+    background-color: @at-gray-848992;
+    min-width: 140px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    bottom: 0px;
+    left: @at-width-collapsed-side-nav;
+    z-index: 2000;
+}
+
+.at-Layout-side--expanded + .at-SettingsSubPane {
+    .at-SettingsSubPane-content {
+        left: @at-width-expanded-side-nav;
+    }
+}
+
+.at-SettingsSubPane-content a {
+    color: @at-white;
+    font-size: 13px;
+    padding: 10px 20px;
+    text-decoration: none;
+    display: block;
+    height: 39px;
+}
+
+// hover stuff
+.at-SettingsSubPane-content a:hover {
+    background-color: @at-gray-b7;
+}
+.at-SettingsSubPane.at-SettingsSubPane--visible .at-SettingsSubPane-content {
+    display: block;
+}
+.at-SettingsSubPane.at-SettingsSubPane--visible .nav-button {
+    background-color: @at-gray-b7;
 }
