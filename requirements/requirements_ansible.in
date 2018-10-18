@@ -48,7 +48,7 @@ pyvmomi==6.5
 # WinRM
 backports.ssl-match-hostname==3.5.0.1
 pywinrm[kerberos]==0.3.0
-requests<2.16  # Older versions rely on certify
+requests
 requests-credssp==0.1.0   # For windows authentication awx/issues/1144
 # OpenStack
 shade==1.27.0

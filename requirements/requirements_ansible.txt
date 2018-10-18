@@ -39,8 +39,9 @@ bcrypt==3.1.4             # via paramiko
 boto3==1.6.2
 boto==2.47.0
 botocore==1.9.3           # via boto3, s3transfer
-certifi==2018.1.18        # via msrest
+certifi==2018.1.18        # via msrest, requests
 cffi==1.11.5              # via bcrypt, cryptography, pynacl
+chardet==3.0.4            # via requests
 colorama==0.3.9           # via azure-cli-core, knack
 configparser==3.5.0       # via entrypoints
 cryptography==2.1.4       # via adal, azure-keyvault, azure-storage, paramiko, pyopenssl, requests-kerberos, requests-ntlm, secretstorage
@@ -52,7 +53,7 @@ entrypoints==0.2.3        # via keyring
 enum34==1.1.6             # via cryptography, knack, msrest, ovirt-engine-sdk-python
 futures==3.2.0            # via openstacksdk, s3transfer
 humanfriendly==4.8        # via azure-cli-core
-idna==2.6                 # via cryptography
+idna==2.6                 # via cryptography, requests
 ipaddress==1.0.19         # via cryptography, openstacksdk
 iso8601==0.1.12           # via keystoneauth1, openstacksdk
 isodate==0.6.0            # via msrest
@@ -100,7 +101,7 @@ requests-credssp==0.1.0
 requests-kerberos==0.12.0  # via pywinrm
 requests-ntlm==1.1.0      # via pywinrm
 requests-oauthlib==0.8.0  # via msrest
-requests==2.15.1
+requests==2.20.0
 requestsexceptions==1.4.0  # via openstacksdk, os-client-config
 s3transfer==0.1.13        # via boto3
 secretstorage==2.3.1      # via keyring
@@ -109,6 +110,7 @@ six==1.11.0               # via azure-cli-core, bcrypt, cryptography, isodate, k
 stevedore==1.28.0         # via keystoneauth1
 suds==0.4                 # via psphere
 tabulate==0.7.7           # via azure-cli-core, knack
+urllib3==1.24             # via requests
 wheel==0.30.0             # via azure-cli-core
 xmltodict==0.11.0         # via pywinrm
 
