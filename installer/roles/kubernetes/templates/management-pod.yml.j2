@@ -17,6 +17,9 @@ spec:
         - name: "{{ kubernetes_deployment_name }}-confd"
           mountPath: "/etc/tower/conf.d/"
           readOnly: true
+      resources:
+        limits:
+          memory: 2Gi
   volumes:
     - name: {{ kubernetes_deployment_name }}-application-config
       configMap:
