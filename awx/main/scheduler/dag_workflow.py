@@ -95,8 +95,10 @@ class WorkflowDAG(SimpleDAG):
             if obj.unified_job_template is None:
                 is_failed = True
                 continue
-            elif not job:
+            elif obj.do_not_run is False and not job:
                 return False, False
+            elif obj.do_not_run is True:
+                continue
 
             children_success = self.get_dependencies(obj, 'success_nodes')
             children_failed = self.get_dependencies(obj, 'failure_nodes')
