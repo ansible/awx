@@ -2,8 +2,8 @@ const search = {
     selector: 'smart-search',
     locateStrategy: 'css selector',
     elements: {
-        clearAll: 'a[class*="clear"]',
-        searchButton: 'i[class$="search"]',
+        clearAll: 'a[class*="clearAll"]',
+        searchButton: 'i[class*="fa-search"]',
         input: 'input',
         tags: '.SmartSearch-tagContainer'
     }

@@ -511,11 +511,11 @@ module.exports = {
         const itemRow = `#projects_table tr[id="${data.project.id}"]`;
         const itemName = `${itemRow} td[class*="name-"] a`;
 
-        client.expect.element('div[class^="at-Panel"] smart-search').visible;
-        client.expect.element('div[class^="at-Panel"] smart-search input').enabled;
+        client.expect.element('div[class*="at-Panel"] smart-search').visible;
+        client.expect.element('div[class*="at-Panel"] smart-search input').enabled;
 
-        client.sendKeys('div[class^="at-Panel"] smart-search input', `id:>${data.project.id - 1} id:<${data.project.id + 1}`);
-        client.sendKeys('div[class^="at-Panel"] smart-search input', client.Keys.ENTER);
+        client.sendKeys('div[class*="at-Panel"] smart-search input', `id:>${data.project.id - 1} id:<${data.project.id + 1}`);
+        client.sendKeys('div[class*="at-Panel"] smart-search input', client.Keys.ENTER);
 
         client.expect.element('div.spinny').visible;
         client.expect.element('div.spinny').not.visible;
