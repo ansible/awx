@@ -449,6 +449,10 @@ Before starting the build process, review the [inventory](./installer/inventory)
 
 When using docker-compose, the `docker-compose.yml` file will be created there (default `/var/lib/awx`).
 
+*ca_trust_dir*
+
+> If you're using a non trusted CA, provide a path where the untrusted Certs are stored on your Host.
+
 #### Docker registry
 
 If you wish to tag and push built images to a Docker registry, set the following variables in the inventory file:
