@@ -7,10 +7,10 @@
 export default ['$scope', '$location', '$stateParams', 'GenerateForm',
     'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath',
     'GetProjectPath', 'GetChoices', 'Wait', '$state', 'CreateSelect2', 'i18n',
-    'CredentialTypes', 'ConfigData',
+    'CredentialTypes', 'ConfigData', 'resolvedModels',
     function($scope, $location, $stateParams, GenerateForm, ProjectsForm, Rest,
     Alert, ProcessErrors, GetBasePath, GetProjectPath, GetChoices, Wait, $state,
-    CreateSelect2, i18n, CredentialTypes, ConfigData) {
+    CreateSelect2, i18n, CredentialTypes, ConfigData, resolvedModels) {
 
         let form = ProjectsForm(),
             base = $location.path().replace(/^\//, '').split('/')[0],
@@ -23,6 +23,9 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
             $scope.canEditOrg = true;
             const virtualEnvs = ConfigData.custom_virtualenvs || [];
             $scope.custom_virtualenvs_options = virtualEnvs;
+            
+            const [ProjectModel] = resolvedModels;
+            $scope.canAdd = ProjectModel.options('actions.POST');
 
             Rest.setUrl(GetBasePath('projects'));
             Rest.options()
