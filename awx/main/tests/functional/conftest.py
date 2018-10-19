@@ -672,6 +672,24 @@ def job_template_labels(organization, job_template):
 
 
 @pytest.fixture
+def jt_linked(job_template_factory, credential, net_credential, vault_credential):
+    '''
+    A job template with a reasonably complete set of related objects to
+    test RBAC and other functionality affected by related objects
+    '''
+    objects = job_template_factory(
+        'testJT', organization='org1', project='proj1', inventory='inventory1',
+        credential='cred1')
+    jt = objects.job_template
+    jt.credentials.add(vault_credential)
+    jt.save()
+    # Add AWS cloud credential and network credential
+    jt.credentials.add(credential)
+    jt.credentials.add(net_credential)
+    return jt
+
+
+@pytest.fixture
 def workflow_job_template(organization):
     wjt = WorkflowJobTemplate(name='test-workflow_job_template', organization=organization)
     wjt.save()
