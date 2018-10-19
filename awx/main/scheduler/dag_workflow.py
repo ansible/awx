@@ -51,9 +51,13 @@ class WorkflowDAG(SimpleDAG):
     def bfs_nodes_to_run(self):
         nodes = self.get_root_nodes()
         nodes_found = []
+        node_ids_visited = set()
 
         for index, n in enumerate(nodes):
             obj = n['node_object']
+            if obj.id in node_ids_visited:
+                continue
+            node_ids_visited.add(obj.id)
 
             if obj.do_not_run is True:
                 continue
