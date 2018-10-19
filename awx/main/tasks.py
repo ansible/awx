@@ -566,7 +566,7 @@ def update_host_smart_inventory_memberships():
 
 
 @task()
-def delete_inventory(inventory_id, user_id):
+def delete_inventory(inventory_id, user_id, retries=5):
     # Delete inventory as user
     if user_id is None:
         user = None
@@ -591,7 +591,9 @@ def delete_inventory(inventory_id, user_id):
             return
         except DatabaseError:
             logger.exception('Database error deleting inventory {}, but will retry.'.format(inventory_id))
-            # TODO: self.retry(countdown=10)
+            if retries > 0:
+                time.sleep(10)
+                delete_inventory(inventory_id, user_id, retries=retries - 1)
 
 
 def with_path_cleanup(f):
