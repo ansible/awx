@@ -10,6 +10,8 @@ const spinny = "//*[contains(@class, 'spinny')]";
 const workflowTemplateNavTab = "//at-side-nav-item[contains(@name, 'TEMPLATES')]";
 const workflowSelector = "//a[contains(text(), 'test-actions-workflow-template')]";
 const workflowVisualizerBtn = "//button[contains(@id, 'workflow_job_template_workflow_visualizer_btn')]";
+const workflowSearchBar = "//input[contains(@class, 'SmartSearch-input')]";
+const workflowText = 'name.iexact:"test-actions-workflow-template"'
 
 const rootNode = "//*[@id='node-2']";
 const childNode = "//*[@id='node-3']";
@@ -21,8 +23,8 @@ const nodeRemove = "//*[contains(@class, 'nodeRemoveCross')]";
 // one of the jobs or projects or inventories
 const testActionsProject = "//td[contains(text(), 'test-actions-project')]";
 const testActionsJob = "//td[contains(text(), 'test-actions-job')]";
-const testActionsProjectText = 'test-actions-project';
-const testActionsJobText = 'test-actions-job';
+const testActionsProjectText = 'name.iexact:"test-actions-project"';
+const testActionsJobText = 'name.iexact:"test-actions-job-template"';
 
 // search bar for visualizer templates
 const jobSearchBar = "//*[contains(@id, 'workflow-jobs-list')]//input[contains(@class, 'SmartSearch-input')]";
@@ -58,6 +60,9 @@ module.exports = {
             .findThenClick(workflowTemplateNavTab)
             .pause(1500)
             .waitForElementNotVisible(spinny)
+            .clearValue(workflowSearchBar)
+            .setValue(workflowSearchBar, [workflowText, client.Keys.ENTER])
+            .pause(1000)
             .findThenClick(workflowSelector)
             .findThenClick(workflowVisualizerBtn);
     },
