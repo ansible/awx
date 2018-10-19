@@ -12,6 +12,7 @@ const workflowSelector = "//a[contains(text(), 'test-actions-workflow-template')
 const workflowVisualizerBtn = "//button[contains(@id, 'workflow_job_template_workflow_visualizer_btn')]";
 const workflowSearchBar = "//input[contains(@class, 'SmartSearch-input')]";
 const workflowText = 'name.iexact:"test-actions-workflow-template"';
+const workflowSearchBadgeCount = '//span[contains(@class, "at-Panel-headingTitleBadge") and contains(text(), "1")]';
 
 const rootNode = "//*[@id='node-2']";
 const childNode = "//*[@id='node-3']";
@@ -62,6 +63,8 @@ module.exports = {
             .waitForElementNotVisible(spinny)
             .clearValue(workflowSearchBar)
             .setValue(workflowSearchBar, [workflowText, client.Keys.ENTER])
+            .waitForElementVisible(workflowSearchBadgeCount)
+            .waitForElementNotVisible(spinny)
             .findThenClick(workflowSelector)
             .findThenClick(workflowVisualizerBtn);
     },
