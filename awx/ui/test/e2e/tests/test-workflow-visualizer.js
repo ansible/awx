@@ -11,7 +11,7 @@ const workflowTemplateNavTab = "//at-side-nav-item[contains(@name, 'TEMPLATES')]
 const workflowSelector = "//a[contains(text(), 'test-actions-workflow-template')]";
 const workflowVisualizerBtn = "//button[contains(@id, 'workflow_job_template_workflow_visualizer_btn')]";
 const workflowSearchBar = "//input[contains(@class, 'SmartSearch-input')]";
-const workflowText = 'name.iexact:"test-actions-workflow-template"'
+const workflowText = 'name.iexact:"test-actions-workflow-template"';
 
 const rootNode = "//*[@id='node-2']";
 const childNode = "//*[@id='node-3']";
@@ -62,7 +62,6 @@ module.exports = {
             .waitForElementNotVisible(spinny)
             .clearValue(workflowSearchBar)
             .setValue(workflowSearchBar, [workflowText, client.Keys.ENTER])
-            .pause(1000)
             .findThenClick(workflowSelector)
             .findThenClick(workflowVisualizerBtn);
     },
