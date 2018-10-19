@@ -348,6 +348,32 @@ class TestJobReaper(object):
         else:
             assert job.status == status
 
+    @pytest.mark.parametrize('excluded_uuids, fail', [
+        (['abc123'], False),
+        ([], True),
+    ])
+    def test_do_not_reap_excluded_uuids(self, excluded_uuids, fail):
+        i = Instance(hostname='awx')
+        i.save()
+        j = Job(
+            status='running',
+            execution_node='awx',
+            controller_node='',
+            start_args='SENSITIVE',
+            celery_task_id='abc123',
+        )
+        j.save()
+
+        # if the UUID is excluded, don't reap it
+        reaper.reap(i, excluded_uuids=excluded_uuids)
+        job = Job.objects.first()
+        if fail:
+            assert job.status == 'failed'
+            assert 'marked as failed' in job.job_explanation
+            assert job.start_args == ''
+        else:
+            assert job.status == 'running'
+
     def test_workflow_does_not_reap(self):
         i = Instance(hostname='awx')
         i.save()

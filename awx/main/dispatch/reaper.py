@@ -26,7 +26,7 @@ def reap_job(j, status):
     )
 
 
-def reap(instance=None, status='failed'):
+def reap(instance=None, status='failed', excluded_uuids=[]):
     '''
     Reap all jobs in waiting|running for this instance.
     '''
@@ -41,6 +41,6 @@ def reap(instance=None, status='failed'):
             Q(execution_node=me.hostname) |
             Q(controller_node=me.hostname)
         ) & ~Q(polymorphic_ctype_id=workflow_ctype_id)
-    )
+    ).exclude(celery_task_id__in=excluded_uuids)
     for j in jobs:
         reap_job(j, status)

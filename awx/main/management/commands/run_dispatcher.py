@@ -7,7 +7,7 @@ from multiprocessing import Process
 from django.conf import settings
 from django.core.cache import cache as django_cache
 from django.core.management.base import BaseCommand
-from django.db import connection as django_connection
+from django.db import connection as django_connection, connections
 from kombu import Connection, Exchange, Queue
 
 from awx.main.dispatch import get_local_queuename, reaper
@@ -57,6 +57,10 @@ class Command(BaseCommand):
                 return super(AWXScheduler, self).tick(*args, **kwargs)
 
             def apply_async(self, entry, producer=None, advance=True, **kwargs):
+                for conn in connections.all():
+                    # If the database connection has a hiccup, re-establish a new
+                    # connection
+                    conn.close_if_unusable_or_obsolete()
                 task = TaskWorker.resolve_callable(entry.task)
                 result, queue = task.apply_async()
 
