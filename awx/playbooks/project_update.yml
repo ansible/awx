@@ -118,7 +118,6 @@
         when: results is defined
       when: scm_type == 'insights'
 
-
     - name: Repository Version
       debug: msg="Repository Version {{ scm_version }}"
       when: scm_version is defined
@@ -128,29 +127,20 @@
         dest: "{{ scm_revision_output }}"
         content: "{{ scm_version }}"
       when: scm_version is defined and scm_revision_output is defined
-
-- hosts: all
-  connection: local
-  gather_facts: false
-  tasks:
-
+    
     - block:
       - name: detect requirements.yml
         stat: path={{project_path|quote}}/roles/requirements.yml
         register: doesRequirementsExist
 
       - name: fetch galaxy roles from requirements.yml
-        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/
+        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ {{ scm_clean|ternary('--force','') }}
         args:
           chdir: "{{project_path|quote}}/roles"
         register: galaxy_result
-        when: doesRequirementsExist.stat.exists and scm_result is undefined
+        when: doesRequirementsExist.stat.exists
         changed_when: "'was installed successfully' in galaxy_result.stdout"
+      
+      when: roles_enabled|bool
 
-      - name: fetch galaxy roles from requirements.yml (forced update)
-        command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ --force
-        args:
-          chdir: "{{project_path|quote}}/roles"
-        when: doesRequirementsExist.stat.exists and scm_result is defined
 
-      when: scm_full_checkout|bool and roles_enabled|bool
