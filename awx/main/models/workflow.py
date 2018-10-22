@@ -211,7 +211,7 @@ class WorkflowJobNode(WorkflowNodeBase):
             data.update(accepted_fields)  # missing fields are handled in the scheduler
         # build ancestor artifacts, save them to node model for later
         aa_dict = {}
-        for parent_node in self.get_parent_nodes():
+        for parent_node in self.get_parent_nodes().order_by('id'):
             aa_dict.update(parent_node.ancestor_artifacts)
             if parent_node.job and hasattr(parent_node.job, 'artifacts'):
                 aa_dict.update(parent_node.job.artifacts)
