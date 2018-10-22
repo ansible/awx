@@ -82,7 +82,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         success_parents = getattr(self, '%ss_success' % self.__class__.__name__.lower()).all()
         failure_parents = getattr(self, '%ss_failure' % self.__class__.__name__.lower()).all()
         always_parents = getattr(self, '%ss_always' % self.__class__.__name__.lower()).all()
-        return success_parents | failure_parents | always_parents
+        return (success_parents | failure_parents | always_parents).order_by('id')
 
     @classmethod
     def _get_workflow_job_field_names(cls):
