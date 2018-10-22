@@ -11,19 +11,19 @@ RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/
 RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
 
 RUN yum -y update && yum -y install openssh-server ansible mg vim tmux \
-  git2u-core mercurial subversion python-devel python-psycopg2 make postgresql \
+  git2u-core mercurial subversion python36 python36-devel python-psycopg2 make postgresql \
   postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel \
   libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel \
-  zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 \
+  xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 \
   xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap \
-  zanata-python-client gettext gcc-c++ libcurl-devel python-pycurl bzip2 \
-  python-crypto rsync
+  zanata-python-client gettext gcc-c++ libcurl-devel bzip2 \
+  rsync
 
-RUN pip install virtualenv
+RUN python36 -m ensurepip
+RUN pip3 install virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /data/db
-RUN pip2 install honcho
-RUN pip2 install supervisor
+RUN pip3 install honcho
 
 ADD requirements/requirements.txt \
   requirements/requirements_git.txt \
@@ -64,5 +64,5 @@ RUN for dir in /var/lib/awx/ /projects /.ansible /var/log/nginx /var/lib/nginx /
   do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done
 
 RUN for file in /etc/passwd /etc/supervisord.conf \
-  /venv/awx/lib/python2.7/site-packages/awx.egg-link /var/run/nginx.pid; \
+  /venv/awx/lib/python3.6/site-packages/awx.egg-link /var/run/nginx.pid; \
   do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done

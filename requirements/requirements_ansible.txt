@@ -51,7 +51,6 @@ docutils==0.14            # via botocore
 dogpile.cache==0.6.5      # via openstacksdk
 entrypoints==0.2.3        # via keyring
 enum34==1.1.6             # via cryptography, knack, msrest, ovirt-engine-sdk-python
-futures==3.2.0            # via openstacksdk, s3transfer
 humanfriendly==4.8        # via azure-cli-core
 idna==2.6                 # via cryptography, requests
 ipaddress==1.0.19         # via cryptography, openstacksdk
@@ -81,7 +80,6 @@ packaging==17.1
 paramiko==2.4.0           # via azure-cli-core, ncclient
 pbr==3.1.1                # via keystoneauth1, openstacksdk, os-service-types, shade, stevedore
 pexpect==4.6.0
-psphere==0.5.2
 psutil==5.4.3
 ptyprocess==0.5.2         # via pexpect
 pyasn1==0.4.2             # via paramiko
@@ -97,7 +95,7 @@ python-dateutil==2.6.1    # via adal, azure-storage, botocore
 python-memcached==1.59
 pyvmomi==6.5
 pywinrm[kerberos]==0.3.0
-pyyaml==3.12              # via azure-cli-core, knack, openstacksdk, os-client-config, psphere
+pyyaml==3.12              # via azure-cli-core, knack, openstacksdk, os-client-config
 requests-credssp==0.1.0
 requests-kerberos==0.12.0  # via pywinrm
 requests-ntlm==1.1.0      # via pywinrm
@@ -110,7 +108,6 @@ selectors2==2.0.1         # via ncclient
 shade==1.27.0
 six==1.11.0               # via azure-cli-core, bcrypt, cryptography, isodate, keystoneauth1, knack, munch, ncclient, ntlm-auth, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, python-memcached, pyvmomi, pywinrm, stevedore
 stevedore==1.28.0         # via keystoneauth1
-suds==0.4                 # via psphere
 tabulate==0.7.7           # via azure-cli-core, knack
 urllib3==1.24             # via requests
 wheel==0.30.0             # via azure-cli-core
