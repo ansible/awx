@@ -20,7 +20,7 @@ export default
                     inputClass: '&',
                     disabled: '=?'
                 },
-                templateUrl: templateUrl('system-tracking/date-picker/date-picker'),
+                templateUrl: templateUrl('scheduler/schedulerDatePicker'),
                 link: function(scope, element, attrs) {
                     var lang = window.navigator.languages ?
                         window.navigator.languages[0] :
