@@ -59,10 +59,10 @@ EXPOSE 8043 8013 8080 22
 ENTRYPOINT ["/tini", "--"]
 CMD /start_development.sh
 
-RUN touch /venv/awx/lib/python2.7/site-packages/awx.egg-link
-RUN chmod g+rwx /venv/awx/lib/python2.7/site-packages/awx.egg-link
+# Pre-create things that we need to write to
+RUN for dir in /var/lib/awx/ /projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
+  do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done
 
-RUN chmod g+w /etc/passwd
-RUN mkdir -p /projects && chmod g+w /projects
-
-USER ${UID}
+RUN for file in /etc/passwd /supervisor.conf \
+  /venv/awx/lib/python2.7/site-packages/awx.egg-link /var/run/nginx.pid; \
+  do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
