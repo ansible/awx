@@ -57,7 +57,6 @@ This is to prevent saturation of the task system with an infinite chain of workf
 ### Tree-Graph Formation and Restrictions
 The tree-graph structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. However there are restrictions that must be enforced when setting up new connections. Here are the three restrictions that will raise validation error when break:
 * Cycle restriction: According to tree definition, no cycle is allowed.
-* Convergent restriction: Different paths should not come into the same node, in other words, a node cannot have multiple parents.
 
 > Note: A node can now have all three types of child nodes.
 
@@ -113,7 +112,7 @@ Artifact support starts in Ansible and is carried through in Tower. The `set_sta
 * Verify that workflow job template nodes can be created under, or (dis)associated with workflow job templates.
 * Verify that the permitted types of job template types can be associated with a workflow job template node. Currently the permitted types are *job templates, inventory sources, projects, and workflow job templates*.
 * Verify that workflow job template nodes under the same workflow job template can be associated to form parent-child relationship of decision trees. In specific, one node takes another as its child node by POSTing another node's id to one of the three endpoints: `/success_nodes/`, `/failure_nodes/` and `/always_nodes/`.
-* Verify that workflow job template nodes are not allowed to have invalid association. Any attempt that causes invalidity will trigger 400-level response. The three types of invalid associations are cycle, convergence(multiple parent).
+* Verify that workflow job template nodes are not allowed to have invalid association. Any attempt that causes invalidity will trigger 400-level response (i.e. cycles).
 * Verify that a workflow job template can be successfully copied and the created workflow job template does not miss any field that should be copied or intentionally modified.
 * Verify that if a user has no access to any of the related resources of a workflow job template node, that node will not be copied and will have `null` as placeholder.
 * Verify that `artifacts` is populated when `set_stats` is used in Ansible >= v2.2.1.0-0.3.rc3.
