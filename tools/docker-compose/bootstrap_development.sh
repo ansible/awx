@@ -22,7 +22,6 @@ else
 fi
 
 make awx-link
-ln -s /awx_devel/tools/rdb.py /venv/awx/lib/python2.7/site-packages/rdb.py || true
 yes | cp -rf /awx_devel/tools/docker-compose/supervisor.conf /supervisor.conf
 
 # AWX bootstrapping
