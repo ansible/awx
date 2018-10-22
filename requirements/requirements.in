@@ -1,7 +1,6 @@
 appdirs==1.4.2
 asgi-amqp==1.1.2
 asgiref==1.1.2
-backports.ssl-match-hostname==3.5.0.1
 boto==2.47.0
 channels==1.1.8
 celery==4.2.1
@@ -23,15 +22,11 @@ djangorestframework==3.7.7
 djangorestframework-yaml==1.0.3
 irc==16.2
 jsonschema==2.6.0
-M2Crypto==0.29.0
-Markdown==2.6.11
 ordereddict==1.1
 pexpect==4.6.0
 psutil==5.4.3
 psycopg2==2.7.3.2   # problems with Segmentation faults / wheels on upgrade
-pycrypto==2.6.1
 pygerduty==0.37.0
-pyOpenSSL==17.5.0
 pyparsing==2.2.0
 python-dateutil==2.7.2  # contains support for TZINFO= parsing
 python-logstash==0.4.6
@@ -49,6 +44,5 @@ tacacs_plus==1.0
 twilio==6.10.4
 uWSGI==2.0.17
 uwsgitop==0.10.0
-xmltodict==0.11.0
 pip==9.0.1
 setuptools==36.0.1
