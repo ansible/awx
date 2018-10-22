@@ -19,7 +19,7 @@ logger = logging.getLogger('awx.main.dispatch')
 
 
 def construct_bcast_queue_name(common_name):
-    return common_name.encode('utf8') + '_' + settings.CLUSTER_HOST_ID
+    return common_name + '_' + settings.CLUSTER_HOST_ID
 
 
 class Command(BaseCommand):
@@ -80,10 +80,10 @@ class Command(BaseCommand):
 
     def handle(self, *arg, **options):
         if options.get('status'):
-            print Control('dispatcher').status()
+            print(Control('dispatcher').status())
             return
         if options.get('running'):
-            print Control('dispatcher').running()
+            print(Control('dispatcher').running())
             return
         if options.get('reload'):
             return Control('dispatcher').control({'control': 'reload'})

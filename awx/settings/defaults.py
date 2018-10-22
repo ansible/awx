@@ -40,7 +40,7 @@ def IS_TESTING(argv=None):
 
 
 if "pytest" in sys.modules:
-    import mock
+    from unittest import mock
     with mock.patch('__main__.__builtins__.dir', return_value=[]):
         import ldap
 else:

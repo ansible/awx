@@ -1,7 +1,7 @@
 # Python
 import pytest
-import mock
-from mock import PropertyMock
+from unittest import mock
+from unittest.mock import PropertyMock
 
 # AWX
 from awx.api.serializers import (

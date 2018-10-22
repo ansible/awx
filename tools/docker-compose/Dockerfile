@@ -11,7 +11,7 @@ RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/
 RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
 
 RUN yum -y update && yum -y install openssh-server ansible mg vim tmux \
-  git2u-core mercurial subversion python36 python36-devel python-psycopg2 make postgresql \
+  git2u-core mercurial subversion python-devel python36 python36-devel python-psycopg2 make postgresql \
   postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel \
   libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel \
   xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 \

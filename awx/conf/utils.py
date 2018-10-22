@@ -102,7 +102,7 @@ def comment_assignments_in_file(filename, assignment_names, dry_run=True, backup
         if not dry_run:
             if backup_filename:
                 shutil.copy2(filename, backup_filename)
-            with open(filename, 'wb') as fileobj:
+            with open(filename, 'w') as fileobj:
                 fileobj.write(new_file_data)
     return '\n'.join(diff_lines)
 

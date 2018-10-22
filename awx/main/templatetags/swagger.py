@@ -1,5 +1,4 @@
 import re
-from django.utils.encoding import force_unicode
 from django import template
 
 register = template.Library()
@@ -12,7 +11,6 @@ VOWEL_SOUND = re.compile(r'''[aeio]|u([aeiou]|[^n][^aeiou]|ni[^dmnl]|nil[^l])|h(
 def anora(text):
     # https://pypi.python.org/pypi/anora
     # < 10 lines of BSD-3 code, not worth a dependency
-    text = force_unicode(text)
     anora = 'an' if not CONSONANT_SOUND.match(text) and VOWEL_SOUND.match(text) else 'a'
     return anora + ' ' + text
 

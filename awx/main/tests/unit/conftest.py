@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from mock import PropertyMock
+from unittest.mock import PropertyMock
 
 from awx.api.urls import urlpatterns as api_patterns
 

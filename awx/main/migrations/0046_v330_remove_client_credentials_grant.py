@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='oauth2application',
             name='authorization_grant_type',
-            field=models.CharField(choices=[(b'authorization-code', 'Authorization code'), (b'implicit', 'Implicit'), (b'password', 'Resource owner password-based')], help_text='The Grant type the user must use for acquire tokens for this application.', max_length=32),
+            field=models.CharField(choices=[('authorization-code', 'Authorization code'), ('implicit', 'Implicit'), ('password', 'Resource owner password-based')], help_text='The Grant type the user must use for acquire tokens for this application.', max_length=32),
         ),
     ]

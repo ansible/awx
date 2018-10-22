@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 # Python
-import urllib
+import urllib.parse
 import logging
 
 # Django
@@ -24,7 +24,7 @@ class BaseRedirectView(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):
         last_path = self.request.COOKIES.get('lastPath', '')
-        last_path = urllib.quote(urllib.unquote(last_path).strip('"'))
+        last_path = urllib.parse.quote(urllib.parse.unquote(last_path).strip('"'))
         url = reverse('ui:index')
         if last_path:
             return '%s#%s' % (url, last_path)
@@ -45,7 +45,7 @@ class CompleteView(BaseRedirectView):
             response.set_cookie('userLoggedIn', 'true')
             current_user = UserSerializer(self.request.user)
             current_user = JSONRenderer().render(current_user.data)
-            current_user = urllib.quote('%s' % current_user, '')
+            current_user = urllib.parse.quote('%s' % current_user, '')
             response.set_cookie('current_user', current_user, secure=settings.SESSION_COOKIE_SECURE or None)
         return response
 

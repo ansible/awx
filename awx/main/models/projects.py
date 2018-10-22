@@ -4,7 +4,7 @@
 # Python
 import datetime
 import os
-import urlparse
+import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
@@ -68,7 +68,7 @@ class ProjectOptions(models.Model):
     @classmethod
     def get_local_path_choices(cls):
         if os.path.exists(settings.PROJECTS_ROOT):
-            paths = [x.decode('utf-8') for x in os.listdir(settings.PROJECTS_ROOT)
+            paths = [x for x in os.listdir(settings.PROJECTS_ROOT)
                      if (os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x)) and
                          not x.startswith('.') and not x.startswith('_'))]
             qs = Project.objects

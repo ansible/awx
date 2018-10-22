@@ -5,11 +5,11 @@ from __future__ import absolute_import
 
 from collections import OrderedDict
 import json
-import mock
 import os
 import shutil
 import sys
 import tempfile
+from unittest import mock
 
 import pytest
 

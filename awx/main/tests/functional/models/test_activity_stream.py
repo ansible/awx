@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 
 import json
 
@@ -158,7 +158,7 @@ class TestUserModels:
 def test_missing_related_on_delete(inventory_source):
     old_is = InventorySource.objects.get(name=inventory_source.name)
     inventory_source.inventory.delete()
-    d = model_to_dict(old_is, serializer_mapping=model_serializer_mapping)
+    d = model_to_dict(old_is, serializer_mapping=model_serializer_mapping())
     assert d['inventory'] == '<missing inventory source>-{}'.format(old_is.inventory_id)
 
 
@@ -218,7 +218,7 @@ def test_modified_not_allowed_field(somecloud_type):
     from awx.main.registrar import activity_stream_registrar
 
     for Model in activity_stream_registrar.models:
-        assert 'modified' not in get_allowed_fields(Model(), model_serializer_mapping), Model
+        assert 'modified' not in get_allowed_fields(Model(), model_serializer_mapping()), Model
 
 
 @pytest.mark.django_db
@@ -233,7 +233,7 @@ def test_survey_spec_create_entry(job_template, survey_spec_factory):
 def test_survey_create_diff(job_template, survey_spec_factory):
     old = JobTemplate.objects.get(pk=job_template.pk)
     job_template.survey_spec = survey_spec_factory('foo')
-    before, after = model_instance_diff(old, job_template, model_serializer_mapping)['survey_spec']
+    before, after = model_instance_diff(old, job_template, model_serializer_mapping())['survey_spec']
     assert before == '{}'
     assert json.loads(after) == survey_spec_factory('foo')
 

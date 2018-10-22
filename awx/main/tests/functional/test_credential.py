@@ -206,10 +206,10 @@ def test_vault_validation(organization, inputs, valid):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('become_method, valid', zip(
+@pytest.mark.parametrize('become_method, valid', list(zip(
     dict(V1Credential.FIELDS['become_method'].choices).keys(),
     itertools.repeat(True)
-) + [('invalid-choice', False)])
+)) + [('invalid-choice', False)])
 def test_choices_validity(become_method, valid, organization):
     inputs = {'become_method': become_method}
     cred_type = CredentialType.defaults['ssh']()

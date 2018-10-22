@@ -92,7 +92,7 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         if 'name' in self.__dict__:
             return u'%s-%s' % (self.name, self.pk)
         else:
@@ -152,7 +152,7 @@ class CreatedModifiedModel(BaseModel):
     )
 
     def save(self, *args, **kwargs):
-        update_fields = kwargs.get('update_fields', [])
+        update_fields = list(kwargs.get('update_fields', []))
         # Manually perform auto_now_add and auto_now logic.
         if not self.pk and not self.created:
             self.created = now()

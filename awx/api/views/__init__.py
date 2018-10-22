@@ -517,7 +517,7 @@ class AuthView(APIView):
         from rest_framework.reverse import reverse
         data = OrderedDict()
         err_backend, err_message = request.session.get('social_auth_error', (None, None))
-        auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS, force_load=True).items()
+        auth_backends = list(load_backends(settings.AUTHENTICATION_BACKENDS, force_load=True).items())
         # Return auth backends in consistent order: Google, GitHub, SAML.
         auth_backends.sort(key=lambda x: 'g' if x[0] == 'google-oauth2' else x[0])
         for name, backend in auth_backends:
@@ -2308,7 +2308,7 @@ class JobTemplateLaunch(RetrieveAPIView):
                         raise ParseError({key: [msg], 'credentials': [msg]})
 
                     # add the deprecated credential specified in the request
-                    if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, basestring):
+                    if not isinstance(prompted_value, Iterable) or isinstance(prompted_value, str):
                         prompted_value = [prompted_value]
 
                     # If user gave extra_credentials, special case to use exactly
@@ -4459,7 +4459,7 @@ class RoleChildrenList(SubListAPIView):
 # in URL patterns and reverse URL lookups, converting CamelCase names to
 # lowercase_with_underscore (e.g. MyView.as_view() becomes my_view).
 this_module = sys.modules[__name__]
-for attr, value in locals().items():
+for attr, value in list(locals().items()):
     if isinstance(value, type) and issubclass(value, APIView):
         name = camelcase_to_underscore(attr)
         view = value.as_view()

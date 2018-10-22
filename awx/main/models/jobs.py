@@ -8,7 +8,7 @@ import logging
 import os
 import time
 import json
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 import six
 
@@ -347,8 +347,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             except JobLaunchConfig.DoesNotExist:
                 wj_config = JobLaunchConfig()
             actual_inventory = wj_config.inventory if wj_config.inventory else self.inventory
-            for idx in xrange(min(self.job_slice_count,
-                                  actual_inventory.hosts.count())):
+            for idx in range(min(self.job_slice_count,
+                                 actual_inventory.hosts.count())):
                 create_kwargs = dict(workflow_job=job,
                                      unified_job_template=self,
                                      ancestor_artifacts=dict(job_slice=idx + 1))
@@ -695,7 +695,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
             if self.job_slice_count > 1:
                 # Integer division intentional
-                count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) / self.job_slice_count
+                count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) // self.job_slice_count
         return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     @property
@@ -1120,7 +1120,7 @@ class JobHostSummary(CreatedModifiedModel):
     skipped = models.PositiveIntegerField(default=0, editable=False)
     failed = models.BooleanField(default=False, editable=False)
 
-    def __unicode__(self):
+    def __str__(self):
         host = getattr_dne(self, 'host')
         hostname = host.name if host else 'N/A'
         return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \

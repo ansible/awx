@@ -3,7 +3,7 @@
 
 # Python
 import pytest
-import mock
+from unittest import mock
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
 
@@ -48,7 +48,7 @@ def test_cleanup_older_than(fact_scans, hosts, monkeypatch_jsonbfield_get_db_pre
     hosts(5)
     fact_scans(28, timestamp_epoch=epoch)
     qs = Fact.objects.all().order_by('-timestamp')
-    fact_middle = qs[qs.count() / 2]
+    fact_middle = qs[int(qs.count() / 2)]
     granularity = relativedelta()
 
     cleanup_facts = CleanupFacts()
@@ -92,7 +92,7 @@ def test_cleanup_logic(fact_scans, hosts, monkeypatch_jsonbfield_get_db_prep_sav
         facts = Fact.objects.filter(host__id=host_id, module=module, timestamp__lt=timestamp_middle).order_by('-timestamp')
         host_facts[host_id] = facts
 
-    for host_id, facts in host_facts.iteritems():
+    for host_id, facts in host_facts.items():
         assert 15 == len(facts)
 
         timestamp_pivot = timestamp_middle
@@ -108,7 +108,7 @@ def test_system_tracking_feature_disabled(mocker):
     cmd = Command()
     with pytest.raises(CommandError) as err:
         cmd.handle(None)
-    assert 'The System Tracking feature is not enabled for your instance' in err.value
+    assert 'The System Tracking feature is not enabled for your instance' in str(err.value)
 
 
 @mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_enabled)
@@ -206,4 +206,4 @@ def test_parameters_fail(mocker):
         cmd = Command()
         with pytest.raises(CommandError) as err:
             cmd.handle(None, older_than=kv['older_than'], granularity=kv['granularity'])
-        assert kv['msg'] in err.value
+        assert kv['msg'] in str(err.value)

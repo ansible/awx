@@ -1,4 +1,4 @@
-import mock # noqa
+from unittest import mock # noqa
 import pytest
 
 from awx.api.versioning import reverse
@@ -38,7 +38,7 @@ def post_adhoc(post, inventory, machine_credential):
         if 'credential' not in data:
             data['credential'] = machine_credential.id
 
-        for k,v in data.items():
+        for k, v in list(data.items()):
             if v is None:
                 del data[k]
 

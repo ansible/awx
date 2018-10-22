@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='controller_node',
-            field=models.TextField(blank=True, default=b'', editable=False, help_text='The instance that managed the isolated execution environment.'),
+            field=models.TextField(blank=True, default='', editable=False, help_text='The instance that managed the isolated execution environment.'),
         ),
     ]

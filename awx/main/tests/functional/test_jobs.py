@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 import json
 
 from awx.main.models import Job, Instance

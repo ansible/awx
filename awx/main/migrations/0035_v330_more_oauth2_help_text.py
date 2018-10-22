@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='oauth2accesstoken',
             name='scope',
-            field=models.TextField(blank=True, default=b'write', help_text="Allowed scopes, further restricts user's permissions. Must be a simple space-separated string with allowed scopes ['read', 'write']."),
+            field=models.TextField(blank=True, default='write', help_text="Allowed scopes, further restricts user's permissions. Must be a simple space-separated string with allowed scopes ['read', 'write']."),
         ),
     ]

@@ -152,8 +152,8 @@ class SimpleDAG(object):
             return self._get_dependencies_by_label(this_ord, label)
         else:
             nodes = []
-            map(lambda l: nodes.extend(self._get_dependencies_by_label(this_ord, l)),
-                self.node_from_edges_by_label.keys())
+            for l in self.node_from_edges_by_label.keys():
+                nodes.extend(self._get_dependencies_by_label(this_ord, l))
             return nodes
 
     def _get_dependents_by_label(self, node_index, label):
@@ -168,8 +168,8 @@ class SimpleDAG(object):
             return self._get_dependents_by_label(this_ord, label)
         else:
             nodes = []
-            map(lambda l: nodes.extend(self._get_dependents_by_label(this_ord, l)),
-                self.node_to_edges_by_label.keys())
+            for l in self.node_to_edges_by_label.keys():
+                nodes.extend(self._get_dependents_by_label(this_ord, l))
             return nodes
 
     def get_root_nodes(self):
@@ -189,7 +189,7 @@ class SimpleDAG(object):
             node_obj = stack.pop()
 
             children = [node['node_object'] for node in self.get_dependencies(node_obj)]
-            children_to_add = filter(lambda node_obj: node_obj not in node_objs_visited, children)
+            children_to_add = list(filter(lambda node_obj: node_obj not in node_objs_visited, children))
 
             if children_to_add:
                 if node_obj in path:

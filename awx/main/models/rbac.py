@@ -155,7 +155,7 @@ class Role(models.Model):
     object_id = models.PositiveIntegerField(null=True, default=None)
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    def __unicode__(self):
+    def __str__(self):
         if 'role_field' in self.__dict__:
             return u'%s-%s' % (self.name, self.pk)
         else:
@@ -315,7 +315,7 @@ class Role(models.Model):
         # minus 4k of padding for the other parts of the query, leads us
         # to the magic number of 41496, or 40000 for a nice round number
         def split_ids_for_sqlite(role_ids):
-            for i in xrange(0, len(role_ids), 40000):
+            for i in range(0, len(role_ids), 40000):
                 yield role_ids[i:i + 40000]
 
 

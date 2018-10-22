@@ -1,7 +1,7 @@
 
 # Python
 import pytest
-import mock
+from unittest import mock
 
 # DRF
 from rest_framework import status
@@ -12,7 +12,6 @@ from rest_framework.exceptions import PermissionDenied
 from awx.api.generics import (
     ParentMixin,
     SubListCreateAttachDetachAPIView, SubListAttachDetachAPIView,
-    DeleteLastUnattachLabelMixin,
     ResourceAccessList,
     ListAPIView
 )
@@ -28,13 +27,6 @@ def get_object_or_404(mocker):
 @pytest.fixture
 def get_object_or_400(mocker):
     return mocker.patch('awx.api.generics.get_object_or_400')
-
-
-@pytest.fixture
-def mock_response_new(mocker):
-    m = mocker.patch('awx.api.generics.Response.__new__')
-    m.return_value = m
-    return m
 
 
 @pytest.fixture
@@ -76,33 +68,26 @@ class TestSubListCreateAttachDetachAPIView:
 
         assert type(res) is Response
 
-    def test_attach_create_and_associate(self, mocker, get_object_or_400, parent_relationship_factory, mock_response_new):
+    def test_attach_create_and_associate(self, mocker, get_object_or_400, parent_relationship_factory):
         (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         create_return_value = mocker.MagicMock(status_code=status.HTTP_201_CREATED)
         serializer.create = mocker.Mock(return_value=create_return_value)
 
         mock_request = mocker.MagicMock(data=dict())
-        ret = serializer.attach(mock_request, None, None)
+        serializer.attach(mock_request, None, None)
 
-        assert ret == mock_response_new
         serializer.create.assert_called_with(mock_request, None, None)
         mock_parent_relationship.wife.add.assert_called_with(get_object_or_400.return_value)
-        mock_response_new.assert_called_with(
-            Response, create_return_value.data, status=status.HTTP_201_CREATED,
-            headers={'Location': create_return_value['Location']}
-        )
 
-    def test_attach_associate_only(self, mocker, get_object_or_400, parent_relationship_factory, mock_response_new):
+    def test_attach_associate_only(self, mocker, get_object_or_400, parent_relationship_factory):
         (serializer, mock_parent_relationship) = parent_relationship_factory(SubListCreateAttachDetachAPIView, 'wife')
         serializer.create = mocker.Mock(return_value=mocker.MagicMock())
 
         mock_request = mocker.MagicMock(data=dict(id=1))
-        ret = serializer.attach(mock_request, None, None)
+        serializer.attach(mock_request, None, None)
 
-        assert ret == mock_response_new
         serializer.create.assert_not_called()
         mock_parent_relationship.wife.add.assert_called_with(get_object_or_400.return_value)
-        mock_response_new.assert_called_with(Response, status=status.HTTP_204_NO_CONTENT)
 
     def test_unattach_validate_ok(self, mocker):
         mock_request = mocker.MagicMock(data=dict(id=1))
@@ -181,44 +166,6 @@ def test_attach_detatch_only(mocker):
 
     assert 'Foo Bar' in resp.data['msg']
     assert 'field is missing' in resp.data['msg']
-
-
-class TestDeleteLastUnattachLabelMixin:
-    @mock.patch('__builtin__.super')
-    def test_unattach_ok(self, super, mocker):
-        mock_request = mocker.MagicMock()
-        mock_sub_id = mocker.MagicMock()
-        super.return_value = super
-        super.unattach_validate = mocker.MagicMock(return_value=(mock_sub_id, None))
-        super.unattach_by_id = mocker.MagicMock()
-
-        mock_model = mocker.MagicMock()
-        mock_model.objects.get.return_value = mock_model
-        mock_model.is_detached.return_value = True
-
-        view = DeleteLastUnattachLabelMixin()
-        view.model = mock_model
-
-        view.unattach(mock_request, None, None)
-
-        super.unattach_validate.assert_called_with(mock_request)
-        super.unattach_by_id.assert_called_with(mock_request, mock_sub_id)
-        mock_model.is_detached.assert_called_with()
-        mock_model.objects.get.assert_called_with(id=mock_sub_id)
-        mock_model.delete.assert_called_with()
-
-    @mock.patch('__builtin__.super')
-    def test_unattach_fail(self, super, mocker):
-        mock_request = mocker.MagicMock()
-        mock_response = mocker.MagicMock()
-        super.return_value = super
-        super.unattach_validate = mocker.MagicMock(return_value=(None, mock_response))
-        view = DeleteLastUnattachLabelMixin()
-
-        res = view.unattach(mock_request, None, None)
-
-        super.unattach_validate.assert_called_with(mock_request)
-        assert mock_response == res
 
 
 class TestParentMixin:

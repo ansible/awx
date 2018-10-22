@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 
 from awx.api.versioning import reverse
 from awx.main.utils import decrypt_field

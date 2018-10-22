@@ -10,15 +10,14 @@ import os
 import re
 import subprocess
 import stat
-import urllib
-import urlparse
+import urllib.parse
 import threading
 import contextlib
 import tempfile
 import six
 import psutil
 from functools import reduce, wraps
-from StringIO import StringIO
+from io import StringIO
 
 from decimal import Decimal
 
@@ -95,11 +94,12 @@ def to_python_boolean(value, allow_none=False):
 
 
 def region_sorting(region):
-        if region[1].lower() == 'all':
-            return -1
-        elif region[1].lower().startswith('us'):
-            return 0
+    # python3's removal of sorted(cmp=...) is _stupid_
+    if region[1].lower() == 'all':
+        return ''
+    elif region[1].lower().startswith('us'):
         return region[1]
+    return 'ZZZ' + str(region[1])
 
 
 def camelcase_to_underscore(s):
@@ -177,7 +177,7 @@ def get_ansible_version():
     try:
         proc = subprocess.Popen(['ansible', '--version'],
                                 stdout=subprocess.PIPE)
-        result = proc.communicate()[0]
+        result = smart_str(proc.communicate()[0])
         return result.split('\n')[0].replace('ansible', '').strip()
     except Exception:
         return 'unknown'
@@ -191,7 +191,7 @@ def get_ssh_version():
     try:
         proc = subprocess.Popen(['ssh', '-V'],
                                 stderr=subprocess.PIPE)
-        result = proc.communicate()[1]
+        result = smart_str(proc.communicate()[1])
         return result.split(" ")[0].split("_")[1]
     except Exception:
         return 'unknown'
@@ -255,7 +255,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
         raise ValueError(_('Unsupported SCM type "%s"') % str(scm_type))
     if not url.strip():
         return ''
-    parts = urlparse.urlsplit(url)
+    parts = urllib.parse.urlsplit(url)
     try:
         parts.port
     except ValueError:
@@ -281,14 +281,14 @@ def update_scm_url(scm_type, url, username=True, password=True,
             modified_url = '@'.join(filter(None, [userpass, hostpath]))
             # git+ssh scheme identifies URLs that should be converted back to
             # SCP style before passed to git module.
-            parts = urlparse.urlsplit('git+ssh://%s' % modified_url)
+            parts = urllib.parse.urlsplit('git+ssh://%s' % modified_url)
         # Handle local paths specified without file scheme (e.g. /path/to/foo).
         # Only supported by git and hg.
         elif scm_type in ('git', 'hg'):
             if not url.startswith('/'):
-                parts = urlparse.urlsplit('file:///%s' % url)
+                parts = urllib.parse.urlsplit('file:///%s' % url)
             else:
-                parts = urlparse.urlsplit('file://%s' % url)
+                parts = urllib.parse.urlsplit('file://%s' % url)
         else:
             raise ValueError(_('Invalid %s URL') % scm_type)
 
@@ -334,14 +334,14 @@ def update_scm_url(scm_type, url, username=True, password=True,
             netloc_password = ''
 
     if netloc_username and parts.scheme != 'file' and scm_type != "insights":
-        netloc = u':'.join([urllib.quote(x,safe='') for x in (netloc_username, netloc_password) if x])
+        netloc = u':'.join([urllib.parse.quote(x,safe='') for x in (netloc_username, netloc_password) if x])
     else:
         netloc = u''
     netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
     if parts.port:
         netloc = u':'.join([netloc, six.text_type(parts.port)])
-    new_url = urlparse.urlunsplit([parts.scheme, netloc, parts.path,
-                                   parts.query, parts.fragment])
+    new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path,
+                                       parts.query, parts.fragment])
     if scp_format and parts.scheme == 'git+ssh':
         new_url = new_url.replace('git+ssh://', '', 1).replace('/', ':', 1)
     return new_url
@@ -387,7 +387,7 @@ def _convert_model_field_for_display(obj, field_name, password_fields=None):
             field_val = json.dumps(field_val, ensure_ascii=False)
         except Exception:
             pass
-    if type(field_val) not in (bool, int, type(None), long):
+    if type(field_val) not in (bool, int, type(None)):
         field_val = smart_str(field_val)
     return field_val
 
@@ -558,7 +558,7 @@ def prefetch_page_capabilities(model, page, prefetch_list, user):
 
         display_method = None
         if type(prefetch_entry) is dict:
-            display_method = prefetch_entry.keys()[0]
+            display_method = list(prefetch_entry.keys())[0]
             paths = prefetch_entry[display_method]
         else:
             paths = prefetch_entry
@@ -699,7 +699,7 @@ def get_mem_capacity():
         forkmem = 100
 
     mem = psutil.virtual_memory().total
-    return (mem, max(1, ((mem / 1024 / 1024) - 2048) / forkmem))
+    return (mem, max(1, ((mem // 1024 // 1024) - 2048) // forkmem))
 
 
 def get_system_task_capacity(scale=Decimal(1.0), cpu_capacity=None, mem_capacity=None):
@@ -966,7 +966,7 @@ def get_custom_venv_choices():
     custom_venv_path = settings.BASE_VENV_PATH
     if os.path.exists(custom_venv_path):
         return [
-            os.path.join(custom_venv_path, x.decode('utf-8'), '')
+            os.path.join(custom_venv_path, x, '')
             for x in os.listdir(custom_venv_path)
             if x != 'awx' and
             os.path.isdir(os.path.join(custom_venv_path, x)) and
@@ -999,6 +999,7 @@ class OutputEventFilter(object):
         pass
 
     def write(self, data):
+        data = smart_str(data)
         self._buffer.write(data)
 
         # keep a sliding window of the last chunk written so we can detect
@@ -1093,7 +1094,7 @@ def is_ansible_variable(key):
 def extract_ansible_vars(extra_vars):
     extra_vars = parse_yaml_or_json(extra_vars)
     ansible_vars = set([])
-    for key in extra_vars.keys():
+    for key in list(extra_vars.keys()):
         if is_ansible_variable(key):
             extra_vars.pop(key)
             ansible_vars.add(key)

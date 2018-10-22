@@ -22,7 +22,7 @@ channels==1.1.8
 constantly==15.1.0        # via twisted
 cryptography==2.3.1       # via requests
 daphne==1.3.0
-defusedxml==0.4.1         # via python-saml
+defusedxml==0.5.0         # via python3-saml
 django-auth-ldap==1.7.0
 django-crum==0.7.2
 django-extensions==2.0.0
@@ -30,7 +30,7 @@ django-jsonfield==1.0.1
 django-oauth-toolkit==1.1.3
 django-pglocks==1.0.2
 django-polymorphic==2.0.2
-django-radius==1.1.0
+django-radius==1.3.3
 django-solo==1.1.3
 django-split-settings==0.3.0
 django-taggit==0.22.2
@@ -53,11 +53,13 @@ jaraco.itertools==2.1.1   # via irc
 jaraco.logging==1.5.1     # via irc
 jaraco.stream==1.1.2      # via irc
 jaraco.text==1.10         # via irc, jaraco.collections
+jinja2==2.10
 jsonpickle==0.9.6         # via asgi-amqp
 jsonschema==2.6.0
 kombu==4.2.1              # via asgi-amqp, celery
 lxml==4.2.3
 markdown==2.6.11
+MarkupSafe==1.0           # via jinja2
 more-itertools==4.1.0     # via irc, jaraco.functools, jaraco.itertools
 msgpack-python==0.5.5     # via asgi-amqp
 netaddr==0.7.19           # via pyrad
@@ -73,14 +75,14 @@ pycparser==2.18           # via cffi
 pygerduty==0.37.0
 pyjwt==1.6.0              # via social-auth-core, twilio
 pyparsing==2.2.0
-pyrad==1.2                # via django-radius
+pyrad==2.1                # via django-radius
 python-dateutil==2.7.2
 python-ldap==3.1.0        # via django-auth-ldap
 python-logstash==0.4.6
 python-memcached==1.59
 python-openid==2.2.5      # via social-auth-core
 python-radius==1.0
-python-saml==2.4.0
+python3-saml==1.4.0
 pytz==2018.5              # via celery, django, irc, tempora, twilio
 pyyaml==3.12              # via djangorestframework-yaml
 redbaron==0.6.3

@@ -19,11 +19,11 @@ class InstanceNotFound(Exception):
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('--queuename', dest='queuename', type=lambda s: six.text_type(s, 'utf8'),
+        parser.add_argument('--queuename', dest='queuename', type=str,
                             help='Queue to create/update')
-        parser.add_argument('--hostnames', dest='hostnames', type=lambda s: six.text_type(s, 'utf8'),
+        parser.add_argument('--hostnames', dest='hostnames', type=str,
                             help='Comma-Delimited Hosts to add to the Queue (will not remove already assigned instances)')
-        parser.add_argument('--controller', dest='controller', type=lambda s: six.text_type(s, 'utf8'),
+        parser.add_argument('--controller', dest='controller', type=str,
                             default='', help='The controlling group (makes this an isolated group)')
         parser.add_argument('--instance_percent', dest='instance_percent', type=int, default=0,
                             help='The percentage of active instances that will be assigned to this group'),

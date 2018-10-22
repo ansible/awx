@@ -1,6 +1,5 @@
 import base64
 import codecs
-import StringIO
 import json
 import os
 import shutil
@@ -9,8 +8,10 @@ import tempfile
 import time
 import logging
 from distutils.version import LooseVersion as Version
+from io import StringIO
 
 from django.conf import settings
+from django.utils.encoding import smart_bytes, smart_str
 
 import awx
 from awx.main.expect import run
@@ -144,7 +145,7 @@ class IsolatedManager(object):
 
         # if an ssh private key fifo exists, read its contents and delete it
         if self.ssh_key_path:
-            buff = StringIO.StringIO()
+            buff = StringIO()
             with open(self.ssh_key_path, 'r') as fifo:
                 for line in fifo:
                     buff.write(line)
@@ -156,7 +157,10 @@ class IsolatedManager(object):
         # into a variable, and will replicate the data into a named pipe on the
         # isolated instance
         secrets_path = os.path.join(self.private_data_dir, 'env')
-        run.open_fifo_write(secrets_path, base64.b64encode(json.dumps(secrets)))
+        run.open_fifo_write(
+            secrets_path,
+            smart_str(base64.b64encode(smart_bytes(json.dumps(secrets))))
+        )
 
         self.build_isolated_job_data()
 
@@ -176,7 +180,7 @@ class IsolatedManager(object):
         args = self._build_args('run_isolated.yml', '%s,' % self.host, extra_vars)
         if self.instance.verbosity:
             args.append('-%s' % ('v' * min(5, self.instance.verbosity)))
-        buff = StringIO.StringIO()
+        buff = StringIO()
         logger.debug('Starting job {} on isolated host with `run_isolated.yml` playbook.'.format(self.instance.id))
         status, rc = IsolatedManager.run_pexpect(
             args, self.awx_playbook_path(), self.management_env, buff,
@@ -246,7 +250,7 @@ class IsolatedManager(object):
         os.makedirs(self.path_to('artifacts', 'job_events'), mode=stat.S_IXUSR + stat.S_IWUSR + stat.S_IRUSR)
 
     def _missing_artifacts(self, path_list, output):
-        missing_artifacts = filter(lambda path: not os.path.exists(path), path_list)
+        missing_artifacts = list(filter(lambda path: not os.path.exists(path), path_list))
         for path in missing_artifacts:
             self.stdout_handle.write('ansible did not exit cleanly, missing `{}`.\n'.format(path))
         if missing_artifacts:
@@ -284,7 +288,7 @@ class IsolatedManager(object):
         status = 'failed'
         output = ''
         rc = None
-        buff = StringIO.StringIO()
+        buff = StringIO()
         last_check = time.time()
         seek = 0
         job_timeout = remaining = self.job_timeout
@@ -305,7 +309,7 @@ class IsolatedManager(object):
                 time.sleep(1)
                 continue
 
-            buff = StringIO.StringIO()
+            buff = StringIO()
             logger.debug('Checking on isolated job {} with `check_isolated.yml`.'.format(self.instance.id))
             status, rc = IsolatedManager.run_pexpect(
                 args, self.awx_playbook_path(), self.management_env, buff,
@@ -342,7 +346,7 @@ class IsolatedManager(object):
         elif status == 'failed':
             # if we were unable to retrieve job reults from the isolated host,
             # print stdout of the `check_isolated.yml` playbook for clues
-            self.stdout_handle.write(output)
+            self.stdout_handle.write(smart_str(output))
 
         return status, rc
 
@@ -357,7 +361,7 @@ class IsolatedManager(object):
         }
         args = self._build_args('clean_isolated.yml', '%s,' % self.host, extra_vars)
         logger.debug('Cleaning up job {} on isolated host with `clean_isolated.yml` playbook.'.format(self.instance.id))
-        buff = StringIO.StringIO()
+        buff = StringIO()
         timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
         status, rc = IsolatedManager.run_pexpect(
             args, self.awx_playbook_path(), self.management_env, buff,

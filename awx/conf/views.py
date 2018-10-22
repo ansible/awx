@@ -72,7 +72,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         self.category_slug = self.kwargs.get('category_slug', 'all')
-        all_category_slugs = settings_registry.get_registered_categories(features_enabled=get_licensed_features()).keys()
+        all_category_slugs = list(settings_registry.get_registered_categories(features_enabled=get_licensed_features()).keys())
         for slug_to_delete in VERSION_SPECIFIC_CATEGORIES_TO_EXCLUDE[get_request_version(self.request)]:
             all_category_slugs.remove(slug_to_delete)
         if self.request.user.is_superuser or getattr(self.request.user, 'is_system_auditor', False):
@@ -123,7 +123,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             if key == 'LICENSE' or settings_registry.is_setting_read_only(key):
                 continue
             if settings_registry.is_setting_encrypted(key) and \
-                    isinstance(value, basestring) and \
+                    isinstance(value, str) and \
                     value.startswith('$encrypted$'):
                 continue
             setattr(serializer.instance, key, value)
@@ -210,7 +210,7 @@ class SettingLoggingTest(GenericAPIView):
 # in URL patterns and reverse URL lookups, converting CamelCase names to
 # lowercase_with_underscore (e.g. MyView.as_view() becomes my_view).
 this_module = sys.modules[__name__]
-for attr, value in locals().items():
+for attr, value in list(locals().items()):
     if isinstance(value, type) and issubclass(value, APIView):
         name = camelcase_to_underscore(attr)
         view = value.as_view()

@@ -45,7 +45,7 @@ class task:
 
     @task(queue='tower_broadcast', exchange_type='fanout')
     def announce():
-        print "Run this everywhere!"
+        print("Run this everywhere!")
     """
 
     def __init__(self, queue=None, exchange_type=None):

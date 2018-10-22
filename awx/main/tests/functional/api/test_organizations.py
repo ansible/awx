@@ -7,7 +7,7 @@ import os
 from backports.tempfile import TemporaryDirectory
 from django.conf import settings
 import pytest
-import mock
+from unittest import mock
 
 # AWX
 from awx.main.models import * # noqa
@@ -38,14 +38,14 @@ def create_project_update_factory(organization, project):
 
 @pytest.fixture
 def organization_jobs_successful(create_job_factory, create_project_update_factory):
-    return [create_job_factory(status='successful') for i in xrange(0, 2)] + \
-        [create_project_update_factory(status='successful') for i in xrange(0, 2)]
+    return [create_job_factory(status='successful') for i in range(0, 2)] + \
+        [create_project_update_factory(status='successful') for i in range(0, 2)]
 
 
 @pytest.fixture
 def organization_jobs_running(create_job_factory, create_project_update_factory):
-    return [create_job_factory(status='running') for i in xrange(0, 2)] + \
-        [create_project_update_factory(status='running') for i in xrange(0, 2)]
+    return [create_job_factory(status='running') for i in range(0, 2)] + \
+        [create_project_update_factory(status='running') for i in range(0, 2)]
 
 
 @pytest.mark.django_db

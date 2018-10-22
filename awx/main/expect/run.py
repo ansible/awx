@@ -4,7 +4,6 @@ import argparse
 import base64
 import codecs
 import collections
-import StringIO
 import logging
 import json
 import os
@@ -13,12 +12,12 @@ import pipes
 import re
 import signal
 import sys
-import thread
+import _thread
 import time
+from io import StringIO
 
 import pexpect
 import psutil
-import six
 
 
 logger = logging.getLogger('awx.main.utils.expect')
@@ -49,7 +48,7 @@ def open_fifo_write(path, data):
     reads data from the pipe.
     '''
     os.mkfifo(path, 0o600)
-    thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
+    _thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
 
 
 def run_pexpect(args, cwd, env, logfile,
@@ -97,14 +96,8 @@ def run_pexpect(args, cwd, env, logfile,
         # enforce usage of an OrderedDict so that the ordering of elements in
         # `keys()` matches `values()`.
         expect_passwords = collections.OrderedDict(expect_passwords)
-    password_patterns = expect_passwords.keys()
-    password_values = expect_passwords.values()
-
-    # pexpect needs all env vars to be utf-8 encoded strings
-    # https://github.com/pexpect/pexpect/issues/512
-    for k, v in env.items():
-        if isinstance(v, six.text_type):
-            env[k] = v.encode('utf-8')
+    password_patterns = list(expect_passwords.keys())
+    password_values = list(expect_passwords.values())
 
     child = pexpect.spawn(
         args[0], args[1:], cwd=cwd, env=env, ignore_sighup=True,
@@ -232,7 +225,7 @@ def handle_termination(pid, args, proot_cmd, is_cancel=True):
                       instance's cancel_flag.
     '''
     try:
-        if proot_cmd in ' '.join(args):
+        if proot_cmd.encode('utf-8') in args:
             if not psutil:
                 os.kill(pid, signal.SIGKILL)
             else:
@@ -253,7 +246,7 @@ def handle_termination(pid, args, proot_cmd, is_cancel=True):
 
 
 def __run__(private_data_dir):
-    buff = StringIO.StringIO()
+    buff = StringIO()
     with open(os.path.join(private_data_dir, 'env'), 'r') as f:
         for line in f:
             buff.write(line)

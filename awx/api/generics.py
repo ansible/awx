@@ -6,7 +6,7 @@ import inspect
 import logging
 import time
 import six
-import urllib
+import urllib.parse
 
 # Django
 from django.conf import settings
@@ -91,8 +91,9 @@ class LoggedLoginView(auth_views.LoginView):
             ret.set_cookie('userLoggedIn', 'true')
             current_user = UserSerializer(self.request.user)
             current_user = JSONRenderer().render(current_user.data)
-            current_user = urllib.quote('%s' % current_user, '')
+            current_user = urllib.parse.quote('%s' % current_user, '')
             ret.set_cookie('current_user', current_user, secure=settings.SESSION_COOKIE_SECURE or None)
+
             return ret
         else:
             ret.status_code = 401
@@ -304,7 +305,7 @@ class APIView(views.APIView):
         # submitted data was rejected.
         request_method = getattr(self, '_raw_data_request_method', None)
         response_status = getattr(self, '_raw_data_response_status', 0)
-        if request_method in ('POST', 'PUT', 'PATCH') and response_status in xrange(400, 500):
+        if request_method in ('POST', 'PUT', 'PATCH') and response_status in range(400, 500):
             return self.request.data.copy()
 
         return data
@@ -347,7 +348,7 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         # form.
         if hasattr(self, '_raw_data_form_marker'):
             # Always remove read only fields from serializer.
-            for name, field in serializer.fields.items():
+            for name, field in list(serializer.fields.items()):
                 if getattr(field, 'read_only', None):
                     del serializer.fields[name]
             serializer._data = self.update_raw_data(serializer.data)
@@ -747,7 +748,7 @@ class SubListAttachDetachAPIView(SubListCreateAttachDetachAPIView):
     def update_raw_data(self, data):
         request_method = getattr(self, '_raw_data_request_method', None)
         response_status = getattr(self, '_raw_data_response_status', 0)
-        if request_method == 'POST' and response_status in xrange(400, 500):
+        if request_method == 'POST' and response_status in range(400, 500):
             return super(SubListAttachDetachAPIView, self).update_raw_data(data)
         return {'id': None}
 

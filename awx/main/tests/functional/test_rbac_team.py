@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 
 from awx.main.access import TeamAccess
 from awx.main.models import Project, Organization, Team

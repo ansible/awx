@@ -10,7 +10,7 @@ from django.conf import settings
 from kombu.utils.url import parse_url
 
 # Mock
-import mock
+from unittest import mock
 
 # AWX
 from awx.api.versioning import reverse

@@ -120,7 +120,7 @@ virtualenv_ansible:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/ansible && \
+			virtualenv -p python --system-site-packages $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
@@ -133,10 +133,8 @@ virtualenv_awx:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/awx && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+			python36 -m ensurepip --upgrade && \
+			python36 -m venv --system-site-packages $(VENV_BASE)/awx; \
 		fi; \
 	fi
 
@@ -155,10 +153,8 @@ requirements_ansible_dev:
 
 requirements_isolated:
 	if [ ! -d "$(VENV_BASE)/awx" ]; then \
-		virtualenv --system-site-packages $(VENV_BASE)/awx && \
-		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
-		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+		python36 -m ensurepip --upgrade && \
+		python36 -m venv --system-site-packages $(VENV_BASE)/awx; \
 	fi;
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_isolated.txt
 
@@ -195,7 +191,7 @@ version_file:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.awx_version; \
+	python -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
 
 # Do any one-time init tasks.
 comma := ,

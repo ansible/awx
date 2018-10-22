@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 
 # Python
-import mock
+from unittest import mock
 
 # AWX
 from awx.main.ha import is_ha_environment

@@ -14,7 +14,7 @@ import traceback
 from split_settings.tools import optional, include
 
 # Load default settings.
-from defaults import *  # NOQA
+from .defaults import *  # NOQA
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -95,7 +95,7 @@ except IOError:
         try:
             e = None
             open(settings_file)
-        except IOError as e:
+        except IOError:
             pass
         if e and e.errno == errno.EACCES:
             SECRET_KEY = 'permission-denied'

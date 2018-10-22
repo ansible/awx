@@ -8,8 +8,8 @@ import django.db.models.deletion
 import awx.main.models.workflow
 import awx.main.fields
 
-import _squashed
-from _squashed_30 import SQUASHED_30
+from . import _squashed
+from ._squashed_30 import SQUASHED_30
 
 
 class Migration(migrations.Migration):
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
     ]
 
     replaces = _squashed.replaces(SQUASHED_30) + [
-        (b'main', '0034_v310_release'),
+        ('main', '0034_v310_release'),
     ]
 
     operations = _squashed.operations(SQUASHED_30) + [
@@ -42,13 +42,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobevent',
             name='uuid',
-            field=models.CharField(default=b'', max_length=1024, editable=False),
+            field=models.CharField(default='', max_length=1024, editable=False),
         ),
         # Job Parent Event UUID
         migrations.AddField(
             model_name='jobevent',
             name='parent_uuid',
-            field=models.CharField(default=b'', max_length=1024, editable=False),
+            field=models.CharField(default='', max_length=1024, editable=False),
         ),
         # Modify the HA Instance
         migrations.RemoveField(
@@ -63,19 +63,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='credential',
             name='become_method',
-            field=models.CharField(default=b'', help_text='Privilege escalation method.', max_length=32, blank=True, choices=[(b'', 'None'), (b'sudo', 'Sudo'), (b'su', 'Su'), (b'pbrun', 'Pbrun'), (b'pfexec', 'Pfexec'), (b'dzdo', 'DZDO'), (b'pmrun', 'Pmrun')]),
+            field=models.CharField(default='', help_text='Privilege escalation method.', max_length=32, blank=True, choices=[('', 'None'), ('sudo', 'Sudo'), ('su', 'Su'), ('pbrun', 'Pbrun'), ('pfexec', 'Pfexec'), ('dzdo', 'DZDO'), ('pmrun', 'Pmrun')]),
         ),
         # Add Workflows
         migrations.AlterField(
             model_name='unifiedjob',
             name='launch_type',
-            field=models.CharField(default=b'manual', max_length=20, editable=False, choices=[(b'manual', 'Manual'), (b'relaunch', 'Relaunch'), (b'callback', 'Callback'), (b'scheduled', 'Scheduled'), (b'dependency', 'Dependency'), (b'workflow', 'Workflow'), (b'sync', 'Sync')]),
+            field=models.CharField(default='manual', max_length=20, editable=False, choices=[('manual', 'Manual'), ('relaunch', 'Relaunch'), ('callback', 'Callback'), ('scheduled', 'Scheduled'), ('dependency', 'Dependency'), ('workflow', 'Workflow'), ('sync', 'Sync')]),
         ),
         migrations.CreateModel(
             name='WorkflowJob',
             fields=[
                 ('unifiedjob_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJob')),
-                ('extra_vars', models.TextField(default=b'', blank=True)),
+                ('extra_vars', models.TextField(default='', blank=True)),
             ],
             options={
                 'ordering': ('id',),
@@ -101,8 +101,8 @@ class Migration(migrations.Migration):
             name='WorkflowJobTemplate',
             fields=[
                 ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJobTemplate')),
-                ('extra_vars', models.TextField(default=b'', blank=True)),
-                ('admin_role', awx.main.fields.ImplicitRoleField(related_name='+', parent_role=b'singleton:system_administrator', to='main.Role', null=b'True')),
+                ('extra_vars', models.TextField(default='', blank=True)),
+                ('admin_role', awx.main.fields.ImplicitRoleField(related_name='+', parent_role='singleton:system_administrator', to='main.Role', null='True')),
             ],
             bases=('main.unifiedjobtemplate', models.Model),
         ),
@@ -176,7 +176,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplate',
             name='execute_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'admin_role'], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['admin_role'], to='main.Role', null='True'),
         ),
         migrations.AddField(
             model_name='workflowjobtemplate',
@@ -186,7 +186,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workflowjobtemplate',
             name='read_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'singleton:system_auditor', b'organization.auditor_role', b'execute_role', b'admin_role'], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['singleton:system_auditor', 'organization.auditor_role', 'execute_role', 'admin_role'], to='main.Role', null='True'),
         ),
         migrations.AddField(
             model_name='workflowjobtemplatenode',
@@ -216,7 +216,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='workflowjobtemplate',
             name='admin_role',
-            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'singleton:system_administrator', b'organization.admin_role'], to='main.Role', null=b'True'),
+            field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=['singleton:system_administrator', 'organization.admin_role'], to='main.Role', null='True'),
         ),
         migrations.AlterField(
             model_name='workflowjobtemplatenode',
@@ -269,23 +269,23 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='unifiedjob',
             name='execution_node',
-            field=models.TextField(default=b'', editable=False, blank=True),
+            field=models.TextField(default='', editable=False, blank=True),
         ),
         # SCM Revision
         migrations.AddField(
             model_name='project',
             name='scm_revision',
-            field=models.CharField(default=b'', editable=False, max_length=1024, blank=True, help_text='The last revision fetched by a project update', verbose_name='SCM Revision'),
+            field=models.CharField(default='', editable=False, max_length=1024, blank=True, help_text='The last revision fetched by a project update', verbose_name='SCM Revision'),
         ),
         migrations.AddField(
             model_name='projectupdate',
             name='job_type',
-            field=models.CharField(default=b'check', max_length=64, choices=[(b'run', 'Run'), (b'check', 'Check')]),
+            field=models.CharField(default='check', max_length=64, choices=[('run', 'Run'), ('check', 'Check')]),
         ),
         migrations.AddField(
             model_name='job',
             name='scm_revision',
-            field=models.CharField(default=b'', editable=False, max_length=1024, blank=True, help_text='The SCM Revision from the Project used for this job, if available', verbose_name='SCM Revision'),
+            field=models.CharField(default='', editable=False, max_length=1024, blank=True, help_text='The SCM Revision from the Project used for this job, if available', verbose_name='SCM Revision'),
         ),
         # Project Playbook Files
         migrations.AddField(
@@ -307,12 +307,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='adhoccommandevent',
             name='stdout',
-            field=models.TextField(default=b'', editable=False),
+            field=models.TextField(default='', editable=False),
         ),
         migrations.AddField(
             model_name='adhoccommandevent',
             name='uuid',
-            field=models.CharField(default=b'', max_length=1024, editable=False),
+            field=models.CharField(default='', max_length=1024, editable=False),
         ),
         migrations.AddField(
             model_name='adhoccommandevent',
@@ -327,7 +327,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobevent',
             name='playbook',
-            field=models.CharField(default=b'', max_length=1024, editable=False),
+            field=models.CharField(default='', max_length=1024, editable=False),
         ),
         migrations.AddField(
             model_name='jobevent',
@@ -337,7 +337,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jobevent',
             name='stdout',
-            field=models.TextField(default=b'', editable=False),
+            field=models.TextField(default='', editable=False),
         ),
         migrations.AddField(
             model_name='jobevent',
@@ -352,7 +352,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='adhoccommandevent',
             name='event',
-            field=models.CharField(max_length=100, choices=[(b'runner_on_failed', 'Host Failed'), (b'runner_on_ok', 'Host OK'), (b'runner_on_unreachable', 'Host Unreachable'), (b'runner_on_skipped', 'Host Skipped'), (b'debug', 'Debug'), (b'verbose', 'Verbose'), (b'deprecated', 'Deprecated'), (b'warning', 'Warning'), (b'system_warning', 'System Warning'), (b'error', 'Error')]),
+            field=models.CharField(max_length=100, choices=[('runner_on_failed', 'Host Failed'), ('runner_on_ok', 'Host OK'), ('runner_on_unreachable', 'Host Unreachable'), ('runner_on_skipped', 'Host Skipped'), ('debug', 'Debug'), ('verbose', 'Verbose'), ('deprecated', 'Deprecated'), ('warning', 'Warning'), ('system_warning', 'System Warning'), ('error', 'Error')]),
         ),
         migrations.AlterField(
             model_name='jobevent',
@@ -362,7 +362,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jobevent',
             name='event',
-            field=models.CharField(max_length=100, choices=[(b'runner_on_failed', 'Host Failed'), (b'runner_on_ok', 'Host OK'), (b'runner_on_error', 'Host Failure'), (b'runner_on_skipped', 'Host Skipped'), (b'runner_on_unreachable', 'Host Unreachable'), (b'runner_on_no_hosts', 'No Hosts Remaining'), (b'runner_on_async_poll', 'Host Polling'), (b'runner_on_async_ok', 'Host Async OK'), (b'runner_on_async_failed', 'Host Async Failure'), (b'runner_item_on_ok', 'Item OK'), (b'runner_item_on_failed', 'Item Failed'), (b'runner_item_on_skipped', 'Item Skipped'), (b'runner_retry', 'Host Retry'), (b'runner_on_file_diff', 'File Difference'), (b'playbook_on_start', 'Playbook Started'), (b'playbook_on_notify', 'Running Handlers'), (b'playbook_on_include', 'Including File'), (b'playbook_on_no_hosts_matched', 'No Hosts Matched'), (b'playbook_on_no_hosts_remaining', 'No Hosts Remaining'), (b'playbook_on_task_start', 'Task Started'), (b'playbook_on_vars_prompt', 'Variables Prompted'), (b'playbook_on_setup', 'Gathering Facts'), (b'playbook_on_import_for_host', 'internal: on Import for Host'), (b'playbook_on_not_import_for_host', 'internal: on Not Import for Host'), (b'playbook_on_play_start', 'Play Started'), (b'playbook_on_stats', 'Playbook Complete'), (b'debug', 'Debug'), (b'verbose', 'Verbose'), (b'deprecated', 'Deprecated'), (b'warning', 'Warning'), (b'system_warning', 'System Warning'), (b'error', 'Error')]),
+            field=models.CharField(max_length=100, choices=[('runner_on_failed', 'Host Failed'), ('runner_on_ok', 'Host OK'), ('runner_on_error', 'Host Failure'), ('runner_on_skipped', 'Host Skipped'), ('runner_on_unreachable', 'Host Unreachable'), ('runner_on_no_hosts', 'No Hosts Remaining'), ('runner_on_async_poll', 'Host Polling'), ('runner_on_async_ok', 'Host Async OK'), ('runner_on_async_failed', 'Host Async Failure'), ('runner_item_on_ok', 'Item OK'), ('runner_item_on_failed', 'Item Failed'), ('runner_item_on_skipped', 'Item Skipped'), ('runner_retry', 'Host Retry'), ('runner_on_file_diff', 'File Difference'), ('playbook_on_start', 'Playbook Started'), ('playbook_on_notify', 'Running Handlers'), ('playbook_on_include', 'Including File'), ('playbook_on_no_hosts_matched', 'No Hosts Matched'), ('playbook_on_no_hosts_remaining', 'No Hosts Remaining'), ('playbook_on_task_start', 'Task Started'), ('playbook_on_vars_prompt', 'Variables Prompted'), ('playbook_on_setup', 'Gathering Facts'), ('playbook_on_import_for_host', 'internal: on Import for Host'), ('playbook_on_not_import_for_host', 'internal: on Not Import for Host'), ('playbook_on_play_start', 'Play Started'), ('playbook_on_stats', 'Playbook Complete'), ('debug', 'Debug'), ('verbose', 'Verbose'), ('deprecated', 'Deprecated'), ('warning', 'Warning'), ('system_warning', 'System Warning'), ('error', 'Error')]),
         ),
         migrations.AlterUniqueTogether(
             name='adhoccommandevent',
@@ -505,7 +505,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='host',
             name='instance_id',
-            field=models.CharField(default=b'', help_text='The value used by the remote inventory source to uniquely identify the host', max_length=1024, blank=True),
+            field=models.CharField(default='', help_text='The value used by the remote inventory source to uniquely identify the host', max_length=1024, blank=True),
         ),
         migrations.AlterField(
             model_name='project',
@@ -520,7 +520,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='project',
             name='scm_type',
-            field=models.CharField(default=b'', choices=[(b'', 'Manual'), (b'git', 'Git'), (b'hg', 'Mercurial'), (b'svn', 'Subversion')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
+            field=models.CharField(default='', choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
         ),
         migrations.AlterField(
             model_name='project',
@@ -535,7 +535,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='project',
             name='scm_url',
-            field=models.CharField(default=b'', help_text='The location where the project is stored.', max_length=1024, verbose_name='SCM URL', blank=True),
+            field=models.CharField(default='', help_text='The location where the project is stored.', max_length=1024, verbose_name='SCM URL', blank=True),
         ),
         migrations.AlterField(
             model_name='project',
@@ -555,12 +555,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='projectupdate',
             name='scm_type',
-            field=models.CharField(default=b'', choices=[(b'', 'Manual'), (b'git', 'Git'), (b'hg', 'Mercurial'), (b'svn', 'Subversion')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
+            field=models.CharField(default='', choices=[('', 'Manual'), ('git', 'Git'), ('hg', 'Mercurial'), ('svn', 'Subversion')], max_length=8, blank=True, help_text='Specifies the source control system used to store the project.', verbose_name='SCM Type'),
         ),
         migrations.AlterField(
             model_name='projectupdate',
             name='scm_url',
-            field=models.CharField(default=b'', help_text='The location where the project is stored.', max_length=1024, verbose_name='SCM URL', blank=True),
+            field=models.CharField(default='', help_text='The location where the project is stored.', max_length=1024, verbose_name='SCM URL', blank=True),
         ),
         migrations.AlterField(
             model_name='projectupdate',
@@ -600,7 +600,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unifiedjob',
             name='execution_node',
-            field=models.TextField(default=b'', help_text='The Tower node the job executed on.', editable=False, blank=True),
+            field=models.TextField(default='', help_text='The Tower node the job executed on.', editable=False, blank=True),
         ),
         migrations.AlterField(
             model_name='unifiedjob',
@@ -610,7 +610,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='unifiedjob',
             name='job_explanation',
-            field=models.TextField(default=b'', help_text="A status field to indicate the state of the job if it wasn't able to run and capture stdout", editable=False, blank=True),
+            field=models.TextField(default='', help_text="A status field to indicate the state of the job if it wasn't able to run and capture stdout", editable=False, blank=True),
         ),
         migrations.AlterField(
             model_name='unifiedjob',

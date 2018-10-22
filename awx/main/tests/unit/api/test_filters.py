@@ -66,7 +66,7 @@ def test_invalid_field():
     field_lookup = FieldLookupBackend()
     with pytest.raises(ValueError) as excinfo:
         field_lookup.value_to_python(WorkflowJobTemplate, invalid_field, 'foo')
-    assert 'is not an allowed field name. Must be ascii encodable.' in excinfo.value.message
+    assert 'is not an allowed field name. Must be ascii encodable.' in str(excinfo.value)
 
 
 @pytest.mark.parametrize('lookup_suffix', ['', 'contains', 'startswith', 'in'])

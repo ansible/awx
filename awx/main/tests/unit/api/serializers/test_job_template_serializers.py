@@ -1,8 +1,6 @@
 # Python
 import pytest
-import mock
-
-from six.moves import xrange
+from unittest import mock
 
 # AWX
 from awx.api.serializers import (
@@ -41,7 +39,7 @@ def job(mocker, job_template):
 
 @pytest.fixture
 def jobs(mocker):
-    return [Job(id=x, name='job-%d' % x) for x in xrange(0, 25)]
+    return [Job(id=x, name='job-%d' % x) for x in range(0, 25)]
 
 
 @mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x,y: {})

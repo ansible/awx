@@ -7,7 +7,7 @@ import json
 import operator
 import re
 import six
-import urllib
+import urllib.parse
 
 from jinja2 import Environment, StrictUndefined
 from jinja2.exceptions import UndefinedError, TemplateSyntaxError
@@ -251,6 +251,9 @@ class ImplicitRoleField(models.ForeignKey):
             if type(field_name) == tuple:
                 continue
 
+            if type(field_name) == bytes:
+                field_name = field_name.decode('utf-8')
+
             if field_name.startswith('singleton:'):
                 continue
 
@@ -373,7 +376,7 @@ class SmartFilterField(models.TextField):
         # https://docs.python.org/2/library/stdtypes.html#truth-value-testing
         if not value:
             return None
-        value = urllib.unquote(value)
+        value = urllib.parse.unquote(value)
         try:
             SmartFilter().query_from_string(value)
         except RuntimeError as e:
@@ -407,9 +410,6 @@ class JSONSchemaField(JSONBField):
             self.schema(model_instance),
             format_checker=self.format_checker
         ).iter_errors(value):
-            # strip Python unicode markers from jsonschema validation errors
-            error.message = re.sub(r'\bu(\'|")', r'\1', error.message)
-
             if error.validator == 'pattern' and 'error' in error.schema:
                 error.message = six.text_type(error.schema['error']).format(instance=error.instance)
             elif error.validator == 'type':
@@ -514,10 +514,10 @@ class CredentialInputField(JSONSchemaField):
             field = field.copy()
             if field['type'] == 'become_method':
                 field.pop('type')
-                field['choices'] = map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS)
+                field['choices'] = list(map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS))
             properties[field['id']] = field
             if field.get('choices', []):
-                field['enum'] = field['choices'][:]
+                field['enum'] = list(field['choices'])[:]
         return {
             'type': 'object',
             'properties': properties,
@@ -824,14 +824,14 @@ class CredentialTypeInjectorField(JSONSchemaField):
         )
 
         class ExplodingNamespace:
-            def __unicode__(self):
+            def __str__(self):
                 raise UndefinedError(_('Must define unnamed file injector in order to reference `tower.filename`.'))
 
         class TowerNamespace:
             def __init__(self):
                 self.filename = ExplodingNamespace()
 
-            def __unicode__(self):
+            def __str__(self):
                 raise UndefinedError(_('Cannot directly reference reserved `tower` namespace container.'))
 
         valid_namespace['tower'] = TowerNamespace()

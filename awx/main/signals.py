@@ -20,9 +20,9 @@ from django.db.models.signals import (
 )
 from django.dispatch import receiver
 from django.contrib.auth import SESSION_KEY
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.sessions.models import Session
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
 
 # Django-CRUM
 from crum import get_current_request, get_current_user
@@ -32,7 +32,6 @@ import six
 
 # AWX
 from awx.main.models import * # noqa
-from awx.api.serializers import * # noqa
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
@@ -80,23 +79,28 @@ def emit_event_detail(serializer, relation, **kwargs):
 
 
 def emit_job_event_detail(sender, **kwargs):
-    emit_event_detail(JobEventWebSocketSerializer, 'job_id', **kwargs)
+    from awx.api import serializers
+    emit_event_detail(serializers.JobEventWebSocketSerializer, 'job_id', **kwargs)
 
 
 def emit_ad_hoc_command_event_detail(sender, **kwargs):
-    emit_event_detail(AdHocCommandEventWebSocketSerializer, 'ad_hoc_command_id', **kwargs)
+    from awx.api import serializers
+    emit_event_detail(serializers.AdHocCommandEventWebSocketSerializer, 'ad_hoc_command_id', **kwargs)
 
 
 def emit_project_update_event_detail(sender, **kwargs):
-    emit_event_detail(ProjectUpdateEventWebSocketSerializer, 'project_update_id', **kwargs)
+    from awx.api import serializers
+    emit_event_detail(serializers.ProjectUpdateEventWebSocketSerializer, 'project_update_id', **kwargs)
 
 
 def emit_inventory_update_event_detail(sender, **kwargs):
-    emit_event_detail(InventoryUpdateEventWebSocketSerializer, 'inventory_update_id', **kwargs)
+    from awx.api import serializers
+    emit_event_detail(serializers.InventoryUpdateEventWebSocketSerializer, 'inventory_update_id', **kwargs)
 
 
 def emit_system_job_event_detail(sender, **kwargs):
-    emit_event_detail(SystemJobEventWebSocketSerializer, 'system_job_id', **kwargs)
+    from awx.api import serializers
+    emit_event_detail(serializers.SystemJobEventWebSocketSerializer, 'system_job_id', **kwargs)
 
 
 def emit_update_inventory_computed_fields(sender, **kwargs):
@@ -347,7 +351,7 @@ class ActivityStreamEnabled(threading.local):
     def __init__(self):
         self.enabled = True
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.enabled and getattr(settings, 'ACTIVITY_STREAM_ENABLED', True))
 
 
@@ -385,31 +389,38 @@ def disable_computed_fields():
     connect_computed_field_signals()
 
 
-model_serializer_mapping = {
-    Organization: OrganizationSerializer,
-    Inventory: InventorySerializer,
-    Host: HostSerializer,
-    Group: GroupSerializer,
-    InstanceGroup: InstanceGroupSerializer,
-    InventorySource: InventorySourceSerializer,
-    CustomInventoryScript: CustomInventoryScriptSerializer,
-    Credential: CredentialSerializer,
-    Team: TeamSerializer,
-    Project: ProjectSerializer,
-    JobTemplate: JobTemplateWithSpecSerializer,
-    Job: JobSerializer,
-    AdHocCommand: AdHocCommandSerializer,
-    NotificationTemplate: NotificationTemplateSerializer,
-    Notification: NotificationSerializer,
-    CredentialType: CredentialTypeSerializer,
-    Schedule: ScheduleSerializer,
-    Label: LabelSerializer,
-    WorkflowJobTemplate: WorkflowJobTemplateWithSpecSerializer,
-    WorkflowJobTemplateNode: WorkflowJobTemplateNodeSerializer,
-    WorkflowJob: WorkflowJobSerializer,
-    OAuth2AccessToken: OAuth2TokenSerializer,
-    OAuth2Application: OAuth2ApplicationSerializer,
-}
+def model_serializer_mapping():
+    from awx.api import serializers
+    from awx.main import models
+
+    from awx.conf.models import Setting
+    from awx.conf.serializers import SettingSerializer
+    return {
+        Setting: SettingSerializer,
+        models.Organization: serializers.OrganizationSerializer,
+        models.Inventory: serializers.InventorySerializer,
+        models.Host: serializers.HostSerializer,
+        models.Group: serializers.GroupSerializer,
+        models.InstanceGroup: serializers.InstanceGroupSerializer,
+        models.InventorySource: serializers.InventorySourceSerializer,
+        models.CustomInventoryScript: serializers.CustomInventoryScriptSerializer,
+        models.Credential: serializers.CredentialSerializer,
+        models.Team: serializers.TeamSerializer,
+        models.Project: serializers.ProjectSerializer,
+        models.JobTemplate: serializers.JobTemplateWithSpecSerializer,
+        models.Job: serializers.JobSerializer,
+        models.AdHocCommand: serializers.AdHocCommandSerializer,
+        models.NotificationTemplate: serializers.NotificationTemplateSerializer,
+        models.Notification: serializers.NotificationSerializer,
+        models.CredentialType: serializers.CredentialTypeSerializer,
+        models.Schedule: serializers.ScheduleSerializer,
+        models.Label: serializers.LabelSerializer,
+        models.WorkflowJobTemplate: serializers.WorkflowJobTemplateWithSpecSerializer,
+        models.WorkflowJobTemplateNode: serializers.WorkflowJobTemplateNodeSerializer,
+        models.WorkflowJob: serializers.WorkflowJobSerializer,
+        models.OAuth2AccessToken: serializers.OAuth2TokenSerializer,
+        models.OAuth2Application: serializers.OAuth2ApplicationSerializer,
+    }
 
 
 def activity_stream_create(sender, instance, created, **kwargs):
@@ -422,7 +433,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
         if getattr(_type, '_deferred', False):
             return
         object1 = camelcase_to_underscore(instance.__class__.__name__)
-        changes = model_to_dict(instance, model_serializer_mapping)
+        changes = model_to_dict(instance, model_serializer_mapping())
         # Special case where Job survey password variables need to be hidden
         if type(instance) == Job:
             changes['credentials'] = [
@@ -461,7 +472,7 @@ def activity_stream_update(sender, instance, **kwargs):
         return
 
     new = instance
-    changes = model_instance_diff(old, new, model_serializer_mapping)
+    changes = model_instance_diff(old, new, model_serializer_mapping())
     if changes is None:
         return
     _type = type(instance)
@@ -506,7 +517,7 @@ def activity_stream_delete(sender, instance, **kwargs):
     _type = type(instance)
     if getattr(_type, '_deferred', False):
         return
-    changes.update(model_to_dict(instance, model_serializer_mapping))
+    changes.update(model_to_dict(instance, model_serializer_mapping()))
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     if type(instance) == OAuth2AccessToken:
         changes['token'] = CENSOR_VALUE
@@ -643,7 +654,7 @@ def save_user_session_membership(sender, **kwargs):
     if len(expired):
         consumers.emit_channel_notification(
             'control-limit_reached_{}'.format(user.pk),
-            dict(group_name='control', reason=unicode(_('limit_reached')))
+            dict(group_name='control', reason='limit_reached')
         )
 
 

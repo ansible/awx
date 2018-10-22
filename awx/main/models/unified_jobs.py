@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 # Python
-from StringIO import StringIO
+from io import StringIO
 import json
 import logging
 import os
@@ -353,7 +353,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
                 logger.warn(six.text_type('Fields {} are not allowed as overrides to spawn from {}.').format(
                     six.text_type(', ').join(unallowed_fields), self
                 ))
-            map(validated_kwargs.pop, unallowed_fields)
+            for f in unallowed_fields:
+                validated_kwargs.pop(f)
 
         unified_job = copy_model_by_class(self, unified_job_class, fields, validated_kwargs)
 
@@ -735,7 +736,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _resources_sufficient_for_launch(self):
         return True
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s-%s-%s' % (self.created, self.id, self.status)
 
     @property
@@ -900,7 +901,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             parent = getattr(self, self._get_parent_field_name())
         if parent is None:
             return
-        valid_fields = parent.get_ask_mapping().keys()
+        valid_fields = list(parent.get_ask_mapping().keys())
         # Special cases allowed for workflows
         if hasattr(self, 'extra_vars'):
             valid_fields.extend(['survey_passwords', 'extra_vars'])
@@ -991,6 +992,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if not os.path.exists(settings.JOBOUTPUT_ROOT):
                 os.makedirs(settings.JOBOUTPUT_ROOT)
             fd = tempfile.NamedTemporaryFile(
+                mode='w',
                 prefix='{}-{}-'.format(self.model_to_str(), self.pk),
                 suffix='.out',
                 dir=settings.JOBOUTPUT_ROOT
@@ -1030,9 +1032,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     # don't bother actually fetching the data
                     total = self.get_event_queryset().aggregate(
                         total=models.Sum(models.Func(models.F('stdout'), function='LENGTH'))
-                    )['total']
+                    )['total'] or 0
                     if total > max_supported:
                         raise StdoutMaxBytesExceeded(total, max_supported)
+
+                # psycopg2's copy_expert writes bytes, but callers of this
+                # function assume a str-based fd will be returned; decode
+                # .write() calls on the fly to maintain this interface
+                _write = fd.write
+                fd.write = lambda s: _write(smart_text(s))
 
                 cursor.copy_expert(
                     "copy (select stdout from {} where {}={} order by start_line) to stdout".format(
@@ -1063,7 +1071,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return content
 
     def _result_stdout_raw(self, redact_sensitive=False, escape_ascii=False):
-        content = self.result_stdout_raw_handle().read().decode('utf-8')
+        content = self.result_stdout_raw_handle().read()
         if redact_sensitive:
             content = UriCleaner.remove_sensitive(content)
         if escape_ascii:
@@ -1096,7 +1104,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             else:
                 end_actual = len(stdout_lines)
 
-        return_buffer = return_buffer.getvalue().decode('utf-8')
+        return_buffer = return_buffer.getvalue()
         if redact_sensitive:
             return_buffer = UriCleaner.remove_sensitive(return_buffer)
         if escape_ascii:
@@ -1314,7 +1322,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def cancel(self, job_explanation=None, is_chain=False):
         if self.can_cancel:
             if not is_chain:
-                map(lambda x: x.cancel(job_explanation=self._build_job_explanation(), is_chain=True), self.get_jobs_fail_chain())
+                for x in self.get_jobs_fail_chain():
+                    x.cancel(job_explanation=self._build_job_explanation(), is_chain=True)
 
             if not self.cancel_flag:
                 self.cancel_flag = True

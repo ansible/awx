@@ -460,10 +460,10 @@ class Command(BaseCommand):
                     elif file_to_comment not in to_comment_patterns:
                         to_comment_patterns.append(file_to_comment)
             # Run once in dry-run mode to catch any errors from updating the files.
-            diffs = comment_assignments(to_comment_patterns, to_comment.keys(), dry_run=True, backup_suffix=self.backup_suffix)
+            diffs = comment_assignments(to_comment_patterns, list(to_comment.keys()), dry_run=True, backup_suffix=self.backup_suffix)
             # Then, if really updating, run again.
             if not self.dry_run and not self.no_comment:
-                diffs = comment_assignments(to_comment_patterns, to_comment.keys(), dry_run=False, backup_suffix=self.backup_suffix)
+                diffs = comment_assignments(to_comment_patterns, list(to_comment.keys()), dry_run=False, backup_suffix=self.backup_suffix)
                 if license_file_to_comment:
                     diffs.extend(self._comment_license_file(dry_run=False))
                 if local_settings_file_to_comment:

@@ -125,8 +125,8 @@ class GraphNode(object):
             evolving_prefix = '__'.join(prefixes)
             for attr_name, attr_value in zip(stack[-1].fields, named_url_parts):
                 attr_name = ("__%s" % attr_name) if evolving_prefix else attr_name
-                if isinstance(attr_value, six.binary_type):
-                    attr_value = six.moves.urllib.parse.unquote(attr_value).decode(encoding='utf-8')
+                if isinstance(attr_value, str):
+                    attr_value = six.moves.urllib.parse.unquote(attr_value)
                 kwargs[evolving_prefix + attr_name] = attr_value
             idx += 1
         if stack[-1].counter >= len(stack[-1].adj_list):
@@ -304,7 +304,7 @@ def generate_graph(models):
                 candidate_nodes[model].append([fields, fk_names])
         if model not in candidate_nodes:
             dead_ends.add(model)
-    candidate_nodes = candidate_nodes.items()
+    candidate_nodes = list(candidate_nodes.items())
     largest_graph = {}
     for configuration in _generate_configurations(candidate_nodes):
         candidate_graph = _generate_single_graph(configuration, dead_ends)

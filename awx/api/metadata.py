@@ -157,7 +157,7 @@ class Metadata(metadata.SimpleMetadata):
             finally:
                 view.request = request
 
-            for field, meta in actions[method].items():
+            for field, meta in list(actions[method].items()):
                 if not isinstance(meta, dict):
                     continue
 

@@ -33,7 +33,7 @@ class Setting(CreatedModifiedModel):
         on_delete=models.CASCADE,
     ))
 
-    def __unicode__(self):
+    def __str__(self):
         try:
             json_value = json.dumps(self.value)
         except ValueError:
