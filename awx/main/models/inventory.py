@@ -9,7 +9,6 @@ import copy
 from urlparse import urljoin
 import os.path
 import six
-
 from itertools import chain
 import time
 
