@@ -426,7 +426,7 @@ If you choose to use the official images then the remote host will be the one to
 
 > As mentioned above, in [Prerequisites](#prerequisites-1), the prerequisites are required on the remote host.
 
-> When deploying to a remote host, the playook does not execute tasks with the `become` option. For this reason, make sure the user that connects to the remote host has privileges to run the `docker` command. This typically means that non-privileged users need to be part of the `docker` group.
+> When deploying to a remote host, the playbook does not execute tasks with the `become` option. For this reason, make sure the user that connects to the remote host has privileges to run the `docker` command. This typically means that non-privileged users need to be part of the `docker` group.
 
 
 #### Inventory variables
