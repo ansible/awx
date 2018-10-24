@@ -111,6 +111,8 @@ function TemplatesStrings (BaseString) {
         JOBS: t.s('JOBS'),
         PLEASE_CLICK_THE_START_BUTTON: t.s('Please click the start button to build your workflow.'),
         PLEASE_HOVER_OVER_A_TEMPLATE: t.s('Please hover over a template for additional options.'),
+        EDIT_LINK_TOOLTIP: t.s('Click to edit link'),
+        VIEW_LINK_TOOLTIP: t.s('Click to view link'),
         RUN: t.s('RUN'),
         CHECK: t.s('CHECK'),
         SELECT: t.s('SELECT'),
@@ -122,7 +124,8 @@ function TemplatesStrings (BaseString) {
         INVENTORY_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden by the parent workflow inventory.'),
         INVENTORY_PROMPT_WILL_OVERRIDE: t.s('The inventory of this node will be overridden if a parent workflow inventory is provided at launch.'),
         INVENTORY_PROMPT_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden if a parent workflow inventory is provided at launch.'),
-        EDIT_LINK: ({ parentName, childName }) => t.s('EDIT LINK | {{parentName}} to {{childName}}', { parentName, childName })
+        EDIT_LINK: ({ parentName, childName }) => t.s('EDIT LINK | {{parentName}} to {{childName}}', { parentName, childName }),
+        VIEW_LINK: ({ parentName, childName }) => t.s('VIEW LINK | {{parentName}} to {{childName}}', { parentName, childName })
     }
 }
 
