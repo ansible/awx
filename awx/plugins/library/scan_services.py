@@ -69,7 +69,7 @@ class ServiceScanService(BaseService):
 
         # Upstart
         if initctl_path is not None and chkconfig_path is None:
-            p = re.compile('^\s?(?P<name>.*)\s(?P<goal>\w+)\/(?P<state>\w+)(\,\sprocess\s(?P<pid>[0-9]+))?\s*$')
+            p = re.compile(r'^\s?(?P<name>.*)\s(?P<goal>\w+)\/(?P<state>\w+)(\,\sprocess\s(?P<pid>[0-9]+))?\s*$')
             rc, stdout, stderr = self.module.run_command("%s list" % initctl_path)
             real_stdout = stdout.replace("\r","")
             for line in real_stdout.split("\n"):
@@ -90,8 +90,8 @@ class ServiceScanService(BaseService):
         elif chkconfig_path is not None:
             #print '%s --status-all | grep -E "is (running|stopped)"' % service_path
             p = re.compile(
-                '(?P<service>.*?)\s+[0-9]:(?P<rl0>on|off)\s+[0-9]:(?P<rl1>on|off)\s+[0-9]:(?P<rl2>on|off)\s+'
-                '[0-9]:(?P<rl3>on|off)\s+[0-9]:(?P<rl4>on|off)\s+[0-9]:(?P<rl5>on|off)\s+[0-9]:(?P<rl6>on|off)')
+                r'(?P<service>.*?)\s+[0-9]:(?P<rl0>on|off)\s+[0-9]:(?P<rl1>on|off)\s+[0-9]:(?P<rl2>on|off)\s+'
+                r'[0-9]:(?P<rl3>on|off)\s+[0-9]:(?P<rl4>on|off)\s+[0-9]:(?P<rl5>on|off)\s+[0-9]:(?P<rl6>on|off)')
             rc, stdout, stderr = self.module.run_command('%s' % chkconfig_path, use_unsafe_shell=True)
             # Check for special cases where stdout does not fit pattern
             match_any = False
@@ -99,7 +99,7 @@ class ServiceScanService(BaseService):
                 if p.match(line):
                     match_any = True
             if not match_any:
-                p_simple = re.compile('(?P<service>.*?)\s+(?P<rl0>on|off)')
+                p_simple = re.compile(r'(?P<service>.*?)\s+(?P<rl0>on|off)')
                 match_any = False
                 for line in stdout.split('\n'):
                     if p_simple.match(line):

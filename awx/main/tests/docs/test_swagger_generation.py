@@ -119,7 +119,7 @@ class TestSwaggerGeneration():
     def test_autogen_response_examples(self, swagger_autogen):
         for pattern, node in TestSwaggerGeneration.JSON['paths'].items():
             pattern = pattern.replace('{id}', '[0-9]+')
-            pattern = pattern.replace('{category_slug}', '[a-zA-Z0-9\-]+')
+            pattern = pattern.replace(r'{category_slug}', r'[a-zA-Z0-9\-]+')
             for path, result in swagger_autogen.items():
                 if re.match('^{}$'.format(pattern), path):
                     for key, value in result.items():

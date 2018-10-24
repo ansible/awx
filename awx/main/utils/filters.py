@@ -118,10 +118,10 @@ def string_to_type(t):
     elif t == u'false':
         return False
 
-    if re.search('^[-+]?[0-9]+$',t):
+    if re.search(r'^[-+]?[0-9]+$',t):
         return int(t)
 
-    if re.search('^[-+]?[0-9]+\.[0-9]+$',t):
+    if re.search(r'^[-+]?[0-9]+\.[0-9]+$',t):
         return float(t)
 
     return t

@@ -78,10 +78,10 @@ def sanitize_jinja(arg):
     if isinstance(arg, six.string_types):
         # If the argument looks like it contains Jinja expressions
         # {{ x }} ...
-        if re.search('\{\{[^}]+}}', arg) is not None:
+        if re.search(r'\{\{[^}]+}}', arg) is not None:
             raise ValueError('Inline Jinja variables are not allowed.')
         # If the argument looks like it contains Jinja statements/control flow...
         # {% if x.foo() %} ...
-        if re.search('\{%[^%]+%}', arg) is not None:
+        if re.search(r'\{%[^%]+%}', arg) is not None:
             raise ValueError('Inline Jinja variables are not allowed.')
     return arg

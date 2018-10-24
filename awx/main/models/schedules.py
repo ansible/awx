@@ -153,7 +153,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
         if 'until=' in rrule.lower():
             # if DTSTART;TZID= is used, coerce "naive" UNTIL values
             # to the proper UTC date
-            match_until = re.match(".*?(?P<until>UNTIL\=[0-9]+T[0-9]+)(?P<utcflag>Z?)", rrule)
+            match_until = re.match(r".*?(?P<until>UNTIL\=[0-9]+T[0-9]+)(?P<utcflag>Z?)", rrule)
             if not len(match_until.group('utcflag')):
                 # rrule = DTSTART;TZID=America/New_York:20200601T120000 RRULE:...;UNTIL=20200601T170000
 
