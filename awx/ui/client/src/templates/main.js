@@ -409,9 +409,9 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                 workflowMaker = {
                     name: 'templates.editWorkflowJobTemplate.workflowMaker',
                     url: '/workflow-maker',
-                    // ncyBreadcrumb: {
-                    //     label: 'WORKFLOW MAKER'
-                    // },
+                    ncyBreadcrumb: {
+                        skip: true
+                    },
                     data: {
                         formChildState: true
                     },
@@ -708,11 +708,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                 delete list.fields.labels;
                                 delete list.fieldActions;
                                 list.fields.name.columnClass = "col-md-8";
-                                list.disableRow = "{{ !workflowJobTemplateObj.summary_fields.user_capabilities.edit }}";
-                                list.disableRowValue = '!workflowJobTemplateObj.summary_fields.user_capabilities.edit';
-                                list.iterator = 'job_template';
-                                list.name = 'job_templates';
-                                list.basePath = "job_templates";
+                                list.disableRow = "{{ !template.summary_fields.user_capabilities.edit }}";
+                                list.disableRowValue = '!template.summary_fields.user_capabilities.edit';
                                 list.fields.info = {
                                     ngInclude: "'/static/partials/job-template-details.html'",
                                     type: 'template',
