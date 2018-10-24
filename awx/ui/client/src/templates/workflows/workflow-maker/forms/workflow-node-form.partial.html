@@ -1,17 +1,111 @@
-<div class="Form-tabHolder">
-    <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'jobs'}" ng-click="toggleFormTab('jobs')">{{strings.get('workflow_maker.JOBS')}}</div>
-    <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'project_sync'}" ng-click="toggleFormTab('project_sync')">{{strings.get('workflow_maker.PROJECT_SYNC')}}</div>
-    <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'inventory_sync'}" ng-click="toggleFormTab('inventory_sync')">{{strings.get('workflow_maker.INVENTORY_SYNC')}}</div>
-</div>
-<div class="WorkflowMaker-formLists">
-    <div id="workflow-jobs-list" ui-view="jobTemplateList" ng-show="workflowMakerFormConfig.activeTab === 'jobs'"></div>
-    <div id="workflow-project-sync-list" ui-view="projectSyncList" ng-show="workflowMakerFormConfig.activeTab === 'project_sync'"></div>
-    <div id="workflow-inventory-sync-list" ui-view="inventorySyncList" ng-show="workflowMakerFormConfig.activeTab === 'inventory_sync'"></div>
-</div>
-<span ng-show="selectedTemplate &&
-    ((selectedTemplate.type === 'job_template' && workflowMakerFormConfig.activeTab === 'jobs') ||
-    (selectedTemplate.type === 'project' && workflowMakerFormConfig.activeTab === 'project_sync') ||
-    (selectedTemplate.type === 'inventory_source' && workflowMakerFormConfig.activeTab === 'inventory_sync'))">
+<div ng-show="nodeFormDataLoaded">
+    <div class="WorkflowMaker-formTitle ng-binding">{{mode === 'edit' ? node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_TEMPLATE')}}</div>
+    <div class="Form-tabHolder">
+        <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'jobs'}" ng-click="activeTab = 'jobs'">{{strings.get('workflow_maker.JOBS')}}</div>
+        <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'project_syncs'}" ng-click="activeTab = 'project_syncs'">{{strings.get('workflow_maker.PROJECT_SYNC')}}</div>
+        <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'inventory_syncs'}" ng-click="activeTab = 'inventory_syncs'">{{strings.get('workflow_maker.INVENTORY_SYNC')}}</div>
+    </div>
+    <div class="WorkflowMaker-formLists">
+        <div id="workflow-jobs-list" ng-show="activeTab === 'jobs'">
+            <div ng-hide="templates.length === 0 && (searchTags | isEmpty)">
+                <smart-search django-model="templates" base-path="unified_job_templates" iterator="template" dataset="template_dataset" list="templateList" collection="templates" default-params="template_default_params" query-set="template_queryset" search-bar-full-width="true" search-tags="searchTags">
+                </smart-search>
+            </div>
+
+            <div class="row" ng-show="templates.length === 0 && !(searchTags | isEmpty)">
+                <div class="col-lg-12 List-searchNoResults" translate>No records matched your search.</div>
+            </div>
+            <div class="List-noItems" ng-show="templates.length === 0 && (searchTags | isEmpty)">PLEASE ADD ITEMS TO THIS LIST</div>
+            <div class="list-table-container" ng-show="templates.length > 0">
+                <table id="templates_table" class="List-table" is-extended="false">
+                    <thead>
+                        <tr class="List-tableHeaderRow">
+                            <th class="List-tableHeader select-column List-staticColumn--smallStatus" translate=""></th>
+                            <th base-path="unified_job_templates" collection="templates" dataset="template_dataset" column-sort="" column-field="name" column-iterator="template" column-no-sort="undefined" column-label="Name" column-custom-class="" query-set="template_queryset">
+                            </th>
+                            <th class="List-tableHeader--info" base-path="unified_job_templates" collection="templates" dataset="template_dataset" column-sort="" column-field="info" column-iterator="template" column-no-sort="true" column-label="" column-custom-class="" query-set="template_queryset">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-class="[template.success_class, {'List-tableRow--selected' : $stateParams['template_id'] == template.id}, {'List-tableRow--disabled': !template.summary_fields.user_capabilities.edit}]" id="{{ template.id }}" class="List-tableRow template_class" disable-row="{{ !template.summary_fields.user_capabilities.edit }}" ng-repeat="template in templates">
+                            <td class="List-tableCell">
+                                <input type="radio" ng-model="template.checked" ng-value="1" ng-false-value="0" name="check_template_{{template.id}}" ng-click="toggle_row(template)" ng-disabled="!template.summary_fields.user_capabilities.edit">
+                            </td>
+                            <td class="List-tableCell name-column col-md-8" ng-click="toggle_row(template)">
+                                {{ template.name }}</td>
+                            <td class="col-md-3" ng-include="'/static/partials/job-template-details.html'"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <paginate base-path="unified_job_templates" collection="templates" dataset="template_dataset" iterator="template" query-set="template_queryset" hide-view-per-page="true" max-visible-pages="5"></paginate>
+        </div>
+        <div id="workflow-project-sync-list" ng-show="activeTab === 'project_syncs'">
+            <div ng-hide="projects.length === 0 && (searchTags | isEmpty)">
+                <smart-search django-model="projects" base-path="projects" iterator="project" dataset="project_dataset" list="projectList" collection="projects" default-params="project_default_params" query-set="project_queryset" search-bar-full-width="true" search-tags="searchTags">
+                </smart-search>
+            </div>
+
+            <div class="row" ng-show="projects.length === 0 && !(searchTags | isEmpty)">
+                <div class="col-lg-12 List-searchNoResults" translate>No records matched your search.</div>
+            </div>
+            <div class="List-noItems" ng-show="projects.length === 0 && (searchTags | isEmpty)">No Projects Have Been Created</div>
+            <div class="list-table-container" ng-show="projects.length > 0">
+                <table id="projects_table" class="List-table" is-extended="false">
+                    <thead>
+                        <tr class="List-tableHeaderRow">
+                            <th class="List-tableHeader select-column List-staticColumn--smallStatus" translate=""></th>
+                            <th base-path="projects" collection="projects" dataset="project_dataset" column-sort="" column-field="name" column-iterator="project" column-no-sort="undefined" column-label="Name" column-custom-class="col-md-8" query-set="project_queryset">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-class="[project.success_class, {'List-tableRow--selected' : $stateParams['project_id'] == project.id}]" id="{{ project.id }}" class="List-tableRow project_class" ng-repeat="project in projects">
+                            <td class="List-tableCell">
+                                <input type="radio" ng-model="project.checked" ng-value="1" ng-false-value="0" name="check_project_{{project.id}}" ng-click="toggle_row(project)" ng-disabled="undefined">
+                            </td>
+                            <td class="List-tableCell name-column col-md-8" ng-click="toggle_row(project)">
+                                {{ project.name }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <paginate base-path="projects" collection="projects" dataset="project_dataset" iterator="project" query-set="project_queryset" hide-view-per-page="true" max-visible-pages="5"></paginate>
+        </div>
+        <div id="workflow-inventory-sync-list" ng-show="activeTab === 'inventory_syncs'">
+            <div ng-hide="inventory_sources.length === 0 && (searchTags | isEmpty)">
+                <smart-search django-model="inventory_sources" base-path="inventory_sources" iterator="inventory_source" dataset="inventory_source_dataset" list="inventorySourceList" collection="inventory_sources" default-params="inventory_source_default_params" query-set="inventory_source_queryset" search-bar-full-width="true" search-tags="searchTags">
+                </smart-search>
+            </div>
+
+            <div class="row" ng-show="inventory_sources.length === 0 && !(searchTags | isEmpty)">
+                <div class="col-lg-12 List-searchNoResults" translate>No records matched your search.</div>
+            </div>
+            <div class="List-noItems" ng-show="inventory_sources.length === 0 && (searchTags | isEmpty)">PLEASE ADD ITEMS TO THIS LIST</div>
+            <div class="list-table-container" ng-show="inventory_sources.length > 0">
+                <table id="workflow_inventory_sources_table" class="List-table" is-extended="false">
+                    <thead>
+                        <tr class="List-tableHeaderRow">
+                            <th class="List-tableHeader select-column List-staticColumn--smallStatus" translate=""></th>
+                            <th base-path="inventory_sources" collection="inventory_sources" dataset="inventory_source_dataset" column-sort="" column-field="name" column-iterator="inventory_source" column-no-sort="undefined" column-label="Name" column-custom-class="" query-set="inventory_source_queryset">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-class="[inventory_source.success_class, {'List-tableRow--selected' : $stateParams['inventory_source_id'] == inventory_source.id}]" id="{{ inventory_source.id }}" class="List-tableRow inventory_source_class" ng-repeat="inventory_source in inventory_sources">
+                            <td class="List-tableCell">
+                                <input type="radio" ng-model="inventory_source.checked" ng-value="1" ng-false-value="0" name="check_inventory_source_{{inventory_source.id}}" ng-click="toggle_row(inventory_source)" ng-disabled="undefined">
+                            </td>
+                            <td class="List-tableCell name-column col-md-11" ng-click="toggle_row(inventory_source)">
+                                <span aw-tool-tip="Inventory: {{inventory_source.summary_fields.inventory.name}}" data-placement="top">{{ inventory_source.name }}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <paginate base-path="inventory_sources" collection="inventory_sources" dataset="inventory_source_dataset" iterator="inventory_source" query-set="inventory_source_queryset" hide-view-per-page="true" max-visible-pages="5"></paginate>
+        </div>
+    </div>
     <div ng-if="selectedTemplate && selectedTemplateInvalid">
         <div class="WorkflowMaker-invalidJobTemplateWarning">
             <span class="fa fa-warning"></span>
@@ -24,28 +118,29 @@
             <span>{{:: strings.get('workflows.CREDENTIAL_WITH_PASS') }}</span>
         </div>
     </div>
-    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-show="selectedTemplate && !selectedTemplateInvalid && !(credentialRequiresPassword && !promptData.launchConf.ask_credential_on_launch)">
-        <label for="verbosity" class="Form-inputLabelContainer">
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-show="mode === 'add'">
+        <label for="edgeType" class="Form-inputLabelContainer">
             <span class="Form-requiredAsterisk">*</span>
             <span class="Form-inputLabel">{{:: strings.get('workflow_maker.RUN') }}</span>
         </label>
         <div>
             <select
-                id="workflow_node_edge"
+                id="workflow_node_edge_3"
                 ng-options="v as v.label for v in edgeTypeOptions track by v.value"
                 ng-model="edgeType"
                 class="form-control Form-dropDown"
                 name="edgeType"
                 tabindex="-1"
-                ng-disabled="!workflowJobTemplateObj.summary_fields.user_capabilities.edit"
+                ng-disabled="readOnly"
                 aria-hidden="true">
             </select>
         </div>
     </div>
     <div class="buttons Form-buttons" id="workflow_maker_controls">
         <button type="button" class="btn btn-sm Form-primaryButton Form-primaryButton--noMargin" id="workflow_maker_prompt_btn" ng-show="showPromptButton" ng-click="openPromptModal()"> {{:: strings.get('prompt.PROMPT') }}</button>
-        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_btn" ng-show="(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)" ng-click="cancelNodeForm()"> {{:: strings.get('CANCEL') }}</button>
-        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_close_btn" ng-show="!(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)" ng-click="cancelNodeForm()"> {{:: strings.get('CLOSE') }}</button>
-        <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_btn" ng-show="(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) && !selectedTemplateInvalid && !(credentialRequiresPassword && !promptData.launchConf.ask_credential_on_launch)" ng-click="confirmNodeForm()" ng-disabled="!selectedTemplate || promptModalMissingReqFields || credentialRequiresPassword"> {{:: strings.get('workflow_maker.SELECT') }}</button>
+        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_btn" ng-show="!readOnly" ng-click="cancel()"> {{:: strings.get('CANCEL') }}</button>
+        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_close_btn" ng-show="readOnly" ng-click="cancel()"> {{:: strings.get('CLOSE') }}</button>
+        <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_btn" ng-show="!readOnly" ng-click="select({selectedTemplate, promptData, edgeType})" ng-disabled="!selectedTemplate || promptModalMissingReqFields || credentialRequiresPassword || selectedTemplateInvalid"> {{:: strings.get('workflow_maker.SELECT') }}</button>
     </div>
-</span>
+    <prompt prompt-data="promptData" action-text="{{:: strings.get('prompt.CONFIRM')}}" prevent-creds-with-passwords="preventCredsWithPasswords" read-only-prompts="readOnly"></prompt>
+</div>
