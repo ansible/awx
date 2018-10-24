@@ -109,8 +109,8 @@
       RABBITMQ_VHOST: "{{ rabbitmq_default_vhost }}"
       MEMCACHED_HOST: "memcached"
       MEMCACHED_PORT: "11211"
-      AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
-      AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
+      AWX_ADMIN_USER: "{{ admin_user|default('admin') }}"
+      AWX_ADMIN_PASSWORD: "{{ admin_password|default('password') }}"
   register: awx_web_container
 
 - name: Update CA trust in awx_web container
@@ -150,5 +150,5 @@
       RABBITMQ_VHOST: "{{ rabbitmq_default_vhost }}"
       MEMCACHED_HOST: "memcached"
       MEMCACHED_PORT: "11211"
-      AWX_ADMIN_USER: "{{ default_admin_user|default('admin') }}"
-      AWX_ADMIN_PASSWORD: "{{ default_admin_password|default('password') }}"
+      AWX_ADMIN_USER: "{{ admin_user|default('admin') }}"
+      AWX_ADMIN_PASSWORD: "{{ admin_password|default('password') }}"
