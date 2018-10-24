@@ -19,6 +19,7 @@ The following notes are changes that may require changes to playbooks.
  - Specifying `inputs` or `injectors` as strings in the
    `tower_credential_type` module is no longer supported. Provide as dictionaries instead.
  - When a project is created, it will wait for the update/sync to finish by default; this can be turned off with the `wait` parameter, if desired.
+ - Creating a "scan" type job template is no longer supported.
 
 ## Running
 

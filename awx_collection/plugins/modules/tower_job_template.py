@@ -36,7 +36,7 @@ options:
       description:
         - The job type to use for the job template.
       required: True
-      choices: ["run", "check", "scan"]
+      choices: ["run", "check"]
       type: str
     inventory:
       description:
@@ -55,11 +55,20 @@ options:
     credential:
       description:
         - Name of the credential to use for the job template.
+        - Deprecated, mutually exclusive with 'credentials'.
       version_added: 2.7
       type: str
+    credentials:
+      description:
+        - List of credentials to use for the job template.
+        - Will not remove any existing credentials. This may change in the future.
+      version_added: 2.8
+      type: list
+      default: []
     vault_credential:
       description:
         - Name of the vault credential to use for the job template.
+        - Deprecated, mutually exclusive with 'credential'.
       version_added: 2.7
       type: str
     forks:
@@ -300,13 +309,14 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         description=dict(default=''),
-        job_type=dict(choices=['run', 'check', 'scan'], required=True),
+        job_type=dict(choices=['run', 'check']),
         inventory=dict(default=''),
         project=dict(required=True),
         playbook=dict(required=True),
         credential=dict(default=''),
         vault_credential=dict(default=''),
         custom_virtualenv=dict(type='str', required=False),
+        credentials=dict(type='list', default=[]),
         forks=dict(type='int'),
         limit=dict(default=''),
         verbosity=dict(type='int', choices=[0, 1, 2, 3, 4], default=0),
@@ -335,7 +345,14 @@ def main():
         state=dict(choices=['present', 'absent'], default='present'),
     )
 
-    module = TowerModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = TowerModule(
+        argument_spec=argument_spec,
+        supports_check_mode=True,
+        mutually_exclusive=[
+            ('credential', 'credentials'),
+            ('vault_credential', 'credentials')
+        ]
+    )
 
     name = module.params.get('name')
     state = module.params.pop('state')
@@ -358,6 +375,18 @@ def main():
                 result = jt.delete(**params)
         except (exc.ConnectionError, exc.BadRequest, exc.NotFound, exc.AuthError) as excinfo:
             module.fail_json(msg='Failed to update job template: {0}'.format(excinfo), changed=False)
+
+        cred_list = module.params.get('credentials')
+        if cred_list:
+            cred = tower_cli.get_resource('credential')
+            for cred_name in cred_list:
+                try:
+                    cred_id = cred.get(name=cred_name)['id']
+                    r = jt.associate_credential(result['id'], cred_id)
+                except (exc.ConnectionError, exc.BadRequest, exc.NotFound, exc.AuthError) as excinfo:
+                    module.fail_json(msg='Failed to add credential to job template: {0}'.format(excinfo), changed=False)
+                if r.get('changed'):
+                    result['changed'] = True
 
     json_output['changed'] = result['changed']
     module.exit_json(**json_output)
