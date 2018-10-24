@@ -9,7 +9,7 @@
     }
   },
   "extends": [
-    "airbnb",
+    "airbnb"
   ],
   "settings": {
     "react": {
@@ -18,22 +18,24 @@
   },
   "env": {
     "browser": true,
-    "node": true
+    "node": true,
+    "jest": true
   },
   "globals": {
-    "window": true,
+    "window": true
   },
   "rules": {
     "camelcase": "off",
     "arrow-parens": "off",
-    "comma-dangle": "off",    
+    "comma-dangle": "off",
+    "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
     "indent": ["error", 2, {
       "SwitchCase": 1
     }],
-    "max-len": ['error', {
+    "max-len": ["error", {
       "code": 100,
       "ignoreStrings": true,
-      "ignoreTemplateLiterals": true,
+      "ignoreTemplateLiterals": true
     }],
     "no-continue": "off",
     "no-debugger": "off",
@@ -42,7 +44,7 @@
     "no-plusplus": "off",
     "no-underscore-dangle": "off",
     "no-use-before-define": "off",
-    "no-multiple-empty-lines": ["error", { max: 1 }],
+    "no-multiple-empty-lines": ["error", { "max": 1 }],
     "object-curly-newline": "off",
     "space-before-function-paren": ["error", "always"],
     "no-trailing-spaces": ["error"],
