@@ -9,13 +9,16 @@ import workflowNodeFormController from './workflow-node-form.controller';
 export default ['templateUrl',
     function(templateUrl) {
         return {
-            scope: {},
+            scope: {
+                mode: '<',
+                node: '=',
+                cancel: '&',
+                select: '&',
+                readOnly: '<'
+            },
             restrict: 'E',
             templateUrl: templateUrl('templates/workflows/workflow-maker/forms/workflow-node-form'),
-            controller: workflowNodeFormController,
-            link: function(scope) {
-                console.log('inside link function for workflow node form');
-            }
+            controller: workflowNodeFormController
         };
     }
 ];

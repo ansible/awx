@@ -109,6 +109,8 @@ function TemplatesStrings (BaseString) {
         JOBS: t.s('JOBS'),
         PLEASE_CLICK_THE_START_BUTTON: t.s('Please click the start button to build your workflow.'),
         PLEASE_HOVER_OVER_A_TEMPLATE: t.s('Please hover over a template for additional options.'),
+        EDIT_LINK_TOOLTIP: t.s('Click to edit link'),
+        VIEW_LINK_TOOLTIP: t.s('Click to view link'),
         RUN: t.s('RUN'),
         CHECK: t.s('CHECK'),
         SELECT: t.s('SELECT'),
@@ -117,6 +119,7 @@ function TemplatesStrings (BaseString) {
         DETAILS: t.s('DETAILS'),
         TITLE: t.s('WORKFLOW VISUALIZER'),
         EDIT_LINK: ({ parentName, childName }) => t.s('EDIT LINK | {{parentName}} to {{childName}}', { parentName, childName }),
+        VIEW_LINK: ({ parentName, childName }) => t.s('VIEW LINK | {{parentName}} to {{childName}}', { parentName, childName })
     }
 
 }
