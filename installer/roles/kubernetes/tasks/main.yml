@@ -192,6 +192,7 @@
       bash -c "awx-manage create_preload_data"
   register: cdo
   changed_when: "'added' in cdo.stdout"
+  when: create_preload_data | bool
 
 - name: Delete management pod
   shell: |
