@@ -2,6 +2,7 @@ version: '2'
 services:
   # Primary AWX Development Container
   awx:
+    user: ${CURRENT_UID}
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx
     environment:
