@@ -1,43 +1,88 @@
-.link circle,
-.link polygon,
-.link .linkCross,
-.node circle,
-.node .linkIcon,
-.node .WorkflowChart-hoverPath {
+.WorkflowChart-node {
+    font-size: 12px;
+    font-family: 'Open Sans', sans-serif, 'FontAwesome';
+}
+
+.WorkflowChart-link {
+    fill: none;
+    stroke-width: 2px;
+}
+
+.WorkflowChart-linkOverlay {
+    fill: @default-interface-txt;
+}
+
+.WorkflowChart-link--active.WorkflowChart-linkOverlay,
+.WorkflowChart-linkHovering .WorkflowChart-linkOverlay {
+    cursor: pointer;
+    opacity: 1;
+    fill: @cgrey;
+}
+
+.WorkflowChart-linkHovering .WorkflowChart-linkPath {
+    cursor: pointer;
+}
+
+.WorkflowChart-link circle,
+.WorkflowChart-link polygon,
+.WorkflowChart-link .WorkflowChart-betweenNodesIcon,
+.WorkflowChart-node .WorkflowChart-nodeAddCircle,
+.WorkflowChart-node .WorkflowChart-nodeRemoveCircle,
+.WorkflowChart-node .WorkflowChart-nodeAddIcon,
+.WorkflowChart-node .WorkflowChart-nodeRemoveIcon {
     opacity: 0;
 }
 
-.node .addCircle, .link .addCircle {
+.WorkflowChart-node .WorkflowChart-addCircle, .WorkflowChart-link .WorkflowChart-addCircle {
     fill: @default-succ;
 }
 
-.addCircle.addHovering {
+.WorkflowChart-addCircle.WorkflowChart-addHovering {
     fill: @default-succ-hov;
 }
 
-.node .removeCircle {
+.WorkflowChart-node .WorkflowChart-nodeRemoveCircle {
     fill: @default-err;
 }
 
-.removeCircle.removeHovering {
+.WorkflowChart-nodeRemoveCircle.removeHovering {
     fill: @default-err-hov;
 }
 
-.node .linkCircle {
-    fill: @default-link;
+.WorkflowChart-node .WorkflowChart-rect {
+    fill: @default-secondary-bg;
 }
 
-.node .linkIcon {
-    color: @default-bg;
+.WorkflowChart-rect.WorkflowChart-placeholder {
+    stroke-dasharray: 3;
 }
 
-.linkCircle.removeHovering {
-    fill: @default-link-hov;
+.WorkflowChart-node .WorkflowChart-transparentRect {
+    fill: @default-bg;
+    opacity: 0;
 }
 
-.node {
-    font-size: 12px;
-    font-family: 'Open Sans', sans-serif, 'FontAwesome';
+.WorkflowChart-alwaysShowAdd circle,
+.WorkflowChart-alwaysShowAdd path,
+.WorkflowChart-alwaysShowAdd .WorkflowChart-betweenNodesIcon,
+.WorkflowChart-nodeHovering .WorkflowChart-nodeAddCircle,
+.WorkflowChart-nodeHovering .WorkflowChart-nodeAddIcon,
+.WorkflowChart-nodeHovering .WorkflowChart-nodeRemoveCircle,
+.WorkflowChart-nodeHovering .WorkflowChart-nodeRemoveIcon,
+.WorkflowChart-addHovering circle,
+.WorkflowChart-addHovering path,
+.WorkflowChart-addHovering .WorkflowChart-betweenNodesIcon {
+    cursor: pointer;
+    opacity: 1;
+}
+
+.WorkflowChart-link.WorkflowChart-placeholder {
+    stroke-dasharray: 3;
+}
+
+.WorkflowChart-svg {
+    border-bottom-left-radius: 5px;
+    width: 100%;
 }
 
 .WorkflowChart-defaultText {
@@ -49,76 +94,36 @@
     cursor: default;
 }
 
-.node .rect {
-    fill: @default-secondary-bg;
-}
-
-.rect.placeholder {
-    stroke-dasharray: 3;
-}
-
-.node .transparentRect {
-    fill: @default-bg;
-    opacity: 0;
-}
-
-.WorkflowChart-alwaysShowAdd circle,
-.WorkflowChart-alwaysShowAdd path,
-.WorkflowChart-alwaysShowAdd .linkCross,
-.hovering .addCircle,
-.hovering .removeCircle,
-.addHovering .betweenNodesCircle,
-.hovering .linkCircle,
-.hovering .linkIcon,
-.hovering .WorkflowChart-hoverPath,
-.addHovering .linkCross {
-    cursor: pointer;
-    opacity: 1;
-}
-
-.link {
-  fill: none;
-  stroke-width: 2px;
-}
-
-.link.placeholder {
-    stroke-dasharray: 3;
-}
-
-.WorkflowChart-svg {
-    border-bottom-left-radius: 5px;
-    width: 100%;
-}
-
-.WorkflowResults-rightSide .WorkflowChart-svg {
-    background-color: @f6grey;
-    border: 1px solid @d7grey;
-    border-top: 0px;
-    border-bottom-right-radius: 5px;
-}
 .WorkflowChart-nodeTypeCircle {
     fill: @default-icon;
 }
+
 .WorkflowChart-nodeTypeLetter {
     fill: @default-bg;
 }
-.workflowChart-nodeStatus--running {
+
+.WorkflowChart-nodeStatus--running {
     fill: @default-icon;
 }
-.workflowChart-nodeStatus--success {
+
+.WorkflowChart-nodeStatus--success {
     fill: @default-succ;
 }
-.workflowChart-nodeStatus--failed, .workflowChart-nodeStatus--canceled {
+
+.WorkflowChart-nodeStatus--failed, .WorkflowChart-nodeStatus--canceled {
     fill: @default-err;
 }
+
 .WorkflowChart-detailsLink {
     fill: @default-link;
     cursor: pointer;
     font-size: 10px;
 }
+
 .WorkflowChart-incompleteIcon {
     color: @default-warning;
 }
+
 .WorkflowChart-deletedText {
     width: 90px;
     color: @default-interface-txt;
@@ -126,6 +131,7 @@
 .WorkflowChart-activeNode {
     fill: @default-link;
 }
+
 .WorkflowChart-elapsedHolder {
     background-color: @b7grey;
     color: @default-bg;
@@ -134,40 +140,47 @@
     padding: 1px 3px;
     border-radius: 4px;
 }
+
 .WorkflowChart-nameText {
     font-size: 10px;
 }
 
+.WorkflowChart-tooltip {
+    pointer-events: none;
+    text-align: center;
+}
+
 .WorkflowChart-tooltipContents {
     padding: 10px;
-    background-color: #707070;
-    color: #FFFFFF;
+    background-color: @default-interface-txt;
+    color: @default-bg;
     border-radius: 4px;
     word-wrap: break-word;
     max-width: 325px;
+    font-size: 10px;
 }
-.WorkflowChart-tooltipArrow {
+
+.WorkflowChart-tooltipArrow--down {
     width: 0;
     height: 0;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-top: 10px solid #707070;
+    border-top: 10px solid @default-interface-txt;
     margin: auto;
 }
+
+.WorkflowChart-tooltipArrow--right {
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid @default-interface-txt;
+    margin: auto;
+    position: relative;
+    right: -55px;
+    top: -34px;
+}
+
 .WorkflowChart-dashedNode {
    stroke-dasharray: 5,5;
-}
-
-.linkOverlay {
-    fill: @default-interface-txt;
-}
-
-.linkActiveEdit.linkOverlay,
-.overlayHovering .linkOverlay {
-    cursor: pointer;
-    opacity: 0.4;
-}
-
-.overlayHovering .linkPath {
-    cursor: pointer;
 }

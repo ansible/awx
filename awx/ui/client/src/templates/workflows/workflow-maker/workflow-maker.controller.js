@@ -11,26 +11,10 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
         ProcessErrors, CreateSelect2, $q, JobTemplate, WorkflowJobTemplate,
         Empty, PromptService, Rest, TemplatesStrings, $timeout, $state) {
 
-        let promptWatcher, surveyQuestionWatcher, credentialsWatcher;
-
         $scope.strings = TemplatesStrings;
+        // TODO: I don't think this needs to be on scope but changing it will require changes to
+        // all the prompt places
         $scope.preventCredsWithPasswords = true;
-
-        $scope.workflowMakerFormConfig = {
-            nodeMode: "idle",
-            activeTab: "jobs",
-            formIsValid: false
-        };
-
-        $scope.job_type_options = [{
-            label: $scope.strings.get('workflow_maker.RUN'),
-            value: "run"
-        }, {
-            label: $scope.strings.get('workflow_maker.CHECK'),
-            value: "check"
-        }];
-
-        $scope.edgeTypeOptions = createEdgeTypeOptions();
 
         let editRequests = [];
         let associateRequests = [];
@@ -41,32 +25,10 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
         $scope.toggleKey = () => $scope.showKey = !$scope.showKey;
         $scope.keyClassList = `{ 'Key-menuIcon--active': showKey }`;
 
-        function createEdgeTypeOptions() {
-            return ([{
-                    label: $scope.strings.get('workflow_maker.ALWAYS'),
-                    value: 'always'
-                },
-                {
-                    label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
-                    value: 'success'
-                },
-                {
-                    label: $scope.strings.get('workflow_maker.ON_FAILURE'),
-                    value: 'failure'
-                }
-            ]);
-        }
-
-        function resetNodeForm() {
-            $scope.workflowMakerFormConfig.nodeMode = "idle";
-            delete $scope.selectedTemplate;
-            delete $scope.placeholderNode;
-            delete $scope.betweenTwoNodes;
-            $scope.nodeBeingEdited = null;
-            $scope.workflowMakerFormConfig.activeTab = "jobs";
-
-            $scope.$broadcast('clearWorkflowLists');
-        }
+        $scope.formState = {
+            'showNodeForm': false,
+            'showLinkForm': false
+        };
 
         function recursiveNodeUpdates(params, completionCallback) {
             // params.parentId
@@ -301,62 +263,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
             }
         }
 
-        let updateEdgeDropdownOptions = (edgeTypeValue) => {
-            // Not passing an edgeTypeValue will include all by default
-
-            if (edgeTypeValue) {
-                $scope.edgeTypeOptions = _.filter(createEdgeTypeOptions(), {
-                    'value': edgeTypeValue
-                });
-            } else {
-                $scope.edgeTypeOptions = createEdgeTypeOptions();
-            }
-
-            CreateSelect2({
-                element: '#workflow_node_edge',
-                multiple: false
-            });
-        };
-
-        let checkCredentialsForRequiredPasswords = () => {
-            let credentialRequiresPassword = false;
-            $scope.promptData.prompts.credentials.value.forEach((credential) => {
-                if ((credential.passwords_needed &&
-                        credential.passwords_needed.length > 0) ||
-                    (_.has(credential, 'inputs.vault_password') &&
-                        credential.inputs.vault_password === "ASK")
-                ) {
-                    credentialRequiresPassword = true;
-                }
-            });
-            $scope.credentialRequiresPassword = credentialRequiresPassword;
-        };
-
-        let watchForPromptChanges = () => {
-            let promptDataToWatch = [
-                'promptData.prompts.inventory.value',
-                'promptData.prompts.verbosity.value',
-                'missingSurveyValue'
-            ];
-
-            promptWatcher = $scope.$watchGroup(promptDataToWatch, function () {
-                let missingPromptValue = false;
-                if ($scope.missingSurveyValue) {
-                    missingPromptValue = true;
-                } else if ($scope.selectedTemplate.type === 'job_template' && (!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id)) {
-                    missingPromptValue = true;
-                }
-                $scope.promptModalMissingReqFields = missingPromptValue;
-            });
-
-            if ($scope.promptData.launchConf.ask_credential_on_launch && $scope.credentialRequiresPassword) {
-                credentialsWatcher = $scope.$watch('promptData.prompts.credentials', () => {
-                    checkCredentialsForRequiredPasswords();
-                });
-            }
-        };
-
-        $scope.closeWorkflowMaker = function () {
+        $scope.closeWorkflowMaker = function() {
             // Revert the data to the master which was created when the dialog was opened
             $scope.treeData.data = angular.copy($scope.treeDataMaster);
             $scope.closeDialog();
@@ -442,19 +349,15 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
         $scope.startAddNode = function (parent, betweenTwoNodes) {
 
-            if ($scope.placeholderNode || $scope.nodeBeingEdited) {
+            if ($scope.nodeBeingWorkedOn) {
                 $scope.cancelNodeForm();
             }
 
-            if ($scope.linkBeingEdited) {
+            if ($scope.linkBeingWorkedOn) {
                 $scope.cancelLinkForm();
             }
 
-            $scope.workflowMakerFormConfig.nodeMode = "add";
-            $scope.addParent = parent;
-            $scope.betweenTwoNodes = betweenTwoNodes;
-
-            $scope.placeholderNode = WorkflowService.addPlaceholderNode({
+            $scope.nodeBeingWorkedOn = WorkflowService.addPlaceholderNode({
                 parent: parent,
                 betweenTwoNodes: betweenTwoNodes,
                 tree: $scope.treeData.data,
@@ -463,443 +366,96 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
             $scope.treeData.nextIndex++;
 
-            // Set the default to success
-            let edgeType = {
-                label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
-                value: "success"
-            };
-
-            if (parent && ((betweenTwoNodes && parent.source.isStartNode) || (!betweenTwoNodes && parent.isStartNode))) {
-                // This node will always be executed
-                updateEdgeDropdownOptions('always');
-                edgeType = {
-                    label: $scope.strings.get('workflow_maker.ALWAYS'),
-                    value: "always"
-                };
-            } else {
-                updateEdgeDropdownOptions();
-            }
-
-            $scope.edgeType = edgeType;
             $scope.$broadcast("refreshWorkflowChart");
 
+            $scope.nodeFormMode = "add";
+            $scope.formState.showNodeForm = true;
         };
 
-        $scope.confirmNodeForm = function () {
-            if ($scope.workflowMakerFormConfig.nodeMode === "add") {
-                if ($scope.selectedTemplate && $scope.edgeType && $scope.edgeType.value) {
-
-                    $scope.placeholderNode.unifiedJobTemplate = $scope.selectedTemplate;
-                    $scope.placeholderNode.edgeType = $scope.edgeType.value;
-                    if ($scope.placeholderNode.unifiedJobTemplate.type === 'job_template' ||
-                        $scope.placeholderNode.unifiedJobTemplate.type === 'workflow_job_template') {
-                        $scope.placeholderNode.promptData = _.cloneDeep($scope.promptData);
+        $scope.confirmNodeForm = function(selectedTemplate, promptData, edgeType) {
+            if ($scope.nodeFormMode === "add") {
+                if (selectedTemplate && edgeType && edgeType.value) {
+                    $scope.nodeBeingWorkedOn.unifiedJobTemplate = selectedTemplate;
+                    $scope.nodeBeingWorkedOn.edgeType = edgeType.value;
+                    if ($scope.nodeBeingWorkedOn.unifiedJobTemplate.type === 'job_template') {
+                        $scope.nodeBeingWorkedOn.promptData = _.cloneDeep(promptData);
                     }
-                    $scope.placeholderNode.canEdit = true;
+                    $scope.nodeBeingWorkedOn.canEdit = true;
 
-                    delete $scope.placeholderNode.placeholder;
-
-                    resetNodeForm();
+                    delete $scope.nodeBeingWorkedOn.placeholder;
 
                     // Increment the total node counter
                     $scope.treeData.data.totalNodes++;
 
                 }
-            } else if ($scope.workflowMakerFormConfig.nodeMode === "edit") {
-                if ($scope.selectedTemplate && $scope.edgeType && $scope.edgeType.value) {
-                    $scope.nodeBeingEdited.unifiedJobTemplate = $scope.selectedTemplate;
-                    $scope.nodeBeingEdited.edgeType = $scope.edgeType.value;
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.type === 'job_template' || $scope.nodeBeingEdited.unifiedJobTemplate.type === 'workflow_job_template') {
-                        $scope.nodeBeingEdited.promptData = _.cloneDeep($scope.promptData);
+            } else if ($scope.nodeFormMode === "edit") {
+                if (selectedTemplate) {
+                    $scope.nodeBeingWorkedOn.unifiedJobTemplate = selectedTemplate;
+
+                    if ($scope.nodeBeingWorkedOn.unifiedJobTemplate.type === 'job_template') {
+                        $scope.nodeBeingWorkedOn.promptData = _.cloneDeep(promptData);
                     }
 
-                    $scope.nodeBeingEdited.isActiveEdit = false;
+                    $scope.nodeBeingWorkedOn.isActiveEdit = false;
 
-                    $scope.nodeBeingEdited.edited = true;
-
-                    resetNodeForm();
+                    $scope.nodeBeingWorkedOn.edited = true;
                 }
             }
 
-            if (promptWatcher) {
-                promptWatcher();
-            }
-
-            if (surveyQuestionWatcher) {
-                surveyQuestionWatcher();
-            }
-
-            if (credentialsWatcher) {
-                credentialsWatcher();
-            }
-
-            $scope.promptData = null;
+            $scope.formState.showNodeForm = false;
+            $scope.nodeFormMode = null;
+            $scope.nodeBeingWorkedOn = null;
 
             $scope.$broadcast("refreshWorkflowChart");
         };
 
-        $scope.cancelNodeForm = function () {
-            if ($scope.workflowMakerFormConfig.nodeMode === "add") {
+        $scope.cancelNodeForm = function() {
+            if ($scope.nodeFormMode === "add") {
                 // Remove the placeholder node from the tree
                 WorkflowService.removeNodeFromTree({
                     tree: $scope.treeData.data,
-                    nodeToBeDeleted: $scope.placeholderNode
+                    nodeToBeDeleted: $scope.nodeBeingWorkedOn
                 });
-            } else if ($scope.workflowMakerFormConfig.nodeMode === "edit") {
-                $scope.nodeBeingEdited.isActiveEdit = false;
+            } else if ($scope.nodeFormMode === "edit") {
+                $scope.nodeBeingWorkedOn.isActiveEdit = false;
             }
-
-            if (promptWatcher) {
-                promptWatcher();
-            }
-
-            if (surveyQuestionWatcher) {
-                surveyQuestionWatcher();
-            }
-
-            if (credentialsWatcher) {
-                credentialsWatcher();
-            }
-
-            $scope.promptData = null;
-            $scope.selectedTemplateInvalid = false;
-            $scope.showPromptButton = false;
-
-            // Reset the form
-            resetNodeForm();
-
+            $scope.formState.showNodeForm = false;
+            $scope.nodeBeingWorkedOn = null;
+            $scope.nodeFormMode = null;
             $scope.$broadcast("refreshWorkflowChart");
         };
 
         /* EDIT NODE FUNCTIONS */
 
-        $scope.startEditNode = function (nodeToEdit) {
-            $scope.editNodeHelpMessage = null;
-
-            if ($scope.linkBeingEdited) {
+        $scope.startEditNode = function(nodeToEdit) {
+            if ($scope.linkBeingWorkedOn) {
                 $scope.cancelLinkForm();
             }
 
-            if (!$scope.nodeBeingEdited || ($scope.nodeBeingEdited && $scope.nodeBeingEdited.id !== nodeToEdit.id)) {
-                if ($scope.placeholderNode || $scope.nodeBeingEdited) {
+            if (!$scope.nodeBeingWorkedOn || ($scope.nodeBeingWorkedOn && $scope.nodeBeingWorkedOn.id !== nodeToEdit.id)) {
+                if ($scope.nodeBeingWorkedOn) {
                     $scope.cancelNodeForm();
-
-                    // Refresh this object as the parent has changed
-                    nodeToEdit = WorkflowService.searchTree({
-                        element: $scope.treeData.data,
-                        matchingId: nodeToEdit.id
-                    });
                 }
 
-                $scope.workflowMakerFormConfig.nodeMode = "edit";
+                $scope.nodeFormMode = "edit";
+
+                $scope.formState.showNodeForm = true;
 
                 let parent = WorkflowService.searchTree({
                     element: $scope.treeData.data,
                     matchingId: nodeToEdit.parent.id
                 });
 
-                $scope.nodeBeingEdited = WorkflowService.searchTree({
+                $scope.nodeBeingWorkedOn = WorkflowService.searchTree({
                     element: parent,
                     matchingId: nodeToEdit.id
                 });
 
-                $scope.nodeBeingEdited.isActiveEdit = true;
-
-                let finishConfiguringEdit = function () {
-                    let templateType = $scope.nodeBeingEdited.unifiedJobTemplate.type;
-                    let jobTemplate = templateType === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();
-                    if (!_.isEmpty($scope.nodeBeingEdited.promptData)) {
-                        $scope.promptData = _.cloneDeep($scope.nodeBeingEdited.promptData);
-                        const launchConf = $scope.promptData.launchConf;
-
-                        if (!launchConf.survey_enabled &&
-                            !launchConf.ask_inventory_on_launch &&
-                            !launchConf.ask_credential_on_launch &&
-                            !launchConf.ask_verbosity_on_launch &&
-                            !launchConf.ask_job_type_on_launch &&
-                            !launchConf.ask_limit_on_launch &&
-                            !launchConf.ask_tags_on_launch &&
-                            !launchConf.ask_skip_tags_on_launch &&
-                            !launchConf.ask_diff_mode_on_launch &&
-                            !launchConf.credential_needed_to_start &&
-                            !launchConf.ask_variables_on_launch &&
-                            launchConf.variables_needed_to_start.length === 0) {
-                            $scope.showPromptButton = false;
-                            $scope.promptModalMissingReqFields = false;
-                        } else {
-                            $scope.showPromptButton = true;
-
-                            if ($scope.nodeBeingEdited.unifiedJobTemplate.type === 'job_template' && launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeBeingEdited.originalNodeObj.summary_fields.inventory')) {
-                                $scope.promptModalMissingReqFields = true;
-                            } else {
-                                $scope.promptModalMissingReqFields = false;
-                            }
-                        }
-                    } else if (
-                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'job' ||
-                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === 'job_template' ||
-                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'workflow_job' ||
-                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === 'workflow_job_template'
-                    ) {
-                        let promises = [jobTemplate.optionsLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id), jobTemplate.getLaunch($scope.nodeBeingEdited.unifiedJobTemplate.id)];
-
-                        if (_.has($scope, 'nodeBeingEdited.originalNodeObj.related.credentials')) {
-                            Rest.setUrl($scope.nodeBeingEdited.originalNodeObj.related.credentials);
-                            promises.push(Rest.get());
-                        }
-
-                        $q.all(promises)
-                            .then((responses) => {
-                                let launchOptions = responses[0].data,
-                                    launchConf = responses[1].data,
-                                    workflowNodeCredentials = responses[2] ? responses[2].data.results : [];
-
-                                let prompts = PromptService.processPromptValues({
-                                    launchConf: responses[1].data,
-                                    launchOptions: responses[0].data,
-                                    currentValues: $scope.nodeBeingEdited.originalNodeObj
-                                });
-
-                                let defaultCredsWithoutOverrides = [];
-
-                                prompts.credentials.previousOverrides = _.cloneDeep(workflowNodeCredentials);
-
-                                const credentialHasScheduleOverride = (templateDefaultCred) => {
-                                    let credentialHasOverride = false;
-                                    workflowNodeCredentials.forEach((scheduleCred) => {
-                                        if (templateDefaultCred.credential_type === scheduleCred.credential_type) {
-                                            if (
-                                                (!templateDefaultCred.vault_id && !scheduleCred.inputs.vault_id) ||
-                                                (templateDefaultCred.vault_id && scheduleCred.inputs.vault_id && templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
-                                            ) {
-                                                credentialHasOverride = true;
-                                            }
-                                        }
-                                    });
-
-                                    return credentialHasOverride;
-                                };
-
-                                if (_.has(launchConf, 'defaults.credentials')) {
-                                    launchConf.defaults.credentials.forEach((defaultCred) => {
-                                        if (!credentialHasScheduleOverride(defaultCred)) {
-                                            defaultCredsWithoutOverrides.push(defaultCred);
-                                        }
-                                    });
-                                }
-
-                                prompts.credentials.value = workflowNodeCredentials.concat(defaultCredsWithoutOverrides);
-
-                                if ($scope.nodeBeingEdited.unifiedJobTemplate.unified_job_template === 'job') {
-                                    if ((!$scope.nodeBeingEdited.unifiedJobTemplate.inventory && !launchConf.ask_inventory_on_launch) || !$scope.nodeBeingEdited.unifiedJobTemplate.project) {
-                                        $scope.selectedTemplateInvalid = true;
-                                    } else {
-                                        $scope.selectedTemplateInvalid = false;
-                                    }
-                                } else {
-                                    $scope.selectedTemplateInvalid = false;
-                                }
-
-                                let credentialRequiresPassword = false;
-
-                                prompts.credentials.value.forEach((credential) => {
-                                    if (credential.inputs) {
-                                        if ((credential.inputs.password && credential.inputs.password === "ASK") ||
-                                            (credential.inputs.become_password && credential.inputs.become_password === "ASK") ||
-                                            (credential.inputs.ssh_key_unlock && credential.inputs.ssh_key_unlock === "ASK") ||
-                                            (credential.inputs.vault_password && credential.inputs.vault_password === "ASK")
-                                        ) {
-                                            credentialRequiresPassword = true;
-                                        }
-                                    } else if (credential.passwords_needed && credential.passwords_needed.length > 0) {
-                                        credentialRequiresPassword = true;
-                                    }
-                                });
-
-                                $scope.credentialRequiresPassword = credentialRequiresPassword;
-
-                                if (!launchConf.survey_enabled &&
-                                    !launchConf.ask_inventory_on_launch &&
-                                    !launchConf.ask_credential_on_launch &&
-                                    !launchConf.ask_verbosity_on_launch &&
-                                    !launchConf.ask_job_type_on_launch &&
-                                    !launchConf.ask_limit_on_launch &&
-                                    !launchConf.ask_tags_on_launch &&
-                                    !launchConf.ask_skip_tags_on_launch &&
-                                    !launchConf.ask_diff_mode_on_launch &&
-                                    !launchConf.credential_needed_to_start &&
-                                    !launchConf.ask_variables_on_launch &&
-                                    launchConf.variables_needed_to_start.length === 0) {
-                                    $scope.showPromptButton = false;
-                                    $scope.promptModalMissingReqFields = false;
-                                } else {
-                                    $scope.showPromptButton = true;
-
-                                    if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeBeingEdited.originalNodeObj.summary_fields.inventory')) {
-                                        $scope.promptModalMissingReqFields = true;
-                                    } else {
-                                        $scope.promptModalMissingReqFields = false;
-                                    }
-
-                                    if (responses[1].data.survey_enabled) {
-                                        // go out and get the survey questions
-                                        jobTemplate.getSurveyQuestions($scope.nodeBeingEdited.unifiedJobTemplate.id)
-                                            .then((surveyQuestionRes) => {
-
-                                                let processed = PromptService.processSurveyQuestions({
-                                                    surveyQuestions: surveyQuestionRes.data.spec,
-                                                    extra_data: _.cloneDeep($scope.nodeBeingEdited.originalNodeObj.extra_data)
-                                                });
-
-                                                $scope.missingSurveyValue = processed.missingSurveyValue;
-
-                                                $scope.extraVars = (processed.extra_data === '' || _.isEmpty(processed.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(processed.extra_data);
-
-                                                $scope.nodeBeingEdited.promptData = $scope.promptData = {
-                                                    launchConf: launchConf,
-                                                    launchOptions: launchOptions,
-                                                    prompts: prompts,
-                                                    surveyQuestions: surveyQuestionRes.data.spec,
-                                                    templateType: $scope.nodeBeingEdited.unifiedJobTemplate.type,
-                                                    template: $scope.nodeBeingEdited.unifiedJobTemplate.id
-                                                };
-
-                                                surveyQuestionWatcher = $scope.$watch('promptData.surveyQuestions', () => {
-                                                    let missingSurveyValue = false;
-                                                    _.each($scope.promptData.surveyQuestions, (question) => {
-                                                        if (question.required && (Empty(question.model) || question.model === [])) {
-                                                            missingSurveyValue = true;
-                                                        }
-                                                    });
-                                                    $scope.missingSurveyValue = missingSurveyValue;
-                                                }, true);
-
-                                                checkCredentialsForRequiredPasswords();
-
-                                                watchForPromptChanges();
-                                            });
-                                    } else {
-                                        $scope.nodeBeingEdited.promptData = $scope.promptData = {
-                                            launchConf: launchConf,
-                                            launchOptions: launchOptions,
-                                            prompts: prompts,
-                                            templateType: $scope.nodeBeingEdited.unifiedJobTemplate.type,
-                                            template: $scope.nodeBeingEdited.unifiedJobTemplate.id
-                                        };
-
-                                        checkCredentialsForRequiredPasswords();
-
-                                        watchForPromptChanges();
-                                    }
-                                }
-                            });
-                    }
-
-                    if (_.get($scope, 'nodeBeingEdited.unifiedJobTemplate')) {
-
-                        if (_.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === "job_template" ||
-                            _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.type') === "workflow_job_template") {
-                            $scope.workflowMakerFormConfig.activeTab = "jobs";
-                        }
-
-                        $scope.selectedTemplate = $scope.nodeBeingEdited.unifiedJobTemplate;
-
-                        if ($scope.selectedTemplate.unified_job_type) {
-                            switch ($scope.selectedTemplate.unified_job_type) {
-                                case "job":
-                                case "workflow_job":
-                                    $scope.workflowMakerFormConfig.activeTab = "jobs";
-                                    break;
-                                case "project_update":
-                                    $scope.workflowMakerFormConfig.activeTab = "project_sync";
-                                    break;
-                                case "inventory_update":
-                                    $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
-                                    break;
-                            }
-                        } else if ($scope.selectedTemplate.type) {
-                            switch ($scope.selectedTemplate.type) {
-                                case "job_template":
-                                case "workflow_job_template":
-                                    $scope.workflowMakerFormConfig.activeTab = "jobs";
-                                    break;
-                                case "project":
-                                    $scope.workflowMakerFormConfig.activeTab = "project_sync";
-                                    break;
-                                case "inventory_source":
-                                    $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
-                                    break;
-                            }
-                        }
-                    } else {
-                        $scope.workflowMakerFormConfig.activeTab = "jobs";
-                    }
-
-                    let edgeDropdownOptions = null;
-
-                    // Select RUN dropdown option
-                    switch ($scope.nodeBeingEdited.edgeType) {
-                        case "always":
-                            $scope.edgeType = {
-                                label: $scope.strings.get('workflow_maker.ALWAYS'),
-                                value: "always"
-                            };
-                            if ($scope.nodeBeingEdited.isRoot) {
-                                edgeDropdownOptions = 'always';
-                            }
-                            break;
-                        case "success":
-                            $scope.edgeType = {
-                                label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
-                                value: "success"
-                            };
-                            break;
-                        case "failure":
-                            $scope.edgeType = {
-                                label: $scope.strings.get('workflow_maker.ON_FAILURE'),
-                                value: "failure"
-                            };
-                            break;
-                    }
-
-                    $timeout(updateEdgeDropdownOptions(edgeDropdownOptions));
-
-                    $scope.$broadcast("refreshWorkflowChart");
-                };
-
-                // Determine whether or not we need to go out and GET this nodes unified job template
-                // in order to determine whether or not prompt fields are needed
-                if (!$scope.nodeBeingEdited.isNew && !$scope.nodeBeingEdited.edited &&
-                    (_.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'job' ||
-                        _.get($scope, 'nodeBeingEdited.unifiedJobTemplate.unified_job_type') === 'workflow_job')) {
-                    // This is a node that we got back from the api with an incomplete
-                    // unified job template so we're going to pull down the whole object
-
-                    TemplatesService.getUnifiedJobTemplate($scope.nodeBeingEdited.unifiedJobTemplate.id)
-                        .then(function (data) {
-                            $scope.nodeBeingEdited.unifiedJobTemplate = _.clone(data.data.results[0]);
-                            finishConfiguringEdit();
-                        }, function ({
-                            data,
-                            status,
-                            config
-                        }) {
-                            ProcessErrors($scope, data, status, null, {
-                                hdr: $scope.strings.get('error.HEADER'),
-                                msg: $scope.strings.get('error.CALL', {
-                                    path: `${config.url}`,
-                                    action: `${config.method}`,
-                                    status
-                                })
-                            });
-                        });
-                } else {
-                    finishConfiguringEdit();
-                }
-
+                $scope.nodeBeingWorkedOn.isActiveEdit = true;
             }
 
-        };
+            $scope.$broadcast("refreshWorkflowChart");
+        }
 
         /* EDIT LINK FUNCTIONS */
 
@@ -907,18 +463,17 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
             const setupLinkEdit = () => {
                 const parentNode = WorkflowService.searchTree({
                     element: $scope.treeData.data,
-                    matchingId: parentId,
-                    byNodeId: true
+                    matchingId: parentId
                 });
 
                 parentNode.isLinkEditParent = true;
 
                 // Loop across children looking for childId
-                const childNode = _.find(parentNode.children, {'nodeId': childId});
+                const childNode = _.find(parentNode.children, {'id': childId});
 
                 childNode.isLinkEditChild = true;
 
-                $scope.linkBeingEdited = {
+                $scope.linkBeingWorkedOn = {
                     parent: parentNode,
                     child: childNode
                 }
@@ -934,19 +489,19 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                     },
                     edgeType: childNode.edgeType
                 }
-                $scope.editLink = true;
+                $scope.formState.showLinkForm = true;
 
                 $scope.$broadcast("refreshWorkflowChart");
             }
 
-            if ($scope.nodeBeingEdited || $scope.placeholderNode) {
+            if ($scope.nodeBeingWorkedOn) {
                 $scope.cancelNodeForm();
             }
 
-            if ($scope.linkBeingEdited) {
-                if ($scope.linkBeingEdited.parent.nodeId !== parentId || $scope.linkBeingEdited.child.nodeId !== childId) {
-                    $scope.linkBeingEdited.parent.isLinkEditParent = false;
-                    $scope.linkBeingEdited.child.isLinkEditChild = false;
+            if ($scope.linkBeingWorkedOn) {
+                if ($scope.linkBeingWorkedOn.parent.nodeId !== parentId || $scope.linkBeingWorkedOn.child.nodeId !== childId) {
+                    $scope.linkBeingWorkedOn.parent.isLinkEditParent = false;
+                    $scope.linkBeingWorkedOn.child.isLinkEditChild = false;
                     setupLinkEdit()
                 }
             } else {
@@ -955,34 +510,20 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
         };
 
-        $scope.confirmLinkForm = (parentId, childId, edgeType) => {
-            $scope.linkBeingEdited.parent.isLinkEditParent = false;
-            $scope.linkBeingEdited.child.isLinkEditChild = false;
-            const parentNode = WorkflowService.searchTree({
-                element: $scope.treeData.data,
-                matchingId: parentId,
-                byNodeId: true
-            });
-
-            // Loop across children looking for childId
-            const childNode = _.find(parentNode.children, {'nodeId': childId});
-
-            childNode.edgeType = edgeType;
-
-            $scope.linkBeingEdited = null;
-
-            $scope.editLink = false;
-
+        $scope.confirmLinkForm = (newEdgeType) => {
+            $scope.linkBeingWorkedOn.parent.isLinkEditParent = false;
+            $scope.linkBeingWorkedOn.child.isLinkEditChild = false;
+            $scope.linkBeingWorkedOn.child.edgeType = newEdgeType;
+            $scope.linkBeingWorkedOn = null;
+            $scope.formState.showLinkForm = false;
             $scope.$broadcast("refreshWorkflowChart");
         }
 
         $scope.cancelLinkForm = () => {
-            $scope.linkBeingEdited.parent.isLinkEditParent = false;
-            $scope.linkBeingEdited.child.isLinkEditChild = false;
-            $scope.linkBeingEdited = null;
-
-            $scope.editLink = false;
-
+            $scope.linkBeingWorkedOn.parent.isLinkEditParent = false;
+            $scope.linkBeingWorkedOn.child.isLinkEditChild = false;
+            $scope.linkBeingWorkedOn = null;
+            $scope.formState.showLinkForm = false;
             $scope.$broadcast("refreshWorkflowChart");
         };
 
@@ -1005,7 +546,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
         $scope.confirmDeleteNode = function () {
             if ($scope.nodeToBeDeleted) {
 
-                if ($scope.linkBeingEdited) {
+                if ($scope.linkBeingWorkedOn) {
                     $scope.cancelLinkForm();
                 }
 
@@ -1020,225 +561,16 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                     $scope.treeData.data.deletedNodes.push($scope.nodeToBeDeleted.nodeId);
                 }
 
-                if ($scope.nodeToBeDeleted.isActiveEdit) {
-                    resetNodeForm();
-                }
-
                 resetDeleteNode();
 
                 $scope.$broadcast("refreshWorkflowChart");
-
-                if ($scope.placeholderNode) {
-                    let edgeType = {
-                        label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
-                        value: "success"
-                    };
-
-                    if ($scope.placeholderNode.isRoot) {
-                        updateEdgeDropdownOptions('always');
-                        edgeType = {
-                            label: $scope.strings.get('workflow_maker.ALWAYS'),
-                            value: "always"
-                        };
-                    } else {
-                        updateEdgeDropdownOptions();
-                    }
-
-                    $scope.edgeType = edgeType;
-                } else if ($scope.nodeBeingEdited) {
-
-                    switch ($scope.nodeBeingEdited.edgeType) {
-                        case "always":
-                            $scope.edgeType = {
-                                label: $scope.strings.get('workflow_maker.ALWAYS'),
-                                value: "always"
-                            };
-                            if ($scope.nodeBeingEdited.isRoot) {
-                                updateEdgeDropdownOptions('always');
-                            } else {
-                                updateEdgeDropdownOptions();
-                            }
-                            break;
-                        case "success":
-                            $scope.edgeType = {
-                                label: $scope.strings.get('workflow_maker.ON_SUCCESS'),
-                                value: "success"
-                            };
-                            updateEdgeDropdownOptions();
-                            break;
-                        case "failure":
-                            $scope.edgeType = {
-                                label: $scope.strings.get('workflow_maker.ON_FAILURE'),
-                                value: "failure"
-                            };
-                            updateEdgeDropdownOptions();
-                            break;
-                    }
-                }
 
                 $scope.treeData.data.totalNodes--;
             }
 
         };
 
-        $scope.toggleFormTab = function (tab) {
-            if ($scope.workflowMakerFormConfig.activeTab !== tab) {
-                $scope.workflowMakerFormConfig.activeTab = tab;
-            }
-        };
-
-        function getEditNodeHelpMessage(workflowTemplate, selectedTemplate) {
-            if (selectedTemplate.type === "workflow_job_template") {
-                if (workflowTemplate.inventory) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
-                    }
-                }
-
-                if (workflowTemplate.ask_inventory_on_launch) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
-                    }
-                }
-            }
-
-            if (selectedTemplate.type === "job_template") {
-                if (workflowTemplate.inventory) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
-                    }
-
-                    return $scope.strings.get('workflow_maker.INVENTORY_WILL_NOT_OVERRIDE');
-                }
-
-                if (workflowTemplate.ask_inventory_on_launch) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
-                    }
-
-                    return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_NOT_OVERRIDE');
-                }
-            }
-
-            return null;
-        }
-
-        $scope.templateManuallySelected = function (selectedTemplate) {
-
-            if (promptWatcher) {
-                promptWatcher();
-            }
-
-            if (surveyQuestionWatcher) {
-                surveyQuestionWatcher();
-            }
-
-            if (credentialsWatcher) {
-                credentialsWatcher();
-            }
-
-            $scope.promptData = null;
-            $scope.editNodeHelpMessage = getEditNodeHelpMessage($scope.treeData.workflow_job_template_obj, selectedTemplate);
-
-            if (selectedTemplate.type === "job_template" || selectedTemplate.type === "workflow_job_template") {
-                let jobTemplate = selectedTemplate.type === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();
-
-                $q.all([jobTemplate.optionsLaunch(selectedTemplate.id), jobTemplate.getLaunch(selectedTemplate.id)])
-                    .then((responses) => {
-                        const launchConf = jobTemplate.getLaunchConf();
-
-                        if (selectedTemplate.type === 'job_template') {
-                            if ((!selectedTemplate.inventory && !launchConf.ask_inventory_on_launch) || !selectedTemplate.project) {
-                                $scope.selectedTemplateInvalid = true;
-                            } else {
-                                $scope.selectedTemplateInvalid = false;
-                            }
-
-                            if (launchConf.passwords_needed_to_start && launchConf.passwords_needed_to_start.length > 0) {
-                                $scope.credentialRequiresPassword = true;
-                            } else {
-                                $scope.credentialRequiresPassword = false;
-                            }
-                        }
-
-                        $scope.selectedTemplate = angular.copy(selectedTemplate);
-
-                        if (jobTemplate.canLaunchWithoutPrompt()) {
-                            $scope.showPromptButton = false;
-                            $scope.promptModalMissingReqFields = false;
-                        } else {
-                            $scope.showPromptButton = true;
-
-                            if (['job_template', 'workflow_job_template'].includes(selectedTemplate.type)) {
-                                if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory')) {
-                                    $scope.promptModalMissingReqFields = true;
-                                } else {
-                                    $scope.promptModalMissingReqFields = false;
-                                }
-                            } else {
-                                $scope.promptModalMissingReqFields = false;
-                            }
-
-                            if (launchConf.survey_enabled) {
-                                // go out and get the survey questions
-                                jobTemplate.getSurveyQuestions(selectedTemplate.id)
-                                    .then((surveyQuestionRes) => {
-
-                                        let processed = PromptService.processSurveyQuestions({
-                                            surveyQuestions: surveyQuestionRes.data.spec
-                                        });
-
-                                        $scope.missingSurveyValue = processed.missingSurveyValue;
-                                        $scope.promptData = {
-                                            launchConf,
-                                            launchOptions: responses[0].data,
-                                            surveyQuestions: processed.surveyQuestions,
-                                            template: selectedTemplate.id,
-                                            templateType: selectedTemplate.type,
-                                            prompts: PromptService.processPromptValues({
-                                                launchConf: responses[1].data,
-                                                launchOptions: responses[0].data
-                                            }),
-                                        };
-
-                                        surveyQuestionWatcher = $scope.$watch('promptData.surveyQuestions', () => {
-                                            let missingSurveyValue = false;
-                                            _.each($scope.promptData.surveyQuestions, (question) => {
-                                                if (question.required && (Empty(question.model) || question.model === [])) {
-                                                    missingSurveyValue = true;
-                                                }
-                                            });
-                                            $scope.missingSurveyValue = missingSurveyValue;
-                                        }, true);
-
-                                        watchForPromptChanges();
-                                    });
-                            } else {
-
-                                $scope.promptData = {
-                                    launchConf,
-                                    launchOptions: responses[0].data,
-                                    template: selectedTemplate.id,
-                                    templateType: selectedTemplate.type,
-                                    prompts: PromptService.processPromptValues({
-                                        launchConf: responses[1].data,
-                                        launchOptions: responses[0].data
-                                    }),
-                                };
-
-                                watchForPromptChanges();
-                            }
-                        }
-                    });
-            } else {
-                $scope.selectedTemplate = angular.copy(selectedTemplate);
-                $scope.selectedTemplateInvalid = false;
-                $scope.showPromptButton = false;
-                $scope.promptModalMissingReqFields = false;
-            }
-        };
-
-        $scope.toggleManualControls = function () {
+        $scope.toggleManualControls = function() {
             $scope.showManualControls = !$scope.showManualControls;
         };
 
@@ -1266,10 +598,6 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
         $scope.zoomToFitChart = function () {
             $scope.$broadcast('zoomToFitChart');
-        };
-
-        $scope.openPromptModal = function () {
-            $scope.promptData.triggerModalOpen = true;
         };
 
         let allNodes = [];
@@ -1310,11 +638,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                         // This is the last page
                         buildTreeFromNodes();
                     }
-                }, function ({
-                    data,
-                    status,
-                    config
-                }) {
+                }, function ({ data, status, config }) {
                     ProcessErrors($scope, data, status, null, {
                         hdr: $scope.strings.get('error.HEADER'),
                         msg: $scope.strings.get('error.CALL', {
@@ -1327,7 +651,5 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
         };
 
         getNodes();
-
-        updateEdgeDropdownOptions();
     }
 ];
