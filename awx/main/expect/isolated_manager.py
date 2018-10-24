@@ -38,7 +38,7 @@ class IsolatedManager(object):
         :param stdout_handle:       a file-like object for capturing stdout
         :param ssh_key_path:        a filepath where SSH key data can be read
         :param expect_passwords:    a dict of regular expression password prompts
-                                    to input values, i.e., {r'Password:\s*?$':
+                                    to input values, i.e., {r'Password:*?$':
                                     'some_password'}
         :param cancelled_callback:  a callable - which returns `True` or `False`
                                     - signifying if the job has been prematurely

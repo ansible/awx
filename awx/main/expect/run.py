@@ -71,7 +71,7 @@ def run_pexpect(args, cwd, env, logfile,
                                 - signifying if the job has been prematurely
                                   cancelled
     :param expect_passwords:    a dict of regular expression password prompts
-                                to input values, i.e., {r'Password:\s*?$':
+                                to input values, i.e., {r'Password:*?$':
                                 'some_password'}
     :param extra_update_fields: a dict used to specify DB fields which should
                                 be updated on the underlying model

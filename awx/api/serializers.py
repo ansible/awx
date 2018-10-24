@@ -4535,13 +4535,13 @@ class SchedulePreviewSerializer(BaseSerializer):
     # - COUNT > 999
     def validate_rrule(self, value):
         rrule_value = value
-        multi_by_month_day = ".*?BYMONTHDAY[\:\=][0-9]+,-*[0-9]+"
-        multi_by_month = ".*?BYMONTH[\:\=][0-9]+,[0-9]+"
-        by_day_with_numeric_prefix = ".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
-        match_count = re.match(".*?(COUNT\=[0-9]+)", rrule_value)
-        match_multiple_dtstart = re.findall(".*?(DTSTART(;[^:]+)?\:[0-9]+T[0-9]+Z?)", rrule_value)
-        match_native_dtstart = re.findall(".*?(DTSTART:[0-9]+T[0-9]+) ", rrule_value)
-        match_multiple_rrule = re.findall(".*?(RRULE\:)", rrule_value)
+        multi_by_month_day = r".*?BYMONTHDAY[\:\=][0-9]+,-*[0-9]+"
+        multi_by_month = r".*?BYMONTH[\:\=][0-9]+,[0-9]+"
+        by_day_with_numeric_prefix = r".*?BYDAY[\:\=][0-9]+[a-zA-Z]{2}"
+        match_count = re.match(r".*?(COUNT\=[0-9]+)", rrule_value)
+        match_multiple_dtstart = re.findall(r".*?(DTSTART(;[^:]+)?\:[0-9]+T[0-9]+Z?)", rrule_value)
+        match_native_dtstart = re.findall(r".*?(DTSTART:[0-9]+T[0-9]+) ", rrule_value)
+        match_multiple_rrule = re.findall(r".*?(RRULE\:)", rrule_value)
         if not len(match_multiple_dtstart):
             raise serializers.ValidationError(_('Valid DTSTART required in rrule. Value should start with: DTSTART:YYYYMMDDTHHMMSSZ'))
         if len(match_native_dtstart):

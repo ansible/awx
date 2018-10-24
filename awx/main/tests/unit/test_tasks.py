@@ -891,9 +891,9 @@ class TestJobCredentials(TestJobExecution):
             (k.pattern, v) for k, v in call_kwargs['expect_passwords'].items()
             if 'Vault' in k.pattern
         )
-        assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'pass@prod'
-        assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'pass@dev'
-        assert vault_passwords['Vault password:\\s*?$'] == ''
+        assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'pass@prod'  # noqa
+        assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'pass@dev'  # noqa
+        assert vault_passwords['Vault password:\\s*?$'] == ''  # noqa
         assert '--ask-vault-pass' not in ' '.join(args)
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)
@@ -935,9 +935,9 @@ class TestJobCredentials(TestJobExecution):
             (k.pattern, v) for k, v in call_kwargs['expect_passwords'].items()
             if 'Vault' in k.pattern
         )
-        assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'provided-at-launch@prod'
-        assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'provided-at-launch@dev'
-        assert vault_passwords['Vault password:\\s*?$'] == ''
+        assert vault_passwords['Vault password \(prod\):\\s*?$'] == 'provided-at-launch@prod'  # noqa
+        assert vault_passwords['Vault password \(dev\):\\s*?$'] == 'provided-at-launch@dev'  # noqa
+        assert vault_passwords['Vault password:\\s*?$'] == ''  # noqa
         assert '--ask-vault-pass' not in ' '.join(args)
         assert '--vault-id dev@prompt' in ' '.join(args)
         assert '--vault-id prod@prompt' in ' '.join(args)
