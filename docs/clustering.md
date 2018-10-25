@@ -306,7 +306,7 @@ Each Tower instance is made up of several different services working collaborati
 
 * HTTP Services - This includes the Tower application itself as well as external web services.
 * Callback Receiver - Whose job it is to receive job events from running Ansible jobs.
-* Celery - The worker queue, that processes and runs all jobs.
+* Dispatcher - The worker queue, that processes and runs all jobs.
 * RabbitMQ - Message Broker, this is used as a signaling mechanism for Celery as well as any event data propogated to the application.
 * Memcached - local caching service for the instance it lives on.
 

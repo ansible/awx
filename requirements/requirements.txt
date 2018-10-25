@@ -15,9 +15,7 @@ autobahn==18.3.1          # via daphne
 automat==0.6.0            # via twisted
 backports.functools-lru-cache==1.5  # via jaraco.functools
 baron==0.6.6              # via redbaron
-billiard==3.5.0.4         # via celery
 boto==2.47.0
-celery==4.2.1
 cffi==1.11.5              # via cryptography
 channels==1.1.8
 constantly==15.1.0        # via twisted
@@ -59,7 +57,7 @@ jaraco.stream==1.1.2      # via irc
 jaraco.text==1.10         # via irc, jaraco.collections
 jsonpickle==0.9.6         # via asgi-amqp
 jsonschema==2.6.0
-kombu==4.2.1              # via asgi-amqp, celery
+kombu==4.2.1              # via asgi-amqp,
 lxml==4.2.3
 more-itertools==4.1.0     # via irc, jaraco.functools, jaraco.itertools
 msgpack-python==0.5.5     # via asgi-amqp
@@ -84,7 +82,7 @@ python-memcached==1.59
 python-openid==2.2.5      # via social-auth-core
 python-radius==1.0
 python-saml==2.4.0
-pytz==2018.5              # via celery, django, irc, tempora, twilio
+pytz==2018.5              # via django, irc, tempora, twilio
 pyyaml==3.12              # via djangorestframework-yaml
 redbaron==0.6.3
 requests-futures==0.9.7

@@ -135,9 +135,7 @@ the following dates are saved in the database:
 * `main_schedule.dtend` - the _last_ datetime in the list of all occurrences (coerced to UTC)
 * `main_schedule.next_run` - the _next_ datetime in list after `utcnow()` (coerced to UTC)
 
-awx makes use of [Celery Periodic Tasks
-(celerybeat)](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)
-to run a periodic task that discovers new jobs that need to run at a regular
+awx runs a periodic task that discovers new jobs that need to run at a regular
 interval (by default, every 30 seconds).  When this task starts, it queries the
 database for Schedules where `Schedule.next_run` is between
 `scheduler_last_runtime()` and `utcnow()`.  For each of these, a new job is
