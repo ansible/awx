@@ -63,7 +63,7 @@ class Scheduler(object):
 
 
 def handler(state, signum, frame):
-    state.apply_async(state.scheduler_entry)
+    state.apply_async(state.scheduler_entry, expiration=state.scheduler_entry.period.total_seconds())
 
     state.scheduler.update_time()
     next_wakeup = state.scheduler.next_cycle() - state.scheduler.get_time()

@@ -65,7 +65,7 @@ class task:
                 return cls.apply_async(args, kwargs)
 
             @classmethod
-            def apply_async(cls, args=None, kwargs=None, queue=None, uuid=None, **kw):
+            def apply_async(cls, args=None, kwargs=None, queue=None, uuid=None, expiration=None, **kw):
                 task_id = uuid or str(uuid4())
                 args = args or []
                 kwargs = kwargs or {}
@@ -98,7 +98,8 @@ class task:
                                          exchange=exchange,
                                          declare=[exchange],
                                          delivery_mode="persistent",
-                                         routing_key=queue)
+                                         routing_key=queue,
+                                         expiration=expiration,)
                 return (obj, queue)
 
         # If the object we're wrapping *is* a class (e.g., RunJob), return

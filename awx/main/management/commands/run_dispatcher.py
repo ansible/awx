@@ -50,13 +50,13 @@ class Command(BaseCommand):
                     raise SystemExit()
                 return super(AWXScheduler, self).tick(*args, **kwargs)
 
-            def apply_async(self, entry, producer=None, advance=True, **kwargs):
+            def apply_async(self, entry, producer=None, advance=True, expiration=None, **kwargs):
                 for conn in connections.all():
                     # If the database connection has a hiccup, re-establish a new
                     # connection
                     conn.close_if_unusable_or_obsolete()
                 task = TaskWorker.resolve_callable(entry.task)
-                result, queue = task.apply_async()
+                result, queue = task.apply_async(expiration=expiration)
 
                 class TaskResult(object):
                     id = result['uuid']
