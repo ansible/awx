@@ -24,26 +24,14 @@ describe('<LoginPage />', () => {
     expect(submitButton.length).toBe(1);
   });
 
-  // initially renders empty username and password fields
-  // as well as state.username and state.password to empty strings
-  // initially sets state.error and state.loading to false
+  // initially renders empty username and password fields, sets empty error message and makes submit button not disabled
 
-  // on unmount, unmount is set to true
+  // typing into username and password fields (if the component is not unmounting) will clear out any error message
 
-  // typing into username and password fields (if the component is not unmounting)
-  // set state.username and state.password, as well as set state.error to empty string
-  // this is done through the handleUsernameChange and handlePasswordChange functions
-  // which both call safeSetState
+  // when the submit Button is clicked, as long as it is not disabled state.loading is set to true
+  // api.login is called with param 1 username and param 2 password
+  // if api.login returns an error, the state.error should be set to LOGIN_ERROR_MESSAGE, if the error object returned has response.status set to 401.
+  // regardless of error or not, after api.login returns, state.loading should be set to false
 
-  // when the submit Button is clicked, as long as it is not disabled (through state.loading
-  // being set tp true), state.loading is set to true (through safeSetState)
-  // api.login is called with param 1 username and param 2 password based on state
-  
-  // if api.login returns an error, the state.error should be set to LOGIN_ERROR_MESSAGE
-  // if the error object returned has response.status set to 401.
-
-  // regardless of error or not, after api.login returns state.loading should be set to false
-  // via safeSetState
-
-  // QUESTION: if api.login is valid, how does redirect happen?
+  // if api.isAuthenticated mock returns true, Redirect to / should be rendered
 });

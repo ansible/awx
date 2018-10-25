@@ -63,9 +63,9 @@ class LoginPage extends Component {
     const { username, password, loading, error } = this.state;
     const { logo, loginInfo } = this.props;
 
-    // if (api.isAuthenticated()) {
-    //   return (<Redirect to="/" />);
-    // }
+    if (api.isAuthenticated()) {
+      return (<Redirect to="/" />);
+    }
 
     return (
       <Login
