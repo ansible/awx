@@ -35,19 +35,13 @@ class Command(BaseCommand):
                                   'running jobs will run to completion first'))
 
     def beat(self):
-        from celery import Celery
-        from celery.beat import PersistentScheduler
-        from celery.apps import beat
+        from awx.main.beat import Beat
 
-        class AWXScheduler(PersistentScheduler):
+        class AWXScheduler(Beat):
 
             def __init__(self, *args, **kwargs):
                 self.ppid = os.getppid()
                 super(AWXScheduler, self).__init__(*args, **kwargs)
-
-            def setup_schedule(self):
-                super(AWXScheduler, self).setup_schedule()
-                self.update_from_dict(settings.CELERYBEAT_SCHEDULE)
 
             def tick(self, *args, **kwargs):
                 if os.getppid() != self.ppid:
@@ -69,14 +63,7 @@ class Command(BaseCommand):
 
                 return TaskResult()
 
-        app = Celery()
-        app.conf.BROKER_URL = settings.BROKER_URL
-        app.conf.CELERY_TASK_RESULT_EXPIRES = False
-        beat.Beat(
-            30,
-            app,
-            schedule='/var/lib/awx/beat.db', scheduler_cls=AWXScheduler
-        ).run()
+        AWXScheduler().start()
 
     def handle(self, *arg, **options):
         if options.get('status'):
