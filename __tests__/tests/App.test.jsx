@@ -17,10 +17,10 @@ describe('<App />', () => {
 
     const appWrapper = mount(<App />);
 
-    const redirectChild = appWrapper.find(Login);
-    expect(redirectChild.length).toBe(1);
-    const routeChild = appWrapper.find(Dashboard);
-    expect(routeChild.length).toBe(0);
+    const login = appWrapper.find(Login);
+    expect(login.length).toBe(1);
+    const dashboard = appWrapper.find(Dashboard);
+    expect(dashboard.length).toBe(0);
   });
 
   test('renders dashboard when authenticated', () => {
@@ -29,9 +29,9 @@ describe('<App />', () => {
 
     const appWrapper = mount(<App />);
 
-    const redirectChild = appWrapper.find(Dashboard);
-    expect(redirectChild.length).toBe(1);
-    const routeChild = appWrapper.find(Login);
-    expect(routeChild.length).toBe(0);
+    const dashboard = appWrapper.find(Dashboard);
+    expect(dashboard.length).toBe(1);
+    const login = appWrapper.find(Login);
+    expect(login.length).toBe(0);
   });
 });
