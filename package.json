@@ -2,7 +2,7 @@
   "name": "awx-react",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.jsx",
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.js --mode development",
     "test": "jest --watchAll --coverage",
