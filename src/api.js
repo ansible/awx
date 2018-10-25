@@ -11,6 +11,8 @@ const API_ORGANIZATIONS = `${API_V2}organizations/`;
 const CSRF_COOKIE_NAME = 'csrftoken';
 const CSRF_HEADER_NAME = 'X-CSRFToken';
 
+const LOGIN_CONTENT_TYPE = 'application/x-www-form-urlencoded';
+
 class APIClient {
   constructor () {
     this.http = axios.create({
@@ -19,10 +21,15 @@ class APIClient {
     });
   }
 
+  /* eslint class-methods-use-this: ["error", { "exceptMethods": ["getCookie"] }] */
+  getCookie () {
+    return document.cookie;
+  }
+
   isAuthenticated () {
     let authenticated = false;
 
-    const parsed = (`; ${document.cookie}`).split('; userLoggedIn=');
+    const parsed = (`; ${this.getCookie()}`).split('; userLoggedIn=');
 
     if (parsed.length === 2) {
       authenticated = parsed.pop().split(';').shift() === 'true';
@@ -37,7 +44,7 @@ class APIClient {
     const next = encodeURIComponent(redirect);
 
     const data = `username=${un}&password=${pw}&next=${next}`;
-    const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+    const headers = { 'Content-Type': LOGIN_CONTENT_TYPE };
 
     return this.http.get(API_LOGIN, { headers })
       .then(() => this.http.post(API_LOGIN, data, { headers }));

@@ -97,7 +97,7 @@ class LoginPage extends Component {
                   onChange={this.handleUsernameChange}
                 />
               </div>
-              <div className="pf-c-form__group">
+              <div className="pf-c-form__group" id="password">
                 <label className="pf-c-form__label" htmlFor="pw">
                   Password
                   <span className="pf-c-form__label__required" aria-hidden="true">&#42;</span>

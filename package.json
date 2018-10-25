@@ -2,10 +2,10 @@
   "name": "awx-react",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.jsx",
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.js --mode development",
-    "test": "echo \"No test specified\" && exit 0",
+    "test": "jest --watchAll --coverage",
     "lint": "./node_modules/eslint/bin/eslint.js src/**/*.js src/**/*.jsx"
   },
   "keywords": [],
@@ -14,16 +14,20 @@
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.0",
+    "babel-jest": "^23.6.0",
     "babel-loader": "^7.1.5",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "css-loader": "^1.0.0",
+    "enzyme": "^3.7.0",
+    "enzyme-adapter-react-16": "^1.6.0",
     "eslint": "^5.6.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.11.1",
     "file-loader": "^2.0.0",
+    "jest": "^23.6.0",
     "node-sass": "^4.9.3",
     "react-hot-loader": "^4.3.3",
     "sass-loader": "^7.1.0",
@@ -42,5 +46,25 @@
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.0"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}"
+    ],
+    "moduleNameMapper": {
+      "^[./a-zA-Z0-9$_-]+\\.svg$": "<rootDir>/__tests__/stubs/svgStub.js"
+    },
+    "setupTestFrameworkScriptFile": "<rootDir>/enzyme.config.js",
+    "testMatch": [
+      "<rootDir>/__tests__/tests/**/*.{js,jsx}"
+    ],
+    "testEnvironment": "jsdom",
+    "testURL": "http://127.0.0.1:3001",
+    "transform": {
+      "^.+\\.(js|jsx)$": "<rootDir>/node_modules/babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
+    ]
   }
 }

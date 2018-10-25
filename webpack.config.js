@@ -1,9 +1,10 @@
 const webpack = require('webpack');
+
 const TARGET_PORT = 8043;
 const TARGET = `https://localhost:${TARGET_PORT}`;
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/index.jsx',
   module: {
     rules: [
       {
