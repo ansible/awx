@@ -66,10 +66,5 @@
     "transformIgnorePatterns": [
       "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
     ]
-  },
-  "babel": {
-    "presets": [
-      "react-app"
-    ]
   }
 }
