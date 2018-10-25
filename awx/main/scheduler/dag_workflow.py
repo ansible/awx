@@ -12,8 +12,14 @@ class WorkflowDAG(SimpleDAG):
         if workflow_job:
             self._init_graph(workflow_job)
 
-    def _init_graph(self, workflow_job):
-        node_qs = workflow_job.workflow_job_nodes
+    def _init_graph(self, workflow_job_or_jt):
+        if hasattr(workflow_job_or_jt, 'workflow_job_template_nodes'):
+            node_qs = workflow_job_or_jt.workflow_job_template_nodes
+        elif hasattr(workflow_job_or_jt, 'workflow_job_nodes'):
+            node_qs = workflow_job_or_jt.workflow_job_nodes
+        else:
+            raise RuntimeError("Unexpected object {} {}".format(type(workflow_job_or_jt), workflow_job_or_jt))
+
         workflow_nodes = node_qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes').all()
         for workflow_node in workflow_nodes:
             self.add_node(workflow_node)
