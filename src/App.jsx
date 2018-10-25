@@ -35,8 +35,6 @@ import api from './api';
 
 import About from './components/About';
 import TowerLogo from './components/TowerLogo';
-// import AuthenticatedRoute from './components/AuthenticatedRoute';
-// import UnauthenticatedRoute from './components/UnauthenticatedRoute';
 import ConditionalRedirect from './components/ConditionalRedirect';
 
 import Applications from './pages/Applications';
