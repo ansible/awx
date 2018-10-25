@@ -69,7 +69,7 @@ from rest_framework.exceptions import PermissionDenied
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error', 'handle_work_success', 'apply_cluster_membership_policies',
            'update_inventory_computed_fields', 'update_host_smart_inventory_memberships',
-           'send_notifications', 'run_administrative_checks', 'purge_old_stdout_files']
+           'send_notifications', 'run_administrative_checks',]
 
 HIDDEN_PASSWORD = '**********'
 
@@ -300,15 +300,6 @@ def run_administrative_checks():
                   _("Ansible Tower license will expire soon"),
                   tower_admin_emails,
                   fail_silently=True)
-
-
-@task(queue=get_local_queuename)
-def purge_old_stdout_files():
-    nowtime = time.time()
-    for f in os.listdir(settings.JOBOUTPUT_ROOT):
-        if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT,f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
-            os.unlink(os.path.join(settings.JOBOUTPUT_ROOT,f))
-            logger.info(six.text_type("Removing {}").format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
 
 
 @task(queue=get_local_queuename)
