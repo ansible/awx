@@ -15,24 +15,6 @@ from awx.main.models.organization import Organization
 from awx.main.models.schedules import Schedule
 
 
-@pytest.fixture
-def jt_linked(job_template_factory, credential, net_credential, vault_credential):
-    '''
-    A job template with a reasonably complete set of related objects to
-    test RBAC and other functionality affected by related objects
-    '''
-    objects = job_template_factory(
-        'testJT', organization='org1', project='proj1', inventory='inventory1',
-        credential='cred1')
-    jt = objects.job_template
-    jt.credentials.add(vault_credential)
-    jt.save()
-    # Add AWS cloud credential and network credential
-    jt.credentials.add(credential)
-    jt.credentials.add(net_credential)
-    return jt
-
-
 @mock.patch.object(BaseAccess, 'check_license', return_value=None)
 @pytest.mark.django_db
 def test_job_template_access_superuser(check_license, user, deploy_jobtemplate):

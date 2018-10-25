@@ -1,11 +1,16 @@
 import itertools
 import pytest
+import six
 
 # Django
 from django.contrib.contenttypes.models import ContentType
 
 # AWX
-from awx.main.models import UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate, Project, WorkflowJob, Schedule
+from awx.main.models import (
+    UnifiedJobTemplate, Job, JobTemplate, WorkflowJobTemplate,
+    Project, WorkflowJob, Schedule,
+    Credential
+)
 
 
 @pytest.mark.django_db
@@ -62,6 +67,21 @@ class TestCreateUnifiedJob:
         assert second_job.inventory == job_with_links.inventory
         assert second_job.limit == 'my_server'
         assert net_credential in second_job.credentials.all()
+
+    def test_job_relaunch_modifed_jt(self, jt_linked):
+        # Replace all credentials with a new one of same type
+        new_creds = []
+        for cred in jt_linked.credentials.all():
+            new_creds.append(Credential.objects.create(
+                name=six.text_type(cred.name) + six.text_type('_new'),
+                credential_type=cred.credential_type,
+                inputs=cred.inputs
+            ))
+        job = jt_linked.create_unified_job()
+        jt_linked.credentials.clear()
+        jt_linked.credentials.add(*new_creds)
+        relaunched_job = job.copy_unified_job()
+        assert set(relaunched_job.credentials.all()) == set(new_creds)
 
 
 @pytest.mark.django_db
