@@ -45,6 +45,7 @@ RUN chmod -R g+w /var/log/tower
 RUN mkdir -p /etc/tower
 COPY {{ awx_sdist_file }} /tmp/{{ awx_sdist_file }}
 RUN OFFICIAL=yes pip install /tmp/{{ awx_sdist_file }}
+RUN rm -rf /tmp/*
 
 RUN echo "{{ awx_version }}" > /var/lib/awx/.tower_version
 ADD nginx.conf /etc/nginx/nginx.conf
