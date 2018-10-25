@@ -87,6 +87,7 @@ from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata, JobTypeMetadata
 from awx.main.constants import ACTIVE_STATES
+from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.views.mixin import (
     ActivityStreamEnforcementMixin,
     SystemTrackingEnforcementMixin,
@@ -141,6 +142,9 @@ from awx.api.views.root import ( # noqa
     ApiV1PingView,
     ApiV1ConfigView,
 )
+
+
+logger = logging.getLogger('awx.api.views')
 
 
 def api_exception_handler(exc, context):
@@ -2950,33 +2954,17 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
         if created:
             return None
 
-        workflow_nodes = parent.workflow_job_template.workflow_job_template_nodes.all().\
-            prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
-        graph = {}
-        for workflow_node in workflow_nodes:
-            graph[workflow_node.pk] = dict(node_object=workflow_node, metadata={'parent': None, 'traversed': False})
+        if parent.id == sub.id:
+            return {"Error": _("Cycle detected.")}
 
-        find = False
-        for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
-            for workflow_node in workflow_nodes:
-                parent_node = graph[workflow_node.pk]
-                related_nodes = getattr(parent_node['node_object'], node_type).all()
-                for related_node in related_nodes:
-                    sub_node = graph[related_node.pk]
-                    sub_node['metadata']['parent'] = parent_node
-                    if not find and parent == workflow_node and sub == related_node and self.relationship == node_type:
-                        find = True
-        if not find:
-            sub_node = graph[sub.pk]
-            parent_node = graph[parent.pk]
-            sub_node['metadata']['parent'] = parent_node
-            iter_node = sub_node
-            while iter_node is not None:
-                if iter_node['metadata']['traversed']:
-                    return {"Error": _("Cycle detected.")}
-                iter_node['metadata']['traversed'] = True
-                iter_node = iter_node['metadata']['parent']
+        parent_node_type_relationship = getattr(parent, self.relationship)
+        parent_node_type_relationship.add(sub)
+        parent.save()
 
+        graph = WorkflowDAG(parent.workflow_job_template)
+        if graph.has_cycle():
+            parent_node_type_relationship.remove(sub)
+            return {"Error": _("Cycle detected.")}
         return None
 
 
