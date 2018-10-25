@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.js --mode development",
-    "test": "jest --watchAll",
+    "test": "jest --watchAll --coverage",
     "lint": "./node_modules/eslint/bin/eslint.js src/**/*.js src/**/*.jsx"
   },
   "keywords": [],
