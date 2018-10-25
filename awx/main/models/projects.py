@@ -466,6 +466,14 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin, CustomVirtualEn
             models.Q(ProjectUpdate___project=self)
         )
 
+    def delete(self, *args, **kwargs):
+        path_to_delete = self.get_project_path(check_if_exists=False)
+        r = super(Project, self).delete(*args, **kwargs)
+        if self.scm_type and path_to_delete:  # non-manual, concrete path
+            from awx.main.tasks import delete_project_files
+            delete_project_files.delay(path_to_delete)
+        return r
+
 
 class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManagerProjectUpdateMixin):
     '''

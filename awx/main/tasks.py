@@ -251,6 +251,24 @@ def handle_setting_changes(setting_keys):
     cache.delete_many(cache_keys)
 
 
+@task(queue='tower_broadcast_all', exchange_type='fanout')
+def delete_project_files(project_path):
+    # TODO: possibly implement some retry logic
+    lock_file = project_path + '.lock'
+    if os.path.exists(project_path):
+        try:
+            shutil.rmtree(project_path)
+            logger.info(six.text_type('Success removing project files {}').format(project_path))
+        except Exception:
+            logger.exception(six.text_type('Could not remove project directory {}').format(project_path))
+    if os.path.exists(lock_file):
+        try:
+            os.remove(lock_file)
+            logger.debug(six.text_type('Success removing {}').format(lock_file))
+        except Exception:
+            logger.exception(six.text_type('Could not remove lock file {}').format(lock_file))
+
+
 @task()
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
