@@ -1,13 +1,8 @@
 import signal
 from django.conf import settings
-from collections import namedtuple
 from datetime import datetime
-from datetime import timedelta
-from awx.main.dispatch.worker.task import TaskWorker
 from functools import partial
 
-
-schedules = []
 
 class ScheduleEntry(object):
     def __init__(self, task, period, expiration):
@@ -66,6 +61,7 @@ class Scheduler(object):
 
         return next_cycle_smallest
 
+
 def handler(state, signum, frame):
     state.apply_async(state.scheduler_entry)
 
@@ -78,6 +74,7 @@ def handler(state, signum, frame):
 
     signal.setitimer(signal.ITIMER_REAL, next_wakeup_seconds)
 
+
 class Beat(object):
     def __init__(self, *args, **kwargs):
         self.scheduler = Scheduler()
@@ -85,8 +82,8 @@ class Beat(object):
 
         for k,v in settings.CELERYBEAT_SCHEDULE.iteritems():
             self.scheduler.add_entry(ScheduleEntry(v.get('task', None),
-                                                       v.get('schedule', None),
-                                                       v.get('options', {}).get('expires', None)))
+                                                   v.get('schedule', None),
+                                                   v.get('options', {}).get('expires', None)))
 
     def start(self):
         signal.signal(signal.SIGALRM, partial(handler, self))
