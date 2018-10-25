@@ -4,19 +4,20 @@ import {
   Redirect
 } from 'react-router-dom';
 
-const ConditionalRedirect = ({ component: Component, shouldRedirect, redirectPath, ...props }) => {
-  if (shouldRedirect()) {
-    return (
-      <Redirect to={{
-        pathname: redirectPath,
-        state: { from: props.location }
-      }}/>
-    );
-  } else {
-    return (
-      <Route {...props} render={props => (<Component {...props}/>)} />
-    );
-  }
-};
+const ConditionalRedirect = ({
+  component: Component,
+  shouldRedirect,
+  redirectPath,
+  location,
+  ...props
+}) => (shouldRedirect() ? (
+  <Redirect to={{
+    pathname: redirectPath,
+    state: { from: location }
+  }}
+  />
+) : (
+  <Route {...props} render={rest => (<Component {...rest} />)} />
+));
 
 export default ConditionalRedirect;
