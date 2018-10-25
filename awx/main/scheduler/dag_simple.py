@@ -23,9 +23,9 @@ class SimpleDAG(object):
         def run_status(obj):
             dnr = "RUN"
             status = "NA"
-            if obj.job:
+            if hasattr(obj, 'job') and obj.job and hasattr(obj.job, 'status'):
                 status = obj.job.status
-            if obj.do_not_run is True:
+            if hasattr(obj, 'do_not_run') and obj.do_not_run is True:
                 dnr = "DNR"
             return "{}_{}_{}".format(dnr, status, obj.id)
 
@@ -36,7 +36,7 @@ class SimpleDAG(object):
         for n in self.nodes:
             obj = n['node_object']
             status = "NA"
-            if obj.job:
+            if hasattr(obj, 'job') and obj.job:
                 status = obj.job.status
             color = 'black'
             if status == 'successful':
@@ -65,8 +65,12 @@ class SimpleDAG(object):
     def add_edge(self, from_obj, to_obj, label=None):
         from_obj_ord = self.find_ord(from_obj)
         to_obj_ord = self.find_ord(to_obj)
-        if from_obj_ord is None or to_obj_ord is None:
-            raise LookupError("Object not found")
+        if from_obj_ord is None and to_obj_ord is None:
+            raise LookupError("From object {} and to object not found".format(from_obj, to_obj))
+        elif from_obj_ord is None:
+            raise LookupError("From object not found {}".format(from_obj))
+        elif to_obj_ord is None:
+            raise LookupError("To object not found {}".format(to_obj))
         self.edges.append((from_obj_ord, to_obj_ord, label))
 
     def add_edges(self, edgelist):
@@ -116,3 +120,29 @@ class SimpleDAG(object):
             if len(self.get_dependents(n['node_object'])) < 1:
                 roots.append(n)
         return roots
+
+    def has_cycle(self):
+        node_objs = [node['node_object'] for node in self.get_root_nodes()]
+        nodes_visited = set([])
+        path = set([])
+        stack = node_objs
+        path_direction = 'DOWN'
+
+        while stack:
+            node_obj = stack.pop()
+
+            children = self.get_dependencies(node_obj)
+            for child in children:
+                if child['node_object'] not in nodes_visited:
+                    stack.append(child['node_object'])
+            if node_obj in path:
+                return True
+
+            if not children:
+                path_direction = 'UP'
+
+            if path_direction == 'DOWN':
+                path.add(node_obj)
+            elif path_direction == 'UP':
+                path.discard(node_obj)
+        return False
