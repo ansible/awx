@@ -50,6 +50,7 @@ class WorkflowDAG(SimpleDAG):
         return [n['node_object'] for n in nodes_found]
 
     def cancel_node_jobs(self):
+        cancel_finished = True
         for n in self.nodes:
             obj = n['node_object']
             job = obj.job
@@ -57,7 +58,9 @@ class WorkflowDAG(SimpleDAG):
             if not job:
                 continue
             elif job.can_cancel:
+                cancel_finished = False
                 job.cancel()
+        return cancel_finished
 
     def is_workflow_done(self):
         root_nodes = self.get_root_nodes()
