@@ -1,5 +1,5 @@
 //
-// Header
+// page layout
 //
 
 .pf-l-page__header {
@@ -10,9 +10,10 @@
 }
 
 .pf-l-page__header-brand {
+  display: flex;
   align-self: center;
   height: 60px;
-  max-width: 190px;
+  max-width: 255px;
   padding: 0px;
   margin: 0px;
 }
@@ -20,7 +21,7 @@
 .pf-l-page__header-tools {
   align-self: center;
   height: 60px;
-  padding-left: 190px;
+  padding-left: 255px;
 
   .fa-user:hover {
     // temporary dev logout
@@ -28,12 +29,8 @@
   }
 }
 
-.pf-l-toolbar {
-  align-self: center;
-  height: 60px;
-}
-
 .pf-l-page__header-brand-link {
+  max-width: 85px;
   align-self: center;
 }
 
@@ -55,41 +52,48 @@
   }
 }
 
-//
-// Side Navigation
-//
-
-.pf-c-nav {
-  overflow-y: auto;
-}
-
-.pf-c-nav__section {
-  --pf-c-nav__section--MarginTop: 8px;
-}
-
 .pf-l-page__sidebar{
-  --pf-l-page__sidebar--Width--lg: 190px;
-}
+  --pf-l-page__sidebar--Width--lg: 255px;
 
-.pf-c-nav__section + .pf-c-nav__section {
-  --pf-c-nav__section--MarginTop: 8px;
-}
+  .pf-c-nav {
+    overflow-y: auto;
+  
+    .pf-c-nav__section {
+      --pf-c-nav__section--MarginTop: 8px;
+    }
+    
+    .pf-c-nav__section + .pf-c-nav__section {
+      --pf-c-nav__section--MarginTop: 8px;
+    }
+    
+    .pf-c-nav__simple-list .pf-c-nav__link {
+      --pf-c-nav__simple-list-link--PaddingLeft: 24px;
+      --pf-c-nav__simple-list-link--PaddingBottom: 6px;
+      --pf-c-nav__simple-list-link--PaddingTop: 6px;
+    }
+    
+    .pf-c-nav__section-title {
+      --pf-c-nav__section-title--PaddingLeft: 24px;
+    }
 
-.pf-c-nav__simple-list .pf-c-nav__link {
-  --pf-c-nav__simple-list-link--PaddingLeft: 24px;
-  --pf-c-nav__simple-list-link--PaddingBottom: 6px;
-  --pf-c-nav__simple-list-link--PaddingTop: 6px;
+    .pf-c-nav__link {
+      display: flex;
+      align-items: center;
+      padding-right: 64px;
+    }
+  }
 }
-
-.pf-c-nav__section-title {
-  --pf-c-nav__section-title--PaddingLeft: 24px;
-}
-
-//
-// Page
-//
 
 .pf-l-page__main-section {
   --pf-l-page__main-section--PaddingTop: 11px;
   --pf-l-page__main-section--PaddingLeft: 11px;
+}
+
+//
+// toolbar layout
+//
+
+.pf-l-toolbar {
+  align-self: center;
+  height: 60px;
 }
