@@ -5,17 +5,17 @@ import {
   Title,
 } from '@patternfly/react-core';
 
-class Settings extends Component {
+class SystemSettings extends Component {
   render () {
     const { light, medium } = PageSectionVariants;
 
     return (
       <Fragment>
-        <PageSection variant={light}><Title size="2xl">Settings</Title></PageSection>
+        <PageSection variant={light}><Title size="2xl">System Settings</Title></PageSection>
         <PageSection variant={medium} />
       </Fragment>
     );
   }
 }
 
-export default Settings;
+export default SystemSettings;
