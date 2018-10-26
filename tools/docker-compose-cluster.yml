@@ -14,6 +14,7 @@ services:
       - "1936:1936"
       - "15672:15672"
   awx_1:
+    user: ${CURRENT_UID}
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_1
@@ -30,6 +31,7 @@ services:
     ports:
       - "5899-5999:5899-5999"
   awx_2:
+    user: ${CURRENT_UID}
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_2
@@ -46,6 +48,7 @@ services:
     ports:
       - "6899-6999:6899-6999"
   awx_3:
+    user: ${CURRENT_UID}
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_3
