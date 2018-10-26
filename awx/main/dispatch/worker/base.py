@@ -125,7 +125,7 @@ class BaseWorker(object):
             except QueueEmpty:
                 continue
             except Exception as e:
-                logger.error("Exception on worker, restarting: " + str(e))
+                logger.error("Exception on worker {}, restarting: ".format(idx) + str(e))
                 continue
             try:
                 self.perform_work(body, *args)
