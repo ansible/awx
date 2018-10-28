@@ -98,6 +98,12 @@ module.exports = {
         projects.waitForElementVisible('div.spinny', 120000);
         projects.waitForElementNotVisible('div.spinny');
         projects.expect.element('i[class$="success"]').visible;
+
+        projects.expect.element('#project_cancel_btn').visible;
+        projects.click('#project_cancel_btn');
+        client.refresh();
+        client.waitForElementVisible('div.spinny');
+        client.waitForElementNotVisible('div.spinny');
     },
     'create inventory': client => {
         const inventories = client.page.inventories();
