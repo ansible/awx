@@ -37,11 +37,11 @@
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
-    "@patternfly/patternfly-next": "^1.0.58",
-    "@patternfly/react-core": "1.23.0",
-    "@patternfly/react-icons": "^2.5.4",
+    "@patternfly/patternfly-next": "^1.0.64",
+    "@patternfly/react-core": "^1.28.1",
+    "@patternfly/react-icons": "^2.6.0",
     "@patternfly/react-styles": "^2.3.0",
-    "@patternfly/react-tokens": "^1.5.5",
+    "@patternfly/react-tokens": "^1.6.0",
     "axios": "^0.18.0",
     "babel-preset-env": "^1.7.0",
     "react": "^16.4.1",
