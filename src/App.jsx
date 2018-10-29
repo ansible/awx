@@ -1,8 +1,6 @@
 import React, { Fragment } from 'react';
 import {
   HashRouter as Router,
-  Route,
-  Link,
   Redirect,
   Switch,
 } from 'react-router-dom';
@@ -10,30 +8,22 @@ import {
 import {
   BackgroundImage,
   BackgroundImageSrc,
-  Brand,
   Button,
   ButtonVariant,
   Nav,
   NavExpandable,
-  NavGroup,
+  NavList,
   NavItem,
   Page,
   PageHeader,
-  PageSection,
-  PageSectionVariants,
-  PageSidebar,
-  TextContent,
-  Text,
-  Toolbar,
-  ToolbarGroup,
-  ToolbarItem
+  PageSidebar
 } from '@patternfly/react-core';
+import { UserIcon } from '@patternfly/react-icons';
 import { global_breakpoint_md as breakpointMd } from '@patternfly/react-tokens';
-import { css } from '@patternfly/react-styles';
 
 import api from './api';
 
-import About from './components/About';
+// import About from './components/About';
 import TowerLogo from './components/TowerLogo';
 import ConditionalRedirect from './components/ConditionalRedirect';
 
@@ -52,63 +42,69 @@ import Organizations from './pages/Organizations';
 import Portal from './pages/Portal';
 import Projects from './pages/Projects';
 import Schedules from './pages/Schedules';
-import Settings from './pages/Settings';
+import AuthSettings from './pages/AuthSettings';
+import JobsSettings from './pages/JobsSettings';
+import SystemSettings from './pages/SystemSettings';
+import UISettings from './pages/UISettings';
+import License from './pages/License';
 import Teams from './pages/Teams';
 import Templates from './pages/Templates';
 import Users from './pages/Users';
 
 class App extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props);
 
+    const isNavOpen = typeof window !== 'undefined' && window.innerWidth >= parseInt(breakpointMd.value, 10);
     this.state = {
-      activeItem: window.location.hash.split("#/").pop().split("/").shift(),
-      isNavOpen: (typeof window !== 'undefined' &&
-        window.innerWidth >= parseInt(breakpointMd.value, 10)),
+      isNavOpen,
+      activeGroup: 'views_group',
+      activeItem: 'views_group_dashboard'
     };
-
-    this.state.activeGroup = this.state.activeItem.startsWith("settings_group_") ? "settings": "";
   }
+
+  onNavSelect = result => {
+    this.setState({
+      activeItem: result.itemId,
+      activeGroup: result.groupId
+    });
+  };
 
   onNavToggle = () => {
-    const { isNavOpen } = this.state;
-
-    this.setState({ isNavOpen: !isNavOpen });
-  }
-
-  onNavSelect = ({ groupId, itemId }) => {
-    this.setState({ activeGroup: groupId || "", activeItem: itemId });
+    this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
   };
 
   onLogoClick = () => {
-    this.setState({ activeItem: "dashboard" });
+    this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
   }
 
   onDevLogout = () => {
     api.logout()
       .then(() => {
-        this.setState({ activeItem: "dashboard" });
-      })
+        this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
+      });
   }
 
-  render() {
+  render () {
     const { activeItem, activeGroup, isNavOpen } = this.state;
     const { logo, loginInfo } = this.props;
 
     return (
       <Router>
         <Fragment>
-          <BackgroundImage src={{
-            [BackgroundImageSrc.lg]: '/assets/images/pfbg_1200.jpg',
-            [BackgroundImageSrc.md]: '/assets/images/pfbg_992.jpg',
-            [BackgroundImageSrc.md2x]: '/assets/images/pfbg_992@2x.jpg',
-            [BackgroundImageSrc.sm]: '/assets/images/pfbg_768.jpg',
-            [BackgroundImageSrc.sm2x]: '/assets/images/pfbg_768@2x.jpg',
-            [BackgroundImageSrc.xl]: '/assets/images/pfbg_2000.jpg',
-            [BackgroundImageSrc.xs]: '/assets/images/pfbg_576.jpg',
-            [BackgroundImageSrc.xs2x]: '/assets/images/pfbg_576@2x.jpg',
-            [BackgroundImageSrc.filter]: '/assets/images/background-filter.svg'
-          }} />
+          <BackgroundImage
+            src={{
+              [BackgroundImageSrc.lg]: '/assets/images/pfbg_1200.jpg',
+              [BackgroundImageSrc.md]: '/assets/images/pfbg_992.jpg',
+              [BackgroundImageSrc.md2x]: '/assets/images/pfbg_992@2x.jpg',
+              [BackgroundImageSrc.sm]: '/assets/images/pfbg_768.jpg',
+              [BackgroundImageSrc.sm2x]: '/assets/images/pfbg_768@2x.jpg',
+              [BackgroundImageSrc.xl]: '/assets/images/pfbg_2000.jpg',
+              [BackgroundImageSrc.xs]: '/assets/images/pfbg_576.jpg',
+              [BackgroundImageSrc.xs2x]: '/assets/images/pfbg_576@2x.jpg',
+              [BackgroundImageSrc.filter]: '/assets/images/background-filter.svg'
+            }}
+          />
           <Switch>
             <ConditionalRedirect shouldRedirect={() => api.isAuthenticated()} redirectPath="/" path="/login" component={() => <Login logo={logo} loginInfo={loginInfo} />} />
             <Fragment>
@@ -116,7 +112,7 @@ class App extends React.Component {
                 header={(
                   <PageHeader
                     logo={<TowerLogo onClick={this.onLogoClick} />}
-                    avatar={<i className="fas fa-user" onClick={this.onDevLogout}></i>}
+                    avatar={<Button id="button-logout" aria-label="Logout" variant={ButtonVariant.plain} onClick={this.onDevLogout} onKeyDown={event => { if (event.keycode === 13) { this.onDevLogout(); } }}><UserIcon /></Button>}
                     showNavToggle
                     onNavToggle={this.onNavToggle}
                   />
@@ -125,50 +121,217 @@ class App extends React.Component {
                   <PageSidebar
                     isNavOpen={isNavOpen}
                     nav={(
-                      <Nav aria-label="Primary Navigation">
-                        <NavGroup title="Views">
-                          <NavItem to="#/home" itemId="dashboard" isActive={activeItem ==='home'}>Dashboard</NavItem>
-                          <NavItem to="#/jobs" itemId="jobs" isActive={activeItem === 'jobs'}>Jobs</NavItem>
-                          <NavItem to="#/schedules" itemId="schedules" isActive={activeItem === 'schedules'}>Schedules</NavItem>
-                          <NavItem to="#/portal" itemId="portal" isActive={activeItem === 'portal'}>My View</NavItem>
-                        </NavGroup>
-                        <NavGroup title="Resources">
-                          <NavItem to="#/templates" itemId="templates" isActive={activeItem === 'templates'}>Templates</NavItem>
-                          <NavItem to="#/credentials" itemId="credentials" isActive={activeItem === 'credentials'}>Credentials</NavItem>
-                          <NavItem to="#/projects" itemId="projects" isActive={activeItem === 'projects'}>Projects</NavItem>
-                          <NavItem to="#/inventories" itemId="inventories" isActive={activeItem === 'inventories'}>Inventories</NavItem>
-                          <NavItem to="#/inventory_scripts" itemId="inventory_scripts" isActive={activeItem === 'inventory_scripts'}>Inventory Scripts</NavItem>
-                        </NavGroup>
-                        <NavGroup title="Access">
-                          <NavItem to="#/organizations" itemId="organizations" isActive={activeItem === 'organizations'}>Organizations</NavItem>
-                          <NavItem to="#/users" itemId="users" isActive={activeItem === 'users'}>Users</NavItem>
-                          <NavItem to="#/teams" itemId="teams" isActive={activeItem === 'teams'}>Teams</NavItem>
-                        </NavGroup>
-                        <NavGroup title="Administration">
-                          <NavItem to="#/credential_types" itemId="credential_types" isActive={activeItem === 'credential_types'}>Credential Types</NavItem>
-                          <NavItem to="#/notification_templates" itemId="notification_templates" isActive={activeItem === 'notification_templates'}>Notifications</NavItem>
-                          <NavItem to="#/management_jobs" itemId="management_jobs" isActive={activeItem === 'management_jobs'}>Management Jobs</NavItem>
-                          <NavItem to="#/instance_groups" itemId="instance_groups" isActive={activeItem === 'instance_groups'}>Instance Groups</NavItem>
-                          <NavItem to="#/applications" itemId="applications" isActive={activeItem === 'applications'}>Applications</NavItem>
-                          <NavExpandable title="Settings" groupId="settings_group" isActive={activeGroup === 'settings_group'}>
-                            <NavItem to="#/settings/auth" groupId="settings_group" itemId="settings_group_auth" isActive={activeItem === 'settings_group_auth'}>
-                              Authentication
+                      <Nav onSelect={this.onNavSelect} aria-label="Primary Navigation">
+                        <NavList>
+                          <NavExpandable
+                            title="Views"
+                            groupId="views_group"
+                            isActive={activeGroup === 'views_group'}
+                            isExpanded={activeGroup === 'views_group'}
+                          >
+                            <NavItem
+                              to="#/home"
+                              groupId="views_group"
+                              itemId="views_group_dashboard"
+                              isActive={activeItem === 'views_group_dashboard'}
+                            >
+                              Dashboard
                             </NavItem>
-                            <NavItem to="#/settings/jobs" groupId="settings_group" itemId="settings_group_jobs" isActive={activeItem === 'settings_group_jobs'}>
+                            <NavItem
+                              to="#/jobs"
+                              groupId="views_group"
+                              itemId="views_group_jobs"
+                              isActive={activeItem === 'views_group_jobs'}
+                            >
                               Jobs
                             </NavItem>
-                            <NavItem to="#/settings/system" groupId="settings_group" itemId="settings_group_system" isActive={activeItem === 'settings_group_system'}>
+                            <NavItem
+                              to="#/schedules"
+                              groupId="views_group"
+                              itemId="views_group_schedules"
+                              isActive={activeItem === 'views_group_schedules'}
+                            >
+                              Schedules
+                            </NavItem>
+                            <NavItem
+                              to="#/portal"
+                              groupId="views_group"
+                              itemId="views_group_portal"
+                              isActive={activeItem === 'views_group_portal'}
+                            >
+                              My View
+                            </NavItem>
+                          </NavExpandable>
+                          <NavExpandable
+                            title="Resources"
+                            groupId="resources_group"
+                            isActive={activeGroup === 'resources_group'}
+                            isExpanded={activeGroup === 'resources_group'}
+                          >
+                            <NavItem
+                              to="#/templates"
+                              groupId="resources_group"
+                              itemId="resources_group_templates"
+                              isActive={activeItem === 'resources_group_templates'}
+                            >
+                              Templates
+                            </NavItem>
+                            <NavItem
+                              to="#/credentials"
+                              groupId="resources_group"
+                              itemId="resources_group_credentials"
+                              isActive={activeItem === 'resources_group_credentials'}
+                            >
+                              Credentials
+                            </NavItem>
+                            <NavItem
+                              to="#/projects"
+                              groupId="resources_group"
+                              itemId="resources_group_projects"
+                              isActive={activeItem === 'resources_group_projects'}
+                            >
+                              Projects
+                            </NavItem>
+                            <NavItem
+                              to="#/inventories"
+                              groupId="resources_group"
+                              itemId="resources_group_inventories"
+                              isActive={activeItem === 'resources_group_inventories'}
+                            >
+                              Inventories
+                            </NavItem>
+                            <NavItem
+                              to="#/inventory_scripts"
+                              groupId="resources_group"
+                              itemId="resources_group_inventory_scripts"
+                              isActive={activeItem === 'resources_group_inventory_scripts'}
+                            >
+                              Inventory Scripts
+                            </NavItem>
+                          </NavExpandable>
+                          <NavExpandable
+                            title="Access"
+                            groupId="access_group"
+                            isActive={activeGroup === 'access_group'}
+                            isExpanded={activeGroup === 'access_group'}
+                          >
+                            <NavItem
+                              to="#/organizations"
+                              groupId="access_group"
+                              itemId="access_group_organizations"
+                              isActive={activeItem === 'access_group_organizations'}
+                            >
+                              Organizations
+                            </NavItem>
+                            <NavItem
+                              to="#/users"
+                              groupId="access_group"
+                              itemId="access_group_users"
+                              isActive={activeItem === 'access_group_users'}
+                            >
+                              Users
+                            </NavItem>
+                            <NavItem
+                              to="#/teams"
+                              groupId="access_group"
+                              itemId="access_group_teams"
+                              isActive={activeItem === 'access_group_teams'}
+                            >
+                              Teams
+                            </NavItem>
+                          </NavExpandable>
+                          <NavExpandable
+                            title="Administration"
+                            groupId="administration_group"
+                            isActive={activeGroup === 'administration_group'}
+                            isExpanded={activeGroup === 'administration_group'}
+                          >
+                            <NavItem
+                              to="#/credential_types"
+                              groupId="administration_group"
+                              itemId="administration_group_credential_types"
+                              isActive={activeItem === 'administration_group_credential_types'}
+                            >
+                              Credential Types
+                            </NavItem>
+                            <NavItem
+                              to="#/notification_templates"
+                              groupId="administration_group"
+                              itemId="administration_group_notification_templates"
+                              isActive={activeItem === 'administration_group_notification_templates'}
+                            >
+                              Notification Templates
+                            </NavItem>
+                            <NavItem
+                              to="#/management_jobs"
+                              groupId="administration_group"
+                              itemId="administration_group_management_jobs"
+                              isActive={activeItem === 'administration_group_management_jobs'}
+                            >
+                              Management Jobs
+                            </NavItem>
+                            <NavItem
+                              to="#/instance_groups"
+                              groupId="administration_group"
+                              itemId="administration_group_instance_groups"
+                              isActive={activeItem === 'administration_group_instance_groups'}
+                            >
+                              Instance Groups
+                            </NavItem>
+                            <NavItem
+                              to="#/applications"
+                              groupId="administration_group"
+                              itemId="administration_group_applications"
+                              isActive={activeItem === 'administration_group_applications'}
+                            >
+                              Applications
+                            </NavItem>
+                          </NavExpandable>
+                          <NavExpandable
+                            title="Settings"
+                            groupId="settings_group"
+                            isActive={activeGroup === 'settings_group'}
+                            isExpanded={activeGroup === 'settings_group'}
+                          >
+                            <NavItem
+                              to="#/auth_settings"
+                              groupId="settings_group"
+                              itemId="settings_group_auth"
+                              isActive={activeItem === 'settings_group_auth'}
+                            >
+                              Authentication
+                            </NavItem>
+                            <NavItem
+                              to="#/jobs_settings"
+                              groupId="settings_group"
+                              itemId="settings_group_jobs"
+                              isActive={activeItem === 'settings_group_jobs'}
+                            >
+                              Jobs
+                            </NavItem>
+                            <NavItem
+                              to="#/system_settings"
+                              groupId="settings_group"
+                              itemId="settings_group_system"
+                              isActive={activeItem === 'settings_group_system'}
+                            >
                               System
                             </NavItem>
-                            <NavItem to="#/settings/ui" groupId="settings_group" itemId="settings_group_ui" isActive={activeItem === 'settings_group_ui'}>
+                            <NavItem
+                              to="#/ui_settings"
+                              groupId="settings_group"
+                              itemId="settings_group_ui"
+                              isActive={activeItem === 'settings_group_ui'}
+                            >
                               User Interface
                             </NavItem>
                           </NavExpandable>
-                        </NavGroup>
+                        </NavList>
                       </Nav>
                     )}
                   />
-                )}>
+                )}
+              >
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" exact path="/" component={() => (<Redirect to="/home" />)} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/home" component={Dashboard} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/jobs" component={Jobs} />
@@ -187,7 +350,11 @@ class App extends React.Component {
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/management_jobs" component={ManagementJobs} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/instance_groups" component={InstanceGroups} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/applications" component={Applications} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/settings" component={Settings} />
+                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/auth_settings" component={AuthSettings} />
+                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/jobs_settings" component={JobsSettings} />
+                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/system_settings" component={SystemSettings} />
+                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/ui_settings" component={UISettings} />
+                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/license" component={License} />
               </Page>
             </Fragment>
           </Switch>
