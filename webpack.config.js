@@ -1,3 +1,4 @@
+const path = require('path');
 const webpack = require('webpack');
 
 const TARGET_PORT = 8043;
@@ -10,7 +11,7 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: ['babel-loader']
+        loader: 'babel-loader'
       },
       {
         test: /\.s?[ac]ss$/,
@@ -23,29 +24,29 @@ module.exports = {
       {
         test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
         use: [{
-            loader: 'file-loader',
-            options: {
-                name: '[name].[ext]',
-                outputPath: 'assets/fonts/',
-                publicPatH: '../',
-                includePaths: [
-                  'node_modules/@patternfly/patternfly-next/assets/fonts',
-                ]
-            }
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]',
+            outputPath: 'assets/fonts/',
+            publicPatH: '../',
+            includePaths: [
+              'node_modules/@patternfly/patternfly-next/assets/fonts',
+            ]
+          }
         }]
       },
       {
         test: /\.(jpg|png|gif|svg)(\?v=\d+\.\d+\.\d+)?$/,
         use: [{
-            loader: 'file-loader',
-            options: {
-                name: '[name].[ext]',
-                outputPath: 'assets/images/',
-                publicPatH: '../',
-                includePaths: [
-                  'node_modules/@patternfly/patternfly-next/assets/images',
-                ]
-            }
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]',
+            outputPath: 'assets/images/',
+            publicPatH: '../',
+            includePaths: [
+              'node_modules/@patternfly/patternfly-next/assets/images',
+            ]
+          }
         }]
       }
     ]
@@ -54,7 +55,7 @@ module.exports = {
     extensions: ['*', '.js', '.jsx', '.css']
   },
   output: {
-    path: __dirname + '/dist',
+    path: path.resolve(__dirname, '/dist'),
     publicPath: '/',
     filename: 'bundle.js'
   },
@@ -71,29 +72,30 @@ module.exports = {
     port: 3001,
     clientLogLevel: 'none',
     proxy: [
-    {
+      {
         context: '/api/login/',
         target: TARGET,
         secure: false,
         ws: false,
         headers: {
-            Host: `localhost:${TARGET_PORT}`,
-            Origin: TARGET,
-            Referer: `${TARGET}/`
+          Host: `localhost:${TARGET_PORT}`,
+          Origin: TARGET,
+          Referer: `${TARGET}/`
         }
-    },
-    {
+      },
+      {
         context: '/api',
         target: TARGET,
         secure: false,
         ws: false,
         bypass: req => (req.originalUrl.includes('hot-update.json') || req.originalUrl.includes('login')),
-    },
-    {
+      },
+      {
         context: '/websocket',
         target: TARGET,
         secure: false,
         ws: true
-    }]
+      }
+    ]
   }
 };
