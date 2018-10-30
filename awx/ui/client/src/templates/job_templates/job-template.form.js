@@ -267,7 +267,7 @@ function(NotificationsList, i18n) {
                     dataTitle: i18n._('Slice Job Count'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    awPopOver: "<p>" + i18n._("The number of jobs to slice into at runtime. Will cause the Job Template to launch a workflow if value is greater than 1.") + "</p>",
+                    awPopOver: "<p>" + i18n._("The number of job slices to create for this job. This should not be set for jobs where cross-host orchestration is done. For best behavior, this number should be high enough that each slice is smaller than an individual cluster node capacity.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 diff_mode: {
