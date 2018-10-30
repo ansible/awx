@@ -22,6 +22,7 @@ djangorestframework==3.7.7
 djangorestframework-yaml==1.0.3
 irc==16.2
 jsonschema==2.6.0
+Markdown==2.6.11    # used for formatting API help
 ordereddict==1.1
 pexpect==4.6.0
 psutil==5.4.3

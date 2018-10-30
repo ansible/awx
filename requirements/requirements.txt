@@ -61,6 +61,7 @@ jsonpickle==0.9.6         # via asgi-amqp
 jsonschema==2.6.0
 kombu==4.2.1              # via asgi-amqp, celery
 lxml==4.2.3
+markdown==2.6.11
 more-itertools==4.1.0     # via irc, jaraco.functools, jaraco.itertools
 msgpack-python==0.5.5     # via asgi-amqp
 netaddr==0.7.19           # via pyrad
