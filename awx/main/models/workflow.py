@@ -9,6 +9,7 @@ import logging
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ObjectDoesNotExist
 #from django import settings as tower_settings
 
 # AWX
@@ -206,13 +207,24 @@ class WorkflowJobNode(WorkflowNodeBase):
                                   workflow_pk=self.pk,
                                   error_text=errors))
             data.update(accepted_fields)  # missing fields are handled in the scheduler
+            try:
+                # config saved on the workflow job itself
+                wj_config = self.workflow_job.launch_config
+            except ObjectDoesNotExist:
+                wj_config = None
+            if wj_config:
+                accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**wj_config.prompts_dict())
+                accepted_fields.pop('extra_vars', None)  # merge handled with other extra_vars later
+                data.update(accepted_fields)
         # build ancestor artifacts, save them to node model for later
         aa_dict = {}
+        is_root_node = True
         for parent_node in self.get_parent_nodes():
+            is_root_node = False
             aa_dict.update(parent_node.ancestor_artifacts)
             if parent_node.job and hasattr(parent_node.job, 'artifacts'):
                 aa_dict.update(parent_node.job.artifacts)
-        if aa_dict:
+        if aa_dict and not is_root_node:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
         # process password list
@@ -240,6 +252,12 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['extra_vars'] = extra_vars
         # ensure that unified jobs created by WorkflowJobs are marked
         data['_eager_fields'] = {'launch_type': 'workflow'}
+        # Extra processing in the case that this is a slice job
+        if 'job_slice' in self.ancestor_artifacts and is_root_node:
+            data['_eager_fields']['allow_simultaneous'] = True
+            data['_eager_fields']['job_slice_number'] = self.ancestor_artifacts['job_slice']
+            data['_eager_fields']['job_slice_count'] = self.workflow_job.workflow_job_nodes.count()
+            data['_prevent_slicing'] = True
         return data
 
 
@@ -260,6 +278,12 @@ class WorkflowJobOptions(BaseModel):
     @property
     def workflow_nodes(self):
         raise NotImplementedError()
+
+    @classmethod
+    def _get_unified_job_field_names(cls):
+        return set(f.name for f in WorkflowJobOptions._meta.fields) | set(
+            ['name', 'description', 'schedule', 'survey_passwords', 'labels']
+        )
 
     def _create_workflow_nodes(self, old_node_list, user=None):
         node_links = {}
@@ -288,7 +312,7 @@ class WorkflowJobOptions(BaseModel):
 
     def create_relaunch_workflow_job(self):
         new_workflow_job = self.copy_unified_job()
-        if self.workflow_job_template is None:
+        if self.unified_job_template_id is None:
             new_workflow_job.copy_nodes_from_original(original=self)
         return new_workflow_job
 
@@ -330,12 +354,6 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
     @classmethod
     def _get_unified_job_class(cls):
         return WorkflowJob
-
-    @classmethod
-    def _get_unified_job_field_names(cls):
-        return set(f.name for f in WorkflowJobOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels']
-        )
 
     @classmethod
     def _get_unified_jt_copy_names(cls):
@@ -433,13 +451,28 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         default=None,
         on_delete=models.SET_NULL,
     )
+    job_template = models.ForeignKey(
+        'JobTemplate',
+        related_name='slice_workflow_jobs',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        help_text=_("If automatically created for a sliced job run, the job template "
+                    "the workflow job was created from."),
+    )
+    is_sliced_job = models.BooleanField(
+        default=False
+    )
 
     @property
     def workflow_nodes(self):
         return self.workflow_job_nodes
 
-    @classmethod
-    def _get_parent_field_name(cls):
+    def _get_parent_field_name(self):
+        if self.job_template_id:
+            # This is a workflow job which is a container for slice jobs
+            return 'job_template'
         return 'workflow_job_template'
 
     @classmethod

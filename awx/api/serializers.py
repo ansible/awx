@@ -3011,7 +3011,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         fields = ('*', 'host_config_key', 'ask_diff_mode_on_launch', 'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
                   'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'diff_mode',
-                  'allow_simultaneous', 'custom_virtualenv')
+                  'allow_simultaneous', 'custom_virtualenv', 'job_slice_count')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -3028,6 +3028,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
             labels = self.reverse('api:job_template_label_list', kwargs={'pk': obj.pk}),
             object_roles = self.reverse('api:job_template_object_roles_list', kwargs={'pk': obj.pk}),
             instance_groups = self.reverse('api:job_template_instance_groups_list', kwargs={'pk': obj.pk}),
+            slice_workflow_jobs = self.reverse('api:job_template_slice_workflow_jobs_list', kwargs={'pk': obj.pk}),
         ))
         if self.version > 1:
             res['copy'] = self.reverse('api:job_template_copy', kwargs={'pk': obj.pk})
@@ -3123,7 +3124,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
                   'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
                   'ask_job_type_on_launch', 'ask_verbosity_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'allow_simultaneous', 'artifacts', 'scm_revision',
-                  'instance_group', 'diff_mode')
+                  'instance_group', 'diff_mode', 'job_slice_number', 'job_slice_count')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -3590,6 +3591,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
     class Meta:
         model = WorkflowJob
         fields = ('*', 'workflow_job_template', 'extra_vars', 'allow_simultaneous',
+                  'job_template', 'is_sliced_job',
                   '-execution_node', '-event_processing_finished', '-controller_node',)
 
     def get_related(self, obj):
@@ -3598,6 +3600,8 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             res['workflow_job_template'] = self.reverse('api:workflow_job_template_detail',
                                                         kwargs={'pk': obj.workflow_job_template.pk})
             res['notifications'] = self.reverse('api:workflow_job_notifications_list', kwargs={'pk': obj.pk})
+        if obj.job_template_id:
+            res['job_template'] = self.reverse('api:job_template_detail', kwargs={'pk': obj.job_template_id})
         res['workflow_nodes'] = self.reverse('api:workflow_job_workflow_nodes_list', kwargs={'pk': obj.pk})
         res['labels'] = self.reverse('api:workflow_job_label_list', kwargs={'pk': obj.pk})
         res['activity_stream'] = self.reverse('api:workflow_job_activity_stream_list', kwargs={'pk': obj.pk})

@@ -151,6 +151,12 @@
     <div class="JobResults-resultRowText">{{ vm.jobType.value }}</div>
 </div>
 
+<!-- SLICE JOB DETAIL -->
+<div class="JobResults-resultRow" ng-if="vm.sliceJobDetails">
+    <label class="JobResults-resultRowLabel">{{ vm.sliceJobDetails.label }}</label>
+    <div class="JobResults-resultRowText">{{ vm.sliceJobDetails.offset }}</div>
+</div>
+
 <!-- LAUNCHED BY DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.launchedBy">
     <label class="JobResults-resultRowLabel">{{ vm.launchedBy.label }}</label>

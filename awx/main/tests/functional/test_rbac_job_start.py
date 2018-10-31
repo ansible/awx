@@ -3,6 +3,11 @@ import pytest
 from awx.main.models.inventory import Inventory
 from awx.main.models.credential import Credential
 from awx.main.models.jobs import JobTemplate, Job
+from awx.main.access import (
+    UnifiedJobAccess,
+    WorkflowJobAccess, WorkflowJobNodeAccess,
+    JobAccess
+)
 
 
 @pytest.mark.django_db
@@ -41,6 +46,31 @@ def test_inventory_use_access(inventory, user):
     inventory.use_role.members.add(common_user)
 
     assert common_user.can_access(Inventory, 'use', inventory)
+
+
+@pytest.mark.django_db
+def test_slice_job(slice_job_factory, rando):
+    workflow_job = slice_job_factory(2, jt_kwargs={'created_by': rando}, spawn=True)
+    workflow_job.job_template.execute_role.members.add(rando)
+
+    # Abilities of user with execute_role for slice workflow job container
+    assert WorkflowJobAccess(rando).can_start(workflow_job)  # relaunch allowed
+    for access_cls in (UnifiedJobAccess, WorkflowJobAccess):
+        access = access_cls(rando)
+        assert access.can_read(workflow_job)
+        assert workflow_job in access.get_queryset()
+
+    # Abilities of user with execute_role for all the slice of the job
+    for node in workflow_job.workflow_nodes.all():
+        access = WorkflowJobNodeAccess(rando)
+        assert access.can_read(node)
+        assert node in access.get_queryset()
+        job = node.job
+        assert JobAccess(rando).can_start(job)  # relaunch allowed
+        for access_cls in (UnifiedJobAccess, JobAccess):
+            access = access_cls(rando)
+            assert access.can_read(job)
+            assert job in access.get_queryset()
 
 
 @pytest.mark.django_db

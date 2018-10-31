@@ -23,7 +23,8 @@
                     status-tip="{{ vm.strings.get('list.STATUS_TOOLTIP', job.status) }}"
                     header-value="{{ job.id }} - {{ job.name }}"
                     header-state="{{ vm.getSref(job) }}"
-                    header-tag="{{ vm.jobTypes[job.type] }}">
+                    header-tag="{{ vm.jobTypes[job.type] }}"
+                    secondary-tag="{{ vm.getSliceJobDetails(job) }}">
                 </at-row-item>
                 <div class="at-Row--inline">
                     <at-row-item

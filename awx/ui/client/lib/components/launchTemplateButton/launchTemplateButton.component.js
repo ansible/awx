@@ -41,7 +41,13 @@ function atLaunchTemplateCtrl (
                         selectedJobTemplate
                             .postLaunch({ id: vm.template.id })
                             .then(({ data }) => {
-                                $state.go('output', { id: data.job, type: 'playbook' }, { reload: true });
+                                /* Slice Jobs: Redirect to WF Details page if returned
+                                job type is a WF job */
+                                if (data.type === 'workflow_job' && data.workflow_job !== null) {
+                                    $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
+                                } else {
+                                    $state.go('output', { id: data.job, type: 'playbook' }, { reload: true });
+                                }
                             });
                     } else {
                         const promptData = {
@@ -142,7 +148,13 @@ function atLaunchTemplateCtrl (
                 id: vm.promptData.template,
                 launchData: jobLaunchData
             }).then((launchRes) => {
-                $state.go('output', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
+                /* Slice Jobs: Redirect to WF Details page if returned
+                job type is a WF job */
+                if (launchRes.data.type === 'workflow_job' && launchRes.data.workflow_job !== null) {
+                    $state.go('workflowResults', { id: launchRes.data.workflow_job }, { reload: true });
+                } else {
+                    $state.go('output', { id: launchRes.data.job, type: 'playbook' }, { reload: true });
+                }
             }).catch(createErrorHandler('launch job template', 'POST'));
         } else if (vm.promptData.templateType === 'workflow_job_template') {
             workflowTemplate.create().postLaunch({

@@ -277,6 +277,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         default=False,
         allows_field='credentials'
     )
+    job_slice_count = models.PositiveIntegerField(
+        blank=True,
+        default=1,
+        help_text=_("The number of jobs to slice into at runtime. "
+                    "Will cause the Job Template to launch a workflow if value is greater than 1."),
+    )
+
     admin_role = ImplicitRoleField(
         parent_role=['project.organization.job_template_admin_role', 'inventory.organization.job_template_admin_role']
     )
@@ -295,7 +302,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     @classmethod
     def _get_unified_job_field_names(cls):
         return set(f.name for f in JobOptions._meta.fields) | set(
-            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials']
+            ['name', 'description', 'schedule', 'survey_passwords', 'labels', 'credentials',
+             'job_slice_number', 'job_slice_count']
         )
 
     @property
@@ -319,6 +327,31 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         Create a new job based on this template.
         '''
         return self.create_unified_job(**kwargs)
+
+    def create_unified_job(self, **kwargs):
+        prevent_slicing = kwargs.pop('_prevent_slicing', False)
+        slice_event = bool(self.job_slice_count > 1 and (not prevent_slicing))
+        if slice_event:
+            # A Slice Job Template will generate a WorkflowJob rather than a Job
+            from awx.main.models.workflow import WorkflowJobTemplate, WorkflowJobNode
+            kwargs['_unified_job_class'] = WorkflowJobTemplate._get_unified_job_class()
+            kwargs['_parent_field_name'] = "job_template"
+            kwargs.setdefault('_eager_fields', {})
+            kwargs['_eager_fields']['is_sliced_job'] = True
+        job = super(JobTemplate, self).create_unified_job(**kwargs)
+        if slice_event:
+            try:
+                wj_config = job.launch_config
+            except JobLaunchConfig.DoesNotExist:
+                wj_config = JobLaunchConfig()
+            actual_inventory = wj_config.inventory if wj_config.inventory else self.inventory
+            for idx in xrange(min(self.job_slice_count,
+                                  actual_inventory.hosts.count())):
+                create_kwargs = dict(workflow_job=job,
+                                     unified_job_template=self,
+                                     ancestor_artifacts=dict(job_slice=idx + 1))
+                WorkflowJobNode.objects.create(**create_kwargs)
+        return job
 
     def get_absolute_url(self, request=None):
         return reverse('api:job_template_detail', kwargs={'pk': self.pk}, request=request)
@@ -452,7 +485,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     RelatedJobsMixin
     '''
     def _get_related_jobs(self):
-        return Job.objects.filter(job_template=self)
+        return UnifiedJob.objects.filter(unified_job_template=self)
 
 
 class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin):
@@ -501,10 +534,21 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         on_delete=models.SET_NULL,
         help_text=_('The SCM Refresh task used to make sure the playbooks were available for the job run'),
     )
+    job_slice_number = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+        help_text=_("If part of a sliced job, the ID of the inventory slice operated on. "
+                    "If not part of sliced job, parameter is not used."),
+    )
+    job_slice_count = models.PositiveIntegerField(
+        blank=True,
+        default=1,
+        help_text=_("If ran as part of sliced jobs, the total number of slices. "
+                    "If 1, job is not part of a sliced job."),
+    )
 
 
-    @classmethod
-    def _get_parent_field_name(cls):
+    def _get_parent_field_name(self):
         return 'job_template'
 
     @classmethod
@@ -544,6 +588,15 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     @property
     def event_class(self):
         return JobEvent
+
+    def copy_unified_job(self, **new_prompts):
+        # Needed for job slice relaunch consistency, do no re-spawn workflow job
+        # target same slice as original job
+        new_prompts['_prevent_slicing'] = True
+        new_prompts.setdefault('_eager_fields', {})
+        new_prompts['_eager_fields']['job_slice_number'] = self.job_slice_number
+        new_prompts['_eager_fields']['job_slice_count'] = self.job_slice_count
+        return super(Job, self).copy_unified_job(**new_prompts)
 
     @property
     def ask_diff_mode_on_launch(self):
@@ -638,6 +691,9 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             count_hosts = 2
         else:
             count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
+            if self.job_slice_count > 1:
+                # Integer division intentional
+                count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) / self.job_slice_count
         return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     @property

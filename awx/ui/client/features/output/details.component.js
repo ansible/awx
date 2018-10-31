@@ -126,6 +126,33 @@ function getSourceWorkflowJobDetails () {
     return { link, tooltip };
 }
 
+function getSliceJobDetails () {
+    const count = resource.model.get('job_slice_count');
+
+    if (!count) {
+        return null;
+    }
+
+    if (count === 1) {
+        return null;
+    }
+
+    const number = resource.model.get('job_slice_number');
+
+    if (!number) {
+        return null;
+    }
+
+    const label = strings.get('labels.SLICE_JOB');
+    const offset = `${number}/${count}`;
+    const tooltip = strings.get('tooltips.SLICE_JOB_DETAILS');
+
+    if (label && offset && tooltip) {
+        return { label, offset, tooltip };
+    }
+    return null;
+}
+
 function getJobTemplateDetails () {
     const jobTemplate = resource.model.get('summary_fields.job_template');
 
@@ -671,6 +698,7 @@ function JobDetailsController (
         vm.jobType = getJobTypeDetails();
         vm.jobTemplate = getJobTemplateDetails();
         vm.sourceWorkflowJob = getSourceWorkflowJobDetails();
+        vm.sliceJobDetails = getSliceJobDetails();
         vm.inventory = getInventoryDetails();
         vm.project = getProjectDetails();
         vm.projectUpdate = getProjectUpdateDetails();

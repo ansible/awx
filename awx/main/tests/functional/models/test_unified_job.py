@@ -58,9 +58,7 @@ class TestCreateUnifiedJob:
         job_with_links.save()
         job_with_links.credentials.add(machine_credential)
         job_with_links.credentials.add(net_credential)
-        with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names',
-                          return_value=['inventory', 'credential', 'limit']):
-            second_job = job_with_links.copy_unified_job()
+        second_job = job_with_links.copy_unified_job()
 
         # Check that job data matches the original variables
         assert second_job.credential == job_with_links.credential
@@ -154,3 +152,50 @@ def test_event_processing_not_finished():
 def test_event_model_undefined():
     wj = WorkflowJob.objects.create(name='foobar', status='finished')
     assert wj.event_processing_finished
+
+
+@pytest.mark.django_db
+class TestTaskImpact:
+    @pytest.fixture
+    def job_host_limit(self, job_template, inventory):
+        def r(hosts, forks):
+            for i in range(hosts):
+                inventory.hosts.create(name='foo' + str(i))
+            job = Job.objects.create(
+                name='fake-job',
+                launch_type='workflow',
+                job_template=job_template,
+                inventory=inventory,
+                forks=forks
+            )
+            return job
+        return r
+
+    def test_limit_task_impact(self, job_host_limit):
+        job = job_host_limit(5, 2)
+        assert job.task_impact == 2 + 1  # forks becomes constraint
+
+    def test_host_task_impact(self, job_host_limit):
+        job = job_host_limit(3, 5)
+        assert job.task_impact == 3 + 1  # hosts becomes constraint
+
+    def test_shard_task_impact(self, slice_job_factory):
+        # factory creates on host per slice
+        workflow_job = slice_job_factory(3, jt_kwargs={'forks': 50}, spawn=True)
+        # arrange the jobs by their number
+        jobs = [None for i in range(3)]
+        for node in workflow_job.workflow_nodes.all():
+            jobs[node.job.job_slice_number - 1] = node.job
+        # Even distribution - all jobs run on 1 host
+        assert [
+            len(jobs[0].inventory.get_script_data(slice_number=i + 1, slice_count=3)['all']['hosts'])
+            for i in range(3)
+        ] == [1, 1, 1]
+        assert [job.task_impact for job in jobs] == [2, 2, 2]  # plus one base task impact
+        # Uneven distribution - first job takes the extra host
+        jobs[0].inventory.hosts.create(name='remainder_foo')
+        assert [
+            len(jobs[0].inventory.get_script_data(slice_number=i + 1, slice_count=3)['all']['hosts'])
+            for i in range(3)
+        ] == [2, 1, 1]
+        assert [job.task_impact for job in jobs] == [3, 2, 2]

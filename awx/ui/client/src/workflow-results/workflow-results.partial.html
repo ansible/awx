@@ -144,6 +144,22 @@
                         </div>
                     </div>
 
+                    <!-- SLIIIIIICE -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="workflow.summary_fields.job_template.name">
+                        <label
+                            class="WorkflowResults-resultRowLabel">
+                            {{ strings.labels.SLICE_TEMPLATE }}
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ slice_job_template_link }}"
+                                aw-tool-tip="{{ strings.tooltips.EDIT_SLICE_TEMPLATE }}"
+                                data-placement="top">
+                                {{ workflow.summary_fields.job_template.name }}
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- EXTRA VARIABLES DETAIL -->
                     <at-code-mirror
                         ng-if="variables"

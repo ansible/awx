@@ -123,6 +123,22 @@ def test_job_relaunch_on_failed_hosts(post, inventory, project, machine_credenti
 
 
 @pytest.mark.django_db
+def test_slice_jt_recent_jobs(slice_job_factory, admin_user, get):
+    workflow_job = slice_job_factory(3, spawn=True)
+    slice_jt = workflow_job.job_template
+    r = get(
+        url=slice_jt.get_absolute_url(),
+        user=admin_user,
+        expect=200
+    )
+    job_ids = [entry['id'] for entry in r.data['summary_fields']['recent_jobs']]
+    assert workflow_job.pk not in job_ids
+    for node in workflow_job.workflow_nodes.all():
+        job = node.job
+        assert job.pk in job_ids
+
+
+@pytest.mark.django_db
 def test_block_unprocessed_events(delete, admin_user, mocker):
     time_of_finish = parse("Thu Feb 28 09:10:20 2013 -0500")
     job = Job.objects.create(

@@ -6,7 +6,7 @@ import json
 from awx.api.serializers import JobLaunchSerializer
 from awx.main.models.credential import Credential
 from awx.main.models.inventory import Inventory, Host
-from awx.main.models.jobs import Job, JobTemplate
+from awx.main.models.jobs import Job, JobTemplate, UnifiedJobTemplate
 
 from awx.api.versioning import reverse
 
@@ -553,15 +553,15 @@ def test_callback_accept_prompted_extra_var(mocker, survey_spec_factory, job_tem
 
     with mocker.patch('awx.main.access.BaseAccess.check_license'):
         mock_job = mocker.MagicMock(spec=Job, id=968, extra_vars={"job_launch_var": 3, "survey_var": 4})
-        with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
+        with mocker.patch.object(UnifiedJobTemplate, 'create_unified_job', return_value=mock_job):
             with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
                 with mocker.patch('awx.api.views.JobTemplateCallback.find_matching_hosts', return_value=[host]):
                     post(
                         reverse('api:job_template_callback', kwargs={'pk': job_template.pk}),
                         dict(extra_vars={"job_launch_var": 3, "survey_var": 4}, host_config_key="foo"),
                         admin_user, expect=201, format='json')
-                    assert JobTemplate.create_unified_job.called
-                    assert JobTemplate.create_unified_job.call_args == ({
+                    assert UnifiedJobTemplate.create_unified_job.called
+                    assert UnifiedJobTemplate.create_unified_job.call_args == ({
                         'extra_vars': {'survey_var': 4, 'job_launch_var': 3},
                         '_eager_fields': {'launch_type': 'callback'},
                         'limit': 'single-host'},
@@ -579,15 +579,15 @@ def test_callback_ignore_unprompted_extra_var(mocker, survey_spec_factory, job_t
 
     with mocker.patch('awx.main.access.BaseAccess.check_license'):
         mock_job = mocker.MagicMock(spec=Job, id=968, extra_vars={"job_launch_var": 3, "survey_var": 4})
-        with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
+        with mocker.patch.object(UnifiedJobTemplate, 'create_unified_job', return_value=mock_job):
             with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
                 with mocker.patch('awx.api.views.JobTemplateCallback.find_matching_hosts', return_value=[host]):
                     post(
                         reverse('api:job_template_callback', kwargs={'pk':job_template.pk}),
                         dict(extra_vars={"job_launch_var": 3, "survey_var": 4}, host_config_key="foo"),
                         admin_user, expect=201, format='json')
-                    assert JobTemplate.create_unified_job.called
-                    assert JobTemplate.create_unified_job.call_args == ({
+                    assert UnifiedJobTemplate.create_unified_job.called
+                    assert UnifiedJobTemplate.create_unified_job.call_args == ({
                         '_eager_fields': {'launch_type': 'callback'},
                         'limit': 'single-host'},
                     )

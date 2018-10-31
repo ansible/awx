@@ -76,6 +76,22 @@ function ListJobsController (
             return { icon, link, value };
         });
 
+    vm.getSliceJobDetails = (job) => {
+        if (!job.job_slice_count) {
+            return null;
+        }
+
+        if (job.job_slice_count === 1) {
+            return null;
+        }
+
+        if (job.job_slice_number && job.job_slice_count) {
+            return `Slice Job ${job.job_slice_number}/${job.job_slice_count}`;
+        }
+
+        return null;
+    };
+
     vm.getSref = ({ type, id }) => {
         let sref;
 

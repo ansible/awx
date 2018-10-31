@@ -38,6 +38,33 @@ class TestInventoryScript:
             'remote_tower_id': host.id
         }
 
+    def test_slice_subset(self, inventory):
+        for i in range(3):
+            inventory.hosts.create(name='host{}'.format(i))
+        for i in range(3):
+            assert inventory.get_script_data(slice_number=i + 1, slice_count=3) == {
+                'all': {'hosts': ['host{}'.format(i)]}
+            }
+
+    def test_slice_subset_with_groups(self, inventory):
+        hosts = []
+        for i in range(3):
+            host = inventory.hosts.create(name='host{}'.format(i))
+            hosts.append(host)
+        g1 = inventory.groups.create(name='contains_all_hosts')
+        for host in hosts:
+            g1.hosts.add(host)
+        g2 = inventory.groups.create(name='contains_two_hosts')
+        for host in hosts[:2]:
+            g2.hosts.add(host)
+        for i in range(3):
+            expected_data = {
+                'contains_all_hosts': {'hosts': ['host{}'.format(i)], 'children': [], 'vars': {}},
+            }
+            if i < 2:
+                expected_data['contains_two_hosts'] = {'hosts': ['host{}'.format(i)], 'children': [], 'vars': {}}
+            assert inventory.get_script_data(slice_number=i + 1, slice_count=3) == expected_data
+
 
 @pytest.mark.django_db
 class TestActiveCount:
