@@ -146,7 +146,7 @@ const getAdminMachineCredential = (namespace = session) => {
 };
 
 const getTeam = (namespace = session) => getOrganization(namespace)
-    .then(organization => getOrCreate('/teams/', {
+    .then(organization => getOrCreate(`/organizations/${organization.id}/teams/`, {
         name: `${namespace}-team`,
         description: namespace,
         organization: organization.id,
@@ -162,7 +162,7 @@ const getSmartInventory = (namespace = session) => getOrganization(namespace)
     }));
 
 const getNotificationTemplate = (namespace = session) => getOrganization(namespace)
-    .then(organization => getOrCreate('/notification_templates/', {
+    .then(organization => getOrCreate(`/organizations/${organization.id}/notification_templates/`, {
         name: `${namespace}-notification-template`,
         description: namespace,
         organization: organization.id,
@@ -174,7 +174,7 @@ const getNotificationTemplate = (namespace = session) => getOrganization(namespa
     }));
 
 const getProject = (namespace = session) => getOrganization(namespace)
-    .then(organization => getOrCreate('/projects/', {
+    .then(organization => getOrCreate(`/organizations/${organization.id}/projects/`, {
         name: `${namespace}-project`,
         description: namespace,
         organization: organization.id,
@@ -218,15 +218,6 @@ const getUpdatedProject = (namespace = session) => getProject(namespace)
         return project;
     });
 
-const getJob = (namespace = session) => getJobTemplate(namespace)
-    .then(template => {
-        const launchURL = template.related.launch;
-        return post(launchURL, {}).then(response => {
-            const jobURL = response.data.url;
-            return waitForJob(jobURL).then(() => response.data);
-        });
-    });
-
 const getJobTemplate = (namespace = session) => {
     const promises = [
         getInventory(namespace),
@@ -245,11 +236,18 @@ const getJobTemplate = (namespace = session) => {
         }));
 };
 
-const getWorkflowTemplate = (namespace = session) => {
-    const endpoint = '/workflow_job_templates/';
+const getJob = (namespace = session) => getJobTemplate(namespace)
+    .then(template => {
+        const launchURL = template.related.launch;
+        return post(launchURL, {}).then(response => {
+            const jobURL = response.data.url;
+            return waitForJob(jobURL).then(() => response.data);
+        });
+    });
 
+const getWorkflowTemplate = (namespace = session) => {
     const workflowTemplatePromise = getOrganization(namespace)
-        .then(organization => getOrCreate(endpoint, {
+        .then(organization => getOrCreate(`/organizations/${organization.id}/workflow_job_templates/`, {
             name: `${namespace}-workflow-template`,
             organization: organization.id,
             variables: '---',
@@ -288,7 +286,7 @@ const getWorkflowTemplate = (namespace = session) => {
 };
 
 const getAuditor = (namespace = session) => getOrganization(namespace)
-    .then(organization => getOrCreate('/users/', {
+    .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
         username: `auditor-${uuid().substr(0, 8)}`,
         organization: organization.id,
         first_name: 'auditor',
@@ -300,7 +298,7 @@ const getAuditor = (namespace = session) => getOrganization(namespace)
     }, ['username']));
 
 const getUser = (namespace = session) => getOrganization(namespace)
-    .then(organization => getOrCreate('/users/', {
+    .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
         username: `user-${uuid().substr(0, 8)}`,
         organization: organization.id,
         first_name: 'firstname',
@@ -316,7 +314,7 @@ const getJobTemplateAdmin = (namespace = session) => {
         .then(obj => obj.summary_fields.object_roles.admin_role);
 
     const userPromise = getOrganization(namespace)
-        .then(obj => getOrCreate('/users/', {
+        .then(obj => getOrCreate(`/organizations/${obj.id}/users/`, {
             username: `job-template-admin-${uuid().substr(0, 8)}`,
             organization: obj.id,
             first_name: 'firstname',
@@ -339,7 +337,7 @@ const getProjectAdmin = (namespace = session) => {
         .then(obj => obj.summary_fields.object_roles.admin_role);
 
     const userPromise = getOrganization(namespace)
-        .then(obj => getOrCreate('/users/', {
+        .then(obj => getOrCreate(`/organizations/${obj.id}/users/`, {
             username: `project-admin-${uuid().substr(0, 8)}`,
             organization: obj.id,
             first_name: 'firstname',
