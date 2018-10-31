@@ -153,7 +153,7 @@ const getTeam = (namespace = session) => getOrganization(namespace)
     }));
 
 const getSmartInventory = (namespace = session) => getOrganization(namespace)
-    .then(organization => getOrCreate(`/inventories/`, {
+    .then(organization => getOrCreate('/inventories/', {
         name: `${namespace}-smart-inventory`,
         description: namespace,
         organization: organization.id,
@@ -218,15 +218,6 @@ const getUpdatedProject = (namespace = session) => getProject(namespace)
         return project;
     });
 
-const getJob = (namespace = session) => getJobTemplate(namespace)
-    .then(template => {
-        const launchURL = template.related.launch;
-        return post(launchURL, {}).then(response => {
-            const jobURL = response.data.url;
-            return waitForJob(jobURL).then(() => response.data);
-        });
-    });
-
 const getJobTemplate = (namespace = session) => {
     const promises = [
         getInventory(namespace),
@@ -245,8 +236,16 @@ const getJobTemplate = (namespace = session) => {
         }));
 };
 
-const getWorkflowTemplate = (namespace = session) => {
+const getJob = (namespace = session) => getJobTemplate(namespace)
+    .then(template => {
+        const launchURL = template.related.launch;
+        return post(launchURL, {}).then(response => {
+            const jobURL = response.data.url;
+            return waitForJob(jobURL).then(() => response.data);
+        });
+    });
 
+const getWorkflowTemplate = (namespace = session) => {
     const workflowTemplatePromise = getOrganization(namespace)
         .then(organization => getOrCreate(`/organizations/${organization.id}/workflow_job_templates/`, {
             name: `${namespace}-workflow-template`,
