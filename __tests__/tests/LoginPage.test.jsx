@@ -1,6 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount, shallow } from 'enzyme';
+import { asyncFlush } from '../../jest.setup';
 import LoginPage from '../../src/pages/Login';
 import api from '../../src/api';
 
@@ -75,88 +76,58 @@ describe('<LoginPage />', () => {
     expect(loginPage.state().error).toBe('');
   });
 
-  test('submit calls api.login successfully', (done) => {
-    api.login = jest.fn().mockImplementation(() => {
-      const loginPromise = Promise.resolve({});
-
-      setTimeout(() => {
-        loginPromise.finally(() => {
-          expect(loginPage.state().loading).toBe(false);
-          done();
-        });
-      }, 1);
-
-      return loginPromise;
-    });
+  test('api.login not called when loading', () => {
+    api.login = jest.fn().mockImplementation(() => Promise.resolve({}));
     expect(loginPage.state().loading).toBe(false);
-    loginPage.setState({ username: 'unamee', password: 'pwordd', loading: true });
+    loginPage.setState({ loading: true });
     submitButton.simulate('submit');
     expect(api.login).toHaveBeenCalledTimes(0);
-    loginPage.setState({ loading: false });
-    submitButton.simulate('submit');
-    expect(api.login).toHaveBeenCalledTimes(1);
-    expect(api.login).toHaveBeenCalledWith('unamee', 'pwordd');
-    expect(loginPage.state().loading).toBe(true);
   });
 
-  test('submit calls api.login handles 401 error', (done) => {
-    api.login = jest.fn().mockImplementation(() => {
-      const err = {
-        response: { status: 401, message: 'problem' },
-      };
-      const loginPromise = Promise.reject(err);
-
-      setTimeout(() => {
-        loginPromise.catch(() => {
-          expect(loginPage.state().error).toBe(LOGIN_ERROR_MESSAGE);
-        }).finally(() => {
-          expect(loginPage.state().loading).toBe(false);
-          done();
-        });
-      }, 1);
-
-      return loginPromise;
-    });
+  test('submit calls api.login successfully', async () => {
+    api.login = jest.fn().mockImplementation(() => Promise.resolve({}));
     expect(loginPage.state().loading).toBe(false);
-    loginPage.setState({ username: 'unamee', password: 'pwordd', loading: true });
-    submitButton.simulate('submit');
-    expect(api.login).toHaveBeenCalledTimes(0);
-    loginPage.setState({ loading: false });
-    expect(loginPage.state().error).toBe('');
+    loginPage.setState({ username: 'unamee', password: 'pwordd' });
     submitButton.simulate('submit');
     expect(api.login).toHaveBeenCalledTimes(1);
     expect(api.login).toHaveBeenCalledWith('unamee', 'pwordd');
     expect(loginPage.state().loading).toBe(true);
+    await asyncFlush();
+    expect(loginPage.state().loading).toBe(false);
   });
 
-  test('submit calls api.login handles non-401 error', (done) => {
+  test('submit calls api.login handles 401 error', async () => {
     api.login = jest.fn().mockImplementation(() => {
-      const err = {
-        response: { status: 500, message: 'problem' },
-      };
-      const loginPromise = Promise.reject(err);
-
-      setTimeout(() => {
-        loginPromise.catch(() => {
-          expect(loginPage.state().error).toBe('');
-        }).finally(() => {
-          expect(loginPage.state().loading).toBe(false);
-          done();
-        });
-      }, 1);
-
-      return loginPromise;
+      const err = new Error('401 error');
+      err.response = { status: 401, message: 'problem' };
+      return Promise.reject(err);
     });
     expect(loginPage.state().loading).toBe(false);
-    loginPage.setState({ username: 'unamee', password: 'pwordd', loading: true });
-    submitButton.simulate('submit');
-    expect(api.login).toHaveBeenCalledTimes(0);
-    loginPage.setState({ loading: false });
-    expect(loginPage.state().error).toBe('');
+    loginPage.setState({ username: 'unamee', password: 'pwordd' });
     submitButton.simulate('submit');
     expect(api.login).toHaveBeenCalledTimes(1);
     expect(api.login).toHaveBeenCalledWith('unamee', 'pwordd');
     expect(loginPage.state().loading).toBe(true);
+    await asyncFlush();
+    expect(loginPage.state().error).toBe(LOGIN_ERROR_MESSAGE);
+    expect(loginPage.state().loading).toBe(false);
+  });
+
+  test('submit calls api.login handles non-401 error', async () => {
+    api.login = jest.fn().mockImplementation(() => {
+      const err = new Error('500 error');
+      err.response = { status: 500, message: 'problem' };
+      return Promise.reject(err);
+    });
+    expect(loginPage.state().loading).toBe(false);
+    loginPage.setState({ username: 'unamee', password: 'pwordd' });
+    submitButton.simulate('submit');
+    expect(api.login).toHaveBeenCalledTimes(1);
+    expect(api.login).toHaveBeenCalledWith('unamee', 'pwordd');
+    expect(loginPage.state().loading).toBe(true);
+    await asyncFlush();
+    expect(loginPage.state().error).toBe('');
+    expect(loginPage.state().loading).toBe(false);
   });
 
   test('render Redirect to / when already authenticated', () => {
