@@ -41,22 +41,24 @@ class LoginPage extends Component {
 
   handlePasswordChange = value => this.safeSetState({ password: value, error: '' });
 
-  handleSubmit = event => {
-    const { username, password } = this.state;
+  handleSubmit = async event => {
+    const { username, password, loading } = this.state;
 
     event.preventDefault();
 
-    this.safeSetState({ loading: true });
+    if (!loading) {
+      this.safeSetState({ loading: true });
 
-    api.login(username, password)
-      .catch(error => {
+      try {
+        await api.login(username, password);
+      } catch (error) {
         if (error.response.status === 401) {
           this.safeSetState({ error: LOGIN_ERROR_MESSAGE });
         }
-      })
-      .finally(() => {
+      } finally {
         this.safeSetState({ loading: false });
-      });
+      }
+    }
   }
 
   render () {
