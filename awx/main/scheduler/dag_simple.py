@@ -123,26 +123,24 @@ class SimpleDAG(object):
 
     def has_cycle(self):
         node_objs = [node['node_object'] for node in self.get_root_nodes()]
-        nodes_visited = set([])
+        node_objs_visited = set([])
         path = set([])
         stack = node_objs
-        path_direction = 'DOWN'
 
         while stack:
             node_obj = stack.pop()
 
-            children = self.get_dependencies(node_obj)
-            for child in children:
-                if child['node_object'] not in nodes_visited:
-                    stack.append(child['node_object'])
-            if node_obj in path:
-                return True
+            children = [node['node_object'] for node in self.get_dependencies(node_obj)]
+            children_to_add = filter(lambda node_obj: node_obj not in node_objs_visited, children)
 
-            if not children:
-                path_direction = 'UP'
-
-            if path_direction == 'DOWN':
+            if children_to_add:
+                if node_obj in path:
+                    return True
                 path.add(node_obj)
-            elif path_direction == 'UP':
+                stack.append(node_obj)
+                stack.extend(children_to_add)
+            else:
+                node_objs_visited.add(node_obj)
                 path.discard(node_obj)
+
         return False
