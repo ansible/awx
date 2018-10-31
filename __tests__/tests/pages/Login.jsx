@@ -1,9 +1,9 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount, shallow } from 'enzyme';
-import { asyncFlush } from '../../jest.setup';
-import LoginPage from '../../src/pages/Login';
-import api from '../../src/api';
+import { asyncFlush } from '../../../jest.setup';
+import LoginPage from '../../../src/pages/Login';
+import api from '../../../src/api';
 
 const LOGIN_ERROR_MESSAGE = 'Invalid username or password. Please try again.';
 
