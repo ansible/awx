@@ -79,17 +79,12 @@ describe('<LoginPage />', () => {
     api.login = jest.fn().mockImplementation(() => {
       const loginPromise = Promise.resolve({});
 
-      // wrapped in timeout so this .then happens after state.loading is set to
-      // false in the actual .then handler
-      //
-      // would be improved by using .finally but that's not available for
-      // some reason
       setTimeout(() => {
-        loginPromise.then(() => {
+        loginPromise.finally(() => {
           expect(loginPage.state().loading).toBe(false);
           done();
         });
-      }, 50);
+      }, 1);
 
       return loginPromise;
     });
@@ -109,21 +104,16 @@ describe('<LoginPage />', () => {
       const err = {
         response: { status: 401, message: 'problem' },
       };
-
       const loginPromise = Promise.reject(err);
 
-      // wrapped in timeout so this .then happens after state.loading is set to
-      // false in the actual .then handler
-      //
-      // would be improved by using .finally but that's not available for
-      // some reason
       setTimeout(() => {
         loginPromise.catch(() => {
-          expect(loginPage.state().loading).toBe(false);
           expect(loginPage.state().error).toBe(LOGIN_ERROR_MESSAGE);
+        }).finally(() => {
+          expect(loginPage.state().loading).toBe(false);
           done();
         });
-      }, 50);
+      }, 1);
 
       return loginPromise;
     });
@@ -139,26 +129,21 @@ describe('<LoginPage />', () => {
     expect(loginPage.state().loading).toBe(true);
   });
 
-  test('submit calls api.login handles 401 error', (done) => {
+  test('submit calls api.login handles non-401 error', (done) => {
     api.login = jest.fn().mockImplementation(() => {
       const err = {
         response: { status: 500, message: 'problem' },
       };
-
       const loginPromise = Promise.reject(err);
 
-      // wrapped in timeout so this .then happens after state.loading is set to
-      // false in the actual .then handler
-      //
-      // would be improved by using .finally but that's not available for
-      // some reason
       setTimeout(() => {
         loginPromise.catch(() => {
-          expect(loginPage.state().loading).toBe(false);
           expect(loginPage.state().error).toBe('');
+        }).finally(() => {
+          expect(loginPage.state().loading).toBe(false);
           done();
         });
-      }, 50);
+      }, 1);
 
       return loginPromise;
     });

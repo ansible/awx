@@ -50,14 +50,13 @@ class LoginPage extends Component {
       this.safeSetState({ loading: true });
 
       api.login(username, password)
-        .then(() => {
-          this.safeSetState({ loading: false });
-        })
         .catch(error => {
-          this.safeSetState({ loading: false });
           if (error.response.status === 401) {
             this.safeSetState({ error: LOGIN_ERROR_MESSAGE });
           }
+        })
+        .finally(() => {
+          this.safeSetState({ loading: false });
         });
     }
   }
