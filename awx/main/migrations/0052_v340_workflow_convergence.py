@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0050_v340_drop_celery_tables'),
+        ('main', '0051_v340_job_slicing'),
     ]
 
     operations = [
