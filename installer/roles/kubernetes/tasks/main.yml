@@ -81,9 +81,9 @@
 - name: Deploy and Activate Postgres (Kubernetes)
   shell: |
     helm install --name {{ kubernetes_deployment_name }} --namespace {{ kubernetes_namespace }} \
-      --set postgresUser={{ pg_username }} \
-      --set postgresPassword={{ pg_password }} \
-      --set postgresDatabase={{ pg_database }} \
+      --set postgresqlUsername={{ pg_username }} \
+      --set postgresqlPassword={{ pg_password }} \
+      --set postgresqlDatabase={{ pg_database }} \
       --set persistence.size={{ pg_volume_capacity|default('5')}}Gi \
       --tiller-namespace={{ tiller_namespace | default('kube-system') }} \
       stable/postgresql
