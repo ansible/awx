@@ -127,6 +127,9 @@ class SimpleDAG(object):
         path = set([])
         stack = node_objs
 
+        if len(self.nodes) != 0 and len(node_objs) == 0:
+            return True
+
         while stack:
             node_obj = stack.pop()
 
