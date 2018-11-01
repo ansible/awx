@@ -2130,6 +2130,7 @@ class HostFactVersionsList(SystemTrackingEnforcementMixin, ParentMixin, ListAPIV
     serializer_class = FactVersionSerializer
     parent_model = Host
     search_fields = ('facts',)
+    deprecated = True
 
     def get_queryset(self):
         from_spec = self.request.query_params.get('from', None)
@@ -2155,6 +2156,7 @@ class HostFactCompareView(SystemTrackingEnforcementMixin, SubDetailAPIView):
     model = Fact
     parent_model = Host
     serializer_class = FactSerializer
+    deprecated = True
 
     def retrieve(self, request, *args, **kwargs):
         datetime_spec = request.query_params.get('datetime', None)
@@ -4175,6 +4177,11 @@ class JobRelaunch(RetrieveAPIView):
                     'Cannot relaunch because previous job had 0 {status_value} hosts.'
                 ).format(status_value=retry_hosts)}, status=status.HTTP_400_BAD_REQUEST)
             copy_kwargs['limit'] = ','.join(retry_host_list)
+            limit_length = len(copy_kwargs['limit'])
+            if limit_length > 1024:
+                return Response({'limit': _(
+                    'Cannot relaunch because the limit length {limit_length} exceeds the max of {limit_max}.'
+                ).format(limit_length=limit_length, limit_max=1024)}, status=status.HTTP_400_BAD_REQUEST)
 
         new_job = obj.copy_unified_job(**copy_kwargs)
         result = new_job.signal_start(**serializer.validated_data['credential_passwords'])

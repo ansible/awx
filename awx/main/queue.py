@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import json
 import logging
 import os
 
@@ -12,8 +13,29 @@ from django.conf import settings
 
 # Kombu
 from kombu import Connection, Exchange, Producer
+from kombu.serialization import registry
 
 __all__ = ['CallbackQueueDispatcher']
+
+
+# use a custom JSON serializer so we can properly handle !unsafe and !vault
+# objects that may exist in events emitted by the callback plugin
+# see: https://github.com/ansible/ansible/pull/38759
+class AnsibleJSONEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        if getattr(o, 'yaml_tag', None) == '!vault':
+            return o.data
+        return super(AnsibleJSONEncoder, self).default(o)
+
+
+registry.register(
+    'json-ansible',
+    lambda obj: json.dumps(obj, cls=AnsibleJSONEncoder),
+    lambda obj: json.loads(obj),
+    content_type='application/json',
+    content_encoding='utf-8'
+)
 
 
 class CallbackQueueDispatcher(object):
@@ -41,7 +63,7 @@ class CallbackQueueDispatcher(object):
 
                 producer = Producer(self.connection)
                 producer.publish(obj,
-                                 serializer='json',
+                                 serializer='json-ansible',
                                  compression='bzip2',
                                  exchange=self.exchange,
                                  declare=[self.exchange],

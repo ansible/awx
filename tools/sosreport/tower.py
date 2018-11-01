@@ -11,17 +11,22 @@ SOSREPORT_TOWER_COMMANDS = [
     "supervisorctl status",   # tower process status
     "rabbitmqctl status",
     "rabbitmqctl cluster_status",
-    "/var/lib/awx/venv/awx/bin/pip freeze",             # pip package list
-    "/var/lib/awx/venv/ansible/bin/pip freeze",             # pip package list
+    "/var/lib/awx/venv/awx/bin/pip freeze",        # pip package list
+    "/var/lib/awx/venv/awx/bin/pip freeze -l",     # pip package list without globally-installed packages
+    "/var/lib/awx/venv/ansible/bin/pip freeze",    # pip package list
+    "/var/lib/awx/venv/ansible/bin/pip freeze -l", # pip package list without globally-installed packages
     "tree -d /var/lib/awx",   # show me the dirs
     "ls -ll /var/lib/awx",    # check permissions
     "ls -ll /var/lib/awx/venv", # list all venvs
-    "ls -ll /etc/tower"
+    "ls -ll /etc/tower",
+    "umask -p"    # check current umask
 ]
 
 SOSREPORT_TOWER_DIRS = [
     "/etc/tower/",
     "/etc/ansible/",
+    "/etc/supervisord.d/",
+    "/etc/nginx/",
     "/var/log/tower",
     "/var/log/nginx",
     "/var/log/rabbitmq",
