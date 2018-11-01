@@ -3169,12 +3169,12 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
 
         parent_node_type_relationship = getattr(parent, self.relationship)
         parent_node_type_relationship.add(sub)
-        parent.save()
 
         graph = WorkflowDAG(parent.workflow_job_template)
         if graph.has_cycle():
             parent_node_type_relationship.remove(sub)
             return {"Error": _("Cycle detected.")}
+        parent_node_type_relationship.remove(sub)
         return None
 
 
