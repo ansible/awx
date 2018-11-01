@@ -3,6 +3,7 @@
 
 # Python
 import re
+import sys
 from dateutil.relativedelta import relativedelta
 
 # Django
@@ -129,6 +130,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        sys.stderr.write("This command has been deprecated and will be removed in a future release.\n")
         if not feature_enabled('system_tracking'):
             raise CommandError("The System Tracking feature is not enabled for your instance")
         cleanup_facts = CleanupFacts()

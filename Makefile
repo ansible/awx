@@ -600,7 +600,6 @@ docker-compose-cluster-elk: docker-auth
 minishift-dev:
 	ansible-playbook -i localhost, -e devtree_directory=$(CURDIR) tools/clusterdevel/start_minishift_dev.yml
 
-
 clean-elk:
 	docker stop tools_kibana_1
 	docker stop tools_logstash_1

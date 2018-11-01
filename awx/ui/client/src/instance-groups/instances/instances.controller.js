@@ -51,7 +51,7 @@ function InstancesController ($scope, $state, $http, models, strings, Dataset, P
     };
 
     vm.toggle = (toggled) => {
-        const instance = _.find(vm.instances, 'id', toggled.id);
+        const instance = _.find(vm.instances, ['id', toggled.id]);
         instance.enabled = !instance.enabled;
 
         const data = {
