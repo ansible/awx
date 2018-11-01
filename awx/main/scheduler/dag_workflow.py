@@ -50,7 +50,7 @@ class WorkflowDAG(SimpleDAG):
                 return False
 
             # Node decidedly got a job; check if job is done
-            if p.job and p.job.status not in ['successful', 'failed']:
+            if p.job and p.job.status not in ['successful', 'failed', 'error']:
                 return False
         return True
 
@@ -69,7 +69,7 @@ class WorkflowDAG(SimpleDAG):
                 continue
 
             if obj.job:
-                if obj.job.status == 'failed':
+                if obj.job.status in ['failed', 'error']:
                     nodes.extend(self.get_dependencies(obj, 'failure_nodes') +
                                  self.get_dependencies(obj, 'always_nodes'))
                 elif obj.job.status == 'successful':
@@ -121,9 +121,9 @@ class WorkflowDAG(SimpleDAG):
                 else:
                     is_failed = True if children_all else job.status in ['failed', 'canceled', 'error']
 
-            if job.status in ['canceled', 'error']:
+            if job.status == 'canceled':
                 continue
-            elif job.status == 'failed':
+            elif job.status in ['error', 'failed']:
                 nodes.extend(children_failed + children_always)
             elif job.status == 'successful':
                 nodes.extend(children_success + children_always)
@@ -168,7 +168,7 @@ class WorkflowDAG(SimpleDAG):
                     if node in (self.get_dependencies(p, 'success_nodes') +
                                 self.get_dependencies(p, 'always_nodes')):
                         return False
-                elif p.job.status == 'failed':
+                elif p.job.status in ['failed', 'error']:
                     if node in (self.get_dependencies(p, 'failure_nodes') +
                                 self.get_dependencies(p, 'always_nodes')):
                         return False
@@ -203,7 +203,7 @@ class WorkflowDAG(SimpleDAG):
                              self.get_dependencies(obj, 'failure_nodes') +
                              self.get_dependencies(obj, 'always_nodes'))
             elif obj.job:
-                if obj.job.status == 'failed':
+                if obj.job.status in ['failed', 'error']:
                     nodes.extend(self.get_dependencies(obj, 'success_nodes'))
                 elif obj.job.status == 'successful':
                     nodes.extend(self.get_dependencies(obj, 'failure_nodes'))
