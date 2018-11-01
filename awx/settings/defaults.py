@@ -919,6 +919,7 @@ SCM_EXCLUDE_EMPTY_GROUPS = True
 # Defaults for enabling/disabling activity stream.
 # Note: These settings may be overridden by database settings.
 ACTIVITY_STREAM_ENABLED = True
+ACTIVITY_STREAM_COALESCE_ENTRIES = True
 ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 
 # Internal API URL for use by inventory scripts and callback plugin.

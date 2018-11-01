@@ -25,6 +25,17 @@ register(
 )
 
 register(
+    'ACTIVITY_STREAM_COALESCE_ENTRIES',
+    field_class=fields.BooleanField,
+    label=_('Coalesce Select Activity Stream Entries'),
+    help_text=_('For certain processes, combine multiple entries into one. '
+                'This replaces many similar entries with a single summary entry.'),
+    category=_('System'),
+    category_slug='system',
+    feature_required='activity_streams',
+)
+
+register(
     'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC',
     field_class=fields.BooleanField,
     label=_('Enable Activity Stream for Inventory Sync'),

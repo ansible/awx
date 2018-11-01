@@ -487,12 +487,22 @@ def activity_stream_delete(sender, instance, **kwargs):
     # If we trigger this handler there we may fall into db-integrity-related race conditions.
     # So we add flag verification to prevent normal signal handling. This funciton will be
     # explicitly called with flag on in Inventory.schedule_deletion.
-    if isinstance(instance, Inventory) and not kwargs.get('inventory_delete_flag', False):
-        return
+    changes = {}
+    if isinstance(instance, Inventory):
+        if not kwargs.get('inventory_delete_flag', False):
+            return
+        if settings.ACTIVITY_STREAM_COALESCE_ENTRIES:
+            # Add additional data about child hosts / groups that will be deleted
+            changes['coalesce_data'] = {
+                'hosts_deleted': instance.hosts.count(),
+                'groups_deleted': instance.groups.count()
+            }
+    elif isinstance(instance, (Host, Group)) and instance.inventory.pending_deletion and settings.ACTIVITY_STREAM_COALESCE_ENTRIES:
+        return  # accounted for by inventory entry, above
     _type = type(instance)
     if getattr(_type, '_deferred', False):
         return
-    changes = model_to_dict(instance)
+    changes.update(model_to_dict(instance))
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     if type(instance) == OAuth2AccessToken:
         changes['token'] = CENSOR_VALUE
