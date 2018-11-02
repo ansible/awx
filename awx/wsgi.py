@@ -77,5 +77,5 @@ def get_wsgi_application():
     django.setup(set_prefix=False)
     return AWXWSGIHandler()
 
-
-application = get_wsgi_application()
+if not settings.COVERAGE_ENABLED:
+    application = get_wsgi_application()

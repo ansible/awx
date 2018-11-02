@@ -1,0 +1,7 @@
+nginx:          make nginx
+runworker:      make runworker
+daphne:         make daphne
+dispatcher:     make dispatcher
+receiver:       make receiver
+uwsgi:          make coverage-uwsgi
+jupyter:        make jupyter

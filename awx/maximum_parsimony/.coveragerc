@@ -1,9 +1,9 @@
 [run]
-source = awx
+source = ../awx
 branch = True
 omit =
-    awx/main/migrations/*
-    awx/lib/site-packages/*
+    ../awx/main/migrations/*
+    ../awx/lib/site-packages/*
 parallel = True
 concurrency = multiprocessing
 

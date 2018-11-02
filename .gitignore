@@ -3,6 +3,9 @@ swagger.json
 schema.json
 reference-schema.json
 
+# Coverage data
+*.coverage.awx*
+
 # Tags
 .tags
 .tags1

@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 from django.conf.urls import url, include
+from django.conf import settings  # NOQA
 from awx.main.views import (
     handle_400,
     handle_403,
@@ -20,6 +21,13 @@ urlpatterns = [
     url(r'^(?:api/)?404.html$', handle_404),
     url(r'^(?:api/)?500.html$', handle_500),
 ]
+
+if settings.COVERAGE_ENABLED:
+    urlpatterns.extend(
+        [
+            url(r'^coverage/', include('awx.maximum_parsimony.urls', namespace='maximum_parsimony'))
+        ]
+    )
 
 handler400 = 'awx.main.views.handle_400'
 handler403 = 'awx.main.views.handle_403'
