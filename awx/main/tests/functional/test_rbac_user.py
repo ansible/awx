@@ -1,8 +1,9 @@
 import pytest
+import mock
 
 from django.test import TransactionTestCase
 
-from awx.main.access import UserAccess
+from awx.main.access import UserAccess, RoleAccess, TeamAccess
 from awx.main.models import User, Organization, Inventory
 
 
@@ -57,6 +58,57 @@ def test_user_queryset(user):
     access = UserAccess(u)
     qs = access.get_queryset()
     assert qs.count() == 1
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('ext_auth,superuser,expect', [
+    (True, True, True),
+    (False, True, True),  # your setting can't touch me, I'm superuser
+    (True, False, True),  # org admin, managing my peeps
+    (False, False, False),  # setting blocks org admin
+], ids=['superuser', 'superuser-off', 'org', 'org-off'])
+def test_manage_org_auth_setting(ext_auth, superuser, expect, organization, rando, user, team):
+    u = user('foo-user', is_superuser=superuser)
+    if not superuser:
+        organization.admin_role.members.add(u)
+
+    with mock.patch('awx.main.access.settings') as settings_mock:
+        settings_mock.MANAGE_ORGANIZATION_AUTH = ext_auth
+        assert [
+            # use via /api/v2/users/N/roles/
+            UserAccess(u).can_attach(rando, organization.admin_role, 'roles'),
+            UserAccess(u).can_attach(rando, team.admin_role, 'roles'),
+            # use via /api/v2/roles/N/users/
+            RoleAccess(u).can_attach(organization.admin_role, rando, 'members'),
+            RoleAccess(u).can_attach(team.admin_role, rando, 'members')
+        ] == [expect for i in range(4)]
+        assert [
+            # use via /api/v2/users/N/roles/
+            UserAccess(u).can_unattach(rando, organization.admin_role, 'roles'),
+            UserAccess(u).can_unattach(rando, team.admin_role, 'roles'),
+            # use via /api/v2/roles/N/users/
+            RoleAccess(u).can_unattach(organization.admin_role, rando, 'members'),
+            RoleAccess(u).can_unattach(team.admin_role, rando, 'members')
+        ] == [expect for i in range(4)]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('ext_auth', [True, False])
+def test_team_org_resource_role(ext_auth, organization, rando, org_admin, team):
+    with mock.patch('awx.main.access.settings') as settings_mock:
+        settings_mock.MANAGE_ORGANIZATION_AUTH = ext_auth
+        assert [
+            # use via /api/v2/teams/N/roles/
+            TeamAccess(org_admin).can_attach(team, organization.workflow_admin_role, 'roles'),
+            # use via /api/v2/roles/teams/
+            RoleAccess(org_admin).can_attach(organization.workflow_admin_role, team, 'member_role.parents')
+        ] == [True for i in range(2)]
+        assert [
+            # use via /api/v2/teams/N/roles/
+            TeamAccess(org_admin).can_unattach(team, organization.workflow_admin_role, 'roles'),
+            # use via /api/v2/roles/teams/
+            RoleAccess(org_admin).can_unattach(organization.workflow_admin_role, team, 'member_role.parents')
+        ] == [True for i in range(2)]
 
 
 @pytest.mark.django_db
