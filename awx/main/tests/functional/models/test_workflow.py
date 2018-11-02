@@ -104,7 +104,7 @@ class TestWorkflowDNR():
     @pytest.fixture
     def workflow_job_fn(self):
         def fn(states=['new', 'new', 'new', 'new', 'new', 'new']):
-            """
+            r"""
             Workflow topology:
                    node[0]
                     /   |
