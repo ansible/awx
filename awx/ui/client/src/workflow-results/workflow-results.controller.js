@@ -68,7 +68,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                 },
                 legend: {
                     ON_SUCCESS: i18n._('On Success'),
-                    ON_FAIL: i18n._('On Fail'),
+                    ON_FAILURE: i18n._('On Failure'),
                     ALWAYS: i18n._('Always'),
                     PROJECT_SYNC: i18n._('Project Sync'),
                     INVENTORY_SYNC: i18n._('Inventory Sync'),

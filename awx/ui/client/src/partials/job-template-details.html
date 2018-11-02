@@ -1,4 +1,4 @@
-<div class="List-infoCell" ng-if="job_template.type === 'job_template'">
-    <span class="Key-icon Key-icon--circle Key-icon--default" aw-pop-over="<dl><dt>{{ 'INVENTORY' | translate }}</dt><dd>{{(job_template.summary_fields.inventory.name | sanitize) || ('NONE SELECTED' | translate)}}</dd></dl><dl><dt>{{ 'PROJECT' | translate }}</dt><dd>{{job_template.summary_fields.project.name | sanitize}}</dd></dl><dl><dt>{{ 'PLAYBOOK' | translate }}</dt><dd>{{job_template.playbook| sanitize}}</dd></dl><dl><dt>{{ 'CREDENTIAL' | translate }}</dt> <dd>{{(job_template.summary_fields.credential.name | sanitize) || ('NONE SELECTED' | translate)}}</dd></dl>"
-        data-popover-title="{{job_template.name| sanitize}}">?</span>
+<div class="List-infoCell" ng-if="template.type === 'job_template'">
+    <span class="Key-icon Key-icon--circle Key-icon--default" aw-pop-over="<dl><dt>{{ 'INVENTORY' | translate }}</dt><dd>{{(template.summary_fields.inventory.name | sanitize) || ('NONE SELECTED' | translate)}}</dd></dl><dl><dt>{{ 'PROJECT' | translate }}</dt><dd>{{template.summary_fields.project.name | sanitize}}</dd></dl><dl><dt>{{ 'PLAYBOOK' | translate }}</dt><dd>{{template.playbook| sanitize}}</dd></dl><dl><dt>{{ 'CREDENTIAL' | translate }}</dt> <dd>{{(template.summary_fields.credential.name | sanitize) || ('NONE SELECTED' | translate)}}</dd></dl>"
+        data-popover-title="{{template.name| sanitize}}">?</span>
 </div>
