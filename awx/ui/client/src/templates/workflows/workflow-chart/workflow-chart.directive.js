@@ -1093,30 +1093,7 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                         };
 
                         if (d.job.id) {
-                            if (d.unifiedJobTemplate) {
-                                goToJobResults(d.unifiedJobTemplate.unified_job_type);
-                            } else {
-                                // We don't have access to the unified resource and have to make
-                                // a GET request in order to find out what type job this was
-                                // so that we can route the user to the correct stdout view
-
-                                Rest.setUrl(GetBasePath("unified_jobs") + "?id=" + d.job.id);
-                                Rest.get()
-                                    .then(function (res) {
-                                        if (res.data.results && res.data.results.length > 0) {
-                                            goToJobResults(res.data.results[0].type);
-                                        }
-                                    })
-                                    .catch(({
-                                        data,
-                                        status
-                                    }) => {
-                                        ProcessErrors(scope, data, status, null, {
-                                            hdr: 'Error!',
-                                            msg: 'Unable to get job: ' + status
-                                        });
-                                    });
-                            }
+                            goToJobResults(d.job.type);
                         }
                     });
                 }
