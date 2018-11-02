@@ -108,20 +108,17 @@ class TestWorkflowDNR():
             Workflow topology:
                    node[0]
                     /\
-                  s/  \f
+                  s   f
                   /    \
                node[1] node[3]
                  /       \
-               s/         \f
+                s         f
                /           \
-            node[2]       node[4]
-               \           /
-                \         /
-                 \       /
-                  s     f
-                   \   /
-                    \ /
-                  node[5]
+            node[2]    node[4]
+               \         /
+                s       f
+                 \     /
+                 node[5]
             """
             wfj = WorkflowJob.objects.create()
             jt = JobTemplate.objects.create(name='test-jt')
