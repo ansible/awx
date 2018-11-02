@@ -8,8 +8,6 @@ import {
 import {
   BackgroundImage,
   BackgroundImageSrc,
-  Button,
-  ButtonVariant,
   Nav,
   NavExpandable,
   NavList,
@@ -18,12 +16,12 @@ import {
   PageHeader,
   PageSidebar
 } from '@patternfly/react-core';
-import { UserIcon } from '@patternfly/react-icons';
 import { global_breakpoint_md as breakpointMd } from '@patternfly/react-tokens';
 
 import api from './api';
 
 // import About from './components/About';
+import LogoutButton from './components/LogoutButton';
 import TowerLogo from './components/TowerLogo';
 import ConditionalRedirect from './components/ConditionalRedirect';
 
@@ -78,13 +76,6 @@ class App extends React.Component {
     this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
   }
 
-  onDevLogout = () => {
-    api.logout()
-      .then(() => {
-        this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
-      });
-  }
-
   render () {
     const { activeItem, activeGroup, isNavOpen } = this.state;
     const { logo, loginInfo } = this.props;
@@ -112,7 +103,7 @@ class App extends React.Component {
                 header={(
                   <PageHeader
                     logo={<TowerLogo onClick={this.onLogoClick} />}
-                    avatar={<Button id="button-logout" aria-label="Logout" variant={ButtonVariant.plain} onClick={this.onDevLogout} onKeyDown={event => { if (event.keycode === 13) { this.onDevLogout(); } }}><UserIcon /></Button>}
+                    avatar={<LogoutButton onDevLogout={api.logout} />}
                     showNavToggle
                     onNavToggle={this.onNavToggle}
                   />
