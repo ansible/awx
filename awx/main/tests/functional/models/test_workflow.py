@@ -77,13 +77,6 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         self.assertTrue(is_done)
         self.assertTrue(has_failed)
 
-    def test_workflow_fails_for_unfinished_node(self):
-        wfj = self.workflow_job(states=['error', None, None, None, None])
-        dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
-        self.assertTrue(is_done)
-        self.assertTrue(has_failed)
-
     def test_workflow_fails_for_no_error_handler(self):
         wfj = self.workflow_job(states=['successful', 'failed', None, None, None])
         dag = WorkflowDAG(workflow_job=wfj)
