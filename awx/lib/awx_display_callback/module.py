@@ -477,7 +477,7 @@ class BaseCallbackModule(CallbackBase):
 
     def v2_runner_on_start(self, host, task):
         event_data = dict(
-            host=host,
+            host=host.get_name(),
             task=task
         )
         with self.capture_event_data('runner_on_start', **event_data):
