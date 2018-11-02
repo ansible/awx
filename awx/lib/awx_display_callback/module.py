@@ -475,6 +475,15 @@ class BaseCallbackModule(CallbackBase):
         with self.capture_event_data('runner_retry', **event_data):
             super(BaseCallbackModule, self).v2_runner_retry(result)
 
+    def v2_runner_on_start(self, host, task):
+        event_data = dict(
+            host=host.get_name(),
+            task=task
+        )
+        with self.capture_event_data('runner_on_start', **event_data):
+            super(BaseCallbackModule, self).v2_runner_on_start(host, task)
+            
+
 
 class AWXDefaultCallbackModule(BaseCallbackModule, DefaultCallbackModule):
 
