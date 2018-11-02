@@ -38,6 +38,28 @@ class TestInventoryScript:
             'remote_tower_id': host.id
         }
 
+    def test_grandparent_group(self, inventory):
+        g1 = inventory.groups.create(name='g1', variables={'v1': 'v1'})
+        g2 = inventory.groups.create(name='g2', variables={'v2': 'v2'})
+        h1 = inventory.hosts.create(name='h1')
+        # h1 becomes indirect member of g1 group
+        g1.children.add(g2)
+        g2.hosts.add(h1)
+        # make sure we return g1 details in output
+        data = inventory.get_script_data(hostvars=1)
+        assert 'g1' in data
+        assert 'g2' in data
+        assert data['g1'] == {
+            'hosts': [],
+            'children': ['g2'],
+            'vars': {'v1': 'v1'}
+        }
+        assert data['g2'] == {
+            'hosts': ['h1'],
+            'children': [],
+            'vars': {'v2': 'v2'}
+        }
+
     def test_slice_subset(self, inventory):
         for i in range(3):
             inventory.hosts.create(name='host{}'.format(i))
