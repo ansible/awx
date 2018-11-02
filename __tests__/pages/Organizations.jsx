@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import Organizations from '../../../src/pages/Organizations';
+import Organizations from '../../src/pages/Organizations';
 
 describe('<Organizations />', () => {
   let pageWrapper;

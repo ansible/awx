@@ -1,14 +1,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import Portal from '../../../src/pages/Portal';
+import AuthSettings from '../../src/pages/AuthSettings';
 
-describe('<Portal />', () => {
+describe('<AuthSettings />', () => {
   let pageWrapper;
   let pageSections;
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<Portal />);
+    pageWrapper = mount(<AuthSettings />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });

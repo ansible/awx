@@ -1,14 +1,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import CredentialTypes from '../../../src/pages/CredentialTypes';
+import Schedules from '../../src/pages/Schedules';
 
-describe('<CredentialTypes />', () => {
+describe('<Schedules />', () => {
   let pageWrapper;
   let pageSections;
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<CredentialTypes />);
+    pageWrapper = mount(<Schedules />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });

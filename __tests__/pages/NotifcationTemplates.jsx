@@ -1,14 +1,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import Templates from '../../../src/pages/Templates';
+import NotificationTemplates from '../../src/pages/NotificationTemplates';
 
-describe('<Templates />', () => {
+describe('<NotificationTemplates />', () => {
   let pageWrapper;
   let pageSections;
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<Templates />);
+    pageWrapper = mount(<NotificationTemplates />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });

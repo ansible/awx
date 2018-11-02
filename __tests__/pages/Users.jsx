@@ -1,14 +1,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import UISettings from '../../../src/pages/UISettings';
+import Users from '../../src/pages/Users';
 
-describe('<UISettings />', () => {
+describe('<Users />', () => {
   let pageWrapper;
   let pageSections;
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<UISettings />);
+    pageWrapper = mount(<Users />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });

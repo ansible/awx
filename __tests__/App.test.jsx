@@ -1,9 +1,9 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import App from '../../src/App';
-import api from '../../src/api';
-import Dashboard from '../../src/pages/Dashboard';
-import Login from '../../src/pages/Login';
+import App from '../src/App';
+import api from '../src/api';
+import Dashboard from '../src/pages/Dashboard';
+import Login from '../src/pages/Login';
 
 describe('<App />', () => {
   test('renders without crashing', () => {

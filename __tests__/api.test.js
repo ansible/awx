@@ -1,6 +1,6 @@
 
 import mockAxios from 'axios';
-import APIClient from '../../src/api';
+import APIClient from '../src/api';
 
 const API_ROOT = '/api/';
 const API_LOGIN = `${API_ROOT}login/`;

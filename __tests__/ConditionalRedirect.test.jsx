@@ -4,7 +4,7 @@ import {
   Redirect
 } from 'react-router-dom';
 import { shallow } from 'enzyme';
-import ConditionalRedirect from '../../src/components/ConditionalRedirect';
+import ConditionalRedirect from '../src/components/ConditionalRedirect';
 
 describe('<ConditionalRedirect />', () => {
   test('renders Redirect when shouldRedirect is passed truthy func', () => {

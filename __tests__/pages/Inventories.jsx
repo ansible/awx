@@ -1,14 +1,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import Applications from '../../../src/pages/Applications';
+import Inventories from '../../src/pages/Inventories';
 
-describe('<Applications />', () => {
+describe('<Inventories />', () => {
   let pageWrapper;
   let pageSections;
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<Applications />);
+    pageWrapper = mount(<Inventories />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });

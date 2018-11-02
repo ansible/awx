@@ -1,14 +1,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import InstanceGroups from '../../../src/pages/InstanceGroups';
+import InventoryScripts from '../../src/pages/InventoryScripts';
 
-describe('<InstanceGroups />', () => {
+describe('<InventoryScripts />', () => {
   let pageWrapper;
   let pageSections;
   let title;
 
   beforeEach(() => {
-    pageWrapper = mount(<InstanceGroups />);
+    pageWrapper = mount(<InventoryScripts />);
     pageSections = pageWrapper.find('PageSection');
     title = pageWrapper.find('Title');
   });
