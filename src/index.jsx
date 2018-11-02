@@ -11,9 +11,15 @@ import './app.scss';
 
 const el = document.getElementById('app');
 
-api.getRoot()
-  .then(({ data }) => {
-    const { custom_logo, custom_login_info } = data;
+const main = () => {
+  api.getRoot()
+    .then(({ data }) => {
+      const { custom_logo, custom_login_info } = data;
 
-    render(<App logo={custom_logo} loginInfo={custom_login_info} />, el);
-  });
+      render(<App logo={custom_logo} loginInfo={custom_login_info} />, el);
+    });
+};
+
+main();
+
+export default main;
