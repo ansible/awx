@@ -299,7 +299,19 @@ const getAuditor = (namespace = session) => getOrganization(namespace)
 
 const getUser = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
-        username: `user-${uuid().substr(0, 8)}`,
+        username: `${namespace}-user-${uuid().substr(0, 8)}`,
+        organization: organization.id,
+        first_name: 'firstname',
+        last_name: 'lastname',
+        email: 'null@ansible.com',
+        is_superuser: false,
+        is_system_auditor: false,
+        password: AWX_E2E_PASSWORD
+    }, ['username']));
+
+const getUserExact = (namespace = session, name) => getOrganization(namespace)
+    .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
+        username: `${name}`,
         organization: organization.id,
         first_name: 'firstname',
         last_name: 'lastname',
@@ -392,5 +404,6 @@ module.exports = {
     getTeam,
     getUpdatedProject,
     getUser,
+    getUserExact,
     getWorkflowTemplate,
 };
