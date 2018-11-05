@@ -63,7 +63,7 @@ class Command(BaseCommand):
 
                 return TaskResult()
 
-        AWXScheduler().start()
+        AWXScheduler(settings.CELERYBEAT_SCHEDULE).start()
 
     def handle(self, *arg, **options):
         if options.get('status'):
