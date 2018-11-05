@@ -1311,16 +1311,12 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         'admin', 'update',
         {'copy': 'organization.project_admin'}
     ]
-    scm_delete_on_next_update = serializers.BooleanField(
-        read_only=True,
-        help_text=_('This field has been deprecated and will be removed in a future release'))
 
     class Meta:
         model = Project
-        fields = ('*', 'organization', 'scm_delete_on_next_update', 'scm_update_on_launch',
+        fields = ('*', 'organization', 'scm_update_on_launch',
                   'scm_update_cache_timeout', 'scm_revision', 'custom_virtualenv',) + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
-        read_only_fields = ('scm_delete_on_next_update',)
 
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
