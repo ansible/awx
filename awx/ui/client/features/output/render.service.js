@@ -259,17 +259,17 @@ function JobRenderService ($q, $sce, $window) {
             return this.records[event.counter];
         }
 
-        let isHost = false;
-        if (typeof event.host === 'number') {
-            isHost = true;
+        let isClickable = false;
+        if (typeof event.host === 'number' || event.event_data && event.event_data.res) {
+            isClickable = true;
         } else if (event.type === 'project_update_event' &&
             event.event !== 'runner_on_skipped' &&
             event.event_data.host) {
-            isHost = true;
+            isClickable = true;
         }
 
         const record = {
-            isHost,
+            isClickable,
             id: event.id,
             line: event.start_line + 1,
             name: event.event,
@@ -369,7 +369,7 @@ function JobRenderService ($q, $sce, $window) {
                 tdToggle = `<div class="at-Stdout-toggle" ng-click="vm.toggleCollapse('${id}')"><i class="fa ${icon} can-toggle"></i></div>`;
             }
 
-            if (record.isHost) {
+            if (record.isClickable) {
                 tdEvent = `<div class="at-Stdout-event--host" ng-click="vm.showHostDetails('${record.id}', '${record.uuid}')"><span ng-non-bindable>${content}</span></div>`;
             }
 
