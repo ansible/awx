@@ -16,7 +16,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
         scope: {
             allSelected: '=',
             view: '@',
-            dataset: '='
+            dataset: '=',
+            objectType: '='
         },
         template: "<div class='addPermissionsList-inner'></div>",
         link: function(scope, element, attrs, ctrl) {
@@ -38,6 +39,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             list.listTitleBadge = false;
             delete list.actions;
             delete list.fieldActions;
+
+            console.log(scope.objectType);
 
             switch(scope.view){
 
@@ -170,7 +173,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                                 // which is intended here.
                                 itm.tooltip = undefined;
                             }
-                            else if(!itm.summary_fields.user_capabilities.edit){
+                            else if(scope.objectType === 'organization' && !itm.summary_fields.user_capabilities.edit){
                                 itm.tooltip = i18n._('You do not have permission to manage this user');
                             }
                         });
