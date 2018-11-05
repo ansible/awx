@@ -527,7 +527,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
                                 'this is not normal and suggests task manager degeneracy.')
                 break
             wj_ids.add(wj.pk)
-            ancestors.append(wj.workflow_job_template_id)
+            ancestors.append(wj.workflow_job_template)
             wj = wj.get_workflow_job()
         return ancestors
 

@@ -249,7 +249,7 @@ def test_workflow_ancestors(organization):
         job=parent_job
     )
     # ancestors method gives a list of WFJT ids
-    assert child_job.get_ancestor_workflows() == [parent.pk, grandparent.pk]
+    assert child_job.get_ancestor_workflows() == [parent, grandparent]
 
 
 @pytest.mark.django_db

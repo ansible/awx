@@ -124,17 +124,18 @@ class TaskManager():
                 can_start = True
                 if isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
                     workflow_ancestors = job.get_ancestor_workflows()
-                    if spawn_node.unified_job_template.id in set(workflow_ancestors):
+                    if spawn_node.unified_job_template in set(workflow_ancestors):
                         can_start = False
                         logger.info('Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
-                            job.id, spawn_node.unified_job_template.id, workflow_ancestors))
+                            job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]))
+                        display_list = [spawn_node.unified_job_template] + workflow_ancestors
                         job.job_explanation = _(
                             "Workflow Job spawned from workflow could not start because it "
-                            "would result in recursion (template spawn order {})"
-                        ).format([spawn_node.unified_job_template.id] + workflow_ancestors)
+                            "would result in recursion (spawn order, most recent first: {})"
+                        ).format(six.text_type(', ').join([six.text_type('<{}>').format(tmp) for tmp in display_list]))
                     else:
                         logger.debug('Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
-                            job.id, spawn_node.unified_job_template.id, workflow_ancestors))
+                            job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]))
                 if not job._resources_sufficient_for_launch():
                     can_start = False
                     job.job_explanation = _("Job spawned from workflow could not start because it "
