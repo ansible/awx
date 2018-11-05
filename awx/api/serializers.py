@@ -3107,15 +3107,33 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     passwords_needed_to_start = serializers.ReadOnlyField()
-    ask_diff_mode_on_launch = serializers.ReadOnlyField()
-    ask_variables_on_launch = serializers.ReadOnlyField()
-    ask_limit_on_launch = serializers.ReadOnlyField()
-    ask_skip_tags_on_launch = serializers.ReadOnlyField()
-    ask_tags_on_launch = serializers.ReadOnlyField()
-    ask_job_type_on_launch = serializers.ReadOnlyField()
-    ask_verbosity_on_launch = serializers.ReadOnlyField()
-    ask_inventory_on_launch = serializers.ReadOnlyField()
-    ask_credential_on_launch = serializers.ReadOnlyField()
+    ask_diff_mode_on_launch = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
+    ask_variables_on_launch = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
+    ask_limit_on_launch = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
+    ask_skip_tags_on_launch = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
+    ask_tags_on_launch = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
+    ask_job_type_on_launch = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
+    ask_verbosity_on_launch = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
+    ask_inventory_on_launch = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
+    ask_credential_on_launch = serializers.BooleanField(
+        read_only=True,
+        help_text=_('This field has been deprecated and will be removed in a future release'))
     artifacts = serializers.SerializerMethodField()
 
     class Meta:
