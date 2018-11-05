@@ -77,8 +77,17 @@ function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors) {
 
     // aggregate name/descriptions for each available role, based on resource type
     // reasoning:
-    function aggregateKey(item, type){
-        _.merge(scope.keys[type], item.summary_fields.object_roles);
+    function aggregateKey(item, type) {
+        const ownerType = _.get(scope, ['owner', 'type']);
+        const { object_roles } = item.summary_fields;
+
+        if (ownerType === 'team' && type === 'organizations') {
+            // some organization object_roles aren't allowed for teams
+            delete object_roles.admin_role;
+            delete object_roles.member_role;
+        }
+
+        _.merge(scope.keys[type], object_roles);
     }
 
     scope.closeModal = function() {
