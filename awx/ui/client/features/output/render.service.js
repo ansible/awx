@@ -2,10 +2,7 @@ import Ansi from 'ansi-to-html';
 import Entities from 'html-entities';
 
 import {
-    EVENT_NOTIFY_PLAYBOOK,
-    EVENT_RUNNER_OK,
     EVENT_START_PLAY,
-    EVENT_START_PLAYBOOK,
     EVENT_STATS_PLAY,
     EVENT_START_TASK,
     OUTPUT_ANSI_COLORMAP,
@@ -211,15 +208,7 @@ function JobRenderService ($q, $sce, $window) {
         const lines = stdout.split('\r\n');
         const record = this.createRecord(event, lines);
 
-        if (event.event === EVENT_START_PLAYBOOK) {
-            return { html: '', count: 0 };
-        }
-
-        if (event.stdout === '' && event.event === EVENT_NOTIFY_PLAYBOOK) {
-            return { html: '', count: 0 };
-        }
-
-        if (event.stdout === '' && event.event === EVENT_RUNNER_OK) {
+        if (lines.length === 1 && lines[0] === '') {
             return { html: '', count: 0 };
         }
 
