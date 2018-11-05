@@ -580,7 +580,7 @@ class CredentialType(CommonModelNameNotUnique):
         if not self.injectors:
             if self.managed_by_tower and credential.kind in dir(builtin_injectors):
                 injected_env = {}
-                getattr(builtin_injectors, credential.kind)(credential, injected_env)
+                getattr(builtin_injectors, credential.kind)(credential, injected_env, private_data_dir)
                 env.update(injected_env)
                 safe_env.update(build_safe_env(injected_env))
             return

@@ -1232,9 +1232,7 @@ class RunJob(BaseTask):
         # Set environment variables for cloud credentials.
         cred_files = kwargs.get('private_data_files', {}).get('credentials', {})
         for cloud_cred in job.cloud_credentials:
-            if cloud_cred and cloud_cred.kind == 'gce':
-                env['GCE_PEM_FILE_PATH'] = cred_files.get(cloud_cred, '')
-            elif cloud_cred and cloud_cred.kind == 'openstack':
+            if cloud_cred and cloud_cred.kind == 'openstack':
                 env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
 
         for network_cred in job.network_credentials:
@@ -1805,10 +1803,6 @@ class RunInventoryUpdate(BaseTask):
         """
         private_data = {'credentials': {}}
         credential = inventory_update.get_cloud_credential()
-        # If this is GCE, return the RSA key
-        if inventory_update.source == 'gce':
-            private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data')
-            return private_data
 
         if inventory_update.source == 'openstack':
             openstack_auth = dict(auth_url=credential.host,
@@ -2041,7 +2035,6 @@ class RunInventoryUpdate(BaseTask):
             'ec2': 'EC2_INI_PATH',
             'vmware': 'VMWARE_INI_PATH',
             'azure_rm': 'AZURE_INI_PATH',
-            'gce': 'GCE_PEM_FILE_PATH',
             'openstack': 'OS_CLIENT_CONFIG_FILE',
             'satellite6': 'FOREMAN_INI_PATH',
             'cloudforms': 'CLOUDFORMS_INI_PATH'
