@@ -1,10 +1,13 @@
 export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
     'jobLabels', 'workflowNodes', '$scope', 'ParseTypeChange',
-    'ParseVariableString', 'WorkflowService', 'count', '$state', 'i18n',
-    'moment', '$filter', function(workflowData, workflowResultsService,
+    'ParseVariableString', 'count', '$state', 'i18n',
+    'moment', function(workflowData, workflowResultsService,
     workflowDataOptions, jobLabels, workflowNodes, $scope, ParseTypeChange,
-    ParseVariableString, WorkflowService, count, $state, i18n, moment, $filter) {
+    ParseVariableString, count, $state, i18n, moment) {
         var runTimeElapsedTimer = null;
+        let workflowMakerNodeIdCounter = 1;
+        let nodeIdToMakerIdMapping = {};
+        let chartNodeIdToIndexMapping = {};
 
         var getLinks = function() {
             var getLink = function(key) {
@@ -113,11 +116,8 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.workflow_nodes = workflowNodes;
             $scope.workflowOptions = workflowDataOptions.actions.GET;
             $scope.labels = jobLabels;
-            $scope.count = count.val;
             $scope.showManualControls = false;
-            $scope.showKey = false;
-            $scope.toggleKey = () => $scope.showKey = !$scope.showKey;
-            $scope.keyClassList = `{ 'Key-menuIcon--active': showKey }`;
+            $scope.readOnly = true;
 
             // Start elapsed time updater for job known to be running
             if ($scope.workflow.started !== null && $scope.workflow.status === 'running') {
@@ -167,24 +167,95 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.varsTooltip= i18n._('Read only view of extra variables added to the workflow.');
             $scope.varsLabel = i18n._('Extra Variables');
 
-
             // Click binding for the expand/collapse button on the standard out log
             $scope.stdoutFullScreen = false;
 
-            WorkflowService.buildTree({
-                workflowNodes: workflowNodes
-            }).then(function(data){
-                $scope.treeData = data;
-
-                // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
-                // this treeData object and removing the children object for some reason (?)
-                // This happens on occasion and I think is a race condition (?)
-                if(!$scope.treeData.data.children) {
-                    $scope.treeData.data.children = [];
+            let nonRootNodeIds = [];
+            let allNodeIds = [];
+            let arrayOfLinksForChart = [];
+            let arrayOfNodesForChart = [
+                {
+                    index: 0,
+                    id: workflowMakerNodeIdCounter,
+                    isStartNode: true,
+                    unifiedJobTemplate: {
+                        name: "START"
+                    },
+                    fixed: true,
+                    x: 0,
+                    y: 0
                 }
+            ];
 
-                $scope.canAddWorkflowJobTemplate = false;
+            workflowMakerNodeIdCounter++;
+            // Assign each node an ID - 0 is reserved for the start node.  We need to
+            // make sure that we have an ID on every node including new nodes so the
+            // ID returned by the api won't do
+            workflowNodes.forEach((node) => {
+                node.workflowMakerNodeId = workflowMakerNodeIdCounter;
+                const nodeObj = {
+                    index: workflowMakerNodeIdCounter-1,
+                    id: workflowMakerNodeIdCounter,
+                    unifiedJobTemplate: node.summary_fields.unified_job_template
+                };
+                if(node.summary_fields.job) {
+                    nodeObj.job = node.summary_fields.job;
+                }
+                if(node.summary_fields.unified_job_template) {
+                    nodeObj.unifiedJobTemplate = node.summary_fields.unified_job_template;
+                }
+                arrayOfNodesForChart.push(nodeObj);
+                allNodeIds.push(node.id);
+                nodeIdToMakerIdMapping[node.id] = node.workflowMakerNodeId;
+                chartNodeIdToIndexMapping[workflowMakerNodeIdCounter] = workflowMakerNodeIdCounter-1;
+                workflowMakerNodeIdCounter++;
             });
+
+            workflowNodes.forEach((node) => {
+                const sourceIndex = chartNodeIdToIndexMapping[node.workflowMakerNodeId];
+                node.success_nodes.forEach((nodeId) => {
+                    const targetIndex = chartNodeIdToIndexMapping[nodeIdToMakerIdMapping[nodeId]];
+                    arrayOfLinksForChart.push({
+                        source: arrayOfNodesForChart[sourceIndex],
+                        target: arrayOfNodesForChart[targetIndex],
+                        edgeType: "success"
+                    });
+                    nonRootNodeIds.push(nodeId);
+                });
+                node.failure_nodes.forEach((nodeId) => {
+                    const targetIndex = chartNodeIdToIndexMapping[nodeIdToMakerIdMapping[nodeId]];
+                    arrayOfLinksForChart.push({
+                        source: arrayOfNodesForChart[sourceIndex],
+                        target: arrayOfNodesForChart[targetIndex],
+                        edgeType: "failure"
+                    });
+                    nonRootNodeIds.push(nodeId);
+                });
+                node.always_nodes.forEach((nodeId) => {
+                    const targetIndex = chartNodeIdToIndexMapping[nodeIdToMakerIdMapping[nodeId]];
+                    arrayOfLinksForChart.push({
+                        source: arrayOfNodesForChart[sourceIndex],
+                        target: arrayOfNodesForChart[targetIndex],
+                        edgeType: "always"
+                    });
+                    nonRootNodeIds.push(nodeId);
+                });
+            });
+
+            let uniqueNonRootNodeIds = Array.from(new Set(nonRootNodeIds));
+
+            let rootNodes = _.difference(allNodeIds, uniqueNonRootNodeIds);
+
+            rootNodes.forEach((rootNodeId) => {
+                const targetIndex = chartNodeIdToIndexMapping[nodeIdToMakerIdMapping[rootNodeId]];
+                arrayOfLinksForChart.push({
+                    source: arrayOfNodesForChart[0],
+                    target: arrayOfNodesForChart[targetIndex],
+                    edgeType: "always"
+                });
+            });
+
+            $scope.treeState = { arrayOfNodesForChart, arrayOfLinksForChart };
 
         }
 
@@ -285,12 +356,11 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
                     }
 
-                    WorkflowService.updateStatusOfNode({
-                        treeData: $scope.treeData,
-                        nodeId: data.workflow_node_id,
-                        status: data.status,
-                        unified_job_id: data.unified_job_id
-                    });
+                    $scope.treeState.arrayOfNodesForChart[chartNodeIdToIndexMapping[nodeIdToMakerIdMapping[data.workflow_node_id]]].job = {
+                        id: data.unified_job_id,
+                        status: data.status
+                    };
+
 
                     $scope.workflow_nodes.forEach(node => {
                         if(parseInt(node.id) === parseInt(data.workflow_node_id)){
@@ -300,8 +370,6 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         }
                     });
 
-                    $scope.count = workflowResultsService
-                        .getCounts($scope.workflow_nodes);
                     $scope.$broadcast("refreshWorkflowChart");
             }
             getLabelsAndTooltips();

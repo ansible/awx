@@ -1,5 +1,5 @@
 <div ng-show="nodeFormDataLoaded">
-    <div class="WorkflowMaker-formTitle ng-binding">{{mode === 'edit' ? node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_TEMPLATE')}}</div>
+    <div class="WorkflowMaker-formTitle ng-binding">{{nodeConfig.mode === 'edit' ? node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_TEMPLATE')}}</div>
     <div class="Form-tabHolder">
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'jobs'}" ng-click="activeTab = 'jobs'">{{strings.get('workflow_maker.JOBS')}}</div>
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'project_syncs'}" ng-click="activeTab = 'project_syncs'">{{strings.get('workflow_maker.PROJECT_SYNC')}}</div>
@@ -118,7 +118,7 @@
             <span>{{:: strings.get('workflows.CREDENTIAL_WITH_PASS') }}</span>
         </div>
     </div>
-    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-show="mode === 'add'">
+    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-show="nodeConfig.mode === 'add'">
         <label for="edgeType" class="Form-inputLabelContainer">
             <span class="Form-requiredAsterisk">*</span>
             <span class="Form-inputLabel">{{:: strings.get('workflow_maker.RUN') }}</span>
