@@ -1,8 +1,6 @@
 export const API_MAX_PAGE_SIZE = 200;
 export const API_ROOT = '/api/v2/';
 
-export const EVENT_NOTIFY_PLAYBOOK = 'playbook_on_notify';
-export const EVENT_RUNNER_OK = 'runner_on_ok';
 export const EVENT_START_TASK = 'playbook_on_task_start';
 export const EVENT_START_PLAY = 'playbook_on_play_start';
 export const EVENT_START_PLAYBOOK = 'playbook_on_start';
