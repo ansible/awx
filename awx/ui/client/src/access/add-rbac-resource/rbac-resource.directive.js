@@ -29,8 +29,6 @@ export default ['templateUrl', '$state',
                 };
 
                 window.scrollTo(0, 0);
-
-                scope.objectType = scope.object.type;
             }
         };
     }
