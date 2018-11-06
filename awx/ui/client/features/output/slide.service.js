@@ -114,6 +114,9 @@ function SlidingWindowService ($q) {
             }
         }
 
+        this.buffer.events.length = 0;
+        delete this.buffer.events;
+
         this.buffer.events = frames;
         this.buffer.min = min;
         this.buffer.max = max;
