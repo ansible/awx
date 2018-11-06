@@ -5,26 +5,31 @@ from datetime import timedelta
 
 from awx.main.beat import Beat
 
+
 def find_entry(entries, name):
     for e in entries:
         if e.name == name:
             return e
     return None
 
+
 @pytest.fixture(autouse=True)
 def _disable_database_settings(mocker):
     m = mocker.patch('awx.conf.settings.SettingsWrapper.all_supported_settings', new_callable=mock.PropertyMock)
     m.return_value = []
 
+
 @pytest.fixture
 def epoch():
     return datetime.datetime(2000, 1, 1, 00, 00)
+
 
 @pytest.fixture(autouse=True)
 def mock_signal():
     mock.patch('awx.main.beat.signal.pause', lambda: True)
     signal = mock.patch('awx.main.beat.signal')
     return signal
+
 
 @pytest.fixture
 def schedules_simple(epoch):
@@ -43,6 +48,7 @@ def schedules_simple(epoch):
         }
     }
 
+
 @pytest.fixture
 def schedules_towerish(epoch):
     return {
@@ -60,6 +66,7 @@ def schedules_towerish(epoch):
         }
     }
 
+
 @pytest.fixture
 def schedules_1(epoch):
     schedules = {
@@ -69,6 +76,7 @@ def schedules_1(epoch):
         }
     }
     return schedules
+
 
 @pytest.fixture
 def schedules_thundering_heard(epoch):
@@ -91,6 +99,7 @@ def schedules_thundering_heard(epoch):
         },
     }
     return schedules
+
 
 def test_beat_startup(schedules_simple, epoch):
     beat = Beat(schedules_simple, epoch=epoch)
@@ -120,6 +129,7 @@ def test_beat_startup(schedules_simple, epoch):
     assert set(['t2']) == set([s.name for s in scheds])
     assert epoch + timedelta(seconds=1) == scheds[0].last_exec_absolute
 
+
 def test_beat_thundering_heard(schedules_thundering_heard, epoch):
     beat = Beat(schedules_thundering_heard, epoch=epoch)
 
@@ -136,6 +146,7 @@ def test_beat_thundering_heard(schedules_thundering_heard, epoch):
     scheds = list(beat.scheduler.get_schedules_to_run())
     assert 0 == len(scheds)
 
+
 def test_beat_backlog(schedules_simple, epoch):
     beat = Beat(schedules_simple, epoch=epoch)
 
@@ -150,6 +161,7 @@ def test_beat_backlog(schedules_simple, epoch):
 
     assert [2, 9] == [find_entry(beat.scheduler.entries, 't1').periods_missed,
                       find_entry(beat.scheduler.entries, 't2').periods_missed]
+
 
 def test_beat_boundaries(schedules_towerish, epoch):
     beat = Beat(schedules_towerish, epoch=epoch)
