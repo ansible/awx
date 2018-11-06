@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'TemplatesStrings', 'CreateSelect2', '$timeout',
-    function($scope, TemplatesStrings, CreateSelect2, $timeout) {
+export default ['$scope', 'TemplatesStrings', 'CreateSelect2',
+    function($scope, TemplatesStrings, CreateSelect2) {
         $scope.strings = TemplatesStrings;
 
         $scope.edgeTypeOptions = [
