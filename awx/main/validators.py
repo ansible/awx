@@ -168,9 +168,9 @@ def validate_certificate(data):
     Validate that data contains one or more certificates. Adds BEGIN/END lines
     if necessary.
     """
-    if 'BEGIN' not in data:
+    if 'BEGIN ' not in data:
         data = "-----BEGIN CERTIFICATE-----\n{}".format(data)
-    if 'END' not in data:
+    if 'END ' not in data:
         data = "{}\n-----END CERTIFICATE-----\n".format(data)
     return validate_pem(data, max_keys=0, min_certs=1)
 
