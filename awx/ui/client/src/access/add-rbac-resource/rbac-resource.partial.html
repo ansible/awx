@@ -88,7 +88,7 @@
                                             {{ obj.type }}
                                         </span>
                                     </div>
-                                    <rbac-multiselect-role class="AddPermissions-roleSelect" roles="roles" model="obj.roles">
+                                    <rbac-multiselect-role class="AddPermissions-roleSelect" roles="tab.teams ? teamRoles : roles" model="obj.roles">
                                     </rbac-multiselect-role>
                                     <button class="AddPermissions-roleRemove"
                                         ng-click="removeObject(obj)">
