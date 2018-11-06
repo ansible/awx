@@ -588,7 +588,8 @@ export default
                             .then(function() {
                                 Wait('stop');
                                 saveCompleted();
-                            });
+                            })
+                            .finally(() => Wait('stop'));
                     });
                 });
             });
