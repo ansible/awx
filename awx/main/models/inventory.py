@@ -297,6 +297,9 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
             if not (data.get(group_name, {}).get('hosts', []) or data.get(group_name, {}).get('children', [])):
                 data.pop(group_name)
 
+        # Add the all group
+        data['all'] = all_group
+
         if hostvars:
             data.setdefault('_meta', dict())
             data['_meta'].setdefault('hostvars', dict())

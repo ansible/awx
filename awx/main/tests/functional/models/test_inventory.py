@@ -38,6 +38,30 @@ class TestInventoryScript:
             'remote_tower_id': host.id
         }
 
+    def test_all_group(self, inventory):
+        inventory.groups.create(name='all', variables={'a1': 'a1'})
+        g1 = inventory.groups.create(name='g1', variables={'v1': 'v1'})
+        h1 = inventory.hosts.create(name='h1')
+        inventory.hosts.create(name='h2')
+        # h1 becomes member of g1 group
+        g1.hosts.add(h1)
+        # make sure we return a1 details in output
+        data = inventory.get_script_data(hostvars=1)
+        assert 'all' in data
+        assert 'g1' in data
+        assert data['g1'] == {
+            'hosts': ['h1'],
+            'children': [],
+            'vars': {'v1': 'v1'}
+        }
+        assert data['all'] == {
+            'hosts': ['h2'],
+            'children': ['g1'],
+            'vars': {'a1': 'a1'}
+        }
+
+
+
     def test_grandparent_group(self, inventory):
         g1 = inventory.groups.create(name='g1', variables={'v1': 'v1'})
         g2 = inventory.groups.create(name='g2', variables={'v2': 'v2'})
