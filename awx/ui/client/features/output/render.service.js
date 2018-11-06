@@ -33,9 +33,13 @@ const pattern = [
 const re = new RegExp(pattern);
 const hasAnsi = input => re.test(input);
 
-function JobRenderService ($q, $sce, $window) {
-    this.init = ({ compile, toggles }) => {
-        this.hooks = { compile };
+let $scope;
+
+function JobRenderService ($q, $compile, $sce, $window) {
+    this.init = (_$scope_, { toggles }) => {
+        $scope = _$scope_;
+        this.setScope();
+
         this.el = $(OUTPUT_ELEMENT_TBODY);
         this.parent = null;
 
@@ -434,8 +438,16 @@ function JobRenderService ($q, $sce, $window) {
         });
     });
 
-    this.compile = content => {
-        this.hooks.compile(content);
+    this.setScope = () => {
+        if (this.scope) this.scope.$destroy();
+        delete this.scope;
+
+        this.scope = $scope.$new();
+    };
+
+    this.compile = () => {
+        this.setScope();
+        $compile(this.el)(this.scope);
 
         return this.requestAnimationFrame();
     };
@@ -471,10 +483,7 @@ function JobRenderService ($q, $sce, $window) {
         const result = this.prependEventGroup(events);
         const html = this.trustHtml(result.html);
 
-        const newElements = angular.element(html);
-
-        return this.requestAnimationFrame(() => this.el.prepend(newElements))
-            .then(() => this.compile(newElements))
+        return this.requestAnimationFrame(() => this.el.prepend(html))
             .then(() => result.lines);
     };
 
@@ -486,10 +495,7 @@ function JobRenderService ($q, $sce, $window) {
         const result = this.appendEventGroup(events);
         const html = this.trustHtml(result.html);
 
-        const newElements = angular.element(html);
-
-        return this.requestAnimationFrame(() => this.el.append(newElements))
-            .then(() => this.compile(newElements))
+        return this.requestAnimationFrame(() => this.el.append(html))
             .then(() => result.lines);
     };
 
@@ -600,6 +606,6 @@ function JobRenderService ($q, $sce, $window) {
     this.getCapacity = () => OUTPUT_EVENT_LIMIT - (this.getTailCounter() - this.getHeadCounter());
 }
 
-JobRenderService.$inject = ['$q', '$sce', '$window'];
+JobRenderService.$inject = ['$q', '$compile', '$sce', '$window'];
 
 export default JobRenderService;
