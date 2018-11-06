@@ -119,9 +119,12 @@ function TemplatesStrings (BaseString) {
         START: t.s('START'),
         DETAILS: t.s('DETAILS'),
         TITLE: t.s('WORKFLOW VISUALIZER'),
-        EDIT_LINK: ({ parentName, childName }) => t.s('EDIT LINK | {{parentName}} to {{childName}}', { parentName, childName }),
-        VIEW_LINK: ({ parentName, childName }) => t.s('VIEW LINK | {{parentName}} to {{childName}}', { parentName, childName })
-    }
+        ADD_LINK: t.s('ADD LINK'),
+        EDIT_LINK: t.s('EDIT LINK'),
+        VIEW_LINK: t.s('VIEW LINK'),
+        NEW_LINK: t.s('Please click on an available node to form a new link.'),
+        UNLINK: t.s('UNLINK')
+    };
 
 }
 
