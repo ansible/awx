@@ -1532,6 +1532,18 @@ class UserRolesList(SubListAttachDetachAPIView):
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
             if not role.content_object.organization and not request.user.is_superuser:
+                if request.user.id is user.id and request.data.get('disassociate'):
+                    data = dict(msg=_("You cannot revoke your access to a private credential"))
+                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+                if request.user.id is user.id and not request.data.get('disassociate'):
+                    data = dict(msg=_("You cannot grant yourself access to a private credential"))
+                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+                if request.data.get('disassociate'):
+                    data = dict(msg=_("You cannot revoke another user's access to a private credential"))
+                    return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
                 data = dict(msg=_("You cannot grant private credential access to another user"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
