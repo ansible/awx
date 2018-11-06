@@ -347,6 +347,7 @@ function JobRenderService ($q, $compile, $sce, $window) {
         let tdToggle = '';
         let tdEvent = '';
         let classList = '';
+        let directives = '';
 
         if (record.isMissing) {
             return `<div id="${record.uuid}" class="at-Stdout-row">
@@ -371,10 +372,6 @@ function JobRenderService ($q, $compile, $sce, $window) {
                 }
 
                 tdToggle = `<div class="at-Stdout-toggle" ng-click="vm.toggleCollapse('${id}')"><i class="fa ${icon} can-toggle"></i></div>`;
-            }
-
-            if (record.isClickable) {
-                tdEvent = `<div class="at-Stdout-event--host" ng-click="vm.showHostDetails('${record.id}', '${record.uuid}')"><span ng-non-bindable>${content}</span></div>`;
             }
 
             if (record.time && record.line === ln) {
@@ -404,11 +401,16 @@ function JobRenderService ($q, $compile, $sce, $window) {
             }
         }
 
+        if (record && record.isClickable) {
+            classList += ' at-Stdout-row--clickable';
+            directives = `ng-click="vm.showHostDetails('${record.id}', '${record.uuid}')"`;
+        }
+
         return `
-            <div id="${id}" class="at-Stdout-row ${classList}">
+            <div id="${id}" class="at-Stdout-row ${classList}" ${directives}>
                 ${tdToggle}
                 <div class="at-Stdout-line">${ln}</div>
-                ${tdEvent}
+                <div class="at-Stdout-event"><span ng-non-bindable>${content}</span></div>
                 <div class="at-Stdout-time">${timestamp}</div>
             </div>`;
     };

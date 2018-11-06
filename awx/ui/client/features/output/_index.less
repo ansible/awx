@@ -72,9 +72,17 @@
     &-row {
         display: flex;
 
+        &:hover {
+            background-color: white;
+        }
+
         &:hover div {
             background-color: white;
         }
+    }
+
+    &-row--clickable {
+        cursor: pointer;
     }
 
     &-toggle {
@@ -110,12 +118,6 @@
 
     &-event {
         .at-mixin-event();
-    }
-
-    &-event--host {
-        .at-mixin-event();
-
-        cursor: pointer;
     }
 
     &-time {
