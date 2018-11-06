@@ -10,8 +10,7 @@ export default ['templateUrl',
     function(templateUrl) {
         return {
             scope: {
-                mode: '<',
-                node: '=',
+                nodeConfig: '<',
                 cancel: '&',
                 select: '&',
                 readOnly: '<'
