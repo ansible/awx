@@ -31,6 +31,10 @@ class LogstashFormatter(LogstashFormatterVersion1):
         to the logging receiver
         '''
         if kind == 'activity_stream':
+            try:
+                raw_data['changes'] = json.loads(raw_data.get('changes', '{}'))
+            except Exception:
+                pass  # best effort here, if it's not valid JSON, then meh
             return raw_data
         elif kind == 'system_tracking':
             data = copy(raw_data['ansible_facts'])
