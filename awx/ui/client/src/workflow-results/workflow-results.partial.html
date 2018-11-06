@@ -363,7 +363,14 @@
                         </div>
                     </div>
                 </div>
-                <workflow-chart tree-data="treeData.data" workflow-zoomed="workflowZoomed(zoom)" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="details" class="WorkflowMaker-chart"></workflow-chart>
+                <workflow-chart
+                    tree-state="treeState"
+                    workflow-zoomed="workflowZoomed(zoom)"
+                    can-add-workflow-job-template="canAddWorkflowJobTemplate"
+                    mode="details"
+                    read-only="readOnly"
+                    class="WorkflowMaker-chart">
+                </workflow-chart>
             </div>
 
         </div>
