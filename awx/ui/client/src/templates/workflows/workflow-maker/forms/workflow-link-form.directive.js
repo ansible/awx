@@ -13,7 +13,8 @@ export default ['templateUrl',
                 linkConfig: '<',
                 readOnly: '<',
                 cancel: '&',
-                select: '&'
+                select: '&',
+                unlink: '&'
             },
             restrict: 'E',
             templateUrl: templateUrl('templates/workflows/workflow-maker/forms/workflow-link-form'),
