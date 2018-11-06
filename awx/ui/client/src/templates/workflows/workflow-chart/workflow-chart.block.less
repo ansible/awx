@@ -16,7 +16,7 @@
 .WorkflowChart-linkHovering .WorkflowChart-linkOverlay {
     cursor: pointer;
     opacity: 1;
-    fill: @cgrey;
+    fill: #E1E1E1;
 }
 
 .WorkflowChart-linkHovering .WorkflowChart-linkPath {
@@ -27,9 +27,11 @@
 .WorkflowChart-link polygon,
 .WorkflowChart-link .WorkflowChart-betweenNodesIcon,
 .WorkflowChart-node .WorkflowChart-nodeAddCircle,
+.WorkflowChart-node .WorkflowChart-linkCircle,
 .WorkflowChart-node .WorkflowChart-nodeRemoveCircle,
 .WorkflowChart-node .WorkflowChart-nodeAddIcon,
-.WorkflowChart-node .WorkflowChart-nodeRemoveIcon {
+.WorkflowChart-node .WorkflowChart-nodeRemoveIcon,
+.WorkflowChart-node .WorkflowChart-nodeLinkIcon {
     opacity: 0;
 }
 
@@ -39,6 +41,14 @@
 
 .WorkflowChart-addCircle.WorkflowChart-addHovering {
     fill: @default-succ-hov;
+}
+
+.WorkflowChart-node .WorkflowChart-linkCircle {
+    fill: @default-link;
+}
+
+.WorkflowChart-linkCircle.WorkflowChart-linkButtonHovering {
+    fill: @default-link-hov;
 }
 
 .WorkflowChart-node .WorkflowChart-nodeRemoveCircle {
@@ -53,13 +63,18 @@
     fill: @default-secondary-bg;
 }
 
-.WorkflowChart-rect.WorkflowChart-placeholder {
+.WorkflowChart-rect.WorkflowChart-isNodeBeingAdded {
     stroke-dasharray: 3;
 }
 
-.WorkflowChart-node .WorkflowChart-transparentRect {
+.WorkflowChart-node .WorkflowChart-nodeOverlay--transparent {
     fill: @default-bg;
     opacity: 0;
+}
+
+.WorkflowChart-node .WorkflowChart-nodeOverlay--disabled {
+    fill: @default-dark;
+    opacity: 0.2;
 }
 
 .WorkflowChart-alwaysShowAdd circle,
@@ -67,6 +82,8 @@
 .WorkflowChart-alwaysShowAdd .WorkflowChart-betweenNodesIcon,
 .WorkflowChart-nodeHovering .WorkflowChart-nodeAddCircle,
 .WorkflowChart-nodeHovering .WorkflowChart-nodeAddIcon,
+.WorkflowChart-nodeHovering .WorkflowChart-linkCircle,
+.WorkflowChart-nodeHovering .WorkflowChart-nodeLinkIcon,
 .WorkflowChart-nodeHovering .WorkflowChart-nodeRemoveCircle,
 .WorkflowChart-nodeHovering .WorkflowChart-nodeRemoveIcon,
 .WorkflowChart-addHovering circle,
@@ -76,7 +93,7 @@
     opacity: 1;
 }
 
-.WorkflowChart-link.WorkflowChart-placeholder {
+.WorkflowChart-link.WorkflowChart-isNodeBeingAdded {
     stroke-dasharray: 3;
 }
 
@@ -183,4 +200,12 @@
 
 .WorkflowChart-dashedNode {
    stroke-dasharray: 5,5;
+}
+
+.WorkflowChart-nodeLinkIcon {
+    color: @default-bg;
+}
+
+.WorkflowChart-nodeHovering .WorkflowChart-addLinkCircle {
+    fill: @default-link;
 }

@@ -74,26 +74,39 @@
                 </div>
                 <div class="WorkflowLegend-maker--right">
                     <span class="WorkflowMaker-totalJobs">{{strings.get('workflow_maker.TOTAL_TEMPLATES')}}</span>
-                    <span class="badge List-titleBadge" ng-bind="treeData.data.totalNodes"></span>
+                    <span class="badge List-titleBadge" ng-bind="treeState.arrayOfNodesForChart.length-1"></span>
                     <i ng-class="{'WorkflowMaker-manualControlsIcon--active': showManualControls}" class="fa fa-cog WorkflowMaker-manualControlsIcon" aria-hidden="true" alt="Controls" ng-click="toggleManualControls()"></i>
                     <div ng-show="showManualControls" class="WorkflowMaker-manualControls noselect">
                         <workflow-controls class="WorkflowControls" pan-chart="panChart(direction)" zoom-chart="zoomChart(zoom)" reset-chart="resetChart()" zoom-to-fit-chart="zoomToFitChart()"></workflow-controls>
                     </div>
                 </div>
             </div>
-            <workflow-chart ng-if="modalOpen" tree-data="treeData.data" add-node="startAddNode(parent, betweenTwoNodes)" edit-node="startEditNode(nodeToEdit)" edit-link="startEditLink(parentId, childId)" delete-node="startDeleteNode(nodeToDelete)" workflow-zoomed="workflowZoomed(zoom)" can-add-workflow-job-template="canAddWorkflowJobTemplate" workflow-job-template-obj="workflowJobTemplateObj" mode="edit" class="WorkflowMaker-chart"></workflow-chart>
+            <workflow-chart
+                ng-if="modalOpen"
+                tree-state="treeState"
+                add-node-without-child="startAddNodeWithoutChild(parent)"
+                add-node-with-child="startAddNodeWithChild(link)"
+                edit-node="startEditNode(nodeToEdit)"
+                edit-link="startEditLink(linkToEdit)"
+                select-node-for-linking="selectNodeForLinking(nodeToStartLink)"
+                delete-node="startDeleteNode(nodeToDelete)"
+                workflow-zoomed="workflowZoomed(zoom)"
+                read-only="readOnly"
+                mode="edit"
+                class="WorkflowMaker-chart">
+            </workflow-chart>
         </div>
         <div class="WorkflowMaker-contentRight">
             <span ng-if="formState.showNodeForm">
-                <workflow-node-form mode="nodeFormMode" node="nodeBeingWorkedOn" select="confirmNodeForm(selectedTemplate, promptData, edgeType)" cancel="cancelNodeForm()" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit"/>
+                <workflow-node-form node-config="nodeConfig" node="nodeBeingWorkedOn" select="confirmNodeForm(selectedTemplate, promptData, edgeType)" cancel="cancelNodeForm()" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit"/>
             </span>
             <span ng-if="formState.showLinkForm">
-                <workflow-link-form link-config="linkConfig" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit" select="confirmLinkForm(edgeType)" cancel="cancelLinkForm()"/>
+                <workflow-link-form link-config="linkConfig" read-only="!workflowJobTemplateObj.summary_fields.user_capabilities.edit" select="confirmLinkForm(edgeType)" cancel="cancelLinkForm()" unlink="unlink()"/>
             </span>
         </div>
     </div>
     <div class="WorkflowMaker-buttonHolder">
         <button type="button" class="btn btn-sm WorkflowMaker-cancelButton" ng-click="closeWorkflowMaker()"> {{:: strings.get('CLOSE') }}</button>
-        <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate" ng-disabled="showNodeForm || showLinkForm"> {{:: strings.get('SAVE') }}</button>
+        <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate" ng-disabled="formState.showNodeForm || formState.showLinkForm"> {{:: strings.get('SAVE') }}</button>
     </div>
 </div>
