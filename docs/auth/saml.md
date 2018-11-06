@@ -68,28 +68,12 @@ Below is another example of a SAML attribute that contains a Team membership in 
   "remove": true,
   "team_org_map": [
     {
-      "team": "Blue",
+      "team": "member",
       "organization": "Default1"
     },
     {
-      "team": "Blue",
+      "team": "staff",
       "organization": "Default2"
-    },
-    {
-      "team": "Blue",
-      "organization": "Default3"
-    },
-    {
-      "team": "Red",
-      "organization": "Default1"
-    },
-    {
-      "team": "Green",
-      "organization": "Default1"
-    },
-    {
-      "team": "Green",
-      "organization": "Default3"
     }
   ]
 }
