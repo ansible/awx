@@ -1,3 +1,6 @@
+# Ignore generated schema
+swagger.json
+schema.json
 
 # Tags
 .tags
