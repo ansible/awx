@@ -152,7 +152,7 @@ class TaskManager():
                 if not can_start:
                     job.status = 'failed'
                     job.save(update_fields=['status', 'job_explanation'])
-                    connection.on_commit(lambda: job.websocket_emit_status('failed'))
+                    job.websocket_emit_status('failed')
 
                 # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
                 #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
@@ -169,7 +169,7 @@ class TaskManager():
                     workflow_job.status = 'canceled'
                     workflow_job.start_args = ''  # blank field to remove encrypted passwords
                     workflow_job.save(update_fields=['status', 'start_args'])
-                    connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
+                    workflow_job.websocket_emit_status(workflow_job.status)
             else:
                 is_done, has_failed = dag.is_workflow_done()
                 if not is_done:
@@ -181,7 +181,7 @@ class TaskManager():
                 workflow_job.status = new_status
                 workflow_job.start_args = ''  # blank field to remove encrypted passwords
                 workflow_job.save(update_fields=['status', 'start_args'])
-                connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
+                workflow_job.websocket_emit_status(workflow_job.status)
         return result
 
     def get_dependent_jobs_for_inv_and_proj_update(self, job_obj):
@@ -247,7 +247,6 @@ class TaskManager():
                 self.consume_capacity(task, rampart_group.name)
 
         def post_commit():
-            task.websocket_emit_status(task.status)
             if task.status != 'failed' and type(task) is not WorkflowJob:
                 task_cls = task._get_task_class()
                 task_cls.apply_async(
@@ -266,6 +265,7 @@ class TaskManager():
                     }],
                 )
 
+        task.websocket_emit_status(task.status)  # adds to on_commit
         connection.on_commit(post_commit)
 
     def process_running_tasks(self, running_tasks):
