@@ -40,8 +40,6 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             delete list.actions;
             delete list.fieldActions;
 
-            console.log(scope.objectType);
-
             switch(scope.view){
 
                 case 'Projects':
