@@ -16,8 +16,8 @@
         index: false,
         hover: true,
         emptyListText : i18n._('No Users exist'),
-        disableRow: "{{ user.summary_fields.user_capabilities.edit === false }}",
-        disableRowValue: "user.summary_fields.user_capabilities.edit === false",
+        disableRow: "{{ objectType === 'organization' && user.summary_fields.user_capabilities.edit === false }}",
+        disableRowValue: "objectType === 'organization' && user.summary_fields.user_capabilities.edit === false",
         disableTooltip: {
             placement: 'top',
             tipWatch: 'user.tooltip'
