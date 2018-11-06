@@ -1032,10 +1032,11 @@ class TestJobCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            assert env['GCE_EMAIL'] == 'bob'
-            assert env['GCE_PROJECT'] == 'some-project'
-            ssh_key_data = env['GCE_PEM_FILE_PATH']
-            assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
+            json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
+            assert json_data['type'] == 'service_account'
+            assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
+            assert json_data['client_email'] == 'bob'
+            assert json_data['project_id'] == 'some-project'
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
@@ -2048,11 +2049,12 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            assert env['GCE_EMAIL'] == 'bob'
-            assert env['GCE_PROJECT'] == 'some-project'
             assert env['GCE_ZONE'] == expected_gce_zone
-            ssh_key_data = env['GCE_PEM_FILE_PATH']
-            assert open(ssh_key_data, 'rb').read() == self.EXAMPLE_PRIVATE_KEY
+            json_data = json.load(open(env['GCE_CREDENTIALS_FILE_PATH'], 'rb'))
+            assert json_data['type'] == 'service_account'
+            assert json_data['private_key'] == self.EXAMPLE_PRIVATE_KEY
+            assert json_data['client_email'] == 'bob'
+            assert json_data['project_id'] == 'some-project'
 
             config = ConfigParser.ConfigParser()
             config.read(env['GCE_INI_PATH'])
