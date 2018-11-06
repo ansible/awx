@@ -4,6 +4,7 @@ import App from '../src/App';
 import api from '../src/api';
 import Dashboard from '../src/pages/Dashboard';
 import Login from '../src/pages/Login';
+import { asyncFlush } from '../jest.setup';
 
 const DEFAULT_ACTIVE_GROUP = 'views_group';
 const DEFAULT_ACTIVE_ITEM = 'views_group_dashboard';
@@ -62,11 +63,15 @@ describe('<App />', () => {
     expect(appWrapper.state().activeGroup).toBe(DEFAULT_ACTIVE_GROUP);
   });
 
-  test('api.logout called from logout button', () => {
-    api.logout = jest.fn();
+  test('api.logout called from logout button', async () => {
+    api.logout = jest.fn().mockImplementation(() => Promise.resolve({}));
     const appWrapper = mount(<App />);
     const logoutButton = appWrapper.find('LogoutButton');
     logoutButton.props().onDevLogout();
+    appWrapper.setState({ activeGroup: 'foo', activeItem: 'bar' });
     expect(api.logout).toHaveBeenCalledTimes(1);
+    await asyncFlush();
+    expect(appWrapper.state().activeItem).toBe(DEFAULT_ACTIVE_ITEM);
+    expect(appWrapper.state().activeGroup).toBe(DEFAULT_ACTIVE_GROUP);
   });
 });

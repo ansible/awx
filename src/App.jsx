@@ -76,6 +76,13 @@ class App extends React.Component {
     this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
   }
 
+  onDevLogout = () => {
+    api.logout()
+      .then(() => {
+        this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
+      });
+  }
+
   render () {
     const { activeItem, activeGroup, isNavOpen } = this.state;
     const { logo, loginInfo } = this.props;
@@ -103,7 +110,7 @@ class App extends React.Component {
                 header={(
                   <PageHeader
                     logo={<TowerLogo onClick={this.onLogoClick} />}
-                    avatar={<LogoutButton onDevLogout={api.logout} />}
+                    avatar={<LogoutButton onDevLogout={() => this.onDevLogout()} />}
                     showNavToggle
                     onNavToggle={this.onNavToggle}
                   />
