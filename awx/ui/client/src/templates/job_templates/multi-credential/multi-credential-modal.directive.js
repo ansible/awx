@@ -44,17 +44,24 @@ function MultiCredentialModal(
             selectedCredentials: '=',
         },
         link: (scope, element, attrs, controllers) => {
-            const compiledList = $compile(listHtml)(scope);
-            const compiledVaultList = $compile(vaultHtml)(scope);
-
             const modalBodyElement = $('#multi-credential-modal-body');
             const modalElement = $('#multi-credential-modal');
 
             scope.showModal = () => modalElement.modal('show');
             scope.hideModal = () => modalElement.modal('hide');
 
-            scope.createList = () => modalBodyElement.append(compiledList);
-            scope.createVaultList = () => modalBodyElement.append(compiledVaultList);
+            scope.createList = () => {
+                const compiledList = $compile(listHtml)(scope);
+
+                modalBodyElement.append(compiledList);
+            };
+
+            scope.createVaultList = () => {
+                const compiledVaultList = $compile(vaultHtml)(scope);
+
+                modalBodyElement.append(compiledVaultList);
+            };
+
             scope.destroyList = () => modalBodyElement.empty();
 
             modalElement.on('hidden.bs.modal', () => {
