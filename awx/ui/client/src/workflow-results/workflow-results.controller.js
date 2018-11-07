@@ -41,6 +41,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     EDIT_WORKFLOW: i18n._('Edit the workflow job template'),
                     EDIT_SLICE_TEMPLATE: i18n._('Edit the slice job template'),
                     EDIT_SCHEDULE: i18n._('Edit the schedule'),
+                    SOURCE_WORKFLOW_JOB: i18n._('View the source Workflow Job'),
                     TOGGLE_STDOUT_FULLSCREEN: i18n._('Expand Output'),
                     STATUS: '' // re-assigned elsewhere
                 },
@@ -53,7 +54,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     STATUS: i18n._('Status'),
                     SLICE_TEMPLATE: i18n._('Slice Job Template'),
                     JOB_EXPLANATION: i18n._('Explanation'),
-                    SOURCE_WORKFLOW_JOB: i18n._('Parent Workflow')
+                    SOURCE_WORKFLOW_JOB: i18n._('Source Workflow')
                 },
                 details: {
                     HEADER: i18n._('DETAILS'),

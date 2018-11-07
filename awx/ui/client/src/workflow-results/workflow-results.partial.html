@@ -187,14 +187,16 @@
                         </div>
                     </div>
 
-                    <!-- PARENT WORKFLOW DETAIL -->
+                    <!-- SOURCE WORKFLOW JOB DETAIL -->
                     <div class="WorkflowResults-resultRow"
                         ng-if="workflow.summary_fields.source_workflow_job">
                         <label class="WorkflowResults-resultRowLabel">
                             {{ strings.labels.SOURCE_WORKFLOW_JOB }}
                         </label>
                         <div class="WorkflowResults-resultRowText">
-                            <a href="{{ source_workflow_job_link }}">
+                            <a href="{{ source_workflow_job_link }}"
+                            aw-tool-tip="{{ strings.tooltips.SOURCE_WORKFLOW_JOB }}"
+                            data-placement="top">
                                 {{ workflow.summary_fields.source_workflow_job.name }}
                             </a>
                         </div>

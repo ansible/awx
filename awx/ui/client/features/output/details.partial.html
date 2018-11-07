@@ -281,6 +281,19 @@
     </div>
 </div>
 
+<!-- SOURCE WORKFLOW JOB DETAIL -->
+<div class="JobResults-resultRow" ng-if="vm.sourceWorkflowJob">
+    <label class="JobResults-resultRowLabel">{{ vm.sourceWorkflowJob.label }}</label>
+    <div class="JobResults-resultRowText">
+        <a href="{{ vm.sourceWorkflowJob.link }}"
+        aw-tool-tip="{{ vm.sourceWorkflowJob.tooltip }}"
+        data-placement="top">
+        {{ vm.sourceWorkflowJob.value }}
+        </a>
+    </div>
+</div>
+
+
 <!-- EXTRA VARIABLES DETAIL -->
 <at-code-mirror
     class="JobResults-resultRow"

@@ -9,6 +9,11 @@
             max-width: 100%;
         }
     }
+
+    @media screen and (max-width: @breakpoint-md) {
+        display: block;
+        min-width: 400px;
+    }
 }
 
 .WorkflowResults-leftSide {
@@ -26,6 +31,7 @@
     .OnePlusTwo-right--panel(100%, @breakpoint-md);
     height: ~"calc(100vh - 177px)";
     min-height: 350px;
+    min-width: 0;
 
     @media (max-width: @breakpoint-md - 1px) {
         padding-right: 15px;
@@ -74,7 +80,7 @@
 .WorkflowResults-resultRowLabel {
     text-transform: uppercase;
     color: @default-interface-txt;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: normal!important;
     width: 30%;
     margin-right: 20px;

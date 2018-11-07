@@ -48,7 +48,6 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                     windowWidth = dimensions.width;
 
                     $('.WorkflowMaker-chart').css("height", windowHeight);
-                    $('.WorkflowMaker-chart').css("width", windowWidth);
 
                     scope.dimensionsSet = true;
 
@@ -1137,7 +1136,6 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                 function onResize() {
                     let dimensions = calcAvailableScreenSpace();
 
-                    $('.WorkflowMaker-chart').css("width", dimensions.width);
                     $('.WorkflowMaker-chart').css("height", dimensions.height);
                 }
 
@@ -1160,7 +1158,6 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                     scope.$on('workflowMakerModalResized', function () {
                         let dimensions = calcAvailableScreenSpace();
 
-                        $('.WorkflowMaker-chart').css("width", dimensions.width);
                         $('.WorkflowMaker-chart').css("height", dimensions.height);
                     });
                 }
