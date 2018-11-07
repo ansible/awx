@@ -299,7 +299,7 @@ const getAuditor = (namespace = session) => getOrganization(namespace)
 
 const getUser = (namespace = session) => getOrganization(namespace)
     .then(organization => getOrCreate(`/organizations/${organization.id}/users/`, {
-        username: `${namespace}-user-${uuid().substr(0, 8)}`,
+        username: `user-${uuid().substr(0, 8)}`,
         organization: organization.id,
         first_name: 'firstname',
         last_name: 'lastname',
