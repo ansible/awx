@@ -115,7 +115,7 @@ export default [
                         stateParams.workflow_job_template_id = item.summary_fields.unified_job_template.id;
                     } else if (item.summary_fields.unified_job_template.unified_job_type === 'inventory_update') {
                         route = 'inventories.edit.inventory_sources.edit.schedules.edit';
-                        stateParams.inventory_id = parseInt(item.related.inventory.split("/").slice(-2, -1)[0]);
+                        stateParams.inventory_id = item.summary_fields.inventory.id;
                         stateParams.inventory_source_id = item.summary_fields.unified_job_template.id;
                     } else if (item.summary_fields.unified_job_template.unified_job_type === 'system_job') {
                         route = 'managementJobsList.schedule';
