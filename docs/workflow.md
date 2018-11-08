@@ -54,11 +54,8 @@ In the event that spawning the workflow would result in recursion, the child wor
 will be marked as failed with a message explaining that recursion was detected.
 This is to prevent saturation of the task system with an infinite chain of workflows.
 
-### Tree-Graph Formation and Restrictions
-The tree-graph structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. However there are restrictions that must be enforced when setting up new connections. Here are the three restrictions that will raise validation error when break:
-* Cycle restriction: According to tree definition, no cycle is allowed.
-
-> Note: A node can now have all three types of child nodes.
+### DAG Formation and Restrictions
+The DAG structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. There is one restriction that is enforced when setting up new connections and that is the cycle restriction, since it's a DAG.
 
 ### Workflow Run Details
 A typical workflow run starts by either POSTing to endpoint `/workflow_job_templates/\d+/launch/`, or being triggered automatically by related schedule. At the very first, the workflow job template creates workflow job, and all related workflow job template nodes create workflow job nodes. Right after that, all root nodes are populated with corresponding job resources and start running. If nothing goes wrong, each decision tree will follow its own route to completion. The entire workflow finishes running when all its decision trees complete.
