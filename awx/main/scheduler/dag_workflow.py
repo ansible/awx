@@ -1,6 +1,7 @@
 
 # Python
 import copy
+from awx.main.models import WorkflowJobTemplateNode
 
 # AWX
 from awx.main.scheduler.dag_simple import SimpleDAG
@@ -14,21 +15,28 @@ class WorkflowDAG(SimpleDAG):
 
     def _init_graph(self, workflow_job_or_jt):
         if hasattr(workflow_job_or_jt, 'workflow_job_template_nodes'):
-            node_qs = workflow_job_or_jt.workflow_job_template_nodes
+            workflow_nodes = workflow_job_or_jt.workflow_job_template_nodes
         elif hasattr(workflow_job_or_jt, 'workflow_job_nodes'):
-            node_qs = workflow_job_or_jt.workflow_job_nodes
+            workflow_nodes = workflow_job_or_jt.workflow_job_nodes
         else:
             raise RuntimeError("Unexpected object {} {}".format(type(workflow_job_or_jt), workflow_job_or_jt))
 
-        workflow_nodes = node_qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes').all()
-        for workflow_node in workflow_nodes:
+        success_nodes = WorkflowJobTemplateNode.success_nodes.through.objects.filter(from_workflowjobtemplatenode__workflow_job_template_id=workflow_job_or_jt.id).values_list('from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id')
+        failure_nodes = WorkflowJobTemplateNode.failure_nodes.through.objects.filter(from_workflowjobtemplatenode__workflow_job_template_id=workflow_job_or_jt.id).values_list('from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id')
+        always_nodes = WorkflowJobTemplateNode.always_nodes.through.objects.filter(from_workflowjobtemplatenode__workflow_job_template_id=workflow_job_or_jt.id).values_list('from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id')
+
+        wfn_by_id = dict()
+
+        for workflow_node in workflow_nodes.all():
+            wfn_by_id[workflow_node.id] = workflow_node
             self.add_node(workflow_node)
 
-        for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
-            for workflow_node in workflow_nodes:
-                related_nodes = getattr(workflow_node, node_type).all()
-                for related_node in related_nodes:
-                    self.add_edge(workflow_node, related_node, node_type)
+        for edge in success_nodes:
+            self.add_edge(wfn_by_id[edge[0]], wfn_by_id[edge[1]], 'success_nodes')
+        for edge in failure_nodes:
+            self.add_edge(wfn_by_id[edge[0]], wfn_by_id[edge[1]], 'failure_nodes')
+        for edge in always_nodes:
+            self.add_edge(wfn_by_id[edge[0]], wfn_by_id[edge[1]], 'always_nodes')
 
     '''
     Determine if all, relevant, parents node are finished.
