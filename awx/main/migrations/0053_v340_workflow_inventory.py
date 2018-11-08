@@ -10,7 +10,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0051_v340_job_slicing'),
+        ('main', '0052_v340_remove_project_scm_delete_on_next_update'),
     ]
 
     operations = [
