@@ -32,6 +32,14 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.cloud_credential_link = getLink('cloud_credential');
             $scope.network_credential_link = getLink('network_credential');
 
+            if ($scope.workflow.summary_fields.inventory) {
+                if ($scope.workflow.summary_fields.inventory.kind === 'smart') {
+                    $scope.inventory_link = '/#/inventories/smart/' + $scope.workflow.inventory;
+                } else {
+                    $scope.inventory_link = '/#/inventories/inventory/' + $scope.workflow.inventory;
+                }
+            }
+
             $scope.strings = {
                 tooltips: {
                     RELAUNCH: i18n._('Relaunch using the same parameters'),
@@ -51,7 +59,8 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     FINISHED: i18n._('Finished'),
                     LABELS: i18n._('Labels'),
                     SLICE_TEMPLATE: i18n._('Slice Job Template'),
-                    STATUS: i18n._('Status')
+                    STATUS: i18n._('Status'),
+                    INVENTORY: i18n._('Inventory'),
                 },
                 details: {
                     HEADER: i18n._('DETAILS'),
