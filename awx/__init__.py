@@ -21,6 +21,30 @@ except ImportError: # pragma: no cover
     MODE = 'production'
 
 
+import django
+import hashlib
+from django.utils.encoding import force_bytes
+from django.db.backends.base.schema import BaseDatabaseSchemaEditor
+from django.db.backends.base import schema
+
+class FipsBaseDatabaseSchemaEditor(BaseDatabaseSchemaEditor):
+    
+    @classmethod
+    def _digest(cls, *args):
+        """
+        Generates a 32-bit digest of a set of arguments that can be used to
+        shorten identifying names.
+        """
+        h = hashlib.md5(usedforsecurity=False)
+        for arg in args:
+            h.update(force_bytes(arg))
+        return h.hexdigest()[:8]
+        
+schema.BaseDatabaseSchemaEditor = FipsBaseDatabaseSchemaEditor
+
+
+
+
 def find_commands(management_dir):
     # Modified version of function from django/core/management/__init__.py.
     command_dir = os.path.join(management_dir, 'commands')
