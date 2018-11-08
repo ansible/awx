@@ -81,6 +81,11 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     dataTitle: i18n._('Inventory'),
                     dataPlacement: 'right',
                     dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_inventory_on_launch',
+                        ngChange: 'workflow_job_template_form.inventory_name.$validate()',
+                        text: i18n._('Prompt on launch')
+                    },
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) || !canEditInventory',
                 },
                 labels: {

@@ -50,8 +50,10 @@ function canLaunchWithoutPrompt () {
     const launchData = this.model.launch.GET;
 
     return (
-        launchData.can_start_without_user_input &&
-        !launchData.survey_enabled
+        // TODO: may need api update
+        // launchData.can_start_without_user_input &&
+        !launchData.survey_enabled &&
+        !this.model.GET.ask_inventory_on_launch
     );
 }
 
