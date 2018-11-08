@@ -4614,6 +4614,22 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
             res['inventory'] = obj.unified_job_template.inventory.get_absolute_url(self.context.get('request'))
         return res
 
+    def get_summary_fields(self, obj):
+        summary_fields = super(ScheduleSerializer, self).get_summary_fields(obj)
+        inventory = None
+        if obj.inventory:
+            inventory = obj.inventory
+        elif obj.unified_job_template and getattr(obj.unified_job_template, 'inventory', None):
+            inventory = obj.unified_job_template.inventory
+        else:
+            return summary_fields
+
+        summary_fields['inventory'] = dict()
+        for field in SUMMARIZABLE_FK_FIELDS['inventory']:
+            summary_fields['inventory'][field] = getattr(inventory, field, None)
+
+        return summary_fields
+
     def validate_unified_job_template(self, value):
         if type(value) == InventorySource and value.source not in SCHEDULEABLE_PROVIDERS:
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
