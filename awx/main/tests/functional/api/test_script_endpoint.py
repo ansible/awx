@@ -13,6 +13,7 @@ def test_empty_inventory(post, get, admin_user, organization, group_factory):
     inventory.save()
     resp = get(reverse('api:inventory_script_view', kwargs={'version': 'v2', 'pk': inventory.pk}), admin_user)
     jdata = json.loads(resp.content)
+    jdata.pop('all')
 
     assert inventory.hosts.count() == 0
     assert jdata == {}
