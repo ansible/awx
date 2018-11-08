@@ -1091,8 +1091,31 @@ export default ['$state', 'moment', '$timeout', '$window', '$filter', 'Rest', 'G
                             }
                         };
 
-                        if (d.job.id) {
+                        if (d.job.type) {
                             goToJobResults(d.job.type);
+                        }
+                        else {
+                            // We don't have access to the job type and have to make
+                            // a GET request in order to find out what type job this was
+                            // so that we can route the user to the correct stdout view
+                            Rest.setUrl(GetBasePath("workflow_jobs") + `${d.originalNodeObj.workflow_job}/workflow_nodes/?order_by=id`);
+                            Rest.get()
+                                .then(function (res) {
+                                    if (res.data.results && res.data.results.length > 0) {
+                                        const { results } = res.data;
+                                        const job = results.filter(result => result.summary_fields.job.id === d.job.id);
+                                        goToJobResults(job[0].summary_fields.job.type);
+                                    }
+                                })
+                                .catch(({
+                                    data,
+                                    status
+                                }) => {
+                                    ProcessErrors(scope, data, status, null, {
+                                        hdr: 'Error!',
+                                        msg: 'Unable to get job: ' + status
+                                    });
+                                });
                         }
                     });
                 }
