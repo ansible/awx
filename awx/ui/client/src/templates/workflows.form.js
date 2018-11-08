@@ -68,6 +68,21 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) || !canEditOrg',
                     awLookupWhen: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) && canEditOrg'
                 },
+                inventory: {
+                    label: i18n._('Inventory'),
+                    type: 'lookup',
+                    basePath: 'inventory',
+                    list: 'InventoryList',
+                    sourceModel: 'inventory',
+                    sourceField: 'name',
+                    autopopulateLookup: false,
+                    column: 1,
+                    awPopOver: "<p>" + i18n._("Select an inventory for the workflow. This inventory is applied to all job templates nodes that prompt for an inventory.") + "</p>",
+                    dataTitle: i18n._('Inventory'),
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) || !canEditInventory',
+                },
                 labels: {
                     label: i18n._('Labels'),
                     type: 'select',

@@ -8,11 +8,11 @@ export default [
     '$scope', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
     'Wait', '$state', 'CreateSelect2', 'TemplatesService',
     'ToJSON', 'ParseTypeChange', '$q', 'Rest', 'GetBasePath', 'availableLabels', 'i18n',
-    'resolvedModels',
+    'resolvedModels', 'Inventory',
     function($scope, WorkflowForm, GenerateForm, Alert, ProcessErrors,
     Wait, $state, CreateSelect2, TemplatesService, ToJSON,
     ParseTypeChange, $q, Rest, GetBasePath, availableLabels, i18n,
-    resolvedModels) {
+    resolvedModels, Inventory) {
 
          // Inject dynamic view
          let form = WorkflowForm(),
@@ -23,6 +23,7 @@ export default [
          $scope.canAddWorkflowJobTemplate = workflowTemplate.options('actions.POST');
 
          $scope.canEditOrg = true;
+         $scope.canEditInventory = true;
          $scope.parseType = 'yaml';
          $scope.can_edit = true;
          // apply form definition's default field values
@@ -49,6 +50,12 @@ export default [
 
          $scope.workflowEditorTooltip = i18n._("Please save before defining the workflow graph.");
          $scope.surveyTooltip = i18n._('Please save before adding a survey to this workflow.');
+
+
+        if (Inventory){
+            $scope.inventory = Inventory.id;
+            $scope.inventory_name = Inventory.name;
+        }
 
          $scope.formSave = function () {
              let fld, data = {};
