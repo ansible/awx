@@ -343,8 +343,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         validated_kwargs = kwargs.copy()
         if unallowed_fields:
             if parent_field_name is None:
-                logger.warn(six.text_type('Fields {} are not allowed as overrides to spawn {} from {}.').format(
-                    six.text_type(', ').join(unallowed_fields), unified_job, self
+                logger.warn(six.text_type('Fields {} are not allowed as overrides to spawn from {}.').format(
+                    six.text_type(', ').join(unallowed_fields), self
                 ))
             map(validated_kwargs.pop, unallowed_fields)
 
