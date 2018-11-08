@@ -6,10 +6,10 @@
 
 export default ['$scope', 'TemplatesService',
     'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
-    'Empty', 'PromptService', 'Rest', 'TemplatesStrings',
+    'Empty', 'PromptService', 'Rest', 'TemplatesStrings', 'WorkflowChartService',
     function ($scope, TemplatesService,
         ProcessErrors, CreateSelect2, $q, JobTemplate,
-        Empty, PromptService, Rest, TemplatesStrings) {
+        Empty, PromptService, Rest, TemplatesStrings, WorkflowChartService) {
 
         $scope.strings = TemplatesStrings;
         // TODO: I don't think this needs to be on scope but changing it will require changes to
@@ -19,12 +19,9 @@ export default ['$scope', 'TemplatesService',
         let credentialRequests = [];
         let deletedNodeIds = [];
         let workflowMakerNodeIdCounter = 1;
-        let nodeIdToMakerIdMapping = {};
+        let nodeIdToChartNodeIdMapping = {};
         let chartNodeIdToIndexMapping = {};
         let nodeRef = {};
-
-        // TODO: fix this
-        $scope.totalNodes = 0;
 
         $scope.showKey = false;
         $scope.toggleKey = () => $scope.showKey = !$scope.showKey;
@@ -108,7 +105,7 @@ export default ['$scope', 'TemplatesService',
                         }).then(({data}) => {
                             nodeRef[workflowMakerNodeId].originalNodeObject = data;
                             // TODO: do we need this?
-                            nodeIdToMakerIdMapping[data.id] = parseInt(workflowMakerNodeId);
+                            nodeIdToChartNodeIdMapping[data.id] = parseInt(workflowMakerNodeId);
                             // if (_.get(params, 'node.promptData.launchConf.ask_credential_on_launch')) {
                             //     // This finds the credentials that were selected in the prompt but don't occur
                             //     // in the template defaults
@@ -222,8 +219,8 @@ export default ['$scope', 'TemplatesService',
 
                         Object.keys(linkMap).map((sourceNodeId) => {
                             Object.keys(linkMap[sourceNodeId]).map((targetNodeId) => {
-                                const foo = nodeIdToMakerIdMapping[sourceNodeId];
-                                const bar = nodeIdToMakerIdMapping[targetNodeId];
+                                const foo = nodeIdToChartNodeIdMapping[sourceNodeId];
+                                const bar = nodeIdToChartNodeIdMapping[targetNodeId];
                                 switch(linkMap[sourceNodeId][targetNodeId]) {
                                     case "success":
                                         if (
@@ -340,6 +337,8 @@ export default ['$scope', 'TemplatesService',
 
             workflowMakerNodeIdCounter++;
 
+            $scope.treeState.depthMap = WorkflowChartService.generateDepthMap($scope.treeState.arrayOfLinksForChart);
+
             $scope.$broadcast("refreshWorkflowChart");
 
             $scope.formState.showNodeForm = true;
@@ -380,6 +379,8 @@ export default ['$scope', 'TemplatesService',
             });
 
             workflowMakerNodeIdCounter++;
+
+            $scope.treeState.depthMap = WorkflowChartService.generateDepthMap($scope.treeState.arrayOfLinksForChart);
 
             $scope.$broadcast("refreshWorkflowChart");
 
@@ -476,6 +477,8 @@ export default ['$scope', 'TemplatesService',
                         chartNodeIdToIndexMapping[key]--;
                     }
                 }
+
+                $scope.treeState.depthMap = WorkflowChartService.generateDepthMap($scope.treeState.arrayOfLinksForChart);
             } else if ($scope.nodeConfig.mode === "edit") {
                 $scope.treeState.arrayOfNodesForChart.map( (node) => {
                     if (node.index === $scope.nodeConfig.nodeId) {
@@ -562,6 +565,7 @@ export default ['$scope', 'TemplatesService',
                     // User is going from editing one link to editing another
                     if ($scope.linkConfig.mode === "add") {
                         $scope.treeState.arrayOfLinksForChart.splice($scope.treeState.arrayOfLinksForChart.length-1, 1);
+                        $scope.treeState.depthMap = WorkflowChartService.generateDepthMap($scope.treeState.arrayOfLinksForChart);
                     }
                     $scope.treeState.arrayOfLinksForChart.forEach((link) => {
                         link.isLinkBeingEdited = false;
@@ -575,7 +579,6 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.selectNodeForLinking = (node) => {
-            // start here
             if ($scope.linkConfig) {
                 // This is the second node selected
                 $scope.linkConfig.child = {
@@ -594,6 +597,14 @@ export default ['$scope', 'TemplatesService',
                     edgeType: "placeholder",
                     isLinkBeingEdited: true
                 });
+
+                $scope.treeState.arrayOfLinksForChart.forEach((link, index) => {
+                    if (link.source.id === 1 && link.target.id === node.id) {
+                        $scope.treeState.arrayOfLinksForChart.splice(index, 1);
+                    }
+                });
+
+                $scope.treeState.depthMap = WorkflowChartService.generateDepthMap($scope.treeState.arrayOfLinksForChart);
 
                 $scope.treeState.isLinkMode = false;
             } else {
@@ -681,6 +692,8 @@ export default ['$scope', 'TemplatesService',
                 }
             }
 
+            $scope.treeState.depthMap = WorkflowChartService.generateDepthMap($scope.treeState.arrayOfLinksForChart);
+
             $scope.formState.showLinkForm = false;
             $scope.linkConfig = null;
             $scope.$broadcast("refreshWorkflowChart");
@@ -689,6 +702,21 @@ export default ['$scope', 'TemplatesService',
         $scope.cancelLinkForm = () => {
             if ($scope.linkConfig.mode === "add" && $scope.linkConfig.child) {
                 $scope.treeState.arrayOfLinksForChart.splice($scope.treeState.arrayOfLinksForChart.length-1, 1);
+                let targetIsOrphaned = true;
+                $scope.treeState.arrayOfLinksForChart.forEach((link) => {
+                    if (link.target.id === $scope.linkConfig.child.id) {
+                        targetIsOrphaned = false;
+                    }
+                });
+                if (targetIsOrphaned) {
+                    // Link it to the start node
+                    $scope.treeState.arrayOfLinksForChart.push({
+                        source: $scope.treeState.arrayOfNodesForChart[0],
+                        target: $scope.treeState.arrayOfNodesForChart[chartNodeIdToIndexMapping[$scope.linkConfig.child.id]],
+                        edgeType: "always"
+                    });
+                }
+                $scope.treeState.depthMap = WorkflowChartService.generateDepthMap($scope.treeState.arrayOfLinksForChart);
             }
             $scope.treeState.addLinkSource = null;
             $scope.treeState.isLinkMode = false;
@@ -779,6 +807,8 @@ export default ['$scope', 'TemplatesService',
                     }
                 }
 
+                $scope.treeState.depthMap = WorkflowChartService.generateDepthMap($scope.treeState.arrayOfLinksForChart);
+
                 $scope.nodeToBeDeleted = null;
                 $scope.deleteOverlayVisible = false;
 
@@ -832,87 +862,14 @@ export default ['$scope', 'TemplatesService',
                         page++;
                         getNodes();
                     } else {
-                        let nonRootNodeIds = [];
-                        let allNodeIds = [];
                         let arrayOfLinksForChart = [];
-                        let arrayOfNodesForChart = [
-                            {
-                                index: 0,
-                                id: workflowMakerNodeIdCounter,
-                                isStartNode: true,
-                                unifiedJobTemplate: {
-                                    name: "START"
-                                },
-                                fixed: true,
-                                x: 0,
-                                y: 0
-                            }
-                        ];
-                        workflowMakerNodeIdCounter++;
-                        // Assign each node an ID - 0 is reserved for the start node.  We need to
-                        // make sure that we have an ID on every node including new nodes so the
-                        // ID returned by the api won't do
-                        allNodes.forEach((node) => {
-                            node.workflowMakerNodeId = workflowMakerNodeIdCounter;
-                            nodeRef[workflowMakerNodeIdCounter] = {
-                                originalNodeObject: node
-                            };
-                            arrayOfNodesForChart.push({
-                                index: workflowMakerNodeIdCounter-1,
-                                id: workflowMakerNodeIdCounter,
-                                unifiedJobTemplate: node.summary_fields.unified_job_template
-                            });
-                            allNodeIds.push(node.id);
-                            nodeIdToMakerIdMapping[node.id] = node.workflowMakerNodeId;
-                            chartNodeIdToIndexMapping[workflowMakerNodeIdCounter] = workflowMakerNodeIdCounter-1;
-                            workflowMakerNodeIdCounter++;
-                        });
+                        let arrayOfNodesForChart = [];
 
-                        allNodes.forEach((node) => {
-                            const sourceIndex = chartNodeIdToIndexMapping[node.workflowMakerNodeId];
-                            node.success_nodes.forEach((nodeId) => {
-                                const targetIndex = chartNodeIdToIndexMapping[nodeIdToMakerIdMapping[nodeId]];
-                                arrayOfLinksForChart.push({
-                                    source: arrayOfNodesForChart[sourceIndex],
-                                    target: arrayOfNodesForChart[targetIndex],
-                                    edgeType: "success"
-                                });
-                                nonRootNodeIds.push(nodeId);
-                            });
-                            node.failure_nodes.forEach((nodeId) => {
-                                const targetIndex = chartNodeIdToIndexMapping[nodeIdToMakerIdMapping[nodeId]];
-                                arrayOfLinksForChart.push({
-                                    source: arrayOfNodesForChart[sourceIndex],
-                                    target: arrayOfNodesForChart[targetIndex],
-                                    edgeType: "failure"
-                                });
-                                nonRootNodeIds.push(nodeId);
-                            });
-                            node.always_nodes.forEach((nodeId) => {
-                                const targetIndex = chartNodeIdToIndexMapping[nodeIdToMakerIdMapping[nodeId]];
-                                arrayOfLinksForChart.push({
-                                    source: arrayOfNodesForChart[sourceIndex],
-                                    target: arrayOfNodesForChart[targetIndex],
-                                    edgeType: "always"
-                                });
-                                nonRootNodeIds.push(nodeId);
-                            });
-                        });
+                        ({arrayOfNodesForChart, arrayOfLinksForChart, chartNodeIdToIndexMapping, nodeIdToChartNodeIdMapping, nodeRef, workflowMakerNodeIdCounter} = WorkflowChartService.generateArraysOfNodesAndLinks(allNodes));
 
-                        let uniqueNonRootNodeIds = Array.from(new Set(nonRootNodeIds));
+                        let depthMap = WorkflowChartService.generateDepthMap(arrayOfLinksForChart);
 
-                        let rootNodes = _.difference(allNodeIds, uniqueNonRootNodeIds);
-
-                        rootNodes.forEach((rootNodeId) => {
-                            const targetIndex = chartNodeIdToIndexMapping[nodeIdToMakerIdMapping[rootNodeId]];
-                            arrayOfLinksForChart.push({
-                                source: arrayOfNodesForChart[0],
-                                target: arrayOfNodesForChart[targetIndex],
-                                edgeType: "always"
-                            });
-                        });
-
-                        $scope.treeState = { arrayOfNodesForChart, arrayOfLinksForChart };
+                        $scope.treeState = { arrayOfNodesForChart, arrayOfLinksForChart, depthMap };
                     }
                 }, function ({ data, status, config }) {
                     ProcessErrors($scope, data, status, null, {

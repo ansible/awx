@@ -56,7 +56,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
             function init() {
                 force = d3.layout.force()
                     .gravity(0)
-                    .charge(-60)
+                    .charge(-300)
                     .linkDistance(300)
                     .size([windowHeight, windowWidth]);
 
@@ -1003,6 +1003,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         }
                     });
 
+                    // TODO: this
                     // if(scope.treeState.arrayOfNodesForChart && scope.treeState.arrayOfNodesForChart > 1 && !graphLoaded) {
                     //     zoomToFitChart();
                     // }
@@ -1010,14 +1011,14 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     graphLoaded = true;
 
                     // This will make sure that all the link elements appear before the nodes in the dom
+                    // TODO: i don't think this is working...
                     svgGroup.selectAll(".WorkflowChart-node").order();
 
-                    let tick = (e) => {
-                      var k = 6 * e.alpha;
-
-                      // TODO: replace hard-coded 60 here
+                    let tick = () => {
                       linkLines
-                          .each(function(d) { d.source.y -= k; d.target.y += k; })
+                          .each(function(d) {
+                              d.target.y = scope.treeState.depthMap[d.target.id] * 300;
+                          })
                           .attr("x1", function(d) { return d.target.y; })
                           .attr("y1", function(d) { return d.target.x + (nodeH/2); })
                           .attr("x2", function(d) { return d.source.index === 0 ? (scope.mode === 'details' ? d.source.y + 25 : d.source.y + 60) : (d.source.y + nodeW); })
