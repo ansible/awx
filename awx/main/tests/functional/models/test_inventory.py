@@ -40,27 +40,16 @@ class TestInventoryScript:
 
     def test_all_group(self, inventory):
         inventory.groups.create(name='all', variables={'a1': 'a1'})
-        g1 = inventory.groups.create(name='g1', variables={'v1': 'v1'})
-        h1 = inventory.hosts.create(name='h1')
-        inventory.hosts.create(name='h2')
-        # h1 becomes member of g1 group
-        g1.hosts.add(h1)
         # make sure we return a1 details in output
-        data = inventory.get_script_data(hostvars=1)
+        data = inventory.get_script_data()
         assert 'all' in data
-        assert 'g1' in data
-        assert data['g1'] == {
-            'hosts': ['h1'],
-            'children': [],
-            'vars': {'v1': 'v1'}
-        }
         assert data['all'] == {
-            'hosts': ['h2'],
-            'children': ['g1'],
-            'vars': {'a1': 'a1'}
+            'hosts': [],
+            'children': [],
+            'vars': {
+                'a1': 'a1'
+            }
         }
-
-
 
     def test_grandparent_group(self, inventory):
         g1 = inventory.groups.create(name='g1', variables={'v1': 'v1'})
@@ -109,7 +98,9 @@ class TestInventoryScript:
             }
             if i < 2:
                 expected_data['contains_two_hosts'] = {'hosts': ['host{}'.format(i)], 'children': [], 'vars': {}}
-            assert inventory.get_script_data(slice_number=i + 1, slice_count=3) == expected_data
+            data = inventory.get_script_data(slice_number=i + 1, slice_count=3)
+            data.pop('all')
+            assert data == expected_data
 
 
 @pytest.mark.django_db

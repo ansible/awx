@@ -294,11 +294,10 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
 
         # Remove any empty groups
         for group_name in list(data.keys()):
+            if group_name == 'all':
+                continue
             if not (data.get(group_name, {}).get('hosts', []) or data.get(group_name, {}).get('children', [])):
                 data.pop(group_name)
-
-        # Add the all group
-        data['all'] = all_group
 
         if hostvars:
             data.setdefault('_meta', dict())
