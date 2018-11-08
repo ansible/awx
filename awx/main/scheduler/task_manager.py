@@ -26,6 +26,7 @@ from awx.main.models import (
     ProjectUpdate,
     SystemJob,
     WorkflowJob,
+    WorkflowJobTemplate
 )
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.utils.pglock import advisory_lock
@@ -120,7 +121,26 @@ class TaskManager():
                 spawn_node.job = job
                 spawn_node.save()
                 logger.info('Spawned %s in %s for node %s', job.log_format, workflow_job.log_format, spawn_node.pk)
-                if job._resources_sufficient_for_launch():
+                can_start = True
+                if isinstance(spawn_node.unified_job_template, WorkflowJobTemplate):
+                    workflow_ancestors = job.get_ancestor_workflows()
+                    if spawn_node.unified_job_template in set(workflow_ancestors):
+                        can_start = False
+                        logger.info('Refusing to start recursive workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                            job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]))
+                        display_list = [spawn_node.unified_job_template] + workflow_ancestors
+                        job.job_explanation = _(
+                            "Workflow Job spawned from workflow could not start because it "
+                            "would result in recursion (spawn order, most recent first: {})"
+                        ).format(six.text_type(', ').join([six.text_type('<{}>').format(tmp) for tmp in display_list]))
+                    else:
+                        logger.debug('Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
+                            job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]))
+                if not job._resources_sufficient_for_launch():
+                    can_start = False
+                    job.job_explanation = _("Job spawned from workflow could not start because it "
+                                            "was missing a related resource such as project or inventory")
+                if can_start:
                     if workflow_job.start_args:
                         start_args = json.loads(decrypt_field(workflow_job, 'start_args'))
                     else:
@@ -129,14 +149,10 @@ class TaskManager():
                     if not can_start:
                         job.job_explanation = _("Job spawned from workflow could not start because it "
                                                 "was not in the right state or required manual credentials")
-                else:
-                    can_start = False
-                    job.job_explanation = _("Job spawned from workflow could not start because it "
-                                            "was missing a related resource such as project or inventory")
                 if not can_start:
                     job.status = 'failed'
                     job.save(update_fields=['status', 'job_explanation'])
-                    connection.on_commit(lambda: job.websocket_emit_status('failed'))
+                    job.websocket_emit_status('failed')
 
                 # TODO: should we emit a status on the socket here similar to tasks.py awx_periodic_scheduler() ?
                 #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
@@ -153,7 +169,7 @@ class TaskManager():
                     workflow_job.status = 'canceled'
                     workflow_job.start_args = ''  # blank field to remove encrypted passwords
                     workflow_job.save(update_fields=['status', 'start_args'])
-                    connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
+                    workflow_job.websocket_emit_status(workflow_job.status)
             else:
                 is_done, has_failed = dag.is_workflow_done()
                 if not is_done:
@@ -165,7 +181,7 @@ class TaskManager():
                 workflow_job.status = new_status
                 workflow_job.start_args = ''  # blank field to remove encrypted passwords
                 workflow_job.save(update_fields=['status', 'start_args'])
-                connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
+                workflow_job.websocket_emit_status(workflow_job.status)
         return result
 
     def get_dependent_jobs_for_inv_and_proj_update(self, job_obj):
@@ -231,7 +247,6 @@ class TaskManager():
                 self.consume_capacity(task, rampart_group.name)
 
         def post_commit():
-            task.websocket_emit_status(task.status)
             if task.status != 'failed' and type(task) is not WorkflowJob:
                 task_cls = task._get_task_class()
                 task_cls.apply_async(
@@ -250,6 +265,7 @@ class TaskManager():
                     }],
                 )
 
+        task.websocket_emit_status(task.status)  # adds to on_commit
         connection.on_commit(post_commit)
 
     def process_running_tasks(self, running_tasks):

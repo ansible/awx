@@ -31,7 +31,7 @@ from awx.main.models.mixins import (
     SurveyJobMixin,
     RelatedJobsMixin,
 )
-from awx.main.models.jobs import LaunchTimeConfig
+from awx.main.models.jobs import LaunchTimeConfig, JobTemplate
 from awx.main.models.credential import Credential
 from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
@@ -199,7 +199,14 @@ class WorkflowJobNode(WorkflowNodeBase):
         data = {}
         ujt_obj = self.unified_job_template
         if ujt_obj is not None:
-            accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**self.prompts_dict())
+            # MERGE note: move this to prompts_dict method on node when merging
+            # with the workflow inventory branch
+            prompts_data = self.prompts_dict()
+            if isinstance(ujt_obj, WorkflowJobTemplate):
+                if self.workflow_job.extra_vars:
+                    prompts_data.setdefault('extra_vars', {})
+                    prompts_data['extra_vars'].update(self.workflow_job.extra_vars_dict)
+            accepted_fields, ignored_fields, errors = ujt_obj._accept_or_ignore_job_kwargs(**prompts_data)
             if errors:
                 logger.info(_('Bad launch configuration starting template {template_pk} as part of '
                               'workflow {workflow_pk}. Errors:\n{error_text}').format(
@@ -246,8 +253,9 @@ class WorkflowJobNode(WorkflowNodeBase):
             functional_aa_dict.pop('_ansible_no_log', None)
             extra_vars.update(functional_aa_dict)
         # Workflow Job extra_vars higher precedence than ancestor artifacts
-        if self.workflow_job and self.workflow_job.extra_vars:
-            extra_vars.update(self.workflow_job.extra_vars_dict)
+        if ujt_obj and isinstance(ujt_obj, JobTemplate):
+            if self.workflow_job and self.workflow_job.extra_vars:
+                extra_vars.update(self.workflow_job.extra_vars_dict)
         if extra_vars:
             data['extra_vars'] = extra_vars
         # ensure that unified jobs created by WorkflowJobs are marked
@@ -504,6 +512,24 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     @property
     def task_impact(self):
         return 0
+
+    def get_ancestor_workflows(self):
+        """Returns a list of WFJTs that are indirect parents of this workflow job
+        say WFJTs are set up to spawn in order of A->B->C, and this workflow job
+        came from C, then C is the parent and [B, A] will be returned from this.
+        """
+        ancestors = []
+        wj_ids = set([self.pk])
+        wj = self.get_workflow_job()
+        while wj and wj.workflow_job_template_id:
+            if wj.pk in wj_ids:
+                logger.critical('Cycles detected in the workflow jobs graph, '
+                                'this is not normal and suggests task manager degeneracy.')
+                break
+            wj_ids.add(wj.pk)
+            ancestors.append(wj.workflow_job_template)
+            wj = wj.get_workflow_job()
+        return ancestors
 
     def get_notification_templates(self):
         return self.workflow_job_template.notification_templates

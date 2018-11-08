@@ -102,6 +102,7 @@ function TemplatesStrings (BaseString) {
         ALWAYS: t.s('Always'),
         PROJECT_SYNC: t.s('Project Sync'),
         INVENTORY_SYNC: t.s('Inventory Sync'),
+        WORKFLOW: t.s('Workflow'),
         WARNING: t.s('Warning'),
         TOTAL_TEMPLATES: t.s('TOTAL TEMPLATES'),
         ADD_A_TEMPLATE: t.s('ADD A TEMPLATE'),

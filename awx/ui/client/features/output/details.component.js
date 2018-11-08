@@ -120,10 +120,12 @@ function getSourceWorkflowJobDetails () {
         return null;
     }
 
+    const label = strings.get('labels.SOURCE_WORKFLOW_JOB');
+    const value = sourceWorkflowJob.name;
     const link = `/#/workflows/${sourceWorkflowJob.id}`;
     const tooltip = strings.get('tooltips.SOURCE_WORKFLOW_JOB');
 
-    return { link, tooltip };
+    return { label, value, link, tooltip };
 }
 
 function getSliceJobDetails () {

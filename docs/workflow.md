@@ -1,7 +1,7 @@
 ## Tower Workflow Overview
 Workflows are structured compositions of Tower job resources. The only job of a workflow is to trigger other jobs in specific orders to achieve certain goals, such as tracking the full set of jobs that were part of a release process as a single unit.
 
-A workflow has an associated tree-graph that is composed of multiple nodes. Each node in the tree has one associated job template (job template, inventory update, or project update) along with related resources that, if defined, will override the associated job template resources (i.e. credential, inventory, etc.) if the job template associated with the node is chosen to run.
+A workflow has an associated tree-graph that is composed of multiple nodes. Each node in the tree has one associated job template (job template, inventory update, project update, or workflow job template) along with related resources that, if defined, will override the associated job template resources (i.e. credential, inventory, etc.) if the job template associated with the node is chosen to run.
 
 ## Usage Manual
 
@@ -25,6 +25,18 @@ When a workflow job template is launched a workflow job is created. A workflow j
 See the document on saved launch configurations for how these are processed
 when the job is launched, and the API validation involved in building
 the launch configurations on workflow nodes.
+
+#### Workflows as Workflow Nodes
+
+A workflow can be added as a node in another workflow. The child workflow is the associated
+`unified_job_template` that the node references, when that node is added to the parent workflow.
+When the parent workflow dispatches that node, then the child workflow will begin running, and
+the parent will resume execution of that branch when the child workflow finishes.
+Branching into success / failed pathways is decided based on the status of the child workflow.
+
+In the event that spawning the workflow would result in recursion, the child workflow
+will be marked as failed with a message explaining that recursion was detected.
+This is to prevent saturation of the task system with an infinite chain of workflows.
 
 ### Tree-Graph Formation and Restrictions
 The tree-graph structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. However there are restrictions that must be enforced when setting up new connections. Here are the three restrictions that will raise validation error when break:
@@ -83,7 +95,7 @@ Artifact support starts in Ansible and is carried through in Tower. The `set_sta
   * No CRUD actions are possible on workflow job nodes by any user, and they may only be deleted by deleting their workflow job.
   * Workflow jobs can be deleted by superusers and org admins of the organization of its associated workflow job template, and no one else.
 * Verify that workflow job template nodes can be created under, or (dis)associated with workflow job templates.
-* Verify that only the permitted types of job template types can be associated with a workflow job template node. Currently the permitted types are *job templates, inventory sources and projects*.
+* Verify that the permitted types of job template types can be associated with a workflow job template node. Currently the permitted types are *job templates, inventory sources, projects, and workflow job templates*.
 * Verify that workflow job template nodes under the same workflow job template can be associated to form parent-child relationship of decision trees. In specific, one node takes another as its child node by POSTing another node's id to one of the three endpoints: `/success_nodes/`, `/failure_nodes/` and `/always_nodes/`.
 * Verify that workflow job template nodes are not allowed to have invalid association. Any attempt that causes invalidity will trigger 400-level response. The three types of invalid associations are cycle, convergence(multiple parent).
 * Verify that a workflow job template can be successfully copied and the created workflow job template does not miss any field that should be copied or intentionally modified.

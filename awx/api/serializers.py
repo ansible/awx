@@ -104,7 +104,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
     'vault_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud', 'credential_type_id'),
-    'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed'),
+    'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed', 'type'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
     'workflow_job': DEFAULT_SUMMARY_FIELDS,
@@ -3830,9 +3830,6 @@ class WorkflowJobTemplateNodeSerializer(LaunchConfigurationBaseSerializer):
             ujt_obj = attrs['unified_job_template']
         elif self.instance:
             ujt_obj = self.instance.unified_job_template
-        if isinstance(ujt_obj, (WorkflowJobTemplate)):
-            raise serializers.ValidationError({
-                "unified_job_template": _("Cannot nest a %s inside a WorkflowJobTemplate") % ujt_obj.__class__.__name__})
         if 'credential' in deprecated_fields:  # TODO: remove when v2 API is deprecated
             cred = deprecated_fields['credential']
             attrs['credential'] = cred

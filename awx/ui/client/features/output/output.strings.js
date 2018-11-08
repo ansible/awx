@@ -74,6 +74,7 @@ function OutputStrings (BaseString) {
         SKIP_TAGS: t.s('Skip Tags'),
         SOURCE: t.s('Source'),
         SOURCE_CREDENTIAL: t.s('Source Credential'),
+        SOURCE_WORKFLOW_JOB: t.s('Source Workflow'),
         STARTED: t.s('Started'),
         STATUS: t.s('Status'),
         VERBOSITY: t.s('Verbosity'),

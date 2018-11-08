@@ -25,7 +25,6 @@ from rest_framework.filters import BaseFilterBackend
 from awx.main.utils import get_type_for_model, to_python_boolean
 from awx.main.utils.db import get_all_field_names
 from awx.main.models.credential import CredentialType
-from awx.main.models.rbac import RoleAncestorEntry
 
 
 class V1CredentialFilterBackend(BaseFilterBackend):
@@ -347,12 +346,12 @@ class FieldLookupBackend(BaseFilterBackend):
                     else:
                         args.append(Q(**{k:v}))
                 for role_name in role_filters:
+                    if not hasattr(queryset.model, 'accessible_pk_qs'):
+                        raise ParseError(_(
+                            'Cannot apply role_level filter to this list because its model '
+                            'does not use roles for access control.'))
                     args.append(
-                        Q(pk__in=RoleAncestorEntry.objects.filter(
-                            ancestor__in=request.user.roles.all(),
-                            content_type_id=ContentType.objects.get_for_model(queryset.model).id,
-                            role_field=role_name
-                        ).values_list('object_id').distinct())
+                        Q(pk__in=queryset.model.accessible_pk_qs(request.user, role_name))
                     )
                 if or_filters:
                     q = Q()
