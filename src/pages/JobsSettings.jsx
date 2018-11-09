@@ -11,7 +11,7 @@ class JobsSettings extends Component {
 
     return (
       <Fragment>
-        <PageSection variant={light}><Title size="2xl">Jobs Settings</Title></PageSection>
+        <PageSection variant={light} className="pf-m-condensed"><Title size="2xl">Jobs Settings</Title></PageSection>
         <PageSection variant={medium} />
       </Fragment>
     );

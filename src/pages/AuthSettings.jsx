@@ -11,7 +11,7 @@ class AuthSettings extends Component {
 
     return (
       <Fragment>
-        <PageSection variant={light}><Title size="2xl">Authentication Settings</Title></PageSection>
+        <PageSection variant={light} className="pf-m-condensed"><Title size="2xl">Authentication Settings</Title></PageSection>
         <PageSection variant={medium} />
       </Fragment>
     );
