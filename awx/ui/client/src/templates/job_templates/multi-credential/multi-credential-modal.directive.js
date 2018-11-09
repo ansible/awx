@@ -96,7 +96,7 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
         scope = _scope_;
         scope.modalSelectedCredentials = _.cloneDeep(scope.selectedCredentials);
 
-        scope.credentialTypes.forEach(({ name, id }) => types[name] = id);
+        scope.credentialTypes.forEach(({ kind, id }) => types[kind] = id);
 
         scope.toggle_row = vm.toggle_row;
         scope.toggle_credential = vm.toggle_credential;
@@ -152,13 +152,13 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
 
     function getInitialCredentialType () {
         const selectedMachineCredential = scope.modalSelectedCredentials
-            .find(c => c.id === types.Machine);
+            .find(c => c.id === types.ssh);
 
         if (selectedMachineCredential) {
-            return `${types.Vault}`;
+            return `${types.vault}`;
         }
 
-        return `${types.Machine}`;
+        return `${types.ssh}`;
     }
 
     function fetchCredentials (credentialType) {
@@ -175,7 +175,7 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
 
                 scope.destroyList();
 
-                if (credentialType === types.Vault) {
+                if (credentialType === types.vault) {
                     scope.createVaultList();
                 } else {
                     scope.createList();
@@ -215,11 +215,11 @@ function multiCredentialModalController(GetBasePath, qs, MultiCredentialService)
 
         const credentialTypeId = credential.credential_type || credential.credential_type_id;
 
-        if (credentialTypeId === types.Vault) {
+        if (credentialTypeId === types.vault) {
             const vaultId = _.get(credential, 'inputs.vault_id');
 
             scope.modalSelectedCredentials = scope.modalSelectedCredentials
-                .filter(c => (c.credential_type !== types.Vault) || (c.inputs.vault_id !== vaultId))
+                .filter(c => (c.credential_type !== types.vault) || (c.inputs.vault_id !== vaultId))
                 .concat([credential]);
         } else {
             scope.modalSelectedCredentials = scope.modalSelectedCredentials

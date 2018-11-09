@@ -12,7 +12,7 @@ export default
                 .then(({data}) => {
                     credentialTypesLookup()
                         .then(kinds => {
-                            if(data.credential_type === kinds.Machine && data.inputs){
+                            if(data.credential_type === kinds.ssh && data.inputs){
                                 if(data.inputs.password === "ASK" ){
                                     passwords.push("ssh_password");
                                 }
