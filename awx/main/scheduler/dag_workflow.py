@@ -1,7 +1,10 @@
 
 # Python
 import copy
-from awx.main.models import WorkflowJobTemplateNode
+from awx.main.models import (
+    WorkflowJobTemplateNode,
+    WorkflowJobNode,
+)
 
 # AWX
 from awx.main.scheduler.dag_simple import SimpleDAG
@@ -16,14 +19,19 @@ class WorkflowDAG(SimpleDAG):
     def _init_graph(self, workflow_job_or_jt):
         if hasattr(workflow_job_or_jt, 'workflow_job_template_nodes'):
             workflow_nodes = workflow_job_or_jt.workflow_job_template_nodes
+            success_nodes = WorkflowJobTemplateNode.success_nodes.through.objects.filter(from_workflowjobtemplatenode__workflow_job_template_id=workflow_job_or_jt.id).values_list('from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id')
+            failure_nodes = WorkflowJobTemplateNode.failure_nodes.through.objects.filter(from_workflowjobtemplatenode__workflow_job_template_id=workflow_job_or_jt.id).values_list('from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id')
+            always_nodes = WorkflowJobTemplateNode.always_nodes.through.objects.filter(from_workflowjobtemplatenode__workflow_job_template_id=workflow_job_or_jt.id).values_list('from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id')
         elif hasattr(workflow_job_or_jt, 'workflow_job_nodes'):
             workflow_nodes = workflow_job_or_jt.workflow_job_nodes
+            success_nodes = WorkflowJobNode.success_nodes.through.objects.filter(from_workflowjobnode__workflow_job_id=workflow_job_or_jt.id).values_list('from_workflowjobnode_id', 'to_workflowjobnode_id')
+            failure_nodes = WorkflowJobNode.failure_nodes.through.objects.filter(from_workflowjobnode__workflow_job_id=workflow_job_or_jt.id).values_list('from_workflowjobnode_id', 'to_workflowjobnode_id')
+            always_nodes = WorkflowJobNode.always_nodes.through.objects.filter(from_workflowjobnode__workflow_job_id=workflow_job_or_jt.id).values_list('from_workflowjobnode_id', 'to_workflowjobnode_id')
         else:
             raise RuntimeError("Unexpected object {} {}".format(type(workflow_job_or_jt), workflow_job_or_jt))
 
-        success_nodes = WorkflowJobTemplateNode.success_nodes.through.objects.filter(from_workflowjobtemplatenode__workflow_job_template_id=workflow_job_or_jt.id).values_list('from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id')
-        failure_nodes = WorkflowJobTemplateNode.failure_nodes.through.objects.filter(from_workflowjobtemplatenode__workflow_job_template_id=workflow_job_or_jt.id).values_list('from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id')
-        always_nodes = WorkflowJobTemplateNode.always_nodes.through.objects.filter(from_workflowjobtemplatenode__workflow_job_template_id=workflow_job_or_jt.id).values_list('from_workflowjobtemplatenode_id', 'to_workflowjobtemplatenode_id')
+        print("workflow id {}".format(workflow_job_or_jt.id))
+        print("Count of success nodes {}".format(len(success_nodes)))
 
         wfn_by_id = dict()
 
