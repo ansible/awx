@@ -33,7 +33,7 @@ export default ['i18n', function(i18n) {
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
                 // ngBind: 'schedule.summary_fields.unified_job_template.name',
-                ngClick: "editSchedule(schedule)",
+                uiSref: "{{schedule.linkToDetails}}",
                 awToolTip: "{{ schedule.nameTip | sanitize}}",
                 dataTipWatch: 'schedule.nameTip',
                 dataPlacement: "top",
