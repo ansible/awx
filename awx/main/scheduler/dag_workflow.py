@@ -30,9 +30,6 @@ class WorkflowDAG(SimpleDAG):
         else:
             raise RuntimeError("Unexpected object {} {}".format(type(workflow_job_or_jt), workflow_job_or_jt))
 
-        print("workflow id {}".format(workflow_job_or_jt.id))
-        print("Count of success nodes {}".format(len(success_nodes)))
-
         wfn_by_id = dict()
 
         for workflow_node in workflow_nodes.all():
