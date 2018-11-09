@@ -141,7 +141,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
 
             let depthMap = WorkflowChartService.generateDepthMap(arrayOfLinksForChart);
 
-            $scope.treeState = { arrayOfNodesForChart, arrayOfLinksForChart, depthMap };
+            $scope.graphState = { arrayOfNodesForChart, arrayOfLinksForChart, depthMap };
         }
 
         $scope.toggleStdoutFullscreen = function() {
@@ -241,7 +241,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
                     }
 
-                    $scope.treeState.arrayOfNodesForChart[chartNodeIdToIndexMapping[nodeIdToChartNodeIdMapping[data.workflow_node_id]]].job = {
+                    $scope.graphState.arrayOfNodesForChart[chartNodeIdToIndexMapping[nodeIdToChartNodeIdMapping[data.workflow_node_id]]].job = {
                         id: data.unified_job_id,
                         status: data.status
                     };
