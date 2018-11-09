@@ -507,13 +507,54 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         .attr("class", function(d) { return d.isInvalidLinkTarget ? "WorkflowChart-nodeOverlay WorkflowChart-nodeOverlay--disabled" : "WorkflowChart-nodeOverlay WorkflowChart-nodeOverlay--transparent"; });
 
                     baseSvg.selectAll(".WorkflowChart-nodeTypeCircle")
-                        .style("display", function(d) { return d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update" || d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update" ) ? null : "none"; });
+                    .style("display", function (d) {
+                        return d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" ||
+                        d.unifiedJobTemplate.unified_job_type === "project_update" ||
+                        d.unifiedJobTemplate.type === "inventory_source" ||
+                        d.unifiedJobTemplate.unified_job_type === "inventory_update" ||
+                        d.unifiedJobTemplate.type === "workflow_job_template" ||
+                        d.unifiedJobTemplate.unified_job_type === "workflow_job") ? null : "none";
+                    });
 
                     baseSvg.selectAll(".WorkflowChart-nodeTypeLetter")
                         .text(function (d) {
-                            return (d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update")) ? "P" : (d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? "I" : "");
+                            let nodeTypeLetter = "";
+                            if (d.unifiedJobTemplate && d.unifiedJobTemplate.type) {
+                                switch (d.unifiedJobTemplate.type) {
+                                    case "project":
+                                        nodeTypeLetter = "P";
+                                        break;
+                                    case "inventory_source":
+                                        nodeTypeLetter = "I";
+                                        break;
+                                    case "workflow_job_template":
+                                        nodeTypeLetter = "W";
+                                        break;
+                                }
+                            } else if (d.unifiedJobTemplate && d.unifiedJobTemplate.unified_job_type) {
+                                switch (d.unifiedJobTemplate.unified_job_type) {
+                                    case "project_update":
+                                        nodeTypeLetter = "P";
+                                        break;
+                                    case "inventory_update":
+                                        nodeTypeLetter = "I";
+                                        break;
+                                    case "workflow_job":
+                                        nodeTypeLetter = "W";
+                                        break;
+                                }
+                            }
+                            return nodeTypeLetter;
                         })
-                        .style("display", function(d) { return d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update" || d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? null : "none"; });
+                        .style("display", function (d) {
+                            return d.unifiedJobTemplate &&
+                            (d.unifiedJobTemplate.type === "project" ||
+                            d.unifiedJobTemplate.unified_job_type === "project_update" ||
+                            d.unifiedJobTemplate.type === "inventory_source" ||
+                            d.unifiedJobTemplate.unified_job_type === "inventory_update" ||
+                            d.unifiedJobTemplate.type === "workflow_job_template" ||
+                            d.unifiedJobTemplate.unified_job_type === "workflow_job") ? null : "none";
+                        });
 
                     baseSvg.selectAll(".WorkflowChart-nodeStatus")
                         .attr("class", function(d) {
