@@ -7,9 +7,11 @@
 export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService', 'Rest', '$q',
         'TemplatesStrings', 'CreateSelect2', 'Empty', 'generateList', 'QuerySet',
         'GetBasePath', 'TemplateList', 'ProjectList', 'InventorySourcesList', 'ProcessErrors',
+        'i18n',
     function($scope, TemplatesService, JobTemplate, PromptService, Rest, $q,
         TemplatesStrings, CreateSelect2, Empty, generateList, qs,
-        GetBasePath, TemplateList, ProjectList, InventorySourcesList, ProcessErrors
+        GetBasePath, TemplateList, ProjectList, InventorySourcesList, ProcessErrors,
+        i18n
     ) {
 
         let promptWatcher, credentialsWatcher, surveyQuestionWatcher, listPromises = [];
@@ -23,13 +25,19 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         delete templateList.fields.smart_status;
         delete templateList.fields.labels;
         delete templateList.fieldActions;
+        templateList.name = 'wf_maker_templates';
+        templateList.iterator = 'wf_maker_template';
         templateList.fields.name.columnClass = "col-md-8";
+        templateList.fields.name.tag = i18n._('WORKFLOW');
+        templateList.fields.name.showTag = "{{wf_maker_template.type === 'workflow_job_template'}}";
         templateList.disableRow = "{{ readOnly }}";
         templateList.disableRowValue = 'readOnly';
+        templateList.basePath = 'unified_job_templates';
         templateList.fields.info = {
             ngInclude: "'/static/partials/job-template-details.html'",
             type: 'template',
             columnClass: 'col-md-3',
+            infoHeaderClass: 'col-md-3',
             label: '',
             nosort: true
         };
@@ -38,6 +46,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         $scope.templateList = templateList;
 
         let inventorySourceList = _.cloneDeep(InventorySourcesList);
+        inventorySourceList.name = 'wf_maker_inventory_sources';
+        inventorySourceList.iterator = 'wf_maker_inventory_source';
         inventorySourceList.maxVisiblePages = 5;
         inventorySourceList.searchBarFullWidth = true;
         inventorySourceList.disableRow = "{{ readOnly }}";
@@ -48,6 +58,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         delete projectList.fields.status;
         delete projectList.fields.scm_type;
         delete projectList.fields.last_updated;
+        projectList.name = 'wf_maker_projects';
+        projectList.iterator = 'wf_maker_project';
         projectList.fields.name.columnClass = "col-md-11";
         projectList.maxVisiblePages = 5;
         projectList.searchBarFullWidth = true;
@@ -473,55 +485,56 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
         const setupNodeForm = () => {
             $scope.nodeFormDataLoaded = false;
-            $scope.template_queryset = {
-                page_size: '5',
+            $scope.wf_maker_template_queryset = {
+                page_size: '10',
                 order_by: 'name',
+                role_level: 'execute_role',
                 type: 'workflow_job_template,job_template'
             };
 
-            $scope.templates = [];
-            $scope.template_dataset = {};
+            $scope.wf_maker_templates = [];
+            $scope.wf_maker_template_dataset = {};
 
             // Go out and GET the list contents for each of the tabs
 
             listPromises.push(
-                qs.search(GetBasePath('unified_job_templates'), $scope.template_queryset)
+                qs.search(GetBasePath('unified_job_templates'), $scope.wf_maker_template_queryset)
                 .then(function(res) {
-                    $scope.template_dataset = res.data;
-                    $scope.templates = $scope.template_dataset.results;
+                    $scope.wf_maker_template_dataset = res.data;
+                    $scope.wf_maker_templates = $scope.wf_maker_template_dataset.results;
                 })
             );
 
-            $scope.project_queryset = {
+            $scope.wf_maker_project_queryset = {
                 page_size: '5',
                 order_by: 'name'
             };
 
-            $scope.projects = [];
-            $scope.project_dataset = {};
+            $scope.wf_maker_projects = [];
+            $scope.wf_maker_project_dataset = {};
 
             listPromises.push(
-                qs.search(GetBasePath('projects'), $scope.project_queryset)
+                qs.search(GetBasePath('projects'), $scope.wf_maker_project_queryset)
                 .then(function(res) {
-                    $scope.project_dataset = res.data;
-                    $scope.projects = $scope.project_dataset.results;
+                    $scope.wf_maker_project_dataset = res.data;
+                    $scope.wf_maker_projects = $scope.wf_maker_project_dataset.results;
                 })
             );
 
-            $scope.inventory_source_dataset = {
+            $scope.wf_maker_inventory_source_dataset = {
                 page_size: '5',
                 order_by: 'name',
                 not__source: ''
             };
 
-            $scope.inventory_sources = [];
-            $scope.inventory_source_dataset = {};
+            $scope.wf_maker_inventory_sources = [];
+            $scope.wf_maker_inventory_source_dataset = {};
 
             listPromises.push(
-                qs.search(GetBasePath('inventory_sources'), $scope.inventory_source_dataset)
+                qs.search(GetBasePath('inventory_sources'), $scope.wf_maker_inventory_source_dataset)
                 .then(function(res) {
-                    $scope.inventory_source_dataset = res.data;
-                    $scope.inventory_sources = $scope.inventory_source_dataset.results;
+                    $scope.wf_maker_inventory_source_dataset = res.data;
+                    $scope.wf_maker_inventory_sources = $scope.wf_maker_inventory_source_dataset.results;
                 })
             );
 
@@ -561,30 +574,30 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 // TODO: make this more concise
                 switch($scope.activeTab) {
                     case 'jobs':
-                        $scope.templates.forEach(function(row, i) {
+                        $scope.wf_maker_templates.forEach(function(row, i) {
                             if (row.id === selectedRow.id) {
-                                $scope.templates[i].checked = 1;
+                                $scope.wf_maker_templates[i].checked = 1;
 
                             } else {
-                                $scope.templates[i].checked = 0;
+                                $scope.wf_maker_templates[i].checked = 0;
                             }
                         });
                         break;
                     case 'project_syncs':
-                        $scope.projects.forEach(function(row, i) {
+                        $scope.wf_maker_projects.forEach(function(row, i) {
                             if (row.id === selectedRow.id) {
-                                $scope.projects[i].checked = 1;
+                                $scope.wf_maker_projects[i].checked = 1;
                             } else {
-                                $scope.projects[i].checked = 0;
+                                $scope.wf_maker_projects[i].checked = 0;
                             }
                         });
                         break;
                     case 'inventory_syncs':
-                        $scope.inventory_sources.forEach(function(row, i) {
+                        $scope.wf_maker_inventory_sources.forEach(function(row, i) {
                             if (row.id === selectedRow.id) {
-                                $scope.inventory_sources[i].checked = 1;
+                                $scope.wf_maker_inventory_sources[i].checked = 1;
                             } else {
-                                $scope.inventory_sources[i].checked = 0;
+                                $scope.wf_maker_inventory_sources[i].checked = 0;
                             }
                         });
                         break;
@@ -599,36 +612,36 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             }
         });
 
-        $scope.$watchGroup(['templates', 'projects', 'inventory_sources', 'activeTab'], () => {
+        $scope.$watchGroup(['wf_maker_templates', 'wf_maker_projects', 'wf_maker_inventory_sources', 'activeTab'], () => {
             // TODO: make this more concise
             switch($scope.activeTab) {
                 case 'jobs':
-                    $scope.templates.forEach(function(row, i) {
+                    $scope.wf_maker_templates.forEach(function(row, i) {
                         if(_.hasIn($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.id') && row.id === $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id) {
-                            $scope.templates[i].checked = 1;
+                            $scope.wf_maker_templates[i].checked = 1;
                         }
                         else {
-                            $scope.templates[i].checked = 0;
+                            $scope.wf_maker_templates[i].checked = 0;
                         }
                     });
                     break;
                 case 'project_syncs':
-                    $scope.projects.forEach(function(row, i) {
+                    $scope.wf_maker_projects.forEach(function(row, i) {
                         if(_.hasIn($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.id') && row.id === $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id) {
-                            $scope.projects[i].checked = 1;
+                            $scope.wf_maker_projects[i].checked = 1;
                         }
                         else {
-                            $scope.projects[i].checked = 0;
+                            $scope.wf_maker_projects[i].checked = 0;
                         }
                     });
                     break;
                 case 'inventory_syncs':
-                    $scope.inventory_sources.forEach(function(row, i) {
+                    $scope.wf_maker_inventory_sources.forEach(function(row, i) {
                         if(_.hasIn($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.id') && row.id === $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id) {
-                            $scope.inventory_sources[i].checked = 1;
+                            $scope.wf_maker_inventory_sources[i].checked = 1;
                         }
                         else {
-                            $scope.inventory_sources[i].checked = 0;
+                            $scope.wf_maker_inventory_sources[i].checked = 0;
                         }
                     });
                     break;
