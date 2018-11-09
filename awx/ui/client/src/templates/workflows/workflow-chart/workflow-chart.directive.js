@@ -9,7 +9,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
     return {
         scope: {
-            treeState: '=',
+            graphState: '=',
             readOnly: '<',
             addNodeWithoutChild: '&',
             addNodeWithChild: '&',
@@ -55,6 +55,11 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function init() {
                 force = d3.layout.force()
+                    // .gravity(0)
+                    // .linkStrength(2)
+                    // .friction(0.4)
+                    // .charge(-4000)
+                    // .linkDistance(300)
                     .gravity(0)
                     .charge(-300)
                     .linkDistance(300)
@@ -206,7 +211,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
             function update() {
                 if(scope.dimensionsSet) {
                     let links = svgGroup.selectAll(".WorkflowChart-link")
-                        .data(scope.treeState.arrayOfLinksForChart, function(d) { return `${d.source.id}-${d.target.id}`; });
+                        .data(scope.graphState.arrayOfLinksForChart, function(d) { return `${d.source.id}-${d.target.id}`; });
 
                     // Remove any stale links
                     links.exit().remove();
@@ -217,7 +222,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                     baseSvg.selectAll(".WorkflowChart-linkPath")
                         .attr("class", function(d) {
-                            return (d.source.isNodeBeingAdded || d.target.isNodeBeingAdded) ? "WorkflowChart-linkPath WorkflowChart-isNodeBeingAdded" : "WorkflowChart-linkPath";
+                            return (d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded) ? "WorkflowChart-linkPath WorkflowChart-isNodeBeingAdded" : "WorkflowChart-linkPath";
                         })
                         .attr('stroke', function(d) {
                             let edgeType = d.edgeType;
@@ -241,7 +246,11 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-overlay";})
                         .attr("class", function(d) {
                             let linkClasses = ["WorkflowChart-linkOverlay"];
-                            if (d.isLinkBeingEdited) {
+                            if (
+                                scope.graphState.linkBeingEdited &&
+                                d.source.id === scope.graphState.linkBeingEdited.source &&
+                                d.target.id === scope.graphState.linkBeingEdited.target
+                            ) {
                                 linkClasses.push("WorkflowChart-link--active");
                             }
                             return linkClasses.join(' ');
@@ -249,10 +258,10 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                     baseSvg.selectAll(".WorkflowChart-circleBetweenNodes")
                         .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
-                        .style("display", function(d) { return (scope.treeState.isLinkMode || d.source.isNodeBeingAdded || d.target.isNodeBeingAdded || scope.readOnly) ? "none" : null; });
+                        .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; });
 
                     baseSvg.selectAll(".WorkflowChart-betweenNodesIcon")
-                        .style("display", function(d) { return (scope.treeState.isLinkMode || d.source.isNodeBeingAdded || d.target.isNodeBeingAdded || scope.readOnly) ? "none" : null; });
+                        .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; });
 
 
                     // Add any new links
@@ -263,7 +272,11 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                      linkEnter.append("polygon", "g")
                           .attr("class", function(d) {
                               let linkClasses = ["WorkflowChart-linkOverlay"];
-                              if (d.isLinkBeingEdited) {
+                              if (
+                                  scope.graphState.linkBeingEdited &&
+                                  d.source.id === scope.graphState.linkBeingEdited.source &&
+                                  d.target.id === scope.graphState.linkBeingEdited.target
+                              ) {
                                   linkClasses.push("WorkflowChart-link--active");
                               }
                               return linkClasses.join(' ');
@@ -271,8 +284,9 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                           .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-overlay";})
                           .call(edit_link)
                           .on("mouseover", function(d) {
-                              if(!scope.treeState.isLinkMode && !d.source.isStartNode && !d.source.isNodeBeingAdded && !d.target.isNodeBeingAdded && scope.mode !== 'details') {
-                                  d3.select("#link-" + d.source.id + "-" + d.target.id)
+                              if(!scope.graphState.isLinkMode && !d.source.isStartNode && d.source.id !== scope.graphState.nodeBeingAdded && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
+                                  $(`#link-${d.source.id}-${d.target.id}`).appendTo(`#aw-workflow-chart-g`);
+                                  d3.select(`#link-${d.source.id}-${d.target.id}`)
                                       .classed("WorkflowChart-linkHovering", true);
 
                                   let xPos, yPos, arrowClass;
@@ -314,7 +328,8 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                           })
                           .on("mouseout", function(d){
-                              if(!d.source.isStartNode && !d.target.isNodeBeingAdded && scope.mode !== 'details') {
+                              if(!d.source.isStartNode && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
+                                  $(`#aw-workflow-chart-g`).prepend($(`#link-${d.source.id}-${d.target.id}`));
                                   d3.select("#link-" + d.source.id + "-" + d.target.id)
                                       .classed("WorkflowChart-linkHovering", false);
                               }
@@ -324,11 +339,12 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     // Add entering links in the parent’s old position.
                     linkEnter.append("line")
                          .attr("class", function(d) {
-                             return (d.source.isNodeBeingAdded || d.target.isNodeBeingAdded) ? "WorkflowChart-linkPath WorkflowChart-isNodeBeingAdded" : "WorkflowChart-linkPath";
+                             return (d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded) ? "WorkflowChart-linkPath WorkflowChart-isNodeBeingAdded" : "WorkflowChart-linkPath";
                          })
                          .call(edit_link)
                          .on("mouseenter", function(d) {
-                             if(!scope.treeState.isLinkMode && !d.source.isStartNode && !d.source.isNodeBeingAdded && !d.target.isNodeBeingAdded && scope.mode !== 'details') {
+                             if(!scope.graphState.isLinkMode && !d.source.isStartNode && d.source.id !== scope.graphState.nodeBeingAdded && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
+                                 $(`#link-${d.source.id}-${d.target.id}`).appendTo(`#aw-workflow-chart-g`);
                                  d3.select("#link-" + d.source.id + "-" + d.target.id)
                                      .classed("WorkflowChart-linkHovering", true);
 
@@ -370,7 +386,8 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                              }
                          })
                          .on("mouseleave", function(d){
-                             if(!d.source.isStartNode && !d.target.isNodeBeingAdded && scope.mode !== 'details') {
+                             if(!d.source.isStartNode && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
+                                 $(`#aw-workflow-chart-g`).prepend($(`#link-${d.source.id}-${d.target.id}`));
                                  d3.select("#link-" + d.source.id + "-" + d.target.id)
                                      .classed("WorkflowChart-linkHovering", false);
                              }
@@ -398,13 +415,15 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                           .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
                           .attr("r", 10)
                           .attr("class", "WorkflowChart-addCircle WorkflowChart-circleBetweenNodes")
-                          .style("display", function(d) { return (scope.treeState.isLinkMode || d.source.isNodeBeingAdded || d.target.isNodeBeingAdded || scope.readOnly) ? "none" : null; })
+                          .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                           .call(add_node_with_child)
                           .on("mouseover", function(d) {
+                              $(`#link-${d.source.id}-${d.target.id}`).appendTo(`#aw-workflow-chart-g`);
                               d3.select("#link-" + d.source.id + "-" + d.target.id)
                                   .classed("WorkflowChart-addHovering", true);
                           })
                           .on("mouseout", function(d){
+                              $(`#aw-workflow-chart-g`).prepend($(`#link-${d.source.id}-${d.target.id}`));
                               d3.select("#link-" + d.source.id + "-" + d.target.id)
                                   .classed("WorkflowChart-addHovering", false);
                           });
@@ -416,13 +435,15 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                               .size(60)
                               .type("cross")
                           )
-                          .style("display", function(d) { return (scope.treeState.isLinkMode || d.source.isNodeBeingAdded || d.target.isNodeBeingAdded || scope.readOnly) ? "none" : null; })
+                          .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                           .call(add_node_with_child)
                           .on("mouseover", function(d) {
+                              $(`#link-${d.source.id}-${d.target.id}`).appendTo(`#aw-workflow-chart-g`);
                               d3.select("#link-" + d.source.id + "-" + d.target.id)
                                   .classed("WorkflowChart-addHovering", true);
                           })
                           .on("mouseout", function(d){
+                              $(`#aw-workflow-chart-g`).prepend($(`#link-${d.source.id}-${d.target.id}`));
                               d3.select("#link-" + d.source.id + "-" + d.target.id)
                                   .classed("WorkflowChart-addHovering", false);
                           });
@@ -435,29 +456,29 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     let linkAddBetweenIcon = svgGroup.selectAll(".WorkflowChart-betweenNodesIcon");
 
                     let nodes = svgGroup.selectAll('.WorkflowChart-node')
-                        .data(scope.treeState.arrayOfNodesForChart, function(d) { return d.id; });
+                        .data(scope.graphState.arrayOfNodesForChart, function(d) { return d.id; });
 
                     // Remove any stale nodes
                     nodes.exit().remove();
 
                     // Update existing nodes
                     baseSvg.selectAll(".WorkflowChart-nodeAddCircle")
-                        .style("display", function(d) { return scope.treeState.isLinkMode || d.isNodeBeingAdded || scope.readOnly ? "none" : null; });
+                        .style("display", function(d) { return scope.graphState.isLinkMode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; });
 
                     baseSvg.selectAll(".WorkflowChart-nodeAddIcon")
-                        .style("display", function(d) { return scope.treeState.isLinkMode || d.isNodeBeingAdded || scope.readOnly ? "none" : null; });
+                        .style("display", function(d) { return scope.graphState.isLinkMode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; });
 
                     baseSvg.selectAll(".WorkflowChart-linkCircle")
-                        .style("display", function(d) { return scope.treeState.isLinkMode || d.isNodeBeingAdded || scope.readOnly ? "none" : null; });
+                        .style("display", function(d) { return scope.graphState.isLinkMode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; });
 
                     baseSvg.selectAll(".WorkflowChart-nodeLinkIcon")
-                        .style("display", function(d) { return scope.treeState.isLinkMode || d.isNodeBeingAdded || scope.readOnly ? "none" : null; });
+                        .style("display", function(d) { return scope.graphState.isLinkMode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; });
 
                     baseSvg.selectAll(".WorkflowChart-nodeRemoveCircle")
-                        .style("display", function(d) { return scope.treeState.isLinkMode || d.isNodeBeingAdded || scope.readOnly ? "none" : null; });
+                        .style("display", function(d) { return scope.graphState.isLinkMode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; });
 
                     baseSvg.selectAll(".WorkflowChart-nodeRemoveIcon")
-                        .style("display", function(d) { return scope.treeState.isLinkMode || d.isNodeBeingAdded || scope.readOnly ? "none" : null; });
+                        .style("display", function(d) { return scope.graphState.isLinkMode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; });
 
                     baseSvg.selectAll(".WorkflowChart-rect")
                         .attr('stroke', function(d) {
@@ -477,7 +498,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                             }
                          })
                          .attr("class", function(d) {
-                             let classString = d.isNodeBeingAdded ? "WorkflowChart-rect WorkflowChart-isNodeBeingAdded" : "WorkflowChart-rect";
+                             let classString = d.id === scope.graphState.nodeBeingAdded ? "WorkflowChart-rect WorkflowChart-isNodeBeingAdded" : "WorkflowChart-rect";
                              classString += !d.unifiedJobTemplate ? " WorkflowChart-dashedNode" : "";
                              return classString;
                          });
@@ -561,17 +582,17 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; });
 
                     baseSvg.selectAll(".WorkflowChart-deletedText")
-                        .style("display", function(d){ return d.unifiedJobTemplate || d.isNodeBeingAdded ? "none" : null; });
+                        .style("display", function(d){ return d.unifiedJobTemplate || d.id === scope.graphState.nodeBeingAdded ? "none" : null; });
 
                     baseSvg.selectAll(".WorkflowChart-activeNode")
-                        .style("display", function(d) { return d.isNodeBeingEdited ? null : "none"; });
+                        .style("display", function(d) { return d.id === scope.graphState.nodeBeingEdited ? null : "none"; });
 
                     baseSvg.selectAll(".WorkflowChart-elapsed")
                         .style("display", function(d) { return (d.job && d.job.elapsed) ? null : "none"; });
 
                     baseSvg.selectAll(".WorkflowChart-addLinkCircle")
-                        .attr("fill", function(d) { return scope.treeState.addLinkSource === d.id ? "#337AB7" : "#D7D7D7"; })
-                        .style("display", function(d) { return scope.treeState.isLinkMode && !d.isInvalidLinkTarget ? null : "none"; });
+                        .attr("fill", function(d) { return scope.graphState.addLinkSource === d.id ? "#337AB7" : "#D7D7D7"; })
+                        .style("display", function(d) { return scope.graphState.isLinkMode && !d.isInvalidLinkTarget ? null : "none"; });
 
                     // Add new nodes
                     const nodeEnter = nodes
@@ -619,7 +640,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("cx", nodeW)
                                 .attr("r", 8)
                                 .attr("class", "WorkflowChart-addLinkCircle")
-                                .style("display", function() { return scope.treeState.isLinkMode ? null : "none"; });
+                                .style("display", function() { return scope.graphState.isLinkMode ? null : "none"; });
                             thisNode.append("rect")
                                 .attr("width", nodeW)
                                 .attr("height", nodeH)
@@ -643,7 +664,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 })
                                 .attr('stroke-width', "2px")
                                 .attr("class", function(d) {
-                                    let classString = d.isNodeBeingAdded ? "WorkflowChart-rect WorkflowChart-isNodeBeingAdded" : "WorkflowChart-rect";
+                                    let classString = d.id === scope.graphState.nodeBeingAdded ? "WorkflowChart-rect WorkflowChart-isNodeBeingAdded" : "WorkflowChart-rect";
                                     classString += !_.get(d, 'unifiedJobTemplate.name') ? " WorkflowChart-dashedNode" : "";
                                     return classString;
                                 });
@@ -651,7 +672,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                             thisNode.append("path")
                                 .attr("d", rounded_rect(1, 0, 5, nodeH, 5, 1, 0, 1, 0))
                                 .attr("class", "WorkflowChart-activeNode")
-                                .style("display", function(d) { return d.isNodeBeingEdited ? null : "none"; });
+                                .style("display", function(d) { return d.id === scope.graphState.nodeBeingEdited ? null : "none"; });
 
                             thisNode.append("text")
                                 .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 20 : nodeW / 2; })
@@ -673,7 +694,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .html(function () {
                                     return `<span>${TemplatesStrings.get('workflow_maker.DELETED')}</span>`;
                                 })
-                                .style("display", function(d) { return d.unifiedJobTemplate || d.isNodeBeingAdded ? "none" : null; });
+                                .style("display", function(d) { return d.unifiedJobTemplate || d.id === scope.graphState.nodeBeingAdded ? "none" : null; });
 
                             thisNode.append("circle")
                                 .attr("cy", nodeH)
@@ -738,6 +759,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .call(node_click)
                                 .on("mouseover", function(d) {
                                     if(!d.isStartNode) {
+                                        $(`#node-${d.id}`).appendTo(`#aw-workflow-chart-g`);
                                         let resourceName = (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? d.unifiedJobTemplate.name : "";
                                         if(resourceName && resourceName.length > maxNodeTextLength) {
                                             // When the graph is initially rendered all the links come after the nodes (when you look at the dom).
@@ -773,8 +795,8 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                                 });
                                         }
 
-                                        if (scope.treeState.isLinkMode && !d.isInvalidLinkTarget && scope.treeState.addLinkSource !== d.id) {
-                                            let sourceNode = d3.select(`#node-${scope.treeState.addLinkSource}`);
+                                        if (scope.graphState.isLinkMode && !d.isInvalidLinkTarget && scope.graphState.addLinkSource !== d.id) {
+                                            let sourceNode = d3.select(`#node-${scope.graphState.addLinkSource}`);
                                             const sourceNodeX = d3.transform(sourceNode.attr("transform")).translate[0];
                                             const sourceNodeY = d3.transform(sourceNode.attr("transform")).translate[1];
 
@@ -821,7 +843,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("cx", nodeW)
                                 .attr("r", 10)
                                 .attr("class", "WorkflowChart-addCircle WorkflowChart-nodeAddCircle")
-                                .style("display", function(d) { return d.isNodeBeingAdded || scope.readOnly ? "none" : null; })
+                                .style("display", function(d) { return d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; })
                                 .call(add_node_without_child)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -843,7 +865,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                     .size(60)
                                     .type("cross")
                                 )
-                                .style("display", function(d) { return d.isNodeBeingAdded || scope.readOnly ? "none" : null; })
+                                .style("display", function(d) { return d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; })
                                 .call(add_node_without_child)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -863,7 +885,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("cy", nodeH/2)
                                 .attr("r", 10)
                                 .attr("class", "WorkflowChart-linkCircle")
-                                .style("display", function(d) { return d.isNodeBeingAdded || scope.readOnly ? "none" : null; })
+                                .style("display", function(d) { return d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; })
                                 .call(add_link)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -877,8 +899,6 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                     d3.select("#node-" + d.id + "-link")
                                         .classed("WorkflowChart-linkButtonHovering", false);
                                 });
-                          // TODO: clean up the placement of this icon... this works but it's not
-                          // clean
                           thisNode.append("foreignObject")
                                .attr("x", nodeW - 6)
                                .attr("y", nodeH/2 - 9)
@@ -887,7 +907,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                    return `<span class="fa fa-link" />`;
                                })
                                .attr("class", "WorkflowChart-nodeLinkIcon")
-                               .style("display", function(d) { return d.isNodeBeingAdded || scope.readOnly ? "none" : null; })
+                               .style("display", function(d) { return d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; })
                                .call(add_link)
                                .on("mouseover", function(d) {
                                    d3.select("#node-" + d.id)
@@ -907,7 +927,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("cy", nodeH)
                                 .attr("r", 10)
                                 .attr("class", "WorkflowChart-nodeRemoveCircle")
-                                .style("display", function(d) { return (d.isStartNode || d.isNodeBeingAdded || scope.readOnly) ? "none" : null; })
+                                .style("display", function(d) { return (d.isStartNode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                                 .call(remove_node)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -929,7 +949,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                     .size(60)
                                     .type("cross")
                                 )
-                                .style("display", function(d) { return (d.isStartNode || d.isNodeBeingAdded || scope.readOnly) ? "none" : null; })
+                                .style("display", function(d) { return (d.isStartNode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                                 .call(remove_node)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -1004,7 +1024,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     });
 
                     // TODO: this
-                    // if(scope.treeState.arrayOfNodesForChart && scope.treeState.arrayOfNodesForChart > 1 && !graphLoaded) {
+                    // if(scope.graphState.arrayOfNodesForChart && scope.graphState.arrayOfNodesForChart > 1 && !graphLoaded) {
                     //     zoomToFitChart();
                     // }
 
@@ -1017,7 +1037,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     let tick = () => {
                       linkLines
                           .each(function(d) {
-                              d.target.y = scope.treeState.depthMap[d.target.id] * 300;
+                              d.target.y = scope.graphState.depthMap[d.target.id] * 300;
                           })
                           .attr("x1", function(d) { return d.target.y; })
                           .attr("y1", function(d) { return d.target.x + (nodeH/2); })
@@ -1068,8 +1088,8 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     };
 
                     force
-                        .nodes(scope.treeState.arrayOfNodesForChart)
-                        .links(scope.treeState.arrayOfLinksForChart)
+                        .nodes(scope.graphState.arrayOfNodesForChart)
+                        .links(scope.graphState.arrayOfLinksForChart)
                         .on("tick", tick)
                         .start();
                 }
@@ -1086,7 +1106,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function add_node_without_child() {
                 this.on("click", function(d) {
-                    if(!scope.readOnly && !scope.treeState.isLinkMode) {
+                    if(!scope.readOnly && !scope.graphState.isLinkMode) {
                         scope.addNodeWithoutChild({
                             parent: d
                         });
@@ -1096,7 +1116,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function add_node_with_child() {
                 this.on("click", function(d) {
-                    if(!scope.readOnly && !scope.treeState.isLinkMode) {
+                    if(!scope.readOnly && !scope.graphState.isLinkMode) {
                         scope.addNodeWithChild({
                             link: d
                         });
@@ -1106,7 +1126,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function remove_node() {
                 this.on("click", function(d) {
-                    if(!d.isStartNode && !scope.readOnly && !scope.treeState.isLinkMode) {
+                    if(!d.isStartNode && !scope.readOnly && !scope.graphState.isLinkMode) {
                         scope.deleteNode({
                             nodeToDelete: d
                         });
@@ -1116,13 +1136,13 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function node_click() {
                 this.on("click", function(d) {
-                    if(!d.isStartNode && !scope.readOnly){
-                        if(scope.treeState.isLinkMode && !d.isInvalidLinkTarget) {
+                    if(d.id !== scope.graphState.nodeBeingAdded && !scope.readOnly){
+                        if(scope.graphState.isLinkMode && !d.isInvalidLinkTarget) {
                             $('.WorkflowChart-potentialLink').remove();
                             scope.selectNodeForLinking({
                                 nodeToStartLink: d
                             });
-                        } else if(!scope.treeState.isLinkMode) {
+                        } else if(!scope.graphState.isLinkMode) {
                             scope.editNode({
                                 nodeToEdit: d
                             });
@@ -1134,7 +1154,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function edit_link() {
                 this.on("click", function(d) {
-                    if(!scope.treeState.isLinkMode && !d.source.isStartNode && !d.source.isNodeBeingAdded && !d.target.isNodeBeingAdded && scope.mode !== 'details'){
+                    if(!scope.graphState.isLinkMode && !d.source.isStartNode && d.source.id !== scope.graphState.nodeBeingAdded && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details'){
                         scope.editLink({
                             linkToEdit: d
                         });
@@ -1144,7 +1164,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function add_link() {
                 this.on("click", function(d) {
-                    if (!scope.readOnly && !scope.treeState.isLinkMode) {
+                    if (!scope.readOnly && !scope.graphState.isLinkMode) {
                         scope.selectNodeForLinking({
                             nodeToStartLink: d
                         });
@@ -1198,7 +1218,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
             }
 
             scope.$on('refreshWorkflowChart', function(){
-                if(scope.treeState) {
+                if(scope.graphState) {
                     update();
                 }
             });
@@ -1219,12 +1239,12 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 zoomToFitChart();
             });
 
-            let clearWatchTreeState = scope.$watch('treeState.arrayOfNodesForChart', function(newVal) {
+            let clearWatchgraphState = scope.$watch('graphState.arrayOfNodesForChart', function(newVal) {
                 if(newVal) {
-                    // scope.treeState.arrayOfNodesForChart
+                    // scope.graphState.arrayOfNodesForChart
 
                     update();
-                    clearWatchTreeState();
+                    clearWatchgraphState();
                 }
             });
 
