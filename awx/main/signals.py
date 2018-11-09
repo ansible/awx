@@ -491,13 +491,12 @@ def activity_stream_delete(sender, instance, **kwargs):
     if isinstance(instance, Inventory):
         if not kwargs.get('inventory_delete_flag', False):
             return
-        if settings.ACTIVITY_STREAM_COALESCE_ENTRIES:
-            # Add additional data about child hosts / groups that will be deleted
-            changes['coalesce_data'] = {
-                'hosts_deleted': instance.hosts.count(),
-                'groups_deleted': instance.groups.count()
-            }
-    elif isinstance(instance, (Host, Group)) and instance.inventory.pending_deletion and settings.ACTIVITY_STREAM_COALESCE_ENTRIES:
+        # Add additional data about child hosts / groups that will be deleted
+        changes['coalesced_data'] = {
+            'hosts_deleted': instance.hosts.count(),
+            'groups_deleted': instance.groups.count()
+        }
+    elif isinstance(instance, (Host, Group)) and instance.inventory.pending_deletion:
         return  # accounted for by inventory entry, above
     _type = type(instance)
     if getattr(_type, '_deferred', False):
