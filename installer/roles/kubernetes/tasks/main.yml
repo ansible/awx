@@ -69,7 +69,7 @@
           -e POSTGRESQL_PASSWORD={{ pg_password }} \
           -e POSTGRESQL_ADMIN_PASSWORD={{ pg_password }} \
           -e POSTGRESQL_DATABASE={{ pg_database }} \
-          -e POSTGRESQL_VERSION=9.5 \
+          -e POSTGRESQL_VERSION=9.6 \
           -n {{ kubernetes_namespace }}
       register: openshift_pg_activate
       no_log: yes
