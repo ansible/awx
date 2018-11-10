@@ -28,7 +28,7 @@ class Organizations extends Component {
 
     return (
       <Fragment>
-        <PageSection variant={light}>
+        <PageSection variant={light} className="pf-m-condensed">
           <Title size="2xl">Organizations</Title>
         </PageSection>
         <PageSection variant={medium}>

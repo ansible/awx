@@ -14,7 +14,10 @@ import {
   NavItem,
   Page,
   PageHeader,
-  PageSidebar
+  PageSidebar,
+  Toolbar,
+  ToolbarGroup,
+  ToolbarItem
 } from '@patternfly/react-core';
 import { global_breakpoint_md as breakpointMd } from '@patternfly/react-tokens';
 
@@ -87,6 +90,16 @@ class App extends React.Component {
     const { activeItem, activeGroup, isNavOpen } = this.state;
     const { logo, loginInfo } = this.props;
 
+    const PageToolbar = (
+      <Toolbar>
+        <ToolbarGroup>
+          <ToolbarItem>
+            <LogoutButton onDevLogout={() => this.onDevLogout()} />
+          </ToolbarItem>
+        </ToolbarGroup>
+      </Toolbar>
+    );
+
     return (
       <Router>
         <Fragment>
@@ -110,7 +123,7 @@ class App extends React.Component {
                 header={(
                   <PageHeader
                     logo={<TowerLogo onClick={this.onLogoClick} />}
-                    avatar={<LogoutButton onDevLogout={() => this.onDevLogout()} />}
+                    toolbar={PageToolbar}
                     showNavToggle
                     onNavToggle={this.onNavToggle}
                   />
@@ -329,6 +342,7 @@ class App extends React.Component {
                     )}
                   />
                 )}
+                useCondensed
               >
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" exact path="/" component={() => (<Redirect to="/home" />)} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/home" component={Dashboard} />

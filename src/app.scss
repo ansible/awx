@@ -1,56 +1,24 @@
 //
-// page layout
+// masthead overrides
 //
 
-.pf-l-page__header {
-  --pf-l-page__header--MinHeight: 0px;
-  display: flex;
-  align-items: center;
-  height: 60px;
-}
-
 .pf-l-page__header-brand {
-  display: flex;
-  align-self: center;
-  height: 60px;
   max-width: 255px;
-  padding: 0px;
-  margin: 0px;
-}
-
-.pf-l-page__header-tools {
-  align-self: center;
-  height: 60px;
-  padding-left: 255px;
-
-  .fa-user:hover {
-    // temporary dev logout
-    cursor: pointer;
-  }
 }
 
 .pf-l-page__header-brand-link {
   max-width: 85px;
-  align-self: center;
 }
 
 .pf-l-page__header-brand-link img {
   transform: scale(1.1, 1.1);
   position: relative;
-  top: 6px;
+  top: -4px;
 }
 
-.pf-l-page__header-brand-toggle {
-  align-self: center;
-  position: relative;
-  right: 14px;
-  --pf-l-page__header-brand-link--MarginLeft: 0px;
-  --pf-l-page__header-brand-link--MarginLeft: 0px;
-
-  button {
-    --pf-l-page__header-sidebar-toggle--FontSize: 18px;
-  }
-}
+//
+// sidebar overrides
+//
 
 .pf-l-page__sidebar{
   --pf-l-page__sidebar--Width--lg: 255px;
@@ -84,16 +52,11 @@
   }
 }
 
-.pf-l-page__main-section {
-  --pf-l-page__main-section--PaddingTop: 11px;
-  --pf-l-page__main-section--PaddingLeft: 11px;
-}
-
 //
-// toolbar layout
+// page header overrides
 //
 
-.pf-l-toolbar {
-  align-self: center;
-  height: 60px;
+.pf-l-page__main-section.pf-m-condensed {
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
