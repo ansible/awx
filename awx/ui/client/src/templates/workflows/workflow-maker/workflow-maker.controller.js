@@ -568,7 +568,6 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
         /* EDIT NODE FUNCTIONS */
 
         $scope.startEditNode = function (nodeToEdit) {
-
             if (!$scope.nodeBeingEdited || ($scope.nodeBeingEdited && $scope.nodeBeingEdited.id !== nodeToEdit.id)) {
                 if ($scope.placeholderNode || $scope.nodeBeingEdited) {
                     $scope.cancelNodeForm();
@@ -1005,7 +1004,8 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
                 $q.all([jobTemplate.optionsLaunch(selectedTemplate.id), jobTemplate.getLaunch(selectedTemplate.id)])
                     .then((responses) => {
-                        let launchConf = responses[1].data;
+                        const launchConf = jobTemplate.getLaunchConf();
+
                         if (selectedTemplate.type === 'job_template') {
                             if ((!selectedTemplate.inventory && !launchConf.ask_inventory_on_launch) || !selectedTemplate.project) {
                                 $scope.selectedTemplateInvalid = true;
@@ -1022,24 +1022,13 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
 
                         $scope.selectedTemplate = angular.copy(selectedTemplate);
 
-                        if (!launchConf.survey_enabled &&
-                            !launchConf.ask_inventory_on_launch &&
-                            !launchConf.ask_credential_on_launch &&
-                            !launchConf.ask_verbosity_on_launch &&
-                            !launchConf.ask_job_type_on_launch &&
-                            !launchConf.ask_limit_on_launch &&
-                            !launchConf.ask_tags_on_launch &&
-                            !launchConf.ask_skip_tags_on_launch &&
-                            !launchConf.ask_diff_mode_on_launch &&
-                            !launchConf.credential_needed_to_start &&
-                            !launchConf.ask_variables_on_launch &&
-                            launchConf.variables_needed_to_start.length === 0) {
+                        if (jobTemplate.canLaunchWithoutPrompt()) {
                             $scope.showPromptButton = false;
                             $scope.promptModalMissingReqFields = false;
                         } else {
                             $scope.showPromptButton = true;
 
-                            if (selectedTemplate.type === 'job_template') {
+                            if (['job_template', 'workflow_job_template'].includes(selectedTemplate.type)) {
                                 if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory')) {
                                     $scope.promptModalMissingReqFields = true;
                                 } else {
@@ -1059,9 +1048,8 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                                         });
 
                                         $scope.missingSurveyValue = processed.missingSurveyValue;
-
                                         $scope.promptData = {
-                                            launchConf: responses[1].data,
+                                            launchConf,
                                             launchOptions: responses[0].data,
                                             surveyQuestions: processed.surveyQuestions,
                                             template: selectedTemplate.id,
@@ -1084,8 +1072,9 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                                         watchForPromptChanges();
                                     });
                             } else {
+
                                 $scope.promptData = {
-                                    launchConf: responses[1].data,
+                                    launchConf,
                                     launchOptions: responses[0].data,
                                     template: selectedTemplate.id,
                                     prompts: PromptService.processPromptValues({

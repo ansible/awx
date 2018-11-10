@@ -242,28 +242,30 @@ function PromptService (Empty, $filter)  {
             }
         }
 
+        const launchConfDefaults = _.get(params, ['promptData', 'launchConf', 'defaults'], {});
+
         if(_.has(params, 'promptData.prompts.jobType.value.value') && _.get(params, 'promptData.launchConf.ask_job_type_on_launch')) {
-            promptDataToSave.job_type = params.promptData.launchConf.defaults.job_type && params.promptData.launchConf.defaults.job_type === params.promptData.prompts.jobType.value.value ? null : params.promptData.prompts.jobType.value.value;
+            promptDataToSave.job_type = launchConfDefaults.job_type && launchConfDefaults.job_type === params.promptData.prompts.jobType.value.value ? null : params.promptData.prompts.jobType.value.value;
         }
         if(_.has(params, 'promptData.prompts.tags.value') && _.get(params, 'promptData.launchConf.ask_tags_on_launch')){
-            const templateDefaultJobTags = params.promptData.launchConf.defaults.job_tags.split(',');
+            const templateDefaultJobTags = launchConfDefaults.job_tags.split(',');
             promptDataToSave.job_tags = (_.isEqual(templateDefaultJobTags.sort(), params.promptData.prompts.tags.value.map(a => a.value).sort())) ? null : params.promptData.prompts.tags.value.map(a => a.value).join();
         }
         if(_.has(params, 'promptData.prompts.skipTags.value') && _.get(params, 'promptData.launchConf.ask_skip_tags_on_launch')){
-            const templateDefaultSkipTags = params.promptData.launchConf.defaults.skip_tags.split(',');
+            const templateDefaultSkipTags = launchConfDefaults.skip_tags.split(',');
             promptDataToSave.skip_tags = (_.isEqual(templateDefaultSkipTags.sort(), params.promptData.prompts.skipTags.value.map(a => a.value).sort())) ? null : params.promptData.prompts.skipTags.value.map(a => a.value).join();
         }
         if(_.has(params, 'promptData.prompts.limit.value') && _.get(params, 'promptData.launchConf.ask_limit_on_launch')){
-            promptDataToSave.limit = params.promptData.launchConf.defaults.limit && params.promptData.launchConf.defaults.limit === params.promptData.prompts.limit.value ? null : params.promptData.prompts.limit.value;
+            promptDataToSave.limit = launchConfDefaults.limit && launchConfDefaults.limit === params.promptData.prompts.limit.value ? null : params.promptData.prompts.limit.value;
         }
         if(_.has(params, 'promptData.prompts.verbosity.value.value') && _.get(params, 'promptData.launchConf.ask_verbosity_on_launch')){
-            promptDataToSave.verbosity = params.promptData.launchConf.defaults.verbosity && params.promptData.launchConf.defaults.verbosity === params.promptData.prompts.verbosity.value.value ? null : params.promptData.prompts.verbosity.value.value;
+            promptDataToSave.verbosity = launchConfDefaults.verbosity && launchConfDefaults.verbosity === params.promptData.prompts.verbosity.value.value ? null : params.promptData.prompts.verbosity.value.value;
         }
         if(_.has(params, 'promptData.prompts.inventory.value') && _.get(params, 'promptData.launchConf.ask_inventory_on_launch')){
-            promptDataToSave.inventory = params.promptData.launchConf.defaults.inventory && params.promptData.launchConf.defaults.inventory.id === params.promptData.prompts.inventory.value.id ? null : params.promptData.prompts.inventory.value.id;
+            promptDataToSave.inventory = launchConfDefaults.inventory && launchConfDefaults.inventory.id === params.promptData.prompts.inventory.value.id ? null : params.promptData.prompts.inventory.value.id;
         }
         if(_.has(params, 'promptData.prompts.diffMode.value') && _.get(params, 'promptData.launchConf.ask_diff_mode_on_launch')){
-            promptDataToSave.diff_mode = params.promptData.launchConf.defaults.diff_mode && params.promptData.launchConf.defaults.diff_mode === params.promptData.prompts.diffMode.value ? null : params.promptData.prompts.diffMode.value;
+            promptDataToSave.diff_mode = launchConfDefaults.diff_mode && launchConfDefaults.diff_mode === params.promptData.prompts.diffMode.value ? null : params.promptData.prompts.diffMode.value;
         }
 
         return promptDataToSave;

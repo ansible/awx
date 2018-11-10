@@ -97,12 +97,12 @@ function atLaunchTemplateCtrl (
                             extra_vars: wfjtData.data.extra_vars
                         };
                         const promptData = {
-                            launchConf: launchData.data,
+                            launchConf: selectedWorkflowJobTemplate.getLaunchConf(),
                             launchOptions: launchOptions.data,
                             template: vm.template.id,
                             templateType: vm.template.type,
                             prompts: PromptService.processPromptValues({
-                                launchConf: launchData.data,
+                                launchConf: selectedWorkflowJobTemplate.getLaunchConf(),
                                 launchOptions: launchOptions.data
                             }),
                             triggerModalOpen: true,

@@ -15,7 +15,7 @@ export default [
         ProcessErrors, GetBasePath, $q, ParseTypeChange, Wait, Empty,
         ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
         TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData, i18n,
-        workflowLaunch, $transitions, WorkflowJobTemplate, Inventory,
+        workflowLaunch, $transitions, WorkflowJobTemplate, Inventory
     ) {
 
         $scope.missingTemplates = _.has(workflowLaunch, 'node_templates_missing') && workflowLaunch.node_templates_missing.length > 0 ? true : false;
