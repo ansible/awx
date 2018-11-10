@@ -135,7 +135,7 @@ angular.module('inventory', [
                                     if(_.has(resourceData, 'data.summary_fields.insights_credential')){
                                         return credentialTypesLookup()
                                             .then(kinds => {
-                                                let insightsKind = kinds.Insights;
+                                                let insightsKind = kinds.insights;
                                                 let path = `${GetBasePath('projects')}?credential__credential_type=${insightsKind}&role_level=use_role`;
                                                 Rest.setUrl(path);
                                                 return Rest.get().then(({data}) => {
