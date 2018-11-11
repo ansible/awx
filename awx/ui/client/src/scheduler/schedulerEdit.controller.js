@@ -424,7 +424,20 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                         currentValues: scheduleResolve
                     });
 
-                    if(!launchConf.survey_enabled) {
+                   if (!launchConf.survey_enabled &&
+                        !launchConf.ask_inventory_on_launch &&
+                        !launchConf.ask_credential_on_launch &&
+                        !launchConf.ask_verbosity_on_launch &&
+                        !launchConf.ask_job_type_on_launch &&
+                        !launchConf.ask_limit_on_launch &&
+                        !launchConf.ask_tags_on_launch &&
+                        !launchConf.ask_skip_tags_on_launch &&
+                        !launchConf.ask_diff_mode_on_launch &&
+                        !launchConf.survey_enabled &&
+                        !launchConf.credential_needed_to_start &&
+                        !launchConf.inventory_needed_to_start &&
+                        launchConf.passwords_needed_to_start.length === 0 &&
+                        launchConf.variables_needed_to_start.length === 0) {
                         $scope.showPromptButton = false;
                     } else {
                         $scope.showPromptButton = true;
@@ -446,6 +459,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                                         launchOptions: launchOptions,
                                         prompts: prompts,
                                         surveyQuestions: surveyQuestionRes.data.spec,
+                                        templateType: ParentObject.type,
                                         template: ParentObject.id
                                     };
 
@@ -467,6 +481,7 @@ function($filter, $state, $stateParams, Wait, $scope, moment,
                                 launchConf: launchConf,
                                 launchOptions: launchOptions,
                                 prompts: prompts,
+                                templateType: ParentObject.type,
                                 template: ParentObject.id
                             };
                             watchForPromptChanges();

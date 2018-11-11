@@ -239,7 +239,19 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                     });
                 };
 
-                if(!launchConf.survey_enabled) {
+                if (!launchConf.survey_enabled &&
+                    !launchConf.ask_inventory_on_launch &&
+                    !launchConf.ask_credential_on_launch &&
+                    !launchConf.ask_verbosity_on_launch &&
+                    !launchConf.ask_job_type_on_launch &&
+                    !launchConf.ask_limit_on_launch &&
+                    !launchConf.ask_tags_on_launch &&
+                    !launchConf.ask_skip_tags_on_launch &&
+                    !launchConf.ask_diff_mode_on_launch &&
+                    !launchConf.survey_enabled &&
+                    !launchConf.credential_needed_to_start &&
+                    !launchConf.inventory_needed_to_start &&
+                    launchConf.variables_needed_to_start.length === 0) {
                         $scope.showPromptButton = false;
                 } else {
                     $scope.showPromptButton = true;
@@ -259,6 +271,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                                     launchConf: responses[1].data,
                                     launchOptions: responses[0].data,
                                     surveyQuestions: processed.surveyQuestions,
+                                    templateType: ParentObject.type,
                                     template: ParentObject.id,
                                     prompts: PromptService.processPromptValues({
                                         launchConf: responses[1].data,
@@ -283,6 +296,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
                         $scope.promptData = {
                             launchConf: responses[1].data,
                             launchOptions: responses[0].data,
+                            templateType: ParentObject.type,
                             template: ParentObject.id,
                             prompts: PromptService.processPromptValues({
                                 launchConf: responses[1].data,
