@@ -53,6 +53,7 @@ export default [
         $scope.mode = 'edit';
         $scope.parseType = 'yaml';
         $scope.includeWorkflowMaker = false;
+        $scope.ask_inventory_on_launch = workflowJobTemplateData.ask_inventory_on_launch;
 
         if (Inventory){
             $scope.inventory = Inventory.id;
