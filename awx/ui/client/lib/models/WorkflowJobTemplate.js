@@ -1,7 +1,6 @@
 /* eslint camelcase: 0 */
 let Base;
 let $http;
-let $q;
 
 function optionsLaunch (id) {
     const req = {
@@ -13,19 +12,16 @@ function optionsLaunch (id) {
 }
 
 function getLaunch (id) {
-    const urls = [
-        `${this.path}${id}/`,
-        `${this.path}${id}/launch/`,
-    ];
+    const req = {
+        method: 'GET',
+        url: `${this.path}${id}/launch/`
+    };
 
-    const promises = urls.map(url => $http({ method: 'GET', url }));
+    return $http(req)
+        .then(res => {
+            this.model.launch.GET = res.data;
 
-    return $q.all(promises)
-        .then(([res, launchRes]) => {
-            this.model.GET = res.data;
-            this.model.launch.GET = launchRes.data;
-
-            return launchRes;
+            return res;
         });
 }
 
@@ -52,28 +48,7 @@ function getSurveyQuestions (id) {
 }
 
 function getLaunchConf () {
-    // We may need api updates to align /:id/launch data with what is returned for job templates.
-    // For now, we splice values from the different endpoints to get the launchData we need.
-    const {
-        ask_inventory_on_launch,
-        ask_variables_on_launch,
-        survey_enabled,
-    } = this.model.GET;
-
-    const {
-        can_start_without_user_input,
-        variables_needed_to_start,
-    } = this.model.launch.GET;
-
-    const launchConf = {
-        ask_inventory_on_launch,
-        ask_variables_on_launch,
-        can_start_without_user_input,
-        survey_enabled,
-        variables_needed_to_start,
-    };
-
-    return launchConf;
+    return this.model.launch.GET;
 }
 
 function canLaunchWithoutPrompt () {
@@ -104,10 +79,9 @@ function WorkflowJobTemplateModel (method, resource, config) {
     return this.create(method, resource, config);
 }
 
-function WorkflowJobTemplateModelLoader (BaseModel, _$http_, _$q_) {
+function WorkflowJobTemplateModelLoader (BaseModel, _$http_) {
     Base = BaseModel;
     $http = _$http_;
-    $q = _$q_;
 
     return WorkflowJobTemplateModel;
 }
@@ -115,7 +89,6 @@ function WorkflowJobTemplateModelLoader (BaseModel, _$http_, _$q_) {
 WorkflowJobTemplateModelLoader.$inject = [
     'BaseModel',
     '$http',
-    '$q',
 ];
 
 export default WorkflowJobTemplateModelLoader;

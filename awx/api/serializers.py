@@ -4418,6 +4418,7 @@ class JobLaunchSerializer(BaseSerializer):
 class WorkflowJobLaunchSerializer(BaseSerializer):
 
     can_start_without_user_input = serializers.BooleanField(read_only=True)
+    defaults = serializers.SerializerMethodField()
     variables_needed_to_start = serializers.ReadOnlyField()
     survey_enabled = serializers.SerializerMethodField()
     extra_vars = VerbatimField(required=False, write_only=True)
@@ -4429,15 +4430,26 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('can_start_without_user_input', 'extra_vars', 'inventory',
-                  'survey_enabled', 'variables_needed_to_start',
+        fields = ('ask_inventory_on_launch', 'can_start_without_user_input', 'defaults', 'extra_vars',
+                  'inventory', 'survey_enabled', 'variables_needed_to_start',
                   'node_templates_missing', 'node_prompts_rejected',
-                  'workflow_job_template_data')
+                  'workflow_job_template_data', 'survey_enabled')
+        read_only_fields = ('ask_inventory_on_launch',)
 
     def get_survey_enabled(self, obj):
         if obj:
             return obj.survey_enabled and 'spec' in obj.survey_spec
         return False
+
+    def get_defaults(self, obj):
+        defaults ={
+            'inventory': {
+                'name': getattrd(obj, 'inventory.name', None),
+                'id': getattrd(obj, 'inventory.pk', None)
+            }
+        }
+
+        return defaults
 
     def get_workflow_job_template_data(self, obj):
         return dict(name=obj.name, id=obj.id, description=obj.description)
