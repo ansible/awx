@@ -748,6 +748,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                                                     launchOptions: launchOptions,
                                                     prompts: prompts,
                                                     surveyQuestions: surveyQuestionRes.data.spec,
+                                                    templateType: $scope.nodeBeingEdited.unifiedJobTemplate.type,
                                                     template: $scope.nodeBeingEdited.unifiedJobTemplate.id
                                                 };
 
@@ -770,6 +771,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                                             launchConf: launchConf,
                                             launchOptions: launchOptions,
                                             prompts: prompts,
+                                            templateType: $scope.nodeBeingEdited.unifiedJobTemplate.type,
                                             template: $scope.nodeBeingEdited.unifiedJobTemplate.id
                                         };
 
@@ -1053,6 +1055,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                                             launchOptions: responses[0].data,
                                             surveyQuestions: processed.surveyQuestions,
                                             template: selectedTemplate.id,
+                                            templateType: selectedTemplate.type,
                                             prompts: PromptService.processPromptValues({
                                                 launchConf: responses[1].data,
                                                 launchOptions: responses[0].data
@@ -1077,6 +1080,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                                     launchConf,
                                     launchOptions: responses[0].data,
                                     template: selectedTemplate.id,
+                                    templateType: selectedTemplate.type,
                                     prompts: PromptService.processPromptValues({
                                         launchConf: responses[1].data,
                                         launchOptions: responses[0].data
