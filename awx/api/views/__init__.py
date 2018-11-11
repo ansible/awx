@@ -3113,6 +3113,9 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
+        if 'inventory_id' in request.data:
+            request.data['inventory'] = request.data['inventory_id']
+
         serializer = self.serializer_class(instance=obj, data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
