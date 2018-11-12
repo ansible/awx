@@ -4442,14 +4442,15 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         return False
 
     def get_defaults(self, obj):
-        defaults ={
-            'inventory': {
-                'name': getattrd(obj, 'inventory.name', None),
-                'id': getattrd(obj, 'inventory.pk', None)
-            }
-        }
-
-        return defaults
+        defaults_dict = {}
+        for field_name in WorkflowJobTemplate.get_ask_mapping().keys():
+            if field_name == 'inventory':
+                defaults_dict[field_name] = dict(
+                    name=getattrd(obj, '%s.name' % field_name, None),
+                    id=getattrd(obj, '%s.pk' % field_name, None))
+            else:
+                defaults_dict[field_name] = getattr(obj, field_name)
+        return defaults_dict
 
     def get_workflow_job_template_data(self, obj):
         return dict(name=obj.name, id=obj.id, description=obj.description)

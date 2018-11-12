@@ -440,6 +440,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
                 if rejected_vars:
                     rejected_data['extra_vars'] = rejected_vars
                 errors_dict.update(vars_errors)
+                continue
 
             if field_name not in kwargs:
                 continue
