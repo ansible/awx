@@ -140,56 +140,76 @@ module.exports = {
         templates.expect.element('@save').enabled;
         client.pause(1000);
 
-        templates.section.editWorkflowJobTemplate
-            .waitForElementVisible('@visualizerButton')
-            .click('@visualizerButton')
-            .waitForElementVisible('div.spinny')
-            .waitForElementNotVisible('div.spinny')
-            .waitForAngular();
+        client.getValue('#workflow_job_template_name', result => {
+            templates.expect.element('#workflow_job_template_cancel_btn').visible;
+            templates.click('#workflow_job_template_cancel_btn');
+            client.refresh();
+            client.waitForElementVisible('div.spinny');
+            client.waitForElementNotVisible('div.spinny');
 
-        client.expect.element('#workflow-modal-dialog').visible;
-        client.expect.element('#workflow-modal-dialog span[class^="badge"]').visible;
-        client.expect.element('#workflow-modal-dialog span[class^="badge"]').text.equal('3');
-        client.expect.element('div[class="WorkflowMaker-title"]').visible;
-        client.expect.element('div[class="WorkflowMaker-title"]').text.contain(data.workflow.name);
-        client.expect.element('div[class="WorkflowMaker-title"]').text.not.equal(data.workflow.name);
+            templates.expect.element('smart-search').visible;
+            templates.expect.element('smart-search input').enabled;
 
-        client.expect.element('#workflow-modal-dialog i[class*="fa-cog"]').visible;
-        client.expect.element('#workflow-modal-dialog i[class*="fa-cog"]').enabled;
+            templates
+                .sendKeys('smart-search input', `name.iexact:"${result.value}"`)
+                .sendKeys('smart-search input', client.Keys.ENTER);
 
-        client.click('#workflow-modal-dialog i[class*="fa-cog"]');
+            templates.waitForElementVisible('div.spinny');
+            templates.waitForElementNotVisible('div.spinny');
 
-        client.waitForElementVisible('workflow-controls');
-        client.waitForElementVisible('div[class*="-zoomPercentage"]');
+            templates.expect.element('.at-Panel-headingTitleBadge').text.equal('1').before(10000);
+            templates.expect.element('div[ui-view="templatesList"] i[class*="sitemap"]').visible;
+            templates.expect.element('div[ui-view="templatesList"] i[class*="sitemap"]').enabled;
 
-        client.click('i[class*="fa-home"]').expect.element('div[class*="-zoomPercentage"]').text.equal('100%');
-        client.click('i[class*="fa-minus"]').expect.element('div[class*="-zoomPercentage"]').text.equal('90%');
-        client.click('i[class*="fa-minus"]').expect.element('div[class*="-zoomPercentage"]').text.equal('80%');
-        client.click('i[class*="fa-minus"]').expect.element('div[class*="-zoomPercentage"]').text.equal('70%');
-        client.click('i[class*="fa-minus"]').expect.element('div[class*="-zoomPercentage"]').text.equal('60%');
+            client
+                .click('div[ui-view="templatesList"] i[class*="sitemap"]')
+                .pause(1500)
+                .waitForElementNotVisible('div.spinny');
 
-        client.expect.element('#node-1').visible;
-        client.expect.element('#node-2').visible;
-        client.expect.element('#node-3').visible;
-        client.expect.element('#node-4').visible;
+            client.expect.element('#workflow-modal-dialog').visible;
+            client.expect.element('#workflow-modal-dialog span[class^="badge"]').visible;
+            client.expect.element('#workflow-modal-dialog span[class^="badge"]').text.equal('3');
+            client.expect.element('div[class="WorkflowMaker-title"]').visible;
+            client.expect.element('div[class="WorkflowMaker-title"]').text.contain(data.workflow.name);
+            client.expect.element('div[class="WorkflowMaker-title"]').text.not.equal(data.workflow.name);
 
-        client.expect.element('#node-1 text').text.not.equal('').after(5000);
-        client.expect.element('#node-2 text').text.not.equal('').after(5000);
-        client.expect.element('#node-3 text').text.not.equal('').after(5000);
-        client.expect.element('#node-4 text').text.not.equal('').after(5000);
+            client.expect.element('#workflow-modal-dialog i[class*="fa-cog"]').visible;
+            client.expect.element('#workflow-modal-dialog i[class*="fa-cog"]').enabled;
 
-        const checkNodeText = (selector, text) => client.getText(selector, ({ value }) => {
-            client.assert.equal(text.indexOf(value.replace('...', '')) >= 0, true);
+            client.click('#workflow-modal-dialog i[class*="fa-cog"]');
+
+            client.waitForElementVisible('workflow-controls');
+            client.waitForElementVisible('div[class*="-zoomPercentage"]');
+
+            client.click('i[class*="fa-home"]').expect.element('div[class*="-zoomPercentage"]').text.equal('100%');
+            client.click('i[class*="fa-minus"]').expect.element('div[class*="-zoomPercentage"]').text.equal('90%');
+            client.click('i[class*="fa-minus"]').expect.element('div[class*="-zoomPercentage"]').text.equal('80%');
+            client.click('i[class*="fa-minus"]').expect.element('div[class*="-zoomPercentage"]').text.equal('70%');
+            client.click('i[class*="fa-minus"]').expect.element('div[class*="-zoomPercentage"]').text.equal('60%');
+
+            client.expect.element('#node-1').visible;
+            client.expect.element('#node-2').visible;
+            client.expect.element('#node-3').visible;
+            client.expect.element('#node-4').visible;
+
+            client.expect.element('#node-1 text').text.not.equal('').after(5000);
+            client.expect.element('#node-2 text').text.not.equal('').after(5000);
+            client.expect.element('#node-3 text').text.not.equal('').after(5000);
+            client.expect.element('#node-4 text').text.not.equal('').after(5000);
+
+            const checkNodeText = (selector, text) => client.getText(selector, ({ value }) => {
+                client.assert.equal(text.indexOf(value.replace('...', '')) >= 0, true);
+            });
+
+            checkNodeText('#node-1 text', 'START');
+            checkNodeText('#node-2 text', data.project.name);
+            checkNodeText('#node-3 text', data.template.name);
+            checkNodeText('#node-4 text', data.source.name);
+
+            templates.expect.element('@save').visible;
+            templates.expect.element('@save').enabled;
+
+            client.end();
         });
-
-        checkNodeText('#node-1 text', 'START');
-        checkNodeText('#node-2 text', data.project.name);
-        checkNodeText('#node-3 text', data.template.name);
-        checkNodeText('#node-4 text', data.source.name);
-
-        templates.expect.element('@save').visible;
-        templates.expect.element('@save').enabled;
-
-        client.end();
     }
 };
