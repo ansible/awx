@@ -14,6 +14,65 @@ from rest_framework import serializers
 EXAMPLE_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nxyz==\n-----END PRIVATE KEY-----'
 EXAMPLE_ENCRYPTED_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nxyz==\n-----END PRIVATE KEY-----'
 
+PKCS8_PRIVATE_KEY = '''-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQD0uyqyUHELQ25B
+8lNBu/ZfVx8fPFT6jvAUscxfWLqsZCJrR8BWadXMa/0ALMaUuZbZ8Ug27jztOSO8
+w8hJ6dqHaQ2gfbwsfbF6XHaetap0OoAFtnaiULSvljOkoWG+WSyfvJ73ZwEP3KzW
+0JbNX24zGFdTFzX1W+8BbLpEIw3XiP9iYPtu0uit6VradMrt2Kdu+VKlQzbG1+89
+g70IyFkvopynnWAkA+YXNo08dxOzmci7/G0Cp1Lwh4IAH++HbE2E4odWm5zoCaT7
+gcZzKuZs/kkDHaS9O5VjsWGrZ+mp3NgeABbFRP0jDhCtS8QRa94RC6mobtnYoRd7
+C1Iz3cdjAgMBAAECggEAb5p9BZUegBrviH5YDmWHnIHP7QAn5p1RibZtM1v0wRHn
+ClJNuXqJJ7BlT3Ob2Y3q55ebLYWmXi4NCJOl3mMZJ2A2eSZtrkJhsaHB7G1+/oMB
+B9nmLu4r/9i4005PEy16ZpvvSHZ+KvwhC9NSufRXflCO3hL7JdmXXGh3ZwQvV0a7
+mP1RIQKIcLynPBTbTH1w30Znj2M4bSjUlsLbOYhwg2YQxa1qKuCtata5qdAVbgny
+JYPruBhcHLPGvC0FBcd8zoYWLvQ52hcXNxrl0iN1KY7zIEYmU+3gbuBIoVl2Qo/p
+zmH01bo9h9p5DdkjQ6MdjvrOX8aT93S1g9y8WqtoXQKBgQD7E2+RZ/XNIFts9cqG
+2S7aywIydkgEmaOJl1fzebutJPPQXJDpQZtEenr+CG7KsRPf8nJ3jc/4OHIsnHYD
+WBgXLQz0QWEgXwTRicXsxsARzHKV2Lb8IsXK5vfia+i9fxZV3WwkKVXOmTJHcVl1
+XD5zfbAlrQ4r+Uo618zgpchsBQKBgQD5h+A+PX+3PdUPNkHdCltMwaSsXjBcYYoF
+uZGR4v8jRQguGD5h8Eyk/cS3VVryYRKiYJCvaPFXTzN6GAsQoSnMW+37GKsbL+oK
+5JYoSiCY6BpaJO3uo/UwvitV8EjHdaArb5oBjx1yiobRqhVJ+iH1PKxgnQFI5RgO
+4AhnnYMqRwKBgQDUX+VQXlp5LzSGXwX3uH+8jFmIa6qRUZAWU1EO3tqUI5ykk5fz
+5g27B8s/U8y7YLuKA581Z1wR/1T8TUA5peuCtxWtChxo8Fa4E0y68ocGxyPpgk2N
+yq/56BKnkFVm7Lfs24WctOYjAkyYR9W+ws8Ei71SsSY6pfxW97ESGMkGLQKBgAlW
+ABnUCzc75QDQst4mSQwyIosgawbJz3QvYTboG0uihY/T8GGRsAxsQjPpyaFP6HaS
+zlcBwiXWHMLwq1lP7lRrDBhc7+nwfP0zWDrhqx6NcI722sAW+lF8i/qHJvHvgLKf
+Vk/AnwVuEWU+y9UcurCGOJzUwvuLNr83upjF1+Z5AoGAP91XiBCorJLRJaryi6zt
+iCjRxoVsrN6NvAh+MQ1yfAopO4RhxEXM/uUOBkulNhlnp+evSxUwDnFNOWzsZVn9
+B6yXdJ9BTWXFX7YhEkosRZCXnNWX4Dz+DGU/yvSHQR/JYj8mRav98TmJU6lK6Vw/
+YukmWPxNB+x4Ym3RNPrLpU4=
+-----END PRIVATE KEY-----'''
+PKCS8_ENCRYPTED_PRIVATE_KEY = '''-----BEGIN ENCRYPTED PRIVATE KEY-----
+MIIFHzBJBgkqhkiG9w0BBQ0wPDAbBgkqhkiG9w0BBQwwDgQIC4E/DX+33rACAggA
+MB0GCWCGSAFlAwQBAgQQbeAsQdsEKoztekP5JXmHFASCBNAmNAMGSnycmN4sYleT
+NS9r/ph9v58dv0/hzbE6TCt/i6nmA/D8mtuYB8gm30E/DOuN/dnL3z2gpyvr478P
+FjoRnueuwMdLcfEpzEXotJdc7vmUsSjTFq99oh84JHdCfWSRtxkDu64dwp3GPC9+
+f1qqg6o4/bPkjni+bCMgq9vgr4K+vuaKzaJqUTEQFuT3CirDGoWGpfRDtDoBmlg8
+8esEXoA6RD2DNv6fQrOu9Q4Fc0YkzcoIfY6EJxu+f75LF/NUVpmeJ8QDjj6VFVuX
+35ChPYolhBSC/MHBHAVVrn17FAdpLkiz7hIR7KBIg2nuu8oUnPMzDff/CeehYzNb
+OH12P9zaHZa3DZHuu27oI6yUdgs8HYNLtBzXH/DbyAeW9alg1Ofber5DO62ieL3E
+LqBd4R7qqDSTQmiA6B8LkVIrFrIOqn+nWoM9gHhIrTI409A/oTbpen87sZ4MIQk4
+Vjw/A/D5OYhnjOEVgMXrNpKzFfRJPdKh8LYjAaytsLKZk/NOWKpBOcIPhBG/agmx
+CX2NE2tpwNo+uWSOG6qTqc8xiQFDsQmbz9YEuux13J3Hg5gVMOJQNMvYpxgFD156
+Z82QBMdrY1tRIA91kW97UDj6OEAyz8HnmL+rCiRLGJXKUnZsSET+VHs9+uhBggX8
+GxliP35pYlmdejqGWHjiYlGF2+WKrd5axx/m1DcfZdXSaF1IdLKafnNXzUZbOnOM
+7RbKHDhBKr/vkBV1SGYgDLNn4hflFzhdI65AKxO2KankzaWxF09/0kRZlmxm+tZX
+8r0fHe9IO1KQR/52Kfg1vAQdt2KiyAziw5+tcqQT28knSDboNKpD2Du8BAoH9xG7
+0Ca57oBHh/VGzM/niJBjI4EMOPZKuRJsxZF7wOOO6NTh/XFf3LpzsR1y3qoXN4cR
+n+/jLUO/3kSGsqso6DT9C0o1pTrnORaJb4aF05jljFx9LYiQUOoLujp8cVW7XxQB
+pTgJEFxTN5YA//cwYu3GOJ1AggSeF/WkHCDfCTpTfnO/WTZ0oc+nNyC1lBVfcZ67
+GCH8COsfmhusrYiJUN6vYZIr4MfylVg53PUKYbLKYad9bIIaYYuu3MP4CtKDWHvk
+8q+GzpjVUCPwjjsea56RMav+xDPvmgIayDptae26Fv+mRPcwqORYMFNtVRG6DUXo
++lrWlaDlkfyfZlQ6sK5c1cJNI8pSPocP/c9TBhP+xFROiWxvMOxhM7DmDl8rhAxU
+ttZSukCg7n38AFsUqg5eLLq9sT+P6VmX8d3YflPBIkvNgK7nKUTwgrpbuADo07b0
+sVlAY/9SmtHvOCibxphvPYUOhwWo97PzzAsdVGz/xRvH8mzI/Iftbc1U2C2La8FJ
+xjaAFwWK/CjQSwnCB8raWo9FUavV6xdb2K0G4VBVDvZO9EJBzX0m6EqQx3XMZf1s
+crP0Dp9Ee66vVOlj+XnyyTkUADSYHr8/42Aohv96fJEMjy5gbBl4QQm2QKzAkq9n
+lrHvQpCxPixUUAEI0ZL1Y74hcMecnfbpGibrUvSp+cyDCOG92KKxLXEgVYCbXHZu
+bOlOanZF3vC6I9dUC2d8I5B87b2K+y57OkWpmS3zxCEpsBqQmn8Te50DnlkPJPBj
+GLqbpJyX2r3p/Rmo6mLY71SqpA==
+-----END ENCRYPTED PRIVATE KEY-----'''
+
 
 @pytest.mark.django_db
 def test_default_cred_types():
@@ -89,6 +148,10 @@ def test_credential_creation(organization_factory):
     [EXAMPLE_PRIVATE_KEY, 'super-secret', False],  # unencrypted key, unlock pass
     [EXAMPLE_ENCRYPTED_PRIVATE_KEY, 'super-secret', True],  # encrypted key, unlock pass
     [EXAMPLE_ENCRYPTED_PRIVATE_KEY, None, False],  # encrypted key, no unlock pass
+    [PKCS8_ENCRYPTED_PRIVATE_KEY, 'passme', True],  # encrypted PKCS8 key, unlock pass
+    [PKCS8_ENCRYPTED_PRIVATE_KEY, None, False],  # encrypted PKCS8 key, no unlock pass
+    [PKCS8_PRIVATE_KEY, None, True],  # unencrypted PKCS8 key, no unlock pass
+    [PKCS8_PRIVATE_KEY, 'passme', False],  # unencrypted PKCS8 key, unlock pass
     [None, None, True],  # no key, no unlock pass
     [None, 'super-secret', False],  # no key, unlock pass
     ['INVALID-KEY-DATA', None, False],  # invalid key data

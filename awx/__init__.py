@@ -26,6 +26,7 @@ from django.utils.encoding import force_bytes
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.backends.base import schema
 
+
 class FipsBaseDatabaseSchemaEditor(BaseDatabaseSchemaEditor):
 
     @classmethod
@@ -42,9 +43,8 @@ class FipsBaseDatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             h.update(force_bytes(arg))
         return h.hexdigest()[:8]
 
+
 schema.BaseDatabaseSchemaEditor = FipsBaseDatabaseSchemaEditor
-
-
 
 
 def find_commands(management_dir):

@@ -76,7 +76,7 @@ def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
         if pem_obj_type.endswith('PRIVATE KEY'):
             key_count += 1
             pem_obj_info['type'] = 'PRIVATE KEY'
-            key_type = pem_obj_type.replace('PRIVATE KEY', '').strip()
+            key_type = pem_obj_type.replace('ENCRYPTED PRIVATE KEY', '').replace('PRIVATE KEY', '').strip()
             try:
                 pem_obj_info['key_type'] = private_key_types[key_type]
             except KeyError:
@@ -118,6 +118,8 @@ def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
             # length field, followed by the ciphername -- if ciphername is anything
             # other than 'none' the key is encrypted.
             pem_obj_info['key_enc'] = not bool(pem_obj_info['bin'].startswith('openssh-key-v1\x00\x00\x00\x00\x04none'))
+        elif match.group('type') == 'ENCRYPTED PRIVATE KEY':
+            pem_obj_info['key_enc'] = True
         elif pem_obj_info.get('key_type', ''):
             pem_obj_info['key_enc'] = bool('ENCRYPTED' in pem_obj_info['data'])
 
