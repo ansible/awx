@@ -6,8 +6,8 @@
 
 import promptInventoryController from './prompt-inventory.controller';
 
-export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$compile', 'InventoryList',
-    (templateUrl, qs, GetBasePath, GenerateList, $compile, InventoryList) => {
+export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$compile', 'InventoryList', 'i18n',
+    (templateUrl, qs, GetBasePath, GenerateList, $compile, InventoryList, i18n) => {
     return {
         scope: {
             promptData: '=',
@@ -46,11 +46,18 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
                     let invList = _.cloneDeep(InventoryList);
                     invList.disableRow = "{{ readOnlyPrompts }}";
                     invList.disableRowValue = "readOnlyPrompts";
-                    let html = GenerateList.build({
+
+                    const listConfig = {
                         list: invList,
                         input_type: 'radio',
-                        mode: 'lookup'
-                    });
+                        mode: 'lookup',
+                    };
+
+                    if (scope.promptData.templateType === "workflow_job_template") {
+                        listConfig.lookupMessage = i18n._("This inventory is applied to all job templates nodes that prompt for an inventory.");
+                    }
+
+                    let html = GenerateList.build(listConfig);
 
                     scope.list = invList;
 

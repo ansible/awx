@@ -806,13 +806,19 @@ function($injector, $stateExtender, $log, i18n) {
                     views: {
                         'modal': {
                             templateProvider: function(ListDefinition, generateList) {
-                                let list_html = generateList.build({
+                                const listConfig = {
                                     mode: 'lookup',
                                     list: ListDefinition,
                                     input_type: 'radio'
-                                });
-                                return `<lookup-modal>${list_html}</lookup-modal>`;
+                                };
 
+                                if (field.lookupMessage) {
+                                    listConfig.lookupMessage = field.lookupMessage;
+                                }
+
+                                let list_html = generateList.build(listConfig);
+
+                                return `<lookup-modal>${list_html}</lookup-modal>`;
                             }
                         }
                     },

@@ -71,6 +71,7 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
                 inventory: {
                     label: i18n._('Inventory'),
                     type: 'lookup',
+                    lookupMessage: i18n._("This inventory is applied to all job templates nodes that prompt for an inventory."),
                     basePath: 'inventory',
                     list: 'InventoryList',
                     sourceModel: 'inventory',

@@ -494,6 +494,10 @@ export default ['$compile', 'Attr', 'Icon',
                     html += `></paginate></div>`;
                 }
 
+                if (options.mode === 'lookup' && options.lookupMessage) {
+                    html = `<div class="Prompt-bodyQuery">${options.lookupMessage}</div>` + html;
+                }
+
                 return html;
             },
 
