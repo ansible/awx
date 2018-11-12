@@ -307,6 +307,10 @@ export default ['$scope', 'TemplatesService',
                 $scope.cancelNodeForm();
             }
 
+            if ($scope.linkConfig) {
+                $scope.cancelLinkForm();
+            }
+
             $scope.graphState.arrayOfNodesForChart.push({
                 index: $scope.graphState.arrayOfNodesForChart.length,
                 id: workflowMakerNodeIdCounter,
@@ -341,6 +345,10 @@ export default ['$scope', 'TemplatesService',
         $scope.startAddNodeWithChild = function (link) {
             if ($scope.nodeConfig) {
                 $scope.cancelNodeForm();
+            }
+
+            if ($scope.linkConfig) {
+                $scope.cancelLinkForm();
             }
 
             $scope.graphState.arrayOfNodesForChart.push({

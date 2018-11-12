@@ -832,7 +832,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                                 .attr("height", tipHeight+20)
                                                 .attr("class", "WorkflowChart-tooltip")
                                                 .html(function(){
-                                                    return "<div class='WorkflowChart-tooltipContents'><span>" + $filter('sanitize')(resourceName) + "</span></div><div class='WorkflowChart-tooltipArrow'></div>";
+                                                    return "<div class='WorkflowChart-tooltipContents'><span>" + $filter('sanitize')(resourceName) + "</span></div><div class='WorkflowChart-tooltipArrow--down'></div>";
                                                 });
                                         }
 
