@@ -1,9 +1,9 @@
 export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
     'jobLabels', 'workflowNodes', '$scope', 'ParseTypeChange',
-    'ParseVariableString', 'count', '$state', 'i18n', 'WorkflowChartService',
+    'ParseVariableString', 'count', '$state', 'i18n', 'WorkflowChartService', '$filter',
     'moment', function(workflowData, workflowResultsService,
     workflowDataOptions, jobLabels, workflowNodes, $scope, ParseTypeChange,
-    ParseVariableString, count, $state, i18n, WorkflowChartService,
+    ParseVariableString, count, $state, i18n, WorkflowChartService, $filter,
     moment) {
         var runTimeElapsedTimer = null;
         let nodeIdToChartNodeIdMapping = {};
