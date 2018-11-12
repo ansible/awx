@@ -7,23 +7,23 @@
     </div>
     <div class="WorkflowMaker-formLists">
         <div id="workflow-jobs-list" ng-show="activeTab === 'jobs'">
-            <div ng-hide="templates.length === 0 && (searchTags | isEmpty)">
-                <smart-search django-model="templates" base-path="unified_job_templates" iterator="template" dataset="template_dataset" list="templateList" collection="templates" default-params="template_default_params" query-set="template_queryset" search-bar-full-width="true" search-tags="searchTags">
+            <div ng-hide="wf_maker_templates.length === 0 && (searchTags | isEmpty)">
+                <smart-search django-model="unified_job_templates" base-path="unified_job_templates" iterator="wf_maker_template" dataset="wf_maker_template_dataset" list="templateList" collection="wf_maker_templates" default-params="wf_maker_template_default_params" query-set="wf_maker_template_queryset" search-bar-full-width="true" search-tags="searchTags">
                 </smart-search>
             </div>
 
-            <div class="row" ng-show="templates.length === 0 && !(searchTags | isEmpty)">
+            <div class="row" ng-show="wf_maker_templates.length === 0 && !(searchTags | isEmpty)">
                 <div class="col-lg-12 List-searchNoResults" translate>No records matched your search.</div>
             </div>
-            <div class="List-noItems" ng-show="templates.length === 0 && (searchTags | isEmpty)">PLEASE ADD ITEMS TO THIS LIST</div>
+            <div class="List-noItems" ng-show="wf_maker_templates.length === 0 && (searchTags | isEmpty)">PLEASE ADD ITEMS TO THIS LIST</div>
             <div class="list-table-container" ng-show="wf_maker_templates.length > 0">
                 <table id="templates_table" class="List-table" is-extended="false">
                     <thead>
                         <tr class="List-tableHeaderRow">
                             <th class="List-tableHeader select-column List-staticColumn--smallStatus" translate=""></th>
-                            <th base-path="unified_job_templates" collection="templates" dataset="template_dataset" column-sort="" column-field="name" column-iterator="template" column-no-sort="undefined" column-label="Name" column-custom-class="" query-set="template_queryset">
+                            <th class="col-md-8" base-path="unified_job_templates" collection="templates" dataset="template_dataset" column-sort="" column-field="name" column-iterator="template" column-no-sort="undefined" column-label="Name" column-custom-class="" query-set="template_queryset">
                             </th>
-                            <th class="List-tableHeader--info" base-path="unified_job_templates" collection="wf_maker_templates" dataset="wf_maker_template_dataset" column-sort="" column-field="info" column-iterator="wf_maker_template" column-no-sort="true" column-label="" column-custom-class="" query-set="wf_maker_template_queryset">
+                            <th class="List-tableHeader--info col-md-3" base-path="unified_job_templates" collection="wf_maker_templates" dataset="wf_maker_template_dataset" column-sort="" column-field="info" column-iterator="wf_maker_template" column-no-sort="true" column-label="" column-custom-class="" query-set="wf_maker_template_queryset">
                             </th>
                         </tr>
                     </thead>
