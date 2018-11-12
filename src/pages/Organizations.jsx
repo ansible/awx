@@ -9,6 +9,7 @@ import {
 
 import OrganizationCard from '../components/OrganizationCard';
 import api from '../api';
+import { API_ORGANIZATIONS } from '../endpoints';
 
 class Organizations extends Component {
   constructor (props) {
@@ -17,9 +18,9 @@ class Organizations extends Component {
     this.state = { organizations: [] };
   }
 
-  componentDidMount () {
-    api.getOrganizations()
-      .then(({ data }) => this.setState({ organizations: data.results }));
+  async componentDidMount () {
+    const { data } = await api.BaseGet(API_ORGANIZATIONS);
+    this.setState({ organizations: data.results });
   }
 
   render () {

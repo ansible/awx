@@ -3,6 +3,7 @@ import { render } from 'react-dom';
 
 import App from './App';
 import api from './api';
+import { API_ROOT } from './endpoints';
 
 import '@patternfly/react-core/dist/styles/base.css';
 import '@patternfly/patternfly-next/patternfly.css';
@@ -11,13 +12,9 @@ import './app.scss';
 
 const el = document.getElementById('app');
 
-const main = () => {
-  api.getRoot()
-    .then(({ data }) => {
-      const { custom_logo, custom_login_info } = data;
-
-      render(<App logo={custom_logo} loginInfo={custom_login_info} />, el);
-    });
+const main = async () => {
+    const { custom_logo, custom_login_info } = await api.BaseGet(API_ROOT);
+    render(<App logo={custom_logo} loginInfo={custom_login_info} />, el);
 };
 
 main();
