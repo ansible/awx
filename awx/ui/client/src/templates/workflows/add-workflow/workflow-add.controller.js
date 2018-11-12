@@ -154,8 +154,7 @@ export default [
                                  $q.all(defers)
                                      .then(function() {
                                          // If we follow the same pattern as job templates then the survey logic will go here
-
-                                         $state.go('templates.editWorkflowJobTemplate', {workflow_job_template_id: data.data.id}, {reload: true});
+                                         $state.go('templates.editWorkflowJobTemplate.workflowMaker', { workflow_job_template_id: data.data.id }, { reload: true });
                                      });
                              });
                          });
