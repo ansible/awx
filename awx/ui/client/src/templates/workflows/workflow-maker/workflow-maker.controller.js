@@ -571,6 +571,8 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
         /* EDIT NODE FUNCTIONS */
 
         $scope.startEditNode = function (nodeToEdit) {
+            $scope.editNodeHelpMessage = null;
+
             if (!$scope.nodeBeingEdited || ($scope.nodeBeingEdited && $scope.nodeBeingEdited.id !== nodeToEdit.id)) {
                 if ($scope.placeholderNode || $scope.nodeBeingEdited) {
                     $scope.cancelNodeForm();
@@ -989,6 +991,42 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
             }
         };
 
+        function getEditNodeHelpMessage(workflowTemplate, selectedTemplate) {
+            if (selectedTemplate.type === "workflow_job_template") {
+                if (workflowTemplate.inventory) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
+                    }
+                }
+
+                if (workflowTemplate.ask_inventory_on_launch) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
+                    }
+                }
+            }
+
+            if (selectedTemplate.type === "job_template") {
+                if (workflowTemplate.inventory) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
+                    }
+
+                    return $scope.strings.get('workflow_maker.INVENTORY_WILL_NOT_OVERRIDE');
+                }
+
+                if (workflowTemplate.ask_inventory_on_launch) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
+                    }
+
+                    return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_NOT_OVERRIDE');
+                }
+            }
+
+            return null;
+        }
+
         $scope.templateManuallySelected = function (selectedTemplate) {
 
             if (promptWatcher) {
@@ -1004,6 +1042,8 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
             }
 
             $scope.promptData = null;
+            $scope.editNodeHelpMessage = getEditNodeHelpMessage($scope.treeData.workflow_job_template_obj, selectedTemplate);
+
             if (selectedTemplate.type === "job_template" || selectedTemplate.type === "workflow_job_template") {
                 let jobTemplate = selectedTemplate.type === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();
 

@@ -117,9 +117,12 @@ function TemplatesStrings (BaseString) {
         DELETED: t.s('DELETED'),
         START: t.s('START'),
         DETAILS: t.s('DETAILS'),
-        TITLE: t.s('WORKFLOW VISUALIZER')
+        TITLE: t.s('WORKFLOW VISUALIZER'),
+        INVENTORY_WILL_OVERRIDE: t.s('The inventory of this node will be overridden by the parent workflow inventory.'),
+        INVENTORY_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden by the parent workflow inventory.'),
+        INVENTORY_PROMPT_WILL_OVERRIDE: t.s('The inventory of this node will be overridden if a parent workflow inventory is provided at launch.'),
+        INVENTORY_PROMPT_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden if a parent workflow inventory is provided at launch.'),
     }
-
 }
 
 TemplatesStrings.$inject = ['BaseStringService'];
