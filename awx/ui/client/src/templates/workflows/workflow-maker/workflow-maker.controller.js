@@ -6,10 +6,10 @@
 
 export default ['$scope', 'WorkflowService', 'TemplatesService',
     'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel', 'WorkflowJobTemplateModel',
-    'Empty', 'PromptService', 'Rest', 'TemplatesStrings', '$timeout',
+    'Empty', 'PromptService', 'Rest', 'TemplatesStrings', '$timeout', '$state',
     function ($scope, WorkflowService, TemplatesService,
         ProcessErrors, CreateSelect2, $q, JobTemplate, WorkflowJobTemplate,
-        Empty, PromptService, Rest, TemplatesStrings, $timeout) {
+        Empty, PromptService, Rest, TemplatesStrings, $timeout, $state) {
 
         let promptWatcher, surveyQuestionWatcher, credentialsWatcher;
 
@@ -360,6 +360,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
             // Revert the data to the master which was created when the dialog was opened
             $scope.treeData.data = angular.copy($scope.treeDataMaster);
             $scope.closeDialog();
+            $state.transitionTo('templates');
         };
 
         $scope.saveWorkflowMaker = function () {
@@ -409,6 +410,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                             return $q.all(associatePromises.concat(credentialPromises))
                                 .then(function () {
                                     $scope.closeDialog();
+                                    $state.transitionTo('templates');
                                 });
                         }).catch(({
                             data,
@@ -432,6 +434,7 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
                 $q.all(deletePromises)
                     .then(function () {
                         $scope.closeDialog();
+                        $state.transitionTo('templates');
                     });
             }
         };

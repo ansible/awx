@@ -101,6 +101,14 @@ function ListTemplatesController(
 
     vm.isPortalMode = $state.includes('portalMode');
 
+    vm.openWorkflowVisualizer = template => {
+        const name = 'templates.editWorkflowJobTemplate.workflowMaker';
+        const params = { workflow_job_template_id: template.id };
+        const options = { reload: false };
+
+        $state.go(name, params, options);
+    };
+
     vm.deleteTemplate = template => {
         if (!template) {
             Alert(strings.get('error.DELETE'), strings.get('alert.MISSING_PARAMETER'));
