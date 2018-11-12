@@ -218,14 +218,8 @@ class WorkflowDAG(SimpleDAG):
                         obj.do_not_run = True
                         nodes_marked_do_not_run.append(n)
 
-            if obj.do_not_run is True:
-                nodes.extend(self.get_dependencies(obj, 'success_nodes') +
-                             self.get_dependencies(obj, 'failure_nodes') +
-                             self.get_dependencies(obj, 'always_nodes'))
-            elif obj.job:
-                if obj.job.status in ['failed', 'error']:
-                    nodes.extend(self.get_dependencies(obj, 'success_nodes'))
-                elif obj.job.status == 'successful':
-                    nodes.extend(self.get_dependencies(obj, 'failure_nodes'))
+            nodes.extend(self.get_dependencies(obj, 'success_nodes') +
+                         self.get_dependencies(obj, 'failure_nodes') +
+                         self.get_dependencies(obj, 'always_nodes'))
         return [n['node_object'] for n in nodes_marked_do_not_run]
 
