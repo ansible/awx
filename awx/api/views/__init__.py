@@ -8,7 +8,6 @@ import dateutil
 import time
 import socket
 import sys
-import logging
 import requests
 from base64 import b64encode
 from collections import OrderedDict, Iterable
@@ -21,11 +20,9 @@ from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.db.models import Q
 from django.db import IntegrityError, transaction, connection
 from django.shortcuts import get_object_or_404
-from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
@@ -63,12 +60,11 @@ from wsgiref.util import FileWrapper
 # AWX
 from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
-from awx.main.ha import is_ha_environment
 from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
-from awx.api.versioning import reverse, get_request_version, drf_reverse
-from awx.conf.license import get_license, feature_enabled, feature_exists, LicenseForbids
+from awx.api.versioning import reverse, get_request_version
+from awx.conf.license import feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.main.utils import (
@@ -137,8 +133,15 @@ from awx.api.views.inventory import ( # noqa
     InventoryJobTemplateList,
     InventoryCopy,
 )
-
-logger = logging.getLogger('awx.api.views')
+from awx.api.views.root import ( # noqa
+    ApiRootView,
+    ApiOAuthAuthorizationRootView,
+    ApiVersionRootView,
+    ApiV1RootView,
+    ApiV2RootView,
+    ApiV1PingView,
+    ApiV1ConfigView,
+)
 
 
 def api_exception_handler(exc, context):
@@ -152,244 +155,6 @@ def api_exception_handler(exc, context):
     if isinstance(context['view'], UnifiedJobStdout):
         context['view'].renderer_classes = [BrowsableAPIRenderer, renderers.JSONRenderer]
     return exception_handler(exc, context)
-
-
-class ApiRootView(APIView):
-
-    permission_classes = (AllowAny,)
-    view_name = _('REST API')
-    versioning_class = None
-    swagger_topic = 'Versioning'
-
-    @method_decorator(ensure_csrf_cookie)
-    def get(self, request, format=None):
-        ''' List supported API versions '''
-
-        v1 = reverse('api:api_v1_root_view', kwargs={'version': 'v1'})
-        v2 = reverse('api:api_v2_root_view', kwargs={'version': 'v2'})
-        data = OrderedDict()
-        data['description'] = _('AWX REST API')
-        data['current_version'] = v2
-        data['available_versions'] = dict(v1 = v1, v2 = v2)
-        data['oauth2'] = drf_reverse('api:oauth_authorization_root_view')
-        if feature_enabled('rebranding'):
-            data['custom_logo'] = settings.CUSTOM_LOGO
-            data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
-        return Response(data)
-
-
-class ApiOAuthAuthorizationRootView(APIView):
-
-    permission_classes = (AllowAny,)
-    view_name = _("API OAuth 2 Authorization Root")
-    versioning_class = None
-    swagger_topic = 'Authentication'
-
-    def get(self, request, format=None):
-        data = OrderedDict()
-        data['authorize'] = drf_reverse('api:authorize')
-        data['token'] = drf_reverse('api:token')
-        data['revoke_token'] = drf_reverse('api:revoke-token')
-        return Response(data)
-
-
-class ApiVersionRootView(APIView):
-
-    permission_classes = (AllowAny,)
-    swagger_topic = 'Versioning'
-
-    def get(self, request, format=None):
-        ''' List top level resources '''
-        data = OrderedDict()
-        data['ping'] = reverse('api:api_v1_ping_view', request=request)
-        data['instances'] = reverse('api:instance_list', request=request)
-        data['instance_groups'] = reverse('api:instance_group_list', request=request)
-        data['config'] = reverse('api:api_v1_config_view', request=request)
-        data['settings'] = reverse('api:setting_category_list', request=request)
-        data['me'] = reverse('api:user_me_list', request=request)
-        data['dashboard'] = reverse('api:dashboard_view', request=request)
-        data['organizations'] = reverse('api:organization_list', request=request)
-        data['users'] = reverse('api:user_list', request=request)
-        data['projects'] = reverse('api:project_list', request=request)
-        data['project_updates'] = reverse('api:project_update_list', request=request)
-        data['teams'] = reverse('api:team_list', request=request)
-        data['credentials'] = reverse('api:credential_list', request=request)
-        if get_request_version(request) > 1:
-            data['credential_types'] = reverse('api:credential_type_list', request=request)
-            data['applications'] = reverse('api:o_auth2_application_list', request=request)
-            data['tokens'] = reverse('api:o_auth2_token_list', request=request)
-        data['inventory'] = reverse('api:inventory_list', request=request)
-        data['inventory_scripts'] = reverse('api:inventory_script_list', request=request)
-        data['inventory_sources'] = reverse('api:inventory_source_list', request=request)
-        data['inventory_updates'] = reverse('api:inventory_update_list', request=request)
-        data['groups'] = reverse('api:group_list', request=request)
-        data['hosts'] = reverse('api:host_list', request=request)
-        data['job_templates'] = reverse('api:job_template_list', request=request)
-        data['jobs'] = reverse('api:job_list', request=request)
-        data['job_events'] = reverse('api:job_event_list', request=request)
-        data['ad_hoc_commands'] = reverse('api:ad_hoc_command_list', request=request)
-        data['system_job_templates'] = reverse('api:system_job_template_list', request=request)
-        data['system_jobs'] = reverse('api:system_job_list', request=request)
-        data['schedules'] = reverse('api:schedule_list', request=request)
-        data['roles'] = reverse('api:role_list', request=request)
-        data['notification_templates'] = reverse('api:notification_template_list', request=request)
-        data['notifications'] = reverse('api:notification_list', request=request)
-        data['labels'] = reverse('api:label_list', request=request)
-        data['unified_job_templates'] = reverse('api:unified_job_template_list', request=request)
-        data['unified_jobs'] = reverse('api:unified_job_list', request=request)
-        data['activity_stream'] = reverse('api:activity_stream_list', request=request)
-        data['workflow_job_templates'] = reverse('api:workflow_job_template_list', request=request)
-        data['workflow_jobs'] = reverse('api:workflow_job_list', request=request)
-        data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list', request=request)
-        data['workflow_job_nodes'] = reverse('api:workflow_job_node_list', request=request)
-        return Response(data)
-
-
-class ApiV1RootView(ApiVersionRootView):
-    view_name = _('Version 1')
-
-
-class ApiV2RootView(ApiVersionRootView):
-    view_name = _('Version 2')
-
-
-class ApiV1PingView(APIView):
-    """A simple view that reports very basic information about this
-    instance, which is acceptable to be public information.
-    """
-    permission_classes = (AllowAny,)
-    authentication_classes = ()
-    view_name = _('Ping')
-    swagger_topic = 'System Configuration'
-
-    def get(self, request, format=None):
-        """Return some basic information about this instance
-
-        Everything returned here should be considered public / insecure, as
-        this requires no auth and is intended for use by the installer process.
-        """
-        response = {
-            'ha': is_ha_environment(),
-            'version': get_awx_version(),
-            'active_node': settings.CLUSTER_HOST_ID,
-        }
-
-        response['instances'] = []
-        for instance in Instance.objects.all():
-            response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified,
-                                              capacity=instance.capacity, version=instance.version))
-            response['instances'].sort()
-        response['instance_groups'] = []
-        for instance_group in InstanceGroup.objects.all():
-            response['instance_groups'].append(dict(name=instance_group.name,
-                                                    capacity=instance_group.capacity,
-                                                    instances=[x.hostname for x in instance_group.instances.all()]))
-        return Response(response)
-
-
-class ApiV1ConfigView(APIView):
-
-    permission_classes = (IsAuthenticated,)
-    view_name = _('Configuration')
-    swagger_topic = 'System Configuration'
-
-    def check_permissions(self, request):
-        super(ApiV1ConfigView, self).check_permissions(request)
-        if not request.user.is_superuser and request.method.lower() not in {'options', 'head', 'get'}:
-            self.permission_denied(request)  # Raises PermissionDenied exception.
-
-    def get(self, request, format=None):
-        '''Return various sitewide configuration settings'''
-
-        if request.user.is_superuser or request.user.is_system_auditor:
-            license_data = get_license(show_key=True)
-        else:
-            license_data = get_license(show_key=False)
-        if not license_data.get('valid_key', False):
-            license_data = {}
-        if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
-            # FIXME: Make the final setting value dependent on the feature?
-            license_data['features']['activity_streams'] &= settings.ACTIVITY_STREAM_ENABLED
-
-        pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
-
-        data = dict(
-            time_zone=settings.TIME_ZONE,
-            license_info=license_data,
-            version=get_awx_version(),
-            ansible_version=get_ansible_version(),
-            eula=render_to_string("eula.md") if license_data.get('license_type', 'UNLICENSED') != 'open' else '',
-            analytics_status=pendo_state
-        )
-
-        # If LDAP is enabled, user_ldap_fields will return a list of field
-        # names that are managed by LDAP and should be read-only for users with
-        # a non-empty ldap_dn attribute.
-        if getattr(settings, 'AUTH_LDAP_SERVER_URI', None) and feature_enabled('ldap'):
-            user_ldap_fields = ['username', 'password']
-            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
-            user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
-            data['user_ldap_fields'] = user_ldap_fields
-
-        if request.user.is_superuser \
-                or request.user.is_system_auditor \
-                or Organization.accessible_objects(request.user, 'admin_role').exists() \
-                or Organization.accessible_objects(request.user, 'auditor_role').exists():
-            data.update(dict(
-                project_base_dir = settings.PROJECTS_ROOT,
-                project_local_paths = Project.get_local_path_choices(),
-                custom_virtualenvs = get_custom_venv_choices()
-            ))
-        elif JobTemplate.accessible_objects(request.user, 'admin_role').exists():
-            data['custom_virtualenvs'] = get_custom_venv_choices()
-
-        return Response(data)
-
-    def post(self, request):
-        if not isinstance(request.data, dict):
-            return Response({"error": _("Invalid license data")}, status=status.HTTP_400_BAD_REQUEST)
-        if "eula_accepted" not in request.data:
-            return Response({"error": _("Missing 'eula_accepted' property")}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            eula_accepted = to_python_boolean(request.data["eula_accepted"])
-        except ValueError:
-            return Response({"error": _("'eula_accepted' value is invalid")}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not eula_accepted:
-            return Response({"error": _("'eula_accepted' must be True")}, status=status.HTTP_400_BAD_REQUEST)
-        request.data.pop("eula_accepted")
-        try:
-            data_actual = json.dumps(request.data)
-        except Exception:
-            logger.info(smart_text(u"Invalid JSON submitted for license."),
-                        extra=dict(actor=request.user.username))
-            return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            from awx.main.utils.common import get_licenser
-            license_data = json.loads(data_actual)
-            license_data_validated = get_licenser(**license_data).validate()
-        except Exception:
-            logger.warning(smart_text(u"Invalid license submitted."),
-                           extra=dict(actor=request.user.username))
-            return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
-
-        # If the license is valid, write it to the database.
-        if license_data_validated['valid_key']:
-            settings.LICENSE = license_data
-            settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
-            return Response(license_data_validated)
-
-        logger.warning(smart_text(u"Invalid license submitted."),
-                       extra=dict(actor=request.user.username))
-        return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request):
-        try:
-            settings.LICENSE = {}
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception:
-            # FIX: Log
-            return Response({"error": _("Failed to remove license (%s)") % has_error}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DashboardView(APIView):
