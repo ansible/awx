@@ -104,7 +104,7 @@ function ListTemplatesController(
     vm.openWorkflowVisualizer = template => {
         const name = 'templates.editWorkflowJobTemplate.workflowMaker';
         const params = { workflow_job_template_id: template.id };
-        const options = { reload: false };
+        const options = { reload: true };
 
         $state.go(name, params, options);
     };
