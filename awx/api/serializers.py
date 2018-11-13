@@ -3046,7 +3046,7 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
         prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
         if project is None:
-            raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
+            raise serializers.ValidationError({'project': _("Job Templates must have a project assigned.")})
         elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
             raise serializers.ValidationError({'inventory': prompting_error_message})
 
