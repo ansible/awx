@@ -81,7 +81,7 @@ class App extends React.Component {
   }
 
   onDevLogout = async () => {
-    await api.BaseGet(API_LOGOUT);
+    await api.get(API_LOGOUT);
     this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
   }
 

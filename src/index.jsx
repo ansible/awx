@@ -13,7 +13,7 @@ import './app.scss';
 const el = document.getElementById('app');
 
 const main = async () => {
-    const { custom_logo, custom_login_info } = await api.BaseGet(API_ROOT);
+    const { custom_logo, custom_login_info } = await api.get(API_ROOT);
     render(<App logo={custom_logo} loginInfo={custom_login_info} />, el);
 };
 

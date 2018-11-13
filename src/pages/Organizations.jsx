@@ -19,7 +19,7 @@ class Organizations extends Component {
   }
 
   async componentDidMount () {
-    const { data } = await api.BaseGet(API_ORGANIZATIONS);
+    const { data } = await api.get(API_ORGANIZATIONS);
     this.setState({ organizations: data.results });
   }
 
