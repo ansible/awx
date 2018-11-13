@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import { API_ORGANIZATIONS } from '../../src/endpoints';
 import Organizations from '../../src/pages/Organizations';
 
 describe('<Organizations />', () => {
@@ -51,4 +52,9 @@ describe('<Organizations />', () => {
     expect(galleryItems.length).toBe(3);
     expect(orgCards.length).toBe(3);
   });
+
+  test('API Organization endpoint is valid', () => {
+    expect(API_ORGANIZATIONS).toBeDefined();
+  });
+
 });

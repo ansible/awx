@@ -40,15 +40,12 @@ class APIClient {
     const data = `username=${un}&password=${pw}&next=${next}`;
     const headers = { 'Content-Type': LOGIN_CONTENT_TYPE };
 
-    try {
-      await this.http.get(constant.API_LOGIN, { headers });
-      await this.http.post(constant.API_LOGIN, data, { headers });
-    } catch (err) {
-      alert(`There was a problem logging in: ${err}`);
-    }
+    await this.http.get(constant.API_LOGIN, { headers });
+    await this.http.post(constant.API_LOGIN, data, { headers });
   }
 
   BaseGet = (endpoint) => this.http.get(endpoint);
+
 }
 
 export default new APIClient();
