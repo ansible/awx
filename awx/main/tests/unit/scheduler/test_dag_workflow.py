@@ -31,11 +31,13 @@ class WorkflowNodeUJT(WorkflowNodeDNR):
 def WorkflowNodeClass():
     return WorkflowNodeBase
 
+
 @pytest.fixture
 def wf_node_generator(mocker, WorkflowNodeClass):
     def fn(**kwargs):
         return WorkflowNodeClass(**kwargs)
     return fn
+
 
 @pytest.fixture
 def workflow_dag_1(wf_node_generator):
@@ -63,6 +65,7 @@ def workflow_dag_1(wf_node_generator):
     g.add_edge(nodes[1], nodes[3], "failure_nodes")
     g.add_edge(nodes[3], nodes[2], "failure_nodes")
     return (g, nodes)
+
 
 class TestWorkflowDAG():
     @pytest.fixture
@@ -137,6 +140,7 @@ class TestDNR():
         assert 1 == len(do_not_run_nodes)
         assert nodes[3] == do_not_run_nodes[0]
 
+
 class TestIsWorkflowDone():
     @pytest.fixture
     def WorkflowNodeClass(self):
@@ -163,9 +167,9 @@ class TestIsWorkflowDone():
                W2
         '''
         nodes[0].job = Job(status='successful')
-        do_not_run_nodes = g.mark_dnr_nodes()
+        g.mark_dnr_nodes()
         nodes[1].job = Job(status='successful')
-        do_not_run_nodes = g.mark_dnr_nodes()
+        g.mark_dnr_nodes()
         nodes[2].job = Job(status='waiting')
         return (g, nodes)
 
@@ -188,9 +192,9 @@ class TestIsWorkflowDone():
                F2
         '''
         nodes[0].job = Job(status='successful')
-        do_not_run_nodes = g.mark_dnr_nodes()
+        g.mark_dnr_nodes()
         nodes[1].job = Job(status='successful')
-        do_not_run_nodes = g.mark_dnr_nodes()
+        g.mark_dnr_nodes()
         nodes[2].job = Job(status='failure')
         return (g, nodes)
 
@@ -199,13 +203,13 @@ class TestIsWorkflowDone():
 
         is_done, is_failed = g.is_workflow_done()
 
-        assert False == is_done
-        assert False == is_failed
+        assert is_done is False
+        assert is_failed is False
 
     def test_is_workflow_done_failed(self, workflow_dag_failed):
         g = workflow_dag_failed[0]
 
         is_done, is_failed = g.is_workflow_done()
 
-        assert True == is_done
-        assert True == is_failed
+        assert is_done is True
+        assert is_failed is True
