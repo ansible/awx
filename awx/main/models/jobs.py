@@ -315,7 +315,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         if self.inventory is None and not self.ask_inventory_on_launch:
             validation_errors['inventory'] = [_("Job Template must provide 'inventory' or allow prompting for it."),]
         if self.project is None:
-            validation_errors['project'] = [_("Job types 'run' and 'check' must have assigned a project."),]
+            validation_errors['project'] = [_("Job Templates must have a project assigned."),]
         return validation_errors
 
     @property
