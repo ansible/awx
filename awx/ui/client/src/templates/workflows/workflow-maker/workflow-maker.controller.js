@@ -570,6 +570,9 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.selectNodeForLinking = (node) => {
+            if ($scope.nodeConfig) {
+                $scope.cancelNodeForm();
+            }
             if ($scope.linkConfig) {
                 // This is the second node selected
                 $scope.linkConfig.child = {
