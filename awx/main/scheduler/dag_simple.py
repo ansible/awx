@@ -5,7 +5,6 @@ class SimpleDAG(object):
     def __init__(self):
         self.nodes = []
         self.root_nodes = set([])
-        self.leaf_nodes = set([])
 
         r'''
         Track node_obj->node index
@@ -104,7 +103,6 @@ class SimpleDAG(object):
             '''
             node_index = len(self.nodes)
             self.root_nodes.add(node_index)
-            self.leaf_nodes.add(node_index)
             self.node_obj_to_node_index[obj] = node_index
             entry = dict(node_object=obj, metadata=metadata)
             self.nodes.append(entry)
@@ -132,13 +130,6 @@ class SimpleDAG(object):
 
         self.node_from_edges_by_label[label][from_obj_ord].append(to_obj_ord)
         self.node_to_edges_by_label[label][to_obj_ord].append(from_obj_ord)
-
-        '''
-        To node is no longer a leaf node
-        '''
-        for l in self.node_to_edges_by_label.keys():
-            if len(self.node_to_edges_by_label[l].get(to_obj_ord, [])) != 0:
-                self.leaf_nodes.discard(to_obj_ord)
 
     def find_ord(self, obj):
         return self.node_obj_to_node_index.get(obj, None)
@@ -174,9 +165,6 @@ class SimpleDAG(object):
             map(lambda l: nodes.extend(self._get_dependents_by_label(this_ord, l)),
                 self.node_to_edges_by_label.keys())
             return nodes
-
-    def get_leaf_nodes(self):
-        return [self.nodes[index] for index in self.leaf_nodes]
 
     def get_root_nodes(self):
         return [self.nodes[index] for index in self.root_nodes]
