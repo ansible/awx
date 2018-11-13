@@ -163,6 +163,7 @@ class TaskManager():
             dag = WorkflowDAG(workflow_job)
             status_changed = False
             if workflow_job.cancel_flag:
+                workflow_job.workflow_nodes.filter(do_not_run=False, job__isnull=True).update(do_not_run=True)
                 logger.debug('Canceling spawned jobs of %s due to cancel flag.', workflow_job.log_format)
                 cancel_finished = dag.cancel_node_jobs()
                 if cancel_finished:
@@ -172,11 +173,12 @@ class TaskManager():
                     workflow_job.save(update_fields=['status', 'start_args'])
                     status_changed = True
             else:
-                is_done, has_failed = dag.is_workflow_done()
                 workflow_nodes = dag.mark_dnr_nodes()
                 map(lambda n: n.save(update_fields=['do_not_run']), workflow_nodes)
+                is_done = dag.is_workflow_done()
                 if not is_done:
                     continue
+                has_failed = dag.has_workflow_failed()
                 logger.info('Marking %s as %s.', workflow_job.log_format, 'failed' if has_failed else 'successful')
                 result.append(workflow_job.id)
                 new_status = 'failed' if has_failed else 'successful'
