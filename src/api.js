@@ -45,7 +45,6 @@ class APIClient {
   }
 
   get = (endpoint) => this.http.get(endpoint);
-
 }
 
 export default new APIClient();

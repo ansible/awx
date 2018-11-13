@@ -15,17 +15,24 @@ class Organizations extends Component {
   constructor (props) {
     super(props);
 
-    this.state = { organizations: [] };
+    this.state = {
+      organizations: [],
+      error: false,
+    };
   }
 
   async componentDidMount () {
-    const { data } = await api.get(API_ORGANIZATIONS);
-    this.setState({ organizations: data.results });
+    try {
+      const { data } = await api.get(API_ORGANIZATIONS);
+      this.setState({ organizations: data.results });
+    } catch (err) {
+      this.setState({ error: err });
+    }
   }
 
   render () {
     const { light, medium } = PageSectionVariants;
-    const { organizations } = this.state;
+    const { organizations, error } = this.state;
 
     return (
       <Fragment>
@@ -39,6 +46,7 @@ class Organizations extends Component {
                 <OrganizationCard key={o.id} organization={o} />
               </GalleryItem>
             ))}
+            { error ? <div>error</div> : '' }
           </Gallery>
         </PageSection>
       </Fragment>
