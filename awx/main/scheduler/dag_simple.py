@@ -85,12 +85,14 @@ class SimpleDAG(object):
                 run_status(n['node_object']),
                 color
             )
-        for from_node, to_node, label in self.edges:
-            doc += "%s -> %s [ label=\"%s\" ];\n" % (
-                run_status(self.nodes[from_node]['node_object']),
-                run_status(self.nodes[to_node]['node_object']),
-                label,
-            )
+        for label, edges in self.node_from_edges_by_label.iteritems():
+            for from_node, to_nodes in edges.iteritems():
+                for to_node in to_nodes:
+                    doc += "%s -> %s [ label=\"%s\" ];\n" % (
+                        run_status(self.nodes[from_node]['node_object']),
+                        run_status(self.nodes[to_node]['node_object']),
+                        label,
+                    )
         doc += "}\n"
         gv_file = open('/awx_devel/graph.gv', 'w')
         gv_file.write(doc)
