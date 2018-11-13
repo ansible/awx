@@ -80,7 +80,7 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                 ngShow: "scm_type.value == 'manual' " ,
                 awPopOver: '<p>' + i18n._('Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
                     'Together the base path and selected playbook directory provide the full path used to locate playbooks.') + '</p>' +
-                    '<p>' + i18n.sprintf(i18n._('Change %s under "Configure {{BRAND_NAME}}" to change this location.'), 'PROJECTS_ROOT') + '</p>',
+                    '<p>' + i18n.sprintf(i18n._('Change %s when deploying {{BRAND_NAME}} to change this location.'), 'PROJECTS_ROOT') + '</p>',
                 dataTitle: i18n._('Project Base Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
