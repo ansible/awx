@@ -302,13 +302,20 @@ class SurveyJobTemplateMixin(models.Model):
             extra_vars = {}
 
         if extra_vars:
+            # Prune the prompted variables for those identical to template
+            tmp_extra_vars = self.extra_vars_dict
+            for key in (set(tmp_extra_vars.keys()) & set(extra_vars.keys())):
+                if tmp_extra_vars[key] == extra_vars[key]:
+                    extra_vars.pop(key)
+
+        if extra_vars:
             # Leftover extra_vars, keys provided that are not allowed
             rejected.update(extra_vars)
             # ignored variables does not block manual launch
             if 'prompts' not in _exclude_errors:
                 errors['extra_vars'] = [_('Variables {list_of_keys} are not allowed on launch. Check the Prompt on Launch setting '+
                                         'on the Job Template to include Extra Variables.').format(
-                    list_of_keys=', '.join(extra_vars.keys()))]
+                    list_of_keys=six.text_type(', ').join([six.text_type(key) for key in extra_vars.keys()]))]
 
         return (accepted, rejected, errors)
 
