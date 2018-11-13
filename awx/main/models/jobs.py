@@ -338,6 +338,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             kwargs['_parent_field_name'] = "job_template"
             kwargs.setdefault('_eager_fields', {})
             kwargs['_eager_fields']['is_sliced_job'] = True
+        elif prevent_slicing:
+            kwargs.setdefault('_eager_fields', {})
+            kwargs['_eager_fields'].setdefault('job_slice_count', 1)
         job = super(JobTemplate, self).create_unified_job(**kwargs)
         if slice_event:
             try:
