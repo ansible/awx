@@ -30,7 +30,12 @@ from rest_framework.exceptions import ParseError
 from polymorphic.models import PolymorphicModel
 
 # AWX
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    CommonModelNameNotUnique,
+    PasswordFieldsModel,
+    NotificationFieldsModel,
+    prevent_search
+)
 from awx.main.dispatch.control import Control as ControlDispatcher
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
@@ -315,6 +320,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         Return notification_templates relevant to this Unified Job Template
         '''
         # NOTE: Derived classes should implement
+        from awx.main.models.notifications import NotificationTemplate
         return NotificationTemplate.objects.none()
 
     def create_unified_job(self, **kwargs):
