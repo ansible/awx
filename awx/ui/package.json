@@ -117,6 +117,7 @@
     "codemirror": "^5.17.0",
     "components-font-awesome": "^4.6.1",
     "d3": "^3.5.4",
+    "dagre": "^0.8.2",
     "hamsterjs": "^1.1.2",
     "html-entities": "^1.2.1",
     "inherits": "^1.0.2",

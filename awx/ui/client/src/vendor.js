@@ -38,6 +38,7 @@ require('moment');
 require('rrule');
 require('sprintf-js');
 require('reconnectingwebsocket');
+global.dagre = require('dagre');
 
 // D3 + extensions
 require('d3');
