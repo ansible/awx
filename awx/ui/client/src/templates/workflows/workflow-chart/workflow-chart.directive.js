@@ -23,8 +23,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
         restrict: 'E',
         link: function(scope, element) {
 
-            let marginLeft = 20,
-                nodeW = 180,
+            let nodeW = 180,
                 nodeH = 60,
                 rootW = 60,
                 rootH = 40,
@@ -32,11 +31,12 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 maxNodeTextLength = 27,
                 windowHeight,
                 windowWidth,
+                line,
                 zoomObj,
                 baseSvg,
                 svgGroup,
                 graphLoaded,
-                force;
+                nodePositionMap = {};
 
             scope.dimensionsSet = false;
 
@@ -54,16 +54,13 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
             });
 
             function init() {
-                force = d3.layout.force()
-                    // .gravity(0)
-                    // .linkStrength(2)
-                    // .friction(0.4)
-                    // .charge(-4000)
-                    // .linkDistance(300)
-                    .gravity(0)
-                    .charge(-300)
-                    .linkDistance(300)
-                    .size([windowHeight, windowWidth]);
+                line = d3.svg.line()
+                    .x(function (d) {
+                        return d.x;
+                    })
+                    .y(function (d) {
+                        return d.y;
+                    });
 
                 zoomObj = d3.behavior.zoom().scaleExtent([0.5, 2]);
 
@@ -75,7 +72,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                 svgGroup = baseSvg.append("g")
                     .attr("id", "aw-workflow-chart-g")
-                    .attr("transform", "translate(" + marginLeft + "," + (windowHeight/2 - rootH/2 - startNodeOffsetY) + ")");
+                    .attr("transform", "translate(0," + (windowHeight/2 - rootH/2 - startNodeOffsetY) + ")");
             }
 
             function calcAvailableScreenSpace() {
@@ -100,6 +97,37 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 }
 
                 return dimensions;
+            }
+
+            // Dagre is going to shift the root node around as nodes are added/removed
+            // This function ensures that the user doesn't experience that
+            let normalizeY = ((y) => {
+                return y - nodePositionMap[1].y;
+            });
+
+            function lineData(d) {
+
+                let sourceX = nodePositionMap[d.source.id].x + (nodePositionMap[d.source.id].width);
+                let sourceY = normalizeY(nodePositionMap[d.source.id].y) + (nodePositionMap[d.source.id].height/2);
+                let targetX = nodePositionMap[d.target.id].x;
+                let targetY = normalizeY(nodePositionMap[d.target.id].y) + (nodePositionMap[d.target.id].height/2);
+
+                // There's something off with the math on the root node...
+                if (d.source.id === 1) {
+                    sourceY = sourceY + 10;
+                }
+
+                let points = [{
+                        x: sourceX,
+                        y: sourceY
+                    },
+                    {
+                        x: targetX,
+                        y: targetY
+                    }
+                ];
+
+                return line(points);
             }
 
             // TODO: this function is hacky and we need to come up with a better solution
@@ -137,7 +165,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 let scale = d3.event.scale,
                     translation = d3.event.translate;
 
-                translation = [translation[0] + (marginLeft*scale), translation[1] + ((windowHeight/2 - rootH/2 - startNodeOffsetY)*scale)];
+                translation = [translation[0], translation[1] + ((windowHeight/2 - rootH/2 - startNodeOffsetY)*scale)];
 
                 svgGroup.attr("transform", "translate(" + translation + ")scale(" + scale + ")");
 
@@ -156,7 +184,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 translateX = unscaledOffsetX*scale - ((scale*windowWidth)-windowWidth)/2,
                 translateY = unscaledOffsetY*scale - ((scale*windowHeight)-windowHeight)/2;
 
-                svgGroup.attr("transform", "translate(" + [translateX + (marginLeft*scale), translateY + ((windowHeight/2 - rootH/2 - startNodeOffsetY)*scale)] + ")scale(" + scale + ")");
+                svgGroup.attr("transform", "translate(" + [translateX, translateY + ((windowHeight/2 - rootH/2 - startNodeOffsetY)*scale)] + ")scale(" + scale + ")");
                 zoomObj.scale(scale);
                 zoomObj.translate([translateX, translateY]);
             }
@@ -179,7 +207,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
             }
 
             function resetZoomAndPan() {
-                svgGroup.attr("transform", "translate(" + marginLeft + "," + (windowHeight/2 - rootH/2 - startNodeOffsetY) + ")scale(" + 1 + ")");
+                svgGroup.attr("transform", "translate(0," + (windowHeight/2 - rootH/2 - startNodeOffsetY) + ")scale(" + 1 + ")");
                 // Update the zoomObj
                 zoomObj.scale(1);
                 zoomObj.translate([0,0]);
@@ -187,16 +215,14 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function zoomToFitChart() {
                 let graphDimensions = d3.select('#aw-workflow-chart-g')[0][0].getBoundingClientRect(),
-                startNodeDimensions = d3.select('.WorkflowChart-rootNode')[0][0].getBoundingClientRect(),
                 availableScreenSpace = calcAvailableScreenSpace(),
                 currentZoomValue = zoomObj.scale(),
                 unscaledH = graphDimensions.height/currentZoomValue,
                 unscaledW = graphDimensions.width/currentZoomValue,
                 scaleNeededForMaxHeight = (availableScreenSpace.height)/unscaledH,
-                scaleNeededForMaxWidth = (availableScreenSpace.width - marginLeft)/unscaledW,
+                scaleNeededForMaxWidth = (availableScreenSpace.width)/unscaledW,
                 lowerScale = Math.min(scaleNeededForMaxHeight, scaleNeededForMaxWidth),
-                scaleToFit = lowerScale < 0.5 ? 0.5 : (lowerScale > 2 ? 2 : Math.floor(lowerScale * 10)/10),
-                startNodeOffsetFromGraphCenter = Math.round((((rootH/2) + (startNodeDimensions.top/currentZoomValue)) - ((graphDimensions.top/currentZoomValue) + (unscaledH/2)))*scaleToFit);
+                scaleToFit = lowerScale < 0.5 ? 0.5 : (lowerScale > 2 ? 2 : Math.floor(lowerScale * 10)/10);
 
                 manualZoom(scaleToFit*100);
 
@@ -204,12 +230,42 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     zoom: scaleToFit
                 });
 
-                svgGroup.attr("transform", "translate(" + marginLeft + "," + (windowHeight/2 - (nodeH*scaleToFit/2) + startNodeOffsetFromGraphCenter) + ")scale(" + scaleToFit + ")");
-                zoomObj.translate([marginLeft - scaleToFit*marginLeft, windowHeight/2 - (nodeH*scaleToFit/2) + startNodeOffsetFromGraphCenter - ((windowHeight/2 - rootH/2 - startNodeOffsetY)*scaleToFit)]);
+                svgGroup.attr("transform", "translate(0," + (windowHeight/2 - (nodeH*scaleToFit/2)) + ")scale(" + scaleToFit + ")");
+                zoomObj.translate([0, windowHeight/2 - (nodeH*scaleToFit/2) - ((windowHeight/2 - rootH/2 - startNodeOffsetY)*scaleToFit)]);
             }
 
             function update() {
                 if(scope.dimensionsSet) {
+                    var g = new dagre.graphlib.Graph();
+
+                    g.setGraph({rankdir: 'LR', nodesep: 30, ranksep: 120});
+
+                    g.setDefaultEdgeLabel(function() { return {}; });
+
+                    scope.graphState.arrayOfNodesForChart.forEach((node) => {
+                        if (node.id === 1) {
+                            if (scope.mode === "details") {
+                                g.setNode(node.id, { label: "",  width: 25, height: 25 });
+                            } else {
+                                g.setNode(node.id, { label: "",  width: rootW, height: rootH });
+                            }
+                        } else {
+                            g.setNode(node.id, { label: "",  width: nodeW, height: nodeH });
+                        }
+                    });
+
+                    scope.graphState.arrayOfLinksForChart.forEach((link) => {
+                        g.setEdge(link.source.id, link.target.id);
+                    });
+
+                    dagre.layout(g);
+
+                    nodePositionMap = {};
+
+                    g.nodes().forEach((node) => {
+                        nodePositionMap[node] = g.node(node);
+                    });
+
                     let links = svgGroup.selectAll(".WorkflowChart-link")
                         .data(scope.graphState.arrayOfLinksForChart, function(d) { return `${d.source.id}-${d.target.id}`; });
 
@@ -221,9 +277,11 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id;});
 
                     baseSvg.selectAll(".WorkflowChart-linkPath")
+                        .transition()
                         .attr("class", function(d) {
                             return (d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded) ? "WorkflowChart-linkPath WorkflowChart-isNodeBeingAdded" : "WorkflowChart-linkPath";
                         })
+                        .attr("d", lineData)
                         .attr('stroke', function(d) {
                             let edgeType = d.edgeType;
                             if(edgeType) {
@@ -254,15 +312,64 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 linkClasses.push("WorkflowChart-link--active");
                             }
                             return linkClasses.join(' ');
+                        })
+                        .attr("points",function(d) {
+                            let x1 = nodePositionMap[d.target.id].x;
+                            let y1 = normalizeY(nodePositionMap[d.target.id].y) + (nodePositionMap[d.target.id].height/2);
+                            let x2 = nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].width;
+                            let y2 = normalizeY(nodePositionMap[d.source.id].y) + (nodePositionMap[d.source.id].height/2);
+                            let slope = (y2 - y1)/(x2-x1);
+                            let yIntercept = y1 - slope*x1;
+                            let orthogonalDistance = 8;
+
+                            const pt1 = [x1, slope*x1 + yIntercept + orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
+                            const pt2 = [x2, slope*x2 + yIntercept + orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
+                            const pt3 = [x2, slope*x2 + yIntercept - orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
+                            const pt4 = [x1, slope*x1 + yIntercept - orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
+
+                            return [pt1, pt2, pt3, pt4].join(" ");
                         });
 
                     baseSvg.selectAll(".WorkflowChart-circleBetweenNodes")
                         .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
-                        .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; });
+                        .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                        .attr("cx", function(d) {
+                            return (nodePositionMap[d.source.id].x + nodePositionMap[d.source.id].width + nodePositionMap[d.target.id].x)/2;
+                        })
+                        .attr("cy", function(d) {
+                            const normalizedSourceY = normalizeY(nodePositionMap[d.source.id].y);
+                            const halfSourceHeight = nodePositionMap[d.source.id].height/2;
+                            const normalizedTargetY = normalizeY(nodePositionMap[d.target.id].y);
+                            const halfTargetHeight = nodePositionMap[d.target.id].height/2;
+
+                            let yPos = (normalizedSourceY + halfSourceHeight + normalizedTargetY + halfTargetHeight)/2;
+
+                            if (d.source.id === 1) {
+                                yPos = yPos + 4;
+                            }
+
+                            return yPos;
+                        });
 
                     baseSvg.selectAll(".WorkflowChart-betweenNodesIcon")
-                        .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; });
+                        .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                        .attr("transform", function(d) {
+                            let translate;
 
+                            const normalizedSourceY = normalizeY(nodePositionMap[d.source.id].y);
+                            const halfSourceHeight = nodePositionMap[d.source.id].height/2;
+                            const normalizedTargetY = normalizeY(nodePositionMap[d.target.id].y);
+                            const halfTargetHeight = nodePositionMap[d.target.id].height/2;
+
+                            let yPos = (normalizedSourceY + halfSourceHeight + normalizedTargetY + halfTargetHeight)/2;
+
+                            if (d.source.id === 1) {
+                                yPos = yPos + 4;
+                            }
+
+                            translate = "translate(" + (nodePositionMap[d.source.id].x + nodePositionMap[d.source.id].width + nodePositionMap[d.target.id].x)/2 + "," + yPos + ")";
+                            return translate;
+                        });
 
                     // Add any new links
                     let linkEnter = links.enter().append("g")
@@ -283,6 +390,22 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                           })
                           .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-overlay";})
                           .call(edit_link)
+                          .attr("points",function(d) {
+                              let x1 = nodePositionMap[d.target.id].x;
+                              let y1 = normalizeY(nodePositionMap[d.target.id].y) + (nodePositionMap[d.target.id].height/2);
+                              let x2 = nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].width;
+                              let y2 = normalizeY(nodePositionMap[d.source.id].y) + (nodePositionMap[d.source.id].height/2);
+                              let slope = (y2 - y1)/(x2-x1);
+                              let yIntercept = y1 - slope*x1;
+                              let orthogonalDistance = 8;
+
+                              const pt1 = [x1, slope*x1 + yIntercept + orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
+                              const pt2 = [x2, slope*x2 + yIntercept + orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
+                              const pt3 = [x2, slope*x2 + yIntercept - orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
+                              const pt4 = [x1, slope*x1 + yIntercept - orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
+
+                              return [pt1, pt2, pt3, pt4].join(" ");
+                          })
                           .on("mouseover", function(d) {
                               if(!scope.graphState.isLinkMode && !d.source.isStartNode && d.source.id !== scope.graphState.nodeBeingAdded && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
                                   $(`#link-${d.source.id}-${d.target.id}`).appendTo(`#aw-workflow-chart-g`);
@@ -290,13 +413,13 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                       .classed("WorkflowChart-linkHovering", true);
 
                                   let xPos, yPos, arrowClass;
-                                  if (d.source.x === d.target.x) {
-                                      xPos = d.source.y + nodeW + ((d.target.y - (d.source.y + nodeW))/2) - (100/2);
-                                      yPos = (d.source.x + nodeH/2 - d.target.x + nodeH/2)/2 + (d.target.x + nodeH/2) - 100;
+                                  if (nodePositionMap[d.source.id].y === nodePositionMap[d.target.id].y) {
+                                      xPos = (nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].x)/2 + 45;
+                                      yPos = (nodePositionMap[d.source.id].y + nodePositionMap[d.target.id].y)/2 - 107;
                                       arrowClass = 'WorkflowChart-tooltipArrow--down';
                                   } else {
-                                      xPos = d.source.y + nodeW + ((d.target.y - (d.source.y + nodeW))/2) - 115;
-                                      yPos = (d.source.x + nodeH/2 - d.target.x + nodeH/2)/2 + (d.target.x + nodeH/2) - 50;
+                                      xPos = (nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].x)/2 - 30;
+                                      yPos = (nodePositionMap[d.source.id].y + nodePositionMap[d.target.id].y)/2 - 70;
                                       arrowClass = 'WorkflowChart-tooltipArrow--right';
                                   }
 
@@ -337,10 +460,11 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                           });
 
                     // Add entering links in the parent’s old position.
-                    linkEnter.append("line")
+                    linkEnter.insert("path", "g")
                          .attr("class", function(d) {
                              return (d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded) ? "WorkflowChart-linkPath WorkflowChart-isNodeBeingAdded" : "WorkflowChart-linkPath";
                          })
+                         .attr("d", lineData)
                          .call(edit_link)
                          .on("mouseenter", function(d) {
                              if(!scope.graphState.isLinkMode && !d.source.isStartNode && d.source.id !== scope.graphState.nodeBeingAdded && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
@@ -349,13 +473,13 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                      .classed("WorkflowChart-linkHovering", true);
 
                                  let xPos, yPos, arrowClass;
-                                 if (d.source.x === d.target.x) {
-                                     xPos = d.source.y + nodeW + ((d.target.y - (d.source.y + nodeW))/2) - (100/2);
-                                     yPos = (d.source.x + nodeH/2 - d.target.x + nodeH/2)/2 + (d.target.x + nodeH/2) - 100;
+                                 if (nodePositionMap[d.source.id].y === nodePositionMap[d.target.id].y) {
+                                     xPos = (nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].x)/2 + 45;
+                                     yPos = (nodePositionMap[d.source.id].y + nodePositionMap[d.target.id].y)/2 - 107;
                                      arrowClass = 'WorkflowChart-tooltipArrow--down';
                                  } else {
-                                     xPos = d.source.y + nodeW + ((d.target.y - (d.source.y + nodeW))/2) - 115;
-                                     yPos = (d.source.x + nodeH/2 - d.target.x + nodeH/2)/2 + (d.target.x + nodeH/2) - 50;
+                                     xPos = (nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].x)/2 - 30;
+                                     yPos = (nodePositionMap[d.source.id].y + nodePositionMap[d.target.id].y)/2 - 70;
                                      arrowClass = 'WorkflowChart-tooltipArrow--right';
                                  }
 
@@ -416,6 +540,23 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                           .attr("r", 10)
                           .attr("class", "WorkflowChart-addCircle WorkflowChart-circleBetweenNodes")
                           .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                          .attr("cx", function(d) {
+                              return (nodePositionMap[d.source.id].x + nodePositionMap[d.source.id].width + nodePositionMap[d.target.id].x)/2;
+                          })
+                          .attr("cy", function(d) {
+                              const normalizedSourceY = normalizeY(nodePositionMap[d.source.id].y);
+                              const halfSourceHeight = nodePositionMap[d.source.id].height/2;
+                              const normalizedTargetY = normalizeY(nodePositionMap[d.target.id].y);
+                              const halfTargetHeight = nodePositionMap[d.target.id].height/2;
+
+                              let yPos = (normalizedSourceY + halfSourceHeight + normalizedTargetY + halfTargetHeight)/2;
+
+                              if (d.source.id === 1) {
+                                  yPos = yPos + 4;
+                              }
+
+                              return yPos;
+                          })
                           .call(add_node_with_child)
                           .on("mouseover", function(d) {
                               $(`#link-${d.source.id}-${d.target.id}`).appendTo(`#aw-workflow-chart-g`);
@@ -436,6 +577,23 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                               .type("cross")
                           )
                           .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                          .attr("transform", function(d) {
+                              let translate;
+
+                              const normalizedSourceY = normalizeY(nodePositionMap[d.source.id].y);
+                              const halfSourceHeight = nodePositionMap[d.source.id].height/2;
+                              const normalizedTargetY = normalizeY(nodePositionMap[d.target.id].y);
+                              const halfTargetHeight = nodePositionMap[d.target.id].height/2;
+
+                              let yPos = (normalizedSourceY + halfSourceHeight + normalizedTargetY + halfTargetHeight)/2;
+
+                              if (d.source.id === 1) {
+                                  yPos = yPos + 4;
+                              }
+
+                              translate = "translate(" + (nodePositionMap[d.source.id].x + nodePositionMap[d.source.id].width + nodePositionMap[d.target.id].x)/2 + "," + yPos + ")";
+                              return translate;
+                          })
                           .call(add_node_with_child)
                           .on("mouseover", function(d) {
                               $(`#link-${d.source.id}-${d.target.id}`).appendTo(`#aw-workflow-chart-g`);
@@ -448,13 +606,6 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                   .classed("WorkflowChart-addHovering", false);
                           });
 
-                    // Create references to all the link elements so that they can be transitioned
-                    // properly in the tick function
-                    let linkLines = svgGroup.selectAll(".WorkflowChart-link line");
-                    let linkPolygons = svgGroup.selectAll(".WorkflowChart-link polygon");
-                    let linkAddBetweenCircle = svgGroup.selectAll(".WorkflowChart-link circle");
-                    let linkAddBetweenIcon = svgGroup.selectAll(".WorkflowChart-betweenNodesIcon");
-
                     let nodes = svgGroup.selectAll('.WorkflowChart-node')
                         .data(scope.graphState.arrayOfNodesForChart, function(d) { return d.id; });
 
@@ -462,6 +613,15 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     nodes.exit().remove();
 
                     // Update existing nodes
+                    baseSvg.selectAll(".WorkflowChart-node")
+                        .transition()
+                        .attr("transform", function (d) {
+                            // Update prior x and prior y
+                            d.px = d.x;
+                            d.py = d.y;
+                            return "translate(" + nodePositionMap[d.id].x + "," + normalizeY(nodePositionMap[d.id].y) + ")";
+                    });
+
                     baseSvg.selectAll(".WorkflowChart-nodeAddCircle")
                         .style("display", function(d) { return scope.graphState.isLinkMode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; });
 
@@ -640,7 +800,10 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                       .enter()
                       .append('g')
                       .attr("class", "WorkflowChart-node")
-                      .attr("id", function(d){return "node-" + d.id;});
+                      .attr("id", function(d){return "node-" + d.id;})
+                      .attr("transform", function (d) {
+                          return "translate(" + nodePositionMap[d.id].x + "," + normalizeY(nodePositionMap[d.id].y) + ")";
+                      });
 
                     nodeEnter.each(function(d) {
                         let thisNode = d3.select(this);
@@ -1064,75 +1227,14 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         }
                     });
 
-                    // TODO: this
-                    // if(scope.graphState.arrayOfNodesForChart && scope.graphState.arrayOfNodesForChart > 1 && !graphLoaded) {
-                    //     zoomToFitChart();
-                    // }
+                    if(scope.graphState.arrayOfNodesForChart && scope.graphState.arrayOfNodesForChart.length > 1 && !graphLoaded) {
+                        zoomToFitChart();
+                    }
 
                     graphLoaded = true;
 
                     // This will make sure that all the link elements appear before the nodes in the dom
-                    // TODO: i don't think this is working...
                     svgGroup.selectAll(".WorkflowChart-node").order();
-
-                    let tick = () => {
-                      linkLines
-                          .each(function(d) {
-                              d.target.y = scope.graphState.depthMap[d.target.id] * 300;
-                          })
-                          .attr("x1", function(d) { return d.target.y; })
-                          .attr("y1", function(d) { return d.target.x + (nodeH/2); })
-                          .attr("x2", function(d) { return d.source.index === 0 ? (scope.mode === 'details' ? d.source.y + 25 : d.source.y + 60) : (d.source.y + nodeW); })
-                          .attr("y2", function(d) { return d.source.x + (nodeH/2); });
-
-                      linkPolygons
-                          .attr("points",function(d) {
-                              let x1 = d.target.y;
-                              let y1 = d.target.x + (nodeH/2);
-                              let x2 = d.source.index === 0 ? (d.source.y + 60) : (d.source.y + nodeW);
-                              let y2 = d.source.x + (nodeH/2);
-                              let slope = (y2 - y1)/(x2-x1);
-                              let yIntercept = y1 - slope*x1;
-                              let orthogonalDistance = 8;
-
-                              const pt1 = [x1, slope*x1 + yIntercept + orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
-                              const pt2 = [x2, slope*x2 + yIntercept + orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
-                              const pt3 = [x2, slope*x2 + yIntercept - orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
-                              const pt4 = [x1, slope*x1 + yIntercept - orthogonalDistance*Math.sqrt(1+slope*slope)].join(",");
-
-                              return [pt1, pt2, pt3, pt4].join(" ");
-                          });
-
-                      linkAddBetweenCircle
-                          .attr("cx", function(d) {
-                              return (d.source.isStartNode) ? (d.target.y + d.source.y + rootW) / 2 : (d.target.y + d.source.y + nodeW) / 2;
-                          })
-                          .attr("cy", function(d) {
-                              return (d.source.isStartNode) ? ((d.target.x + startNodeOffsetY + rootH/2) + (d.source.x + nodeH/2)) / 2 : (d.target.x + d.source.x + nodeH) / 2;
-                          });
-
-                      linkAddBetweenIcon
-                          .attr("transform", function(d) {
-                              let translate;
-                              if(d.source.isStartNode) {
-                                  translate = "translate(" + (d.target.y + d.source.y + rootW) / 2 + "," + ((d.target.x + startNodeOffsetY + rootH/2) + (d.source.x + nodeH/2)) / 2 + ")";
-                              }
-                              else {
-                                  translate = "translate(" + (d.target.y + d.source.y + nodeW) / 2 + "," + (d.target.x + d.source.x + nodeH) / 2 + ")";
-                              }
-                              return translate;
-                          });
-
-                      nodes
-                          .attr("transform", function(d) {
-			    return "translate(" + d.y + "," + d.x + ")"; });
-                    };
-
-                    force
-                        .nodes(scope.graphState.arrayOfNodesForChart)
-                        .links(scope.graphState.arrayOfLinksForChart)
-                        .on("tick", tick)
-                        .start();
                 }
                 else if(!scope.watchDimensionsSet){
                     scope.watchDimensionsSet = scope.$watch('dimensionsSet', function(){
@@ -1178,7 +1280,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
             function node_click() {
                 this.on("click", function(d) {
                     if(d.id !== scope.graphState.nodeBeingAdded && !scope.readOnly){
-                        if(scope.graphState.isLinkMode && !d.isInvalidLinkTarget) {
+                        if(scope.graphState.isLinkMode && !d.isInvalidLinkTarget && scope.graphState.addLinkSource !== d.id) {
                             $('.WorkflowChart-potentialLink').remove();
                             scope.selectNodeForLinking({
                                 nodeToStartLink: d
