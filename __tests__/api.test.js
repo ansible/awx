@@ -1,14 +1,7 @@
 
 import mockAxios from 'axios';
 import APIClient from '../src/api';
-
-const API_ROOT = '/api/';
-const API_LOGIN = `${API_ROOT}login/`;
-const API_LOGOUT = `${API_ROOT}logout/`;
-const API_V2 = `${API_ROOT}v2/`;
-const API_CONFIG = `${API_V2}config/`;
-const API_PROJECTS = `${API_V2}projects/`;
-const API_ORGANIZATIONS = `${API_V2}organizations/`;
+import * as endpoints from '../src/endpoints';
 
 const CSRF_COOKIE_NAME = 'csrftoken';
 const CSRF_HEADER_NAME = 'X-CSRFToken';
@@ -52,9 +45,9 @@ describe('APIClient (api.js)', () => {
     APIClient.setCookie = jest.fn();
     APIClient.login(un, pw, next).then(() => {
       expect(mockAxios.get).toHaveBeenCalledTimes(1);
-      expect(mockAxios.get).toHaveBeenCalledWith(API_LOGIN, { headers });
+      expect(mockAxios.get).toHaveBeenCalledWith(endpoints.API_LOGIN, { headers });
       expect(mockAxios.post).toHaveBeenCalledTimes(1);
-      expect(mockAxios.post).toHaveBeenCalledWith(API_LOGIN, data, { headers });
+      expect(mockAxios.post).toHaveBeenCalledWith(endpoints.API_LOGIN, data, { headers });
       done();
     });
   });
@@ -67,7 +60,7 @@ describe('APIClient (api.js)', () => {
     const data = `username=${encodeURIComponent(un)}&password=${encodeURIComponent(pw)}&next=${encodeURIComponent(next)}`;
     APIClient.login(un, pw, next).then(() => {
       expect(mockAxios.post).toHaveBeenCalledTimes(1);
-      expect(mockAxios.post).toHaveBeenCalledWith(API_LOGIN, data, { headers });
+      expect(mockAxios.post).toHaveBeenCalledWith(endpoints.API_LOGIN, data, { headers });
       done();
     });
   });
@@ -76,42 +69,13 @@ describe('APIClient (api.js)', () => {
     const un = 'foo';
     const pw = 'bar';
     const headers = { 'Content-Type': LOGIN_CONTENT_TYPE };
-    const data = `username=${un}&password=${pw}&next=${encodeURIComponent(API_CONFIG)}`;
+    const data = `username=${un}&password=${pw}&next=${encodeURIComponent(endpoints.API_CONFIG)}`;
     APIClient.setCookie = jest.fn();
     APIClient.login(un, pw).then(() => {
       expect(mockAxios.post).toHaveBeenCalledTimes(1);
-      expect(mockAxios.post).toHaveBeenCalledWith(API_LOGIN, data, { headers });
+      expect(mockAxios.post).toHaveBeenCalledWith(endpoints.API_LOGIN, data, { headers });
       done();
     });
   });
 
-  test('logout calls get to logout route', () => {
-    APIClient.logout();
-    expect(mockAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockAxios.get).toHaveBeenCalledWith(API_LOGOUT);
-  });
-
-  test('getConfig calls get to config route', () => {
-    APIClient.getConfig();
-    expect(mockAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockAxios.get).toHaveBeenCalledWith(API_CONFIG);
-  });
-
-  test('getProjects calls get to projects route', () => {
-    APIClient.getProjects();
-    expect(mockAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockAxios.get).toHaveBeenCalledWith(API_PROJECTS);
-  });
-
-  test('getOrganigzations calls get to organizations route', () => {
-    APIClient.getOrganizations();
-    expect(mockAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockAxios.get).toHaveBeenCalledWith(API_ORGANIZATIONS);
-  });
-
-  test('getRoot calls get to root route', () => {
-    APIClient.getRoot();
-    expect(mockAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockAxios.get).toHaveBeenCalledWith(API_ROOT);
-  });
 });

@@ -22,6 +22,7 @@ import {
 import { global_breakpoint_md as breakpointMd } from '@patternfly/react-tokens';
 
 import api from './api';
+import { API_LOGOUT } from './endpoints';
 
 // import About from './components/About';
 import LogoutButton from './components/LogoutButton';
@@ -79,11 +80,9 @@ class App extends React.Component {
     this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
   }
 
-  onDevLogout = () => {
-    api.logout()
-      .then(() => {
-        this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
-      });
+  onDevLogout = async () => {
+    await api.get(API_LOGOUT);
+    this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
   }
 
   render () {

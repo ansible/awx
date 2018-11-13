@@ -2,6 +2,8 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import App from '../src/App';
 import api from '../src/api';
+import { API_LOGOUT } from '../src/endpoints';
+
 import Dashboard from '../src/pages/Dashboard';
 import Login from '../src/pages/Login';
 import { asyncFlush } from '../jest.setup';
@@ -64,12 +66,13 @@ describe('<App />', () => {
   });
 
   test('api.logout called from logout button', async () => {
-    api.logout = jest.fn().mockImplementation(() => Promise.resolve({}));
+    api.get = jest.fn().mockImplementation(() => Promise.resolve({}));
     const appWrapper = mount(<App />);
     const logoutButton = appWrapper.find('LogoutButton');
     logoutButton.props().onDevLogout();
     appWrapper.setState({ activeGroup: 'foo', activeItem: 'bar' });
-    expect(api.logout).toHaveBeenCalledTimes(1);
+    expect(api.get).toHaveBeenCalledTimes(1);
+    expect(api.get).toHaveBeenCalledWith(API_LOGOUT);
     await asyncFlush();
     expect(appWrapper.state().activeItem).toBe(DEFAULT_ACTIVE_ITEM);
     expect(appWrapper.state().activeGroup).toBe(DEFAULT_ACTIVE_GROUP);

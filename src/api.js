@@ -1,12 +1,6 @@
 import axios from 'axios';
 
-const API_ROOT = '/api/';
-const API_LOGIN = `${API_ROOT}login/`;
-const API_LOGOUT = `${API_ROOT}logout/`;
-const API_V2 = `${API_ROOT}v2/`;
-const API_CONFIG = `${API_V2}config/`;
-const API_PROJECTS = `${API_V2}projects/`;
-const API_ORGANIZATIONS = `${API_V2}organizations/`;
+import * as endpoints from './endpoints';
 
 const CSRF_COOKIE_NAME = 'csrftoken';
 const CSRF_HEADER_NAME = 'X-CSRFToken';
@@ -38,7 +32,7 @@ class APIClient {
     return authenticated;
   }
 
-  login (username, password, redirect = API_CONFIG) {
+  async login (username, password, redirect = endpoints.API_CONFIG) {
     const un = encodeURIComponent(username);
     const pw = encodeURIComponent(password);
     const next = encodeURIComponent(redirect);
@@ -46,29 +40,11 @@ class APIClient {
     const data = `username=${un}&password=${pw}&next=${next}`;
     const headers = { 'Content-Type': LOGIN_CONTENT_TYPE };
 
-    return this.http.get(API_LOGIN, { headers })
-      .then(() => this.http.post(API_LOGIN, data, { headers }));
+    await this.http.get(endpoints.API_LOGIN, { headers });
+    await this.http.post(endpoints.API_LOGIN, data, { headers });
   }
 
-  logout () {
-    return this.http.get(API_LOGOUT);
-  }
-
-  getConfig () {
-    return this.http.get(API_CONFIG);
-  }
-
-  getProjects () {
-    return this.http.get(API_PROJECTS);
-  }
-
-  getOrganizations () {
-    return this.http.get(API_ORGANIZATIONS);
-  }
-
-  getRoot () {
-    return this.http.get(API_ROOT);
-  }
+  get = (endpoint) => this.http.get(endpoint);
 }
 
 export default new APIClient();

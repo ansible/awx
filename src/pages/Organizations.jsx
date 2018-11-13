@@ -9,22 +9,30 @@ import {
 
 import OrganizationCard from '../components/OrganizationCard';
 import api from '../api';
+import { API_ORGANIZATIONS } from '../endpoints';
 
 class Organizations extends Component {
   constructor (props) {
     super(props);
 
-    this.state = { organizations: [] };
+    this.state = {
+      organizations: [],
+      error: false,
+    };
   }
 
-  componentDidMount () {
-    api.getOrganizations()
-      .then(({ data }) => this.setState({ organizations: data.results }));
+  async componentDidMount () {
+    try {
+      const { data } = await api.get(API_ORGANIZATIONS);
+      this.setState({ organizations: data.results });
+    } catch (err) {
+      this.setState({ error: err });
+    }
   }
 
   render () {
     const { light, medium } = PageSectionVariants;
-    const { organizations } = this.state;
+    const { organizations, error } = this.state;
 
     return (
       <Fragment>
@@ -38,6 +46,7 @@ class Organizations extends Component {
                 <OrganizationCard key={o.id} organization={o} />
               </GalleryItem>
             ))}
+            { error ? <div>error</div> : '' }
           </Gallery>
         </PageSection>
       </Fragment>
