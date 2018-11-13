@@ -195,21 +195,16 @@ class TestIsWorkflowDone():
         g.mark_dnr_nodes()
         nodes[1].job = Job(status='successful')
         g.mark_dnr_nodes()
-        nodes[2].job = Job(status='failure')
+        nodes[2].job = Job(status='failed')
         return (g, nodes)
 
     def test_is_workflow_done(self, workflow_dag_2):
         g = workflow_dag_2[0]
 
-        is_done, is_failed = g.is_workflow_done()
-
-        assert is_done is False
-        assert is_failed is False
+        assert g.is_workflow_done() is False
 
     def test_is_workflow_done_failed(self, workflow_dag_failed):
         g = workflow_dag_failed[0]
 
-        is_done, is_failed = g.is_workflow_done()
-
-        assert is_done is True
-        assert is_failed is True
+        assert g.is_workflow_done() is True
+        assert g.has_workflow_failed() is True
