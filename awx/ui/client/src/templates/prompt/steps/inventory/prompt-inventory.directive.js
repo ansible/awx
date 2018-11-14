@@ -54,7 +54,7 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
                     };
 
                     if (scope.promptData.templateType === "workflow_job_template") {
-                        listConfig.lookupMessage = i18n._("This inventory is applied to all job templates nodes that prompt for an inventory.");
+                        listConfig.lookupMessage = i18n._("This inventory is applied to all job template nodes that prompt for an inventory.");
                     }
 
                     let html = GenerateList.build(listConfig);
