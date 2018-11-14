@@ -1,42 +1,5 @@
 export default [function(){
     return {
-        generateDepthMap: (arrayOfLinks) => {
-            let depthMap = {};
-            let nodesWithChildren = {};
-
-            let walkBranch = (nodeId, depth) => {
-                depthMap[nodeId] = depthMap[nodeId] ? (depth > depthMap[nodeId] ? depth : depthMap[nodeId]) : depth;
-                if (nodesWithChildren[nodeId]) {
-                    _.forEach(nodesWithChildren[nodeId].children, (childNodeId) => {
-                        walkBranch(childNodeId, depth+1);
-                    });
-                }
-            };
-
-            let rootNodeIds = [];
-            arrayOfLinks.forEach(link => {
-                // link.source.index of 0 is our artificial start node
-                if (link.source.index !== 0) {
-                    if (!nodesWithChildren[link.source.id]) {
-                        nodesWithChildren[link.source.id] = {
-                            children: []
-                        };
-                    }
-
-                    nodesWithChildren[link.source.id].children.push(link.target.id);
-                } else {
-                    // Store the fact that might be a root node
-                    rootNodeIds.push(link.target.id);
-                }
-            });
-
-            _.forEach(rootNodeIds, function(rootNodeId) {
-                walkBranch(rootNodeId, 1);
-                depthMap[rootNodeId] = 1;
-            });
-
-            return depthMap;
-        },
         generateArraysOfNodesAndLinks: function(allNodes) {
             let nonRootNodeIds = [];
             let allNodeIds = [];
@@ -77,7 +40,7 @@ export default [function(){
                     nodeObj.job = node.summary_fields.job;
                 }
                 if(node.summary_fields.unified_job_template) {
-                    nodeObj.unifiedJobTemplate = node.summary_fields.unified_job_template;
+                    nodeRef[nodeIdCounter].unifiedJobTemplate = nodeObj.unifiedJobTemplate = node.summary_fields.unified_job_template;
                 }
 
                 arrayOfNodesForChart.push(nodeObj);
