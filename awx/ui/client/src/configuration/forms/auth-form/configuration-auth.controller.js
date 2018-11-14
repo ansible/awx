@@ -29,7 +29,7 @@ export default [
 
         authVm.activeAuthForm = 'azure';
         authVm.activeTab = 'azure';
-        authVm.ldapDropdownValue = '';
+        authVm.ldapDropdownValue = 'ldap';
         authVm.githubDropdownValue = 'github';
 
         let codeInputInitialized = false;
@@ -199,7 +199,6 @@ export default [
                 name: 'ldap5'
             },
         ];
-
         var forms = _.map(authForms, 'formDef');
         _.each(forms, function(form) {
             var keys = _.keys(form.fields);
@@ -207,9 +206,9 @@ export default [
                 if($scope.configDataResolve[key].type === 'choice') {
                     // Create options for dropdowns
                     var optionsGroup = key + '_options';
-                    $scope.$parent[optionsGroup] = [];
+                    $scope.$parent.$parent[optionsGroup] = [];
                     _.each($scope.configDataResolve[key].choices, function(choice){
-                        $scope.$parent[optionsGroup].push({
+                        $scope.$parent.$parent[optionsGroup].push({
                             name: choice[0],
                             label: choice[1],
                             value: choice[0]
@@ -303,7 +302,7 @@ export default [
             }
 
             if($scope.$parent[groupPropName] !== null) {
-                $scope.$parent[groupPropName] = _.find($scope[groupOptionsPropName], { value: $scope.$parent[groupPropName] });
+                $scope.$parent.$parent[groupPropName] = _.find($scope[groupOptionsPropName], { value: $scope.$parent[groupPropName] });
             }
 
             if(flag !== undefined){
@@ -322,7 +321,7 @@ export default [
 
         function populateTacacsProtocol(flag){
             if($scope.$parent.TACACSPLUS_AUTH_PROTOCOL !== null) {
-                $scope.$parent.TACACSPLUS_AUTH_PROTOCOL = _.find($scope.$parent.TACACSPLUS_AUTH_PROTOCOL_options, { value: $scope.$parent.TACACSPLUS_AUTH_PROTOCOL });
+                $scope.$parent.$parent.TACACSPLUS_AUTH_PROTOCOL = _.find($scope.$parent.TACACSPLUS_AUTH_PROTOCOL_options, { value: $scope.$parent.TACACSPLUS_AUTH_PROTOCOL });
             }
 
             if(flag !== undefined){
@@ -384,7 +383,7 @@ export default [
 
         function getActiveAuthForm (tab) {
             if (tab === 'ldap') {
-                return `ldap${authVm.ldapDropdownValue}`;
+                return authVm.ldapDropdownValue;
             } else if (tab === 'github') {
                 return authVm.githubDropdownValue;
             }
