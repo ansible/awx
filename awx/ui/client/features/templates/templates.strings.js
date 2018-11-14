@@ -128,7 +128,9 @@ function TemplatesStrings (BaseString) {
         EDIT_LINK: t.s('EDIT LINK'),
         VIEW_LINK: t.s('VIEW LINK'),
         NEW_LINK: t.s('Please click on an available node to form a new link.'),
-        UNLINK: t.s('UNLINK')
+        UNLINK: t.s('UNLINK'),
+        READ_ONLY_PROMPT_VALUES: t.s('The following promptable values were provided when this node was created:'),
+        READ_ONLY_NO_PROMPT_VALUES: t.s('No promptable values were provided when this node was created.')
     };
 }
 
