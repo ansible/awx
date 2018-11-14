@@ -175,9 +175,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
 
             ({arrayOfNodesForChart, arrayOfLinksForChart, chartNodeIdToIndexMapping, nodeIdToChartNodeIdMapping} = WorkflowChartService.generateArraysOfNodesAndLinks(workflowNodes));
 
-            let depthMap = WorkflowChartService.generateDepthMap(arrayOfLinksForChart);
-
-            $scope.graphState = { arrayOfNodesForChart, arrayOfLinksForChart, depthMap };
+            $scope.graphState = { arrayOfNodesForChart, arrayOfLinksForChart };
         }
 
         $scope.toggleStdoutFullscreen = function() {
