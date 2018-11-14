@@ -49,7 +49,8 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'extract_ansible_vars', 'get_search_fields', 'get_system_task_capacity', 'get_cpu_capacity', 'get_mem_capacity',
            'wrap_args_with_proot', 'build_proot_temp_dir', 'check_proot_installed', 'model_to_dict',
            'model_instance_diff', 'timestamp_apiformat', 'parse_yaml_or_json', 'RequireDebugTrueOrTest',
-           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices', 'get_external_account']
+           'has_model_field_prefetched', 'set_environ', 'IllegalArgumentError', 'get_custom_venv_choices', 'get_external_account',
+           'task_manager_bulk_reschedule', 'schedule_task_manager']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -727,6 +728,7 @@ def get_system_task_capacity(scale=Decimal(1.0), cpu_capacity=None, mem_capacity
 
 
 _inventory_updates = threading.local()
+_task_manager = threading.local()
 
 
 @contextlib.contextmanager
@@ -740,6 +742,37 @@ def ignore_inventory_computed_fields():
         yield
     finally:
         _inventory_updates.is_updating = previous_value
+
+
+def _schedule_task_manager():
+    from awx.main.scheduler.tasks import run_task_manager
+    from django.db import connection
+    # runs right away if not in transaction
+    connection.on_commit(lambda: run_task_manager.delay())
+
+
+@contextlib.contextmanager
+def task_manager_bulk_reschedule():
+    """Context manager to avoid submitting task multiple times.
+    """
+    try:
+        previous_flag = getattr(_task_manager, 'bulk_reschedule', False)
+        previous_value = getattr(_task_manager, 'needs_scheduling', False)
+        _task_manager.bulk_reschedule = True
+        _task_manager.needs_scheduling = False
+        yield
+    finally:
+        _task_manager.bulk_reschedule = previous_flag
+        if _task_manager.needs_scheduling:
+            _schedule_task_manager()
+        _task_manager.needs_scheduling = previous_value
+
+
+def schedule_task_manager():
+    if getattr(_task_manager, 'bulk_reschedule', False):
+        _task_manager.needs_scheduling = True
+        return
+    _schedule_task_manager()
 
 
 @contextlib.contextmanager
