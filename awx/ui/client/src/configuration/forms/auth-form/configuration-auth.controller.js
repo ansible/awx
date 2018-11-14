@@ -29,7 +29,7 @@ export default [
 
         authVm.activeAuthForm = 'azure';
         authVm.activeTab = 'azure';
-        authVm.ldapDropdownValue = 'ldap';
+        authVm.ldapDropdownValue = '';
         authVm.githubDropdownValue = 'github';
 
         let codeInputInitialized = false;
@@ -383,7 +383,7 @@ export default [
 
         function getActiveAuthForm (tab) {
             if (tab === 'ldap') {
-                return authVm.ldapDropdownValue;
+                return `ldap${authVm.ldapDropdownValue}`;
             } else if (tab === 'github') {
                 return authVm.githubDropdownValue;
             }
