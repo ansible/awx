@@ -1,11 +1,11 @@
 <div ng-show="nodeFormDataLoaded">
-    <div class="WorkflowMaker-formTitle ng-binding">{{nodeConfig.mode === 'edit' ? node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_TEMPLATE')}}</div>
-    <div class="Form-tabHolder">
+    <div class="WorkflowMaker-formTitle">{{nodeConfig.mode === 'edit' ? nodeConfig.node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_TEMPLATE')}}</div>
+    <div class="Form-tabHolder" ng-if="!readOnly">
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'jobs'}" ng-click="activeTab = 'jobs'">{{strings.get('workflow_maker.JOBS')}}</div>
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'project_syncs'}" ng-click="activeTab = 'project_syncs'">{{strings.get('workflow_maker.PROJECT_SYNC')}}</div>
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'inventory_syncs'}" ng-click="activeTab = 'inventory_syncs'">{{strings.get('workflow_maker.INVENTORY_SYNC')}}</div>
     </div>
-    <div class="WorkflowMaker-formLists">
+    <div class="WorkflowMaker-formLists" ng-if="!readOnly">
         <div id="workflow-jobs-list" ng-show="activeTab === 'jobs'">
             <div ng-hide="wf_maker_templates.length === 0 && (searchTags | isEmpty)">
                 <smart-search django-model="unified_job_templates" base-path="unified_job_templates" iterator="wf_maker_template" dataset="wf_maker_template_dataset" list="templateList" collection="wf_maker_templates" default-params="wf_maker_template_default_params" query-set="wf_maker_template_queryset" search-bar-full-width="true" search-tags="searchTags">
@@ -139,6 +139,98 @@
                 ng-disabled="readOnly"
                 aria-hidden="true">
             </select>
+        </div>
+    </div>
+    <div ng-if="readOnly">
+        <div
+            class="WorkflowMaker-readOnlyPromptText"
+            ng-show="nodeConfig.node.originalNodeObject.job_type !== null ||
+                     (promptData.prompts.credentials.value && promptData.prompts.credentials.value.length > 0) ||
+                     nodeConfig.node.originalNodeObject.inventory !== null ||
+                     nodeConfig.node.originalNodeObject.limit !== null ||
+                     nodeConfig.node.originalNodeObject.verbosity !== null ||
+                     nodeConfig.node.originalNodeObject.job_tags !== null ||
+                     nodeConfig.node.originalNodeObject.skip_tags !== null ||
+                     nodeConfig.node.originalNodeObject.diff_mode !== null ||
+                     showExtraVars">
+            {{:: strings.get('workflow_maker.READ_ONLY_PROMPT_VALUES')}}
+        </div>
+        <div
+            class="WorkflowMaker-readOnlyPromptText"
+            ng-show="!(nodeConfig.node.originalNodeObject.job_type !== null ||
+                     (promptData.prompts.credentials.value && promptData.prompts.credentials.value.length > 0) ||
+                     nodeConfig.node.originalNodeObject.inventory !== null ||
+                     nodeConfig.node.originalNodeObject.limit !== null ||
+                     nodeConfig.node.originalNodeObject.verbosity !== null ||
+                     nodeConfig.node.originalNodeObject.job_tags !== null ||
+                     nodeConfig.node.originalNodeObject.skip_tags !== null ||
+                     nodeConfig.node.originalNodeObject.diff_mode !== null ||
+                     showExtraVars)">
+            {{:: strings.get('workflow_maker.READ_ONLY_NO_PROMPT_VALUES')}}
+        </div>
+        <div class="Prompt-previewRow--flex" ng-if="nodeConfig.node.originalNodeObject.job_type !== null">
+            <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.JOB_TYPE') }}</div>
+            <div class="Prompt-previewRowValue">
+                <span ng-if="nodeConfig.node.originalNodeObject.job_type === 'run'">{{:: strings.get('prompt.PLAYBOOK_RUN') }}</span>
+                <span ng-if="nodeConfig.node.originalNodeObject.job_type === 'check'">{{:: strings.get('prompt.CHECK') }}</span>
+            </div>
+        </div>
+        <div class="Prompt-previewRow--flex" ng-if="nodeConfig.node.originalNodeObject.inventory !== null">
+            <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.INVENTORY') }}</div>
+            <div class="Prompt-previewRowValue" ng-bind="nodeConfig.node.originalNodeObject.summary_fields.inventory.name"></div>
+        </div>
+        <div class="Prompt-previewRow--flex" ng-if="nodeConfig.node.originalNodeObject.limit !== null">
+            <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.LIMIT') }}</div>
+            <div class="Prompt-previewRowValue" ng-bind="nodeConfig.node.originalNodeObject.limit"></div>
+        </div>
+        <div class="Prompt-previewRow--flex" ng-if="nodeConfig.node.originalNodeObject.verbosity !== null">
+            <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.VERBOSITY') }}</div>
+            <div class="Prompt-previewRowValue" ng-bind="nodeConfig.node.originalNodeObject.verbosity"></div>
+        </div>
+        <div class="Prompt-previewRow--noflex" ng-if="nodeConfig.node.originalNodeObject.job_tags !== null">
+            <div class="Prompt-previewRowTitle">
+                <span>{{:: strings.get('prompt.JOB_TAGS') }}&nbsp;</span>
+                <span ng-click="showJobTags = !showJobTags">
+                    <span class="fa fa-caret-down" ng-show="showJobTags" ></span>
+                    <span class="fa fa-caret-left" ng-show="!showJobTags"></span>
+                </span>
+            </div>
+            <div ng-show="showJobTags" class="Prompt-previewTagContainer">
+                <div class="u-wordwrap" ng-repeat="tag in jobTags">
+                    <div class="LabelList-tag">
+                        <span>{{tag}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="Prompt-previewRow--noflex" ng-if="nodeConfig.node.originalNodeObject.skip_tags !== null">
+            <div class="Prompt-previewRowTitle">
+                <span>{{:: strings.get('prompt.SKIP_TAGS') }}&nbsp;</span>
+                <span ng-click="showSkipTags = !showSkipTags">
+                    <span class="fa fa-caret-down" ng-show="showSkipTags" ></span>
+                    <span class="fa fa-caret-left" ng-show="!showSkipTags"></span>
+                </span>
+            </div>
+            <div ng-show="showSkipTags" class="Prompt-previewTagContainer">
+                <div class="u-wordwrap" ng-repeat="tag in skipTags">
+                    <div class="LabelList-tag">
+                        <span>{{tag}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="Prompt-previewRow--flex" ng-if="nodeConfig.node.originalNodeObject.diff_mode !== null">
+            <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.SHOW_CHANGES') }}</div>
+            <div class="Prompt-previewRowValue">
+                <span ng-if="promptData.prompts.diffMode.value">{{:: strings.get('ON') }}</span>
+                <span ng-if="!promptData.prompts.diffMode.value">{{:: strings.get('OFF') }}</span>
+            </div>
+        </div>
+        <div class="Prompt-previewRow--noflex" ng-show="showExtraVars">
+            <div class="Prompt-previewRowTitle">{{:: strings.get('prompt.EXTRA_VARIABLES') }}</div>
+            <div>
+                <textarea rows="6" ng-model="extraVars" name="node_form_extra_vars" class="form-control Form-textArea Form-textAreaLabel" id="workflow_node_form_extra_vars"></textarea>
+            </div>
         </div>
     </div>
     <div class="buttons Form-buttons" id="workflow_maker_controls">
