@@ -374,7 +374,12 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             unified_job.survey_passwords = new_job_passwords
             kwargs['survey_passwords'] = new_job_passwords  # saved in config object for relaunch
 
-        unified_job.save()
+        from awx.main.signals import disable_activity_stream, activity_stream_create
+        with disable_activity_stream():
+            # Don't emit the activity stream record here for creation,
+            # because we haven't attached important M2M relations yet, like
+            # credentials and labels
+            unified_job.save()
 
         # Labels and credentials copied here
         if validated_kwargs.get('credentials'):
@@ -386,7 +391,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             validated_kwargs['credentials'] = [cred for cred in cred_dict.values()]
             kwargs['credentials'] = validated_kwargs['credentials']
 
-        from awx.main.signals import disable_activity_stream
         with disable_activity_stream():
             copy_m2m_relationships(self, unified_job, fields, kwargs=validated_kwargs)
 
@@ -396,6 +400,12 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         if not getattr(self, '_deprecated_credential_launch', False):
             # Create record of provided prompts for relaunch and rescheduling
             unified_job.create_config_from_prompts(kwargs, parent=self)
+
+        # manually issue the create activity stream entry _after_ M2M relations
+        # have been associated to the UJ
+        from awx.main.models import SystemJob
+        if not isinstance(unified_job, SystemJob):
+            activity_stream_create(None, unified_job, True)
 
         return unified_job
 
