@@ -361,6 +361,16 @@ def on_populate_user(sender, **kwargs):
     # checking membership.
     ldap_user._get_groups().get_group_dns()
 
+    # If the LDAP user has a first or last name > $maxlen chars, truncate it
+    for field in ('first_name', 'last_name'):
+        max_len = User._meta.get_field(field).max_length
+        field_len = len(getattr(user, field))
+        if field_len > max_len:
+            setattr(user, field, getattr(user, field)[:max_len])
+            logger.warn(six.text_type(
+                'LDAP user {} has {} > max {} characters'
+            ).format(user.username, field, max_len))
+
     # Update organization membership based on group memberships.
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
     for org_name, org_opts in org_map.items():
