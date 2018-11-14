@@ -7,9 +7,12 @@
 export default ['$scope', 'TemplatesService',
     'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
     'Empty', 'PromptService', 'Rest', 'TemplatesStrings', 'WorkflowChartService',
+    'Wait',
     function ($scope, TemplatesService,
         ProcessErrors, CreateSelect2, $q, JobTemplate,
-        Empty, PromptService, Rest, TemplatesStrings, WorkflowChartService) {
+        Empty, PromptService, Rest, TemplatesStrings, WorkflowChartService,
+        Wait
+    ) {
 
         $scope.strings = TemplatesStrings;
         $scope.preventCredsWithPasswords = true;
@@ -90,10 +93,12 @@ export default ['$scope', 'TemplatesService',
 
         $scope.saveWorkflowMaker = function () {
 
+            Wait('start');
+
             if ($scope.graphState.arrayOfNodesForChart.length > 1) {
                 let addPromises = [];
                 let editPromises = [];
-                let credentialsToPost = [];
+                let credentialRequests = [];
 
                 Object.keys(nodeRef).map((workflowMakerNodeId) => {
                     if (nodeRef[workflowMakerNodeId].isNew) {
@@ -114,8 +119,8 @@ export default ['$scope', 'TemplatesService',
                                 });
 
                                 credentialIdsToPost.forEach((credentialToPost) => {
-                                    credentialsToPost.push({
-                                        id: data.id,
+                                    credentialRequests.push({
+                                        id: data.data.id,
                                         data: {
                                             id: credentialToPost.id
                                         }
@@ -128,6 +133,51 @@ export default ['$scope', 'TemplatesService',
                             id: nodeRef[workflowMakerNodeId].originalNodeObject.id,
                             data: buildSendableNodeData(nodeRef[workflowMakerNodeId])
                         }));
+
+                        if (_.get(nodeRef[workflowMakerNodeId], 'promptData.launchConf.ask_credential_on_launch')) {
+                            let credentialsNotInPriorCredentials = nodeRef[workflowMakerNodeId].promptData.prompts.credentials.value.filter(function (credFromPrompt) {
+                                let defaultCreds = _.get(nodeRef[workflowMakerNodeId], 'promptData.launchConf.defaults.credentials', []);
+                                return !defaultCreds.some(function (defaultCred) {
+                                    return credFromPrompt.id === defaultCred.id;
+                                });
+                            });
+
+                            let credentialsToAdd = credentialsNotInPriorCredentials.filter(function (credNotInPrior) {
+                                let previousOverrides = _.get(nodeRef[workflowMakerNodeId], 'promptData.prompts.credentials.previousOverrides', []);
+                                return !previousOverrides.some(function (priorCred) {
+                                    return credNotInPrior.id === priorCred.id;
+                                });
+                            });
+
+                            let credentialsToRemove = [];
+
+                            if (_.has(nodeRef[workflowMakerNodeId], 'promptData.prompts.credentials.previousOverrides')) {
+                                credentialsToRemove = nodeRef[workflowMakerNodeId].promptData.prompts.credentials.previousOverrides.filter(function (priorCred) {
+                                    return !credentialsNotInPriorCredentials.some(function (credNotInPrior) {
+                                        return priorCred.id === credNotInPrior.id;
+                                    });
+                                });
+                            }
+
+                            credentialsToAdd.forEach((credentialToAdd) => {
+                                credentialRequests.push({
+                                    id: nodeRef[workflowMakerNodeId].originalNodeObject.id,
+                                    data: {
+                                        id: credentialToAdd.id
+                                    }
+                                });
+                            });
+
+                            credentialsToRemove.forEach((credentialToRemove) => {
+                                credentialRequests.push({
+                                    id: nodeRef[workflowMakerNodeId].originalNodeObject.id,
+                                    data: {
+                                        id: credentialToRemove.id,
+                                        disassociate: true
+                                    }
+                                });
+                            });
+                        }
                     }
 
                 });
@@ -222,7 +272,7 @@ export default ['$scope', 'TemplatesService',
                                     case "success":
                                         if (
                                             !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes ||
-                                            !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes.includes(nodeRef[targetChartNodeId].id)
+                                            !nodeRef[sourceChartNodeId].originalNodeObject.success_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
                                         ) {
                                             associatePromises.push(
                                                 TemplatesService.associateWorkflowNode({
@@ -236,7 +286,7 @@ export default ['$scope', 'TemplatesService',
                                     case "failure":
                                         if (
                                             !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes ||
-                                            !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes.includes(nodeRef[targetChartNodeId].id)
+                                            !nodeRef[sourceChartNodeId].originalNodeObject.failure_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
                                         ) {
                                             associatePromises.push(
                                                 TemplatesService.associateWorkflowNode({
@@ -250,7 +300,7 @@ export default ['$scope', 'TemplatesService',
                                     case "always":
                                         if (
                                             !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes ||
-                                            !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes.includes(nodeRef[targetChartNodeId].id)
+                                            !nodeRef[sourceChartNodeId].originalNodeObject.always_nodes.includes(nodeRef[targetChartNodeId].originalNodeObject.id)
                                         ) {
                                             associatePromises.push(
                                                 TemplatesService.associateWorkflowNode({
@@ -267,7 +317,7 @@ export default ['$scope', 'TemplatesService',
 
                         $q.all(disassociatePromises)
                             .then(function () {
-                                let credentialPromises = credentialsToPost.map(function (request) {
+                                let credentialPromises = credentialRequests.map(function (request) {
                                     return TemplatesService.postWorkflowNodeCredential({
                                         id: request.id,
                                         data: request.data
@@ -276,12 +326,14 @@ export default ['$scope', 'TemplatesService',
 
                                 return $q.all(associatePromises.concat(credentialPromises))
                                     .then(function () {
+                                        Wait('stop');
                                         $scope.closeDialog();
                                     });
                             }).catch(({
                                 data,
                                 status
                             }) => {
+                                Wait('stop');
                                 ProcessErrors($scope, data, status, null, {});
                             });
                     });
@@ -294,6 +346,7 @@ export default ['$scope', 'TemplatesService',
 
                 $q.all(deletePromises)
                     .then(function () {
+                        Wait('stop');
                         $scope.closeDialog();
                     });
             }
@@ -333,8 +386,6 @@ export default ['$scope', 'TemplatesService',
             };
 
             workflowMakerNodeIdCounter++;
-
-            $scope.graphState.depthMap = WorkflowChartService.generateDepthMap($scope.graphState.arrayOfLinksForChart);
 
             $scope.$broadcast("refreshWorkflowChart");
 
@@ -381,8 +432,6 @@ export default ['$scope', 'TemplatesService',
             });
 
             workflowMakerNodeIdCounter++;
-
-            $scope.graphState.depthMap = WorkflowChartService.generateDepthMap($scope.graphState.arrayOfLinksForChart);
 
             $scope.$broadcast("refreshWorkflowChart");
 
@@ -479,7 +528,6 @@ export default ['$scope', 'TemplatesService',
                     }
                 }
 
-                $scope.graphState.depthMap = WorkflowChartService.generateDepthMap($scope.graphState.arrayOfLinksForChart);
             } else if ($scope.nodeConfig.mode === "edit") {
                 $scope.graphState.nodeBeingEdited = null;
             }
@@ -559,7 +607,6 @@ export default ['$scope', 'TemplatesService',
                     // User is going from editing one link to editing another
                     if ($scope.linkConfig.mode === "add") {
                         $scope.graphState.arrayOfLinksForChart.splice($scope.graphState.arrayOfLinksForChart.length-1, 1);
-                        $scope.graphState.depthMap = WorkflowChartService.generateDepthMap($scope.graphState.arrayOfLinksForChart);
                     }
                     setupLinkEdit();
                 }
@@ -601,8 +648,6 @@ export default ['$scope', 'TemplatesService',
                         $scope.graphState.arrayOfLinksForChart.splice(index, 1);
                     }
                 });
-
-                $scope.graphState.depthMap = WorkflowChartService.generateDepthMap($scope.graphState.arrayOfLinksForChart);
 
                 $scope.graphState.isLinkMode = false;
             } else {
@@ -688,8 +733,6 @@ export default ['$scope', 'TemplatesService',
                 }
             }
 
-            $scope.graphState.depthMap = WorkflowChartService.generateDepthMap($scope.graphState.arrayOfLinksForChart);
-
             $scope.formState.showLinkForm = false;
             $scope.linkConfig = null;
             $scope.$broadcast("refreshWorkflowChart");
@@ -712,7 +755,6 @@ export default ['$scope', 'TemplatesService',
                         edgeType: "always"
                     });
                 }
-                $scope.graphState.depthMap = WorkflowChartService.generateDepthMap($scope.graphState.arrayOfLinksForChart);
             }
             $scope.graphState.linkBeingEdited = null;
             $scope.graphState.addLinkSource = null;
@@ -803,8 +845,6 @@ export default ['$scope', 'TemplatesService',
 
                 $scope.deleteOverlayVisible = false;
 
-                $scope.graphState.depthMap = WorkflowChartService.generateDepthMap($scope.graphState.arrayOfLinksForChart);
-
                 $scope.nodeToBeDeleted = null;
                 $scope.deleteOverlayVisible = false;
 
@@ -847,7 +887,7 @@ export default ['$scope', 'TemplatesService',
         let page = 1;
 
         let getNodes = function () {
-            // Get the workflow nodes
+            Wait('start');
             TemplatesService.getWorkflowJobTemplateNodes($scope.workflowJobTemplateObj.id, page)
                 .then(function (data) {
                     for (var i = 0; i < data.data.results.length; i++) {
@@ -863,11 +903,12 @@ export default ['$scope', 'TemplatesService',
 
                         ({arrayOfNodesForChart, arrayOfLinksForChart, chartNodeIdToIndexMapping, nodeIdToChartNodeIdMapping, nodeRef, workflowMakerNodeIdCounter} = WorkflowChartService.generateArraysOfNodesAndLinks(allNodes));
 
-                        let depthMap = WorkflowChartService.generateDepthMap(arrayOfLinksForChart);
+                        $scope.graphState = { arrayOfNodesForChart, arrayOfLinksForChart };
 
-                        $scope.graphState = { arrayOfNodesForChart, arrayOfLinksForChart, depthMap };
+                        Wait('stop');
                     }
                 }, function ({ data, status, config }) {
+                    Wait('stop');
                     ProcessErrors($scope, data, status, null, {
                         hdr: $scope.strings.get('error.HEADER'),
                         msg: $scope.strings.get('error.CALL', {
