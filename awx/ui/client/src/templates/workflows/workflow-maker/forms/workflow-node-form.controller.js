@@ -7,11 +7,11 @@
 export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService', 'Rest', '$q',
         'TemplatesStrings', 'CreateSelect2', 'Empty', 'generateList', 'QuerySet',
         'GetBasePath', 'TemplateList', 'ProjectList', 'InventorySourcesList', 'ProcessErrors',
-        'i18n',
+        'i18n', 'ParseTypeChange',
     function($scope, TemplatesService, JobTemplate, PromptService, Rest, $q,
         TemplatesStrings, CreateSelect2, Empty, generateList, qs,
         GetBasePath, TemplateList, ProjectList, InventorySourcesList, ProcessErrors,
-        i18n
+        i18n, ParseTypeChange
     ) {
 
         let promptWatcher, credentialsWatcher, surveyQuestionWatcher, listPromises = [];
@@ -139,229 +139,254 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
         const finishConfiguringEdit = () => {
 
-            let jobTemplate = new JobTemplate();
+            if (!$scope.readOnly) {
+                let jobTemplate = new JobTemplate();
 
-            if (_.get($scope, 'nodeConfig.node.promptData') && !_.isEmpty($scope.nodeConfig.node.promptData)) {
-                $scope.promptData = _.cloneDeep($scope.nodeConfig.node.promptData);
-                const launchConf = $scope.promptData.launchConf;
+                if (_.get($scope, 'nodeConfig.node.promptData') && !_.isEmpty($scope.nodeConfig.node.promptData)) {
+                    $scope.promptData = _.cloneDeep($scope.nodeConfig.node.promptData);
+                    const launchConf = $scope.promptData.launchConf;
 
-                if (!launchConf.survey_enabled &&
-                    !launchConf.ask_inventory_on_launch &&
-                    !launchConf.ask_credential_on_launch &&
-                    !launchConf.ask_verbosity_on_launch &&
-                    !launchConf.ask_job_type_on_launch &&
-                    !launchConf.ask_limit_on_launch &&
-                    !launchConf.ask_tags_on_launch &&
-                    !launchConf.ask_skip_tags_on_launch &&
-                    !launchConf.ask_diff_mode_on_launch &&
-                    !launchConf.credential_needed_to_start &&
-                    !launchConf.ask_variables_on_launch &&
-                    launchConf.variables_needed_to_start.length === 0) {
-                        $scope.showPromptButton = false;
-                        $scope.promptModalMissingReqFields = false;
-                } else {
-                    $scope.showPromptButton = true;
-
-                    if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeConfig.node.originalNodeObject.summary_fields.inventory')) {
-                        $scope.promptModalMissingReqFields = true;
+                    if (!launchConf.survey_enabled &&
+                        !launchConf.ask_inventory_on_launch &&
+                        !launchConf.ask_credential_on_launch &&
+                        !launchConf.ask_verbosity_on_launch &&
+                        !launchConf.ask_job_type_on_launch &&
+                        !launchConf.ask_limit_on_launch &&
+                        !launchConf.ask_tags_on_launch &&
+                        !launchConf.ask_skip_tags_on_launch &&
+                        !launchConf.ask_diff_mode_on_launch &&
+                        !launchConf.credential_needed_to_start &&
+                        !launchConf.ask_variables_on_launch &&
+                        launchConf.variables_needed_to_start.length === 0) {
+                            $scope.showPromptButton = false;
+                            $scope.promptModalMissingReqFields = false;
                     } else {
-                        $scope.promptModalMissingReqFields = false;
-                    }
-                }
-                $scope.nodeFormDataLoaded = true;
-            } else if (
-                _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.unified_job_type') === 'job_template' ||
-                _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.type') === 'job_template'
-            ) {
-                let promises = [jobTemplate.optionsLaunch($scope.nodeConfig.node.fullUnifiedJobTemplateObject.id), jobTemplate.getLaunch($scope.nodeConfig.node.fullUnifiedJobTemplateObject.id)];
+                        $scope.showPromptButton = true;
 
-                if (_.has($scope, 'nodeConfig.node.originalNodeObject.related.credentials')) {
-                    Rest.setUrl($scope.nodeConfig.node.originalNodeObject.related.credentials);
-                    promises.push(Rest.get());
-                }
-
-                $q.all(promises)
-                    .then((responses) => {
-                        let launchOptions = responses[0].data,
-                            launchConf = responses[1].data,
-                            workflowNodeCredentials = responses[2] ? responses[2].data.results : [];
-
-                        let prompts = PromptService.processPromptValues({
-                            launchConf: responses[1].data,
-                            launchOptions: responses[0].data,
-                            currentValues: $scope.nodeConfig.node.originalNodeObject
-                        });
-
-                        let defaultCredsWithoutOverrides = [];
-
-                        prompts.credentials.previousOverrides = _.cloneDeep(workflowNodeCredentials);
-
-                        const credentialHasScheduleOverride = (templateDefaultCred) => {
-                            let credentialHasOverride = false;
-                            workflowNodeCredentials.forEach((scheduleCred) => {
-                                if (templateDefaultCred.credential_type === scheduleCred.credential_type) {
-                                    if (
-                                        (!templateDefaultCred.vault_id && !scheduleCred.inputs.vault_id) ||
-                                        (templateDefaultCred.vault_id && scheduleCred.inputs.vault_id && templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
-                                    ) {
-                                        credentialHasOverride = true;
-                                    }
-                                }
-                            });
-
-                            return credentialHasOverride;
-                        };
-
-                        if (_.has(launchConf, 'defaults.credentials')) {
-                            launchConf.defaults.credentials.forEach((defaultCred) => {
-                                if (!credentialHasScheduleOverride(defaultCred)) {
-                                    defaultCredsWithoutOverrides.push(defaultCred);
-                                }
-                            });
-                        }
-
-                        prompts.credentials.value = workflowNodeCredentials.concat(defaultCredsWithoutOverrides);
-
-                        if ((!$scope.nodeConfig.node.fullUnifiedJobTemplateObject.inventory && !launchConf.ask_inventory_on_launch) || !$scope.nodeConfig.node.fullUnifiedJobTemplateObject.project) {
-                            $scope.selectedTemplateInvalid = true;
+                        if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeConfig.node.originalNodeObject.summary_fields.inventory')) {
+                            $scope.promptModalMissingReqFields = true;
                         } else {
-                            $scope.selectedTemplateInvalid = false;
+                            $scope.promptModalMissingReqFields = false;
                         }
+                    }
+                    $scope.nodeFormDataLoaded = true;
+                } else if (
+                    _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.unified_job_type') === 'job_template' ||
+                    _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.type') === 'job_template'
+                ) {
+                    let promises = [jobTemplate.optionsLaunch($scope.nodeConfig.node.fullUnifiedJobTemplateObject.id), jobTemplate.getLaunch($scope.nodeConfig.node.fullUnifiedJobTemplateObject.id)];
 
-                        let credentialRequiresPassword = false;
+                    if (_.has($scope, 'nodeConfig.node.originalNodeObject.related.credentials')) {
+                        Rest.setUrl($scope.nodeConfig.node.originalNodeObject.related.credentials);
+                        promises.push(Rest.get());
+                    }
 
-                        prompts.credentials.value.forEach((credential) => {
-                            if(credential.inputs) {
-                                if ((credential.inputs.password && credential.inputs.password === "ASK") ||
-                                    (credential.inputs.become_password && credential.inputs.become_password === "ASK") ||
-                                    (credential.inputs.ssh_key_unlock && credential.inputs.ssh_key_unlock === "ASK") ||
-                                    (credential.inputs.vault_password && credential.inputs.vault_password === "ASK")
-                                ) {
+                    $q.all(promises)
+                        .then((responses) => {
+                            let launchOptions = responses[0].data,
+                                launchConf = responses[1].data,
+                                workflowNodeCredentials = responses[2] ? responses[2].data.results : [];
+
+                            let prompts = PromptService.processPromptValues({
+                                launchConf: responses[1].data,
+                                launchOptions: responses[0].data,
+                                currentValues: $scope.nodeConfig.node.originalNodeObject
+                            });
+
+                            let defaultCredsWithoutOverrides = [];
+
+                            prompts.credentials.previousOverrides = _.cloneDeep(workflowNodeCredentials);
+
+                            const credentialHasScheduleOverride = (templateDefaultCred) => {
+                                let credentialHasOverride = false;
+                                workflowNodeCredentials.forEach((scheduleCred) => {
+                                    if (templateDefaultCred.credential_type === scheduleCred.credential_type) {
+                                        if (
+                                            (!templateDefaultCred.vault_id && !scheduleCred.inputs.vault_id) ||
+                                            (templateDefaultCred.vault_id && scheduleCred.inputs.vault_id && templateDefaultCred.vault_id === scheduleCred.inputs.vault_id)
+                                        ) {
+                                            credentialHasOverride = true;
+                                        }
+                                    }
+                                });
+
+                                return credentialHasOverride;
+                            };
+
+                            if (_.has(launchConf, 'defaults.credentials')) {
+                                launchConf.defaults.credentials.forEach((defaultCred) => {
+                                    if (!credentialHasScheduleOverride(defaultCred)) {
+                                        defaultCredsWithoutOverrides.push(defaultCred);
+                                    }
+                                });
+                            }
+
+                            prompts.credentials.value = workflowNodeCredentials.concat(defaultCredsWithoutOverrides);
+
+                            if ((!$scope.nodeConfig.node.fullUnifiedJobTemplateObject.inventory && !launchConf.ask_inventory_on_launch) || !$scope.nodeConfig.node.fullUnifiedJobTemplateObject.project) {
+                                $scope.selectedTemplateInvalid = true;
+                            } else {
+                                $scope.selectedTemplateInvalid = false;
+                            }
+
+                            let credentialRequiresPassword = false;
+
+                            prompts.credentials.value.forEach((credential) => {
+                                if(credential.inputs) {
+                                    if ((credential.inputs.password && credential.inputs.password === "ASK") ||
+                                        (credential.inputs.become_password && credential.inputs.become_password === "ASK") ||
+                                        (credential.inputs.ssh_key_unlock && credential.inputs.ssh_key_unlock === "ASK") ||
+                                        (credential.inputs.vault_password && credential.inputs.vault_password === "ASK")
+                                    ) {
+                                        credentialRequiresPassword = true;
+                                    }
+                                } else if (credential.passwords_needed && credential.passwords_needed.length > 0) {
                                     credentialRequiresPassword = true;
                                 }
-                            } else if (credential.passwords_needed && credential.passwords_needed.length > 0) {
-                                credentialRequiresPassword = true;
-                            }
-                        });
+                            });
 
-                        $scope.credentialRequiresPassword = credentialRequiresPassword;
+                            $scope.credentialRequiresPassword = credentialRequiresPassword;
 
-                        if (!launchConf.survey_enabled &&
-                            !launchConf.ask_inventory_on_launch &&
-                            !launchConf.ask_credential_on_launch &&
-                            !launchConf.ask_verbosity_on_launch &&
-                            !launchConf.ask_job_type_on_launch &&
-                            !launchConf.ask_limit_on_launch &&
-                            !launchConf.ask_tags_on_launch &&
-                            !launchConf.ask_skip_tags_on_launch &&
-                            !launchConf.ask_diff_mode_on_launch &&
-                            !launchConf.credential_needed_to_start &&
-                            !launchConf.ask_variables_on_launch &&
-                            launchConf.variables_needed_to_start.length === 0) {
-                                $scope.showPromptButton = false;
-                                $scope.promptModalMissingReqFields = false;
-                                $scope.nodeFormDataLoaded = true;
-                        } else {
-                            $scope.showPromptButton = true;
-
-                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeConfig.node.originalNodeObject.summary_fields.inventory')) {
-                                $scope.promptModalMissingReqFields = true;
+                            if (!launchConf.survey_enabled &&
+                                !launchConf.ask_inventory_on_launch &&
+                                !launchConf.ask_credential_on_launch &&
+                                !launchConf.ask_verbosity_on_launch &&
+                                !launchConf.ask_job_type_on_launch &&
+                                !launchConf.ask_limit_on_launch &&
+                                !launchConf.ask_tags_on_launch &&
+                                !launchConf.ask_skip_tags_on_launch &&
+                                !launchConf.ask_diff_mode_on_launch &&
+                                !launchConf.credential_needed_to_start &&
+                                !launchConf.ask_variables_on_launch &&
+                                launchConf.variables_needed_to_start.length === 0) {
+                                    $scope.showPromptButton = false;
+                                    $scope.promptModalMissingReqFields = false;
+                                    $scope.nodeFormDataLoaded = true;
                             } else {
-                                $scope.promptModalMissingReqFields = false;
-                            }
+                                $scope.showPromptButton = true;
 
-                            if (responses[1].data.survey_enabled) {
-                                // go out and get the survey questions
-                                jobTemplate.getSurveyQuestions($scope.nodeConfig.node.fullUnifiedJobTemplateObject.id)
-                                    .then((surveyQuestionRes) => {
+                                if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeConfig.node.originalNodeObject.summary_fields.inventory')) {
+                                    $scope.promptModalMissingReqFields = true;
+                                } else {
+                                    $scope.promptModalMissingReqFields = false;
+                                }
 
-                                        let processed = PromptService.processSurveyQuestions({
-                                            surveyQuestions: surveyQuestionRes.data.spec,
-                                            extra_data: _.cloneDeep($scope.nodeConfig.node.originalNodeObject.extra_data)
-                                        });
+                                if (responses[1].data.survey_enabled) {
+                                    // go out and get the survey questions
+                                    jobTemplate.getSurveyQuestions($scope.nodeConfig.node.fullUnifiedJobTemplateObject.id)
+                                        .then((surveyQuestionRes) => {
 
-                                        $scope.missingSurveyValue = processed.missingSurveyValue;
-
-                                        $scope.extraVars = (processed.extra_data === '' || _.isEmpty(processed.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(processed.extra_data);
-
-                                        $scope.nodeConfig.node.promptData = $scope.promptData = {
-                                            launchConf: launchConf,
-                                            launchOptions: launchOptions,
-                                            prompts: prompts,
-                                            surveyQuestions: surveyQuestionRes.data.spec,
-                                            template: $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id
-                                        };
-
-                                        surveyQuestionWatcher = $scope.$watch('promptData.surveyQuestions', () => {
-                                            let missingSurveyValue = false;
-                                            _.each($scope.promptData.surveyQuestions, (question) => {
-                                                if (question.required && (Empty(question.model) || question.model === [])) {
-                                                    missingSurveyValue = true;
-                                                }
+                                            let processed = PromptService.processSurveyQuestions({
+                                                surveyQuestions: surveyQuestionRes.data.spec,
+                                                extra_data: _.cloneDeep($scope.nodeConfig.node.originalNodeObject.extra_data)
                                             });
-                                            $scope.missingSurveyValue = missingSurveyValue;
-                                        }, true);
 
-                                        checkCredentialsForRequiredPasswords();
+                                            $scope.missingSurveyValue = processed.missingSurveyValue;
 
-                                        watchForPromptChanges();
+                                            $scope.extraVars = (processed.extra_data === '' || _.isEmpty(processed.extra_data)) ? '---' : '---\n' + jsyaml.safeDump(processed.extra_data);
 
-                                        $scope.nodeFormDataLoaded = true;
-                                    });
-                            } else {
-                                $scope.nodeConfig.node.promptData = $scope.promptData = {
-                                    launchConf: launchConf,
-                                    launchOptions: launchOptions,
-                                    prompts: prompts,
-                                    template: $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id
-                                };
+                                            $scope.nodeConfig.node.promptData = $scope.promptData = {
+                                                launchConf: launchConf,
+                                                launchOptions: launchOptions,
+                                                prompts: prompts,
+                                                surveyQuestions: surveyQuestionRes.data.spec,
+                                                template: $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id
+                                            };
 
-                                checkCredentialsForRequiredPasswords();
+                                            surveyQuestionWatcher = $scope.$watch('promptData.surveyQuestions', () => {
+                                                let missingSurveyValue = false;
+                                                _.each($scope.promptData.surveyQuestions, (question) => {
+                                                    if (question.required && (Empty(question.model) || question.model === [])) {
+                                                        missingSurveyValue = true;
+                                                    }
+                                                });
+                                                $scope.missingSurveyValue = missingSurveyValue;
+                                            }, true);
 
-                                watchForPromptChanges();
+                                            checkCredentialsForRequiredPasswords();
 
-                                $scope.nodeFormDataLoaded = true;
+                                            watchForPromptChanges();
+
+                                            $scope.nodeFormDataLoaded = true;
+                                        });
+                                } else {
+                                    $scope.nodeConfig.node.promptData = $scope.promptData = {
+                                        launchConf: launchConf,
+                                        launchOptions: launchOptions,
+                                        prompts: prompts,
+                                        template: $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id
+                                    };
+
+                                    checkCredentialsForRequiredPasswords();
+
+                                    watchForPromptChanges();
+
+                                    $scope.nodeFormDataLoaded = true;
+                                }
                             }
-                        }
-                });
-            } else {
-                $scope.nodeFormDataLoaded = true;
-            }
+                    });
+                } else {
+                    $scope.nodeFormDataLoaded = true;
+                }
 
-            if (_.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject')) {
-                if (_.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.type') === "job_template") {
+                if (_.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject')) {
+                    if (_.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.type') === "job_template") {
+                        $scope.activeTab = "jobs";
+                    }
+
+                    $scope.selectedTemplate = $scope.nodeConfig.node.fullUnifiedJobTemplateObject;
+
+                    if ($scope.selectedTemplate.unified_job_type) {
+                        switch ($scope.selectedTemplate.unified_job_type) {
+                            case "job":
+                                $scope.activeTab = "jobs";
+                                break;
+                            case "project_update":
+                                $scope.activeTab = "project_syncs";
+                                break;
+                            case "inventory_update":
+                                $scope.activeTab = "inventory_syncs";
+                                break;
+                        }
+                    } else if ($scope.selectedTemplate.type) {
+                        switch ($scope.selectedTemplate.type) {
+                            case "job_template":
+                                $scope.activeTab = "jobs";
+                                break;
+                            case "project":
+                                $scope.activeTab = "project_syncs";
+                                break;
+                            case "inventory_source":
+                                $scope.activeTab = "inventory_syncs";
+                                break;
+                        }
+                    }
+                } else {
                     $scope.activeTab = "jobs";
                 }
-
-                $scope.selectedTemplate = $scope.nodeConfig.node.fullUnifiedJobTemplateObject;
-
-                if ($scope.selectedTemplate.unified_job_type) {
-                    switch ($scope.selectedTemplate.unified_job_type) {
-                        case "job":
-                            $scope.activeTab = "jobs";
-                            break;
-                        case "project_update":
-                            $scope.activeTab = "project_syncs";
-                            break;
-                        case "inventory_update":
-                            $scope.activeTab = "inventory_syncs";
-                            break;
-                    }
-                } else if ($scope.selectedTemplate.type) {
-                    switch ($scope.selectedTemplate.type) {
-                        case "job_template":
-                            $scope.activeTab = "jobs";
-                            break;
-                        case "project":
-                            $scope.activeTab = "project_syncs";
-                            break;
-                        case "inventory_source":
-                            $scope.activeTab = "inventory_syncs";
-                            break;
-                    }
-                }
             } else {
-                $scope.activeTab = "jobs";
+                $scope.jobTags = $scope.nodeConfig.node.originalNodeObject.job_tags ? $scope.nodeConfig.node.originalNodeObject.job_tags.split(',').map((tag) => (tag)) : [];
+                $scope.skipTags = $scope.nodeConfig.node.originalNodeObject.skip_tags ? $scope.nodeConfig.node.originalNodeObject.skip_tags.split(',').map((tag) => (tag)) : [];
+                $scope.showJobTags = true;
+                $scope.showSkipTags = true;
+
+                if (!$.isEmptyObject($scope.nodeConfig.node.originalNodeObject.extra_data)) {
+                    $scope.extraVars = '---\n' + jsyaml.safeDump($scope.nodeConfig.node.originalNodeObject.extra_data);
+                    $scope.showExtraVars = true;
+                    $scope.parseType = 'yaml';
+
+                    ParseTypeChange({
+                        scope: $scope,
+                        variable: 'extraVars',
+                        field_id: 'workflow_node_form_extra_vars',
+                        readOnly: true
+                    });
+                } else {
+                    $scope.extraVars = null;
+                    $scope.showExtraVars = false;
+                }
+
+                $scope.nodeFormDataLoaded = true;
             }
 
         };
