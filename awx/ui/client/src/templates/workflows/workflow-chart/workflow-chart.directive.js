@@ -114,7 +114,11 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                 // There's something off with the math on the root node...
                 if (d.source.id === 1) {
-                    sourceY = sourceY + 10;
+                    if (scope.mode === "details") {
+                        sourceY = sourceY + 17;
+                    } else {
+                        sourceY = sourceY + 10;
+                    }
                 }
 
                 let points = [{
@@ -1279,7 +1283,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function node_click() {
                 this.on("click", function(d) {
-                    if(d.id !== scope.graphState.nodeBeingAdded && !scope.readOnly){
+                    if(d.id !== scope.graphState.nodeBeingAdded){
                         if(scope.graphState.isLinkMode && !d.isInvalidLinkTarget && scope.graphState.addLinkSource !== d.id) {
                             $('.WorkflowChart-potentialLink').remove();
                             scope.selectNodeForLinking({
