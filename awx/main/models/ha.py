@@ -152,10 +152,6 @@ class Instance(HasPolicyEditsMixin, BaseModel):
         self.save(update_fields=['capacity', 'version', 'modified', 'cpu',
                                  'memory', 'cpu_capacity', 'mem_capacity'])
 
-    def clean_hostname(self):
-        return self.hostname
-
-    
 
 class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     """A model representing a Queue/Group of AWX Instances."""
@@ -222,8 +218,6 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
     class Meta:
         app_label = 'main'
 
-    def clean_name(self):
-        return self.name
 
     def fit_task_to_most_remaining_capacity_instance(self, task):
         instance_most_capacity = None
