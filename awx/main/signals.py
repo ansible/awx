@@ -425,6 +425,11 @@ def activity_stream_create(sender, instance, created, **kwargs):
         changes = model_to_dict(instance, model_serializer_mapping)
         # Special case where Job survey password variables need to be hidden
         if type(instance) == Job:
+            changes['credentials'] = [
+                six.text_type('{} ({})').format(c.name, c.id)
+                for c in instance.credentials.iterator()
+            ]
+            changes['labels'] = [l.name for l in instance.labels.iterator()]
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
         if type(instance) == OAuth2AccessToken:
