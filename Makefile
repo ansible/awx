@@ -84,6 +84,11 @@ clean-venv:
 clean-dist:
 	rm -rf dist
 
+clean-schema:
+	rm -rf swagger.json
+	rm -rf schema.json
+	rm -rf reference-schema.json
+
 # Remove temporary build files, compiled Python files.
 clean: clean-ui clean-dist
 	rm -rf awx/public
@@ -565,6 +570,15 @@ docker-compose-runtest:
 
 docker-compose-build-swagger:
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh swagger
+
+docker-compose-genschema:
+	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh genschema
+	mv swagger.json schema.json
+
+docker-compose-validate-schema:
+	$(MAKE) docker-compose-genschema
+	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
+	diff -u schema.json reference-schema.json
 
 docker-compose-clean:
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm -w /awx_devel --service-ports awx make clean
