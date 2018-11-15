@@ -40,8 +40,8 @@ from django.apps import apps
 logger = logging.getLogger('awx.main.utils')
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize', 'memoize_delete',
-           'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_version', 'update_scm_url',
-           'get_type_for_model', 'get_model_for_type', 'copy_model_by_class', 'region_sorting',
+           'get_ansible_version', 'get_fips_enabled', 'get_ssh_version', 'get_licenser', 'get_awx_version',
+           'update_scm_url', 'get_type_for_model', 'get_model_for_type', 'copy_model_by_class', 'region_sorting',
            'copy_m2m_relationships', 'prefetch_page_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'getattr_dne', 'NoDefaultProvided',
@@ -182,6 +182,17 @@ def get_ansible_version():
         return result.split('\n')[0].replace('ansible', '').strip()
     except Exception:
         return 'unknown'
+
+
+def get_fips_enabled():
+    path = '/proc/sys/crypto/fips_enabled'
+    if os.path.exists(path):
+        try:
+            with open(path, 'r') as f:
+                return f.read().strip() == '1'
+        except Exception:
+            pass
+    return False
 
 
 @memoize()

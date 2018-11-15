@@ -21,6 +21,7 @@ from awx.main.ha import is_ha_environment
 from awx.main.utils import (
     get_awx_version,
     get_ansible_version,
+    get_fips_enabled,
     get_custom_venv_choices,
     to_python_boolean,
 )
@@ -201,6 +202,7 @@ class ApiV1ConfigView(APIView):
             license_info=license_data,
             version=get_awx_version(),
             ansible_version=get_ansible_version(),
+            fips=get_fips_enabled(),
             eula=render_to_string("eula.md") if license_data.get('license_type', 'UNLICENSED') != 'open' else '',
             analytics_status=pendo_state
         )

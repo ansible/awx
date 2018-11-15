@@ -6,14 +6,18 @@ export default ['$rootScope', '$scope', '$location', 'ConfigService', 'lastPath'
             $scope.version = config.version.split('-')[0];
             $scope.ansible_version = config.ansible_version;
             $scope.subscription = config.license_info.subscription_name;
-            $scope.speechBubble = createSpeechBubble($rootScope.BRAND_NAME, config.version);
+            $scope.speechBubble = createSpeechBubble(
+                $rootScope.BRAND_NAME,
+                config.version,
+                config.fips ? ' (FIPS Mode)' : ''
+            );
             $('#about-modal').modal('show');
         });
 
     $('#about-modal').on('hidden.bs.modal', () => $location.url(lastPath));
 
-    function createSpeechBubble (brand, version) {
-        let text = `${brand} ${version}`;
+    function createSpeechBubble (brand, version, fips) {
+        let text = `${brand} ${version}${fips}`;
         let top = '';
         let bottom = '';
 
