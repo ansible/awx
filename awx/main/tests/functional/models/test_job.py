@@ -19,6 +19,18 @@ def test_awx_virtualenv_from_settings(inventory, project, machine_credential):
 
 
 @pytest.mark.django_db
+def test_prevent_slicing():
+    jt = JobTemplate.objects.create(
+        name='foo',
+        job_slice_count=4
+    )
+    job = jt.create_unified_job(_prevent_slicing=True)
+    assert job.job_slice_count == 1
+    assert job.job_slice_number == 0
+    assert isinstance(job, Job)
+
+
+@pytest.mark.django_db
 def test_awx_custom_virtualenv(inventory, project, machine_credential):
     jt = JobTemplate.objects.create(
         name='my-jt',
