@@ -21,6 +21,42 @@ except ImportError: # pragma: no cover
     MODE = 'production'
 
 
+import hashlib
+import django
+from django.utils.encoding import force_bytes
+from django.db.backends.base.schema import BaseDatabaseSchemaEditor
+from django.db.backends.base import schema
+
+
+# This line exists to make sure we don't regress on FIPS support if we
+# upgrade Django; if you're upgrading Django and see this error,
+# update the version check below, and confirm that FIPS still works.
+if django.__version__ != '1.11.16':
+    raise RuntimeError("Django version other than 1.11.16 detected {}. \
+            Subclassing BaseDatabaseSchemaEditor is known to work for Django 1.11.16 \
+            and may not work in newer Django versions.".format(django.__version__))
+
+
+class FipsBaseDatabaseSchemaEditor(BaseDatabaseSchemaEditor):
+
+    @classmethod
+    def _digest(cls, *args):
+        """
+        Generates a 32-bit digest of a set of arguments that can be used to
+        shorten identifying names.
+        """
+        try:
+            h = hashlib.md5()
+        except ValueError:
+            h = hashlib.md5(usedforsecurity=False)
+        for arg in args:
+            h.update(force_bytes(arg))
+        return h.hexdigest()[:8]
+
+
+schema.BaseDatabaseSchemaEditor = FipsBaseDatabaseSchemaEditor
+
+
 def find_commands(management_dir):
     # Modified version of function from django/core/management/__init__.py.
     command_dir = os.path.join(management_dir, 'commands')
