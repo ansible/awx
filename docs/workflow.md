@@ -64,7 +64,7 @@ As stated, workflow job templates can be created with populated `extra_vars`. Th
 
 Job resources spawned by workflow jobs are needed by workflow to run correctly. Therefore deletion of spawned job resources is blocked while the underlying workflow job is executing.
 
-Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors, all branches starting from that job will stop executing while the rest continue executing. Canceling a workflow spawned job resource follows the same rules. If the unified job template of the node is null (which could be a result of deleting the unified job template or copying a workflow when the user lacks necessary permissions to use the resource), then the branch should stop executing in this case as well.
+Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors, it is treated the same as failure. Canceling a workflow spawned job resource is also treated as a failure. If the unified job template of the node is null (which could be a result of deleting the unified job template or copying a workflow when the user lacks necessary permissions to use the resource), then the branch should stop executing in this case as well.
 
 A workflow job itself can also be canceled. In this case all its spawned job resources will be canceled if cancelable and following paths stop executing.
 
@@ -80,9 +80,7 @@ Workflow job summary:
 
 Starting from Tower 3.2, Workflow jobs support simultaneous job runs just like that of ordinary jobs. It is controlled by `allow_simultaneous` field of underlying workflow job template. By default, simultaneous workflow job runs are disabled and users should be prudent in enabling this functionality. Because the performance boost of simultaneous workflow runs will only manifest when a large portion of jobs contained by a workflow allow simultaneous runs. Otherwise it is expected to have some long-running workflow jobs since its spawned jobs can be in pending state for a long time.
 
-Before Tower 3.3, the 'failed' status of workflow job is not defined. Starting from 3.3 we define a finished workflow job to fail, if at least one of the conditions below satisfies:
-* At least one node runs into states `canceled` or `error`.
-* At least one leaf node runs into states `failed`, but no child node is spawned to run (no error handler).
+A workflow job is marked as failed if a job spawned by a workflow job fails, without a failure handler. A failure handler is a failure or always link in the workflow job template. A job that is canceled is, effectively, considered a failure for purposes of determining if a job nodes is failed.
 
 ### Workflow Copy and Relaunch
 Other than the normal way of creating workflow job templates, it is also possible to copy existing workflow job templates. The resulting new workflow job template will be mostly identical to the original, except for `name` field which will be appended a text to indicate it's a copy.
