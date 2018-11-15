@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from awx.main.scheduler import TaskManager
 from awx.main.utils import encrypt_field
+from awx.main.models import WorkflowJobTemplate, JobTemplate
 
 
 @pytest.mark.django_db
@@ -19,6 +20,95 @@ def test_single_job_scheduler_launch(default_instance_group, job_template_factor
     with mocker.patch("awx.main.scheduler.TaskManager.start_task"):
         TaskManager().schedule()
         TaskManager.start_task.assert_called_once_with(j, default_instance_group, [], instance)
+
+
+@pytest.mark.django_db
+class TestJobLifeCycle:
+
+    def run_tm(self, tm, expect_channel=None, expect_schedule=None, expect_commit=None):
+        """Test helper method that takes parameters to assert against
+        expect_channel - list of expected websocket emit channel message calls
+        expect_schedule - list of expected calls to reschedule itself
+        expect_commit - list of expected on_commit calls
+        If any of these are None, then the assertion is not made.
+        """
+        if expect_schedule and len(expect_schedule) > 1:
+            raise RuntimeError('Task manager should reschedule itself one time, at most.')
+        with mock.patch('awx.main.models.unified_jobs.UnifiedJob.websocket_emit_status') as mock_channel:
+            with mock.patch('awx.main.utils.common._schedule_task_manager') as tm_sch:
+                # Job are ultimately submitted in on_commit hook, but this will not
+                # actually run, because it waits until outer transaction, which is the test
+                # itself in this case
+                with mock.patch('django.db.connection.on_commit') as mock_commit:
+                    tm.schedule()
+                    if expect_channel is not None:
+                        assert mock_channel.mock_calls == expect_channel
+                    if expect_schedule is not None:
+                        assert tm_sch.mock_calls == expect_schedule
+                    if expect_commit is not None:
+                        assert mock_commit.mock_calls == expect_commit
+
+    def test_task_manager_workflow_rescheduling(self, job_template_factory, inventory, project, default_instance_group):
+        jt = JobTemplate.objects.create(
+            allow_simultaneous=True,
+            inventory=inventory,
+            project=project,
+            playbook='helloworld.yml'
+        )
+        wfjt = WorkflowJobTemplate.objects.create(name='foo')
+        for i in range(2):
+            wfjt.workflow_nodes.create(
+                unified_job_template=jt
+            )
+        wj = wfjt.create_unified_job()
+        assert wj.workflow_nodes.count() == 2
+        wj.signal_start()
+        tm = TaskManager()
+
+        # Transitions workflow job to running
+        # needs to re-schedule so it spawns jobs next round
+        self.run_tm(tm, [mock.call('running')], [mock.call()])
+
+        # Spawns jobs
+        # needs re-schedule to submit jobs next round
+        self.run_tm(tm, [mock.call('pending'), mock.call('pending')], [mock.call()])
+
+        assert jt.jobs.count() == 2  # task manager spawned jobs
+
+        # Submits jobs
+        # intermission - jobs will run and reschedule TM when finished
+        self.run_tm(tm, [mock.call('waiting'), mock.call('waiting')], [])
+
+        # I am the job runner
+        for job in jt.jobs.all():
+            job.status = 'successful'
+            job.save()
+
+        # Finishes workflow
+        # no further action is necessary, so rescheduling should not happen
+        self.run_tm(tm, [mock.call('successful')], [])
+
+    def test_task_manager_workflow_workflow_rescheduling(self):
+        wfjts = [WorkflowJobTemplate.objects.create(name='foo')]
+        for i in range(5):
+            wfjt = WorkflowJobTemplate.objects.create(name='foo{}'.format(i))
+            wfjts[-1].workflow_nodes.create(
+                unified_job_template=wfjt
+            )
+            wfjts.append(wfjt)
+
+        wj = wfjts[0].create_unified_job()
+        wj.signal_start()
+        tm = TaskManager()
+
+        while wfjts[0].status != 'successful':
+            wfjts[1].refresh_from_db()
+            if wfjts[1].status == 'successful':
+                # final run, no more work to do
+                self.run_tm(tm, expect_schedule=[])
+            else:
+                self.run_tm(tm, expect_schedule=[mock.call()])
+            wfjts[0].refresh_from_db()
 
 
 @pytest.mark.django_db

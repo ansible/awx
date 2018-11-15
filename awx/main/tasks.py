@@ -56,7 +56,7 @@ from awx.main.dispatch import get_local_queuename, reaper
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, OutputEventFilter, OutputVerboseFilter, ignore_inventory_computed_fields,
-                            ignore_inventory_group_removal, extract_ansible_vars)
+                            ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager)
 from awx.main.utils.safe_yaml import safe_dump, sanitize_jinja
 from awx.main.utils.reload import stop_local_services
 from awx.main.utils.pglock import advisory_lock
@@ -493,8 +493,7 @@ def handle_work_success(task_actual):
     if not instance:
         return
 
-    from awx.main.scheduler.tasks import run_job_complete
-    run_job_complete.delay(instance.id)
+    schedule_task_manager()
 
 
 @task()
@@ -533,8 +532,7 @@ def handle_work_error(task_id, *args, **kwargs):
     # what the job complete message handler does then we may want to send a
     # completion event for each job here.
     if first_instance:
-        from awx.main.scheduler.tasks import run_job_complete
-        run_job_complete.delay(first_instance.id)
+        schedule_task_manager()
         pass
 
 
