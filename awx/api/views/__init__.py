@@ -2056,6 +2056,14 @@ class InventorySourceHostsList(HostRelatedSearchMixin, SubListDestroyAPIView):
     relationship = 'hosts'
     check_sub_obj_permission = False
 
+    def perform_list_destroy(self, instance_list):
+        # Activity stream doesn't record disassociation here anyway
+        # no signals-related reason to not bulk-delete
+        Host.groups.through.objects.filter(
+            host__inventory_sources=self.get_parent_object()
+        ).delete()
+        return super(InventorySourceHostsList, self).perform_list_destroy(instance_list)
+
 
 class InventorySourceGroupsList(SubListDestroyAPIView):
 
@@ -2064,6 +2072,13 @@ class InventorySourceGroupsList(SubListDestroyAPIView):
     parent_model = InventorySource
     relationship = 'groups'
     check_sub_obj_permission = False
+
+    def perform_list_destroy(self, instance_list):
+        # Same arguments for bulk delete as with host list
+        Group.hosts.through.objects.filter(
+            group__inventory_sources=self.get_parent_object()
+        ).delete()
+        return super(InventorySourceGroupsList, self).perform_list_destroy(instance_list)
 
 
 class InventorySourceUpdatesList(SubListAPIView):

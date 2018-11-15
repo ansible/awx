@@ -552,9 +552,8 @@ class SubListDestroyAPIView(DestroyAPIView, SubListAPIView):
 
     def perform_list_destroy(self, instance_list):
         if self.check_sub_obj_permission:
-            # Check permissions for all before deleting, avoiding half-deleted lists
             for instance in instance_list:
-                if self.has_delete_permission(instance):
+                if not self.has_delete_permission(instance):
                     raise PermissionDenied()
         for instance in instance_list:
             self.perform_destroy(instance, check_permission=False)
