@@ -207,7 +207,7 @@ function ListJobsController (
     };
 
     function refreshJobs () {
-        qs.search(SearchBasePath, $state.params.job_search)
+        qs.search(SearchBasePath, $state.params.job_search, { 'X-WS-Session-Quiet': true })
             .then(({ data }) => {
                 vm.jobs = data.results;
                 vm.job_dataset = data;

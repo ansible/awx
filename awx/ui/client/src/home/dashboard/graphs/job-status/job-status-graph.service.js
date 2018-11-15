@@ -36,6 +36,7 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
             return;
         }
         url = dash_path + 'graphs/jobs/?period='+period+'&job_type='+jobType;
+        Rest.setHeader({'X-WS-Session-Quiet': true});
         Rest.setUrl(url);
         var result = Rest.get()
         .catch(function(response) {

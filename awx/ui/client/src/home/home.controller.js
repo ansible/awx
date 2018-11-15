@@ -87,6 +87,7 @@ export default ['$scope', '$rootScope','Wait',
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
             });
             Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
+            Rest.setHeader({'X-WS-Session-Quiet': true});
             Rest.get()
             .then(({data}) => {
                 data = data.results;
@@ -119,6 +120,7 @@ export default ['$scope', '$rootScope','Wait',
             });
 
             Rest.setUrl(GetBasePath("unified_jobs") + "?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
+            Rest.setHeader({'X-WS-Session-Quiet': true});
             Rest.get()
             .then(({data}) => {
                 $scope.dashboardJobsListData = data.results;
