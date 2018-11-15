@@ -90,7 +90,7 @@ class WorkflowDAG(SimpleDAG):
                 continue
 
             if obj.job:
-                if obj.job.status in ['failed', 'error']:
+                if obj.job.status in ['failed', 'error', 'canceled']:
                     nodes.extend(self.get_dependencies(obj, 'failure_nodes') +
                                  self.get_dependencies(obj, 'always_nodes'))
                 elif obj.job.status == 'successful':
@@ -127,7 +127,7 @@ class WorkflowDAG(SimpleDAG):
         failed_nodes = []
         for node in self.nodes:
             obj = node['node_object']
-            if obj.job and obj.job.status in ['failed', 'anceled', 'error']:
+            if obj.job and obj.job.status in ['failed', 'canceled', 'error']:
                 failed_nodes.append(node)
         for node in failed_nodes:
             obj = node['node_object']
