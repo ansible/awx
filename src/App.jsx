@@ -53,22 +53,51 @@ import Teams from './pages/Teams';
 import Templates from './pages/Templates';
 import Users from './pages/Users';
 
+const SideNavItems = ({ items, history }) => {
+  const currentPath = history.location.pathname.replace(/^\//, '');
+  let activeGroup;
+  if (currentPath !== '') {
+    const groupPaths = items.map(({ groupName, routes }) => ({
+      groupName,
+      paths: routes.map(({ path }) => path)
+    }));
+    [{ groupName: activeGroup }] = groupPaths
+      .filter(({ paths }) => paths.indexOf(currentPath) > -1);
+  } else {
+    activeGroup = 'views';
+  }
+
+  return (items.map(({ title, groupName, routes }) => (
+    <NavExpandable
+      key={groupName}
+      title={title}
+      groupId={`${groupName}_group`}
+      isActive={`${activeGroup}_group` === `${groupName}_group`}
+      isExpanded={`${activeGroup}_group` === `${groupName}_group`}
+    >
+      {routes.map(({ path, title: itemTitle }) => (
+        <NavItem
+          key={path}
+          to={`#/${path}`}
+          groupId={`${groupName}_group`}
+          isActive={currentPath === path}
+        >
+          {itemTitle}
+        </NavItem>
+      ))}
+    </NavExpandable>
+  )));
+};
+
 class App extends React.Component {
   constructor (props) {
     super(props);
 
     const isNavOpen = typeof window !== 'undefined' && window.innerWidth >= parseInt(breakpointMd.value, 10);
     this.state = {
-      isNavOpen,
-      activeGroup: 'views_group',
+      isNavOpen
     };
   }
-
-  onNavSelect = result => {
-    this.setState({
-      activeGroup: result.groupId
-    });
-  };
 
   onNavToggle = () => {
     this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
@@ -98,9 +127,8 @@ class App extends React.Component {
   };
 
   render () {
-    console.log('render');
-    const { activeGroup, isNavOpen } = this.state;
-    const { logo, loginInfo } = this.props;
+    const { isNavOpen } = this.state;
+    const { logo, loginInfo, history } = this.props;
 
     const PageToolbar = (
       <Toolbar>
@@ -146,211 +174,61 @@ class App extends React.Component {
                 <PageSidebar
                   isNavOpen={isNavOpen}
                   nav={(
-                    <Nav onSelect={this.onNavSelect} aria-label="Primary Navigation">
+                    <Nav aria-label="Primary Navigation">
                       <NavList>
-                        <NavExpandable
-                          title="Views"
-                          groupId="views_group"
-                          isActive={activeGroup === 'views_group'}
-                          isExpanded={activeGroup === 'views_group'}
-                        >
-                          <NavItem
-                            to="#/home"
-                            groupId="views_group"
-                            itemId="views_group_dashboard"
-                            isActive={this.expand('home', 'views_group')}
-                          >
-                            Dashboard
-                          </NavItem>
-                          <NavItem
-                            to="#/jobs"
-                            groupId="views_group"
-                            itemId="views_group_jobs"
-                            isActive={this.expand('jobs', 'views_group')}
-                          >
-                            Jobs
-                          </NavItem>
-                          <NavItem
-                            to="#/schedules"
-                            groupId="views_group"
-                            itemId="views_group_schedules"
-                            isActive={this.expand('schedules', 'views_group')}
-                          >
-                            Schedules
-                          </NavItem>
-                          <NavItem
-                            to="#/portal"
-                            groupId="views_group"
-                            itemId="views_group_portal"
-                            isActive={this.expand('portal', 'views_group')}
-                          >
-                          My View
-                          </NavItem>
-                        </NavExpandable>
-                        <NavExpandable
-                          title="Resources"
-                          groupId="resources_group"
-                          isActive={activeGroup === 'resources_group'}
-                          isExpanded={activeGroup === 'resources_group'}
-                        >
-                          <NavItem
-                            to="#/templates"
-                            groupId="resources_group"
-                            itemId="resources_group_templates"
-                            isActive={this.expand('templates', 'resources_group')}
-                          >
-                            Templates
-                          </NavItem>
-                          <NavItem
-                            to="#/credentials"
-                            groupId="resources_group"
-                            itemId="resources_group_credentials"
-                            isActive={this.expand('credentials', 'resources_group')}
-                          >
-                            Credentials
-                          </NavItem>
-                          <NavItem
-                            to="#/projects"
-                            groupId="resources_group"
-                            itemId="resources_group_projects"
-                            isActive={this.expand('projects', 'resources_group')}
-                          >
-                            Projects
-                          </NavItem>
-                          <NavItem
-                            to="#/inventories"
-                            groupId="resources_group"
-                            itemId="resources_group_inventories"
-                            isActive={this.expand('inventories', 'resources_group')}
-                          >
-                            Inventories
-                          </NavItem>
-                          <NavItem
-                            to="#/inventory_scripts"
-                            groupId="resources_group"
-                            itemId="resources_group_inventory_scripts"
-                            isActive={this.expand('inventory_scripts', 'resources_group')}
-                          >
-                            Inventory Scripts
-                          </NavItem>
-                        </NavExpandable>
-                        <NavExpandable
-                          title="Access"
-                          groupId="access_group"
-                          isActive={activeGroup === 'access_group'}
-                          isExpanded={activeGroup === 'access_group'}
-                        >
-                          <NavItem
-                            to="#/organizations"
-                            groupId="access_group"
-                            itemId="access_group_organizations"
-                            isActive={this.expand('organizations', 'access_group')}
-                          >
-                            Organizations
-                          </NavItem>
-                          <NavItem
-                            to="#/users"
-                            groupId="access_group"
-                            itemId="access_group_users"
-                            isActive={this.expand('users', 'access_group')}
-                          >
-                            Users
-                          </NavItem>
-                          <NavItem
-                            to="#/teams"
-                            groupId="access_group"
-                            itemId="access_group_teams"
-                            isActive={this.expand('teams', 'access_group')}
-                          >
-                            Teams
-                          </NavItem>
-                        </NavExpandable>
-                        <NavExpandable
-                          title="Administration"
-                          groupId="administration_group"
-                          isActive={activeGroup === 'administration_group'}
-                          isExpanded={activeGroup === 'administration_group'}
-                        >
-                          <NavItem
-                            to="#/credential_types"
-                            groupId="administration_group"
-                            itemId="administration_group_credential_types"
-                            isActive={this.expand('credential_types', 'administration_group')}
-                          >
-                            Credential Types
-                          </NavItem>
-                          <NavItem
-                            to="#/notification_templates"
-                            groupId="administration_group"
-                            itemId="administration_group_notification_templates"
-                            isActive={this.expand('notification_templates', 'administration_group')}
-                          >
-                            Notification Templates
-                          </NavItem>
-                          <NavItem
-                            to="#/management_jobs"
-                            groupId="administration_group"
-                            itemId="administration_group_management_jobs"
-                            isActive={this.expand('management_jobs', 'administration_group')}
-                          >
-                            Management Jobs
-                          </NavItem>
-                          <NavItem
-                            to="#/instance_groups"
-                            groupId="administration_group"
-                            itemId="administration_group_instance_groups"
-                            isActive={this.expand('instance_groups', 'administration_group')}
-                          >
-                            Instance Groups
-                          </NavItem>
-                          <NavItem
-                            to="#/applications"
-                            groupId="administration_group"
-                            itemId="administration_group_applications"
-                            isActive={this.expand('applications', 'administration_group')}
-                          >
-                            Applications
-                          </NavItem>
-                        </NavExpandable>
-                        <NavExpandable
-                          title="Settings"
-                          groupId="settings_group"
-                          isActive={activeGroup === 'settings_group'}
-                          isExpanded={activeGroup === 'settings_group'}
-                        >
-                          <NavItem
-                            to="#/auth_settings"
-                            groupId="settings_group"
-                            itemId="settings_group_auth"
-                            isActive={this.expand('auth_settings', 'settings_group')}
-                          >
-                            Authentication
-                          </NavItem>
-                          <NavItem
-                            to="#/jobs_settings"
-                            groupId="settings_group"
-                            itemId="settings_group_jobs"
-                            isActive={this.expand('jobs_settings', 'settings_group')}
-                          >
-                            Jobs
-                          </NavItem>
-                          <NavItem
-                            to="#/system_settings"
-                            groupId="settings_group"
-                            itemId="settings_group_system"
-                            isActive={this.expand('system_settings', 'settings_group')}
-                          >
-                            System
-                          </NavItem>
-                          <NavItem
-                            to="#/ui_settings"
-                            groupId="settings_group"
-                            itemId="settings_group_ui"
-                            isActive={this.expand('ui_settings', 'settings_group')}
-                          >
-                          User Interface
-                          </NavItem>
-                        </NavExpandable>
+                        <SideNavItems
+                          history={history}
+                          items={[
+                            {
+                              groupName: 'views',
+                              title: 'Views',
+                              routes: [
+                                {
+                                  path: 'home',
+                                  title: 'Dashboard'
+                                },
+                                {
+                                  path: 'jobs',
+                                  title: 'Jobs'
+                                },
+                                {
+                                  path: 'schedules',
+                                  title: 'Schedules'
+                                },
+                                {
+                                  path: 'portal',
+                                  title: 'Portal'
+                                },
+                              ]
+                            },
+                            {
+                              groupName: 'resources',
+                              title: 'Resources',
+                              routes: [
+                                {
+                                  path: 'templates',
+                                  title: 'Templates'
+                                },
+                                {
+                                  path: 'credentials',
+                                  title: 'Credentials'
+                                },
+                                {
+                                  path: 'projects',
+                                  title: 'Projects'
+                                },
+                                {
+                                  path: 'inventories',
+                                  title: 'Inventories'
+                                },
+                                {
+                                  path: 'inventory_scripts',
+                                  title: 'Inventory Scripts'
+                                }
+                              ]
+                            }
+                          ]}
+                        />
                       </NavList>
                     </Nav>
                   )}
