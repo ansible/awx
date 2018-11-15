@@ -71,7 +71,7 @@ class WorkflowDAG(SimpleDAG):
                 return False
 
             # Node decidedly got a job; check if job is done
-            if p.job and p.job.status not in ['successful', 'failed', 'error']:
+            if p.job and p.job.status not in ['successful', 'failed', 'error', 'canceled']:
                 return False
         return True
 
