@@ -420,7 +420,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         workflow_job.copy_nodes_from_original(original=self)
         return workflow_job
 
-    def _accept_or_ignore_job_kwargs(self, _exclude_errors=(), **kwargs):
+    def _accept_or_ignore_job_kwargs(self, **kwargs):
         exclude_errors = kwargs.pop('_exclude_errors', [])
         prompted_data = {}
         rejected_data = {}

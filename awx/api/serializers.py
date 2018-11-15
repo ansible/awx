@@ -4458,9 +4458,7 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
     def validate(self, attrs):
         template = self.instance
 
-        accepted, rejected, errors = template._accept_or_ignore_job_kwargs(
-            _exclude_errors=['required'],
-            **attrs)
+        accepted, rejected, errors = template._accept_or_ignore_job_kwargs(**attrs)
         self._ignored_fields = rejected
 
         if template.inventory and template.inventory.pending_deletion is True:
