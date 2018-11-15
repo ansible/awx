@@ -122,7 +122,7 @@ class TestSwaggerGeneration():
             pattern = pattern.replace('{id}', '[0-9]+')
             pattern = pattern.replace(r'{category_slug}', r'[a-zA-Z0-9\-]+')
             for path, result in swagger_autogen.items():
-                if re.match('^{}$'.format(pattern), path):
+                if re.match(r'^{}$'.format(pattern), path):
                     for key, value in result.items():
                         method, status_code = key
                         content_type, resp, request_data = value
@@ -168,13 +168,13 @@ class TestSwaggerGeneration():
             # replace ISO dates w/ the same value so we don't generate
             # needless diffs
             data = re.sub(
-                '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+Z',
-                '2018-02-01T08:00:00.000000Z',
+                r'[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+Z',
+                r'2018-02-01T08:00:00.000000Z',
                 data
             )
             data = re.sub(
-                '''(\s+"client_id": ")([a-zA-Z0-9]{40})("\,\s*)''',
-                '\\1xxxx\\3',
+                r'''(\s+"client_id": ")([a-zA-Z0-9]{40})("\,\s*)''',
+                r'\1xxxx\3',
                 data
             )
             f.write(data)
