@@ -1,8 +1,8 @@
-<div class="WorkflowMaker-formTitle">{{readOnly ? strings.get('workflow_maker.VIEW_LINK') : (linkConfig.mode === 'add' ? strings.get('workflow_maker.ADD_LINK') : strings.get('workflow_maker.EDIT_LINK')) }} | {{linkConfig.parent.name}} {{linkConfig.child ? 'to ' + linkConfig.child.name : ''}}</div>
+<div class="WorkflowMaker-formTitle">{{readOnly ? strings.get('workflow_maker.VIEW_LINK') : (linkConfig.mode === 'add' ? strings.get('workflow_maker.ADD_LINK') : strings.get('workflow_maker.EDIT_LINK')) }} | {{linkConfig.source.name}} {{linkConfig.target ? 'to ' + linkConfig.target.name : ''}}</div>
 <div class="WorkflowMaker-form">
     <div class="form-group Form-formGroup Form-formGroup--singleColumn">
-        <div ng-show="linkConfig.mode === 'add' && !linkConfig.child">{{:: strings.get('workflow_maker.NEW_LINK')}}</div>
-        <span ng-show="linkConfig.child">
+        <div ng-show="linkConfig.mode === 'add' && !linkConfig.target">{{:: strings.get('workflow_maker.NEW_LINK')}}</div>
+        <span ng-show="linkConfig.target">
             <label for="edgeType" class="Form-inputLabelContainer">
                 <span class="Form-requiredAsterisk">*</span>
                 <span class="Form-inputLabel">{{:: strings.get('workflow_maker.RUN') }}</span>
@@ -25,6 +25,6 @@
         <button type="button" class="btn btn-sm Form-primaryButton Form-primaryButton--noMargin" id="workflow_maker_unlink_btn" ng-show="!readOnly && linkConfig.canUnlink" ng-click="unlink()"> {{:: strings.get('workflow_maker.UNLINK') }}</button>
         <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_link_btn" ng-show="!readOnly" ng-click="cancel()"> {{:: strings.get('CANCEL') }}</button>
         <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_link_btn" ng-show="readOnly" ng-click="cancel()"> {{:: strings.get('CLOSE') }}</button>
-        <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_link_btn" ng-show="!readOnly && linkConfig.child" ng-click="select({edgeType: edgeType.value})" ng-disabled="!edgeType"> {{:: strings.get('SAVE') }}</button>
+        <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_link_btn" ng-show="!readOnly && linkConfig.target" ng-click="select({edgeType: edgeType.value})" ng-disabled="!edgeType"> {{:: strings.get('SAVE') }}</button>
     </div>
 </div>
