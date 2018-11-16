@@ -5,9 +5,8 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
     workflowDataOptions, jobLabels, workflowNodes, $scope, ParseTypeChange,
     ParseVariableString, count, $state, i18n, WorkflowChartService, $filter,
     moment) {
+        let nodeRef;
         var runTimeElapsedTimer = null;
-        let nodeIdToChartNodeIdMapping = {};
-        let chartNodeIdToIndexMapping = {};
 
         var getLinks = function() {
             var getLink = function(key) {
@@ -113,7 +112,6 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
         function init() {
             // put initially resolved request data on scope
             $scope.workflow = workflowData;
-            $scope.workflow_nodes = workflowNodes;
             $scope.workflowOptions = workflowDataOptions.actions.GET;
             $scope.labels = jobLabels;
             $scope.showManualControls = false;
@@ -173,7 +171,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             let arrayOfLinksForChart = [];
             let arrayOfNodesForChart = [];
 
-            ({arrayOfNodesForChart, arrayOfLinksForChart, chartNodeIdToIndexMapping, nodeIdToChartNodeIdMapping} = WorkflowChartService.generateArraysOfNodesAndLinks(workflowNodes));
+            ({arrayOfNodesForChart, arrayOfLinksForChart, nodeRef} = WorkflowChartService.generateArraysOfNodesAndLinks(workflowNodes));
 
             $scope.graphState = { arrayOfNodesForChart, arrayOfLinksForChart };
         }
@@ -275,15 +273,12 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
                     }
 
-                    $scope.graphState.arrayOfNodesForChart[chartNodeIdToIndexMapping[nodeIdToChartNodeIdMapping[data.workflow_node_id]]].job = {
-                        id: data.unified_job_id,
-                        status: data.status
-                    };
-
-                    $scope.workflow_nodes.forEach(node => {
-                        if(parseInt(node.id) === parseInt(data.workflow_node_id)){
-                            node.summary_fields.job = {
-                                    status: data.status
+                    $scope.graphState.arrayOfNodesForChart.forEach((node) => {
+                        if (nodeRef[node.id] && nodeRef[node.id].originalNodeObject.id === data.workflow_node_id) {
+                            node.job = {
+                                id: data.unified_job_id,
+                                status: data.status,
+                                type: nodeRef[node.id].unifiedJobTemplate.unified_job_type
                             };
                         }
                     });
