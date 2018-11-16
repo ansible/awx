@@ -64,7 +64,7 @@ from awx.api.filters import V1CredentialFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
 from awx.api.versioning import reverse, get_request_version
-from awx.conf.license import feature_enabled, feature_exists, LicenseForbids
+from awx.conf.license import feature_enabled, feature_exists, LicenseForbids, get_license
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.main.utils import (
@@ -1592,7 +1592,15 @@ class HostInsights(GenericAPIView):
     def _get_insights(self, url, username, password):
         session = requests.Session()
         session.auth = requests.auth.HTTPBasicAuth(username, password)
-        headers = {'Content-Type': 'application/json'}
+        license = get_license(show_key=False).get('license_type', 'UNLICENSED')
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': '{} {} ({})'.format(
+                'AWX' if license == 'open' else 'Red Hat Ansible Tower',
+                get_awx_version(),
+                license
+            )
+        }
         return session.get(url, headers=headers, timeout=120)
 
     def get_insights(self, url, username, password):

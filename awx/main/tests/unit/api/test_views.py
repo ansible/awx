@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 import mock
 import pytest
 import requests
@@ -217,6 +219,10 @@ class TestHostInsights():
 
         assert resp.data['error'] == 'The Insights Credential for "inventory_name_here" was not found.'
         assert resp.status_code == 404
+
+    def test_get_insights_user_agent(self, patch_parent, mocker):
+        resp = HostInsights()._get_insights('https://example.org', 'joe', 'example')
+        assert re.match(r'AWX [^\s]+ \(open\)', resp.request.headers['User-Agent'])
 
 
 class TestSurveySpecValidation:
