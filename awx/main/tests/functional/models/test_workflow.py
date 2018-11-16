@@ -66,9 +66,10 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         dag = WorkflowDAG(workflow_job=wfj)
         assert 3 == len(dag.mark_dnr_nodes())
         is_done = dag.is_workflow_done()
-        has_failed = dag.has_workflow_failed()
+        has_failed, reason = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertFalse(has_failed)
+        assert reason is None
 
         # verify that relaunched WFJ fails if a JT leaf is deleted
         for jt in JobTemplate.objects.all():
@@ -77,9 +78,10 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         dag = WorkflowDAG(workflow_job=relaunched)
         dag.mark_dnr_nodes()
         is_done = dag.is_workflow_done()
-        has_failed = dag.has_workflow_failed()
+        has_failed, reason = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertTrue(has_failed)
+        assert "Workflow job node {} related unified job template missing".format(wfj.workflow_nodes.all()[0].id)
 
     def test_workflow_fails_for_no_error_handler(self):
         wfj = self.workflow_job(states=['successful', 'failed', None, None, None])
@@ -104,9 +106,10 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         dag = WorkflowDAG(workflow_job=wfj)
         dag.mark_dnr_nodes()
         is_done = dag.is_workflow_done()
-        has_failed = dag.has_workflow_failed()
+        has_failed, reason = dag.has_workflow_failed()
         self.assertFalse(is_done)
         self.assertFalse(has_failed)
+        assert reason is None
 
 
 @pytest.mark.django_db
