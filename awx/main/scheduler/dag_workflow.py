@@ -127,6 +127,9 @@ class WorkflowDAG(SimpleDAG):
         failed_nodes = []
         for node in self.nodes:
             obj = node['node_object']
+
+            if obj.unified_job_template is None:
+                return True
             if obj.job and obj.job.status in ['failed', 'canceled', 'error']:
                 failed_nodes.append(node)
         for node in failed_nodes:
@@ -179,6 +182,21 @@ class WorkflowDAG(SimpleDAG):
                 return False
         return True
 
+    r'''
+    Useful in a failure scenario. Will mark all nodes that might have run a job
+    and haven't already run a job as do_not_run=True
+
+    Return an array of workflow nodes that were marked do_not_run = True
+    '''
+    def _mark_all_remaining_nodes_dnr(self):
+        objs = []
+        for node in self.nodes:
+            obj = node['node_object']
+            if obj.do_not_run is False and not obj.job:
+                obj.do_not_run = True
+                objs.append(obj)
+        return objs
+
     def mark_dnr_nodes(self):
         root_nodes = self.get_root_nodes()
         nodes = copy.copy(root_nodes)
@@ -190,6 +208,14 @@ class WorkflowDAG(SimpleDAG):
             if obj.id in node_ids_visited:
                 continue
             node_ids_visited.add(obj.id)
+
+            '''
+            Special case. On a workflow job template relaunch it's possible for
+            the job template associated with the job to have been deleted. If
+            this is the case, fail the workflow job and mark it done.
+            '''
+            if obj.unified_job_template is None:
+                return self._mark_all_remaining_nodes_dnr()
 
             if obj.do_not_run is False and not obj.job and n not in root_nodes:
                 parent_nodes = filter(lambda n: not n.do_not_run,

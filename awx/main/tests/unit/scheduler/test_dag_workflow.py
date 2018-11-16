@@ -9,33 +9,18 @@ class Job():
         self.status = status
 
 
-class WorkflowNodeBase(object):
-    def __init__(self, id=None, job=None):
+class WorkflowNode(object):
+    def __init__(self, id=None, job=None, do_not_run=False, unified_job_template=None):
         self.id = id if id else uuid.uuid4()
         self.job = job
-
-
-class WorkflowNodeDNR(WorkflowNodeBase):
-    def __init__(self, do_not_run=False, **kwargs):
-        super(WorkflowNodeDNR, self).__init__(**kwargs)
         self.do_not_run = do_not_run
-
-
-class WorkflowNodeUJT(WorkflowNodeDNR):
-    def __init__(self, unified_job_template=None, **kwargs):
-        super(WorkflowNodeUJT, self).__init__(**kwargs)
         self.unified_job_template = unified_job_template
 
 
 @pytest.fixture
-def WorkflowNodeClass():
-    return WorkflowNodeBase
-
-
-@pytest.fixture
-def wf_node_generator(mocker, WorkflowNodeClass):
+def wf_node_generator(mocker):
     def fn(**kwargs):
-        return WorkflowNodeClass(**kwargs)
+        return WorkflowNode(**kwargs)
     return fn
 
 
@@ -94,12 +79,10 @@ class TestWorkflowDAG():
 
 
 class TestDNR():
-    @pytest.fixture
-    def WorkflowNodeClass(self):
-        return WorkflowNodeDNR
-
     def test_mark_dnr_nodes(self, workflow_dag_1):
         (g, nodes) = workflow_dag_1
+        for n in nodes:
+            n.unified_job_template = object()
 
         r'''
                S0
@@ -142,10 +125,6 @@ class TestDNR():
 
 
 class TestIsWorkflowDone():
-    @pytest.fixture
-    def WorkflowNodeClass(self):
-        return WorkflowNodeUJT
-
     @pytest.fixture
     def workflow_dag_2(self, workflow_dag_1):
         (g, nodes) = workflow_dag_1
@@ -212,10 +191,6 @@ class TestIsWorkflowDone():
 
 class TestHasWorkflowFailed():
     @pytest.fixture
-    def WorkflowNodeClass(self):
-        return WorkflowNodeBase
-
-    @pytest.fixture
     def workflow_dag_canceled(self, wf_node_generator):
         g = WorkflowDAG()
         nodes = [wf_node_generator() for i in range(1)]
@@ -245,13 +220,9 @@ class TestHasWorkflowFailed():
 
 class TestBFSNodesToRun():
     @pytest.fixture
-    def WorkflowNodeClass(self):
-        return WorkflowNodeDNR
-
-    @pytest.fixture
     def workflow_dag_canceled(self, wf_node_generator):
         g = WorkflowDAG()
-        nodes = [wf_node_generator() for i in range(4)]
+        nodes = [wf_node_generator(unified_job_template=object()) for i in range(4)]
         map(lambda n: g.add_node(n), nodes)
         r'''
                C0
