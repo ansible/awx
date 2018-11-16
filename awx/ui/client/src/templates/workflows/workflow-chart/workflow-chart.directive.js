@@ -240,6 +240,81 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function update() {
                 if(scope.dimensionsSet) {
+                    const buildLinkTooltip = (d) => {
+                        let sourceNode = d3.select(`#node-${d.source.id}`);
+                        const sourceNodeX = d3.transform(sourceNode.attr("transform")).translate[0];
+                        const sourceNodeY = d3.transform(sourceNode.attr("transform")).translate[1];
+                        let targetNode = d3.select(`#node-${d.target.id}`);
+                        const targetNodeX = d3.transform(targetNode.attr("transform")).translate[0];
+                        const targetNodeY = d3.transform(targetNode.attr("transform")).translate[1];
+                        let xPos, yPos, arrowPoints;
+                        if (nodePositionMap[d.source.id].y === nodePositionMap[d.target.id].y) {
+                            xPos = (sourceNodeX + nodeW + targetNodeX)/2 - 50;
+                            yPos = (sourceNodeY + nodeH + targetNodeY)/2 - 70;
+                             arrowPoints = {
+                                pt1: {
+                                    x: xPos + 40,
+                                    y: yPos + 47
+                                },
+                                pt2: {
+                                    x: xPos + 60,
+                                    y: yPos + 47
+                                },
+                                pt3: {
+                                    x: xPos + 50,
+                                    y: yPos + 57
+                                }
+                            };
+                        } else {
+                            xPos = (sourceNodeX + nodeW + targetNodeX)/2 - 120;
+                            yPos = (sourceNodeY + nodeH + targetNodeY)/2 - 30;
+                             arrowPoints = {
+                                pt1: {
+                                    x: xPos + 100,
+                                    y: yPos + 17
+                                },
+                                pt2: {
+                                    x: xPos + 100,
+                                    y: yPos + 33
+                                },
+                                pt3: {
+                                    x: xPos + 110,
+                                    y: yPos + 25
+                                }
+                            };
+                        }
+                         let edgeTypeLabel;
+                         switch(d.edgeType) {
+                            case "always":
+                                edgeTypeLabel = TemplatesStrings.get('workflow_maker.ALWAYS');
+                                break;
+                            case "success":
+                                edgeTypeLabel = TemplatesStrings.get('workflow_maker.ON_SUCCESS');
+                                break;
+                            case "failure":
+                                edgeTypeLabel = TemplatesStrings.get('workflow_maker.ON_FAILURE');
+                                break;
+                        }
+                         let linkInstructionText = !scope.readOnly ? TemplatesStrings.get('workflow_maker.EDIT_LINK_TOOLTIP') : TemplatesStrings.get('workflow_maker.VIEW_LINK_TOOLTIP');
+                         let linkTooltip = svgGroup.append("g")
+                          .attr("class", "WorkflowChart-tooltip");
+                         linkTooltip.append("foreignObject")
+                            .attr("transform", `translate(${xPos},${yPos})`)
+                            .attr("width", 100)
+                            .attr("height", 50)
+                            .html(function(){
+                                return `<div class='WorkflowChart-tooltipContents'>
+                                          <div>${TemplatesStrings.get('workflow_maker.RUN')}: ${edgeTypeLabel}</div>
+                                          <div>${linkInstructionText}</div>
+                                        </div>`;
+                            });
+                         linkTooltip.append("polygon")
+                            .attr("class", "WorkflowChart-tooltipArrow")
+                            .attr("points", function() {
+                                return `${arrowPoints.pt1.x},${arrowPoints.pt1.y} ${arrowPoints.pt2.x},${arrowPoints.pt2.y} ${arrowPoints.pt3.x},${arrowPoints.pt3.y}`;
+                            });
+                    };
+
                     var g = new dagre.graphlib.Graph();
 
                     g.setGraph({rankdir: 'LR', nodesep: 30, ranksep: 120});
@@ -336,7 +411,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                     baseSvg.selectAll(".WorkflowChart-circleBetweenNodes")
                         .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
-                        .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                        .style("display", function(d) { return (d.edgeType === 'placeholder' || scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                         .attr("cx", function(d) {
                             return (nodePositionMap[d.source.id].x + nodePositionMap[d.source.id].width + nodePositionMap[d.target.id].x)/2;
                         })
@@ -356,7 +431,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         });
 
                     baseSvg.selectAll(".WorkflowChart-betweenNodesIcon")
-                        .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                        .style("display", function(d) { return (d.edgeType === 'placeholder' || scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                         .attr("transform", function(d) {
                             let translate;
 
@@ -411,48 +486,20 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                               return [pt1, pt2, pt3, pt4].join(" ");
                           })
                           .on("mouseover", function(d) {
-                              if(!scope.graphState.isLinkMode && !d.source.isStartNode && d.source.id !== scope.graphState.nodeBeingAdded && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
+                              if(
+                                  d.edgeType !== 'placeholder' &&
+                                  !scope.graphState.isLinkMode &&
+                                  !d.source.isStartNode &&
+                                  d.source.id !== scope.graphState.nodeBeingAdded &&
+                                  d.target.id !== scope.graphState.nodeBeingAdded &&
+                                  scope.mode !== 'details'
+                              ) {
                                   $(`#link-${d.source.id}-${d.target.id}`).appendTo(`#aw-workflow-chart-g`);
                                   d3.select(`#link-${d.source.id}-${d.target.id}`)
                                       .classed("WorkflowChart-linkHovering", true);
 
-                                  let xPos, yPos, arrowClass;
-                                  if (nodePositionMap[d.source.id].y === nodePositionMap[d.target.id].y) {
-                                      xPos = (nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].x)/2 + 45;
-                                      yPos = (nodePositionMap[d.source.id].y + nodePositionMap[d.target.id].y)/2 - 107;
-                                      arrowClass = 'WorkflowChart-tooltipArrow--down';
-                                  } else {
-                                      xPos = (nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].x)/2 - 30;
-                                      yPos = (nodePositionMap[d.source.id].y + nodePositionMap[d.target.id].y)/2 - 70;
-                                      arrowClass = 'WorkflowChart-tooltipArrow--right';
-                                  }
-
-                                  let edgeTypeLabel;
-
-                                  switch(d.edgeType) {
-                                      case "always":
-                                          edgeTypeLabel = TemplatesStrings.get('workflow_maker.ALWAYS');
-                                          break;
-                                      case "success":
-                                          edgeTypeLabel = TemplatesStrings.get('workflow_maker.ON_SUCCESS');
-                                          break;
-                                      case "failure":
-                                          edgeTypeLabel = TemplatesStrings.get('workflow_maker.ON_FAILURE');
-                                          break;
-                                  }
-
-                                  let linkInstructionText = !scope.readOnly ? TemplatesStrings.get('workflow_maker.EDIT_LINK_TOOLTIP') : TemplatesStrings.get('workflow_maker.VIEW_LINK_TOOLTIP');
-
-                                  svgGroup.append("foreignObject")
-                                      .attr("transform", `translate(${xPos},${yPos})`)
-                                      .attr("width", 100)
-                                      .attr("height", 60)
-                                      .attr("class", "WorkflowChart-tooltip")
-                                      .html(function(){
-                                          return `<div class='WorkflowChart-tooltipContents'><div>${TemplatesStrings.get('workflow_maker.RUN')}: ${edgeTypeLabel}</div><div>${linkInstructionText}</div></div><div class='${arrowClass}'></div>`;
-                                      });
+                                  buildLinkTooltip(d);
                               }
-
                           })
                           .on("mouseout", function(d){
                               if(!d.source.isStartNode && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
@@ -471,46 +518,19 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                          .attr("d", lineData)
                          .call(edit_link)
                          .on("mouseenter", function(d) {
-                             if(!scope.graphState.isLinkMode && !d.source.isStartNode && d.source.id !== scope.graphState.nodeBeingAdded && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
+                             if(
+                                 d.edgeType !== 'placeholder' &&
+                                 !scope.graphState.isLinkMode &&
+                                 !d.source.isStartNode &&
+                                 d.source.id !== scope.graphState.nodeBeingAdded &&
+                                 d.target.id !== scope.graphState.nodeBeingAdded &&
+                                 scope.mode !== 'details'
+                             ) {
                                  $(`#link-${d.source.id}-${d.target.id}`).appendTo(`#aw-workflow-chart-g`);
-                                 d3.select("#link-" + d.source.id + "-" + d.target.id)
+                                 d3.select(`#link-${d.source.id}-${d.target.id}`)
                                      .classed("WorkflowChart-linkHovering", true);
 
-                                 let xPos, yPos, arrowClass;
-                                 if (nodePositionMap[d.source.id].y === nodePositionMap[d.target.id].y) {
-                                     xPos = (nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].x)/2 + 45;
-                                     yPos = (nodePositionMap[d.source.id].y + nodePositionMap[d.target.id].y)/2 - 107;
-                                     arrowClass = 'WorkflowChart-tooltipArrow--down';
-                                 } else {
-                                     xPos = (nodePositionMap[d.source.id].x + nodePositionMap[d.target.id].x)/2 - 30;
-                                     yPos = (nodePositionMap[d.source.id].y + nodePositionMap[d.target.id].y)/2 - 70;
-                                     arrowClass = 'WorkflowChart-tooltipArrow--right';
-                                 }
-
-                                 let edgeTypeLabel;
-
-                                 switch(d.edgeType) {
-                                     case "always":
-                                         edgeTypeLabel = TemplatesStrings.get('workflow_maker.ALWAYS');
-                                         break;
-                                     case "success":
-                                         edgeTypeLabel = TemplatesStrings.get('workflow_maker.ON_SUCCESS');
-                                         break;
-                                     case "failure":
-                                         edgeTypeLabel = TemplatesStrings.get('workflow_maker.ON_FAILURE');
-                                         break;
-                                 }
-
-                                 let linkInstructionText = !scope.readOnly ? TemplatesStrings.get('workflow_maker.EDIT_LINK_TOOLTIP') : TemplatesStrings.get('workflow_maker.VIEW_LINK_TOOLTIP');
-
-                                 svgGroup.append("foreignObject")
-                                     .attr("transform", `translate(${xPos},${yPos})`)
-                                     .attr("width", 100)
-                                     .attr("height", 60)
-                                     .attr("class", "WorkflowChart-tooltip")
-                                     .html(function(){
-                                         return `<div class='WorkflowChart-tooltipContents'><div>${TemplatesStrings.get('workflow_maker.RUN')}: ${edgeTypeLabel}</div><div>${linkInstructionText}</div></div><div class='${arrowClass}'></div>`;
-                                     });
+                                 buildLinkTooltip(d);
                              }
                          })
                          .on("mouseleave", function(d){
@@ -543,7 +563,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                           .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
                           .attr("r", 10)
                           .attr("class", "WorkflowChart-addCircle WorkflowChart-circleBetweenNodes")
-                          .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                          .style("display", function(d) { return (d.edgeType === 'placeholder' || scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                           .attr("cx", function(d) {
                               return (nodePositionMap[d.source.id].x + nodePositionMap[d.source.id].width + nodePositionMap[d.target.id].x)/2;
                           })
@@ -580,7 +600,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                               .size(60)
                               .type("cross")
                           )
-                          .style("display", function(d) { return (scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                          .style("display", function(d) { return (d.edgeType === 'placeholder' || scope.graphState.isLinkMode || d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                           .attr("transform", function(d) {
                               let translate;
 
@@ -1263,7 +1283,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function add_node_with_child() {
                 this.on("click", function(d) {
-                    if(!scope.readOnly && !scope.graphState.isLinkMode) {
+                    if(!scope.readOnly && !scope.graphState.isLinkMode && d.edgeType !== 'placeholder') {
                         scope.addNodeWithChild({
                             link: d
                         });
@@ -1340,25 +1360,32 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         }
                     };
 
-                    if(d.job.id) {
+                    if(d.job.type) {
                         if(d.unifiedJobTemplate) {
                             goToJobResults(d.unifiedJobTemplate.unified_job_type);
                         }
                         else {
-                            // We don't have access to the unified resource and have to make
+                            // We don't have access to the job type and have to make
                             // a GET request in order to find out what type job this was
                             // so that we can route the user to the correct stdout view
-
-                            Rest.setUrl(GetBasePath("unified_jobs") + "?id=" + d.job.id);
+                            Rest.setUrl(GetBasePath("workflow_jobs") + `${d.originalNodeObj.workflow_job}/workflow_nodes/?order_by=id`);
                             Rest.get()
-                            .then(function (res) {
-                                if(res.data.results && res.data.results.length > 0) {
-                                    goToJobResults(res.data.results[0].type);
-                                }
-                            })
-                            .catch(({data, status}) => {
-                                ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Unable to get job: ' + status });
-                            });
+                                .then(function (res) {
+                                    if (res.data.results && res.data.results.length > 0) {
+                                        const { results } = res.data;
+                                        const job = results.filter(result => result.summary_fields.job.id === d.job.id);
+                                        goToJobResults(job[0].summary_fields.job.type);
+                                    }
+                                })
+                                .catch(({
+                                    data,
+                                    status
+                                }) => {
+                                    ProcessErrors(scope, data, status, null, {
+                                        hdr: 'Error!',
+                                        msg: 'Unable to get job: ' + status
+                                    });
+                                });
                         }
                     }
                 });

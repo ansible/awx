@@ -1,11 +1,11 @@
 <div ng-show="nodeFormDataLoaded">
-    <div class="WorkflowMaker-formTitle">{{nodeConfig.mode === 'edit' ? nodeConfig.node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_TEMPLATE')}}</div>
-    <div class="Form-tabHolder" ng-if="!readOnly">
+    <div class="WorkflowMaker-formTitle">{{nodeConfig.mode === 'edit' ? nodeConfig.node.fullUnifiedJobTemplateObject.name || nodeConfig.node.unifiedJobTemplate.name : strings.get('workflow_maker.ADD_A_TEMPLATE')}}</div>
+    <div class="Form-tabHolder" ng-show="!readOnly">
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'jobs'}" ng-click="activeTab = 'jobs'">{{strings.get('workflow_maker.JOBS')}}</div>
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'project_syncs'}" ng-click="activeTab = 'project_syncs'">{{strings.get('workflow_maker.PROJECT_SYNC')}}</div>
         <div class="Form-tab WorkflowMaker-formTab" ng-class="{'is-selected': activeTab === 'inventory_syncs'}" ng-click="activeTab = 'inventory_syncs'">{{strings.get('workflow_maker.INVENTORY_SYNC')}}</div>
     </div>
-    <div class="WorkflowMaker-formLists" ng-if="!readOnly">
+    <div class="WorkflowMaker-formLists" ng-show="!readOnly">
         <div id="workflow-jobs-list" ng-show="activeTab === 'jobs'">
             <div ng-hide="wf_maker_templates.length === 0 && (searchTags | isEmpty)">
                 <smart-search django-model="unified_job_templates" base-path="unified_job_templates" iterator="wf_maker_template" dataset="wf_maker_template_dataset" list="templateList" collection="wf_maker_templates" default-params="wf_maker_template_default_params" query-set="wf_maker_template_queryset" search-bar-full-width="true" search-tags="searchTags">
@@ -141,7 +141,7 @@
             </select>
         </div>
     </div>
-    <div ng-if="readOnly">
+    <div ng-show="readOnly">
         <div
             class="WorkflowMaker-readOnlyPromptText"
             ng-show="nodeConfig.node.originalNodeObject.job_type !== null ||
