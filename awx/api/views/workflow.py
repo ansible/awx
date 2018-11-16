@@ -21,6 +21,7 @@ from rest_framework import status
 from awx.main.utils import schedule_task_manager
 from awx.api.versioning import get_request_version
 from awx.api.views.credential import LaunchConfigCredentialsBase
+from awx.api.views.jobtemplate import JobTemplateSurveySpec
 from awx.main.models import (
     ActivityStream,
     Credential,
@@ -31,7 +32,6 @@ from awx.main.models import (
     WorkflowJob,
     WorkflowJobNode,
     WorkflowJobTemplateNode,
-    JobTemplateSurveySpec,
     Schedule,
     Notification,
 )
@@ -48,7 +48,6 @@ from awx.api.generics import (
     CopyAPIView,
     RetrieveDestroyAPIView,
 )
-
 from awx.api.serializers import (
     ActivityStreamSerializer,
     RoleSerializer,
@@ -67,7 +66,6 @@ from awx.api.serializers import (
     WorkflowJobCancelSerializer,
     NotificationSerializer,
 )
-
 from awx.api.views.mixin import (
     ActivityStreamEnforcementMixin,
     WorkflowsEnforcementMixin,
