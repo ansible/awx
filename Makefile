@@ -578,7 +578,8 @@ docker-compose-genschema:
 docker-compose-validate-schema:
 	$(MAKE) docker-compose-genschema
 	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
-	diff -u schema.json reference-schema.json
+	# Ignore differences in whitespace with -b
+	diff -u -b schema.json reference-schema.json
 
 docker-compose-clean:
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm -w /awx_devel --service-ports awx make clean
