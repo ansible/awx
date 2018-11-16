@@ -62,7 +62,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         return d.y;
                     });
 
-                zoomObj = d3.behavior.zoom().scaleExtent([0.5, 2]);
+                zoomObj = d3.behavior.zoom().scaleExtent([0.1, 2]);
 
                 baseSvg = d3.select(element[0]).append("svg")
                     .attr("class", "WorkflowChart-svg")
@@ -1130,9 +1130,11 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                           thisNode.append("foreignObject")
                                .attr("x", nodeW - 6)
                                .attr("y", nodeH/2 - 9)
+                               .attr("height", "17px")
+                               .attr("width", "13px")
                                .style("font-size","14px")
                                .html(function () {
-                                   return `<span class="fa fa-link" />`;
+                                   return `<span class="fa fa-link"></span>`;
                                })
                                .attr("class", "WorkflowChart-nodeLinkIcon")
                                .style("display", function(d) { return d.id === scope.graphState.nodeBeingAdded || scope.readOnly ? "none" : null; })
@@ -1347,46 +1349,18 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     d3.select(this).style("text-decoration", null);
                 });
                 this.on("click", function(d) {
-
-                    let goToJobResults = function(job_type) {
-                        if(job_type === 'job') {
-                            $state.go('output', {id: d.job.id, type: 'playbook'});
-                        }
-                        else if(job_type === 'inventory_update') {
-                            $state.go('output', {id: d.job.id, type: 'inventory'});
-                        }
-                        else if(job_type === 'project_update') {
-                            $state.go('output', {id: d.job.id, type: 'project'});
-                        }
-                    };
-
-                    if(d.job.type) {
-                        if(d.unifiedJobTemplate) {
-                            goToJobResults(d.unifiedJobTemplate.unified_job_type);
-                        }
-                        else {
-                            // We don't have access to the job type and have to make
-                            // a GET request in order to find out what type job this was
-                            // so that we can route the user to the correct stdout view
-                            Rest.setUrl(GetBasePath("workflow_jobs") + `${d.originalNodeObj.workflow_job}/workflow_nodes/?order_by=id`);
-                            Rest.get()
-                                .then(function (res) {
-                                    if (res.data.results && res.data.results.length > 0) {
-                                        const { results } = res.data;
-                                        const job = results.filter(result => result.summary_fields.job.id === d.job.id);
-                                        goToJobResults(job[0].summary_fields.job.type);
-                                    }
-                                })
-                                .catch(({
-                                    data,
-                                    status
-                                }) => {
-                                    ProcessErrors(scope, data, status, null, {
-                                        hdr: 'Error!',
-                                        msg: 'Unable to get job: ' + status
-                                    });
-                                });
-                        }
+                    if(d.job.type === 'job') {
+                        $state.go('output', {id: d.job.id, type: 'playbook'});
+                    }
+                    else if(d.job.type === 'inventory_update') {
+                        $state.go('output', {id: d.job.id, type: 'inventory'});
+                    }
+                    else if(d.job.type === 'project_update') {
+                        $state.go('output', {id: d.job.id, type: 'project'});
+                    } else if (d.job.type === 'workflow_job') {
+                        $state.go('workflowResults', {
+                            id: d.job.id,
+                        });
                     }
                 });
             }
