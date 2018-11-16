@@ -1381,6 +1381,12 @@ class RunJob(BaseTask):
             if job.is_isolated() is True:
                 pu_ig = pu_ig.controller
                 pu_en = settings.CLUSTER_HOST_ID
+            if job.project.status in ('error', 'failed'):
+                msg = _(
+                    'The project revision for this job template is unknown due to a failed update.'
+                )
+                job = self.update_model(job.pk, status='failed', job_explanation=msg)
+                raise RuntimeError(msg)
             local_project_sync = job.project.create_project_update(
                 _eager_fields=dict(
                     launch_type="sync",

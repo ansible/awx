@@ -285,6 +285,11 @@ class TaskManager():
         project_task.created = task.created - timedelta(seconds=1)
         project_task.status = 'pending'
         project_task.save()
+        logger.info(
+            'Spawned {} as dependency of {}'.format(
+                project_task.log_format, task.log_format
+            )
+        )
         return project_task
 
     def create_inventory_update(self, task, inventory_source_task):
@@ -294,6 +299,11 @@ class TaskManager():
         inventory_task.created = task.created - timedelta(seconds=2)
         inventory_task.status = 'pending'
         inventory_task.save()
+        logger.info(
+            'Spawned {} as dependency of {}'.format(
+                inventory_task.log_format, task.log_format
+            )
+        )
         # inventory_sources = self.get_inventory_source_tasks([task])
         # self.process_inventory_sources(inventory_sources)
         return inventory_task
