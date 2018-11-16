@@ -606,6 +606,9 @@ ANSIBLE_PARAMIKO_RECORD_HOST_KEYS = False
 # output
 ANSIBLE_FORCE_COLOR = True
 
+# If tmp generated inventory parsing fails (error state), fail playbook fast
+ANSIBLE_INVENTORY_UNPARSED_FAILED = True
+
 # Additional environment variables to be passed to the ansible subprocesses
 AWX_TASK_ENV = {}
 
