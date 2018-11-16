@@ -209,6 +209,7 @@ class TestIsWorkflowDone():
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() is True
 
+
 class TestHasWorkflowFailed():
     @pytest.fixture
     def WorkflowNodeClass(self):
@@ -269,4 +270,3 @@ class TestBFSNodesToRun():
         (g, nodes) = workflow_dag_canceled
 
         assert set([nodes[1], nodes[2]]) == set(g.bfs_nodes_to_run())
-
