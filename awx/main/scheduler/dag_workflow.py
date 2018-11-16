@@ -129,15 +129,15 @@ class WorkflowDAG(SimpleDAG):
             obj = node['node_object']
 
             if obj.unified_job_template is None:
-                return True
+                return True, "Workflow job node {} related unified job template missing".format(obj.id)
             if obj.job and obj.job.status in ['failed', 'canceled', 'error']:
                 failed_nodes.append(node)
         for node in failed_nodes:
             obj = node['node_object']
             if (len(self.get_dependencies(obj, 'failure_nodes')) +
                     len(self.get_dependencies(obj, 'always_nodes'))) == 0:
-                return True
-        return False
+                return True, "Workflow job node {} has a status of '{}' without an error handler path".format(obj.id, obj.job.status)
+        return False, None
 
     r'''
     Determine if all nodes have been decided on being marked do_not_run.
