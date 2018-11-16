@@ -543,7 +543,7 @@ export default ['$scope', 'TemplatesService',
                 $scope.cancelLinkForm();
             }
 
-            if (!$scope.nodeConfig || ($scope.nodeConfig && $scope.nodeConfig.nodeId !== nodeToEdit.index)) {
+            if (!$scope.nodeConfig || ($scope.nodeConfig && $scope.nodeConfig.nodeId !== nodeToEdit.id)) {
                 if ($scope.nodeConfig) {
                     $scope.cancelNodeForm();
                 }
@@ -582,11 +582,11 @@ export default ['$scope', 'TemplatesService',
 
                 $scope.linkConfig = {
                     mode: "edit",
-                    parent: {
+                    source: {
                         id: linkToEdit.source.id,
                         name: _.get(linkToEdit, 'source.unifiedJobTemplate.name') || ""
                     },
-                    child: {
+                    target: {
                         id: linkToEdit.target.id,
                         name: _.get(linkToEdit, 'target.unifiedJobTemplate.name') || ""
                     },
@@ -603,7 +603,7 @@ export default ['$scope', 'TemplatesService',
             }
 
             if ($scope.linkConfig) {
-                if ($scope.linkConfig.parent.id !== linkToEdit.source.id || $scope.linkConfig.child.id !== linkToEdit.target.id) {
+                if ($scope.linkConfig.source.id !== linkToEdit.source.id || $scope.linkConfig.target.id !== linkToEdit.target.id) {
                     // User is going from editing one link to editing another
                     if ($scope.linkConfig.mode === "add") {
                         $scope.graphState.arrayOfLinksForChart.splice($scope.graphState.arrayOfLinksForChart.length-1, 1);
@@ -620,9 +620,14 @@ export default ['$scope', 'TemplatesService',
             if ($scope.nodeConfig) {
                 $scope.cancelNodeForm();
             }
+            // User was add/editing a link and then hit the link icon
+            if ($scope.linkConfig && $scope.linkConfig.target) {
+                $scope.cancelLinkForm();
+            }
+
             if ($scope.linkConfig) {
                 // This is the second node selected
-                $scope.linkConfig.child = {
+                $scope.linkConfig.target = {
                     id: node.id,
                     name: node.unifiedJobTemplate.name
                 };
@@ -633,14 +638,14 @@ export default ['$scope', 'TemplatesService',
                 });
 
                 $scope.graphState.arrayOfLinksForChart.push({
+                    source: $scope.graphState.arrayOfNodesForChart[chartNodeIdToIndexMapping[$scope.linkConfig.source.id]],
                     target: $scope.graphState.arrayOfNodesForChart[node.index],
-                    source: $scope.graphState.arrayOfNodesForChart[chartNodeIdToIndexMapping[$scope.linkConfig.parent.id]],
                     edgeType: "placeholder"
                 });
 
                 $scope.graphState.linkBeingEdited = {
-                    source: $scope.graphState.arrayOfNodesForChart[node.index].id,
-                    target: $scope.graphState.arrayOfNodesForChart[chartNodeIdToIndexMapping[$scope.linkConfig.parent.id]].id
+                    source: $scope.graphState.arrayOfNodesForChart[chartNodeIdToIndexMapping[$scope.linkConfig.source.id]].id,
+                    target: $scope.graphState.arrayOfNodesForChart[node.index].id
                 };
 
                 $scope.graphState.arrayOfLinksForChart.forEach((link, index) => {
@@ -655,7 +660,7 @@ export default ['$scope', 'TemplatesService',
                 $scope.graphState.addLinkSource = node.id;
                 $scope.linkConfig = {
                     mode: "add",
-                    parent: {
+                    source: {
                         id: node.id,
                         name: node.unifiedJobTemplate.name
                     }
@@ -705,7 +710,7 @@ export default ['$scope', 'TemplatesService',
 
         $scope.confirmLinkForm = (newEdgeType) => {
             $scope.graphState.arrayOfLinksForChart.forEach((link) => {
-                if (link.source.id === $scope.linkConfig.parent.id && link.target.id === $scope.linkConfig.child.id) {
+                if (link.source.id === $scope.linkConfig.source.id && link.target.id === $scope.linkConfig.target.id) {
                     link.edgeType = newEdgeType;
                 }
             });
@@ -728,7 +733,7 @@ export default ['$scope', 'TemplatesService',
             for( let i = $scope.graphState.arrayOfLinksForChart.length; i--; ){
                 const link = $scope.graphState.arrayOfLinksForChart[i];
 
-                if (link.source.id === $scope.linkConfig.parent.id && link.target.id === $scope.linkConfig.child.id) {
+                if (link.source.id === $scope.linkConfig.source.id && link.target.id === $scope.linkConfig.target.id) {
                     $scope.graphState.arrayOfLinksForChart.splice(i, 1);
                 }
             }
@@ -739,11 +744,11 @@ export default ['$scope', 'TemplatesService',
         };
 
         $scope.cancelLinkForm = () => {
-            if ($scope.linkConfig.mode === "add" && $scope.linkConfig.child) {
+            if ($scope.linkConfig.mode === "add" && $scope.linkConfig.target) {
                 $scope.graphState.arrayOfLinksForChart.splice($scope.graphState.arrayOfLinksForChart.length-1, 1);
                 let targetIsOrphaned = true;
                 $scope.graphState.arrayOfLinksForChart.forEach((link) => {
-                    if (link.target.id === $scope.linkConfig.child.id) {
+                    if (link.target.id === $scope.linkConfig.target.id) {
                         targetIsOrphaned = false;
                     }
                 });
@@ -751,7 +756,7 @@ export default ['$scope', 'TemplatesService',
                     // Link it to the start node
                     $scope.graphState.arrayOfLinksForChart.push({
                         source: $scope.graphState.arrayOfNodesForChart[0],
-                        target: $scope.graphState.arrayOfNodesForChart[chartNodeIdToIndexMapping[$scope.linkConfig.child.id]],
+                        target: $scope.graphState.arrayOfNodesForChart[chartNodeIdToIndexMapping[$scope.linkConfig.target.id]],
                         edgeType: "always"
                     });
                 }
@@ -783,7 +788,7 @@ export default ['$scope', 'TemplatesService',
             if ($scope.nodeToBeDeleted) {
                 const nodeIndex = $scope.nodeToBeDeleted.index;
 
-                if ($scope.linkBeingWorkedOn) {
+                if ($scope.linkConfig) {
                     $scope.cancelLinkForm();
                 }
 
