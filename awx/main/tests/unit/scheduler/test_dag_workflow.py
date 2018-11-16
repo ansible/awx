@@ -27,7 +27,7 @@ def wf_node_generator(mocker):
 @pytest.fixture
 def workflow_dag_1(wf_node_generator):
     g = WorkflowDAG()
-    nodes = [wf_node_generator() for i in range(4)]
+    nodes = [wf_node_generator(unified_job_template=object()) for i in range(4)]
     map(lambda n: g.add_node(n), nodes)
 
     r'''
@@ -183,17 +183,17 @@ class TestIsWorkflowDone():
         assert g.is_workflow_done() is False
 
     def test_is_workflow_done_failed(self, workflow_dag_failed):
-        g = workflow_dag_failed[0]
+        (g, nodes) = workflow_dag_failed
 
         assert g.is_workflow_done() is True
-        assert g.has_workflow_failed() is True
+        assert g.has_workflow_failed() == (True, "Workflow job node {} has a status of 'failed' without an error handler path".format(nodes[2].id))
 
 
 class TestHasWorkflowFailed():
     @pytest.fixture
     def workflow_dag_canceled(self, wf_node_generator):
         g = WorkflowDAG()
-        nodes = [wf_node_generator() for i in range(1)]
+        nodes = [wf_node_generator(unified_job_template=object()) for i in range(1)]
         map(lambda n: g.add_node(n), nodes)
         r'''
                F0
@@ -210,12 +210,12 @@ class TestHasWorkflowFailed():
     def test_canceled_should_fail(self, workflow_dag_canceled):
         (g, nodes) = workflow_dag_canceled
 
-        assert g.has_workflow_failed() is True
+        assert g.has_workflow_failed() == (True, "Workflow job node {} has a status of 'canceled' without an error handler path".format(nodes[0].id))
 
     def test_failure_should_fail(self, workflow_dag_failure):
         (g, nodes) = workflow_dag_failure
 
-        assert g.has_workflow_failed() is True
+        assert g.has_workflow_failed() == (True, "Workflow job node {} has a status of 'failed' without an error handler path".format(nodes[0].id))
 
 
 class TestBFSNodesToRun():

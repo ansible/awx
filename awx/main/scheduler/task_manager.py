@@ -178,14 +178,18 @@ class TaskManager():
                 is_done = dag.is_workflow_done()
                 if not is_done:
                     continue
-                has_failed = dag.has_workflow_failed()
+                has_failed, reason = dag.has_workflow_failed()
                 logger.info('Marking %s as %s.', workflow_job.log_format, 'failed' if has_failed else 'successful')
                 result.append(workflow_job.id)
                 new_status = 'failed' if has_failed else 'successful'
                 logger.debug(six.text_type("Transitioning {} to {} status.").format(workflow_job.log_format, new_status))
+                update_fields = ['status', 'start_args']
                 workflow_job.status = new_status
+                if reason:
+                    workflow_job.job_explanation = reason
+                    update_fields.append('job_explanation')
                 workflow_job.start_args = ''  # blank field to remove encrypted passwords
-                workflow_job.save(update_fields=['status', 'start_args'])
+                workflow_job.save(update_fields=update_fields)
                 status_changed = True
             if status_changed:
                 workflow_job.websocket_emit_status(workflow_job.status)
