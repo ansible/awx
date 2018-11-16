@@ -1,6 +1,6 @@
 export default [function(){
     return {
-        generateArraysOfNodesAndLinks: function(allNodes) {
+        generateArraysOfNodesAndLinks: (allNodes) => {
             let nonRootNodeIds = [];
             let allNodeIds = [];
             let arrayOfLinksForChart = [];
@@ -15,10 +15,7 @@ export default [function(){
                     isStartNode: true,
                     unifiedJobTemplate: {
                         name: "START"
-                    },
-                    fixed: true,
-                    x: 0,
-                    y: 0
+                    }
                 }
             ];
             nodeIdCounter++;
