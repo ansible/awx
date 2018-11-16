@@ -8,6 +8,15 @@ const templatesListTemplate = require('~features/templates/templatesList.view.ht
 export default {
     url: "/:organization_id/job_templates",
     name: 'organizations.job_templates',
+    data: {
+        activityStream: true,
+        activityStreamTarget: 'template',
+        socket: {
+            "groups": {
+                "jobs": ["status_changed"]
+            }
+        }
+    },
     params: {
         template_search: {
             dynamic: true,
