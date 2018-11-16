@@ -63,11 +63,12 @@ jsonpointer==2.0          # via jsonpatch
 keyring==15.1.0           # via msrestazure
 keystoneauth1==3.4.0      # via openstacksdk, os-client-config
 knack==0.3.3              # via azure-cli-core
-lxml==4.1.1               # via pyvmomi
+lxml==4.1.1               # via ncclient, pyvmomi
 monotonic==1.4            # via humanfriendly
 msrest==0.4.29
 msrestazure==0.4.31
 munch==2.2.0              # via openstacksdk
+ncclient==0.6.3
 netaddr==0.7.19
 netifaces==0.10.6         # via openstacksdk
 ntlm-auth==1.0.6          # via requests-credssp, requests-ntlm
@@ -77,7 +78,7 @@ os-client-config==1.29.0  # via shade
 os-service-types==1.2.0   # via openstacksdk
 ovirt-engine-sdk-python==4.2.4
 packaging==17.1
-paramiko==2.4.0           # via azure-cli-core
+paramiko==2.4.0           # via azure-cli-core, ncclient
 pbr==3.1.1                # via keystoneauth1, openstacksdk, os-service-types, shade, stevedore
 pexpect==4.6.0
 psphere==0.5.2
@@ -105,8 +106,9 @@ requests==2.20.0
 requestsexceptions==1.4.0  # via openstacksdk, os-client-config
 s3transfer==0.1.13        # via boto3
 secretstorage==2.3.1      # via keyring
+selectors2==2.0.1         # via ncclient
 shade==1.27.0
-six==1.11.0               # via azure-cli-core, bcrypt, cryptography, isodate, keystoneauth1, knack, munch, ntlm-auth, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, python-memcached, pyvmomi, pywinrm, stevedore
+six==1.11.0               # via azure-cli-core, bcrypt, cryptography, isodate, keystoneauth1, knack, munch, ncclient, ntlm-auth, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, python-memcached, pyvmomi, pywinrm, stevedore
 stevedore==1.28.0         # via keystoneauth1
 suds==0.4                 # via psphere
 tabulate==0.7.7           # via azure-cli-core, knack
