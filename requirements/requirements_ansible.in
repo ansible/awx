@@ -33,7 +33,7 @@ azure-graphrbac==0.40.0
 boto==2.47.0    # last which does not break ec2 scripts
 boto3==1.6.2
 # netconf for network modules
-ncclient
+ncclient==0.6.3
 # netaddr filter
 netaddr
 # oVirt/RHV
