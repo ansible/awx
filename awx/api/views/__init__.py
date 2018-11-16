@@ -87,15 +87,16 @@ from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata, JobTypeMetadata
 from awx.main.constants import ACTIVE_STATES
+from awx.api.views.credential import LaunchConfigCredentialsBase
 from awx.api.views.mixin import (
     ActivityStreamEnforcementMixin,
     SystemTrackingEnforcementMixin,
-    WorkflowsEnforcementMixin,
     UnifiedJobDeletionMixin,
     InstanceGroupMembershipMixin,
     RelatedJobsPreventDeleteMixin,
     OrganizationCountsMixin,
     ControlledByScmMixin,
+    EnforceParentRelationshipMixin,
 )
 from awx.api.views.organization import ( # noqa
     OrganizationList,
@@ -131,6 +132,51 @@ from awx.api.views.inventory import ( # noqa
     InventoryObjectRolesList,
     InventoryJobTemplateList,
     InventoryCopy,
+)
+from awx.api.views.workflow import ( # noqa
+    WorkflowJobNodeList,
+    WorkflowJobNodeDetail,
+    WorkflowJobNodeCredentialsList,
+    WorkflowJobTemplateNodeList,
+    WorkflowJobTemplateNodeDetail,
+    WorkflowJobTemplateNodeCredentialsList,
+    WorkflowJobTemplateNodeChildrenBaseList,
+    WorkflowJobTemplateNodeSuccessNodesList,
+    WorkflowJobTemplateNodeFailureNodesList,
+    WorkflowJobTemplateNodeAlwaysNodesList,
+    WorkflowJobNodeChildrenBaseList,
+    WorkflowJobNodeSuccessNodesList,
+    WorkflowJobNodeFailureNodesList,
+    WorkflowJobNodeAlwaysNodesList,
+    WorkflowJobTemplateList,
+    WorkflowJobTemplateDetail,
+    WorkflowJobTemplateCopy,
+    WorkflowJobTemplateLaunch,
+    WorkflowJobRelaunch,
+    WorkflowJobTemplateWorkflowNodesList,
+    WorkflowJobTemplateJobsList,
+    WorkflowJobTemplateSchedulesList,
+    WorkflowJobTemplateNotificationTemplatesAnyList,
+    WorkflowJobTemplateNotificationTemplatesErrorList,
+    WorkflowJobTemplateNotificationTemplatesSuccessList,
+    WorkflowJobTemplateAccessList,
+    WorkflowJobTemplateObjectRolesList,
+    WorkflowJobTemplateActivityStreamList,
+    WorkflowJobList,
+    WorkflowJobDetail,
+    WorkflowJobWorkflowNodesList,
+    WorkflowJobCancel,
+    WorkflowJobNotificationsList,
+    WorkflowJobActivityStreamList,
+    WorkflowJobTemplateSurveySpec,
+)
+from awx.api.views.label import ( # noqa
+    LabelList,
+    LabelDetail,
+    JobLabelList,
+    JobTemplateLabelList,
+    WorkflowJobLabelList,
+    WorkflowJobTemplateLabelList,
 )
 from awx.api.views.root import ( # noqa
     ApiRootView,
@@ -452,39 +498,6 @@ class ScheduleZoneInfo(APIView):
             for zone in Schedule.get_zoneinfo()
         ]
         return Response(zones)
-
-
-class LaunchConfigCredentialsBase(SubListAttachDetachAPIView):
-
-    model = Credential
-    serializer_class = CredentialSerializer
-    relationship = 'credentials'
-
-    def is_valid_relation(self, parent, sub, created=False):
-        if not parent.unified_job_template:
-            return {"msg": _("Cannot assign credential when related template is null.")}
-
-        ask_mapping = parent.unified_job_template.get_ask_mapping()
-
-        if self.relationship not in ask_mapping:
-            return {"msg": _("Related template cannot accept {} on launch.").format(self.relationship)}
-        elif sub.passwords_needed:
-            return {"msg": _("Credential that requires user input on launch "
-                             "cannot be used in saved launch configuration.")}
-
-        ask_field_name = ask_mapping[self.relationship]
-
-        if not getattr(parent.unified_job_template, ask_field_name):
-            return {"msg": _("Related template is not configured to accept credentials on launch.")}
-        elif sub.unique_hash() in [cred.unique_hash() for cred in parent.credentials.all()]:
-            return {"msg": _("This launch configuration already provides a {credential_type} credential.").format(
-                credential_type=sub.unique_hash(display=True))}
-        elif sub.pk in parent.unified_job_template.credentials.values_list('pk', flat=True):
-            return {"msg": _("Related template already uses {credential_type} credential.").format(
-                credential_type=sub.name)}
-
-        # None means there were no validation errors
-        return None
 
 
 class ScheduleCredentialsList(LaunchConfigCredentialsBase):
@@ -1642,35 +1655,6 @@ class GroupList(ListCreateAPIView):
     serializer_class = GroupSerializer
 
 
-class EnforceParentRelationshipMixin(object):
-    '''
-    Useful when you have a self-refering ManyToManyRelationship.
-    * Tower uses a shallow (2-deep only) url pattern. For example:
-
-    When an object hangs off of a parent object you would have the url of the
-    form /api/v1/parent_model/34/child_model. If you then wanted a child of the
-    child model you would NOT do /api/v1/parent_model/34/child_model/87/child_child_model
-    Instead, you would access the child_child_model via /api/v1/child_child_model/87/
-    and you would create child_child_model's off of /api/v1/child_model/87/child_child_model_set
-    Now, when creating child_child_model related to child_model you still want to
-    link child_child_model to parent_model. That's what this class is for
-    '''
-    enforce_parent_relationship = ''
-
-    def update_raw_data(self, data):
-        data.pop(self.enforce_parent_relationship, None)
-        return super(EnforceParentRelationshipMixin, self).update_raw_data(data)
-
-    def create(self, request, *args, **kwargs):
-        # Inject parent group inventory ID into new group data.
-        data = request.data
-        # HACK: Make request data mutable.
-        if getattr(data, '_mutable', None) is False:
-            data._mutable = True
-        data[self.enforce_parent_relationship] = getattr(self.get_parent_object(), '%s_id' % self.enforce_parent_relationship)
-        return super(EnforceParentRelationshipMixin, self).create(request, *args, **kwargs)
-
-
 class GroupChildrenList(ControlledByScmMixin, EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
 
     model = Group
@@ -2557,11 +2541,6 @@ class JobTemplateSurveySpec(GenericAPIView):
         return Response()
 
 
-class WorkflowJobTemplateSurveySpec(WorkflowsEnforcementMixin, JobTemplateSurveySpec):
-
-    model = WorkflowJobTemplate
-
-
 class JobTemplateActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
@@ -2638,29 +2617,6 @@ class JobTemplateExtraCredentialsList(JobTemplateCredentialsList):
         if sub.credential_type.kind not in ('cloud', 'net'):
             return {'error': _('Extra credentials must be network or cloud.')}
         return valid
-
-
-class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
-
-    model = Label
-    serializer_class = LabelSerializer
-    parent_model = JobTemplate
-    relationship = 'labels'
-
-    def post(self, request, *args, **kwargs):
-        # If a label already exists in the database, attach it instead of erroring out
-        # that it already exists
-        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
-            existing = Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
-            if existing.exists():
-                existing = existing[0]
-                request.data['id'] = existing.id
-                del request.data['name']
-                del request.data['organization']
-        if Label.objects.filter(unifiedjobtemplate_labels=self.kwargs['pk']).count() > 100:
-            return Response(dict(msg=_('Maximum number of labels for {} reached.'.format(
-                self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST)
-        return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
 
 
 class JobTemplateCallback(GenericAPIView):
@@ -2879,425 +2835,6 @@ class JobTemplateCopy(CopyAPIView):
     copy_return_serializer_class = JobTemplateSerializer
 
 
-class WorkflowJobNodeList(WorkflowsEnforcementMixin, ListAPIView):
-
-    model = WorkflowJobNode
-    serializer_class = WorkflowJobNodeListSerializer
-    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
-
-
-class WorkflowJobNodeDetail(WorkflowsEnforcementMixin, RetrieveAPIView):
-
-    model = WorkflowJobNode
-    serializer_class = WorkflowJobNodeDetailSerializer
-
-
-class WorkflowJobNodeCredentialsList(SubListAPIView):
-
-    model = Credential
-    serializer_class = CredentialSerializer
-    parent_model = WorkflowJobNode
-    relationship = 'credentials'
-
-
-class WorkflowJobTemplateNodeList(WorkflowsEnforcementMixin, ListCreateAPIView):
-
-    model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeSerializer
-    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
-
-
-class WorkflowJobTemplateNodeDetail(WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
-
-    model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeDetailSerializer
-
-
-class WorkflowJobTemplateNodeCredentialsList(LaunchConfigCredentialsBase):
-
-    parent_model = WorkflowJobTemplateNode
-
-
-class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
-
-    model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeSerializer
-    always_allow_superuser = True
-    parent_model = WorkflowJobTemplateNode
-    relationship = ''
-    enforce_parent_relationship = 'workflow_job_template'
-    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
-
-    '''
-    Limit the set of WorkflowJobTemplateNodes to the related nodes of specified by
-    'relationship'
-    '''
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).all()
-
-    def is_valid_relation(self, parent, sub, created=False):
-
-        if created:
-            return None
-
-        workflow_nodes = parent.workflow_job_template.workflow_job_template_nodes.all().\
-            prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
-        graph = {}
-        for workflow_node in workflow_nodes:
-            graph[workflow_node.pk] = dict(node_object=workflow_node, metadata={'parent': None, 'traversed': False})
-
-        find = False
-        for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
-            for workflow_node in workflow_nodes:
-                parent_node = graph[workflow_node.pk]
-                related_nodes = getattr(parent_node['node_object'], node_type).all()
-                for related_node in related_nodes:
-                    sub_node = graph[related_node.pk]
-                    sub_node['metadata']['parent'] = parent_node
-                    if not find and parent == workflow_node and sub == related_node and self.relationship == node_type:
-                        find = True
-        if not find:
-            sub_node = graph[sub.pk]
-            parent_node = graph[parent.pk]
-            if sub_node['metadata']['parent'] is not None:
-                return {"Error": _("Multiple parent relationship not allowed.")}
-            sub_node['metadata']['parent'] = parent_node
-            iter_node = sub_node
-            while iter_node is not None:
-                if iter_node['metadata']['traversed']:
-                    return {"Error": _("Cycle detected.")}
-                iter_node['metadata']['traversed'] = True
-                iter_node = iter_node['metadata']['parent']
-
-        return None
-
-
-class WorkflowJobTemplateNodeSuccessNodesList(WorkflowJobTemplateNodeChildrenBaseList):
-    relationship = 'success_nodes'
-
-
-class WorkflowJobTemplateNodeFailureNodesList(WorkflowJobTemplateNodeChildrenBaseList):
-    relationship = 'failure_nodes'
-
-
-class WorkflowJobTemplateNodeAlwaysNodesList(WorkflowJobTemplateNodeChildrenBaseList):
-    relationship = 'always_nodes'
-
-
-class WorkflowJobNodeChildrenBaseList(WorkflowsEnforcementMixin, SubListAPIView):
-
-    model = WorkflowJobNode
-    serializer_class = WorkflowJobNodeListSerializer
-    parent_model = WorkflowJobNode
-    relationship = ''
-    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
-
-    #
-    #Limit the set of WorkflowJobeNodes to the related nodes of specified by
-    #'relationship'
-    #
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        return getattr(parent, self.relationship).all()
-
-
-class WorkflowJobNodeSuccessNodesList(WorkflowJobNodeChildrenBaseList):
-    relationship = 'success_nodes'
-
-
-class WorkflowJobNodeFailureNodesList(WorkflowJobNodeChildrenBaseList):
-    relationship = 'failure_nodes'
-
-
-class WorkflowJobNodeAlwaysNodesList(WorkflowJobNodeChildrenBaseList):
-    relationship = 'always_nodes'
-
-
-class WorkflowJobTemplateList(WorkflowsEnforcementMixin, ListCreateAPIView):
-
-    model = WorkflowJobTemplate
-    serializer_class = WorkflowJobTemplateSerializer
-    always_allow_superuser = False
-
-
-class WorkflowJobTemplateDetail(RelatedJobsPreventDeleteMixin, WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
-
-    model = WorkflowJobTemplate
-    serializer_class = WorkflowJobTemplateSerializer
-    always_allow_superuser = False
-
-
-class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, CopyAPIView):
-
-    model = WorkflowJobTemplate
-    copy_return_serializer_class = WorkflowJobTemplateSerializer
-
-    def get(self, request, *args, **kwargs):
-        if get_request_version(request) < 2:
-            return self.v1_not_allowed()
-        obj = self.get_object()
-        if not request.user.can_access(obj.__class__, 'read', obj):
-            raise PermissionDenied()
-        can_copy, messages = request.user.can_access_with_errors(self.model, 'copy', obj)
-        data = OrderedDict([
-            ('can_copy', can_copy), ('can_copy_without_user_input', can_copy),
-            ('templates_unable_to_copy', [] if can_copy else ['all']),
-            ('credentials_unable_to_copy', [] if can_copy else ['all']),
-            ('inventories_unable_to_copy', [] if can_copy else ['all'])
-        ])
-        if messages and can_copy:
-            data['can_copy_without_user_input'] = False
-            data.update(messages)
-        return Response(data)
-
-    @staticmethod
-    def deep_copy_permission_check_func(user, new_objs):
-        for obj in new_objs:
-            for field_name in obj._get_workflow_job_field_names():
-                item = getattr(obj, field_name, None)
-                if item is None:
-                    continue
-                elif field_name in ['inventory']:
-                    if not user.can_access(item.__class__, 'use', item):
-                        setattr(obj, field_name, None)
-                elif field_name in ['unified_job_template']:
-                    if not user.can_access(item.__class__, 'start', item, validate_license=False):
-                        setattr(obj, field_name, None)
-                elif field_name in ['credentials']:
-                    for cred in item.all():
-                        if not user.can_access(cred.__class__, 'use', cred):
-                            logger.debug(six.text_type(
-                                'Deep copy: removing {} from relationship due to permissions').format(cred))
-                            item.remove(cred.pk)
-            obj.save()
-
-
-class WorkflowJobTemplateLabelList(WorkflowsEnforcementMixin, JobTemplateLabelList):
-    parent_model = WorkflowJobTemplate
-
-
-class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
-
-
-    model = WorkflowJobTemplate
-    obj_permission_type = 'start'
-    serializer_class = WorkflowJobLaunchSerializer
-    always_allow_superuser = False
-
-    def update_raw_data(self, data):
-        try:
-            obj = self.get_object()
-        except PermissionDenied:
-            return data
-        extra_vars = data.pop('extra_vars', None) or {}
-        if obj:
-            for v in obj.variables_needed_to_start:
-                extra_vars.setdefault(v, u'')
-            if extra_vars:
-                data['extra_vars'] = extra_vars
-        return data
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-
-        serializer = self.serializer_class(instance=obj, data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        prompted_fields, ignored_fields, errors = obj._accept_or_ignore_job_kwargs(**request.data)
-
-        new_job = obj.create_unified_job(**prompted_fields)
-        new_job.signal_start()
-
-        data = OrderedDict()
-        data['workflow_job'] = new_job.id
-        data['ignored_fields'] = ignored_fields
-        data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
-        headers = {'Location': new_job.get_absolute_url(request)}
-        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
-
-    model = WorkflowJob
-    obj_permission_type = 'start'
-    serializer_class = EmptySerializer
-
-    def check_object_permissions(self, request, obj):
-        if request.method == 'POST' and obj:
-            relaunch_perm, messages = request.user.can_access_with_errors(self.model, 'start', obj)
-            if not relaunch_perm and 'workflow_job_template' in messages:
-                self.permission_denied(request, message=messages['workflow_job_template'])
-        return super(WorkflowJobRelaunch, self).check_object_permissions(request, obj)
-
-    def get(self, request, *args, **kwargs):
-        return Response({})
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.is_sliced_job and not obj.job_template_id:
-            raise ParseError(_('Cannot relaunch slice workflow job orphaned from job template.'))
-        new_workflow_job = obj.create_relaunch_workflow_job()
-        new_workflow_job.signal_start()
-
-        data = WorkflowJobSerializer(new_workflow_job, context=self.get_serializer_context()).data
-        headers = {'Location': new_workflow_job.get_absolute_url(request=request)}
-        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
-
-    model = WorkflowJobTemplateNode
-    serializer_class = WorkflowJobTemplateNodeSerializer
-    parent_model = WorkflowJobTemplate
-    relationship = 'workflow_job_template_nodes'
-    parent_key = 'workflow_job_template'
-    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
-
-    def get_queryset(self):
-        return super(WorkflowJobTemplateWorkflowNodesList, self).get_queryset().order_by('id')
-
-
-class WorkflowJobTemplateJobsList(WorkflowsEnforcementMixin, SubListAPIView):
-
-    model = WorkflowJob
-    serializer_class = WorkflowJobListSerializer
-    parent_model = WorkflowJobTemplate
-    relationship = 'workflow_jobs'
-    parent_key = 'workflow_job_template'
-
-
-class WorkflowJobTemplateSchedulesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
-
-    view_name = _("Workflow Job Template Schedules")
-
-    model = Schedule
-    serializer_class = ScheduleSerializer
-    parent_model = WorkflowJobTemplate
-    relationship = 'schedules'
-    parent_key = 'unified_job_template'
-
-
-class WorkflowJobTemplateNotificationTemplatesAnyList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
-
-    model = NotificationTemplate
-    serializer_class = NotificationTemplateSerializer
-    parent_model = WorkflowJobTemplate
-    relationship = 'notification_templates_any'
-
-
-class WorkflowJobTemplateNotificationTemplatesErrorList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
-
-    model = NotificationTemplate
-    serializer_class = NotificationTemplateSerializer
-    parent_model = WorkflowJobTemplate
-    relationship = 'notification_templates_error'
-
-
-class WorkflowJobTemplateNotificationTemplatesSuccessList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
-
-    model = NotificationTemplate
-    serializer_class = NotificationTemplateSerializer
-    parent_model = WorkflowJobTemplate
-    relationship = 'notification_templates_success'
-
-
-class WorkflowJobTemplateAccessList(WorkflowsEnforcementMixin, ResourceAccessList):
-
-    model = User # needs to be User for AccessLists's
-    parent_model = WorkflowJobTemplate
-
-
-class WorkflowJobTemplateObjectRolesList(WorkflowsEnforcementMixin, SubListAPIView):
-
-    model = Role
-    serializer_class = RoleSerializer
-    parent_model = WorkflowJobTemplate
-    search_fields = ('role_field', 'content_type__model',)
-
-    def get_queryset(self):
-        po = self.get_parent_object()
-        content_type = ContentType.objects.get_for_model(self.parent_model)
-        return Role.objects.filter(content_type=content_type, object_id=po.pk)
-
-
-class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityStreamEnforcementMixin, SubListAPIView):
-
-    model = ActivityStream
-    serializer_class = ActivityStreamSerializer
-    parent_model = WorkflowJobTemplate
-    relationship = 'activitystream_set'
-    search_fields = ('changes',)
-
-    def get_queryset(self):
-        parent = self.get_parent_object()
-        self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
-        return qs.filter(Q(workflow_job_template=parent) |
-                         Q(workflow_job_template_node__workflow_job_template=parent)).distinct()
-
-
-class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
-
-    model = WorkflowJob
-    serializer_class = WorkflowJobListSerializer
-
-
-class WorkflowJobDetail(WorkflowsEnforcementMixin, UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
-
-    model = WorkflowJob
-    serializer_class = WorkflowJobSerializer
-
-
-class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
-
-    model = WorkflowJobNode
-    serializer_class = WorkflowJobNodeListSerializer
-    always_allow_superuser = True
-    parent_model = WorkflowJob
-    relationship = 'workflow_job_nodes'
-    parent_key = 'workflow_job'
-    search_fields = ('unified_job_template__name', 'unified_job_template__description',)
-
-    def get_queryset(self):
-        return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
-
-
-class WorkflowJobCancel(WorkflowsEnforcementMixin, RetrieveAPIView):
-
-    model = WorkflowJob
-    obj_permission_type = 'cancel'
-    serializer_class = WorkflowJobCancelSerializer
-
-    def post(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.can_cancel:
-            obj.cancel()
-            schedule_task_manager()
-            return Response(status=status.HTTP_202_ACCEPTED)
-        else:
-            return self.http_method_not_allowed(request, *args, **kwargs)
-
-
-class WorkflowJobNotificationsList(WorkflowsEnforcementMixin, SubListAPIView):
-
-    model = Notification
-    serializer_class = NotificationSerializer
-    parent_model = WorkflowJob
-    relationship = 'notifications'
-    search_fields = ('subject', 'notification_type', 'body',)
-
-
-class WorkflowJobActivityStreamList(WorkflowsEnforcementMixin, ActivityStreamEnforcementMixin, SubListAPIView):
-
-    model = ActivityStream
-    serializer_class = ActivityStreamSerializer
-    parent_model = WorkflowJob
-    relationship = 'activitystream_set'
-    search_fields = ('changes',)
 
 
 class SystemJobTemplateList(ListAPIView):
@@ -3458,17 +2995,6 @@ class JobExtraCredentialsList(JobCredentialsList):
         return sublist_qs
 
 
-class JobLabelList(SubListAPIView):
-
-    model = Label
-    serializer_class = LabelSerializer
-    parent_model = Job
-    relationship = 'labels'
-    parent_key = 'job'
-
-
-class WorkflowJobLabelList(WorkflowsEnforcementMixin, JobLabelList):
-    parent_model = WorkflowJob
 
 
 class JobActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
@@ -4270,18 +3796,6 @@ class NotificationDetail(RetrieveAPIView):
 
     model = Notification
     serializer_class = NotificationSerializer
-
-
-class LabelList(ListCreateAPIView):
-
-    model = Label
-    serializer_class = LabelSerializer
-
-
-class LabelDetail(RetrieveUpdateAPIView):
-
-    model = Label
-    serializer_class = LabelSerializer
 
 
 class ActivityStreamList(ActivityStreamEnforcementMixin, SimpleListAPIView):

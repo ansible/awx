@@ -307,3 +307,33 @@ class ControlledByScmMixin(object):
         obj = super(ControlledByScmMixin, self).get_parent_object()
         self._reset_inv_src_rev(obj)
         return obj
+
+
+class EnforceParentRelationshipMixin(object):
+    '''
+    Useful when you have a self-refering ManyToManyRelationship.
+    * Tower uses a shallow (2-deep only) url pattern. For example:
+
+    When an object hangs off of a parent object you would have the url of the
+    form /api/v1/parent_model/34/child_model. If you then wanted a child of the
+    child model you would NOT do /api/v1/parent_model/34/child_model/87/child_child_model
+    Instead, you would access the child_child_model via /api/v1/child_child_model/87/
+    and you would create child_child_model's off of /api/v1/child_model/87/child_child_model_set
+    Now, when creating child_child_model related to child_model you still want to
+    link child_child_model to parent_model. That's what this class is for
+    '''
+    enforce_parent_relationship = ''
+
+    def update_raw_data(self, data):
+        data.pop(self.enforce_parent_relationship, None)
+        return super(EnforceParentRelationshipMixin, self).update_raw_data(data)
+
+    def create(self, request, *args, **kwargs):
+        # Inject parent group inventory ID into new group data.
+        data = request.data
+        # HACK: Make request data mutable.
+        if getattr(data, '_mutable', None) is False:
+            data._mutable = True
+        data[self.enforce_parent_relationship] = getattr(self.get_parent_object(), '%s_id' % self.enforce_parent_relationship)
+        return super(EnforceParentRelationshipMixin, self).create(request, *args, **kwargs)
+
