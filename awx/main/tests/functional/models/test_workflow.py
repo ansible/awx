@@ -64,7 +64,9 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
     def test_workflow_done(self):
         wfj = self.workflow_job(states=['failed', None, None, 'successful', None])
         dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
+        assert 3 == len(dag.mark_dnr_nodes())
+        is_done = dag.is_workflow_done()
+        has_failed = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertFalse(has_failed)
 
@@ -73,28 +75,36 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
             jt.delete()
         relaunched = wfj.create_relaunch_workflow_job()
         dag = WorkflowDAG(workflow_job=relaunched)
-        is_done, has_failed = dag.is_workflow_done()
+        dag.mark_dnr_nodes()
+        is_done = dag.is_workflow_done()
+        has_failed = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertTrue(has_failed)
 
     def test_workflow_fails_for_no_error_handler(self):
         wfj = self.workflow_job(states=['successful', 'failed', None, None, None])
         dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
+        dag.mark_dnr_nodes()
+        is_done = dag.is_workflow_done()
+        has_failed = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertTrue(has_failed)
 
     def test_workflow_fails_leaf(self):
         wfj = self.workflow_job(states=['successful', 'successful', 'failed', None, None])
         dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
+        dag.mark_dnr_nodes()
+        is_done = dag.is_workflow_done()
+        has_failed = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertTrue(has_failed)
 
     def test_workflow_not_finished(self):
         wfj = self.workflow_job(states=['new', None, None, None, None])
         dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
+        dag.mark_dnr_nodes()
+        is_done = dag.is_workflow_done()
+        has_failed = dag.has_workflow_failed()
         self.assertFalse(is_done)
         self.assertFalse(has_failed)
 
