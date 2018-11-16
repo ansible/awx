@@ -209,6 +209,7 @@ class TestIsWorkflowDone():
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() is True
 
+
 class TestHasWorkflowFailed():
     @pytest.fixture
     def WorkflowNodeClass(self):
