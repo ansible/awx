@@ -24,7 +24,7 @@ import { global_breakpoint_md as breakpointMd } from '@patternfly/react-tokens';
 import api from './api';
 import { API_LOGOUT } from './endpoints';
 
-// import About from './components/About';
+import HelpDropdown from './components/HelpDropdown';
 import LogoutButton from './components/LogoutButton';
 import TowerLogo from './components/TowerLogo';
 import ConditionalRedirect from './components/ConditionalRedirect';
@@ -92,6 +92,9 @@ class App extends React.Component {
     const PageToolbar = (
       <Toolbar>
         <ToolbarGroup>
+          <ToolbarItem>
+            <HelpDropdown />
+          </ToolbarItem>
           <ToolbarItem>
             <LogoutButton onDevLogout={() => this.onDevLogout()} />
           </ToolbarItem>

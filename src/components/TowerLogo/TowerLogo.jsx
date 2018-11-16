@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { Brand } from '@patternfly/react-core';
 
-import TowerLogoHeader from './tower-logo-header.svg';
-import TowerLogoHeaderHover from './tower-logo-header-hover.svg';
+import TowerLogoHeader from '../../../images/tower-logo-header.svg';
+import TowerLogoHeaderHover from '../../../images/tower-logo-header-hover.svg';
 
 class TowerLogo extends Component {
   constructor (props) {

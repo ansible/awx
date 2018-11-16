@@ -25,21 +25,21 @@
 
   .pf-c-nav {
     overflow-y: auto;
-  
+
     .pf-c-nav__section {
       --pf-c-nav__section--MarginTop: 8px;
     }
-    
+
     .pf-c-nav__section + .pf-c-nav__section {
       --pf-c-nav__section--MarginTop: 8px;
     }
-    
+
     .pf-c-nav__simple-list .pf-c-nav__link {
       --pf-c-nav__simple-list-link--PaddingLeft: 24px;
       --pf-c-nav__simple-list-link--PaddingBottom: 6px;
       --pf-c-nav__simple-list-link--PaddingTop: 6px;
     }
-    
+
     .pf-c-nav__section-title {
       --pf-c-nav__section-title--PaddingLeft: 24px;
     }
@@ -109,4 +109,12 @@
 
 .pf-c-data-list__cell span {
   margin-right: 18px;
+}
+
+//
+// about modal overrides
+//
+.pf-c-backdrop .pf-c-about-modal-box {
+  --pf-c-about-modal-box--MaxHeight: 40rem;
+  --pf-c-about-modal-box--MaxWidth: 63rem;
 }
