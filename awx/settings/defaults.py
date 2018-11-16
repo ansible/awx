@@ -951,7 +951,7 @@ TOWER_ADMIN_ALERTS = True
 # Note: This setting may be overridden by database settings.
 TOWER_URL_BASE = "https://towerhost"
 
-INSIGHTS_URL_BASE = "https://access.redhat.com"
+INSIGHTS_URL_BASE = "https://example.org"
 
 TOWER_SETTINGS_MANIFEST = {}
 
