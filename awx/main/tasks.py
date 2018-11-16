@@ -1208,8 +1208,6 @@ class RunJob(BaseTask):
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
-        env['ANSIBLE_INVENTORY_ENABLED'] = 'script'
-        env['ANSIBLE_INVENTORY_UNPARSED_FAILED'] = 'True'
         env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         if not kwargs.get('isolated'):
             env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
@@ -1223,9 +1221,6 @@ class RunJob(BaseTask):
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0o700)
         env['ANSIBLE_SSH_CONTROL_PATH_DIR'] = cp_dir
-
-        # Allow the inventory script to include host variables inline via ['_meta']['hostvars'].
-        env['INVENTORY_HOSTVARS'] = str(True)
 
         # Set environment variables for cloud credentials.
         cred_files = kwargs.get('private_data_files', {}).get('credentials', {})
