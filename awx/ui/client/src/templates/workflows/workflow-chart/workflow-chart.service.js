@@ -97,7 +97,6 @@ export default [function(){
             return {
                 arrayOfNodesForChart,
                 arrayOfLinksForChart,
-                chartNodeIdToIndexMapping,
                 nodeIdToChartNodeIdMapping,
                 nodeRef,
                 workflowMakerNodeIdCounter: nodeIdCounter
