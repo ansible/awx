@@ -21,7 +21,7 @@ export default ['templateUrl',
                     scope.zoom = 100;
                     $( "#slider" ).slider({
                         value:100,
-                        min: 50,
+                        min: 10,
                         max: 200,
                         step: 10,
                         slide: function( event, ui ) {
@@ -54,7 +54,7 @@ export default ['templateUrl',
                 };
 
                 scope.zoomOut = function() {
-                    scope.zoom = Math.floor((scope.zoom - 10) / 10) * 10 > 50 ? Math.floor((scope.zoom - 10) / 10) * 10 : 50;
+                    scope.zoom = Math.floor((scope.zoom - 10) / 10) * 10 > 10 ? Math.floor((scope.zoom - 10) / 10) * 10 : 10;
                     $("#slider").slider('value',scope.zoom);
                     scope.zoomChart({
                         zoom: scope.zoom

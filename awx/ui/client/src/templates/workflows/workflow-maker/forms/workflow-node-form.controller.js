@@ -88,7 +88,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 'missingSurveyValue'
             ];
 
-            promptWatcher = $scope.$watchGroup(promptDataToWatch, function() {
+            promptWatcher = $scope.$watchGroup(promptDataToWatch, () => {
                 let missingPromptValue = false;
                 if ($scope.missingSurveyValue) {
                     missingPromptValue = true;
@@ -524,7 +524,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
             listPromises.push(
                 qs.search(GetBasePath('unified_job_templates'), $scope.wf_maker_template_queryset)
-                .then(function(res) {
+                .then((res) => {
                     $scope.wf_maker_template_dataset = res.data;
                     $scope.wf_maker_templates = $scope.wf_maker_template_dataset.results;
                 })
@@ -540,7 +540,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
             listPromises.push(
                 qs.search(GetBasePath('projects'), $scope.wf_maker_project_queryset)
-                .then(function(res) {
+                .then((res) => {
                     $scope.wf_maker_project_dataset = res.data;
                     $scope.wf_maker_projects = $scope.wf_maker_project_dataset.results;
                 })
@@ -557,7 +557,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
             listPromises.push(
                 qs.search(GetBasePath('inventory_sources'), $scope.wf_maker_inventory_source_dataset)
-                .then(function(res) {
+                .then((res) => {
                     $scope.wf_maker_inventory_source_dataset = res.data;
                     $scope.wf_maker_inventory_sources = $scope.wf_maker_inventory_source_dataset.results;
                 })
@@ -567,14 +567,14 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 .then(() => {
                     if ($scope.nodeConfig.mode === "edit") {
                         // Make sure that we have the full unified job template object
-                        if (!$scope.nodeConfig.node.fullUnifiedJobTemplate && _.get($scope, 'nodeConfig.node.originalNodeObject.summary_fields.unified_job_template.unified_job_type') === 'job') {
+                        if (!$scope.nodeConfig.node.fullUnifiedJobTemplateObject && _.get($scope, 'nodeConfig.node.originalNodeObject.summary_fields.unified_job_template.unified_job_type') === 'job') {
                             // This is a node that we got back from the api with an incomplete
                             // unified job template so we're going to pull down the whole object
                             TemplatesService.getUnifiedJobTemplate($scope.nodeConfig.node.originalNodeObject.summary_fields.unified_job_template.id)
-                                .then(function({data}) {
+                                .then(({data}) => {
                                     $scope.nodeConfig.node.fullUnifiedJobTemplateObject = data.results[0];
                                     finishConfiguringEdit();
-                                }, function(error) {
+                                }, (error) => {
                                     ProcessErrors($scope, error.data, error.status, null, {
                                         hdr: 'Error!',
                                         msg: 'Failed to get unified job template. GET returned ' +
@@ -590,16 +590,15 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 });
         };
 
-        $scope.openPromptModal = function() {
+        $scope.openPromptModal = () => {
             $scope.promptData.triggerModalOpen = true;
         };
 
-        $scope.toggle_row = function(selectedRow) {
+        $scope.toggle_row = (selectedRow) => {
             if (!$scope.readOnly) {
-                // TODO: make this more concise
                 switch($scope.activeTab) {
                     case 'jobs':
-                        $scope.wf_maker_templates.forEach(function(row, i) {
+                        $scope.wf_maker_templates.forEach((row, i) => {
                             if (row.id === selectedRow.id) {
                                 $scope.wf_maker_templates[i].checked = 1;
 
@@ -609,7 +608,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                         });
                         break;
                     case 'project_syncs':
-                        $scope.wf_maker_projects.forEach(function(row, i) {
+                        $scope.wf_maker_projects.forEach((row, i) => {
                             if (row.id === selectedRow.id) {
                                 $scope.wf_maker_projects[i].checked = 1;
                             } else {
@@ -618,7 +617,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                         });
                         break;
                     case 'inventory_syncs':
-                        $scope.wf_maker_inventory_sources.forEach(function(row, i) {
+                        $scope.wf_maker_inventory_sources.forEach((row, i) => {
                             if (row.id === selectedRow.id) {
                                 $scope.wf_maker_inventory_sources[i].checked = 1;
                             } else {
@@ -638,11 +637,11 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         });
 
         $scope.$watchGroup(['wf_maker_templates', 'wf_maker_projects', 'wf_maker_inventory_sources', 'activeTab'], () => {
-            // TODO: make this more concise
+            const unifiedJobTemplateId = _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.id') || _.get($scope, 'nodeConfig.node.unifiedJobTemplate.id') || null;
             switch($scope.activeTab) {
                 case 'jobs':
-                    $scope.wf_maker_templates.forEach(function(row, i) {
-                        if(_.hasIn($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.id') && row.id === $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id) {
+                    $scope.wf_maker_templates.forEach((row, i) => {
+                        if(row.id === unifiedJobTemplateId) {
                             $scope.wf_maker_templates[i].checked = 1;
                         }
                         else {
@@ -651,8 +650,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     });
                     break;
                 case 'project_syncs':
-                    $scope.wf_maker_projects.forEach(function(row, i) {
-                        if(_.hasIn($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.id') && row.id === $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id) {
+                    $scope.wf_maker_projects.forEach((row, i) => {
+                        if(row.id === unifiedJobTemplateId) {
                             $scope.wf_maker_projects[i].checked = 1;
                         }
                         else {
@@ -661,8 +660,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     });
                     break;
                 case 'inventory_syncs':
-                    $scope.wf_maker_inventory_sources.forEach(function(row, i) {
-                        if(_.hasIn($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.id') && row.id === $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id) {
+                    $scope.wf_maker_inventory_sources.forEach((row, i) => {
+                        if(row.id === unifiedJobTemplateId) {
                             $scope.wf_maker_inventory_sources[i].checked = 1;
                         }
                         else {
