@@ -14,85 +14,120 @@ export default ['$scope', 'TemplatesService',
         Wait
     ) {
 
-        $scope.strings = TemplatesStrings;
-        $scope.preventCredsWithPasswords = true;
-
         let deletedNodeIds = [];
-        let workflowMakerNodeIdCounter = 1;
+        let workflowMakerNodeIdCounter;
         let nodeIdToChartNodeIdMapping = {};
         let nodeRef = {};
+        let allNodes = [];
+        let page = 1;
 
+        $scope.strings = TemplatesStrings;
+        $scope.preventCredsWithPasswords = true;
         $scope.showKey = false;
         $scope.toggleKey = () => $scope.showKey = !$scope.showKey;
         $scope.keyClassList = `{ 'Key-menuIcon--active': showKey }`;
-
         $scope.readOnly = !_.get($scope, 'workflowJobTemplateObj.summary_fields.user_capabilities.edit');
-
         $scope.formState = {
             'showNodeForm': false,
             'showLinkForm': false
         };
 
-        let buildSendableNodeData = function (node) {
-            // Create the node
-            let sendableNodeData = {
-                extra_data: {},
-                inventory: null,
-                job_type: null,
-                job_tags: null,
-                skip_tags: null,
-                limit: null,
-                diff_mode: null,
-                verbosity: null,
-                credential: null
-            };
+        let getNodes = () => {
+            Wait('start');
+            TemplatesService.getWorkflowJobTemplateNodes($scope.workflowJobTemplateObj.id, page)
+                .then(({data}) => {
+                    for (var i = 0; i < data.results.length; i++) {
+                        allNodes.push(data.results[i]);
+                    }
+                    if (data.next) {
+                        // Get the next page
+                        page++;
+                        getNodes();
+                    } else {
+                        let arrayOfLinksForChart = [];
+                        let arrayOfNodesForChart = [];
 
-            if (_.has(node, 'fullUnifiedJobTemplateObject')) {
-                sendableNodeData.unified_job_template = node.fullUnifiedJobTemplateObject.id;
-            }
+                        ({arrayOfNodesForChart, arrayOfLinksForChart, nodeIdToChartNodeIdMapping, nodeRef, workflowMakerNodeIdCounter} = WorkflowChartService.generateArraysOfNodesAndLinks(allNodes));
 
-            if (_.has(node, 'promptData.extraVars')) {
-                if (_.get(node, 'promptData.launchConf.defaults.extra_vars')) {
-                    const defaultVars = jsyaml.safeLoad(node.promptData.launchConf.defaults.extra_vars);
+                        $scope.graphState = { arrayOfNodesForChart, arrayOfLinksForChart };
 
-                    // Only include extra vars that differ from the template default vars
-                    _.forOwn(node.promptData.extraVars, (value, key) => {
-                        if (!defaultVars[key] || defaultVars[key] !== value) {
-                            sendableNodeData.extra_data[key] = value;
-                        }
+                        Wait('stop');
+                    }
+                }, ({ data, status, config }) => {
+                    Wait('stop');
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: $scope.strings.get('error.HEADER'),
+                        msg: $scope.strings.get('error.CALL', {
+                            path: `${config.url}`,
+                            action: `${config.method}`,
+                            status
+                        })
                     });
-                    if (_.isEmpty(sendableNodeData.extra_data)) {
-                        delete sendableNodeData.extra_data;
-                    }
-                } else {
-                    if (_.has(node, 'promptData.extraVars') && !_.isEmpty(node.promptData.extraVars)) {
-                        sendableNodeData.extra_data = node.promptData.extraVars;
-                    }
-                }
-            }
-
-            // Check to see if the user has provided any prompt values that are different
-            // from the defaults in the job template
-
-            if (_.has(node, 'fullUnifiedJobTemplateObject') && node.fullUnifiedJobTemplateObject.type === "job_template" && node.promptData) {
-                sendableNodeData = PromptService.bundlePromptDataForSaving({
-                    promptData: node.promptData,
-                    dataToSave: sendableNodeData
                 });
-            }
-
-            return sendableNodeData;
         };
 
-        $scope.closeWorkflowMaker = function() {
+        getNodes();
+
+        $scope.closeWorkflowMaker = () => {
             // Revert the data to the master which was created when the dialog was opened
             $scope.graphState.nodeTree = angular.copy($scope.graphStateMaster);
             $scope.closeDialog();
         };
 
-        $scope.saveWorkflowMaker = function () {
+        $scope.saveWorkflowMaker = () => {
 
             Wait('start');
+
+            let buildSendableNodeData = (node) => {
+                // Create the node
+                let sendableNodeData = {
+                    extra_data: {},
+                    inventory: null,
+                    job_type: null,
+                    job_tags: null,
+                    skip_tags: null,
+                    limit: null,
+                    diff_mode: null,
+                    verbosity: null,
+                    credential: null
+                };
+
+                if (_.has(node, 'fullUnifiedJobTemplateObject')) {
+                    sendableNodeData.unified_job_template = node.fullUnifiedJobTemplateObject.id;
+                }
+
+                if (_.has(node, 'promptData.extraVars')) {
+                    if (_.get(node, 'promptData.launchConf.defaults.extra_vars')) {
+                        const defaultVars = jsyaml.safeLoad(node.promptData.launchConf.defaults.extra_vars);
+
+                        // Only include extra vars that differ from the template default vars
+                        _.forOwn(node.promptData.extraVars, (value, key) => {
+                            if (!defaultVars[key] || defaultVars[key] !== value) {
+                                sendableNodeData.extra_data[key] = value;
+                            }
+                        });
+                        if (_.isEmpty(sendableNodeData.extra_data)) {
+                            delete sendableNodeData.extra_data;
+                        }
+                    } else {
+                        if (_.has(node, 'promptData.extraVars') && !_.isEmpty(node.promptData.extraVars)) {
+                            sendableNodeData.extra_data = node.promptData.extraVars;
+                        }
+                    }
+                }
+
+                // Check to see if the user has provided any prompt values that are different
+                // from the defaults in the job template
+
+                if (_.has(node, 'fullUnifiedJobTemplateObject') && node.fullUnifiedJobTemplateObject.type === "job_template" && node.promptData) {
+                    sendableNodeData = PromptService.bundlePromptDataForSaving({
+                        promptData: node.promptData,
+                        dataToSave: sendableNodeData
+                    });
+                }
+
+                return sendableNodeData;
+            };
 
             if ($scope.graphState.arrayOfNodesForChart.length > 1) {
                 let addPromises = [];
@@ -110,9 +145,9 @@ export default ['$scope', 'TemplatesService',
                             if (_.get(nodeRef[workflowMakerNodeId], 'promptData.launchConf.ask_credential_on_launch')) {
                                 // This finds the credentials that were selected in the prompt but don't occur
                                 // in the template defaults
-                                let credentialIdsToPost = nodeRef[workflowMakerNodeId].promptData.prompts.credentials.value.filter(function (credFromPrompt) {
+                                let credentialIdsToPost = nodeRef[workflowMakerNodeId].promptData.prompts.credentials.value.filter((credFromPrompt) => {
                                     let defaultCreds = _.get(nodeRef[workflowMakerNodeId], 'promptData.launchConf.defaults.credentials', []);
-                                    return !defaultCreds.some(function (defaultCred) {
+                                    return !defaultCreds.some((defaultCred) => {
                                         return credFromPrompt.id === defaultCred.id;
                                     });
                                 });
@@ -134,16 +169,16 @@ export default ['$scope', 'TemplatesService',
                         }));
 
                         if (_.get(nodeRef[workflowMakerNodeId], 'promptData.launchConf.ask_credential_on_launch')) {
-                            let credentialsNotInPriorCredentials = nodeRef[workflowMakerNodeId].promptData.prompts.credentials.value.filter(function (credFromPrompt) {
+                            let credentialsNotInPriorCredentials = nodeRef[workflowMakerNodeId].promptData.prompts.credentials.value.filter((credFromPrompt) => {
                                 let defaultCreds = _.get(nodeRef[workflowMakerNodeId], 'promptData.launchConf.defaults.credentials', []);
-                                return !defaultCreds.some(function (defaultCred) {
+                                return !defaultCreds.some((defaultCred) => {
                                     return credFromPrompt.id === defaultCred.id;
                                 });
                             });
 
-                            let credentialsToAdd = credentialsNotInPriorCredentials.filter(function (credNotInPrior) {
+                            let credentialsToAdd = credentialsNotInPriorCredentials.filter((credNotInPrior) => {
                                 let previousOverrides = _.get(nodeRef[workflowMakerNodeId], 'promptData.prompts.credentials.previousOverrides', []);
-                                return !previousOverrides.some(function (priorCred) {
+                                return !previousOverrides.some((priorCred) => {
                                     return credNotInPrior.id === priorCred.id;
                                 });
                             });
@@ -151,8 +186,8 @@ export default ['$scope', 'TemplatesService',
                             let credentialsToRemove = [];
 
                             if (_.has(nodeRef[workflowMakerNodeId], 'promptData.prompts.credentials.previousOverrides')) {
-                                credentialsToRemove = nodeRef[workflowMakerNodeId].promptData.prompts.credentials.previousOverrides.filter(function (priorCred) {
-                                    return !credentialsNotInPriorCredentials.some(function (credNotInPrior) {
+                                credentialsToRemove = nodeRef[workflowMakerNodeId].promptData.prompts.credentials.previousOverrides.filter((priorCred) => {
+                                    return !credentialsNotInPriorCredentials.some((credNotInPrior) => {
                                         return priorCred.id === credNotInPrior.id;
                                     });
                                 });
@@ -181,7 +216,7 @@ export default ['$scope', 'TemplatesService',
 
                 });
 
-                let deletePromises = deletedNodeIds.map(function (nodeId) {
+                let deletePromises = deletedNodeIds.map((nodeId) => {
                     return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
                 });
 
@@ -315,8 +350,8 @@ export default ['$scope', 'TemplatesService',
                         });
 
                         $q.all(disassociatePromises)
-                            .then(function () {
-                                let credentialPromises = credentialRequests.map(function (request) {
+                            .then(() => {
+                                let credentialPromises = credentialRequests.map((request) => {
                                     return TemplatesService.postWorkflowNodeCredential({
                                         id: request.id,
                                         data: request.data
@@ -324,7 +359,7 @@ export default ['$scope', 'TemplatesService',
                                 });
 
                                 return $q.all(associatePromises.concat(credentialPromises))
-                                    .then(function () {
+                                    .then(() => {
                                         Wait('stop');
                                         $scope.closeDialog();
                                     });
@@ -339,12 +374,12 @@ export default ['$scope', 'TemplatesService',
 
             } else {
 
-                let deletePromises = deletedNodeIds.map(function (nodeId) {
+                let deletePromises = deletedNodeIds.map((nodeId) => {
                     return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
                 });
 
                 $q.all(deletePromises)
-                    .then(function () {
+                    .then(() => {
                         Wait('stop');
                         $scope.closeDialog();
                         $state.transitionTo('templates');
@@ -354,7 +389,7 @@ export default ['$scope', 'TemplatesService',
 
         /* ADD NODE FUNCTIONS */
 
-        $scope.startAddNodeWithoutChild = function (parent) {
+        $scope.startAddNodeWithoutChild = (parent) => {
             if ($scope.nodeConfig) {
                 $scope.cancelNodeForm();
             }
@@ -389,7 +424,7 @@ export default ['$scope', 'TemplatesService',
             $scope.formState.showNodeForm = true;
         };
 
-        $scope.startAddNodeWithChild = function (link) {
+        $scope.startAddNodeWithChild = (link) => {
             if ($scope.nodeConfig) {
                 $scope.cancelNodeForm();
             }
@@ -432,7 +467,7 @@ export default ['$scope', 'TemplatesService',
             $scope.formState.showNodeForm = true;
         };
 
-        $scope.confirmNodeForm = function(selectedTemplate, promptData, edgeType) {
+        $scope.confirmNodeForm = (selectedTemplate, promptData, edgeType) => {
             const nodeId = $scope.nodeConfig.nodeId;
             if ($scope.nodeConfig.mode === "add") {
                 if (selectedTemplate && edgeType && edgeType.value) {
@@ -471,7 +506,7 @@ export default ['$scope', 'TemplatesService',
             $scope.$broadcast("refreshWorkflowChart");
         };
 
-        $scope.cancelNodeForm = function() {
+        $scope.cancelNodeForm = () => {
             const nodeId = $scope.nodeConfig.nodeId;
             if ($scope.nodeConfig.mode === "add") {
                 // Remove the placeholder node from the array
@@ -524,7 +559,7 @@ export default ['$scope', 'TemplatesService',
 
         /* EDIT NODE FUNCTIONS */
 
-        $scope.startEditNode = function(nodeToEdit) {
+        $scope.startEditNode = (nodeToEdit) => {
             if ($scope.linkConfig) {
                 $scope.cancelLinkForm();
             }
@@ -763,17 +798,17 @@ export default ['$scope', 'TemplatesService',
 
         /* DELETE NODE FUNCTIONS */
 
-        $scope.startDeleteNode = function (nodeToDelete) {
+        $scope.startDeleteNode = (nodeToDelete) => {
             $scope.nodeToBeDeleted = nodeToDelete;
             $scope.deleteOverlayVisible = true;
         };
 
-        $scope.cancelDeleteNode = function () {
+        $scope.cancelDeleteNode = () => {
             $scope.nodeToBeDeleted = null;
             $scope.deleteOverlayVisible = false;
         };
 
-        $scope.confirmDeleteNode = function () {
+        $scope.confirmDeleteNode = () => {
             if ($scope.nodeToBeDeleted) {
                 const nodeId = $scope.nodeToBeDeleted.id;
 
@@ -857,73 +892,34 @@ export default ['$scope', 'TemplatesService',
 
         };
 
-        $scope.toggleManualControls = function() {
+        $scope.toggleManualControls = () => {
             $scope.showManualControls = !$scope.showManualControls;
         };
 
-        $scope.panChart = function (direction) {
+        $scope.panChart = (direction) => {
             $scope.$broadcast('panWorkflowChart', {
                 direction: direction
             });
         };
 
-        $scope.zoomChart = function (zoom) {
+        $scope.zoomChart = (zoom) => {
             $scope.$broadcast('zoomWorkflowChart', {
                 zoom: zoom
             });
         };
 
-        $scope.resetChart = function () {
+        $scope.resetChart = () => {
             $scope.$broadcast('resetWorkflowChart');
         };
 
-        $scope.workflowZoomed = function (zoom) {
+        $scope.workflowZoomed = (zoom) => {
             $scope.$broadcast('workflowZoomed', {
                 zoom: zoom
             });
         };
 
-        $scope.zoomToFitChart = function () {
+        $scope.zoomToFitChart = () => {
             $scope.$broadcast('zoomToFitChart');
         };
-
-        let allNodes = [];
-        let page = 1;
-
-        let getNodes = function () {
-            Wait('start');
-            TemplatesService.getWorkflowJobTemplateNodes($scope.workflowJobTemplateObj.id, page)
-                .then(function (data) {
-                    for (var i = 0; i < data.data.results.length; i++) {
-                        allNodes.push(data.data.results[i]);
-                    }
-                    if (data.data.next) {
-                        // Get the next page
-                        page++;
-                        getNodes();
-                    } else {
-                        let arrayOfLinksForChart = [];
-                        let arrayOfNodesForChart = [];
-
-                        ({arrayOfNodesForChart, arrayOfLinksForChart, nodeIdToChartNodeIdMapping, nodeRef, workflowMakerNodeIdCounter} = WorkflowChartService.generateArraysOfNodesAndLinks(allNodes));
-
-                        $scope.graphState = { arrayOfNodesForChart, arrayOfLinksForChart };
-
-                        Wait('stop');
-                    }
-                }, function ({ data, status, config }) {
-                    Wait('stop');
-                    ProcessErrors($scope, data, status, null, {
-                        hdr: $scope.strings.get('error.HEADER'),
-                        msg: $scope.strings.get('error.CALL', {
-                            path: `${config.url}`,
-                            action: `${config.method}`,
-                            status
-                        })
-                    });
-                });
-        };
-
-        getNodes();
     }
 ];
