@@ -53,39 +53,20 @@ module.exports = {
                 data = { source, template, project, workflow };
                 done();
             });
-    },
-    'navigate to the workflow template visualizer': client => {
-        const templates = client.page.templates();
-
-        client.useCss();
-        client.resizeWindow(1200, 800);
-        client.login();
-        client.waitForAngular();
-
-        templates.load();
-        templates.waitForElementVisible('div.spinny');
-        templates.waitForElementNotVisible('div.spinny');
-
-        templates.expect.element('smart-search').visible;
-        templates.expect.element('smart-search input').enabled;
-
-        templates
-            .sendKeys('smart-search input', `id:>${data.workflow.id - 1} id:<${data.workflow.id + 1}`)
-            .sendKeys('smart-search input', client.Keys.ENTER);
-
-        templates.waitForElementVisible('div.spinny');
-        templates.waitForElementNotVisible('div.spinny');
-
-        templates.expect.element('.at-Panel-headingTitleBadge').text.equal('1').before(10000);
-        templates.expect.element(`#row-${data.workflow.id}`).visible;
-        templates.expect.element('div[ui-view="templatesList"] i[class*="sitemap"]').visible;
-        templates.expect.element('div[ui-view="templatesList"] i[class*="sitemap"]').enabled;
-
         client
-            .click('div[ui-view="templatesList"] i[class*="sitemap"]')
-            .pause(1500)
+            .login()
+            .waitForAngular()
+            .resizeWindow(1200, 1000)
             .useXpath()
-            .waitForElementNotVisible(spinny);
+            .findThenClick(workflowTemplateNavTab)
+            .pause(1500)
+            .waitForElementNotVisible(spinny)
+            .clearValue(workflowSearchBar)
+            .setValue(workflowSearchBar, [workflowText, client.Keys.ENTER])
+            .waitForElementVisible(workflowSearchBadgeCount)
+            .waitForElementNotVisible(spinny)
+            .findThenClick(workflowSelector)
+            .findThenClick(workflowVisualizerBtn);
     },
     'verify that workflow visualizer root node can only be set to always': client => {
         client

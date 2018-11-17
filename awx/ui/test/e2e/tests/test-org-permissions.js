@@ -50,10 +50,12 @@ const readOrgPermissionResults = '//*[@id="permissions_table"]//*[text()="test-a
 
 module.exports = {
     before: (client, done) => {
+        const namespace = 'test-org-permissions';
+
         const resources = [
-            getUserExact('test-actions', 'test-actions-user'),
-            getOrganization('test-actions'),
-            getTeam('test-actions'),
+            getUserExact(namespace, `${namespace}-user`),
+            getOrganization(namespace),
+            getTeam(namespace),
         ];
 
         Promise.all(resources)
