@@ -60,10 +60,10 @@ export default ['templateUrl', 'Wait', '$filter', '$compile', 'i18n',
                         data.results.forEach(function(row) {
                             if ((scope.inventory.has_active_failures && row.status === 'failed') || (!scope.inventory.has_active_failures && row.status === 'successful')) {
                                 html += "<tr>\n";
-                                html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                                html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + "," + "'" + row.type + "'" + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                                     ". Click for details\" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\"><i class=\"fa SmartStatus-tooltip--" + row.status + " icon-job-" + row.status + "\"></i></a></td>\n";
                                 html += "<td>" + ($filter('longDate')(row.finished)) + "</td>";
-                                html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
+                                html += "<td><a href=\"\" ng-click=\"viewJob(" + row.id + "," + "'" + row.type + "'" + ")\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                                     ". Click for details\" aw-tip-placement=\"top\" data-tooltip-outer-class=\"Tooltip-secondary\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
                                 html += "</tr>\n";
                             }
