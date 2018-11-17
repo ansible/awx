@@ -360,7 +360,6 @@ export default ['$scope', 'WorkflowService', 'TemplatesService',
             // Revert the data to the master which was created when the dialog was opened
             $scope.treeData.data = angular.copy($scope.treeDataMaster);
             $scope.closeDialog();
-            $state.transitionTo('templates');
         };
 
         $scope.saveWorkflowMaker = function () {

@@ -60,6 +60,10 @@ export default [
             $scope.inventory_name = Inventory.name;
         }
 
+        $scope.openWorkflowMaker = function() {
+            $state.go('.workflowMaker');
+        };
+
         $scope.formSave = function () {
             let fld, data = {};
             $scope.invalid_survey = false;
@@ -262,6 +266,7 @@ export default [
             opts: opts
         });
 
+        $scope.workflowVisualizerTooltip = i18n._("Click here to open the workflow visualizer.");
         $scope.surveyTooltip = i18n._('Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.');
 
         $scope.workflow_job_template_obj = workflowJobTemplateData;
