@@ -1,6 +1,5 @@
 
 # Python
-import copy
 from awx.main.models import (
     WorkflowJobTemplateNode,
     WorkflowJobNode,
@@ -201,13 +200,12 @@ class WorkflowDAG(SimpleDAG):
 
     def mark_dnr_nodes(self):
         root_nodes = self.get_root_nodes()
-        nodes = copy.copy(root_nodes)
         nodes_marked_do_not_run = []
 
-        for index, node in enumerate(nodes):
-            obj = node['node_object']
-
-            if obj.do_not_run is False and not obj.job:
+        for node_indexes in self.depth:
+            for node_index in node_indexes:
+                node = self.nodes[node_index]
+                obj = node['node_object']
                 parent_nodes = [p['node_object'] for p in self.get_dependents(obj)]
                 if self._are_all_nodes_dnr_decided(parent_nodes):
                     if obj.unified_job_template is None:
@@ -216,8 +214,4 @@ class WorkflowDAG(SimpleDAG):
                     elif node not in root_nodes and self._should_mark_node_dnr(node, parent_nodes):
                         obj.do_not_run = True
                         nodes_marked_do_not_run.append(node)
-
-            nodes.extend(self.get_dependencies(obj, 'success_nodes') +
-                         self.get_dependencies(obj, 'failure_nodes') +
-                         self.get_dependencies(obj, 'always_nodes'))
         return [n['node_object'] for n in nodes_marked_do_not_run]
