@@ -193,6 +193,8 @@ class WorkflowDAG(SimpleDAG):
                 if node in (self.get_dependencies(p, 'failure_nodes') +
                             self.get_dependencies(p, 'always_nodes')):
                     return False
+            elif p.do_not_run is True:
+                pass
             else:
                 return False
         return True
@@ -202,19 +204,18 @@ class WorkflowDAG(SimpleDAG):
         nodes = copy.copy(root_nodes)
         nodes_marked_do_not_run = []
 
-        for index, n in enumerate(nodes):
-            obj = n['node_object']
+        for index, node in enumerate(nodes):
+            obj = node['node_object']
 
             if obj.do_not_run is False and not obj.job:
-                parent_nodes = filter(lambda n: not n.do_not_run,
-                                      [p['node_object'] for p in self.get_dependents(obj)])
+                parent_nodes = [p['node_object'] for p in self.get_dependents(obj)]
                 if self._are_all_nodes_dnr_decided(parent_nodes):
                     if obj.unified_job_template is None:
                         obj.do_not_run = True
-                        nodes_marked_do_not_run.append(n)
-                    elif n not in root_nodes and self._should_mark_node_dnr(n, parent_nodes):
+                        nodes_marked_do_not_run.append(node)
+                    elif node not in root_nodes and self._should_mark_node_dnr(node, parent_nodes):
                         obj.do_not_run = True
-                        nodes_marked_do_not_run.append(n)
+                        nodes_marked_do_not_run.append(node)
 
             nodes.extend(self.get_dependencies(obj, 'success_nodes') +
                          self.get_dependencies(obj, 'failure_nodes') +
