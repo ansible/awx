@@ -61,7 +61,7 @@ from awx.main.redact import UriCleaner, REPLACE_STR
 
 from awx.main.validators import vars_validate_or_raise
 
-from awx.conf.license import feature_enabled
+from awx.conf.license import feature_enabled, LicenseForbids
 from awx.api.versioning import reverse, get_request_version
 from awx.api.fields import (BooleanNullField, CharNullField, ChoiceNullField,
                             VerbatimField, DeprecatedCredentialField)
@@ -3054,6 +3054,13 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
 
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
+
+    def validate_job_slice_count(self, value):
+        if value > 1 and not feature_enabled('workflows'):
+            raise LicenseForbids({'job_slice_count': [_(
+                "Job slicing is a workflows-based feature and your license does not allow use of workflows."
+            )]})
+        return value
 
     def get_summary_fields(self, obj):
         summary_fields = super(JobTemplateSerializer, self).get_summary_fields(obj)
