@@ -1,8 +1,11 @@
 
+
 class SimpleDAG(object):
     ''' A simple implementation of a directed acyclic graph '''
 
     def __init__(self):
+        # Depth
+        self.depth = [set([])]
         self.nodes = []
         self.root_nodes = set([])
 
@@ -99,6 +102,8 @@ class SimpleDAG(object):
         gv_file.close()
 
     def add_node(self, obj, metadata=None):
+        if not metadata:
+            metadata = dict()
         if self.find_ord(obj) is None:
             '''
             Assume node is a root node until a child is added
@@ -108,6 +113,11 @@ class SimpleDAG(object):
             self.node_obj_to_node_index[obj] = node_index
             entry = dict(node_object=obj, metadata=metadata)
             self.nodes.append(entry)
+
+            # Depth
+            metadata['depth'] = 0
+            self.depth[0].add(node_index)
+            return node_index
 
     def add_edge(self, from_obj, to_obj, label):
         from_obj_ord = self.find_ord(from_obj)
@@ -132,6 +142,19 @@ class SimpleDAG(object):
 
         self.node_from_edges_by_label[label][from_obj_ord].append(to_obj_ord)
         self.node_to_edges_by_label[label][to_obj_ord].append(from_obj_ord)
+
+        # Depth
+        parent_depth = self.nodes[from_obj_ord]['metadata']['depth']
+        current_depth = self.nodes[to_obj_ord]['metadata']['depth']
+        if parent_depth >= current_depth:
+            if len(self.depth) <= parent_depth + 1:
+                self.depth.append(set([]))
+
+            self.nodes[to_obj_ord]['metadata']['depth'] = parent_depth + 1
+
+            self.depth[current_depth].remove(to_obj_ord)
+            self.depth[parent_depth + 1].add(to_obj_ord)
+
 
     def find_ord(self, obj):
         return self.node_obj_to_node_index.get(obj, None)
