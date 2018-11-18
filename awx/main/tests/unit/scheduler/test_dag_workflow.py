@@ -11,7 +11,7 @@ class Job():
 
 class WorkflowNode(object):
     def __init__(self, id=None, job=None, do_not_run=False, unified_job_template=None):
-        self.id = id if id else uuid.uuid4()
+        self.id = id if id is not None else uuid.uuid4()
         self.job = job
         self.do_not_run = do_not_run
         self.unified_job_template = unified_job_template
@@ -19,8 +19,12 @@ class WorkflowNode(object):
 
 @pytest.fixture
 def wf_node_generator(mocker):
+    pytest.count = 0
+
     def fn(**kwargs):
-        return WorkflowNode(**kwargs)
+        wfn = WorkflowNode(id=pytest.count, **kwargs)
+        pytest.count += 1
+        return wfn
     return fn
 
 
@@ -177,19 +181,6 @@ class TestIsWorkflowDone():
         nodes[2].job = Job(status='failed')
         return (g, nodes)
 
-    def test_is_workflow_done(self, workflow_dag_2):
-        g = workflow_dag_2[0]
-
-        assert g.is_workflow_done() is False
-
-    def test_is_workflow_done_failed(self, workflow_dag_failed):
-        (g, nodes) = workflow_dag_failed
-
-        assert g.is_workflow_done() is True
-        assert g.has_workflow_failed() == (True, "Workflow job node {} has a status of 'failed' without an error handler path".format(nodes[2].id))
-
-
-class TestHasWorkflowFailed():
     @pytest.fixture
     def workflow_dag_canceled(self, wf_node_generator):
         g = WorkflowDAG()
@@ -206,6 +197,38 @@ class TestHasWorkflowFailed():
         (g, nodes) = workflow_dag_canceled
         nodes[0].job.status = 'failed'
         return (g, nodes)
+
+    def test_done(self, workflow_dag_2):
+        g = workflow_dag_2[0]
+
+        assert g.is_workflow_done() is False
+
+    def test_workflow_done_and_failed(self, workflow_dag_failed):
+        (g, nodes) = workflow_dag_failed
+
+        assert g.is_workflow_done() is True
+        assert g.has_workflow_failed() == (True, "Workflow job node {} has a status of 'failed' without an error handler path".format(nodes[2].id))
+
+    def test_is_workflow_done_no_unified_job_tempalte_end(self, workflow_dag_failed):
+        (g, nodes) = workflow_dag_failed
+
+        nodes[2].unified_job_template = None
+
+        assert g.is_workflow_done() is True
+        assert g.has_workflow_failed() == \
+            (True, "Workflow job node {} related unified job template missing"
+             " and is without an error handle path".format(nodes[2].id))
+
+    def test_is_workflow_done_no_unified_job_tempalte_begin(self, workflow_dag_1):
+        (g, nodes) = workflow_dag_1
+
+        nodes[0].unified_job_template = None
+        g.mark_dnr_nodes()
+
+        assert g.is_workflow_done() is True
+        assert g.has_workflow_failed() == \
+            (True, "Workflow job node {} related unified job template missing"
+             " and is without an error handle path".format(nodes[0].id))
 
     def test_canceled_should_fail(self, workflow_dag_canceled):
         (g, nodes) = workflow_dag_canceled
