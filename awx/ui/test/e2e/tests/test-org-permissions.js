@@ -4,6 +4,8 @@ import {
     getTeam,
 } from '../fixtures';
 
+const namespace = 'test-org-permissions';
+
 let data;
 const spinny = "//*[contains(@class, 'spinny')]";
 const checkbox = '//input[@type="checkbox"]';
@@ -23,7 +25,7 @@ const teamsTab = '//*[@id="teams_tab"]';
 const permissionsTab = '//*[@id="permissions_tab"]';
 const usersTab = '//*[@id="users_tab"]';
 
-const orgsText = 'name.iexact:"test-actions-organization"';
+const orgsText = `name.iexact:"${namespace}-organization"`;
 const orgsCheckbox = '//select-list-item[@item="organization"]//input[@type="checkbox"]';
 const orgDetails = '//*[contains(@class, "OrgCards-label")]';
 const orgRoleSelector = '//*[contains(@aria-labelledby, "select2-organizations")]';
@@ -32,12 +34,12 @@ const readRole = '//*[contains(@id, "organizations-role") and text()="Read"]';
 const memberRoleText = 'member';
 const readRoleText = 'read';
 
-const teamsSelector = "//a[contains(text(), 'test-actions-team')]";
-const teamsText = 'name.iexact:"test-actions-team"';
+const teamsSelector = `//a[contains(text(), '${namespace}-team')]`;
+const teamsText = `name.iexact:"${namespace}-team"`;
 const teamsSearchBadgeCount = '//span[contains(@class, "List-titleBadge") and contains(text(), "1")]';
 const teamCheckbox = '//*[@item="team"]//input[@type="checkbox"]';
 const addUserToTeam = '//*[@aw-tool-tip="Add User"]';
-const userText = 'username.iexact:"test-actions-user"';
+const userText = `username.iexact:"${namespace}-user"`;
 
 const trashButton = '//i[contains(@class, "fa-trash")]';
 const deleteButton = '//*[text()="DELETE"]';
@@ -46,12 +48,10 @@ const saveButton = '//*[text()="Save"]';
 const addPermission = '//*[@aw-tool-tip="Grant Permission"]';
 const addTeamPermission = '//*[@aw-tool-tip="Add a permission"]';
 const verifyTeamPermissions = '//*[contains(@class, "List-tableRow")]//*[text()="Read"]';
-const readOrgPermissionResults = '//*[@id="permissions_table"]//*[text()="test-actions-organization"]/parent::*/parent::*//*[contains(text(), "Read")]';
+const readOrgPermissionResults = `//*[@id="permissions_table"]//*[text()="${namespace}-organization"]/parent::*/parent::*//*[contains(text(), "Read")]`;
 
 module.exports = {
     before: (client, done) => {
-        const namespace = 'test-org-permissions';
-
         const resources = [
             getUserExact(namespace, `${namespace}-user`),
             getOrganization(namespace),
