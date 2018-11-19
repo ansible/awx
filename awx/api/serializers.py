@@ -1499,6 +1499,12 @@ class InventorySerializer(BaseSerializerWithVariables):
         'admin', 'adhoc',
         {'copy': 'organization.inventory_admin'}
     ]
+    groups_with_active_failures = serializers.IntegerField(
+        read_only=True,
+        min_value=0,
+        help_text=_('This field has been deprecated and will be removed in a future release')
+    )
+
 
     class Meta:
         model = Inventory
@@ -1720,6 +1726,11 @@ class AnsibleFactsSerializer(BaseSerializer):
 
 class GroupSerializer(BaseSerializerWithVariables):
     capabilities_prefetch = ['inventory.admin', 'inventory.adhoc']
+    groups_with_active_failures = serializers.IntegerField(
+        read_only=True,
+        min_value=0,
+        help_text=_('This field has been deprecated and will be removed in a future release')
+    )
 
     class Meta:
         model = Group
