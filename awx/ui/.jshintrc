@@ -34,7 +34,8 @@
       "describe": false,
       "moment": false,
       "spyOn": false,
-      "jasmine": false
+      "jasmine": false,
+      "dagre": false
     },
     "strict": false,
     "quotmark": false,
