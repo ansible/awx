@@ -331,6 +331,23 @@ Sometimes it might take us a while to fully review your PR. We try to keep the `
 
 All submitted PRs will have the linter and unit tests run against them via Zuul, and the status reported in the PR.
 
+## PR Checks ran by Zuul
+Zuul jobs for awx are defined in the [zuul-jobs](https://github.com/ansible/zuul-jobs) repo.
+
+Zuul runs the following checks that must pass:
+1) `tox-awx-api-lint`
+2) `tox-awx-ui-lint`
+3) `tox-awx-api`
+4) `tox-awx-ui`
+5) `tox-awx-swagger`
+
+Zuul runs the following checks that are non-voting (can not pass but serve to inform PR reviewers):
+1) `tox-awx-detect-schema-change`
+    This check generates the schema and diffs it against a reference copy of the `devel` version of the schema.
+    Reviewers should inspect the `job-output.txt.gz` related to the check if their is a failure (grep for `diff -u -b` to find beginning of diff).
+    If the schema change is expected and makes sense in relation to the changes made by the PR, then you are good to go!
+    If not, the schema changes should be fixed, but this decision must be enforced by reviewers.
+
 ## Reporting Issues
 
 We welcome your feedback, and encourage you to file an issue when you run into a problem. But before opening a new issues, we ask that you please view our [Issues guide](./ISSUES.md).

@@ -575,7 +575,7 @@ docker-compose-genschema:
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh genschema
 	mv swagger.json schema.json
 
-docker-compose-validate-schema:
+docker-compose-detect-schema-change:
 	$(MAKE) docker-compose-genschema
 	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
 	# Ignore differences in whitespace with -b
