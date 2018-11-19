@@ -24,10 +24,13 @@ class TimeFormatter(logging.Formatter):
 
 
 class LogstashFormatterBase(logging.Formatter):
+    """Base class taken from python-logstash=0.4.6
+    modified here since that version
+    License in docs/licenses/
+    """
 
-    def __init__(self, message_type='Logstash', tags=None, fqdn=False):
+    def __init__(self, message_type='Logstash', fqdn=False):
         self.message_type = message_type
-        self.tags = tags if tags is not None else []
 
         if fqdn:
             self.host = socket.getfqdn()
@@ -76,10 +79,6 @@ class LogstashFormatterBase(logging.Formatter):
             fields['processName'] = record.processName
 
         return fields
-
-    @classmethod
-    def format_source(cls, message_type, host, path):
-        return "%s://%s/%s" % (message_type, host, path)
 
     @classmethod
     def format_timestamp(cls, time):
@@ -234,10 +233,8 @@ class LogstashFormatter(LogstashFormatterBase):
 
     def format(self, record):
         message = {
-            # Fields not included, but exist in related logs
+            # Field not included, but exist in related logs
             # 'path': record.pathname
-            # '@version': '1', # from python-logstash
-            # 'tags': self.tags,
             '@timestamp': self.format_timestamp(record.created),
             'message': record.getMessage(),
             'host': self.host,
