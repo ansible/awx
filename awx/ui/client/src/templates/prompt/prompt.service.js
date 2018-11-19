@@ -151,7 +151,7 @@ function PromptService (Empty, $filter)  {
         if (promptData.launchConf.ask_verbosity_on_launch && _.has(promptData, 'prompts.verbosity.value.value')) {
             launchData.verbosity = promptData.prompts.verbosity.value.value;
         }
-        if (promptData.launchConf.ask_inventory_on_launch && !Empty(promptData.prompts.inventory.value.id)){
+        if (promptData.launchConf.ask_inventory_on_launch && _.has(promptData, 'prompts.inventory.value.id')) {
             launchData.inventory_id = promptData.prompts.inventory.value.id;
         }
         if (promptData.launchConf.ask_credential_on_launch){
