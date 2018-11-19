@@ -1,40 +1,66 @@
 import React from 'react';
+import { HashRouter } from 'react-router-dom';
+
 import { mount } from 'enzyme';
+
+import api from '../../src/api';
 import { API_ORGANIZATIONS } from '../../src/endpoints';
 import Organizations from '../../src/pages/Organizations';
 
 describe('<Organizations />', () => {
   let pageWrapper;
-  let pageSections;
-  let title;
-  let gallery;
-  let galleryItems;
-  let orgCards;
 
-  const orgs = [
-    { id: 1, name: 'org 1' },
-    { id: 2, name: 'org 2' },
-    { id: 3, name: 'org 3' }
+  const results = [
+    {
+      id: 1,
+      name: 'org 1',
+      summary_fields: {
+        related_field_counts: {
+          users: 1,
+          teams: 1,
+          admins: 1
+        }
+      }
+    },
+    {
+      id: 2,
+      name: 'org 2',
+      summary_fields: {
+        related_field_counts: {
+          users: 1,
+          teams: 1,
+          admins: 1
+        }
+      }
+    },
+    {
+      id: 3,
+      name: 'org 3',
+      summary_fields: {
+        related_field_counts: {
+          users: 1,
+          teams: 1,
+          admins: 1
+        }
+      }
+    },
   ];
-
-  const findOrgCards = () => {
-    galleryItems = pageWrapper.find('GalleryItem');
-    orgCards = pageWrapper.find('OrganizationCard');
-  };
+  const count = results.length;
+  const response = { data: { count, results } };
 
   beforeEach(() => {
-    pageWrapper = mount(<Organizations />);
-    pageSections = pageWrapper.find('PageSection');
-    title = pageWrapper.find('Title');
-    gallery = pageWrapper.find('Gallery');
-    findOrgCards();
+    api.get = jest.fn().mockImplementation(() => Promise.resolve(response));
+    pageWrapper = mount(<HashRouter><Organizations /></HashRouter>);
   });
 
   afterEach(() => {
     pageWrapper.unmount();
   });
 
-  test('initially renders without crashing', () => {
+  test('it renders expected content', () => {
+    const pageSections = pageWrapper.find('PageSection');
+    const title = pageWrapper.find('Title');
+
     expect(pageWrapper.length).toBe(1);
     expect(pageSections.length).toBe(2);
     expect(title.length).toBe(1);
@@ -42,19 +68,23 @@ describe('<Organizations />', () => {
     pageSections.forEach(section => {
       expect(section.props().variant).toBeDefined();
     });
-    expect(gallery.length).toBe(1);
-    // by default, no galleryItems or orgCards
-    expect(galleryItems.length).toBe(0);
-    expect(orgCards.length).toBe(0);
-    // will render all orgCards if state is set
-    pageWrapper.setState({ organizations: orgs });
-    findOrgCards();
-    expect(galleryItems.length).toBe(3);
-    expect(orgCards.length).toBe(3);
+    expect(pageWrapper.find('ul').length).toBe(1);
+    expect(pageWrapper.find('ul li').length).toBe(0);
+    // will render all list items on update
+    pageWrapper.update();
+    expect(pageWrapper.find('ul li').length).toBe(count);
   });
 
   test('API Organization endpoint is valid', () => {
     expect(API_ORGANIZATIONS).toBeDefined();
   });
 
+  test('it displays a tooltip on delete hover', () => {
+    const tooltip = '.pf-c-tooltip__content';
+    const deleteButton = 'button[aria-label="Delete"]';
+
+    expect(pageWrapper.find(tooltip).length).toBe(0);
+    pageWrapper.find(deleteButton).simulate('mouseover');
+    expect(pageWrapper.find(tooltip).length).toBe(1);
+  });
 });

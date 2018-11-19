@@ -1,0 +1,220 @@
+import React, { Component } from 'react';
+import {
+  Button,
+  Dropdown,
+  DropdownDirection,
+  DropdownItem,
+  DropdownToggle,
+  Form,
+  FormGroup,
+  Level,
+  LevelItem,
+  TextInput,
+  Toolbar,
+  ToolbarGroup,
+  ToolbarItem,
+  Split,
+  SplitItem,
+} from '@patternfly/react-core';
+
+class Pagination extends Component {
+  constructor (props) {
+    super(props);
+
+    const { page } = this.props;
+
+    this.state = { value: page, isOpen: false };
+  }
+
+  componentDidUpdate (prevProps) {
+    const { page } = this.props;
+
+    if (prevProps.page !== page) {
+      this.setState({ value: page });
+    }
+  }
+
+  onPageChange = value => {
+    this.setState({ value });
+  };
+
+  onSubmit = event => {
+    const { onSetPage, page, pageCount, page_size } = this.props;
+    const { value } = this.state;
+
+    event.preventDefault();
+
+    const isPositiveInteger = value >>> 0 === parseFloat(value) && parseInt(value, 10) > 0;
+    const isValid = isPositiveInteger && parseInt(value, 10) <= pageCount;
+
+    if (isValid) {
+      onSetPage(value, page_size);
+    } else{
+      this.setState({ value: page });
+    }
+  };
+
+  onFirst = () => {
+    const { onSetPage, page_size} = this.props;
+
+    onSetPage(1, page_size);
+  };
+
+  onPrevious = () => {
+    const { onSetPage, page, page_size } = this.props;
+    const previousPage = page - 1;
+
+    if (previousPage >= 1) {
+      onSetPage(previousPage, page_size)
+    }
+  };
+
+  onNext = () => {
+    const { onSetPage, page, pageCount, page_size } = this.props;
+    const nextPage = page + 1;
+
+    if (nextPage <= pageCount) {
+      onSetPage(nextPage, page_size)
+    }
+  };
+
+  onLast = () => {
+    const { onSetPage, pageCount, page_size } = this.props;
+
+    onSetPage(pageCount, page_size)
+  };
+
+  onTogglePageSize = isOpen => {
+    this.setState({ isOpen });
+  };
+
+  onSelectPageSize = ({ target }) => {
+    const { onSetPage } = this.props;
+
+    const page = 1;
+    const page_size = parseInt(target.innerText, 10);
+
+    this.setState({ isOpen: false });
+
+    onSetPage(page, page_size);
+  };
+
+  render () {
+    const { up } = DropdownDirection;
+    const {
+      count,
+      page,
+      pageCount,
+      page_size,
+      pageSizeOptions,
+    } = this.props;
+    const { value, isOpen } = this.state;
+
+    const opts = pageSizeOptions.slice().reverse().filter(o => o !== page_size);
+    const isOnFirst = page === 1;
+    const isOnLast = page === pageCount;
+
+    const itemCount = isOnLast ? count % page_size : page_size;
+    const itemMin = ((page - 1) * page_size) + 1;
+    const itemMax = itemMin + itemCount - 1;
+
+    const disabledStyle = {
+      backgroundColor: '#EDEDED',
+      border: '1px solid #C2C2CA',
+      borderRadius: '0px',
+      color: '#C2C2CA',
+    };
+
+    return (
+      <div className="awx-pagination">
+        <Level>
+          <LevelItem>
+            <Dropdown
+              onToggle={this.onTogglePageSize}
+              onSelect={this.onSelectPageSize}
+              direction={up}
+              isOpen={isOpen}
+              toggle={(
+                <DropdownToggle
+                  onToggle={this.onTogglePageSize}>
+                  { page_size }
+                </DropdownToggle>
+              )}>
+              {opts.map(option => (
+                <DropdownItem key={option} component="button">
+                  { option }
+                </DropdownItem>
+              ))}
+            </Dropdown> Per Page
+          </LevelItem>
+          <LevelItem>
+            <Split gutter="md" className="pf-u-display-flex pf-u-align-items-center">
+              <SplitItem>{itemMin} - {itemMax } of { count }</SplitItem>
+              <SplitItem>
+                <div className="pf-c-input-group">
+                  <Button
+                    variant="tertiary"
+                    aria-label="first"
+                    style={isOnFirst ? disabledStyle : {}}
+                    isDisabled={isOnFirst}
+                    onClick={this.onFirst}>
+                    <i className="fas fa-angle-double-left"></i>
+                  </Button>
+                  <Button
+                    variant="tertiary"
+                    aria-label="previous"
+                    style={isOnFirst ? disabledStyle : {}}
+                    isDisabled={isOnFirst}
+                    onClick={this.onPrevious}>
+                    <i className="fas fa-angle-left"></i>
+                  </Button>
+                </div>
+              </SplitItem>
+              <SplitItem isMain>
+                <form onSubmit={this.onSubmit}>
+                  Page <TextInput
+                    isDisabled={pageCount === 1}
+                    aria-label="Page Number"
+                    style={{
+                      height: '30px',
+                      width: '30px',
+                      textAlign: 'center',
+                      padding: '0',
+                      margin: '0',
+                      ...(pageCount === 1 ? disabledStyle : {})
+                    }}
+                    value={value}
+                    type="text"
+                    onChange={this.onPageChange}
+                  /> of { pageCount }
+                </form>
+              </SplitItem>
+              <SplitItem>
+                <div className="pf-c-input-group">
+                  <Button
+                    variant="tertiary"
+                    aria-label="next"
+                    style={isOnLast ? disabledStyle : {}}
+                    isDisabled={isOnLast}
+                    onClick={this.onNext}>
+                    <i className="fas fa-angle-right"></i>
+                  </Button>
+                  <Button
+                    variant="tertiary"
+                    aria-label="last"
+                    style={isOnLast ? disabledStyle : {}}
+                    isDisabled={isOnLast}
+                    onClick={this.onLast}>
+                    <i className="fas fa-angle-double-right"></i>
+                  </Button>
+                </div>
+              </SplitItem>
+            </Split>
+          </LevelItem>
+        </Level>
+      </div>
+    );
+  }
+}
+
+export default Pagination;

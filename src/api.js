@@ -44,7 +44,7 @@ class APIClient {
     await this.http.post(endpoints.API_LOGIN, data, { headers });
   }
 
-  get = (endpoint) => this.http.get(endpoint);
+  get = (endpoint, params = {}) => this.http.get(endpoint, { params });
 }
 
 export default new APIClient();

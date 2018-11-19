@@ -1,0 +1,226 @@
+import React from 'react';
+import {
+  Button,
+  Checkbox,
+  Dropdown,
+  DropdownPosition,
+  DropdownToggle,
+  DropdownItem,
+  FormGroup,
+  KebabToggle,
+  Level,
+  LevelItem,
+  TextInput,
+  Toolbar,
+  ToolbarGroup,
+  ToolbarItem,
+} from '@patternfly/react-core';
+import {
+  BarsIcon,
+  EqualsIcon,
+  SortAlphaDownIcon,
+  SortAlphaUpIcon,
+  SortNumericDownIcon,
+  SortNumericUpIcon,
+  TrashAltIcon,
+} from '@patternfly/react-icons';
+
+import Tooltip from '../Tooltip';
+
+class DataListToolbar extends React.Component {
+  constructor(props) {
+    super(props);
+
+    const { sortedColumnKey } = this.props;
+
+    this.state = {
+      isSearchDropdownOpen: false,
+      isSortDropdownOpen: false,
+      searchKey: sortedColumnKey,
+      searchValue: '',
+    };
+  }
+
+  handleSearchInputChange = searchValue => {
+    this.setState({ searchValue });
+  };
+
+  onSortDropdownToggle = isSortDropdownOpen => {
+    this.setState({ isSortDropdownOpen });
+  };
+
+  onSortDropdownSelect = ({ target }) => {
+    const { columns, onSort, sortOrder } = this.props;
+
+    const [{ key }] = columns.filter(({ name }) => name === target.innerText);
+
+    this.setState({ isSortDropdownOpen: false });
+
+    onSort(key, sortOrder);
+  };
+
+  onSearchDropdownToggle = isSearchDropdownOpen => {
+    this.setState({ isSearchDropdownOpen });
+  };
+
+  onSearchDropdownSelect = ({ target }) => {
+    const { columns } = this.props;
+
+    const targetName = target.innerText;
+    const [{ key }] = columns.filter(({ name }) => name === targetName);
+
+    this.setState({ isSearchDropdownOpen: false, searchKey: key });
+  };
+
+  onActionToggle = isActionDropdownOpen => {
+    this.setState({ isActionDropdownOpen });
+  };
+
+  onActionSelect = ({ target }) => {
+    this.setState({ isActionDropdownOpen: false });
+  };
+
+  render() {
+    const { up } = DropdownPosition;
+    const {
+      columns,
+      isAllSelected,
+      onSearch,
+      onSelectAll,
+      onSort,
+      sortedColumnKey,
+      sortOrder,
+    } = this.props;
+    const {
+      isActionDropdownOpen,
+      isSearchDropdownOpen,
+      isSortDropdownOpen,
+      searchKey,
+      searchValue,
+    } = this.state;
+
+    const [searchColumn] = columns
+      .filter(({ key }) => key === searchKey);
+    const searchColumnName = searchColumn.name;
+
+    const [sortedColumn] = columns
+      .filter(({ key }) => key === sortedColumnKey);
+    const sortedColumnName = sortedColumn.name;
+    const isSortNumeric = sortedColumn.isNumeric;
+
+    return (
+      <div className="awx-toolbar">
+        <Level>
+          <LevelItem>
+            <Toolbar style={{ marginLeft: "20px" }}>
+              <ToolbarGroup>
+                <ToolbarItem>
+                  <Checkbox
+                    checked={isAllSelected}
+                    onChange={onSelectAll}
+                    aria-label="Select all"
+                    id="select-all"/>
+                </ToolbarItem>
+              </ToolbarGroup>
+              <ToolbarGroup>
+                <ToolbarItem>
+                  <div className="pf-c-input-group">
+                    <Dropdown
+                      onToggle={this.onSearchDropdownToggle}
+                      onSelect={this.onSearchDropdownSelect}
+                      direction={up}
+                      isOpen={isSearchDropdownOpen}
+                      toggle={(
+                        <DropdownToggle
+                          onToggle={this.onSearchDropdownToggle}>
+                          { searchColumnName }
+                        </DropdownToggle>
+                      )}>
+                      {columns.filter(({ key }) => key !== searchKey).map(({ key, name }) => (
+                        <DropdownItem key={key} component="button">
+                          { name }
+                        </DropdownItem>
+                      ))}
+                    </Dropdown>
+                    <TextInput
+                      type="search"
+                      aria-label="search text input"
+                      value={searchValue}
+                      onChange={this.handleSearchInputChange}/>
+                    <Button
+                      variant="tertiary"
+                      aria-label="Search"
+                      onClick={() => onSearch(searchValue)}>
+                      <i className="fas fa-search" aria-hidden="true"></i>
+                    </Button>
+                  </div>
+                </ToolbarItem>
+              </ToolbarGroup>
+              <ToolbarGroup>
+                <ToolbarItem>
+                  <Dropdown
+                    onToggle={this.onSortDropdownToggle}
+                    onSelect={this.onSortDropdownSelect}
+                    direction={up}
+                    isOpen={isSortDropdownOpen}
+                    toggle={(
+                      <DropdownToggle
+                        onToggle={this.onSortDropdownToggle}>
+                        { sortedColumnName }
+                      </DropdownToggle>
+                    )}>
+                    {columns
+                      .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
+                      .map(({ key, name }) => (
+                      <DropdownItem key={key} component="button">
+                        { name }
+                      </DropdownItem>
+                    ))}
+                  </Dropdown>
+                </ToolbarItem>
+                <ToolbarItem>
+                  <Button
+                    onClick={() => onSort(sortedColumnKey, sortOrder === "ascending" ? "descending" : "ascending")}
+                    variant="plain"
+                    aria-label="Sort">
+                    {
+                      isSortNumeric ? (
+                        sortOrder === "ascending" ? <SortNumericUpIcon /> : <SortNumericDownIcon />
+                      ) : (
+                        sortOrder === "ascending" ? <SortAlphaUpIcon /> : <SortAlphaDownIcon />
+                      )
+                    }
+                  </Button>
+                </ToolbarItem>
+              </ToolbarGroup>
+              <ToolbarGroup>
+                <ToolbarItem>
+                  <Button variant="plain" aria-label="Expand">
+                    <BarsIcon />
+                  </Button>
+                </ToolbarItem>
+                <ToolbarItem>
+                  <Button variant="plain" aria-label="Collapse">
+                    <EqualsIcon />
+                  </Button>
+                </ToolbarItem>
+              </ToolbarGroup>
+            </Toolbar>
+          </LevelItem>
+          <LevelItem>
+            <Tooltip message="Delete" position="top">
+              <Button variant="plain" aria-label="Delete">
+                <TrashAltIcon/>
+              </Button>
+            </Tooltip>
+            <Button variant="primary" aria-label="Add">
+              Add
+            </Button>
+          </LevelItem>
+        </Level>
+      </div>
+    );
+  }
+}
+
+export default DataListToolbar;

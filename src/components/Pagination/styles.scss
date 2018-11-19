@@ -1,0 +1,39 @@
+.awx-pagination {
+  --awx-pagination--BackgroundColor: var(--pf-global--BackgroundColor--light-100);
+  --awx-pagination--BorderColor: var(--pf-global--Color--light-200);
+  --awx-pagination--BorderWidth: var(--pf-global--BorderWidth--sm);
+
+  border: var(--awx-pagination--BorderWidth) solid var(--awx-pagination--BorderColor);
+  background-color: var(--awx-pagination--BackgroundColor);
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 20px;
+  height: 70px;
+
+  --pf-global--target-size--MinHeight: 30px;
+  --pf-global--target-size--MinWidth: 30px;
+  --pf-global--FontSize--md: 14px;
+
+  .pf-c-input-group button {
+    width: 30px;
+    height: 30px;
+    padding: 0px;
+  }
+
+  .pf-c-dropdown button {
+    width: 55px;
+    height: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: 0px;
+    margin-right: 10px;
+    text-align: left;
+
+    .pf-c-dropdown__toggle-icon {
+        margin: 0px;
+        margin-top: 2px;
+        padding: 0px;
+        float: right;
+      }
+  }
+}
