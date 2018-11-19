@@ -11,7 +11,6 @@ GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 MANAGEMENT_COMMAND ?= awx-manage
 IMAGE_REPOSITORY_AUTH ?=
 IMAGE_REPOSITORY_BASE ?= https://gcr.io
-
 VERSION := $(shell cat VERSION)
 
 # NOTE: This defaults the container image version to the branch that's active
@@ -84,6 +83,11 @@ clean-venv:
 
 clean-dist:
 	rm -rf dist
+
+clean-schema:
+	rm -rf swagger.json
+	rm -rf schema.json
+	rm -rf reference-schema.json
 
 # Remove temporary build files, compiled Python files.
 clean: clean-ui clean-dist
@@ -338,11 +342,14 @@ pyflakes: reports
 pylint: reports
 	@(set -o pipefail && $@ | reports/$@.report)
 
+genschema: reports
+	$(MAKE) swagger PYTEST_ARGS="--genschema"
+
 swagger: reports
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	(set -o pipefail && py.test awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
+	(set -o pipefail && py.test $(PYTEST_ARGS) awx/conf/tests/functional awx/main/tests/functional/api awx/main/tests/docs --release=$(VERSION_TARGET) | tee reports/$@.report)
 
 check: flake8 pep8 # pyflakes pylint
 
@@ -563,6 +570,16 @@ docker-compose-runtest:
 
 docker-compose-build-swagger:
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh swagger
+
+docker-compose-genschema:
+	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm --service-ports awx /start_tests.sh genschema
+	mv swagger.json schema.json
+
+docker-compose-validate-schema:
+	$(MAKE) docker-compose-genschema
+	curl https://s3.amazonaws.com/awx-public-ci-files/schema.json -o reference-schema.json
+	# Ignore differences in whitespace with -b
+	diff -u -b schema.json reference-schema.json
 
 docker-compose-clean:
 	cd tools && CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose run --rm -w /awx_devel --service-ports awx make clean
