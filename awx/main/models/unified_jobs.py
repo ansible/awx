@@ -37,6 +37,7 @@ from awx.main.models.base import (
     prevent_search
 )
 from awx.main.dispatch.control import Control as ControlDispatcher
+from awx.main.registrar import activity_stream_registrar
 from awx.main.models.mixins import ResourceMixin, TaskManagerUnifiedJobMixin
 from awx.main.utils import (
     encrypt_dict, decrypt_field, _inventory_updates,
@@ -403,8 +404,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
 
         # manually issue the create activity stream entry _after_ M2M relations
         # have been associated to the UJ
-        from awx.main.models import SystemJob
-        if not isinstance(unified_job, SystemJob):
+        if unified_job.__class__ in activity_stream_registrar.models:
             activity_stream_create(None, unified_job, True)
 
         return unified_job
