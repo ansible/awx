@@ -151,7 +151,7 @@ export default ['Rest', 'GetBasePath', '$q', 'NextPage', function(Rest, GetBaseP
           url = url + params.id;
 
           Rest.setUrl(url);
-          return Rest.put(params.data);
+          return Rest.patch(params.data);
       },
       getWorkflowJobTemplate: function(id) {
           var url = GetBasePath('workflow_job_templates');
