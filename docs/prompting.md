@@ -180,7 +180,7 @@ job. If a user creates a node that would do this, a 400 response will be returne
 Workflow JTs are different than other cases, because they do not have a
 template directly linked, so their prompts are a form of action-at-a-distance.
 When the node's prompts are gathered, any prompts from the workflow job
-can take precedence over the node's value.
+will take precedence over the node's value.
 
 As a special exception, `extra_vars` from a workflow will not obey JT survey
 and prompting rules, both both historical and ease-of-understanding reasons.

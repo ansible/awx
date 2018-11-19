@@ -190,7 +190,7 @@ class WorkflowJobNode(WorkflowNodeBase):
 
     def prompts_dict(self, *args, **kwargs):
         r = super(WorkflowJobNode, self).prompts_dict(*args, **kwargs)
-        # Explination - WFJT extra_vars still break pattern, so they are not
+        # Explanation - WFJT extra_vars still break pattern, so they are not
         # put through prompts processing, but inventory is only accepted
         # if JT prompts for it, so it goes through this mechanism
         if self.workflow_job and self.workflow_job.inventory_id:

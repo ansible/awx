@@ -8,19 +8,35 @@ A workflow has an associated tree-graph that is composed of multiple nodes. Each
 ### Workflow Create-Read-Update-Delete (CRUD)
 Like other job resources, workflow jobs are created from workflow job templates. The API exposes common fields similar to job templates, including labels, schedules, notification templates, extra variables and survey specifications. Other than that, in the API, the related workflow graph nodes can be gotten to via the related workflow_nodes field.
 
-The CRUD operations against a workflow job template and its corresponding workflow jobs are almost identical to those of normal job templates and related jobs. However, from an RBAC perspective, CRUD on workflow job templates/jobs are limited to super users. That is, an organization administrator takes full control over all workflow job templates/jobs under the same organization, while an organization auditor is able to see workflow job templates/jobs under the same organization. On the other hand, ordinary organization members have no, and are not able to gain, permission over any workflow-related resources.
+The CRUD operations against a workflow job template and its corresponding workflow jobs are almost identical to those of normal job templates and related jobs. However, from an RBAC perspective, CRUD on workflow job templates/jobs are limited to super users.
+
+By default, organization administrators have full control over all workflow job templates under the same organization, and they share these abilities with users who have the `workflow_admin_role` in that organization. Permissions can be further delegated to other users via the workflow job template roles.
 
 ### Workflow Nodes
 Workflow Nodes are containers of workflow spawned job resources and function as nodes of workflow decision trees. Like that of workflow itself, the two types of workflow nodes are workflow job template nodes and workflow job nodes.
 
 Workflow job template nodes are listed and created under endpoint `/workflow_job_templates/\d+/workflow_nodes/` to be associated with underlying workflow job template, or directly under endpoint `/workflow_job_template_nodes/`. The most important fields of a workflow job template node are `success_nodes`, `failure_nodes`, `always_nodes`, `unified_job_template` and `workflow_job_template`. The former three are lists of workflow job template nodes that, in union, forms the set of all its child nodes, in specific, `success_nodes` are triggered when parent node job succeeds, `failure_nodes` are triggered when parent node job fails, and `always_nodes` are triggered regardless of whether parent job succeeds or fails; The later two reference the job template resource it contains and workflow job template it belongs to.
 
-#### Workflow Node Launch Configuration
+#### Workflow Launch Configuration
+
+Workflow job templates can contain launch configuration items. So far, these only include
+`extra_vars` and `inventory`, and the `extra_vars` may have specifications via
+a survey, in the same way that job templates work.
 
 Workflow nodes may also contain the launch-time configuration for the job it will spawn.
 As such, they share all the properties common to all saved launch configurations.
 
-When a workflow job template is launched a workflow job is created. A workflow job node is created for each WFJT node and all fields from the WFJT node are copied. Note that workflow job nodes contain all fields that a workflow job template node contains plus an additional field, `job`, which is a reference to the to-be-spawned job resource.
+When a workflow job template is launched a workflow job is created. If the workflow
+job template is set to prompt for a value, then the user may provide this on launch,
+and the workflow job will assume the user-provided value.
+
+A workflow job node is created for each WFJT node and all fields from the WFJT node are copied. Note that workflow job nodes contain all fields that a workflow job template node contains plus an additional field, `job`, which is a reference to the to-be-spawned job resource.
+
+If the workflow job and the node both specify the same prompt, then the workflow job
+takes precedence and its value will be used. In either case, if the job template
+the node references does not have the related prompting field set to true
+(such as `ask_inventory_on_launch`), then the prompt will be rejected, and the
+job template default is used instead.
 
 See the document on saved launch configurations for how these are processed
 when the job is launched, and the API validation involved in building
@@ -77,7 +93,7 @@ Other than the normal way of creating workflow job templates, it is also possibl
 
 Workflow job templates can be copied by POSTing to endpoint `/workflow_job_templates/\d+/copy/`. After copy finished, the resulting new workflow job template will have identical fields including description, extra_vars, and survey-related fields (survey_spec and survey_enabled). More importantly, workflow job template node of the original workflow job template, as well as the topology they bear, will be copied. Note there are RBAC restrictions on copying workflow job template nodes. A workflow job template is allowed to be copied if the user has permission to add an equivalent workflow job template. If the user performing the copy does not have access to a node's related resources (job template, inventory, or credential), those related fields will be null in the copy's version of the node. Schedules and notification templates of the original workflow job template will not be copied nor shared, and the name of the created workflow job template is the original name plus a special-formatted suffix to indicate its copy origin as well as the copy time, such as 'copy_from_name@10:30:00 am'.
 
-Workflow jobs cannot be copied directly, instead a workflow job is implicitly copied when it needs to relaunch. Relaunching an existing workflow job is done by POSTing to endpoint `/workflow_jobs/\d+/relaunch/`. What happens next is the original workflow job is copied to create a new workflow job. The new workflow job then gets a copy of all nodes of the original as well as the topology they bear. Finally the full-fledged new workflow job is triggered to run, thus fulfilling the purpose of relaunch. Survey password-type answers should also be redacted in the relaunched version of the workflow job.
+Workflow jobs cannot be copied directly, instead a workflow job is implicitly copied when it needs to relaunch. Relaunching an existing workflow job is done by POSTing to endpoint `/workflow_jobs/\d+/relaunch/`. What happens next is the original workflow job's prompts are re-applied to its workflow job template to create a new workflow job. Finally the full-fledged new workflow job is triggered to run, thus fulfilling the purpose of relaunch. Survey password-type answers should also be redacted in the relaunched version of the workflow job.
 
 ### Artifacts
 Artifact support starts in Ansible and is carried through in Tower. The `set_stats` module is invoked by users, in a playbook, to register facts. Facts are passed in via `data:` argument. Note that the default `set_stats` parameters are the correct ones to work with Tower (i.e. `per_host: no`). Now that facts are registered, we will describe how facts are used. In Ansible, registered facts are "returned" to the callback plugin(s) via the `playbook_on_stats` event. Ansible users can configure whether or not they want the facts displayed through the global `show_custom_stats` configuration. Note that the `show_custom_stats` does not effect the artifacting feature of Tower. This only controls the displaying of `set_stats` fact data in Ansible output (also the output in Ansible playbooks ran in Tower). Tower uses a custom callback plugin that gathers the fact data set via `set_stats` in the `playbook_on_stats` handler and "ships" it back to Tower, saves it in the database, and makes it available on the job endpoint via the variable `artifacts`. The semantics and usage of `artifacts` throughout a workflow is described elsewhere in this document.
