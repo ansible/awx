@@ -80,7 +80,7 @@ pyrad==2.1                # via django-radius
 pysocks==1.6.8            # via twilio
 python-dateutil==2.7.2
 python-ldap==3.1.0        # via django-auth-ldap
-python-logstash==0.4.6
+django-cors-headers==2.4.0
 python-memcached==1.59
 python-radius==1.0
 python3-openid==3.1.0     # via social-auth-core
