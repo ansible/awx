@@ -1,6 +1,9 @@
 import pytest
 import uuid
 
+from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_text
+
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 
 
@@ -22,7 +25,7 @@ def wf_node_generator(mocker):
     pytest.count = 0
 
     def fn(**kwargs):
-        wfn = WorkflowNode(id=pytest.count, **kwargs)
+        wfn = WorkflowNode(id=pytest.count, unified_job_template=object(), **kwargs)
         pytest.count += 1
         return wfn
     return fn
@@ -31,7 +34,7 @@ def wf_node_generator(mocker):
 @pytest.fixture
 def workflow_dag_1(wf_node_generator):
     g = WorkflowDAG()
-    nodes = [wf_node_generator(unified_job_template=object()) for i in range(4)]
+    nodes = [wf_node_generator() for i in range(4)]
     map(lambda n: g.add_node(n), nodes)
 
     r'''
@@ -85,8 +88,6 @@ class TestWorkflowDAG():
 class TestDNR():
     def test_mark_dnr_nodes(self, workflow_dag_1):
         (g, nodes) = workflow_dag_1
-        for n in nodes:
-            n.unified_job_template = object()
 
         r'''
                S0
@@ -132,8 +133,6 @@ class TestIsWorkflowDone():
     @pytest.fixture
     def workflow_dag_2(self, workflow_dag_1):
         (g, nodes) = workflow_dag_1
-        for n in nodes:
-            n.unified_job_template = uuid.uuid4()
         r'''
                S0
                /\
@@ -184,7 +183,7 @@ class TestIsWorkflowDone():
     @pytest.fixture
     def workflow_dag_canceled(self, wf_node_generator):
         g = WorkflowDAG()
-        nodes = [wf_node_generator(unified_job_template=object()) for i in range(1)]
+        nodes = [wf_node_generator() for i in range(1)]
         map(lambda n: g.add_node(n), nodes)
         r'''
                F0
@@ -207,7 +206,9 @@ class TestIsWorkflowDone():
         (g, nodes) = workflow_dag_failed
 
         assert g.is_workflow_done() is True
-        assert g.has_workflow_failed() == (True, "Workflow job node {} has a status of 'failed' without an error handler path".format(nodes[2].id))
+        assert g.has_workflow_failed() == \
+            (True, smart_text(_("No error handle path for workflow job node(s) [({},{})] workflow job node(s)"
+                                " missing unified job template and error handle path [].").format(nodes[2].id, nodes[2].job.status)))
 
     def test_is_workflow_done_no_unified_job_tempalte_end(self, workflow_dag_failed):
         (g, nodes) = workflow_dag_failed
@@ -216,8 +217,8 @@ class TestIsWorkflowDone():
 
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() == \
-            (True, "Workflow job node {} related unified job template missing"
-             " and is without an error handle path".format(nodes[2].id))
+            (True, smart_text(_("No error handle path for workflow job node(s) [] workflow job node(s) missing"
+             " unified job template and error handle path [{}].").format(nodes[2].id)))
 
     def test_is_workflow_done_no_unified_job_tempalte_begin(self, workflow_dag_1):
         (g, nodes) = workflow_dag_1
@@ -227,25 +228,29 @@ class TestIsWorkflowDone():
 
         assert g.is_workflow_done() is True
         assert g.has_workflow_failed() == \
-            (True, "Workflow job node {} related unified job template missing"
-             " and is without an error handle path".format(nodes[0].id))
+            (True, smart_text(_("No error handle path for workflow job node(s) [] workflow job node(s) missing"
+             " unified job template and error handle path [{}].").format(nodes[0].id)))
 
     def test_canceled_should_fail(self, workflow_dag_canceled):
         (g, nodes) = workflow_dag_canceled
 
-        assert g.has_workflow_failed() == (True, "Workflow job node {} has a status of 'canceled' without an error handler path".format(nodes[0].id))
+        assert g.has_workflow_failed() == \
+            (True, smart_text(_("No error handle path for workflow job node(s) [({},{})] workflow job node(s)"
+                                " missing unified job template and error handle path [].").format(nodes[0].id, nodes[0].job.status)))
 
     def test_failure_should_fail(self, workflow_dag_failure):
         (g, nodes) = workflow_dag_failure
 
-        assert g.has_workflow_failed() == (True, "Workflow job node {} has a status of 'failed' without an error handler path".format(nodes[0].id))
+        assert g.has_workflow_failed() == \
+            (True, smart_text(_("No error handle path for workflow job node(s) [({},{})] workflow job node(s)"
+                                " missing unified job template and error handle path [].").format(nodes[0].id, nodes[0].job.status)))
 
 
 class TestBFSNodesToRun():
     @pytest.fixture
     def workflow_dag_canceled(self, wf_node_generator):
         g = WorkflowDAG()
-        nodes = [wf_node_generator(unified_job_template=object()) for i in range(4)]
+        nodes = [wf_node_generator() for i in range(4)]
         map(lambda n: g.add_node(n), nodes)
         r'''
                C0
@@ -262,5 +267,6 @@ class TestBFSNodesToRun():
 
     def test_cancel_still_runs_children(self, workflow_dag_canceled):
         (g, nodes) = workflow_dag_canceled
+        g.mark_dnr_nodes()
 
         assert set([nodes[1], nodes[2]]) == set(g.bfs_nodes_to_run())

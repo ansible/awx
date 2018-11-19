@@ -1,4 +1,7 @@
 
+from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_text
+
 # Python
 from awx.main.models import (
     WorkflowJobTemplateNode,
@@ -50,61 +53,37 @@ class WorkflowDAG(SimpleDAG):
         for edge in always_nodes:
             self.add_edge(wfn_by_id[edge[0]], wfn_by_id[edge[1]], 'always_nodes')
 
-    r'''
-    Determine if all, relevant, parents node are finished.
-    Relevant parents are parents that are marked do_not_run False.
-
-    :param node:     a node entry from SimpleDag.nodes (i.e. a dict with property ['node_object']
-
-    Return a boolean
-    '''
     def _are_relevant_parents_finished(self, node):
         obj = node['node_object']
         parent_nodes = [p['node_object'] for p in self.get_dependents(obj)]
         for p in parent_nodes:
             if p.do_not_run is True:
                 continue
-
-            # job template relationship deleted, don't run the node and take the failure path
-            if p.do_not_run is False and not p.job and p.unified_job_template is None:
-                return True
-
+            elif p.unified_job_template is None:
+                continue
             # Node might run a job
-            if p.do_not_run is False and not p.job:
+            elif not p.job:
                 return False
-
             # Node decidedly got a job; check if job is done
-            if p.job and p.job.status not in ['successful', 'failed', 'error', 'canceled']:
+            elif p.job and p.job.status not in ['successful', 'failed', 'error', 'canceled']:
                 return False
         return True
 
     def bfs_nodes_to_run(self):
-        nodes = self.get_root_nodes()
         nodes_found = []
-        node_ids_visited = set()
 
-        for index, n in enumerate(nodes):
-            obj = n['node_object']
-            if obj.id in node_ids_visited:
+        for node in self.sort_nodes_topological():
+            obj = node['node_object']
+            if obj.do_not_run is True:
                 continue
-            node_ids_visited.add(obj.id)
-
-            if obj.do_not_run is True and obj.unified_job_template:
+            elif obj.job:
                 continue
-
-            if obj.job:
-                if obj.job.status in ['failed', 'error', 'canceled']:
-                    nodes.extend(self.get_dependencies(obj, 'failure_nodes') +
-                                 self.get_dependencies(obj, 'always_nodes'))
-                elif obj.job.status == 'successful':
-                    nodes.extend(self.get_dependencies(obj, 'success_nodes') +
-                                 self.get_dependencies(obj, 'always_nodes'))
             elif obj.unified_job_template is None:
-                nodes.extend(self.get_dependencies(obj, 'failure_nodes') +
-                             self.get_dependencies(obj, 'always_nodes'))
-            else:
-                if self._are_relevant_parents_finished(n):
-                    nodes_found.append(n)
+                continue
+
+            if self._are_relevant_parents_finished(node):
+                nodes_found.append(node)
+
         return [n['node_object'] for n in nodes_found]
 
     def cancel_node_jobs(self):
@@ -123,7 +102,7 @@ class WorkflowDAG(SimpleDAG):
     def is_workflow_done(self):
         for node in self.nodes:
             obj = node['node_object']
-            if obj.do_not_run is False and not obj.job:
+            if obj.do_not_run is False and not obj.job and obj.unified_job_template:
                 return False
             elif obj.job and obj.job.status not in ['successful', 'failed', 'canceled', 'error']:
                 return False
@@ -131,20 +110,40 @@ class WorkflowDAG(SimpleDAG):
 
     def has_workflow_failed(self):
         failed_nodes = []
+        res = False
+        failed_path_nodes_id_status = []
+        failed_unified_job_template_node_ids = []
+
         for node in self.nodes:
             obj = node['node_object']
-            if obj.job and obj.job.status in ['failed', 'canceled', 'error']:
+            if obj.do_not_run is False and obj.unified_job_template is None:
                 failed_nodes.append(node)
-            elif obj.do_not_run is True and obj.unified_job_template is None:
+            elif obj.job and obj.job.status in ['failed', 'canceled', 'error']:
                 failed_nodes.append(node)
+
         for node in failed_nodes:
             obj = node['node_object']
             if (len(self.get_dependencies(obj, 'failure_nodes')) +
                     len(self.get_dependencies(obj, 'always_nodes'))) == 0:
                 if obj.unified_job_template is None:
-                    return True, "Workflow job node {} related unified job template missing and is without an error handle path".format(obj.id)
+                    res = True
+                    failed_unified_job_template_node_ids.append(str(obj.id))
                 else:
-                    return True, "Workflow job node {} has a status of '{}' without an error handler path".format(obj.id, obj.job.status)
+                    res = True
+                    failed_path_nodes_id_status.append((str(obj.id), obj.job.status))
+
+        if res is True:
+            s = _("No error handle path for workflow job node(s) [{node_status}] workflow job "
+                  "node(s) missing unified job template and error handle path [{no_ufjt}].")
+            parms = {
+                'node_status': '',
+                'no_ufjt': '',
+            }
+            if len(failed_path_nodes_id_status) > 0:
+                parms['node_status'] = ",".join(["({},{})".format(id, status) for id, status in failed_path_nodes_id_status])
+            if len(failed_unified_job_template_node_ids) > 0:
+                parms['no_ufjt'] = ",".join(failed_unified_job_template_node_ids)
+            return True, smart_text(s.format(**parms))
         return False, None
 
     r'''
@@ -159,9 +158,7 @@ class WorkflowDAG(SimpleDAG):
     '''
     def _are_all_nodes_dnr_decided(self, workflow_nodes):
         for n in workflow_nodes:
-            if n.unified_job_template is None and n.do_not_run is False:
-                return False
-            if n.do_not_run is False and not n.job:
+            if n.do_not_run is False and not n.job and n.unified_job_template:
                 return False
         return True
 
@@ -177,7 +174,9 @@ class WorkflowDAG(SimpleDAG):
     '''
     def _should_mark_node_dnr(self, node, parent_nodes):
         for p in parent_nodes:
-            if p.job:
+            if p.do_not_run is True:
+                pass
+            elif p.job:
                 if p.job.status == 'successful':
                     if node in (self.get_dependencies(p, 'success_nodes') +
                                 self.get_dependencies(p, 'always_nodes')):
@@ -188,12 +187,10 @@ class WorkflowDAG(SimpleDAG):
                         return False
                 else:
                     return False
-            elif p.unified_job_template is None:
+            elif p.do_not_run is False and p.unified_job_template is None:
                 if node in (self.get_dependencies(p, 'failure_nodes') +
                             self.get_dependencies(p, 'always_nodes')):
                     return False
-            elif p.do_not_run is True:
-                pass
             else:
                 return False
         return True
@@ -205,13 +202,10 @@ class WorkflowDAG(SimpleDAG):
         for node in self.sort_nodes_topological():
             obj = node['node_object']
 
-            if obj.do_not_run is False and not obj.job:
+            if obj.do_not_run is False and not obj.job and node not in root_nodes:
                 parent_nodes = [p['node_object'] for p in self.get_dependents(obj)]
                 if self._are_all_nodes_dnr_decided(parent_nodes):
-                    if obj.unified_job_template is None:
-                        obj.do_not_run = True
-                        nodes_marked_do_not_run.append(node)
-                    elif node not in root_nodes and self._should_mark_node_dnr(node, parent_nodes):
+                    if self._should_mark_node_dnr(node, parent_nodes):
                         obj.do_not_run = True
                         nodes_marked_do_not_run.append(node)
 
