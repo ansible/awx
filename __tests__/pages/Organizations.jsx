@@ -78,4 +78,13 @@ describe('<Organizations />', () => {
   test('API Organization endpoint is valid', () => {
     expect(API_ORGANIZATIONS).toBeDefined();
   });
+
+  test('it displays a tooltip on delete hover', () => {
+    const tooltip = '.pf-c-tooltip__content';
+    const deleteButton = 'button[aria-label="Delete"]';
+
+    expect(pageWrapper.find(tooltip).length).toBe(0);
+    pageWrapper.find(deleteButton).simulate('mouseover');
+    expect(pageWrapper.find(tooltip).length).toBe(1);
+  });
 });
