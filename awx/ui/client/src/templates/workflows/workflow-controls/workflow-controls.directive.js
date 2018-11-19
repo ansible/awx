@@ -17,22 +17,6 @@ export default ['templateUrl',
             restrict: 'E',
             link: function(scope) {
 
-                function init() {
-                    scope.zoom = 100;
-                    $( "#slider" ).slider({
-                        value:100,
-                        min: 10,
-                        max: 200,
-                        step: 10,
-                        slide: function( event, ui ) {
-                            scope.zoom = ui.value;
-                            scope.zoomChart({
-                                zoom: scope.zoom
-                            });
-                        }
-                    });
-                }
-
                 scope.pan = function(direction) {
                     scope.panChart({
                         direction: direction
@@ -70,7 +54,20 @@ export default ['templateUrl',
                     $("#slider").slider('value',scope.zoom);
                 });
 
-                init();
+                scope.zoom = 100;
+
+                $( "#slider" ).slider({
+                    value:100,
+                    min: 10,
+                    max: 200,
+                    step: 10,
+                    slide: function( event, ui ) {
+                        scope.zoom = ui.value;
+                        scope.zoomChart({
+                            zoom: scope.zoom
+                        });
+                    }
+                });
             }
         };
     }

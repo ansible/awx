@@ -36,7 +36,7 @@ export default ['$scope', 'TemplatesService',
             Wait('start');
             TemplatesService.getWorkflowJobTemplateNodes($scope.workflowJobTemplateObj.id, page)
                 .then(({data}) => {
-                    for (var i = 0; i < data.results.length; i++) {
+                    for (let i = 0; i < data.results.length; i++) {
                         allNodes.push(data.results[i]);
                     }
                     if (data.next) {
@@ -538,11 +538,15 @@ export default ['$scope', 'TemplatesService',
                 // Add the new links
                 parents.forEach((parentId) => {
                     children.forEach((child) => {
+                        let source = {
+                            id: parentId
+                        };
                         if (parentId === 1) {
                             child.edgeType = "always";
+                            source.isStartNode = true;
                         }
                         $scope.graphState.arrayOfLinksForChart.push({
-                            source: {id: parentId},
+                            source,
                             target: {id: child.id},
                             edgeType: child.edgeType
                         });
