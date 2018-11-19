@@ -1208,7 +1208,7 @@ class ProjectAccess(BaseAccess):
     @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
-            return Organization.accessible_objects(self.user, 'admin_role').exists()
+            return Organization.accessible_objects(self.user, 'project_admin_role').exists()
         return (self.check_related('organization', Organization, data, role_field='project_admin_role', mandatory=True) and
                 self.check_related('credential', Credential, data, role_field='use_role'))
 
