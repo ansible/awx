@@ -1,5 +1,5 @@
 export default
-    function md5Setup() {
+    function hashSetup() {
         return function(params) {
             var scope = params.scope,
                 master = params.master,
@@ -9,11 +9,12 @@ export default
             scope[check_field] = default_val;
             master[check_field] = default_val;
 
-            scope.genMD5 = function (fld) {
+            // Original gist here: https://gist.github.com/jed/982883
+            scope.genHash = function (fld) {
                 scope[fld] = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
                     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
                 );
-                scope.$emit('NewMD5Generated');
+                scope.$emit('NewHashGenerated');
             };
 
             scope.toggleCallback = function (fld) {
