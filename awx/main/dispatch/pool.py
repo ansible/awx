@@ -298,7 +298,6 @@ class AutoscalePool(WorkerPool):
 
         # max workers can't be less than min_workers
         self.max_workers = max(self.min_workers, self.max_workers)
-        logger.warning(self.debug_meta)
 
     @property
     def should_grow(self):
