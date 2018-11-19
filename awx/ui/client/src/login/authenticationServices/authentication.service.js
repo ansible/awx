@@ -29,6 +29,7 @@ export default
                 $cookies.put('sessionExpired', false);
 
                 $rootScope.userLoggedIn = true;
+                $rootScope.userLoggedOut = false;
                 $rootScope.token_expires = expires;
                 $rootScope.sessionExpired = false;
             },
@@ -110,6 +111,7 @@ export default
                     $rootScope.token_expires = null;
                     $rootScope.login_username = null;
                     $rootScope.login_password = null;
+                    $rootScope.userLoggedOut = true;
                     if ($rootScope.sessionTimer) {
                         $rootScope.sessionTimer.clearTimers();
                     }
