@@ -30,11 +30,11 @@ describe('Controller: workflowResults', () => {
         $provide.value('ParseVariableString', function() {});
         $provide.value('i18n', { '_': (a) => { return a; } });
         $provide.provider('$stateProvider', { '$get': function() { return function() {}; } });
-        $provide.service('WorkflowService', function($q) {
+        $provide.service('WorkflowChartService', function($q) {
             return {
-                buildTree: function() {
+                generateArraysOfNodesAndLinks: function() {
                     var deferred = $q.defer();
-                    deferred.resolve(treeData);
+                    deferred.resolve();
                     return deferred.promise;
                 }
             };
@@ -46,7 +46,6 @@ describe('Controller: workflowResults', () => {
         $rootScope = _$rootScope_;
         workflowResultsService = _workflowResultsService_;
         $interval = _$interval_;
-
     }));
 
     describe('elapsed timer', () => {
