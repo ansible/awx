@@ -68,12 +68,6 @@ export default ['$scope', 'TemplatesService',
 
         getNodes();
 
-        $scope.closeWorkflowMaker = () => {
-            // Revert the data to the master which was created when the dialog was opened
-            $scope.graphState.nodeTree = angular.copy($scope.graphStateMaster);
-            $scope.closeDialog();
-        };
-
         $scope.saveWorkflowMaker = () => {
 
             Wait('start');
