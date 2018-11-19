@@ -14,5 +14,8 @@
             </div>
         </div>
     </div>
+    <div ng-if="inventoryWarning" class="Prompt-credentialTypeMissing">
+        <span class="fa fa-warning"></span>&nbsp; {{ inventoryWarning }}
+    </div>
     <div id="prompt-inventory"></div>
 </div>

@@ -15,17 +15,9 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
             scope = _scope_;
             ({ modal } = scope[scope.ns]);
 
-            vm.isInventoryOptional = false;
-
             scope.$watch('vm.promptData.triggerModalOpen', () => {
-
                 vm.actionButtonClicked = false;
                 if(vm.promptData && vm.promptData.triggerModalOpen) {
-
-                    if (vm.promptData.templateType === "workflow_job_template") {
-                        vm.isInventoryOptional = true;
-                    }
-
                     scope.$emit('launchModalOpen', true);
                     vm.promptDataClone = _.cloneDeep(vm.promptData);
 
