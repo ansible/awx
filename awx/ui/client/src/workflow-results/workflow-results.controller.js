@@ -8,6 +8,9 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
         let nodeRef;
         var runTimeElapsedTimer = null;
 
+        $scope.toggleKey = () => $scope.showKey = !$scope.showKey;
+        $scope.keyClassList = `{ 'Key-menuIcon--active': showKey }`;
+
         var getLinks = function() {
             var getLink = function(key) {
                 if(key === 'schedule') {
