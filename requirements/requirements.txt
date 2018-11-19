@@ -79,6 +79,7 @@ pyparsing==2.2.0
 pyrad==1.2                # via django-radius
 python-dateutil==2.7.2
 python-ldap==2.5.2        # via django-auth-ldap
+django-cors-headers==2.4.0
 python-logstash==0.4.6
 python-memcached==1.59
 python-openid==2.2.5      # via social-auth-core

@@ -252,6 +252,7 @@ TEMPLATES = [
 MIDDLEWARE_CLASSES = (  # NOQA
     'awx.main.middleware.TimingMiddleware',
     'awx.main.middleware.MigrationRanCheckMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -284,6 +285,7 @@ INSTALLED_APPS = (
     'polymorphic',
     'taggit',
     'social_django',
+    'corsheaders',
     'awx.conf',
     'awx.main',
     'awx.api',
