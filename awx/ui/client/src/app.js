@@ -310,11 +310,11 @@ angular
                         }
 
                         if(!_.isEqual(toParamsWithoutSearchKeys, fromParamsWithoutSearchKeys)) {
-                            document.querySelector('.at-Layout-main').scrollTop = 0;
+                            document.body.scrollTop = document.documentElement.scrollTop = 0;
                         }
                     }
                     else {
-                        document.querySelector('.at-Layout-main').scrollTop = 0;
+                        document.body.scrollTop = document.documentElement.scrollTop = 0;
                     }
 
                     if (trans.from().name === 'license' && trans.params('to').hasOwnProperty('licenseMissing')) {
