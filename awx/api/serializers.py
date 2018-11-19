@@ -3117,6 +3117,15 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         return summary_fields
 
 
+class JobTemplateWithSpecSerializer(JobTemplateSerializer):
+    '''
+    Used for activity stream entries.
+    '''
+
+    class Meta:
+        model = JobTemplate
+        fields = ('*', 'survey_spec')
+
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
@@ -3616,6 +3625,16 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
 
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
+
+
+class WorkflowJobTemplateWithSpecSerializer(WorkflowJobTemplateSerializer):
+    '''
+    Used for activity stream entries.
+    '''
+
+    class Meta:
+        model = WorkflowJobTemplate
+        fields = ('*', 'survey_spec')
 
 
 class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
