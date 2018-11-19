@@ -180,6 +180,17 @@ function PromptService (Empty, $filter)  {
             });
         }
 
+        if (_.get(promptData, 'templateType') === 'workflow_job_template') {
+            if (_.get(launchData, 'inventory_id', null) === null) {
+                // It's possible to get here on a workflow job template with an inventory prompt and no
+                // default value by selecting an inventory, removing it, selecting a different inventory,
+                // and then reverting. A null inventory_id may be accepted by the API for prompted workflow
+                // inventories in the future, but for now they will 400. As such, we intercept that case here
+                // and remove it from the request data prior to launching.
+                delete launchData.inventory_id;
+            }
+        }
+
         return launchData;
     };
 
