@@ -10,9 +10,7 @@ export default [function(){
             let nodeIdCounter = 1;
             let arrayOfNodesForChart = [
                 {
-                    index: 0,
                     id: nodeIdCounter,
-                    isStartNode: true,
                     unifiedJobTemplate: {
                         name: "START"
                     }
