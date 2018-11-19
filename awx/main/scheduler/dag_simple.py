@@ -1,3 +1,5 @@
+from collections import deque
+
 
 class SimpleDAG(object):
     ''' A simple implementation of a directed acyclic graph '''
@@ -198,3 +200,26 @@ class SimpleDAG(object):
                 node_objs_visited.add(node_obj)
                 path.discard(node_obj)
         return res
+
+    def sort_nodes_topological(self):
+        nodes_sorted = deque()
+        obj_ids_processed = set([])
+
+        def visit(node):
+            obj = node['node_object']
+            if obj.id in obj_ids_processed:
+                return
+
+            for child in self.get_dependencies(obj):
+                visit(child)
+            obj_ids_processed.add(obj.id)
+            nodes_sorted.appendleft(node)
+
+        for node in self.nodes:
+            obj = node['node_object']
+            if obj.id in obj_ids_processed:
+                continue
+
+            visit(node)
+
+        return nodes_sorted
