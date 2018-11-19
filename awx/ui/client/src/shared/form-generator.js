@@ -79,7 +79,7 @@
  * | default | Default value to place in the field when the form is in 'add' mode. |
  * | defaultText | Default value to put into a select input. |
  * | falseValue | For radio buttons and checkboxes. Value to set the model to when the checkbox or radio button is not selected. |
- * | genMD5 | true or false. If true, places the field in an input group with a button that when clicked replaces the field contents with an MD5 has key. Used with host_config_key on the job templates detail page. |
+ * | genHash | true or false. If true, places the field in an input group with a button that when clicked replaces the field contents with a hash as key. Used with host_config_key on the job templates detail page. |
  * | integer | Adds the integer directive to validate that the value entered is of type integer. Add min and max to supply lower and upper range bounds to the entered value. |
  * | label | Text to use as &lt;label&gt; element for the field |
  * | ngChange | Adds ng-change directive. Set to the JS expression to be evaluated by ng-change. |
@@ -802,7 +802,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";
 
-                        html += (field.clear || field.genMD5) ? "<div class=\"input-group Form-mixedInputGroup\">\n" : "";
+                        html += (field.clear || field.genHash) ? "<div class=\"input-group Form-mixedInputGroup\">\n" : "";
 
                         if (field.control === null || field.control === undefined || field.control) {
                             html += "<input ";
@@ -842,8 +842,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "</span>\n</div>\n";
                         }
 
-                        if (field.genMD5) {
-                            html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn Form-lookupButton\" ng-click=\"genMD5('" + fld + "')\" " +
+                        if (field.genHash) {
+                            html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn Form-lookupButton\" ng-click=\"genHash('" + fld + "')\" " +
                                 "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
                                 "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
                         }
