@@ -35,8 +35,8 @@ A workflow job node is created for each WFJT node and all fields from the WFJT n
 If the workflow job and the node both specify the same prompt, then the workflow job
 takes precedence and its value will be used. In either case, if the job template
 the node references does not have the related prompting field set to true
-(such as `ask_inventory_on_launch`), then the prompt will be rejected, and the
-job template default is used instead.
+(such as `ask_inventory_on_launch`), then the prompt will be ignored, and the
+job template default, if it exists, will be used instead.
 
 See the document on saved launch configurations for how these are processed
 when the job is launched, and the API validation involved in building
