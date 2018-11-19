@@ -40,42 +40,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             scope.dimensionsSet = false;
 
-            $timeout(function(){
-                let dimensions = calcAvailableScreenSpace();
-
-                windowHeight = dimensions.height;
-                windowWidth = dimensions.width;
-
-                $('.WorkflowMaker-chart').css("height", windowHeight);
-
-                scope.dimensionsSet = true;
-
-                init();
-            });
-
-            function init() {
-                line = d3.svg.line()
-                    .x(function (d) {
-                        return d.x;
-                    })
-                    .y(function (d) {
-                        return d.y;
-                    });
-
-                zoomObj = d3.behavior.zoom().scaleExtent([0.1, 2]);
-
-                baseSvg = d3.select(element[0]).append("svg")
-                    .attr("class", "WorkflowChart-svg")
-                    .call(zoomObj
-                        .on("zoom", naturalZoom)
-                    );
-
-                svgGroup = baseSvg.append("g")
-                    .attr("id", "aw-workflow-chart-g")
-                    .attr("transform", "translate(0," + (windowHeight/2 - rootH/2 - startNodeOffsetY) + ")");
-            }
-
-            function calcAvailableScreenSpace() {
+            const calcAvailableScreenSpace = () => {
                 let dimensions = {};
 
                 if(scope.mode !== 'details') {
@@ -97,15 +62,15 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 }
 
                 return dimensions;
-            }
+            };
 
             // Dagre is going to shift the root node around as nodes are added/removed
             // This function ensures that the user doesn't experience that
-            let normalizeY = ((y) => {
+            const normalizeY = ((y) => {
                 return y - nodePositionMap[1].y;
             });
 
-            function lineData(d) {
+            const lineData = (d) => {
 
                 let sourceX = nodePositionMap[d.source.id].x + (nodePositionMap[d.source.id].width);
                 let sourceY = normalizeY(nodePositionMap[d.source.id].y) + (nodePositionMap[d.source.id].height/2);
@@ -132,21 +97,21 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 ];
 
                 return line(points);
-            }
+            };
 
             // TODO: this function is hacky and we need to come up with a better solution
             // see: http://stackoverflow.com/questions/15975440/add-ellipses-to-overflowing-text-in-svg#answer-27723752
-            function wrap(text) {
+            const wrap = (text) => {
                 if(text && text.length > maxNodeTextLength) {
                     return text.substring(0,maxNodeTextLength) + '...';
                 }
                 else {
                     return text;
                 }
-            }
+            };
 
-            function rounded_rect(x, y, w, h, r, tl, tr, bl, br) {
-                var retval;
+            const rounded_rect = (x, y, w, h, r, tl, tr, bl, br) => {
+                let retval;
                 retval  = "M" + (x + r) + "," + y;
                 retval += "h" + (w - 2*r);
                 if (tr) { retval += "a" + r + "," + r + " 0 0 1 " + r + "," + r; }
@@ -162,10 +127,10 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 else { retval += "v" + -r; retval += "h" + r; }
                 retval += "z";
                 return retval;
-            }
+            };
 
             // This is the zoom function called by using the mousewheel/click and drag
-            function naturalZoom() {
+            const naturalZoom = () => {
                 let scale = d3.event.scale,
                     translation = d3.event.translate;
 
@@ -176,10 +141,10 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 scope.workflowZoomed({
                     zoom: scale
                 });
-            }
+            };
 
             // This is the zoom that gets called when the user interacts with the manual zoom controls
-            function manualZoom(zoom) {
+            const manualZoom = (zoom) => {
                 let scale = zoom / 100,
                 translation = zoomObj.translate(),
                 origZoom = zoomObj.scale(),
@@ -191,9 +156,9 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 svgGroup.attr("transform", "translate(" + [translateX, translateY + ((windowHeight/2 - rootH/2 - startNodeOffsetY)*scale)] + ")scale(" + scale + ")");
                 zoomObj.scale(scale);
                 zoomObj.translate([translateX, translateY]);
-            }
+            };
 
-            function manualPan(direction) {
+            const manualPan = (direction) => {
                 let scale = zoomObj.scale(),
                     distance = 150 * scale,
                     translateX,
@@ -208,16 +173,16 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 }
                 svgGroup.attr("transform", "translate(" + translateX + "," + (translateY + ((windowHeight/2 - rootH/2 - startNodeOffsetY)*scale)) + ")scale(" + scale + ")");
                 zoomObj.translate([translateX, translateY]);
-            }
+            };
 
-            function resetZoomAndPan() {
+            const resetZoomAndPan = () => {
                 svgGroup.attr("transform", "translate(0," + (windowHeight/2 - rootH/2 - startNodeOffsetY) + ")scale(" + 1 + ")");
                 // Update the zoomObj
                 zoomObj.scale(1);
                 zoomObj.translate([0,0]);
-            }
+            };
 
-            function zoomToFitChart() {
+            const zoomToFitChart = () => {
                 let graphDimensions = d3.select('#aw-workflow-chart-g')[0][0].getBoundingClientRect(),
                 availableScreenSpace = calcAvailableScreenSpace(),
                 currentZoomValue = zoomObj.scale(),
@@ -236,9 +201,9 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                 svgGroup.attr("transform", "translate(0," + (windowHeight/2 - (nodeH*scaleToFit/2)) + ")scale(" + scaleToFit + ")");
                 zoomObj.translate([0, windowHeight/2 - (nodeH*scaleToFit/2) - ((windowHeight/2 - rootH/2 - startNodeOffsetY)*scaleToFit)]);
-            }
+            };
 
-            function update() {
+            const updateGraph = () => {
                 if(scope.dimensionsSet) {
                     const buildLinkTooltip = (d) => {
                         let sourceNode = d3.select(`#node-${d.source.id}`);
@@ -315,7 +280,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                             });
                     };
 
-                    var g = new dagre.graphlib.Graph();
+                    let g = new dagre.graphlib.Graph();
 
                     g.setGraph({rankdir: 'LR', nodesep: 30, ranksep: 120});
 
@@ -780,7 +745,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         .each(function(d) {
                             if(d.job && d.job.status && (d.job.status === "pending" || d.job.status === "waiting" || d.job.status === "running")) {
                                 // Pulse the circle
-                                var circle = d3.select(this);
+                                let circle = d3.select(this);
                                 (function repeat() {
                                     circle = circle.transition()
                                         .duration(2000)
@@ -1267,11 +1232,11 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         if(scope.dimensionsSet) {
                             scope.watchDimensionsSet();
                             scope.watchDimensionsSet = null;
-                            update();
+                            updateGraph();
                         }
                     });
                 }
-            }
+            };
 
             function add_node_without_child() {
                 this.on("click", function(d) {
@@ -1367,7 +1332,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             scope.$on('refreshWorkflowChart', function(){
                 if(scope.graphState) {
-                    update();
+                    updateGraph();
                 }
             });
 
@@ -1387,12 +1352,10 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 zoomToFitChart();
             });
 
-            let clearWatchgraphState = scope.$watch('graphState.arrayOfNodesForChart', function(newVal) {
+            let clearWatchGraphState = scope.$watch('graphState.arrayOfNodesForChart', function(newVal) {
                 if(newVal) {
-                    // scope.graphState.arrayOfNodesForChart
-
-                    update();
-                    clearWatchgraphState();
+                    updateGraph();
+                    clearWatchGraphState();
                 }
             });
 
@@ -1406,6 +1369,37 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
             function cleanUpResize() {
                 angular.element($window).off('resize', onResize);
             }
+
+            $timeout(() => {
+                let dimensions = calcAvailableScreenSpace();
+
+                windowHeight = dimensions.height;
+                windowWidth = dimensions.width;
+
+                $('.WorkflowMaker-chart').css("height", windowHeight);
+
+                scope.dimensionsSet = true;
+
+                line = d3.svg.line()
+                    .x(function (d) {
+                        return d.x;
+                    })
+                    .y(function (d) {
+                        return d.y;
+                    });
+
+                zoomObj = d3.behavior.zoom().scaleExtent([0.1, 2]);
+
+                baseSvg = d3.select(element[0]).append("svg")
+                    .attr("class", "WorkflowChart-svg")
+                    .call(zoomObj
+                        .on("zoom", naturalZoom)
+                    );
+
+                svgGroup = baseSvg.append("g")
+                    .attr("id", "aw-workflow-chart-g")
+                    .attr("transform", "translate(0," + (windowHeight/2 - rootH/2 - startNodeOffsetY) + ")");
+            });
 
             if(scope.mode === 'details') {
                 angular.element($window).on('resize', onResize);
