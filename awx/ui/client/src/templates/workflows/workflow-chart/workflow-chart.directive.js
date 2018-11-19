@@ -454,7 +454,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                               if(
                                   d.edgeType !== 'placeholder' &&
                                   !scope.graphState.isLinkMode &&
-                                  !d.source.isStartNode &&
+                                  d.source.id !== 1 &&
                                   d.source.id !== scope.graphState.nodeBeingAdded &&
                                   d.target.id !== scope.graphState.nodeBeingAdded &&
                                   scope.mode !== 'details'
@@ -467,7 +467,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                               }
                           })
                           .on("mouseout", function(d){
-                              if(!d.source.isStartNode && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
+                              if(d.source.id !== 1 && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
                                   $(`#aw-workflow-chart-g`).prepend($(`#link-${d.source.id}-${d.target.id}`));
                                   d3.select("#link-" + d.source.id + "-" + d.target.id)
                                       .classed("WorkflowChart-linkHovering", false);
@@ -486,7 +486,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                              if(
                                  d.edgeType !== 'placeholder' &&
                                  !scope.graphState.isLinkMode &&
-                                 !d.source.isStartNode &&
+                                 d.source.id !== 1 &&
                                  d.source.id !== scope.graphState.nodeBeingAdded &&
                                  d.target.id !== scope.graphState.nodeBeingAdded &&
                                  scope.mode !== 'details'
@@ -499,7 +499,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                              }
                          })
                          .on("mouseleave", function(d){
-                             if(!d.source.isStartNode && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
+                             if(d.source.id !== 1 && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details') {
                                  $(`#aw-workflow-chart-g`).prepend($(`#link-${d.source.id}-${d.target.id}`));
                                  d3.select("#link-" + d.source.id + "-" + d.target.id)
                                      .classed("WorkflowChart-linkHovering", false);
@@ -796,7 +796,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                     nodeEnter.each(function(d) {
                         let thisNode = d3.select(this);
-                        if(d.isStartNode && scope.mode === 'details') {
+                        if(d.id === 1 && scope.mode === 'details') {
                             // Overwrite the default root height and width and replace it with a small blue square
                             rootW = 25;
                             rootH = 25;
@@ -809,7 +809,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("fill", "#337ab7")
                                 .attr("class", "WorkflowChart-rootNode");
                         }
-                        else if(d.isStartNode && scope.mode !== 'details') {
+                        else if(d.id === 1 && scope.mode !== 'details') {
                             thisNode.append("rect")
                                 .attr("width", rootW)
                                 .attr("height", rootH)
@@ -951,7 +951,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("class", function(d) { return d.isInvalidLinkTarget ? "WorkflowChart-nodeOverlay WorkflowChart-nodeOverlay--disabled" : "WorkflowChart-nodeOverlay WorkflowChart-nodeOverlay--transparent"; })
                                 .call(node_click)
                                 .on("mouseover", function(d) {
-                                    if(!d.isStartNode) {
+                                    if(d.id !== 1) {
                                         $(`#node-${d.id}`).appendTo(`#aw-workflow-chart-g`);
                                         let resourceName = (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? d.unifiedJobTemplate.name : "";
                                         if(resourceName && resourceName.length > maxNodeTextLength) {
@@ -1016,7 +1016,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .on("mouseout", function(d){
                                     $('.WorkflowChart-tooltip').remove();
                                     $('.WorkflowChart-potentialLink').remove();
-                                    if(!d.isStartNode) {
+                                    if(d.id !== 1) {
                                         d3.select("#node-" + d.id)
                                             .classed("WorkflowChart-nodeHovering", false);
                                     }
@@ -1122,7 +1122,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("cy", nodeH)
                                 .attr("r", 10)
                                 .attr("class", "WorkflowChart-nodeRemoveCircle")
-                                .style("display", function(d) { return (d.isStartNode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                                .style("display", function(d) { return (d.id === 1 || d.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                                 .call(remove_node)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -1144,7 +1144,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                     .size(60)
                                     .type("cross")
                                 )
-                                .style("display", function(d) { return (d.isStartNode || d.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
+                                .style("display", function(d) { return (d.id === 1 || d.id === scope.graphState.nodeBeingAdded || scope.readOnly) ? "none" : null; })
                                 .call(remove_node)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -1260,7 +1260,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function remove_node() {
                 this.on("click", function(d) {
-                    if(!d.isStartNode && !scope.readOnly && !scope.graphState.isLinkMode) {
+                    if(d.id !== 1 && !scope.readOnly && !scope.graphState.isLinkMode) {
                         scope.deleteNode({
                             nodeToDelete: d
                         });
@@ -1288,7 +1288,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
             function edit_link() {
                 this.on("click", function(d) {
-                    if(!scope.graphState.isLinkMode && !d.source.isStartNode && d.source.id !== scope.graphState.nodeBeingAdded && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details'){
+                    if(!scope.graphState.isLinkMode && d.source.id !== 1 && d.source.id !== scope.graphState.nodeBeingAdded && d.target.id !== scope.graphState.nodeBeingAdded && scope.mode !== 'details'){
                         scope.editLink({
                             linkToEdit: d
                         });

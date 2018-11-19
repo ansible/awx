@@ -536,7 +536,6 @@ export default ['$scope', 'TemplatesService',
                         };
                         if (parentId === 1) {
                             child.edgeType = "always";
-                            source.isStartNode = true;
                         }
                         $scope.graphState.arrayOfLinksForChart.push({
                             source,
