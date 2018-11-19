@@ -250,8 +250,8 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE_CLASSES = (  # NOQA
-    'awx.main.middleware.MigrationRanCheckMiddleware',
     'awx.main.middleware.TimingMiddleware',
+    'awx.main.middleware.MigrationRanCheckMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
