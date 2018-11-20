@@ -59,7 +59,7 @@ class SimpleDAG(object):
     def __iter__(self):
         return self.nodes.__iter__()
 
-    def generate_graphviz_plot(self):
+    def generate_graphviz_plot(self, file_name="/awx_devel/graph.gv"):
         def run_status(obj):
             dnr = "RUN"
             status = "NA"
@@ -83,6 +83,8 @@ class SimpleDAG(object):
                 color = 'green'
             elif status == 'failed':
                 color = 'red'
+            elif obj.do_not_run is True:
+                color = 'gray'
             doc += "%s [color = %s]\n" % (
                 run_status(n['node_object']),
                 color
@@ -96,7 +98,7 @@ class SimpleDAG(object):
                         label,
                     )
         doc += "}\n"
-        gv_file = open('/awx_devel/graph.gv', 'w')
+        gv_file = open(file_name, 'w')
         gv_file.write(doc)
         gv_file.close()
 

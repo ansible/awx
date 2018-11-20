@@ -64,7 +64,7 @@ As stated, workflow job templates can be created with populated `extra_vars`. Th
 
 Job resources spawned by workflow jobs are needed by workflow to run correctly. Therefore deletion of spawned job resources is blocked while the underlying workflow job is executing.
 
-Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors, it is treated the same as failure. Canceling a workflow spawned job resource is also treated as a failure. If the unified job template of the node is null (which could be a result of deleting the unified job template or copying a workflow when the user lacks necessary permissions to use the resource), then the branch should stop executing in this case as well.
+Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors or is canceled, it is treated the same as failure. If the unified job template of the node is null (which could be a result of deleting the unified job template or copying a workflow when the user lacks necessary permissions to use the resource), then the node will be treated as 'failed' and the failure paths will continue to execute.
 
 A workflow job itself can also be canceled. In this case all its spawned job resources will be canceled if cancelable and following paths stop executing.
 
@@ -91,6 +91,33 @@ Workflow jobs cannot be copied directly, instead a workflow job is implicitly co
 
 ### Artifacts
 Artifact support starts in Ansible and is carried through in Tower. The `set_stats` module is invoked by users, in a playbook, to register facts. Facts are passed in via `data:` argument. Note that the default `set_stats` parameters are the correct ones to work with Tower (i.e. `per_host: no`). Now that facts are registered, we will describe how facts are used. In Ansible, registered facts are "returned" to the callback plugin(s) via the `playbook_on_stats` event. Ansible users can configure whether or not they want the facts displayed through the global `show_custom_stats` configuration. Note that the `show_custom_stats` does not effect the artifacting feature of Tower. This only controls the displaying of `set_stats` fact data in Ansible output (also the output in Ansible playbooks ran in Tower). Tower uses a custom callback plugin that gathers the fact data set via `set_stats` in the `playbook_on_stats` handler and "ships" it back to Tower, saves it in the database, and makes it available on the job endpoint via the variable `artifacts`. The semantics and usage of `artifacts` throughout a workflow is described elsewhere in this document.
+
+### Workflow Run Example
+To best understand the nuances of workflow run logic we will look at an example workflow run as it progresses through the 'running' state. In the workflow examples below nodes are labeled `<do_not_run, job_status, node_id>` where `do_not_run` can be `RUN` or `DNR` where `DNR` means 'do not run the node' and `RUN` which means will run the node. Nodes start out with `do_not_run = False` depicted as `RUN` in the pictures below. When nodes are known to not run they will be marked `DNR` and the state will not change. `job_status` is the job's status associated with the node. `node_id` is the unique id for the workflow job node.
+
+<p align="center">
+    <img src="img/workflow_step0.png">
+    Workflow before running has started.
+</p>
+<p align="center">
+    <img src="img/workflow_step1.png">
+    Root nodes are selected to run. A root node is a node with no incoming nodes. Node 0 is selected to run and results in a status of 'successful'. Nodes 1, 4, and 5 are marked 'DNR' because they are in the failure path. Node 6 is not marked 'DNR' because nodes 2 and 3 may run and result and node 6 running. The same reasoning is why nodes 7, 8, 9 are not marked 'DNR'.
+</p>
+<p align="center">
+    <img src="img/workflow_step2.png">
+    Nodes 2 and 3 are selected to run and their job results are both 'successful'. Node 6 is not marked 'DNR' because node 3 will trigger node 6.
+</p>
+<p align="center">
+    <img src="img/workflow_step3.png">
+    Node 6 is selected to run and the job results in 'failed'. Node 8 is marked 'DNR' because of the success path. Nodes 7 and 8 will be ran in the next cycle.
+</p>
+<p align="center">
+    <img src="img/workflow_step4.png">
+    Node 7 and 8 are selected to run and their job results are both 'successful'.
+</p>
+
+The resulting state of the workflow job run above would be 'successful'. Although individual nodes fail, the overall workflow job status is 'successful' because all individual node failures have error handling paths ('failed_nodes' or 'always_nodes').
+
 
 ## Test Coverage
 ### CRUD-related
