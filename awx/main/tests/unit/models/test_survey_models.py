@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import tempfile
 import json
 import yaml
@@ -10,7 +11,9 @@ from awx.main.models import (
     Job,
     JobTemplate,
     JobLaunchConfig,
-    WorkflowJobTemplate
+    WorkflowJobTemplate,
+    Project,
+    Inventory
 )
 from awx.main.utils.safe_yaml import SafeLoader
 
@@ -305,3 +308,49 @@ class TestWorkflowSurveys:
         )
         assert wfjt.variables_needed_to_start == ['question2']
         assert not wfjt.can_start_without_user_input()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('provided_vars,valid', [
+    ({'tmpl_var': 'bar'}, True),  # same as template, not counted as prompts
+    ({'tmpl_var': 'bar2'}, False),  # different value from template, not okay
+    ({'tmpl_var': 'bar', 'a': 2}, False),  # extra key, not okay
+    ({'tmpl_var': 'bar', False: 2}, False),  # Falsy key
+    ({'tmpl_var': 'bar', u'🐉': u'🐉'}, False),  # dragons
+])
+class TestExtraVarsNoPrompt:
+    def process_vars_and_assert(self, tmpl, provided_vars, valid):
+        prompted_fields, ignored_fields, errors = tmpl._accept_or_ignore_job_kwargs(
+            extra_vars=provided_vars
+        )
+        if valid:
+            assert not ignored_fields
+            assert not errors
+        else:
+            assert ignored_fields
+            assert errors
+
+    def test_jt_extra_vars_counting(self, provided_vars, valid):
+        jt = JobTemplate(
+            name='foo',
+            extra_vars={'tmpl_var': 'bar'},
+            project=Project(),
+            project_id=42,
+            playbook='helloworld.yml',
+            inventory=Inventory(),
+            inventory_id=42
+        )
+        prompted_fields, ignored_fields, errors = jt._accept_or_ignore_job_kwargs(
+            extra_vars=provided_vars
+        )
+        self.process_vars_and_assert(jt, provided_vars, valid)
+
+    def test_wfjt_extra_vars_counting(self, provided_vars, valid):
+        wfjt = WorkflowJobTemplate(
+            name='foo',
+            extra_vars={'tmpl_var': 'bar'}
+        )
+        prompted_fields, ignored_fields, errors = wfjt._accept_or_ignore_job_kwargs(
+            extra_vars=provided_vars
+        )
+        self.process_vars_and_assert(wfjt, provided_vars, valid)

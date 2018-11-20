@@ -35,6 +35,30 @@ def test_wfjt_schedule_accepted(post, workflow_job_template, admin_user):
 
 
 @pytest.mark.django_db
+def test_wfjt_unprompted_inventory_rejected(post, workflow_job_template, inventory, admin_user):
+    r = post(
+        url=reverse('api:workflow_job_template_schedules_list', kwargs={'pk': workflow_job_template.id}),
+        data={'name': 'test sch', 'rrule': RRULE_EXAMPLE, 'inventory': inventory.pk},
+        user=admin_user,
+        expect=400
+    )
+    assert r.data['inventory'] == ['Field is not configured to prompt on launch.']
+
+
+@pytest.mark.django_db
+def test_wfjt_unprompted_inventory_accepted(post, workflow_job_template, inventory, admin_user):
+    workflow_job_template.ask_inventory_on_launch = True
+    workflow_job_template.save()
+    r = post(
+        url=reverse('api:workflow_job_template_schedules_list', kwargs={'pk': workflow_job_template.id}),
+        data={'name': 'test sch', 'rrule': RRULE_EXAMPLE, 'inventory': inventory.pk},
+        user=admin_user,
+        expect=201
+    )
+    assert Schedule.objects.get(pk=r.data['id']).inventory == inventory
+
+
+@pytest.mark.django_db
 def test_valid_survey_answer(post, admin_user, project, inventory, survey_spec_factory):
     job_template = JobTemplate.objects.create(
         name='test-jt',

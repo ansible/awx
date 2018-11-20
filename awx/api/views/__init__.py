@@ -3106,23 +3106,31 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
                 extra_vars.setdefault(v, u'')
             if extra_vars:
                 data['extra_vars'] = extra_vars
+            if obj.ask_inventory_on_launch:
+                data['inventory'] = obj.inventory_id
+            else:
+                data.pop('inventory', None)
         return data
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
+        if 'inventory_id' in request.data:
+            request.data['inventory'] = request.data['inventory_id']
+
         serializer = self.serializer_class(instance=obj, data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        prompted_fields, ignored_fields, errors = obj._accept_or_ignore_job_kwargs(**request.data)
+        if not request.user.can_access(JobLaunchConfig, 'add', serializer.validated_data, template=obj):
+            raise PermissionDenied()
 
-        new_job = obj.create_unified_job(**prompted_fields)
+        new_job = obj.create_unified_job(**serializer.validated_data)
         new_job.signal_start()
 
         data = OrderedDict()
         data['workflow_job'] = new_job.id
-        data['ignored_fields'] = ignored_fields
+        data['ignored_fields'] = serializer._ignored_fields
         data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
         headers = {'Location': new_job.get_absolute_url(request)}
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)

@@ -149,6 +149,20 @@ class TestWorkflowJobAccess:
         wfjt.execute_role.members.add(alice)
         assert not WorkflowJobAccess(rando).can_start(workflow_job)
 
+    def test_relaunch_inventory_access(self, workflow_job, inventory, rando):
+        wfjt = workflow_job.workflow_job_template
+        wfjt.execute_role.members.add(rando)
+        assert rando in wfjt.execute_role
+        workflow_job.created_by = rando
+        workflow_job.inventory = inventory
+        workflow_job.save()
+        wfjt.ask_inventory_on_launch = True
+        wfjt.save()
+        JobLaunchConfig.objects.create(job=workflow_job, inventory=inventory)
+        assert not WorkflowJobAccess(rando).can_start(workflow_job)
+        inventory.use_role.members.add(rando)
+        assert WorkflowJobAccess(rando).can_start(workflow_job)
+
 
 @pytest.mark.django_db
 class TestWFJTCopyAccess:

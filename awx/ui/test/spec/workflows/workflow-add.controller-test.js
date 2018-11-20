@@ -142,14 +142,15 @@ describe('Controller: WorkflowAdd', () => {
             expect(TemplatesService.createWorkflowJobTemplate).toHaveBeenCalledWith({
                 name: "Test Workflow",
                 description: "This is a test description",
-                labels: undefined,
                 organization: undefined,
+                inventory: undefined,
+                labels: undefined,
                 variables: undefined,
-                extra_vars: undefined,
-                allow_simultaneous: undefined
+                allow_simultaneous: undefined,
+                ask_inventory_on_launch: false,
+                extra_vars: undefined
             });
         });
-
     });
 
     describe('scope.formCancel()', () => {

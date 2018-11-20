@@ -12,6 +12,7 @@ function TemplatesStrings (BaseString) {
         PANEL_TITLE: t.s('TEMPLATES'),
         ADD_DD_JT_LABEL: t.s('Job Template'),
         ADD_DD_WF_LABEL: t.s('Workflow Template'),
+        OPEN_WORKFLOW_VISUALIZER: t.s('Click here to open the workflow visualizer'),
         ROW_ITEM_LABEL_ACTIVITY: t.s('Activity'),
         ROW_ITEM_LABEL_INVENTORY: t.s('Inventory'),
         ROW_ITEM_LABEL_PROJECT: t.s('Project'),
@@ -116,9 +117,12 @@ function TemplatesStrings (BaseString) {
         DELETED: t.s('DELETED'),
         START: t.s('START'),
         DETAILS: t.s('DETAILS'),
-        TITLE: t.s('WORKFLOW VISUALIZER')
+        TITLE: t.s('WORKFLOW VISUALIZER'),
+        INVENTORY_WILL_OVERRIDE: t.s('The inventory of this node will be overridden by the parent workflow inventory.'),
+        INVENTORY_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden by the parent workflow inventory.'),
+        INVENTORY_PROMPT_WILL_OVERRIDE: t.s('The inventory of this node will be overridden if a parent workflow inventory is provided at launch.'),
+        INVENTORY_PROMPT_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden if a parent workflow inventory is provided at launch.'),
     }
-
 }
 
 TemplatesStrings.$inject = ['BaseStringService'];

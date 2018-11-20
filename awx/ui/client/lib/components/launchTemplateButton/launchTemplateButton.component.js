@@ -93,16 +93,15 @@ function atLaunchTemplateCtrl (
                                 $state.go('workflowResults', { id: data.workflow_job }, { reload: true });
                             });
                     } else {
-                        launchData.data.defaults = {
-                            extra_vars: wfjtData.data.extra_vars
-                        };
+                        launchData.data.defaults.extra_vars = wfjtData.data.extra_vars;
+
                         const promptData = {
-                            launchConf: launchData.data,
+                            launchConf: selectedWorkflowJobTemplate.getLaunchConf(),
                             launchOptions: launchOptions.data,
                             template: vm.template.id,
                             templateType: vm.template.type,
                             prompts: PromptService.processPromptValues({
-                                launchConf: launchData.data,
+                                launchConf: selectedWorkflowJobTemplate.getLaunchConf(),
                                 launchOptions: launchOptions.data
                             }),
                             triggerModalOpen: true,

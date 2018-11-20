@@ -303,6 +303,23 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                     },
                     resolve: {
                         add: {
+                            Inventory: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                                    if($stateParams.inventory_id){
+                                        let path = `${GetBasePath('inventory')}${$stateParams.inventory_id}`;
+                                        Rest.setUrl(path);
+                                        return Rest.get().
+                                            then(function(data){
+                                                return data.data;
+                                            }).catch(function(response) {
+                                                ProcessErrors(null, response.data, response.status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get inventory info. GET returned status: ' +
+                                                        response.status
+                                                });
+                                            });
+                                    }
+                            }],
                             availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
                                 function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
                                     return TemplatesService.getAllLabelOptions()
@@ -354,6 +371,23 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                     },
                     resolve: {
                         edit: {
+                            Inventory: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                                    if($stateParams.inventory_id){
+                                        let path = `${GetBasePath('inventory')}${$stateParams.inventory_id}`;
+                                        Rest.setUrl(path);
+                                        return Rest.get().
+                                            then(function(data){
+                                                return data.data;
+                                            }).catch(function(response) {
+                                                ProcessErrors(null, response.data, response.status, null, {
+                                                    hdr: 'Error!',
+                                                    msg: 'Failed to get inventory info. GET returned status: ' +
+                                                        response.status
+                                                });
+                                            });
+                                    }
+                            }],
                             availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
                                 function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
                                     return TemplatesService.getAllLabelOptions()

@@ -23,6 +23,7 @@ export default [
          $scope.canAddWorkflowJobTemplate = workflowTemplate.options('actions.POST');
 
          $scope.canEditOrg = true;
+         $scope.canEditInventory = true;
          $scope.parseType = 'yaml';
          $scope.can_edit = true;
          // apply form definition's default field values
@@ -68,6 +69,7 @@ export default [
                          data[fld] = $scope[fld];
                      }
                  }
+                 data.ask_inventory_on_launch = Boolean($scope.ask_inventory_on_launch);
 
                  data.extra_vars = ToJSON($scope.parseType,
                      $scope.variables, true);
@@ -152,8 +154,7 @@ export default [
                                  $q.all(defers)
                                      .then(function() {
                                          // If we follow the same pattern as job templates then the survey logic will go here
-
-                                         $state.go('templates.editWorkflowJobTemplate', {workflow_job_template_id: data.data.id}, {reload: true});
+                                         $state.go('templates.editWorkflowJobTemplate.workflowMaker', { workflow_job_template_id: data.data.id }, { reload: true });
                                      });
                              });
                          });

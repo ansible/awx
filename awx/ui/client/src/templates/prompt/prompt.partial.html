@@ -45,7 +45,7 @@
         <div class="Prompt-footer">
             <button id="prompt_cancel" class="Prompt-defaultButton" ng-click="vm.cancel()" ng-show="!vm.readOnlyPrompts">{{:: vm.strings.get('CANCEL') }}</button>
             <button id="prompt_close" class="Prompt-defaultButton" ng-click="vm.cancel()" ng-show="vm.readOnlyPrompts">{{:: vm.strings.get('CLOSE') }}</button>
-            <button id="prompt_inventory_next" class="Prompt-actionButton" ng-show="vm.steps.inventory.tab._active" ng-click="vm.next(vm.steps.inventory.tab)" ng-disabled="!vm.promptDataClone.prompts.inventory.value.id && !vm.readOnlyPrompts">{{:: vm.strings.get('NEXT') }}</button>
+            <button id="prompt_inventory_next" class="Prompt-actionButton" ng-show="vm.steps.inventory.tab._active" ng-click="vm.next(vm.steps.inventory.tab)" ng-disabled="vm.promptData.templateType === 'workflow_job_template' && !vm.promptDataClone.prompts.inventory.value.id && vm.promptDataClone.launchConf.defaults.inventory.id && !vm.readOnlyPrompts">{{:: vm.strings.get('NEXT') }}</button>
             <button id="prompt_credential_next" class="Prompt-actionButton"
                 ng-show="vm.steps.credential.tab._active"
                 ng-click="vm.next(vm.steps.credential.tab)"

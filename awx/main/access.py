@@ -1835,8 +1835,10 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if 'survey_enabled' in data and data['survey_enabled']:
             self.check_license(feature='surveys')
 
-        return self.check_related('organization', Organization, data, role_field='workflow_admin_role',
-                                  mandatory=True)
+        return (
+            self.check_related('organization', Organization, data, role_field='workflow_admin_role', mandatory=True) and
+            self.check_related('inventory', Inventory, data, role_field='use_role')
+        )
 
     def can_copy(self, obj):
         if self.save_messages:
@@ -1890,8 +1892,11 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        return (self.check_related('organization', Organization, data, role_field='workflow_admin_role', obj=obj) and
-                self.user in obj.admin_role)
+        return (
+            self.check_related('organization', Organization, data, role_field='workflow_admin_role', obj=obj) and
+            self.check_related('inventory', Inventory, data, role_field='use_role', obj=obj) and
+            self.user in obj.admin_role
+        )
 
     def can_delete(self, obj):
         return self.user.is_superuser or self.user in obj.admin_role
@@ -1949,18 +1954,28 @@ class WorkflowJobAccess(BaseAccess):
         if not template:
             return False
 
-        # If job was launched by another user, it could have survey passwords
-        if obj.created_by_id != self.user.pk:
-            # Obtain prompts used to start original job
-            JobLaunchConfig = obj._meta.get_field('launch_config').related_model
-            try:
-                config = JobLaunchConfig.objects.get(job=obj)
-            except JobLaunchConfig.DoesNotExist:
-                config = None
+        # Obtain prompts used to start original job
+        JobLaunchConfig = obj._meta.get_field('launch_config').related_model
+        try:
+            config = JobLaunchConfig.objects.get(job=obj)
+        except JobLaunchConfig.DoesNotExist:
+            if self.save_messages:
+                self.messages['detail'] = _('Workflow Job was launched with unknown prompts.')
+            return False
 
-            if config is None or config.prompts_dict():
+        # Check if access to prompts to prevent relaunch
+        if config.prompts_dict():
+            if obj.created_by_id != self.user.pk:
                 if self.save_messages:
                     self.messages['detail'] = _('Job was launched with prompts provided by another user.')
+                return False
+            if not JobLaunchConfigAccess(self.user).can_add({'reference_obj': config}):
+                if self.save_messages:
+                    self.messages['detail'] = _('Job was launched with prompts you lack access to.')
+                return False
+            if config.has_unprompted(template):
+                if self.save_messages:
+                    self.messages['detail'] = _('Job was launched with prompts no longer accepted.')
                 return False
 
         # execute permission to WFJT is mandatory for any relaunch

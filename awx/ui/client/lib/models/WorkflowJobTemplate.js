@@ -1,3 +1,4 @@
+/* eslint camelcase: 0 */
 let Base;
 let $http;
 
@@ -46,12 +47,19 @@ function getSurveyQuestions (id) {
     return $http(req);
 }
 
+function getLaunchConf () {
+    return this.model.launch.GET;
+}
+
 function canLaunchWithoutPrompt () {
-    const launchData = this.model.launch.GET;
+    const launchData = this.getLaunchConf();
 
     return (
         launchData.can_start_without_user_input &&
-        !launchData.survey_enabled
+        !launchData.ask_inventory_on_launch &&
+        !launchData.ask_variables_on_launch &&
+        !launchData.survey_enabled &&
+        launchData.variables_needed_to_start.length === 0
     );
 }
 
@@ -63,6 +71,7 @@ function WorkflowJobTemplateModel (method, resource, config) {
     this.getLaunch = getLaunch.bind(this);
     this.postLaunch = postLaunch.bind(this);
     this.getSurveyQuestions = getSurveyQuestions.bind(this);
+    this.getLaunchConf = getLaunchConf.bind(this);
     this.canLaunchWithoutPrompt = canLaunchWithoutPrompt.bind(this);
 
     this.model.launch = {};
@@ -79,7 +88,7 @@ function WorkflowJobTemplateModelLoader (BaseModel, _$http_) {
 
 WorkflowJobTemplateModelLoader.$inject = [
     'BaseModel',
-    '$http'
+    '$http',
 ];
 
 export default WorkflowJobTemplateModelLoader;

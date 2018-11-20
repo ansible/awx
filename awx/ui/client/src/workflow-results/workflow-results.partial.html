@@ -125,6 +125,21 @@
                         </div>
                     </div>
 
+                    <!-- INVENTORY DETAIL -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="workflow.summary_fields.inventory">
+                        <label class="WorkflowResults-resultRowLabel">
+                            {{ strings.labels.INVENTORY }}
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ inventory_link }}"
+                                aw-tool-tip="{{ strings.tooltips.EDIT_WORKFLOW }}"
+                                data-placement="top">
+                                {{ workflow.summary_fields.inventory.name }}
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- TEMPLATE DETAIL -->
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.summary_fields.workflow_job_template.name">

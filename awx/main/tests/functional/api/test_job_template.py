@@ -6,7 +6,7 @@ import pytest
 # AWX
 from awx.api.serializers import JobTemplateSerializer
 from awx.api.versioning import reverse
-from awx.main.models import Job, JobTemplate, CredentialType
+from awx.main.models import Job, JobTemplate, CredentialType, WorkflowJobTemplate
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
@@ -517,6 +517,24 @@ def test_launch_with_pending_deletion_inventory(get, post, organization_factory,
         objs.superusers.admin, expect=400
     )
     assert resp.data['inventory'] == ['The inventory associated with this Job Template is being deleted.']
+
+
+@pytest.mark.django_db
+def test_launch_with_pending_deletion_inventory_workflow(get, post, organization, inventory, admin_user):
+    wfjt = WorkflowJobTemplate.objects.create(
+        name='wfjt',
+        organization=organization,
+        inventory=inventory
+    )
+
+    inventory.pending_deletion = True
+    inventory.save()
+
+    resp = post(
+        url=reverse('api:workflow_job_template_launch', kwargs={'pk': wfjt.pk}),
+        user=admin_user, expect=400
+    )
+    assert resp.data['inventory'] == ['The inventory associated with this Workflow is being deleted.']
 
 
 @pytest.mark.django_db
