@@ -7,11 +7,11 @@
 export default ['$scope', 'TemplatesService',
     'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
     'Empty', 'PromptService', 'Rest', 'TemplatesStrings', 'WorkflowChartService',
-    'Wait',
+    'Wait', '$state',
     function ($scope, TemplatesService,
         ProcessErrors, CreateSelect2, $q, JobTemplate,
         Empty, PromptService, Rest, TemplatesStrings, WorkflowChartService,
-        Wait
+        Wait, $state
     ) {
 
         let deletedNodeIds = [];
