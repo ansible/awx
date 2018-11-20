@@ -99,7 +99,7 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     $scope.schedulerEndMinute = "00";
     $scope.schedulerEndSecond = "00";
     $scope.parentObject = ParentObject;
-
+    
     $scope.hideForm = true;
 
     // extra_data field is not manifested in the UI when scheduling a Management Job
@@ -396,6 +396,8 @@ export default ['$filter', '$state', '$stateParams', '$http', 'Wait',
     scheduler.clear();
     $scope.$on("htmlDetailReady", function() {
         $scope.hideForm = false;
+        scheduler.scope.schedulerStartDt = moment(new Date()).add(1,'days');
+
         $scope.$watchGroup(["schedulerName",
             "schedulerStartDt",
             "schedulerStartHour",
