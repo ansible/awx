@@ -12,7 +12,7 @@
             <at-tag tag="tag.name" remove-tag="deleteTag(tag)"></at-tag>
         </div>
         <div ng-if="fieldIsDisabled" class="LabelList-tag" ng-repeat="tag in instanceGroupsTags">
-            <span class="LabelList-name">{{tag.name}}</span>
+            <span class="LabelList-name">{{tag.name | sanitize}}</span>
         </div>
     </span>
 </div>
