@@ -8,7 +8,7 @@
     <div class="WorkflowMaker-formLists" ng-show="!readOnly">
         <div id="workflow-jobs-list" ng-show="activeTab === 'jobs'">
             <div ng-hide="wf_maker_templates.length === 0 && (searchTags | isEmpty)">
-                <smart-search django-model="unified_job_templates" base-path="unified_job_templates" iterator="wf_maker_template" dataset="wf_maker_template_dataset" list="templateList" collection="wf_maker_templates" default-params="wf_maker_template_default_params" query-set="wf_maker_template_queryset" search-bar-full-width="true" search-tags="searchTags">
+                <smart-search django-model="wf_maker_templates" base-path="unified_job_templates" iterator="wf_maker_template" dataset="wf_maker_template_dataset" list="templateList" collection="wf_maker_templates" default-params="wf_maker_template_default_params" query-set="wf_maker_template_queryset" search-bar-full-width="true" search-tags="searchTags">
                 </smart-search>
             </div>
 
@@ -47,7 +47,7 @@
         </div>
         <div id="workflow-project-sync-list" ng-show="activeTab === 'project_syncs'">
             <div ng-hide="wf_maker_projects.length === 0 && (searchTags | isEmpty)">
-                <smart-search django-model="projects" base-path="projects" iterator="wf_maker_project" dataset="wf_maker_project_dataset" list="projectList" collection="wf_maker_projects" default-params="wf_maker_project_default_params" query-set="wf_maker_project_queryset" search-bar-full-width="true" search-tags="searchTags">
+                <smart-search django-model="wf_maker_projects" base-path="projects" iterator="wf_maker_project" dataset="wf_maker_project_dataset" list="projectList" collection="wf_maker_projects" default-params="wf_maker_project_default_params" query-set="wf_maker_project_queryset" search-bar-full-width="true" search-tags="searchTags">
                 </smart-search>
             </div>
 
@@ -79,7 +79,7 @@
         </div>
         <div id="workflow-inventory-sync-list" ng-show="activeTab === 'inventory_syncs'">
             <div ng-hide="wf_maker_inventory_sources.length === 0 && (searchTags | isEmpty)">
-                <smart-search django-model="inventory_sources" base-path="inventory_sources" iterator="wf_maker_inventory_source" dataset="wf_maker_inventory_source_dataset" list="inventorySourceList" collection="wf_maker_inventory_sources" default-params="wf_maker_inventory_source_default_params" query-set="wf_maker_inventory_source_queryset" search-bar-full-width="true" search-tags="searchTags">
+                <smart-search django-model="wf_maker_inventory_sources" base-path="inventory_sources" iterator="wf_maker_inventory_source" dataset="wf_maker_inventory_source_dataset" list="inventorySourceList" collection="wf_maker_inventory_sources" default-params="wf_maker_inventory_source_default_params" query-set="wf_maker_inventory_source_queryset" search-bar-full-width="true" search-tags="searchTags">
                 </smart-search>
             </div>
 
