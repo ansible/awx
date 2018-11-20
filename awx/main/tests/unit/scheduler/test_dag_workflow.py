@@ -1,5 +1,6 @@
 import pytest
 import uuid
+import os
 
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_text
@@ -270,3 +271,48 @@ class TestBFSNodesToRun():
         g.mark_dnr_nodes()
 
         assert set([nodes[1], nodes[2]]) == set(g.bfs_nodes_to_run())
+
+
+@pytest.mark.skip(reason="Run manually to re-generate doc images")
+class TestDocsExample():
+    @pytest.fixture
+    def complex_dag(self, wf_node_generator):
+        g = WorkflowDAG()
+        nodes = [wf_node_generator() for i in range(10)]
+        map(lambda n: g.add_node(n), nodes)
+
+        g.add_edge(nodes[0], nodes[1], "failure_nodes")
+        g.add_edge(nodes[0], nodes[2], "success_nodes")
+        g.add_edge(nodes[0], nodes[3], "always_nodes")
+        g.add_edge(nodes[1], nodes[4], "success_nodes")
+        g.add_edge(nodes[1], nodes[5], "failure_nodes")
+
+        g.add_edge(nodes[2], nodes[6], "failure_nodes")
+        g.add_edge(nodes[3], nodes[6], "success_nodes")
+        g.add_edge(nodes[4], nodes[6], "always_nodes")
+
+        g.add_edge(nodes[6], nodes[7], "always_nodes")
+        g.add_edge(nodes[6], nodes[8], "success_nodes")
+        g.add_edge(nodes[6], nodes[9], "failure_nodes")
+
+        return (g, nodes)
+
+    def test_dnr_step(self, complex_dag):
+        (g, nodes) = complex_dag
+        base_dir = '/awx_devel'
+
+        g.generate_graphviz_plot(file_name=os.path.join(base_dir, "workflow_step0.gv"))
+        nodes[0].job = Job(status='successful')
+        g.mark_dnr_nodes()
+        g.generate_graphviz_plot(file_name=os.path.join(base_dir, "workflow_step1.gv"))
+        nodes[2].job = Job(status='successful')
+        nodes[3].job = Job(status='successful')
+        g.mark_dnr_nodes()
+        g.generate_graphviz_plot(file_name=os.path.join(base_dir, "workflow_step2.gv"))
+        nodes[6].job = Job(status='failed')
+        g.mark_dnr_nodes()
+        g.generate_graphviz_plot(file_name=os.path.join(base_dir, "workflow_step3.gv"))
+        nodes[7].job = Job(status='successful')
+        nodes[9].job = Job(status='successful')
+        g.mark_dnr_nodes()
+        g.generate_graphviz_plot(file_name=os.path.join(base_dir, "workflow_step4.gv"))
