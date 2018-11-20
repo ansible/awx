@@ -131,7 +131,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     break;
             }
             CreateSelect2({
-                element: '#workflow_node_edge_3',
+                element: '#workflow_node_edge',
                 multiple: false
             });
 
