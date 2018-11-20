@@ -28,7 +28,7 @@ module.exports = {
           options: {
             name: '[name].[ext]',
             outputPath: 'assets/fonts/',
-            publicPatH: '../',
+            publicPath: 'assets/fonts',
             includePaths: [
               'node_modules/@patternfly/patternfly-next/assets/fonts',
             ]
@@ -42,7 +42,7 @@ module.exports = {
           options: {
             name: '[name].[ext]',
             outputPath: 'assets/images/',
-            publicPatH: '../',
+            publicPath: 'assets/images',
             includePaths: [
               'node_modules/@patternfly/patternfly-next/assets/images',
             ]
