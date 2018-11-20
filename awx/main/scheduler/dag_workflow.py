@@ -61,7 +61,7 @@ class WorkflowDAG(SimpleDAG):
                 continue
             elif p.unified_job_template is None:
                 continue
-            # Node might run a job
+            # do_not_run is False, node might still run a job and thus blocks children
             elif not p.job:
                 return False
             # Node decidedly got a job; check if job is done
