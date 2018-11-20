@@ -139,32 +139,35 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         };
 
         const getEditNodeHelpMessage = (selectedTemplate) => {
-            if (selectedTemplate.type === "workflow_job_template") {
-                if ($scope.workflowJobTemplateObj.inventory) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
+            if (selectedTemplate) {
+                if (selectedTemplate.type === "workflow_job_template") {
+                    if ($scope.workflowJobTemplateObj.inventory) {
+                        if (selectedTemplate.ask_inventory_on_launch) {
+                            return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
+                        }
+                    }
+                     if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
+                        if (selectedTemplate.ask_inventory_on_launch) {
+                            return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
+                        }
                     }
                 }
-                 if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
+                if (selectedTemplate.type === "job_template") {
+                    if ($scope.workflowJobTemplateObj.inventory) {
+                        if (selectedTemplate.ask_inventory_on_launch) {
+                            return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
+                        }
+                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_NOT_OVERRIDE');
+                    }
+                    if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
+                        if (selectedTemplate.ask_inventory_on_launch) {
+                            return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
+                        }
+                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_NOT_OVERRIDE');
                     }
                 }
             }
-             if (selectedTemplate.type === "job_template") {
-                if ($scope.workflowJobTemplateObj.inventory) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
-                    }
-                     return $scope.strings.get('workflow_maker.INVENTORY_WILL_NOT_OVERRIDE');
-                }
-                 if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
-                    }
-                     return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_NOT_OVERRIDE');
-                }
-            }
+
              return null;
         };
 
@@ -601,7 +604,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 .then(() => {
                     if ($scope.nodeConfig.mode === "edit") {
                         // Make sure that we have the full unified job template object
-                        if (!$scope.nodeConfig.node.fullUnifiedJobTemplateObject && _.get($scope, 'nodeConfig.node.originalNodeObject.summary_fields.unified_job_template.unified_job_type') === 'job') {
+                        if (!$scope.nodeConfig.node.fullUnifiedJobTemplateObject) {
                             // This is a node that we got back from the api with an incomplete
                             // unified job template so we're going to pull down the whole object
                             TemplatesService.getUnifiedJobTemplate($scope.nodeConfig.node.originalNodeObject.summary_fields.unified_job_template.id)
@@ -671,7 +674,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         });
 
         $scope.$watchGroup(['wf_maker_templates', 'wf_maker_projects', 'wf_maker_inventory_sources', 'activeTab'], () => {
-            const unifiedJobTemplateId = _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.id') || _.get($scope, 'nodeConfig.node.unifiedJobTemplate.id') || null;
+            const unifiedJobTemplateId = _.get($scope, 'selectedTemplate.id') || null;
             switch($scope.activeTab) {
                 case 'jobs':
                     $scope.wf_maker_templates.forEach((row, i) => {
