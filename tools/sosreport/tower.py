@@ -8,6 +8,7 @@ SOSREPORT_TOWER_COMMANDS = [
     "ansible --version",      # ansible core version
     "awx-manage --version", # tower version
     "awx-manage list_instances", # tower cluster configuration
+    "awx-manage run_dispatcher --status", # tower dispatch worker status
     "supervisorctl status",   # tower process status
     "rabbitmqctl status",
     "rabbitmqctl cluster_status",
