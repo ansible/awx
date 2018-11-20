@@ -997,17 +997,44 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                             const targetNodeX = d3.transform(targetNode.attr("transform")).translate[0];
                                             const targetNodeY = d3.transform(targetNode.attr("transform")).translate[1];
 
+                                            const startX = sourceNodeX + nodeW/2;
+                                            const startY = sourceNodeY + nodeH/2;
+
+                                            const finishX = targetNodeX + nodeW/2;
+                                            const finishY = targetNodeY + nodeH/2;
+
+                                            const polylinePoints = {
+                                                start: {
+                                                    x: startX,
+                                                    y: startY
+                                                },
+                                                third: {
+                                                    x: startX + (finishX - startX)/3,
+                                                    y: startY + (finishY - startY)/3
+                                                },
+                                                midpoint: {
+                                                    x: startX + (finishX - startX)/2,
+                                                    y: startY + (finishY - startY)/2
+                                                },
+                                                twoThird: {
+                                                    x: startX + 2*(finishX - startX)/3,
+                                                    y: startY + 2*(finishY - startY)/3
+                                                },
+                                                finish: {
+                                                    x: finishX,
+                                                    y: finishY
+                                                }
+                                            };
+
                                             $('.WorkflowChart-potentialLink').remove();
 
-                                            svgGroup.insert("line", '.WorkflowChart-node')
+                                            svgGroup.insert("polyline", '.WorkflowChart-node')
                                                 .attr("class", "WorkflowChart-potentialLink")
-                                                .attr("x1", sourceNodeX + nodeW/2)
-                                                .attr("x2", targetNodeX + nodeW/2)
-                                                .attr("y1", sourceNodeY + nodeH/2)
-                                                .attr("y2", targetNodeY + nodeH/2)
-                                                .style("stroke-dasharray","5,5")
-                                                .style("stroke-width", "2")
-                                                .style("stroke", "#D7D7D7");
+                                                .attr("points", `${polylinePoints.start.x},${polylinePoints.start.y} ${polylinePoints.third.x},${polylinePoints.third.y} ${polylinePoints.midpoint.x},${polylinePoints.midpoint.y} ${polylinePoints.twoThird.x},${polylinePoints.twoThird.y} ${polylinePoints.finish.x},${polylinePoints.finish.y}`)
+                                                .attr("stroke-dasharray","5,5")
+                                                .attr("stroke-width", "2")
+                                                .attr("stroke", "#D7D7D7")
+                                                .attr('marker-mid', "url(#aw-workflow-chart-arrow)");
                                         }
                                         d3.select("#node-" + d.id)
                                             .classed("WorkflowChart-nodeHovering", true);
@@ -1399,7 +1426,20 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 svgGroup = baseSvg.append("g")
                     .attr("id", "aw-workflow-chart-g")
                     .attr("transform", "translate(0," + (windowHeight/2 - rootH/2 - startNodeOffsetY) + ")");
-            });
+
+                const defs = baseSvg.append("defs");
+
+                  defs.append("marker")
+                    .attr("id", "aw-workflow-chart-arrow")
+                    .attr("viewBox", "0 -5 10 10")
+                    .attr("refX", 5)
+                    .attr("markerWidth", 6)
+                    .attr("markerHeight", 6)
+                    .attr("orient", "auto")
+                  .append("path")
+                    .attr("d", "M0,-5L10,0L0,5")
+                    .attr('fill', "#D7D7D7");
+                        });
 
             if(scope.mode === 'details') {
                 angular.element($window).on('resize', onResize);
