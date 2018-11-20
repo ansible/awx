@@ -185,7 +185,10 @@ class WorkflowJobNode(WorkflowNodeBase):
         editable=False,
     )
     do_not_run = models.BooleanField(
-        default=False
+        default=False,
+        help_text=_("Indidcates that a job will not be created when True. Workflow runtime "
+                    "semantics will mark this True if the node is in a path that will "
+                    "decidedly not be ran. A value of False means the node may not run."),
     )
 
     def get_absolute_url(self, request=None):
