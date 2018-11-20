@@ -11,6 +11,7 @@ export default ['templateUrl',
         return {
             scope: {
                 nodeConfig: '<',
+                workflowJobTemplateObj: '<',
                 cancel: '&',
                 select: '&',
                 readOnly: '<'

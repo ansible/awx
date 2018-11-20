@@ -17,6 +17,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         let promptWatcher, credentialsWatcher, surveyQuestionWatcher, listPromises = [];
 
         $scope.strings = TemplatesStrings;
+        $scope.editNodeHelpMessage = null;
 
         let templateList = _.cloneDeep(TemplateList);
         delete templateList.actions;
@@ -138,6 +139,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         };
 
         const finishConfiguringEdit = () => {
+
+            $scope.editNodeHelpMessage = getEditNodeHelpMessage($scope.nodeConfig.node.fullUnifiedJobTemplateObject);
 
             if (!$scope.readOnly) {
                 let jobTemplate = new JobTemplate();
@@ -391,6 +394,36 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
         };
 
+        const getEditNodeHelpMessage = (selectedTemplate) => {
+            if (selectedTemplate.type === "workflow_job_template") {
+                if ($scope.workflowJobTemplateObj.inventory) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
+                    }
+                }
+                 if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
+                    }
+                }
+            }
+             if (selectedTemplate.type === "job_template") {
+                if ($scope.workflowJobTemplateObj.inventory) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
+                    }
+                     return $scope.strings.get('workflow_maker.INVENTORY_WILL_NOT_OVERRIDE');
+                }
+                 if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
+                    }
+                     return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_NOT_OVERRIDE');
+                }
+            }
+             return null;
+        };
+
         const templateManuallySelected = (selectedTemplate) => {
 
             if (promptWatcher) {
@@ -406,6 +439,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             }
 
             $scope.promptData = null;
+            $scope.editNodeHelpMessage = getEditNodeHelpMessage(selectedTemplate);
 
             if (selectedTemplate.type === "job_template") {
                 let jobTemplate = new JobTemplate();
