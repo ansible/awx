@@ -18,7 +18,7 @@ describe('Controller: workflowResults', () => {
 
     beforeEach(angular.mock.module('workflowResults', ($provide) => {
         ['PromptDialog', 'Prompt', 'Wait', 'Rest', '$state', 'ProcessErrors',
-         'jobLabels', 'workflowNodes', 'count', 'WorkflowJobModel',
+         'jobLabels', 'workflowNodes', 'count', 'WorkflowJobModel', 'ComponentsStrings'
         ].forEach((item) => {
             $provide.value(item, {});
         });
