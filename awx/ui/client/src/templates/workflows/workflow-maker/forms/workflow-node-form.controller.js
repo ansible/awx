@@ -138,6 +138,36 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             $scope.nodeFormDataLoaded = true;
         };
 
+        const getEditNodeHelpMessage = (selectedTemplate) => {
+            if (selectedTemplate.type === "workflow_job_template") {
+                if ($scope.workflowJobTemplateObj.inventory) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
+                    }
+                }
+                 if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
+                    }
+                }
+            }
+             if (selectedTemplate.type === "job_template") {
+                if ($scope.workflowJobTemplateObj.inventory) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
+                    }
+                     return $scope.strings.get('workflow_maker.INVENTORY_WILL_NOT_OVERRIDE');
+                }
+                 if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
+                    if (selectedTemplate.ask_inventory_on_launch) {
+                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
+                    }
+                     return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_NOT_OVERRIDE');
+                }
+            }
+             return null;
+        };
+
         const finishConfiguringEdit = () => {
 
             $scope.editNodeHelpMessage = getEditNodeHelpMessage($scope.nodeConfig.node.fullUnifiedJobTemplateObject);
@@ -392,36 +422,6 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 $scope.nodeFormDataLoaded = true;
             }
 
-        };
-
-        const getEditNodeHelpMessage = (selectedTemplate) => {
-            if (selectedTemplate.type === "workflow_job_template") {
-                if ($scope.workflowJobTemplateObj.inventory) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
-                    }
-                }
-                 if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
-                    }
-                }
-            }
-             if (selectedTemplate.type === "job_template") {
-                if ($scope.workflowJobTemplateObj.inventory) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
-                    }
-                     return $scope.strings.get('workflow_maker.INVENTORY_WILL_NOT_OVERRIDE');
-                }
-                 if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
-                    if (selectedTemplate.ask_inventory_on_launch) {
-                        return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
-                    }
-                     return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_NOT_OVERRIDE');
-                }
-            }
-             return null;
         };
 
         const templateManuallySelected = (selectedTemplate) => {
