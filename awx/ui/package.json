@@ -30,7 +30,8 @@
     "dev": "webpack --config build/webpack.development.js --progress",
     "watch": "webpack-dev-server --config build/webpack.watch.js --progress --https",
     "production": "webpack --config build/webpack.production.js",
-    "grab-licenses": "./utils/get_licenses.js"
+    "grab-licenses": "./utils/get_licenses.js",
+    "pre-check": "npm run lint && npm run jshint && npm run unit && npm run test"
   },
   "devDependencies": {
     "angular-mocks": "~1.6.6",
