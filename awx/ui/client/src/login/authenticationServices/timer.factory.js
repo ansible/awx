@@ -157,6 +157,7 @@ export default
                                 title: i18n._("Idle Session"),
                                 scope: $rootScope,
                                 buttons: buttons,
+                                dialogClass: "no-close",
                                 width: 470,
                                 height: 240,
                                 minWidth: 200,
