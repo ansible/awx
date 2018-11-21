@@ -16,9 +16,9 @@
 
 export default
     ['$http', '$rootScope', '$cookies', 'GetBasePath', 'Store', '$q',
-    '$injector',
+    '$injector', '$location',
     function ($http, $rootScope, $cookies, GetBasePath, Store, $q,
-    $injector) {
+    $injector, $location) {
         return {
             setToken: function (token, expires) {
                 $cookies.remove('token_expires');
@@ -147,7 +147,11 @@ export default
             setUserInfo: function (response) {
                 // store the response values in $rootScope so we can get to them later
                 $rootScope.current_user = response.results[0];
-                $cookies.putObject('current_user', response.results[0]); //keep in session cookie in the event of browser refresh
+                if ($location.protocol() === 'https') {
+                  $cookies.putObject('current_user', response.results[0], {secure: true}); //keep in session cookie in the event of browser refresh
+                } else {
+                $cookies.putObject('current_user', response.results[0], {secure: false});
+              }
             },
 
             restoreUserInfo: function () {

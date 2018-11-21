@@ -13,6 +13,7 @@ from django.views.generic.base import RedirectView
 from django.utils.encoding import smart_text
 from awx.api.serializers import UserSerializer
 from rest_framework.renderers import JSONRenderer
+from django.conf import settings
 
 logger = logging.getLogger('awx.sso.views')
 
@@ -45,7 +46,7 @@ class CompleteView(BaseRedirectView):
             current_user = UserSerializer(self.request.user)
             current_user = JSONRenderer().render(current_user.data)
             current_user = urllib.quote('%s' % current_user, '')
-            response.set_cookie('current_user', current_user)
+            response.set_cookie('current_user', current_user, secure=settings.SESSION_COOKIE_SECURE or None)
         return response
 
 
