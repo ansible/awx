@@ -2,7 +2,7 @@
 
 ## Requirements
 - node.js 8.x LTS
-- npm 5.x LTS
+- npm >=5.10
 - bzip2, gcc-c++, git, make
 
 ## Development
