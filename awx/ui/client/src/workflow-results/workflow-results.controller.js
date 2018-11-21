@@ -115,6 +115,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
         function init() {
             // put initially resolved request data on scope
             $scope.workflow = workflowData;
+            $scope.workflow_nodes = workflowNodes;
             $scope.workflowOptions = workflowDataOptions.actions.GET;
             $scope.labels = jobLabels;
             $scope.showManualControls = false;
