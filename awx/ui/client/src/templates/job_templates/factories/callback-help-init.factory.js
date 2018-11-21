@@ -18,7 +18,7 @@ export default
                     "<p>Successful requests create an entry on the Jobs page, where results and history can be viewed.</p>";
             };
 
-            // The md5 helper emits NewHashGenerated whenever a new key is available
+            // The hash helper emits NewHashGenerated whenever a new key is available
             if (scope.removeNewHashGenerated) {
                 scope.removeNewHashGenerated();
             }

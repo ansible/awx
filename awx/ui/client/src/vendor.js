@@ -53,7 +53,6 @@ require('angular-codemirror');
 require('angular-drag-and-drop-lists');
 require('angular-duration-format');
 require('angular-gettext');
-require('angular-md5');
 require('angular-moment');
 require('angular-scheduler');
 require('angular-tz-extensions');
