@@ -67,6 +67,15 @@ npm install --prefix awx/ui --save prod-package@1.23
 git add awx/ui/package.json awx/ui/package-lock.json
 ```
 
+## Removing dependencies
+```shell
+# remove a development or build dependency
+npm uninstall --prefix awx/ui --save-dev dev-package
+
+# remove a production dependency
+npm uninstall --prefix awx/ui --save prod-package
+```
+
 ## Building for Production
 ```shell
 # built files are placed in awx/ui/static
