@@ -73,7 +73,7 @@
                     </ul>
                 </div>
                 <div class="WorkflowLegend-maker--right">
-                    <span class="WorkflowMaker-totalJobs">{{strings.get('workflow_maker.TOTAL_TEMPLATES')}}</span>
+                    <span class="WorkflowMaker-totalJobs">{{strings.get('workflow_maker.TOTAL_NODES')}}</span>
                     <span class="badge List-titleBadge" ng-bind="graphState.arrayOfNodesForChart.length === 0 ? graphState.arrayOfNodesForChart.length : graphState.arrayOfNodesForChart.length-1"></span>
                     <i ng-class="{'WorkflowMaker-manualControlsIcon--active': showManualControls}" class="fa fa-cog WorkflowMaker-manualControlsIcon" aria-hidden="true" alt="Controls" ng-click="toggleManualControls()"></i>
                     <div ng-show="showManualControls" class="WorkflowMaker-manualControls noselect">
