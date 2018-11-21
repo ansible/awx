@@ -78,7 +78,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     SHOW_MORE: i18n._('Show More'),
                 },
                 results: {
-                    TOTAL_JOBS: i18n._('Total Jobs'),
+                    TOTAL_NODES: i18n._('Total Nodes'),
                     ELAPSED: i18n._('Elapsed'),
                 },
                 legend: {
