@@ -91,12 +91,19 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             ];
 
             promptWatcher = $scope.$watchGroup(promptDataToWatch, () => {
+                const templateType = _.get($scope, 'promptData.templateType');
                 let missingPromptValue = false;
+
                 if ($scope.missingSurveyValue) {
                     missingPromptValue = true;
-                } else if (!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id) {
-                    missingPromptValue = true;
                 }
+
+                if (templateType !== "workflow_job_template") {
+                    if (!$scope.promptData.prompts.inventory.value || !$scope.promptData.prompts.inventory.value.id) {
+                        missingPromptValue = true;
+                    }
+                }
+
                 $scope.promptModalMissingReqFields = missingPromptValue;
             });
 
