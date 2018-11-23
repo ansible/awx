@@ -154,23 +154,28 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                             return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
                         }
                     }
-                     if (workflowJobTemplateObj.ask_inventory_on_launch) {
+
+                    if (workflowJobTemplateObj.ask_inventory_on_launch) {
                         if (selectedTemplate.ask_inventory_on_launch) {
                             return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
                         }
                     }
                 }
+
                 if (selectedTemplate.type === "job_template") {
                     if (workflowJobTemplateObj.inventory) {
                         if (selectedTemplate.ask_inventory_on_launch) {
                             return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
                         }
+
                         return $scope.strings.get('workflow_maker.INVENTORY_WILL_NOT_OVERRIDE');
                     }
+
                     if (workflowJobTemplateObj.ask_inventory_on_launch) {
                         if (selectedTemplate.ask_inventory_on_launch) {
                             return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
                         }
+
                         return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_NOT_OVERRIDE');
                     }
                 }
