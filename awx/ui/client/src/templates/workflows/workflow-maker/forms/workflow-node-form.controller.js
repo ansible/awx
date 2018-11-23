@@ -7,11 +7,11 @@
 export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService', 'Rest', '$q',
         'TemplatesStrings', 'CreateSelect2', 'Empty', 'generateList', 'QuerySet',
         'GetBasePath', 'TemplateList', 'ProjectList', 'InventorySourcesList', 'ProcessErrors',
-        'i18n', 'ParseTypeChange',
+        'i18n', 'ParseTypeChange', 'WorkflowJobTemplateModel',
     function($scope, TemplatesService, JobTemplate, PromptService, Rest, $q,
         TemplatesStrings, CreateSelect2, Empty, generateList, qs,
         GetBasePath, TemplateList, ProjectList, InventorySourcesList, ProcessErrors,
-        i18n, ParseTypeChange
+        i18n, ParseTypeChange, WorkflowJobTemplate
     ) {
 
         let promptWatcher, credentialsWatcher, surveyQuestionWatcher, listPromises = [];
@@ -79,6 +79,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     credentialRequiresPassword = true;
                 }
             });
+
             $scope.credentialRequiresPassword = credentialRequiresPassword;
         };
 
@@ -138,28 +139,28 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             $scope.nodeFormDataLoaded = true;
         };
 
-        const getEditNodeHelpMessage = (selectedTemplate) => {
+        const getEditNodeHelpMessage = (selectedTemplate, workflowJobTemplateObj) => {
             if (selectedTemplate) {
                 if (selectedTemplate.type === "workflow_job_template") {
-                    if ($scope.workflowJobTemplateObj.inventory) {
+                    if (workflowJobTemplateObj.inventory) {
                         if (selectedTemplate.ask_inventory_on_launch) {
                             return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
                         }
                     }
-                     if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
+                     if (workflowJobTemplateObj.ask_inventory_on_launch) {
                         if (selectedTemplate.ask_inventory_on_launch) {
                             return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
                         }
                     }
                 }
                 if (selectedTemplate.type === "job_template") {
-                    if ($scope.workflowJobTemplateObj.inventory) {
+                    if (workflowJobTemplateObj.inventory) {
                         if (selectedTemplate.ask_inventory_on_launch) {
                             return $scope.strings.get('workflow_maker.INVENTORY_WILL_OVERRIDE');
                         }
                         return $scope.strings.get('workflow_maker.INVENTORY_WILL_NOT_OVERRIDE');
                     }
-                    if ($scope.workflowJobTemplateObj.ask_inventory_on_launch) {
+                    if (workflowJobTemplateObj.ask_inventory_on_launch) {
                         if (selectedTemplate.ask_inventory_on_launch) {
                             return $scope.strings.get('workflow_maker.INVENTORY_PROMPT_WILL_OVERRIDE');
                         }
@@ -172,11 +173,13 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         };
 
         const finishConfiguringEdit = () => {
+            const ujt = _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject');
+            const templateType = _.get(ujt, 'type');
 
-            $scope.editNodeHelpMessage = getEditNodeHelpMessage($scope.nodeConfig.node.fullUnifiedJobTemplateObject);
+            $scope.editNodeHelpMessage = getEditNodeHelpMessage(ujt, $scope.workflowJobTemplateObj);
 
             if (!$scope.readOnly) {
-                let jobTemplate = new JobTemplate();
+                let jobTemplate = templateType === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();
 
                 if (_.get($scope, 'nodeConfig.node.promptData') && !_.isEmpty($scope.nodeConfig.node.promptData)) {
                     $scope.promptData = _.cloneDeep($scope.nodeConfig.node.promptData);
@@ -199,7 +202,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     } else {
                         $scope.showPromptButton = true;
 
-                        if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeConfig.node.originalNodeObject.summary_fields.inventory')) {
+                        if (templateType !== "workflow_job_template" && launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory') && !_.has($scope, 'nodeConfig.node.originalNodeObject.summary_fields.inventory')) {
                             $scope.promptModalMissingReqFields = true;
                         } else {
                             $scope.promptModalMissingReqFields = false;
@@ -326,6 +329,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                                                 launchOptions: launchOptions,
                                                 prompts: prompts,
                                                 surveyQuestions: surveyQuestionRes.data.spec,
+                                                templateType: $scope.nodeConfig.node.fullUnifiedJobTemplateObject.type,
                                                 template: $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id
                                             };
 
@@ -350,6 +354,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                                         launchConf: launchConf,
                                         launchOptions: launchOptions,
                                         prompts: prompts,
+                                        templateType: $scope.nodeConfig.node.fullUnifiedJobTemplateObject.type,
                                         template: $scope.nodeConfig.node.fullUnifiedJobTemplateObject.id
                                     };
 
@@ -442,27 +447,30 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             }
 
             $scope.promptData = null;
-            $scope.editNodeHelpMessage = getEditNodeHelpMessage(selectedTemplate);
+            $scope.editNodeHelpMessage = getEditNodeHelpMessage(selectedTemplate, $scope.workflowJobTemplateObj);
 
-            if (selectedTemplate.type === "job_template") {
-                let jobTemplate = new JobTemplate();
+            if (selectedTemplate.type === "job_template" || selectedTemplate.type === "workflow_job_template") {
+                let jobTemplate = selectedTemplate.type === "workflow_job_template" ? new WorkflowJobTemplate() : new JobTemplate();
 
                 $q.all([jobTemplate.optionsLaunch(selectedTemplate.id), jobTemplate.getLaunch(selectedTemplate.id)])
                     .then((responses) => {
                         let launchConf = responses[1].data;
 
-                        if ((!selectedTemplate.inventory && !launchConf.ask_inventory_on_launch) || !selectedTemplate.project) {
-                            $scope.selectedTemplateInvalid = true;
-                        } else {
-                            $scope.selectedTemplateInvalid = false;
+                        let credentialRequiresPassword = false;
+                        let selectedTemplateInvalid = false;
+
+                        if (selectedTemplate.type !== "workflow_job_template") {
+                            if ((!selectedTemplate.inventory && !launchConf.ask_inventory_on_launch) || !selectedTemplate.project) {
+                                selectedTemplateInvalid = true;
+                            }
+
+                            if (launchConf.passwords_needed_to_start && launchConf.passwords_needed_to_start.length > 0) {
+                                credentialRequiresPassword = true;
+                            }
                         }
 
-                        if (launchConf.passwords_needed_to_start && launchConf.passwords_needed_to_start.length > 0) {
-                            $scope.credentialRequiresPassword = true;
-                        } else {
-                            $scope.credentialRequiresPassword = false;
-                        }
-
+                        $scope.credentialRequiresPassword = credentialRequiresPassword;
+                        $scope.selectedTemplateInvalid = selectedTemplateInvalid;
                         $scope.selectedTemplate = angular.copy(selectedTemplate);
 
                         if (!launchConf.survey_enabled &&
@@ -481,11 +489,12 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                                 $scope.promptModalMissingReqFields = false;
                         } else {
                             $scope.showPromptButton = true;
+                            $scope.promptModalMissingReqFields = false;
 
-                            if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory')) {
-                                $scope.promptModalMissingReqFields = true;
-                            } else {
-                                $scope.promptModalMissingReqFields = false;
+                            if (selectedTemplate.type !== "workflow_job_template") {
+                                if (launchConf.ask_inventory_on_launch && !_.has(launchConf, 'defaults.inventory')) {
+                                    $scope.promptModalMissingReqFields = true;
+                                }
                             }
 
                             if (launchConf.survey_enabled) {
@@ -504,6 +513,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                                             launchOptions: responses[0].data,
                                             surveyQuestions: processed.surveyQuestions,
                                             template: selectedTemplate.id,
+                                            templateType: selectedTemplate.type,
                                             prompts: PromptService.processPromptValues({
                                                 launchConf: responses[1].data,
                                                 launchOptions: responses[0].data
@@ -527,6 +537,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                                     launchConf: responses[1].data,
                                     launchOptions: responses[0].data,
                                     template: selectedTemplate.id,
+                                    templateType: selectedTemplate.type,
                                     prompts: PromptService.processPromptValues({
                                         launchConf: responses[1].data,
                                         launchOptions: responses[0].data
