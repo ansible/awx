@@ -407,46 +407,50 @@ class IsolatedManager(object):
         args = cls._build_args('heartbeat_isolated.yml', hostname_string)
         args.extend(['--forks', str(len(instance_qs))])
         env = cls._base_management_env()
-        env['ANSIBLE_STDOUT_CALLBACK'] = 'json'
-
-        buff = StringIO.StringIO()
-        timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
-        status, rc = IsolatedManager.run_pexpect(
-            args, cls.awx_playbook_path(), env, buff,
-            idle_timeout=timeout, job_timeout=timeout,
-            pexpect_timeout=5
-        )
-        output = buff.getvalue().encode('utf-8')
-        buff.close()
 
         try:
-            result = json.loads(output)
-            if not isinstance(result, dict):
-                raise TypeError('Expected a dict but received {}.'.format(str(type(result))))
-        except (ValueError, AssertionError, TypeError):
-            logger.exception('Failed to read status from isolated instances, output:\n {}'.format(output))
-            return
+            facts_path = tempfile.mkdtemp()
+            env['ANSIBLE_CACHE_PLUGIN'] = 'jsonfile'
+            env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = facts_path
 
-        for instance in instance_qs:
-            try:
-                task_result = result['plays'][0]['tasks'][0]['hosts'][instance.hostname]
-            except (KeyError, IndexError):
-                task_result = {}
-            if 'capacity_cpu' in task_result and 'capacity_mem' in task_result:
-                cls.update_capacity(instance, task_result, awx_application_version)
-                logger.debug('Isolated instance {} successful heartbeat'.format(instance.hostname))
-            elif instance.capacity == 0:
-                logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
-                    instance.hostname))
-            else:
-                logger.warning('Could not update status of isolated instance {}, msg={}'.format(
-                    instance.hostname, task_result.get('msg', 'unknown failure')
-                ))
-                if instance.is_lost(isolated=True):
-                    instance.capacity = 0
-                    instance.save(update_fields=['capacity'])
-                    logger.error('Isolated instance {} last checked in at {}, marked as lost.'.format(
-                        instance.hostname, instance.modified))
+            buff = StringIO.StringIO()
+            timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
+            status, rc = IsolatedManager.run_pexpect(
+                args, cls.awx_playbook_path(), env, buff,
+                idle_timeout=timeout, job_timeout=timeout,
+                pexpect_timeout=5
+            )
+
+            for instance in instance_qs:
+                output = buff.getvalue()
+                try:
+                    with open(os.path.join(facts_path, instance.hostname), 'r') as facts_data:
+                        output = facts_data.read()
+                    task_result = json.loads(output)
+                except Exception:
+                    logger.exception('Failed to read status from isolated instances, output:\n {}'.format(output))
+                    return
+                if 'awx_capacity_cpu' in task_result and 'awx_capacity_mem' in task_result:
+                    task_result = {
+                        'capacity_cpu': task_result['awx_capacity_cpu'],
+                        'capacity_mem': task_result['awx_capacity_mem'],
+                        'version': task_result['awx_capacity_version']
+                    }
+                    cls.update_capacity(instance, task_result, awx_application_version)
+                    logger.debug('Isolated instance {} successful heartbeat'.format(instance.hostname))
+                elif instance.capacity == 0:
+                    logger.debug('Isolated instance {} previously marked as lost, could not re-join.'.format(
+                        instance.hostname))
+                else:
+                    logger.warning('Could not update status of isolated instance {}'.format(instance.hostname))
+                    if instance.is_lost(isolated=True):
+                        instance.capacity = 0
+                        instance.save(update_fields=['capacity'])
+                        logger.error('Isolated instance {} last checked in at {}, marked as lost.'.format(
+                            instance.hostname, instance.modified))
+        finally:
+            if os.path.exists(facts_path):
+                shutil.rmtree(facts_path)
 
     @staticmethod
     def get_stdout_handle(instance, private_data_dir, event_data_key='job_id'):
