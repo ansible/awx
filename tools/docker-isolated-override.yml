@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 services:
   # Primary Tower Development Container link
   awx:
@@ -9,6 +9,7 @@ services:
   # Isolated Rampart Container
   isolated:
     image: ${DEV_DOCKER_TAG_BASE}/awx_isolated:${TAG}
+    container_name: tools_isolated_1
     hostname: isolated
     volumes:
       - "../awx/main/expect:/awx_devel"

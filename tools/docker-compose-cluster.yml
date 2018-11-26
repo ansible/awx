@@ -4,6 +4,7 @@ services:
     build:
       context: ./docker-compose
       dockerfile: Dockerfile-haproxy
+    container_name: tools_haproxy_1
     depends_on:
       - "awx_1"
       - "awx_2"
@@ -15,6 +16,7 @@ services:
       - "15672:15672"
   awx_1:
     user: ${CURRENT_UID}
+    container_name: tools_awx_1_1
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_1
@@ -32,6 +34,7 @@ services:
       - "5899-5999:5899-5999"
   awx_2:
     user: ${CURRENT_UID}
+    container_name: tools_awx_2_1
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_2
@@ -49,6 +52,7 @@ services:
       - "6899-6999:6899-6999"
   awx_3:
     user: ${CURRENT_UID}
+    container_name: tools_awx_3_1
     privileged: true
     image: ${DEV_DOCKER_TAG_BASE}/awx_devel:${TAG}
     hostname: awx_3
@@ -67,19 +71,24 @@ services:
   rabbitmq_1:
     image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_1
+    container_name: tools_rabbitmq_1_1
   rabbitmq_2:
     image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_2
+    container_name: tools_rabbitmq_2_1
     environment: 
       - CLUSTERED=true
       - CLUSTER_WITH=rabbitmq_1
   rabbitmq_3:
     image: ${DEV_DOCKER_TAG_BASE}/rabbit_cluster_node:latest
     hostname: rabbitmq_3
+    container_name: tools_rabbitmq_3_1
     environment: 
       - CLUSTERED=true
       - CLUSTER_WITH=rabbitmq_1
   postgres:
     image: postgres:9.6
+    container_name: tools_postgres_1
   memcached:
     image: memcached:alpine
+    container_name: tools_memcached_1
