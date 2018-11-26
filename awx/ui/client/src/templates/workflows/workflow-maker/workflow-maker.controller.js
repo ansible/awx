@@ -113,7 +113,11 @@ export default ['$scope', 'TemplatesService',
                 // Check to see if the user has provided any prompt values that are different
                 // from the defaults in the job template
 
-                if (_.has(node, 'fullUnifiedJobTemplateObject') && node.fullUnifiedJobTemplateObject.type === "job_template" && node.promptData) {
+                if (_.has(node, 'fullUnifiedJobTemplateObject') &&
+                    (node.fullUnifiedJobTemplateObject.type === "workflow_job_template" ||
+                    node.fullUnifiedJobTemplateObject.type === "job_template") && 
+                    node.promptData
+                ) {
                     sendableNodeData = PromptService.bundlePromptDataForSaving({
                         promptData: node.promptData,
                         dataToSave: sendableNodeData
