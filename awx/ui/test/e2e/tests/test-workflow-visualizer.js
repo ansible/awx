@@ -152,57 +152,47 @@ module.exports = {
             .findThenClick(alwaysDropdown)
             .click(nodeSelectButton);
     },
-    // TODO: I'm not sure exactly what this is supposed to test
-    // 'Verify node-shifting behavior upon deletion': client => {
-    //     client
-    //         .findThenClick(xPathNodeById(newChildNodeId))
-    //         .pause(1000)
-    //         .waitForElementNotVisible(spinny)
-    //         .findThenClick(edgeTypeDropdownBar)
-    //         .findThenClick(successDropdown)
-    //         .click(nodeSelectButton)
-    //         .moveToElement(xPathNodeById(newChildNodeId), 0, 0, () => {
-    //             client.pause(500);
-    //             client.waitForElementNotVisible(spinny);
-    //             client.click(newChildNode + nodeAdd);
-    //         })
-    //         .pause(1000)
-    //         .waitForElementNotVisible(spinny);
-    //
-    //     // Grab the id of the new child node for later
-    //     client.getAttribute('//*[contains(@class, "WorkflowChart-isNodeBeingAdded")]/..', 'id', function(res) {
-    //       leafNodeId = res.value.split('-')[1];
-    //     });
-    //
-    //     client
-    //         .clearValue(jobSearchBar)
-    //         .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
-    //         .pause(1000)
-    //         .findThenClick(testActionsJob)
-    //         .pause(1000)
-    //         .waitForElementNotVisible(spinny)
-    //         .findThenClick(edgeTypeDropdownBar)
-    //         .waitForElementPresent(successDropdown)
-    //         .waitForElementPresent(failureDropdown)
-    //         .waitForElementPresent(alwaysDropdown)
-    //         .findThenClick(alwaysDropdown)
-    //         .click(nodeSelectButton)
-    //         .moveToElement(xPathNodeById(newChildNodeId), 0, 0, () => {
-    //             client.pause(500);
-    //             client.waitForElementNotVisible(spinny);
-    //             client.click(newChildNode + nodeRemove);
-    //         })
-    //         .pause(1000)
-    //         .waitForElementNotVisible(spinny)
-    //         .findThenClick(deleteConfirmation)
-    //         .findThenClick(leafNode)
-    //         .pause(1000)
-    //         .waitForElementNotVisible(spinny)
-    //         .findThenClick(edgeTypeDropdownBar)
-    //         .waitForElementPresent(successDropdown)
-    //         .waitForElementPresent(failureDropdown)
-    //         .waitForElementPresent(alwaysDropdown);
-    // },
+    'Verify node-shifting behavior upon deletion': client => {
+        client
+            .moveToElement(xPathNodeById(newChildNodeId), 0, 0, () => {
+                client.pause(500);
+                client.waitForElementNotVisible(spinny);
+                client.click(xPathNodeById(newChildNodeId) + nodeAdd);
+            })
+            .pause(1000)
+            .waitForElementNotVisible(spinny);
+
+        // Grab the id of the new child node for later
+        client.getAttribute('//*[contains(@class, "WorkflowChart-isNodeBeingAdded")]/..', 'id', function(res) {
+          // I had to nest this logic in order to ensure that leafNodeId was available later on.
+          // Separating this out resulted in leafNodeId being `undefined` when sent to xPathLinkById
+          leafNodeId = res.value.split('-')[1];
+          client
+              .clearValue(jobSearchBar)
+              .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
+              .pause(1000)
+              .findThenClick(testActionsJob)
+              .pause(1000)
+              .waitForElementNotVisible(spinny)
+              .findThenClick(edgeTypeDropdownBar)
+              .waitForElementPresent(successDropdown)
+              .waitForElementPresent(failureDropdown)
+              .waitForElementPresent(alwaysDropdown)
+              .findThenClick(alwaysDropdown)
+              .click(nodeSelectButton)
+              .moveToElement(xPathNodeById(newChildNodeId), 0, 0, () => {
+                  client.pause(500);
+                  client.waitForElementNotVisible(spinny);
+                  client.click(xPathNodeById(newChildNodeId) + nodeRemove);
+              })
+              .pause(1000)
+              .waitForElementNotVisible(spinny)
+              .findThenClick(deleteConfirmation)
+              .waitForElementVisible(xPathLinkById(initialJobNodeId, leafNodeId));
+        });
+
+
+    },
     after: client => {
         client.end();
     }
