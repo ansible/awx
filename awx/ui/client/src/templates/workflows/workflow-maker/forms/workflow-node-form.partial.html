@@ -237,9 +237,9 @@
     <br />
     <div class="buttons Form-buttons" id="workflow_maker_controls">
         <button type="button" class="btn btn-sm Form-primaryButton Form-primaryButton--noMargin" id="workflow_maker_prompt_btn" ng-show="showPromptButton && activeTab == 'jobs' " ng-click="openPromptModal()"> {{:: strings.get('prompt.PROMPT') }}</button>
-        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_btn" ng-show="!readOnly" ng-click="cancel()"> {{:: strings.get('CANCEL') }}</button>
-        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_close_btn" ng-show="readOnly" ng-click="cancel()"> {{:: strings.get('CLOSE') }}</button>
-        <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_btn" ng-show="!readOnly" ng-click="select({selectedTemplate, promptData, edgeType})" ng-disabled="!selectedTemplate || promptModalMissingReqFields || credentialRequiresPassword || selectedTemplateInvalid"> {{:: strings.get('workflow_maker.SELECT') }}</button>
+        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_cancel_node_btn" ng-show="!readOnly" ng-click="cancel()"> {{:: strings.get('CANCEL') }}</button>
+        <button type="button" class="btn btn-sm Form-cancelButton" id="workflow_maker_close_node_btn" ng-show="readOnly" ng-click="cancel()"> {{:: strings.get('CLOSE') }}</button>
+        <button type="button" class="btn btn-sm Form-saveButton" id="workflow_maker_select_node_btn" ng-show="!readOnly" ng-click="select({selectedTemplate, promptData, edgeType})" ng-disabled="!selectedTemplate || promptModalMissingReqFields || credentialRequiresPassword || selectedTemplateInvalid"> {{:: strings.get('workflow_maker.SELECT') }}</button>
     </div>
     <prompt prompt-data="promptData" action-text="{{:: strings.get('prompt.CONFIRM')}}" prevent-creds-with-passwords="preventCredsWithPasswords" read-only-prompts="readOnly"></prompt>
 </div>
