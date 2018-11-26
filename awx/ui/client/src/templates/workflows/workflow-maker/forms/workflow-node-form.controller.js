@@ -223,7 +223,8 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     $scope.nodeFormDataLoaded = true;
                 } else if (
                     _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.unified_job_type') === 'job_template' ||
-                    _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.type') === 'job_template'
+                    _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.type') === 'job_template' ||
+                    _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.type') === 'workflow_job_template'
                 ) {
                     let promises = [jobTemplate.optionsLaunch($scope.nodeConfig.node.fullUnifiedJobTemplateObject.id), jobTemplate.getLaunch($scope.nodeConfig.node.fullUnifiedJobTemplateObject.id)];
 
@@ -274,7 +275,11 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
                             prompts.credentials.value = workflowNodeCredentials.concat(defaultCredsWithoutOverrides);
 
-                            if ((!$scope.nodeConfig.node.fullUnifiedJobTemplateObject.inventory && !launchConf.ask_inventory_on_launch) || !$scope.nodeConfig.node.fullUnifiedJobTemplateObject.project) {
+                            if (
+                                $scope.nodeConfig.node.fullUnifiedJobTemplateObject.type === "job_template" &&
+                                ((!$scope.nodeConfig.node.fullUnifiedJobTemplateObject.inventory && !launchConf.ask_inventory_on_launch) ||
+                                !$scope.nodeConfig.node.fullUnifiedJobTemplateObject.project)
+                            ) {
                                 $scope.selectedTemplateInvalid = true;
                             } else {
                                 $scope.selectedTemplateInvalid = false;
@@ -383,10 +388,6 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 }
 
                 if (_.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject')) {
-                    if (_.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.type') === "job_template") {
-                        $scope.activeTab = "jobs";
-                    }
-
                     $scope.selectedTemplate = $scope.nodeConfig.node.fullUnifiedJobTemplateObject;
 
                     if ($scope.selectedTemplate.unified_job_type) {
@@ -404,6 +405,9 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     } else if ($scope.selectedTemplate.type) {
                         switch ($scope.selectedTemplate.type) {
                             case "job_template":
+                                $scope.activeTab = "jobs";
+                                break;
+                            case "workflow_job_template":
                                 $scope.activeTab = "jobs";
                                 break;
                             case "project":
