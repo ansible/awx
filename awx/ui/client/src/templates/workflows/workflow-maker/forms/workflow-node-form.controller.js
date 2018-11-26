@@ -383,10 +383,6 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                 }
 
                 if (_.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject')) {
-                    if (_.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.type') === "job_template") {
-                        $scope.activeTab = "jobs";
-                    }
-
                     $scope.selectedTemplate = $scope.nodeConfig.node.fullUnifiedJobTemplateObject;
 
                     if ($scope.selectedTemplate.unified_job_type) {
@@ -404,6 +400,9 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                     } else if ($scope.selectedTemplate.type) {
                         switch ($scope.selectedTemplate.type) {
                             case "job_template":
+                                $scope.activeTab = "jobs";
+                                break;
+                            case "workflow_job_template":
                                 $scope.activeTab = "jobs";
                                 break;
                             case "project":
