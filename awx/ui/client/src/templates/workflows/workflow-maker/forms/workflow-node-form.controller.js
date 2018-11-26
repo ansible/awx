@@ -591,7 +591,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             );
 
             $scope.wf_maker_project_queryset = {
-                page_size: '5',
+                page_size: '10',
                 order_by: 'name'
             };
 
@@ -607,7 +607,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             );
 
             $scope.wf_maker_inventory_source_dataset = {
-                page_size: '5',
+                page_size: '10',
                 order_by: 'name',
                 not__source: ''
             };
