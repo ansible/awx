@@ -14,30 +14,43 @@ const workflowSearchBar = "//input[contains(@class, 'SmartSearch-input')]";
 const workflowText = 'name.iexact:"test-actions-workflow-template"';
 const workflowSearchBadgeCount = '//span[contains(@class, "at-Panel-headingTitleBadge") and contains(text(), "1")]';
 
-const rootNode = "//*[@id='node-2']";
-const childNode = "//*[@id='node-3']";
-const newChildNode = "//*[@id='node-5']";
-const leafNode = "//*[@id='node-6']";
-const nodeAdd = "//*[contains(@class, 'nodeAddCross')]";
-const nodeRemove = "//*[contains(@class, 'nodeRemoveCross')]";
+const startNodeId = "1";
+let initialJobNodeId;
+let initialProjectNodeId;
+let initialInventoryNodeId;
+let newChildNodeId;
+let leafNodeId;
+const nodeAdd = "//*[contains(@class, 'WorkflowChart-nodeAddIcon')]";
+const nodeRemove = "//*[contains(@class, 'WorkflowChart-nodeRemoveIcon')]";
 
 // one of the jobs or projects or inventories
-const testActionsProject = "//td[contains(text(), 'test-actions-project')]";
 const testActionsJob = "//td[contains(text(), 'test-actions-job')]";
-const testActionsProjectText = 'name.iexact:"test-actions-project"';
 const testActionsJobText = 'name.iexact:"test-actions-job-template"';
 
 // search bar for visualizer templates
 const jobSearchBar = "//*[contains(@id, 'workflow-jobs-list')]//input[contains(@class, 'SmartSearch-input')]";
-const projectSearchBar = "//*[contains(@id, 'workflow-project-sync-list')]//input[contains(@class, 'SmartSearch-input')]";
 
 // dropdown bar which lets you select edge type
 const edgeTypeDropdownBar = "//span[contains(@id, 'select2-workflow_node_edge-container')]";
 const alwaysDropdown = "//li[contains(@id, 'select2-workflow_node_edge') and text()='Always']";
 const successDropdown = "//li[contains(@id, 'select2-workflow_node_edge') and text()='On Success']";
 const failureDropdown = "//li[contains(@id, 'select2-workflow_node_edge') and text()='On Failure']";
-const selectButton = "//*[@id='workflow_maker_select_btn']";
+const linkEdgeTypeDropdownBar = "//span[contains(@id, 'select2-workflow_link_edge-container')]";
+const linkAlwaysDropdown = "//li[contains(@id, 'select2-workflow_link_edge') and text()='Always']";
+const linkSuccessDropdown = "//li[contains(@id, 'select2-workflow_link_edge') and text()='On Success']";
+const linkFailureDropdown = "//li[contains(@id, 'select2-workflow_link_edge') and text()='On Failure']";
+const nodeSelectButton = "//*[@id='workflow_maker_select_node_btn']";
+const linkSelectButton = "//*[@id='workflow_maker_select_link_btn']";
+const nodeCancelButton = "//*[@id='workflow_maker_cancel_node_btn']";
 const deleteConfirmation = "//button[@ng-click='confirmDeleteNode()']";
+
+const xPathNodeById = (id) => {
+    return `//*[@id='node-${id}']`;
+};
+
+const xPathLinkById = (sourceId, targetId) => {
+    return `//*[@id='link-${sourceId}-${targetId}']//*[contains(@class, 'WorkflowChart-linkPath')]`;
+};
 
 module.exports = {
     before: (client, done) => {
@@ -66,72 +79,66 @@ module.exports = {
             .waitForElementVisible(workflowSearchBadgeCount)
             .waitForElementNotVisible(spinny)
             .findThenClick(workflowSelector)
-            .findThenClick(workflowVisualizerBtn);
+            .findThenClick(workflowVisualizerBtn)
+            .waitForElementVisible('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-job")]/..');
+
+        // Grab the ids of the nodes
+        client.getAttribute('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-job")]/..', 'id', function(res) {
+          initialJobNodeId = res.value.split('-')[1];
+        });
+        client.getAttribute('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-project")]/..', 'id', function(res) {
+          initialProjectNodeId = res.value.split('-')[1];
+        });
+        client.getAttribute('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-inventory")]/..', 'id', function(res) {
+          initialInventoryNodeId = res.value.split('-')[1];
+        });
     },
-    'verify that workflow visualizer root node can only be set to always': client => {
+    'verify that workflow visualizer new root node can only be set to always': client => {
         client
             .useXpath()
-            .findThenClick(rootNode)
-            .clearValue(projectSearchBar)
-            .setValue(projectSearchBar, [testActionsProjectText, client.Keys.ENTER])
-            .pause(1000)
-            .findThenClick(testActionsProject)
+            .findThenClick(xPathNodeById(startNodeId))
+            .waitForElementPresent(edgeTypeDropdownBar)
             .findThenClick(edgeTypeDropdownBar)
             .waitForElementNotPresent(successDropdown)
             .waitForElementNotPresent(failureDropdown)
-            .waitForElementPresent(alwaysDropdown);
-    },
-    'verify that a non-root node can be set to always/success/failure': client => {
-        client
-            .useXpath()
-            .findThenClick(childNode)
-            .pause(1000)
-            .waitForElementNotVisible(spinny)
-            .findThenClick(edgeTypeDropdownBar)
-            .waitForElementPresent(successDropdown)
-            .waitForElementPresent(failureDropdown)
             .waitForElementPresent(alwaysDropdown)
-            .findThenClick(edgeTypeDropdownBar);
+            .click(nodeCancelButton)
+            // Make sure that the animation finishes before moving on to the next test
+            .pause(500);
     },
-    'verify that a sibling node can be any edge type': client => {
+    'verify that a link can be changed': client => {
         client
             .useXpath()
-            .moveToElement(childNode, 0, 0, () => {
+            .moveToElement(xPathLinkById(initialJobNodeId, initialInventoryNodeId), 20, 0, () => {
+                client.waitForElementNotVisible(spinny);
+                client.mouseButtonClick(0);
+            })
+            .waitForElementPresent(linkEdgeTypeDropdownBar)
+            .findThenClick(linkEdgeTypeDropdownBar)
+            .waitForElementPresent(linkSuccessDropdown)
+            .waitForElementPresent(linkFailureDropdown)
+            .waitForElementPresent(linkAlwaysDropdown)
+            .findThenClick(linkSuccessDropdown)
+            .click(linkSelectButton);
+    },
+    'verify that a new sibling node can be any edge type': client => {
+        client
+            .useXpath()
+            .moveToElement(xPathNodeById(initialJobNodeId), 0, 0, () => {
                 client.pause(500);
                 client.waitForElementNotVisible(spinny);
                 // Concatenating the xpaths lets us click the proper node
-                client.click(childNode + nodeAdd);
+                client.click(xPathNodeById(initialJobNodeId) + nodeAdd);
             })
             .pause(1000)
-            .waitForElementNotVisible(spinny)
-            .clearValue(jobSearchBar)
-            .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
-            .pause(1000)
-            .findThenClick(testActionsJob)
-            .pause(1000)
-            .waitForElementNotVisible(spinny)
-            .findThenClick(edgeTypeDropdownBar)
-            .waitForElementPresent(successDropdown)
-            .waitForElementPresent(failureDropdown)
-            .waitForElementPresent(alwaysDropdown)
-            .findThenClick(alwaysDropdown)
-            .click(selectButton);
-    },
-    'Verify node-shifting behavior upon deletion': client => {
+            .waitForElementNotVisible(spinny);
+
+        // Grab the id of the new child node for later
+        client.getAttribute('//*[contains(@class, "WorkflowChart-isNodeBeingAdded")]/..', 'id', function(res) {
+          newChildNodeId = res.value.split('-')[1];
+        });
+
         client
-            .findThenClick(newChildNode)
-            .pause(1000)
-            .waitForElementNotVisible(spinny)
-            .findThenClick(edgeTypeDropdownBar)
-            .findThenClick(successDropdown)
-            .click(selectButton)
-            .moveToElement(newChildNode, 0, 0, () => {
-                client.pause(500);
-                client.waitForElementNotVisible(spinny);
-                client.click(newChildNode + nodeAdd);
-            })
-            .pause(1000)
-            .waitForElementNotVisible(spinny)
             .clearValue(jobSearchBar)
             .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
             .pause(1000)
@@ -143,23 +150,59 @@ module.exports = {
             .waitForElementPresent(failureDropdown)
             .waitForElementPresent(alwaysDropdown)
             .findThenClick(alwaysDropdown)
-            .click(selectButton)
-            .moveToElement(newChildNode, 0, 0, () => {
-                client.pause(500);
-                client.waitForElementNotVisible(spinny);
-                client.click(newChildNode + nodeRemove);
-            })
-            .pause(1000)
-            .waitForElementNotVisible(spinny)
-            .findThenClick(deleteConfirmation)
-            .findThenClick(leafNode)
-            .pause(1000)
-            .waitForElementNotVisible(spinny)
-            .findThenClick(edgeTypeDropdownBar)
-            .waitForElementPresent(successDropdown)
-            .waitForElementPresent(failureDropdown)
-            .waitForElementPresent(alwaysDropdown);
+            .click(nodeSelectButton);
     },
+    // TODO: I'm not sure exactly what this is supposed to test
+    // 'Verify node-shifting behavior upon deletion': client => {
+    //     client
+    //         .findThenClick(xPathNodeById(newChildNodeId))
+    //         .pause(1000)
+    //         .waitForElementNotVisible(spinny)
+    //         .findThenClick(edgeTypeDropdownBar)
+    //         .findThenClick(successDropdown)
+    //         .click(nodeSelectButton)
+    //         .moveToElement(xPathNodeById(newChildNodeId), 0, 0, () => {
+    //             client.pause(500);
+    //             client.waitForElementNotVisible(spinny);
+    //             client.click(newChildNode + nodeAdd);
+    //         })
+    //         .pause(1000)
+    //         .waitForElementNotVisible(spinny);
+    //
+    //     // Grab the id of the new child node for later
+    //     client.getAttribute('//*[contains(@class, "WorkflowChart-isNodeBeingAdded")]/..', 'id', function(res) {
+    //       leafNodeId = res.value.split('-')[1];
+    //     });
+    //
+    //     client
+    //         .clearValue(jobSearchBar)
+    //         .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
+    //         .pause(1000)
+    //         .findThenClick(testActionsJob)
+    //         .pause(1000)
+    //         .waitForElementNotVisible(spinny)
+    //         .findThenClick(edgeTypeDropdownBar)
+    //         .waitForElementPresent(successDropdown)
+    //         .waitForElementPresent(failureDropdown)
+    //         .waitForElementPresent(alwaysDropdown)
+    //         .findThenClick(alwaysDropdown)
+    //         .click(nodeSelectButton)
+    //         .moveToElement(xPathNodeById(newChildNodeId), 0, 0, () => {
+    //             client.pause(500);
+    //             client.waitForElementNotVisible(spinny);
+    //             client.click(newChildNode + nodeRemove);
+    //         })
+    //         .pause(1000)
+    //         .waitForElementNotVisible(spinny)
+    //         .findThenClick(deleteConfirmation)
+    //         .findThenClick(leafNode)
+    //         .pause(1000)
+    //         .waitForElementNotVisible(spinny)
+    //         .findThenClick(edgeTypeDropdownBar)
+    //         .waitForElementPresent(successDropdown)
+    //         .waitForElementPresent(failureDropdown)
+    //         .waitForElementPresent(alwaysDropdown);
+    // },
     after: client => {
         client.end();
     }
