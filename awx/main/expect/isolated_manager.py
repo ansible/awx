@@ -101,6 +101,8 @@ class IsolatedManager(object):
         ]
         if extra_vars:
             args.extend(['-e', json.dumps(extra_vars)])
+        if settings.AWX_ISOLATED_VERBOSITY:
+            args.append('-%s' % ('v' * min(5, settings.AWX_ISOLATED_VERBOSITY)))
         return args
 
     @staticmethod
@@ -420,16 +422,18 @@ class IsolatedManager(object):
                 idle_timeout=timeout, job_timeout=timeout,
                 pexpect_timeout=5
             )
+            heartbeat_stdout = buff.getvalue().encode('utf-8')
+            buff.close()
 
             for instance in instance_qs:
-                output = buff.getvalue()
+                output = heartbeat_stdout
+                task_result = {}
                 try:
                     with open(os.path.join(facts_path, instance.hostname), 'r') as facts_data:
                         output = facts_data.read()
                     task_result = json.loads(output)
                 except Exception:
                     logger.exception('Failed to read status from isolated instances, output:\n {}'.format(output))
-                    return
                 if 'awx_capacity_cpu' in task_result and 'awx_capacity_mem' in task_result:
                     task_result = {
                         'capacity_cpu': task_result['awx_capacity_cpu'],

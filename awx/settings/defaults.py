@@ -430,6 +430,9 @@ AWX_ISOLATED_CONNECTION_TIMEOUT = 10
 # The time (in seconds) between the periodic isolated heartbeat status check
 AWX_ISOLATED_PERIODIC_CHECK = 600
 
+# Verbosity level for isolated node management tasks
+AWX_ISOLATED_VERBOSITY = 0
+
 # Memcached django cache configuration
 # CACHES = {
 #     'default': {
