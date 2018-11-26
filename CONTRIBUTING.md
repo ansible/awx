@@ -34,11 +34,11 @@ Have questions about this document or anything not covered here? Come chat with 
 ## Things to know prior to submitting code
 
 - All code submissions are done through pull requests against the `devel` branch.
-- You must use `git commit --signoff` for any commit to be merged, and agree that usage of --signoff constitutes agreement with the terms of [DCO 1.1](./DCO_1_1.md).  
+- You must use `git commit --signoff` for any commit to be merged, and agree that usage of --signoff constitutes agreement with the terms of [DCO 1.1](./DCO_1_1.md).
 - Take care to make sure no merge commits are in the submission, and use `git rebase` vs `git merge` for this reason.
   - If collaborating with someone else on the same branch, consider using `--force-with-lease` instead of `--force`. This will prevent you from accidentally overwriting commits pushed by someone else. For more information, see https://git-scm.com/docs/git-push#git-push---force-with-leaseltrefnamegt
 - If submitting a large code change, it's a good idea to join the `#ansible-awx` channel on irc.freenode.net, and talk about what you would like to do or add first. This not only helps everyone know what's going on, it also helps save time and effort, if the community decides some changes are needed.
-- We ask all of our community members and contributors to adhere to the [Ansible code of conduct](http://docs.ansible.com/ansible/latest/community/code_of_conduct.html). If you have questions, or need assistance, please reach out to our community team at [codeofconduct@ansible.com](mailto:codeofconduct@ansible.com)   
+- We ask all of our community members and contributors to adhere to the [Ansible code of conduct](http://docs.ansible.com/ansible/latest/community/code_of_conduct.html). If you have questions, or need assistance, please reach out to our community team at [codeofconduct@ansible.com](mailto:codeofconduct@ansible.com)
 
 ## Setting up your development environment
 
@@ -50,7 +50,7 @@ The AWX development environment workflow and toolchain is based on Docker, and t
 
 Prior to starting the development services, you'll need `docker` and `docker-compose`. On Linux, you can generally find these in your distro's packaging, but you may find that Docker themselves maintain a separate repo that tracks more closely to the latest releases.
 
-For macOS and Windows, we recommend [Docker for Mac](https://www.docker.com/docker-mac) and [Docker for Windows](https://www.docker.com/docker-windows) 
+For macOS and Windows, we recommend [Docker for Mac](https://www.docker.com/docker-mac) and [Docker for Windows](https://www.docker.com/docker-windows)
 respectively.
 
 For Linux platforms, refer to the following from Docker:
@@ -138,21 +138,21 @@ Run the following to build the AWX UI:
 ```
 ### Running the environment
 
-#### Start the containers 
+#### Start the containers
 
 Start the development containers by running the following:
 
 ```bash
 (host)$ make docker-compose
 ```
-    
+
 The above utilizes the image built in the previous step, and will automatically start all required services and dependent containers. Once the containers launch, your session will be attached to the *awx* container, and you'll be able to watch log messages and events in real time. You will see messages from Django and the front end build process.
 
 If you start a second terminal session, you can take a look at the running containers using the `docker ps` command. For example:
 
 ```bash
 # List running containers
-(host)$ docker ps 
+(host)$ docker ps
 
 $ docker ps
 CONTAINER ID        IMAGE                                              COMMAND                  CREATED             STATUS              PORTS                                                                                                                                      NAMES
@@ -220,7 +220,7 @@ If you want to start and use the development environment, you'll first need to b
 ```
 
 The above will do all the setup tasks, including running database migrations, so it may take a couple minutes.
-    
+
 Now you can start each service individually, or start all services in a pre-configured tmux session like so:
 
 ```bash
@@ -249,9 +249,9 @@ Before you can log into AWX, you need to create an admin user. With this user yo
 (container)# awx-manage createsuperuser
 ```
 You will be prompted for a username, an email address, and a password, and you will be asked to confirm the password. The email address is not important, so just enter something that looks like an email address. Remember the username and password, as you will use them to log into the web interface for the first time.
-    
+
 ##### Load demo data
-  
+
 You can optionally load some demo data. This will create a demo project, inventory, and job template. From within the container shell, run the following to load the data:
 
 ```bash
@@ -277,7 +277,7 @@ in OpenAPI format.  A variety of online tools are available for translating
 this data into more consumable formats (such as HTML). http://editor.swagger.io
 is an example of one such service.
 
-### Accessing the AWX web interface 
+### Accessing the AWX web interface
 
 You can now log into the AWX web interface at [https://localhost:8043](https://localhost:8043), and access the API directly at [https://localhost:8043/api/](https://localhost:8043/api/).
 
@@ -290,7 +290,7 @@ When necessary, remove any AWX containers and images by running the following:
 ```bash
 (host)$ make docker-clean
 ```
-        
+
 ## What should I work on?
 
 For feature work, take a look at the current [Enhancements](https://github.com/ansible/awx/issues?q=is%3Aissue+is%3Aopen+label%3Atype%3Aenhancement).
