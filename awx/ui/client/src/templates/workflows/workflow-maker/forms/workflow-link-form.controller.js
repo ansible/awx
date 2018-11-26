@@ -29,7 +29,7 @@ export default ['$scope', 'TemplatesStrings', 'CreateSelect2',
                     value: $scope.linkConfig.edgeType
                 };
                 CreateSelect2({
-                    element: '#workflow_node_edge_2',
+                    element: '#workflow_link_edge',
                     multiple: false
                 });
             }
