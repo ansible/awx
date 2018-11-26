@@ -322,9 +322,6 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                     baseSvg.selectAll(".WorkflowChart-linkPath")
                         .transition()
-                        .attr("class", function(d) {
-                            return (d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded) ? "WorkflowChart-linkPath WorkflowChart-isNodeBeingAdded" : "WorkflowChart-linkPath";
-                        })
                         .attr("d", lineData)
                         .attr('stroke', function(d) {
                             let edgeType = d.edgeType;
@@ -477,9 +474,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
 
                     // Add entering links in the parent’s old position.
                     linkEnter.insert("path", "g")
-                         .attr("class", function(d) {
-                             return (d.source.id === scope.graphState.nodeBeingAdded || d.target.id === scope.graphState.nodeBeingAdded) ? "WorkflowChart-linkPath WorkflowChart-isNodeBeingAdded" : "WorkflowChart-linkPath";
-                         })
+                         .attr("class", "WorkflowChart-linkPath")
                          .attr("d", lineData)
                          .call(edit_link)
                          .on("mouseenter", function(d) {
