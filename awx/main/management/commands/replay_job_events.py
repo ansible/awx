@@ -32,7 +32,10 @@ class JobStatusLifeCycle():
         # {"status": "successful", "project_id": 13, "unified_job_id": 659, "group_name": "jobs"}
         job.websocket_emit_status(status)
 
-    def determine_job_event_finish_status_index(self, job_event_count, random_seed=7):
+    def determine_job_event_finish_status_index(self, job_event_count, random_seed):
+        if random_seed == 0:
+            return job_event_count - 1
+
         random.seed(random_seed)
         job_event_index = random.randint(0, job_event_count - 1)
         return job_event_index
@@ -108,7 +111,7 @@ class ReplayJobEvents(JobStatusLifeCycle):
             raise RuntimeError("Job is of type {} and replay is not yet supported.".format(type(job)))
             sys.exit(1)
 
-    def run(self, job_id, speed=1.0, verbosity=0, skip_range=[], random_seed=7):
+    def run(self, job_id, speed=1.0, verbosity=0, skip_range=[], random_seed=0, final_status_delay=0, debug=False):
         stats = {
             'events_ontime': {
                 'total': 0,
@@ -138,9 +141,6 @@ class ReplayJobEvents(JobStatusLifeCycle):
             print("{}".format(e.message))
             sys.exit(1)
 
-        if random_seed == -1:
-            random_seed = 7
-
         je_previous = None
 
         self.emit_job_status(job, 'pending')
@@ -153,8 +153,8 @@ class ReplayJobEvents(JobStatusLifeCycle):
             if je_current.counter in skip_range:
                 continue
 
-            if n == finish_status_index:
-                self.emit_job_status(job, job.status)
+            if debug:
+                raw_input("{} of {}:".format(n, job_event_count))
 
             if not je_previous:
                 stats['recording_start'] = je_current.created
@@ -192,6 +192,10 @@ class ReplayJobEvents(JobStatusLifeCycle):
 
             stats['events_total'] += 1
             je_previous = je_current
+
+            if n == finish_status_index:
+                self.sleep(final_status_delay)
+                self.emit_job_status(job, job.status)
 
         if stats['events_total'] > 2:
             stats['replay_end'] = self.now()
@@ -232,19 +236,26 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--job_id', dest='job_id', type=int, metavar='j',
                             help='Id of the job to replay (job or adhoc)')
-        parser.add_argument('--speed', dest='speed', type=int, metavar='s',
+        parser.add_argument('--speed', dest='speed', type=float, metavar='s',
                             help='Speedup factor.')
         parser.add_argument('--skip-range', dest='skip_range', type=str, metavar='k',
                             default='0:-1:1', help='Range of events to skip')
         parser.add_argument('--random-seed', dest='random_seed', type=int, metavar='r',
-                            default=7, help='Seed to use for random number generation')
+                            default=0, help='Random number generator seed to use when determining job_event index to emit final job status')
+        parser.add_argument('--final-status-delay', dest='final_status_delay', type=float, metavar='f',
+                            default=0, help='Delay between event and final status emit')
+        parser.add_argument('--debug', dest='debug', type=bool, metavar='d',
+                            default=False, help='Enable step mode to control emission of job events one at a time.')
 
     def handle(self, *args, **options):
         job_id = options.get('job_id')
         speed = options.get('speed') or 1
         verbosity = options.get('verbosity') or 0
         random_seed = options.get('random_seed')
+        final_status_delay = options.get('final_status_delay')
+        debug = options.get('debug')
         skip = self._parse_slice_range(options.get('skip_range'))
 
         replayer = ReplayJobEvents()
-        replayer.run(job_id, speed=speed, verbosity=verbosity, skip_range=skip, random_seed=random_seed)
+        replayer.run(job_id, speed=speed, verbosity=verbosity, skip_range=skip, random_seed=random_seed,
+                     final_status_delay=final_status_delay, debug=debug)
