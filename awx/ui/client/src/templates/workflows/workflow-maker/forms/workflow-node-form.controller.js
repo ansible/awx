@@ -115,6 +115,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
         };
 
         const finishConfiguringAdd = () => {
+            $scope.selectedTemplate = null;
             $scope.activeTab = "jobs";
             const alwaysOption = {
                 label: $scope.strings.get('workflow_maker.ALWAYS'),
@@ -660,36 +661,6 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
 
         $scope.toggle_row = (selectedRow) => {
             if (!$scope.readOnly) {
-                switch($scope.activeTab) {
-                    case 'jobs':
-                        $scope.wf_maker_templates.forEach((row, i) => {
-                            if (row.id === selectedRow.id) {
-                                $scope.wf_maker_templates[i].checked = 1;
-
-                            } else {
-                                $scope.wf_maker_templates[i].checked = 0;
-                            }
-                        });
-                        break;
-                    case 'project_syncs':
-                        $scope.wf_maker_projects.forEach((row, i) => {
-                            if (row.id === selectedRow.id) {
-                                $scope.wf_maker_projects[i].checked = 1;
-                            } else {
-                                $scope.wf_maker_projects[i].checked = 0;
-                            }
-                        });
-                        break;
-                    case 'inventory_syncs':
-                        $scope.wf_maker_inventory_sources.forEach((row, i) => {
-                            if (row.id === selectedRow.id) {
-                                $scope.wf_maker_inventory_sources[i].checked = 1;
-                            } else {
-                                $scope.wf_maker_inventory_sources[i].checked = 0;
-                            }
-                        });
-                        break;
-                }
                 templateManuallySelected(selectedRow);
             }
         };
@@ -700,7 +671,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
             }
         });
 
-        $scope.$watchGroup(['wf_maker_templates', 'wf_maker_projects', 'wf_maker_inventory_sources', 'activeTab'], () => {
+        $scope.$watchGroup(['wf_maker_templates', 'wf_maker_projects', 'wf_maker_inventory_sources', 'activeTab', 'selectedTemplate.id'], () => {
             const unifiedJobTemplateId = _.get($scope, 'selectedTemplate.id') || null;
             switch($scope.activeTab) {
                 case 'jobs':
