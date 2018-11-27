@@ -291,7 +291,7 @@
                         <div class="WorkflowResults-badgeRow">
                             <!-- PLAYS COUNT -->
                             <div class="WorkflowResults-badgeTitle">
-                                {{ strings.results.TOTAL_JOBS }}
+                                {{ strings.results.TOTAL_NODES }}
                             </div>
                             <span class="badge List-titleBadge">
                                 {{ workflow_nodes.length || 0}}
@@ -363,7 +363,14 @@
                         </div>
                     </div>
                 </div>
-                <workflow-chart tree-data="treeData.data" workflow-zoomed="workflowZoomed(zoom)" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="details" class="WorkflowMaker-chart"></workflow-chart>
+                <workflow-chart
+                    graph-state="graphState"
+                    workflow-zoomed="workflowZoomed(zoom)"
+                    can-add-workflow-job-template="canAddWorkflowJobTemplate"
+                    mode="details"
+                    read-only="readOnly"
+                    class="WorkflowMaker-chart">
+                </workflow-chart>
             </div>
 
         </div>

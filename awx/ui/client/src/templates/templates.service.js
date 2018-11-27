@@ -133,10 +133,10 @@ export default ['Rest', 'GetBasePath', '$q', 'NextPage', function(Rest, GetBaseP
       getWorkflowJobTemplateNodes: function(id, page) {
           var url = GetBasePath('workflow_job_templates');
 
-          url = url + id + '/workflow_nodes';
+          url = url + id + '/workflow_nodes?page_size=200';
 
           if(page) {
-              url += '/?page=' + page;
+              url += '/&page=' + page;
           }
 
           Rest.setUrl(url);

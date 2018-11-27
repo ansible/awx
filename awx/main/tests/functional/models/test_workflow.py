@@ -3,11 +3,17 @@
 import pytest
 
 # AWX
-from awx.main.models.workflow import WorkflowJob, WorkflowJobNode, WorkflowJobTemplateNode, WorkflowJobTemplate
+from awx.main.models.workflow import (
+    WorkflowJob,
+    WorkflowJobNode,
+    WorkflowJobTemplateNode,
+    WorkflowJobTemplate,
+)
 from awx.main.models.jobs import JobTemplate, Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.api.versioning import reverse
+from awx.api.views import WorkflowJobTemplateNodeSuccessNodesList
 
 # Django
 from django.test import TransactionTestCase
@@ -58,46 +64,100 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
     def test_workflow_done(self):
         wfj = self.workflow_job(states=['failed', None, None, 'successful', None])
         dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
+        assert 3 == len(dag.mark_dnr_nodes())
+        is_done = dag.is_workflow_done()
+        has_failed, reason = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertFalse(has_failed)
+        assert reason is None
 
         # verify that relaunched WFJ fails if a JT leaf is deleted
         for jt in JobTemplate.objects.all():
             jt.delete()
         relaunched = wfj.create_relaunch_workflow_job()
         dag = WorkflowDAG(workflow_job=relaunched)
-        is_done, has_failed = dag.is_workflow_done()
+        dag.mark_dnr_nodes()
+        is_done = dag.is_workflow_done()
+        has_failed, reason = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertTrue(has_failed)
-
-    def test_workflow_fails_for_unfinished_node(self):
-        wfj = self.workflow_job(states=['error', None, None, None, None])
-        dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
-        self.assertTrue(is_done)
-        self.assertTrue(has_failed)
+        assert "Workflow job node {} related unified job template missing".format(wfj.workflow_nodes.all()[0].id)
 
     def test_workflow_fails_for_no_error_handler(self):
         wfj = self.workflow_job(states=['successful', 'failed', None, None, None])
         dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
+        dag.mark_dnr_nodes()
+        is_done = dag.is_workflow_done()
+        has_failed = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertTrue(has_failed)
 
     def test_workflow_fails_leaf(self):
         wfj = self.workflow_job(states=['successful', 'successful', 'failed', None, None])
         dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
+        dag.mark_dnr_nodes()
+        is_done = dag.is_workflow_done()
+        has_failed = dag.has_workflow_failed()
         self.assertTrue(is_done)
         self.assertTrue(has_failed)
 
     def test_workflow_not_finished(self):
         wfj = self.workflow_job(states=['new', None, None, None, None])
         dag = WorkflowDAG(workflow_job=wfj)
-        is_done, has_failed = dag.is_workflow_done()
+        dag.mark_dnr_nodes()
+        is_done = dag.is_workflow_done()
+        has_failed, reason = dag.has_workflow_failed()
         self.assertFalse(is_done)
         self.assertFalse(has_failed)
+        assert reason is None
+
+
+@pytest.mark.django_db
+class TestWorkflowDNR():
+    @pytest.fixture
+    def workflow_job_fn(self):
+        def fn(states=['new', 'new', 'new', 'new', 'new', 'new']):
+            r"""
+            Workflow topology:
+                   node[0]
+                    /   |
+                  s     f
+                  /     |
+               node[1] node[3]
+                 /      |
+                s       f
+               /        |
+            node[2]    node[4]
+               \        |
+                s       f
+                 \      |
+                  node[5]
+            """
+            wfj = WorkflowJob.objects.create()
+            jt = JobTemplate.objects.create(name='test-jt')
+            nodes = [WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=jt) for i in range(0, 6)]
+            for node, state in zip(nodes, states):
+                if state:
+                    node.job = jt.create_job()
+                    node.job.status = state
+                    node.job.save()
+                    node.save()
+            nodes[0].success_nodes.add(nodes[1])
+            nodes[1].success_nodes.add(nodes[2])
+            nodes[0].failure_nodes.add(nodes[3])
+            nodes[3].failure_nodes.add(nodes[4])
+            nodes[2].success_nodes.add(nodes[5])
+            nodes[4].failure_nodes.add(nodes[5])
+            return wfj, nodes
+        return fn
+
+    def test_workflow_dnr_because_parent(self, workflow_job_fn):
+        wfj, nodes = workflow_job_fn(states=['successful', None, None, None, None, None,])
+        dag = WorkflowDAG(workflow_job=wfj)
+        workflow_nodes = dag.mark_dnr_nodes()
+        assert 2 == len(workflow_nodes)
+        assert nodes[3] in workflow_nodes
+        assert nodes[4] in workflow_nodes
 
 
 @pytest.mark.django_db
@@ -186,18 +246,12 @@ class TestWorkflowJobTemplate:
         assert parent_qs[0] == wfjt.workflow_job_template_nodes.all()[1]
 
     def test_topology_validator(self, wfjt):
-        from awx.api.views import WorkflowJobTemplateNodeChildrenBaseList
-        test_view = WorkflowJobTemplateNodeChildrenBaseList()
+        test_view = WorkflowJobTemplateNodeSuccessNodesList()
         nodes = wfjt.workflow_job_template_nodes.all()
-        node_assoc = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt)
-        nodes[2].always_nodes.add(node_assoc)
         # test cycle validation
-        assert test_view.is_valid_relation(node_assoc, nodes[0]) == {'Error': 'Cycle detected.'}
-        # test multi-ancestor validation
-        assert test_view.is_valid_relation(node_assoc, nodes[1]) == {'Error': 'Multiple parent relationship not allowed.'}
-        # test mutex validation
-        test_view.relationship = 'failure_nodes'
-        
+        print(nodes[0].success_nodes.get(id=nodes[1].id).failure_nodes.get(id=nodes[2].id))
+        assert test_view.is_valid_relation(nodes[2], nodes[0]) == {'Error': 'Cycle detected.'}
+
     def test_always_success_failure_creation(self, wfjt, admin, get):
         wfjt_node = wfjt.workflow_job_template_nodes.all()[1]
         node = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt)

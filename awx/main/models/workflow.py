@@ -82,7 +82,7 @@ class WorkflowNodeBase(CreatedModifiedModel, LaunchTimeConfig):
         success_parents = getattr(self, '%ss_success' % self.__class__.__name__.lower()).all()
         failure_parents = getattr(self, '%ss_failure' % self.__class__.__name__.lower()).all()
         always_parents = getattr(self, '%ss_always' % self.__class__.__name__.lower()).all()
-        return success_parents | failure_parents | always_parents
+        return (success_parents | failure_parents | always_parents).order_by('id')
 
     @classmethod
     def _get_workflow_job_field_names(cls):
@@ -183,6 +183,12 @@ class WorkflowJobNode(WorkflowNodeBase):
         blank=True,
         default={},
         editable=False,
+    )
+    do_not_run = models.BooleanField(
+        default=False,
+        help_text=_("Indidcates that a job will not be created when True. Workflow runtime "
+                    "semantics will mark this True if the node is in a path that will "
+                    "decidedly not be ran. A value of False means the node may not run."),
     )
 
     def get_absolute_url(self, request=None):

@@ -1,10 +1,15 @@
 export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
     'jobLabels', 'workflowNodes', '$scope', 'ParseTypeChange',
-    'ParseVariableString', 'WorkflowService', 'count', '$state', 'i18n',
-    'moment', '$filter', function(workflowData, workflowResultsService,
+    'ParseVariableString', 'count', '$state', 'i18n', 'WorkflowChartService', '$filter',
+    'moment', function(workflowData, workflowResultsService,
     workflowDataOptions, jobLabels, workflowNodes, $scope, ParseTypeChange,
-    ParseVariableString, WorkflowService, count, $state, i18n, moment, $filter) {
+    ParseVariableString, count, $state, i18n, WorkflowChartService, $filter,
+    moment) {
+        let nodeRef;
         var runTimeElapsedTimer = null;
+
+        $scope.toggleKey = () => $scope.showKey = !$scope.showKey;
+        $scope.keyClassList = `{ 'Key-menuIcon--active': showKey }`;
 
         var getLinks = function() {
             var getLink = function(key) {
@@ -73,7 +78,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     SHOW_MORE: i18n._('Show More'),
                 },
                 results: {
-                    TOTAL_JOBS: i18n._('Total Jobs'),
+                    TOTAL_NODES: i18n._('Total Nodes'),
                     ELAPSED: i18n._('Elapsed'),
                 },
                 legend: {
@@ -113,11 +118,8 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.workflow_nodes = workflowNodes;
             $scope.workflowOptions = workflowDataOptions.actions.GET;
             $scope.labels = jobLabels;
-            $scope.count = count.val;
             $scope.showManualControls = false;
-            $scope.showKey = false;
-            $scope.toggleKey = () => $scope.showKey = !$scope.showKey;
-            $scope.keyClassList = `{ 'Key-menuIcon--active': showKey }`;
+            $scope.readOnly = true;
 
             // Start elapsed time updater for job known to be running
             if ($scope.workflow.started !== null && $scope.workflow.status === 'running') {
@@ -167,25 +169,15 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.varsTooltip= i18n._('Read only view of extra variables added to the workflow.');
             $scope.varsLabel = i18n._('Extra Variables');
 
-
             // Click binding for the expand/collapse button on the standard out log
             $scope.stdoutFullScreen = false;
 
-            WorkflowService.buildTree({
-                workflowNodes: workflowNodes
-            }).then(function(data){
-                $scope.treeData = data;
+            let arrayOfLinksForChart = [];
+            let arrayOfNodesForChart = [];
 
-                // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
-                // this treeData object and removing the children object for some reason (?)
-                // This happens on occasion and I think is a race condition (?)
-                if(!$scope.treeData.data.children) {
-                    $scope.treeData.data.children = [];
-                }
+            ({arrayOfNodesForChart, arrayOfLinksForChart, nodeRef} = WorkflowChartService.generateArraysOfNodesAndLinks(workflowNodes));
 
-                $scope.canAddWorkflowJobTemplate = false;
-            });
-
+            $scope.graphState = { arrayOfNodesForChart, arrayOfLinksForChart };
         }
 
         $scope.toggleStdoutFullscreen = function() {
@@ -285,23 +277,16 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
                     }
 
-                    WorkflowService.updateStatusOfNode({
-                        treeData: $scope.treeData,
-                        nodeId: data.workflow_node_id,
-                        status: data.status,
-                        unified_job_id: data.unified_job_id
-                    });
-
-                    $scope.workflow_nodes.forEach(node => {
-                        if(parseInt(node.id) === parseInt(data.workflow_node_id)){
-                            node.summary_fields.job = {
-                                    status: data.status
+                    $scope.graphState.arrayOfNodesForChart.forEach((node) => {
+                        if (nodeRef[node.id] && nodeRef[node.id].originalNodeObject.id === data.workflow_node_id) {
+                            node.job = {
+                                id: data.unified_job_id,
+                                status: data.status,
+                                type: nodeRef[node.id].unifiedJobTemplate.unified_job_type
                             };
                         }
                     });
 
-                    $scope.count = workflowResultsService
-                        .getCounts($scope.workflow_nodes);
                     $scope.$broadcast("refreshWorkflowChart");
             }
             getLabelsAndTooltips();

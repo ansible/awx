@@ -54,12 +54,8 @@ In the event that spawning the workflow would result in recursion, the child wor
 will be marked as failed with a message explaining that recursion was detected.
 This is to prevent saturation of the task system with an infinite chain of workflows.
 
-### Tree-Graph Formation and Restrictions
-The tree-graph structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. However there are restrictions that must be enforced when setting up new connections. Here are the three restrictions that will raise validation error when break:
-* Cycle restriction: According to tree definition, no cycle is allowed.
-* Convergent restriction: Different paths should not come into the same node, in other words, a node cannot have multiple parents.
-
-> Note: A node can now have all three types of child nodes.
+### DAG Formation and Restrictions
+The DAG structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. There is one restriction that is enforced when setting up new connections and that is the cycle restriction, since it's a DAG.
 
 ### Workflow Run Details
 A typical workflow run starts by either POSTing to endpoint `/workflow_job_templates/\d+/launch/`, or being triggered automatically by related schedule. At the very first, the workflow job template creates workflow job, and all related workflow job template nodes create workflow job nodes. Right after that, all root nodes are populated with corresponding job resources and start running. If nothing goes wrong, each decision tree will follow its own route to completion. The entire workflow finishes running when all its decision trees complete.
@@ -68,7 +64,7 @@ As stated, workflow job templates can be created with populated `extra_vars`. Th
 
 Job resources spawned by workflow jobs are needed by workflow to run correctly. Therefore deletion of spawned job resources is blocked while the underlying workflow job is executing.
 
-Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors, all branches starting from that job will stop executing while the rest continue executing. Canceling a workflow spawned job resource follows the same rules. If the unified job template of the node is null (which could be a result of deleting the unified job template or copying a workflow when the user lacks necessary permissions to use the resource), then the branch should stop executing in this case as well.
+Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors or is canceled, it is treated the same as failure. If the unified job template of the node is null (which could be a result of deleting the unified job template or copying a workflow when the user lacks necessary permissions to use the resource), then the node will be treated as 'failed' and the failure paths will continue to execute.
 
 A workflow job itself can also be canceled. In this case all its spawned job resources will be canceled if cancelable and following paths stop executing.
 
@@ -84,9 +80,7 @@ Workflow job summary:
 
 Starting from Tower 3.2, Workflow jobs support simultaneous job runs just like that of ordinary jobs. It is controlled by `allow_simultaneous` field of underlying workflow job template. By default, simultaneous workflow job runs are disabled and users should be prudent in enabling this functionality. Because the performance boost of simultaneous workflow runs will only manifest when a large portion of jobs contained by a workflow allow simultaneous runs. Otherwise it is expected to have some long-running workflow jobs since its spawned jobs can be in pending state for a long time.
 
-Before Tower 3.3, the 'failed' status of workflow job is not defined. Starting from 3.3 we define a finished workflow job to fail, if at least one of the conditions below satisfies:
-* At least one node runs into states `canceled` or `error`.
-* At least one leaf node runs into states `failed`, but no child node is spawned to run (no error handler).
+A workflow job is marked as failed if a job spawned by a workflow job fails, without a failure handler. A failure handler is a failure or always link in the workflow job template. A job that is canceled is, effectively, considered a failure for purposes of determining if a job nodes is failed.
 
 ### Workflow Copy and Relaunch
 Other than the normal way of creating workflow job templates, it is also possible to copy existing workflow job templates. The resulting new workflow job template will be mostly identical to the original, except for `name` field which will be appended a text to indicate it's a copy.
@@ -97,6 +91,33 @@ Workflow jobs cannot be copied directly, instead a workflow job is implicitly co
 
 ### Artifacts
 Artifact support starts in Ansible and is carried through in Tower. The `set_stats` module is invoked by users, in a playbook, to register facts. Facts are passed in via `data:` argument. Note that the default `set_stats` parameters are the correct ones to work with Tower (i.e. `per_host: no`). Now that facts are registered, we will describe how facts are used. In Ansible, registered facts are "returned" to the callback plugin(s) via the `playbook_on_stats` event. Ansible users can configure whether or not they want the facts displayed through the global `show_custom_stats` configuration. Note that the `show_custom_stats` does not effect the artifacting feature of Tower. This only controls the displaying of `set_stats` fact data in Ansible output (also the output in Ansible playbooks ran in Tower). Tower uses a custom callback plugin that gathers the fact data set via `set_stats` in the `playbook_on_stats` handler and "ships" it back to Tower, saves it in the database, and makes it available on the job endpoint via the variable `artifacts`. The semantics and usage of `artifacts` throughout a workflow is described elsewhere in this document.
+
+### Workflow Run Example
+To best understand the nuances of workflow run logic we will look at an example workflow run as it progresses through the 'running' state. In the workflow examples below nodes are labeled `<do_not_run, job_status, node_id>` where `do_not_run` can be `RUN` or `DNR` where `DNR` means 'do not run the node' and `RUN` which means will run the node. Nodes start out with `do_not_run = False` depicted as `RUN` in the pictures below. When nodes are known to not run they will be marked `DNR` and the state will not change. `job_status` is the job's status associated with the node. `node_id` is the unique id for the workflow job node.
+
+<p align="center">
+    <img src="img/workflow_step0.png">
+    Workflow before running has started.
+</p>
+<p align="center">
+    <img src="img/workflow_step1.png">
+    Root nodes are selected to run. A root node is a node with no incoming nodes. Node 0 is selected to run and results in a status of 'successful'. Nodes 1, 4, and 5 are marked 'DNR' because they are in the failure path. Node 6 is not marked 'DNR' because nodes 2 and 3 may run and result and node 6 running. The same reasoning is why nodes 7, 8, 9 are not marked 'DNR'.
+</p>
+<p align="center">
+    <img src="img/workflow_step2.png">
+    Nodes 2 and 3 are selected to run and their job results are both 'successful'. Node 6 is not marked 'DNR' because node 3 will trigger node 6.
+</p>
+<p align="center">
+    <img src="img/workflow_step3.png">
+    Node 6 is selected to run and the job results in 'failed'. Node 8 is marked 'DNR' because of the success path. Nodes 7 and 8 will be ran in the next cycle.
+</p>
+<p align="center">
+    <img src="img/workflow_step4.png">
+    Node 7 and 8 are selected to run and their job results are both 'successful'.
+</p>
+
+The resulting state of the workflow job run above would be 'successful'. Although individual nodes fail, the overall workflow job status is 'successful' because all individual node failures have error handling paths ('failed_nodes' or 'always_nodes').
+
 
 ## Test Coverage
 ### CRUD-related
@@ -113,7 +134,7 @@ Artifact support starts in Ansible and is carried through in Tower. The `set_sta
 * Verify that workflow job template nodes can be created under, or (dis)associated with workflow job templates.
 * Verify that the permitted types of job template types can be associated with a workflow job template node. Currently the permitted types are *job templates, inventory sources, projects, and workflow job templates*.
 * Verify that workflow job template nodes under the same workflow job template can be associated to form parent-child relationship of decision trees. In specific, one node takes another as its child node by POSTing another node's id to one of the three endpoints: `/success_nodes/`, `/failure_nodes/` and `/always_nodes/`.
-* Verify that workflow job template nodes are not allowed to have invalid association. Any attempt that causes invalidity will trigger 400-level response. The three types of invalid associations are cycle, convergence(multiple parent).
+* Verify that workflow job template nodes are not allowed to have invalid association. Any attempt that causes invalidity will trigger 400-level response (i.e. cycles).
 * Verify that a workflow job template can be successfully copied and the created workflow job template does not miss any field that should be copied or intentionally modified.
 * Verify that if a user has no access to any of the related resources of a workflow job template node, that node will not be copied and will have `null` as placeholder.
 * Verify that `artifacts` is populated when `set_stats` is used in Ansible >= v2.2.1.0-0.3.rc3.

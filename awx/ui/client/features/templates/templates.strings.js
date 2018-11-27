@@ -105,12 +105,14 @@ function TemplatesStrings (BaseString) {
         INVENTORY_SYNC: t.s('Inventory Sync'),
         WORKFLOW: t.s('Workflow'),
         WARNING: t.s('Warning'),
-        TOTAL_TEMPLATES: t.s('TOTAL TEMPLATES'),
+        TOTAL_NODES: t.s('TOTAL NODES'),
         ADD_A_TEMPLATE: t.s('ADD A TEMPLATE'),
         EDIT_TEMPLATE: t.s('EDIT TEMPLATE'),
         JOBS: t.s('JOBS'),
         PLEASE_CLICK_THE_START_BUTTON: t.s('Please click the start button to build your workflow.'),
         PLEASE_HOVER_OVER_A_TEMPLATE: t.s('Please hover over a template for additional options.'),
+        EDIT_LINK_TOOLTIP: t.s('Click to edit link'),
+        VIEW_LINK_TOOLTIP: t.s('Click to view link'),
         RUN: t.s('RUN'),
         CHECK: t.s('CHECK'),
         SELECT: t.s('SELECT'),
@@ -122,7 +124,14 @@ function TemplatesStrings (BaseString) {
         INVENTORY_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden by the parent workflow inventory.'),
         INVENTORY_PROMPT_WILL_OVERRIDE: t.s('The inventory of this node will be overridden if a parent workflow inventory is provided at launch.'),
         INVENTORY_PROMPT_WILL_NOT_OVERRIDE: t.s('The inventory of this node will not be overridden if a parent workflow inventory is provided at launch.'),
-    }
+        ADD_LINK: t.s('ADD LINK'),
+        EDIT_LINK: t.s('EDIT LINK'),
+        VIEW_LINK: t.s('VIEW LINK'),
+        NEW_LINK: t.s('Please click on an available node to form a new link.'),
+        UNLINK: t.s('UNLINK'),
+        READ_ONLY_PROMPT_VALUES: t.s('The following promptable values were provided when this node was created:'),
+        READ_ONLY_NO_PROMPT_VALUES: t.s('No promptable values were provided when this node was created.')
+    };
 }
 
 TemplatesStrings.$inject = ['BaseStringService'];
