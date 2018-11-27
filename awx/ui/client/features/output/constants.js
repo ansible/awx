@@ -16,7 +16,7 @@ export const JOB_STATUS_FINISHED = JOB_STATUS_COMPLETE.concat(JOB_STATUS_INCOMPL
 export const OUTPUT_ANSI_COLORMAP = {
     0: '#000',
     1: '#A00',
-    2: '#0A0',
+    2: '#080',
     3: '#F0AD4E',
     4: '#00A',
     5: '#A0A',
