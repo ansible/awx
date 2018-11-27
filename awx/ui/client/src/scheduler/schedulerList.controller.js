@@ -118,7 +118,7 @@ export default [
                         stateParams.inventory_id = item.summary_fields.inventory.id;
                         stateParams.inventory_source_id = item.summary_fields.unified_job_template.id;
                     } else if (item.summary_fields.unified_job_template.unified_job_type === 'system_job') {
-                        route = 'managementJobsList.schedule';
+                        route = 'managementJobsList.schedule.edit';
                         stateParams.id = item.summary_fields.unified_job_template.id;
                     }
                 }
