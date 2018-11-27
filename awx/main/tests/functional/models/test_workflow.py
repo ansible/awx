@@ -186,7 +186,7 @@ class TestWorkflowJob:
         assert nodes[0].failure_nodes.filter(id=nodes[3].id).exists()
         assert nodes[3].failure_nodes.filter(id=nodes[4].id).exists()
 
-    def test_inherit_ancestor_artifacts_from_job(self, project, mocker):
+    def test_inherit_ancestor_artifacts_from_job(self, job_template, mocker):
         """
         Assure that nodes along the line of execution inherit artifacts
         from both jobs ran, and from the accumulation of old jobs
@@ -197,13 +197,13 @@ class TestWorkflowJob:
         # Workflow job nodes
         job_node = WorkflowJobNode.objects.create(workflow_job=wfj, job=job,
                                                   ancestor_artifacts={'a': 42})
-        queued_node = WorkflowJobNode.objects.create(workflow_job=wfj)
+        queued_node = WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=job_template)
         # Connect old job -> new job
         mocker.patch.object(queued_node, 'get_parent_nodes', lambda: [job_node])
         assert queued_node.get_job_kwargs()['extra_vars'] == {'a': 42, 'b': 43}
         assert queued_node.ancestor_artifacts == {'a': 42, 'b': 43}
 
-    def test_inherit_ancestor_artifacts_from_project_update(self, project, mocker):
+    def test_inherit_ancestor_artifacts_from_project_update(self, project, job_template, mocker):
         """
         Test that the existence of a project update (no artifacts) does
         not break the flow of ancestor_artifacts
@@ -214,7 +214,7 @@ class TestWorkflowJob:
         # Workflow job nodes
         project_node = WorkflowJobNode.objects.create(workflow_job=wfj, job=update,
                                                       ancestor_artifacts={'a': 42, 'b': 43})
-        queued_node = WorkflowJobNode.objects.create(workflow_job=wfj)
+        queued_node = WorkflowJobNode.objects.create(workflow_job=wfj, unified_job_template=job_template)
         # Connect project update -> new job
         mocker.patch.object(queued_node, 'get_parent_nodes', lambda: [project_node])
         assert queued_node.get_job_kwargs()['extra_vars'] == {'a': 42, 'b': 43}

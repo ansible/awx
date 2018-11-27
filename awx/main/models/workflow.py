@@ -264,12 +264,13 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['survey_passwords'] = password_dict
         # process extra_vars
         extra_vars = data.get('extra_vars', {})
-        if aa_dict:
-            functional_aa_dict = copy(aa_dict)
-            functional_aa_dict.pop('_ansible_no_log', None)
-            extra_vars.update(functional_aa_dict)
-        # Workflow Job extra_vars higher precedence than ancestor artifacts
+        if ujt_obj and isinstance(ujt_obj, (JobTemplate, WorkflowJobTemplate)):
+            if aa_dict:
+                functional_aa_dict = copy(aa_dict)
+                functional_aa_dict.pop('_ansible_no_log', None)
+                extra_vars.update(functional_aa_dict)
         if ujt_obj and isinstance(ujt_obj, JobTemplate):
+            # Workflow Job extra_vars higher precedence than ancestor artifacts
             if self.workflow_job and self.workflow_job.extra_vars:
                 extra_vars.update(self.workflow_job.extra_vars_dict)
         if extra_vars:
