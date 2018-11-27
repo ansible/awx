@@ -23,8 +23,8 @@ RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_ecdsa_key
 RUN ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key
 RUN sed -i "s/#UsePrivilegeSeparation.*/UsePrivilegeSeparation no/g" /etc/ssh/sshd_config
 RUN sed -i "s/UsePAM.*/UsePAM yes/g" /etc/ssh/sshd_config
-RUN ssh-keygen -A
+RUN sed -i "s/#StrictModes.*/StrictModes no/g" /etc/ssh/sshd_config
 RUN mkdir -p /root/.ssh
-RUN touch /root/.ssh/authorized_keys
+RUN ln -s /awx_devel/authorized_keys /root/.ssh/authorized_keys
 
 CMD ["/usr/sbin/init"]
