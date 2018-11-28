@@ -963,6 +963,9 @@ class LaunchTimeConfigBase(BaseModel):
         else:
             return self.extra_vars
 
+    def display_extra_data(self):
+        return self.display_extra_vars()
+
     @property
     def _credential(self):
         '''

@@ -506,7 +506,7 @@ def activity_stream_delete(sender, instance, **kwargs):
     _type = type(instance)
     if getattr(_type, '_deferred', False):
         return
-    changes.update(model_to_dict(instance))
+    changes.update(model_to_dict(instance, model_serializer_mapping))
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     if type(instance) == OAuth2AccessToken:
         changes['token'] = CENSOR_VALUE
