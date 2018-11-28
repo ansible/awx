@@ -55,8 +55,9 @@ class TestReplayJobEvents():
         r.get_serializer = lambda self: mock_serializer_fn
         r.get_job = mocker.MagicMock(return_value=Job(id=3))
         r.sleep = mocker.MagicMock()
-        r.get_job_events = lambda self: job_events
+        r.get_job_events = lambda self: (job_events, len(job_events))
         r.replay_offset = lambda *args, **kwarg: 0
+        r.emit_job_status = lambda job, status: True
         return r
 
     @mock.patch('awx.main.management.commands.replay_job_events.emit_channel_notification', lambda *a, **kw: None)
