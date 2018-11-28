@@ -94,7 +94,7 @@
                     tooltip="{{:: vm.strings.get('listActions.COPY', vm.getType(template)) }}">
                 </at-row-action>
                 <at-row-action icon="fa-sitemap" ng-click="vm.openWorkflowVisualizer(template)"
-                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.edit"
+                    ng-show="!vm.isPortalMode"
                     ng-if="template.type === 'workflow_job_template'"
                     tooltip="{{:: vm.strings.get('list.OPEN_WORKFLOW_VISUALIZER') }}">
                 </at-row-action>
