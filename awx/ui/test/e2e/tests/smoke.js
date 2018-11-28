@@ -146,7 +146,7 @@ module.exports = {
         client.waitForElementVisible('div.spinny');
         client.waitForElementNotVisible('div.spinny');
 
-        client.expect.element('#hosts_tab').css('background-color').contain('132, 137, 146');
+        client.expect.element('#hosts_tab').css('background-color').contain('100, 105, 114');
 
         client.useCss();
         client.waitForElementVisible(addHost);
