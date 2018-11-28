@@ -18,11 +18,11 @@ export default
                     "<p>Successful requests create an entry on the Jobs page, where results and history can be viewed.</p>";
             };
 
-            // The md5 helper emits NewMD5Generated whenever a new key is available
-            if (scope.removeNewMD5Generated) {
-                scope.removeNewMD5Generated();
+            // The hash helper emits NewHashGenerated whenever a new key is available
+            if (scope.removeNewHashGenerated) {
+                scope.removeNewHashGenerated();
             }
-            scope.removeNewMD5Generated = scope.$on('NewMD5Generated', function() {
+            scope.removeNewHashGenerated = scope.$on('NewHashGenerated', function() {
                 scope.configKeyChange();
             });
 

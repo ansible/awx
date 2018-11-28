@@ -353,7 +353,7 @@ function(NotificationsList, i18n) {
                     type: 'text',
                     ngShow: "allow_callbacks  && allow_callbacks !== 'false'",
                     ngChange: "configKeyChange()",
-                    genMD5: true,
+                    genHash: true,
                     column: 2,
                     awPopOver: "callback_help",
                     awPopOverWatch: "callback_help",

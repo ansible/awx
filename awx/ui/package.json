@@ -103,7 +103,6 @@
     "angular-drag-and-drop-lists": "git+https://git@github.com/ansible/angular-drag-and-drop-lists#v1.4.1",
     "angular-duration-format": "^1.0.1",
     "angular-gettext": "^2.3.5",
-    "angular-md5": "^0.1.8",
     "angular-moment": "^0.10.1",
     "angular-mousewheel": "^1.0.5",
     "angular-sanitize": "~1.6.6",

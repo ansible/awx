@@ -53,7 +53,6 @@ angular
         'angular-duration-format',
         'angularMoment',
         'AngularScheduler',
-        'angular-md5',
         'dndLists',
         'ncy-angular-breadcrumb',
         'ngSanitize',

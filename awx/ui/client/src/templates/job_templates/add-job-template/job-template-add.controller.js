@@ -7,14 +7,14 @@
  export default
      [   '$filter', '$scope',
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
-        'ProcessErrors', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
+        'ProcessErrors', 'GetBasePath', 'hashSetup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state', 'availableLabels',
         'CreateSelect2', '$q', 'i18n', 'Inventory', 'Project', 'InstanceGroupsService',
         'MultiCredentialService', 'ConfigData', 'resolvedModels',
          function(
              $filter, $scope,
              $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
-             ProcessErrors, GetBasePath, md5Setup, ParseTypeChange, Wait,
+             ProcessErrors, GetBasePath, hashSetup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, GetChoices,
              $state, availableLabels, CreateSelect2, $q, i18n, Inventory, Project, InstanceGroupsService,
              MultiCredentialService, ConfigData, resolvedModels
@@ -43,7 +43,7 @@
             $scope.credentialNotPresent = false;
             $scope.canGetAllRelatedResources = true;
 
-            md5Setup({
+            hashSetup({
                 scope: $scope,
                 master: master,
                 check_field: 'allow_callbacks',

@@ -13,7 +13,7 @@
 export default
     [   '$filter', '$scope', '$rootScope',
         '$location', '$stateParams', 'JobTemplateForm', 'GenerateForm',
-        'Rest', 'Alert',  'ProcessErrors', 'GetBasePath', 'md5Setup',
+        'Rest', 'Alert',  'ProcessErrors', 'GetBasePath', 'hashSetup',
         'ParseTypeChange', 'Wait', 'selectedLabels', 'i18n',
         'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'initSurvey', '$state', 'CreateSelect2',
@@ -23,7 +23,7 @@ export default
         function(
             $filter, $scope, $rootScope,
             $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
-            ProcessErrors, GetBasePath, md5Setup,
+            ProcessErrors, GetBasePath, hashSetup,
             ParseTypeChange, Wait, selectedLabels, i18n,
             Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit,
             SurveyControllerInit, $state, CreateSelect2,
@@ -245,7 +245,7 @@ export default
                 master = masterObject;
 
                 dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? false : true;
-                md5Setup({
+                hashSetup({
                     scope: $scope,
                     master: master,
                     check_field: 'allow_callbacks',
