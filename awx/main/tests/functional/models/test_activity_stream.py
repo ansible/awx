@@ -236,3 +236,17 @@ def test_survey_create_diff(job_template, survey_spec_factory):
     before, after = model_instance_diff(old, job_template, model_serializer_mapping)['survey_spec']
     assert before == '{}'
     assert json.loads(after) == survey_spec_factory('foo')
+
+
+@pytest.mark.django_db
+def test_saved_passwords_hidden_activity(workflow_job_template, job_template_with_survey_passwords):
+    node_with_passwords = workflow_job_template.workflow_nodes.create(
+        unified_job_template=job_template_with_survey_passwords,
+        extra_data={'bbbb': '$encrypted$fooooo'},
+        survey_passwords={'bbbb': '$encrypted$'}
+    )
+    node_with_passwords.delete()
+    entry = ActivityStream.objects.order_by('timestamp').last()
+    changes = json.loads(entry.changes)
+    assert 'survey_passwords' not in changes
+    assert json.loads(changes['extra_data'])['bbbb'] == '$encrypted$'
