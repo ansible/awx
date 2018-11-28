@@ -194,7 +194,8 @@ class ReplayJobEvents(JobStatusLifeCycle):
             je_previous = je_current
 
             if n == finish_status_index:
-                self.sleep(final_status_delay)
+                if final_status_delay != 0:
+                    self.sleep(final_status_delay)
                 self.emit_job_status(job, job.status)
 
         if stats['events_total'] > 2:
