@@ -221,8 +221,12 @@ class TestHostInsights():
         assert resp.status_code == 404
 
     def test_get_insights_user_agent(self, patch_parent, mocker):
-        resp = HostInsights()._get_insights('https://example.org', 'joe', 'example')
-        assert re.match(r'AWX [^\s]+ \(open\)', resp.request.headers['User-Agent'])
+        with mock.patch.object(requests.Session, 'get') as get:
+            HostInsights()._get_insights('https://example.org', 'joe', 'example')
+            assert get.call_count == 1
+            args, kwargs = get.call_args_list[0]
+            assert args == ('https://example.org',)
+            assert re.match(r'AWX [^\s]+ \(open\)', kwargs['headers']['User-Agent'])
 
 
 class TestSurveySpecValidation:
