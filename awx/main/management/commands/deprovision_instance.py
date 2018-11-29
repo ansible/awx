@@ -2,7 +2,6 @@
 # All Rights Reserved
 
 import subprocess
-import warnings
 
 from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
@@ -24,17 +23,10 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--hostname', dest='hostname', type=str,
                             help='Hostname used during provisioning')
-        parser.add_argument('--name', dest='name', type=str,
-                            help='(PENDING DEPRECIATION) Hostname used during provisioning')
 
     @transaction.atomic
     def handle(self, *args, **options):
         # TODO: remove in 3.3
-        if options.get('name'):
-            warnings.warn("`--name` is depreciated in favor of `--hostname`, and will be removed in release 3.3.")
-            if options.get('hostname'):
-                raise CommandError("Cannot accept both --name and --hostname.")
-            options['hostname'] = options['name']
         hostname = options.get('hostname')
         if not hostname:
             raise CommandError("--hostname is a required argument")
