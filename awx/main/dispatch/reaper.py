@@ -11,6 +11,9 @@ logger = logging.getLogger('awx.main.dispatch')
 
 
 def reap_job(j, status):
+    if UnifiedJob.objects.get(id=j.id).status not in ('running', 'waiting'):
+        # just in case, don't reap jobs that aren't running
+        return
     j.status = status
     j.start_args = ''  # blank field to remove encrypted passwords
     j.job_explanation += ' '.join((
