@@ -1,5 +1,7 @@
 function searchWithoutKey (term, singleSearchParam = null) {
-    if (singleSearchParam) {
+    if (singleSearchParam === 'host_filter') {
+        return { [singleSearchParam]: `${encodeURIComponent(term)}` };
+    } else if (singleSearchParam) {
         return { [singleSearchParam]: `search=${encodeURIComponent(term)}` };
     }
     return { search: encodeURIComponent(term) };
@@ -370,7 +372,8 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
         },
         getSearchInputQueryset (searchInput, isFilterableBaseField = null, isRelatedField = null, isAnsibleFactField = null, singleSearchParam = null) {
             // XXX Should find a better approach than passing in the two 'is...Field' callbacks XXX
-            const space = '%20and%20';
+            const encodedAnd = '%20and%20';
+            const encodedOr = '%20or%20';
             let params = {};
 
             // Remove leading/trailing whitespace if there is any
@@ -398,7 +401,13 @@ function QuerysetService ($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearc
                 }
 
                 if (singleSearchParam) {
-                    return `${a}${space}${b}`;
+                    if (b === 'or') {
+                        return `${a}${encodedOr}`;
+                    } else if (a.match(/%20or%20$/g)) {
+                        return `${a}${b}`;
+                    } else {
+                        return `${a}${encodedAnd}${b}`;
+                    }
                 }
 
                 return [a, b];
