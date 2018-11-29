@@ -1413,6 +1413,11 @@ class RunJob(BaseTask):
 
     def final_run_hook(self, job, status, **kwargs):
         super(RunJob, self).final_run_hook(job, status, **kwargs)
+        if 'private_data_dir' not in kwargs:
+            # If there's no private data dir, that means we didn't get into the
+            # actual `run()` call; this _usually_ means something failed in
+            # the pre_run_hook method
+            return
         if job.use_fact_cache:
             job.finish_job_fact_cache(
                 kwargs['private_data_dir'],
