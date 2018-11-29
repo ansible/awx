@@ -1,4 +1,5 @@
 import pytest
+import json
 
 from awx.api.versioning import reverse
 
@@ -73,6 +74,52 @@ def test_node_accepts_prompted_fields(inventory, project, workflow_job_template,
                   kwargs={'pk': workflow_job_template.pk, 'version': 'v1'})
     post(url, {'unified_job_template': job_template.pk, 'limit': 'webservers'},
          user=admin_user, expect=201)
+
+
+@pytest.mark.django_db
+class TestExclusiveRelationshipEnforcement():
+    @pytest.fixture
+    def n1(self, workflow_job_template):
+        return WorkflowJobTemplateNode.objects.create(workflow_job_template=workflow_job_template)
+
+    @pytest.fixture
+    def n2(self, workflow_job_template):
+        return WorkflowJobTemplateNode.objects.create(workflow_job_template=workflow_job_template)
+
+    def generate_url(self, relationship, id):
+        return reverse('api:workflow_job_template_node_{}_nodes_list'.format(relationship),
+                       kwargs={'pk': id})
+
+    relationship_permutations = [
+        ['success', 'failure', 'always'],
+        ['success', 'always', 'failure'],
+        ['failure', 'always', 'success'],
+        ['failure', 'success', 'always'],
+        ['always', 'success', 'failure'],
+        ['always', 'failure', 'success'],
+    ]
+
+    @pytest.mark.parametrize("relationships", relationship_permutations, ids=["-".join(item) for item in relationship_permutations])
+    def test_multi_connections_same_parent_disallowed(self, post, admin_user, n1, n2, relationships):
+        for index, relationship in enumerate(relationships):
+            r = post(self.generate_url(relationship, n1.id),
+                     data={'associate': True, 'id': n2.id},
+                     user=admin_user,
+                     expect=204 if index == 0 else 400)
+
+            if index != 0:
+                assert {'Error': 'Relationship not allowed.'} == json.loads(r.content)
+
+    @pytest.mark.parametrize("relationship", ['success', 'failure', 'always'])
+    def test_existing_relationship_allowed(self, post, admin_user, n1, n2, relationship):
+        post(self.generate_url(relationship, n1.id),
+             data={'associate': True, 'id': n2.id},
+             user=admin_user,
+             expect=204)
+        post(self.generate_url(relationship, n1.id),
+             data={'associate': True, 'id': n2.id},
+             user=admin_user,
+             expect=204)
 
 
 @pytest.mark.django_db

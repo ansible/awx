@@ -9,6 +9,7 @@ import time
 import socket
 import sys
 import requests
+import functools
 from base64 import b64encode
 from collections import OrderedDict, Iterable
 import six
@@ -2956,6 +2957,18 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
 
         if parent.id == sub.id:
             return {"Error": _("Cycle detected.")}
+
+        '''
+        Look for parent->child connection in all relationships except the relationship that is
+        attempting to be added; because it's ok to re-add the relationship
+        '''
+        relationships = ['success_nodes', 'failure_nodes', 'always_nodes']
+        relationships.remove(self.relationship)
+        qs = functools.reduce(lambda x, y: (x | y),
+                              (Q(**{'{}__in'.format(rel): [sub.id]}) for rel in relationships))
+
+        if WorkflowJobTemplateNode.objects.filter(Q(pk=parent.id) & qs).exists():
+            return {"Error": _("Relationship not allowed.")}
 
         parent_node_type_relationship = getattr(parent, self.relationship)
         parent_node_type_relationship.add(sub)
