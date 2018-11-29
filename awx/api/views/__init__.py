@@ -2957,12 +2957,16 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
         if parent.id == sub.id:
             return {"Error": _("Cycle detected.")}
 
-        if parent.id == sub.id
+        '''
+        Look for parent->child connection in all relationships except the relationship that is
+        attempting to be added; because it's ok to re-add the relationship
+        '''
+        relationships = ['success_nodes', 'failure_nodes', 'always_nodes']
+        relationships.remove(self.relationship)
+        qs = reduce(lambda x, y: (x | y),
+                    (Q(**{'{}__in'.format(rel): [sub.id]}) for rel in relationships))
 
-        if WorkflowJobTemplateNode.objects.filter(Q(pk=parent.id) &
-                                                  Q(success_nodes__in=[sub.id]) |
-                                                  Q(failure_nodes__in=[sub.id]) |
-                                                  Q(always_nodes__in=[sub.id])).exists():
+        if WorkflowJobTemplateNode.objects.filter(Q(pk=parent.id) & qs).exists():
             return {"Error": _("Relationship not allowed.")}
 
         parent_node_type_relationship = getattr(parent, self.relationship)
