@@ -176,16 +176,11 @@ module.exports = {
         client.expect.element('#node-1 text').text.not.equal('').after(5000);
         client.expect.element('#node-2 text').text.not.equal('').after(5000);
         client.expect.element('#node-3 text').text.not.equal('').after(5000);
-        client.expect.element('#node-4 text').text.not.equal('').after(5000);
+        client.expect.element('#node-4 text').text.not.equal('').after(5000);        
 
-        const checkNodeText = (selector, text) => client.getText(selector, ({ value }) => {
-            client.assert.equal(text.indexOf(value.replace('...', '')) >= 0, true);
-        });
-
-        checkNodeText('#node-1 text', 'START');
-        checkNodeText('#node-3 text', data.project.name);
-        checkNodeText('#node-4 text', data.template.name);
-        checkNodeText('#node-2 text', data.source.name);
+        client.useXpath().waitForElementVisible('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-job")]/..');
+        client.useXpath().waitForElementVisible('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-project")]/..');
+        client.useXpath().waitForElementVisible('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-inventory")]/..');
 
         templates.expect.element('@save').visible;
         templates.expect.element('@save').enabled;
