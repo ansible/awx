@@ -9,6 +9,7 @@ import time
 import socket
 import sys
 import requests
+import functools
 from base64 import b64encode
 from collections import OrderedDict, Iterable
 import six
@@ -2963,8 +2964,8 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
         '''
         relationships = ['success_nodes', 'failure_nodes', 'always_nodes']
         relationships.remove(self.relationship)
-        qs = reduce(lambda x, y: (x | y),
-                    (Q(**{'{}__in'.format(rel): [sub.id]}) for rel in relationships))
+        qs = functools.reduce(lambda x, y: (x | y),
+                              (Q(**{'{}__in'.format(rel): [sub.id]}) for rel in relationships))
 
         if WorkflowJobTemplateNode.objects.filter(Q(pk=parent.id) & qs).exists():
             return {"Error": _("Relationship not allowed.")}
