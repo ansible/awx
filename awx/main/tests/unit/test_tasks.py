@@ -309,7 +309,15 @@ class TestExtraVarSanitation(TestJobExecution):
 
     UNSAFE = '{{ lookup(''pipe'',''ls -la'') }}'
 
-    def test_vars_unsafe_by_default(self):
+    @pytest.mark.parametrize('safe_mode,marked_unsafe', [
+        ('always', False),
+        ('template', True),
+        ('never', True)
+    ])
+    def test_vars_unsafe_by_default(self, safe_mode, marked_unsafe):
+        patch = mock.patch('awx.main.tasks.settings.ALLOW_JINJA_IN_EXTRA_VARS', safe_mode)
+        patch.start()
+
         self.instance.created_by = User(pk=123, username='angry-spud')
 
         def run_pexpect_side_effect(*args, **kwargs):
@@ -322,7 +330,7 @@ class TestExtraVarSanitation(TestJobExecution):
                            'awx_project_revision',
                            'tower_project_revision', 'tower_user_name',
                            'awx_job_launch_type']:
-                assert hasattr(extra_vars[unsafe], '__UNSAFE__')
+                assert hasattr(extra_vars[unsafe], '__UNSAFE__') is marked_unsafe
 
             # ensure that non-strings are marked as safe
             for safe in ['awx_job_template_id', 'awx_job_id', 'awx_user_id',
