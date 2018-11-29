@@ -1,7 +1,5 @@
 import logging
 import time
-import os
-import signal
 import traceback
 
 from django.conf import settings
@@ -110,8 +108,7 @@ class CallbackBrokerWorker(BaseWorker):
                     break
                 except (OperationalError, InterfaceError, InternalError):
                     if retries >= self.MAX_RETRIES:
-                        logger.exception('Worker could not re-establish database connectivity, shutting down gracefully: Job {}'.format(job_identifier))
-                        os.kill(os.getppid(), signal.SIGINT)
+                        logger.exception('Worker could not re-establish database connectivity, giving up on event for Job {}'.format(job_identifier))
                         return
                     delay = 60 * retries
                     logger.exception('Database Error Saving Job Event, retry #{i} in {delay} seconds:'.format(

@@ -5,7 +5,6 @@ import sys
 import traceback
 
 import six
-from django import db
 
 from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
 
@@ -75,10 +74,6 @@ class TaskWorker(BaseWorker):
             'task': u'awx.main.tasks.RunProjectUpdate'
         }
         '''
-        for conn in db.connections.all():
-            # If the database connection has a hiccup during at task, close it
-            # so we can establish a new connection
-            conn.close_if_unusable_or_obsolete()
         result = None
         try:
             result = self.run_callable(body)
