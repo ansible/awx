@@ -6,8 +6,6 @@ import {
   DropdownPosition,
   DropdownToggle,
   DropdownItem,
-  FormGroup,
-  KebabToggle,
   Level,
   LevelItem,
   TextInput,
@@ -24,11 +22,14 @@ import {
   SortNumericUpIcon,
   TrashAltIcon,
 } from '@patternfly/react-icons';
+import {
+  Link
+} from 'react-router-dom';
 
 import Tooltip from '../Tooltip';
 
 class DataListToolbar extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props);
 
     const { sortedColumnKey } = this.props;
@@ -72,15 +73,15 @@ class DataListToolbar extends React.Component {
     this.setState({ isSearchDropdownOpen: false, searchKey: key });
   };
 
-  onActionToggle = isActionDropdownOpen => {
-    this.setState({ isActionDropdownOpen });
-  };
+  // onActionToggle = isActionDropdownOpen => {
+  //   this.setState({ isActionDropdownOpen });
+  // };
 
-  onActionSelect = ({ target }) => {
-    this.setState({ isActionDropdownOpen: false });
-  };
+  // onActionSelect = () => {
+  //   this.setState({ isActionDropdownOpen: false });
+  // };
 
-  render() {
+  render () {
     const { up } = DropdownPosition;
     const {
       columns,
@@ -90,9 +91,10 @@ class DataListToolbar extends React.Component {
       onSort,
       sortedColumnKey,
       sortOrder,
+      addUrl
     } = this.props;
     const {
-      isActionDropdownOpen,
+      // isActionDropdownOpen,
       isSearchDropdownOpen,
       isSortDropdownOpen,
       searchKey,
@@ -107,19 +109,29 @@ class DataListToolbar extends React.Component {
       .filter(({ key }) => key === sortedColumnKey);
     const sortedColumnName = sortedColumn.name;
     const isSortNumeric = sortedColumn.isNumeric;
+    const displayedSortIcon = () => {
+      let icon;
+      if (sortOrder === 'ascending') {
+        icon = isSortNumeric ? (<SortNumericUpIcon />) : (<SortAlphaUpIcon />);
+      } else {
+        icon = isSortNumeric ? (<SortNumericDownIcon />) : (<SortAlphaDownIcon />);
+      }
+      return icon;
+    };
 
     return (
       <div className="awx-toolbar">
         <Level>
           <LevelItem>
-            <Toolbar style={{ marginLeft: "20px" }}>
+            <Toolbar style={{ marginLeft: '20px' }}>
               <ToolbarGroup>
                 <ToolbarItem>
                   <Checkbox
                     checked={isAllSelected}
                     onChange={onSelectAll}
                     aria-label="Select all"
-                    id="select-all"/>
+                    id="select-all"
+                  />
                 </ToolbarItem>
               </ToolbarGroup>
               <ToolbarGroup>
@@ -132,10 +144,12 @@ class DataListToolbar extends React.Component {
                       isOpen={isSearchDropdownOpen}
                       toggle={(
                         <DropdownToggle
-                          onToggle={this.onSearchDropdownToggle}>
+                          onToggle={this.onSearchDropdownToggle}
+                        >
                           { searchColumnName }
                         </DropdownToggle>
-                      )}>
+                      )}
+                    >
                       {columns.filter(({ key }) => key !== searchKey).map(({ key, name }) => (
                         <DropdownItem key={key} component="button">
                           { name }
@@ -146,12 +160,14 @@ class DataListToolbar extends React.Component {
                       type="search"
                       aria-label="search text input"
                       value={searchValue}
-                      onChange={this.handleSearchInputChange}/>
+                      onChange={this.handleSearchInputChange}
+                    />
                     <Button
                       variant="tertiary"
                       aria-label="Search"
-                      onClick={() => onSearch(searchValue)}>
-                      <i className="fas fa-search" aria-hidden="true"></i>
+                      onClick={() => onSearch(searchValue)}
+                    >
+                      <i className="fas fa-search" aria-hidden="true" />
                     </Button>
                   </div>
                 </ToolbarItem>
@@ -165,31 +181,28 @@ class DataListToolbar extends React.Component {
                     isOpen={isSortDropdownOpen}
                     toggle={(
                       <DropdownToggle
-                        onToggle={this.onSortDropdownToggle}>
+                        onToggle={this.onSortDropdownToggle}
+                      >
                         { sortedColumnName }
                       </DropdownToggle>
-                    )}>
+                    )}
+                  >
                     {columns
                       .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
                       .map(({ key, name }) => (
-                      <DropdownItem key={key} component="button">
-                        { name }
-                      </DropdownItem>
-                    ))}
+                        <DropdownItem key={key} component="button">
+                          { name }
+                        </DropdownItem>
+                      ))}
                   </Dropdown>
                 </ToolbarItem>
                 <ToolbarItem>
                   <Button
-                    onClick={() => onSort(sortedColumnKey, sortOrder === "ascending" ? "descending" : "ascending")}
+                    onClick={() => onSort(sortedColumnKey, sortOrder === 'ascending' ? 'descending' : 'ascending')}
                     variant="plain"
-                    aria-label="Sort">
-                    {
-                      isSortNumeric ? (
-                        sortOrder === "ascending" ? <SortNumericUpIcon /> : <SortNumericDownIcon />
-                      ) : (
-                        sortOrder === "ascending" ? <SortAlphaUpIcon /> : <SortAlphaDownIcon />
-                      )
-                    }
+                    aria-label="Sort"
+                  >
+                    {displayedSortIcon()}
                   </Button>
                 </ToolbarItem>
               </ToolbarGroup>
@@ -210,12 +223,16 @@ class DataListToolbar extends React.Component {
           <LevelItem>
             <Tooltip message="Delete" position="top">
               <Button variant="plain" aria-label="Delete">
-                <TrashAltIcon/>
+                <TrashAltIcon />
               </Button>
             </Tooltip>
-            <Button variant="primary" aria-label="Add">
-              Add
-            </Button>
+            {addUrl && (
+              <Link to={addUrl}>
+                <Button variant="primary" aria-label="Add">
+                  Add
+                </Button>
+              </Link>
+            )}
           </LevelItem>
         </Level>
       </div>

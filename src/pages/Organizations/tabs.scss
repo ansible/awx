@@ -1,0 +1,18 @@
+.at-c-tabs {
+  padding: 0 5px !important;
+  margin: 0 -10px !important;
+
+  .at-c-tabs__tab {
+    margin: 0 5px;
+  }
+
+  .at-c-tabs__tab.at-m-selected {
+    text-decoration: underline;
+  }
+}
+
+.at-c-orgPane {
+  a {
+    display: block;
+  }
+}

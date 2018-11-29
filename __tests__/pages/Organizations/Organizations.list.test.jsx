@@ -3,9 +3,9 @@ import { HashRouter } from 'react-router-dom';
 
 import { mount } from 'enzyme';
 
-import api from '../../src/api';
-import { API_ORGANIZATIONS } from '../../src/endpoints';
-import Organizations from '../../src/pages/Organizations';
+import api from '../../../src/api';
+import { API_ORGANIZATIONS } from '../../../src/endpoints';
+import Organizations from '../../../src/pages/Organizations';
 
 describe('<Organizations />', () => {
   let pageWrapper;

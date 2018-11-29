@@ -11,17 +11,17 @@ import {
   Title,
 } from '@patternfly/react-core';
 
-import DataListToolbar from '../components/DataListToolbar';
+import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
-import Pagination from '../components/Pagination';
+import Pagination from '../../../components/Pagination';
 
-import api from '../api';
-import { API_ORGANIZATIONS } from '../endpoints';
+import api from '../../../api';
+import { API_ORGANIZATIONS } from '../../../endpoints';
 
 import {
   encodeQueryString,
   parseQueryString,
-} from '../qs';
+} from '../../../qs';
 
 class Organizations extends Component {
   columns = [
@@ -58,7 +58,6 @@ class Organizations extends Component {
 
   componentDidMount () {
     const queryParams = this.getQueryParams();
-
     this.fetchOrganizations(queryParams);
   }
 
@@ -122,7 +121,6 @@ class Organizations extends Component {
 
   updateUrl (queryParams) {
     const { history, location } = this.props;
-
     const pathname = '/organizations';
     const search = `?${encodeQueryString(queryParams)}`;
 
@@ -185,6 +183,8 @@ class Organizations extends Component {
       results,
       selected,
     } = this.state;
+    const { match } = this.props;
+    const parentBreadcrumb = { name: 'Organizations', url: match.url };
 
     return (
       <Fragment>
@@ -193,6 +193,7 @@ class Organizations extends Component {
         </PageSection>
         <PageSection variant={medium}>
           <DataListToolbar
+            addUrl={`${match.url}/add`}
             isAllSelected={selected.length === results.length}
             sortedColumnKey={sortedColumnKey}
             sortOrder={sortOrder}
@@ -207,6 +208,8 @@ class Organizations extends Component {
                 key={o.id}
                 itemId={o.id}
                 name={o.name}
+                detailUrl={`${match.url}/${o.id}`}
+                parentBreadcrumb={parentBreadcrumb}
                 userCount={o.summary_fields.related_field_counts.users}
                 teamCount={o.summary_fields.related_field_counts.teams}
                 adminCount={o.summary_fields.related_field_counts.admins}
