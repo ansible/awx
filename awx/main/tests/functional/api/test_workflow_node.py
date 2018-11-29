@@ -110,6 +110,17 @@ class TestExclusivePathEnforcement():
             if index != 0:
                 assert {'Error': 'Relationship not allowed.'} == json.loads(r.content)
 
+    @pytest.mark.parametrize("relationship", ['success', 'failure', 'always']):
+    def test_existing_relationship_allowed(self, post, admin_user, n1, n2, relationship):
+        r = post(self.generate_url(path, n1.id),
+                 data={'associate': True, 'id': n2.id},
+                 user=admin_user,
+                 expect=204)
+        r = post(self.generate_url(path, n1.id),
+                 data={'associate': True, 'id': n2.id},
+                 user=admin_user,
+                 expect=200)
+
 
 @pytest.mark.django_db
 class TestNodeCredentials:

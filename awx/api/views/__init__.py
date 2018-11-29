@@ -2957,6 +2957,8 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
         if parent.id == sub.id:
             return {"Error": _("Cycle detected.")}
 
+        if parent.id == sub.id
+
         if WorkflowJobTemplateNode.objects.filter(Q(pk=parent.id) &
                                                   Q(success_nodes__in=[sub.id]) |
                                                   Q(failure_nodes__in=[sub.id]) |
