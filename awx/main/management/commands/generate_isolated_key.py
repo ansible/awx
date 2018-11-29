@@ -29,7 +29,7 @@ class Command(BaseCommand):
             key='AWX_ISOLATED_PRIVATE_KEY',
             value=key.private_bytes(
                 encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                format=serialization.PrivateFormat.PKCS8,
                 encryption_algorithm=serialization.NoEncryption()
             )
         ).save()
