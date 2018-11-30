@@ -56,6 +56,8 @@ describe('Output | StreamService', () => {
     });
 
     it('returns true', () => {
+      stream.counters.min = 1;
+      stream.counters.ready = 2;
       stream.state.ending = true;
       let res = stream.isReadyToRender();
       expect(res).toBe(true);
