@@ -2983,12 +2983,13 @@ class JobTemplateMixin(object):
     '''
 
     def _recent_jobs(self, obj):
-        if hasattr(obj, 'workflow_jobs'):
-            job_mgr = obj.workflow_jobs
-        else:
-            job_mgr = obj.jobs
-        return [{'id': x.id, 'status': x.status, 'finished': x.finished}
-                for x in job_mgr.all().order_by('-created')[:10]]
+        job_mgr = obj.unifiedjob_unified_jobs.non_polymorphic().exclude(job__job_slice_count__gt=1).only(
+            'id', 'status', 'finished', 'polymorphic_ctype_id')
+        type_mapping = {}
+        for model, ct in ContentType.objects.get_for_models(*UnifiedJob.__subclasses__()).iteritems():
+            type_mapping[ct.pk] = model._meta.verbose_name
+        return [{'id': x.id, 'status': x.status, 'finished': x.finished, 'type': type_mapping[x.polymorphic_ctype_id]}
+                for x in job_mgr.order_by('-created')[:10]]
 
     def get_summary_fields(self, obj):
         d = super(JobTemplateMixin, self).get_summary_fields(obj)

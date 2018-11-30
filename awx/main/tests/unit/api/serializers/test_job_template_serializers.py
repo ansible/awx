@@ -71,11 +71,19 @@ class TestJobTemplateSerializerGetRelated():
 class TestJobTemplateSerializerGetSummaryFields():
     def test__recent_jobs(self, mocker, job_template, jobs):
 
-        job_template.jobs.all = mocker.MagicMock(**{'order_by.return_value': jobs})
-        job_template.jobs.all.return_value = job_template.jobs.all
+        job_template.unifiedjob_unified_jobs = mocker.MagicMock(**{
+            'non_polymorphic.return_value': mocker.MagicMock(**{
+                'only.return_value': mocker.MagicMock(**{
+                    'order_by.return_value': jobs
+                })
+            })
+        })
 
         serializer = JobTemplateSerializer()
         recent_jobs = serializer._recent_jobs(job_template)
+
+        job_template.unifiedjob_unified_jobs.non_polymorphic.assert_called_once_with()
+        job_template.unifiedjob_unified_jobs.non_polymorphic().only().order_by.assert_called_once_with('-created')
 
         job_template.jobs.all.assert_called_once_with()
         job_template.jobs.all.order_by.assert_called_once_with('-created')
