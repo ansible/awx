@@ -4,8 +4,6 @@ import DataListToolbar from '../../src/components/DataListToolbar';
 
 describe('<DataListToolbar />', () => {
   const columns = [{ name: 'Name', key: 'name', isSortable: true }];
-  const noop = () => {};
-
   let toolbar;
 
   afterEach(() => {
