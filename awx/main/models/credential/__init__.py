@@ -383,6 +383,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         super(Credential, self).save(*args, **kwargs)
 
     def encrypt_field(self, field, ask):
+        if not hasattr(self, field):
+            return None
         encrypted = encrypt_field(self, field, ask=ask)
         if encrypted:
             self.inputs[field] = encrypted
