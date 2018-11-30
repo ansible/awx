@@ -114,6 +114,7 @@ export default ['$stateParams', '$scope', '$rootScope',
         $scope.$watchCollection(`${list.iterator}_dataset`, function(data) {
             $scope[list.name] = data.results;
             $scope.orgCards = parseCardData($scope[list.name]);
+            $scope.orgCount = data.count;
         });
 
         $scope.addOrganization = function() {
