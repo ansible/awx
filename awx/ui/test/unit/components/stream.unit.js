@@ -83,7 +83,10 @@ describe('Output | StreamService', () => {
       const params = [
         [null, 1, 0],
         [undefined, 1, NaN],
-        ['1', 1, 1]
+        ['1', 1, 1],
+        [-1, -3, 3],
+        [0, 0, 1],
+        [6, 5, 2]
       ];
 
       params.forEach(([x, y, z]) => {
