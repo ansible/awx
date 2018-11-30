@@ -50,6 +50,10 @@ function OutputStream ($q) {
     this.calcFactors = size => {
         const factors = [1];
 
+        if (size !== parseInt(size, 10) || size <= 1) {
+            return factors;
+        }
+
         for (let i = 2; i <= size / 2; i++) {
             if (size % i === 0) {
                 factors.push(i);
@@ -135,7 +139,7 @@ function OutputStream ($q) {
 
     this.isReadyToRender = () => {
         const { total } = this.counters;
-        const readyCount = this.counters.ready - this.counters.min;
+        const readyCount = this.getReadyCount();
 
         if (readyCount <= 0) {
             return false;
@@ -202,7 +206,7 @@ function OutputStream ($q) {
                     return $q.resolve();
                 }
 
-                const readyCount = this.counters.ready - this.counters.min;
+                const readyCount = this.getReadyCount();
 
                 let events = [];
                 if (readyCount > 0) {
@@ -230,6 +234,7 @@ function OutputStream ($q) {
         });
 
     this.getMaxCounter = () => this.counters.max;
+    this.getReadyCount = () => this.counters.ready - this.counters.min + 1;
 }
 
 OutputStream.$inject = ['$q'];
