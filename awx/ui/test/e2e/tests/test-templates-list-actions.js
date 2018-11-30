@@ -176,8 +176,8 @@ module.exports = {
         client.expect.element('#node-1 text').text.not.equal('').after(5000);
         client.expect.element('#node-2 text').text.not.equal('').after(5000);
         client.expect.element('#node-3 text').text.not.equal('').after(5000);
-        client.expect.element('#node-4 text').text.not.equal('').after(5000);        
-
+        client.expect.element('#node-4 text').text.not.equal('').after(5000);
+        
         client.useXpath().waitForElementVisible('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-job")]/..');
         client.useXpath().waitForElementVisible('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-project")]/..');
         client.useXpath().waitForElementVisible('//*[contains(@class, "WorkflowChart-nameText") and contains(text(), "test-actions-inventory")]/..');
