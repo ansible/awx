@@ -6,13 +6,16 @@ ADD Makefile /tmp/Makefile
 
 RUN mkdir /tmp/requirements
 
-RUN yum -y update && yum -y install curl epel-release && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-3.noarch.rpm
+RUN yum -y update && yum -y install curl epel-release yum-utils && yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+RUN yum -y localinstall https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm
 RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
 
+RUN yum-config-manager --setopt=base."exclude=postgresql*" --save && \
+    yum-config-manager --setopt=updates."exclude=postgresql*" --save
+
 RUN yum -y update && yum -y install openssh-server ansible mg vim tmux \
-  git2u-core mercurial subversion python-devel python-psycopg2 make postgresql \
-  postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel \
+  git2u-core mercurial subversion python-devel python-psycopg2 make postgresql10 \
+  postgresql10-devel nginx nodejs python-psutil libxml2-devel libxslt-devel \
   libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel \
   zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 \
   xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap \
@@ -47,7 +50,7 @@ RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/ngi
 WORKDIR /tmp
 
 RUN mkdir -p /venv && chmod g+w /venv
-RUN CFLAGS="-DXMLSEC_NO_SIZE_T" SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl" VENV_BASE="/venv" make requirements_dev
+RUN export PATH=/usr/pgsql-10/bin:$PATH && CFLAGS="-DXMLSEC_NO_SIZE_T" SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl" VENV_BASE="/venv" make requirements_dev
 RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en

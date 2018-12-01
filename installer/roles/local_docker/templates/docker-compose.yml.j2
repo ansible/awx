@@ -134,7 +134,7 @@ services:
 
   {% if pg_hostname is not defined %}
   postgres:
-    image: postgres:9.6
+    image: postgres:10
     restart: unless-stopped
     volumes:
       - {{ postgres_data_dir }}:/var/lib/postgresql/data:Z

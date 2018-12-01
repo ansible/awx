@@ -28,15 +28,18 @@ ADD RPM-GPG-KEY-ansible-release /etc/pki/rpm-gpg/RPM-GPG-KEY-ansible-release
 WORKDIR /tmp
 RUN mkdir -p /var/lib/awx/public/static
 RUN chgrp -Rf root /var/lib/awx && chmod -Rf g+w /var/lib/awx
-RUN yum -y install epel-release && \
-    yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm && \
+RUN yum -y install epel-release yum-utils && \
+    yum-config-manager --setopt=base."exclude=postgresql*" --save && \
+    yum-config-manager --setopt=updates."exclude=postgresql*" --save && \
+    yum -y localinstall https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm && \
     yum -y update && \
-    yum -y install ansible git mercurial subversion curl python-psycopg2 python-pip python-setuptools libselinux-python setools-libs yum-utils sudo acl make postgresql-devel nginx python-psutil libxml2-devel libxslt-devel libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 xmlsec1-openssl-devel libtool-ltdl-devel bubblewrap gcc-c++ python-devel krb5-workstation krb5-libs python-crypto libcurl-devel rsync unzip && \
+    yum -y install ansible git mercurial subversion curl python-psycopg2 python-pip python-setuptools libselinux-python setools-libs sudo acl make postgresql10-devel nginx python-psutil libxml2-devel libxslt-devel libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 xmlsec1-openssl-devel libtool-ltdl-devel bubblewrap gcc-c++ python-devel krb5-workstation krb5-libs python-crypto libcurl-devel rsync unzip && \
+    export PATH=/usr/pgsql-10/bin:$PATH && \
     pip install virtualenv supervisor && \
     CFLAGS="-DXMLSEC_NO_SIZE_T" \
     VENV_BASE=/var/lib/awx/venv make requirements_ansible && \
     VENV_BASE=/var/lib/awx/venv make requirements_awx && \
-    yum -y remove gcc postgresql-devel libxml2-devel libxslt-devel cyrus-sasl-devel openldap-devel xmlsec1-devel krb5-devel xmlsec1-openssl-devel libtool-ltdl-devel gcc-c++ python-devel && \
+    yum -y remove gcc postgresql10-devel libxml2-devel libxslt-devel cyrus-sasl-devel openldap-devel xmlsec1-devel krb5-devel xmlsec1-openssl-devel libtool-ltdl-devel gcc-c++ python-devel && \
     yum -y clean all && \
     rm -rf /root/.cache
 
