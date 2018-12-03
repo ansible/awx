@@ -1,33 +1,22 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import {
-  Brand,
-  Button,
-  Level,
-  LevelItem,
-  Login,
-  LoginBox,
-  LoginBoxHeader,
-  LoginBoxBody,
-  LoginFooter,
-  LoginHeaderBrand,
-  TextInput,
+  LoginForm,
+  LoginPage,
 } from '@patternfly/react-core';
 
-import TowerLogo from '../components/TowerLogo';
+import towerLogo from '../../images/tower-logo-header.svg';
 import api from '../api';
 
-const LOGIN_ERROR_MESSAGE = 'Invalid username or password. Please try again.';
-
-class LoginPage extends Component {
+class AtLogin extends Component {
   constructor (props) {
     super(props);
 
     this.state = {
       username: '',
       password: '',
-      error: '',
-      loading: false,
+      isValidPassword: true,
+      loading: false
     };
   }
 
@@ -37,9 +26,9 @@ class LoginPage extends Component {
 
   safeSetState = obj => !this.unmounting && this.setState(obj);
 
-  handleUsernameChange = value => this.safeSetState({ username: value, error: '' });
+  handleUsernameChange = value => this.safeSetState({ username: value, isValidPassword: true });
 
-  handlePasswordChange = value => this.safeSetState({ password: value, error: '' });
+  handlePasswordChange = value => this.safeSetState({ password: value, isValidPassword: true });
 
   handleSubmit = async event => {
     const { username, password, loading } = this.state;
@@ -53,7 +42,7 @@ class LoginPage extends Component {
         await api.login(username, password);
       } catch (error) {
         if (error.response.status === 401) {
-          this.safeSetState({ error: LOGIN_ERROR_MESSAGE });
+          this.safeSetState({ isValidPassword: false });
         }
       } finally {
         this.safeSetState({ loading: false });
@@ -62,75 +51,39 @@ class LoginPage extends Component {
   }
 
   render () {
-    const { username, password, loading, error } = this.state;
-    const { logo, loginInfo } = this.props;
+    const { username, password, isValidPassword } = this.state;
+    const { logo, alt } = this.props;
+    const logoSrc = logo ? `data:image/jpeg;${logo}` : towerLogo;
+    const logoAlt = alt || 'Ansible Tower';
+    const LOGIN_ERROR_MESSAGE = 'Invalid username or password. Please try again.';
+    const LOGIN_TITLE = 'Welcome to Ansible Tower! Please Sign In.';
+    const LOGIN_USERNAME = 'Username';
+    const LOGIN_PASSWORD = 'Password';
 
     if (api.isAuthenticated()) {
       return (<Redirect to="/" />);
     }
 
     return (
-      <Login
-        header={(
-          <LoginHeaderBrand>
-            {logo ? <Brand src={`data:image/jpeg;${logo}`} alt="logo brand" /> : <TowerLogo />}
-          </LoginHeaderBrand>
-        )}
-        footer={<LoginFooter>{ loginInfo }</LoginFooter>}
+      <LoginPage
+        mainBrandImgSrc={logoSrc}
+        mainBrandImgAlt={logoAlt}
+        loginTitle={LOGIN_TITLE}
       >
-        <LoginBox>
-          <LoginBoxHeader>
-            Welcome to Ansible Tower! Please Sign In.
-          </LoginBoxHeader>
-          <LoginBoxBody>
-            <form className="pf-c-form" onSubmit={this.handleSubmit}>
-              <div className="pf-c-form__group" id="username">
-                <label className="pf-c-form__label" htmlFor="username">
-                  Username
-                  <span className="pf-c-form__label__required" aria-hidden="true">&#42;</span>
-                </label>
-                <TextInput
-                  autoComplete="off"
-                  aria-label="Username"
-                  name="username"
-                  type="text"
-                  isDisabled={loading}
-                  value={username}
-                  onChange={this.handleUsernameChange}
-                />
-              </div>
-              <div className="pf-c-form__group" id="password">
-                <label className="pf-c-form__label" htmlFor="pw">
-                  Password
-                  <span className="pf-c-form__label__required" aria-hidden="true">&#42;</span>
-                </label>
-                <TextInput
-                  aria-label="Password"
-                  name="password"
-                  type="password"
-                  isDisabled={loading}
-                  value={password}
-                  onChange={this.handlePasswordChange}
-                />
-              </div>
-              <Level>
-                <LevelItem>
-                  <p className="pf-c-form__helper-text pf-m-error" aria-live="polite">
-                    { error }
-                  </p>
-                </LevelItem>
-                <LevelItem>
-                  <Button type="submit" isDisabled={loading}>
-                    Sign In
-                  </Button>
-                </LevelItem>
-              </Level>
-            </form>
-          </LoginBoxBody>
-        </LoginBox>
-      </Login>
+        <LoginForm
+          usernameLabel={LOGIN_USERNAME}
+          usernameValue={username}
+          onChangeUsername={this.handleUsernameChange}
+          passwordLabel={LOGIN_PASSWORD}
+          passwordValue={password}
+          onChangePassword={this.handlePasswordChange}
+          isValidPassword={isValidPassword}
+          passwordHelperTextInvalid={LOGIN_ERROR_MESSAGE}
+          onLoginButtonClick={this.handleSubmit}
+        />
+      </LoginPage>
     );
   }
 }
 
-export default LoginPage;
+export default AtLogin;
