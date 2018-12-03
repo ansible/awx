@@ -20,7 +20,6 @@ from django.db.models.signals import (
 )
 from django.dispatch import receiver
 from django.contrib.auth import SESSION_KEY
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 
@@ -192,22 +191,28 @@ def sync_superuser_status_to_rbac(instance, **kwargs):
 
 
 def rbac_activity_stream(instance, sender, **kwargs):
-    user_type = ContentType.objects.get_for_model(User)
     # Only if we are associating/disassociating
     if kwargs['action'] in ['pre_add', 'pre_remove']:
-        # Only if this isn't for the User.admin_role
-        if hasattr(instance, 'content_type'):
-            if instance.content_type in [None, user_type]:
+        if hasattr(instance, 'content_type'):  # Duck typing, migration-independent isinstance(instance, Role)
+            if instance.content_type_id is None and instance.singleton_name == ROLE_SINGLETON_SYSTEM_ADMINISTRATOR:
+                # Skip entries for the system admin role because user serializer covers it
+                # System auditor role is shown in the serializer, but its relationship is
+                # managed separately, its value is incorrect, and a correction entry is needed
                 return
-            elif sender.__name__ == 'Role_parents':
+            # This juggles which role to use, because could be A->B or B->A association
+            if sender.__name__ == 'Role_parents':
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
                 # don't record implicit creation / parents in activity stream
                 if role is not None and is_implicit_parent(parent_role=role, child_role=instance):
                     return
             else:
                 role = instance
-            instance = instance.content_object
+            # If a singleton role is the instance, the singleton role is acted on
+            # otherwise the related object is considered to be acted on
+            if instance.content_object:
+                instance = instance.content_object
         else:
+            # Association with actor, like role->user
             role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
 
         activity_stream_associate(sender, instance, role=role, **kwargs)
@@ -403,6 +408,7 @@ def model_serializer_mapping():
     from awx.conf.serializers import SettingSerializer
     return {
         Setting: SettingSerializer,
+        models.User: serializers.UserActivityStreamSerializer,
         models.Organization: serializers.OrganizationSerializer,
         models.Inventory: serializers.InventorySerializer,
         models.Host: serializers.HostSerializer,

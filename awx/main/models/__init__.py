@@ -142,10 +142,15 @@ def user_is_system_auditor(user):
 def user_is_system_auditor(user, tf):
     if user.id:
         if tf:
-            Role.singleton('system_auditor').members.add(user)
+            role = Role.singleton('system_auditor')
+            # must check if member to not duplicate activity stream
+            if user not in role.members.all():
+                role.members.add(user)
             user._is_system_auditor = True
         else:
-            Role.singleton('system_auditor').members.remove(user)
+            role = Role.singleton('system_auditor')
+            if user in role.members.all():
+                role.members.remove(user)
             user._is_system_auditor = False
 
 

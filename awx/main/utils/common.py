@@ -423,10 +423,8 @@ def model_to_dict(obj, serializer_mapping=None):
 
     allowed_fields = get_allowed_fields(obj, serializer_mapping)
 
-    for field in obj._meta.fields:
-        if field.name not in allowed_fields:
-            continue
-        attr_d[field.name] = _convert_model_field_for_display(obj, field.name, password_fields=password_fields)
+    for field_name in allowed_fields:
+        attr_d[field_name] = _convert_model_field_for_display(obj, field_name, password_fields=password_fields)
     return attr_d
 
 
