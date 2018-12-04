@@ -63,6 +63,6 @@ CMD /start_development.sh
 RUN for dir in /var/lib/awx/ /projects /.ansible /var/log/nginx /var/lib/nginx /.local; \
   do mkdir -p $dir; chmod -R g+rwx $dir; chgrp -R root $dir; done
 
-RUN for file in /etc/passwd /supervisor.conf \
+RUN for file in /etc/passwd /etc/supervisord.conf \
   /venv/awx/lib/python2.7/site-packages/awx.egg-link /var/run/nginx.pid; \
   do touch $file; chmod -R g+rwx $file; chgrp -R root $file; done
