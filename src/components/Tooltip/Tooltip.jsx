@@ -45,7 +45,9 @@ class Tooltip extends React.Component {
     return (
       <span
         style={{ position: 'relative' }}
+        className="mouseOutHandler"
         onMouseLeave={() => this.setState({ isDisplayed: false })}
+        onBlur={() => this.setState({ isDisplayed: false })}
       >
         { isDisplayed
           && (
@@ -61,6 +63,7 @@ class Tooltip extends React.Component {
           )
         }
         <span
+          className="mouseOverHandler"
           onMouseOver={() => this.setState({ isDisplayed: true })}
           onFocus={() => this.setState({ isDisplayed: true })}
         >
