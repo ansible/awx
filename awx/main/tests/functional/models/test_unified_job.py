@@ -2,6 +2,9 @@ import itertools
 import pytest
 import six
 
+# CRUM
+from crum import impersonate
+
 # Django
 from django.contrib.contenttypes.models import ContentType
 
@@ -152,6 +155,76 @@ def test_event_processing_not_finished():
 def test_event_model_undefined():
     wj = WorkflowJob.objects.create(name='foobar', status='finished')
     assert wj.event_processing_finished
+
+
+@pytest.mark.django_db
+class TestUpdateParentInstance:
+
+    def test_template_modified_by_not_changed_on_launch(self, job_template, alice):
+        # jobs are launched as a particular user, user not saved as JT modified_by
+        with impersonate(alice):
+            assert job_template.current_job is None
+            assert job_template.status == 'never updated'
+            assert job_template.modified_by is None
+            job = job_template.jobs.create(status='new')
+            job.status = 'pending'
+            job.save()
+            assert job_template.current_job == job
+            assert job_template.status == 'pending'
+            assert job_template.modified_by is None
+
+    def check_update(self, project, status):
+        pu_check = project.project_updates.create(
+            job_type='check', status='new', launch_type='manual'
+        )
+        pu_check.status = 'running'
+        pu_check.save()
+        # these should always be updated for a running check job
+        assert project.current_job == pu_check
+        assert project.status == 'running'
+
+        pu_check.status = status
+        pu_check.save()
+        return pu_check
+
+    def run_update(self, project, status):
+        pu_run = project.project_updates.create(
+            job_type='run', status='new', launch_type='sync'
+        )
+        pu_run.status = 'running'
+        pu_run.save()
+
+        pu_run.status = status
+        pu_run.save()
+        return pu_run
+
+    def test_project_update_fails_project(self, project):
+        # This is the normal server auto-update on create behavior
+        assert project.status == 'never updated'
+        pu_check = self.check_update(project, status='failed')
+
+        assert project.last_job == pu_check
+        assert project.status == 'failed'
+
+    def test_project_sync_with_skip_update(self, project):
+        # syncs may be permitted to change project status
+        # only if prior status is "never updated"
+        assert project.status == 'never updated'
+        pu_run = self.run_update(project, status='successful')
+
+        assert project.last_job == pu_run
+        assert project.status == 'successful'
+
+    def test_project_sync_does_not_fail_project(self, project):
+        # Accurate normal server behavior, creating a project auto-updates
+        # have to create update, otherwise will fight with last_job logic
+        assert project.status == 'never updated'
+        pu_check = self.check_update(project, status='successful')
+        assert project.status == 'successful'
+
+        self.run_update(project, status='failed')
+        assert project.last_job == pu_check
+        assert project.status == 'successful'
 
 
 @pytest.mark.django_db
