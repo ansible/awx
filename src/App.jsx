@@ -57,11 +57,11 @@ const SideNavItems = ({ items, history }) => {
   const currentPath = history.location.pathname.replace(/^\//, '');
   let activeGroup;
   if (currentPath !== '') {
-    const groupPaths = items.map(({ groupName, routes }) => ({
-      groupName,
-      paths: routes.map(({ path }) => path)
-    }));
-    [{ groupName: activeGroup }] = groupPaths
+    [{ groupName: activeGroup }] = items
+      .map(({ groupName, routes }) => ({
+        groupName,
+        paths: routes.map(({ path }) => path)
+      }))
       .filter(({ paths }) => paths.indexOf(currentPath) > -1);
   } else {
     activeGroup = 'views';
