@@ -335,6 +335,13 @@ It's important to note that not all instances are required to be provisioned wit
 Project updates behave differently than they did before. Previously they were ordinary jobs that ran on a single instance. It's now important that
 they run successfully on any instance that could potentially run a job. Project's will now sync themselves to the correct version on the instance immediately
 prior to running the job.
+When the sync happens, it is recorded in the database as a project update with a `launch_type` of "sync"
+and a `job_type` of "run". Project syncs will not change the status or version of the project,
+instead, they will update the source tree only on the instance where they run.
+The only exception to this behavior is when the project is in the "never updated" state
+(meaning that no project updates of any type have been ran),
+in which case a sync should fill in the project's initial revision and status, and subsequent
+syncs should not make such changes.
 
 If an Instance Group is configured but all instances in that group are offline or unavailable, any jobs that are launched targeting only that group will be stuck
 in a waiting state until instances become available. Fallback or backup resources should be provisioned to handle any work that might encounter this scenario.

@@ -475,6 +475,21 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin, TaskManage
     def _get_parent_field_name(self):
         return 'project'
 
+    def _update_parent_instance(self):
+        if not self.project:
+            return  # no parent instance to update
+        if self.job_type == PERM_INVENTORY_DEPLOY:
+            # Do not update project status if this is sync job
+            # unless no other updates have happened or started
+            first_update = False
+            if self.project.status == 'never updated' and self.status == 'running':
+                first_update = True
+            elif self.project.current_job == self:
+                first_update = True
+            if not first_update:
+                return
+        return super(ProjectUpdate, self)._update_parent_instance()
+
     @classmethod
     def _get_task_class(cls):
         from awx.main.tasks import RunProjectUpdate
