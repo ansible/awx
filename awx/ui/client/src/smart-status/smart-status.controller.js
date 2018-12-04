@@ -21,19 +21,16 @@ export default ['$scope', '$filter', 'i18n',
                 return;
             }
 
-            // unless we explicitly define a value for the template-type attribute when invoking the
-            // directive, assume the status icons are for a regular (non-workflow) job when building
-            // the details url path
-            if (typeof $scope.templateType !== 'undefined' && $scope.templateType === 'workflow_job_template') {
-                detailsBaseUrl = '/#/workflows/';
-            } else {
-                detailsBaseUrl = '/#/jobs/playbook/';
-            }
-
             var sparkData =
             _.sortBy(recentJobs.map(function(job) {
-
                 const finished = $filter('longDate')(job.finished) || job.status+"";
+
+                // We now get the job type of recent jobs associated with a JT
+                if (job.type === 'workflow job') {
+                    detailsBaseUrl = '/#/workflows/';
+                } else if (job.type === 'job') {
+                    detailsBaseUrl = '/#/jobs/playbook/';
+                }
 
                 const data = {
                     status: job.status,
