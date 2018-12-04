@@ -65,8 +65,13 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
                             $('#instance-groups-modal-body').append($compile(html)($scope));
 
                             if ($scope.instanceGroups) {
-                                $scope.instance_groups.map( (item) => {
-                                    isSelected(item);
+                                $scope.instanceGroups = $scope.instanceGroups.map( (item) => {
+                                    item.isSelected = true;
+                                    if (!$scope.igTags) {
+                                        $scope.igTags = [];
+                                    }
+                                    $scope.igTags.push(item);
+                                    return item;
                                 });
                             }
 
@@ -82,21 +87,9 @@ export default ['templateUrl', '$window', function(templateUrl, $window) {
                             });
                         });
                     });
-
             }
 
             init();
-
-            function isSelected(item) {
-                if(_.find($scope.instanceGroups, {id: item.id})){
-                    item.isSelected = true;
-                    if (!$scope.igTags) {
-                        $scope.igTags = [];
-                    }
-                    $scope.igTags.push(item);
-                }
-                return item;
-            }
 
             $scope.$on("selectedOrDeselected", function(e, value) {
                 let item = value.value;
