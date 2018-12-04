@@ -42,7 +42,7 @@ const DetailTab = ({ location, match, tab, currentTab, children, breadcrumb }) =
 
   return (
     <ToolbarItem className={tabClasses()}>
-      <Link to={{ pathname: `${match.url}`, search: updateTab(), state: { breadcrumb } }}>
+      <Link to={{ pathname: `${match.url}`, search: updateTab(), state: { breadcrumb } }} replace={tab === currentTab}>
         {children}
       </Link>
     </ToolbarItem>
