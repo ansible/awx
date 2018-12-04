@@ -8,7 +8,7 @@ describe('<Organizations />', () => {
     mount(
       <MemoryRouter initialEntries={['/organizations']} initialIndex={0}>
         <Organizations
-          match={{ path: '/organizations', route: '/organizations', link: 'organizations' }}
+          match={{ path: '/organizations', url: '/organizations' }}
           location={{ search: '', pathname: '/organizations' }}
         />
       </MemoryRouter>
