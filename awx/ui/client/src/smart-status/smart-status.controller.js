@@ -26,7 +26,7 @@ export default ['$scope', '$filter', 'i18n',
                 const finished = $filter('longDate')(job.finished) || job.status+"";
 
                 // We now get the job type of recent jobs associated with a JT
-                if (job.type === 'workflow job') {
+                if (job.type === 'workflow_job') {
                     detailsBaseUrl = '/#/workflows/';
                 } else if (job.type === 'job') {
                     detailsBaseUrl = '/#/jobs/playbook/';

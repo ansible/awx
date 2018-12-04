@@ -697,9 +697,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     )
 
     def get_absolute_url(self, request=None):
-        real_instance = self.get_real_instance()
-        if real_instance != self:
-            return real_instance.get_absolute_url(request=request)
+        RealClass = self.get_real_instance_class()
+        if RealClass != UnifiedJob:
+            return RealClass.get_absolute_url(RealClass(pk=self.pk), request=request)
         else:
             return ''
 

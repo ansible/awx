@@ -1276,6 +1276,7 @@ class JobTemplateAccess(BaseAccess):
         'instance_groups',
         'credentials__credential_type',
         Prefetch('labels', queryset=Label.objects.all().order_by('name')),
+        Prefetch('last_job', queryset=UnifiedJob.objects.non_polymorphic()),
     )
 
     def filtered_queryset(self):

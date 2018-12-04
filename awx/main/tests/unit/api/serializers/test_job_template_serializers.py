@@ -69,35 +69,17 @@ class TestJobTemplateSerializerGetRelated():
 
 
 class TestJobTemplateSerializerGetSummaryFields():
-    def test__recent_jobs(self, mocker, job_template, jobs):
-
-        job_template.unifiedjob_unified_jobs = mocker.MagicMock(**{
-            'non_polymorphic.return_value': mocker.MagicMock(**{
-                'only.return_value': mocker.MagicMock(**{
-                    'order_by.return_value': jobs
-                })
-            })
-        })
-
-        serializer = JobTemplateSerializer()
-        recent_jobs = serializer._recent_jobs(job_template)
-
-        job_template.unifiedjob_unified_jobs.non_polymorphic.assert_called_once_with()
-        job_template.unifiedjob_unified_jobs.non_polymorphic().only().order_by.assert_called_once_with('-created')
-
-        job_template.jobs.all.assert_called_once_with()
-        job_template.jobs.all.order_by.assert_called_once_with('-created')
-        assert len(recent_jobs) == 10
-        for x in jobs[:10]:
-            assert recent_jobs == [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in jobs[:10]]
-
     def test_survey_spec_exists(self, test_get_summary_fields, mocker, job_template):
         job_template.survey_spec = {'name': 'blah', 'description': 'blah blah'}
-        test_get_summary_fields(JobTemplateSerializer, job_template, 'survey')
+        with mocker.patch.object(JobTemplateSerializer, '_recent_jobs') as mock_rj:
+            mock_rj.return_value = []
+            test_get_summary_fields(JobTemplateSerializer, job_template, 'survey')
 
-    def test_survey_spec_absent(self, get_summary_fields_mock_and_run, job_template):
+    def test_survey_spec_absent(self, get_summary_fields_mock_and_run, mocker, job_template):
         job_template.survey_spec = None
-        summary = get_summary_fields_mock_and_run(JobTemplateSerializer, job_template)
+        with mocker.patch.object(JobTemplateSerializer, '_recent_jobs') as mock_rj:
+            mock_rj.return_value = []
+            summary = get_summary_fields_mock_and_run(JobTemplateSerializer, job_template)
         assert 'survey' not in summary
 
     def test_copy_edit_standard(self, mocker, job_template_factory):

@@ -4,9 +4,11 @@ import mock
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from crum import impersonate
+import datetime
 
 # Django rest framework
 from rest_framework.exceptions import PermissionDenied
+from django.utils import timezone
 
 # AWX
 from awx.api.versioning import reverse
@@ -123,6 +125,31 @@ def test_job_relaunch_on_failed_hosts(post, inventory, project, machine_credenti
 
 
 @pytest.mark.django_db
+def test_summary_fields_recent_jobs(job_template, admin_user, get):
+    jobs = []
+    for i in range(13):
+        jobs.append(Job.objects.create(
+            job_template=job_template,
+            status='failed',
+            created=timezone.make_aware(datetime.datetime(2017, 3, 21, 9, i)),
+            finished=timezone.make_aware(datetime.datetime(2017, 3, 21, 10, i))
+        ))
+    r = get(
+        url = job_template.get_absolute_url(),
+        user = admin_user,
+        exepect = 200
+    )
+    recent_jobs = r.data['summary_fields']['recent_jobs']
+    assert len(recent_jobs) == 10
+    assert recent_jobs == [{
+        'id': job.id,
+        'status': 'failed',
+        'finished': job.finished,
+        'type': 'job'
+    } for job in jobs[-10:][::-1]]
+
+
+@pytest.mark.django_db
 def test_slice_jt_recent_jobs(slice_job_factory, admin_user, get):
     workflow_job = slice_job_factory(3, spawn=True)
     slice_jt = workflow_job.job_template
@@ -132,10 +159,9 @@ def test_slice_jt_recent_jobs(slice_job_factory, admin_user, get):
         expect=200
     )
     job_ids = [entry['id'] for entry in r.data['summary_fields']['recent_jobs']]
-    assert workflow_job.pk not in job_ids
-    for node in workflow_job.workflow_nodes.all():
-        job = node.job
-        assert job.pk in job_ids
+    # decision is that workflow job should be shown in the related jobs
+    # joblets of the workflow job should NOT be shown
+    assert job_ids == [workflow_job.pk]
 
 
 @pytest.mark.django_db
