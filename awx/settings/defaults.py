@@ -1116,11 +1116,11 @@ LOGGING = {
             'handlers': ['console'],
         },
         'django.request': {
-            'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
+            'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
         },
         'rest_framework.request': {
-            'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
+            'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'WARNING',
             'propagate': False,
         },
