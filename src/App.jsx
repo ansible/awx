@@ -54,7 +54,7 @@ import Templates from './pages/Templates';
 import Users from './pages/Users';
 
 const SideNavItems = ({ items, history }) => {
-  const currentPath = history.location.pathname.replace(/^\//, '');
+  const currentPath = history.location.pathname.split('/')[1];
   let activeGroup;
   if (currentPath !== '') {
     [{ groupName: activeGroup }] = items
@@ -108,23 +108,9 @@ class App extends React.Component {
   }
 
   onDevLogout = async () => {
-    console.log('called')
     await api.get(API_LOGOUT);
     this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
-
-    console.log(this.state);
   }
-
-  expand = (path, group) => {
-    const { history } = this.props;
-    const { activeGroup } = this.state;
-
-    const currentPath = history.location.pathname.split('/')[1];
-    if ((path === currentPath) && (group !== activeGroup)) {
-      this.setState({ activeGroup: group });
-    }
-    return (path === currentPath);
-  };
 
   render () {
     const { isNavOpen } = this.state;
@@ -197,7 +183,7 @@ class App extends React.Component {
                                 },
                                 {
                                   path: 'portal',
-                                  title: 'Portal'
+                                  title: 'Portal Mode'
                                 },
                               ]
                             },
@@ -224,6 +210,76 @@ class App extends React.Component {
                                 {
                                   path: 'inventory_scripts',
                                   title: 'Inventory Scripts'
+                                }
+                              ]
+                            },
+                            {
+                              groupName: 'access',
+                              title: 'Access',
+                              routes: [
+                                {
+                                  path: 'organizations',
+                                  title: 'Organizations'
+                                },
+                                {
+                                  path: 'users',
+                                  title: 'Users'
+                                },
+                                {
+                                  path: 'teams',
+                                  title: 'Teams'
+                                }
+                              ]
+                            },
+                            {
+                              groupName: 'administration',
+                              title: 'Administration',
+                              routes: [
+                                {
+                                  path: 'credential_types',
+                                  title: 'Credential Types',
+                                },
+                                {
+                                  path: 'notification_templates',
+                                  title: 'Notifications'
+                                },
+                                {
+                                  path: 'management_jobs',
+                                  title: 'Management Jobs'
+                                },
+                                {
+                                  path: 'instance_groups',
+                                  title: 'Instance Groups'
+                                },
+                                {
+                                  path: 'applications',
+                                  title: 'Integrations'
+                                }
+                              ]
+                            },
+                            {
+                              groupName: 'settings',
+                              title: 'Settings',
+                              routes: [
+                                {
+                                  path: 'auth_settings',
+                                  title: 'Authentication',
+                                },
+                                {
+                                  path: 'jobs_settings',
+                                  title: 'Jobs'
+                                },
+                                {
+                                  path: 'system_settings',
+                                  title: 'System'
+                                },
+                                {
+                                  path: 'ui_settings',
+                                  title: 'User Interface'
+                                },
+                                {
+                                  path: 'license',
+                                  title: 'License'
                                 }
                               ]
                             }

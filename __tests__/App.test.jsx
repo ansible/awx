@@ -1,8 +1,6 @@
 import React from 'react';
 import { HashRouter as Router } from 'react-router-dom';
 import { shallow, mount } from 'enzyme';
-import { createMemoryHistory } from 'history'
-
 import App from '../src/App';
 import api from '../src/api';
 import { API_LOGOUT } from '../src/endpoints';
@@ -44,27 +42,15 @@ describe('<App />', () => {
     expect(login.length).toBe(0);
   });
 
-  test('onNavSelect sets state.activeItem and state.activeGroup', () => {
-    const history = createMemoryHistory('/jobs');
-    const appWrapper = shallow(<App.WrappedComponent history={history} />);
-
-    appWrapper.instance().onNavSelect({ groupId: 'bar' });
-    expect(appWrapper.state().activeGroup).toBe('bar');
-  });
-
   test('onNavToggle sets state.isNavOpen to opposite', () => {
-    const history = createMemoryHistory('/jobs');
-
-    const appWrapper = shallow(<App.WrappedComponent history={history} />);
+    const appWrapper = shallow(<App.WrappedComponent />);
     expect(appWrapper.state().isNavOpen).toBe(true);
     appWrapper.instance().onNavToggle();
     expect(appWrapper.state().isNavOpen).toBe(false);
   });
 
   test('onLogoClick sets selected nav back to defaults', () => {
-    const history = createMemoryHistory('/jobs');
-
-    const appWrapper = shallow(<App.WrappedComponent history={history} />);
+    const appWrapper = shallow(<App.WrappedComponent />);
     appWrapper.setState({ activeGroup: 'foo', activeItem: 'bar' });
     expect(appWrapper.state().activeItem).toBe('bar');
     expect(appWrapper.state().activeGroup).toBe('foo');
@@ -74,18 +60,13 @@ describe('<App />', () => {
 
   test('api.logout called from logout button', async () => {
     api.get = jest.fn().mockImplementation(() => Promise.resolve({}));
-    let appWrapper = mount(<Router><App /></Router>);
-    let logoutButton = appWrapper.find('LogoutButton');
-    logoutButton.props().onDevLogout();
+    const appWrapper = shallow(<App.WrappedComponent />);
+    appWrapper.instance().onDevLogout();
     appWrapper.setState({ activeGroup: 'foo', activeItem: 'bar' });
-
-    await asyncFlush();
-
     expect(api.get).toHaveBeenCalledTimes(1);
     expect(api.get).toHaveBeenCalledWith(API_LOGOUT);
-
-    console.log(appWrapper.state());
+    await asyncFlush();
+    expect(appWrapper.state().activeItem).toBe(DEFAULT_ACTIVE_ITEM);
     expect(appWrapper.state().activeGroup).toBe(DEFAULT_ACTIVE_GROUP);
   });
-
 });
