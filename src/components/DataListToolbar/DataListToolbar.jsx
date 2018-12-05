@@ -73,14 +73,6 @@ class DataListToolbar extends React.Component {
     this.setState({ isSearchDropdownOpen: false, searchKey: key });
   };
 
-  // onActionToggle = isActionDropdownOpen => {
-  //   this.setState({ isActionDropdownOpen });
-  // };
-
-  // onActionSelect = () => {
-  //   this.setState({ isActionDropdownOpen: false });
-  // };
-
   render () {
     const { up } = DropdownPosition;
     const {
