@@ -3,8 +3,21 @@ import {
   Badge,
   Checkbox,
 } from '@patternfly/react-core';
+import {
+  Link
+} from 'react-router-dom';
 
-export default ({ itemId, name, userCount, teamCount, adminCount, isSelected, onSelect }) => (
+export default ({
+  itemId,
+  name,
+  userCount,
+  teamCount,
+  adminCount,
+  isSelected,
+  onSelect,
+  detailUrl,
+  parentBreadcrumb
+}) => (
   <li key={itemId} className="pf-c-data-list__item" aria-labelledby="check-action-item1">
     <div className="pf-c-data-list__check">
       <Checkbox
@@ -16,23 +29,36 @@ export default ({ itemId, name, userCount, teamCount, adminCount, isSelected, on
     </div>
     <div className="pf-c-data-list__cell">
       <span id="check-action-item1">
-        <a href={`#/organizations/${itemId}`}>{ name }</a>
+        <Link
+          to={{
+            pathname: detailUrl,
+            state: { breadcrumb: [parentBreadcrumb, { name, url: detailUrl }] }
+          }}
+        >
+          {name}
+        </Link>
       </span>
     </div>
     <div className="pf-c-data-list__cell">
-      <a href="#/dashboard"> Users </a>
+      <Link to={`${detailUrl}?tab=users`}>
+        Users
+      </Link>
       <Badge isRead>
         {' '}
         {userCount}
         {' '}
       </Badge>
-      <a href="#/dashboard"> Teams </a>
+      <Link to={`${detailUrl}?tab=teams`}>
+        Teams
+      </Link>
       <Badge isRead>
         {' '}
         {teamCount}
         {' '}
       </Badge>
-      <a href="#/dashboard"> Admins </a>
+      <Link to={`${detailUrl}?tab=admins`}>
+        Admins
+      </Link>
       <Badge isRead>
         {' '}
         {adminCount}

@@ -1,0 +1,21 @@
+import React, { Fragment } from 'react';
+import {
+  PageSection,
+  PageSectionVariants,
+  Title,
+} from '@patternfly/react-core';
+
+const { light, medium } = PageSectionVariants;
+
+const OrganizationView = () => (
+  <Fragment>
+    <PageSection variant={light} className="pf-m-condensed">
+      <Title size="2xl">Organization Add</Title>
+    </PageSection>
+    <PageSection variant={medium}>
+      This is the add view
+    </PageSection>
+  </Fragment>
+);
+
+export default OrganizationView;
