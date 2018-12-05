@@ -1,6 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
 
+import {
+  HashRouter as Router
+} from 'react-router-dom';
 import App from './App';
 import api from './api';
 import { API_ROOT } from './endpoints';
@@ -15,8 +18,8 @@ import './components/DataListToolbar/styles.scss';
 const el = document.getElementById('app');
 
 const main = async () => {
-    const { custom_logo, custom_login_info } = await api.get(API_ROOT);
-    render(<App logo={custom_logo} loginInfo={custom_login_info} />, el);
+  const { custom_logo, custom_login_info } = await api.get(API_ROOT);
+  render(<Router><App logo={custom_logo} loginInfo={custom_login_info} /></Router>, el);
 };
 
 main();
