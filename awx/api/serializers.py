@@ -2983,12 +2983,16 @@ class JobTemplateMixin(object):
     '''
 
     def _recent_jobs(self, obj):
-        if hasattr(obj, 'workflow_jobs'):
-            job_mgr = obj.workflow_jobs
-        else:
-            job_mgr = obj.jobs
-        return [{'id': x.id, 'status': x.status, 'finished': x.finished}
-                for x in job_mgr.all().order_by('-created')[:10]]
+        # Exclude "joblets", jobs that ran as part of a sliced workflow job
+        uj_qs = obj.unifiedjob_unified_jobs.exclude(job__job_slice_count__gt=1).order_by('-created')
+        # Would like to apply an .only, but does not play well with non_polymorphic
+        # .only('id', 'status', 'finished', 'polymorphic_ctype_id')
+        optimized_qs = uj_qs.non_polymorphic()
+        return [{
+            'id': x.id, 'status': x.status, 'finished': x.finished,
+            # Make type consistent with API top-level key, for instance workflow_job
+            'type': x.get_real_instance_class()._meta.verbose_name.replace(' ', '_')
+        } for x in optimized_qs[:10]]
 
     def get_summary_fields(self, obj):
         d = super(JobTemplateMixin, self).get_summary_fields(obj)
