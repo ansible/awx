@@ -15,12 +15,12 @@
     <at-row ng-repeat="user in users">
         <div class="at-Row-items">
             <at-row-item
-                header-value="{{ user.summary_fields.user.username }}"
+                header-value="{{ user.summary_fields.user.username | sanitize }}"
                 header-link="/#/users/{{ user.summary_fields.user.id }}">
             </at-row-item>
             <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_DESCRIPTION') }}"
-                value="{{ user.description }}">
+                value="{{ user.description | sanitize }}">
             </at-row-item>
             <at-row-item
                 label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_EXPIRED') }}"
