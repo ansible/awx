@@ -152,7 +152,7 @@ export default ['$scope', 'TemplatesService',
 
                                 credentialIdsToPost.forEach((credentialToPost) => {
                                     credentialRequests.push({
-                                        id: data.data.id,
+                                        id: data.id,
                                         data: {
                                             id: credentialToPost.id
                                         }
