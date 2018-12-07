@@ -49,11 +49,11 @@ export default
 
                 if (scope.promptData.launchConf.survey_enabled){
                     scope.promptData.surveyQuestions.forEach(surveyQuestion => {
+                        if (!scope.promptData.extraVars) {
+                            scope.promptData.extraVars = {};
+                        }
                         // grab all survey questions that have answers
                         if (surveyQuestion.required || (surveyQuestion.required === false && surveyQuestion.model.toString()!=="")) {
-                            if (!scope.promptData.extraVars) {
-                                scope.promptData.extraVars = {};
-                            }
                             scope.promptData.extraVars[surveyQuestion.variable] = surveyQuestion.model;
                         }
 
