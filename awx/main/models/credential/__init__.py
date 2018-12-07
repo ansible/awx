@@ -479,6 +479,9 @@ class CredentialType(CommonModelNameNotUnique):
     )
 
     def get_absolute_url(self, request=None):
+        # Page does not exist in API v1
+        if request.version == 'v1':
+            return reverse('api:credential_type_detail', kwargs={'pk': self.pk})
         return reverse('api:credential_type_detail', kwargs={'pk': self.pk}, request=request)
 
     @property

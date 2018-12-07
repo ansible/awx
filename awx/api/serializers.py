@@ -4938,10 +4938,6 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_related(self, obj):
         rel = {}
-        VIEW_NAME_EXCEPTIONS = {
-            'custom_inventory_script': 'inventory_script_detail',
-            'o_auth2_access_token': 'o_auth2_token_detail'
-        }
         if obj.actor is not None:
             rel['actor'] = self.reverse('api:user_detail', kwargs={'pk': obj.actor.pk})
         for fk, __ in self._local_summarizable_fk_fields:
@@ -4955,11 +4951,12 @@ class ActivityStreamSerializer(BaseSerializer):
                     if getattr(thisItem, 'id', None) in id_list:
                         continue
                     id_list.append(getattr(thisItem, 'id', None))
-                    if fk in VIEW_NAME_EXCEPTIONS:
-                        view_name = VIEW_NAME_EXCEPTIONS[fk]
+                    if hasattr(thisItem, 'get_absolute_url'):
+                        rel_url = thisItem.get_absolute_url(self.context.get('request'))
                     else:
                         view_name = fk + '_detail'
-                    rel[fk].append(self.reverse('api:' + view_name, kwargs={'pk': thisItem.id}))
+                        rel_url = self.reverse('api:' + view_name, kwargs={'pk': thisItem.id})
+                    rel[fk].append(rel_url)
 
                     if fk == 'schedule':
                         rel['unified_job_template'] = thisItem.unified_job_template.get_absolute_url(self.context.get('request'))
