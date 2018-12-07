@@ -30,6 +30,7 @@ azure-graphrbac==0.40.0
 # AWS
 boto==2.47.0    # last which does not break ec2 scripts
 boto3==1.6.2
+google-auth==1.6.2  # needed for gce inventory imports
 # netconf for network modules
 ncclient==0.6.3
 # netaddr filter

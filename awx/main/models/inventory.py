@@ -10,6 +10,11 @@ import re
 import copy
 import os.path
 from urllib.parse import urljoin
+import yaml
+import configparser
+import stat
+import tempfile
+from distutils.version import LooseVersion as Version
 
 # Django
 from django.conf import settings
@@ -1015,6 +1020,8 @@ class InventorySourceOptions(BaseModel):
     Common fields for InventorySource and InventoryUpdate.
     '''
 
+    injectors = dict()
+
     SOURCE_CHOICES = [
         ('', _('Manual')),
         ('file', _('File, Directory or Script')),
@@ -1308,6 +1315,8 @@ class InventorySourceOptions(BaseModel):
         return None
 
     def get_inventory_plugin_name(self):
+        if self.source in InventorySourceOptions.injectors:
+            return InventorySourceOptions.injectors[self.source].plugin_name
         if self.source in CLOUD_PROVIDERS or self.source == 'custom':
             # TODO: today, all vendored sources are scripts
             # in future release inventory plugins will replace these
@@ -1532,8 +1541,15 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMix
             return bool(self.source_script)
         elif self.source == 'scm':
             return bool(self.source_project)
-        else:
-            return bool(self.source in CLOUD_INVENTORY_SOURCES)
+        elif self.source == 'file':
+            return False
+        elif self.source == 'ec2':
+            # Permit credential-less ec2 updates to allow IAM roles
+            return True
+        elif self.source == 'gce':
+            # These updates will hang if correct credential is not supplied
+            return bool(self.get_cloud_credential().kind == 'gce')
+        return True
 
     def create_inventory_update(self, **kwargs):
         return self.create_unified_job(**kwargs)
@@ -1695,6 +1711,14 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/jobs/inventory/{}".format(self.pk))
 
+    @property
+    def ansible_virtualenv_path(self):
+        if self.inventory and self.inventory.organization:
+            virtualenv = self.inventory.organization.custom_virtualenv
+            if virtualenv:
+                return virtualenv
+        return settings.ANSIBLE_VENV_PATH
+
     def get_actual_source_path(self):
         '''Alias to source_path that combines with project path for for SCM file based sources'''
         if self.inventory_source_id is None or self.inventory_source.source_project_id is None:
@@ -1717,13 +1741,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
     def can_start(self):
         if not super(InventoryUpdate, self).can_start:
             return False
-
-        if (self.source not in ('custom', 'ec2', 'scm') and
-                not (self.get_cloud_credential())):
-            return False
-        elif self.source == 'scm' and not self.inventory_source.source_project:
-            return False
-        elif self.source == 'file':
+        elif not self.inventory_source or not self.inventory_source._can_update():
             return False
         return True
 
@@ -1801,3 +1819,88 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
 
     def get_absolute_url(self, request=None):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
+
+
+# TODO: move these to their own file somewhere?
+class PluginFileInjector(object):
+    plugin_name = None
+    initial_version = None
+
+    def __init__(self, ansible_version):
+        # This is InventoryOptions instance, could be source or inventory update
+        self.ansible_version = ansible_version
+
+    @property
+    def filename(self):
+        return '{0}.yml'.format(self.plugin_name)
+
+    def inventory_contents(self, inventory_source):
+        return yaml.safe_dump(self.inventory_as_dict(inventory_source), default_flow_style=False)
+
+    def should_use_plugin(self):
+        return bool(
+            self.initial_version and
+            Version(self.ansible_version) >= Version(self.initial_version)
+        )
+
+    def build_env(self, *args, **kwargs):
+        if self.should_use_plugin():
+            return self.build_plugin_env(*args, **kwargs)
+        else:
+            return self.build_script_env(*args, **kwargs)
+
+    def build_plugin_env(self, inventory_update, env, private_data_dir):
+        return env
+
+    def build_script_env(self, inventory_update, env, private_data_dir):
+        return env
+
+    def build_private_data(self, *args, **kwargs):
+        if self.should_use_plugin():
+            return self.build_private_data(*args, **kwargs)
+        else:
+            return self.build_private_data(*args, **kwargs)
+
+    def build_script_private_data(self, *args, **kwargs):
+        pass
+
+    def build_plugin_private_data(self, *args, **kwargs):
+        pass
+
+
+class gce(PluginFileInjector):
+    plugin_name = 'gcp_compute'
+    initial_version = '2.6'
+
+    def build_script_env(self, inventory_update, env, private_data_dir):
+        env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''  # noqa
+
+        # by default, the GCE inventory source caches results on disk for
+        # 5 minutes; disable this behavior
+        cp = configparser.ConfigParser()
+        cp.add_section('cache')
+        cp.set('cache', 'cache_max_age', '0')
+        handle, path = tempfile.mkstemp(dir=private_data_dir)
+        cp.write(os.fdopen(handle, 'w'))
+        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+        env['GCE_INI_PATH'] = path
+        return env
+
+    def inventory_as_dict(self, inventory_source):
+        # NOTE: generalizing this to be use templating like credential types would be nice
+        # but with YAML content that need to inject list parameters into the YAML,
+        # it is hard to see any clean way we can possibly do this
+        ret = dict(
+            plugin='gcp_compute',
+            projects=[inventory_source.get_cloud_credential().project],
+            filters=None,  # necessary cruft, see: https://github.com/ansible/ansible/pull/50025
+            service_account_file="creds.json",
+            auth_kind="serviceaccount"
+        )
+        if inventory_source.source_regions:
+            ret['zones'] = inventory_source.source_regions.split(',')
+        return ret
+
+
+for cls in PluginFileInjector.__subclasses__():
+    InventorySourceOptions.injectors[cls.__name__] = cls

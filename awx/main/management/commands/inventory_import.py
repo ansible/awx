@@ -124,7 +124,13 @@ class AnsibleInventoryLoader(object):
 
     def get_base_args(self):
         # get ansible-inventory absolute path for running in bubblewrap/proot, in Popen
-        bargs= [self.get_path_to_ansible_inventory(), '-i', self.source]
+
+        # NOTE:  why do we add "python" to the start of these args?
+        # the script that runs ansible-inventory specifies a python interpreter
+        # that makes no sense in light of the fact that we put all the dependencies
+        # inside of /venv/ansible, so we override the specified interpreter
+        # https://github.com/ansible/ansible/issues/50714
+        bargs= ['python', self.get_path_to_ansible_inventory(), '-i', self.source]
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 

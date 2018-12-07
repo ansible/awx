@@ -38,6 +38,7 @@ bcrypt==3.1.4             # via paramiko
 boto3==1.6.2
 boto==2.47.0
 botocore==1.9.3           # via boto3, s3transfer
+cachetools==3.0.0         # via google-auth
 certifi==2018.1.18        # via msrest, requests
 cffi==1.11.5              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
@@ -50,6 +51,8 @@ docutils==0.14            # via botocore
 dogpile.cache==0.6.5      # via openstacksdk
 entrypoints==0.2.3        # via keyring
 enum34==1.1.6; python_version < '3' # via cryptography, knack, msrest, ovirt-engine-sdk-python
+futures==3.2.0            # via openstacksdk, s3transfer
+google-auth==1.6.2
 humanfriendly==4.8        # via azure-cli-core
 idna==2.6                 # via cryptography, requests
 ipaddress==1.0.19         # via cryptography, openstacksdk
@@ -81,6 +84,7 @@ pbr==3.1.1                # via keystoneauth1, openstacksdk, os-service-types, s
 pexpect==4.6.0
 psutil==5.4.3
 ptyprocess==0.5.2         # via pexpect
+pyasn1-modules==0.2.3     # via google-auth
 pyasn1==0.4.2             # via paramiko
 pycparser==2.18           # via cffi
 pycurl==7.43.0.1          # via ovirt-engine-sdk-python
@@ -100,11 +104,12 @@ requests-ntlm==1.1.0      # via pywinrm
 requests-oauthlib==0.8.0  # via msrest
 requests==2.20.0
 requestsexceptions==1.4.0  # via openstacksdk, os-client-config
+rsa==4.0                  # via google-auth
 s3transfer==0.1.13        # via boto3
 secretstorage==2.3.1      # via keyring
 selectors2==2.0.1         # via ncclient
 shade==1.27.0
-six==1.11.0               # via azure-cli-core, bcrypt, cryptography, isodate, keystoneauth1, knack, munch, ncclient, ntlm-auth, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, pyvmomi, pywinrm, stevedore
+six==1.11.0               # via azure-cli-core, bcrypt, cryptography, google-auth, isodate, keystoneauth1, knack, munch, ncclient, ntlm-auth, openstacksdk, ovirt-engine-sdk-python, packaging, pynacl, pyopenssl, python-dateutil, pyvmomi, pywinrm, stevedore
 stevedore==1.28.0         # via keystoneauth1
 tabulate==0.7.7           # via azure-cli-core, knack
 urllib3==1.24             # via requests
