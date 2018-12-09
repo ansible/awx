@@ -9,7 +9,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render, render_to_response
 from django.template import loader
 
-from .cov import cov
+from ..coverage_wsgi import cov
 
 def start_coverage(request):
     cov.erase()
@@ -26,8 +26,9 @@ def stop_coverage(request):
         raise Http404("""
             Insufficient data collected to create report.
             If you have not started data collection, do so at /coverage/start/
-            If you have started data collection, you just need to excercise the application more,
-            or not rapidly toggle between /coverage/start/ and /coverage/stop/
+            If you have started data collection, you need to excercise the application more,
+            or not rapidly toggle between /coverage/start/ and /coverage/stop/.
+            Restart coverage at /coverage/start/ and try again.
             """)
     return HttpResponse('Stopped and saved data from code coverage')
 

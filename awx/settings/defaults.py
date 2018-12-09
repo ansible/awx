@@ -11,13 +11,6 @@ from django.conf import global_settings
 # ugettext lazy
 from django.utils.translation import ugettext_lazy as _
 
-###############################################################################
-# COVERAGE SETTINGS
-###############################################################################
-
-COVERAGE_ENABLED = os.environ.get("COVERAGE_ENABLED", False)
-
-###############################################################################
 
 # Update this module's local settings from the global settings module.
 this_module = sys.modules[__name__]
@@ -301,12 +294,19 @@ INSTALLED_APPS = (
     'solo'
 )
 
+###############################################################################
+# COVERAGE SETTINGS
+###############################################################################
+
+COVERAGE_ENABLED = os.environ.get("COVERAGE_ENABLED", False)
+
 if COVERAGE_ENABLED:
     print("COVERAGE ENABLED, ADDING APP TO INSTALLED APPS")
     INSTALLED_APPS += ('awx.maximum_parsimony',)
     TEMPLATES[0]['DIRS'].append(
         os.path.join(BASE_DIR, 'maximum_parsimony/htmlcov')
     )
+###############################################################################
 
 INTERNAL_IPS = ('127.0.0.1',)
 
