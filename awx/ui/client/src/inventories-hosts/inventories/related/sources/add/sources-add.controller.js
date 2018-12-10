@@ -185,10 +185,6 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
 
             if (source === 'scm') {
                 $scope.projectBasePath = GetBasePath('projects')  + '?not__status=never updated';
-                $scope.overwrite_vars = true;
-                $scope.inventory_source_form.inventory_file.$setPristine();
-            } else {
-                $scope.overwrite_vars = false;
             }
 
             // reset fields
@@ -201,6 +197,7 @@ export default ['$state', '$stateParams', '$scope', 'SourcesFormDefinition',
             $scope.credential_name = null;
             $scope.group_by = null;
             $scope.group_by_choices = [];
+            $scope.overwrite_vars = false;
             initRegionSelect();
         };
         // region / source options callback
