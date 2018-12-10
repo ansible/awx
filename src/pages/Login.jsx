@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
+import { I18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   LoginForm,
   LoginPage,
@@ -54,34 +56,33 @@ class AtLogin extends Component {
     const { username, password, isValidPassword } = this.state;
     const { logo, alt } = this.props;
     const logoSrc = logo ? `data:image/jpeg;${logo}` : towerLogo;
-    const logoAlt = alt || 'Ansible Tower';
-    const LOGIN_ERROR_MESSAGE = 'Invalid username or password. Please try again.';
-    const LOGIN_TITLE = 'Welcome to Ansible Tower! Please Sign In.';
-    const LOGIN_USERNAME = 'Username';
-    const LOGIN_PASSWORD = 'Password';
 
     if (api.isAuthenticated()) {
       return (<Redirect to="/" />);
     }
 
     return (
-      <LoginPage
-        mainBrandImgSrc={logoSrc}
-        mainBrandImgAlt={logoAlt}
-        loginTitle={LOGIN_TITLE}
-      >
-        <LoginForm
-          usernameLabel={LOGIN_USERNAME}
-          usernameValue={username}
-          onChangeUsername={this.handleUsernameChange}
-          passwordLabel={LOGIN_PASSWORD}
-          passwordValue={password}
-          onChangePassword={this.handlePasswordChange}
-          isValidPassword={isValidPassword}
-          passwordHelperTextInvalid={LOGIN_ERROR_MESSAGE}
-          onLoginButtonClick={this.handleSubmit}
-        />
-      </LoginPage>
+      <I18n>
+        {({ i18n }) => (
+          <LoginPage
+            mainBrandImgSrc={logoSrc}
+            mainBrandImgAlt={alt || 'Ansible Tower'}
+            loginTitle={i18n._(t`Welcome to Ansible Tower! Please Sign In.`)}
+          >
+            <LoginForm
+              usernameLabel={i18n._(t`Username`)}
+              usernameValue={username}
+              onChangeUsername={this.handleUsernameChange}
+              passwordLabel={i18n._(t`Password`)}
+              passwordValue={password}
+              onChangePassword={this.handlePasswordChange}
+              isValidPassword={isValidPassword}
+              passwordHelperTextInvalid={i18n._(t`Invalid username or password. Please try again.`)}
+              onLoginButtonClick={this.handleSubmit}
+            />
+          </LoginPage>
+        )}
+      </I18n>
     );
   }
 }

@@ -1,0 +1,10 @@
+{
+  "Logout": {
+    "origin": [
+      [
+        "src/components/LogoutButton.jsx",
+        17
+      ]
+    ]
+  }
+}

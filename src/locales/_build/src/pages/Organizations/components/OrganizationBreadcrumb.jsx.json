@@ -1,0 +1,18 @@
+{
+  "> edit": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationBreadcrumb.jsx",
+        53
+      ]
+    ]
+  },
+  "> add": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationBreadcrumb.jsx",
+        60
+      ]
+    ]
+  }
+}

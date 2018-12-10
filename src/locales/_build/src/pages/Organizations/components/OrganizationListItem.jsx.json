@@ -1,0 +1,34 @@
+{
+  "select organization {itemId}": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationListItem.jsx",
+        30
+      ]
+    ]
+  },
+  "Users": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationListItem.jsx",
+        50
+      ]
+    ]
+  },
+  "Teams": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationListItem.jsx",
+        58
+      ]
+    ]
+  },
+  "Admins": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationListItem.jsx",
+        66
+      ]
+    ]
+  }
+}

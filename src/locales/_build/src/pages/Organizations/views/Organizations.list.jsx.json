@@ -1,0 +1,46 @@
+{
+  "Name": {
+    "origin": [
+      [
+        "src/pages/Organizations/views/Organizations.list.jsx",
+        30
+      ]
+    ]
+  },
+  "Modified": {
+    "origin": [
+      [
+        "src/pages/Organizations/views/Organizations.list.jsx",
+        31
+      ]
+    ]
+  },
+  "Created": {
+    "origin": [
+      [
+        "src/pages/Organizations/views/Organizations.list.jsx",
+        32
+      ]
+    ]
+  },
+  "Organizations": {
+    "origin": [
+      [
+        "src/pages/Organizations/views/Organizations.list.jsx",
+        189
+      ],
+      [
+        "src/pages/Organizations/views/Organizations.list.jsx",
+        195
+      ]
+    ]
+  },
+  "Organizations List": {
+    "origin": [
+      [
+        "src/pages/Organizations/views/Organizations.list.jsx",
+        211
+      ]
+    ]
+  }
+}

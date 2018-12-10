@@ -1,0 +1,34 @@
+{
+  "Copyright 2018 Red Hat, Inc.": {
+    "origin": [
+      [
+        "src/components/About.jsx",
+        78
+      ]
+    ]
+  },
+  "Brand Image": {
+    "origin": [
+      [
+        "src/components/About.jsx",
+        80
+      ]
+    ]
+  },
+  "AboutModal Logo": {
+    "origin": [
+      [
+        "src/components/About.jsx",
+        82
+      ]
+    ]
+  },
+  "Ansible Version": {
+    "origin": [
+      [
+        "src/components/About.jsx",
+        100
+      ]
+    ]
+  }
+}

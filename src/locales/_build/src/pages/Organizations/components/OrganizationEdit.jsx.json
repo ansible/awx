@@ -1,0 +1,18 @@
+{
+  "edit view": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationEdit.jsx",
+        20
+      ]
+    ]
+  },
+  "save/cancel and go back to view": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationEdit.jsx",
+        22
+      ]
+    ]
+  }
+}

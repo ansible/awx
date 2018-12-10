@@ -1,0 +1,222 @@
+{
+  "Primary Navigation": {
+    "origin": [
+      [
+        "src/App.jsx",
+        180
+      ]
+    ]
+  },
+  "Views": {
+    "origin": [
+      [
+        "src/App.jsx",
+        187
+      ]
+    ]
+  },
+  "Dashboard": {
+    "origin": [
+      [
+        "src/App.jsx",
+        191
+      ]
+    ]
+  },
+  "Jobs": {
+    "origin": [
+      [
+        "src/App.jsx",
+        195
+      ],
+      [
+        "src/App.jsx",
+        287
+      ]
+    ]
+  },
+  "Schedules": {
+    "origin": [
+      [
+        "src/App.jsx",
+        199
+      ]
+    ]
+  },
+  "Portal Mode": {
+    "origin": [
+      [
+        "src/App.jsx",
+        203
+      ]
+    ]
+  },
+  "Resources": {
+    "origin": [
+      [
+        "src/App.jsx",
+        209
+      ]
+    ]
+  },
+  "Templates": {
+    "origin": [
+      [
+        "src/App.jsx",
+        213
+      ]
+    ]
+  },
+  "Credentials": {
+    "origin": [
+      [
+        "src/App.jsx",
+        217
+      ]
+    ]
+  },
+  "Projects": {
+    "origin": [
+      [
+        "src/App.jsx",
+        221
+      ]
+    ]
+  },
+  "Inventories": {
+    "origin": [
+      [
+        "src/App.jsx",
+        225
+      ]
+    ]
+  },
+  "Inventory Scripts": {
+    "origin": [
+      [
+        "src/App.jsx",
+        229
+      ]
+    ]
+  },
+  "Access": {
+    "origin": [
+      [
+        "src/App.jsx",
+        235
+      ]
+    ]
+  },
+  "Organizations": {
+    "origin": [
+      [
+        "src/App.jsx",
+        239
+      ]
+    ]
+  },
+  "Users": {
+    "origin": [
+      [
+        "src/App.jsx",
+        243
+      ]
+    ]
+  },
+  "Teams": {
+    "origin": [
+      [
+        "src/App.jsx",
+        247
+      ]
+    ]
+  },
+  "Administration": {
+    "origin": [
+      [
+        "src/App.jsx",
+        253
+      ]
+    ]
+  },
+  "Credential Types": {
+    "origin": [
+      [
+        "src/App.jsx",
+        257
+      ]
+    ]
+  },
+  "Notifications": {
+    "origin": [
+      [
+        "src/App.jsx",
+        261
+      ]
+    ]
+  },
+  "Management Jobs": {
+    "origin": [
+      [
+        "src/App.jsx",
+        265
+      ]
+    ]
+  },
+  "Instance Groups": {
+    "origin": [
+      [
+        "src/App.jsx",
+        269
+      ]
+    ]
+  },
+  "Integrations": {
+    "origin": [
+      [
+        "src/App.jsx",
+        273
+      ]
+    ]
+  },
+  "Settings": {
+    "origin": [
+      [
+        "src/App.jsx",
+        279
+      ]
+    ]
+  },
+  "Authentication": {
+    "origin": [
+      [
+        "src/App.jsx",
+        283
+      ]
+    ]
+  },
+  "System": {
+    "origin": [
+      [
+        "src/App.jsx",
+        291
+      ]
+    ]
+  },
+  "User Interface": {
+    "origin": [
+      [
+        "src/App.jsx",
+        295
+      ]
+    ]
+  },
+  "License": {
+    "origin": [
+      [
+        "src/App.jsx",
+        299
+      ]
+    ]
+  }
+}

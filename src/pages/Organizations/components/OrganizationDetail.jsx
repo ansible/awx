@@ -1,4 +1,6 @@
 import React, { Fragment } from 'react';
+import { I18n } from '@lingui/react';
+import { Trans, t } from '@lingui/macro';
 import {
   Card,
   CardHeader,
@@ -62,52 +64,56 @@ const OrganizationDetail = ({
 
   const deleteResourceView = () => (
     <Fragment>
-      {`deleting ${currentTab} association with orgs  `}
+      <Trans>{`deleting ${currentTab} association with orgs  `}</Trans>
       <Link to={{ pathname: `${match.url}`, search: `?${params.toString()}`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
-        {`confirm removal of ${currentTab}/cancel and go back to ${currentTab} view.`}
+        <Trans>{`confirm removal of ${currentTab}/cancel and go back to ${currentTab} view.`}</Trans>
       </Link>
     </Fragment>
   );
 
   const addResourceView = () => (
     <Fragment>
-      {`adding ${currentTab}   `}
+      <Trans>{`adding ${currentTab}   `}</Trans>
       <Link to={{ pathname: `${match.url}`, search: `?${params.toString()}`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
-        {`save/cancel and go back to ${currentTab} view`}
+        <Trans>{`save/cancel and go back to ${currentTab} view`}</Trans>
       </Link>
     </Fragment>
   );
 
   const resourceView = () => (
     <Fragment>
-      {`${currentTab} detail view  `}
+      <Trans>{`${currentTab} detail view  `}</Trans>
       <Link to={{ pathname: `${match.url}/add-resource`, search: `?${params.toString()}`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
-        {`add ${currentTab}`}
+        <Trans>{`add ${currentTab}`}</Trans>
       </Link>
       {'  '}
       <Link to={{ pathname: `${match.url}/delete-resources`, search: `?${params.toString()}`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
-        {`delete ${currentTab}`}
+        <Trans>{`delete ${currentTab}`}</Trans>
       </Link>
     </Fragment>
   );
 
   const detailTabs = (tabs) => (
-    <ToolbarSection aria-label="Organization detail tabs">
-      <ToolbarGroup className="at-c-tabs">
-        {tabs.map(tab => (
-          <DetailTab
-            key={tab}
-            tab={tab}
-            location={location}
-            match={match}
-            currentTab={currentTab}
-            breadcrumb={parentBreadcrumbObj}
-          >
-            {getTabName(tab)}
-          </DetailTab>
-        ))}
-      </ToolbarGroup>
-    </ToolbarSection>
+    <I18n>
+      {({ i18n }) => (
+        <ToolbarSection aria-label={i18n._(t`Organization detail tabs`)}>
+          <ToolbarGroup className="at-c-tabs">
+            {tabs.map(tab => (
+              <DetailTab
+                key={tab}
+                tab={tab}
+                location={location}
+                match={match}
+                currentTab={currentTab}
+                breadcrumb={parentBreadcrumbObj}
+              >
+                {getTabName(tab)}
+              </DetailTab>
+            ))}
+          </ToolbarGroup>
+        </ToolbarSection>
+      )}
+    </I18n>
   );
 
   return (

@@ -1,0 +1,66 @@
+{
+  "deleting {currentTab} association with orgs": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationDetail.jsx",
+        67
+      ]
+    ]
+  },
+  "confirm removal of {currentTab}/cancel and go back to {currentTab} view.": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationDetail.jsx",
+        69
+      ]
+    ]
+  },
+  "adding {currentTab}": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationDetail.jsx",
+        76
+      ]
+    ]
+  },
+  "save/cancel and go back to {currentTab} view": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationDetail.jsx",
+        78
+      ]
+    ]
+  },
+  "{currentTab} detail view": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationDetail.jsx",
+        85
+      ]
+    ]
+  },
+  "add {currentTab}": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationDetail.jsx",
+        87
+      ]
+    ]
+  },
+  "delete {currentTab}": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationDetail.jsx",
+        91
+      ]
+    ]
+  },
+  "Organization detail tabs": {
+    "origin": [
+      [
+        "src/pages/Organizations/components/OrganizationDetail.jsx",
+        99
+      ]
+    ]
+  }
+}

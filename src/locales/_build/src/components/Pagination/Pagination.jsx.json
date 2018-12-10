@@ -1,0 +1,66 @@
+{
+  "Per Page": {
+    "origin": [
+      [
+        "src/components/Pagination/Pagination.jsx",
+        153
+      ]
+    ]
+  },
+  "{itemMin} - {itemMax} of {count}": {
+    "origin": [
+      [
+        "src/components/Pagination/Pagination.jsx",
+        158
+      ]
+    ]
+  },
+  "First": {
+    "origin": [
+      [
+        "src/components/Pagination/Pagination.jsx",
+        164
+      ]
+    ]
+  },
+  "Previous": {
+    "origin": [
+      [
+        "src/components/Pagination/Pagination.jsx",
+        173
+      ]
+    ]
+  },
+  "Page <0/> of {pageCount}": {
+    "origin": [
+      [
+        "src/components/Pagination/Pagination.jsx",
+        184
+      ]
+    ]
+  },
+  "Page Number": {
+    "origin": [
+      [
+        "src/components/Pagination/Pagination.jsx",
+        187
+      ]
+    ]
+  },
+  "Next": {
+    "origin": [
+      [
+        "src/components/Pagination/Pagination.jsx",
+        207
+      ]
+    ]
+  },
+  "Last": {
+    "origin": [
+      [
+        "src/components/Pagination/Pagination.jsx",
+        216
+      ]
+    ]
+  }
+}

@@ -97,5 +97,9 @@ module.exports = {
         ws: true
       }
     ]
+  },
+  // https://github.com/lingui/js-lingui/issues/408
+  node: {
+    fs: 'empty'
   }
 };

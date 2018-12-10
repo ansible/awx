@@ -1,0 +1,18 @@
+{
+  "Help": {
+    "origin": [
+      [
+        "src/components/HelpDropdown.jsx",
+        26
+      ]
+    ]
+  },
+  "About": {
+    "origin": [
+      [
+        "src/components/HelpDropdown.jsx",
+        32
+      ]
+    ]
+  }
+}
