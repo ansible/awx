@@ -25,7 +25,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
         // the object permissions are being added to
         scope.object = scope.resourceData.data;
         // array for all possible roles for the object
-        scope.roles = scope.object.summary_fields.object_roles;
+        scope.roles = angular.copy(scope.object.summary_fields.object_roles);
 
         const objectType = _.get(scope, ['object', 'type']);
         const teamRoles = _.get(scope, ['object', 'summary_fields', 'object_roles'], {});
