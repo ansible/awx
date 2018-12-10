@@ -112,15 +112,15 @@ class TestMetaVars:
         for key in user_vars:
             assert key not in job.awx_meta_vars()
 
-    def test_workflow_job_metavars(self, admin_user):
+    def test_workflow_job_metavars(self, admin_user, job_template):
         workflow_job = WorkflowJob.objects.create(
             name='workflow-job',
             created_by=admin_user
         )
-        job = Job.objects.create(
-            name='fake-job',
-            launch_type='workflow'
-        )
+        node = workflow_job.workflow_nodes.create(unified_job_template=job_template)
+        job_kv = node.get_job_kwargs()
+        job = node.unified_job_template.create_unified_job(**job_kv)
+
         workflow_job.workflow_nodes.create(job=job)
         data = job.awx_meta_vars()
         assert data['awx_user_id'] == admin_user.id

@@ -1374,14 +1374,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         created_by = getattr_dne(self, 'created_by')
 
-        if not created_by:
-            wj = self.get_workflow_job()
-            if wj:
-                for name in ('awx', 'tower'):
-                    r['{}_workflow_job_id'.format(name)] = wj.pk
-                    r['{}_workflow_job_name'.format(name)] = wj.name
-                created_by = getattr_dne(wj, 'created_by')
+        wj = self.get_workflow_job()
+        if wj:
+            for name in ('awx', 'tower'):
+                r['{}_workflow_job_id'.format(name)] = wj.pk
+                r['{}_workflow_job_name'.format(name)] = wj.name
 
+        if not created_by:
             schedule = getattr_dne(self, 'schedule')
             if schedule:
                 for name in ('awx', 'tower'):
