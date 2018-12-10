@@ -22,7 +22,14 @@ import api from '../../../api';
 const { light } = PageSectionVariants;
 
 class OrganizationAdd extends React.Component {
+  constructor(props) {
+    super(props);
 
+    this.handleChange = this.handleChange.bind(this);
+    this.onSelectChange = this.onSelectChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.resetForm = this.resetForm.bind(this);
+  }
   state = {
     name: '',
     description: '',
@@ -31,31 +38,30 @@ class OrganizationAdd extends React.Component {
     post_endpoint: API_ORGANIZATIONS,
   };
 
-  onSelectChange = (value, _) => {
+  onSelectChange (value, _) {
     this.setState({ ansible_environment: value });
   };
-
-  envs = [ // Placeholder for Ansible Environment Dropdown
-    { ansible_environment: 'default', label: 'Select Ansible Environment', disabled: true },
-    { ansible_environment: '1', label: '1', disabled: false },
-    { ansible_environment: '2', label: '2', disabled: false },
-    { ansible_environment: '3', label: '3', disabled: false }
-  ];
-  resetForm = () => {
+  resetForm() {
     this.setState({
       ...this.state,
       name: '',
       description: ''
     })
   }
-  handleChange = (_, evt) => {
+  handleChange(_, evt) {
     this.setState({ [evt.target.name]: evt.target.value });
   }
-  onSubmit = async () => {
+  async onSubmit() {
     const data = Object.assign({}, { ...this.state });
     await api.post(API_ORGANIZATIONS, data);
     this.resetForm();
   }
+  envs = [ // Placeholder for Ansible Environment Dropdown
+    { ansible_environment: 'default', label: 'Select Ansible Environment', disabled: true },
+    { ansible_environment: '1', label: '1', disabled: false },
+    { ansible_environment: '2', label: '2', disabled: false },
+    { ansible_environment: '3', label: '3', disabled: false }
+  ];
   render() {
     const { name } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
@@ -101,9 +107,9 @@ class OrganizationAdd extends React.Component {
                     />
                   </FormGroup>
                   <FormGroup label="Ansible Environment" fieldId="simple-form-instance-groups">
-                    <Select value={this.state.value} onChange={this.onSelectChange} aria-label="Select Input">
+                    <Select value={this.state.ansible_environment} onChange={this.onSelectChange} aria-label="Select Input">
                       {this.envs.map((env, index) => (
-                        <SelectOption isDisabled={env.disabled} key={index} value={env.value} label={env.label} />
+                        <SelectOption isDisabled={env.disabled} key={index} value={env.ansible_environment} label={env.label} />
                       ))}
                     </Select>
                   </FormGroup>
@@ -111,7 +117,7 @@ class OrganizationAdd extends React.Component {
                 <ActionGroup className="at-align-right">
                   <Toolbar>
                     <ToolbarGroup>
-                      <Button variant="primary" onClick={this.onSubmit} isDisabled={!enabled}>Save</Button>
+                      <Button className="at-C-SubmitButton" variant="primary" onClick={this.onSubmit} isDisabled={!enabled}>Save</Button>
                     </ToolbarGroup>
                     <ToolbarGroup>
                       <Button variant="secondary">Cancel</Button>
