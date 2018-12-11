@@ -1,15 +1,16 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import AnsibleEnvironmentSelect from '../../src/components/AnsibleEnvironmentSelect';
+import AnsibleSelect from '../../src/components/AnsibleEnvironmentSelect';
 
-describe('<AnsibleEnvironmentSelect />', () => {
+const mockData = ['foo', 'bar'];
+describe('<AnsibleSelect />', () => {
   test('initially renders succesfully', async() => {
-    const wrapper = mount(<AnsibleEnvironmentSelect selected="foo" selectChange={() => {}} />);
+    const wrapper = mount(<AnsibleSelect selected="foo" data={mockData} selectChange={() => {}} />);
     wrapper.setState({ isHidden: false });
   });
   test('calls "onSelectChange" on dropdown select change', () => {
-    const spy = jest.spyOn(AnsibleEnvironmentSelect.prototype, 'onSelectChange');
-    const wrapper = mount(<AnsibleEnvironmentSelect selected="foo" selectChange={() => {}} />);
+    const spy = jest.spyOn(AnsibleSelect.prototype, 'onSelectChange');
+    const wrapper = mount(<AnsibleSelect selected="foo" data={mockData} selectChange={() => {}} />);
     wrapper.setState({ isHidden: false });
     expect(spy).not.toHaveBeenCalled();
     wrapper.find('select').simulate('change');

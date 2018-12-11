@@ -1,3 +1,3 @@
-import AnsibleEnvironmentSelect from './AnsibleEnvironmentSelect';
+import AnsibleSelect from './AnsibleEnvironmentSelect';
 
-export default AnsibleEnvironmentSelect;
+export default AnsibleSelect;

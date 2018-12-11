@@ -4,27 +4,11 @@ import {
   Select,
   SelectOption,
 } from '@patternfly/react-core';
-import { API_CONFIG } from '../../endpoints';
-import api from '../../api';
 
-class AnsibleEnvironmentSelect extends React.Component {
+class AnsibleSelect extends React.Component {
   constructor(props) {
     super(props);
     this.onSelectChange = this.onSelectChange.bind(this);
-  }
-
-  state = {
-    custom_virtualenvs: [],
-    isHidden: true,
-  }
-
-  async componentDidMount() {
-    const { data } = await api.get(API_CONFIG);
-    this.setState({ custom_virtualenvs: [...data.custom_virtualenvs] });
-    if (this.state.custom_virtualenvs.length > 1) {
-      // Show dropdown if we have more than one ansible environment
-      this.setState({ isHidden: !this.state.isHidden });
-    }
   }
 
   onSelectChange(val, _) {
@@ -32,15 +16,14 @@ class AnsibleEnvironmentSelect extends React.Component {
   }
 
   render() {
-    const { isHidden } = this.state;
-    if (isHidden) {
+    const hide = this.props.hidden;
+    if (hide) {
       return null;
     } else {
       return (
-        <FormGroup label="Ansible Environment" fieldId="simple-form-instance-groups">
+        <FormGroup label={this.props.labelName} fieldId="ansible-select">
           <Select value={this.props.selected} onChange={this.onSelectChange} aria-label="Select Input">
-            <SelectOption isDisabled value="Select Ansible Environment" label="Select Ansible Environment" />
-            {this.state.custom_virtualenvs.map((env, index) => (
+            {this.props.data.map((env, index) => (
               <SelectOption isDisabled={env.disabled} key={index} value={env} label={env} />
             ))}
           </Select>
@@ -50,4 +33,4 @@ class AnsibleEnvironmentSelect extends React.Component {
   }
 }
 
-export default AnsibleEnvironmentSelect;
+export default AnsibleSelect;

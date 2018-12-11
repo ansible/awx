@@ -15,9 +15,9 @@ import {
   CardBody,
 } from '@patternfly/react-core';
 
-import { API_ORGANIZATIONS } from '../../../endpoints';
+import { API_ORGANIZATIONS, API_CONFIG } from '../../../endpoints';
 import api from '../../../api';
-import AnsibleEnvironmentSelect from '../../../components/AnsibleEnvironmentSelect'
+import AnsibleSelect from '../../../components/AnsibleEnvironmentSelect'
 const { light } = PageSectionVariants;
 
 class OrganizationAdd extends React.Component {
@@ -35,7 +35,8 @@ class OrganizationAdd extends React.Component {
     description: '',
     instanceGroups: '',
     custom_virtualenv: '',
-    post_endpoint: API_ORGANIZATIONS,
+    custom_virtualenvs: [],
+    hideAnsibleSelect: true,
   };
 
   onSelectChange(value, _) {
@@ -60,6 +61,14 @@ class OrganizationAdd extends React.Component {
     this.resetForm();
   }
 
+  async componentDidMount() {
+    const { data } = await api.get(API_CONFIG);
+    this.setState({ custom_virtualenvs: [...data.custom_virtualenvs] });
+    if (this.state.custom_virtualenvs.length > 1) {
+      // Show dropdown if we have more than one ansible environment
+      this.setState({ hideAnsibleSelect: !this.state.hideAnsibleSelect });
+    }
+  }
   render() {
     const { name } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
@@ -104,7 +113,13 @@ class OrganizationAdd extends React.Component {
                       onChange={this.handleChange}
                     />
                   </FormGroup>
-                  <AnsibleEnvironmentSelect selected={this.state.custom_virtualenv} selectChange={this.onSelectChange} />
+                  <AnsibleSelect
+                    labelName="Ansible Environment"
+                    selected={this.state.custom_virtualenv}
+                    selectChange={this.onSelectChange}
+                    data={this.state.custom_virtualenvs}
+                    hidden={this.state.hideAnsibleSelect}
+                  />
                 </Gallery>
                 <ActionGroup className="at-align-right">
                   <Toolbar>
