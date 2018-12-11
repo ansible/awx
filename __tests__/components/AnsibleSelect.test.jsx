@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import AnsibleSelect from '../../src/components/AnsibleEnvironmentSelect';
+import AnsibleSelect from '../../src/components/AnsibleSelect';
 
 const mockData = ['foo', 'bar'];
 describe('<AnsibleSelect />', () => {

@@ -17,7 +17,7 @@ import {
 
 import { API_ORGANIZATIONS, API_CONFIG } from '../../../endpoints';
 import api from '../../../api';
-import AnsibleSelect from '../../../components/AnsibleEnvironmentSelect'
+import AnsibleSelect from '../../../components/AnsibleSelect'
 const { light } = PageSectionVariants;
 
 class OrganizationAdd extends React.Component {
