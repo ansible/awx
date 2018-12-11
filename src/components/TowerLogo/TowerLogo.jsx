@@ -15,13 +15,8 @@ class TowerLogo extends Component {
   }
 
   onClick = () => {
-    const { history, onClick: handleClick } = this.props;
-
-    if (!handleClick) return;
-
+    const { history } = this.props;
     history.push('/');
-
-    handleClick();
   };
 
   onHover = () => {
