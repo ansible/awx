@@ -7,14 +7,9 @@ import {
   DropdownDirection,
   DropdownItem,
   DropdownToggle,
-  Form,
-  FormGroup,
   Level,
   LevelItem,
   TextInput,
-  Toolbar,
-  ToolbarGroup,
-  ToolbarItem,
   Split,
   SplitItem,
 } from '@patternfly/react-core';
@@ -32,7 +27,7 @@ class Pagination extends Component {
     const { page } = this.props;
 
     if (prevProps.page !== page) {
-      this.setState({ value: page });
+      this.onPageChange(page);
     }
   }
 
@@ -51,13 +46,13 @@ class Pagination extends Component {
 
     if (isValid) {
       onSetPage(value, page_size);
-    } else{
+    } else {
       this.setState({ value: page });
     }
   };
 
   onFirst = () => {
-    const { onSetPage, page_size} = this.props;
+    const { onSetPage, page_size } = this.props;
 
     onSetPage(1, page_size);
   };
@@ -67,7 +62,7 @@ class Pagination extends Component {
     const previousPage = page - 1;
 
     if (previousPage >= 1) {
-      onSetPage(previousPage, page_size)
+      onSetPage(previousPage, page_size);
     }
   };
 
@@ -76,7 +71,7 @@ class Pagination extends Component {
     const nextPage = page + 1;
 
     if (nextPage <= pageCount) {
-      onSetPage(nextPage, page_size)
+      onSetPage(nextPage, page_size);
     }
   };
 
@@ -139,18 +134,18 @@ class Pagination extends Component {
                   direction={up}
                   isOpen={isOpen}
                   toggle={(
-                    <DropdownToggle
-                      onToggle={this.onTogglePageSize}>
+                    <DropdownToggle className="togglePageSize" onToggle={this.onTogglePageSize}>
                       { page_size }
                     </DropdownToggle>
-                  )}>
+                  )}
+                >
                   {opts.map(option => (
                     <DropdownItem key={option} component="button">
                       { option }
                     </DropdownItem>
                   ))}
                 </Dropdown>
-                <Trans>Per Page</Trans>
+                <Trans> Per Page</Trans>
               </LevelItem>
               <LevelItem>
                 <Split gutter="md" className="pf-u-display-flex pf-u-align-items-center">
