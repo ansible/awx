@@ -16,8 +16,8 @@ class AnsibleSelect extends React.Component {
   }
 
   render() {
-    const hide = this.props.hidden;
-    if (hide) {
+    const { hidden } = this.props;
+    if (hidden) {
       return null;
     } else {
       return (
