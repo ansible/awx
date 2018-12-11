@@ -11,18 +11,6 @@ describe('<OrganizationAdd />', () => {
       />
     );
   });
-  test('calls "onSelectChange" on dropdown select change', () => {
-    const spy = jest.spyOn(OrganizationAdd.prototype, 'onSelectChange');
-    const wrapper = mount(
-      <OrganizationAdd
-        match={{ path: '/organizations/add', url: '/organizations/add' }}
-        location={{ search: '', pathname: '/organizations/add' }}
-      />
-    );
-    expect(spy).not.toHaveBeenCalled();
-    wrapper.find('select').simulate('change');
-    expect(spy).toHaveBeenCalled();
-  });
   test('calls "handleChange" when input values change', () => {
     const spy = jest.spyOn(OrganizationAdd.prototype, 'handleChange');
     const wrapper = mount(

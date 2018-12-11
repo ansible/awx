@@ -11,14 +11,13 @@ import {
   ToolbarGroup,
   Button,
   Gallery,
-  Select,
-  SelectOption,
   Card,
   CardBody,
 } from '@patternfly/react-core';
 
 import { API_ORGANIZATIONS } from '../../../endpoints';
 import api from '../../../api';
+import AnsibleEnvironmentSelect from '../../../components/AnsibleEnvironmentSelect'
 const { light } = PageSectionVariants;
 
 class OrganizationAdd extends React.Component {
@@ -30,17 +29,19 @@ class OrganizationAdd extends React.Component {
     this.onSubmit = this.onSubmit.bind(this);
     this.resetForm = this.resetForm.bind(this);
   }
+
   state = {
     name: '',
     description: '',
     instanceGroups: '',
-    ansible_environment: 'default',
+    custom_virtualenv: '',
     post_endpoint: API_ORGANIZATIONS,
   };
 
-  onSelectChange (value, _) {
-    this.setState({ ansible_environment: value });
+  onSelectChange(value, _) {
+    this.setState({ custom_virtualenv: value });
   };
+
   resetForm() {
     this.setState({
       ...this.state,
@@ -48,20 +49,17 @@ class OrganizationAdd extends React.Component {
       description: ''
     })
   }
+
   handleChange(_, evt) {
     this.setState({ [evt.target.name]: evt.target.value });
   }
+
   async onSubmit() {
     const data = Object.assign({}, { ...this.state });
     await api.post(API_ORGANIZATIONS, data);
     this.resetForm();
   }
-  envs = [ // Placeholder for Ansible Environment Dropdown
-    { ansible_environment: 'default', label: 'Select Ansible Environment', disabled: true },
-    { ansible_environment: '1', label: '1', disabled: false },
-    { ansible_environment: '2', label: '2', disabled: false },
-    { ansible_environment: '3', label: '3', disabled: false }
-  ];
+
   render() {
     const { name } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
@@ -106,13 +104,7 @@ class OrganizationAdd extends React.Component {
                       onChange={this.handleChange}
                     />
                   </FormGroup>
-                  <FormGroup label="Ansible Environment" fieldId="simple-form-instance-groups">
-                    <Select value={this.state.ansible_environment} onChange={this.onSelectChange} aria-label="Select Input">
-                      {this.envs.map((env, index) => (
-                        <SelectOption isDisabled={env.disabled} key={index} value={env.ansible_environment} label={env.label} />
-                      ))}
-                    </Select>
-                  </FormGroup>
+                  <AnsibleEnvironmentSelect selected={this.state.custom_virtualenv} selectChange={this.onSelectChange} />
                 </Gallery>
                 <ActionGroup className="at-align-right">
                   <Toolbar>
