@@ -1910,6 +1910,7 @@ class RunInventoryUpdate(BaseTask):
             group_patterns = '[]'
             group_prefix = 'foreman_'
             want_hostcollections = 'False'
+            want_ssh_host = 'False'
             foreman_opts = dict(inventory_update.source_vars_dict.items())
             foreman_opts.setdefault('ssl_verify', 'False')
             for k, v in foreman_opts.items():
@@ -1919,6 +1920,8 @@ class RunInventoryUpdate(BaseTask):
                     group_prefix = v
                 elif k == 'satellite6_want_hostcollections' and isinstance(v, bool):
                     want_hostcollections = v
+                elif k == 'satellite6_want_ansible_ssh_host' and isinstance(v, bool):
+                    want_ssh_host = v
                 else:
                     cp.set(section, k, six.text_type(v))
 
@@ -1933,6 +1936,7 @@ class RunInventoryUpdate(BaseTask):
             cp.set(section, 'want_facts', True)
             cp.set(section, 'want_hostcollections', want_hostcollections)
             cp.set(section, 'group_prefix', group_prefix)
+            cp.set(section, 'want_ansible_ssh_host', want_ssh_host)
 
             section = 'cache'
             cp.add_section(section)
