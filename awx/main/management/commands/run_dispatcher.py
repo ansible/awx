@@ -103,7 +103,7 @@ class Command(BaseCommand):
             try:
                 bcast = 'tower_broadcast_all'
                 queues = [
-                    Queue(q, Exchange(q), routing_key=q)
+                    Queue(q, Exchange(q), routing_key=q, durable=False)
                     for q in (settings.AWX_CELERY_QUEUES_STATIC + [get_local_queuename()])
                 ]
                 queues.append(
@@ -111,7 +111,8 @@ class Command(BaseCommand):
                         construct_bcast_queue_name(bcast),
                         exchange=Exchange(bcast, type='fanout'),
                         routing_key=bcast,
-                        reply=True
+                        reply=True,
+                        durable=False
                     )
                 )
                 consumer = AWXConsumer(

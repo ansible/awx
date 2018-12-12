@@ -19,7 +19,7 @@ class Control(object):
             raise RuntimeError('{} must be in {}'.format(service, self.services))
         self.service = service
         self.queuename = host or get_local_queuename()
-        self.queue = Queue(self.queuename, Exchange(self.queuename), routing_key=self.queuename)
+        self.queue = Queue(self.queuename, Exchange(self.queuename), routing_key=self.queuename, durable=False)
 
     def publish(self, msg, conn, **kwargs):
         producer = Producer(
@@ -37,7 +37,7 @@ class Control(object):
 
     def control_with_reply(self, command, timeout=5):
         logger.warn('checking {} {} for {}'.format(self.service, command, self.queuename))
-        reply_queue = Queue(name="amq.rabbitmq.reply-to")
+        reply_queue = Queue(name="amq.rabbitmq.reply-to", durable=False)
         self.result = None
         with Connection(settings.BROKER_URL) as conn:
             with Consumer(conn, reply_queue, callbacks=[self.process_message], no_ack=True):

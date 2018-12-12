@@ -7,6 +7,7 @@ import signal
 from uuid import UUID
 from Queue import Empty as QueueEmpty
 
+import amqp
 from django import db
 from kombu import Producer
 from kombu.mixins import ConsumerMixin
@@ -47,6 +48,19 @@ class AWXConsumer(ConsumerMixin):
 
     def get_consumers(self, Consumer, channel):
         logger.debug(self.listening_on)
+
+        # detect queues that are durable=True and delete them so we can
+        # recreate a new non-durable queue
+        for q in self.queues:
+            try:
+                Consumer(queues=[q], accept=['json'])
+            except amqp.exceptions.PreconditionFailed as e:
+                if e.method_name == 'Queue.declare' and "inequivalent arg 'durable'" in e.reply_text:
+                    logger.error(
+                        'queue {} was already declared with durable=True, deleting'.format(q.name)
+                    )
+                    channel.queue_delete(q.name)
+
         return [Consumer(queues=self.queues, accept=['json'],
                          callbacks=[self.process_task])]
 

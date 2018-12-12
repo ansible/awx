@@ -28,7 +28,8 @@ class Command(BaseCommand):
                         Queue(
                             settings.CALLBACK_QUEUE,
                             Exchange(settings.CALLBACK_QUEUE, type='direct'),
-                            routing_key=settings.CALLBACK_QUEUE
+                            routing_key=settings.CALLBACK_QUEUE,
+                            durable=False
                         )
                     ]
                 )
