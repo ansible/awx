@@ -14,6 +14,10 @@ from awx.main.dispatch.publish import task
 from awx.main.dispatch.worker import BaseWorker, TaskWorker
 
 
+def restricted(a, b):
+    raise AssertionError("This code should not run because it isn't decorated with @task")
+
+
 @task()
 def add(a, b):
     return a + b
@@ -23,6 +27,11 @@ class BaseTask(object):
 
     def add(self, a, b):
         return add(a, b)
+
+
+class Restricted(object):
+    def run(self, a, b):
+        raise AssertionError("This code should not run because it isn't decorated with @task")
 
 
 @task()
@@ -262,12 +271,43 @@ class TestTaskDispatcher:
         })
         assert result == 4
 
+    def test_function_dispatch_must_be_decorated(self):
+        result = self.tm.perform_work({
+            'task': 'awx.main.tests.functional.test_dispatch.restricted',
+            'args': [2, 2]
+        })
+        assert isinstance(result, ValueError)
+        assert result.message == 'awx.main.tests.functional.test_dispatch.restricted is not decorated with @task()'  # noqa
+
     def test_method_dispatch(self):
         result = self.tm.perform_work({
             'task': 'awx.main.tests.functional.test_dispatch.Adder',
             'args': [2, 2]
         })
         assert result == 4
+
+    def test_method_dispatch_must_be_decorated(self):
+        result = self.tm.perform_work({
+            'task': 'awx.main.tests.functional.test_dispatch.Restricted',
+            'args': [2, 2]
+        })
+        assert isinstance(result, ValueError)
+        assert result.message == 'awx.main.tests.functional.test_dispatch.Restricted is not decorated with @task()'  # noqa
+
+    def test_python_function_cannot_be_imported(self):
+        result = self.tm.perform_work({
+            'task': 'os.system',
+            'args': ['ls'],
+        })
+        assert isinstance(result, ValueError)
+        assert result.message == 'os.system is not a valid awx task'  # noqa
+
+    def test_undefined_function_cannot_be_imported(self):
+        result = self.tm.perform_work({
+            'task': 'awx.foo.bar'
+        })
+        assert isinstance(result, ImportError)
+        assert result.message == 'No module named foo'  # noqa
 
 
 class TestTaskPublisher:
