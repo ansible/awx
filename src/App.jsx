@@ -55,8 +55,8 @@ import Teams from './pages/Teams';
 import Templates from './pages/Templates';
 import Users from './pages/Users';
 
-import ja from './locales/ja/messages';
-import en from './locales/en/messages';
+import ja from '../build/locales/ja/messages';
+import en from '../build/locales/en/messages';
 
 const catalogs = { en, ja };
 
