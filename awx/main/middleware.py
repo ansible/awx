@@ -126,8 +126,9 @@ class SessionTimeoutMiddleware(object):
     """
 
     def process_response(self, request, response):
+        should_skip = 'HTTP_X_WS_SESSION_QUIET' in request.META
         req_session = getattr(request, 'session', None)
-        if req_session and not req_session.is_empty():
+        if req_session and not req_session.is_empty() and should_skip is False:
             expiry = int(settings.SESSION_COOKIE_AGE)
             request.session.set_expiry(expiry)
             response['Session-Timeout'] = expiry
