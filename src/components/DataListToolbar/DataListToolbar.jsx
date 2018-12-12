@@ -23,6 +23,7 @@ import {
   SortNumericDownIcon,
   SortNumericUpIcon,
   TrashAltIcon,
+  PlusIcon
 } from '@patternfly/react-icons';
 import {
   Link
@@ -114,6 +115,12 @@ class DataListToolbar extends React.Component {
       return icon;
     };
 
+    const dropdownItems = columns.filter(({ key }) => key !== searchKey).map(({ key, name }) => (
+      <DropdownItem key={key} component="button">
+        { name }
+      </DropdownItem>
+    ));
+
     return (
       <I18n>
         {({ i18n }) => (
@@ -146,13 +153,8 @@ class DataListToolbar extends React.Component {
                               { searchColumnName }
                             </DropdownToggle>
                           )}
-                        >
-                          {columns.filter(({ key }) => key !== searchKey).map(({ key, name }) => (
-                            <DropdownItem key={key} component="button">
-                              { name }
-                            </DropdownItem>
-                          ))}
-                        </Dropdown>
+                          dropdownItems={dropdownItems}
+                        />
                         <TextInput
                           type="search"
                           aria-label={i18n._(t`Search text input`)}
@@ -183,15 +185,8 @@ class DataListToolbar extends React.Component {
                             { sortedColumnName }
                           </DropdownToggle>
                         )}
-                      >
-                        {columns
-                          .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
-                          .map(({ key, name }) => (
-                            <DropdownItem key={key} component="button">
-                              { name }
-                            </DropdownItem>
-                          ))}
-                      </Dropdown>
+                        dropdownItems={dropdownItems}
+                      />
                     </ToolbarItem>
                     <ToolbarItem>
                       <Button
@@ -228,7 +223,7 @@ class DataListToolbar extends React.Component {
                 {addUrl && (
                   <Link to={addUrl}>
                     <Button variant="primary" aria-label={i18n._(t`Add`)}>
-                      <Trans>Add</Trans>
+                      <PlusIcon />
                     </Button>
                   </Link>
                 )}
