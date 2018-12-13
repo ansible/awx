@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { I18n } from '@lingui/react';
+import { Trans, t } from '@lingui/macro';
 import {
   Button,
   Dropdown,
@@ -126,93 +128,106 @@ class Pagination extends Component {
     };
 
     return (
-      <div className="awx-pagination">
-        <Level>
-          <LevelItem>
-            <Dropdown
-              onToggle={this.onTogglePageSize}
-              onSelect={this.onSelectPageSize}
-              direction={up}
-              isOpen={isOpen}
-              toggle={(
-                <DropdownToggle
-                  onToggle={this.onTogglePageSize}>
-                  { page_size }
-                </DropdownToggle>
-              )}>
-              {opts.map(option => (
-                <DropdownItem key={option} component="button">
-                  { option }
-                </DropdownItem>
-              ))}
-            </Dropdown> Per Page
-          </LevelItem>
-          <LevelItem>
-            <Split gutter="md" className="pf-u-display-flex pf-u-align-items-center">
-              <SplitItem>{itemMin} - {itemMax } of { count }</SplitItem>
-              <SplitItem>
-                <div className="pf-c-input-group">
-                  <Button
-                    variant="tertiary"
-                    aria-label="first"
-                    style={isOnFirst ? disabledStyle : {}}
-                    isDisabled={isOnFirst}
-                    onClick={this.onFirst}>
-                    <i className="fas fa-angle-double-left"></i>
-                  </Button>
-                  <Button
-                    variant="tertiary"
-                    aria-label="previous"
-                    style={isOnFirst ? disabledStyle : {}}
-                    isDisabled={isOnFirst}
-                    onClick={this.onPrevious}>
-                    <i className="fas fa-angle-left"></i>
-                  </Button>
-                </div>
-              </SplitItem>
-              <SplitItem isMain>
-                <form onSubmit={this.onSubmit}>
-                  Page <TextInput
-                    isDisabled={pageCount === 1}
-                    aria-label="Page Number"
-                    style={{
-                      height: '30px',
-                      width: '30px',
-                      textAlign: 'center',
-                      padding: '0',
-                      margin: '0',
-                      ...(pageCount === 1 ? disabledStyle : {})
-                    }}
-                    value={value}
-                    type="text"
-                    onChange={this.onPageChange}
-                  /> of { pageCount }
-                </form>
-              </SplitItem>
-              <SplitItem>
-                <div className="pf-c-input-group">
-                  <Button
-                    variant="tertiary"
-                    aria-label="next"
-                    style={isOnLast ? disabledStyle : {}}
-                    isDisabled={isOnLast}
-                    onClick={this.onNext}>
-                    <i className="fas fa-angle-right"></i>
-                  </Button>
-                  <Button
-                    variant="tertiary"
-                    aria-label="last"
-                    style={isOnLast ? disabledStyle : {}}
-                    isDisabled={isOnLast}
-                    onClick={this.onLast}>
-                    <i className="fas fa-angle-double-right"></i>
-                  </Button>
-                </div>
-              </SplitItem>
-            </Split>
-          </LevelItem>
-        </Level>
-      </div>
+      <I18n>
+        {({ i18n }) => (
+          <div className="awx-pagination">
+            <Level>
+              <LevelItem>
+                <Dropdown
+                  onToggle={this.onTogglePageSize}
+                  onSelect={this.onSelectPageSize}
+                  direction={up}
+                  isOpen={isOpen}
+                  toggle={(
+                    <DropdownToggle
+                      onToggle={this.onTogglePageSize}>
+                      { page_size }
+                    </DropdownToggle>
+                  )}>
+                  {opts.map(option => (
+                    <DropdownItem key={option} component="button">
+                      { option }
+                    </DropdownItem>
+                  ))}
+                </Dropdown>
+                <Trans>Per Page</Trans>
+              </LevelItem>
+              <LevelItem>
+                <Split gutter="md" className="pf-u-display-flex pf-u-align-items-center">
+                  <SplitItem>
+                    <Trans>{ itemMin } - { itemMax } of { count }</Trans>
+                  </SplitItem>
+                  <SplitItem>
+                    <div className="pf-c-input-group">
+                      <Button
+                        variant="tertiary"
+                        aria-label={i18n._(t`First`)}
+                        style={isOnFirst ? disabledStyle : {}}
+                        isDisabled={isOnFirst}
+                        onClick={this.onFirst}
+                      >
+                        <i className="fas fa-angle-double-left" />
+                      </Button>
+                      <Button
+                        variant="tertiary"
+                        aria-label={i18n._(t`Previous`)}
+                        style={isOnFirst ? disabledStyle : {}}
+                        isDisabled={isOnFirst}
+                        onClick={this.onPrevious}
+                      >
+                        <i className="fas fa-angle-left" />
+                      </Button>
+                    </div>
+                  </SplitItem>
+                  <SplitItem isMain>
+                    <form onSubmit={this.onSubmit}>
+                      <Trans>
+                        Page <TextInput
+                          isDisabled={pageCount === 1}
+                          aria-label={i18n._(t`Page Number`)}
+                          style={{
+                            height: '30px',
+                            width: '30px',
+                            textAlign: 'center',
+                            padding: '0',
+                            margin: '0',
+                            ...(pageCount === 1 ? disabledStyle : {})
+                          }}
+                          value={value}
+                          type="text"
+                          onChange={this.onPageChange}
+                        /> of { pageCount }
+                      </Trans>
+                    </form>
+                  </SplitItem>
+                  <SplitItem>
+                    <div className="pf-c-input-group">
+                      <Button
+                        variant="tertiary"
+                        aria-label={i18n._(t`Next`)}
+                        style={isOnLast ? disabledStyle : {}}
+                        isDisabled={isOnLast}
+                        onClick={this.onNext}
+                      >
+                        <i className="fas fa-angle-right" />
+                      </Button>
+                      <Button
+                        variant="tertiary"
+                        aria-label={i18n._(t`Last`)}
+                        style={isOnLast ? disabledStyle : {}}
+                        isDisabled={isOnLast}
+                        onClick={this.onLast}
+                      >
+                        <i className="fas fa-angle-double-right" />
+                      </Button>
+                    </div>
+                  </SplitItem>
+                </Split>
+              </LevelItem>
+            </Level>
+          </div>
+        )}
+      </I18n>
     );
   }
 }

@@ -1,4 +1,6 @@
 import React from 'react';
+import { I18n } from '@lingui/react';
+import { Trans, t } from '@lingui/macro';
 import {
   Button,
   Checkbox,
@@ -112,122 +114,126 @@ class DataListToolbar extends React.Component {
     };
 
     return (
-      <div className="awx-toolbar">
-        <Level>
-          <LevelItem>
-            <Toolbar style={{ marginLeft: '20px' }}>
-              <ToolbarGroup>
-                <ToolbarItem>
-                  <Checkbox
-                    checked={isAllSelected}
-                    onChange={onSelectAll}
-                    aria-label="Select all"
-                    id="select-all"
-                  />
-                </ToolbarItem>
-              </ToolbarGroup>
-              <ToolbarGroup>
-                <ToolbarItem>
-                  <div className="pf-c-input-group">
-                    <Dropdown
-                      onToggle={this.onSearchDropdownToggle}
-                      onSelect={this.onSearchDropdownSelect}
-                      direction={up}
-                      isOpen={isSearchDropdownOpen}
-                      toggle={(
-                        <DropdownToggle
+      <I18n>
+        {({ i18n }) => (
+          <div className="awx-toolbar">
+            <Level>
+              <LevelItem>
+                <Toolbar style={{ marginLeft: '20px' }}>
+                  <ToolbarGroup>
+                    <ToolbarItem>
+                      <Checkbox
+                        checked={isAllSelected}
+                        onChange={onSelectAll}
+                        aria-label={i18n._(t`Select all`)}
+                        id="select-all"
+                      />
+                    </ToolbarItem>
+                  </ToolbarGroup>
+                  <ToolbarGroup>
+                    <ToolbarItem>
+                      <div className="pf-c-input-group">
+                        <Dropdown
                           onToggle={this.onSearchDropdownToggle}
+                          onSelect={this.onSearchDropdownSelect}
+                          direction={up}
+                          isOpen={isSearchDropdownOpen}
+                          toggle={(
+                            <DropdownToggle
+                              onToggle={this.onSearchDropdownToggle}
+                            >
+                              { searchColumnName }
+                            </DropdownToggle>
+                          )}
                         >
-                          { searchColumnName }
-                        </DropdownToggle>
-                      )}
-                    >
-                      {columns.filter(({ key }) => key !== searchKey).map(({ key, name }) => (
-                        <DropdownItem key={key} component="button">
-                          { name }
-                        </DropdownItem>
-                      ))}
-                    </Dropdown>
-                    <TextInput
-                      type="search"
-                      aria-label="search text input"
-                      value={searchValue}
-                      onChange={this.handleSearchInputChange}
-                    />
-                    <Button
-                      variant="tertiary"
-                      aria-label="Search"
-                      onClick={() => onSearch(searchValue)}
-                    >
-                      <i className="fas fa-search" aria-hidden="true" />
-                    </Button>
-                  </div>
-                </ToolbarItem>
-              </ToolbarGroup>
-              <ToolbarGroup>
-                <ToolbarItem>
-                  <Dropdown
-                    onToggle={this.onSortDropdownToggle}
-                    onSelect={this.onSortDropdownSelect}
-                    direction={up}
-                    isOpen={isSortDropdownOpen}
-                    toggle={(
-                      <DropdownToggle
+                          {columns.filter(({ key }) => key !== searchKey).map(({ key, name }) => (
+                            <DropdownItem key={key} component="button">
+                              { name }
+                            </DropdownItem>
+                          ))}
+                        </Dropdown>
+                        <TextInput
+                          type="search"
+                          aria-label={i18n._(t`Search text input`)}
+                          value={searchValue}
+                          onChange={this.handleSearchInputChange}
+                        />
+                        <Button
+                          variant="tertiary"
+                          aria-label={i18n._(t`Search`)}
+                          onClick={() => onSearch(searchValue)}
+                        >
+                          <i className="fas fa-search" aria-hidden="true" />
+                        </Button>
+                      </div>
+                    </ToolbarItem>
+                  </ToolbarGroup>
+                  <ToolbarGroup>
+                    <ToolbarItem>
+                      <Dropdown
                         onToggle={this.onSortDropdownToggle}
+                        onSelect={this.onSortDropdownSelect}
+                        direction={up}
+                        isOpen={isSortDropdownOpen}
+                        toggle={(
+                          <DropdownToggle
+                            onToggle={this.onSortDropdownToggle}
+                          >
+                            { sortedColumnName }
+                          </DropdownToggle>
+                        )}
                       >
-                        { sortedColumnName }
-                      </DropdownToggle>
-                    )}
-                  >
-                    {columns
-                      .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
-                      .map(({ key, name }) => (
-                        <DropdownItem key={key} component="button">
-                          { name }
-                        </DropdownItem>
-                      ))}
-                  </Dropdown>
-                </ToolbarItem>
-                <ToolbarItem>
-                  <Button
-                    onClick={() => onSort(sortedColumnKey, sortOrder === 'ascending' ? 'descending' : 'ascending')}
-                    variant="plain"
-                    aria-label="Sort"
-                  >
-                    {displayedSortIcon()}
+                        {columns
+                          .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
+                          .map(({ key, name }) => (
+                            <DropdownItem key={key} component="button">
+                              { name }
+                            </DropdownItem>
+                          ))}
+                      </Dropdown>
+                    </ToolbarItem>
+                    <ToolbarItem>
+                      <Button
+                        onClick={() => onSort(sortedColumnKey, sortOrder === 'ascending' ? 'descending' : 'ascending')}
+                        variant="plain"
+                        aria-label={i18n._(t`Sort`)}
+                      >
+                        {displayedSortIcon()}
+                      </Button>
+                    </ToolbarItem>
+                  </ToolbarGroup>
+                  <ToolbarGroup>
+                    <ToolbarItem>
+                      <Button variant="plain" aria-label={i18n._(t`Expand`)}>
+                        <BarsIcon />
+                      </Button>
+                    </ToolbarItem>
+                    <ToolbarItem>
+                      <Button variant="plain" aria-label={i18n._(t`Collapse`)}>
+                        <EqualsIcon />
+                      </Button>
+                    </ToolbarItem>
+                  </ToolbarGroup>
+                </Toolbar>
+              </LevelItem>
+              <LevelItem>
+                <Tooltip message={i18n._(t`Delete`)} position="top">
+                  <Button variant="plain" aria-label={i18n._(t`Delete`)}>
+                    <TrashAltIcon />
                   </Button>
-                </ToolbarItem>
-              </ToolbarGroup>
-              <ToolbarGroup>
-                <ToolbarItem>
-                  <Button variant="plain" aria-label="Expand">
-                    <BarsIcon />
-                  </Button>
-                </ToolbarItem>
-                <ToolbarItem>
-                  <Button variant="plain" aria-label="Collapse">
-                    <EqualsIcon />
-                  </Button>
-                </ToolbarItem>
-              </ToolbarGroup>
-            </Toolbar>
-          </LevelItem>
-          <LevelItem>
-            <Tooltip message="Delete" position="top">
-              <Button variant="plain" aria-label="Delete">
-                <TrashAltIcon />
-              </Button>
-            </Tooltip>
-            {addUrl && (
-              <Link to={addUrl}>
-                <Button variant="primary" aria-label="Add">
-                  Add
-                </Button>
-              </Link>
-            )}
-          </LevelItem>
-        </Level>
-      </div>
+                </Tooltip>
+                {addUrl && (
+                  <Link to={addUrl}>
+                    <Button variant="primary" aria-label={i18n._(t`Add`)}>
+                      <Trans>Add</Trans>
+                    </Button>
+                  </Link>
+                )}
+              </LevelItem>
+            </Level>
+          </div>
+        )}
+      </I18n>
     );
   }
 }

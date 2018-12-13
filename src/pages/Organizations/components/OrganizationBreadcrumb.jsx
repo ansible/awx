@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react';
+import { Trans } from '@lingui/macro';
 import {
   PageSection,
   PageSectionVariants,
@@ -49,14 +50,14 @@ const OrganizationBreadcrumb = ({ parentObj, organization, currentTab, location 
       breadcrumb = (
         <Fragment>
           {generateCrumb()}
-          {' > edit'}
+          <Trans>{' > edit'}</Trans>
         </Fragment>
       );
     } else if (location.pathname.indexOf('add') > -1) {
       breadcrumb = (
         <Fragment>
           {generateCrumb()}
-          {' > add'}
+          <Trans>{' > add'}</Trans>
         </Fragment>
       );
     } else {

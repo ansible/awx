@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import { i18nMark } from '@lingui/react';
 import {
   Switch,
   Route
@@ -58,7 +59,7 @@ class OrganizationView extends Component {
         }
         const { name } = data;
         if (parentBreadcrumbObj === 'loading') {
-          this.setState({ parentBreadcrumbObj: [{ name: 'Organizations', url: '/organizations' }, { name, url: match.url }] });
+          this.setState({ parentBreadcrumbObj: [{ name: i18nMark('Organizations'), url: '/organizations' }, { name, url: match.url }] });
         }
       } catch (err) {
         this.setState({ error: true });

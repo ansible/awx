@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import { Trans } from '@lingui/macro';
 import {
   PageSection,
   PageSectionVariants,
@@ -11,7 +12,11 @@ class NotificationTemplates extends Component {
 
     return (
       <Fragment>
-        <PageSection variant={light} className="pf-m-condensed"><Title size="2xl">Notification Templates</Title></PageSection>
+        <PageSection variant={light} className="pf-m-condensed">
+          <Title size="2xl">
+            <Trans>Notification Templates</Trans>
+          </Title>
+        </PageSection>
         <PageSection variant={medium} />
       </Fragment>
     );
