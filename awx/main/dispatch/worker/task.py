@@ -30,11 +30,18 @@ class TaskWorker(BaseWorker):
         awx.main.tasks.delete_inventory
         awx.main.tasks.RunProjectUpdate
         '''
+        if not task.startswith('awx.'):
+            raise ValueError('{} is not a valid awx task'.format(task))
         module, target = task.rsplit('.', 1)
         module = importlib.import_module(module)
         _call = None
         if hasattr(module, target):
             _call = getattr(module, target, None)
+        if not (
+            hasattr(_call, 'apply_async') and hasattr(_call, 'delay')
+        ):
+            raise ValueError('{} is not decorated with @task()'.format(task))
+
         return _call
 
     def run_callable(self, body):
@@ -78,6 +85,7 @@ class TaskWorker(BaseWorker):
         try:
             result = self.run_callable(body)
         except Exception as exc:
+            result = exc
 
             try:
                 if getattr(exc, 'is_awx_task_error', False):
