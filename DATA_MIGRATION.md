@@ -18,7 +18,7 @@ $ pip install --upgrade ansible-tower-cli
 
 The AWX host URL, user, and password must be set for the AWX instance to be exported:
 ```
-$ tower-cli config host <old-awx-host.example.com>
+$ tower-cli config host http://<old-awx-host.example.com>
 $ tower-cli config username <user>
 $ tower-cli config password <pass>
 ```
@@ -62,7 +62,7 @@ For other install methods, refer to the [Install.md](https://github.com/ansible/
 Configure tower-cli for your new AWX host as shown earlier.  Import from a JSON file named assets.json
 
 ```
-$ tower-cli config host <new-awx-host.example.com>
+$ tower-cli config host http://<new-awx-host.example.com>
 $ tower-cli config username <user>
 $ tower-cli config password <pass>
 $ tower-cli send assets.json
