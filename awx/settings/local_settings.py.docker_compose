@@ -267,7 +267,10 @@ TEST_SVN_PRIVATE_HTTPS = 'https://github.com/ansible/product-docs'
 
 # To test repo access via SSH login to localhost.
 import getpass
-TEST_SSH_LOOPBACK_USERNAME = getpass.getuser()
+try:
+    TEST_SSH_LOOPBACK_USERNAME = getpass.getuser()
+except KeyError:
+    TEST_SSH_LOOPBACK_USERNAME = 'root'
 TEST_SSH_LOOPBACK_PASSWORD = ''
 
 ###############################################################################
