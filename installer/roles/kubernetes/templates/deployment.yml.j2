@@ -37,12 +37,20 @@ metadata:
 data:
   enabled_plugins: |
       [rabbitmq_management,rabbitmq_peer_discovery_k8s].
+  rabbitmq_definitions.json: |
+      {
+        "users":[{"name": "{{ rabbitmq_user }}", "password": "{{ rabbitmq_password }}", "tags": ""}],
+        "permissions":[
+          {"user":"{{ rabbitmq_user }}","vhost":"awx","configure":".*","write":".*","read":".*"}
+        ],
+        "vhosts":[{"name":"awx"}],
+        "policies":[
+            {"vhost":"awx","name":"ha-all","pattern":".*","definition":{"ha-mode":"all","ha-sync-mode":"automatic"}}
+        ]
+      }
   rabbitmq.conf: |
-      default_user = {{ rabbitmq_user }}
-      default_pass = {{ rabbitmq_password }}
-      default_vhost = awx
-
       ## Clustering
+      management.load_definitions = /etc/rabbitmq/rabbitmq_definitions.json
       cluster_formation.peer_discovery_backend  = rabbit_peer_discovery_k8s
       cluster_formation.k8s.host = kubernetes.default.svc
       cluster_formation.k8s.address_type = ip
@@ -283,6 +291,8 @@ spec:
               path: rabbitmq.conf
             - key: enabled_plugins
               path: enabled_plugins
+            - key: rabbitmq_definitions.json
+              path: rabbitmq_definitions.json
 ---
 apiVersion: v1
 kind: Service
