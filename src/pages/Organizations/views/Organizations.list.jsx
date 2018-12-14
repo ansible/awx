@@ -205,6 +205,7 @@ class Organizations extends Component {
             onSearch={this.onSearch}
             onSort={this.onSort}
             onSelectAll={this.onSelectAll}
+            hideExpandCollapse
           />
           <I18n>
             {({ i18n }) => (
