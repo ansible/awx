@@ -222,17 +222,16 @@ function PromptService (Empty, $filter)  {
     };
 
     this.bundlePromptDataForSaving = (params) => {
-
         const promptDataToSave = params.dataToSave ? params.dataToSave : {};
 
         if(params.promptData.launchConf.survey_enabled){
+            if(!promptDataToSave.extra_data) {
+                promptDataToSave.extra_data = {};
+            }
             for (var i=0; i < params.promptData.surveyQuestions.length; i++){
                 var fld = params.promptData.surveyQuestions[i].variable;
                 // grab all survey questions that have answers
                 if(params.promptData.surveyQuestions[i].required || (params.promptData.surveyQuestions[i].required === false && params.promptData.surveyQuestions[i].model.toString()!=="")) {
-                    if(!promptDataToSave.extra_data) {
-                        promptDataToSave.extra_data = {};
-                    }
                     promptDataToSave.extra_data[fld] = params.promptData.surveyQuestions[i].model;
                 }
 
