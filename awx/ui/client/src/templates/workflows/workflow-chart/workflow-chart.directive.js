@@ -764,7 +764,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         });
 
                     baseSvg.selectAll(".WorkflowChart-detailsLink")
-                        .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; })
+                        .style("display", function(d){ return d.job && d.job.status && d.job.id && d.job.type ? null : "none"; })
                         .html(function (d) {
                             let href = "";
                             if (d.job) {
@@ -1065,8 +1065,8 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("y", nodeH - 15)
                                 .attr("dy", ".35em")
                                 .attr("class", "WorkflowChart-detailsLink")
-                                .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; })
-                                .html(function () {
+                                .style("display", function(d){ return d.job && d.job.status && d.job.id && d.job.type ? null : "none"; })
+                                .html(function (d) {
                                     let href = "";
                                     if (d.job) {
                                         if(d.job.type === 'job') {

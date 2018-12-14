@@ -1,10 +1,10 @@
 export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
     'jobLabels', 'workflowNodes', '$scope', 'ParseTypeChange',
     'ParseVariableString', 'count', '$state', 'i18n', 'WorkflowChartService', '$filter',
-    'moment', function(workflowData, workflowResultsService,
+    'moment', 'ProcessErrors', function(workflowData, workflowResultsService,
     workflowDataOptions, jobLabels, workflowNodes, $scope, ParseTypeChange,
     ParseVariableString, count, $state, i18n, WorkflowChartService, $filter,
-    moment) {
+    moment, ProcessErrors) {
         let nodeRef;
         var runTimeElapsedTimer = null;
 
@@ -279,15 +279,34 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
 
                     $scope.graphState.arrayOfNodesForChart.forEach((node) => {
                         if (nodeRef[node.id] && nodeRef[node.id].originalNodeObject.id === data.workflow_node_id) {
-                            node.job = {
-                                id: data.unified_job_id,
-                                status: data.status,
-                                type: nodeRef[node.id].unifiedJobTemplate.unified_job_type
-                            };
+                            if (!nodeRef[node.id].jobType && nodeRef[node.id].unifiedJobTemplate.unified_job_type === "job") {
+                                workflowResultsService.getWorkflowNode(nodeRef[node.id].originalNodeObject.url)
+                                    .then((nodeData) => {
+                                        nodeRef[node.id].jobType = nodeData.data.summary_fields.job.type;
+
+                                        node.job = {
+                                            id: data.unified_job_id,
+                                            status: data.status,
+                                            type: nodeRef[node.id].jobType
+                                        };
+        
+                                        $scope.$broadcast("refreshWorkflowChart");
+                                    })
+                                    .catch(({ data, status }) => {
+                                        const params = { hdr: 'Error!', msg: `Call to get workflow node failed. Return status: ${status}` };
+                                        ProcessErrors($scope, data, status, null, params);
+                                    });
+                            } else {
+                                node.job = {
+                                    id: data.unified_job_id,
+                                    status: data.status,
+                                    type: nodeRef[node.id].jobType || nodeRef[node.id].unifiedJobTemplate.unified_job_type
+                                };
+
+                                $scope.$broadcast("refreshWorkflowChart");
+                            }
                         }
                     });
-
-                    $scope.$broadcast("refreshWorkflowChart");
             }
             getLabelsAndTooltips();
         });

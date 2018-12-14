@@ -133,6 +133,10 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
             }
             return false;
         },
+        getWorkflowNode: (nodeUrl) => {
+            Rest.setUrl(nodeUrl);
+            return Rest.get();
+        }
     };
     return val;
 }];
