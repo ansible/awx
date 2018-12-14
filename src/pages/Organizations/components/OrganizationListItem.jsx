@@ -1,4 +1,6 @@
 import React from 'react';
+import { I18n } from '@lingui/react';
+import { Trans, t } from '@lingui/macro';
 import {
   Badge,
   Checkbox,
@@ -20,12 +22,16 @@ export default ({
 }) => (
   <li key={itemId} className="pf-c-data-list__item" aria-labelledby="check-action-item1">
     <div className="pf-c-data-list__check">
-      <Checkbox
-        checked={isSelected}
-        onChange={onSelect}
-        aria-label={`select organization ${itemId}`}
-        id={`select-organization-${itemId}`}
-      />
+      <I18n>
+        {({ i18n }) => (
+          <Checkbox
+            checked={isSelected}
+            onChange={onSelect}
+            aria-label={i18n._(t`select organization ${itemId}`)}
+            id={`select-organization-${itemId}`}
+          />
+        )}
+      </I18n>
     </div>
     <div className="pf-c-data-list__cell">
       <span id="check-action-item1">
@@ -41,7 +47,7 @@ export default ({
     </div>
     <div className="pf-c-data-list__cell">
       <Link to={`${detailUrl}?tab=users`}>
-        Users
+        <Trans>Users</Trans>
       </Link>
       <Badge isRead>
         {' '}
@@ -49,7 +55,7 @@ export default ({
         {' '}
       </Badge>
       <Link to={`${detailUrl}?tab=teams`}>
-        Teams
+        <Trans>Teams</Trans>
       </Link>
       <Badge isRead>
         {' '}
@@ -57,7 +63,7 @@ export default ({
         {' '}
       </Badge>
       <Link to={`${detailUrl}?tab=admins`}>
-        Admins
+        <Trans>Admins</Trans>
       </Link>
       <Badge isRead>
         {' '}

@@ -5,6 +5,8 @@ import React, {
 import {
   withRouter
 } from 'react-router-dom';
+import { I18n, i18nMark } from '@lingui/react';
+import { Trans, t } from '@lingui/macro';
 import {
   PageSection,
   PageSectionVariants,
@@ -25,9 +27,9 @@ import {
 
 class Organizations extends Component {
   columns = [
-    { name: 'Name', key: 'name', isSortable: true },
-    { name: 'Modified', key: 'modified', isSortable: true, isNumeric: true },
-    { name: 'Created', key: 'created', isSortable: true, isNumeric: true },
+    { name: i18nMark('Name'), key: 'name', isSortable: true },
+    { name: i18nMark('Modified'), key: 'modified', isSortable: true, isNumeric: true },
+    { name: i18nMark('Created'), key: 'created', isSortable: true, isNumeric: true },
   ];
 
   defaultParams = {
@@ -184,12 +186,14 @@ class Organizations extends Component {
       selected,
     } = this.state;
     const { match } = this.props;
-    const parentBreadcrumb = { name: 'Organizations', url: match.url };
+    const parentBreadcrumb = { name: i18nMark('Organizations'), url: match.url };
 
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">Organizations</Title>
+          <Title size="2xl">
+            <Trans>Organizations</Trans>
+          </Title>
         </PageSection>
         <PageSection variant={medium}>
           <DataListToolbar
@@ -202,22 +206,26 @@ class Organizations extends Component {
             onSort={this.onSort}
             onSelectAll={this.onSelectAll}
           />
-          <ul className="pf-c-data-list" aria-label="Organizations List">
-            { results.map(o => (
-              <OrganizationListItem
-                key={o.id}
-                itemId={o.id}
-                name={o.name}
-                detailUrl={`${match.url}/${o.id}`}
-                parentBreadcrumb={parentBreadcrumb}
-                userCount={o.summary_fields.related_field_counts.users}
-                teamCount={o.summary_fields.related_field_counts.teams}
-                adminCount={o.summary_fields.related_field_counts.admins}
-                isSelected={selected.includes(o.id)}
-                onSelect={() => this.onSelect(o.id)}
-              />
-            ))}
-          </ul>
+          <I18n>
+            {({ i18n }) => (
+              <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
+                { results.map(o => (
+                  <OrganizationListItem
+                    key={o.id}
+                    itemId={o.id}
+                    name={o.name}
+                    detailUrl={`${match.url}/${o.id}`}
+                    parentBreadcrumb={parentBreadcrumb}
+                    userCount={o.summary_fields.related_field_counts.users}
+                    teamCount={o.summary_fields.related_field_counts.teams}
+                    adminCount={o.summary_fields.related_field_counts.admins}
+                    isSelected={selected.includes(o.id)}
+                    onSelect={() => this.onSelect(o.id)}
+                  />
+                ))}
+              </ul>
+            )}
+          </I18n>
           <Pagination
             count={count}
             page={page}

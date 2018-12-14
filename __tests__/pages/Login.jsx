@@ -1,6 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount, shallow } from 'enzyme';
+import { I18nProvider } from '@lingui/react';
 import { asyncFlush } from '../../jest.setup';
 import AtLogin from '../../src/pages/Login';
 import api from '../../src/api';
@@ -26,7 +27,13 @@ describe('<Login />', () => {
   };
 
   beforeEach(() => {
-    loginWrapper = mount(<MemoryRouter><AtLogin /></MemoryRouter>);
+    loginWrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <AtLogin />
+        </I18nProvider>
+      </MemoryRouter>
+    );
     findChildren();
   });
 
@@ -49,7 +56,13 @@ describe('<Login />', () => {
   });
 
   test('custom logo renders Brand component with correct src and alt', () => {
-    loginWrapper = mount(<MemoryRouter><AtLogin logo="images/foo.jpg" alt="Foo Application" /></MemoryRouter>);
+    loginWrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <AtLogin logo="images/foo.jpg" alt="Foo Application" />
+        </I18nProvider>
+      </MemoryRouter>
+    );
     findChildren();
     expect(loginHeaderLogo.length).toBe(1);
     expect(loginHeaderLogo.props().src).toBe('data:image/jpeg;images/foo.jpg');
@@ -57,7 +70,13 @@ describe('<Login />', () => {
   });
 
   test('default logo renders Brand component with correct src and alt', () => {
-    loginWrapper = mount(<MemoryRouter><AtLogin /></MemoryRouter>);
+    loginWrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <AtLogin />
+        </I18nProvider>
+      </MemoryRouter>
+    );
     findChildren();
     expect(loginHeaderLogo.length).toBe(1);
     expect(loginHeaderLogo.props().src).toBe('tower-logo-header.svg');

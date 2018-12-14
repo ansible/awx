@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import { Trans } from '@lingui/macro';
 import {
   Dropdown,
   DropdownItem,
@@ -22,14 +23,14 @@ class HelpDropdown extends Component {
         target="_blank"
         key="help"
       >
-      Help
+        <Trans>Help</Trans>
       </DropdownItem>,
       <DropdownItem
         onClick={() => this.setState({ showAboutModal: true })}
         key="about"
       >
-      About
-      </DropdownItem>,
+        <Trans>About</Trans>
+      </DropdownItem>
     ];
 
     return (

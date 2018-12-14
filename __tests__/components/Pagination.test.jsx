@@ -1,34 +1,35 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import { I18nProvider } from '@lingui/react';
 import Pagination from '../../src/components/Pagination';
 
 describe('<Pagination />', () => {
-  const noop = () => {};
-
   let pagination;
 
   afterEach(() => {
-    if (toolbar) {
+    if (pagination) {
       pagination.unmount();
       pagination = null;
     }
   });
 
   test('it triggers the expected callbacks on next and last', () => {
-    const next = 'button[aria-label="next"]';
-    const last = 'button[aria-label="last"]';
+    const next = 'button[aria-label="Next"]';
+    const last = 'button[aria-label="Last"]';
 
     const onSetPage = jest.fn();
 
     pagination = mount(
-      <Pagination
-        count={21}
-        page={1}
-        pageCount={5}
-        page_size={5}
-        pageSizeOptions={[5, 10, 25, 50]}
-        onSetPage={onSetPage}
-      />
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={1}
+          pageCount={5}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
     );
 
     pagination.find(next).simulate('click');
@@ -43,20 +44,22 @@ describe('<Pagination />', () => {
   });
 
   test('it triggers the expected callback on previous and first', () => {
-    const previous = 'button[aria-label="previous"]';
-    const first = 'button[aria-label="first"]';
+    const previous = 'button[aria-label="Previous"]';
+    const first = 'button[aria-label="First"]';
 
     const onSetPage = jest.fn();
 
     pagination = mount(
-      <Pagination
-        count={21}
-        page={5}
-        pageCount={5}
-        page_size={5}
-        pageSizeOptions={[5, 10, 25, 50]}
-        onSetPage={onSetPage}
-      />
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={5}
+          pageCount={5}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
     );
 
     pagination.find(previous).simulate('click');

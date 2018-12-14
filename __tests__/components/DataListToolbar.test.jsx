@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import { I18nProvider } from '@lingui/react';
 import DataListToolbar from '../../src/components/DataListToolbar';
 
 describe('<DataListToolbar />', () => {
@@ -15,7 +16,7 @@ describe('<DataListToolbar />', () => {
 
   test('it triggers the expected callbacks', () => {
     const search = 'button[aria-label="Search"]';
-    const searchTextInput = 'input[aria-label="search text input"]';
+    const searchTextInput = 'input[aria-label="Search text input"]';
     const selectAll = 'input[aria-label="Select all"]';
     const sort = 'button[aria-label="Sort"]';
 
@@ -24,15 +25,17 @@ describe('<DataListToolbar />', () => {
     const onSelectAll = jest.fn();
 
     toolbar = mount(
-      <DataListToolbar
-        isAllSelected={false}
-        sortedColumnKey="name"
-        sortOrder="ascending"
-        columns={columns}
-        onSearch={onSearch}
-        onSort={onSort}
-        onSelectAll={onSelectAll}
-      />
+      <I18nProvider>
+        <DataListToolbar
+          isAllSelected={false}
+          sortedColumnKey="name"
+          sortOrder="ascending"
+          columns={columns}
+          onSearch={onSearch}
+          onSort={onSort}
+          onSelectAll={onSelectAll}
+        />
+      </I18nProvider>
     );
 
     toolbar.find(sort).simulate('click');
