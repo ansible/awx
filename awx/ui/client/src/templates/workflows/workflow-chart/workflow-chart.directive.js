@@ -1358,30 +1358,6 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                 });
             }
 
-            // function details() {
-            //     this.on("mouseover", function() {
-            //         d3.select(this).style("text-decoration", "underline");
-            //     });
-            //     this.on("mouseout", function() {
-            //         d3.select(this).style("text-decoration", null);
-            //     });
-            //     this.on("click", function(d) {
-            //         if(d.job.type === 'job') {
-            //             $state.go('output', {id: d.job.id, type: 'playbook'});
-            //         }
-            //         else if(d.job.type === 'inventory_update') {
-            //             $state.go('output', {id: d.job.id, type: 'inventory'});
-            //         }
-            //         else if(d.job.type === 'project_update') {
-            //             $state.go('output', {id: d.job.id, type: 'project'});
-            //         } else if (d.job.type === 'workflow_job') {
-            //             $state.go('workflowResults', {
-            //                 id: d.job.id,
-            //             });
-            //         }
-            //     });
-            // }
-
             scope.$on('refreshWorkflowChart', function(){
                 if(scope.graphState) {
                     updateGraph();
