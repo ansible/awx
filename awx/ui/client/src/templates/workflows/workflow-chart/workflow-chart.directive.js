@@ -769,7 +769,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                             let href = "";
                             if (d.job) {
                                 if(d.job.type === 'job') {
-                                    href = `/#/jobs/playbook/${d.job.id}`;
+                                    href = `/#/workflow_node_playbook_results/${d.job.id}`;
                                 }
                                 else if(d.job.type === 'inventory_update') {
                                     href = `/#/jobs/inventory/${d.job.id}`;
@@ -1070,7 +1070,7 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                     let href = "";
                                     if (d.job) {
                                         if(d.job.type === 'job') {
-                                            href = `/#/jobs/playbook/${d.job.id}`;
+                                            href = `/#/workflow_node_playbook_results/${d.job.id}`;
                                         }
                                         else if(d.job.type === 'inventory_update') {
                                             href = `/#/jobs/inventory/${d.job.id}`;
