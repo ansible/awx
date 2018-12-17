@@ -1,6 +1,6 @@
 import React from 'react';
 import { I18n } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import {
   Button,
   Checkbox,
@@ -115,11 +115,21 @@ class DataListToolbar extends React.Component {
       return icon;
     };
 
-    const dropdownItems = columns.filter(({ key }) => key !== searchKey).map(({ key, name }) => (
-      <DropdownItem key={key} component="button">
-        { name }
-      </DropdownItem>
-    ));
+    const searchDropdownItems = columns
+      .filter(({ key }) => key !== searchKey)
+      .map(({ key, name }) => (
+        <DropdownItem key={key} component="button">
+          { name }
+        </DropdownItem>
+      ));
+
+    const sortDropdownItems = columns
+      .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
+      .map(({ key, name }) => (
+        <DropdownItem key={key} component="button">
+          { name }
+        </DropdownItem>
+      ));
 
     return (
       <I18n>
@@ -153,7 +163,7 @@ class DataListToolbar extends React.Component {
                               { searchColumnName }
                             </DropdownToggle>
                           )}
-                          dropdownItems={dropdownItems}
+                          dropdownItems={searchDropdownItems}
                         />
                         <TextInput
                           type="search"
@@ -185,7 +195,7 @@ class DataListToolbar extends React.Component {
                             { sortedColumnName }
                           </DropdownToggle>
                         )}
-                        dropdownItems={dropdownItems}
+                        dropdownItems={sortDropdownItems}
                       />
                     </ToolbarItem>
                     <ToolbarItem>
