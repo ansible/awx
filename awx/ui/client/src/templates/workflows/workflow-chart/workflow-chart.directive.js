@@ -1058,6 +1058,9 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 .attr("dy", ".35em")
                                 .attr("class", "WorkflowChart-detailsLink")
                                 .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; })
+                                .on("mousedown", function(){
+                                    d3.event.stopPropagation();
+                                })
                                 .html(function (d) {
                                     let href = "";
                                     if (d.job) {
