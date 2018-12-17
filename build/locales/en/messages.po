@@ -1,0 +1,360 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2018-12-10 10:08-0500\n"
+"Mime-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/pages/Organizations/components/OrganizationBreadcrumb.jsx:60
+msgid "> add"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationBreadcrumb.jsx:53
+msgid "> edit"
+msgstr ""
+
+#: src/components/HelpDropdown.jsx:32
+msgid "About"
+msgstr ""
+
+#: src/components/About.jsx:82
+msgid "AboutModal Logo"
+msgstr ""
+
+#: src/App.jsx:235
+msgid "Access"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:227
+#: src/components/DataListToolbar/DataListToolbar.jsx:228
+msgid "Add"
+msgstr ""
+
+#: src/App.jsx:253
+msgid "Administration"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationListItem.jsx:66
+msgid "Admins"
+msgstr ""
+
+#: src/components/About.jsx:100
+msgid "Ansible Version"
+msgstr ""
+
+#: src/pages/Applications.jsx:17
+msgid "Applications"
+msgstr ""
+
+#: src/App.jsx:283
+msgid "Authentication"
+msgstr ""
+
+#: src/pages/AuthSettings.jsx:17
+msgid "Authentication Settings"
+msgstr ""
+
+#: src/components/About.jsx:80
+msgid "Brand Image"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:212
+msgid "Collapse"
+msgstr ""
+
+#: src/components/About.jsx:78
+msgid "Copyright 2018 Red Hat, Inc."
+msgstr ""
+
+#: src/pages/Organizations/views/Organizations.list.jsx:32
+msgid "Created"
+msgstr ""
+
+#: src/App.jsx:257
+#: src/pages/CredentialTypes.jsx:17
+msgid "Credential Types"
+msgstr ""
+
+#: src/App.jsx:217
+#: src/pages/Credentials.jsx:17
+msgid "Credentials"
+msgstr ""
+
+#: src/App.jsx:191
+#: src/pages/Dashboard.jsx:17
+msgid "Dashboard"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:220
+#: src/components/DataListToolbar/DataListToolbar.jsx:221
+msgid "Delete"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:207
+msgid "Expand"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:164
+msgid "First"
+msgstr ""
+
+#: src/components/HelpDropdown.jsx:26
+msgid "Help"
+msgstr ""
+
+#: src/App.jsx:269
+#: src/pages/InstanceGroups.jsx:17
+msgid "Instance Groups"
+msgstr ""
+
+#: src/App.jsx:273
+msgid "Integrations"
+msgstr ""
+
+#: src/pages/Login.jsx:80
+msgid "Invalid username or password. Please try again."
+msgstr ""
+
+#: src/App.jsx:225
+#: src/pages/Inventories.jsx:17
+msgid "Inventories"
+msgstr ""
+
+#: src/App.jsx:229
+#: src/pages/InventoryScripts.jsx:17
+msgid "Inventory Scripts"
+msgstr ""
+
+#: src/App.jsx:195
+#: src/App.jsx:287
+#: src/pages/Jobs.jsx:17
+msgid "Jobs"
+msgstr ""
+
+#: src/pages/JobsSettings.jsx:17
+msgid "Jobs Settings"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:216
+msgid "Last"
+msgstr ""
+
+#: src/App.jsx:299
+#: src/pages/License.jsx:17
+msgid "License"
+msgstr ""
+
+#: src/components/LogoutButton.jsx:17
+msgid "Logout"
+msgstr ""
+
+#: src/App.jsx:265
+#: src/pages/ManagementJobs.jsx:17
+msgid "Management Jobs"
+msgstr ""
+
+#: src/pages/Organizations/views/Organizations.list.jsx:31
+msgid "Modified"
+msgstr ""
+
+#: src/pages/Portal.jsx:17
+msgid "My View"
+msgstr ""
+
+#: src/pages/Organizations/views/Organizations.list.jsx:30
+msgid "Name"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:207
+msgid "Next"
+msgstr ""
+
+#: src/pages/NotificationTemplates.jsx:17
+msgid "Notification Templates"
+msgstr ""
+
+#: src/App.jsx:261
+msgid "Notifications"
+msgstr ""
+
+#: src/pages/Organizations/views/Organization.add.jsx:15
+msgid "Organization Add"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:99
+msgid "Organization detail tabs"
+msgstr ""
+
+#: src/App.jsx:239
+#: src/pages/Organizations/views/Organization.view.jsx:62
+#: src/pages/Organizations/views/Organizations.list.jsx:189
+#: src/pages/Organizations/views/Organizations.list.jsx:195
+msgid "Organizations"
+msgstr ""
+
+#: src/pages/Organizations/views/Organizations.list.jsx:211
+msgid "Organizations List"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:184
+msgid "Page <0/> of {pageCount}"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:187
+msgid "Page Number"
+msgstr ""
+
+#: src/pages/Login.jsx:76
+msgid "Password"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:153
+msgid "Per Page"
+msgstr ""
+
+#: src/App.jsx:203
+msgid "Portal Mode"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:173
+msgid "Previous"
+msgstr ""
+
+#: src/App.jsx:180
+msgid "Primary Navigation"
+msgstr ""
+
+#: src/App.jsx:221
+#: src/pages/Projects.jsx:17
+msgid "Projects"
+msgstr ""
+
+#: src/App.jsx:209
+msgid "Resources"
+msgstr ""
+
+#: src/App.jsx:199
+#: src/pages/Schedules.jsx:17
+msgid "Schedules"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:163
+msgid "Search"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:157
+msgid "Search text input"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:128
+msgid "Select all"
+msgstr ""
+
+#: src/App.jsx:279
+msgid "Settings"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:199
+msgid "Sort"
+msgstr ""
+
+#: src/App.jsx:291
+msgid "System"
+msgstr ""
+
+#: src/pages/SystemSettings.jsx:17
+msgid "System Settings"
+msgstr ""
+
+#: src/App.jsx:247
+#: src/pages/Organizations/components/OrganizationListItem.jsx:58
+#: src/pages/Teams.jsx:17
+msgid "Teams"
+msgstr ""
+
+#: src/App.jsx:213
+#: src/pages/Templates.jsx:17
+msgid "Templates"
+msgstr ""
+
+#: src/components/TowerLogo/TowerLogo.jsx:48
+msgid "Tower Brand Image"
+msgstr ""
+
+#: src/App.jsx:295
+msgid "User Interface"
+msgstr ""
+
+#: src/pages/UISettings.jsx:17
+msgid "User Interface Settings"
+msgstr ""
+
+#: src/pages/Login.jsx:73
+msgid "Username"
+msgstr ""
+
+#: src/App.jsx:243
+#: src/pages/Organizations/components/OrganizationListItem.jsx:50
+#: src/pages/Users.jsx:17
+msgid "Users"
+msgstr ""
+
+#: src/App.jsx:187
+msgid "Views"
+msgstr ""
+
+#: src/pages/Login.jsx:70
+msgid "Welcome to Ansible Tower! Please Sign In."
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:87
+msgid "add {currentTab}"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:76
+msgid "adding {currentTab}"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:69
+msgid "confirm removal of {currentTab}/cancel and go back to {currentTab} view."
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:91
+msgid "delete {currentTab}"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:67
+msgid "deleting {currentTab} association with orgs"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationEdit.jsx:20
+msgid "edit view"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationEdit.jsx:22
+msgid "save/cancel and go back to view"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:78
+msgid "save/cancel and go back to {currentTab} view"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationListItem.jsx:30
+msgid "select organization {itemId}"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:85
+msgid "{currentTab} detail view"
+msgstr ""
+
+#: src/components/Pagination/Pagination.jsx:158
+msgid "{itemMin} - {itemMax} of {count}"
+msgstr ""

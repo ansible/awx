@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { Trans } from '@lingui/macro';
 import {
   PageSection,
   PageSectionVariants,
@@ -68,7 +69,9 @@ class OrganizationAdd extends React.Component {
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">Organization Add</Title>
+          <Title size="2xl">
+            <Trans>Organization Add</Trans>
+          </Title>
         </PageSection>
         <PageSection>
           <Card>

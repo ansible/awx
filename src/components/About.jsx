@@ -1,4 +1,6 @@
 import React from 'react';
+import { I18n } from '@lingui/react';
+import { Trans, t } from '@lingui/macro';
 import {
   AboutModal,
   TextContent,
@@ -67,37 +69,43 @@ class About extends React.Component {
     const { ansible_version = 'loading', version = 'loading' } = config;
 
     return (
-      <AboutModal
-        isOpen={isOpen}
-        onClose={this.handleModalToggle}
-        productName="Ansible Tower"
-        trademark="Copyright 2018 Red Hat, Inc."
-        brandImageSrc={brandImg}
-        brandImageAlt="Brand Image"
-        logoImageSrc={logoImg}
-        logoImageAlt="AboutModal Logo"
-        heroImageSrc={heroImg}
-      >
-        <pre>
-          { this.createSpeechBubble(version) }
-          {`
-          \\
-           \\  ^__^
-              (oo)\\_______
-              (__)      A )\\
-                  ||----w |
-                  ||     ||
-                    `}
-        </pre>
+      <I18n>
+        {({ i18n }) => (
+          <AboutModal
+            isOpen={isOpen}
+            onClose={this.handleModalToggle}
+            productName="Ansible Tower"
+            trademark={i18n._(t`Copyright 2018 Red Hat, Inc.`)}
+            brandImageSrc={brandImg}
+            brandImageAlt={i18n._(t`Brand Image`)}
+            logoImageSrc={logoImg}
+            logoImageAlt={i18n._(t`AboutModal Logo`)}
+            heroImageSrc={heroImg}
+          >
+            <pre>
+              { this.createSpeechBubble(version) }
+              {`
+              \\
+              \\  ^__^
+                  (oo)\\_______
+                  (__)      A )\\
+                      ||----w |
+                      ||     ||
+                        `}
+            </pre>
 
-        <TextContent>
-          <TextList component="dl">
-            <TextListItem component="dt">Ansible Version</TextListItem>
-            <TextListItem component="dd">{ ansible_version }</TextListItem>
-          </TextList>
-        </TextContent>
-        { error ? <div>error</div> : ''}
-      </AboutModal>
+            <TextContent>
+              <TextList component="dl">
+                <TextListItem component="dt">
+                  <Trans>Ansible Version</Trans>
+                </TextListItem>
+                <TextListItem component="dd">{ ansible_version }</TextListItem>
+              </TextList>
+            </TextContent>
+            { error ? <div>error</div> : ''}
+          </AboutModal>
+        )}
+      </I18n>
     );
   }
 }

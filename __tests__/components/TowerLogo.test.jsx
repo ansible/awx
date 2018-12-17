@@ -1,6 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount } from 'enzyme';
+import { I18nProvider } from '@lingui/react';
 import TowerLogo from '../../src/components/TowerLogo';
 
 let logoWrapper;
@@ -14,7 +15,13 @@ const findChildren = () => {
 
 describe('<TowerLogo />', () => {
   test('initially renders without crashing', () => {
-    logoWrapper = mount(<MemoryRouter><TowerLogo /></MemoryRouter>);
+    logoWrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <TowerLogo />
+        </I18nProvider>
+      </MemoryRouter>
+    );
     findChildren();
     expect(logoWrapper.length).toBe(1);
     expect(towerLogoElem.length).toBe(1);
@@ -23,7 +30,13 @@ describe('<TowerLogo />', () => {
 
   test('adds navigation to route history on click', () => {
     const onLogoClick = jest.fn();
-    logoWrapper = mount(<MemoryRouter><TowerLogo onClick={onLogoClick} /></MemoryRouter>);
+    logoWrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <TowerLogo onClick={onLogoClick} />
+        </I18nProvider>
+      </MemoryRouter>
+    );
     findChildren();
     expect(towerLogoElem.props().history.length).toBe(1);
     logoWrapper.simulate('click');
@@ -31,7 +44,13 @@ describe('<TowerLogo />', () => {
   });
 
   test('gracefully handles not being passed click handler', () => {
-    logoWrapper = mount(<MemoryRouter><TowerLogo /></MemoryRouter>);
+    logoWrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <TowerLogo />
+        </I18nProvider>
+      </MemoryRouter>
+    );
     findChildren();
     expect(towerLogoElem.props().history.length).toBe(1);
     logoWrapper.simulate('click');
@@ -40,7 +59,13 @@ describe('<TowerLogo />', () => {
 
   test('handles mouse over and out state.hover changes', () => {
     const onLogoClick = jest.fn();
-    logoWrapper = mount(<MemoryRouter><TowerLogo onClick={onLogoClick} /></MemoryRouter>);
+    logoWrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <TowerLogo onClick={onLogoClick} />
+        </I18nProvider>
+      </MemoryRouter>
+    );
     findChildren();
     findChildren();
     expect(brandElem.props().src).toBe('tower-logo-header.svg');

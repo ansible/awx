@@ -2,7 +2,8 @@ module.exports = api => {
   api.cache(false);
   return {
     plugins: [
-      '@babel/plugin-proposal-class-properties'
+      '@babel/plugin-proposal-class-properties',
+      'macros'
     ],
     presets: [
       ['@babel/preset-env', {

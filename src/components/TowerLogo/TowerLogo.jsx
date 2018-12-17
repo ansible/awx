@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
+import { I18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import { Brand } from '@patternfly/react-core';
 
 import TowerLogoHeader from '../../../images/tower-logo-header.svg';
@@ -39,15 +41,19 @@ class TowerLogo extends Component {
     }
 
     return (
-      <Brand
-        src={src}
-        alt="Tower Brand Image"
-        onMouseOut={this.onHover}
-        onMouseOver={this.onHover}
-        onBlur={this.onHover}
-        onFocus={this.onHover}
-        onClick={this.onClick}
-      />
+      <I18n>
+        {({ i18n }) => (
+          <Brand
+            src={src}
+            alt={i18n._(t`Tower Brand Image`)}
+            onMouseOut={this.onHover}
+            onMouseOver={this.onHover}
+            onBlur={this.onHover}
+            onFocus={this.onHover}
+            onClick={this.onClick}
+          />
+        )}
+      </I18n>
     );
   }
 }

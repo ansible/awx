@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import { I18nProvider } from '@lingui/react';
 import LogoutButton from '../../src/components/LogoutButton';
 
 let buttonWrapper;
@@ -14,7 +15,11 @@ const findChildren = () => {
 describe('<LogoutButton />', () => {
   test('initially renders without crashing', () => {
     const onDevLogout = jest.fn();
-    buttonWrapper = mount(<LogoutButton onDevLogout={onDevLogout} />);
+    buttonWrapper = mount(
+      <I18nProvider>
+        <LogoutButton onDevLogout={onDevLogout} />
+      </I18nProvider>
+    );
     findChildren();
     expect(buttonWrapper.length).toBe(1);
     expect(buttonElem.length).toBe(1);

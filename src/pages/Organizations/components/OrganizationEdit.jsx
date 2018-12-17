@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans } from '@lingui/macro';
 import {
   Card,
   CardBody,
@@ -16,9 +17,9 @@ const OrganizationEdit = ({ match, parentBreadcrumbObj, organization }) => {
     <PageSection variant={medium}>
       <Card className="at-c-orgPane">
         <CardBody>
-          {'edit view   '}
+          <Trans>edit view   </Trans>
           <Link to={{ pathname: `/organizations/${match.params.id}`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
-            {'save/cancel and go back to view'}
+            <Trans>save/cancel and go back to view</Trans>
           </Link>
         </CardBody>
       </Card>

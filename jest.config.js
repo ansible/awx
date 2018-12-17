@@ -2,6 +2,9 @@ module.exports = {
   collectCoverageFrom: [
     'src/**/*.{js,jsx}'
   ],
+  coveragePathIgnorePatterns: [
+    '<rootDir>/src/locales'
+  ],
   moduleNameMapper: {
     '\\.(css|scss|less)$': '<rootDir>/__mocks__/styleMock.js'
   },
