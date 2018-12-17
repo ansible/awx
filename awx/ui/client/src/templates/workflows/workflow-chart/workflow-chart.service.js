@@ -33,7 +33,6 @@ export default [function(){
 
                 if(node.summary_fields.job) {
                     nodeObj.job = node.summary_fields.job;
-                    nodeRef[nodeIdCounter].jobType = node.summary_fields.job.type;
                 }
                 if(node.summary_fields.unified_job_template) {
                     nodeRef[nodeIdCounter].unifiedJobTemplate = nodeObj.unifiedJobTemplate = node.summary_fields.unified_job_template;

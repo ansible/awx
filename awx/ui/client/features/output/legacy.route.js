@@ -67,8 +67,8 @@ function LegacyRedirect ($http, $stateRegistry) {
             }
         },
         {
-            name: 'workflowPlaybookNodeRedirect',
-            url: '/workflow_node_playbook_results/:id',
+            name: 'workflowNodeRedirect',
+            url: '/workflow_node_results/:id',
             redirectTo: (trans) => {
                 // The workflow job viewer uses this route for playbook job nodes. The provided id
                 // is used to lookup the corresponding unified job, which is then inspected to
@@ -81,11 +81,19 @@ function LegacyRedirect ($http, $stateRegistry) {
                         const { results } = data;
                         const [obj] = results;
 
-                        if (obj && obj.type === 'workflow_job') {
-                            return { state: 'workflowResults', params: { id } };
+                        if (obj) {
+                            if (obj.type === 'workflow_job') {
+                                return { state: 'workflowResults', params: { id } };
+                            } else if (obj.type === 'job') {
+                                return { state: 'output', params: { type: 'playbook', id } };
+                            } else if (obj.type === 'inventory_update') {
+                                return { state: 'output', params: { type: 'inventory', id } };
+                            } else if (obj.type === 'project_update') {
+                                return { state: 'output', params: { type: 'project', id } };
+                            }
                         }
 
-                        return { state: destination, params: { type: 'playbook', id } };
+                        return { state: 'jobs' };
                     })
                     .catch(() => ({ state: 'dashboard' }));
             }
