@@ -1,10 +1,10 @@
 export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
     'jobLabels', 'workflowNodes', '$scope', 'ParseTypeChange',
     'ParseVariableString', 'count', '$state', 'i18n', 'WorkflowChartService', '$filter',
-    'moment', 'ProcessErrors', function(workflowData, workflowResultsService,
+    'moment', function(workflowData, workflowResultsService,
     workflowDataOptions, jobLabels, workflowNodes, $scope, ParseTypeChange,
     ParseVariableString, count, $state, i18n, WorkflowChartService, $filter,
-    moment, ProcessErrors) {
+    moment) {
         let nodeRef;
         var runTimeElapsedTimer = null;
 
