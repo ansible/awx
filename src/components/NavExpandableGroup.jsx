@@ -21,7 +21,7 @@ class NavExpandableGroup extends Component {
   isActivePath = (path) => {
     const { history } = this.props;
 
-    return history.location.pathname.includes(path);
+    return history.location.pathname.startsWith(path);
   };
 
   render () {
