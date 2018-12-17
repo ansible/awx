@@ -13,7 +13,7 @@ other Groups.
 
 Instance Groups (not Instances themselves) can be assigned to be used by Jobs at various levels (see clustering.md).
 When the Task Manager is preparing its graph to determine which Group a Job will run on it will commit the capacity of
-an Instance Group to a job that hasn't or isn't ready to start yet.
+an Instance Group to a job that hasn't or isn't ready to start yet. (see task_manager_system.md)
 
 Finally, if only one Instance is available, in smaller configurations, for a Job to run the Task Manager will allow that
 Job to run on the Instance even if it would push the Instance over capacity. We do this as a way to guarantee that Jobs

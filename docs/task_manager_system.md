@@ -28,6 +28,8 @@ The `schedule()` function is ran (a) periodically by a background task and (b) o
 | successful | Job finished with ansible-playbook return code 0.                                                                  |
 | failed     | Job finished with ansible-playbook return code other than 0.                                                       |
 | error      | System failure.                                                                                                    |
+### Node Affinity Decider
+The Task Manager decides what exact node a job will run on. It does so by considering user-configured (1) group execution policy and (2) capacity. First, the set of groups on which a job _can_ run on is constructed (see clustering.md). The groups are traversed until a node within that group is found. The node with the largest remaining capacity that is idle is chosen first. If there are no idle nodes, then the node with the largest remaining capacity >= the job capacity requirements is chosen.
 
 ## Code Composition
 The main goal of the new task manager is to run in our HA environment. This translates to making the task manager logic run on any tower node. To support this we need to remove any reliance on state between task manager schedule logic runs. We had a secondary goal in mind of designing the task manager to have limited/no access to the database for the future federation feature. This secondary requirement combined with performance needs led us to create partial models that wrap dict database model data.
