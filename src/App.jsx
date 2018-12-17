@@ -1,4 +1,6 @@
 import React, { Fragment } from 'react';
+import { ConfigContext } from './context';
+
 import {
   Redirect,
   Switch,
@@ -22,7 +24,7 @@ import {
 import { global_breakpoint_md as breakpointMd } from '@patternfly/react-tokens';
 
 import api from './api';
-import { API_LOGOUT } from './endpoints';
+import { API_LOGOUT, API_CONFIG } from './endpoints';
 
 import HelpDropdown from './components/HelpDropdown';
 import LogoutButton from './components/LogoutButton';
@@ -90,13 +92,17 @@ const SideNavItems = ({ items, history }) => {
 };
 
 class App extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     const isNavOpen = typeof window !== 'undefined' && window.innerWidth >= parseInt(breakpointMd.value, 10);
     this.state = {
-      isNavOpen
+      isNavOpen,
     };
+  }
+
+  getSessionObject(key) {
+    return JSON.parse(sessionStorage.getItem(key) || '{}');
   }
 
   onNavToggle = () => {
@@ -110,9 +116,19 @@ class App extends React.Component {
   onDevLogout = async () => {
     await api.get(API_LOGOUT);
     this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
+    if (sessionStorage.config) {
+      sessionStorage.clear();
+    }
   }
 
-  render () {
+  async componentDidMount() {
+    // Grab our config data from the API and store in sessionStorage
+    if (!sessionStorage.config) {
+      const { data } = await api.get(API_CONFIG);
+      sessionStorage.setItem('config', JSON.stringify(data));
+    }
+  }
+  render() {
     const { isNavOpen } = this.state;
     const { logo, loginInfo, history } = this.props;
 
@@ -302,7 +318,9 @@ class App extends React.Component {
               <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/projects" component={Projects} />
               <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventories" component={Inventories} />
               <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventory_scripts" component={InventoryScripts} />
-              <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/organizations" component={Organizations} />
+              <ConfigContext.Provider value={this.getSessionObject('config')}>
+                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/organizations" component={Organizations} />
+              </ConfigContext.Provider>
               <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/users" component={Users} />
               <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/teams" component={Teams} />
               <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/credential_types" component={CredentialTypes} />

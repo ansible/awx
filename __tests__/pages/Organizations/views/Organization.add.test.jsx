@@ -1,6 +1,27 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import OrganizationAdd from '../../../../src/pages/Organizations/views/Organization.add';
+
+let OrganizationAdd;
+const getAppWithConfigContext = (context = {
+  custom_virtualenvs: ['foo', 'bar']
+}) => {
+
+  // Mock the ConfigContext module being used in our OrganizationAdd component
+  jest.doMock('../../../../src/context', () => {
+    return {
+      ConfigContext: {
+        Consumer: (props) => props.children(context)
+      }
+    }
+  });
+
+  // Return the updated OrganizationAdd module with mocked context
+  return require('../../../../src/pages/Organizations/views/Organization.add').default;
+};
+
+beforeEach(() => {
+  OrganizationAdd = getAppWithConfigContext();
+})
 
 describe('<OrganizationAdd />', () => {
   test('initially renders succesfully', () => {
@@ -20,8 +41,8 @@ describe('<OrganizationAdd />', () => {
       />
     );
     expect(spy).not.toHaveBeenCalled();
-    wrapper.find('input#add-org-form-name').simulate('change', {target: {value: 'foo'}});
-    wrapper.find('input#add-org-form-description').simulate('change', {target: {value: 'bar'}});
+    wrapper.find('input#add-org-form-name').simulate('change', { target: { value: 'foo' } });
+    wrapper.find('input#add-org-form-description').simulate('change', { target: { value: 'bar' } });
     expect(spy).toHaveBeenCalledTimes(2);
   });
   test('calls "onSubmit" when Save button is clicked', () => {
