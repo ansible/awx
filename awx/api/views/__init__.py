@@ -3154,9 +3154,10 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.is_sliced_job:
-            if not obj.job_template_id:
+            jt = obj.job_template
+            if not jt:
                 raise ParseError(_('Cannot relaunch slice workflow job orphaned from job template.'))
-            elif obj.job_template.job_slice_count != obj.workflow_nodes.count():
+            elif not jt.inventory or min(jt.inventory.hosts.count(), jt.job_slice_count) != obj.workflow_nodes.count():
                 raise ParseError(_('Cannot relaunch sliced workflow job after slice count has changed.'))
         new_workflow_job = obj.create_relaunch_workflow_job()
         new_workflow_job.signal_start()
