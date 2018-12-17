@@ -1053,6 +1053,8 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                             thisNode.append("foreignObject")
                                 .attr("x", nodeW - 45)
                                 .attr("y", nodeH - 15)
+                                .attr("height", "15px")
+                                .attr("width", "40px")
                                 .attr("dy", ".35em")
                                 .attr("class", "WorkflowChart-detailsLink")
                                 .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; })
