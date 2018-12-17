@@ -86,7 +86,7 @@ class DataListToolbar extends React.Component {
       sortedColumnKey,
       sortOrder,
       addUrl,
-      hideExpandCollapse
+      showExpandCollapse
     } = this.props;
     const {
       // isActionDropdownOpen,
@@ -203,18 +203,20 @@ class DataListToolbar extends React.Component {
                       </Button>
                     </ToolbarItem>
                   </ToolbarGroup>
-                  <ToolbarGroup className={hideExpandCollapse ? 'pf-u-display-none' : null}>
-                    <ToolbarItem>
-                      <Button variant="plain" aria-label={i18n._(t`Expand`)}>
-                        <BarsIcon />
-                      </Button>
-                    </ToolbarItem>
-                    <ToolbarItem>
-                      <Button variant="plain" aria-label={i18n._(t`Collapse`)}>
-                        <EqualsIcon />
-                      </Button>
-                    </ToolbarItem>
-                  </ToolbarGroup>
+                  { showExpandCollapse && (
+                    <ToolbarGroup>
+                      <ToolbarItem>
+                        <Button variant="plain" aria-label={i18n._(t`Expand`)}>
+                          <BarsIcon />
+                        </Button>
+                      </ToolbarItem>
+                      <ToolbarItem>
+                        <Button variant="plain" aria-label={i18n._(t`Collapse`)}>
+                          <EqualsIcon />
+                        </Button>
+                      </ToolbarItem>
+                    </ToolbarGroup>
+                  )}
                 </Toolbar>
               </LevelItem>
               <LevelItem>
