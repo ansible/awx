@@ -33,7 +33,7 @@
   margin-right: 20px;
 }
 
-.awx-toolbar button {
+.awx-toolbar button.pf-c-button {
   height: 30px;
   padding: 0px;
 }
@@ -43,7 +43,7 @@
   height: 30px;
 
   input {
-    padding: 0px;
+    padding: 0 10px;
     width: 300px;
   }
 
@@ -57,7 +57,7 @@
   min-height: 30px;
   min-width: 70px;
   height: 30px;
-  padding: 0px;
+  padding: 0 10px;
   margin: 0px;
 
   .pf-c-dropdown__toggle-icon {
@@ -74,10 +74,9 @@
 .awx-toolbar .pf-c-button.pf-m-primary {
   background-color: #5cb85c;
   min-width: 0px;
-  width: 58px;
+  width: 30px;
   height: 30px;
   text-align: center;
-
   padding: 0px;
   margin: 0px;
   margin-right: 20px;

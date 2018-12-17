@@ -41,7 +41,7 @@ export default ({
             state: { breadcrumb: [parentBreadcrumb, { name, url: detailUrl }] }
           }}
         >
-          {name}
+          <b>{name}</b>
         </Link>
       </span>
     </div>
