@@ -1,7 +1,28 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import OrganizationAdd from '../../../../src/pages/Organizations/views/Organization.add';
 import { MemoryRouter } from 'react-router-dom';
+
+let OrganizationAdd;
+const getAppWithConfigContext = (context = {
+  custom_virtualenvs: ['foo', 'bar']
+}) => {
+
+  // Mock the ConfigContext module being used in our OrganizationAdd component
+  jest.doMock('../../../../src/context', () => {
+    return {
+      ConfigContext: {
+        Consumer: (props) => props.children(context)
+      }
+    }
+  });
+
+  // Return the updated OrganizationAdd module with mocked context
+  return require('../../../../src/pages/Organizations/views/Organization.add').default;
+};
+
+beforeEach(() => {
+  OrganizationAdd = getAppWithConfigContext();
+})
 
 describe('<OrganizationAdd />', () => {
   test('initially renders succesfully', () => {

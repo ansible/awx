@@ -1,6 +1,11 @@
 import React, { Fragment } from 'react';
+<<<<<<< HEAD
 import { I18nProvider, I18n } from '@lingui/react';
 import { t } from '@lingui/macro';
+=======
+import { ConfigContext } from './context';
+
+>>>>>>> Implement React Context API
 import {
   Redirect,
   Switch,
@@ -22,7 +27,7 @@ import {
 import { global_breakpoint_md as breakpointMd } from '@patternfly/react-tokens';
 
 import api from './api';
-import { API_LOGOUT } from './endpoints';
+import { API_LOGOUT, API_CONFIG } from './endpoints';
 
 import HelpDropdown from './components/HelpDropdown';
 import LogoutButton from './components/LogoutButton';
@@ -68,13 +73,17 @@ const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
 
 class App extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     const isNavOpen = typeof window !== 'undefined' && window.innerWidth >= parseInt(breakpointMd.value, 10);
     this.state = {
-      isNavOpen
+      isNavOpen,
     };
+  }
+
+  getSessionObject(key) {
+    return JSON.parse(sessionStorage.getItem(key) || '{}');
   }
 
   onNavToggle = () => {
@@ -83,9 +92,20 @@ class App extends React.Component {
 
   onDevLogout = async () => {
     await api.get(API_LOGOUT);
+    this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
+    if (sessionStorage.config) {
+      sessionStorage.clear();
+    }
   }
 
-  render () {
+  async componentDidMount() {
+    // Grab our config data from the API and store in sessionStorage
+    if (!sessionStorage.config) {
+      const { data } = await api.get(API_CONFIG);
+      sessionStorage.setItem('config', JSON.stringify(data));
+    }
+  }
+  render() {
     const { isNavOpen } = this.state;
     const { logo, loginInfo, history } = this.props;
 
@@ -119,17 +139,12 @@ class App extends React.Component {
             }}
           />
           <Switch>
-            <ConditionalRedirect
-              shouldRedirect={() => api.isAuthenticated()}
-              redirectPath="/"
-              path="/login"
-              component={() => <Login logo={logo} loginInfo={loginInfo} />}
-            />
+            <ConditionalRedirect shouldRedirect={() => api.isAuthenticated()} redirectPath="/" path="/login" component={() => <Login logo={logo} loginInfo={loginInfo} />} />
             <Fragment>
               <Page
                 header={(
                   <PageHeader
-                    logo={<TowerLogo />}
+                    logo={<TowerLogo onClick={this.onLogoClick} />}
                     toolbar={PageToolbar}
                     showNavToggle
                     onNavToggle={this.onNavToggle}
@@ -139,66 +154,133 @@ class App extends React.Component {
                   <PageSidebar
                     isNavOpen={isNavOpen}
                     nav={(
-                      <I18n>
-                        {({ i18n }) => (
-                          <Nav aria-label={i18n._(t`Primary Navigation`)}>
-                            <NavList>
-                              <NavExpandableGroup
-                                groupId="views_group"
-                                title={i18n._("Views")}
-                                routes={[
-                                  { path: '/home', title: i18n._('Dashboard') },
-                                  { path: '/jobs', title: i18n._('Jobs') },
-                                  { path: '/schedules', title: i18n._('Schedules') },
-                                  { path: '/portal', title: i18n._('Portal Mode') },
-                                ]}
-                              />
-                              <NavExpandableGroup
-                                groupId="resources_group"
-                                title={i18n._("Resources")}
-                                routes={[
-                                  { path: '/templates', title: i18n._('Templates') },
-                                  { path: '/credentials', title: i18n._('Credentials') },
-                                  { path: '/projects', title: i18n._('Projects') },
-                                  { path: '/inventories', title: i18n._('Inventories') },
-                                  { path: '/inventory_scripts', title: i18n._('Inventory Scripts') }
-                                ]}
-                              />
-                              <NavExpandableGroup
-                                groupId="access_group"
-                                title={i18n._("Access")}
-                                routes={[
-                                  { path: '/organizations', title: i18n._('Organizations') },
-                                  { path: '/users', title: i18n._('Users') },
-                                  { path: '/teams', title: i18n._('Teams') }
-                                ]}
-                              />
-                              <NavExpandableGroup
-                                groupId="administration_group"
-                                title={i18n._("Administration")}
-                                routes={[
-                                  { path: '/credential_types', title: i18n._('Credential Types') },
-                                  { path: '/notification_templates', title: i18n._('Notifications') },
-                                  { path: '/management_jobs', title: i18n._('Management Jobs') },
-                                  { path: '/instance_groups', title: i18n._('Instance Groups') },
-                                  { path: '/applications', title: i18n._('Integrations') }
-                                ]}
-                              />
-                              <NavExpandableGroup
-                                groupId="settings_group"
-                                title={i18n._("Settings")}
-                                routes={[
-                                  { path: '/auth_settings', title: i18n._('Authentication') },
-                                  { path: '/jobs_settings', title: i18n._('Jobs') },
-                                  { path: '/system_settings', title: i18n._('System') },
-                                  { path: '/ui_settings', title: i18n._('User Interface') },
-                                  { path: '/license', title: i18n._('License') }
-                                ]}
-                              />
-                            </NavList>
-                          </Nav>
-                        )}
-                      </I18n>
+                      <Nav aria-label="Primary Navigation">
+                        <NavList>
+                          <SideNavItems
+                            history={history}
+                            items={[
+                              {
+                                groupName: 'views',
+                                title: 'Views',
+                                routes: [
+                                  {
+                                    path: 'home',
+                                    title: 'Dashboard'
+                                  },
+                                  {
+                                    path: 'jobs',
+                                    title: 'Jobs'
+                                  },
+                                  {
+                                    path: 'schedules',
+                                    title: 'Schedules'
+                                  },
+                                  {
+                                    path: 'portal',
+                                    title: 'Portal Mode'
+                                  },
+                                ]
+                              },
+                              {
+                                groupName: 'resources',
+                                title: 'Resources',
+                                routes: [
+                                  {
+                                    path: 'templates',
+                                    title: 'Templates'
+                                  },
+                                  {
+                                    path: 'credentials',
+                                    title: 'Credentials'
+                                  },
+                                  {
+                                    path: 'projects',
+                                    title: 'Projects'
+                                  },
+                                  {
+                                    path: 'inventories',
+                                    title: 'Inventories'
+                                  },
+                                  {
+                                    path: 'inventory_scripts',
+                                    title: 'Inventory Scripts'
+                                  }
+                                ]
+                              },
+                              {
+                                groupName: 'access',
+                                title: 'Access',
+                                routes: [
+                                  {
+                                    path: 'organizations',
+                                    title: 'Organizations'
+                                  },
+                                  {
+                                    path: 'users',
+                                    title: 'Users'
+                                  },
+                                  {
+                                    path: 'teams',
+                                    title: 'Teams'
+                                  }
+                                ]
+                              },
+                              {
+                                groupName: 'administration',
+                                title: 'Administration',
+                                routes: [
+                                  {
+                                    path: 'credential_types',
+                                    title: 'Credential Types',
+                                  },
+                                  {
+                                    path: 'notification_templates',
+                                    title: 'Notifications'
+                                  },
+                                  {
+                                    path: 'management_jobs',
+                                    title: 'Management Jobs'
+                                  },
+                                  {
+                                    path: 'instance_groups',
+                                    title: 'Instance Groups'
+                                  },
+                                  {
+                                    path: 'applications',
+                                    title: 'Integrations'
+                                  }
+                                ]
+                              },
+                              {
+                                groupName: 'settings',
+                                title: 'Settings',
+                                routes: [
+                                  {
+                                    path: 'auth_settings',
+                                    title: 'Authentication',
+                                  },
+                                  {
+                                    path: 'jobs_settings',
+                                    title: 'Jobs'
+                                  },
+                                  {
+                                    path: 'system_settings',
+                                    title: 'System'
+                                  },
+                                  {
+                                    path: 'ui_settings',
+                                    title: 'User Interface'
+                                  },
+                                  {
+                                    path: 'license',
+                                    title: 'License'
+                                  }
+                                ]
+                              }
+                            ]}
+                          />
+                        </NavList>
+                      </Nav>
                     )}
                   />
                 )}
@@ -214,7 +296,9 @@ class App extends React.Component {
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/projects" component={Projects} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventories" component={Inventories} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventory_scripts" component={InventoryScripts} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/organizations" component={Organizations} />
+                <ConfigContext.Provider value={this.getSessionObject('config')}>
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/organizations" component={Organizations} />
+                </ConfigContext.Provider>
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/users" component={Users} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/teams" component={Teams} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/credential_types" component={CredentialTypes} />
