@@ -45,6 +45,8 @@ class APIClient {
   }
 
   get = (endpoint, params = {}) => this.http.get(endpoint, { params });
+
+  post = (endpoint, data) => this.http.post(endpoint, data);
 }
 
 export default new APIClient();
