@@ -7,5 +7,5 @@
 import CredentialTypesListController from './list.controller';
 
 export default
-angular.module('credenitalTypesList', [])
+angular.module('credentialTypesList', [])
     .controller('CredentialTypesListController', CredentialTypesListController);

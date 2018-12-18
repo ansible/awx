@@ -1720,7 +1720,7 @@ msgid "Edit Survey"
 msgstr "Editar la encuesta"
 
 #: client/src/credential-types/credential-types.list.js:58
-msgid "Edit credenital type"
+msgid "Edit credential type"
 msgstr "Editar tipo de credencial"
 
 #: client/src/credentials/credentials.list.js:68

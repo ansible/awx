@@ -1718,7 +1718,7 @@ msgid "Edit Survey"
 msgstr "Modifier le questionnaire"
 
 #: client/src/credential-types/credential-types.list.js:58
-msgid "Edit credenital type"
+msgid "Edit credential type"
 msgstr "Modifier le type d'information d'identification"
 
 #: client/src/credentials/credentials.list.js:68
