@@ -6,10 +6,7 @@ import {
   CardHeader,
   CardBody,
   PageSection,
-  PageSectionVariants,
-  ToolbarGroup,
-  ToolbarItem,
-  ToolbarSection,
+  PageSectionVariants
 } from '@patternfly/react-core';
 import {
   Switch,
@@ -23,9 +20,9 @@ import '../tabs.scss';
 
 const DetailTab = ({ location, match, tab, currentTab, children, breadcrumb }) => {
   const tabClasses = () => {
-    let classes = 'at-c-tabs__tab';
+    let classes = 'pf-c-tabs__item';
     if (tab === currentTab) {
-      classes += ' at-m-selected';
+      classes += ' pf-m-current';
     }
 
     return classes;
@@ -43,11 +40,14 @@ const DetailTab = ({ location, match, tab, currentTab, children, breadcrumb }) =
   };
 
   return (
-    <ToolbarItem className={tabClasses()}>
-      <Link to={{ pathname: `${match.url}`, search: updateTab(), state: { breadcrumb } }} replace={tab === currentTab}>
-        {children}
-      </Link>
-    </ToolbarItem>
+    <li className={tabClasses()}>
+        <Link
+          className={'pf-c-tabs__button'}
+          to={{ pathname: `${match.url}`, search: updateTab(), state: { breadcrumb } }}
+          replace={tab === currentTab}>
+          {children}
+        </Link>
+    </li>
   );
 };
 
@@ -96,8 +96,8 @@ const OrganizationDetail = ({
   const detailTabs = (tabs) => (
     <I18n>
       {({ i18n }) => (
-        <ToolbarSection aria-label={i18n._(t`Organization detail tabs`)}>
-          <ToolbarGroup className="at-c-tabs">
+        <div className="pf-c-tabs" aria-label={i18n._(t`Organization detail tabs`)}>
+          <ul className="pf-c-tabs__list">
             {tabs.map(tab => (
               <DetailTab
                 key={tab}
@@ -110,8 +110,8 @@ const OrganizationDetail = ({
                 {getTabName(tab)}
               </DetailTab>
             ))}
-          </ToolbarGroup>
-        </ToolbarSection>
+          </ul>
+        </div>
       )}
     </I18n>
   );

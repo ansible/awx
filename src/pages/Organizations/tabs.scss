@@ -1,19 +1,47 @@
-.at-c-tabs {
-  padding: 0 5px !important;
-  margin: 0 -10px !important;
-
-  .at-c-tabs__tab {
-    margin: 0 5px;
-  }
-
-  .at-c-tabs__tab.at-m-selected {
-    text-decoration: underline;
-  }
-}
-
 .at-c-orgPane {
   a {
     display: block;
+  }
+}
+
+.pf-c-card__header {
+  --pf-c-card__header--PaddingBottom: 0;
+  --pf-c-card__header--PaddingLeft: 0;
+  --pf-c-card__header--PaddingRight: 0;
+  --pf-c-card__header--PaddingTop: 0;
+}
+
+.pf-c-tabs {
+  --pf-global--link--Color: #484848;
+  --pf-global--link--Color--hover: #484848;
+  --pf-global--link--TextDecoration--hover: none;
+
+  &:before {
+    border-bottom: 1px solid var(--pf-c-tabs__item--BorderColor);
+    border-top: 1px solid var(--pf-c-tabs__item--BorderColor);
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  .pf-c-tabs__button {
+    --pf-c-tabs__button--PaddingLeft: 20px;
+    --pf-c-tabs__button--PaddingRight: 20px;
+  }
+
+  .pf-c-tabs__item.pf-m-current
+  .pf-c-tabs__button::after {
+    border-bottom: 3px solid var(--pf-c-tabs__item--m-current--Color);
+    border-top: none;
+  }
+
+  .pf-c-tabs__item:not(.pf-m-current):hover
+  .pf-c-tabs__button::after {
+    border-bottom: 3px solid var(--pf-global--Color--dark-200);
+    border-top: none;
   }
 }
 
