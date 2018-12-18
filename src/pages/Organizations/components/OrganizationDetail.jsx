@@ -18,7 +18,7 @@ import getTabName from '../utils';
 
 import '../tabs.scss';
 
-const DetailTab = ({ location, match, tab, currentTab, children, breadcrumb }) => {
+const Tab = ({ location, match, tab, currentTab, children, breadcrumb }) => {
   const tabClasses = () => {
     let classes = 'pf-c-tabs__item';
     if (tab === currentTab) {
@@ -93,13 +93,13 @@ const OrganizationDetail = ({
     </Fragment>
   );
 
-  const detailTabs = (tabs) => (
+  const tabList = (tabs) => (
     <I18n>
       {({ i18n }) => (
         <div className="pf-c-tabs" aria-label={i18n._(t`Organization detail tabs`)}>
           <ul className="pf-c-tabs__list">
             {tabs.map(tab => (
-              <DetailTab
+              <Tab
                 key={tab}
                 tab={tab}
                 location={location}
@@ -108,7 +108,7 @@ const OrganizationDetail = ({
                 breadcrumb={parentBreadcrumbObj}
               >
                 {getTabName(tab)}
-              </DetailTab>
+              </Tab>
             ))}
           </ul>
         </div>
@@ -120,7 +120,7 @@ const OrganizationDetail = ({
     <PageSection variant={medium}>
       <Card className="at-c-orgPane">
         <CardHeader>
-          {detailTabs(['details', 'users', 'teams', 'admins', 'notifications'])}
+          {tabList(['details', 'access', 'teams', 'notifications'])}
         </CardHeader>
         <CardBody>
           {(currentTab && currentTab !== 'details') ? (

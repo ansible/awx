@@ -225,7 +225,6 @@ class Organizations extends Component {
                     parentBreadcrumb={parentBreadcrumb}
                     userCount={o.summary_fields.related_field_counts.users}
                     teamCount={o.summary_fields.related_field_counts.teams}
-                    adminCount={o.summary_fields.related_field_counts.admins}
                     isSelected={selected.includes(o.id)}
                     onSelect={() => this.onSelect(o.id)}
                   />
