@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
+import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
-import { I18n} from '@lingui/react';
 import {
   Card,
   CardHeader,
