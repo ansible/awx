@@ -1388,7 +1388,7 @@ msgid "Disassociate host"
 msgstr ""
 
 #: client/src/templates/survey-maker/surveys/init.factory.js:21
-msgid "Disble Survey"
+msgid "Disable Survey"
 msgstr ""
 
 #: client/src/configuration/forms/auth-form/configuration-auth.controller.js:54
@@ -1398,11 +1398,11 @@ msgid "Discard changes"
 msgstr ""
 
 #: client/src/teams/teams.form.js:149
-msgid "Dissasociate permission from team"
+msgid "Dissassociate permission from team"
 msgstr ""
 
 #: client/src/users/users.form.js:227
-msgid "Dissasociate permission from user"
+msgid "Dissassociate permission from user"
 msgstr ""
 
 #: client/src/templates/job_templates/job-template.form.js:270
@@ -1690,7 +1690,7 @@ msgstr ""
 
 #: client/src/credentials/factories/become-method-change.factory.js:81
 #: client/src/credentials/factories/kind-change.factory.js:138
-msgid "Enter the URL for the virtual machine which %scorresponds to your CloudForm instance. %sFor example, %s"
+msgid "Enter the URL for the virtual machine which %scorresponds to your CloudForms instance. %sFor example, %s"
 msgstr ""
 
 #: client/src/credentials/factories/become-method-change.factory.js:71
@@ -3495,7 +3495,7 @@ msgid "Pass extra command line variables to the playbook. Provide key/value pair
 msgstr ""
 
 #: client/src/templates/workflows.form.js:114
-msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentaton for example syntax."
+msgid "Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter for ansible-playbook. Provide key/value pairs using either YAML or JSON. Refer to the Ansible Tower documentation for example syntax."
 msgstr ""
 
 #: client/src/inventories-hosts/inventories/adhoc/adhoc.form.js:139

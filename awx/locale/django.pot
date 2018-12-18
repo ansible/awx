@@ -2835,7 +2835,7 @@ msgstr ""
 
 #: awx/main/models/credential/__init__.py:979
 msgid ""
-"Enter the URL for the virtual machine that corresponds to your CloudForm "
+"Enter the URL for the virtual machine that corresponds to your CloudForms "
 "instance. For example, https://cloudforms.example.org"
 msgstr ""
 

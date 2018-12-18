@@ -224,7 +224,7 @@ export default ['i18n', function(i18n) {
                             label: i18n._('Remove'),
                             ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',
                             iconClass: 'fa fa-times',
-                            awToolTip: i18n._('Dissasociate permission from user'),
+                            awToolTip: i18n._('Dissassociate permission from user'),
                             ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },

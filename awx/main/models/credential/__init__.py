@@ -982,7 +982,7 @@ def cloudforms(cls):
                 'label': ugettext_noop('CloudForms URL'),
                 'type': 'string',
                 'help_text': ugettext_noop('Enter the URL for the virtual machine that '
-                                           'corresponds to your CloudForm instance. '
+                                           'corresponds to your CloudForms instance. '
                                            'For example, https://cloudforms.example.org')
             }, {
                 'id': 'username',
