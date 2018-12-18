@@ -281,13 +281,12 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                         if (nodeRef[node.id] && nodeRef[node.id].originalNodeObject.id === data.workflow_node_id) {
                             node.job = {
                                 id: data.unified_job_id,
-                                status: data.status,
-                                type: nodeRef[node.id].unifiedJobTemplate.unified_job_type
+                                status: data.status
                             };
+
+                            $scope.$broadcast("refreshWorkflowChart");
                         }
                     });
-
-                    $scope.$broadcast("refreshWorkflowChart");
             }
             getLabelsAndTooltips();
         });

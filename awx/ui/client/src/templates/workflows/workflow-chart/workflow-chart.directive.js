@@ -764,7 +764,14 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                         });
 
                     baseSvg.selectAll(".WorkflowChart-detailsLink")
-                        .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; });
+                        .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; })
+                        .html(function (d) {
+                            let href = "";
+                            if (d.job) {
+                                href = `/#/workflow_node_results/${d.job.id}`;
+                            }
+                            return `<a href="${href}">${TemplatesStrings.get('workflow_maker.DETAILS')}</a>`;
+                        });
 
                     baseSvg.selectAll(".WorkflowChart-deletedText")
                         .style("display", function(d){ return d.unifiedJobTemplate || d.id === scope.graphState.nodeBeingAdded ? "none" : null; });
@@ -1043,16 +1050,24 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                             .classed("WorkflowChart-nodeHovering", false);
                                     }
                                 });
-                            thisNode.append("text")
+                            thisNode.append("foreignObject")
                                 .attr("x", nodeW - 45)
-                                .attr("y", nodeH - 10)
+                                .attr("y", nodeH - 15)
+                                .attr("height", "15px")
+                                .attr("width", "40px")
                                 .attr("dy", ".35em")
                                 .attr("class", "WorkflowChart-detailsLink")
                                 .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; })
-                                .text(function () {
-                                    return TemplatesStrings.get('workflow_maker.DETAILS');
+                                .on("mousedown", function(){
+                                    d3.event.stopPropagation();
                                 })
-                                .call(details);
+                                .html(function (d) {
+                                    let href = "";
+                                    if (d.job) {
+                                        href = `/#/workflow_node_results/${d.job.id}`;
+                                    }
+                                    return `<a href="${href}">${TemplatesStrings.get('workflow_maker.DETAILS')}</a>`;
+                                });
                             thisNode.append("circle")
                                 .attr("id", function(d){return "node-" + d.id + "-add";})
                                 .attr("cx", nodeW)
@@ -1323,30 +1338,6 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                     if (!scope.readOnly && !scope.graphState.isLinkMode) {
                         scope.selectNodeForLinking({
                             nodeToStartLink: d
-                        });
-                    }
-                });
-            }
-
-            function details() {
-                this.on("mouseover", function() {
-                    d3.select(this).style("text-decoration", "underline");
-                });
-                this.on("mouseout", function() {
-                    d3.select(this).style("text-decoration", null);
-                });
-                this.on("click", function(d) {
-                    if(d.job.type === 'job') {
-                        $state.go('output', {id: d.job.id, type: 'playbook'});
-                    }
-                    else if(d.job.type === 'inventory_update') {
-                        $state.go('output', {id: d.job.id, type: 'inventory'});
-                    }
-                    else if(d.job.type === 'project_update') {
-                        $state.go('output', {id: d.job.id, type: 'project'});
-                    } else if (d.job.type === 'workflow_job') {
-                        $state.go('workflowResults', {
-                            id: d.job.id,
                         });
                     }
                 });

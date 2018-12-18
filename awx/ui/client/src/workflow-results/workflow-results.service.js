@@ -132,7 +132,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                 return true;
             }
             return false;
-        },
+        }
     };
     return val;
 }];
