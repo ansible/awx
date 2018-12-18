@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router-dom';
 import { Trans } from '@lingui/macro';
 import {
   PageSection,
@@ -31,6 +32,7 @@ class OrganizationAdd extends React.Component {
     this.onSelectChange = this.onSelectChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.resetForm = this.resetForm.bind(this);
+    this.onCancel = this.onCancel.bind(this);
   }
 
   state = {
@@ -38,6 +40,7 @@ class OrganizationAdd extends React.Component {
     description: '',
     instanceGroups: '',
     custom_virtualenv: '',
+    error:'',
   };
 
   onSelectChange(value, _) {
@@ -62,6 +65,23 @@ class OrganizationAdd extends React.Component {
     this.resetForm();
   }
 
+  onCancel() {
+    this.props.history.push('/organizations');
+  }
+
+  async componentDidMount() {
+    try {
+      const { data } = await api.get(API_CONFIG);
+      this.setState({ custom_virtualenvs: [...data.custom_virtualenvs] });
+      if (this.state.custom_virtualenvs.length > 1) {
+        // Show dropdown if we have more than one ansible environment
+        this.setState({ hideAnsibleSelect: !this.state.hideAnsibleSelect });
+      }
+    } catch (error) {
+      this.setState({ error })
+    }
+    
+  }
   render() {
     const { name } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
@@ -126,7 +146,7 @@ class OrganizationAdd extends React.Component {
                       <Button className="at-C-SubmitButton" variant="primary" onClick={this.onSubmit} isDisabled={!enabled}>Save</Button>
                     </ToolbarGroup>
                     <ToolbarGroup>
-                      <Button variant="secondary">Cancel</Button>
+                      <Button className="at-C-CancelButton" variant="secondary" onClick={this.onCancel}>Cancel</Button>
                     </ToolbarGroup>
                   </Toolbar>
                 </ActionGroup>
@@ -143,4 +163,4 @@ OrganizationAdd.contextTypes = {
   custom_virtualenvs: PropTypes.array,
 };
 
-export default OrganizationAdd;
+export default withRouter(OrganizationAdd);

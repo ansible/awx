@@ -13,9 +13,7 @@ import {
   BackgroundImage,
   BackgroundImageSrc,
   Nav,
-  NavExpandable,
   NavList,
-  NavItem,
   Page,
   PageHeader,
   PageSidebar,
@@ -32,6 +30,7 @@ import HelpDropdown from './components/HelpDropdown';
 import LogoutButton from './components/LogoutButton';
 import TowerLogo from './components/TowerLogo';
 import ConditionalRedirect from './components/ConditionalRedirect';
+import NavExpandableGroup from './components/NavExpandableGroup';
 
 import Applications from './pages/Applications';
 import Credentials from './pages/Credentials';
@@ -69,41 +68,6 @@ const language = (navigator.languages && navigator.languages[0])
 
 const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
-const SideNavItems = ({ items, history }) => {
-  const currentPath = history.location.pathname.split('/')[1];
-  let activeGroup;
-  if (currentPath !== '') {
-    [{ groupName: activeGroup }] = items
-      .map(({ groupName, routes }) => ({
-        groupName,
-        paths: routes.map(({ path }) => path)
-      }))
-      .filter(({ paths }) => paths.indexOf(currentPath) > -1);
-  } else {
-    activeGroup = 'views';
-  }
-
-  return (items.map(({ title, groupName, routes }) => (
-    <NavExpandable
-      key={groupName}
-      title={title}
-      groupId={`${groupName}_group`}
-      isActive={`${activeGroup}_group` === `${groupName}_group`}
-      isExpanded={`${activeGroup}_group` === `${groupName}_group`}
-    >
-      {routes.map(({ path, title: itemTitle }) => (
-        <NavItem
-          key={path}
-          to={`#/${path}`}
-          groupId={`${groupName}_group`}
-          isActive={currentPath === path}
-        >
-          {itemTitle}
-        </NavItem>
-      ))}
-    </NavExpandable>
-  )));
-};
 
 class App extends React.Component {
   constructor(props) {
@@ -176,7 +140,12 @@ class App extends React.Component {
             }}
           />
           <Switch>
-            <ConditionalRedirect shouldRedirect={() => api.isAuthenticated()} redirectPath="/" path="/login" component={() => <Login logo={logo} loginInfo={loginInfo} />} />
+            <ConditionalRedirect
+              shouldRedirect={() => api.isAuthenticated()}
+              redirectPath="/"
+              path="/login"
+              component={() => <Login logo={logo} loginInfo={loginInfo} />}
+            />
             <Fragment>
               <Page
                 header={(
@@ -195,127 +164,56 @@ class App extends React.Component {
                         {({ i18n }) => (
                           <Nav aria-label={i18n._(t`Primary Navigation`)}>
                             <NavList>
-                              <SideNavItems
-                                history={history}
-                                items={[
-                                  {
-                                    groupName: 'views',
-                                    title: i18n._('Views'),
-                                    routes: [
-                                      {
-                                        path: 'home',
-                                        title: i18n._('Dashboard')
-                                      },
-                                      {
-                                        path: 'jobs',
-                                        title: i18n._('Jobs')
-                                      },
-                                      {
-                                        path: 'schedules',
-                                        title: i18n._('Schedules')
-                                      },
-                                      {
-                                        path: 'portal',
-                                        title: i18n._('Portal Mode')
-                                      },
-                                    ]
-                                  },
-                                  {
-                                    groupName: 'resources',
-                                    title: i18n._('Resources'),
-                                    routes: [
-                                      {
-                                        path: 'templates',
-                                        title: i18n._('Templates')
-                                      },
-                                      {
-                                        path: 'credentials',
-                                        title: i18n._('Credentials')
-                                      },
-                                      {
-                                        path: 'projects',
-                                        title: i18n._('Projects')
-                                      },
-                                      {
-                                        path: 'inventories',
-                                        title: i18n._('Inventories')
-                                      },
-                                      {
-                                        path: 'inventory_scripts',
-                                        title: i18n._('Inventory Scripts')
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    groupName: 'access',
-                                    title: i18n._('Access'),
-                                    routes: [
-                                      {
-                                        path: 'organizations',
-                                        title: i18n._('Organizations')
-                                      },
-                                      {
-                                        path: 'users',
-                                        title: i18n._('Users')
-                                      },
-                                      {
-                                        path: 'teams',
-                                        title: i18n._('Teams')
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    groupName: 'administration',
-                                    title: i18n._('Administration'),
-                                    routes: [
-                                      {
-                                        path: 'credential_types',
-                                        title: i18n._('Credential Types'),
-                                      },
-                                      {
-                                        path: 'notification_templates',
-                                        title: i18n._('Notifications')
-                                      },
-                                      {
-                                        path: 'management_jobs',
-                                        title: i18n._('Management Jobs')
-                                      },
-                                      {
-                                        path: 'instance_groups',
-                                        title: i18n._('Instance Groups')
-                                      },
-                                      {
-                                        path: 'applications',
-                                        title: i18n._('Integrations')
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    groupName: 'settings',
-                                    title: i18n._('Settings'),
-                                    routes: [
-                                      {
-                                        path: 'auth_settings',
-                                        title: i18n._('Authentication'),
-                                      },
-                                      {
-                                        path: 'jobs_settings',
-                                        title: i18n._('Jobs')
-                                      },
-                                      {
-                                        path: 'system_settings',
-                                        title: i18n._('System')
-                                      },
-                                      {
-                                        path: 'ui_settings',
-                                        title: i18n._('User Interface')
-                                      },
-                                      {
-                                        path: 'license',
-                                        title: i18n._('License')
-                                      }
-                                    ]
-                                  }
+                              <NavExpandableGroup
+                                groupId="views_group"
+                                title={i18n._("Views")}
+                                routes={[
+                                  { path: '/home', title: i18n._('Dashboard') },
+                                  { path: '/jobs', title: i18n._('Jobs') },
+                                  { path: '/schedules', title: i18n._('Schedules') },
+                                  { path: '/portal', title: i18n._('Portal Mode') },
+                                ]}
+                              />
+                              <NavExpandableGroup
+                                groupId="resources_group"
+                                title={i18n._("Resources")}
+                                routes={[
+                                  { path: '/templates', title: i18n._('Templates') },
+                                  { path: '/credentials', title: i18n._('Credentials') },
+                                  { path: '/projects', title: i18n._('Projects') },
+                                  { path: '/inventories', title: i18n._('Inventories') },
+                                  { path: '/inventory_scripts', title: i18n._('Inventory Scripts') }
+                                ]}
+                              />
+                              <NavExpandableGroup
+                                groupId="access_group"
+                                title={i18n._("Access")}
+                                routes={[
+                                  { path: '/organizations', title: i18n._('Organizations') },
+                                  { path: '/users', title: i18n._('Users') },
+                                  { path: '/teams', title: i18n._('Teams') }
+                                ]}
+                              />
+                              <NavExpandableGroup
+                                groupId="administration_group"
+                                title={i18n._("Administration")}
+                                routes={[
+                                  { path: '/credential_types', title: i18n._('Credential Types') },
+                                  { path: '/notification_templates', title: i18n._('Notifications') },
+                                  { path: '/management_jobs', title: i18n._('Management Jobs') },
+                                  { path: '/instance_groups', title: i18n._('Instance Groups') },
+                                  { path: '/applications', title: i18n._('Integrations') }
+                                ]}
+                              />
+                              <NavExpandableGroup
+                                groupId="settings_group"
+                                title={i18n._("Settings")}
+                                routes={[
+                                  { path: '/auth_settings', title: i18n._('Authentication') },
+                                  { path: '/jobs_settings', title: i18n._('Jobs') },
+                                  { path: '/system_settings', title: i18n._('System') },
+                                  { path: '/ui_settings', title: i18n._('User Interface') },
+                                  { path: '/license', title: i18n._('License') }
                                 ]}
                               />
                             </NavList>

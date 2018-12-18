@@ -118,3 +118,13 @@
   --pf-c-about-modal-box--MaxHeight: 40rem;
   --pf-c-about-modal-box--MaxWidth: 63rem;
 }
+
+
+//
+// layout styles
+//
+.at-align-right {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}

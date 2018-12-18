@@ -1,6 +1,6 @@
 import React from 'react';
 import { I18n } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import {
   Button,
   Checkbox,
@@ -23,6 +23,7 @@ import {
   SortNumericDownIcon,
   SortNumericUpIcon,
   TrashAltIcon,
+  PlusIcon
 } from '@patternfly/react-icons';
 import {
   Link
@@ -85,7 +86,8 @@ class DataListToolbar extends React.Component {
       onSort,
       sortedColumnKey,
       sortOrder,
-      addUrl
+      addUrl,
+      showExpandCollapse
     } = this.props;
     const {
       // isActionDropdownOpen,
@@ -112,6 +114,22 @@ class DataListToolbar extends React.Component {
       }
       return icon;
     };
+
+    const searchDropdownItems = columns
+      .filter(({ key }) => key !== searchKey)
+      .map(({ key, name }) => (
+        <DropdownItem key={key} component="button">
+          { name }
+        </DropdownItem>
+      ));
+
+    const sortDropdownItems = columns
+      .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
+      .map(({ key, name }) => (
+        <DropdownItem key={key} component="button">
+          { name }
+        </DropdownItem>
+      ));
 
     return (
       <I18n>
@@ -145,13 +163,8 @@ class DataListToolbar extends React.Component {
                               { searchColumnName }
                             </DropdownToggle>
                           )}
-                        >
-                          {columns.filter(({ key }) => key !== searchKey).map(({ key, name }) => (
-                            <DropdownItem key={key} component="button">
-                              { name }
-                            </DropdownItem>
-                          ))}
-                        </Dropdown>
+                          dropdownItems={searchDropdownItems}
+                        />
                         <TextInput
                           type="search"
                           aria-label={i18n._(t`Search text input`)}
@@ -182,15 +195,8 @@ class DataListToolbar extends React.Component {
                             { sortedColumnName }
                           </DropdownToggle>
                         )}
-                      >
-                        {columns
-                          .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
-                          .map(({ key, name }) => (
-                            <DropdownItem key={key} component="button">
-                              { name }
-                            </DropdownItem>
-                          ))}
-                      </Dropdown>
+                        dropdownItems={sortDropdownItems}
+                      />
                     </ToolbarItem>
                     <ToolbarItem>
                       <Button
@@ -202,18 +208,20 @@ class DataListToolbar extends React.Component {
                       </Button>
                     </ToolbarItem>
                   </ToolbarGroup>
-                  <ToolbarGroup>
-                    <ToolbarItem>
-                      <Button variant="plain" aria-label={i18n._(t`Expand`)}>
-                        <BarsIcon />
-                      </Button>
-                    </ToolbarItem>
-                    <ToolbarItem>
-                      <Button variant="plain" aria-label={i18n._(t`Collapse`)}>
-                        <EqualsIcon />
-                      </Button>
-                    </ToolbarItem>
-                  </ToolbarGroup>
+                  { showExpandCollapse && (
+                    <ToolbarGroup>
+                      <ToolbarItem>
+                        <Button variant="plain" aria-label={i18n._(t`Expand`)}>
+                          <BarsIcon />
+                        </Button>
+                      </ToolbarItem>
+                      <ToolbarItem>
+                        <Button variant="plain" aria-label={i18n._(t`Collapse`)}>
+                          <EqualsIcon />
+                        </Button>
+                      </ToolbarItem>
+                    </ToolbarGroup>
+                  )}
                 </Toolbar>
               </LevelItem>
               <LevelItem>
@@ -225,7 +233,7 @@ class DataListToolbar extends React.Component {
                 {addUrl && (
                   <Link to={addUrl}>
                     <Button variant="primary" aria-label={i18n._(t`Add`)}>
-                      <Trans>Add</Trans>
+                      <PlusIcon />
                     </Button>
                   </Link>
                 )}
