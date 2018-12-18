@@ -1710,7 +1710,7 @@ msgid "Edit Survey"
 msgstr "Vragenlijst wijzigen"
 
 #: client/src/credential-types/credential-types.list.js:58
-msgid "Edit credenital type"
+msgid "Edit credential type"
 msgstr "Soort toegangsgegevens wijzigen"
 
 #: client/src/credentials/credentials.list.js:68

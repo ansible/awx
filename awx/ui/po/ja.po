@@ -1659,7 +1659,7 @@ msgid "Edit Survey"
 msgstr "Survey の編集"
 
 #: client/src/credential-types/credential-types.list.js:58
-msgid "Edit credenital type"
+msgid "Edit credential type"
 msgstr "認証情報タイプの編集"
 
 #: client/src/credentials/credentials.list.js:68

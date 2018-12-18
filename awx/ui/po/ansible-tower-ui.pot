@@ -1525,7 +1525,7 @@ msgid "Edit Survey"
 msgstr ""
 
 #: client/src/credential-types/credential-types.list.js:58
-msgid "Edit credenital type"
+msgid "Edit credential type"
 msgstr ""
 
 #: client/src/credentials/credentials.list.js:68
