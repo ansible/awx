@@ -6,6 +6,7 @@ import {
     OUTPUT_PAGE_SIZE,
 } from './constants';
 
+let $interval;
 let $q;
 let $scope;
 let $state;
@@ -632,6 +633,7 @@ function startListening () {
 }
 
 function handleJobEvent (data) {
+    isReadyToSync = false;
     streaming = streaming || resource.events
         .getRange([Math.max(1, data.counter - 50), data.counter + 50])
         .then(results => {
@@ -671,6 +673,7 @@ function handleJobEvent (data) {
 }
 
 function handleStatusEvent (data) {
+    isReadyToSync = false;
     status.pushStatusEvent(data);
 }
 
@@ -678,7 +681,68 @@ function handleSummaryEvent (data) {
     if (resource.model.get('id') !== data.unified_job_id) return;
     if (!data.final_counter) return;
 
+    isReadyToSync = false;
     stream.setFinalCounter(data.final_counter);
+}
+
+function onEventProcessingFinished () {
+    lockFollow = true;
+    stopFollowing();
+    stopListening();
+    stopStatusPolling();
+    scroll.unlock();
+    scroll.unhide();
+    render.compile();
+}
+
+//
+// Status Polling
+//
+
+let isReadyToSync;
+let statusInterval;
+function stopStatusPolling () {
+    isReadyToSync = false;
+    $interval.cancel(statusInterval);
+}
+
+function startStatusPolling () {
+    stopStatusPolling();
+
+    if (resource.model.get('type') === 'job' ||
+        resource.model.get('type') === 'project_update') {
+        statusInterval = $interval(onStatusInterval, 1000 * 10);
+    }
+}
+
+function onStatusInterval () {
+    // Check if a new event has arrived on any channel since the last time this was
+    // called. If no new events have arrived, a request is made to the job details
+    // endpoint for the status. If we find the job has finished running, we update
+    // the page and stop polling.
+    if (!isReadyToSync) {
+        // Setting the sync flag to true will allow the http request to happen the
+        // next time this interval function fires. The event handlers for each
+        // channel will reset this back to false if they are called before next time.
+        isReadyToSync = true;
+
+        return $q.resolve();
+    }
+
+    // We reach this point only if no new events have been received since the
+    // last time this function was called.
+    isReadyToSync = false;
+
+    return status.sync()
+        .then(done => {
+            if (done) {
+                // if the job is finished running, unsubscribe from everything
+                // and update the page as usual.
+                onEventProcessingFinished();
+            }
+
+            return $q.resolve();
+        });
 }
 
 //
@@ -712,6 +776,7 @@ function clear () {
 }
 
 function OutputIndexController (
+    _$interval_,
     _$q_,
     _$scope_,
     _$state_,
@@ -729,6 +794,7 @@ function OutputIndexController (
     const { isPanelExpanded, _debug } = $stateParams;
     const isProcessingFinished = !_debug && _resource_.model.get('event_processing_finished');
 
+    $interval = _$interval_;
     $q = _$q_;
     $scope = _$scope_;
     $state = _$state_;
@@ -808,15 +874,10 @@ function OutputIndexController (
                 }
             },
             onStop () {
-                lockFollow = true;
-                stopFollowing();
-                stopListening();
                 status.updateStats();
                 status.dispatch();
                 status.sync();
-                scroll.unlock();
-                scroll.unhide();
-                render.compile();
+                onEventProcessingFinished();
             }
         });
 
@@ -825,6 +886,7 @@ function OutputIndexController (
             lockFollow = true;
             lockFrames = true;
             stopListening();
+            stopStatusPolling();
         } else {
             followOnce = true;
             lockFollow = false;
@@ -832,6 +894,7 @@ function OutputIndexController (
             resource.events.clearCache();
             status.subscribe(data => { vm.status = data.status; });
             startListening();
+            startStatusPolling();
         }
 
         if (_debug) {
@@ -843,6 +906,7 @@ function OutputIndexController (
 
     $scope.$on('$destroy', () => {
         stopListening();
+        stopStatusPolling();
 
         render.clear();
         render.el.remove();
@@ -852,6 +916,7 @@ function OutputIndexController (
 }
 
 OutputIndexController.$inject = [
+    '$interval',
     '$q',
     '$scope',
     '$state',

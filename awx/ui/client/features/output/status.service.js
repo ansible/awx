@@ -8,10 +8,11 @@ import {
     JOB_STATUS_COMPLETE,
     JOB_STATUS_INCOMPLETE,
     JOB_STATUS_UNSUCCESSFUL,
+    JOB_STATUS_FAILED,
     JOB_STATUS_FINISHED,
 } from './constants';
 
-function JobStatusService (moment, message) {
+function JobStatusService ($q, moment, message) {
     this.dispatch = () => message.dispatch('status', this.state);
     this.subscribe = listener => message.subscribe('status', listener);
 
@@ -301,11 +302,21 @@ function JobStatusService (moment, message) {
                 this.initPlaybookCounts({ model });
 
                 this.dispatch();
+
+                let isProcessingFinished = false;
+
+                if (JOB_STATUS_FINISHED.includes(model.get('status')) ||
+                    JOB_STATUS_FAILED.includes(model.get('status'))) {
+                    isProcessingFinished = model.get('event_processing_finished');
+                }
+
+                return $q.resolve(isProcessingFinished);
             });
     };
 }
 
 JobStatusService.$inject = [
+    '$q',
     'moment',
     'OutputMessageService',
 ];
