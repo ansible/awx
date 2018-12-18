@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
-import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
+import { I18n} from '@lingui/react';
 import {
   Card,
   CardHeader,
@@ -14,42 +14,10 @@ import {
   Route
 } from 'react-router-dom';
 
+import Tab from '../../../components/Tabs/Tab';
+import Tabs from '../../../components/Tabs/Tabs';
 import getTabName from '../utils';
 
-import '../tabs.scss';
-
-const Tab = ({ location, match, tab, currentTab, children, breadcrumb }) => {
-  const tabClasses = () => {
-    let classes = 'pf-c-tabs__item';
-    if (tab === currentTab) {
-      classes += ' pf-m-current';
-    }
-
-    return classes;
-  };
-
-  const updateTab = () => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('tab') !== undefined) {
-      params.set('tab', tab);
-    } else {
-      params.append('tab', tab);
-    }
-
-    return `?${params.toString()}`;
-  };
-
-  return (
-    <li className={tabClasses()}>
-        <Link
-          className={'pf-c-tabs__button'}
-          to={{ pathname: `${match.url}`, search: updateTab(), state: { breadcrumb } }}
-          replace={tab === currentTab}>
-          {children}
-        </Link>
-    </li>
-  );
-};
 
 const OrganizationDetail = ({
   location,
@@ -61,6 +29,7 @@ const OrganizationDetail = ({
 }) => {
   // TODO: set objectName by param or through grabbing org detail get from api
   const { medium } = PageSectionVariants;
+  const tabList=['details', 'access', 'teams', 'notifications'];
 
   const deleteResourceView = () => (
     <Fragment>
@@ -93,34 +62,29 @@ const OrganizationDetail = ({
     </Fragment>
   );
 
-  const tabList = (tabs) => (
-    <I18n>
-      {({ i18n }) => (
-        <div className="pf-c-tabs" aria-label={i18n._(t`Organization detail tabs`)}>
-          <ul className="pf-c-tabs__list">
-            {tabs.map(tab => (
-              <Tab
-                key={tab}
-                tab={tab}
-                location={location}
-                match={match}
-                currentTab={currentTab}
-                breadcrumb={parentBreadcrumbObj}
-              >
-                {getTabName(tab)}
-              </Tab>
-            ))}
-          </ul>
-        </div>
-      )}
-    </I18n>
-  );
 
   return (
     <PageSection variant={medium}>
       <Card className="at-c-orgPane">
         <CardHeader>
-          {tabList(['details', 'access', 'teams', 'notifications'])}
+          <I18n>
+            {({ i18n }) => (
+              <Tabs labelText={i18n._(t`Organization detail tabs`)}>
+                {tabList.map(tab => (
+                  <Tab
+                    key={tab}
+                    tab={tab}
+                    location={location}
+                    match={match}
+                    currentTab={currentTab}
+                    breadcrumb={parentBreadcrumbObj}
+                  >
+                  {getTabName(tab)}
+                  </Tab>
+                ))}
+              </Tabs>
+            )}
+          </I18n>
         </CardHeader>
         <CardBody>
           {(currentTab && currentTab !== 'details') ? (
