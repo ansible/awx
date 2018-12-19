@@ -146,7 +146,7 @@ export default ['i18n', function(i18n) {
                             ngClick: 'deletePermissionFromTeam(team_id, team_obj.name, permission.name, permission.summary_fields.resource_name, permission.related.teams)',
                             'class': "List-actionButton--delete",
                             iconClass: 'fa fa-times',
-                            awToolTip: i18n._('Dissasociate permission from team'),
+                            awToolTip: i18n._('Dissassociate permission from team'),
                             dataPlacement: 'top',
                             ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }

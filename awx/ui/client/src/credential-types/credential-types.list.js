@@ -55,7 +55,7 @@ export default ['i18n', function(i18n){
                 icon: 'fa-edit',
                 label: i18n._('Edit'),
                 "class": 'btn-sm',
-                awToolTip: i18n._('Edit credenital type'),
+                awToolTip: i18n._('Edit credential type'),
                 dataPlacement: 'top',
                 ngShow: 'credential_type.summary_fields.user_capabilities.edit'
             },

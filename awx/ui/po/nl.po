@@ -1555,7 +1555,7 @@ msgid "Disassociate host"
 msgstr "Host loskoppelen"
 
 #: client/src/templates/survey-maker/surveys/init.factory.js:21
-msgid "Disble Survey"
+msgid "Disable Survey"
 msgstr "Vragenlijst uitschkelen"
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:94
@@ -1566,11 +1566,11 @@ msgid "Discard changes"
 msgstr "Wijzigingen annuleren"
 
 #: client/src/teams/teams.form.js:149
-msgid "Dissasociate permission from team"
+msgid "Dissassociate permission from team"
 msgstr "Machtiging loskoppelen van team"
 
 #: client/src/users/users.form.js:227
-msgid "Dissasociate permission from user"
+msgid "Dissassociate permission from user"
 msgstr "Machtiging loskoppelen van gebruiker"
 
 #: client/src/credentials/credentials.form.js:384
@@ -1710,7 +1710,7 @@ msgid "Edit Survey"
 msgstr "Vragenlijst wijzigen"
 
 #: client/src/credential-types/credential-types.list.js:58
-msgid "Edit credenital type"
+msgid "Edit credential type"
 msgstr "Soort toegangsgegevens wijzigen"
 
 #: client/src/credentials/credentials.list.js:68
@@ -1914,7 +1914,7 @@ msgstr ""
 #: client/src/credentials/factories/become-method-change.factory.js:81
 #: client/src/credentials/factories/kind-change.factory.js:138
 msgid ""
-"Enter the URL for the virtual machine which %scorresponds to your CloudForm "
+"Enter the URL for the virtual machine which %scorresponds to your CloudForms "
 "instance. %sFor example, %s"
 msgstr ""
 "Voer de URL in voor de virtuele machine die %sovereenkomt met uw CloudForm-"
@@ -3826,7 +3826,7 @@ msgstr ""
 msgid ""
 "Pass extra command line variables to the playbook. This is the -e or "
 "--extra-vars command line parameter for ansible-playbook. Provide key/value "
-"pairs using either YAML or JSON. Refer to the Ansible Tower documentaton for"
+"pairs using either YAML or JSON. Refer to the Ansible Tower documentation for"
 " example syntax."
 msgstr ""
 "Geef extra commandoregelvariabelen op in het draaiboek. Dit is de "

@@ -1510,7 +1510,7 @@ msgid "Disassociate host"
 msgstr "ホストの関連付けの解除"
 
 #: client/src/templates/survey-maker/surveys/init.factory.js:21
-msgid "Disble Survey"
+msgid "Disable Survey"
 msgstr "Survey の無効化"
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:94
@@ -1521,11 +1521,11 @@ msgid "Discard changes"
 msgstr "変更の破棄"
 
 #: client/src/teams/teams.form.js:149
-msgid "Dissasociate permission from team"
+msgid "Dissassociate permission from team"
 msgstr "チームからパーミッションの関連付けを解除"
 
 #: client/src/users/users.form.js:227
-msgid "Dissasociate permission from user"
+msgid "Dissassociate permission from user"
 msgstr "ユーザーからパーミッションの関連付けを解除"
 
 #: client/src/credentials/credentials.form.js:384
@@ -1659,7 +1659,7 @@ msgid "Edit Survey"
 msgstr "Survey の編集"
 
 #: client/src/credential-types/credential-types.list.js:58
-msgid "Edit credenital type"
+msgid "Edit credential type"
 msgstr "認証情報タイプの編集"
 
 #: client/src/credentials/credentials.list.js:68
@@ -1851,7 +1851,7 @@ msgstr "各行に 1 つの電話番号を入力し、SMS メッセージのル�
 #: client/src/credentials/factories/become-method-change.factory.js:81
 #: client/src/credentials/factories/kind-change.factory.js:138
 msgid ""
-"Enter the URL for the virtual machine which %scorresponds to your CloudForm "
+"Enter the URL for the virtual machine which %scorresponds to your CloudForms "
 "instance. %sFor example, %s"
 msgstr "CloudForms インスタンスに対応する %s仮想マシンの URL を入力します (%s例: %s)。"
 
@@ -3703,7 +3703,7 @@ msgstr ""
 msgid ""
 "Pass extra command line variables to the playbook. This is the -e or "
 "--extra-vars command line parameter for ansible-playbook. Provide key/value "
-"pairs using either YAML or JSON. Refer to the Ansible Tower documentaton for"
+"pairs using either YAML or JSON. Refer to the Ansible Tower documentation for"
 " example syntax."
 msgstr ""
 "追加のコマンドライン変数を Playbook に渡します。これは、ansible-playbook の -e または --extra-vars "

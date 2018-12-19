@@ -79,7 +79,7 @@ export default
                        scope.host_required = true;
                        scope.hostLabel = i18n._("CloudForms URL");
                        scope.hostPopOver = i18n.sprintf(i18n._("Enter the URL for the virtual machine which %s" +
-                           "corresponds to your CloudForm instance. %s" +
+                           "corresponds to your CloudForms instance. %s" +
                            "For example, %s"), "<br />", "<br />", "https://cloudforms.example.org");
                     break;
                     case 'net':

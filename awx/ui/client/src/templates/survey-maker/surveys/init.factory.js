@@ -18,7 +18,7 @@ export default
                 {name: i18n._('Integer'), type: 'integer'},
                 {name: i18n._('Float'), type: 'float'}
             ];
-            scope.disableSurveyTooltip = i18n._('Disble Survey');
+            scope.disableSurveyTooltip = i18n._('Disable Survey');
             scope.editQuestionTooltip = i18n._('Edit Question');
             scope.deleteQuestionTooltip = i18n._('Delete Question');
             scope.dragQuestionTooltip = i18n._('Drag to reorder question');
