@@ -62,7 +62,12 @@ def main():
 
     # Module never results in a change
     module.exit_json(changed=False, capacity_cpu=capacity_cpu,
-                     capacity_mem=capacity_mem, version=version)
+                     capacity_mem=capacity_mem, version=version,
+                     ansible_facts=dict(
+                         awx_capacity_cpu=capacity_cpu,
+                         awx_capacity_mem=capacity_mem,
+                         awx_capacity_version=version
+                     ))
 
 
 if __name__ == '__main__':

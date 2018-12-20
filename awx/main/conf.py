@@ -198,6 +198,18 @@ register(
 )
 
 register(
+    'AWX_ISOLATED_VERBOSITY',
+    field_class=fields.IntegerField,
+    min_value=0,
+    max_value=5,
+    label=_('Verbosity level for isolated node management tasks'),
+    help_text=_('This can be raised to aid in debugging connection issues for isolated task execution'),
+    category=_('Jobs'),
+    category_slug='jobs',
+    default=0
+)
+
+register(
     'AWX_ISOLATED_CHECK_INTERVAL',
     field_class=fields.IntegerField,
     min_value=0,
