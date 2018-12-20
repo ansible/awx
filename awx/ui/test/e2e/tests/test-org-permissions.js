@@ -1,6 +1,6 @@
 import {
     getOrganization,
-    getUserExact,
+    getUser,
     getTeam,
 } from '../fixtures';
 
@@ -53,7 +53,7 @@ const readOrgPermissionResults = `//*[@id="permissions_table"]//*[text()="${name
 module.exports = {
     before: (client, done) => {
         const resources = [
-            getUserExact(namespace, `${namespace}-user`),
+            getUser(namespace, `${namespace}-user`),
             getOrganization(namespace),
             getTeam(namespace),
         ];
