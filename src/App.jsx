@@ -82,10 +82,6 @@ class App extends React.Component {
     };
   }
 
-  getSessionObject(key) {
-    return JSON.parse(sessionStorage.getItem(key) || '{}');
-  }
-
   onNavToggle = () => {
     this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
   };
@@ -93,20 +89,15 @@ class App extends React.Component {
   onDevLogout = async () => {
     await api.get(API_LOGOUT);
     this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
-    if (sessionStorage.config) {
-      sessionStorage.clear();
-    }
   }
 
   async componentDidMount() {
-    // Grab our config data from the API and store in sessionStorage
-    if (!sessionStorage.config) {
-      const { data } = await api.get(API_CONFIG);
-      sessionStorage.setItem('config', JSON.stringify(data));
-    }
+    // Grab our config data from the API and store in state
+    const { data } = await api.get(API_CONFIG);
+    this.setState({ config: data });
   }
   render() {
-    const { isNavOpen } = this.state;
+    const { isNavOpen, config } = this.state;
     const { logo, loginInfo, history } = this.props;
 
     const PageToolbar = (
@@ -296,7 +287,7 @@ class App extends React.Component {
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/projects" component={Projects} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventories" component={Inventories} />
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventory_scripts" component={InventoryScripts} />
-                <ConfigContext.Provider value={this.getSessionObject('config')}>
+                <ConfigContext.Provider value={config}>
                   <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/organizations" component={Organizations} />
                 </ConfigContext.Provider>
                 <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/users" component={Users} />
