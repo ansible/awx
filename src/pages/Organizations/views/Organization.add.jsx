@@ -69,19 +69,6 @@ class OrganizationAdd extends React.Component {
     this.props.history.push('/organizations');
   }
 
-  async componentDidMount() {
-    try {
-      const { data } = await api.get(API_CONFIG);
-      this.setState({ custom_virtualenvs: [...data.custom_virtualenvs] });
-      if (this.state.custom_virtualenvs.length > 1) {
-        // Show dropdown if we have more than one ansible environment
-        this.setState({ hideAnsibleSelect: !this.state.hideAnsibleSelect });
-      }
-    } catch (error) {
-      this.setState({ error })
-    }
-    
-  }
   render() {
     const { name } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
