@@ -79,6 +79,8 @@ class App extends React.Component {
     const isNavOpen = typeof window !== 'undefined' && window.innerWidth >= parseInt(breakpointMd.value, 10);
     this.state = {
       isNavOpen,
+      config: {},
+      error: false,
     };
   }
 
@@ -93,9 +95,14 @@ class App extends React.Component {
 
   async componentDidMount() {
     // Grab our config data from the API and store in state
-    const { data } = await api.get(API_CONFIG);
-    this.setState({ config: data });
+    try {
+      const { data } = await api.get(API_CONFIG);
+      this.setState({ config: data });
+    } catch (error) {
+      this.setState({ error });
+    }
   }
+
   render() {
     const { isNavOpen, config } = this.state;
     const { logo, loginInfo, history } = this.props;

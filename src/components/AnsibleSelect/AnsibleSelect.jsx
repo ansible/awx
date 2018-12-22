@@ -12,12 +12,25 @@ class AnsibleSelect extends React.Component {
     this.onSelectChange = this.onSelectChange.bind(this);
   }
 
+  state = {
+    count: 1,
+  }
+
+  static getDerivedStateFromProps(nexProps, _) {
+    if (nexProps.data) {
+      return {
+        count: nexProps.data.length,
+      }
+    }
+    return null;
+  }
   onSelectChange(val, _) {
     this.props.selectChange(val);
   }
 
   render() {
-    if (this.props.data.length > 1) {
+    const { count } = this.state;
+    if (count > 1) {
       return (
         <FormGroup label={this.props.labelName} fieldId="ansible-select">
           <Select value={this.props.selected} onChange={this.onSelectChange} aria-label="Select Input">
