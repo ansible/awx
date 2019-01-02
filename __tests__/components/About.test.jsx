@@ -31,26 +31,4 @@ describe('<About />', () => {
     expect(onAboutModalClose).toBeCalled();
     aboutWrapper.unmount();
   });
-
-  test('sets error on api request failure', async () => {
-    api.get = jest.fn().mockImplementation(() => {
-      const err = new Error('404 error');
-      err.response = { status: 404, message: 'problem' };
-      return Promise.reject(err);
-    });
-    aboutWrapper = mount(
-      <I18nProvider>
-        <About isOpen />
-      </I18nProvider>
-    );
-
-    const aboutComponentInstance = aboutWrapper.find(About).instance();
-    await aboutComponentInstance.componentDidMount();
-    expect(aboutComponentInstance.state.error.response.status).toBe(404);
-    aboutWrapper.unmount();
-  });
-
-  test('API Config endpoint is valid', () => {
-    expect(API_CONFIG).toBeDefined();
-  });
 });

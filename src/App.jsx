@@ -1,11 +1,8 @@
 import React, { Fragment } from 'react';
-<<<<<<< HEAD
-import { I18nProvider, I18n } from '@lingui/react';
-import { t } from '@lingui/macro';
-=======
 import { ConfigContext } from './context';
 
->>>>>>> Implement React Context API
+import { I18nProvider, I18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 import {
   Redirect,
   Switch,
@@ -66,8 +63,8 @@ const catalogs = { en, ja };
 
 // This spits out the language and the region.  Example: es-US
 const language = (navigator.languages && navigator.languages[0])
-|| navigator.language
-|| navigator.userLanguage;
+  || navigator.language
+  || navigator.userLanguage;
 
 const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
@@ -87,6 +84,10 @@ class App extends React.Component {
   onNavToggle = () => {
     this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
   };
+
+  onLogoClick = () => {
+    this.setState({ activeGroup: 'views_group' });
+  }
 
   onDevLogout = async () => {
     await api.get(API_LOGOUT);
@@ -136,182 +137,121 @@ class App extends React.Component {
               [BackgroundImageSrc.filter]: '/assets/images/background-filter.svg'
             }}
           />
-          <Switch>
-            <ConditionalRedirect shouldRedirect={() => api.isAuthenticated()} redirectPath="/" path="/login" component={() => <Login logo={logo} loginInfo={loginInfo} />} />
-            <Fragment>
-              <Page
-                header={(
-                  <PageHeader
-                    logo={<TowerLogo onClick={this.onLogoClick} />}
-                    toolbar={PageToolbar}
-                    showNavToggle
-                    onNavToggle={this.onNavToggle}
-                  />
-                )}
-                sidebar={(
-                  <PageSidebar
-                    isNavOpen={isNavOpen}
-                    nav={(
-                      <Nav aria-label="Primary Navigation">
-                        <NavList>
-                          <SideNavItems
-                            history={history}
-                            items={[
-                              {
-                                groupName: 'views',
-                                title: 'Views',
-                                routes: [
-                                  {
-                                    path: 'home',
-                                    title: 'Dashboard'
-                                  },
-                                  {
-                                    path: 'jobs',
-                                    title: 'Jobs'
-                                  },
-                                  {
-                                    path: 'schedules',
-                                    title: 'Schedules'
-                                  },
-                                  {
-                                    path: 'portal',
-                                    title: 'Portal Mode'
-                                  },
-                                ]
-                              },
-                              {
-                                groupName: 'resources',
-                                title: 'Resources',
-                                routes: [
-                                  {
-                                    path: 'templates',
-                                    title: 'Templates'
-                                  },
-                                  {
-                                    path: 'credentials',
-                                    title: 'Credentials'
-                                  },
-                                  {
-                                    path: 'projects',
-                                    title: 'Projects'
-                                  },
-                                  {
-                                    path: 'inventories',
-                                    title: 'Inventories'
-                                  },
-                                  {
-                                    path: 'inventory_scripts',
-                                    title: 'Inventory Scripts'
-                                  }
-                                ]
-                              },
-                              {
-                                groupName: 'access',
-                                title: 'Access',
-                                routes: [
-                                  {
-                                    path: 'organizations',
-                                    title: 'Organizations'
-                                  },
-                                  {
-                                    path: 'users',
-                                    title: 'Users'
-                                  },
-                                  {
-                                    path: 'teams',
-                                    title: 'Teams'
-                                  }
-                                ]
-                              },
-                              {
-                                groupName: 'administration',
-                                title: 'Administration',
-                                routes: [
-                                  {
-                                    path: 'credential_types',
-                                    title: 'Credential Types',
-                                  },
-                                  {
-                                    path: 'notification_templates',
-                                    title: 'Notifications'
-                                  },
-                                  {
-                                    path: 'management_jobs',
-                                    title: 'Management Jobs'
-                                  },
-                                  {
-                                    path: 'instance_groups',
-                                    title: 'Instance Groups'
-                                  },
-                                  {
-                                    path: 'applications',
-                                    title: 'Integrations'
-                                  }
-                                ]
-                              },
-                              {
-                                groupName: 'settings',
-                                title: 'Settings',
-                                routes: [
-                                  {
-                                    path: 'auth_settings',
-                                    title: 'Authentication',
-                                  },
-                                  {
-                                    path: 'jobs_settings',
-                                    title: 'Jobs'
-                                  },
-                                  {
-                                    path: 'system_settings',
-                                    title: 'System'
-                                  },
-                                  {
-                                    path: 'ui_settings',
-                                    title: 'User Interface'
-                                  },
-                                  {
-                                    path: 'license',
-                                    title: 'License'
-                                  }
-                                ]
-                              }
-                            ]}
-                          />
-                        </NavList>
-                      </Nav>
-                    )}
-                  />
-                )}
-                useCondensed
-              >
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" exact path="/" component={() => (<Redirect to="/home" />)} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/home" component={Dashboard} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/jobs" component={Jobs} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/schedules" component={Schedules} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/portal" component={Portal} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/templates" component={Templates} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/credentials" component={Credentials} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/projects" component={Projects} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventories" component={Inventories} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventory_scripts" component={InventoryScripts} />
-                <ConfigContext.Provider value={config}>
+          <ConfigContext.Provider value={config}>
+            <Switch>
+              <ConditionalRedirect
+                shouldRedirect={() => api.isAuthenticated()}
+                redirectPath="/"
+                path="/login"
+                component={() => <Login logo={logo} loginInfo={loginInfo} />}
+              />
+              <Fragment>
+                <Page
+                  header={(
+                    <PageHeader
+                      logo={<TowerLogo onClick={this.onLogoClick} />}
+                      toolbar={PageToolbar}
+                      showNavToggle
+                      onNavToggle={this.onNavToggle}
+                    />
+                  )}
+                  sidebar={(
+                    <PageSidebar
+                      isNavOpen={isNavOpen}
+                      nav={(
+                        <I18n>
+                          {({ i18n }) => (
+                            <Nav aria-label={i18n._(t`Primary Navigation`)}>
+                              <NavList>
+                                <NavExpandableGroup
+                                  groupId="views_group"
+                                  title={i18n._("Views")}
+                                  routes={[
+                                    { path: '/home', title: i18n._('Dashboard') },
+                                    { path: '/jobs', title: i18n._('Jobs') },
+                                    { path: '/schedules', title: i18n._('Schedules') },
+                                    { path: '/portal', title: i18n._('Portal Mode') },
+                                  ]}
+                                />
+                                <NavExpandableGroup
+                                  groupId="resources_group"
+                                  title={i18n._("Resources")}
+                                  routes={[
+                                    { path: '/templates', title: i18n._('Templates') },
+                                    { path: '/credentials', title: i18n._('Credentials') },
+                                    { path: '/projects', title: i18n._('Projects') },
+                                    { path: '/inventories', title: i18n._('Inventories') },
+                                    { path: '/inventory_scripts', title: i18n._('Inventory Scripts') }
+                                  ]}
+                                />
+                                <NavExpandableGroup
+                                  groupId="access_group"
+                                  title={i18n._("Access")}
+                                  routes={[
+                                    { path: '/organizations', title: i18n._('Organizations') },
+                                    { path: '/users', title: i18n._('Users') },
+                                    { path: '/teams', title: i18n._('Teams') }
+                                  ]}
+                                />
+                                <NavExpandableGroup
+                                  groupId="administration_group"
+                                  title={i18n._("Administration")}
+                                  routes={[
+                                    { path: '/credential_types', title: i18n._('Credential Types') },
+                                    { path: '/notification_templates', title: i18n._('Notifications') },
+                                    { path: '/management_jobs', title: i18n._('Management Jobs') },
+                                    { path: '/instance_groups', title: i18n._('Instance Groups') },
+                                    { path: '/applications', title: i18n._('Integrations') }
+                                  ]}
+                                />
+                                <NavExpandableGroup
+                                  groupId="settings_group"
+                                  title={i18n._("Settings")}
+                                  routes={[
+                                    { path: '/auth_settings', title: i18n._('Authentication') },
+                                    { path: '/jobs_settings', title: i18n._('Jobs') },
+                                    { path: '/system_settings', title: i18n._('System') },
+                                    { path: '/ui_settings', title: i18n._('User Interface') },
+                                    { path: '/license', title: i18n._('License') }
+                                  ]}
+                                />
+                              </NavList>
+                            </Nav>
+                          )}
+                        </I18n>
+                      )}
+                    />
+                  )}
+                  useCondensed
+                >
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" exact path="/" component={() => (<Redirect to="/home" />)} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/home" component={Dashboard} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/jobs" component={Jobs} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/schedules" component={Schedules} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/portal" component={Portal} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/templates" component={Templates} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/credentials" component={Credentials} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/projects" component={Projects} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventories" component={Inventories} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/inventory_scripts" component={InventoryScripts} />
                   <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/organizations" component={Organizations} />
-                </ConfigContext.Provider>
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/users" component={Users} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/teams" component={Teams} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/credential_types" component={CredentialTypes} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/notification_templates" component={NotificationTemplates} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/management_jobs" component={ManagementJobs} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/instance_groups" component={InstanceGroups} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/applications" component={Applications} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/auth_settings" component={AuthSettings} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/jobs_settings" component={JobsSettings} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/system_settings" component={SystemSettings} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/ui_settings" component={UISettings} />
-                <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/license" component={License} />
-              </Page>
-            </Fragment>
-          </Switch>
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/users" component={Users} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/teams" component={Teams} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/credential_types" component={CredentialTypes} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/notification_templates" component={NotificationTemplates} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/management_jobs" component={ManagementJobs} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/instance_groups" component={InstanceGroups} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/applications" component={Applications} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/auth_settings" component={AuthSettings} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/jobs_settings" component={JobsSettings} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/system_settings" component={SystemSettings} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/ui_settings" component={UISettings} />
+                  <ConditionalRedirect shouldRedirect={() => !api.isAuthenticated()} redirectPath="/login" path="/license" component={License} />
+
+                </Page>
+              </Fragment>
+            </Switch>
+          </ConfigContext.Provider>
         </Fragment>
       </I18nProvider>
     );
