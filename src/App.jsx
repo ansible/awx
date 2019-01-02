@@ -73,75 +73,57 @@ class App extends Component {
 
   render () {
     const { config, isNavOpen } = this.state;
-    const { navLabel = '', routeGroups = [] } = this.props;
-
-    const header = (
-      <PageHeader
-        showNavToggle
-        onNavToggle={() => this.onNavToggle()}
-        logo={(
-          <TowerLogo
-            onClick={this.onLogoClick}
-          />
-        )}
-        toolbar={(
-          <Toolbar>
-            <ToolbarGroup>
-              <ToolbarItem>
-                <HelpDropdown />
-              </ToolbarItem>
-              <ToolbarItem>
-                <LogoutButton
-                  onDevLogout={() => this.onDevLogout()}
-                />
-              </ToolbarItem>
-            </ToolbarGroup>
-          </Toolbar>
-        )}
-      />
-    );
-
-    const sidebar = (
-      <PageSidebar
-        isNavOpen={isNavOpen}
-        nav={(
-          <Nav aria-label={navLabel}>
-            <NavList>
-              {routeGroups.map(params => (
-                <NavExpandableGroup key={params.groupId} {...params} />
-              ))}
-            </NavList>
-          </Nav>
-        )}
-      />
-    );
+    const {
+      render,
+      routeGroups = [],
+      navLabel = '',
+    } = this.props;
 
     return (
       <ConfigContext.Provider value={config}>
         <Page
           usecondensed="True"
-          header={header}
-          sidebar={sidebar}
+          header={(
+            <PageHeader
+              showNavToggle
+              onNavToggle={() => this.onNavToggle()}
+              logo={(
+                <TowerLogo
+                  onClick={this.onLogoClick}
+                />
+              )}
+              toolbar={(
+                <Toolbar>
+                  <ToolbarGroup>
+                    <ToolbarItem>
+                      <HelpDropdown />
+                    </ToolbarItem>
+                    <ToolbarItem>
+                      <LogoutButton
+                        onDevLogout={this.onLogout}
+                      />
+                    </ToolbarItem>
+                  </ToolbarGroup>
+                </Toolbar>
+              )}
+            />
+          )}
+          sidebar={(
+            <PageSidebar
+              isNavOpen={isNavOpen}
+              nav={(
+                <Nav aria-label={navLabel}>
+                  <NavList>
+                    {routeGroups.map(params => (
+                      <NavExpandableGroup key={params.groupId} {...params} />
+                    ))}
+                  </NavList>
+                </Nav>
+              )}
+            />
+          )}
         >
-        {
-          //
-          // Extract a flattened array of all route params from the provided route config
-          // and use it to render route components.
-          //
-          // [{ routes }, { routes }] -> [route, route, route] -> (<Route/><Route/><Route/>)
-          //
-          routeGroups
-            .reduce((allRoutes, { routes }) => allRoutes.concat(routes), [])
-            .map(({ component: Component, path }) => (
-              <Route
-                key={path}
-                path={path}
-                render={params => (
-                  <Component {...params } />
-                )}
-              />
-          ))
-        }
+          { render ? render({ routeGroups }) : '' }
         </Page>
       </ConfigContext.Provider>
     );

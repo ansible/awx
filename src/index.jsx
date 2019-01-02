@@ -235,6 +235,21 @@ export async function main () {
                             ],
                           },
                         ]}
+                        render={({ routeGroups }) => (
+                          routeGroups
+                            .reduce((allRoutes, { routes }) => allRoutes.concat(routes), [])
+                            .map(({ component: PageComponent, path }) => (
+                              <Route
+                                key={path}
+                                path={path}
+                                render={({ match }) => (
+                                  <PageComponent
+                                    match={match}
+                                  />
+                                )}
+                              />
+                          ))
+                        )}
                       />
                     )}
                   />
