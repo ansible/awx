@@ -476,6 +476,17 @@ export default ['i18n', function(i18n) {
                 ngShow: "notification_type.value == 'slack' ",
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
                 awPopOver: i18n._('Specify a notification color. Acceptable colors are hex color code (example: #3af or #789abc) .')
+            },
+            as_user: {
+                label: i18n._('Post as User'),
+                dataTitle: i18n._('Post as User'),
+                type: 'checkbox',
+                subForm: 'typeSubForm',
+                ngShow: "notification_type.value == 'slack' ",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+                awPopOver: i18n._('Specify the as_user=True flag to the Slack API.  See https://api.slack.com/methods/chat.postMessage#authorship for more details.'),
+                dataPlacement: 'right',
+                dataContainer: "body"
             }
         },
 

@@ -19,12 +19,13 @@ class SlackBackend(AWXBaseEmailBackend):
     recipient_parameter = "channels"
     sender_parameter = None
 
-    def __init__(self, token, hex_color="", fail_silently=False, **kwargs):
+    def __init__(self, token, hex_color="", fail_silently=False, as_user=True, **kwargs):
         super(SlackBackend, self).__init__(fail_silently=fail_silently)
         self.token = token
         self.color = None
         if hex_color.startswith("#") and (len(hex_color) == 4 or len(hex_color) == 7):
             self.color = hex_color
+        self.as_user = as_user
 
     def send_messages(self, messages):
         connection = SlackClient(self.token)
@@ -34,18 +35,20 @@ class SlackBackend(AWXBaseEmailBackend):
                 for r in m.recipients():
                     if r.startswith('#'):
                         r = r[1:]
+                    attachment = {
+                        "text": m.subject
+                    }
+                    kwargs = {}
                     if self.color:
-                        ret = connection.api_call("chat.postMessage",
-                                                  channel=r,
-                                                  as_user=True,
-                                                  attachments=[{
-                                                      "color": self.color,
-                                                      "text": m.subject
-                                                  }])
-                    else:
-                        ret = connection.api_call("chat.postMessage",
-                                                  channel=r,
-                                                  text=m.subject)
+                        attachment['color'] = self.color
+                    if self.as_user:
+                        kwargs['as_user'] = True
+                    ret = connection.api_call(
+                        "chat.postMessage",
+                        channel=r,
+                        attachments=[attachment],
+                        **kwargs
+                    )
                     logger.debug(ret)
                     if ret['ok']:
                         sent_messages += 1
