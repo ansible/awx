@@ -10,8 +10,6 @@ import {
 import towerLogo from '../../images/tower-logo-header.svg';
 import api from '../api';
 
-import Background from '../components/Background';
-
 class AtLogin extends Component {
   constructor (props) {
     super(props);
@@ -66,25 +64,23 @@ class AtLogin extends Component {
     return (
       <I18n>
         {({ i18n }) => (
-          <Background>
-            <LoginPage
-              brandImgSrc={logoSrc}
-              brandImgAlt={alt || 'Ansible Tower'}
-              loginTitle={i18n._(t`Welcome to Ansible Tower! Please Sign In.`)}
-            >
-              <LoginForm
-                usernameLabel={i18n._(t`Username`)}
-                usernameValue={username}
-                onChangeUsername={this.handleUsernameChange}
-                passwordLabel={i18n._(t`Password`)}
-                passwordValue={password}
-                onChangePassword={this.handlePasswordChange}
-                isValidPassword={isValidPassword}
-                passwordHelperTextInvalid={i18n._(t`Invalid username or password. Please try again.`)}
-                onLoginButtonClick={this.handleSubmit}
-              />
-            </LoginPage>
-          </Background>
+          <LoginPage
+            brandImgSrc={logoSrc}
+            brandImgAlt={alt || 'Ansible Tower'}
+            loginTitle={i18n._(t`Welcome to Ansible Tower! Please Sign In.`)}
+          >
+            <LoginForm
+              usernameLabel={i18n._(t`Username`)}
+              usernameValue={username}
+              onChangeUsername={this.handleUsernameChange}
+              passwordLabel={i18n._(t`Password`)}
+              passwordValue={password}
+              onChangePassword={this.handlePasswordChange}
+              isValidPassword={isValidPassword}
+              passwordHelperTextInvalid={i18n._(t`Invalid username or password. Please try again.`)}
+              onLoginButtonClick={this.handleSubmit}
+            />
+          </LoginPage>
         )}
       </I18n>
     );
