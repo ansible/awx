@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { global_breakpoint_md } from '@patternfly/react-tokens';
 import {
   Redirect,
   Switch,
@@ -14,7 +15,6 @@ import {
   ToolbarGroup,
   ToolbarItem
 } from '@patternfly/react-core';
-import { global_breakpoint_md as breakpointMd } from '@patternfly/react-tokens';
 
 import api from './api';
 import { API_LOGOUT, API_CONFIG } from './endpoints';
@@ -31,7 +31,7 @@ class App extends Component {
 
     // initialize with a closed navbar if window size is small
     const isNavOpen = typeof window !== 'undefined'
-      && window.innerWidth >= parseInt(breakpointMd.value, 10);
+      && window.innerWidth >= parseInt(global_breakpoint_md.value, 10);
 
     this.state = {
       isNavOpen,
