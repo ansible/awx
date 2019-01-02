@@ -5,7 +5,8 @@ import {
   HashRouter as Router,
   Redirect,
   Switch,
-  withRouter
+  withRouter,
+  Route,
 } from 'react-router-dom';
 import {
   BackgroundImage,
@@ -28,12 +29,10 @@ import { API_LOGOUT, API_CONFIG } from './endpoints';
 
 import ja from '../build/locales/ja/messages';
 import en from '../build/locales/en/messages';
-
 import Login from './pages/Login';
 import HelpDropdown from './components/HelpDropdown';
 import LogoutButton from './components/LogoutButton';
 import TowerLogo from './components/TowerLogo';
-import ConditionalRedirect from './components/ConditionalRedirect';
 import NavExpandableGroup from './components/NavExpandableGroup';
 
 const catalogs = { en, ja };
@@ -61,6 +60,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
+    // initialize with a closed navbar if window size is small
     const isNavOpen = typeof window !== 'undefined'
       && window.innerWidth >= parseInt(breakpointMd.value, 10);
 
@@ -95,10 +95,9 @@ class App extends React.Component {
   }
 
   render () {
-    const { isNavOpen } = this.state;
-    const { logo, loginInfo, history, routeConfig = [] } = this.props;
+    const { config, isNavOpen } = this.state;
     // extract a flattened array of all routes from the provided route config
-    const allRoutes = routeConfig.reduce((flattened, { routes }) => flattened.concat(routes), []);
+    const { logo, loginInfo, routeGroups = [] } = this.props;
 
     return (
       <Router>
@@ -108,82 +107,80 @@ class App extends React.Component {
         >
           <I18n>
             {({ i18n }) => (
-              <Fragment>
-                <ConfigContext.Provider>
-                  <BackgroundImage src={backgroundConfig} />
+              api.isAuthenticated () ? (
+                <ConfigContext.Provider value={config}>
                   <Switch>
-                    <ConditionalRedirect
-                      shouldRedirect={() => api.isAuthenticated()}
-                      redirectPath="/"
-                      path="/login"
-                      component={() => <Login logo={logo} loginInfo={loginInfo} />}
-                    />
-                    <Fragment>
-                      <Page
-                        usecondensed="True"
-                        header={(
-                          <PageHeader
-                            logo={<TowerLogo onClick={this.onLogoClick} />}
-                            toolbar={(
-                              <Toolbar>
-                                <ToolbarGroup>
-                                  <ToolbarItem>
-                                    <HelpDropdown />
-                                  </ToolbarItem>
-                                  <ToolbarItem>
-                                    <LogoutButton onDevLogout={() => this.onDevLogout()} />
-                                  </ToolbarItem>
-                                </ToolbarGroup>
-                              </Toolbar>
-                            )}
-                            showNavToggle
-                            onNavToggle={this.onNavToggle}
-                          />
-                        )}
-                        sidebar={(
-                          <PageSidebar
-                            isNavOpen={isNavOpen}
-                            nav={(
-                              <Nav aria-label={i18n._("Primary Navigation")}>
-                                <NavList>
-                                  { routeConfig.map(({ groupId, routes, title }) => (
-                                    <NavExpandableGroup
-                                      key={groupId}
-                                      groupId={groupId}
-                                      title={i18n._(title)}
-                                      routes={routes.map(route => ({
-                                        path: route.path,
-                                        component: route.component,
-                                        title: i18n._(route.title)
-                                      }))}
-                                    />
-                                  ))}
-                                </NavList>
-                              </Nav>
-                            )}
-                          />
-                        )}
-                      >
-                        <ConditionalRedirect
-                          shouldRedirect={() => !api.isAuthenticated()}
-                          redirectPath="/login"
-                          exact path="/"
-                          component={() => (<Redirect to="/home" />)}
-                        />
-                        { allRoutes.map(({ component, path }) => (
-                          <ConditionalRedirect
-                            key={path}
-                            path={path}
-                            redirectPath="/login"
-                            shouldRedirect={() => !api.isAuthenticated()}
-                            component={component}
-                          />
-                        ))}
-                      </Page>
-                    </Fragment>
+                    <Route path="/login" render={() => <Redirect to='/home' />} />
+                    <Route exact path="/" render={() => <Redirect to='/home' />} />
+                    <Route render={() => (
+                      <Fragment>
+                        <BackgroundImage src={backgroundConfig} />
+                        <Page
+                          usecondensed="True"
+                          header={(
+                            <PageHeader
+                              showNavToggle
+                              onNavToggle={() => this.onNavToggle()}
+                              logo={(
+                                <TowerLogo
+                                  onClick={this.onLogoClick}
+                                />
+                              )}
+                              toolbar={(
+                                <Toolbar>
+                                  <ToolbarGroup>
+                                    <ToolbarItem>
+                                      <HelpDropdown />
+                                    </ToolbarItem>
+                                    <ToolbarItem>
+                                      <LogoutButton
+                                        onDevLogout={() => this.onDevLogout()}
+                                      />
+                                    </ToolbarItem>
+                                  </ToolbarGroup>
+                                </Toolbar>
+                              )}
+                            />
+                          )}
+                          sidebar={(
+                            <PageSidebar
+                              isNavOpen={isNavOpen}
+                              nav={(
+                                <Nav aria-label={i18n._("Primary Navigation")}>
+                                  <NavList>
+                                  {
+                                    routeGroups.map(params => <NavExpandableGroup key={params.groupId} {...params} />)
+                                  }
+                                  </NavList>
+                                </Nav>
+                              )}
+                            />
+                          )}
+                        >
+                        {
+                          //
+                          // Extract a flattened array of all route params from the provided route groups
+                          // and use it to create the route components.
+                          //
+                          // [{ routes }, { routes }] -> [route, route, route] -> (<Route/><Route/><Route/>)
+                          //
+                          routeGroups
+                            .reduce((allRoutes, { routes }) => allRoutes.concat(routes), [])
+                            .map(({ component: Component, path }) => (
+                              <Route key={path} path={path} render={params => <Component {...params } />} />
+                            ))
+                        }
+                        </Page>
+                      </Fragment>
+                    )} />
                   </Switch>
                 </ConfigContext.Provider>
-              </Fragment>
+              ) : (
+                <Switch>
+                  <Route path="/login" render={() => <Login logo={logo} loginInfo={loginInfo} />} />
+                  <Redirect to="/login" />
+                </Switch>
+              )
             )}
           </I18n>
         </I18nProvider>
