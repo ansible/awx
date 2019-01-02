@@ -23,7 +23,7 @@ describe('<Login />', () => {
     usernameInput = loginWrapper.find('input#pf-login-username-id');
     passwordInput = loginWrapper.find('input#pf-login-password-id');
     submitButton = loginWrapper.find('Button[type="submit"]');
-    loginHeaderLogo = loginWrapper.find('LoginHeaderBrand Brand');
+    loginHeaderLogo = loginPage.find('img');
   };
 
   beforeEach(() => {
