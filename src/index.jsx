@@ -1,7 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
 import {
-  HashRouter as Router,
+  HashRouter,
+  Redirect,
+  Route,
   Switch,
 } from 'react-router-dom';
 import {
@@ -59,8 +61,23 @@ export async function main () {
   const { data } = await api.getRoot();
   const { custom_logo, custom_login_info } = data;
 
+  const loginRoutes = (
+    <Switch>
+      <Route
+        path="/login"
+        render={() => (
+          <Login
+            logo={custom_logo}
+            loginInfo={custom_login_info}
+          />
+        )}
+      />
+      <Redirect to="/login" />
+    </Switch>
+  );
+
   render(
-    <Router>
+    <HashRouter>
       <I18nProvider
         language={languageWithoutRegionCode}
         catalogs={catalogs}
@@ -68,158 +85,166 @@ export async function main () {
         <I18n>
           {({ i18n }) => (
             <Background>
-              <App
-                logo={custom_logo}
-                loginInfo={custom_login_info}
-                navLabel={i18n._(t`Primary Navigation`)}
-                routeGroups={[
-                  {
-                    title: i18n._(t`Views`),
-                    groupId: 'views_group',
-                    routes: [
-                      {
-                        title: i18n._(t`Dashboard`),
-                        path: '/home',
-                        component: Dashboard
-                      },
-                      {
-                        title: i18n._(t`Jobs`),
-                        path: '/jobs',
-                        component: Jobs
-                      },
-                      {
-                        title: i18n._(t`Schedules`),
-                        path: '/schedules',
-                        component: Schedules
-                      },
-                      {
-                        title: i18n._(t`Portal Mode`),
-                        path: '/portal',
-                        component: Portal
-                      },
-                    ],
-                  },
-                  {
-                    title: i18n._(t`Resources`),
-                    groupId: 'resources_group',
-                    routes: [
-                      {
-                        title: i18n._(t`Templates`),
-                        path: '/templates',
-                        component: Templates
-                      },
-                      {
-                        title: i18n._(t`Credentials`),
-                        path: '/credentials',
-                        component: Credentials
-                      },
-                      {
-                        title: i18n._(t`Projects`),
-                        path: '/projects',
-                        component: Projects
-                      },
-                      {
-                        title: i18n._(t`Inventories`),
-                        path: '/inventories',
-                        component: Inventories
-                      },
-                      {
-                        title: i18n._(t`Inventory Scripts`),
-                        path: '/inventory_scripts',
-                        component: InventoryScripts
-                      },
-                    ],
-                  },
-                  {
-                    title: i18n._(t`Access`),
-                    groupId: 'access_group',
-                    routes: [
-                      {
-                        title: i18n._(t`Organizations`),
-                        path: '/organizations',
-                        component: Organizations
-                      },
-                      {
-                        title: i18n._(t`Users`),
-                        path: '/users',
-                        component: Users
-                      },
-                      {
-                        title: i18n._(t`Teams`),
-                        path: '/teams',
-                        component: Teams
-                      },
-                    ],
-                  },
-                  {
-                    title: i18n._(t`Administration`),
-                    groupId: 'administration_group',
-                    routes: [
-                      {
-                        title: i18n._(t`Credential Types`),
-                        path: '/credential_types',
-                        component: CredentialTypes
-                      },
-                      {
-                        title: i18n._(t`Notifications`),
-                        path: '/notification_templates',
-                        component: NotificationTemplates
-                      },
-                      {
-                        title: i18n._(t`Management Jobs`),
-                        path: '/management_jobs',
-                        component: ManagementJobs
-                      },
-                      {
-                        title: i18n._(t`Instance Groups`),
-                        path: '/instance_groups',
-                        component: InstanceGroups
-                      },
-                      {
-                        title: i18n._(t`Integrations`),
-                        path: '/applications',
-                        component: Applications
-                      },
-                    ],
-                  },
-                  {
-                    title: i18n._(t`Settings`),
-                    groupId: 'settings_group',
-                    routes: [
-                      {
-                        title: i18n._(t`Authentication`),
-                        path: '/auth_settings',
-                        component: AuthSettings
-                      },
-                      {
-                        title: i18n._(t`Jobs`),
-                        path: '/jobs_settings',
-                        component: JobsSettings
-                      },
-                      {
-                        title: i18n._(t`System`),
-                        path: '/system_settings',
-                        component: SystemSettings
-                      },
-                      {
-                        title: i18n._(t`User Interface`),
-                        path: '/ui_settings',
-                        component: UISettings
-                      },
-                      {
-                        title: i18n._(t`License`),
-                        path: '/license',
-                        component: License
-                      },
-                    ],
-                  },
-                ]}
-              />
+              {!api.isAuthenticated() ? loginRoutes : (
+                <Switch>
+                  <Route path="/login" render={() => <Redirect to="/home" />} />
+                  <Route exact path="/" render={() => <Redirect to="/home" />} />
+                  <Route
+                    render={() => (
+                      <App
+                        navLabel={i18n._(t`Primary Navigation`)}
+                        routeGroups={[
+                          {
+                            title: i18n._(t`Views`),
+                            groupId: 'views_group',
+                            routes: [
+                              {
+                                title: i18n._(t`Dashboard`),
+                                path: '/home',
+                                component: Dashboard
+                              },
+                              {
+                                title: i18n._(t`Jobs`),
+                                path: '/jobs',
+                                component: Jobs
+                              },
+                              {
+                                title: i18n._(t`Schedules`),
+                                path: '/schedules',
+                                component: Schedules
+                              },
+                              {
+                                title: i18n._(t`Portal Mode`),
+                                path: '/portal',
+                                component: Portal
+                              },
+                            ],
+                          },
+                          {
+                            title: i18n._(t`Resources`),
+                            groupId: 'resources_group',
+                            routes: [
+                              {
+                                title: i18n._(t`Templates`),
+                                path: '/templates',
+                                component: Templates
+                              },
+                              {
+                                title: i18n._(t`Credentials`),
+                                path: '/credentials',
+                                component: Credentials
+                              },
+                              {
+                                title: i18n._(t`Projects`),
+                                path: '/projects',
+                                component: Projects
+                              },
+                              {
+                                title: i18n._(t`Inventories`),
+                                path: '/inventories',
+                                component: Inventories
+                              },
+                              {
+                                title: i18n._(t`Inventory Scripts`),
+                                path: '/inventory_scripts',
+                                component: InventoryScripts
+                              },
+                            ],
+                          },
+                          {
+                            title: i18n._(t`Access`),
+                            groupId: 'access_group',
+                            routes: [
+                              {
+                                title: i18n._(t`Organizations`),
+                                path: '/organizations',
+                                component: Organizations
+                              },
+                              {
+                                title: i18n._(t`Users`),
+                                path: '/users',
+                                component: Users
+                              },
+                              {
+                                title: i18n._(t`Teams`),
+                                path: '/teams',
+                                component: Teams
+                              },
+                            ],
+                          },
+                          {
+                            title: i18n._(t`Administration`),
+                            groupId: 'administration_group',
+                            routes: [
+                              {
+                                title: i18n._(t`Credential Types`),
+                                path: '/credential_types',
+                                component: CredentialTypes
+                              },
+                              {
+                                title: i18n._(t`Notifications`),
+                                path: '/notification_templates',
+                                component: NotificationTemplates
+                              },
+                              {
+                                title: i18n._(t`Management Jobs`),
+                                path: '/management_jobs',
+                                component: ManagementJobs
+                              },
+                              {
+                                title: i18n._(t`Instance Groups`),
+                                path: '/instance_groups',
+                                component: InstanceGroups
+                              },
+                              {
+                                title: i18n._(t`Integrations`),
+                                path: '/applications',
+                                component: Applications
+                              },
+                            ],
+                          },
+                          {
+                            title: i18n._(t`Settings`),
+                            groupId: 'settings_group',
+                            routes: [
+                              {
+                                title: i18n._(t`Authentication`),
+                                path: '/auth_settings',
+                                component: AuthSettings
+                              },
+                              {
+                                title: i18n._(t`Jobs`),
+                                path: '/jobs_settings',
+                                component: JobsSettings
+                              },
+                              {
+                                title: i18n._(t`System`),
+                                path: '/system_settings',
+                                component: SystemSettings
+                              },
+                              {
+                                title: i18n._(t`User Interface`),
+                                path: '/ui_settings',
+                                component: UISettings
+                              },
+                              {
+                                title: i18n._(t`License`),
+                                path: '/license',
+                                component: License
+                              },
+                            ],
+                          },
+                        ]}
+                      />
+                    )}
+                  />
+                </Switch>
+              )}
             </Background>
           )}
         </I18n>
       </I18nProvider>
-    </Router>, el);
+    </HashRouter>, el);
 };
 
 export default main();
