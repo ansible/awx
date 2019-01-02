@@ -65,8 +65,8 @@ class AtLogin extends Component {
       <I18n>
         {({ i18n }) => (
           <LoginPage
-            mainBrandImgSrc={logoSrc}
-            mainBrandImgAlt={alt || 'Ansible Tower'}
+            brandImgSrc={logoSrc}
+            brandImgAlt={alt || 'Ansible Tower'}
             loginTitle={i18n._(t`Welcome to Ansible Tower! Please Sign In.`)}
           >
             <LoginForm
