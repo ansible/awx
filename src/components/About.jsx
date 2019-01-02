@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
 import {
@@ -13,13 +14,8 @@ import brandImg from '../../images/tower-logo-white.svg';
 import logoImg from '../../images/tower-logo-login.svg';
 
 import { ConfigContext } from '../context';
-import PropTypes from 'prop-types';
+
 class About extends React.Component {
-
-  constructor(props) {
-    super(props);
-  }
-
   createSpeechBubble = (version) => {
     let text = `Tower ${version}`;
     let top = '';
@@ -42,13 +38,13 @@ class About extends React.Component {
     onAboutModalClose();
   };
 
-  render() {
+  render () {
     const { isOpen } = this.props;
     return (
       <I18n>
         {({ i18n }) => (
           <ConfigContext.Consumer>
-            {({ ansible_version, version }) =>
+            {({ ansible_version, version }) => (
               <AboutModal
                 isOpen={isOpen}
                 onClose={this.handleModalToggle}
@@ -81,7 +77,7 @@ class About extends React.Component {
                   </TextList>
                 </TextContent>
               </AboutModal>
-            }
+            )}
           </ConfigContext.Consumer>
         )}
       </I18n>
