@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import api from '../src/api';
 
-import indexToRender from '../src/index';
+import { main } from '../src/index';
 
 const custom_logo = (<div>logo</div>);
 const custom_login_info = 'custom login info';
@@ -15,7 +15,7 @@ describe('index.jsx', () => {
     api.getRoot = jest.fn().mockImplementation(() => Promise
       .resolve({ data: { custom_logo, custom_login_info } }));
 
-    await indexToRender();
+    await main();
 
     expect(ReactDOM.render).toHaveBeenCalled();
   });

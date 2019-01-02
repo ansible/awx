@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-import * as endpoints from './endpoints';
+import {
+  API_CONFIG,
+  API_LOGIN,
+  API_ROOT,
+} from './endpoints';
 
 const CSRF_COOKIE_NAME = 'csrftoken';
 const CSRF_HEADER_NAME = 'X-CSRFToken';
@@ -32,7 +36,11 @@ class APIClient {
     return authenticated;
   }
 
-  async login (username, password, redirect = endpoints.API_CONFIG) {
+  getRoot () {
+    return this.http.get(API_ROOT);
+  }
+
+  async login (username, password, redirect = API_CONFIG) {
     const un = encodeURIComponent(username);
     const pw = encodeURIComponent(password);
     const next = encodeURIComponent(redirect);
@@ -40,8 +48,8 @@ class APIClient {
     const data = `username=${un}&password=${pw}&next=${next}`;
     const headers = { 'Content-Type': LOGIN_CONTENT_TYPE };
 
-    await this.http.get(endpoints.API_LOGIN, { headers });
-    await this.http.post(endpoints.API_LOGIN, data, { headers });
+    await this.http.get(API_LOGIN, { headers });
+    await this.http.post(API_LOGIN, data, { headers });
   }
 
   get = (endpoint, params = {}) => this.http.get(endpoint, { params });
