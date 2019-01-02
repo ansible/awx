@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 const API_ROOT = '/api/';
 const API_LOGIN = `${API_ROOT}login/`;
 const API_LOGOUT = `${API_ROOT}logout/`;
@@ -7,21 +5,14 @@ const API_V2 = `${API_ROOT}v2/`;
 const API_CONFIG = `${API_V2}config/`;
 const API_ORGANIZATIONS = `${API_V2}organizations/`;
 
-const CSRF_COOKIE_NAME = 'csrftoken';
-const CSRF_HEADER_NAME = 'X-CSRFToken';
 const LOGIN_CONTENT_TYPE = 'application/x-www-form-urlencoded';
-
-const defaultHttpAdapter = axios.create({
-  xsrfCookieName: CSRF_COOKIE_NAME,
-  xsrfHeaderName: CSRF_HEADER_NAME,
-});
 
 class APIClient {
   static getCookie () {
     return document.cookie;
   }
 
-  constructor (httpAdapter = defaultHttpAdapter) {
+  constructor (httpAdapter) {
     this.http = httpAdapter;
   }
 

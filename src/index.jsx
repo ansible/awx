@@ -1,5 +1,6 @@
+import axios from 'axios';
 import React from 'react';
-import { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import {
   HashRouter,
   Redirect,
@@ -48,15 +49,28 @@ import Users from './pages/Users';
 import ja from '../build/locales/ja/messages';
 import en from '../build/locales/en/messages';
 
-const catalogs = { en, ja };
+//
+// Initialize http
+//
+
+const http = axios.create({ xsrfCookieName: 'csrftoken', xsrfHeaderName: 'X-CSRFToken' });
+
+//
 // Derive the language and region from global user agent data. Example: es-US
-// https://developer.mozilla.org/en-US/docs/Web/API/Navigator
+// see: https://developer.mozilla.org/en-US/docs/Web/API/Navigator
+//
+
 const language = (navigator.languages && navigator.languages[0])
   || navigator.language
   || navigator.userLanguage;
 const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
+const catalogs = { en, ja };
 
-export async function main (api) {
+//
+//  Function Main
+//
+
+export async function main (render, api) {
   const el = document.getElementById('app');
   // fetch additional config from server
   const { data } = await api.getRoot();
@@ -78,7 +92,7 @@ export async function main (api) {
     </Switch>
   );
 
-  render(
+  return render(
     <HashRouter>
       <I18nProvider
         language={languageWithoutRegionCode}
@@ -89,8 +103,8 @@ export async function main (api) {
             <Background>
               {!api.isAuthenticated() ? loginRoutes : (
                 <Switch>
-                  <Route path="/login" render={() => <Redirect to="/home" />} />
-                  <Route exact path="/" render={() => <Redirect to="/home" />} />
+                  <Route path="/login" render={() => (<Redirect to="/home" />)} />
+                  <Route exact path="/" render={() => (<Redirect to="/home" />)} />
                   <Route
                     render={() => (
                       <App
@@ -266,4 +280,4 @@ export async function main (api) {
     </HashRouter>, el);
 };
 
-export default main(new APIClient());
+main(ReactDOM.render, new APIClient(http));

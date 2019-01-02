@@ -4,7 +4,7 @@ import { mount, shallow } from 'enzyme';
 import { I18nProvider } from '@lingui/react';
 import { asyncFlush } from '../../jest.setup';
 import AtLogin from '../../src/pages/Login';
-import api from '../../src/api';
+import APIClient from '../../src/api';
 
 describe('<Login />', () => {
   let loginWrapper;
@@ -15,6 +15,8 @@ describe('<Login />', () => {
   let passwordInput;
   let submitButton;
   let loginHeaderLogo;
+
+  const api = new APIClient({});
 
   const findChildren = () => {
     atLogin = loginWrapper.find('AtLogin');
@@ -30,7 +32,7 @@ describe('<Login />', () => {
     loginWrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <AtLogin />
+          <AtLogin api={api} />
         </I18nProvider>
       </MemoryRouter>
     );
@@ -59,7 +61,7 @@ describe('<Login />', () => {
     loginWrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <AtLogin logo="images/foo.jpg" alt="Foo Application" />
+          <AtLogin api={api} logo="images/foo.jpg" alt="Foo Application" />
         </I18nProvider>
       </MemoryRouter>
     );
@@ -73,7 +75,7 @@ describe('<Login />', () => {
     loginWrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <AtLogin />
+          <AtLogin api={api} />
         </I18nProvider>
       </MemoryRouter>
     );
@@ -166,7 +168,7 @@ describe('<Login />', () => {
   test('render Redirect to / when already authenticated', () => {
     api.isAuthenticated = jest.fn();
     api.isAuthenticated.mockReturnValue(true);
-    loginWrapper = shallow(<AtLogin />);
+    loginWrapper = shallow(<AtLogin api={api} />);
     const redirectElem = loginWrapper.find('Redirect');
     expect(redirectElem.length).toBe(1);
     expect(redirectElem.props().to).toBe('/');

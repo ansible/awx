@@ -4,7 +4,7 @@ import { HashRouter as Router } from 'react-router-dom';
 import { shallow, mount } from 'enzyme';
 import App from '../src/App';
 import api from '../src/api';
-import { API_LOGOUT, API_CONFIG } from '../src/endpoints';
+import { API_LOGOUT } from '../src/endpoints';
 
 import Dashboard from '../src/pages/Dashboard';
 import { asyncFlush } from '../jest.setup';
@@ -45,6 +45,7 @@ describe('<App />', () => {
     const appWrapper = shallow(<App />);
     appWrapper.instance().onDevLogout();
     appWrapper.setState({ activeGroup: 'foo', activeItem: 'bar' });
+    expect(api.get).toHaveBeenCalledTimes(1);
     expect(api.get).toHaveBeenCalledWith(API_LOGOUT);
     await asyncFlush();
     expect(appWrapper.state().activeItem).toBe(DEFAULT_ACTIVE_ITEM);
