@@ -38,7 +38,16 @@ class App extends Component {
       config: {},
       error: false,
     };
+
+    this.onLogout = this.onLogout.bind(this);
   };
+
+  async onLogout () {
+    const { api } = this.props;
+
+    await api.logout();
+    window.location.replace('/#/login')
+  }
 
   onNavToggle = () => {
     this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));

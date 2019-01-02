@@ -17,9 +17,6 @@ import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
 import Pagination from '../../../components/Pagination';
 
-import api from '../../../api';
-import { API_ORGANIZATIONS } from '../../../endpoints';
-
 import {
   encodeQueryString,
   parseQueryString,
@@ -132,6 +129,7 @@ class Organizations extends Component {
   }
 
   async fetchOrganizations (queryParams) {
+    const { api } = this.props;
     const { page, page_size, order_by } = queryParams;
 
     let sortOrder = 'ascending';
@@ -145,7 +143,7 @@ class Organizations extends Component {
     this.setState({ error: false, loading: true });
 
     try {
-      const { data } = await api.get(API_ORGANIZATIONS, queryParams);
+      const { data } = await api.getOrganizations(queryParams);
       const { count, results } = data;
 
       const pageCount = Math.ceil(count / page_size);

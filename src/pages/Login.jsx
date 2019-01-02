@@ -8,7 +8,6 @@ import {
 } from '@patternfly/react-core';
 
 import towerLogo from '../../images/tower-logo-header.svg';
-import api from '../api';
 
 class AtLogin extends Component {
   constructor (props) {
@@ -34,6 +33,7 @@ class AtLogin extends Component {
 
   handleSubmit = async event => {
     const { username, password, loading } = this.state;
+    const { api } = this.props;
 
     event.preventDefault();
 
@@ -54,7 +54,7 @@ class AtLogin extends Component {
 
   render () {
     const { username, password, isValidPassword } = this.state;
-    const { logo, alt } = this.props;
+    const { api, alt, logo } = this.props;
     const logoSrc = logo ? `data:image/jpeg;${logo}` : towerLogo;
 
     if (api.isAuthenticated()) {

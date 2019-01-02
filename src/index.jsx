@@ -18,7 +18,8 @@ import './app.scss';
 import './components/Pagination/styles.scss';
 import './components/DataListToolbar/styles.scss';
 
-import api from './api';
+import APIClient from './api';
+
 import App from './App';
 import Background from './components/Background';
 import Applications from './pages/Applications';
@@ -55,7 +56,7 @@ const language = (navigator.languages && navigator.languages[0])
   || navigator.userLanguage;
 const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
-export async function main () {
+export async function main (api) {
   const el = document.getElementById('app');
   // fetch additional config from server
   const { data } = await api.getRoot();
@@ -67,6 +68,7 @@ export async function main () {
         path="/login"
         render={() => (
           <Login
+            api={api}
             logo={custom_logo}
             loginInfo={custom_login_info}
           />
@@ -92,6 +94,7 @@ export async function main () {
                   <Route
                     render={() => (
                       <App
+                        api={api}
                         navLabel={i18n._(t`Primary Navigation`)}
                         routeGroups={[
                           {
@@ -244,6 +247,7 @@ export async function main () {
                                 path={path}
                                 render={({ match }) => (
                                   <PageComponent
+                                    api={api}
                                     match={match}
                                   />
                                 )}
@@ -262,4 +266,4 @@ export async function main () {
     </HashRouter>, el);
 };
 
-export default main();
+export default main(new APIClient());

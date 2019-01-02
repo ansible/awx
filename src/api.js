@@ -1,43 +1,41 @@
 import axios from 'axios';
 
-import {
-  API_CONFIG,
-  API_LOGIN,
-  API_ROOT,
-} from './endpoints';
+const API_ROOT = '/api/';
+const API_LOGIN = `${API_ROOT}login/`;
+const API_LOGOUT = `${API_ROOT}logout/`;
+const API_V2 = `${API_ROOT}v2/`;
+const API_CONFIG = `${API_V2}config/`;
+const API_ORGANIZATIONS = `${API_V2}organizations/`;
 
 const CSRF_COOKIE_NAME = 'csrftoken';
 const CSRF_HEADER_NAME = 'X-CSRFToken';
-
 const LOGIN_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 
-class APIClient {
-  constructor () {
-    this.http = axios.create({
-      xsrfCookieName: CSRF_COOKIE_NAME,
-      xsrfHeaderName: CSRF_HEADER_NAME,
-    });
-  }
+const defaultHttpAdapter = axios.create({
+  xsrfCookieName: CSRF_COOKIE_NAME,
+  xsrfHeaderName: CSRF_HEADER_NAME,
+});
 
-  /* eslint class-methods-use-this: ["error", { "exceptMethods": ["getCookie"] }] */
-  getCookie () {
+class APIClient {
+  static getCookie () {
     return document.cookie;
   }
 
-  isAuthenticated () {
-    let authenticated = false;
+  constructor (httpAdapter = defaultHttpAdapter) {
+    this.http = httpAdapter;
+  }
 
-    const parsed = (`; ${this.getCookie()}`).split('; userLoggedIn=');
+  isAuthenticated () {
+    const cookie = this.constructor.getCookie();
+    const parsed = (`; ${cookie}`).split('; userLoggedIn=');
+
+    let authenticated = false;
 
     if (parsed.length === 2) {
       authenticated = parsed.pop().split(';').shift() === 'true';
     }
 
     return authenticated;
-  }
-
-  getRoot () {
-    return this.http.get(API_ROOT);
   }
 
   async login (username, password, redirect = API_CONFIG) {
@@ -49,12 +47,36 @@ class APIClient {
     const headers = { 'Content-Type': LOGIN_CONTENT_TYPE };
 
     await this.http.get(API_LOGIN, { headers });
-    await this.http.post(API_LOGIN, data, { headers });
+    const response = await this.http.post(API_LOGIN, data, { headers });
+
+    return response;
   }
 
-  get = (endpoint, params = {}) => this.http.get(endpoint, { params });
+  logout () {
+    return this.http.get(API_LOGOUT);
+  }
 
-  post = (endpoint, data) => this.http.post(endpoint, data);
+  getRoot () {
+    return this.http.get(API_ROOT);
+  }
+
+  getConfig () {
+    return this.http.get(API_CONFIG);
+  }
+
+  getOrganizations (params = {}) {
+    return this.http.get(API_ORGANIZATIONS, { params });
+  }
+
+  createOrganization (data) {
+    return this.http.post(API_ORGANIZATIONS, data);
+  }
+
+  getOrganizationDetails (id) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/`;
+
+    return this.http.get(endpoint);
+  }
 }
 
-export default new APIClient();
+export default APIClient;
