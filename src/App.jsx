@@ -9,8 +9,6 @@ import {
   Route,
 } from 'react-router-dom';
 import {
-  BackgroundImage,
-  BackgroundImageSrc,
   Nav,
   NavList,
   Page,
@@ -30,6 +28,7 @@ import { API_LOGOUT, API_CONFIG } from './endpoints';
 import ja from '../build/locales/ja/messages';
 import en from '../build/locales/en/messages';
 import Login from './pages/Login';
+import Background from './components/Background';
 import HelpDropdown from './components/HelpDropdown';
 import LogoutButton from './components/LogoutButton';
 import TowerLogo from './components/TowerLogo';
@@ -43,18 +42,6 @@ const language = (navigator.languages && navigator.languages[0])
   || navigator.userLanguage;
 const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
-// define background src image config
-const backgroundConfig = {
-  [BackgroundImageSrc.lg]: '/assets/images/pfbg_1200.jpg',
-  [BackgroundImageSrc.md]: '/assets/images/pfbg_992.jpg',
-  [BackgroundImageSrc.md2x]: '/assets/images/pfbg_992@2x.jpg',
-  [BackgroundImageSrc.sm]: '/assets/images/pfbg_768.jpg',
-  [BackgroundImageSrc.sm2x]: '/assets/images/pfbg_768@2x.jpg',
-  [BackgroundImageSrc.xl]: '/assets/images/pfbg_2000.jpg',
-  [BackgroundImageSrc.xs]: '/assets/images/pfbg_576.jpg',
-  [BackgroundImageSrc.xs2x]: '/assets/images/pfbg_576@2x.jpg',
-  [BackgroundImageSrc.filter]: '/assets/images/background-filter.svg'
-};
 
 class App extends React.Component {
   constructor(props) {
@@ -113,8 +100,7 @@ class App extends React.Component {
                     <Route path="/login" render={() => <Redirect to='/home' />} />
                     <Route exact path="/" render={() => <Redirect to='/home' />} />
                     <Route render={() => (
-                      <Fragment>
-                        <BackgroundImage src={backgroundConfig} />
+                      <Background>
                         <Page
                           usecondensed="True"
                           header={(
@@ -171,7 +157,7 @@ class App extends React.Component {
                             ))
                         }
                         </Page>
-                      </Fragment>
+                      </Background>
                     )} />
                   </Switch>
                 </ConfigContext.Provider>
