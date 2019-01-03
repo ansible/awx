@@ -27,6 +27,8 @@ class OrganizationView extends Component {
       loading: false,
       mounted: false
     };
+
+    this.fetchOrganization = this.fetchOrganization.bind(this);
   }
 
   componentDidMount () {
