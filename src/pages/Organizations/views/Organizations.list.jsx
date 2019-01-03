@@ -53,6 +53,15 @@ class Organizations extends Component {
       results: [],
       selected: [],
     };
+
+    this.onSearch = this.onSearch.bind(this);
+    this.getQueryParams = this.getQueryParams.bind(this);
+    this.onSort = this.onSort.bind(this);
+    this.onSetPage = this.onSetPage.bind(this);
+    this.onSelectAll = this.onSelectAll.bind(this);
+    this.onSelect = this.onSelect.bind(this);
+    this.updateUrl = this.updateUrl.bind(this);
+    this.fetchOrganizations = this.fetchOrganizations.bind(this);
   }
 
   componentDidMount () {
@@ -75,7 +84,7 @@ class Organizations extends Component {
     return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
-  onSort = (sortedColumnKey, sortOrder) => {
+  onSort(sortedColumnKey, sortOrder) {
     const { page_size } = this.state;
 
     let order_by = sortedColumnKey;
@@ -87,26 +96,26 @@ class Organizations extends Component {
     const queryParams = this.getQueryParams({ order_by, page_size });
 
     this.fetchOrganizations(queryParams);
-  };
+  }
 
-  onSetPage = (pageNumber, pageSize) => {
+  onSetPage (pageNumber, pageSize) {
     const page = parseInt(pageNumber, 10);
     const page_size = parseInt(pageSize, 10);
 
     const queryParams = this.getQueryParams({ page, page_size });
 
     this.fetchOrganizations(queryParams);
-  };
+  }
 
-  onSelectAll = isSelected => {
+  onSelectAll (isSelected) {
     const { results } = this.state;
 
     const selected = isSelected ? results.map(o => o.id) : [];
 
     this.setState({ selected });
-  };
+  }
 
-  onSelect = id => {
+  onSelect (id) {
     const { selected } = this.state;
 
     const isSelected = selected.includes(id);
@@ -116,7 +125,7 @@ class Organizations extends Component {
     } else {
       this.setState({ selected: selected.concat(id) });
     }
-  };
+  }
 
   updateUrl (queryParams) {
     const { history, location } = this.props;
