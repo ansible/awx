@@ -73,8 +73,7 @@ const catalogs = { en, ja };
 export async function main (render, api) {
   const el = document.getElementById('app');
   // fetch additional config from server
-  const { data } = await api.getRoot();
-  const { custom_logo, custom_login_info } = data;
+  const { data: { custom_logo, custom_login_info } } = await api.getRoot();
 
   const loginRoutes = (
     <Switch>
@@ -252,7 +251,7 @@ export async function main (render, api) {
                             ],
                           },
                         ]}
-                        render={({ routeGroups }) => (
+                        render={({ routeGroups, config }) => (
                           routeGroups
                             .reduce((allRoutes, { routes }) => allRoutes.concat(routes), [])
                             .map(({ component: PageComponent, path }) => (
@@ -263,6 +262,7 @@ export async function main (render, api) {
                                   <PageComponent
                                     api={api}
                                     match={match}
+                                    {...config}
                                   />
                                 )}
                               />

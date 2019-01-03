@@ -24,9 +24,11 @@ class App extends Component {
 
     this.state = {
       ansible_version: null,
-      version: null,
+      custom_virtualenvs: null,
       isAboutModalOpen: false,
       isNavOpen,
+      version: null,
+
     };
 
     this.fetchConfig = this.fetchConfig.bind(this);
@@ -41,22 +43,22 @@ class App extends Component {
     this.fetchConfig();
   }
 
+  async fetchConfig () {
+    const { api } = this.props;
+
+    try {
+      const { data: { ansible_version, custom_virtualenvs, version } } = await api.getConfig();
+      this.setState({ ansible_version, custom_virtualenvs, version });
+    } catch (err) {
+      this.setState({ ansible_version: null, custom_virtualenvs: null, version: null });
+    }
+  }
+
   async onLogout () {
     const { api } = this.props;
 
     await api.logout();
     window.location.replace('/#/login')
-  }
-
-  async fetchConfig () {
-    const { api } = this.props;
-
-    try {
-      const { data: { ansible_version, version } } = await api.getConfig();
-      this.setState({ ansible_version, version });
-    } catch (err) {
-      this.setState({ ansible_version: null, version: null });
-    }
   }
 
   onAboutModalOpen () {
@@ -78,10 +80,12 @@ class App extends Component {
   render () {
     const {
       ansible_version,
+      custom_virtualenvs,
       isAboutModalOpen,
       isNavOpen,
       version,
     } = this.state;
+
     const {
       render,
       routeGroups = [],
@@ -90,6 +94,7 @@ class App extends Component {
 
     const config = {
       ansible_version,
+      custom_virtualenvs,
       version,
     };
 
@@ -134,7 +139,7 @@ class App extends Component {
           }
         >
           <ConfigContext.Provider value={config}>
-            { render ? render({ routeGroups }) : '' }
+            {render && render({ routeGroups, config })}
           </ConfigContext.Provider>
         </Page>
         <About
