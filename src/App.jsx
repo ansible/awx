@@ -141,7 +141,7 @@ class App extends Component {
           }
         >
           <ConfigContext.Provider value={config}>
-            {render && render({ routeGroups, config })}
+            {render && render({ routeGroups })}
           </ConfigContext.Provider>
         </Page>
         <About

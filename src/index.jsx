@@ -251,7 +251,7 @@ export async function main (render, api) {
                             ],
                           },
                         ]}
-                        render={({ routeGroups, config }) => (
+                        render={({ routeGroups }) => (
                           routeGroups
                             .reduce((allRoutes, { routes }) => allRoutes.concat(routes), [])
                             .map(({ component: PageComponent, path }) => (
@@ -262,7 +262,6 @@ export async function main (render, api) {
                                   <PageComponent
                                     api={api}
                                     match={match}
-                                    {...config}
                                   />
                                 )}
                               />
