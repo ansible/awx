@@ -81,13 +81,8 @@ class App extends React.Component {
     this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
   };
 
-  onLogoClick = () => {
-    this.setState({ activeGroup: 'views_group' });
-  }
-
   onDevLogout = async () => {
     await api.get(API_LOGOUT);
-    this.setState({ activeGroup: 'views_group', activeItem: 'views_group_dashboard' });
   }
 
   render () {
@@ -134,7 +129,7 @@ class App extends React.Component {
               <Page
                 header={(
                   <PageHeader
-                    logo={<TowerLogo onClick={this.onLogoClick} />}
+                    logo={<TowerLogo />}
                     toolbar={PageToolbar}
                     showNavToggle
                     onNavToggle={this.onNavToggle}

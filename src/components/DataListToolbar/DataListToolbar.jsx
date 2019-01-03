@@ -152,6 +152,7 @@ class DataListToolbar extends React.Component {
                     <ToolbarItem>
                       <div className="pf-c-input-group">
                         <Dropdown
+                          className="searchKeyDropdown"
                           onToggle={this.onSearchDropdownToggle}
                           onSelect={this.onSearchDropdownSelect}
                           direction={up}
@@ -181,7 +182,7 @@ class DataListToolbar extends React.Component {
                       </div>
                     </ToolbarItem>
                   </ToolbarGroup>
-                  <ToolbarGroup>
+                  <ToolbarGroup className="sortDropdownGroup">
                     <ToolbarItem>
                       <Dropdown
                         onToggle={this.onSortDropdownToggle}

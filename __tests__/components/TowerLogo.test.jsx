@@ -43,20 +43,6 @@ describe('<TowerLogo />', () => {
     expect(towerLogoElem.props().history.length).toBe(2);
   });
 
-  test('gracefully handles not being passed click handler', () => {
-    logoWrapper = mount(
-      <MemoryRouter>
-        <I18nProvider>
-          <TowerLogo />
-        </I18nProvider>
-      </MemoryRouter>
-    );
-    findChildren();
-    expect(towerLogoElem.props().history.length).toBe(1);
-    logoWrapper.simulate('click');
-    expect(towerLogoElem.props().history.length).toBe(1);
-  });
-
   test('handles mouse over and out state.hover changes', () => {
     const onLogoClick = jest.fn();
     logoWrapper = mount(
