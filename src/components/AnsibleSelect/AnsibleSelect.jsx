@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   FormGroup,
   Select,
@@ -11,24 +12,37 @@ class AnsibleSelect extends React.Component {
     this.onSelectChange = this.onSelectChange.bind(this);
   }
 
+  state = {
+    count: 1,
+  }
+
+  static getDerivedStateFromProps(nexProps, _) {
+    if (nexProps.data) {
+      return {
+        count: nexProps.data.length,
+      }
+    }
+    return null;
+  }
   onSelectChange(val, _) {
     this.props.selectChange(val);
   }
 
   render() {
-    const { hidden } = this.props;
-    if (hidden) {
-      return null;
-    } else {
+    const { count } = this.state;
+    if (count > 1) {
       return (
         <FormGroup label={this.props.labelName} fieldId="ansible-select">
           <Select value={this.props.selected} onChange={this.onSelectChange} aria-label="Select Input">
-            {this.props.data.map((env, index) => (
-              <SelectOption isDisabled={env.disabled} key={index} value={env} label={env} />
+            {this.props.data.map((datum, index) => (
+              <SelectOption isDisabled={datum.disabled} key={index} value={datum} label={datum} />
             ))}
           </Select>
         </FormGroup>
-      );
+      )
+    }
+    else {
+      return null;
     }
   }
 }
