@@ -111,7 +111,7 @@ export async function main (render, api) {
                         navLabel={i18n._(t`Primary Navigation`)}
                         routeGroups={[
                           {
-                            title: i18n._(t`Views`),
+                            groupTitle: i18n._(t`Views`),
                             groupId: 'views_group',
                             routes: [
                               {
@@ -137,7 +137,7 @@ export async function main (render, api) {
                             ],
                           },
                           {
-                            title: i18n._(t`Resources`),
+                            groupTitle: i18n._(t`Resources`),
                             groupId: 'resources_group',
                             routes: [
                               {
@@ -168,7 +168,7 @@ export async function main (render, api) {
                             ],
                           },
                           {
-                            title: i18n._(t`Access`),
+                            groupTitle: i18n._(t`Access`),
                             groupId: 'access_group',
                             routes: [
                               {
@@ -189,7 +189,7 @@ export async function main (render, api) {
                             ],
                           },
                           {
-                            title: i18n._(t`Administration`),
+                            groupTitle: i18n._(t`Administration`),
                             groupId: 'administration_group',
                             routes: [
                               {
@@ -220,7 +220,7 @@ export async function main (render, api) {
                             ],
                           },
                           {
-                            title: i18n._(t`Settings`),
+                            groupTitle: i18n._(t`Settings`),
                             groupId: 'settings_group',
                             routes: [
                               {

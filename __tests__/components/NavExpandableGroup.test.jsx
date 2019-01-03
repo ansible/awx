@@ -12,7 +12,7 @@ describe('NavExpandableGroup', () => {
         <Nav aria-label="Test Navigation">
           <NavExpandableGroup
             groupId="test"
-            title="Test"
+            groupTitle="Test"
             routes={[
               { path: '/foo', title: 'Foo' },
               { path: '/bar', title: 'Bar' },
@@ -45,7 +45,7 @@ describe('NavExpandableGroup', () => {
             <Nav aria-label="Test Navigation">
               <NavExpandableGroup
                 groupId="test"
-                title="Test"
+                groupTitle="Test"
                 routes={[
                   { path: '/foo', title: 'Foo' },
                   { path: '/bar', title: 'Bar' },

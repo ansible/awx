@@ -17,7 +17,7 @@ describe('<App />', () => {
           <App
             routeGroups={[
               {
-                title: 'Group One',
+                groupTitle: 'Group One',
                 groupId: 'group_one',
                 routes: [
                   { title: 'Foo', path: '/foo' },
@@ -25,7 +25,7 @@ describe('<App />', () => {
                 ],
               },
               {
-                title: 'Group Two',
+                groupTitle: 'Group Two',
                 groupId: 'group_two',
                 routes: [
                   { title: 'Fiz', path: '/fiz' },
@@ -77,19 +77,13 @@ describe('<App />', () => {
     expect(appWrapper.state().activeGroup).toBe(DEFAULT_ACTIVE_GROUP);
   });
 
-  test('logout button click triggers expected callback', async (done) => {
+  test('onLogout makes expected call to api client', async (done) => {
     const logout = jest.fn(() => Promise.resolve());
     const api = { logout };
 
-    const appWrapper = mount(
-      <HashRouter>
-        <I18nProvider>
-          <App api={api} />
-        </I18nProvider>
-      </HashRouter>
-    );
+    const appWrapper = shallow(<App api={api} />);
 
-    appWrapper.find('button[id="button-logout"]').simulate('click');
+    appWrapper.instance().onLogout();
     await asyncFlush();
     expect(api.logout).toHaveBeenCalledTimes(1);
 
@@ -106,6 +100,6 @@ describe('<App />', () => {
         </I18nProvider>
       </HashRouter>
     );
-    expect(api.get).toHaveBeenCalledTimes(1);
+    expect(getConfig).toHaveBeenCalledTimes(1);
   });
 });

@@ -25,7 +25,7 @@ class NavExpandableGroup extends Component {
   };
 
   render () {
-    const { routes, groupId, staticContext, ...rest } = this.props;
+    const { groupId, groupTitle, routes } = this.props;
     const isActive = this.isActiveGroup();
 
     return (
@@ -33,7 +33,7 @@ class NavExpandableGroup extends Component {
         isActive={isActive}
         isExpanded={isActive}
         groupId={groupId}
-        {...rest}
+        title={groupTitle}
       >
         {routes.map(({ path, title }) => (
           <NavItem

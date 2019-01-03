@@ -1,5 +1,4 @@
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { Trans } from '@lingui/macro';
 import {
@@ -18,10 +17,8 @@ import {
   CardBody,
 } from '@patternfly/react-core';
 
-import { ConfigContext } from '../../../context';
-import { API_ORGANIZATIONS } from '../../../endpoints';
-import api from '../../../api';
-import AnsibleSelect from '../../../components/AnsibleSelect'
+import AnsibleSelect from '../../../components/AnsibleSelect';
+
 const { light } = PageSectionVariants;
 
 class OrganizationAdd extends React.Component {
@@ -40,6 +37,8 @@ class OrganizationAdd extends React.Component {
     description: '',
     instanceGroups: '',
     custom_virtualenv: '',
+    custom_virtualenvs: [],
+    hideAnsibleSelect: true,
     error:'',
   };
 
@@ -61,7 +60,8 @@ class OrganizationAdd extends React.Component {
 
   async onSubmit() {
     const data = Object.assign({}, { ...this.state });
-    await api.post(API_ORGANIZATIONS, data);
+    await api.createOrganization(data);
+
     this.resetForm();
   }
 
@@ -69,10 +69,22 @@ class OrganizationAdd extends React.Component {
     this.props.history.push('/organizations');
   }
 
+  async componentDidMount() {
+    try {
+      const { data } = await api.getConfig();
+      this.setState({ custom_virtualenvs: [...data.custom_virtualenvs] });
+      if (this.state.custom_virtualenvs.length > 1) {
+        // Show dropdown if we have more than one ansible environment
+        this.setState({ hideAnsibleSelect: !this.state.hideAnsibleSelect });
+      }
+    } catch (error) {
+      this.setState({ error })
+    }
+  }
+
   render() {
     const { name } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
-
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
@@ -116,16 +128,13 @@ class OrganizationAdd extends React.Component {
                       onChange={this.handleChange}
                     />
                   </FormGroup>
-                  <ConfigContext.Consumer>
-                    {({ custom_virtualenvs }) =>
-                      <AnsibleSelect
-                        labelName="Ansible Environment"
-                        selected={this.state.custom_virtualenv}
-                        selectChange={this.onSelectChange}
-                        data={custom_virtualenvs}
-                      />
-                    }
-                  </ConfigContext.Consumer>
+                  <AnsibleSelect
+                    labelName="Ansible Environment"
+                    selected={this.state.custom_virtualenv}
+                    selectChange={this.onSelectChange}
+                    data={this.state.custom_virtualenvs}
+                    hidden={this.state.hideAnsibleSelect}
+                  />
                 </Gallery>
                 <ActionGroup className="at-align-right">
                   <Toolbar>
@@ -145,9 +154,5 @@ class OrganizationAdd extends React.Component {
     );
   }
 }
-
-OrganizationAdd.contextTypes = {
-  custom_virtualenvs: PropTypes.array,
-};
 
 export default withRouter(OrganizationAdd);

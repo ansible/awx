@@ -126,10 +126,12 @@ class App extends Component {
               nav={(
                 <Nav aria-label={navLabel}>
                   <NavList>
-                    {routeGroups.map(params => (
+                    {routeGroups.map(({ groupId, groupTitle, routes }) => (
                       <NavExpandableGroup
-                        key={params.groupId}
-                        {...params}
+                        key={groupId}
+                        groupId={groupId}
+                        groupTitle={groupTitle}
+                        routes={routes}
                       />
                     ))}
                   </NavList>
