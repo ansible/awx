@@ -1,29 +1,18 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { global_breakpoint_md } from '@patternfly/react-tokens';
-import {
-  Redirect,
-  Switch,
-  Route,
-} from 'react-router-dom';
 import {
   Nav,
   NavList,
   Page,
   PageHeader,
   PageSidebar,
-  Toolbar,
-  ToolbarGroup,
-  ToolbarItem
 } from '@patternfly/react-core';
 
-import api from './api';
-import { API_LOGOUT, API_CONFIG } from './endpoints';
-import { ConfigContext } from './context';
-
-import HelpDropdown from './components/HelpDropdown';
-import LogoutButton from './components/LogoutButton';
-import TowerLogo from './components/TowerLogo';
+import About from './components/About';
 import NavExpandableGroup from './components/NavExpandableGroup';
+import TowerLogo from './components/TowerLogo';
+import PageHeaderToolbar from './components/PageHeaderToolbar';
+import { ConfigContext } from './context';
 
 class App extends Component {
   constructor (props) {
@@ -34,13 +23,23 @@ class App extends Component {
       && window.innerWidth >= parseInt(global_breakpoint_md.value, 10);
 
     this.state = {
+      ansible_version: null,
+      version: null,
+      isAboutModalOpen: false,
       isNavOpen,
-      config: {},
-      error: false,
     };
 
+    this.fetchConfig = this.fetchConfig.bind(this);
     this.onLogout = this.onLogout.bind(this);
+    this.onAboutModalClose = this.onAboutModalClose.bind(this);
+    this.onAboutModalOpen = this.onAboutModalOpen.bind(this);
+    this.onLogoClick = this.onLogoClick.bind(this);
+    this.onNavToggle = this.onNavToggle.bind(this);
   };
+
+  componentDidMount () {
+    this.fetchConfig();
+  }
 
   async onLogout () {
     const { api } = this.props;
@@ -49,92 +48,102 @@ class App extends Component {
     window.location.replace('/#/login')
   }
 
-  onNavToggle = () => {
-    this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
-  };
+  async fetchConfig () {
+    const { api } = this.props;
 
-  onLogoClick = () => {
-    this.setState({
-      activeGroup: 'views_group'
-    });
-  }
-
-  onDevLogout = async () => {
-    await api.get(API_LOGOUT);
-
-    this.setState({
-      activeGroup: 'views_group',
-      activeItem: 'views_group_dashboard',
-    });
-
-    window.location.replace('/#/login');
-  };
-
-  async componentDidMount() {
-    // Grab our config data from the API and store in state
     try {
-      const { data } = await api.get(API_CONFIG);
-      this.setState({ config: data });
-    } catch (error) {
-      this.setState({ error });
+      const { data: { ansible_version, version } } = await api.getConfig();
+      this.setState({ ansible_version, version });
+    } catch (err) {
+      this.setState({ ansible_version: null, version: null });
     }
   }
 
+  onAboutModalOpen () {
+    this.setState({ isAboutModalOpen: true });
+  }
+
+  onAboutModalClose () {
+    this.setState({ isAboutModalOpen: false });
+  }
+
+  onNavToggle () {
+    this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
+  }
+
+  onLogoClick () {
+    this.setState({ activeGroup: 'views_group' });
+  }
+
   render () {
-    const { config, isNavOpen } = this.state;
+    const {
+      ansible_version,
+      isAboutModalOpen,
+      isNavOpen,
+      version,
+    } = this.state;
     const {
       render,
       routeGroups = [],
       navLabel = '',
     } = this.props;
 
+    const config = {
+      ansible_version,
+      version,
+    };
+
     return (
-      <ConfigContext.Provider value={config}>
+      <Fragment>
         <Page
           usecondensed="True"
           header={(
             <PageHeader
               showNavToggle
-              onNavToggle={() => this.onNavToggle()}
-              logo={(
+              onNavToggle={this.onNavToggle}
+              logo={
                 <TowerLogo
                   onClick={this.onLogoClick}
                 />
-              )}
-              toolbar={(
-                <Toolbar>
-                  <ToolbarGroup>
-                    <ToolbarItem>
-                      <HelpDropdown />
-                    </ToolbarItem>
-                    <ToolbarItem>
-                      <LogoutButton
-                        onDevLogout={this.onLogout}
-                      />
-                    </ToolbarItem>
-                  </ToolbarGroup>
-                </Toolbar>
-              )}
+              }
+              toolbar={
+                <PageHeaderToolbar
+                  isAboutDisabled={!version}
+                  onAboutClick={this.onAboutModalOpen}
+                  onLogoutClick={this.onLogout}
+                />
+              }
             />
           )}
-          sidebar={(
+          sidebar={
             <PageSidebar
               isNavOpen={isNavOpen}
               nav={(
                 <Nav aria-label={navLabel}>
                   <NavList>
                     {routeGroups.map(params => (
-                      <NavExpandableGroup key={params.groupId} {...params} />
+                      <NavExpandableGroup
+                        key={params.groupId}
+                        {...params}
+                      />
                     ))}
                   </NavList>
                 </Nav>
               )}
             />
-          )}
+          }
         >
-          { render ? render({ routeGroups }) : '' }
+          <ConfigContext.Provider value={config}>
+            { render ? render({ routeGroups }) : '' }
+          </ConfigContext.Provider>
         </Page>
-      </ConfigContext.Provider>
+        <About
+          ansible_version={ansible_version}
+          version={version}
+          isOpen={isAboutModalOpen}
+          onClose={this.onAboutModalClose}
+        />
+      </Fragment>
     );
   }
 }

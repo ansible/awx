@@ -1,61 +1,111 @@
 import React from 'react';
-import { HashRouter as Router } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
+import { I18nProvider } from '@lingui/react';
 
-import { shallow, mount } from 'enzyme';
-import App from '../src/App';
-import api from '../src/api';
-import { API_LOGOUT } from '../src/endpoints';
-
-import Dashboard from '../src/pages/Dashboard';
+import { mount, shallow } from 'enzyme';
 import { asyncFlush } from '../jest.setup';
 
-const DEFAULT_ACTIVE_GROUP = 'views_group';
-const DEFAULT_ACTIVE_ITEM = 'views_group_dashboard';
+import App from '../src/App';
 
-const routeGroups = [{
-  groupId: DEFAULT_ACTIVE_GROUP,
-  title: 'test',
-  routes: [{ path: '/home', title: 'Dashboard', component:  Dashboard }],
-}];
+const DEFAULT_ACTIVE_GROUP = 'views_group';
 
 describe('<App />', () => {
-  test('renders without crashing', () => {
-    const appWrapper = shallow(<App />);
+  test('expected content is rendered', () => {
+    const appWrapper = mount(
+      <HashRouter>
+        <I18nProvider>
+          <App
+            routeGroups={[
+              {
+                title: 'Group One',
+                groupId: 'group_one',
+                routes: [
+                  { title: 'Foo', path: '/foo' },
+                  { title: 'Bar', path: '/bar' },
+                ],
+              },
+              {
+                title: 'Group Two',
+                groupId: 'group_two',
+                routes: [
+                  { title: 'Fiz', path: '/fiz' },
+                ]
+              }
+            ]}
+            render={({ routeGroups }) => (
+              routeGroups.map(({ groupId }) => (<div key={groupId} id={groupId} />))
+            )}
+          />
+        </I18nProvider>
+      </HashRouter>
+    );
+
+    // page components
     expect(appWrapper.length).toBe(1);
+    expect(appWrapper.find('PageHeader').length).toBe(1);
+    expect(appWrapper.find('PageSidebar').length).toBe(1);
+
+    // sidebar groups and route links
+    expect(appWrapper.find('NavExpandableGroup').length).toBe(2);
+    expect(appWrapper.find('a[href="/#/foo"]').length).toBe(1);
+    expect(appWrapper.find('a[href="/#/bar"]').length).toBe(1);
+    expect(appWrapper.find('a[href="/#/fiz"]').length).toBe(1);
+
+    // inline render
+    expect(appWrapper.find('#group_one').length).toBe(1);
+    expect(appWrapper.find('#group_two').length).toBe(1);
   });
 
   test('onNavToggle sets state.isNavOpen to opposite', () => {
     const appWrapper = shallow(<App />);
-    expect(appWrapper.state().isNavOpen).toBe(true);
-    appWrapper.instance().onNavToggle();
-    expect(appWrapper.state().isNavOpen).toBe(false);
+    const { onNavToggle } = appWrapper.instance();
+
+    [true, false, true, false, true].forEach(expected => {
+      expect(appWrapper.state().isNavOpen).toBe(expected);
+      onNavToggle();
+    });
   });
 
   test('onLogoClick sets selected nav back to defaults', () => {
     const appWrapper = shallow(<App />);
+
     appWrapper.setState({ activeGroup: 'foo', activeItem: 'bar' });
     expect(appWrapper.state().activeItem).toBe('bar');
     expect(appWrapper.state().activeGroup).toBe('foo');
+
     appWrapper.instance().onLogoClick();
     expect(appWrapper.state().activeGroup).toBe(DEFAULT_ACTIVE_GROUP);
   });
 
-  test('api.logout called from logout button', async () => {
-    api.get = jest.fn().mockImplementation(() => Promise.resolve({}));
-    const appWrapper = shallow(<App />);
-    appWrapper.instance().onDevLogout();
-    appWrapper.setState({ activeGroup: 'foo', activeItem: 'bar' });
-    expect(api.get).toHaveBeenCalledTimes(1);
-    expect(api.get).toHaveBeenCalledWith(API_LOGOUT);
+  test('logout button click triggers expected callback', async (done) => {
+    const logout = jest.fn(() => Promise.resolve());
+    const api = { logout };
+
+    const appWrapper = mount(
+      <HashRouter>
+        <I18nProvider>
+          <App api={api} />
+        </I18nProvider>
+      </HashRouter>
+    );
+
+    appWrapper.find('button[id="button-logout"]').simulate('click');
     await asyncFlush();
-    expect(appWrapper.state().activeItem).toBe(DEFAULT_ACTIVE_ITEM);
-    expect(appWrapper.state().activeGroup).toBe(DEFAULT_ACTIVE_GROUP);
+    expect(api.logout).toHaveBeenCalledTimes(1);
+
+    done();
   });
 
-  test('Componenet makes REST call to API_CONFIG endpoint when mounted', () => {
-    api.get = jest.fn().mockImplementation(() => Promise.resolve({}));
-    const appWrapper = shallow(<App.WrappedComponent />);
+  test('Component makes expected call to api client when mounted', () => {
+    const getConfig = jest.fn().mockImplementation(() => Promise.resolve({}));
+    const api = { getConfig };
+    const appWrapper = mount(
+      <HashRouter>
+        <I18nProvider>
+          <App api={api} />
+        </I18nProvider>
+      </HashRouter>
+    );
     expect(api.get).toHaveBeenCalledTimes(1);
-    expect(api.get).toHaveBeenCalledWith(API_CONFIG);
   });
 });
