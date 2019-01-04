@@ -18,7 +18,6 @@ import {
 } from '@patternfly/react-icons';
 
 const DOCLINK = 'https://docs.ansible.com/ansible-tower/latest/html/userguide/index.html';
-const KEY_ENTER = 13;
 
 class PageHeaderToolbar extends Component {
   constructor (props) {
@@ -27,17 +26,8 @@ class PageHeaderToolbar extends Component {
 
     this.onHelpSelect = this.onHelpSelect.bind(this);
     this.onHelpToggle = this.onHelpToggle.bind(this);
-    this.onLogoutKeyDown = this.onLogoutKeyDown.bind(this);
     this.onUserSelect = this.onUserSelect.bind(this);
     this.onUserToggle = this.onUserToggle.bind(this);
-  }
-
-  onLogoutKeyDown ({ keyCode }) {
-    const { onLogoutClick } = this.props;
-
-    if (keyCode === KEY_ENTER) {
-      onLogoutClick();
-    }
   }
 
   onHelpSelect () {
@@ -122,7 +112,6 @@ class PageHeaderToolbar extends Component {
                       key="logout"
                       component="button"
                       onClick={onLogoutClick}
-                      onKeyDown={this.onLogoutKeyDown}
                     >
                       {i18n._(t`Logout`)}
                     </DropdownItem>
