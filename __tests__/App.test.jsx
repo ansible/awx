@@ -1,65 +1,105 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { shallow, mount } from 'enzyme';
-import App from '../src/App';
-import api from '../src/api';
-import { API_LOGOUT, API_CONFIG } from '../src/endpoints';
+import { HashRouter } from 'react-router-dom';
+import { I18nProvider } from '@lingui/react';
 
-import Dashboard from '../src/pages/Dashboard';
-import Login from '../src/pages/Login';
+import { mount, shallow } from 'enzyme';
+import { asyncFlush } from '../jest.setup';
+
+import App from '../src/App';
+
+const DEFAULT_ACTIVE_GROUP = 'views_group';
 
 describe('<App />', () => {
-  test('renders without crashing', () => {
-    const appWrapper = shallow(<App />);
+  test('expected content is rendered', () => {
+    const appWrapper = mount(
+      <HashRouter>
+        <I18nProvider>
+          <App
+            routeGroups={[
+              {
+                groupTitle: 'Group One',
+                groupId: 'group_one',
+                routes: [
+                  { title: 'Foo', path: '/foo' },
+                  { title: 'Bar', path: '/bar' },
+                ],
+              },
+              {
+                groupTitle: 'Group Two',
+                groupId: 'group_two',
+                routes: [
+                  { title: 'Fiz', path: '/fiz' },
+                ]
+              }
+            ]}
+            render={({ routeGroups }) => (
+              routeGroups.map(({ groupId }) => (<div key={groupId} id={groupId} />))
+            )}
+          />
+        </I18nProvider>
+      </HashRouter>
+    );
+
+    // page components
     expect(appWrapper.length).toBe(1);
-  });
+    expect(appWrapper.find('PageHeader').length).toBe(1);
+    expect(appWrapper.find('PageSidebar').length).toBe(1);
 
-  test('renders login page when not authenticated', () => {
-    api.isAuthenticated = jest.fn();
-    api.isAuthenticated.mockReturnValue(false);
+    // sidebar groups and route links
+    expect(appWrapper.find('NavExpandableGroup').length).toBe(2);
+    expect(appWrapper.find('a[href="/#/foo"]').length).toBe(1);
+    expect(appWrapper.find('a[href="/#/bar"]').length).toBe(1);
+    expect(appWrapper.find('a[href="/#/fiz"]').length).toBe(1);
 
-    const appWrapper = mount(<MemoryRouter><App /></MemoryRouter>);
-
-    const login = appWrapper.find(Login);
-    expect(login.length).toBe(1);
-    const dashboard = appWrapper.find(Dashboard);
-    expect(dashboard.length).toBe(0);
-  });
-
-  test('renders dashboard when authenticated', () => {
-    api.isAuthenticated = jest.fn();
-    api.isAuthenticated.mockReturnValue(true);
-
-    const appWrapper = mount(<MemoryRouter><App /></MemoryRouter>);
-
-    const dashboard = appWrapper.find(Dashboard);
-    expect(dashboard.length).toBe(1);
-    const login = appWrapper.find(Login);
-    expect(login.length).toBe(0);
+    // inline render
+    expect(appWrapper.find('#group_one').length).toBe(1);
+    expect(appWrapper.find('#group_two').length).toBe(1);
   });
 
   test('onNavToggle sets state.isNavOpen to opposite', () => {
-    const appWrapper = shallow(<App.WrappedComponent />);
-    expect(appWrapper.state().isNavOpen).toBe(true);
-    appWrapper.instance().onNavToggle();
-    expect(appWrapper.state().isNavOpen).toBe(false);
+    const appWrapper = shallow(<App />);
+    const { onNavToggle } = appWrapper.instance();
+
+    [true, false, true, false, true].forEach(expected => {
+      expect(appWrapper.state().isNavOpen).toBe(expected);
+      onNavToggle();
+    });
   });
 
-  test('api.logout called from logout button', async () => {
-    const logOutButtonSelector = 'button[aria-label="Logout"]';
-    api.get = jest.fn().mockImplementation(() => Promise.resolve({}));
-    const appWrapper = mount(<MemoryRouter><App /></MemoryRouter>);
-    const logOutButton = appWrapper.find(logOutButtonSelector);
-    expect(logOutButton.length).toBe(1);
-    logOutButton.simulate('click');
+  test('onLogoClick sets selected nav back to defaults', () => {
+    const appWrapper = shallow(<App />);
+
     appWrapper.setState({ activeGroup: 'foo', activeItem: 'bar' });
-    expect(api.get).toHaveBeenCalledWith(API_LOGOUT);
+    expect(appWrapper.state().activeItem).toBe('bar');
+    expect(appWrapper.state().activeGroup).toBe('foo');
+
+    appWrapper.instance().onLogoClick();
+    expect(appWrapper.state().activeGroup).toBe(DEFAULT_ACTIVE_GROUP);
   });
 
-  test('Componenet makes REST call to API_CONFIG endpoint when mounted', () => {
-    api.get = jest.fn().mockImplementation(() => Promise.resolve({}));
-    const appWrapper = shallow(<App.WrappedComponent />);
-    expect(api.get).toHaveBeenCalledTimes(1);
-    expect(api.get).toHaveBeenCalledWith(API_CONFIG);
+  test('onLogout makes expected call to api client', async (done) => {
+    const logout = jest.fn(() => Promise.resolve());
+    const api = { logout };
+
+    const appWrapper = shallow(<App api={api} />);
+
+    appWrapper.instance().onLogout();
+    await asyncFlush();
+    expect(api.logout).toHaveBeenCalledTimes(1);
+
+    done();
+  });
+
+  test('Component makes expected call to api client when mounted', () => {
+    const getConfig = jest.fn().mockImplementation(() => Promise.resolve({}));
+    const api = { getConfig };
+    const appWrapper = mount(
+      <HashRouter>
+        <I18nProvider>
+          <App api={api} />
+        </I18nProvider>
+      </HashRouter>
+    );
+    expect(getConfig).toHaveBeenCalledTimes(1);
   });
 });

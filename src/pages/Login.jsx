@@ -8,53 +8,57 @@ import {
 } from '@patternfly/react-core';
 
 import towerLogo from '../../images/tower-logo-header.svg';
-import api from '../api';
 
-class AtLogin extends Component {
+class AWXLogin extends Component {
   constructor (props) {
     super(props);
 
     this.state = {
       username: '',
       password: '',
-      isValidPassword: true,
-      loading: false
+      isInputValid: true,
+      isLoading: false
     };
+
+    this.onChangeUsername = this.onChangeUsername.bind(this);
+    this.onChangePassword = this.onChangePassword.bind(this);
+    this.onLoginButtonClick = this.onLoginButtonClick.bind(this);
   }
 
-  componentWillUnmount () {
-    this.unmounting = true; // todo: state management
+  onChangeUsername (value) {
+    this.setState({ username: value, isInputValid: true });
   }
 
-  safeSetState = obj => !this.unmounting && this.setState(obj);
+  onChangePassword (value) {
+    this.setState({ password: value, isInputValid: true });
+  }
 
-  handleUsernameChange = value => this.safeSetState({ username: value, isValidPassword: true });
-
-  handlePasswordChange = value => this.safeSetState({ password: value, isValidPassword: true });
-
-  handleSubmit = async event => {
-    const { username, password, loading } = this.state;
+  async onLoginButtonClick (event) {
+    const { username, password, isLoading } = this.state;
+    const { api } = this.props;
 
     event.preventDefault();
 
-    if (!loading) {
-      this.safeSetState({ loading: true });
+    if (isLoading) {
+      return;
+    }
 
-      try {
-        await api.login(username, password);
-      } catch (error) {
-        if (error.response.status === 401) {
-          this.safeSetState({ isValidPassword: false });
-        }
-      } finally {
-        this.safeSetState({ loading: false });
+    this.setState({ isLoading: true });
+
+    try {
+      await api.login(username, password);
+    } catch (error) {
+      if (error.response.status === 401) {
+        this.setState({ isInputValid: false });
       }
+    } finally {
+      this.setState({ isLoading: false });
     }
   }
 
   render () {
-    const { username, password, isValidPassword } = this.state;
-    const { logo, alt } = this.props;
+    const { username, password, isInputValid } = this.state;
+    const { api, alt, loginInfo, logo } = this.props;
     const logoSrc = logo ? `data:image/jpeg;${logo}` : towerLogo;
 
     if (api.isAuthenticated()) {
@@ -65,20 +69,21 @@ class AtLogin extends Component {
       <I18n>
         {({ i18n }) => (
           <LoginPage
-            mainBrandImgSrc={logoSrc}
-            mainBrandImgAlt={alt || 'Ansible Tower'}
+            brandImgSrc={logoSrc}
+            brandImgAlt={alt || 'Ansible Tower'}
             loginTitle={i18n._(t`Welcome to Ansible Tower! Please Sign In.`)}
+            textContent={loginInfo}
           >
             <LoginForm
               usernameLabel={i18n._(t`Username`)}
-              usernameValue={username}
-              onChangeUsername={this.handleUsernameChange}
               passwordLabel={i18n._(t`Password`)}
-              passwordValue={password}
-              onChangePassword={this.handlePasswordChange}
-              isValidPassword={isValidPassword}
               passwordHelperTextInvalid={i18n._(t`Invalid username or password. Please try again.`)}
-              onLoginButtonClick={this.handleSubmit}
+              usernameValue={username}
+              passwordValue={password}
+              isValidPassword={isInputValid}
+              onChangeUsername={this.onChangeUsername}
+              onChangePassword={this.onChangePassword}
+              onLoginButtonClick={this.onLoginButtonClick}
             />
           </LoginPage>
         )}
@@ -87,4 +92,4 @@ class AtLogin extends Component {
   }
 }
 
-export default AtLogin;
+export default AWXLogin;

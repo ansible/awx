@@ -2,15 +2,12 @@ import React, { Component, Fragment } from 'react';
 import { i18nMark } from '@lingui/react';
 import {
   Switch,
-  Route
+  Route,
+  withRouter,
 } from 'react-router-dom';
-
 import OrganizationBreadcrumb from '../components/OrganizationBreadcrumb';
 import OrganizationDetail from '../components/OrganizationDetail';
 import OrganizationEdit from '../components/OrganizationEdit';
-
-import api from '../../../api';
-import { API_ORGANIZATIONS } from '../../../endpoints';
 
 class OrganizationView extends Component {
   constructor (props) {
@@ -30,6 +27,8 @@ class OrganizationView extends Component {
       loading: false,
       mounted: false
     };
+
+    this.fetchOrganization = this.fetchOrganization.bind(this);
   }
 
   componentDidMount () {
@@ -47,13 +46,15 @@ class OrganizationView extends Component {
 
   async fetchOrganization () {
     const { mounted } = this.state;
+    const { api } = this.props;
+
     if (mounted) {
       this.setState({ error: false, loading: true });
 
       const { match } = this.props;
       const { parentBreadcrumbObj, organization } = this.state;
       try {
-        const { data } = await api.get(`${API_ORGANIZATIONS}${match.params.id}/`);
+        const { data } = await api.getOrganizationDetails(match.params.id);
         if (organization === 'loading') {
           this.setState({ organization: data });
         }
@@ -118,4 +119,4 @@ class OrganizationView extends Component {
   }
 }
 
-export default OrganizationView;
+export default withRouter(OrganizationView);

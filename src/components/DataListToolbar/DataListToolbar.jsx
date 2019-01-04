@@ -43,17 +43,24 @@ class DataListToolbar extends React.Component {
       searchKey: sortedColumnKey,
       searchValue: '',
     };
+
+    this.handleSearchInputChange = this.handleSearchInputChange.bind(this);
+    this.onSortDropdownToggle = this.onSortDropdownToggle.bind(this);
+    this.onSortDropdownSelect = this.onSortDropdownSelect.bind(this);
+    this.onSearch = this.onSearch.bind(this);
+    this.onSearchDropdownToggle = this.onSearchDropdownToggle.bind(this);
+    this.onSearchDropdownSelect = this.onSearchDropdownSelect.bind(this);
   }
 
-  handleSearchInputChange = searchValue => {
+  handleSearchInputChange (searchValue) {
     this.setState({ searchValue });
-  };
+  }
 
-  onSortDropdownToggle = isSortDropdownOpen => {
+  onSortDropdownToggle (isSortDropdownOpen) {
     this.setState({ isSortDropdownOpen });
-  };
+  }
 
-  onSortDropdownSelect = ({ target }) => {
+  onSortDropdownSelect ({ target }) {
     const { columns, onSort, sortOrder } = this.props;
 
     const [{ key }] = columns.filter(({ name }) => name === target.innerText);
@@ -61,27 +68,33 @@ class DataListToolbar extends React.Component {
     this.setState({ isSortDropdownOpen: false });
 
     onSort(key, sortOrder);
-  };
+  }
 
-  onSearchDropdownToggle = isSearchDropdownOpen => {
+  onSearchDropdownToggle (isSearchDropdownOpen) {
     this.setState({ isSearchDropdownOpen });
-  };
+  }
 
-  onSearchDropdownSelect = ({ target }) => {
+  onSearchDropdownSelect ({ target }) {
     const { columns } = this.props;
 
     const targetName = target.innerText;
     const [{ key }] = columns.filter(({ name }) => name === targetName);
 
     this.setState({ isSearchDropdownOpen: false, searchKey: key });
-  };
+  }
+
+  onSearch () {
+    const { searchValue } = this.state;
+    const { onSearch } = this.props;
+
+    onSearch(searchValue);
+  }
 
   render () {
     const { up } = DropdownPosition;
     const {
       columns,
       isAllSelected,
-      onSearch,
       onSelectAll,
       onSort,
       sortedColumnKey,
@@ -175,7 +188,7 @@ class DataListToolbar extends React.Component {
                         <Button
                           variant="tertiary"
                           aria-label={i18n._(t`Search`)}
-                          onClick={() => onSearch(searchValue)}
+                          onClick={this.onSearch}
                         >
                           <i className="fas fa-search" aria-hidden="true" />
                         </Button>

@@ -12,18 +12,26 @@ class TowerLogo extends Component {
     super(props);
 
     this.state = { hover: false };
+
+    this.onClick = this.onClick.bind(this);
+    this.onHover = this.onHover.bind(this);
   }
 
-  onClick = () => {
-    const { history } = this.props;
-    history.push('/');
-  };
+  onClick () {
+    const { history, onClick: handleClick } = this.props;
 
-  onHover = () => {
+    if (!handleClick) return;
+
+    history.push('/');
+
+    handleClick();
+  }
+
+  onHover () {
     const { hover } = this.state;
 
     this.setState({ hover: !hover });
-  };
+  }
 
   render () {
     const { hover } = this.state;
