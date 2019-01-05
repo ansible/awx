@@ -407,7 +407,11 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     @property
     def cache_timeout_blocked(self):
-        # TODO: don't allow running of job template if same workflow template running
+        if WorkflowJob.objects.filter(workflow_job_template=self,
+                                      status__in=['pending', 'waiting', 'running']).count() > getattr(settings, 'SCHEDULE_MAX_JOBS', 10):
+            logger.error("Workflow Job template %s could not be started because there are more than %s other jobs from that template waiting to run" %
+                         (self.name, getattr(settings, 'SCHEDULE_MAX_JOBS', 10)))
+            return True
         return False
 
     @property
