@@ -324,7 +324,7 @@ class IsolatedManager(object):
 
             path = self.path_to('artifacts', 'stdout')
             if os.path.exists(path):
-                with open(path, 'r') as f:
+                with codecs.open(path, 'r', encoding='utf-8') as f:
                     f.seek(seek)
                     for line in f:
                         self.stdout_handle.write(line)
@@ -419,7 +419,7 @@ class IsolatedManager(object):
             env['ANSIBLE_CACHE_PLUGIN'] = 'jsonfile'
             env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = facts_path
 
-            buff = StringIO.StringIO()
+            buff = StringIO()
             timeout = max(60, 2 * settings.AWX_ISOLATED_CONNECTION_TIMEOUT)
             status, rc = IsolatedManager.run_pexpect(
                 args, cls.awx_playbook_path(), env, buff,

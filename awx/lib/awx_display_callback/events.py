@@ -54,9 +54,8 @@ class IsolatedFileWrite:
         filename = '{}-partial.json'.format(event_uuid)
         dropoff_location = os.path.join(self.private_data_dir, 'artifacts', 'job_events', filename)
         write_location = '.'.join([dropoff_location, 'tmp'])
-        partial_data = json.dumps(value)
         with os.fdopen(os.open(write_location, os.O_WRONLY | os.O_CREAT, stat.S_IRUSR | stat.S_IWUSR), 'w') as f:
-            f.write(partial_data)
+            f.write(value)
         os.rename(write_location, dropoff_location)
 
 
