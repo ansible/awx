@@ -60,21 +60,25 @@ const http = axios.create({ xsrfCookieName: 'csrftoken', xsrfHeaderName: 'X-CSRF
 // see: https://developer.mozilla.org/en-US/docs/Web/API/Navigator
 //
 
-const language = (navigator.languages && navigator.languages[0])
-  || navigator.language
-  || navigator.userLanguage;
-const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
-const catalogs = { en, ja };
+export function getLanguage (nav) {
+  const language = (nav.languages && nav.languages[0]) || nav.language || nav.userLanguage;
+  const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
+
+  return languageWithoutRegionCode;
+};
 
 //
 //  Function Main
 //
 
 export async function main (render, api) {
+  const catalogs = { en, ja };
+  const language = getLanguage(navigator);
+
   const el = document.getElementById('app');
-  // fetch additional config from server
   const { data: { custom_logo, custom_login_info } } = await api.getRoot();
 
+  const defaultRedirect = () => (<Redirect to="/home" />);
   const loginRoutes = (
     <Switch>
       <Route
@@ -94,7 +98,7 @@ export async function main (render, api) {
   return render(
     <HashRouter>
       <I18nProvider
-        language={languageWithoutRegionCode}
+        language={language}
         catalogs={catalogs}
       >
         <I18n>
@@ -102,8 +106,8 @@ export async function main (render, api) {
             <Background>
               {!api.isAuthenticated() ? loginRoutes : (
                 <Switch>
-                  <Route path="/login" render={() => (<Redirect to="/home" />)} />
-                  <Route exact path="/" render={() => (<Redirect to="/home" />)} />
+                  <Route path="/login" render={defaultRedirect} />
+                  <Route exact path="/" render={defaultRedirect} />
                   <Route
                     render={() => (
                       <App
