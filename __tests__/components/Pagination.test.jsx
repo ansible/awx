@@ -122,7 +122,6 @@ describe('<Pagination />', () => {
   test('submit a new page by typing in input works', () => {
     const textInputSelector = '.pf-l-split__item.pf-m-main .pf-c-form-control';
     const submitFormSelector = '.pf-l-split__item.pf-m-main form';
-
     const onSetPage = jest.fn();
 
     pagination = mount(
@@ -137,6 +136,7 @@ describe('<Pagination />', () => {
         />
       </I18nProvider>
     );
+
     const textInput = pagination.find(textInputSelector);
     expect(textInput.length).toBe(1);
     textInput.simulate('change');
@@ -145,7 +145,7 @@ describe('<Pagination />', () => {
     const submitForm = pagination.find(submitFormSelector);
     expect(submitForm.length).toBe(1);
     submitForm.simulate('submit');
-    pagination.setState({ value: 'invalid' });
+    pagination.find('Pagination').instance().setState({ value: 'invalid' });
     submitForm.simulate('submit');
   });
 

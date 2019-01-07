@@ -18,8 +18,7 @@ class Pagination extends Component {
   constructor (props) {
     super(props);
 
-    const { page } = this.props;
-
+    const { page } = props;
     this.state = { value: page, isOpen: false };
 
     this.onPageChange = this.onPageChange.bind(this);
@@ -70,18 +69,14 @@ class Pagination extends Component {
     const { onSetPage, page, page_size } = this.props;
     const previousPage = page - 1;
 
-    if (previousPage >= 1) {
-      onSetPage(previousPage, page_size);
-    }
+    onSetPage(previousPage, page_size);
   }
 
   onNext () {
     const { onSetPage, page, pageCount, page_size } = this.props;
     const nextPage = page + 1;
 
-    if (nextPage <= pageCount) {
-      onSetPage(nextPage, page_size);
-    }
+    onSetPage(nextPage, page_size);
   }
 
   onLast () {
@@ -143,14 +138,20 @@ class Pagination extends Component {
                   direction={up}
                   isOpen={isOpen}
                   toggle={(
-                    <DropdownToggle className="togglePageSize" onToggle={this.onTogglePageSize}>
-                      { page_size }
+                    <DropdownToggle
+                      className="togglePageSize"
+                      onToggle={this.onTogglePageSize}
+                    >
+                      {page_size}
                     </DropdownToggle>
                   )}
                 >
                   {opts.map(option => (
-                    <DropdownItem key={option} component="button">
-                      { option }
+                    <DropdownItem
+                      key={option}
+                      component="button"
+                    >
+                      {option}
                     </DropdownItem>
                   ))}
                 </Dropdown>
@@ -159,7 +160,7 @@ class Pagination extends Component {
               <LevelItem>
                 <Split gutter="md" className="pf-u-display-flex pf-u-align-items-center">
                   <SplitItem>
-                    <Trans>{ itemMin } - { itemMax } of { count }</Trans>
+                    <Trans>{itemMin} - {itemMax} of {count}</Trans>
                   </SplitItem>
                   <SplitItem>
                     <div className="pf-c-input-group">
@@ -200,7 +201,7 @@ class Pagination extends Component {
                           value={value}
                           type="text"
                           onChange={this.onPageChange}
-                        /> of { pageCount }
+                        /> of {pageCount}
                       </Trans>
                     </form>
                   </SplitItem>
