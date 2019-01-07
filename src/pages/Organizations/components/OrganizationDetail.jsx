@@ -79,7 +79,7 @@ const OrganizationDetail = ({
                     currentTab={currentTab}
                     breadcrumb={parentBreadcrumbObj}
                   >
-                  {getTabName(tab)}
+                    <Trans>{getTabName(tab)}</Trans>
                   </Tab>
                 ))}
               </Tabs>
