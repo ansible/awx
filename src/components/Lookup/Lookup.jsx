@@ -35,7 +35,7 @@ class Lookup extends React.Component {
   }
 
   onChecked(_, evt) {
-    this.props.lookupChange(evt.target.id);
+    this.props.lookupChange(evt.target.value);
   };
 
   wrapTags(tags) {
@@ -54,7 +54,7 @@ class Lookup extends React.Component {
         <span className="pf-c-input-group__text" aria-label="search" id="search" onClick={this.onLookup}><SearchIcon /></span>
         <div className="pf-c-form-control">{this.wrapTags(this.props.data)}</div>
         <Modal
-          isLarge
+          className="awx-c-modal"
           title={`Select ${this.props.lookup_header}`}
           isOpen={isModalOpen}
           onClose={this.handleModalToggle}
@@ -64,10 +64,11 @@ class Lookup extends React.Component {
               <ListItem key={i.id}>
                 <Checkbox
                   label={i.name}
-                  isChecked={i.isChecked}
+                  checked={i.isChecked}
                   onChange={this.onChecked}
                   aria-label="result checkbox"
-                  id={`${i.id}`}
+                  id={`checked-${i.id}`}
+                  value={i.id}
                 />
               </ListItem>)}
           </List>

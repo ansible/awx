@@ -19,11 +19,9 @@ import {
 } from '@patternfly/react-core';
 
 import { ConfigContext } from '../../../context';
-import api from '../../../api';
 import Lookup from '../../../components/Lookup';
 import AnsibleSelect from '../../../components/AnsibleSelect'
 const { light } = PageSectionVariants;
-
 class OrganizationAdd extends React.Component {
   constructor(props) {
     super(props);
@@ -58,10 +56,14 @@ class OrganizationAdd extends React.Component {
 
   resetForm() {
     this.setState({
-      ...this.state,
       name: '',
-      description: ''
+      description: '',
+    });
+    let reset = [];
+    this.state.results.map((result) => {
+      reset.push({ id: result.id, name: result.name, isChecked: false });
     })
+    this.setState({ results: reset });
   }
 
   handleChange(_, evt) {
@@ -71,7 +73,10 @@ class OrganizationAdd extends React.Component {
   async onSubmit() {
     const { api } = this.props;
     const data = Object.assign({}, { ...this.state });
-    await api.createOrganization(data);
+    const { data: response } = await api.createOrganization(data);
+    const url = response.related.instance_groups;
+    const selected = this.state.results.filter(group => group.isChecked);
+    await api.createInstanceGroups(url, selected);
     this.resetForm();
   }
 
