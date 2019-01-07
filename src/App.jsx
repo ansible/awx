@@ -28,7 +28,6 @@ class App extends Component {
       isAboutModalOpen: false,
       isNavOpen,
       version: null,
-
     };
 
     this.fetchConfig = this.fetchConfig.bind(this);

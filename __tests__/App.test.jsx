@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@lingui/react';
 
 import { mount, shallow } from 'enzyme';
@@ -12,7 +12,7 @@ const DEFAULT_ACTIVE_GROUP = 'views_group';
 describe('<App />', () => {
   test('expected content is rendered', () => {
     const appWrapper = mount(
-      <HashRouter>
+      <MemoryRouter>
         <I18nProvider>
           <App
             routeGroups={[
@@ -37,7 +37,7 @@ describe('<App />', () => {
             )}
           />
         </I18nProvider>
-      </HashRouter>
+      </MemoryRouter>
     );
 
     // page components
@@ -54,6 +54,48 @@ describe('<App />', () => {
     // inline render
     expect(appWrapper.find('#group_one').length).toBe(1);
     expect(appWrapper.find('#group_two').length).toBe(1);
+  });
+
+  test('opening the about modal renders prefetched config data', async (done) => {
+    const ansible_version = '111';
+    const version = '222';
+
+    const getConfig = jest.fn(() => Promise.resolve({ data: { ansible_version, version} }));
+    const api = { getConfig };
+
+    const wrapper = mount(
+      <MemoryRouter>
+        <I18nProvider>
+          <App api={api}/>
+        </I18nProvider>
+      </MemoryRouter>
+    );
+
+    await asyncFlush();
+    expect(getConfig).toHaveBeenCalledTimes(1);
+
+    // open about modal
+    const aboutDropdown = 'Dropdown QuestionCircleIcon';
+    const aboutButton = 'DropdownItem li button';
+    const aboutModalContent = 'AboutModalBoxContent';
+    const aboutModalClose = 'button[aria-label="Close Dialog"]';
+
+    expect(wrapper.find(aboutModalContent)).toHaveLength(0);
+    wrapper.find(aboutDropdown).simulate('click');
+    wrapper.find(aboutButton).simulate('click');
+    wrapper.update();
+
+    // check about modal content
+    const content = wrapper.find(aboutModalContent);
+    expect(content).toHaveLength(1);
+    expect(content.find('dd').text()).toContain(ansible_version);
+    expect(content.find('pre').text()).toContain(`<  Tower ${version}  >`);
+
+    // close about modal
+    wrapper.find(aboutModalClose).simulate('click');
+    expect(wrapper.find(aboutModalContent)).toHaveLength(0);
+
+    done();
   });
 
   test('onNavToggle sets state.isNavOpen to opposite', () => {
@@ -88,18 +130,5 @@ describe('<App />', () => {
     expect(api.logout).toHaveBeenCalledTimes(1);
 
     done();
-  });
-
-  test('Component makes expected call to api client when mounted', () => {
-    const getConfig = jest.fn().mockImplementation(() => Promise.resolve({}));
-    const api = { getConfig };
-    const appWrapper = mount(
-      <HashRouter>
-        <I18nProvider>
-          <App api={api} />
-        </I18nProvider>
-      </HashRouter>
-    );
-    expect(getConfig).toHaveBeenCalledTimes(1);
   });
 });
