@@ -20,8 +20,10 @@ import {
 
 import { ConfigContext } from '../../../context';
 import { API_ORGANIZATIONS } from '../../../endpoints';
+import { API_INSTANCE_GROUPS } from '../../../endpoints';
 import api from '../../../api';
-import AnsibleSelect from '../../../components/AnsibleSelect'
+import AnsibleSelect from '../../../components/AnsibleSelect';
+import Lookup from '../../../components/Lookup';
 const { light } = PageSectionVariants;
 
 class OrganizationAdd extends React.Component {
@@ -30,6 +32,7 @@ class OrganizationAdd extends React.Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.onSelectChange = this.onSelectChange.bind(this);
+    this.onLookupChange = this.onLookupChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.resetForm = this.resetForm.bind(this);
     this.onCancel = this.onCancel.bind(this);
@@ -38,14 +41,22 @@ class OrganizationAdd extends React.Component {
   state = {
     name: '',
     description: '',
-    instanceGroups: '',
+    results: [],
+    instance_groups: [],
     custom_virtualenv: '',
-    error:'',
+    error: '',
   };
 
   onSelectChange(value, _) {
     this.setState({ custom_virtualenv: value });
   };
+
+  onLookupChange(id, _) {
+    let selected = { ...this.state.results }
+    const index = id - 1;
+    selected[index].isChecked = !selected[index].isChecked;
+    this.setState({ selected })
+  }
 
   resetForm() {
     this.setState({
@@ -69,10 +80,18 @@ class OrganizationAdd extends React.Component {
     this.props.history.push('/organizations');
   }
 
-  render() {
-    const { name } = this.state;
-    const enabled = name.length > 0; // TODO: add better form validation
+  async componentDidMount() {
+    const { data } = await api.get(API_INSTANCE_GROUPS);
+    let results = [];
+    data.results.map((result) => {
+      results.push({ id: result.id, name: result.name, isChecked: false });
+    })
+    this.setState({ results });
+  }
 
+  render() {
+    const { name, results } = this.state;
+    const enabled = name.length > 0; // TODO: add better form validation
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">
@@ -109,11 +128,10 @@ class OrganizationAdd extends React.Component {
                   </FormGroup>
                   {/* LOOKUP MODAL PLACEHOLDER */}
                   <FormGroup label="Instance Groups" fieldId="simple-form-instance-groups">
-                    <TextInput
-                      id="add-org-form-instance-groups"
-                      name="instance-groups"
-                      value={this.state.instanceGroups}
-                      onChange={this.handleChange}
+                    <Lookup
+                      lookup_header="Instance Groups"
+                      lookupChange={this.onLookupChange}
+                      data={results}
                     />
                   </FormGroup>
                   <ConfigContext.Consumer>

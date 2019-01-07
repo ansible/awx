@@ -5,3 +5,4 @@ export const API_V2 = `${API_ROOT}v2/`;
 export const API_CONFIG = `${API_V2}config/`;
 export const API_PROJECTS = `${API_V2}projects/`;
 export const API_ORGANIZATIONS = `${API_V2}organizations/`;
+export const API_INSTANCE_GROUPS = `${API_V2}instance_groups/`;
