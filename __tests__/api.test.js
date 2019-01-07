@@ -58,4 +58,72 @@ describe('APIClient (api.js)', () => {
 
     done();
   });
+
+  test('logout calls expected http method', async (done) => {
+    const createPromise = () => Promise.resolve();
+    const mockHttp = ({ get: jest.fn(createPromise) });
+
+    const api = new APIClient(mockHttp);
+    await api.logout();
+
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+
+    done();
+  });
+
+  test('getConfig calls expected http method', async (done) => {
+    const createPromise = () => Promise.resolve();
+    const mockHttp = ({ get: jest.fn(createPromise) });
+
+    const api = new APIClient(mockHttp);
+    await api.getConfig();
+
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+
+    done();
+  });
+
+  test('getOrganizations calls http method with expected data', async (done) => {
+    const createPromise = () => Promise.resolve();
+    const mockHttp = ({ get: jest.fn(createPromise) });
+    const api = new APIClient(mockHttp);
+
+    const defaultParams = {};
+    const testParams = { foo: 'bar' };
+
+    await api.getOrganizations(testParams);
+    await api.getOrganizations();
+
+    expect(mockHttp.get).toHaveBeenCalledTimes(2);
+    expect(mockHttp.get.mock.calls[0][1]).toEqual({ params: testParams });
+    expect(mockHttp.get.mock.calls[1][1]).toEqual({ params: defaultParams });
+    done();
+  });
+
+  test('createOrganization calls http method with expected data', async (done) => {
+    const createPromise = () => Promise.resolve();
+    const mockHttp = ({ post: jest.fn(createPromise) });
+
+    const api = new APIClient(mockHttp);
+    const data = { name: 'test '};
+    await api.createOrganization(data);
+
+    expect(mockHttp.post).toHaveBeenCalledTimes(1);
+    expect(mockHttp.post.mock.calls[0][1]).toEqual(data);
+
+    done();
+  });
+
+  test('getOrganizationDetails calls http method with expected data', async (done) => {
+    const createPromise = () => Promise.resolve();
+    const mockHttp = ({ get: jest.fn(createPromise) });
+
+    const api = new APIClient(mockHttp);
+    await api.getOrganizationDetails(99);
+
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.get.mock.calls[0][0]).toContain('99');
+
+    done();
+  });
 });

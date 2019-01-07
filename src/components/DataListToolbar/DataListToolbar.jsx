@@ -47,9 +47,10 @@ class DataListToolbar extends React.Component {
     this.handleSearchInputChange = this.handleSearchInputChange.bind(this);
     this.onSortDropdownToggle = this.onSortDropdownToggle.bind(this);
     this.onSortDropdownSelect = this.onSortDropdownSelect.bind(this);
-    this.onSearch = this.onSearch.bind(this);
     this.onSearchDropdownToggle = this.onSearchDropdownToggle.bind(this);
     this.onSearchDropdownSelect = this.onSearchDropdownSelect.bind(this);
+    this.onSearch = this.onSearch.bind(this);
+    this.onSort = this.onSort.bind(this);
   }
 
   handleSearchInputChange (searchValue) {
@@ -62,12 +63,12 @@ class DataListToolbar extends React.Component {
 
   onSortDropdownSelect ({ target }) {
     const { columns, onSort, sortOrder } = this.props;
+    const { innerText } = target;
 
-    const [{ key }] = columns.filter(({ name }) => name === target.innerText);
+    const [{ key: searchKey }] = columns.filter(({ name }) => name === innerText);
 
     this.setState({ isSortDropdownOpen: false });
-
-    onSort(key, sortOrder);
+    onSort(searchKey, sortOrder);
   }
 
   onSearchDropdownToggle (isSearchDropdownOpen) {
@@ -76,11 +77,10 @@ class DataListToolbar extends React.Component {
 
   onSearchDropdownSelect ({ target }) {
     const { columns } = this.props;
+    const { innerText } = target;
 
-    const targetName = target.innerText;
-    const [{ key }] = columns.filter(({ name }) => name === targetName);
-
-    this.setState({ isSearchDropdownOpen: false, searchKey: key });
+    const [{ key: searchKey }] = columns.filter(({ name }) => name === innerText);
+    this.setState({ isSearchDropdownOpen: false, searchKey });
   }
 
   onSearch () {
@@ -90,13 +90,19 @@ class DataListToolbar extends React.Component {
     onSearch(searchValue);
   }
 
+  onSort () {
+    const { onSort, sortedColumnKey, sortOrder } = this.props;
+    const newSortOrder = sortOrder === 'ascending' ? 'descending' : 'ascending';
+
+    onSort(sortedColumnKey, newSortOrder);
+  }
+
   render () {
     const { up } = DropdownPosition;
     const {
       columns,
       isAllSelected,
       onSelectAll,
-      onSort,
       sortedColumnKey,
       sortOrder,
       addUrl,
@@ -110,29 +116,15 @@ class DataListToolbar extends React.Component {
       searchValue,
     } = this.state;
 
-    const [searchColumn] = columns
-      .filter(({ key }) => key === searchKey);
-    const searchColumnName = searchColumn.name;
-
-    const [sortedColumn] = columns
+    const [{ name: searchColumnName }] = columns.filter(({ key }) => key === searchKey);
+    const [{ name: sortedColumnName, isNumeric }] = columns
       .filter(({ key }) => key === sortedColumnKey);
-    const sortedColumnName = sortedColumn.name;
-    const isSortNumeric = sortedColumn.isNumeric;
-    const displayedSortIcon = () => {
-      let icon;
-      if (sortOrder === 'ascending') {
-        icon = isSortNumeric ? (<SortNumericUpIcon />) : (<SortAlphaUpIcon />);
-      } else {
-        icon = isSortNumeric ? (<SortNumericDownIcon />) : (<SortAlphaDownIcon />);
-      }
-      return icon;
-    };
 
     const searchDropdownItems = columns
       .filter(({ key }) => key !== searchKey)
       .map(({ key, name }) => (
         <DropdownItem key={key} component="button">
-          { name }
+          {name}
         </DropdownItem>
       ));
 
@@ -140,9 +132,16 @@ class DataListToolbar extends React.Component {
       .filter(({ key, isSortable }) => isSortable && key !== sortedColumnKey)
       .map(({ key, name }) => (
         <DropdownItem key={key} component="button">
-          { name }
+          {name}
         </DropdownItem>
       ));
+
+    let SortIcon;
+    if (isNumeric) {
+      SortIcon = sortOrder === 'ascending' ? SortNumericUpIcon : SortNumericDownIcon;
+    } else {
+      SortIcon = sortOrder === 'ascending' ? SortAlphaUpIcon : SortAlphaDownIcon;
+    }
 
     return (
       <I18n>
@@ -150,7 +149,9 @@ class DataListToolbar extends React.Component {
           <div className="awx-toolbar">
             <Level>
               <LevelItem>
-                <Toolbar style={{ marginLeft: '20px' }}>
+                <Toolbar
+                  style={{ marginLeft: '20px' }}
+                >
                   <ToolbarGroup>
                     <ToolbarItem>
                       <Checkbox
@@ -174,7 +175,7 @@ class DataListToolbar extends React.Component {
                             <DropdownToggle
                               onToggle={this.onSearchDropdownToggle}
                             >
-                              { searchColumnName }
+                              {searchColumnName}
                             </DropdownToggle>
                           )}
                           dropdownItems={searchDropdownItems}
@@ -195,7 +196,9 @@ class DataListToolbar extends React.Component {
                       </div>
                     </ToolbarItem>
                   </ToolbarGroup>
-                  <ToolbarGroup className="sortDropdownGroup">
+                  <ToolbarGroup
+                    className="sortDropdownGroup"
+                  >
                     <ToolbarItem>
                       <Dropdown
                         onToggle={this.onSortDropdownToggle}
@@ -206,7 +209,7 @@ class DataListToolbar extends React.Component {
                           <DropdownToggle
                             onToggle={this.onSortDropdownToggle}
                           >
-                            { sortedColumnName }
+                            {sortedColumnName}
                           </DropdownToggle>
                         )}
                         dropdownItems={sortDropdownItems}
@@ -214,23 +217,29 @@ class DataListToolbar extends React.Component {
                     </ToolbarItem>
                     <ToolbarItem>
                       <Button
-                        onClick={() => onSort(sortedColumnKey, sortOrder === 'ascending' ? 'descending' : 'ascending')}
+                        onClick={this.onSort}
                         variant="plain"
                         aria-label={i18n._(t`Sort`)}
                       >
-                        {displayedSortIcon()}
+                        <SortIcon/>
                       </Button>
                     </ToolbarItem>
                   </ToolbarGroup>
-                  { showExpandCollapse && (
+                  {showExpandCollapse && (
                     <ToolbarGroup>
                       <ToolbarItem>
-                        <Button variant="plain" aria-label={i18n._(t`Expand`)}>
+                        <Button
+                          variant="plain"
+                          aria-label={i18n._(t`Expand`)}
+                        >
                           <BarsIcon />
                         </Button>
                       </ToolbarItem>
                       <ToolbarItem>
-                        <Button variant="plain" aria-label={i18n._(t`Collapse`)}>
+                        <Button
+                          variant="plain"
+                          aria-label={i18n._(t`Collapse`)}
+                        >
                           <EqualsIcon />
                         </Button>
                       </ToolbarItem>
@@ -239,14 +248,23 @@ class DataListToolbar extends React.Component {
                 </Toolbar>
               </LevelItem>
               <LevelItem>
-                <Tooltip message={i18n._(t`Delete`)} position="top">
-                  <Button variant="plain" aria-label={i18n._(t`Delete`)}>
+                <Tooltip
+                  message={i18n._(t`Delete`)}
+                  position="top"
+                >
+                  <Button
+                    variant="plain"
+                    aria-label={i18n._(t`Delete`)}
+                  >
                     <TrashAltIcon />
                   </Button>
                 </Tooltip>
                 {addUrl && (
                   <Link to={addUrl}>
-                    <Button variant="primary" aria-label={i18n._(t`Add`)}>
+                    <Button
+                      variant="primary"
+                      aria-label={i18n._(t`Add`)}
+                    >
                       <PlusIcon />
                     </Button>
                   </Link>
