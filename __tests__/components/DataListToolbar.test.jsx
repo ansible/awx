@@ -29,6 +29,7 @@ describe('<DataListToolbar />', () => {
       <I18nProvider>
         <DataListToolbar
           isAllSelected={false}
+          showExpandCollapse={true}
           sortedColumnKey="name"
           sortOrder="ascending"
           columns={columns}
