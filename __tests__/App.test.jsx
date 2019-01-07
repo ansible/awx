@@ -108,17 +108,6 @@ describe('<App />', () => {
     });
   });
 
-  test('onLogoClick sets selected nav back to defaults', () => {
-    const appWrapper = shallow(<App />);
-
-    appWrapper.setState({ activeGroup: 'foo', activeItem: 'bar' });
-    expect(appWrapper.state().activeItem).toBe('bar');
-    expect(appWrapper.state().activeGroup).toBe('foo');
-
-    appWrapper.instance().onLogoClick();
-    expect(appWrapper.state().activeGroup).toBe(DEFAULT_ACTIVE_GROUP);
-  });
-
   test('onLogout makes expected call to api client', async (done) => {
     const logout = jest.fn(() => Promise.resolve());
     const api = { logout };

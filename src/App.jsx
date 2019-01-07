@@ -34,7 +34,6 @@ class App extends Component {
     this.onLogout = this.onLogout.bind(this);
     this.onAboutModalClose = this.onAboutModalClose.bind(this);
     this.onAboutModalOpen = this.onAboutModalOpen.bind(this);
-    this.onLogoClick = this.onLogoClick.bind(this);
     this.onNavToggle = this.onNavToggle.bind(this);
   };
 
@@ -72,10 +71,6 @@ class App extends Component {
     this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
   }
 
-  onLogoClick () {
-    this.setState({ activeGroup: 'views_group' });
-  }
-
   render () {
     const {
       ansible_version,
@@ -105,11 +100,7 @@ class App extends Component {
             <PageHeader
               showNavToggle
               onNavToggle={this.onNavToggle}
-              logo={
-                <TowerLogo
-                  onClick={this.onLogoClick}
-                />
-              }
+              logo={<TowerLogo linkTo="/"/>}
               toolbar={
                 <PageHeaderToolbar
                   isAboutDisabled={!version}
