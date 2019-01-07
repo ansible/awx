@@ -3,7 +3,9 @@ import { Trans } from '@lingui/macro';
 import {
   PageSection,
   PageSectionVariants,
-  Title,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbHeading
 } from '@patternfly/react-core';
 import {
   Link
@@ -21,20 +23,22 @@ const OrganizationBreadcrumb = ({ parentObj, organization, currentTab, location 
           .map(({ url, name }, index) => {
             let elem;
             if (noLastLink && parentObj.length - 1 === index) {
-              elem = (<Fragment key={name}>{name}</Fragment>);
+              elem = (<BreadcrumbHeading className="heading" key={name}>{name}</BreadcrumbHeading>);
             } else {
               elem = (
-                <Link
-                  key={name}
-                  to={{ pathname: url, state: { breadcrumb: parentObj, organization } }}
-                >
-                  {name}
-                </Link>
+                <BreadcrumbItem key={name}>
+                  <Link
+                    key={name}
+                    to={{ pathname: url, state: { breadcrumb: parentObj, organization } }}
+                  >
+                    {name}
+                  </Link>
+                </BreadcrumbItem>
               );
             }
             return elem;
           })
-          .reduce((prev, curr) => [prev, ' > ', curr])}
+          .reduce((prev, curr) => [prev, curr])}
       </Fragment>
     );
 
@@ -42,25 +46,31 @@ const OrganizationBreadcrumb = ({ parentObj, organization, currentTab, location 
       breadcrumb = (
         <Fragment>
           {generateCrumb()}
-          {' > '}
-          {getTabName(currentTab)}
+          <BreadcrumbHeading className="heading">
+            {getTabName(currentTab)}
+          </BreadcrumbHeading>
         </Fragment>
       );
     } else if (location.pathname.indexOf('edit') > -1) {
       breadcrumb = (
         <Fragment>
           {generateCrumb()}
-          <Trans>{' > edit'}</Trans>
+          <BreadcrumbHeading className="heading">
+            <Trans>Edit</Trans>
+          </BreadcrumbHeading>
         </Fragment>
       );
     } else if (location.pathname.indexOf('add') > -1) {
       breadcrumb = (
         <Fragment>
           {generateCrumb()}
-          <Trans>{' > add'}</Trans>
+          <BreadcrumbHeading className="heading">
+            <Trans>Add</Trans>
+          </BreadcrumbHeading>
         </Fragment>
       );
     } else {
+
       breadcrumb = (
         <Fragment>
           {generateCrumb(true)}
@@ -71,7 +81,7 @@ const OrganizationBreadcrumb = ({ parentObj, organization, currentTab, location 
 
   return (
     <PageSection variant={light} className="pf-m-condensed">
-      <Title size="2xl">{breadcrumb}</Title>
+      <Breadcrumb>{breadcrumb}</Breadcrumb>
     </PageSection>
   );
 };

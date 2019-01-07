@@ -14,7 +14,6 @@ export default ({
   name,
   userCount,
   teamCount,
-  adminCount,
   isSelected,
   onSelect,
   detailUrl,
@@ -46,7 +45,7 @@ export default ({
       </span>
     </div>
     <div className="pf-c-data-list__cell">
-      <Link to={`${detailUrl}?tab=users`}>
+      <Link to={`${detailUrl}?tab=access`}>
         <Trans>Users</Trans>
       </Link>
       <Badge isRead>
@@ -60,14 +59,6 @@ export default ({
       <Badge isRead>
         {' '}
         {teamCount}
-        {' '}
-      </Badge>
-      <Link to={`${detailUrl}?tab=admins`}>
-        <Trans>Admins</Trans>
-      </Link>
-      <Badge isRead>
-        {' '}
-        {adminCount}
         {' '}
       </Badge>
     </div>
