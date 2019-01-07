@@ -6,10 +6,7 @@ import {
   CardHeader,
   CardBody,
   PageSection,
-  PageSectionVariants,
-  ToolbarGroup,
-  ToolbarItem,
-  ToolbarSection,
+  PageSectionVariants
 } from '@patternfly/react-core';
 import {
   Switch,
@@ -17,39 +14,10 @@ import {
   Route
 } from 'react-router-dom';
 
+import Tab from '../../../components/Tabs/Tab';
+import Tabs from '../../../components/Tabs/Tabs';
 import getTabName from '../utils';
 
-import '../tabs.scss';
-
-const DetailTab = ({ location, match, tab, currentTab, children, breadcrumb }) => {
-  const tabClasses = () => {
-    let classes = 'at-c-tabs__tab';
-    if (tab === currentTab) {
-      classes += ' at-m-selected';
-    }
-
-    return classes;
-  };
-
-  const updateTab = () => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('tab') !== undefined) {
-      params.set('tab', tab);
-    } else {
-      params.append('tab', tab);
-    }
-
-    return `?${params.toString()}`;
-  };
-
-  return (
-    <ToolbarItem className={tabClasses()}>
-      <Link to={{ pathname: `${match.url}`, search: updateTab(), state: { breadcrumb } }} replace={tab === currentTab}>
-        {children}
-      </Link>
-    </ToolbarItem>
-  );
-};
 
 const OrganizationDetail = ({
   location,
@@ -61,6 +29,7 @@ const OrganizationDetail = ({
 }) => {
   // TODO: set objectName by param or through grabbing org detail get from api
   const { medium } = PageSectionVariants;
+  const tabList=['details', 'access', 'teams', 'notifications'];
 
   const deleteResourceView = () => (
     <Fragment>
@@ -93,34 +62,29 @@ const OrganizationDetail = ({
     </Fragment>
   );
 
-  const detailTabs = (tabs) => (
-    <I18n>
-      {({ i18n }) => (
-        <ToolbarSection aria-label={i18n._(t`Organization detail tabs`)}>
-          <ToolbarGroup className="at-c-tabs">
-            {tabs.map(tab => (
-              <DetailTab
-                key={tab}
-                tab={tab}
-                location={location}
-                match={match}
-                currentTab={currentTab}
-                breadcrumb={parentBreadcrumbObj}
-              >
-                {getTabName(tab)}
-              </DetailTab>
-            ))}
-          </ToolbarGroup>
-        </ToolbarSection>
-      )}
-    </I18n>
-  );
 
   return (
     <PageSection variant={medium}>
       <Card className="at-c-orgPane">
         <CardHeader>
-          {detailTabs(['details', 'users', 'teams', 'admins', 'notifications'])}
+          <I18n>
+            {({ i18n }) => (
+              <Tabs labelText={i18n._(t`Organization detail tabs`)}>
+                {tabList.map(tab => (
+                  <Tab
+                    key={tab}
+                    tab={tab}
+                    location={location}
+                    match={match}
+                    currentTab={currentTab}
+                    breadcrumb={parentBreadcrumbObj}
+                  >
+                    <Trans>{getTabName(tab)}</Trans>
+                  </Tab>
+                ))}
+              </Tabs>
+            )}
+          </I18n>
         </CardHeader>
         <CardBody>
           {(currentTab && currentTab !== 'details') ? (

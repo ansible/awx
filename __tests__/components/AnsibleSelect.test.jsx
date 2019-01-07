@@ -29,4 +29,16 @@ describe('<AnsibleSelect />', () => {
     wrapper.find('select').simulate('change');
     expect(spy).toHaveBeenCalled();
   });
+  test('content not rendered when data property is falsey', () => {
+    const wrapper = mount(
+      <AnsibleSelect
+        selected="foo"
+        selectChange={() => { }}
+        labelName={label}
+        data={null}
+      />
+    );
+    expect(wrapper.find('FormGroup')).toHaveLength(0);
+    expect(wrapper.find('Select')).toHaveLength(0);
+  });
 });

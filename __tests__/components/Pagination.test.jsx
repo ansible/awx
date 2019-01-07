@@ -72,4 +72,97 @@ describe('<Pagination />', () => {
     expect(onSetPage).toHaveBeenCalledTimes(2);
     expect(onSetPage).toBeCalledWith(1, 5);
   });
+
+  test('previous button does not work on page 1', () => {
+    const previous = 'button[aria-label="First"]';
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={1}
+          pageCount={5}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    pagination.find(previous).simulate('click');
+    expect(onSetPage).toHaveBeenCalledTimes(0);
+  });
+
+  test('changing pageSize works', () => {
+    const pageSizeDropdownToggleSelector = 'DropdownToggle DropdownToggle[className="togglePageSize"]';
+    const pageSizeDropdownItemsSelector = 'DropdownItem';
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={1}
+          pageCount={5}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+    const pageSizeDropdownToggle = pagination.find(pageSizeDropdownToggleSelector);
+    expect(pageSizeDropdownToggle.length).toBe(1);
+    pageSizeDropdownToggle.at(0).simulate('click');
+
+    const pageSizeDropdownItems = pagination.find(pageSizeDropdownItemsSelector);
+    expect(pageSizeDropdownItems.length).toBe(3);
+    pageSizeDropdownItems.at(1).simulate('click');
+  });
+
+  test('submit a new page by typing in input works', () => {
+    const textInputSelector = '.pf-l-split__item.pf-m-main .pf-c-form-control';
+    const submitFormSelector = '.pf-l-split__item.pf-m-main form';
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={21}
+          page={1}
+          pageCount={5}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+      </I18nProvider>
+    );
+
+    const textInput = pagination.find(textInputSelector);
+    expect(textInput.length).toBe(1);
+    textInput.simulate('change');
+    pagination.setProps({ page: 2 });
+
+    const submitForm = pagination.find(submitFormSelector);
+    expect(submitForm.length).toBe(1);
+    submitForm.simulate('submit');
+    pagination.find('Pagination').instance().setState({ value: 'invalid' });
+    submitForm.simulate('submit');
+  });
+
+  test('text input page change is disabled when only 1 page', () => {
+    const onSetPage = jest.fn();
+
+    pagination = mount(
+      <I18nProvider>
+        <Pagination
+          count={4}
+          page={1}
+          pageCount={1}
+          page_size={5}
+          pageSizeOptions={[5, 10, 25, 50]}
+          onSetPage={onSetPage}
+        />
+        </I18nProvider>
+    );
+  });
 });

@@ -1,8 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@lingui/react';
-import api from '../../src/api';
-import { API_CONFIG } from '../../src/endpoints';
 import About from '../../src/components/About';
 
 describe('<About />', () => {
@@ -19,16 +17,16 @@ describe('<About />', () => {
     aboutWrapper.unmount();
   });
 
-  test('close button calls onAboutModalClose', () => {
-    const onAboutModalClose = jest.fn();
+  test('close button calls onClose handler', () => {
+    const onClose = jest.fn();
     aboutWrapper = mount(
       <I18nProvider>
-        <About isOpen onAboutModalClose={onAboutModalClose} />
+        <About isOpen onClose={onClose} />
       </I18nProvider>
     );
     closeButton = aboutWrapper.find('AboutModalBoxCloseButton Button');
     closeButton.simulate('click');
-    expect(onAboutModalClose).toBeCalled();
+    expect(onClose).toBeCalled();
     aboutWrapper.unmount();
   });
 });

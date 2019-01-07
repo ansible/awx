@@ -17,9 +17,6 @@ import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
 import Pagination from '../../../components/Pagination';
 
-import api from '../../../api';
-import { API_ORGANIZATIONS } from '../../../endpoints';
-
 import {
   encodeQueryString,
   parseQueryString,
@@ -56,6 +53,15 @@ class Organizations extends Component {
       results: [],
       selected: [],
     };
+
+    this.onSearch = this.onSearch.bind(this);
+    this.getQueryParams = this.getQueryParams.bind(this);
+    this.onSort = this.onSort.bind(this);
+    this.onSetPage = this.onSetPage.bind(this);
+    this.onSelectAll = this.onSelectAll.bind(this);
+    this.onSelect = this.onSelect.bind(this);
+    this.updateUrl = this.updateUrl.bind(this);
+    this.fetchOrganizations = this.fetchOrganizations.bind(this);
   }
 
   componentDidMount () {
@@ -78,7 +84,7 @@ class Organizations extends Component {
     return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
-  onSort = (sortedColumnKey, sortOrder) => {
+  onSort(sortedColumnKey, sortOrder) {
     const { page_size } = this.state;
 
     let order_by = sortedColumnKey;
@@ -90,26 +96,26 @@ class Organizations extends Component {
     const queryParams = this.getQueryParams({ order_by, page_size });
 
     this.fetchOrganizations(queryParams);
-  };
+  }
 
-  onSetPage = (pageNumber, pageSize) => {
+  onSetPage (pageNumber, pageSize) {
     const page = parseInt(pageNumber, 10);
     const page_size = parseInt(pageSize, 10);
 
     const queryParams = this.getQueryParams({ page, page_size });
 
     this.fetchOrganizations(queryParams);
-  };
+  }
 
-  onSelectAll = isSelected => {
+  onSelectAll (isSelected) {
     const { results } = this.state;
 
     const selected = isSelected ? results.map(o => o.id) : [];
 
     this.setState({ selected });
-  };
+  }
 
-  onSelect = id => {
+  onSelect (id) {
     const { selected } = this.state;
 
     const isSelected = selected.includes(id);
@@ -119,7 +125,7 @@ class Organizations extends Component {
     } else {
       this.setState({ selected: selected.concat(id) });
     }
-  };
+  }
 
   updateUrl (queryParams) {
     const { history, location } = this.props;
@@ -132,6 +138,7 @@ class Organizations extends Component {
   }
 
   async fetchOrganizations (queryParams) {
+    const { api } = this.props;
     const { page, page_size, order_by } = queryParams;
 
     let sortOrder = 'ascending';
@@ -145,7 +152,7 @@ class Organizations extends Component {
     this.setState({ error: false, loading: true });
 
     try {
-      const { data } = await api.get(API_ORGANIZATIONS, queryParams);
+      const { data } = await api.getOrganizations(queryParams);
       const { count, results } = data;
 
       const pageCount = Math.ceil(count / page_size);
@@ -218,7 +225,6 @@ class Organizations extends Component {
                     parentBreadcrumb={parentBreadcrumb}
                     userCount={o.summary_fields.related_field_counts.users}
                     teamCount={o.summary_fields.related_field_counts.teams}
-                    adminCount={o.summary_fields.related_field_counts.admins}
                     isSelected={selected.includes(o.id)}
                     onSelect={() => this.onSelect(o.id)}
                   />

@@ -19,11 +19,9 @@ import {
 } from '@patternfly/react-core';
 
 import { ConfigContext } from '../../../context';
-import { API_ORGANIZATIONS } from '../../../endpoints';
-import { API_INSTANCE_GROUPS } from '../../../endpoints';
 import api from '../../../api';
-import AnsibleSelect from '../../../components/AnsibleSelect';
 import Lookup from '../../../components/Lookup';
+import AnsibleSelect from '../../../components/AnsibleSelect'
 const { light } = PageSectionVariants;
 
 class OrganizationAdd extends React.Component {
@@ -71,8 +69,9 @@ class OrganizationAdd extends React.Component {
   }
 
   async onSubmit() {
+    const { api } = this.props;
     const data = Object.assign({}, { ...this.state });
-    await api.post(API_ORGANIZATIONS, data);
+    await api.createOrganization(data);
     this.resetForm();
   }
 
@@ -81,7 +80,8 @@ class OrganizationAdd extends React.Component {
   }
 
   async componentDidMount() {
-    const { data } = await api.get(API_INSTANCE_GROUPS);
+    const { api } = this.props;
+    const { data } = await api.getInstanceGroups();
     let results = [];
     data.results.map((result) => {
       results.push({ id: result.id, name: result.name, isChecked: false });
@@ -92,6 +92,7 @@ class OrganizationAdd extends React.Component {
   render() {
     const { name, results } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
+
     return (
       <Fragment>
         <PageSection variant={light} className="pf-m-condensed">

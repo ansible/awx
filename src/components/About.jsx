@@ -13,10 +13,8 @@ import heroImg from '@patternfly/patternfly-next/assets/images/pfbg_992.jpg';
 import brandImg from '../../images/tower-logo-white.svg';
 import logoImg from '../../images/tower-logo-login.svg';
 
-import { ConfigContext } from '../context';
-
 class About extends React.Component {
-  createSpeechBubble = (version) => {
+  static createSpeechBubble (version) {
     let text = `Tower ${version}`;
     let top = '';
     let bottom = '';
@@ -33,52 +31,56 @@ class About extends React.Component {
     return top + text + bottom;
   }
 
-  handleModalToggle = () => {
-    const { onAboutModalClose } = this.props;
-    onAboutModalClose();
-  };
+  constructor (props) {
+    super(props);
+
+    this.createSpeechBubble = this.constructor.createSpeechBubble.bind(this);
+  }
 
   render () {
-    const { isOpen } = this.props;
+    const {
+      ansible_version,
+      version,
+      isOpen,
+      onClose
+    } = this.props;
+
+    const speechBubble = this.createSpeechBubble(version);
+
     return (
       <I18n>
         {({ i18n }) => (
-          <ConfigContext.Consumer>
-            {({ ansible_version, version }) => (
-              <AboutModal
-                isOpen={isOpen}
-                onClose={this.handleModalToggle}
-                productName="Ansible Tower"
-                trademark={i18n._(t`Copyright 2018 Red Hat, Inc.`)}
-                brandImageSrc={brandImg}
-                brandImageAlt={i18n._(t`Brand Image`)}
-                logoImageSrc={logoImg}
-                logoImageAlt={i18n._(t`AboutModal Logo`)}
-                heroImageSrc={heroImg}
-              >
-                <pre>
-                  {this.createSpeechBubble(version)}
-                  {`
+          <AboutModal
+            isOpen={isOpen}
+            onClose={onClose}
+            productName="Ansible Tower"
+            trademark={i18n._(t`Copyright 2018 Red Hat, Inc.`)}
+            brandImageSrc={brandImg}
+            brandImageAlt={i18n._(t`Brand Image`)}
+            logoImageSrc={logoImg}
+            logoImageAlt={i18n._(t`AboutModal Logo`)}
+            heroImageSrc={heroImg}
+          >
+            <pre>
+              { speechBubble }
+              {`
               \\
-              \\  ^__^
+              \\   ^__^
                   (oo)\\_______
                   (__)      A )\\
                       ||----w |
                       ||     ||
                         `}
-                </pre>
-
-                <TextContent>
-                  <TextList component="dl">
-                    <TextListItem component="dt">
-                      <Trans>Ansible Version</Trans>
-                    </TextListItem>
-                    <TextListItem component="dd">{ansible_version}</TextListItem>
-                  </TextList>
-                </TextContent>
-              </AboutModal>
-            )}
-          </ConfigContext.Consumer>
+            </pre>
+            <TextContent>
+              <TextList component="dl">
+                <TextListItem component="dt">
+                  <Trans>Ansible Version</Trans>
+                </TextListItem>
+                <TextListItem component="dd">{ ansible_version }</TextListItem>
+              </TextList>
+            </TextContent>
+          </AboutModal>
         )}
       </I18n>
     );

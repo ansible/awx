@@ -43,12 +43,12 @@
     "style-loader": "^0.23.0",
     "webpack": "^4.23.1",
     "webpack-cli": "^3.0.8",
-    "webpack-dev-server": "^3.1.4"
+    "webpack-dev-server": "^3.1.14"
   },
   "dependencies": {
     "@lingui/react": "^2.7.2",
     "@patternfly/patternfly-next": "^1.0.84",
-    "@patternfly/react-core": "^1.37.2",
+    "@patternfly/react-core": "^1.43.5",
     "@patternfly/react-icons": "^2.9.1",
     "@patternfly/react-styles": "^2.3.0",
     "@patternfly/react-tokens": "^1.9.0",

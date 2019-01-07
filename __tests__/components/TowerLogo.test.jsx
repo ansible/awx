@@ -29,11 +29,10 @@ describe('<TowerLogo />', () => {
   });
 
   test('adds navigation to route history on click', () => {
-    const onLogoClick = jest.fn();
     logoWrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <TowerLogo onClick={onLogoClick} />
+          <TowerLogo linkTo="/" />
         </I18nProvider>
       </MemoryRouter>
     );
@@ -43,7 +42,7 @@ describe('<TowerLogo />', () => {
     expect(towerLogoElem.props().history.length).toBe(2);
   });
 
-  test('gracefully handles not being passed click handler', () => {
+  test('linkTo prop is optional', () => {
     logoWrapper = mount(
       <MemoryRouter>
         <I18nProvider>
@@ -62,7 +61,7 @@ describe('<TowerLogo />', () => {
     logoWrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <TowerLogo onClick={onLogoClick} />
+          <TowerLogo />
         </I18nProvider>
       </MemoryRouter>
     );

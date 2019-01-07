@@ -1,22 +1,51 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { mount } from 'enzyme';
+import { main, getLanguage } from '../src/index';
 
-import api from '../src/api';
-
-import indexToRender from '../src/index';
-
-const custom_logo = (<div>logo</div>);
-const custom_login_info = 'custom login info';
-
-jest.mock('react-dom', () => ({ render: jest.fn() }));
+const render = template => mount(template);
+const data = { custom_logo: 'foo', custom_login_info: '' }
 
 describe('index.jsx', () => {
-  test('renders without crashing', async () => {
-    api.getRoot = jest.fn().mockImplementation(() => Promise
-      .resolve({ data: { custom_logo, custom_login_info } }));
+  test('login loads when unauthenticated', async (done) => {
+    const isAuthenticated = () => false;
+    const getRoot = jest.fn(() => Promise.resolve({ data }));
 
-    await indexToRender();
+    const api = { getRoot, isAuthenticated };
+    const wrapper = await main(render, api);
 
-    expect(ReactDOM.render).toHaveBeenCalled();
+    expect(api.getRoot).toHaveBeenCalled();
+    expect(wrapper.find('App')).toHaveLength(0);
+    expect(wrapper.find('Login')).toHaveLength(1);
+
+    const { src } = wrapper.find('Login Brand img').props();
+    expect(src).toContain(data.custom_logo);
+
+    done();
+  });
+
+  test('app loads when authenticated', async (done) => {
+    const isAuthenticated = () => true;
+    const getRoot = jest.fn(() => Promise.resolve({ data }));
+
+    const api = { getRoot, isAuthenticated };
+    const wrapper = await main(render, api);
+
+    expect(api.getRoot).toHaveBeenCalled();
+    expect(wrapper.find('App')).toHaveLength(1);
+    expect(wrapper.find('Login')).toHaveLength(0);
+
+    wrapper.find('header a').simulate('click');
+    wrapper.update();
+
+    expect(wrapper.find('App')).toHaveLength(1);
+    expect(wrapper.find('Login')).toHaveLength(0);
+
+    done();
+  });
+
+  test('getLanguage returns the expected language code', () => {
+    expect(getLanguage({ languages: ['es-US'] })).toEqual('es');
+    expect(getLanguage({ languages: ['es-US'], language: 'fr-FR', userLanguage: 'en-US' })).toEqual('es');
+    expect(getLanguage({ language: 'fr-FR', userLanguage: 'en-US' })).toEqual('fr');
+    expect(getLanguage({ userLanguage: 'en-US' })).toEqual('en');
   });
 });

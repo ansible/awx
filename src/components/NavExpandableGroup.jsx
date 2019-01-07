@@ -14,18 +14,23 @@ class NavExpandableGroup extends Component {
     // Extract a list of paths from the route params and store them for later. This creates
     // an array of url paths associated with any NavItem component rendered by this component.
     this.navItemPaths = routes.map(({ path }) => path);
+
+    this.isActiveGroup = this.isActiveGroup.bind(this);
+    this.isActivePath = this.isActivePath.bind(this);
   }
 
-  isActiveGroup = () => this.navItemPaths.some(this.isActivePath);
+  isActiveGroup () {
+    return this.navItemPaths.some(this.isActivePath);
+  }
 
-  isActivePath = (path) => {
+  isActivePath (path) {
     const { history } = this.props;
 
     return history.location.pathname.startsWith(path);
-  };
+  }
 
   render () {
-    const { routes, groupId, staticContext, ...rest } = this.props;
+    const { groupId, groupTitle, routes } = this.props;
     const isActive = this.isActiveGroup();
 
     return (
@@ -33,7 +38,7 @@ class NavExpandableGroup extends Component {
         isActive={isActive}
         isExpanded={isActive}
         groupId={groupId}
-        {...rest}
+        title={groupTitle}
       >
         {routes.map(({ path, title }) => (
           <NavItem

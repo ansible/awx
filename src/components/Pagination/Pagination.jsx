@@ -7,14 +7,9 @@ import {
   DropdownDirection,
   DropdownItem,
   DropdownToggle,
-  Form,
-  FormGroup,
   Level,
   LevelItem,
   TextInput,
-  Toolbar,
-  ToolbarGroup,
-  ToolbarItem,
   Split,
   SplitItem,
 } from '@patternfly/react-core';
@@ -23,24 +18,32 @@ class Pagination extends Component {
   constructor (props) {
     super(props);
 
-    const { page } = this.props;
-
+    const { page } = props;
     this.state = { value: page, isOpen: false };
+
+    this.onPageChange = this.onPageChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.onFirst = this.onFirst.bind(this);
+    this.onPrevious = this.onPrevious.bind(this);
+    this.onNext = this.onNext.bind(this);
+    this.onLast = this.onLast.bind(this);
+    this.onTogglePageSize = this.onTogglePageSize.bind(this);
+    this.onSelectPageSize = this.onSelectPageSize.bind(this);
   }
 
   componentDidUpdate (prevProps) {
     const { page } = this.props;
 
     if (prevProps.page !== page) {
-      this.setState({ value: page });
+      this.onPageChange(page);
     }
   }
 
-  onPageChange = value => {
+  onPageChange (value) {
     this.setState({ value });
-  };
+  }
 
-  onSubmit = event => {
+  onSubmit (event) {
     const { onSetPage, page, pageCount, page_size } = this.props;
     const { value } = this.state;
 
@@ -51,46 +54,42 @@ class Pagination extends Component {
 
     if (isValid) {
       onSetPage(value, page_size);
-    } else{
+    } else {
       this.setState({ value: page });
     }
-  };
+  }
 
-  onFirst = () => {
-    const { onSetPage, page_size} = this.props;
+  onFirst () {
+    const { onSetPage, page_size } = this.props;
 
     onSetPage(1, page_size);
-  };
+  }
 
-  onPrevious = () => {
+  onPrevious () {
     const { onSetPage, page, page_size } = this.props;
     const previousPage = page - 1;
 
-    if (previousPage >= 1) {
-      onSetPage(previousPage, page_size)
-    }
-  };
+    onSetPage(previousPage, page_size);
+  }
 
-  onNext = () => {
+  onNext () {
     const { onSetPage, page, pageCount, page_size } = this.props;
     const nextPage = page + 1;
 
-    if (nextPage <= pageCount) {
-      onSetPage(nextPage, page_size)
-    }
-  };
+    onSetPage(nextPage, page_size);
+  }
 
-  onLast = () => {
+  onLast () {
     const { onSetPage, pageCount, page_size } = this.props;
 
     onSetPage(pageCount, page_size)
-  };
+  }
 
-  onTogglePageSize = isOpen => {
+  onTogglePageSize (isOpen) {
     this.setState({ isOpen });
-  };
+  }
 
-  onSelectPageSize = ({ target }) => {
+  onSelectPageSize ({ target }) {
     const { onSetPage } = this.props;
 
     const page = 1;
@@ -99,7 +98,7 @@ class Pagination extends Component {
     this.setState({ isOpen: false });
 
     onSetPage(page, page_size);
-  };
+  }
 
   render () {
     const { up } = DropdownDirection;
@@ -140,22 +139,28 @@ class Pagination extends Component {
                   isOpen={isOpen}
                   toggle={(
                     <DropdownToggle
-                      onToggle={this.onTogglePageSize}>
-                      { page_size }
+                      className="togglePageSize"
+                      onToggle={this.onTogglePageSize}
+                    >
+                      {page_size}
                     </DropdownToggle>
-                  )}>
+                  )}
+                >
                   {opts.map(option => (
-                    <DropdownItem key={option} component="button">
-                      { option }
+                    <DropdownItem
+                      key={option}
+                      component="button"
+                    >
+                      {option}
                     </DropdownItem>
                   ))}
                 </Dropdown>
-                <Trans>Per Page</Trans>
+                <Trans> Per Page</Trans>
               </LevelItem>
               <LevelItem>
                 <Split gutter="md" className="pf-u-display-flex pf-u-align-items-center">
                   <SplitItem>
-                    <Trans>{ itemMin } - { itemMax } of { count }</Trans>
+                    <Trans>{itemMin} - {itemMax} of {count}</Trans>
                   </SplitItem>
                   <SplitItem>
                     <div className="pf-c-input-group">
@@ -196,7 +201,7 @@ class Pagination extends Component {
                           value={value}
                           type="text"
                           onChange={this.onPageChange}
-                        /> of { pageCount }
+                        /> of {pageCount}
                       </Trans>
                     </form>
                   </SplitItem>
