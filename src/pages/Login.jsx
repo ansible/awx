@@ -48,7 +48,7 @@ class AWXLogin extends Component {
     try {
       await api.login(username, password);
     } catch (error) {
-      if (error.response.status === 401) {
+      if (error.response && error.response.status === 401) {
         this.setState({ isInputValid: false });
       }
     } finally {
