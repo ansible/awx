@@ -70,7 +70,7 @@ class APIClient {
     return this.http.get(endpoint);
   }
 
-  getInstanceGroups (){
+  getInstanceGroups () {
     return this.http.get(API_INSTANCE_GROUPS);
   }
 
@@ -82,7 +82,6 @@ class APIClient {
     }
     return false;
   }
-
 }
 
 export default APIClient;

@@ -73,11 +73,20 @@ class OrganizationAdd extends React.Component {
   async onSubmit() {
     const { api } = this.props;
     const data = Object.assign({}, { ...this.state });
-    const { data: response } = await api.createOrganization(data);
-    const url = response.related.instance_groups;
-    const selected = this.state.results.filter(group => group.isChecked);
-    await api.createInstanceGroups(url, selected);
-    this.resetForm();
+    try {
+      const { data: response } = await api.createOrganization(data);
+      const url = response.related.instance_groups;
+      const selected = this.state.results.filter(group => group.isChecked);
+      try {
+        await api.createInstanceGroups(url, selected);
+        this.resetForm();
+      } catch (err) {
+        this.setState({ createInstanceGroupsError: err })
+      }
+    }
+    catch (err) {
+      this.setState({ onSubmitError: err })
+    }
   }
 
   onCancel() {
@@ -86,12 +95,17 @@ class OrganizationAdd extends React.Component {
 
   async componentDidMount() {
     const { api } = this.props;
-    const { data } = await api.getInstanceGroups();
-    let results = [];
-    data.results.map((result) => {
-      results.push({ id: result.id, name: result.name, isChecked: false });
-    })
-    this.setState({ results });
+    try {
+      const { data } = await api.getInstanceGroups();
+      let results = [];
+      data.results.map((result) => {
+        results.push({ id: result.id, name: result.name, isChecked: false });
+      })
+      this.setState({ results });
+    } catch (error) {
+      this.setState({ getInstanceGroupsError: error })
+    }
+
   }
 
   render() {

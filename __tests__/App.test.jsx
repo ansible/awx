@@ -120,11 +120,4 @@ describe('<App />', () => {
 
     done();
   });
-
-  test('Componenet makes REST call to API_CONFIG endpoint when mounted', () => {
-    api.get = jest.fn().mockImplementation(() => Promise.resolve({}));
-    const appWrapper = shallow(<App.WrappedComponent />);
-    expect(api.get).toHaveBeenCalledTimes(1);
-    expect(api.get).toHaveBeenCalledWith(API_CONFIG);
-  });
 });
