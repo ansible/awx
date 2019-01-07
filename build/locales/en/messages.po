@@ -14,39 +14,39 @@ msgstr ""
 "Plural-Forms: \n"
 
 #: src/pages/Organizations/components/OrganizationBreadcrumb.jsx:60
-msgid "> add"
-msgstr ""
+#~ msgid "> add"
+#~ msgstr ""
 
 #: src/pages/Organizations/components/OrganizationBreadcrumb.jsx:53
-msgid "> edit"
-msgstr ""
+#~ msgid "> edit"
+#~ msgstr ""
 
-#: src/components/HelpDropdown.jsx:32
+#: src/components/PageHeaderToolbar.jsx:88
 msgid "About"
 msgstr ""
 
-#: src/components/About.jsx:82
+#: src/components/About.jsx:60
 msgid "AboutModal Logo"
 msgstr ""
 
-#: src/App.jsx:235
+#: src/index.jsx:175
 msgid "Access"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:227
-#: src/components/DataListToolbar/DataListToolbar.jsx:228
+#: src/components/DataListToolbar/DataListToolbar.jsx:266
+#: src/pages/Organizations/components/OrganizationBreadcrumb.jsx:68
 msgid "Add"
 msgstr ""
 
-#: src/App.jsx:253
+#: src/index.jsx:196
 msgid "Administration"
 msgstr ""
 
 #: src/pages/Organizations/components/OrganizationListItem.jsx:66
-msgid "Admins"
-msgstr ""
+#~ msgid "Admins"
+#~ msgstr ""
 
-#: src/components/About.jsx:100
+#: src/components/About.jsx:77
 msgid "Ansible Version"
 msgstr ""
 
@@ -54,7 +54,7 @@ msgstr ""
 msgid "Applications"
 msgstr ""
 
-#: src/App.jsx:283
+#: src/index.jsx:231
 msgid "Authentication"
 msgstr ""
 
@@ -62,60 +62,64 @@ msgstr ""
 msgid "Authentication Settings"
 msgstr ""
 
-#: src/components/About.jsx:80
+#: src/components/About.jsx:58
 msgid "Brand Image"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:212
+#: src/components/DataListToolbar/DataListToolbar.jsx:241
 msgid "Collapse"
 msgstr ""
 
-#: src/components/About.jsx:78
+#: src/components/About.jsx:56
 msgid "Copyright 2018 Red Hat, Inc."
 msgstr ""
 
-#: src/pages/Organizations/views/Organizations.list.jsx:32
+#: src/pages/Organizations/views/Organizations.list.jsx:29
 msgid "Created"
 msgstr ""
 
-#: src/App.jsx:257
+#: src/index.jsx:200
 #: src/pages/CredentialTypes.jsx:17
 msgid "Credential Types"
 msgstr ""
 
-#: src/App.jsx:217
+#: src/index.jsx:153
 #: src/pages/Credentials.jsx:17
 msgid "Credentials"
 msgstr ""
 
-#: src/App.jsx:191
+#: src/index.jsx:122
 #: src/pages/Dashboard.jsx:17
 msgid "Dashboard"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:220
-#: src/components/DataListToolbar/DataListToolbar.jsx:221
+#: src/components/DataListToolbar/DataListToolbar.jsx:252
+#: src/components/DataListToolbar/DataListToolbar.jsx:257
 msgid "Delete"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:207
+#: src/pages/Organizations/components/OrganizationBreadcrumb.jsx:59
+msgid "Edit"
+msgstr ""
+
+#: src/components/DataListToolbar/DataListToolbar.jsx:233
 msgid "Expand"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:164
+#: src/components/Pagination/Pagination.jsx:169
 msgid "First"
 msgstr ""
 
-#: src/components/HelpDropdown.jsx:26
+#: src/components/PageHeaderToolbar.jsx:80
 msgid "Help"
 msgstr ""
 
-#: src/App.jsx:269
+#: src/index.jsx:215
 #: src/pages/InstanceGroups.jsx:17
 msgid "Instance Groups"
 msgstr ""
 
-#: src/App.jsx:273
+#: src/index.jsx:220
 msgid "Integrations"
 msgstr ""
 
@@ -123,18 +127,18 @@ msgstr ""
 msgid "Invalid username or password. Please try again."
 msgstr ""
 
-#: src/App.jsx:225
+#: src/index.jsx:163
 #: src/pages/Inventories.jsx:17
 msgid "Inventories"
 msgstr ""
 
-#: src/App.jsx:229
+#: src/index.jsx:168
 #: src/pages/InventoryScripts.jsx:17
 msgid "Inventory Scripts"
 msgstr ""
 
-#: src/App.jsx:195
-#: src/App.jsx:287
+#: src/index.jsx:127
+#: src/index.jsx:236
 #: src/pages/Jobs.jsx:17
 msgid "Jobs"
 msgstr ""
@@ -143,37 +147,38 @@ msgstr ""
 msgid "Jobs Settings"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:216
+#: src/components/Pagination/Pagination.jsx:221
 msgid "Last"
 msgstr ""
 
-#: src/App.jsx:299
+#: src/index.jsx:251
 #: src/pages/License.jsx:17
 msgid "License"
 msgstr ""
 
-#: src/components/LogoutButton.jsx:17
+#: src/components/PageHeaderToolbar.jsx:116
 msgid "Logout"
 msgstr ""
 
-#: src/App.jsx:265
+#: src/index.jsx:210
 #: src/pages/ManagementJobs.jsx:17
 msgid "Management Jobs"
 msgstr ""
 
-#: src/pages/Organizations/views/Organizations.list.jsx:31
+#: src/pages/Organizations/views/Organizations.list.jsx:28
 msgid "Modified"
 msgstr ""
 
+#: src/index.jsx:137
 #: src/pages/Portal.jsx:17
 msgid "My View"
 msgstr ""
 
-#: src/pages/Organizations/views/Organizations.list.jsx:30
+#: src/pages/Organizations/views/Organizations.list.jsx:27
 msgid "Name"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:207
+#: src/components/Pagination/Pagination.jsx:212
 msgid "Next"
 msgstr ""
 
@@ -181,92 +186,92 @@ msgstr ""
 msgid "Notification Templates"
 msgstr ""
 
-#: src/App.jsx:261
+#: src/index.jsx:205
 msgid "Notifications"
 msgstr ""
 
-#: src/pages/Organizations/views/Organization.add.jsx:15
+#: src/pages/Organizations/views/Organization.add.jsx:79
 msgid "Organization Add"
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:99
+#: src/pages/Organizations/components/OrganizationDetail.jsx:72
 msgid "Organization detail tabs"
 msgstr ""
 
-#: src/App.jsx:239
-#: src/pages/Organizations/views/Organization.view.jsx:62
-#: src/pages/Organizations/views/Organizations.list.jsx:189
-#: src/pages/Organizations/views/Organizations.list.jsx:195
+#: src/index.jsx:179
+#: src/pages/Organizations/views/Organization.view.jsx:63
+#: src/pages/Organizations/views/Organizations.list.jsx:196
+#: src/pages/Organizations/views/Organizations.list.jsx:202
 msgid "Organizations"
 msgstr ""
 
-#: src/pages/Organizations/views/Organizations.list.jsx:211
+#: src/pages/Organizations/views/Organizations.list.jsx:218
 msgid "Organizations List"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:184
+#: src/components/Pagination/Pagination.jsx:189
 msgid "Page <0/> of {pageCount}"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:187
+#: src/components/Pagination/Pagination.jsx:192
 msgid "Page Number"
 msgstr ""
 
-#: src/pages/Login.jsx:76
+#: src/pages/Login.jsx:79
 msgid "Password"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:153
+#: src/components/Pagination/Pagination.jsx:158
 msgid "Per Page"
 msgstr ""
 
 #: src/App.jsx:203
-msgid "Portal Mode"
-msgstr ""
+#~ msgid "Portal Mode"
+#~ msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:173
+#: src/components/Pagination/Pagination.jsx:178
 msgid "Previous"
 msgstr ""
 
-#: src/App.jsx:180
+#: src/index.jsx:115
 msgid "Primary Navigation"
 msgstr ""
 
-#: src/App.jsx:221
+#: src/index.jsx:158
 #: src/pages/Projects.jsx:17
 msgid "Projects"
 msgstr ""
 
-#: src/App.jsx:209
+#: src/index.jsx:144
 msgid "Resources"
 msgstr ""
 
-#: src/App.jsx:199
+#: src/index.jsx:132
 #: src/pages/Schedules.jsx:17
 msgid "Schedules"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:163
+#: src/components/DataListToolbar/DataListToolbar.jsx:191
 msgid "Search"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:157
+#: src/components/DataListToolbar/DataListToolbar.jsx:185
 msgid "Search text input"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:128
+#: src/components/DataListToolbar/DataListToolbar.jsx:160
 msgid "Select all"
 msgstr ""
 
-#: src/App.jsx:279
+#: src/index.jsx:227
 msgid "Settings"
 msgstr ""
 
-#: src/components/DataListToolbar/DataListToolbar.jsx:199
+#: src/components/DataListToolbar/DataListToolbar.jsx:222
 msgid "Sort"
 msgstr ""
 
-#: src/App.jsx:291
+#: src/index.jsx:241
 msgid "System"
 msgstr ""
 
@@ -274,13 +279,13 @@ msgstr ""
 msgid "System Settings"
 msgstr ""
 
-#: src/App.jsx:247
-#: src/pages/Organizations/components/OrganizationListItem.jsx:58
+#: src/index.jsx:189
+#: src/pages/Organizations/components/OrganizationListItem.jsx:57
 #: src/pages/Teams.jsx:17
 msgid "Teams"
 msgstr ""
 
-#: src/App.jsx:213
+#: src/index.jsx:148
 #: src/pages/Templates.jsx:17
 msgid "Templates"
 msgstr ""
@@ -289,7 +294,11 @@ msgstr ""
 msgid "Tower Brand Image"
 msgstr ""
 
-#: src/App.jsx:295
+#: src/components/PageHeaderToolbar.jsx:108
+msgid "User Details"
+msgstr ""
+
+#: src/index.jsx:246
 msgid "User Interface"
 msgstr ""
 
@@ -297,41 +306,41 @@ msgstr ""
 msgid "User Interface Settings"
 msgstr ""
 
-#: src/pages/Login.jsx:73
+#: src/pages/Login.jsx:78
 msgid "Username"
 msgstr ""
 
-#: src/App.jsx:243
-#: src/pages/Organizations/components/OrganizationListItem.jsx:50
+#: src/index.jsx:184
+#: src/pages/Organizations/components/OrganizationListItem.jsx:49
 #: src/pages/Users.jsx:17
 msgid "Users"
 msgstr ""
 
-#: src/App.jsx:187
+#: src/index.jsx:118
 msgid "Views"
 msgstr ""
 
-#: src/pages/Login.jsx:70
+#: src/pages/Login.jsx:74
 msgid "Welcome to Ansible Tower! Please Sign In."
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:87
+#: src/pages/Organizations/components/OrganizationDetail.jsx:56
 msgid "add {currentTab}"
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:76
+#: src/pages/Organizations/components/OrganizationDetail.jsx:45
 msgid "adding {currentTab}"
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:69
+#: src/pages/Organizations/components/OrganizationDetail.jsx:38
 msgid "confirm removal of {currentTab}/cancel and go back to {currentTab} view."
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:91
+#: src/pages/Organizations/components/OrganizationDetail.jsx:60
 msgid "delete {currentTab}"
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:67
+#: src/pages/Organizations/components/OrganizationDetail.jsx:36
 msgid "deleting {currentTab} association with orgs"
 msgstr ""
 
@@ -343,18 +352,22 @@ msgstr ""
 msgid "save/cancel and go back to view"
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:78
+#: src/pages/Organizations/components/OrganizationDetail.jsx:47
 msgid "save/cancel and go back to {currentTab} view"
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationListItem.jsx:30
+#: src/pages/Organizations/components/OrganizationListItem.jsx:29
 msgid "select organization {itemId}"
 msgstr ""
 
-#: src/pages/Organizations/components/OrganizationDetail.jsx:85
+#: src/pages/Organizations/components/OrganizationDetail.jsx:82
+msgid "{0}"
+msgstr ""
+
+#: src/pages/Organizations/components/OrganizationDetail.jsx:54
 msgid "{currentTab} detail view"
 msgstr ""
 
-#: src/components/Pagination/Pagination.jsx:158
+#: src/components/Pagination/Pagination.jsx:163
 msgid "{itemMin} - {itemMax} of {count}"
 msgstr ""
