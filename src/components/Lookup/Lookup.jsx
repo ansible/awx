@@ -3,14 +3,13 @@ import React from 'react';
 import { SearchIcon } from '@patternfly/react-icons';
 import {
   Modal,
-  List,
-  ListItem,
-  Checkbox,
   Button,
   ActionGroup,
   Toolbar,
   ToolbarGroup,
 } from '@patternfly/react-core';
+
+import ListItem from '../ListItem'
 
 class Lookup extends React.Component {
   constructor(props) {
@@ -54,24 +53,23 @@ class Lookup extends React.Component {
         <span className="pf-c-input-group__text" aria-label="search" id="search" onClick={this.onLookup}><SearchIcon /></span>
         <div className="pf-c-form-control">{this.wrapTags(this.props.data)}</div>
         <Modal
+          isLarge
           className="awx-c-modal"
           title={`Select ${this.props.lookup_header}`}
           isOpen={isModalOpen}
           onClose={this.handleModalToggle}
         >
-          <List>
+          <ul className="pf-c-data-list awx-c-list">
             {data.map(i =>
-              <ListItem key={i.id}>
-                <Checkbox
-                  label={i.name}
-                  checked={i.isChecked}
-                  onChange={this.onChecked}
-                  aria-label="result checkbox"
-                  id={`checked-${i.id}`}
-                  value={i.id}
-                />
-              </ListItem>)}
-          </List>
+              <ListItem
+                key={i.id}
+                itemId={i.id}
+                name={i.name}
+                isSelected={i.isChecked}
+                onSelect={this.onChecked}
+              />
+            )}
+          </ul>
           <ActionGroup className="at-align-right">
             <Toolbar>
               <ToolbarGroup>
