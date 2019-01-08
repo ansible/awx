@@ -34,7 +34,7 @@ import Jobs from './pages/Jobs';
 import Login from './pages/Login';
 import ManagementJobs from './pages/ManagementJobs';
 import NotificationTemplates from './pages/NotificationTemplates';
-import Organizations from './pages/Organizations';
+import Organizations from './pages/Organizations/Organizations';
 import Portal from './pages/Portal';
 import Projects from './pages/Projects';
 import Schedules from './pages/Schedules';

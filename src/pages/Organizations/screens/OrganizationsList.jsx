@@ -22,7 +22,7 @@ import {
   parseQueryString,
 } from '../../../qs';
 
-class Organizations extends Component {
+class OrganizationsList extends Component {
   columns = [
     { name: i18nMark('Name'), key: 'name', isSortable: true },
     { name: i18nMark('Modified'), key: 'modified', isSortable: true, isNumeric: true },
@@ -248,4 +248,4 @@ class Organizations extends Component {
   }
 }
 
-export default withRouter(Organizations);
+export default withRouter(OrganizationsList);

@@ -2,7 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@lingui/react';
-import Organizations from '../../../src/pages/Organizations/index';
+import Organizations from '../../../src/pages/Organizations/Organizations';
 
 describe('<Organizations />', () => {
   test('initially renders succesfully', () => {

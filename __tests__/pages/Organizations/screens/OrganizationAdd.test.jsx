@@ -17,7 +17,7 @@ const getAppWithConfigContext = (context = {
   });
 
   // Return the updated OrganizationAdd module with mocked context
-  return require('../../../../src/pages/Organizations/views/Organization.add').default;
+  return require('../../../../src/pages/Organizations/screens/OrganizationAdd').default;
 };
 
 beforeEach(() => {
