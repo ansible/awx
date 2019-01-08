@@ -75,6 +75,7 @@ class OrganizationAdd extends React.Component {
     const data = Object.assign({}, { ...this.state });
     try {
       const { data: response } = await api.createOrganization(data);
+      console.log(response);
       const url = response.related.instance_groups;
       const selected = this.state.results.filter(group => group.isChecked);
       try {
@@ -82,15 +83,21 @@ class OrganizationAdd extends React.Component {
         this.resetForm();
       } catch (err) {
         this.setState({ createInstanceGroupsError: err })
+      } finally {
+        this.onSuccess(response.id);
       }
     }
     catch (err) {
       this.setState({ onSubmitError: err })
-    }
+    } 
   }
 
   onCancel() {
     this.props.history.push('/organizations');
+  }
+
+  onSuccess(id) {
+    this.props.history.push(`/organizations/${id}`);
   }
 
   async componentDidMount() {
