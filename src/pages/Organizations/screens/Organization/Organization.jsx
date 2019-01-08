@@ -5,11 +5,15 @@ import {
   Route,
   withRouter,
 } from 'react-router-dom';
-import OrganizationBreadcrumb from '../components/OrganizationBreadcrumb';
-import OrganizationDetail from '../components/OrganizationDetail';
-import OrganizationEdit from '../components/OrganizationEdit';
+import {
+  PageSection
+} from '@patternfly/react-core';
 
-class OrganizationView extends Component {
+import OrganizationBreadcrumb from '../../components/OrganizationBreadcrumb';
+import OrganizationDetail from './OrganizationDetail';
+import OrganizationEdit from './OrganizationEdit';
+
+class Organization extends Component {
   constructor (props) {
     super(props);
 
@@ -84,39 +88,41 @@ class OrganizationView extends Component {
           location={location}
           organization={organization}
         />
-        <Switch>
-          <Route
-            path={`${match.path}/edit`}
-            component={() => (
-              <OrganizationEdit
-                location={location}
-                match={match}
-                parentBreadcrumbObj={parentBreadcrumbObj}
-                organization={organization}
-                params={params}
-                currentTab={currentTab}
-              />
-            )}
-          />
-          <Route
-            path={`${match.path}`}
-            component={() => (
-              <OrganizationDetail
-                location={location}
-                match={match}
-                parentBreadcrumbObj={parentBreadcrumbObj}
-                organization={organization}
-                params={params}
-                currentTab={currentTab}
-              />
-            )}
-          />
-        </Switch>
-        {error ? 'error!' : ''}
-        {loading ? 'loading...' : ''}
+        <PageSection>
+          <Switch>
+            <Route
+              path={`${match.path}/edit`}
+              component={() => (
+                <OrganizationEdit
+                  location={location}
+                  match={match}
+                  parentBreadcrumbObj={parentBreadcrumbObj}
+                  organization={organization}
+                  params={params}
+                  currentTab={currentTab}
+                />
+              )}
+            />
+            <Route
+              path={`${match.path}`}
+              component={() => (
+                <OrganizationDetail
+                  location={location}
+                  match={match}
+                  parentBreadcrumbObj={parentBreadcrumbObj}
+                  organization={organization}
+                  params={params}
+                  currentTab={currentTab}
+                />
+              )}
+            />
+          </Switch>
+          {error ? 'error!' : ''}
+          {loading ? 'loading...' : ''}
+        </PageSection>
       </Fragment>
     );
   }
 }
 
-export default withRouter(OrganizationView);
+export default withRouter(Organization);

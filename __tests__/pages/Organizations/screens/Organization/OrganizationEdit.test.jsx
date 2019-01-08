@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-import OrganizationEdit from '../../../../src/pages/Organizations/components/OrganizationEdit';
+import OrganizationEdit from '../../../../../src/pages/Organizations/screens/Organization/OrganizationEdit';
 
 describe('<OrganizationEdit />', () => {
   test('initially renders succesfully', () => {
