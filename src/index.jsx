@@ -134,7 +134,7 @@ export async function main (render, api) {
                                 component: Schedules
                               },
                               {
-                                title: i18n._(t`Portal Mode`),
+                                title: i18n._(t`My View`),
                                 path: '/portal',
                                 component: Portal
                               },
