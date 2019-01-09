@@ -146,6 +146,7 @@ virtualenv_awx:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
 			$(PYTHON) -m venv --system-site-packages $(VENV_BASE)/awx; \
+			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed docutils==0.14; \
 		fi; \
 	fi
 
