@@ -2,8 +2,7 @@ export default
     function KindChange(Empty, i18n) {
         return function(params) {
             var scope = params.scope,
-            reset = params.reset,
-            collapse, id;
+            reset = params.reset;
 
             $('.popover').each(function() {
                 // remove lingering popover <div>. Seems to be a bug in TB3 RC1
