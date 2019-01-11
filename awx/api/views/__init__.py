@@ -18,7 +18,7 @@ import six
 # Django
 from django.conf import settings
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.db import IntegrityError, transaction, connection
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
@@ -173,7 +173,7 @@ class DashboardView(APIView):
         user_inventory = get_user_queryset(request.user, Inventory)
         inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
         user_inventory_external = user_inventory.filter(has_inventory_sources=True)
-        failed_inventory = sum(i.inventory_sources_with_failures for i in user_inventory)
+        failed_inventory = user_inventory.aggregate(Sum('inventory_sources_with_failures'))['inventory_sources_with_failures__sum']
         data['inventories'] = {'url': reverse('api:inventory_list', request=request),
                                'total': user_inventory.count(),
                                'total_with_inventory_source': user_inventory_external.count(),
