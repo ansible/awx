@@ -28,7 +28,7 @@ else
 fi
 
 make awx-link
-yes | cp -rf /awx_devel/tools/docker-compose/supervisor.conf /supervisor.conf
+yes | cp -rf /awx_devel/tools/docker-compose/supervisor.conf /etc/supervisord.conf
 
 # AWX bootstrapping
 make version_file
