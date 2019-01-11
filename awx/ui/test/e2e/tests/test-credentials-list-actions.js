@@ -30,7 +30,7 @@ module.exports = {
         credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
-        credentials.expect.element(`#credentials_table tr[id="${data.credential.id}"]`).visible;
+        credentials.expect.element(`#credentials_table .List-tableRow[id="${data.credential.id}"]`).visible;
         credentials.expect.element('i[class*="copy"]').visible;
         credentials.expect.element('i[class*="copy"]').enabled;
 
