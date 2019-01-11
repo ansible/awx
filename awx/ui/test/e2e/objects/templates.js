@@ -1,9 +1,7 @@
 import _ from 'lodash';
 
-import actions from './sections/actions';
 import breadcrumb from './sections/breadcrumb';
 import createFormSection from './sections/createFormSection';
-import createTableSection from './sections/createTableSection';
 import header from './sections/header';
 import lookupModal from './sections/lookupModal';
 import navigation from './sections/navigation';
@@ -175,10 +173,10 @@ module.exports = {
                 .waitForElementVisible('div.spinny')
                 .waitForElementNotVisible('div.spinny');
 
-            this.api                
+            this.api
                 .waitForElementNotPresent('#inventories_table .List-tableRow:nth-child(2)')
                 .waitForElementVisible('#inventories_table .List-tableRow:nth-child(1) input[type="radio"]')
-                .click('#inventories_table .List-tableRow:nth-child(1) input[type="radio"]')
+                .click('#inventories_table .List-tableRow:nth-child(1) input[type="radio"]');
 
             this.section.lookupInventory.expect.element('@save').enabled;
 
@@ -202,7 +200,7 @@ module.exports = {
                 .waitForElementVisible('div.spinny')
                 .waitForElementNotVisible('div.spinny');
 
-            this.api                
+            this.api
                 .waitForElementNotPresent('#projects_table .List-tableRow:nth-child(2)')
                 .waitForElementVisible('#projects_table .List-tableRow:nth-child(1) input[type="radio"]')
                 .click('#projects_table .List-tableRow:nth-child(1) input[type="radio"]');
