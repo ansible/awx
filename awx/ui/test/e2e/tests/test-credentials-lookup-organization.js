@@ -51,24 +51,23 @@ module.exports = {
         const credentials = client.page.credentials();
         const { details } = credentials.section.add.section;
         const { lookupModal } = credentials.section;
-        const { table } = lookupModal.section;
 
         details.section.organization.expect.element('@lookup').visible;
 
         credentials.expect.section('@lookupModal').present;
 
-        table.expect.element('tbody tr:nth-child(1) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(2) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(3) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(4) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(5) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(6) input[type="radio"]').not.present;
+        lookupModal.expect.element('.List-tableRow:nth-child(1) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(2) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(3) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(4) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(5) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(6) input[type="radio"]').not.present;
 
         lookupModal.expect.element('@select').visible;
         lookupModal.expect.element('@select').not.enabled;
 
-        table.click('tbody tr:nth-child(2)');
-        table.expect.element('tbody tr:nth-child(2) input[type="radio"]').selected;
+        lookupModal.click('.List-tableRow:nth-child(2)');
+        lookupModal.expect.element('.List-tableRow:nth-child(2) input[type="radio"]').selected;
 
         lookupModal.expect.element('@select').visible;
         lookupModal.expect.element('@select').enabled;
@@ -76,58 +75,53 @@ module.exports = {
     'sort and unsort the table by name with an item selected': client => {
         const credentials = client.page.credentials();
         const { lookupModal } = credentials.section;
-        const { table } = lookupModal.section;
 
-        const column = table.section.header.findColumnByText('Name');
+        lookupModal.expect.element('#organization-name-header').visible;
+        lookupModal.expect.element('#organization-name-header').visible;
 
-        column.expect.element('@self').visible;
-        column.expect.element('@sortable').visible;
-
-        column.click('@self');
+        lookupModal.click('#organization-name-header');
         credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
-        table.expect.element('tbody tr:nth-child(1) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(2) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(3) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(4) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(5) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(1) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(2) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(3) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(4) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(5) input[type="radio"]').not.selected;
 
-        column.click('@self');
+        lookupModal.click('#organization-name-header');
         credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
-        table.expect.element('tbody tr:nth-child(1) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(2) input[type="radio"]').selected;
-        table.expect.element('tbody tr:nth-child(3) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(4) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(5) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(1) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(2) input[type="radio"]').selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(3) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(4) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(5) input[type="radio"]').not.selected;
     },
     'use the pagination controls with an item selected': client => {
         const credentials = client.page.credentials();
         const { lookupModal } = credentials.section;
-        const { table } = lookupModal.section;
         const { pagination } = lookupModal.section;
 
         pagination.click('@next');
         credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
-        table.expect.element('tbody tr:nth-child(1) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(2) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(3) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(4) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(5) input[type="radio"]').not.selected;
-
+        lookupModal.expect.element('.List-tableRow:nth-child(1) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(2) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(3) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(4) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(5) input[type="radio"]').not.selected;
         pagination.click('@previous');
         credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
-        table.expect.element('tbody tr:nth-child(1) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(2) input[type="radio"]').selected;
-        table.expect.element('tbody tr:nth-child(3) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(4) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(5) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(1) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(2) input[type="radio"]').selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(3) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(4) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(5) input[type="radio"]').not.selected;
 
         pagination.click('@last');
         credentials.waitForElementVisible('div.spinny');
@@ -137,21 +131,21 @@ module.exports = {
         credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
-        table.expect.element('tbody tr:nth-child(1) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(2) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(3) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(4) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(5) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(1) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(2) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(3) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(4) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(5) input[type="radio"]').not.selected;
 
         pagination.click('@first');
         credentials.waitForElementVisible('div.spinny');
         credentials.waitForElementNotVisible('div.spinny');
 
-        table.expect.element('tbody tr:nth-child(1) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(2) input[type="radio"]').selected;
-        table.expect.element('tbody tr:nth-child(3) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(4) input[type="radio"]').not.selected;
-        table.expect.element('tbody tr:nth-child(5) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(1) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(2) input[type="radio"]').selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(3) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(4) input[type="radio"]').not.selected;
+        lookupModal.expect.element('.List-tableRow:nth-child(5) input[type="radio"]').not.selected;
 
         client.end();
     }

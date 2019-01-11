@@ -88,7 +88,7 @@ module.exports = {
             }
         },
         list: {
-            selector: '.Panel',
+            selector: '.at-Panel',
             elements: {
                 badge: 'span[class~="badge"]',
                 title: 'div[class="List-titleText"]',

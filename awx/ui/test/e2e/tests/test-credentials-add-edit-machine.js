@@ -193,16 +193,14 @@ module.exports = {
     },
     'credential is searchable after saving': client => {
         const credentials = client.page.credentials();
-        const row = '#credentials_table tbody tr';
+        const row = '#credentials_table .List-tableRow';
 
-        credentials.section.list.section.search
-            .waitForElementVisible('@input', AWX_E2E_TIMEOUT_LONG)
-            .waitForElementVisible('@searchButton', AWX_E2E_TIMEOUT_LONG)
-            .sendKeys('@input', `name:${store.credential.name}`)
-            .sendKeys('@input', client.Keys.ENTER);
+        const { search } = credentials.section.list.section;
 
-        client.pause(1000);
-        client.waitForElementNotVisible('div.spinny');
+        search
+            .waitForElementVisible('@input')
+            .setValue('@input', `name:${store.credential.name}`)
+            .click('@searchButton');
 
         credentials.waitForElementNotPresent(`${row}:nth-of-type(2)`);
         credentials.expect.element(row).text.contain(store.credential.name);

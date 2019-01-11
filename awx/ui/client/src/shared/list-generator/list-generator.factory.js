@@ -562,7 +562,7 @@ export default ['$compile', 'Attr', 'Icon',
                 }
 
                 if(options.mode === 'edit' && list.fieldActions) {
-                    html += "<div class=\"List-tableHeader List-tableHeader--actions actions-column";
+                    html += `<div id="${list.iterator}-actions-header" class=\"List-tableHeader List-tableHeader--actions actions-column`;
                     html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : "";
                     html += "\" translate>";
                     html += (list.fieldActions.label === undefined || list.fieldActions.label) ? i18n._("Actions") : "";
