@@ -17,7 +17,8 @@ from django.conf import LazySettings
 from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured
-from django.db import ProgrammingError, OperationalError, transaction, connection
+from django.db import transaction, connection
+from django.db.utils import Error as DBError
 from django.utils.functional import cached_property
 
 # Django REST Framework
@@ -90,7 +91,7 @@ def _ctit_db_wrapper(trans_safe=False):
                     logger.debug('Obtaining database settings in spite of broken transaction.')
                     transaction.set_rollback(False)
         yield
-    except (ProgrammingError, OperationalError):
+    except DBError:
         if 'migrate' in sys.argv and get_tower_migration_version() < '310':
             logger.info('Using default settings until version 3.1 migration.')
         else:
