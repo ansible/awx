@@ -17,31 +17,29 @@
             </div>
             <div class="List-noItems" ng-show="wf_maker_templates.length === 0 && (searchTags | isEmpty)">PLEASE ADD ITEMS TO THIS LIST</div>
             <div class="list-table-container" ng-show="wf_maker_templates.length > 0">
-                <table id="templates_table" class="List-table" is-extended="false">
-                    <thead>
-                        <tr class="List-tableHeaderRow">
-                            <th class="List-tableHeader select-column List-staticColumn--smallStatus" translate=""></th>
-                            <th class="col-md-8" base-path="unified_job_templates" collection="wf_maker_templates" dataset="wf_maker_template_dataset" column-sort="" column-field="name" column-iterator="wf_maker_template" column-no-sort="undefined" column-label="Name" column-custom-class="" query-set="wf_maker_template_queryset">
-                            </th>
-                            <th class="List-tableHeader--info col-md-3" base-path="unified_job_templates" collection="wf_maker_templates" dataset="wf_maker_template_dataset" column-sort="" column-field="info" column-iterator="wf_maker_template" column-no-sort="true" column-label="" column-custom-class="" query-set="wf_maker_template_queryset">
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-class="[template.success_class, {'List-tableRow--selected' : $stateParams['template_id'] == wf_maker_template.id}, {'List-tableRow--disabled': !wf_maker_template.summary_fields.user_capabilities.edit}]" id="{{ wf_maker_template.id }}" class="List-tableRow template_class" disable-row="{{ !wf_maker_template.summary_fields.user_capabilities.edit }}" ng-repeat="wf_maker_template in wf_maker_templates">
-                            <td class="List-tableCell">
-                                <input type="radio" ng-model="wf_maker_template.checked" ng-value="1" ng-false-value="0" name="check_template_{{wf_maker_template.id}}" ng-click="toggle_row(wf_maker_template)" ng-disabled="!wf_maker_template.summary_fields.user_capabilities.edit">
-                            </td>
-                            <td class="List-tableCell name-column col-md-8" ng-click="toggle_row(wf_maker_template)">
+                <div id="templates_table" class="List-table" is-extended="false">
+                    <div class="List-lookupLayout List-tableHeaderRow">
+                        <div></div>
+                        <div class="d-flex h-100">
+                            <div class="col-md-8" base-path="unified_job_templates" collection="wf_maker_templates" dataset="wf_maker_template_dataset" column-sort="" column-field="name" column-iterator="wf_maker_template" column-no-sort="undefined" column-label="Name" column-custom-class="" query-set="wf_maker_template_queryset"></div>
+                            <div class="List-tableHeader--info col-md-4" base-path="unified_job_templates" collection="wf_maker_templates" dataset="wf_maker_template_dataset" column-sort="" column-field="info" column-iterator="wf_maker_template" column-no-sort="true" column-label="" column-custom-class="" query-set="wf_maker_template_queryset"></div>
+                        </div>
+                    </div>
+                    <div ng-class="[template.success_class, {'List-tableRow--selected' : $stateParams['template_id'] == wf_maker_template.id}, {'List-tableRow--disabled': !wf_maker_template.summary_fields.user_capabilities.edit}]" id="{{ wf_maker_template.id }}" class="List-lookupLayout List-tableRow template_class" disable-row="{{ !wf_maker_template.summary_fields.user_capabilities.edit }}" ng-repeat="wf_maker_template in wf_maker_templates">
+                        <div class="List-centerEnd select-column">
+                            <input type="radio" ng-model="wf_maker_template.checked" ng-value="1" ng-false-value="0" name="check_template_{{wf_maker_template.id}}" ng-click="toggle_row(wf_maker_template)" ng-disabled="!wf_maker_template.summary_fields.user_capabilities.edit">
+                        </div>
+                        <div class="d-flex h-100">
+                            <div class="List-tableCell name-column col-md-8" ng-click="toggle_row(wf_maker_template)">
                                 {{wf_maker_template.name}}
                                 <span class="at-RowItem-tag" ng-show="wf_maker_template.type === 'workflow_job_template'">
                                     {{:: strings.get('workflow_maker.WORKFLOW') }}
                                 </span>
-                            </td>
-                            <td class="col-md-3" ng-include="'/static/partials/job-template-details.html'"></td>
-                        </tr>
-                    </tbody>
-                </table>
+                            </div>
+                            <div class="col-md-4" ng-include="'/static/partials/job-template-details.html'"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <paginate base-path="unified_job_templates" collection="wf_maker_templates" dataset="wf_maker_template_dataset" iterator="wf_maker_template" query-set="wf_maker_template_queryset" hide-view-per-page="true" max-visible-pages="5"></paginate>
         </div>
@@ -56,24 +54,22 @@
             </div>
             <div class="List-noItems" ng-show="wf_maker_projects.length === 0 && (searchTags | isEmpty)">No Projects Have Been Created</div>
             <div class="list-table-container" ng-show="wf_maker_projects.length > 0">
-                <table id="projects_table" class="List-table" is-extended="false">
-                    <thead>
-                        <tr class="List-tableHeaderRow">
-                            <th class="List-tableHeader select-column List-staticColumn--smallStatus" translate=""></th>
-                            <th base-path="projects" collection="wf_maker_projects" dataset="wf_maker_project_dataset" column-sort="" column-field="name" column-iterator="wf_maker_project" column-no-sort="undefined" column-label="Name" column-custom-class="col-md-8" query-set="wf_maker_project_queryset">
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-class="[wf_maker_project.success_class, {'List-tableRow--selected' : $stateParams['project_id'] == wf_maker_project.id}]" id="{{ wf_maker_project.id }}" class="List-tableRow project_class" ng-repeat="wf_maker_project in wf_maker_projects">
-                            <td class="List-tableCell">
-                                <input type="radio" ng-model="wf_maker_project.checked" ng-value="1" ng-false-value="0" name="check_project_{{wf_maker_project.id}}" ng-click="toggle_row(wf_maker_project)" ng-disabled="undefined">
-                            </td>
-                            <td class="List-tableCell name-column col-md-8" ng-click="toggle_row(wf_maker_project)">
-                                {{ wf_maker_project.name }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div id="projects_table" class="List-table" is-extended="false">
+                    <div class="List-lookupLayout List-tableHeaderRow">
+                        <div></div>
+                        <div class="d-flex h-100">
+                            <div base-path="projects" collection="wf_maker_projects" dataset="wf_maker_project_dataset" column-sort="" column-field="name" column-iterator="wf_maker_project" column-no-sort="undefined" column-label="Name" column-custom-class="col-md-12" query-set="wf_maker_project_queryset"></div>
+                        </div>
+                    </div>
+                    <div ng-class="[wf_maker_project.success_class, {'List-tableRow--selected' : $stateParams['project_id'] == wf_maker_project.id}]" id="{{ wf_maker_project.id }}" class="List-lookupLayout List-tableRow project_class" ng-repeat="wf_maker_project in wf_maker_projects">
+                        <div class="List-centerEnd select-column">
+                            <input type="radio" ng-model="wf_maker_project.checked" ng-value="1" ng-false-value="0" name="check_project_{{wf_maker_project.id}}" ng-click="toggle_row(wf_maker_project)" ng-disabled="undefined">
+                        </div>
+                        <div class="d-flex h-100">
+                            <div class="List-tableCell name-column col-md-12" ng-click="toggle_row(wf_maker_project)">{{ wf_maker_project.name }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <paginate base-path="projects" collection="wf_maker_projects" dataset="wf_maker_project_dataset" iterator="wf_maker_project" query-set="wf_maker_project_queryset" hide-view-per-page="true" max-visible-pages="5"></paginate>
         </div>
@@ -88,25 +84,22 @@
             </div>
             <div class="List-noItems" ng-show="wf_maker_inventory_sources.length === 0 && (searchTags | isEmpty)">PLEASE ADD ITEMS TO THIS LIST</div>
             <div class="list-table-container" ng-show="wf_maker_inventory_sources.length > 0">
-                <table id="workflow_inventory_sources_table" class="List-table" is-extended="false">
-                    <thead>
-                        <tr class="List-tableHeaderRow">
-                            <th class="List-tableHeader select-column List-staticColumn--smallStatus" translate=""></th>
-                            <th base-path="inventory_sources" collection="wf_maker_inventory_sources" dataset="wf_maker_inventory_source_dataset" column-sort="" column-field="name" column-iterator="wf_maker_inventory_source" column-no-sort="undefined" column-label="Name" column-custom-class="" query-set="wf_maker_inventory_source_queryset">
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-class="[wf_maker_inventory_source.success_class, {'List-tableRow--selected' : $stateParams['inventory_source_id'] == wf_maker_inventory_source.id}]" id="{{ wf_maker_inventory_source.id }}" class="List-tableRow inventory_source_class" ng-repeat="wf_maker_inventory_source in wf_maker_inventory_sources">
-                            <td class="List-tableCell">
-                                <input type="radio" ng-model="wf_maker_inventory_source.checked" ng-value="1" ng-false-value="0" name="check_inventory_source_{{wf_maker_inventory_source.id}}" ng-click="toggle_row(wf_maker_inventory_source)" ng-disabled="undefined">
-                            </td>
-                            <td class="List-tableCell name-column col-md-11" ng-click="toggle_row(wf_maker_inventory_source)">
-                                <span aw-tool-tip="Inventory: {{wf_maker_inventory_source.summary_fields.inventory.name}}" data-placement="top">{{ wf_maker_inventory_source.name }}</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div id="workflow_inventory_sources_table" class="List-table" is-extended="false">
+                    <div class="List-lookupLayout List-tableHeaderRow">
+                        <div></div>
+                        <div class="d-flex h-100">
+                            <div base-path="inventory_sources" collection="wf_maker_inventory_sources" dataset="wf_maker_inventory_source_dataset" column-sort="" column-field="name" column-iterator="wf_maker_inventory_source" column-no-sort="undefined" column-label="Name" column-custom-class="" query-set="wf_maker_inventory_source_queryset"></div>
+                        </div>
+                    </div>
+                    <div ng-class="[wf_maker_inventory_source.success_class, {'List-tableRow--selected' : $stateParams['inventory_source_id'] == wf_maker_inventory_source.id}]" id="{{ wf_maker_inventory_source.id }}" class="List-lookupLayout List-tableRow inventory_source_class" ng-repeat="wf_maker_inventory_source in wf_maker_inventory_sources">
+                        <div class="List-centerEnd select-column">
+                            <input type="radio" ng-model="wf_maker_inventory_source.checked" ng-value="1" ng-false-value="0" name="check_inventory_source_{{wf_maker_inventory_source.id}}" ng-click="toggle_row(wf_maker_inventory_source)" ng-disabled="undefined">
+                        </div>
+                        <div class="d-flex h-100">
+                            <div class="List-tableCell name-column col-md-12" ng-click="toggle_row(wf_maker_inventory_source)">{{ wf_maker_inventory_source.name }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <paginate base-path="inventory_sources" collection="wf_maker_inventory_sources" dataset="wf_maker_inventory_source_dataset" iterator="wf_maker_inventory_source" query-set="wf_maker_inventory_source_queryset" hide-view-per-page="true" max-visible-pages="5"></paginate>
         </div>

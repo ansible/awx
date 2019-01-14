@@ -1,8 +1,8 @@
 body {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
-    color: #161B1F;
-    background-color: #FCFCFC;
+    color: @default-data-txt;
+    background-color: @default-secondary-bg;
     font-size: 0.88rem;
 }
 
@@ -22,22 +22,22 @@ body {
 
 .bs-tooltip-top .arrow::before,
 .bs-tooltip-auto[x-placement^="top"] .arrow::before {
-    border-top-color: #707070;
+    border-top-color: @default-stdout-txt;
 }
 
 .bs-tooltip-bottom .arrow::before,
 .bs-tooltip-auto[x-placement^="bottom"] .arrow::before {
-    border-bottom-color: #707070;
+    border-bottom-color: @default-stdout-txt;
 }
 
 .bs-tooltip-left .arrow::before,
 .bs-tooltip-auto[x-placement^="left"] .arrow::before {
-    border-left-color: #707070;
+    border-left-color: @default-stdout-txt;
 }
 
 .bs-tooltip-right .arrow::before,
 .bs-tooltip-auto[x-placement^="right"] .arrow::before {
-    border-right-color: #707070;
+    border-right-color: @default-stdout-txt;
 }
 
 /* this used to exist but was removed */
@@ -108,27 +108,27 @@ button, html input[type=button], input[type=reset], input[type=submit] {
 }
 
 .bs-popover-auto[x-placement^=right] .arrow::after, .bs-popover-right .arrow::after {
-    border-right-color: #707070;
+    border-right-color: @default-stdout-txt;
 }
 
 .bs-popover-auto[x-placement^=left] .arrow::after, .bs-popover-left .arrow::after {
-    border-left-color: #707070;
+    border-left-color: @default-stdout-txt;
 }
 
 .bs-popover-auto[x-placement^=top] .arrow::after, .bs-popover-top .arrow::after {
-    border-top-color: #707070;
+    border-top-color: @default-stdout-txt;
 }
 
 .bs-popover-auto[x-placement^=bottom] .arrow::after, .bs-popover-bottom .arrow::after {
-    border-bottom-color: #707070;
+    border-bottom-color: @default-stdout-txt;
 }
 
 a:not([href]):not([tabindex]) {
-    color: #337AB7;
+    color: @default-link;
 }
 
 a:not([href]):not([tabindex]):hover {
-    color: #286090;
+    color: @default-link-hov;
 }
 
 .dropdown-menu>li>a {
@@ -145,8 +145,8 @@ a:not([href]):not([tabindex]):hover {
 .dropdown-menu>li>a:hover,
 .dropdown-menu>li>a:focus {
     text-decoration: none;
-    color: #262626;
-    background-color: #f5f5f5;
+    color: @default-data-txt;
+    background-color: @f6grey;
 }
 
 .radio-inline+.radio-inline, .checkbox-inline+.checkbox-inline {
@@ -162,7 +162,7 @@ label {
 }
 
 .form-control {
-    height: 34px;
+    height: 30px;
 }
 
 .btn-success{

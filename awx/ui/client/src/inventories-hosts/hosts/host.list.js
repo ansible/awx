@@ -68,7 +68,7 @@ export default ['i18n', function(i18n) {
                 key: true,
                 label: i18n._('Name'),
                 ngClick: "editHost(host.id)",
-                columnClass: 'col-sm-4 col-xs-7',
+                columnClass: 'col-sm-4',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
                 class: 'InventoryManage-breakWord'
