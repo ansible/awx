@@ -191,6 +191,7 @@
     dockerfile: Dockerfile
     name: "{{ web_image }}"
     tag: "{{ awx_version }}"
+    force: yes
   delegate_to: localhost
 
 - name: Build base task image
@@ -204,6 +205,7 @@
     name: "{{ task_image }}"
     tag: "{{ awx_version }}"
     pull: no
+    force: yes
   delegate_to: localhost
 
 - name: Tag task and web images as latest
