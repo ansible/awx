@@ -12,9 +12,12 @@ import pipes
 import re
 import signal
 import sys
-import _thread
+import threading
 import time
-from io import StringIO
+try:
+    from io import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 import pexpect
 import psutil
@@ -48,7 +51,10 @@ def open_fifo_write(path, data):
     reads data from the pipe.
     '''
     os.mkfifo(path, 0o600)
-    _thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
+    threading.Thread(
+        target=lambda p, d: open(p, 'w').write(d),
+        args=(path, data)
+    ).start()
 
 
 def run_pexpect(args, cwd, env, logfile,
@@ -225,7 +231,11 @@ def handle_termination(pid, args, proot_cmd, is_cancel=True):
                       instance's cancel_flag.
     '''
     try:
-        if proot_cmd.encode('utf-8') in args:
+        if sys.version_info > (3, 0):
+            used_proot = proot_cmd.encode('utf-8') in args
+        else:
+            used_proot = proot_cmd in ' '.join(args)
+        if used_proot:
             if not psutil:
                 os.kill(pid, signal.SIGKILL)
             else:
