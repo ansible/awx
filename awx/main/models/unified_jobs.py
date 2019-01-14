@@ -3,6 +3,7 @@
 
 # Python
 from io import StringIO
+import codecs
 import json
 import logging
 import os
@@ -995,7 +996,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 mode='w',
                 prefix='{}-{}-'.format(self.model_to_str(), self.pk),
                 suffix='.out',
-                dir=settings.JOBOUTPUT_ROOT
+                dir=settings.JOBOUTPUT_ROOT,
+                encoding='utf-8'
             )
 
         # Before the addition of event-based stdout, older versions of
@@ -1010,7 +1012,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             fd.write(legacy_stdout_text)
             if hasattr(fd, 'name'):
                 fd.flush()
-                return open(fd.name, 'r')
+                return codecs.open(fd.name, 'r', encoding='utf-8')
             else:
                 # we just wrote to this StringIO, so rewind it
                 fd.seek(0)
@@ -1056,7 +1058,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     # up escaped line sequences
                     fd.flush()
                     subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(fd.name), shell=True).wait()
-                    return open(fd.name, 'r')
+                    return codecs.open(fd.name, 'r', encoding='utf-8')
                 else:
                     # If we're dealing with an in-memory string buffer, use
                     # string.replace()
