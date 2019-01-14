@@ -38,7 +38,6 @@ django==1.11.16
 djangorestframework-yaml==1.0.3
 djangorestframework==3.7.7
 docutils==0.14            # via botocore
-enum34==1.1.6             # via cryptography
 hyperlink==18.0.0         # via twisted
 idna==2.6                 # via cryptography, hyperlink, requests
 incremental==17.5.0       # via twisted
@@ -76,11 +75,12 @@ pygerduty==0.37.0
 pyjwt==1.6.0              # via social-auth-core, twilio
 pyparsing==2.2.0
 pyrad==2.1                # via django-radius
+pysocks==1.6.8
 python-dateutil==2.7.2
 python-ldap==3.1.0        # via django-auth-ldap
 python-logstash==0.4.6
 python-memcached==1.59
-python-openid==2.2.5      # via social-auth-core
+python3-openid>=3.0.10      # via social-auth-core
 python-radius==1.0
 python3-saml==1.4.0
 pytz==2018.5              # via celery, django, irc, tempora, twilio
