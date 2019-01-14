@@ -64,6 +64,7 @@ docker_compose_dir=/var/lib/awx
 # a new postgres service will be created
 # pg_hostname=postgresql
 pg_username=awx
+# password should be random 10 character alphanumeric string, when postgresql is running on kubernetes
 pg_password=awxpass
 pg_database=awx
 pg_port=5432
