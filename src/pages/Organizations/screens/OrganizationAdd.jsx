@@ -30,7 +30,6 @@ class OrganizationAdd extends React.Component {
     this.onSelectChange = this.onSelectChange.bind(this);
     this.onLookupChange = this.onLookupChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-    this.resetForm = this.resetForm.bind(this);
     this.onCancel = this.onCancel.bind(this);
   }
 
@@ -75,7 +74,6 @@ class OrganizationAdd extends React.Component {
     const data = Object.assign({}, { ...this.state });
     try {
       const { data: response } = await api.createOrganization(data);
-      console.log(response);
       const url = response.related.instance_groups;
       const selected = this.state.results.filter(group => group.isChecked);
       try {
@@ -89,7 +87,7 @@ class OrganizationAdd extends React.Component {
     }
     catch (err) {
       this.setState({ onSubmitError: err })
-    } 
+    }
   }
 
   onCancel() {
@@ -153,7 +151,6 @@ class OrganizationAdd extends React.Component {
                       onChange={this.handleChange}
                     />
                   </FormGroup>
-                  {/* LOOKUP MODAL PLACEHOLDER */}
                   <FormGroup label="Instance Groups" fieldId="simple-form-instance-groups">
                     <Lookup
                       lookup_header="Instance Groups"

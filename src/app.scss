@@ -135,7 +135,7 @@
     cursor: pointer;
   }
 }
-.awx-pill {
+.awx-c-tag--pill {
   color: white;
   background-color: rgb(0, 123, 186);
   border-radius: 3px;
@@ -151,17 +151,27 @@
   flex-direction: row;
   justify-content: flex-end;
 }
-
+//
+// list styles
+//
 .awx-c-list {
   border-top: 1px solid #d7d7d7;
   border-bottom: 1px solid #d7d7d7;
 }
-
+//
+// pf modal overrides
+//
 .awx-c-modal {
   width: 550px;
   margin: 0;
 }
 
+.awx-c-icon--remove {
+  padding-left: 10px;
+  &:hover {
+    cursor: pointer;
+  }
+}
 .pf-c-modal-box__footer {
   --pf-c-modal-box__footer--PaddingTop: 0;
   --pf-c-modal-box__footer--PaddingBottom: 0;

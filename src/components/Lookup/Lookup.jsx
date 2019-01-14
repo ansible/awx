@@ -9,7 +9,7 @@ import {
   ToolbarGroup,
 } from '@patternfly/react-core';
 
-import ListItem from '../ListItem'
+import CheckboxListItem from '../CheckboxListItem'
 
 class Lookup extends React.Component {
   constructor(props) {
@@ -21,6 +21,7 @@ class Lookup extends React.Component {
     this.onLookup = this.onLookup.bind(this);
     this.onChecked = this.onChecked.bind(this);
     this.wrapTags = this.wrapTags.bind(this);
+    this.onRemove = this.onRemove.bind(this);
   }
 
   handleModalToggle() {
@@ -37,10 +38,13 @@ class Lookup extends React.Component {
     this.props.lookupChange(evt.target.value);
   };
 
+  onRemove(evt) {
+    this.props.lookupChange(evt.target.id);
+  }
   wrapTags(tags) {
     return tags.filter(tag => tag.isChecked).map((tag, index) => {
       return (
-        <span className="awx-pill" key={index}>{tag.name}</span>
+        <span className="awx-c-tag--pill" key={index}>{tag.name}<span className="awx-c-icon--remove" id={tag.id} onClick={this.onRemove}>x</span></span>
       )
     })
   }
@@ -53,7 +57,6 @@ class Lookup extends React.Component {
         <span className="pf-c-input-group__text" aria-label="search" id="search" onClick={this.onLookup}><SearchIcon /></span>
         <div className="pf-c-form-control">{this.wrapTags(this.props.data)}</div>
         <Modal
-          isLarge
           className="awx-c-modal"
           title={`Select ${this.props.lookup_header}`}
           isOpen={isModalOpen}
@@ -61,7 +64,7 @@ class Lookup extends React.Component {
         >
           <ul className="pf-c-data-list awx-c-list">
             {data.map(i =>
-              <ListItem
+              <CheckboxListItem
                 key={i.id}
                 itemId={i.id}
                 name={i.name}

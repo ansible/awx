@@ -1,3 +1,3 @@
-import ListItem from './ListItem';
+import CheckboxListItem from './CheckboxListItem';
 
-export default ListItem;
+export default CheckboxListItem;
