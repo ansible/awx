@@ -80,7 +80,8 @@
 
 - name: Deploy and Activate Postgres (Kubernetes)
   shell: |
-    helm upgrade --install --name {{ postgresql_service_name }} \
+    helm repo update --tiller-namespace={{ tiller_namespace | default('kube-system') }}
+    helm upgrade {{ postgresql_service_name }} --install \
       --namespace {{ kubernetes_namespace }} \
       --set postgresqlUsername={{ pg_username }} \
       --set postgresqlPassword={{ pg_password }} \
