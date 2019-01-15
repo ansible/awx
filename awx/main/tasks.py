@@ -2285,15 +2285,18 @@ class RunInventoryUpdate(BaseTask):
             if src in InventorySource.injectors:
                 cloud_cred = inventory_update.get_cloud_credential()
                 injector = InventorySource.injectors[cloud_cred.kind](self.get_ansible_version(inventory_update))
-                content = injector.inventory_contents(inventory_update)
-                # must be a statically named file
-                inventory_path = os.path.join(private_data_dir, injector.filename)
-                with open(inventory_path, 'w') as f:
-                    f.write(content)
-                os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+                if injector.should_use_plugin():
+                    content = injector.inventory_contents(inventory_update)
+                    # must be a statically named file
+                    inventory_path = os.path.join(private_data_dir, injector.filename)
+                    with open(inventory_path, 'w') as f:
+                        f.write(content)
+                    os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+                else:
+                    # Use the vendored script path
+                    inventory_path = self.get_path_to('..', 'plugins', 'inventory', '%s.py' % src)
             else:
-                # Get the path to the inventory plugin, and append it to our
-                # arguments.
+                # TODO: get rid of this else after all CLOUD_PROVIDERS have injectors written
                 inventory_path = self.get_path_to('..', 'plugins', 'inventory', '%s.py' % src)
         elif src == 'scm':
             inventory_path = inventory_update.get_actual_source_path()

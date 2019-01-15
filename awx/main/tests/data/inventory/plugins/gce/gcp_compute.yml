@@ -1,0 +1,9 @@
+auth_kind: serviceaccount
+filters: null
+plugin: gcp_compute
+projects:
+- fooo
+service_account_file: creds.json
+zones:
+- us-east4-a
+- us-west1-b

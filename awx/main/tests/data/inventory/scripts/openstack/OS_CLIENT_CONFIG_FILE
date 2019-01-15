@@ -1,0 +1,15 @@
+ansible:
+  expand_hostvars: true
+  fail_on_errors: true
+  use_hostnames: false
+cache:
+  path: {{ cache_dir }}
+clouds:
+  devstack:
+    auth:
+      auth_url: https://foo.invalid
+      domain_name: fooo
+      password: fooo
+      project_name: fooo
+      username: fooo
+    private: false

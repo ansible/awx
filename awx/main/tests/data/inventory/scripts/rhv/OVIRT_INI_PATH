@@ -1,0 +1,5 @@
+[ovirt]
+ovirt_url=https://foo.invalid
+ovirt_username=fooo
+ovirt_password=fooo
+ovirt_ca_file=fooo

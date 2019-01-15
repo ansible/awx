@@ -1,0 +1,16 @@
+[cloudforms]
+url = https://foo.invalid
+username = fooo
+password = fooo
+ssl_verify = false
+version = 2.4
+purge_actions = maybe
+clean_group_keys = this_key
+nest_tags = yes
+suffix = .ppt
+prefer_ipv4 = yes
+
+[cache]
+max_age = 0
+path = {{ cache_dir }}
+

@@ -1,0 +1,8 @@
+[azure]
+include_powerstate = yes
+group_by_resource_group = yes
+group_by_location = yes
+group_by_tag = yes
+locations = southcentralus,westus
+base_source_var = value_of_var
+

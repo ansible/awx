@@ -1,0 +1,31 @@
+[ec2]
+base_source_var = value_of_var
+regions = us-east-2,ap-south-1
+regions_exclude = us-gov-west-1,cn-north-1
+destination_variable = public_dns_name
+vpc_destination_variable = ip_address
+route53 = False
+all_instances = True
+all_rds_instances = False
+include_rds_clusters = False
+rds = False
+nested_groups = True
+elasticache = False
+stack_filters = False
+instance_filters = foobaa
+group_by_ami_id = False
+group_by_availability_zone = False
+group_by_aws_account = False
+group_by_instance_id = False
+group_by_instance_state = False
+group_by_platform = False
+group_by_instance_type = False
+group_by_key_pair = False
+group_by_region = False
+group_by_security_group = False
+group_by_tag_keys = False
+group_by_tag_none = False
+group_by_vpc_id = False
+cache_path = {{ cache_dir }}
+cache_max_age = 300
+

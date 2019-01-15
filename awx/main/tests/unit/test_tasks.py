@@ -2035,11 +2035,12 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert 'cache' in config.sections()
             assert config.getint('cache', 'cache_max_age') == 0
 
+        # Change the initial version of the inventory plugin to force use of script
+        with mock.patch('awx.main.models.inventory.gce.initial_version', None):
+            run('')
 
-        run('')
-
-        inventory_update.source_regions = 'us-east-4'
-        run('us-east-4')
+            self.instance.source_regions = 'us-east-4'
+            run('us-east-4')
 
     def test_openstack_source(self, inventory_update, private_data_dir):
         task = tasks.RunInventoryUpdate()
