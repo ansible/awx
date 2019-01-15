@@ -69,13 +69,29 @@ class Command(BaseCommand):
 
                 return TaskResult()
 
+        sched_file = '/var/lib/awx/beat.db'
         app = Celery()
         app.conf.BROKER_URL = settings.BROKER_URL
         app.conf.CELERY_TASK_RESULT_EXPIRES = False
+
+        # celery in py3 seems to have a bug where the celerybeat schedule
+        # shelve can become corrupted; we've _only_ seen this in Ubuntu and py36
+        # it can be avoided by detecting and removing the corrupted file
+        # at some point, we'll just stop using celerybeat, because it's clearly
+        # buggy, too -_-
+        #
+        # https://github.com/celery/celery/issues/4777
+        sched = AWXScheduler(schedule_filename=sched_file, app=app)
+        try:
+            sched.setup_schedule()
+        except Exception:
+            logger.exception('{} is corrupted, removing.'.format(sched_file))
+            sched._remove_db()
+
         beat.Beat(
             30,
             app,
-            schedule='/var/lib/awx/beat.db', scheduler_cls=AWXScheduler
+            schedule=sched_file, scheduler_cls=AWXScheduler
         ).run()
 
     def handle(self, *arg, **options):
