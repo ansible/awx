@@ -1,5 +1,6 @@
 import { AWX_E2E_TIMEOUT_ASYNC } from '../settings';
 
+/* Post-login utility function that waits for the application to fully load. */
 exports.command = function waitForAngular (callback) {
     this.timeoutsAsyncScript(AWX_E2E_TIMEOUT_ASYNC, () => {
         this.executeAsync(done => {
