@@ -45,6 +45,8 @@ SHELL_PLUS_PRINT_SQL = False
 # show colored logs in the dev environment
 # to disable this, set `COLOR_LOGS = False` in awx/settings/local_settings.py
 LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'
+# task system does not propagate to AWX, so color log these too
+LOGGING['handlers']['task_system'] = LOGGING['handlers']['console'].copy()
 COLOR_LOGS = True
 
 # Pipe management playbook output to console
