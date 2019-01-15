@@ -9,7 +9,7 @@ import {
   ToolbarGroup,
 } from '@patternfly/react-core';
 
-import CheckboxListItem from '../CheckboxListItem'
+import CheckboxListItem from '../ListItem'
 
 class Lookup extends React.Component {
   constructor(props) {

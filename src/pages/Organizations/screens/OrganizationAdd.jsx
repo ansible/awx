@@ -30,7 +30,9 @@ class OrganizationAdd extends React.Component {
     this.onSelectChange = this.onSelectChange.bind(this);
     this.onLookupChange = this.onLookupChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.onSuccess = this.onSuccess.bind(this);
     this.onCancel = this.onCancel.bind(this);
+    this.format = this.format.bind(this);
   }
 
   state = {
@@ -98,19 +100,23 @@ class OrganizationAdd extends React.Component {
     this.props.history.push(`/organizations/${id}`);
   }
 
+  format(data) {
+    let results = [];
+    data.results.map((result) => {
+      results.push({ id: result.id, name: result.name, isChecked: false });
+    });
+    return results;
+  };
+
   async componentDidMount() {
     const { api } = this.props;
     try {
       const { data } = await api.getInstanceGroups();
-      let results = [];
-      data.results.map((result) => {
-        results.push({ id: result.id, name: result.name, isChecked: false });
-      })
+      this.format(data);
       this.setState({ results });
     } catch (error) {
       this.setState({ getInstanceGroupsError: error })
     }
-
   }
 
   render() {
