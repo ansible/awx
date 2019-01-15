@@ -3,6 +3,7 @@
 
 # Python
 import datetime
+import time
 import logging
 import re
 import copy
@@ -428,7 +429,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         '''
         Update model fields that are computed from database relationships.
         '''
-        logger.debug("Going to update inventory computed fields")
+        logger.debug("Going to update inventory computed fields, pk={0}".format(self.pk))
+        start_time = time.time()
         if update_hosts:
             self.update_host_computed_fields()
         if update_groups:
@@ -465,7 +467,8 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
                 computed_fields.pop(field)
         if computed_fields:
             iobj.save(update_fields=computed_fields.keys())
-        logger.debug("Finished updating inventory computed fields")
+        logger.debug("Finished updating inventory computed fields, pk={0}, in "
+                     "{1:.3f} seconds".format(self.pk, time.time() - start_time))
 
     def websocket_emit_status(self, status):
         connection.on_commit(lambda: emit_channel_notification(

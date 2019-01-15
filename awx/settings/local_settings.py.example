@@ -48,9 +48,6 @@ if is_testing(sys.argv):
 # AMQP configuration.
 BROKER_URL = 'amqp://guest:guest@localhost:5672'
 
-# Set True to enable additional logging from the job_event_callback plugin
-JOB_CALLBACK_DEBUG = False
-
 # Absolute filesystem path to the directory to host projects (with playbooks).
 # This directory should NOT be web-accessible.
 PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
@@ -99,9 +96,6 @@ PROXY_IP_WHITELIST = []
 
 # If set, use -vvv for project updates instead of -v for more output.
 # PROJECT_UPDATE_VVV=True
-
-# Set verbosity for inventory import command when running inventory updates.
-# INVENTORY_UPDATE_VERBOSITY=1
 
 ###############################################################################
 # EMAIL SETTINGS
@@ -158,9 +152,9 @@ LOGGING['handlers']['syslog'] = {
 #}
 
 # Enable the following lines to turn on lots of permissions-related logging.
-#LOGGING['loggers']['awx.main.access']['propagate'] = True
-#LOGGING['loggers']['awx.main.signals']['propagate'] = True
-#LOGGING['loggers']['awx.main.permissions']['propagate'] = True
+#LOGGING['loggers']['awx.main.access']['level'] = 'DEBUG'
+#LOGGING['loggers']['awx.main.signals']['level'] = 'DEBUG'
+#LOGGING['loggers']['awx.main.permissions']['level'] = 'DEBUG'
 
 # Enable the following line to turn on database settings logging.
 #LOGGING['loggers']['awx.conf']['level'] = 'DEBUG'

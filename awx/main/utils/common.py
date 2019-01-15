@@ -10,7 +10,6 @@ import os
 import re
 import subprocess
 import stat
-import sys
 import urllib
 import urlparse
 import threading
@@ -118,7 +117,7 @@ class RequireDebugTrueOrTest(logging.Filter):
 
     def filter(self, record):
         from django.conf import settings
-        return settings.DEBUG or 'test' in sys.argv
+        return settings.DEBUG or settings.IS_TESTING()
 
 
 class IllegalArgumentError(ValueError):
