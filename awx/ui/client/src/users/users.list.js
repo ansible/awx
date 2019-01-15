@@ -31,11 +31,11 @@ export default ['i18n', function(i18n) {
             },
             first_name: {
                 label: i18n._('First Name'),
-                columnClass: 'col-md-3 col-sm-3 hidden-xs'
+                columnClass: 'd-none d-sm-flex col-sm-3'
             },
             last_name: {
                 label: i18n._('Last Name'),
-                columnClass: 'col-md-3 col-sm-3 hidden-xs'
+                columnClass: 'd-none d-sm-flex col-sm-3'
             }
         },
 

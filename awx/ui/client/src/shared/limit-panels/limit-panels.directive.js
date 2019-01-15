@@ -10,23 +10,22 @@ export default [function() {
             const maxPanels = parseInt(scope.maxPanels);
 
             scope.$watch(
-                () => angular.element('#' + scope.panelContainer).find('.Panel, .at-Panel').length,
+                () => angular.element('#' + scope.panelContainer).find('.at-Panel').length,
                 () => {
-                    const panels = angular.element('#' + scope.panelContainer).find('.Panel, .at-Panel');
-
+                    const panels = angular.element('#' + scope.panelContainer).find('.at-Panel');
                     if(panels.length > maxPanels) {
                         // hide the excess panels
                         $(panels).each(function( index ) {
                             if(index+1 > maxPanels) {
-                                $(this).addClass('Panel-hidden');
+                                $(this).addClass('d-none');
                             }
                             else {
-                                $(this).removeClass('Panel-hidden');
+                                $(this).removeClass('d-none');
                             }
                         });
                     } else {
                         // show all the panels
-                        $(panels).removeClass('Panel-hidden');
+                        $(panels).removeClass('d-none');
                     }
                 }
             );

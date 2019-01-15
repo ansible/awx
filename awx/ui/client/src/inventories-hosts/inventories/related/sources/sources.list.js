@@ -15,21 +15,26 @@
         hover: true,
         trackBy: 'inventory_source.id',
         basePath:  'api/v2/inventories/{{$stateParams.inventory_id}}/inventory_sources/',
+        layoutClass: 'List-staticColumnLayout--statusOrCheckbox',
+        staticColumns: [
+            {
+                field: 'sync_status',
+                content: {
+                    label: '',
+                    nosort: true,
+                    mode: 'all',
+                    iconOnly: true,
+                    ngClick: 'viewUpdateStatus(inventory_source.id)',
+                    awToolTip: "{{ inventory_source.status_tooltip }}",
+                    dataTipWatch: "inventory_source.status_tooltip",
+                    icon: "{{ 'fa icon-cloud-' + inventory_source.status_class }}",
+                    ngClass: "inventory_source.status_class",
+                    dataPlacement: "top",
+                }
+            }
+        ],
 
         fields: {
-            sync_status: {
-                label: '',
-                nosort: true,
-                mode: 'all',
-                iconOnly: true,
-                ngClick: 'viewUpdateStatus(inventory_source.id)',
-                awToolTip: "{{ inventory_source.status_tooltip }}",
-                dataTipWatch: "inventory_source.status_tooltip",
-                icon: "{{ 'fa icon-cloud-' + inventory_source.status_class }}",
-                ngClass: "inventory_source.status_class",
-                dataPlacement: "top",
-                columnClass: 'status-column List-staticColumn--smallStatus'
-            },
             name: {
                 label: i18n._('Sources'),
                 key: true,

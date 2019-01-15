@@ -296,7 +296,6 @@ function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Enable Privilege Escalation'),
                         dataContainer: "body",
-                        labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
                         name: 'allow_callbacks',
@@ -309,7 +308,6 @@ function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Allow Provisioning Callbacks'),
                         dataContainer: "body",
-                        labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
                         name: 'allow_simultaneous',
@@ -320,7 +318,6 @@ function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Enable Concurrent Jobs'),
                         dataContainer: "body",
-                        labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }, {
                         name: 'use_fact_cache',
@@ -331,7 +328,6 @@ function(NotificationsList, i18n) {
                         dataPlacement: 'right',
                         dataTitle: i18n._('Use Fact Cache'),
                         dataContainer: "body",
-                        labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }]
                 },
@@ -433,19 +429,19 @@ function(NotificationsList, i18n) {
                             key: true,
                             label: 'User',
                             linkBase: 'users',
-                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                            columnClass: 'col-sm-3 col-xs-4'
                         },
                         role: {
                             label: 'Role',
                             type: 'role',
                             nosort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            columnClass: 'col-sm-4 col-xs-4',
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             nosort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            columnClass: 'col-sm-5 col-xs-4',
                         }
                     }
                 },

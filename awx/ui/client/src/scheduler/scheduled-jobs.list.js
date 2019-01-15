@@ -14,22 +14,27 @@ export default ['i18n', function(i18n) {
         listTitle: i18n._('SCHEDULED JOBS'),
         hover: true,
         emptyListText: i18n._('No schedules exist'),
+        layoutClass: 'List-staticColumnLayout--toggleOnOff',
+        staticColumns: [
+            {
+                field: 'enabled',
+                content: {
+                    label: '',
+                    type: 'toggle',
+                    ngClick: "toggleSchedule($event, schedule.id)",
+                    nosort: true,
+                    awToolTip: "{{ schedule.play_tip }}",
+                    ngDisabled: "!schedule.summary_fields.user_capabilities.edit",
+                    dataTipWatch: "schedule.play_tip",
+                    dataPlacement: 'top'
+                }
+            }
+        ],
 
         fields: {
-            enabled: {
-                label: '',
-                columnClass: 'List-staticColumn--toggle',
-                type: 'toggle',
-                ngClick: "toggleSchedule($event, schedule.id)",
-                nosort: true,
-                awToolTip: "{{ schedule.play_tip }}",
-                ngDisabled: "!schedule.summary_fields.user_capabilities.edit",
-                dataTipWatch: "schedule.play_tip",
-                dataPlacement: 'top'
-            },
             name: {
                 label: i18n._('Name'),
-                columnClass: 'col-lg-4 col-md-5 col-sm-5 col-xs-7 List-staticColumnAdjacent',
+                columnClass: 'col-xl-4 col-lg-5 col-md-5 col-sm-7 List-staticColumnAdjacent',
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
                 // ngBind: 'schedule.summary_fields.unified_job_template.name',
@@ -41,7 +46,7 @@ export default ['i18n', function(i18n) {
             type: {
                 label: i18n._('Type'),
                 noLink: true,
-                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
+                columnClass: "d-none d-md-flex col-md-2",
                 sourceModel: 'unified_job_template',
                 sourceField: 'unified_job_type',
                 ngBind: 'schedule.type_label',
@@ -50,7 +55,7 @@ export default ['i18n', function(i18n) {
             next_run: {
                 label: i18n._('Next Run'),
                 noLink: true,
-                columnClass: "col-lg-3 col-md-2 col-sm-3 hidden-xs",
+                columnClass: "d-none d-md-flex col-xl-3 col-lg-2 col-md-3",
                 filter: "longDate",
                 key: true
             }
@@ -60,7 +65,7 @@ export default ['i18n', function(i18n) {
 
         fieldActions: {
 
-            columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-5',
+            columnClass: 'col-xl-3 col-lg-3 col-md-4 col-sm-5',
             "edit": {
                 mode: "all",
                 ngClick: "editSchedule(schedule)",

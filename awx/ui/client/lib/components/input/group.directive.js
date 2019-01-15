@@ -118,6 +118,7 @@ function AtInputGroupController ($scope, $compile) {
 
     vm.insert = group => {
         const container = document.createElement('div');
+        container.className = 'row';
         let col = 1;
         const colPerRow = 12 / scope.col;
         let isDivided = true;

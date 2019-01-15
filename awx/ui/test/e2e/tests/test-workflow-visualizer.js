@@ -24,7 +24,7 @@ const nodeAdd = "//*[contains(@class, 'WorkflowChart-nodeAddIcon')]";
 const nodeRemove = "//*[contains(@class, 'WorkflowChart-nodeRemoveIcon')]";
 
 // one of the jobs or projects or inventories
-const testActionsJob = "//td[contains(text(), 'test-actions-job')]";
+const testActionsJob = "//div[contains(@class, 'List-tableCell') and contains(text(), 'test-actions-job')]";
 const testActionsJobText = 'name.iexact:"test-actions-job-template"';
 
 // search bar for visualizer templates
@@ -134,6 +134,7 @@ module.exports = {
         });
 
         client
+            .waitForElementVisible(jobSearchBar)
             .clearValue(jobSearchBar)
             .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
             .pause(1000)
@@ -164,6 +165,7 @@ module.exports = {
             // xPathLinkById
             leafNodeId = res.value.split('-')[1];
             client
+                .waitForElementVisible(jobSearchBar)
                 .clearValue(jobSearchBar)
                 .setValue(jobSearchBar, [testActionsJobText, client.Keys.ENTER])
                 .pause(1000)

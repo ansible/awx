@@ -42,6 +42,10 @@ function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
             list.name = 'add_users';
             list.multiSelect = true;
             list.fields.username.ngClick = 'linkoutUser(add_user.id)';
+            list.fields.username.columnClass = 'col-sm-4';
+            list.fields.first_name.columnClass = 'col-sm-4';
+            list.fields.last_name.columnClass = 'col-sm-4';
+            list.layoutClass = 'List-staticColumnLayout--statusOrCheckbox';
             delete list.actions;
             delete list.fieldActions;
 

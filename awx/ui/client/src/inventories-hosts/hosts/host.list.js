@@ -22,45 +22,53 @@ export default ['i18n', function(i18n) {
         basePath: 'hosts',
         title: false,
         actionHolderClass: 'List-actionHolder',
+        layoutClass: 'List-staticColumnLayout--hostsWithCheckbox',
+        staticColumns: [
+            {
+                field: 'toggleHost',
+                content: {
+                    ngDisabled: 'host.has_inventory_sources',
+                    label: '',
+                    columnClass: 'List-staticColumn--toggle',
+                    type: "toggle",
+                    ngClick: "toggleHost($event, host)",
+                    awToolTip: "<p>" +
+                        i18n._("Indicates if a host is available and should be included in running jobs.") +
+                        "</p><p>" +
+                        i18n._("For hosts that are part of an external" +
+                               " inventory, this flag cannot be changed. It will be" +
+                               " set by the inventory sync process.") +
+                        "</p>",
+                    dataPlacement: "right",
+                    nosort: true,
+                }
+            }, {
+                field: 'active_failures',
+                content: {
+                    label: '',
+                    iconOnly: true,
+                    nosort: true,
+                    // do not remove this ng-click directive
+                    // the list generator case to handle fields without ng-click
+                    // cannot handle the aw-* directives
+                    ngClick: 'noop()',
+                    awPopOver: "{{ host.job_status_html }}",
+                    dataTitle: "{{ host.job_status_title }}",
+                    awToolTip: "{{ host.badgeToolTip }}",
+                    dataPlacement: 'top',
+                    icon: "{{ 'fa icon-job-' + host.active_failures }}",
+                    id: 'active-failures-action',
+                    columnClass: 'status-column List-staticColumn--smallStatus'
+                }
+            }
+        ],
 
         fields: {
-            toggleHost: {
-                ngDisabled: 'host.has_inventory_sources',
-                label: '',
-                columnClass: 'List-staticColumn--toggle',
-                type: "toggle",
-                ngClick: "toggleHost($event, host)",
-                awToolTip: "<p>" +
-                    i18n._("Indicates if a host is available and should be included in running jobs.") +
-                    "</p><p>" +
-                    i18n._("For hosts that are part of an external" +
-                           " inventory, this flag cannot be changed. It will be" +
-                           " set by the inventory sync process.") +
-                    "</p>",
-                dataPlacement: "right",
-                nosort: true,
-            },
-            active_failures: {
-                label: '',
-                iconOnly: true,
-                nosort: true,
-                // do not remove this ng-click directive
-                // the list generator case to handle fields without ng-click
-                // cannot handle the aw-* directives
-                ngClick: 'noop()',
-                awPopOver: "{{ host.job_status_html }}",
-                dataTitle: "{{ host.job_status_title }}",
-                awToolTip: "{{ host.badgeToolTip }}",
-                dataPlacement: 'top',
-                icon: "{{ 'fa icon-job-' + host.active_failures }}",
-                id: 'active-failures-action',
-                columnClass: 'status-column List-staticColumn--smallStatus'
-            },
             name: {
                 key: true,
                 label: i18n._('Name'),
                 ngClick: "editHost(host.id)",
-                columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
+                columnClass: 'col-sm-4',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
                 class: 'InventoryManage-breakWord'
@@ -69,14 +77,14 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Inventory'),
                 sourceModel: 'inventory',
                 sourceField: 'name',
-                columnClass: 'col-lg-5 col-md-4 col-sm-4 hidden-xs elllipsis',
+                columnClass: 'd-none d-sm-flex col-sm-4 elllipsis',
                 ngClick: "editInventory(host)"
             }
         },
 
         fieldActions: {
 
-            columnClass: 'col-lg-6 col-md-4 col-sm-4 col-xs-5 text-right',
+            columnClass: 'col-sm-4 col-xs-5 text-right',
             edit: {
                 ngClick: "editHost(host.id)",
                 icon: 'icon-edit',

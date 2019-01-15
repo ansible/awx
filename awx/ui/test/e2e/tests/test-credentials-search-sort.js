@@ -1,6 +1,3 @@
-const columns = ['Name', 'Kind', 'Owners', 'Actions'];
-const sortable = ['Name'];
-
 module.exports = {
     before: (client, done) => {
         const credentials = client.page.credentials();
@@ -18,37 +15,26 @@ module.exports = {
     },
     'expected table columns are visible': client => {
         const credentials = client.page.credentials();
-        const { table } = credentials.section.list.section;
 
-        columns.forEach(label => {
-            table.section.header.findColumnByText(label)
-                .expect.element('@self').visible;
-        });
+        credentials.expect.element('#credential-name-header').visible;
+        credentials.expect.element('#credential-kind-header').visible;
+        credentials.expect.element('#credential-owners-header').visible;
+        credentials.expect.element('#credential-actions-header').visible;
     },
     'only fields expected to be sortable show sort icon': client => {
         const credentials = client.page.credentials();
-        const { table } = credentials.section.list.section;
 
-        sortable.forEach(label => {
-            table.section.header.findColumnByText(label)
-                .expect.element('@sortable').visible;
-        });
+        credentials.expect.element('#credential-name-header > i.columnSortIcon').visible;
     },
     'sort all columns expected to be sortable': client => {
         const credentials = client.page.credentials();
-        const { table } = credentials.section.list.section;
 
-        sortable.forEach(label => {
-            const column = table.section.header.findColumnByText(label);
-
-            column.click('@self');
-
-            credentials
-                .waitForElementVisible('div.spinny')
-                .waitForElementNotVisible('div.spinny');
-
-            column.expect.element('@sorted').visible;
-        });
+        credentials.expect.element('#credential-name-header > i.columnSortIcon.fa-sort-up').visible;
+        credentials.click('#credential-name-header');
+        credentials
+            .waitForElementVisible('div.spinny')
+            .waitForElementNotVisible('div.spinny');
+        credentials.expect.element('#credential-name-header > i.columnSortIcon.fa-sort-down').visible;
 
         client.end();
     }

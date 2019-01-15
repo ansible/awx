@@ -21,18 +21,14 @@
                 aria-expanded="false">
                 <span class="sr-only">Toggle Dropdown</span>
             </button>
-            <ul class="dropdown-menu at-List-toolbarActionDropdownMenu">
-                <li>
-                    <a ui-sref="templates.addJobTemplate">
-                        {{:: vm.strings.get('list.ADD_DD_JT_LABEL') }}
-                    </a>
-                </li>
-                <li>
-                    <a ui-sref="templates.addWorkflowJobTemplate">
-                        {{:: vm.strings.get('list.ADD_DD_WF_LABEL') }}
-                    </a>
-                </li>
-            </ul>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="button-add">
+              <a class="dropdown-item" ui-sref="templates.addJobTemplate">
+                  {{:: vm.strings.get('list.ADD_DD_JT_LABEL') }}
+              </a>
+              <a class="dropdown-item" ui-sref="templates.addWorkflowJobTemplate">
+                  {{:: vm.strings.get('list.ADD_DD_WF_LABEL') }}
+              </a>
+            </div>
         </div>
     </div>
     <at-list results="vm.templates" id="templates_list">

@@ -1,4 +1,4 @@
-<div id="htmlTemplate" class=" SchedulerFormPanel Panel" ng-hide="hideForm">
+<div id="htmlTemplate" class="card at-Panel" ng-hide="hideForm">
     <div class="Form-header">
         <div class="Form-title" ng-show="!isEdit">{{ schedulerName || "ADD SCHEDULE"}}</div>
         <div class="Form-title" ng-show="isEdit">{{ schedulerName || "EDIT SCHEDULE"}}</div>
@@ -40,11 +40,10 @@
                     <span class="red-text">*</span>
                     <span translate>Start Date</span>
                 </label>
-                <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
-                    <scheduler-date-picker date="schedulerStartDt"
-                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
-                    </scheduler-date-picker>
-                </div>
+                <scheduler-date-picker date="schedulerStartDt"
+                    class="input-group Form-inputGroup SchedulerForm-inputGroup--date"
+                    disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
+                </scheduler-date-picker>
                 <div class="error"
                     ng-show="scheduler_form_schedulerStartDt_error"
                     ng-bind="scheduler_form_schedulerStartDt_error">
@@ -508,11 +507,10 @@
                         <span class="red-text">*</span>
                         End Date
                     </label>
-                    <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
-                        <scheduler-date-picker date="$parent.schedulerEndDt"
-                            disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
-                        </scheduler-date-picker>
-                    </div>
+                    <scheduler-date-picker date="$parent.schedulerEndDt"
+                        class="input-group Form-inputGroup SchedulerForm-inputGroup--date"
+                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
+                    </scheduler-date-picker>
                     <div class="error"
                         ng-show="$parent.scheduler_endDt_error">
                         Please provide a valid date.
@@ -553,8 +551,7 @@
                         class="SchedulerFormDetail-dateFormatsLabel">
                         Date format
                     </label>
-                    <label class="radio-inline
-                        SchedulerFormDetail-radioLabel">
+                    <label class="radio-inline SchedulerFormDetail-radioLabel">
                         <input type="radio"
                             class="SchedulerFormDetail-radioButton"
                             ng-model="dateChoice"
@@ -562,8 +559,7 @@
                             value="local" >
                         Local time
                     </label>
-                    <label class="radio-inline
-                        SchedulerFormDetail-radioLabel">
+                    <label class="radio-inline SchedulerFormDetail-radioLabel">
                         <input type="radio"
                             class="SchedulerFormDetail-radioButton"
                             ng-model="dateChoice"

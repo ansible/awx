@@ -21,7 +21,7 @@ export default [function() {
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-lg-4 col-md-6 col-sm-8 col-xs-8',
+                columnClass: 'col-sm-12',
                 awToolTip: '{{organization.description | sanitize}}',
                 dataPlacement: 'top'
             },

@@ -104,7 +104,7 @@
                                     <span class="Form-inputLabel" translate> Password</span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-btn">
+                                    <span class="input-group-btn input-group-prepend">
                                         <button type="button" class="btn btn-default show_input_button JobSubmission-passwordButton" id="job-submission-ssh-password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#job-submission-ssh-password')" data-container="job-launch-modal" data-original-title="" title="" translate>Show</button>
                                     </span>
                                     <input id="job-submission-ssh-password" type="password" ng-model="passwords.ssh_password" name="ssh_password" class="password-field form-control input-sm Form-textInput" required>
@@ -118,7 +118,7 @@
                                     <span class="Form-inputLabel" translate> Private Key Passphrase</span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-btn">
+                                    <span class="input-group-btn input-group-prepend">
                                         <button type="button" class="btn btn-default show_input_button JobSubmission-passwordButton" id="job-submission-ssh-key-unlock_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#job-submission-ssh-key-unlock')" data-container="job-launch-modal" data-original-title="" title="" translate>Show</button>
                                     </span>
                                     <input id="job-submission-ssh-key-unlock" type="password" ng-model="passwords.ssh_key_unlock" name="ssh_key_unlock" class="password-field form-control input-sm Form-textInput" required>
@@ -132,7 +132,7 @@
                                     <span class="Form-inputLabel" translate> Privilege Escalation Password</span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-btn">
+                                    <span class="input-group-btn input-group-prepend">
                                         <button type="button" class="btn btn-default show_input_button JobSubmission-passwordButton" id="job-submission-become-password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#job-submission-become-password')" data-container="job-launch-modal" data-original-title="" title="" translate>Show</button>
                                     </span>
                                     <input id="job-submission-become-password" type="password" ng-model="passwords.become_password" name="become_password" class="password-field form-control input-sm Form-textInput" required>
@@ -146,7 +146,7 @@
                                     <span class="Form-inputLabel" translate> Vault Password</span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-btn">
+                                    <span class="input-group-btn input-group-prepend">
                                         <button type="button" class="btn btn-default show_input_button JobSubmission-passwordButton" id="job-submission-vault-password_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#job-submission-vault-password')" data-container="job-launch-modal" data-original-title="" title="" translate>Show</button>
                                     </span>
                                     <input id="job-submission-vault-password" type="password" ng-model="passwords.vault_password" name="vault_password" class="password-field form-control input-sm Form-textInput" required>
@@ -295,7 +295,7 @@
                         </div>
                         <div ng-if="question.type === 'password'">
                             <div class="input-group">
-                                <span class="input-group-btn">
+                                <span class="input-group-btn input-group-prepend">
                                     <button type="button" class="btn btn-default show_input_button JobSubmission-passwordButton" id="survey_question_{{$index}}_show_input_button" aw-tool-tip="Toggle the display of plaintext." aw-tip-placement="top" ng-click="togglePassword('#survey_question_' + $index)" data-original-title="" data-container="job-launch-modal" title="" translate>Show</button>
                                 </span>
                                 <input id="survey_question_{{$index}}" ng-if="!question.default" type="password" ng-model="question.model" name="survey_question_{{$index}}" ng-required="question.required" ng-minlength="question.minlength" ng-maxlength="question.maxlength" class="form-control Form-textInput" autocomplete="false">

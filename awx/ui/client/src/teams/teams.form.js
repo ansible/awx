@@ -95,13 +95,13 @@ export default ['i18n', function(i18n) {
                             key: true,
                             label: i18n._('User'),
                             linkBase: 'users',
-                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                            columnClass: 'col-sm-6'
                         },
                         role: {
                             label: i18n._('Role'),
                             type: 'role',
                             nosort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
+                            columnClass: 'col-sm-6'
                         }
                     }
                 },
@@ -127,20 +127,24 @@ export default ['i18n', function(i18n) {
                             label: i18n._('Name'),
                             ngBind: 'permission.summary_fields.resource_name',
                             ngClick: "redirectToResource(permission)",
-                            nosort: true
+                            nosort: true,
+                            columnClass: 'col-sm-4'
                         },
                         type: {
                             label: i18n._('Type'),
                             ngBind: 'permission.summary_fields.resource_type_display_name',
-                            nosort: true
+                            nosort: true,
+                            columnClass: 'col-sm-3'
                         },
                         role: {
                             label: i18n._('Role'),
                             ngBind: 'permission.name',
-                            nosort: true
+                            nosort: true,
+                            columnClass: 'col-sm-3'
                         }
                     },
                     fieldActions: {
+                        columnClass: 'col-sm-2',
                         "delete": {
                             label: i18n._('Remove'),
                             ngClick: 'deletePermissionFromTeam(team_id, team_obj.name, permission.name, permission.summary_fields.resource_name, permission.related.teams)',

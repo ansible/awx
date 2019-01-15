@@ -345,7 +345,6 @@ return {
             label: i18n._('Update Options'),
             type: 'checkbox_group',
             ngShow: "source && (source.value !== '' && source.value !== null)",
-            class: 'Form-checkbox--stacked',
             subForm: 'sourceSubForm',
             fields: [{
                 name: 'overwrite',
@@ -357,7 +356,6 @@ return {
                 dataTitle: i18n._('Overwrite'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
-                labelClass: 'checkbox-options',
                 ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd))"
             }, {
                 name: 'overwrite_vars',
@@ -369,7 +367,6 @@ return {
                 dataTitle: i18n._('Overwrite Variables'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
-                labelClass: 'checkbox-options',
                 ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd) || source.value === 'scm')"
             }, {
                 name: 'update_on_launch',
@@ -381,7 +378,6 @@ return {
                 dataTitle: i18n._('Update on Launch'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
-                labelClass: 'checkbox-options',
                 ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
             }, {
                 name: 'update_on_project_update',
@@ -394,7 +390,6 @@ return {
                 dataTitle: i18n._('Update on Project Update'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
-                labelClass: 'checkbox-options',
                 ngDisabled: '!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd)'
             }]
         },
