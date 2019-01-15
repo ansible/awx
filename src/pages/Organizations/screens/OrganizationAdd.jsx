@@ -30,6 +30,7 @@ class OrganizationAdd extends React.Component {
     this.onSelectChange = this.onSelectChange.bind(this);
     this.onLookupChange = this.onLookupChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.resetForm = this.resetForm.bind(this);
     this.onSuccess = this.onSuccess.bind(this);
     this.onCancel = this.onCancel.bind(this);
     this.format = this.format.bind(this);
@@ -83,11 +84,11 @@ class OrganizationAdd extends React.Component {
           selected.forEach( async (select) => {
             await api.createInstanceGroups(url, select.id);
           });
-          this.resetForm();
         }
       } catch (err) {
         this.setState({ createInstanceGroupsError: err })
       } finally {
+        this.resetForm();
         this.onSuccess(response.id);
       }
     }
