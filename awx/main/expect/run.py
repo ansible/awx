@@ -257,7 +257,7 @@ def handle_termination(pid, args, proot_cmd, is_cancel=True):
 
 def __run__(private_data_dir):
     buff = StringIO()
-    with open(os.path.join(private_data_dir, 'env'), 'r') as f:
+    with codecs.open(os.path.join(private_data_dir, 'env'), 'r', encoding='utf-8') as f:
         for line in f:
             buff.write(line)
 
