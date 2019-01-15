@@ -98,7 +98,7 @@
 
 - name: Set postgresql hostname to helm package service (Kubernetes)
   set_fact:
-    pg_hostname: "{{ postgresql_service_name }}"
+    pg_hostname: "{{ postgresql_service_name }}-postgresql"
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - kubernetes_context is defined
