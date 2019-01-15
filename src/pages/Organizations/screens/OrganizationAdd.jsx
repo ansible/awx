@@ -79,8 +79,12 @@ class OrganizationAdd extends React.Component {
       const url = response.related.instance_groups;
       const selected = this.state.results.filter(group => group.isChecked);
       try {
-        await api.createInstanceGroups(url, selected);
-        this.resetForm();
+        if (selected.length > 0) {
+          selected.forEach( async (select) => {
+            await api.createInstanceGroups(url, select.id);
+          });
+          this.resetForm();
+        }
       } catch (err) {
         this.setState({ createInstanceGroupsError: err })
       } finally {
@@ -112,7 +116,7 @@ class OrganizationAdd extends React.Component {
     const { api } = this.props;
     try {
       const { data } = await api.getInstanceGroups();
-      this.format(data);
+      const results = this.format(data);
       this.setState({ results });
     } catch (error) {
       this.setState({ getInstanceGroupsError: error })
@@ -159,7 +163,7 @@ class OrganizationAdd extends React.Component {
                   </FormGroup>
                   <FormGroup label="Instance Groups" fieldId="simple-form-instance-groups">
                     <Lookup
-                      lookup_header="Instance Groups"
+                      lookupHeader="Instance Groups"
                       lookupChange={this.onLookupChange}
                       data={results}
                     />

@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
 import {
@@ -86,10 +85,5 @@ class About extends React.Component {
     );
   }
 }
-
-About.contextTypes = {
-  ansible_version: PropTypes.string,
-  version: PropTypes.string,
-};
 
 export default About;

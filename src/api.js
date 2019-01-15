@@ -74,13 +74,8 @@ class APIClient {
     return this.http.get(API_INSTANCE_GROUPS);
   }
 
-  createInstanceGroups (url, selected) {
-    if (selected.length > 0) {
-      selected.forEach(select => {
-        this.http.post(url, { id: select.id });
-      });
-    }
-    return false;
+  createInstanceGroups (url, id) {
+    return this.http.post(url, { id });
   }
 }
 

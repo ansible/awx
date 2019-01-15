@@ -58,7 +58,7 @@ class Lookup extends React.Component {
         <div className="pf-c-form-control">{this.wrapTags(this.props.data)}</div>
         <Modal
           className="awx-c-modal"
-          title={`Select ${this.props.lookup_header}`}
+          title={`Select ${this.props.lookupHeader}`}
           isOpen={isModalOpen}
           onClose={this.handleModalToggle}
         >
