@@ -23,6 +23,7 @@ import configurationLdap5Form from './forms/auth-form/sub-forms/auth-ldap5.form.
 import configurationRadiusForm from './forms/auth-form/sub-forms/auth-radius.form.js';
 import configurationTacacsForm from './forms/auth-form/sub-forms/auth-tacacs.form.js';
 import configurationSamlForm from './forms/auth-form/sub-forms/auth-saml.form';
+import configurationMiscForm from './forms/auth-form/sub-forms/auth-misc.form';
 
 //system sub-forms
 import systemActivityStreamForm from './forms/system-form/sub-forms/system-activity-stream.form.js';
@@ -56,6 +57,7 @@ angular.module('configuration', [])
     .factory('configurationRadiusForm', configurationRadiusForm)
     .factory('configurationTacacsForm', configurationTacacsForm)
     .factory('configurationSamlForm', configurationSamlForm)
+    .factory('configurationMiscForm', configurationMiscForm)
     //system forms
     .factory('systemActivityStreamForm', systemActivityStreamForm)
     .factory('systemLoggingForm', systemLoggingForm)
