@@ -16,7 +16,7 @@ const store = {};
  *
  * @param endpoint - The REST API url suffix.
  * @param data - Attributes used to create a new endpoint.
- * @param [unique=['name']] - A unique key for a resource.
+ * @param [unique=['name']] - An array of keys used to uniquely identify previously created resources from the endpoint.
  *
  */
 const getOrCreate = (endpoint, data, unique = ['name']) => {
