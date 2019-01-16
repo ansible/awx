@@ -3,7 +3,7 @@
 from contextlib import contextmanager
 from datetime import datetime
 from functools import partial
-import ConfigParser
+import configparser
 import json
 import os
 import re
@@ -12,7 +12,7 @@ import tempfile
 
 from backports.tempfile import TemporaryDirectory
 import fcntl
-import mock
+from unittest import mock
 import pytest
 import six
 import yaml
@@ -427,11 +427,11 @@ class TestExtraVarSanitation(TestJobExecution):
 class TestGenericRun(TestJobExecution):
 
     def test_generic_failure(self):
-        self.task.build_private_data_files = mock.Mock(side_effect=IOError())
+        self.task.build_private_data_files = mock.Mock(side_effect=OSError())
         with pytest.raises(Exception):
             self.task.run(self.pk)
         update_model_call = self.task.update_model.call_args[1]
-        assert 'IOError' in update_model_call['result_traceback']
+        assert 'OSError' in update_model_call['result_traceback']
         assert update_model_call['status'] == 'error'
         assert update_model_call['emitted_events'] == 0
 
@@ -1131,7 +1131,7 @@ class TestJobCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'rb').read()
+            shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
             assert shade_config == '\n'.join([
                 'clouds:',
                 '  devstack:',
@@ -1167,7 +1167,7 @@ class TestJobCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(env['OVIRT_INI_PATH'])
             assert config.get('ovirt', 'ovirt_url') == 'some-ovirt-host.example.org'
             assert config.get('ovirt', 'ovirt_username') == 'bob'
@@ -1175,7 +1175,7 @@ class TestJobCredentials(TestJobExecution):
             if ca_file:
                 assert config.get('ovirt', 'ovirt_ca_file') == ca_file
             else:
-                with pytest.raises(ConfigParser.NoOptionError):
+                with pytest.raises(configparser.NoOptionError):
                     config.get('ovirt', 'ovirt_ca_file')
             return ['successful', 0]
 
@@ -1209,7 +1209,7 @@ class TestJobCredentials(TestJobExecution):
             assert env['ANSIBLE_NET_AUTHORIZE'] == expected_authorize
             if authorize:
                 assert env['ANSIBLE_NET_AUTH_PASS'] == 'authorizeme'
-            assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'rb').read() == self.EXAMPLE_PRIVATE_KEY
+            assert open(env['ANSIBLE_NET_SSH_KEYFILE'], 'r').read() == self.EXAMPLE_PRIVATE_KEY
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
@@ -1549,7 +1549,7 @@ class TestJobCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            assert open(env['MY_CLOUD_INI_FILE'], 'rb').read() == '[mycloud]\nABC123'
+            assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == '[mycloud]\nABC123'
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
@@ -1576,7 +1576,7 @@ class TestJobCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            assert open(env['MY_CLOUD_INI_FILE'], 'rb').read() == value.encode('utf-8')
+            assert open(env['MY_CLOUD_INI_FILE'], 'r').read() == value
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
@@ -1619,8 +1619,8 @@ class TestJobCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            assert open(env['MY_CERT_INI_FILE'], 'rb').read() == '[mycert]\nCERT123'
-            assert open(env['MY_KEY_INI_FILE'], 'rb').read() == '[mykey]\nKEY123'
+            assert open(env['MY_CERT_INI_FILE'], 'r').read() == '[mycert]\nCERT123'
+            assert open(env['MY_KEY_INI_FILE'], 'r').read() == '[mykey]\nKEY123'
             return ['successful', 0]
 
         self.run_pexpect.side_effect = run_pexpect_side_effect
@@ -1820,7 +1820,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert 'AWS_SECRET_ACCESS_KEY' not in env
             assert 'EC2_INI_PATH' in env
 
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(env['EC2_INI_PATH'])
             assert 'ec2' in config.sections()
             return ['successful', 0]
@@ -1895,7 +1895,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert env['AWS_SECRET_ACCESS_KEY'] == 'secret'
             assert 'EC2_INI_PATH' in env
 
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(env['EC2_INI_PATH'])
             assert 'ec2' in config.sections()
             return ['successful', 0]
@@ -1921,7 +1921,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
 
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(env['VMWARE_INI_PATH'])
             assert config.get('vmware', 'username') == 'bob'
             assert config.get('vmware', 'password') == 'secret'
@@ -1963,7 +1963,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert env['AZURE_SUBSCRIPTION_ID'] == 'some-subscription'
             assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
 
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(env['AZURE_INI_PATH'])
             assert config.get('azure', 'include_powerstate') == 'yes'
             assert config.get('azure', 'group_by_resource_group') == 'no'
@@ -2008,7 +2008,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert env['AZURE_PASSWORD'] == 'secret'
             assert env['AZURE_CLOUD_ENVIRONMENT'] == 'foobar'
 
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(env['AZURE_INI_PATH'])
             assert config.get('azure', 'include_powerstate') == 'yes'
             assert config.get('azure', 'group_by_resource_group') == 'no'
@@ -2054,7 +2054,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
             assert json_data['client_email'] == 'bob'
             assert json_data['project_id'] == 'some-project'
 
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(env['GCE_INI_PATH'])
             assert 'cache' in config.sections()
             assert config.getint('cache', 'cache_max_age') == 0
@@ -2091,7 +2091,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'rb').read()
+            shade_config = open(env['OS_CLIENT_CONFIG_FILE'], 'r').read()
             assert '\n'.join([
                 'clouds:',
                 '  devstack:',
@@ -2131,7 +2131,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(env['FOREMAN_INI_PATH'])
             assert config.get('foreman', 'url') == 'https://example.org'
             assert config.get('foreman', 'user') == 'bob'
@@ -2168,7 +2168,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
 
         def run_pexpect_side_effect(*args, **kwargs):
             args, cwd, env, stdout = args
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(env['CLOUDFORMS_INI_PATH'])
             assert config.get('cloudforms', 'url') == 'https://example.org'
             assert config.get('cloudforms', 'username') == 'bob'
@@ -2276,7 +2276,7 @@ def test_os_open_oserror():
 
 
 def test_fcntl_ioerror():
-    with pytest.raises(IOError):
+    with pytest.raises(OSError):
         fcntl.flock(99999, fcntl.LOCK_EX)
 
 

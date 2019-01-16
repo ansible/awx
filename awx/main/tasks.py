@@ -3,8 +3,7 @@
 
 # Python
 from collections import OrderedDict, namedtuple
-import ConfigParser
-import cStringIO
+import configparser
 import errno
 import functools
 import importlib
@@ -18,7 +17,6 @@ import stat
 import tempfile
 import time
 import traceback
-import urlparse
 from distutils.version import LooseVersion as Version
 import yaml
 import fcntl
@@ -26,6 +24,8 @@ try:
     import psutil
 except Exception:
     psutil = None
+from io import StringIO
+import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
@@ -185,9 +185,9 @@ def apply_cluster_membership_policies():
         actual_instances = [Node(obj=i, groups=[]) for i in considered_instances if i.managed_by_policy]
         logger.info("Total non-isolated instances:{} available for policy: {}".format(
             total_instances, len(actual_instances)))
-        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+        for g in sorted(actual_groups, key=lambda x: len(x.instances)):
             policy_min_added = []
-            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+            for i in sorted(actual_instances, key=lambda x: len(x.groups)):
                 if len(g.instances) >= g.obj.policy_instance_minimum:
                     break
                 if i.obj.id in g.instances:
@@ -201,9 +201,9 @@ def apply_cluster_membership_policies():
                 logger.info(six.text_type("Policy minimum, adding Instances {} to Group {}").format(policy_min_added, g.obj.name))
 
         # Finally, process instance policy percentages
-        for g in sorted(actual_groups, cmp=lambda x,y: len(x.instances) - len(y.instances)):
+        for g in sorted(actual_groups, key=lambda x: len(x.instances)):
             policy_per_added = []
-            for i in sorted(actual_instances, cmp=lambda x,y: len(x.groups) - len(y.groups)):
+            for i in sorted(actual_instances, key=lambda x: len(x.groups)):
                 if i.obj.id in g.instances:
                     # If the instance is already _in_ the group, it was
                     # applied earlier via a minimum policy or policy list
@@ -294,7 +294,7 @@ def send_notifications(notification_list, job_id=None):
         finally:
             try:
                 notification.save(update_fields=update_fields)
-            except Exception as e:
+            except Exception:
                 logger.exception(six.text_type('Error saving notification {} result.').format(notification.id))
 
 
@@ -722,12 +722,12 @@ class BaseTask(object):
             ssh_ver = get_ssh_version()
             ssh_too_old = True if ssh_ver == "unknown" else Version(ssh_ver) < Version("6.0")
             openssh_keys_supported = ssh_ver != "unknown" and Version(ssh_ver) >= Version("6.5")
-            for credential, data in private_data.get('credentials', {}).iteritems():
+            for credential, data in private_data.get('credentials', {}).items():
                 # Bail out now if a private key was provided in OpenSSH format
                 # and we're running an earlier version (<6.5).
                 if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
                     raise RuntimeError(OPENSSH_KEY_ERROR)
-            for credential, data in private_data.get('credentials', {}).iteritems():
+            for credential, data in private_data.get('credentials', {}).items():
                 # OpenSSH formatted keys must have a trailing newline to be
                 # accepted by ssh-add.
                 if 'OPENSSH PRIVATE KEY' in data and not data.endswith('\n'):
@@ -831,7 +831,7 @@ class BaseTask(object):
         json_data = json.dumps(script_data)
         handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
         f = os.fdopen(handle, 'w')
-        f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint %r\n' % json_data)
+        f.write('#! /usr/bin/env python\n# -*- coding: utf-8 -*-\nprint(%r)\n' % json_data)
         f.close()
         os.chmod(path, stat.S_IRUSR | stat.S_IXUSR | stat.S_IWUSR)
         return path
@@ -882,7 +882,7 @@ class BaseTask(object):
                 if 'uuid' in event_data:
                     cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
                     if cache_event is not None:
-                        event_data.update(cache_event)
+                        event_data.update(json.loads(cache_event))
                 dispatcher.dispatch(event_data)
 
             return OutputEventFilter(event_callback)
@@ -1588,7 +1588,7 @@ class RunProjectUpdate(BaseTask):
 
     def build_safe_args(self, project_update, **kwargs):
         pwdict = dict(kwargs.get('passwords', {}).items())
-        for pw_name, pw_val in pwdict.items():
+        for pw_name, pw_val in list(pwdict.items()):
             if pw_name in ('', 'yes', 'no', 'scm_username'):
                 continue
             pwdict[pw_name] = HIDDEN_PASSWORD
@@ -1609,7 +1609,7 @@ class RunProjectUpdate(BaseTask):
         scm_username = kwargs.get('passwords', {}).get('scm_username', '')
         scm_password = kwargs.get('passwords', {}).get('scm_password', '')
         pwdict = dict(kwargs.get('passwords', {}).items())
-        for pw_name, pw_val in pwdict.items():
+        for pw_name, pw_val in list(pwdict.items()):
             if pw_name in ('', 'yes', 'no', 'scm_username'):
                 continue
             pwdict[pw_name] = HIDDEN_PASSWORD
@@ -1850,7 +1850,7 @@ class RunInventoryUpdate(BaseTask):
             )
             return private_data
 
-        cp = ConfigParser.ConfigParser()
+        cp = configparser.RawConfigParser()
         # Build custom ec2.ini for ec2 inventory script to use.
         if inventory_update.source == 'ec2':
             section = 'ec2'
@@ -1881,14 +1881,14 @@ class RunInventoryUpdate(BaseTask):
                 cache_path = tempfile.mkdtemp(prefix='ec2_cache', dir=kwargs.get('private_data_dir', None))
                 ec2_opts['cache_path'] = cache_path
             ec2_opts.setdefault('cache_max_age', '300')
-            for k,v in ec2_opts.items():
+            for k, v in ec2_opts.items():
                 cp.set(section, k, six.text_type(v))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
 
             section = 'vmware'
             cp.add_section(section)
-            cp.set('vmware', 'cache_max_age', 0)
+            cp.set('vmware', 'cache_max_age', '0')
             cp.set('vmware', 'validate_certs', str(settings.VMWARE_VALIDATE_CERTS))
             cp.set('vmware', 'username', credential.username)
             cp.set('vmware', 'password', decrypt_field(credential, 'password'))
@@ -1900,7 +1900,7 @@ class RunInventoryUpdate(BaseTask):
             if inventory_update.group_by:
                 vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
 
-            for k,v in vmware_opts.items():
+            for k, v in vmware_opts.items():
                 cp.set(section, k, six.text_type(v))
 
         elif inventory_update.source == 'satellite6':
@@ -1913,9 +1913,9 @@ class RunInventoryUpdate(BaseTask):
             foreman_opts = dict(inventory_update.source_vars_dict.items())
             foreman_opts.setdefault('ssl_verify', 'False')
             for k, v in foreman_opts.items():
-                if k == 'satellite6_group_patterns' and isinstance(v, basestring):
+                if k == 'satellite6_group_patterns' and isinstance(v, str):
                     group_patterns = v
-                elif k == 'satellite6_group_prefix' and isinstance(v, basestring):
+                elif k == 'satellite6_group_prefix' and isinstance(v, str):
                     group_prefix = v
                 elif k == 'satellite6_want_hostcollections' and isinstance(v, bool):
                     want_hostcollections = v
@@ -1930,8 +1930,8 @@ class RunInventoryUpdate(BaseTask):
             section = 'ansible'
             cp.add_section(section)
             cp.set(section, 'group_patterns', group_patterns)
-            cp.set(section, 'want_facts', True)
-            cp.set(section, 'want_hostcollections', want_hostcollections)
+            cp.set(section, 'want_facts', 'True')
+            cp.set(section, 'want_hostcollections', str(want_hostcollections))
             cp.set(section, 'group_prefix', group_prefix)
 
             section = 'cache'
@@ -1952,7 +1952,7 @@ class RunInventoryUpdate(BaseTask):
             cloudforms_opts = dict(inventory_update.source_vars_dict.items())
             for opt in ['version', 'purge_actions', 'clean_group_keys', 'nest_tags', 'suffix', 'prefer_ipv4']:
                 if opt in cloudforms_opts:
-                    cp.set(section, opt, cloudforms_opts[opt])
+                    cp.set(section, opt, str(cloudforms_opts[opt]))
 
             section = 'cache'
             cp.add_section(section)
@@ -1978,12 +1978,12 @@ class RunInventoryUpdate(BaseTask):
                 )
 
             azure_rm_opts = dict(inventory_update.source_vars_dict.items())
-            for k,v in azure_rm_opts.items():
+            for k, v in azure_rm_opts.items():
                 cp.set(section, k, six.text_type(v))
 
         # Return INI content.
         if cp.sections():
-            f = cStringIO.StringIO()
+            f = StringIO()
             cp.write(f)
             private_data['credentials'][credential] = f.getvalue()
             return private_data
@@ -2054,7 +2054,7 @@ class RunInventoryUpdate(BaseTask):
 
             # by default, the GCE inventory source caches results on disk for
             # 5 minutes; disable this behavior
-            cp = ConfigParser.ConfigParser()
+            cp = configparser.ConfigParser()
             cp.add_section('cache')
             cp.set('cache', 'cache_max_age', '0')
             handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
@@ -2134,7 +2134,7 @@ class RunInventoryUpdate(BaseTask):
             f = os.fdopen(handle, 'w')
             if inventory_update.source_script is None:
                 raise RuntimeError('Inventory Script does not exist')
-            f.write(inventory_update.source_script.script.encode('utf-8'))
+            f.write(inventory_update.source_script.script)
             f.close()
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             args.append(path)

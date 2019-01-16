@@ -1,4 +1,4 @@
-PYTHON ?= python
+PYTHON ?= python3
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print(get_python_version())")
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
 OFFICIAL ?= no
@@ -120,7 +120,7 @@ virtualenv_ansible:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/ansible && \
+			virtualenv -p python --system-site-packages $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
 			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
@@ -133,10 +133,7 @@ virtualenv_awx:
 			mkdir $(VENV_BASE); \
 		fi; \
 		if [ ! -d "$(VENV_BASE)/awx" ]; then \
-			virtualenv --system-site-packages $(VENV_BASE)/awx && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==36.0.1 && \
-			$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+			$(PYTHON) -m venv $(VENV_BASE)/awx; \
 		fi; \
 	fi
 
@@ -155,11 +152,9 @@ requirements_ansible_dev:
 
 requirements_isolated:
 	if [ ! -d "$(VENV_BASE)/awx" ]; then \
-		virtualenv --system-site-packages $(VENV_BASE)/awx && \
-		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed six packaging appdirs && \
-		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==35.0.2 && \
-		$(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==9.0.1; \
+		$(PYTHON) -m venv $(VENV_BASE)/awx; \
 	fi;
+	echo "include-system-site-packages = true" >> $(VENV_BASE)/awx/lib/python$(PYTHON_VERSION)/pyvenv.cfg
 	$(VENV_BASE)/awx/bin/pip install -r requirements/requirements_isolated.txt
 
 # Install third-party requirements needed for AWX's environment.
@@ -169,6 +164,7 @@ requirements_awx: virtualenv_awx
 	else \
 	    cat requirements/requirements.txt requirements/requirements_git.txt | $(VENV_BASE)/awx/bin/pip install $(PIP_OPTIONS) --no-binary $(SRC_ONLY_PKGS) --ignore-installed -r /dev/stdin ; \
 	fi
+	echo "include-system-site-packages = true" >> $(VENV_BASE)/awx/lib/python$(PYTHON_VERSION)/pyvenv.cfg
 	#$(VENV_BASE)/awx/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_awx_dev:
@@ -195,7 +191,7 @@ version_file:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/awx/bin/activate; \
 	fi; \
-	python -c "import awx as awx; print awx.__version__" > /var/lib/awx/.awx_version; \
+	python -c "import awx; print(awx.__version__)" > /var/lib/awx/.awx_version; \
 
 # Do any one-time init tasks.
 comma := ,
@@ -356,7 +352,7 @@ check: flake8 pep8 # pyflakes pylint
 awx-link:
 	cp -R /tmp/awx.egg-info /awx_devel/ || true
 	sed -i "s/placeholder/$(shell git describe --long | sed 's/\./\\./g')/" /awx_devel/awx.egg-info/PKG-INFO
-	cp -f /tmp/awx.egg-link /venv/awx/lib/python2.7/site-packages/awx.egg-link
+	cp -f /tmp/awx.egg-link /venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.egg-link
 
 TEST_DIRS ?= awx/main/tests/unit awx/main/tests/functional awx/conf/tests awx/sso/tests
 
@@ -547,7 +543,7 @@ docker-isolated:
 	TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml create
 	docker start tools_awx_1
 	docker start tools_isolated_1
-	echo "__version__ = '`git describe --long | cut -d - -f 1-1`'" | docker exec -i tools_isolated_1 /bin/bash -c "cat > /venv/awx/lib/python2.7/site-packages/awx.py"
+	echo "__version__ = '`git describe --long | cut -d - -f 1-1`'" | docker exec -i tools_isolated_1 /bin/bash -c "cat > /venv/awx/lib/python$(PYTHON_VERSION)/site-packages/awx.py"
 	CURRENT_UID=$(shell id -u) TAG=$(COMPOSE_TAG) DEV_DOCKER_TAG_BASE=$(DEV_DOCKER_TAG_BASE) docker-compose -f tools/docker-compose.yml -f tools/docker-isolated-override.yml up
 
 # Docker Compose Development environment

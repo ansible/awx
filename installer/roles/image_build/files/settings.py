@@ -5,7 +5,7 @@ import os
 
 def get_secret():
     if os.path.exists("/etc/tower/SECRET_KEY"):
-        return file('/etc/tower/SECRET_KEY', 'rb').read().strip()
+        return open('/etc/tower/SECRET_KEY', 'rb').read().strip()
     return os.getenv("SECRET_KEY", "privateawx")
 
 

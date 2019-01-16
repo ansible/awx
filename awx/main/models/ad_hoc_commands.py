@@ -3,7 +3,7 @@
 
 # Python
 import logging
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 # Django
 from django.conf import settings
@@ -109,7 +109,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         return self.limit
 
     def clean_module_name(self):
-        if type(self.module_name) not in (str, unicode):
+        if type(self.module_name) is not str:
             raise ValidationError(_("Invalid type for ad hoc command"))
         module_name = self.module_name.strip() or 'command'
         if module_name not in settings.AD_HOC_COMMANDS:
@@ -117,7 +117,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         return module_name
 
     def clean_module_args(self):
-        if type(self.module_args) not in (str, unicode):
+        if type(self.module_args) is not str:
             raise ValidationError(_("Invalid type for ad hoc command"))
         module_args = self.module_args
         if self.module_name in ('command', 'shell') and not module_args:

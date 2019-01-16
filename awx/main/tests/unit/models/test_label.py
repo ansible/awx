@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 
 from awx.main.models.label import Label
 from awx.main.models.unified_jobs import UnifiedJobTemplate, UnifiedJob

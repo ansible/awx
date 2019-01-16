@@ -8,7 +8,6 @@ import uuid
 import json
 import six
 import random
-from sets import Set
 
 # Django
 from django.db import transaction, connection
@@ -77,14 +76,14 @@ class TaskManager():
 
 
     def get_latest_project_update_tasks(self, all_sorted_tasks):
-        project_ids = Set()
+        project_ids = set()
         for task in all_sorted_tasks:
             if isinstance(task, Job):
                 project_ids.add(task.project_id)
         return ProjectUpdate.objects.filter(id__in=project_ids)
 
     def get_latest_inventory_update_tasks(self, all_sorted_tasks):
-        inventory_ids = Set()
+        inventory_ids = set()
         for task in all_sorted_tasks:
             if isinstance(task, Job):
                 inventory_ids.add(task.inventory_id)
@@ -96,7 +95,7 @@ class TaskManager():
         return graph_workflow_jobs
 
     def get_inventory_source_tasks(self, all_sorted_tasks):
-        inventory_ids = Set()
+        inventory_ids = set()
         for task in all_sorted_tasks:
             if isinstance(task, Job):
                 inventory_ids.add(task.inventory_id)
@@ -174,7 +173,8 @@ class TaskManager():
                     status_changed = True
             else:
                 workflow_nodes = dag.mark_dnr_nodes()
-                map(lambda n: n.save(update_fields=['do_not_run']), workflow_nodes)
+                for n in workflow_nodes:
+                    n.save(update_fields=['do_not_run'])
                 is_done = dag.is_workflow_done()
                 if not is_done:
                     continue
@@ -284,7 +284,9 @@ class TaskManager():
         connection.on_commit(post_commit)
 
     def process_running_tasks(self, running_tasks):
-        map(lambda task: self.graph[task.instance_group.name]['graph'].add_job(task) if task.instance_group else None, running_tasks)
+        for task in running_tasks:
+            if task.instance_group:
+                self.graph[task.instance_group.name]['graph'].add_job(task)
 
     def create_project_update(self, task):
         project_task = Project.objects.get(id=task.project_id).create_project_update(
@@ -323,7 +325,7 @@ class TaskManager():
 
             for dep in dependencies:
                 # Add task + all deps except self
-                dep.dependent_jobs.add(*([task] + filter(lambda d: d != dep, dependencies)))
+                dep.dependent_jobs.add(*([task] + [d for d in dependencies if d != dep]))
 
     def get_latest_inventory_update(self, inventory_source):
         latest_inventory_update = InventoryUpdate.objects.filter(inventory_source=inventory_source).order_by("-created")
@@ -456,7 +458,7 @@ class TaskManager():
                                  task.log_format, rampart_group.name, execution_instance.hostname))
                 if execution_instance:
                     self.graph[rampart_group.name]['graph'].add_job(task)
-                    tasks_to_fail = filter(lambda t: t != task, dependency_tasks)
+                    tasks_to_fail = [t for t in dependency_tasks if t != task]
                     tasks_to_fail += [dependent_task]
                     self.start_task(task, rampart_group, tasks_to_fail, execution_instance)
                     found_acceptable_queue = True
@@ -534,13 +536,13 @@ class TaskManager():
         return (self.graph[instance_group]['capacity_total'] - self.graph[instance_group]['consumed_capacity'])
 
     def process_tasks(self, all_sorted_tasks):
-        running_tasks = filter(lambda t: t.status in ['waiting', 'running'], all_sorted_tasks)
+        running_tasks = [t for t in all_sorted_tasks if t.status in ['waiting', 'running']]
 
         self.calculate_capacity_consumed(running_tasks)
 
         self.process_running_tasks(running_tasks)
 
-        pending_tasks = filter(lambda t: t.status in 'pending', all_sorted_tasks)
+        pending_tasks = [t for t in all_sorted_tasks if t.status == 'pending']
         self.process_pending_tasks(pending_tasks)
 
     def _schedule(self):

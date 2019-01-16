@@ -45,8 +45,8 @@ def replaces(squashed, applied=False):
     '''
     squashed_keys, key_index = squash_data(squashed)
     if applied:
-        return [(b'main', key) for key in squashed_keys[:key_index]]
-    return [(b'main', key) for key in squashed_keys[key_index:]]
+        return [('main', key) for key in squashed_keys[:key_index]]
+    return [('main', key) for key in squashed_keys[key_index:]]
 
 
 def operations(squashed, applied=False):

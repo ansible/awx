@@ -7,12 +7,13 @@ RUN yum install -y bzip2 \
     gettext \
     git \
     make \
-    python \
-    python-pip
+    python36-setuptools
 
 RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
 RUN yum install -y nodejs
 RUN npm set progress=false
+
+RUN ln -s /usr/bin/python36 /usr/bin/python3
 
 WORKDIR "/awx"
 

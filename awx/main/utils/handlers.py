@@ -6,10 +6,10 @@ import logging
 import json
 import requests
 import time
-import urlparse
 import socket
 import select
 import six
+from urllib import parse as urlparse
 from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import RequestException
 
@@ -334,7 +334,7 @@ class AWXProxyHandler(logging.Handler):
         handler = self.get_handler(custom_settings=custom_settings, force_create=True)
         handler.setFormatter(LogstashFormatter())
         logger = logging.getLogger(__file__)
-        fn, lno, func = logger.findCaller()
+        fn, lno, func, _ = logger.findCaller()
         record = logger.makeRecord('awx', 10, fn, lno,
                                    'AWX Connection Test', tuple(),
                                    None, func)

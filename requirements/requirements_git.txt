@@ -1,4 +1,3 @@
 git+https://github.com/ansible/ansiconv.git@tower_1.0.0#egg=ansiconv
-git+https://github.com/ansible/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
-git+https://github.com/ansible/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
+git+https://github.com/ansible/django-qsstats-magic.git@py3#egg=django-qsstats-magic
 git+https://github.com/ansible/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield

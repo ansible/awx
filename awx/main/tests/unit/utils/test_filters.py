@@ -1,7 +1,7 @@
 
 # Python
 import pytest
-import mock
+from unittest import mock
 
 # AWX
 from awx.main.utils.filters import SmartFilter, ExternalLoggerEnabled
@@ -120,7 +120,7 @@ class TestSmartFilterQueryFromString():
     def test_invalid_filter_strings(self, mock_get_host_model, filter_string):
         with pytest.raises(RuntimeError) as e:
             SmartFilter.query_from_string(filter_string)
-        assert e.value.message == u"Invalid query " + filter_string
+        assert str(e.value) == u"Invalid query " + filter_string
 
     @pytest.mark.parametrize("filter_string", [
         'created_by__password__icontains=pbkdf2'

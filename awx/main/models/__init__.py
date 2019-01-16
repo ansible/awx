@@ -152,10 +152,6 @@ def o_auth2_token_get_absolute_url(self, request=None):
 
 OAuth2AccessToken.add_to_class('get_absolute_url', o_auth2_token_get_absolute_url)
 
-
-# Import signal handlers only after models have been defined.
-import awx.main.signals # noqa
-
 from awx.main.registrar import activity_stream_registrar # noqa
 activity_stream_registrar.connect(Organization)
 activity_stream_registrar.connect(Inventory)

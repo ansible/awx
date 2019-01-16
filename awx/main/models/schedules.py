@@ -209,7 +209,7 @@ class Schedule(CommonModel, LaunchTimeConfig):
                 pass
         return x
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s_t%s_%s_%s' % (self.name, self.unified_job_template.id, self.id, self.next_run)
 
     def get_absolute_url(self, request=None):

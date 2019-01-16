@@ -117,7 +117,7 @@ def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
             # Decoded key data starts with magic string (null-terminated), four byte
             # length field, followed by the ciphername -- if ciphername is anything
             # other than 'none' the key is encrypted.
-            pem_obj_info['key_enc'] = not bool(pem_obj_info['bin'].startswith('openssh-key-v1\x00\x00\x00\x00\x04none'))
+            pem_obj_info['key_enc'] = not bool(pem_obj_info['bin'].startswith(b'openssh-key-v1\x00\x00\x00\x00\x04none'))
         elif match.group('type') == 'ENCRYPTED PRIVATE KEY':
             pem_obj_info['key_enc'] = True
         elif pem_obj_info.get('key_type', ''):

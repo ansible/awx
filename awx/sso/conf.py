@@ -1,6 +1,6 @@
 # Python
 import collections
-import urlparse
+import urllib.parse as urlparse
 
 # Django
 from django.conf import settings
@@ -461,7 +461,7 @@ register(
 
 register(
     'RADIUS_SECRET',
-    field_class=fields.RADIUSSecretField,
+    field_class=fields.CharField,
     allow_blank=True,
     default='',
     label=_('RADIUS Secret'),

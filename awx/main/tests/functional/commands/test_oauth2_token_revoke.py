@@ -3,7 +3,7 @@ import datetime
 import pytest
 import string
 import random
-import StringIO
+from io import StringIO
 
 # Django
 from django.core.management import call_command
@@ -19,12 +19,12 @@ from awx.api.versioning import reverse
 class TestOAuth2RevokeCommand:
 
     def test_non_existing_user(self):
-        out = StringIO.StringIO()
+        out = StringIO()
         fake_username = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
         arg = '--user=' + fake_username
         with pytest.raises(CommandError) as excinfo:
             call_command('revoke_oauth2_tokens', arg, stdout=out)
-        assert 'A user with that username does not exist' in excinfo.value.message
+        assert 'A user with that username does not exist' in str(excinfo.value)
         out.close()
 
     def test_revoke_all_access_tokens(self, post, admin, alice):

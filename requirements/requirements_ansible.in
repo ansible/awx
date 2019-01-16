@@ -45,7 +45,6 @@ psutil==5.4.3    # same as AWX requirement
 setuptools==36.0.1
 pip==9.0.1
 # VMware
-psphere==0.5.2
 pyvmomi==6.5
 # WinRM
 backports.ssl-match-hostname==3.5.0.1

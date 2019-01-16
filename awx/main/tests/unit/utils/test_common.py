@@ -7,7 +7,7 @@ import pytest
 from uuid import uuid4
 import json
 import yaml
-import mock
+from unittest import mock
 
 from backports.tempfile import TemporaryDirectory
 from django.conf import settings

@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Python
-#import urlparse
 import logging
 
 # Django
@@ -37,7 +36,7 @@ from awx.main.redact import REPLACE_STR
 from awx.main.fields import JSONField
 
 from copy import copy
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 

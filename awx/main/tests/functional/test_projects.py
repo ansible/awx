@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import mock # noqa
+from unittest import mock # noqa
 import pytest
 
 from awx.api.versioning import reverse

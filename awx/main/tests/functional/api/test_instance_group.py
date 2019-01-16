@@ -66,15 +66,15 @@ def create_project_update_factory(instance_group, project):
 
 @pytest.fixture
 def instance_group_jobs_running(instance_group, create_job_factory, create_project_update_factory):
-    jobs_running = [create_job_factory(status='running') for i in xrange(0, 2)]
-    project_updates_running = [create_project_update_factory(status='running') for i in xrange(0, 2)]
+    jobs_running = [create_job_factory(status='running') for i in range(0, 2)]
+    project_updates_running = [create_project_update_factory(status='running') for i in range(0, 2)]
     return jobs_running + project_updates_running
 
 
 @pytest.fixture
 def instance_group_jobs_successful(instance_group, create_job_factory, create_project_update_factory):
-    jobs_successful = [create_job_factory(status='successful') for i in xrange(0, 2)]
-    project_updates_successful = [create_project_update_factory(status='successful') for i in xrange(0, 2)]
+    jobs_successful = [create_job_factory(status='successful') for i in range(0, 2)]
+    project_updates_successful = [create_project_update_factory(status='successful') for i in range(0, 2)]
     return jobs_successful + project_updates_successful
 
 

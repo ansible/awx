@@ -8,7 +8,7 @@ from uuid import uuid4
 import collections
 from multiprocessing import Process
 from multiprocessing import Queue as MPQueue
-from Queue import Full as QueueFull, Empty as QueueEmpty
+from queue import Full as QueueFull, Empty as QueueEmpty
 
 from django.conf import settings
 from django.db import connection as django_connection, connections
@@ -129,7 +129,7 @@ class PoolWorker(object):
         # the task at [0] is the one that's running right now (or is about to
         # be running)
         if len(self.managed_tasks):
-            return self.managed_tasks[self.managed_tasks.keys()[0]]
+            return self.managed_tasks[list(self.managed_tasks.keys())[0]]
 
         return None
 
@@ -180,7 +180,7 @@ class WorkerPool(object):
     class MessagePrinter(awx.main.dispatch.worker.BaseWorker):
 
         def perform_work(self, body):
-            print body
+            print(body)
 
     pool = WorkerPool(min_workers=4)  # spawn four worker processes
     pool.init_workers(MessagePrint().work_loop)
@@ -253,7 +253,7 @@ class WorkerPool(object):
         return tmpl.render(pool=self, workers=self.workers, meta=self.debug_meta)
 
     def write(self, preferred_queue, body):
-        queue_order = sorted(range(len(self.workers)), cmp=lambda x, y: -1 if x==preferred_queue else 0)
+        queue_order = sorted(range(len(self.workers)), key=lambda x: -1 if x==preferred_queue else x)
         write_attempt_order = []
         for queue_actual in queue_order:
             try:
@@ -365,7 +365,7 @@ class AutoscalePool(WorkerPool):
         running_uuids = []
         for worker in self.workers:
             worker.calculate_managed_tasks()
-            running_uuids.extend(worker.managed_tasks.keys())
+            running_uuids.extend(list(worker.managed_tasks.keys()))
         try:
             reaper.reap(excluded_uuids=running_uuids)
         except Exception:

@@ -5,7 +5,7 @@ import os
 import logging
 import signal
 from uuid import UUID
-from Queue import Empty as QueueEmpty
+from queue import Empty as QueueEmpty
 
 from django import db
 from kombu import Producer

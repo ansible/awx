@@ -14,7 +14,8 @@ def node_generator():
 def simple_cycle_1(node_generator):
     g = SimpleDAG()
     nodes = [node_generator() for i in range(4)]
-    map(lambda n: g.add_node(n), nodes)
+    for n in nodes:
+        g.add_node(n)
 
     r'''
             0

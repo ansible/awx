@@ -1,7 +1,7 @@
 
 # Python
 import pytest
-import mock
+from unittest import mock
 from contextlib import contextmanager
 
 from awx.main.tests.factories import (

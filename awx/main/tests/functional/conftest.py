@@ -1,14 +1,13 @@
 # Python
 import pytest
-import mock
+from unittest import mock
 import json
 import os
 import six
 import tempfile
 import shutil
 from datetime import timedelta
-from six.moves import xrange
-from mock import PropertyMock
+from unittest.mock import PropertyMock
 
 # Django
 from django.core.urlresolvers import resolve
@@ -426,7 +425,7 @@ def org_member(user, organization):
 def organizations(instance):
     def rf(organization_count=1):
         orgs = []
-        for i in xrange(0, organization_count):
+        for i in range(0, organization_count):
             o = Organization.objects.create(name="test-org-%d" % i, description="test-org-desc")
             orgs.append(o)
         return orgs
@@ -449,7 +448,7 @@ def hosts(group_factory):
 
     def rf(host_count=1):
         hosts = []
-        for i in xrange(0, host_count):
+        for i in range(0, host_count):
             name = '%s-host-%s' % (group1.name, i)
             (host, created) = group1.inventory.hosts.get_or_create(name=name)
             if created:
@@ -613,7 +612,7 @@ def fact_scans(group_factory, fact_ansible_json, fact_packages_json, fact_servic
         facts_json['packages'] = fact_packages_json
         facts_json['services'] = fact_services_json
 
-        for i in xrange(0, fact_scans):
+        for i in range(0, fact_scans):
             for host in group1.hosts.all():
                 for module_name in module_names:
                     facts.append(Fact.objects.create(host=host, timestamp=timestamp_current, module=module_name, facts=facts_json[module_name]))
@@ -764,7 +763,7 @@ def sqlite_copy_expert(request):
                     InventoryUpdateEvent, SystemJobEvent):
             if cls._meta.db_table == tablename:
                 for event in cls.objects.order_by('start_line').all():
-                    fd.write(event.stdout.encode('utf-8'))
+                    fd.write(event.stdout)
 
     setattr(SQLiteCursorWrapper, 'copy_expert', write_stdout)
     request.addfinalizer(lambda: shutil.rmtree(path))

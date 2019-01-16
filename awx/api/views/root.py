@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 import logging
+import operator
 import json
 from collections import OrderedDict
 
@@ -161,7 +162,7 @@ class ApiV1PingView(APIView):
         for instance in Instance.objects.all():
             response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified,
                                               capacity=instance.capacity, version=instance.version))
-            response['instances'].sort()
+            sorted(response['instances'], key=operator.itemgetter('node'))
         response['instance_groups'] = []
         for instance_group in InstanceGroup.objects.all():
             response['instance_groups'].append(dict(name=instance_group.name,

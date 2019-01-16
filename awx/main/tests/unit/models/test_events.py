@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.utils.timezone import utc
-import mock
+from unittest import mock
 import pytest
 
 from awx.main.models import (JobEvent, ProjectUpdateEvent, AdHocCommandEvent,

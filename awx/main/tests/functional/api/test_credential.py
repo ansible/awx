@@ -1,8 +1,10 @@
 import itertools
 import re
 
-import mock # noqa
+from unittest import mock # noqa
 import pytest
+
+from django.utils.encoding import smart_str
 
 from awx.main.models import (AdHocCommand, Credential, CredentialType, Job, JobTemplate,
                              Inventory, InventorySource, Project,
@@ -255,7 +257,7 @@ def test_credential_validation_error_with_bad_user(post, admin, version, credent
         admin
     )
     assert response.status_code == 400
-    assert response.data['user'][0] == 'Incorrect type. Expected pk value, received unicode.'
+    assert response.data['user'][0] == 'Incorrect type. Expected pk value, received str.'
 
 
 @pytest.mark.django_db
@@ -799,7 +801,7 @@ def test_field_dependencies(get, post, organization, admin, kind, extraneous):
         admin
     )
     assert response.status_code == 400
-    assert re.search('cannot be set unless .+ is set.', response.content)
+    assert re.search('cannot be set unless .+ is set.', smart_str(response.content))
 
     assert Credential.objects.count() == 0
 

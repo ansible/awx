@@ -7,7 +7,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.functional import Promise
 from django.utils.encoding import force_text
 
-from coreapi.compat import force_bytes
 from openapi_codec.encode import generate_swagger_object
 import pytest
 
@@ -17,6 +16,8 @@ from awx.api.versioning import drf_reverse
 class i18nEncoder(DjangoJSONEncoder):
     def default(self, obj):
         if isinstance(obj, Promise):
+            return force_text(obj)
+        if type(obj) == bytes:
             return force_text(obj)
         return super(i18nEncoder, self).default(obj)
 
@@ -91,16 +92,16 @@ class TestSwaggerGeneration():
         # for a reasonable number here; if this test starts failing, raise/lower the bounds
         paths = JSON['paths']
         assert 250 < len(paths) < 300
-        assert paths['/api/'].keys() == ['get']
-        assert paths['/api/v2/'].keys() == ['get']
-        assert sorted(
+        assert list(paths['/api/'].keys()) == ['get']
+        assert list(paths['/api/v2/'].keys()) == ['get']
+        assert list(sorted(
             paths['/api/v2/credentials/'].keys()
-        ) == ['get', 'post']
-        assert sorted(
+        )) == ['get', 'post']
+        assert list(sorted(
             paths['/api/v2/credentials/{id}/'].keys()
-        ) == ['delete', 'get', 'patch', 'put']
-        assert paths['/api/v2/settings/'].keys() == ['get']
-        assert paths['/api/v2/settings/{category_slug}/'].keys() == [
+        )) == ['delete', 'get', 'patch', 'put']
+        assert list(paths['/api/v2/settings/'].keys()) == ['get']
+        assert list(paths['/api/v2/settings/{category_slug}/'].keys()) == [
             'get', 'put', 'patch', 'delete'
         ]
 
@@ -162,9 +163,7 @@ class TestSwaggerGeneration():
     @classmethod
     def teardown_class(cls):
         with open('swagger.json', 'w') as f:
-            data = force_bytes(
-                json.dumps(cls.JSON, cls=i18nEncoder, indent=2)
-            )
+            data = json.dumps(cls.JSON, cls=i18nEncoder, indent=2)
             # replace ISO dates w/ the same value so we don't generate
             # needless diffs
             data = re.sub(

@@ -154,7 +154,7 @@ class ReplayJobEvents(JobStatusLifeCycle):
                 continue
 
             if debug:
-                raw_input("{} of {}:".format(n, job_event_count))
+                input("{} of {}:".format(n, job_event_count))
 
             if not je_previous:
                 stats['recording_start'] = je_current.created

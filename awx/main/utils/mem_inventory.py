@@ -171,7 +171,7 @@ class MemInventory(object):
         return self.all_group.all_groups[name]
 
     def delete_empty_groups(self):
-        for name, group in self.all_group.all_groups.items():
+        for name, group in list(self.all_group.all_groups.items()):
             if not group.children and not group.hosts and not group.variables:
                 logger.debug('Removing empty group %s', name)
                 for parent in group.parents:
@@ -236,7 +236,7 @@ def dict_to_mem_data(data, inventory=None):
 
     _meta = data.pop('_meta', {})
 
-    for k,v in data.iteritems():
+    for k,v in data.items():
         group = inventory.get_group(k)
         if not group:
             continue
@@ -246,7 +246,7 @@ def dict_to_mem_data(data, inventory=None):
             # Process hosts within a group.
             hosts = v.get('hosts', {})
             if isinstance(hosts, dict):
-                for hk, hv in hosts.iteritems():
+                for hk, hv in hosts.items():
                     host = inventory.get_host(hk)
                     if not host:
                         continue
@@ -303,7 +303,7 @@ def dict_to_mem_data(data, inventory=None):
             inventory.all_group.add_child_group(group)
 
     if _meta:
-        for k,v in inventory.all_group.all_hosts.iteritems():
+        for k,v in inventory.all_group.all_hosts.items():
             meta_hostvars = _meta['hostvars'].get(k, {})
             if isinstance(meta_hostvars, dict):
                 v.variables.update(meta_hostvars)

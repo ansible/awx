@@ -5,12 +5,12 @@ import json
 from django.db import connection
 from django.test.utils import override_settings
 from django.test import Client
+from django.utils.encoding import smart_str, smart_bytes
 
 from awx.main.utils.encryption import decrypt_value, get_encryption_key
 from awx.api.versioning import reverse, drf_reverse
 from awx.main.models.oauth import (OAuth2Application as Application, 
-                                   OAuth2AccessToken as AccessToken, 
-                                   )
+                                   OAuth2AccessToken as AccessToken)
 from awx.sso.models import UserEnterpriseAuth
 from oauth2_provider.models import RefreshToken
 
@@ -22,11 +22,11 @@ def test_personal_access_token_creation(oauth_application, post, alice):
         url,
         data='grant_type=password&username=alice&password=alice&scope=read',
         content_type='application/x-www-form-urlencoded',
-        HTTP_AUTHORIZATION='Basic ' + base64.b64encode(':'.join([
+        HTTP_AUTHORIZATION='Basic ' + smart_str(base64.b64encode(smart_bytes(':'.join([
             oauth_application.client_id, oauth_application.client_secret
-        ]))
+        ]))))
     )
-    resp_json = resp._container[0]
+    resp_json = smart_str(resp._container[0])
     assert 'access_token' in resp_json
     assert 'scope' in resp_json
     assert 'refresh_token' in resp_json
@@ -43,15 +43,15 @@ def test_token_creation_disabled_for_external_accounts(oauth_application, post, 
             url,
             data='grant_type=password&username=alice&password=alice&scope=read',
             content_type='application/x-www-form-urlencoded',
-            HTTP_AUTHORIZATION='Basic ' + base64.b64encode(':'.join([
+            HTTP_AUTHORIZATION='Basic ' + smart_str(base64.b64encode(smart_bytes(':'.join([
                 oauth_application.client_id, oauth_application.client_secret
-            ])),
+            ])))),
             status=status
         )
         if allow_oauth:
             assert AccessToken.objects.count() == 1
         else:
-            assert 'OAuth2 Tokens cannot be created by users associated with an external authentication provider' in resp.content
+            assert 'OAuth2 Tokens cannot be created by users associated with an external authentication provider' in smart_str(resp.content)  # noqa
             assert AccessToken.objects.count() == 0
 
 
@@ -302,9 +302,9 @@ def test_refresh_accesstoken(oauth_application, post, get, delete, admin):
         refresh_url,
         data='grant_type=refresh_token&refresh_token=' + refresh_token.token,
         content_type='application/x-www-form-urlencoded',
-        HTTP_AUTHORIZATION='Basic ' + base64.b64encode(':'.join([
+        HTTP_AUTHORIZATION='Basic ' + smart_str(base64.b64encode(smart_bytes(':'.join([
             oauth_application.client_id, oauth_application.client_secret
-        ]))
+        ]))))
     )
     assert RefreshToken.objects.filter(token=refresh_token).exists()
     original_refresh_token = RefreshToken.objects.get(token=refresh_token)

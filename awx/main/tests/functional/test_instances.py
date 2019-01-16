@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 
 from awx.main.models import AdHocCommand, InventoryUpdate, Job, JobTemplate, ProjectUpdate
 from awx.main.models.ha import Instance, InstanceGroup
@@ -71,10 +71,10 @@ def test_instance_dup(org_admin, organization, project, instance_factory, instan
     project.organization.instance_groups.add(ig_all, ig_dup)
     actual_num_instances = Instance.objects.active_count()
     list_response = get(reverse('api:instance_list'), user=system_auditor)
-    api_num_instances_auditor = list_response.data.items()[0][1]
+    api_num_instances_auditor = list(list_response.data.items())[0][1]
 
     list_response2 = get(reverse('api:instance_list'), user=org_admin)
-    api_num_instances_oa = list_response2.data.items()[0][1]
+    api_num_instances_oa = list(list_response2.data.items())[0][1]
 
     assert actual_num_instances == api_num_instances_auditor
     # Note: The org_admin will not see the default 'tower' node because it is not in it's group, as expected

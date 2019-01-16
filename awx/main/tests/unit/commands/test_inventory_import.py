@@ -20,8 +20,8 @@ class TestInvalidOptions:
         cmd = Command()
         with pytest.raises(CommandError) as err:
             cmd.handle()
-        assert 'inventory-id' in err.value.message
-        assert 'required' in err.value.message
+        assert 'inventory-id' in str(err.value)
+        assert 'required' in str(err.value)
 
     def test_invalid_options_name_and_id(self):
         # You can not specify both name and if of the inventory
@@ -30,8 +30,8 @@ class TestInvalidOptions:
             cmd.handle(
                 inventory_id=42, inventory_name='my-inventory'
             )
-        assert 'inventory-id' in err.value.message
-        assert 'exclusive' in err.value.message
+        assert 'inventory-id' in str(err.value)
+        assert 'exclusive' in str(err.value)
 
     def test_invalid_options_id_and_keep_vars(self):
         # You can't overwrite and keep_vars at the same time, that wouldn't make sense
@@ -40,8 +40,8 @@ class TestInvalidOptions:
             cmd.handle(
                 inventory_id=42, overwrite=True, keep_vars=True
             )
-        assert 'overwrite-vars' in err.value.message
-        assert 'exclusive' in err.value.message
+        assert 'overwrite-vars' in str(err.value)
+        assert 'exclusive' in str(err.value)
 
     def test_invalid_options_id_but_no_source(self):
         # Need a source to import
@@ -50,19 +50,19 @@ class TestInvalidOptions:
             cmd.handle(
                 inventory_id=42, overwrite=True, keep_vars=True
             )
-        assert 'overwrite-vars' in err.value.message
-        assert 'exclusive' in err.value.message
+        assert 'overwrite-vars' in str(err.value)
+        assert 'exclusive' in str(err.value)
         with pytest.raises(CommandError) as err:
             cmd.handle(
                 inventory_id=42, overwrite_vars=True, keep_vars=True
             )
-        assert 'overwrite-vars' in err.value.message
-        assert 'exclusive' in err.value.message
+        assert 'overwrite-vars' in str(err.value)
+        assert 'exclusive' in str(err.value)
 
     def test_invalid_options_missing_source(self):
         cmd = Command()
         with pytest.raises(CommandError) as err:
             cmd.handle(inventory_id=42)
-        assert '--source' in err.value.message
-        assert 'required' in err.value.message
+        assert '--source' in str(err.value)
+        assert 'required' in str(err.value)
 

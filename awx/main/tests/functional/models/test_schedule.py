@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.utils.timezone import now
-import mock
+from unittest import mock
 import pytest
 import pytz
 

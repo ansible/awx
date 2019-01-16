@@ -1,9 +1,8 @@
 # Python
-import mock
+from unittest import mock
 import pytest
 from datetime import timedelta
-import urlparse
-import urllib
+import urllib.parse
 
 # AWX
 from awx.api.versioning import reverse
@@ -33,9 +32,9 @@ def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), get_params=
 
 
 def check_url(url1_full, fact_known, module):
-    url1_split = urlparse.urlsplit(url1_full)
+    url1_split = urllib.parse.urlsplit(url1_full)
     url1 = url1_split.path
-    url1_params = urlparse.parse_qsl(url1_split.query)
+    url1_params = urllib.parse.parse_qsl(url1_split.query)
 
     url2 = reverse('api:host_fact_compare_view', kwargs={'pk': fact_known.host.pk})
     url2_params = [('module', module), ('datetime', timestamp_apiformat(fact_known.timestamp))]
@@ -44,7 +43,7 @@ def check_url(url1_full, fact_known, module):
     # Sort before comparing because urlencode can't be trusted
     url1_params_sorted = sorted(url1_params, key=lambda val: val[0])
     url2_params_sorted = sorted(url2_params, key=lambda val: val[0])
-    assert urllib.urlencode(url1_params_sorted) == urllib.urlencode(url2_params_sorted)
+    assert urllib.parse.urlencode(url1_params_sorted) == urllib.parse.urlencode(url2_params_sorted)
 
 
 def check_response_facts(facts_known, response):

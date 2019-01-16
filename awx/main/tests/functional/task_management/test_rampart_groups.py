@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 from datetime import timedelta
 from awx.main.scheduler import TaskManager
 from awx.main.models import InstanceGroup, WorkflowJob

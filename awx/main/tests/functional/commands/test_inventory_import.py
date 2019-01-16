@@ -3,7 +3,7 @@
 
 # Python
 import pytest
-import mock
+from unittest import mock
 
 # Django
 from django.core.management.base import CommandError
@@ -91,25 +91,25 @@ class TestInvalidOptionsFunctional:
         # Give invalid file to the command
         cmd = inventory_import.Command()
         with mock.patch('django.db.transaction.rollback'):
-            with pytest.raises(IOError) as err:
+            with pytest.raises(OSError) as err:
                 cmd.handle(
                     inventory_id=inventory.id,
                     source='/tmp/pytest-of-root/pytest-7/inv_files0-invalid')
-        assert 'Source does not exist' in err.value.message
+        assert 'Source does not exist' in str(err.value)
 
     def test_invalid_inventory_id(self):
         cmd = inventory_import.Command()
         with pytest.raises(CommandError) as err:
             cmd.handle(inventory_id=42, source='/notapath/shouldnotmatter')
-        assert 'id = 42' in err.value.message
-        assert 'cannot be found' in err.value.message
+        assert 'id = 42' in str(err.value)
+        assert 'cannot be found' in str(err.value)
 
     def test_invalid_inventory_name(self):
         cmd = inventory_import.Command()
         with pytest.raises(CommandError) as err:
             cmd.handle(inventory_name='fooservers', source='/notapath/shouldnotmatter')
-        assert 'name = fooservers' in err.value.message
-        assert 'cannot be found' in err.value.message
+        assert 'name = fooservers' in str(err.value)
+        assert 'cannot be found' in str(err.value)
 
 
 @pytest.mark.django_db

@@ -1,6 +1,6 @@
 
 import pytest
-import mock
+from unittest import mock
 
 from rest_framework.exceptions import ValidationError
 
@@ -37,7 +37,7 @@ class TestSAMLOrgAttrField():
         ({'remove': True, 'saml_attr': False},
             ValidationError('Not a valid string.')),
         ({'remove': True, 'saml_attr': False, 'foo': 'bar', 'gig': 'ity'},
-            ValidationError('Invalid key(s): "gig", "foo".')),
+            ValidationError('Invalid key(s): "foo", "gig".')),
         ({'remove_admins': True, 'saml_admin_attr': False},
             ValidationError('Not a valid string.')),
         ({'remove_admins': 'blah', 'saml_admin_attr': 'foobar'},

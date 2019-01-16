@@ -1,6 +1,7 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 import datetime
+from django.utils.encoding import smart_str
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -35,10 +36,10 @@ class Command(BaseCommand):
         ).save()
         pemfile = Setting.objects.create(
             key='AWX_ISOLATED_PUBLIC_KEY',
-            value=key.public_key().public_bytes(
+            value=smart_str(key.public_key().public_bytes(
                 encoding=serialization.Encoding.OpenSSH,
                 format=serialization.PublicFormat.OpenSSH
-            ) + " generated-by-awx@%s" % datetime.datetime.utcnow().isoformat()
+            )) + " generated-by-awx@%s" % datetime.datetime.utcnow().isoformat()
         )
         pemfile.save()
         print(pemfile.value)

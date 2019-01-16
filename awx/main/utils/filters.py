@@ -8,7 +8,7 @@ from pyparsing import (
     CharsNotIn,
     ParseException,
 )
-from logging import Filter, _levelNames
+from logging import Filter, _nameToLevel
 
 import six
 
@@ -91,8 +91,7 @@ class ExternalLoggerEnabled(Filter):
             return False
 
         # Level enablement
-        if record.levelno < _levelNames[self.lvl]:
-            # logging._levelNames -> logging._nameToLevel in python 3
+        if record.levelno < _nameToLevel[self.lvl]:
             return False
 
         # Logger type enablement
@@ -206,7 +205,7 @@ class SmartFilter(object):
                 elif type(last_v) is list:
                     last_v.append(new_kv)
                 elif type(last_v) is dict:
-                    last_kv[last_kv.keys()[0]] = new_kv
+                    last_kv[list(last_kv.keys())[0]] = new_kv
 
                 last_v = new_v
                 last_kv = new_kv
@@ -216,7 +215,7 @@ class SmartFilter(object):
             if type(last_v) is list:
                 last_v.append(v)
             elif type(last_v) is dict:
-                last_kv[last_kv.keys()[0]] = v
+                last_kv[list(last_kv.keys())[0]] = v
 
             return (assembled_k, assembled_v)
 

@@ -1,6 +1,6 @@
 # Python
 import pytest
-import mock
+from unittest import mock
 
 # Tower
 from awx.sso.backends import _get_or_set_enterprise_user

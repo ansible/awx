@@ -1,7 +1,6 @@
 import pytest
 
 from datetime import timedelta
-from six.moves import xrange
 
 from django.utils import timezone
 
@@ -45,7 +44,7 @@ def test_all_ansible(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save)
     assert 3 == len(facts_known)
     assert 3 == len(fact_objs)
 
-    for i in xrange(len(facts_known) - 1, 0):
+    for i in range(len(facts_known) - 1, 0):
         assert facts_known[i].id == fact_objs[i].id
 
 
@@ -103,12 +102,12 @@ def test_to_lte(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     ts_to = epoch + timedelta(days=1)
 
     (facts_known, fact_objs) = setup_common(hosts, fact_scans, ts_from=None, ts_to=ts_to, epoch=epoch)
-    facts_known_subset = filter(lambda x: x.timestamp <= ts_to, facts_known)
+    facts_known_subset = list(filter(lambda x: x.timestamp <= ts_to, facts_known))
 
     assert 2 == len(facts_known_subset)
     assert 2 == len(fact_objs)
 
-    for i in xrange(0, len(fact_objs)):
+    for i in range(0, len(fact_objs)):
         assert facts_known_subset[len(facts_known_subset) - i - 1].id == fact_objs[i].id
 
 
@@ -118,12 +117,12 @@ def test_from_gt(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     ts_from = epoch
 
     (facts_known, fact_objs) = setup_common(hosts, fact_scans, ts_from=ts_from, ts_to=None, epoch=epoch)
-    facts_known_subset = filter(lambda x: x.timestamp > ts_from, facts_known)
+    facts_known_subset = list(filter(lambda x: x.timestamp > ts_from, facts_known))
 
     assert 2 == len(facts_known_subset)
     assert 2 == len(fact_objs)
 
-    for i in xrange(0, len(fact_objs)):
+    for i in range(0, len(fact_objs)):
         assert facts_known_subset[len(facts_known_subset) - i - 1].id == fact_objs[i].id
 
 
@@ -135,5 +134,5 @@ def test_no_ts(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     assert 3 == len(facts_known)
     assert 3 == len(fact_objs)
 
-    for i in xrange(len(facts_known) - 1, 0):
+    for i in range(len(facts_known) - 1, 0):
         assert facts_known[i].id == fact_objs[i].id

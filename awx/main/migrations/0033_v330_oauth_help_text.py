@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='oauth2accesstoken',
             name='scope',
-            field=models.TextField(blank=True, default=b'write', help_text="Allowed scopes, further restricts user's permissions."),
+            field=models.TextField(blank=True, default='write', help_text="Allowed scopes, further restricts user's permissions."),
         ),
         migrations.AlterField(
             model_name='oauth2accesstoken',
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='oauth2application',
             name='authorization_grant_type',
-            field=models.CharField(choices=[(b'authorization-code', 'Authorization code'), (b'implicit', 'Implicit'), (b'password', 'Resource owner password-based'), (b'client-credentials', 'Client credentials')], help_text='The Grant type the user must use for acquire tokens for this application.', max_length=32),
+            field=models.CharField(choices=[('authorization-code', 'Authorization code'), ('implicit', 'Implicit'), ('password', 'Resource owner password-based'), ('client-credentials', 'Client credentials')], help_text='The Grant type the user must use for acquire tokens for this application.', max_length=32),
         ),
         migrations.AlterField(
             model_name='oauth2application',
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='oauth2application',
             name='client_type',
-            field=models.CharField(choices=[(b'confidential', 'Confidential'), (b'public', 'Public')], help_text='Set to Public or Confidential depending on how secure the client device is.', max_length=32),
+            field=models.CharField(choices=[('confidential', 'Confidential'), ('public', 'Public')], help_text='Set to Public or Confidential depending on how secure the client device is.', max_length=32),
         ),
         migrations.AlterField(
             model_name='oauth2application',

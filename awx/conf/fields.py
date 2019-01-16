@@ -1,6 +1,6 @@
 # Python
 import logging
-import urlparse
+import urllib.parse as urlparse
 from collections import OrderedDict
 
 # Django
@@ -71,7 +71,7 @@ class StringListBooleanField(ListField):
                 return False
             elif value in NullBooleanField.NULL_VALUES:
                 return None
-            elif isinstance(value, basestring):
+            elif isinstance(value, str):
                 return self.child.to_representation(value)
         except TypeError:
             pass
@@ -88,7 +88,7 @@ class StringListBooleanField(ListField):
                 return False
             elif data in NullBooleanField.NULL_VALUES:
                 return None
-            elif isinstance(data, basestring):
+            elif isinstance(data, str):
                 return self.child.run_validation(data)
         except TypeError:
             pass

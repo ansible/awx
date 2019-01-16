@@ -1,10 +1,9 @@
 import pytest
 import base64
 import json
-from StringIO import StringIO
+from io import StringIO
 
-from six.moves import xrange
-
+from django.utils.encoding import smart_bytes, smart_str
 from awx.main.utils import OutputEventFilter, OutputVerboseFilter
 
 MAX_WIDTH = 78
@@ -12,14 +11,14 @@ EXAMPLE_UUID = '890773f5-fe6d-4091-8faf-bdc8021d65dd'
 
 
 def write_encoded_event_data(fileobj, data):
-    b64data = base64.b64encode(json.dumps(data))
+    b64data = smart_str(base64.b64encode(smart_bytes(json.dumps(data))))
     # pattern corresponding to OutputEventFilter expectation
-    fileobj.write(u'\x1b[K')
-    for offset in xrange(0, len(b64data), MAX_WIDTH):
+    fileobj.write('\x1b[K')
+    for offset in range(0, len(b64data), MAX_WIDTH):
         chunk = b64data[offset:offset + MAX_WIDTH]
-        escaped_chunk = u'{}\x1b[{}D'.format(chunk, len(chunk))
+        escaped_chunk = '{}\x1b[{}D'.format(chunk, len(chunk))
         fileobj.write(escaped_chunk)
-    fileobj.write(u'\x1b[K')
+    fileobj.write('\x1b[K')
 
 
 @pytest.fixture

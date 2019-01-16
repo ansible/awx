@@ -26,7 +26,7 @@ def generate_role_objects(objects):
     combined_objects = {}
     for o in objects:
         if type(o) is dict:
-            for k,v in o.iteritems():
+            for k, v in o.items():
                 if combined_objects.get(k) is not None:
                     raise NotUnique(k, combined_objects)
                 combined_objects[k] = v

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import re
-
-import mock
 import pytest
 import requests
 from copy import deepcopy
+from unittest import mock
 
 from collections import namedtuple
 
@@ -24,13 +23,6 @@ from awx.main.views import handle_error
 from rest_framework.test import APIRequestFactory
 
 
-@pytest.fixture
-def mock_response_new(mocker):
-    m = mocker.patch('awx.api.views.Response.__new__')
-    m.return_value = m
-    return m
-
-
 def test_handle_error():
     # Assure that templating of error does not raise errors
     request = APIRequestFactory().get('/fooooo/')
@@ -38,7 +30,7 @@ def test_handle_error():
 
 
 class TestApiRootView:
-    def test_get_endpoints(self, mocker, mock_response_new):
+    def test_get_endpoints(self, mocker):
         endpoints = [
             'ping',
             'config',
@@ -72,11 +64,9 @@ class TestApiRootView:
         ]
         view = ApiVersionRootView()
         ret = view.get(mocker.MagicMock())
-
-        assert ret == mock_response_new
-        data_arg = mock_response_new.mock_calls[0][1][1]
+        assert ret.status_code == 200
         for endpoint in endpoints:
-            assert endpoint in data_arg
+            assert endpoint in ret.data
 
 
 class TestJobTemplateLabelList:

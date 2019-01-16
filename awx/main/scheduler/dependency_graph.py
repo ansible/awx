@@ -145,4 +145,5 @@ class DependencyGraph(object):
             self.mark_inventory_update(job.inventory_id)
 
     def add_jobs(self, jobs):
-        map(lambda j: self.add_job(j), jobs)
+        for j in jobs:
+            self.add_job(j)

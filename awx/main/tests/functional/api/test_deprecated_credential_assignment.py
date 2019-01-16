@@ -1,7 +1,8 @@
 import json
-import mock
+from unittest import mock
 import pytest
 
+from django.utils.encoding import smart_str
 from awx.main.models import Credential, CredentialType, Job
 from awx.api.versioning import reverse
 
@@ -48,7 +49,7 @@ def test_ssh_credential_access(get, job_template, admin, machine_credential):
 def test_invalid_credential_update(get, patch, job_template, admin, key):
     url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk, 'version': 'v1'})
     resp = patch(url, {key: 999999}, admin, expect=400)
-    assert 'Credential 999999 does not exist' in json.loads(resp.content)[key]
+    assert 'Credential 999999 does not exist' in json.loads(smart_str(smart_str(resp.content)))[key]
 
 
 @pytest.mark.django_db
@@ -63,7 +64,7 @@ def test_ssh_credential_update(get, patch, job_template, admin, machine_credenti
 def test_ssh_credential_update_invalid_kind(get, patch, job_template, admin, vault_credential):
     url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk})
     resp = patch(url, {'credential': vault_credential.pk}, admin, expect=400)
-    assert 'You must provide an SSH credential.' in resp.content
+    assert 'You must provide an SSH credential.' in smart_str(resp.content)
 
 
 @pytest.mark.django_db
@@ -89,7 +90,7 @@ def test_vault_credential_update_invalid_kind(get, patch, job_template, admin,
                                               machine_credential):
     url = reverse('api:job_template_detail', kwargs={'pk': job_template.pk})
     resp = patch(url, {'vault_credential': machine_credential.pk}, admin, expect=400)
-    assert 'You must provide a vault credential.' in resp.content
+    assert 'You must provide a vault credential.' in smart_str(resp.content)
 
 
 @pytest.mark.django_db
@@ -118,7 +119,7 @@ def test_extra_credentials_requires_cloud_or_net(get, post, job_template, admin,
 
     for cred in (machine_credential, vault_credential):
         resp = post(url, {'associate': True, 'id': cred.pk}, admin, expect=400)
-        assert 'Extra credentials must be network or cloud.' in resp.content
+        assert 'Extra credentials must be network or cloud.' in smart_str(resp.content)
 
     post(url, {'associate': True, 'id': credential.pk}, admin, expect=204)
     assert get(url, admin).data['count'] == 1
@@ -148,7 +149,7 @@ def test_prevent_multiple_machine_creds(get, post, job_template, admin, machine_
     assert get(url, admin).data['count'] == 1
 
     resp = post(url, _new_cred('Second Cred'), admin, expect=400)
-    assert 'Cannot assign multiple Machine credentials.' in resp.content
+    assert 'Cannot assign multiple Machine credentials.' in smart_str(resp.content)
 
 
 @pytest.mark.django_db
@@ -180,7 +181,7 @@ def test_prevent_multiple_machine_creds_at_launch(get, post, job_template, admin
     creds = [machine_credential.pk, other_cred.pk]
     url = reverse('api:job_template_launch', kwargs={'pk': job_template.pk})
     resp = post(url, {'credentials': creds}, admin)
-    assert 'Cannot assign multiple Machine credentials.' in resp.content
+    assert 'Cannot assign multiple Machine credentials.' in smart_str(resp.content)
 
 
 @pytest.mark.django_db
@@ -205,7 +206,7 @@ def test_extra_credentials_unique_by_kind(get, post, job_template, admin,
     assert get(url, admin).data['count'] == 1
 
     resp = post(url, _new_cred('Second Cred'), admin, expect=400)
-    assert 'Cannot assign multiple Amazon Web Services credentials.' in resp.content
+    assert 'Cannot assign multiple Amazon Web Services credentials.' in smart_str(resp.content)
 
 
 @pytest.mark.django_db
@@ -407,14 +408,14 @@ def test_inventory_source_deprecated_credential(get, patch, admin, ec2_source, c
     url = reverse('api:inventory_source_detail', kwargs={'pk': ec2_source.pk})
     patch(url, {'credential': credential.pk}, admin, expect=200)
     resp = get(url, admin, expect=200)
-    assert json.loads(resp.content)['credential'] == credential.pk
+    assert json.loads(smart_str(resp.content))['credential'] == credential.pk
 
 
 @pytest.mark.django_db
 def test_inventory_source_invalid_deprecated_credential(patch, admin, ec2_source, credential):
     url = reverse('api:inventory_source_detail', kwargs={'pk': ec2_source.pk})
     resp = patch(url, {'credential': 999999}, admin, expect=400)
-    assert 'Credential 999999 does not exist' in resp.content
+    assert 'Credential 999999 does not exist' in smart_str(resp.content)
 
 
 @pytest.mark.django_db

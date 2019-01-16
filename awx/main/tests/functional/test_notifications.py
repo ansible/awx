@@ -1,11 +1,9 @@
-import mock
+from unittest import mock
 import pytest
 
 from requests.adapters import HTTPAdapter
 from requests.utils import select_proxy
 from requests.exceptions import ConnectionError
-
-from six.moves import xrange
 
 from awx.api.versioning import reverse
 from awx.main.models.notifications import NotificationTemplate, Notification
@@ -77,7 +75,7 @@ def test_inherited_notification_templates(get, post, user, organization, project
     u = user('admin-poster', True)
     url = reverse('api:notification_template_list')
     notification_templates = []
-    for nfiers in xrange(3):
+    for nfiers in range(3):
         response = post(url,
                         dict(name="test-webhook-{}".format(nfiers),
                              description="test webhook {}".format(nfiers),

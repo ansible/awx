@@ -1,7 +1,8 @@
 import pytest
 
-from awx.api.versioning import reverse
+from django.utils.encoding import smart_str
 
+from awx.api.versioning import reverse
 from awx.main.models import JobTemplate, Schedule
 from awx.main.utils.encryption import decrypt_value, get_encryption_key
 
@@ -153,7 +154,7 @@ def test_invalid_rrules(post, admin_user, project, inventory, rrule, error):
         'name': 'Some Schedule',
         'rrule': rrule,
     }, admin_user, expect=400)
-    assert error in resp.content
+    assert error in smart_str(resp.content)
 
 
 @pytest.mark.django_db
@@ -167,7 +168,7 @@ def test_utc_preview(post, admin_user):
     url = reverse('api:schedule_rrule')
     r = post(url, {'rrule': get_rrule()}, admin_user, expect=200)
     assert r.data['utc'] == r.data['local']
-    assert map(str, r.data['utc']) == [
+    assert list(map(str, r.data['utc'])) == [
         '2030-03-08 05:00:00+00:00',
         '2030-03-09 05:00:00+00:00',
         '2030-03-10 05:00:00+00:00',
@@ -182,14 +183,14 @@ def test_nyc_with_dst(post, admin_user):
     r = post(url, {'rrule': get_rrule('America/New_York')}, admin_user, expect=200)
 
     # March 10, 2030 is when DST takes effect in NYC
-    assert map(str, r.data['local']) == [
+    assert list(map(str, r.data['local'])) == [
         '2030-03-08 05:00:00-05:00',
         '2030-03-09 05:00:00-05:00',
         '2030-03-10 05:00:00-04:00',
         '2030-03-11 05:00:00-04:00',
         '2030-03-12 05:00:00-04:00',
     ]
-    assert map(str, r.data['utc']) == [
+    assert list(map(str, r.data['utc'])) == [
         '2030-03-08 10:00:00+00:00',
         '2030-03-09 10:00:00+00:00',
         '2030-03-10 09:00:00+00:00',
@@ -206,14 +207,14 @@ def test_phoenix_without_dst(post, admin_user):
     r = post(url, {'rrule': get_rrule('America/Phoenix')}, admin_user, expect=200)
 
     # March 10, 2030 is when DST takes effect in NYC
-    assert map(str, r.data['local']) == [
+    assert list(map(str, r.data['local'])) == [
         '2030-03-08 05:00:00-07:00',
         '2030-03-09 05:00:00-07:00',
         '2030-03-10 05:00:00-07:00',
         '2030-03-11 05:00:00-07:00',
         '2030-03-12 05:00:00-07:00',
     ]
-    assert map(str, r.data['utc']) == [
+    assert list(map(str, r.data['utc'])) == [
         '2030-03-08 12:00:00+00:00',
         '2030-03-09 12:00:00+00:00',
         '2030-03-10 12:00:00+00:00',
@@ -229,14 +230,14 @@ def test_interval_by_local_day(post, admin_user):
     r = post(url, {'rrule': rrule}, admin_user, expect=200)
 
     # March 10, 2030 is when DST takes effect in NYC
-    assert map(str, r.data['local']) == [
+    assert list(map(str, r.data['local'])) == [
         '2030-02-02 21:00:00-05:00',
         '2030-03-02 21:00:00-05:00',
         '2030-04-06 21:00:00-04:00',
         '2030-05-04 21:00:00-04:00',
     ]
 
-    assert map(str, r.data['utc']) == [
+    assert list(map(str, r.data['utc'])) == [
         '2030-02-03 02:00:00+00:00',
         '2030-03-03 02:00:00+00:00',
         '2030-04-07 01:00:00+00:00',
@@ -250,13 +251,13 @@ def test_weekday_timezone_boundary(post, admin_user):
     rrule = 'DTSTART;TZID=America/New_York:20300101T210000 RRULE:FREQ=WEEKLY;BYDAY=TU;INTERVAL=1;COUNT=3'
     r = post(url, {'rrule': rrule}, admin_user, expect=200)
 
-    assert map(str, r.data['local']) == [
+    assert list(map(str, r.data['local'])) == [
         '2030-01-01 21:00:00-05:00',
         '2030-01-08 21:00:00-05:00',
         '2030-01-15 21:00:00-05:00',
     ]
 
-    assert map(str, r.data['utc']) == [
+    assert list(map(str, r.data['utc'])) == [
         '2030-01-02 02:00:00+00:00',
         '2030-01-09 02:00:00+00:00',
         '2030-01-16 02:00:00+00:00',
@@ -269,13 +270,13 @@ def test_first_monthly_weekday_timezone_boundary(post, admin_user):
     rrule = 'DTSTART;TZID=America/New_York:20300101T210000 RRULE:FREQ=MONTHLY;BYDAY=SU;BYSETPOS=1;INTERVAL=1;COUNT=3'
     r = post(url, {'rrule': rrule}, admin_user, expect=200)
 
-    assert map(str, r.data['local']) == [
+    assert list(map(str, r.data['local'])) == [
         '2030-01-06 21:00:00-05:00',
         '2030-02-03 21:00:00-05:00',
         '2030-03-03 21:00:00-05:00',
     ]
 
-    assert map(str, r.data['utc']) == [
+    assert list(map(str, r.data['utc'])) == [
         '2030-01-07 02:00:00+00:00',
         '2030-02-04 02:00:00+00:00',
         '2030-03-04 02:00:00+00:00',
@@ -288,13 +289,13 @@ def test_annual_timezone_boundary(post, admin_user):
     rrule = 'DTSTART;TZID=America/New_York:20301231T230000 RRULE:FREQ=YEARLY;INTERVAL=1;COUNT=3'
     r = post(url, {'rrule': rrule}, admin_user, expect=200)
 
-    assert map(str, r.data['local']) == [
+    assert list(map(str, r.data['local'])) == [
         '2030-12-31 23:00:00-05:00',
         '2031-12-31 23:00:00-05:00',
         '2032-12-31 23:00:00-05:00',
     ]
 
-    assert map(str, r.data['utc']) == [
+    assert list(map(str, r.data['utc'])) == [
         '2031-01-01 04:00:00+00:00',
         '2032-01-01 04:00:00+00:00',
         '2033-01-01 04:00:00+00:00',
@@ -312,12 +313,12 @@ def test_dst_phantom_hour(post, admin_user):
     rrule = 'DTSTART;TZID=America/New_York:20300303T023000 RRULE:FREQ=WEEKLY;BYDAY=SU;INTERVAL=1;COUNT=3'
     r = post(url, {'rrule': rrule}, admin_user, expect=200)
 
-    assert map(str, r.data['local']) == [
+    assert list(map(str, r.data['local'])) == [
         '2030-03-03 02:30:00-05:00',
         '2030-03-17 02:30:00-04:00',  # Skip 3/10 because 3/10 @ 2:30AM isn't a real date
     ]
 
-    assert map(str, r.data['utc']) == [
+    assert list(map(str, r.data['utc'])) == [
         '2030-03-03 07:30:00+00:00',
         '2030-03-17 06:30:00+00:00',  # Skip 3/10 because 3/10 @ 2:30AM isn't a real date
     ]
@@ -330,7 +331,7 @@ def test_months_with_31_days(post, admin_user):
     r = post(url, {'rrule': rrule}, admin_user, expect=200)
 
     # 30 days have September, April, June, and November...
-    assert map(str, r.data['local']) == [
+    assert list(map(str, r.data['local'])) == [
         '2030-01-31 00:00:00-05:00',
         '2030-03-31 00:00:00-04:00',
         '2030-05-31 00:00:00-04:00',
@@ -350,7 +351,7 @@ def test_dst_rollback_duplicates(post, admin_user):
     rrule = 'DTSTART;TZID=America/New_York:20301102T233000 RRULE:FREQ=HOURLY;INTERVAL=1;COUNT=5'
     r = post(url, {'rrule': rrule}, admin_user, expect=200)
 
-    assert map(str, r.data['local']) == [
+    assert list(map(str, r.data['local'])) == [
         '2030-11-02 23:30:00-04:00',
         '2030-11-03 00:30:00-04:00',
         '2030-11-03 01:30:00-04:00',

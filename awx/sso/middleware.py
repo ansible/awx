@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 # Python
-import urllib
+import urllib.parse
 
 # Six
 import six
@@ -40,7 +40,7 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
             # see: https://github.com/ansible/tower/issues/1979
             utils.BACKENDS = settings.AUTHENTICATION_BACKENDS
         token_key = request.COOKIES.get('token', '')
-        token_key = urllib.quote(urllib.unquote(token_key).strip('"'))
+        token_key = urllib.parse.quote(urllib.parse.unquote(token_key).strip('"'))
 
         if not hasattr(request, 'successful_authenticator'):
             request.successful_authenticator = None

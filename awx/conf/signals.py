@@ -9,14 +9,10 @@ from django.core.cache import cache
 from django.dispatch import receiver
 
 # Tower
-import awx.main.signals
 from awx.conf import settings_registry
 from awx.conf.models import Setting
-from awx.conf.serializers import SettingSerializer
 
 logger = logging.getLogger('awx.conf.signals')
-
-awx.main.signals.model_serializer_mapping[Setting] = SettingSerializer
 
 __all__ = []
 

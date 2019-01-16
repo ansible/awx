@@ -86,10 +86,10 @@ def test_python_and_js_licenses():
 
     def remediate_licenses_and_requirements(licenses, requirements):
         errors = []
-        items = licenses.keys()
+        items = list(licenses.keys())
         items.sort()
         for item in items:
-            if item not in requirements.keys() and item != 'awx':
+            if item not in [r.lower() for r in requirements.keys()] and item != 'awx':
                 errors.append(" license file %s does not correspond to an existing requirement; it should be removed." % (licenses[item]['filename'],))
                 continue
             # uWSGI has a linking exception
@@ -101,10 +101,10 @@ def test_python_and_js_licenses():
                     errors.append(" embedded source for %s is %s instead of the required version %s" % (item, licenses[item]['source_version'], version))
             elif licenses[item]['source_version']:
                 errors.append(" embedded source version %s for %s is included despite not being needed" % (licenses[item]['source_version'],item))
-        items = requirements.keys()
+        items = list(requirements.keys())
         items.sort()
         for item in items:
-            if item not in licenses.keys():
+            if item.lower() not in licenses.keys():
                 errors.append(" license for requirement %s is missing" %(item,))
         return errors
 

@@ -1,4 +1,4 @@
-import mock # noqa
+from unittest import mock # noqa
 import pytest
 
 from django.db import transaction

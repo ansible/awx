@@ -8,7 +8,7 @@ import logging
 import operator
 import re
 import six
-import urllib
+import urllib.parse
 from collections import OrderedDict
 from datetime import timedelta
 
@@ -40,6 +40,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from polymorphic.models import PolymorphicModel
 
 # AWX
+from awx.main.access import get_user_capabilities
 from awx.main.constants import (
     SCHEDULEABLE_PROVIDERS,
     ANSI_SGR_PATTERN,
@@ -49,7 +50,6 @@ from awx.main.constants import (
 )
 from awx.main.models import * # noqa
 from awx.main.models.base import NEW_JOB_TYPE_CHOICES
-from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
@@ -203,11 +203,11 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
 
     @staticmethod
     def _is_list_of_strings(x):
-        return isinstance(x, (list, tuple)) and all([isinstance(y, basestring) for y in x])
+        return isinstance(x, (list, tuple)) and all([isinstance(y, str) for y in x])
 
     @staticmethod
     def _is_extra_kwargs(x):
-        return isinstance(x, dict) and all([isinstance(k, basestring) and isinstance(v, dict) for k,v in x.items()])
+        return isinstance(x, dict) and all([isinstance(k, str) and isinstance(v, dict) for k,v in x.items()])
 
     @classmethod
     def _update_meta(cls, base, meta, other=None):
@@ -259,9 +259,7 @@ class BaseSerializerMetaclass(serializers.SerializerMetaclass):
         return super(BaseSerializerMetaclass, cls).__new__(cls, name, bases, attrs)
 
 
-class BaseSerializer(serializers.ModelSerializer):
-
-    __metaclass__ = BaseSerializerMetaclass
+class BaseSerializer(serializers.ModelSerializer, metaclass=BaseSerializerMetaclass):
 
     class Meta:
         fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
@@ -284,7 +282,7 @@ class BaseSerializer(serializers.ModelSerializer):
         # The following lines fix the problem of being able to pass JSON dict into PrimaryKeyRelatedField.
         data = kwargs.get('data', False)
         if data:
-            for field_name, field_instance in six.iteritems(self.fields):
+            for field_name, field_instance in self.fields.items():
                 if isinstance(field_instance, ManyRelatedField) and not field_instance.read_only:
                     if isinstance(data.get(field_name, False), dict):
                         raise serializers.ValidationError(_('Cannot use dictionary for %s' % field_name))
@@ -294,7 +292,7 @@ class BaseSerializer(serializers.ModelSerializer):
         """
         The request version component of the URL as an integer i.e., 1 or 2
         """
-        return get_request_version(self.context.get('request'))
+        return get_request_version(self.context.get('request')) or 1
 
     def get_type(self, obj):
         return get_type_for_model(self.Meta.model)
@@ -612,7 +610,7 @@ class BaseSerializer(serializers.ModelSerializer):
                         v2.extend(e)
                     else:
                         v2.append(e)
-                d[k] = map(force_text, v2)
+                d[k] = list(map(force_text, v2))
             raise ValidationError(d)
         return attrs
 
@@ -632,9 +630,7 @@ class EmptySerializer(serializers.Serializer):
     pass
 
 
-class BaseFactSerializer(BaseSerializer):
-
-    __metaclass__ = BaseSerializerMetaclass
+class BaseFactSerializer(BaseSerializer, metaclass=BaseSerializerMetaclass):
 
     def get_fields(self):
         ret = super(BaseFactSerializer, self).get_fields()
@@ -2139,10 +2135,10 @@ class InventorySourceSerializer(UnifiedJobTemplateSerializer, InventorySourceOpt
             return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
         if get_field_from_model_or_attrs('source') != 'scm':
-            redundant_scm_fields = filter(
+            redundant_scm_fields = list(filter(
                 lambda x: attrs.get(x, None),
                 ['source_project', 'source_path', 'update_on_project_update']
-            )
+            ))
             if redundant_scm_fields:
                 raise serializers.ValidationError(
                     {"detail": _("Cannot set %s if not SCM type." % ' '.join(redundant_scm_fields))}
@@ -2465,17 +2461,17 @@ class CredentialTypeSerializer(BaseSerializer):
                     field['help_text'] = _(field['help_text'])
                 if field['type'] == 'become_method':
                     field.pop('type')
-                    field['choices'] = map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS)
+                    field['choices'] = list(map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS))
         return value
 
     def filter_field_metadata(self, fields, method):
         # API-created/modified CredentialType kinds are limited to
         # `cloud` and `net`
         if method in ('PUT', 'POST'):
-            fields['kind']['choices'] = filter(
+            fields['kind']['choices'] = list(filter(
                 lambda choice: choice[0] in ('cloud', 'net'),
                 fields['kind']['choices']
-            )
+            ))
         return fields
 
 
@@ -2626,8 +2622,8 @@ class CredentialSerializer(BaseSerializer):
                 raise serializers.ValidationError({"kind": _('"%s" is not a valid choice' % kind)})
             data['credential_type'] = credential_type.pk
             value = OrderedDict(
-                {'credential_type': credential_type}.items() +
-                super(CredentialSerializer, self).to_internal_value(data).items()
+                list({'credential_type': credential_type}.items()) +
+                list(super(CredentialSerializer, self).to_internal_value(data).items())
             )
 
             # Make a set of the keys in the POST/PUT payload
@@ -3487,12 +3483,16 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
             ret['name'] = obj.module_name
         return ret
 
+    def validate(self, attrs):
+        ret = super(AdHocCommandSerializer, self).validate(attrs)
+        return ret
+
     def validate_extra_vars(self, value):
         redacted_extra_vars, removed_vars = extract_ansible_vars(value)
         if removed_vars:
             raise serializers.ValidationError(_(
                 "{} are prohibited from use in ad hoc commands."
-            ).format(", ".join(removed_vars)))
+            ).format(", ".join(sorted(removed_vars, reverse=True))))
         return vars_validate_or_raise(value)
 
 
@@ -3720,7 +3720,7 @@ class LaunchConfigurationBaseSerializer(BaseSerializer):
             for field in self.instance._meta.fields:
                 setattr(mock_obj, field.name, getattr(self.instance, field.name))
         field_names = set(field.name for field in self.Meta.model._meta.fields)
-        for field_name, value in attrs.items():
+        for field_name, value in list(attrs.items()):
             setattr(mock_obj, field_name, value)
             if field_name not in field_names:
                 attrs.pop(field_name)
@@ -4490,11 +4490,11 @@ class NotificationTemplateSerializer(BaseSerializer):
         model = NotificationTemplate
         fields = ('*', 'organization', 'notification_type', 'notification_configuration')
 
-    type_map = {"string": (str, unicode),
+    type_map = {"string": (str,),
                 "int": (int,),
                 "bool": (bool,),
                 "list": (list,),
-                "password": (str, unicode),
+                "password": (str,),
                 "object": (dict, OrderedDict)}
 
     def to_representation(self, obj):
@@ -4877,7 +4877,7 @@ class ActivityStreamSerializer(BaseSerializer):
         for key in summary_dict.keys():
             if 'id' not in summary_dict[key]:
                 summary_dict[key] = summary_dict[key] + ('id',)
-        field_list = summary_dict.items()
+        field_list = list(summary_dict.items())
         # Needed related fields that are not in the default summary fields
         field_list += [
             ('workflow_job_template_node', ('id', 'unified_job_template_id')),
@@ -4897,7 +4897,7 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_fields(self):
         ret = super(ActivityStreamSerializer, self).get_fields()
-        for key, field in ret.items():
+        for key, field in list(ret.items()):
             if key == 'changes':
                 field.help_text = _('A summary of the new and changed values when an object is created, updated, or deleted')
             if key == 'object1':
@@ -5039,7 +5039,7 @@ class FactVersionSerializer(BaseFactSerializer):
         }
         res['fact_view'] = '%s?%s' % (
             reverse('api:host_fact_compare_view', kwargs={'pk': obj.host.pk}, request=self.context.get('request')),
-            urllib.urlencode(params)
+            urllib.parse.urlencode(params)
         )
         return res
 

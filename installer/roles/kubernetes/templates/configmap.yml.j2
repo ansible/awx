@@ -18,6 +18,8 @@ data:
     SYSTEM_TASK_ABS_CPU = {{ ((task_cpu_request|int / 1000) * 4)|int }}
     SYSTEM_TASK_ABS_MEM = {{ ((task_mem_request|int * 1024) / 100)|int }}
 
+    INSIGHTS_URL_BASE = "{{ insights_url_base }}"
+
     #Autoprovisioning should replace this
     CLUSTER_HOST_ID = socket.gethostname()
     SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
@@ -30,7 +32,7 @@ data:
     STATIC_ROOT = '/var/lib/awx/public/static'
     PROJECTS_ROOT = '/var/lib/awx/projects'
     JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
-    SECRET_KEY = file('/etc/tower/SECRET_KEY', 'rb').read().strip()
+    SECRET_KEY = open('/etc/tower/SECRET_KEY', 'rb').read().strip()
     ALLOWED_HOSTS = ['*']
     INTERNAL_API_URL = 'http://127.0.0.1:8052'
     SERVER_EMAIL = 'root@localhost'

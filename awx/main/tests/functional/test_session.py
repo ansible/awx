@@ -7,7 +7,7 @@ from django.test.utils import override_settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.sessions.models import Session
 from django.contrib.auth import SESSION_KEY
-import mock
+from unittest import mock
 
 from awx.api.versioning import reverse
 

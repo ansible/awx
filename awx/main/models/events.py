@@ -27,7 +27,7 @@ __all__ = ['JobEvent', 'ProjectUpdateEvent', 'AdHocCommandEvent',
 
 def sanitize_event_keys(kwargs, valid_keys):
     # Sanity check: Don't honor keys that we don't recognize.
-    for key in kwargs.keys():
+    for key in list(kwargs.keys()):
         if key not in valid_keys:
             kwargs.pop(key)
 
@@ -424,7 +424,7 @@ class JobEvent(BasePlaybookEvent):
     def get_absolute_url(self, request=None):
         return reverse('api:job_event_detail', kwargs={'pk': self.pk}, request=request)
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s @ %s' % (self.get_event_display2(), self.created.isoformat())
 
     def _update_from_event_data(self):
@@ -580,7 +580,7 @@ class BaseCommandEvent(CreatedModifiedModel):
         editable=False,
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
 
     @classmethod

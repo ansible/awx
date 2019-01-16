@@ -65,7 +65,7 @@ class TypeFilterBackend(BaseFilterBackend):
                 model = queryset.model
                 model_type = get_type_for_model(model)
                 if 'polymorphic_ctype' in get_all_field_names(model):
-                    types_pks = set([v for k,v in types_map.items() if k in types])
+                    types_pks = set([v for k, v in types_map.items() if k in types])
                     queryset = queryset.filter(polymorphic_ctype_id__in=types_pks)
                 elif model_type in types:
                     queryset = queryset
@@ -192,7 +192,7 @@ class FieldLookupBackend(BaseFilterBackend):
 
     def value_to_python(self, model, lookup, value):
         try:
-            lookup = lookup.encode("ascii")
+            lookup.encode("ascii")
         except UnicodeEncodeError:
             raise ValueError("%r is not an allowed field name. Must be ascii encodable." % lookup)
 
@@ -363,12 +363,12 @@ class FieldLookupBackend(BaseFilterBackend):
                     args.append(q)
                 if search_filters and search_filter_relation == 'OR':
                     q = Q()
-                    for term, constrains in search_filters.iteritems():
+                    for term, constrains in search_filters.items():
                         for constrain in constrains:
                             q |= Q(**{constrain: term})
                     args.append(q)
                 elif search_filters and search_filter_relation == 'AND':
-                    for term, constrains in search_filters.iteritems():
+                    for term, constrains in search_filters.items():
                         q_chain = Q()
                         for constrain in constrains:
                             q_chain |= Q(**{constrain: term})
