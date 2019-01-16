@@ -3,7 +3,6 @@ import { mount } from 'enzyme';
 import Lookup from '../../src/components/Lookup';
 import { I18nProvider } from '@lingui/react';
 
-
 const mockData = [{ name: 'foo', id: 0, isChecked: false }];
 describe('<Lookup />', () => {
   test('initially renders succesfully', () => {
@@ -19,15 +18,61 @@ describe('<Lookup />', () => {
     const spy = jest.spyOn(Lookup.prototype, 'onLookup');
     const wrapper = mount(
       <I18nProvider>
-      <Lookup
-        lookup_header="Foo Bar"
-        lookupChange={() => { }}
-        data={mockData}
-      />
+        <Lookup
+          lookup_header="Foo Bar"
+          lookupChange={() => { }}
+          data={mockData}
+        />
       </I18nProvider>
     );
     expect(spy).not.toHaveBeenCalled();
     wrapper.find('#search').simulate('click');
     expect(spy).toHaveBeenCalled();
+  });
+  test('calls "onChecked" when a user changes a checkbox', () => {
+    const spy = jest.spyOn(Lookup.prototype, 'onChecked');
+    const wrapper = mount(
+      <I18nProvider>
+        <Lookup
+          lookup_header="Foo Bar"
+          lookupChange={() => { }}
+          data={mockData}
+        />
+      </I18nProvider>
+    );
+    wrapper.find('#search').simulate('click');
+    wrapper.find('input[type="checkbox"]').simulate('change');
+    expect(spy).toHaveBeenCalled();
+  });
+  test('calls "onRemove" when remove icon is clicked', () => {
+    const spy = jest.spyOn(Lookup.prototype, 'onRemove');
+    const mockData = [{ name: 'foo', id: 0, isChecked: false }, { name: 'bar', id: 1, isChecked: true }];
+    const wrapper = mount(
+      <I18nProvider>
+        <Lookup
+          lookup_header="Foo Bar"
+          lookupChange={() => { }}
+          data={mockData}
+        />
+      </I18nProvider>
+    );
+    wrapper.find('.awx-c-icon--remove').simulate('click');
+    expect(spy).toHaveBeenCalled();
+  });
+  test('"wrapTags" method properly handles data', () => {
+    const spy = jest.spyOn(Lookup.prototype, 'wrapTags');
+    const mockData = [{ name: 'foo', id: 0, isChecked: false }, { name: 'bar', id: 1, isChecked: false }];
+    const wrapper = mount(
+      <I18nProvider>
+        <Lookup
+          lookup_header="Foo Bar"
+          lookupChange={() => { }}
+          data={mockData}
+        />
+      </I18nProvider>
+    );
+    expect(spy).toHaveBeenCalled();
+    const pill = wrapper.find('span.awx-c-tag--pill');
+    expect(pill).toHaveLength(0);
   });
 });

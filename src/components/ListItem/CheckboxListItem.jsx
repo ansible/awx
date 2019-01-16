@@ -26,7 +26,7 @@ export default ({
         </I18n>
       </div>
       <div className="pf-c-data-list__cell">
-        <label htmlFor={`selectd-${itemId}`} id="check-action-item1">
+        <label htmlFor={`selectd-${itemId}`} className="check-action-item">
           <b>{name}</b>
         </label>
       </div>
