@@ -163,7 +163,7 @@ class TestSwaggerGeneration():
     @classmethod
     def teardown_class(cls):
         with open('swagger.json', 'w') as f:
-            data = json.dumps(cls.JSON, cls=i18nEncoder, indent=2)
+            data = json.dumps(cls.JSON, cls=i18nEncoder, indent=2, sort_keys=True)
             # replace ISO dates w/ the same value so we don't generate
             # needless diffs
             data = re.sub(
