@@ -5,6 +5,7 @@
 from collections import OrderedDict, namedtuple
 import configparser
 import errno
+import fnmatch
 import functools
 import importlib
 import json
@@ -688,6 +689,13 @@ class BaseTask(object):
         '''
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
+    def get_path_to_ansible(self, instance, executable='ansible-playbook', **kwargs):
+        venv_path = getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH)
+        venv_exe = os.path.join(venv_path, 'bin', executable)
+        if os.path.exists(venv_exe):
+            return venv_exe
+        return shutil.which(executable)
+
     def build_private_data(self, job, **kwargs):
         '''
         Return SSH private key data (only if stored in DB as ssh_key_data).
@@ -782,8 +790,11 @@ class BaseTask(object):
                 'a valid Python virtualenv does not exist at {}'.format(venv_path)
             )
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
-        if os.path.isdir(os.path.join(venv_libdir, "python2.7")):
-            env['PYTHONPATH'] = os.path.join(venv_libdir, "python2.7", "site-packages") + ":"
+        for version in os.listdir(venv_libdir):
+            if fnmatch.fnmatch(version, 'python[23].*'):
+                if os.path.isdir(os.path.join(venv_libdir, version)):
+                    env['PYTHONPATH'] = os.path.join(venv_libdir, version, "site-packages") + ":"
+                    break
         # Add awx/lib to PYTHONPATH.
         if add_awx_lib:
             env['PYTHONPATH'] = env.get('PYTHONPATH', '') + self.get_path_to('..', 'lib') + ':'
@@ -1263,7 +1274,11 @@ class RunJob(BaseTask):
         # it doesn't make sense to rely on ansible-playbook's default of using
         # the current user.
         ssh_username = ssh_username or 'root'
-        args = ['ansible-playbook', '-i', self.build_inventory(job, **kwargs)]
+        args = [
+            self.get_path_to_ansible(job, 'ansible-playbook', **kwargs),
+            '-i',
+            self.build_inventory(job, **kwargs)
+        ]
         if job.job_type == 'check':
             args.append('--check')
         args.extend(['-u', sanitize_jinja(ssh_username)])
@@ -1557,7 +1572,11 @@ class RunProjectUpdate(BaseTask):
         Build command line argument list for running ansible-playbook,
         optionally using ssh-agent for public/private key authentication.
         '''
-        args = ['ansible-playbook', '-i', self.build_inventory(project_update, **kwargs)]
+        args = [
+            self.get_path_to_ansible(project_update, 'ansible-playbook', **kwargs),
+            '-i',
+            self.build_inventory(project_update, **kwargs)
+        ]
         if getattr(settings, 'PROJECT_UPDATE_VVV', False):
             args.append('-vvv')
         else:
@@ -2274,7 +2293,11 @@ class RunAdHocCommand(BaseTask):
         # it doesn't make sense to rely on ansible's default of using the
         # current user.
         ssh_username = ssh_username or 'root'
-        args = ['ansible', '-i', self.build_inventory(ad_hoc_command, **kwargs)]
+        args = [
+            self.get_path_to_ansible(ad_hoc_command, 'ansible', **kwargs),
+            '-i',
+            self.build_inventory(ad_hoc_command, **kwargs)
+        ]
         if ad_hoc_command.job_type == 'check':
             args.append('--check')
         args.extend(['-u', sanitize_jinja(ssh_username)])

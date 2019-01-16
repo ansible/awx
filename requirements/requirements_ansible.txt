@@ -50,7 +50,7 @@ deprecation==2.0          # via openstacksdk
 docutils==0.14            # via botocore
 dogpile.cache==0.6.5      # via openstacksdk
 entrypoints==0.2.3        # via keyring
-enum34==1.1.6             # via cryptography, knack, msrest, ovirt-engine-sdk-python
+enum34==1.1.6; python_version < '3' # via cryptography, knack, msrest, ovirt-engine-sdk-python
 humanfriendly==4.8        # via azure-cli-core
 idna==2.6                 # via cryptography, requests
 ipaddress==1.0.19         # via cryptography, openstacksdk
