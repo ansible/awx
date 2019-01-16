@@ -50,5 +50,7 @@ these tests, you may import needed functions from [fixtures.js](fixtures.js), wh
 via API, which might include organizations, users, and job templates.
 
 The `commands` directory provides extra functions for the client object in 
-nightwatch.js tests. For more information on these functions and how to 
-create your own, refer to the nightwatch.js documentation on custom commands.
+nightwatch.js tests. These functions are automatically made available for use by the
+client object. For more information on these functions and how to 
+create your own, refer to the [nightwatch.js documentation on custom commands]
+(http://nightwatchjs.org/guide/#writing-custom-commands).
