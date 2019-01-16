@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { I18n } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
 import {
@@ -12,7 +12,7 @@ import heroImg from '@patternfly/patternfly-next/assets/images/pfbg_992.jpg';
 import brandImg from '../../images/tower-logo-white.svg';
 import logoImg from '../../images/tower-logo-login.svg';
 
-class About extends Component {
+class About extends React.Component {
   static createSpeechBubble (version) {
     let text = `Tower ${version}`;
     let top = '';

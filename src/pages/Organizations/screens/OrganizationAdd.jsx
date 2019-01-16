@@ -19,38 +19,53 @@ import {
 } from '@patternfly/react-core';
 
 import { ConfigContext } from '../../../context';
+import Lookup from '../../../components/Lookup';
 import AnsibleSelect from '../../../components/AnsibleSelect'
 const { light } = PageSectionVariants;
-
 class OrganizationAdd extends React.Component {
   constructor(props) {
     super(props);
 
     this.handleChange = this.handleChange.bind(this);
     this.onSelectChange = this.onSelectChange.bind(this);
+    this.onLookupChange = this.onLookupChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.resetForm = this.resetForm.bind(this);
+    this.onSuccess = this.onSuccess.bind(this);
     this.onCancel = this.onCancel.bind(this);
+    this.format = this.format.bind(this);
   }
 
   state = {
     name: '',
     description: '',
-    instanceGroups: '',
+    results: [],
+    instance_groups: [],
     custom_virtualenv: '',
-    error:'',
+    error: '',
   };
 
   onSelectChange(value, _) {
     this.setState({ custom_virtualenv: value });
   };
 
+  onLookupChange(id, _) {
+    let selected = { ...this.state.results }
+    const index = id - 1;
+    selected[index].isChecked = !selected[index].isChecked;
+    this.setState({ selected })
+  }
+
   resetForm() {
     this.setState({
-      ...this.state,
       name: '',
-      description: ''
+      description: '',
+    });
+    let reset = [];
+    this.state.results.map((result) => {
+      reset.push({ id: result.id, name: result.name, isChecked: false });
     })
+    this.setState({ results: reset });
   }
 
   handleChange(_, evt) {
@@ -60,16 +75,57 @@ class OrganizationAdd extends React.Component {
   async onSubmit() {
     const { api } = this.props;
     const data = Object.assign({}, { ...this.state });
-    await api.createOrganization(data);
-    this.resetForm();
+    try {
+      const { data: response } = await api.createOrganization(data);
+      const url = response.related.instance_groups;
+      const selected = this.state.results.filter(group => group.isChecked);
+      try {
+        if (selected.length > 0) {
+          selected.forEach( async (select) => {
+            await api.createInstanceGroups(url, select.id);
+          });
+        }
+      } catch (err) {
+        this.setState({ createInstanceGroupsError: err })
+      } finally {
+        this.resetForm();
+        this.onSuccess(response.id);
+      }
+    }
+    catch (err) {
+      this.setState({ onSubmitError: err })
+    }
   }
 
   onCancel() {
     this.props.history.push('/organizations');
   }
 
+  onSuccess(id) {
+    this.props.history.push(`/organizations/${id}`);
+  }
+
+  format(data) {
+    let results = [];
+    data.results.map((result) => {
+      results.push({ id: result.id, name: result.name, isChecked: false });
+    });
+    return results;
+  };
+
+  async componentDidMount() {
+    const { api } = this.props;
+    try {
+      const { data } = await api.getInstanceGroups();
+      const results = this.format(data);
+      this.setState({ results });
+    } catch (error) {
+      this.setState({ getInstanceGroupsError: error })
+    }
+  }
+
   render() {
-    const { name } = this.state;
+    const { name, results } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
 
     return (
@@ -106,13 +162,11 @@ class OrganizationAdd extends React.Component {
                       onChange={this.handleChange}
                     />
                   </FormGroup>
-                  {/* LOOKUP MODAL PLACEHOLDER */}
                   <FormGroup label="Instance Groups" fieldId="simple-form-instance-groups">
-                    <TextInput
-                      id="add-org-form-instance-groups"
-                      name="instance-groups"
-                      value={this.state.instanceGroups}
-                      onChange={this.handleChange}
+                    <Lookup
+                      lookupHeader="Instance Groups"
+                      lookupChange={this.onLookupChange}
+                      data={results}
                     />
                   </FormGroup>
                   <ConfigContext.Consumer>

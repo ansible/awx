@@ -126,4 +126,16 @@ describe('APIClient (api.js)', () => {
 
     done();
   });
+
+  test('getInstanceGroups calls expected http method', async (done) => {
+    const createPromise = () => Promise.resolve();
+    const mockHttp = ({ get: jest.fn(createPromise) });
+
+    const api = new APIClient(mockHttp);
+    await api.getInstanceGroups();
+
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+
+    done();
+  });
 });

@@ -4,6 +4,7 @@ const API_LOGOUT = `${API_ROOT}logout/`;
 const API_V2 = `${API_ROOT}v2/`;
 const API_CONFIG = `${API_V2}config/`;
 const API_ORGANIZATIONS = `${API_V2}organizations/`;
+const API_INSTANCE_GROUPS = `${API_V2}instance_groups/`;
 
 const LOGIN_CONTENT_TYPE = 'application/x-www-form-urlencoded';
 
@@ -67,6 +68,14 @@ class APIClient {
     const endpoint = `${API_ORGANIZATIONS}${id}/`;
 
     return this.http.get(endpoint);
+  }
+
+  getInstanceGroups () {
+    return this.http.get(API_INSTANCE_GROUPS);
+  }
+
+  createInstanceGroups (url, id) {
+    return this.http.post(url, { id });
   }
 }
 
