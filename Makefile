@@ -53,6 +53,7 @@ WHEEL_FILE ?= $(WHEEL_NAME)-py2-none-any.whl
 
 # UI flag files
 UI_DEPS_FLAG_FILE = awx/ui/.deps_built
+UI_RELEASE_DEPS_FLAG_FILE = awx/ui/.release_deps_built
 UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
 I18N_FLAG_FILE = .i18n_built
@@ -73,6 +74,7 @@ clean-ui:
 	rm -rf awx/ui/test/e2e/reports/
 	rm -rf awx/ui/client/languages/
 	rm -f $(UI_DEPS_FLAG_FILE)
+	rm -f $(UI_RELEASE_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_FLAG_FILE)
 
 clean-tmp:
@@ -449,7 +451,7 @@ messages:
 # generate l10n .json .mo
 languages: $(I18N_FLAG_FILE)
 
-$(I18N_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
+$(I18N_FLAG_FILE): $(UI_RELEASE_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run languages
 	$(PYTHON) tools/scripts/compilemessages.py
 	touch $(I18N_FLAG_FILE)
@@ -457,12 +459,30 @@ $(I18N_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
 # End l10n TASKS
 # --------------------------------------
 
-# UI TASKS
+# UI RELEASE TASKS
+# --------------------------------------
+ui-release: $(UI_RELEASE_FLAG_FILE)
+
+$(UI_RELEASE_FLAG_FILE): $(I18N_FLAG_FILE) $(UI_RELEASE_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run build-release
+	touch $(UI_RELEASE_FLAG_FILE)
+
+$(UI_RELEASE_DEPS_FLAG_FILE):
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 $(NPM_BIN) --unsafe-perm --prefix awx/ui install --no-save awx/ui
+	touch $(UI_RELEASE_DEPS_FLAG_FILE)
+
+# END UI RELEASE TASKS
 # --------------------------------------
 
+# UI TASKS
+# --------------------------------------
 ui-deps: $(UI_DEPS_FLAG_FILE)
 
 $(UI_DEPS_FLAG_FILE):
+	@if [ -f ${UI_RELEASE_DEPS_FLAG_FILE} ]; then \
+		rm -rf awx/ui/node_modules; \
+		rm -f ${UI_RELEASE_DEPS_FLAG_FILE}; \
+	fi; \
 	$(NPM_BIN) --unsafe-perm --prefix awx/ui install --no-save awx/ui
 	touch $(UI_DEPS_FLAG_FILE)
 
@@ -477,12 +497,6 @@ ui-docker: $(UI_DEPS_FLAG_FILE)
 ui-devel: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-devel -- $(MAKEFLAGS)
 
-ui-release: $(UI_RELEASE_FLAG_FILE)
-
-$(UI_RELEASE_FLAG_FILE): $(I18N_FLAG_FILE) $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-release
-	touch $(UI_RELEASE_FLAG_FILE)
-
 ui-test: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test
 
@@ -492,9 +506,6 @@ ui: clean-ui ui-devel
 ui-test-ci: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test:ci
 	$(NPM_BIN) --prefix awx/ui run unit
-
-testjs_ci:
-	echo "Update UI unittests later" #ui-test-ci
 
 jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
