@@ -87,6 +87,11 @@ class Command(BaseCommand):
         except Exception:
             logger.exception('{} is corrupted, removing.'.format(sched_file))
             sched._remove_db()
+        finally:
+            try:
+                sched.close()
+            except Exception:
+                logger.exception('{} failed to sync/close'.format(sched_file))
 
         beat.Beat(
             30,
