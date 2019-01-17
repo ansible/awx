@@ -11,7 +11,6 @@ from django.core.management.base import CommandError
 # AWX
 from awx.main.management.commands import inventory_import
 from awx.main.models import Inventory, Host, Group
-from awx.main.utils.mem_inventory import dict_to_mem_data
 
 
 TEST_INVENTORY_CONTENT = {
@@ -73,7 +72,13 @@ TEST_INVENTORY_CONTENT = {
 }
 
 
-TEST_MEM_OBJECTS = dict_to_mem_data(TEST_INVENTORY_CONTENT)
+class MockLoader:
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def load(self):
+        return self._data
 
 
 def mock_logging(self):
@@ -86,7 +91,6 @@ def mock_logging(self):
 @mock.patch.object(inventory_import.Command, 'set_logging_level', mock_logging)
 class TestInvalidOptionsFunctional:
 
-    @mock.patch.object(inventory_import.InstanceGroup.objects, 'get', new=mock.MagicMock(return_value=None))
     def test_invalid_options_invalid_source(self, inventory):
         # Give invalid file to the command
         cmd = inventory_import.Command()
@@ -114,13 +118,13 @@ class TestInvalidOptionsFunctional:
 
 @pytest.mark.django_db
 @pytest.mark.inventory_import
-@mock.patch.object(inventory_import.InstanceGroup.objects, 'get', new=mock.MagicMock(return_value=None))
 @mock.patch.object(inventory_import.Command, 'check_license', new=mock.MagicMock())
 @mock.patch.object(inventory_import.Command, 'set_logging_level', new=mock_logging)
 class TestINIImports:
 
-    @mock.patch.object(inventory_import.AnsibleInventoryLoader, 'load', mock.MagicMock(return_value=TEST_MEM_OBJECTS))
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
     def test_inventory_single_ini_import(self, inventory, capsys):
+        inventory_import.AnsibleInventoryLoader._data = TEST_INVENTORY_CONTENT
         cmd = inventory_import.Command()
         r = cmd.handle(
             inventory_id=inventory.pk, source=__file__,
@@ -174,52 +178,44 @@ class TestINIImports:
         assert reloaded_inv.inventory_sources.count() == 1
         assert reloaded_inv.inventory_sources.all()[0].source == 'file'
 
-    @mock.patch.object(
-        inventory_import, 'load_inventory_source', mock.MagicMock(
-            return_value=dict_to_mem_data(
-                {
-                    "_meta": {
-                        "hostvars": {"foo": {"some_hostvar": "foobar"}}
-                    },
-                    "all": {
-                        "children": ["ungrouped"]
-                    },
-                    "ungrouped": {
-                        "hosts": ["foo"]
-                    }
-                }).all_group
-        )
-    )
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
     def test_hostvars_are_saved(self, inventory):
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {
+                "hostvars": {"foo": {"some_hostvar": "foobar"}}
+            },
+            "all": {
+                "children": ["ungrouped"]
+            },
+            "ungrouped": {
+                "hosts": ["foo"]
+            }
+        }
         cmd = inventory_import.Command()
-        cmd.handle(inventory_id=inventory.pk, source='doesnt matter')
+        cmd.handle(inventory_id=inventory.pk, source=__file__)
         assert inventory.hosts.count() == 1
         h = inventory.hosts.all()[0]
         assert h.name == 'foo'
         assert h.variables_dict == {"some_hostvar": "foobar"}
 
-    @mock.patch.object(
-        inventory_import, 'load_inventory_source', mock.MagicMock(
-            return_value=dict_to_mem_data(
-                {
-                    "_meta": {
-                        "hostvars": {}
-                    },
-                    "all": {
-                        "children": ["fooland", "barland"]
-                    },
-                    "fooland": {
-                        "children": ["barland"]
-                    },
-                    "barland": {
-                        "children": ["fooland"]
-                    }
-                }).all_group
-        )
-    )
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
     def test_recursive_group_error(self, inventory):
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {
+                "hostvars": {}
+            },
+            "all": {
+                "children": ["fooland", "barland"]
+            },
+            "fooland": {
+                "children": ["barland"]
+            },
+            "barland": {
+                "children": ["fooland"]
+            }
+        }
         cmd = inventory_import.Command()
-        cmd.handle(inventory_id=inventory.pk, source='doesnt matter')
+        cmd.handle(inventory_id=inventory.pk, source=__file__)
 
 
 @pytest.mark.django_db
