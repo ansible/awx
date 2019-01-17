@@ -54,7 +54,7 @@ from awx.main.queue import CallbackQueueDispatcher
 from awx.main.expect import run, isolated_manager
 from awx.main.dispatch.publish import task
 from awx.main.dispatch import get_local_queuename, reaper
-from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
+from awx.main.utils import (get_ansible_version, get_ssh_version, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, get_licenser,
                             wrap_args_with_proot, OutputEventFilter, OutputVerboseFilter, ignore_inventory_computed_fields,
                             ignore_inventory_group_removal, extract_ansible_vars, schedule_task_manager)
@@ -1124,16 +1124,16 @@ class RunJob(BaseTask):
         for credential in job.credentials.all():
             # If we were sent SSH credentials, decrypt them and send them
             # back (they will be written to a temporary file).
-            if credential.ssh_key_data not in (None, ''):
-                private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data') or ''
+            if credential.has_input('ssh_key_data'):
+                private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
 
             if credential.kind == 'openstack':
-                openstack_auth = dict(auth_url=credential.host,
-                                      username=credential.username,
-                                      password=decrypt_field(credential, "password"),
-                                      project_name=credential.project)
-                if credential.domain not in (None, ''):
-                    openstack_auth['domain_name'] = credential.domain
+                openstack_auth = dict(auth_url=credential.get_input('host', default=''),
+                                      username=credential.get_input('username', default=''),
+                                      password=credential.get_input('password', default=''),
+                                      project_name=credential.get_input('project', default=''))
+                if credential.has_input('domain'):
+                    openstack_auth['domain_name'] = credential.get_input('domain', default='')
                 openstack_data = {
                     'clouds': {
                         'devstack': {
@@ -1156,22 +1156,27 @@ class RunJob(BaseTask):
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password'):
                 value = kwargs.get(
                     field,
-                    decrypt_field(cred, 'password' if field == 'ssh_password' else field)
+                    cred.get_input('password' if field == 'ssh_password' else field, default='')
                 )
                 if value not in ('', 'ASK'):
                     passwords[field] = value
 
         for cred in job.vault_credentials:
             field = 'vault_password'
-            if cred.inputs.get('vault_id'):
-                field = 'vault_password.{}'.format(cred.inputs['vault_id'])
+            vault_id = cred.get_input('vault_id', default=None)
+            if vault_id:
+                field = 'vault_password.{}'.format(vault_id)
                 if field in passwords:
                     raise RuntimeError(
                         'multiple vault credentials were specified with --vault-id {}@prompt'.format(
-                            cred.inputs['vault_id']
+                            vault_id
                         )
                     )
-            value = kwargs.get(field, decrypt_field(cred, 'vault_password'))
+
+            value = kwargs.get(field, None)
+            if value is None:
+                value = cred.get_input('vault_password', default='')
+
             if value not in ('', 'ASK'):
                 passwords[field] = value
 
@@ -1181,10 +1186,10 @@ class RunJob(BaseTask):
         '''
         if 'ssh_key_unlock' not in passwords:
             for cred in job.network_credentials:
-                if cred.inputs.get('ssh_key_unlock'):
+                if cred.has_input('ssh_key_unlock'):
                     passwords['ssh_key_unlock'] = kwargs.get(
                         'ssh_key_unlock',
-                        decrypt_field(cred, 'ssh_key_unlock')
+                        cred.get_input('ssh_key_unlock', default='')
                     )
                     break
 
@@ -1240,17 +1245,17 @@ class RunJob(BaseTask):
                 env['OS_CLIENT_CONFIG_FILE'] = cred_files.get(cloud_cred, '')
 
         for network_cred in job.network_credentials:
-            env['ANSIBLE_NET_USERNAME'] = network_cred.username
-            env['ANSIBLE_NET_PASSWORD'] = decrypt_field(network_cred, 'password')
+            env['ANSIBLE_NET_USERNAME'] = network_cred.get_input('username', default='')
+            env['ANSIBLE_NET_PASSWORD'] = network_cred.get_input('password', default='')
 
             ssh_keyfile = cred_files.get(network_cred, '')
             if ssh_keyfile:
                 env['ANSIBLE_NET_SSH_KEYFILE'] = ssh_keyfile
 
-            authorize = network_cred.authorize
+            authorize = network_cred.get_input('authorize', default=False)
             env['ANSIBLE_NET_AUTHORIZE'] = six.text_type(int(authorize))
             if authorize:
-                env['ANSIBLE_NET_AUTH_PASS'] = decrypt_field(network_cred, 'authorize_password')
+                env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
         return env
 
@@ -1263,9 +1268,9 @@ class RunJob(BaseTask):
 
         ssh_username, become_username, become_method = '', '', ''
         if creds:
-            ssh_username = kwargs.get('username', creds.username)
-            become_method = kwargs.get('become_method', creds.become_method)
-            become_username = kwargs.get('become_username', creds.become_username)
+            ssh_username = kwargs.get('username', creds.get_input('username', default=''))
+            become_method = kwargs.get('become_method', creds.get_input('become_method', default=''))
+            become_username = kwargs.get('become_username', creds.get_input('become_username', default=''))
         else:
             become_method = None
             become_username = ""
@@ -1490,8 +1495,8 @@ class RunProjectUpdate(BaseTask):
         private_data = {'credentials': {}}
         if project_update.credential:
             credential = project_update.credential
-            if credential.ssh_key_data not in (None, ''):
-                private_data['credentials'][credential] = decrypt_field(credential, 'ssh_key_data')
+            if credential.has_input('ssh_key_data'):
+                private_data['credentials'][credential] = credential.get_input('ssh_key_data', default='')
         return private_data
 
     def build_passwords(self, project_update, **kwargs):
@@ -1502,9 +1507,9 @@ class RunProjectUpdate(BaseTask):
         passwords = super(RunProjectUpdate, self).build_passwords(project_update,
                                                                   **kwargs)
         if project_update.credential:
-            passwords['scm_key_unlock'] = decrypt_field(project_update.credential, 'ssh_key_unlock')
-            passwords['scm_username'] = project_update.credential.username
-            passwords['scm_password'] = decrypt_field(project_update.credential, 'password')
+            passwords['scm_key_unlock'] = project_update.credential.get_input('ssh_key_unlock', default='')
+            passwords['scm_username'] = project_update.credential.get_input('username', default='')
+            passwords['scm_password'] = project_update.credential.get_input('password', default='')
         return passwords
 
     def build_env(self, project_update, **kwargs):
@@ -1828,12 +1833,13 @@ class RunInventoryUpdate(BaseTask):
         credential = inventory_update.get_cloud_credential()
 
         if inventory_update.source == 'openstack':
-            openstack_auth = dict(auth_url=credential.host,
-                                  username=credential.username,
-                                  password=decrypt_field(credential, "password"),
-                                  project_name=credential.project)
-            if credential.domain not in (None, ''):
-                openstack_auth['domain_name'] = credential.domain
+            openstack_auth = dict(auth_url=credential.get_input('host', default=''),
+                                  username=credential.get_input('username', default=''),
+                                  password=credential.get_input('password', default=''),
+                                  project_name=credential.get_input('project', default=''))
+            if credential.has_input('domain'):
+                openstack_auth['domain_name'] = credential.get_input('domain', default='')
+
             private_state = inventory_update.source_vars_dict.get('private', True)
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
@@ -1909,9 +1915,9 @@ class RunInventoryUpdate(BaseTask):
             cp.add_section(section)
             cp.set('vmware', 'cache_max_age', '0')
             cp.set('vmware', 'validate_certs', str(settings.VMWARE_VALIDATE_CERTS))
-            cp.set('vmware', 'username', credential.username)
-            cp.set('vmware', 'password', decrypt_field(credential, 'password'))
-            cp.set('vmware', 'server', credential.host)
+            cp.set('vmware', 'username', credential.get_input('username', default=''))
+            cp.set('vmware', 'password', credential.get_input('password', default=''))
+            cp.set('vmware', 'server', credential.get_input('host', default=''))
 
             vmware_opts = dict(inventory_update.source_vars_dict.items())
             if inventory_update.instance_filters:
@@ -1942,9 +1948,9 @@ class RunInventoryUpdate(BaseTask):
                     cp.set(section, k, six.text_type(v))
 
             if credential:
-                cp.set(section, 'url', credential.host)
-                cp.set(section, 'user', credential.username)
-                cp.set(section, 'password', decrypt_field(credential, 'password'))
+                cp.set(section, 'url', credential.get_input('host', default=''))
+                cp.set(section, 'user', credential.get_input('username', default=''))
+                cp.set(section, 'password', credential.get_input('password', default=''))
 
             section = 'ansible'
             cp.add_section(section)
@@ -1963,9 +1969,9 @@ class RunInventoryUpdate(BaseTask):
             cp.add_section(section)
 
             if credential:
-                cp.set(section, 'url', credential.host)
-                cp.set(section, 'username', credential.username)
-                cp.set(section, 'password', decrypt_field(credential, 'password'))
+                cp.set(section, 'url', credential.get_input('host', default=''))
+                cp.set(section, 'username', credential.get_input('username', default=''))
+                cp.set(section, 'password', credential.get_input('password', default=''))
                 cp.set(section, 'ssl_verify', "false")
 
             cloudforms_opts = dict(inventory_update.source_vars_dict.items())
@@ -2021,10 +2027,10 @@ class RunInventoryUpdate(BaseTask):
         credential = inventory_update.get_cloud_credential()
         if credential:
             for subkey in ('username', 'host', 'project', 'client', 'tenant', 'subscription'):
-                passwords['source_%s' % subkey] = getattr(credential, subkey)
+                passwords['source_%s' % subkey] = credential.get_input(subkey, default='')
             for passkey in ('password', 'ssh_key_data', 'security_token', 'secret'):
                 k = 'source_%s' % passkey
-                passwords[k] = decrypt_field(credential, passkey)
+                passwords[k] = credential.get_input(passkey, default='')
         return passwords
 
     def build_env(self, inventory_update, **kwargs):
@@ -2229,8 +2235,8 @@ class RunAdHocCommand(BaseTask):
         # back (they will be written to a temporary file).
         creds = ad_hoc_command.credential
         private_data = {'credentials': {}}
-        if creds and creds.ssh_key_data not in (None, ''):
-            private_data['credentials'][creds] = decrypt_field(creds, 'ssh_key_data') or ''
+        if creds and creds.has_input('ssh_key_data'):
+            private_data['credentials'][creds] = creds.get_input('ssh_key_data', default='')
         return private_data
 
     def build_passwords(self, ad_hoc_command, **kwargs):
@@ -2243,9 +2249,9 @@ class RunAdHocCommand(BaseTask):
         if creds:
             for field in ('ssh_key_unlock', 'ssh_password', 'become_password'):
                 if field == 'ssh_password':
-                    value = kwargs.get(field, decrypt_field(creds, 'password'))
+                    value = kwargs.get(field, creds.get_input('password', default=''))
                 else:
-                    value = kwargs.get(field, decrypt_field(creds, field))
+                    value = kwargs.get(field, creds.get_input(field, default=''))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
         return passwords
@@ -2282,9 +2288,9 @@ class RunAdHocCommand(BaseTask):
         creds = ad_hoc_command.credential
         ssh_username, become_username, become_method = '', '', ''
         if creds:
-            ssh_username = kwargs.get('username', creds.username)
-            become_method = kwargs.get('become_method', creds.become_method)
-            become_username = kwargs.get('become_username', creds.become_username)
+            ssh_username = kwargs.get('username', creds.get_input('username', default=''))
+            become_method = kwargs.get('become_method', creds.get_input('become_method', default=''))
+            become_username = kwargs.get('become_username', creds.get_input('become_username', default=''))
         else:
             become_method = None
             become_username = ""

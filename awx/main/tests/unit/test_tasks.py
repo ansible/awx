@@ -108,13 +108,16 @@ def test_safe_env_returns_new_copy():
 
 def test_openstack_client_config_generation(mocker):
     update = tasks.RunInventoryUpdate()
-    credential = mocker.Mock(**{
+    credential_type = CredentialType.defaults['openstack']()
+    inputs = {
         'host': 'https://keystone.openstack.example.org',
         'username': 'demo',
         'password': 'secrete',
         'project': 'demo-project',
         'domain': 'my-demo-domain',
-    })
+    }
+    credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
+
     cred_method = mocker.Mock(return_value=credential)
     inventory_update = mocker.Mock(**{
         'source': 'openstack',
@@ -144,13 +147,16 @@ def test_openstack_client_config_generation(mocker):
 ])
 def test_openstack_client_config_generation_with_private_source_vars(mocker, source, expected):
     update = tasks.RunInventoryUpdate()
-    credential = mocker.Mock(**{
+    credential_type = CredentialType.defaults['openstack']()
+    inputs = {
         'host': 'https://keystone.openstack.example.org',
         'username': 'demo',
         'password': 'secrete',
         'project': 'demo-project',
         'domain': None,
-    })
+    }
+    credential = Credential(pk=1, credential_type=credential_type, inputs=inputs)
+
     cred_method = mocker.Mock(return_value=credential)
     inventory_update = mocker.Mock(**{
         'source': 'openstack',
