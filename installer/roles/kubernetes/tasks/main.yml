@@ -53,13 +53,13 @@
 
 - name: Deploy PostgreSQL (OpenShift)
   block:
-    - name: Template PostgreSQL Deployment
+    - name: Template PostgreSQL Deployment (OpenShift)
       template:
         src: postgresql-persistent.yml.j2
         dest: "{{ kubernetes_base_path }}/postgresql-persistent.yml"
         mode: '0600'
 
-    - name: Deploy and Activate Postgres
+    - name: Deploy and Activate Postgres (OpenShift)
       shell: |
         {{ openshift_oc_bin }} new-app --file={{ kubernetes_base_path }}/postgresql-persistent.yml \
           -e MEMORY_LIMIT={{ pg_memory_limit|default('512') }}Mi \
@@ -80,11 +80,14 @@
 
 - name: Deploy and Activate Postgres (Kubernetes)
   shell: |
-    helm install --name {{ kubernetes_deployment_name }} --namespace {{ kubernetes_namespace }} \
+    helm repo update --tiller-namespace={{ tiller_namespace | default('kube-system') }}
+    helm upgrade {{ postgresql_service_name }} --install \
+      --namespace {{ kubernetes_namespace }} \
       --set postgresqlUsername={{ pg_username }} \
       --set postgresqlPassword={{ pg_password }} \
       --set postgresqlDatabase={{ pg_database }} \
       --set persistence.size={{ pg_volume_capacity|default('5')}}Gi \
+      --version="2.0.0" \
       --tiller-namespace={{ tiller_namespace | default('kube-system') }} \
       stable/postgresql
   when:
@@ -94,9 +97,9 @@
   register: kubernetes_pg_activate
   no_log: yes
 
-- name: Set postgresql hostname to helm package service
+- name: Set postgresql hostname to helm package service (Kubernetes)
   set_fact:
-    pg_hostname: "{{ kubernetes_deployment_name }}-postgresql"
+    pg_hostname: "{{ postgresql_service_name }}-postgresql"
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - kubernetes_context is defined
