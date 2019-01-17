@@ -2163,7 +2163,6 @@ class RunInventoryUpdate(BaseTask):
         if private_data_files is None:
             private_data_files = {}
         self.add_awx_venv(env)
-        self.add_ansible_venv(inventory_update.ansible_virtualenv_path, env)
         # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
@@ -2287,7 +2286,6 @@ class RunInventoryUpdate(BaseTask):
                 cloud_cred = inventory_update.get_cloud_credential()
                 injector = InventorySource.injectors[cloud_cred.kind](self.get_ansible_version(inventory_update))
                 content = injector.inventory_contents(inventory_update)
-                content = content.encode('utf-8')
                 # must be a statically named file
                 inventory_path = os.path.join(private_data_dir, injector.filename)
                 with open(inventory_path, 'w') as f:
