@@ -19,7 +19,6 @@ export default [
     'configurationRadiusForm',
     'configurationTacacsForm',
     'configurationSamlForm',
-    'configurationMiscForm',
     'systemActivityStreamForm',
     'systemLoggingForm',
     'systemMiscForm',
@@ -45,7 +44,6 @@ export default [
         configurationRadiusForm,
         configurationTacacsForm,
         configurationSamlForm,
-        configurationMiscForm,
         systemActivityStreamForm,
         systemLoggingForm,
         systemMiscForm,
@@ -73,7 +71,6 @@ export default [
             'radius': configurationRadiusForm,
             'tacacs': configurationTacacsForm,
             'saml': configurationSamlForm,
-            'authMisc': configurationMiscForm,
             'activity_stream': systemActivityStreamForm,
             'logging': systemLoggingForm,
             'misc': systemMiscForm,
@@ -422,7 +419,7 @@ export default [
             return saveDeferred.promise;
         };
 
-        vm.formCancel = function() {            
+        vm.formCancel = function() {
             if ($scope[formTracker.currentFormName()].$dirty === true) {
                 var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
                 var title = i18n._('Warning: Unsaved Changes');

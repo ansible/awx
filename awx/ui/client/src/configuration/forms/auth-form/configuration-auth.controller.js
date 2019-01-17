@@ -94,8 +94,7 @@ export default [
             {label: i18n._('LDAP'), value: 'ldap'},
             {label: i18n._('RADIUS'), value: 'radius'},
             {label: i18n._('SAML'), value: 'saml'},
-            {label: i18n._('TACACS+'), value: 'tacacs'},
-            {label: i18n._('MISC'), value: 'authMisc'}
+            {label: i18n._('TACACS+'), value: 'tacacs'}
         ];
 
         authVm.ldapDropdownOptions = [
@@ -198,12 +197,7 @@ export default [
                 formDef: formDefs.ldap5,
                 id: 'auth-ldap5-form',
                 name: 'ldap5'
-            },
-            {
-                formDef: formDefs.authMisc,
-                id: 'auth-misc-form',
-                name: 'authMisc'
-            },
+            }
         ];
         var forms = _.map(authForms, 'formDef');
         _.each(forms, function(form) {
