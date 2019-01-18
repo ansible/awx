@@ -31,8 +31,8 @@ import uuid
 try:
     import memcache
 except ImportError:
-    raise ImportError('python-memcached is missing; {}bin/pip install python-memcached'.format(
-        os.environ['VIRTUAL_ENV']
+    raise ImportError('python-memcached is missing; {}/bin/pip install python-memcached'.format(
+        os.environ['VIRTUAL_ENV'].rstrip(os.path.sep)
     ))
 
 __all__ = ['event_context']

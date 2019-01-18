@@ -584,7 +584,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             self.project.organization.custom_virtualenv if self.project.organization else None
         ):
             if virtualenv:
-                return virtualenv
+                return virtualenv.rstrip('/')
         return settings.ANSIBLE_VENV_PATH
 
     @property
