@@ -70,7 +70,6 @@ from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.main.utils import (
     extract_ansible_vars,
-    decrypt_field,
 )
 from awx.main.utils.encryption import encrypt_value
 from awx.main.utils.filters import SmartFilter
@@ -1592,7 +1591,7 @@ class HostInsights(GenericAPIView):
     serializer_class = EmptySerializer
 
     def _extract_insights_creds(self, credential):
-        return (credential.inputs['username'], decrypt_field(credential, 'password'))
+        return (credential.get_input('username', default=''), credential.get_input('password', default=''))
 
     def _get_insights(self, url, username, password):
         session = requests.Session()
