@@ -67,6 +67,18 @@ export default ['i18n', function(i18n) {
                 rows: 6,
                 codeMirror: true,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
+            AWX_ISOLATED_CHECK_INTERVAL: {
+                type: 'text',
+                reset: 'AWX_ISOLATED_CHECK_INTERVAL'
+            },
+            AWX_ISOLATED_LAUNCH_TIMEOUT: {
+                type: 'text',
+                reset: 'AWX_ISOLATED_LAUNCH_TIMEOUT'
+            },
+            AWX_ISOLATED_CONNECTION_TIMEOUT: {
+                type: 'text',
+                reset: 'AWX_ISOLATED_CONNECTION_TIMEOUT'
             }
         },
         buttons: {

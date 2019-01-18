@@ -92,10 +92,15 @@ export default [
         var populateFromApi = function() {
             SettingsService.getCurrentValues()
                 .then(function(data) {
+                    // these two values need to be unnested from the
+                    // OAUTH2_PROVIDER key
+                    data.ACCESS_TOKEN_EXPIRE_SECONDS = data
+                        .OAUTH2_PROVIDER.ACCESS_TOKEN_EXPIRE_SECONDS;
+                    data.AUTHORIZATION_CODE_EXPIRE_SECONDS = data
+                        .OAUTH2_PROVIDER.AUTHORIZATION_CODE_EXPIRE_SECONDS;
                     var currentKeys = _.keys(data);
                     $scope.requiredLogValues = {};
                     _.each(currentKeys, function(key) {
-
                         if(key === "LOG_AGGREGATOR_HOST") {
                             $scope.requiredLogValues.LOG_AGGREGATOR_HOST = data[key];
                         }
@@ -232,7 +237,18 @@ export default [
         $scope.resetValue = function(key) {
             Wait('start');
             var payload = {};
-            payload[key] = $scope.configDataResolve[key].default;
+            if (key === 'ACCESS_TOKEN_EXPIRE_SECONDS' || key === 'AUTHORIZATION_CODE_EXPIRE_SECONDS') {
+                // the reset for these two keys needs to be nested under OAUTH2_PROVIDER
+                if (payload.OAUTH2_PROVIDER === undefined) {
+                    payload.OAUTH2_PROVIDER = {
+                        ACCESS_TOKEN_EXPIRE_SECONDS: $scope.ACCESS_TOKEN_EXPIRE_SECONDS,
+                        AUTHORIZATION_CODE_EXPIRE_SECONDS: $scope.AUTHORIZATION_CODE_EXPIRE_SECONDS
+                    };
+                }
+                payload.OAUTH2_PROVIDER[key] = $scope.configDataResolve[key].default;
+            } else {
+                payload[key] = $scope.configDataResolve[key].default;
+            }
             SettingsService.patchConfiguration(payload)
                 .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
@@ -310,7 +326,16 @@ export default [
             var keys = _.keys(formDefs[formTracker.getCurrent()].fields);
             var payload = {};
             _.each(keys, function(key) {
-                if($scope.configDataResolve[key].type === 'choice' || multiselectDropdowns.indexOf(key) !== -1) {
+                if (key === 'ACCESS_TOKEN_EXPIRE_SECONDS' || key === 'AUTHORIZATION_CODE_EXPIRE_SECONDS') {
+                    // These two values need to be POSTed nested under the OAUTH2_PROVIDER key
+                    if (payload.OAUTH2_PROVIDER === undefined) {
+                        payload.OAUTH2_PROVIDER = {
+                            ACCESS_TOKEN_EXPIRE_SECONDS: $scope.ACCESS_TOKEN_EXPIRE_SECONDS,
+                            AUTHORIZATION_CODE_EXPIRE_SECONDS: $scope.AUTHORIZATION_CODE_EXPIRE_SECONDS
+                        };
+                    }
+                    payload.OAUTH2_PROVIDER[key] = $scope[key];
+                } else if($scope.configDataResolve[key].type === 'choice' || multiselectDropdowns.indexOf(key) !== -1) {
                     //Parse dropdowns and dropdowns labeled as lists
                     if($scope[key] === null) {
                         payload[key] = null;
@@ -518,7 +543,18 @@ export default [
             var payload = {};
             clearApiErrors();
             _.each(keys, function(key) {
-                payload[key] = $scope.configDataResolve[key].default;
+                if (key === 'ACCESS_TOKEN_EXPIRE_SECONDS' || key === 'AUTHORIZATION_CODE_EXPIRE_SECONDS') {
+                    // the reset for these two keys needs to be nested under OAUTH2_PROVIDER
+                    if (payload.OAUTH2_PROVIDER === undefined) {
+                        payload.OAUTH2_PROVIDER = {
+                            ACCESS_TOKEN_EXPIRE_SECONDS: $scope.ACCESS_TOKEN_EXPIRE_SECONDS,
+                            AUTHORIZATION_CODE_EXPIRE_SECONDS: $scope.AUTHORIZATION_CODE_EXPIRE_SECONDS
+                        };
+                    }
+                    payload.OAUTH2_PROVIDER[key] = $scope.configDataResolve[key].default;
+                } else {
+                    payload[key] = $scope.configDataResolve[key].default;
+                }
             });
 
             Wait('start');

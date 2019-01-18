@@ -197,7 +197,7 @@ export default [
                 formDef: formDefs.ldap5,
                 id: 'auth-ldap5-form',
                 name: 'ldap5'
-            },
+            }
         ];
         var forms = _.map(authForms, 'formDef');
         _.each(forms, function(form) {

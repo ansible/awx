@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Rest',
-    function($rootScope, GetBasePath, ProcessErrors, $q, $http, Rest) {
+export default ['GetBasePath', '$q', 'Rest', 'i18n',
+    function(GetBasePath, $q, Rest, i18n) {
         var url = GetBasePath('settings') + 'all';
 
         return {
@@ -18,9 +18,35 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
                     .then(({data}) => {
                         // Compare GET actions with PUT actions and flag discrepancies
                         // for disabling in the UI
-                        var getActions = data.actions.GET;
+                        //
+                        // since OAUTH2_PROVIDER returns two of the keys in a nested format,
+                        // we need to split those out into the root of the options payload
+                        // in order for them to be consumed
+                        var appendOauth2ProviderKeys = (optsFromAPI) => {
+                            var unnestOauth2ProviderKey = (key, help_text, label, parentKey) => {
+                                optsFromAPI[key] = _.cloneDeep(optsFromAPI[parentKey]);
+                                optsFromAPI[key].label = label;
+                                optsFromAPI[key].help_text = help_text;
+                                optsFromAPI[key].type = optsFromAPI[parentKey].child.type;
+                                optsFromAPI[key].min_value = optsFromAPI[parentKey].child.min_value;
+                                if (optsFromAPI[parentKey].default) {
+                                    optsFromAPI[key].default = optsFromAPI[parentKey].default[key];
+                                }
+                                delete optsFromAPI[key].child;
+                            };
+                            unnestOauth2ProviderKey('ACCESS_TOKEN_EXPIRE_SECONDS',
+                                i18n._('The duration (in seconds) access tokens remain valid since their creation.'),
+                                i18n._('Access Token Expiration'),
+                                'OAUTH2_PROVIDER');
+                            unnestOauth2ProviderKey('AUTHORIZATION_CODE_EXPIRE_SECONDS',
+                                i18n._('The duration (in seconds) authorization codes remain valid since their creation.'),
+                                i18n._('Authorization Code Expiration'),
+                                'OAUTH2_PROVIDER');
+                            return optsFromAPI;
+                        };
+                        var getActions = appendOauth2ProviderKeys(data.actions.GET);
                         var getKeys = _.keys(getActions);
-                        var putActions = data.actions.PUT;
+                        var putActions = appendOauth2ProviderKeys(data.actions.PUT);
 
                         _.each(getKeys, function(key) {
                             if(putActions && putActions[key]) {

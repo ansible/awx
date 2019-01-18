@@ -43,6 +43,14 @@ export default ['i18n', function(i18n) {
             ALLOW_OAUTH2_FOR_EXTERNAL_USERS: {
                 type: 'toggleSwitch',
             },
+            ACCESS_TOKEN_EXPIRE_SECONDS: {
+                type: 'text',
+                reset: 'ACCESS_TOKEN_EXPIRE_SECONDS'
+            },
+            AUTHORIZATION_CODE_EXPIRE_SECONDS: {
+                type: 'text',
+                reset: 'AUTHORIZATION_CODE_EXPIRE_SECONDS'
+            },
             REMOTE_HOST_HEADERS: {
                 type: 'textarea',
                 reset: 'REMOTE_HOST_HEADERS'
