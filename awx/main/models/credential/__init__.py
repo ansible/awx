@@ -385,6 +385,7 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     def encrypt_field(self, field, ask):
         if not hasattr(self, field):
             return None
+
         encrypted = encrypt_field(self, field, ask=ask)
         if encrypted:
             self.inputs[field] = encrypted
@@ -415,12 +416,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             type_alias = self.credential_type.name
         else:
             type_alias = self.credential_type_id
-        if self.kind == 'vault' and self.inputs.get('vault_id', None):
+        if self.kind == 'vault' and self.has_input('vault_id'):
             if display:
                 fmt_str = six.text_type('{} (id={})')
             else:
                 fmt_str = six.text_type('{}_{}')
-            return fmt_str.format(type_alias, self.inputs.get('vault_id'))
+            return fmt_str.format(type_alias, self.get_input('vault_id'))
         return six.text_type(type_alias)
 
     @staticmethod
@@ -429,6 +430,29 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         for cred in cred_qs:
             ret[cred.unique_hash()] = cred
         return ret
+
+    def get_input(self, field_name, **kwargs):
+        """
+        Get an injectable and decrypted value for an input field.
+
+        Retrieves the value for a given credential input field name. Return
+        values for secret input fields are decrypted. If the credential doesn't
+        have an input value defined for the given field name, an AttributeError
+        is raised unless a default value is provided.
+
+        :param field_name(str):        The name of the input field.
+        :param default(optional[str]): A default return value to use.
+        """
+        if field_name in self.credential_type.secret_fields:
+            return decrypt_field(self, field_name)
+        if field_name in self.inputs:
+            return self.inputs[field_name]
+        if 'default' in kwargs:
+            return kwargs['default']
+        raise AttributeError(field_name)
+
+    def has_input(self, field_name):
+        return field_name in self.inputs and self.inputs[field_name] not in ('', None)
 
 
 class CredentialType(CommonModelNameNotUnique):
@@ -611,8 +635,9 @@ class CredentialType(CommonModelNameNotUnique):
                 safe_namespace[field_name] = namespace[field_name] = value
                 continue
 
+            value = credential.get_input(field_name)
+
             if field_name in self.secret_fields:
-                value = decrypt_field(credential, field_name)
                 safe_namespace[field_name] = '**********'
             elif len(value):
                 safe_namespace[field_name] = value
