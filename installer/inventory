@@ -27,14 +27,26 @@ dockerhub_base=ansible
 # pg_mem_limit=2
 
 # Kubernetes and Openshift Install Resource Requests
-# This is the request value for a pod's "task" container, which is the container
-# used to run jobs. The other containers have a fixed resource request. The total amount
-# of requested resources for a pod is the sum of all resources requested by all containers
-# in the pod
-# A cpu_request of 1500 is 1.5 cores for the task container
-# A mem_request of 2 is for 2 gigabytes of memory for the task container
+# This are the request and limit values for a pod's container for task/web/rabbitmq/memcached/management.
+# The total amount of requested resources for a pod is the sum of all
+# resources requested by all containers in the pod
+# A cpu_request of 1500 is 1.5 cores for the container to start out with.
+# A cpu_limit defines the maximum cores that that container can reserve.
+# A mem_request of 2 is for 2 gigabytes of memory for the container
+# A mem_limit defines the maximum memory that that container can reserve.
+# Default values for these entries can be found in ./roles/kubernetes/defaults/main.yml
 # task_cpu_request=1500
 # task_mem_request=2
+# task_cpu_limit=2000
+# task_mem_limit=4
+# web_cpu_limit=1000
+# web_mem_limit=2
+# rabbitmq_cpu_limit=1000
+# rabbitmq_mem_limit=3
+# memcached_cpu_limit=1000
+# memcached_mem_limit=2
+# management_cpu_limit=2000
+# management_mem_limit=2
 
 # Common Docker parameters
 awx_task_hostname=awx

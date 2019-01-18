@@ -170,6 +170,15 @@ spec:
             requests:
               memory: "{{ web_mem_request }}Gi"
               cpu: "{{ web_cpu_request }}m"
+{% if web_mem_limit is defined or web_cpu_limit is defined %}
+            limits:
+{% endif %}
+{% if web_mem_limit is defined %}
+              memory: "{{ web_mem_limit }}Gi"
+{% endif %}
+{% if web_cpu_limit is defined %}
+              cpu: "{{ web_cpu_limit }}m"
+{% endif %}
         - name: {{ kubernetes_deployment_name }}-celery
           securityContext:
             privileged: true
@@ -216,6 +225,15 @@ spec:
             requests:
               memory: "{{ task_mem_request }}Gi"
               cpu: "{{ task_cpu_request }}m"
+{% if task_mem_limit is defined or task_cpu_limit is defined %}
+            limits:
+{% endif %}
+{% if task_mem_limit is defined %}
+              memory: "{{ task_mem_limit }}Gi"
+{% endif %}
+{% if task_cpu_limit is defined %}
+              cpu: "{{ task_cpu_limit }}m"
+{% endif %}
         - name: {{ kubernetes_deployment_name }}-rabbit
           image: "{{ kubernetes_rabbitmq_image }}:{{ kubernetes_rabbitmq_version }}"
           imagePullPolicy: Always
@@ -259,6 +277,15 @@ spec:
             requests:
               memory: "{{ rabbitmq_mem_request }}Gi"
               cpu: "{{ rabbitmq_cpu_request }}m"
+{% if rabbitmq_mem_limit is defined or rabbitmq_cpu_limit is defined %}
+            limits:
+{% endif %}
+{% if rabbitmq_mem_limit is defined %}
+              memory: "{{ rabbitmq_mem_limit }}Gi"
+{% endif %}
+{% if rabbitmq_cpu_limit is defined %}
+              cpu: "{{ rabbitmq_cpu_limit }}m"
+{% endif %}
         - name: {{ kubernetes_deployment_name }}-memcached
           image: "{{ kubernetes_memcached_image }}:{{ kubernetes_memcached_version }}"
           imagePullPolicy: Always
@@ -266,6 +293,15 @@ spec:
             requests:
               memory: "{{ memcached_mem_request }}Gi"
               cpu: "{{ memcached_cpu_request }}m"
+{% if memcached_mem_limit is defined or memcached_cpu_limit is defined %}
+            limits:
+{% endif %}
+{% if memcached_mem_limit is defined %}
+              memory: "{{ memcached_mem_limit }}Gi"
+{% endif %}
+{% if memcached_cpu_limit is defined %}
+              cpu: "{{ memcached_cpu_limit }}m"
+{% endif %}
       volumes:
         - name: {{ kubernetes_deployment_name }}-application-config
           configMap:
