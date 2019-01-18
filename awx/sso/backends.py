@@ -69,9 +69,6 @@ class LDAPBackend(BaseLDAPBackend):
         super(LDAPBackend, self).__init__(*args, **kwargs)
         setting_changed.connect(self._on_setting_changed, dispatch_uid=self._dispatch_uid)
 
-    def __del__(self):
-        setting_changed.disconnect(dispatch_uid=self._dispatch_uid)
-
     def _on_setting_changed(self, sender, **kwargs):
         # If any AUTH_LDAP_* setting changes, force settings to be reloaded for
         # this backend instance.
