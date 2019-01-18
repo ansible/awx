@@ -166,8 +166,8 @@ class ProjectOptions(models.Model):
                                          check_special_cases=False)
                 scm_url_parts = urlparse.urlsplit(scm_url)
                 # Prefer the username/password in the URL, if provided.
-                scm_username = scm_url_parts.username or cred.username or ''
-                if scm_url_parts.password or cred.password:
+                scm_username = scm_url_parts.username or cred.get_input('username', default='')
+                if scm_url_parts.password or cred.has_input('password'):
                     scm_password = '********'
                 else:
                     scm_password = ''
