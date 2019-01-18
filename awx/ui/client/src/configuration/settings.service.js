@@ -23,9 +23,10 @@ export default ['GetBasePath', '$q', 'Rest', 'i18n',
                         // we need to split those out into the root of the options payload
                         // in order for them to be consumed
                         var appendOauth2ProviderKeys = (optsFromAPI) => {
-                            var unnestOauth2ProviderKey = (key, label, parentKey) => {
+                            var unnestOauth2ProviderKey = (key, help_text, label, parentKey) => {
                                 optsFromAPI[key] = _.cloneDeep(optsFromAPI[parentKey]);
-                                optsFromAPI[key].label = i18n._(label);
+                                optsFromAPI[key].label = label;
+                                optsFromAPI[key].help_text = help_text;
                                 optsFromAPI[key].type = optsFromAPI[parentKey].child.type;
                                 optsFromAPI[key].min_value = optsFromAPI[parentKey].child.min_value;
                                 if (optsFromAPI[parentKey].default) {
@@ -34,10 +35,12 @@ export default ['GetBasePath', '$q', 'Rest', 'i18n',
                                 delete optsFromAPI[key].child;
                             };
                             unnestOauth2ProviderKey('ACCESS_TOKEN_EXPIRE_SECONDS',
-                                'Access Token Expiration',
+                                i18n._('The duration (in seconds) access tokens remain valid since their creation.'),
+                                i18n._('Access Token Expiration'),
                                 'OAUTH2_PROVIDER');
                             unnestOauth2ProviderKey('AUTHORIZATION_CODE_EXPIRE_SECONDS',
-                                'Authorization Code Expiration',
+                                i18n._('The duration (in seconds) authorization codes remain valid since their creation.'),
+                                i18n._('Authorization Code Expiration'),
                                 'OAUTH2_PROVIDER');
                             return optsFromAPI;
                         };
