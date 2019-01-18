@@ -96,7 +96,7 @@ simplejson==3.13.2        # via uwsgitop
 six==1.11.0               # via asgi-amqp, asgiref, autobahn, automat, cryptography, django-extensions, irc, isodate, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, more-itertools, pygerduty, pyrad, python-dateutil, python-memcached, slackclient, social-auth-app-django, social-auth-core, tacacs-plus, tempora, twilio, txaio, websocket-client
 slackclient==1.1.2
 social-auth-app-django==2.1.0
-social-auth-core==1.7.0
+social-auth-core==3.0.0
 tacacs_plus==1.0
 tempora==1.10             # via irc, jaraco.logging
 twilio==6.10.4
