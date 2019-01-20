@@ -186,7 +186,11 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 if (field.type === 'textarea') {
                     if (field.name === 'headers') {
                         $scope[i] = JSON.parse($scope[i]);
-                    } else {
+                    }
+                    else if (field.name === 'annotation_tags' && $scope.notification_type.value === "grafana" && value === null) {
+                        $scope[i] = null;
+                    }
+                    else {
                         $scope[i] = $scope[i].toString().split('\n');
                     }
                 }
