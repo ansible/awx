@@ -392,13 +392,6 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
                 });
             }
 
-            if (source === 'scm') {
-              $scope.overwrite_vars = true;
-              $scope.inventory_source_form.inventory_file.$setPristine();
-            } else {
-              $scope.overwrite_vars = false;
-            }
-
             // reset fields
             $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
@@ -409,6 +402,7 @@ export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
             $scope.credential_name = null;
             $scope.group_by = null;
             $scope.group_by_choices = [];
+            $scope.overwrite_vars = false;
 
             initRegionSelect();
 

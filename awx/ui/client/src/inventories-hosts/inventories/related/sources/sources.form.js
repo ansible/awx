@@ -367,7 +367,7 @@ return {
                 dataTitle: i18n._('Overwrite Variables'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
-                ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd) || source.value === 'scm')"
+                ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd))"
             }, {
                 name: 'update_on_launch',
                 label: i18n._('Update on Launch'),
