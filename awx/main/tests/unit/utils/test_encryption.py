@@ -2,6 +2,8 @@
 
 # Copyright (c) 2017 Ansible, Inc.
 # All Rights Reserved.
+import pytest
+
 from awx.conf.models import Setting
 from awx.main.utils import encryption
 
@@ -43,6 +45,16 @@ def test_encrypt_field_with_ask():
 def test_encrypt_field_with_empty_value():
     encrypted = encryption.encrypt_field(Setting(value=None), 'value')
     assert encrypted is None
+
+
+def test_encrypt_field_with_undefined_attr_raises_expected_exception():
+    with pytest.raises(AttributeError):
+        encryption.encrypt_field({}, 'undefined_attr')
+
+
+def test_decrypt_field_with_undefined_attr_raises_expected_exception():
+    with pytest.raises(AttributeError):
+        encryption.decrypt_field({}, 'undefined_attr')
 
 
 class TestSurveyReversibilityValue:
