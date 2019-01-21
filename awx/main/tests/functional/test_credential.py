@@ -79,6 +79,7 @@ def test_default_cred_types():
         'azure_rm',
         'cloudforms',
         'gce',
+        'hashivault',
         'insights',
         'net',
         'openstack',
