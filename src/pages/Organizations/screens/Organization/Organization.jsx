@@ -75,7 +75,7 @@ class Organization extends Component {
   }
 
   render () {
-    const { location, match } = this.props;
+    const { location, match, api, history } = this.props;
     const { parentBreadcrumbObj, organization, error, loading } = this.state;
     const params = new URLSearchParams(location.search);
     const currentTab = params.get('tab') || 'details';
@@ -92,7 +92,7 @@ class Organization extends Component {
           <Switch>
             <Route
               path={`${match.path}/edit`}
-              component={() => (
+              render={() => (
                 <OrganizationEdit
                   location={location}
                   match={match}
@@ -105,7 +105,7 @@ class Organization extends Component {
             />
             <Route
               path={`${match.path}`}
-              component={() => (
+              render={() => (
                 <OrganizationDetail
                   location={location}
                   match={match}
@@ -113,6 +113,8 @@ class Organization extends Component {
                   organization={organization}
                   params={params}
                   currentTab={currentTab}
+                  history={history}
+                  api={api}
                 />
               )}
             />

@@ -2,10 +2,10 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import OrganizationsList from './screens/OrganizationsList';
-import OrganizationAdd from './screens/OrganizationAdd'
+import OrganizationAdd from './screens/OrganizationAdd';
 import Organization from './screens/Organization/Organization';
 
-export default ({ api, match }) => (
+export default ({ api, match, history }) => (
   <Switch>
     <Route
       path={`${match.path}/add`}
@@ -20,6 +20,7 @@ export default ({ api, match }) => (
       render={() => (
         <Organization
           api={api}
+          history={history}
         />
       )}
     />

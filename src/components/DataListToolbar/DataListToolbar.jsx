@@ -106,7 +106,9 @@ class DataListToolbar extends React.Component {
       sortedColumnKey,
       sortOrder,
       addUrl,
-      showExpandCollapse
+      showExpandCollapse,
+      showDelete,
+      showSelectAll
     } = this.props;
     const {
       // isActionDropdownOpen,
@@ -149,19 +151,19 @@ class DataListToolbar extends React.Component {
           <div className="awx-toolbar">
             <Level>
               <LevelItem>
-                <Toolbar
-                  style={{ marginLeft: '20px' }}
-                >
-                  <ToolbarGroup>
-                    <ToolbarItem>
-                      <Checkbox
-                        checked={isAllSelected}
-                        onChange={onSelectAll}
-                        aria-label={i18n._(t`Select all`)}
-                        id="select-all"
-                      />
-                    </ToolbarItem>
-                  </ToolbarGroup>
+                <Toolbar style={{ marginLeft: '20px' }}>
+                  { showSelectAll && (
+                    <ToolbarGroup>
+                      <ToolbarItem>
+                        <Checkbox
+                          checked={isAllSelected}
+                          onChange={onSelectAll}
+                          aria-label={i18n._(t`Select all`)}
+                          id="select-all"
+                        />
+                      </ToolbarItem>
+                    </ToolbarGroup>
+                  )}
                   <ToolbarGroup>
                     <ToolbarItem>
                       <div className="pf-c-input-group">
@@ -248,17 +250,19 @@ class DataListToolbar extends React.Component {
                 </Toolbar>
               </LevelItem>
               <LevelItem>
-                <Tooltip
-                  message={i18n._(t`Delete`)}
-                  position="top"
-                >
-                  <Button
-                    variant="plain"
-                    aria-label={i18n._(t`Delete`)}
+                { showDelete && (
+                  <Tooltip
+                    message={i18n._(t`Delete`)}
+                    position="top"
                   >
-                    <TrashAltIcon />
-                  </Button>
-                </Tooltip>
+                    <Button
+                      variant="plain"
+                      aria-label={i18n._(t`Delete`)}
+                    >
+                      <TrashAltIcon />
+                    </Button>
+                  </Tooltip>
+                )}
                 {addUrl && (
                   <Link to={addUrl}>
                     <Button

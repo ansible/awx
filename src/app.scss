@@ -82,6 +82,10 @@
 
   --pf-c-data-list__item--PaddingTop: 16px;
   --pf-c-data-list__item--PaddingBottom: 16px;
+
+  .pf-c-badge:not(:last-child), .pf-c-switch:not(:last-child) {
+    margin-right: 18px;
+  }
 }
 
 .pf-c-data-list__item {
@@ -107,10 +111,6 @@
   margin-right: 8px;
 }
 
-.pf-c-data-list__cell span {
-  margin-right: 18px;
-}
-
 //
 // about modal overrides
 //
@@ -119,13 +119,6 @@
   --pf-c-about-modal-box--MaxWidth: 63rem;
 }
 
-.pf-c-list {
-  li {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-  }
-}
 
 .awx-lookup {
   min-height: 36px;
@@ -157,6 +150,12 @@
 .awx-c-list {
   border-top: 1px solid #d7d7d7;
   border-bottom: 1px solid #d7d7d7;
+
+  li {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
 }
 //
 // pf modal overrides
