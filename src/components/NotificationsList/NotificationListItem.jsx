@@ -8,7 +8,6 @@ import {
   Badge,
   Switch
 } from '@patternfly/react-core';
-import CapitalizeText from '../CapitalizeText';
 
 class NotificationListItem extends React.Component {
   constructor (props) {
@@ -38,6 +37,10 @@ class NotificationListItem extends React.Component {
       errorTurnedOn
     } = this.props;
 
+    const capText = {
+      textTransform: 'capitalize'
+    };
+
     return (
       <I18n>
         {({ i18n }) => (
@@ -54,12 +57,11 @@ class NotificationListItem extends React.Component {
                 </Link>
               </div>
               <Badge
+                style={capText}
                 className="pf-u-display-inline-flex"
                 isRead
               >
-                {' '}
-                <CapitalizeText text={notificationType} />
-                {' '}
+                {notificationType}
               </Badge>
             </div>
             <div className="pf-c-data-list__cell" />

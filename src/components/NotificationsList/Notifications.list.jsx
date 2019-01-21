@@ -2,7 +2,7 @@ import React, {
   Component,
   Fragment
 } from 'react';
-import { Title, EmptyState, EmptyStateIcon } from '@patternfly/react-core';
+import { Title, EmptyState, EmptyStateIcon, EmptyStateBody } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 import { I18n, i18nMark } from '@lingui/react';
 import { Trans, t } from '@lingui/macro';
@@ -289,8 +289,11 @@ class Notifications extends Component {
           <EmptyState>
             <EmptyStateIcon icon={CubesIcon} />
             <Title size="lg">
-              <Trans>NO NOTIFICATIONS HAVE BEEN CREATED</Trans>
+              <Trans>No Notifictions Found</Trans>
             </Title>
+            <EmptyStateBody>
+              <Trans>Please add a notification template to populate this list</Trans>
+            </EmptyStateBody>
           </EmptyState>
         )}
         <Fragment>

@@ -88,18 +88,18 @@ class APIClient {
     return this.http.get(endpoint, { params });
   }
 
-  postOrganizationNotificationSuccess (id, data) {
+  createOrganizationNotificationSuccess (id, data) {
     const endpoint = `${API_ORGANIZATIONS}${id}/notification_templates_success/`;
 
     return this.http.post(endpoint, data);
   }
 
-  postOrganizationNotificationError (id, data) {
+  createOrganizationNotificationError (id, data) {
     const endpoint = `${API_ORGANIZATIONS}${id}/notification_templates_error/`;
 
     return this.http.post(endpoint, data);
   }
-  
+
   getInstanceGroups () {
     return this.http.get(API_INSTANCE_GROUPS);
   }

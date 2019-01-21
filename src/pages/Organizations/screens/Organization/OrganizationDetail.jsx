@@ -107,7 +107,7 @@ const OrganizationDetail = ({
           )}
         </I18n>
       </CardHeader>
-      <CardBody>
+      <CardBody className="at-c-listCardBody">
         <Switch>
           <Route path={`${match.path}/delete-resources`} component={() => deleteResourceView()} />
           <Route path={`${match.path}/add-resource`} component={() => addResourceView()} />
