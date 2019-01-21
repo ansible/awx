@@ -49,3 +49,4 @@ uWSGI==2.0.17
 uwsgitop==0.10.0
 pip==9.0.1
 setuptools==36.0.1
+hvac==0.7.1
