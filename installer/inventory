@@ -85,6 +85,7 @@ pg_username=awx
 pg_password=awxpass
 pg_database=awx
 pg_port=5432
+#pg_sslmode=require
 
 # RabbitMQ Configuration
 rabbitmq_password=awxpass
