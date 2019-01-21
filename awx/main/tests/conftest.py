@@ -4,6 +4,7 @@ import pytest
 from unittest import mock
 from contextlib import contextmanager
 
+from awx.main.models import Credential
 from awx.main.tests.factories import (
     create_organization,
     create_job_template,
@@ -139,3 +140,10 @@ def pytest_runtest_teardown(item, nextitem):
     # this is a local test cache, so we want every test to start with empty cache
     cache.clear()
 
+@pytest.fixture(scope='session', autouse=True)
+def mock_external_credential_input_sources():
+    # Credential objects query their related input sources on initialization.
+    # We mock that behavior out of credentials by default unless we need to
+    # test it explicitly.
+    with mock.patch.object(Credential, '_get_dynamic_input_field_names', new=lambda _: []) as _fixture:
+        yield _fixture

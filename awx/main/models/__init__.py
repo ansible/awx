@@ -16,7 +16,7 @@ from awx.main.models.organization import (  # noqa
     Organization, Profile, Team, UserSessionMembership
 )
 from awx.main.models.credential import (  # noqa
-    Credential, CredentialType, ManagedCredentialType, V1Credential, build_safe_env
+    Credential, CredentialType, CredentialInputSource, ManagedCredentialType, V1Credential, build_safe_env
 )
 from awx.main.models.projects import Project, ProjectUpdate  # noqa
 from awx.main.models.inventory import (  # noqa
