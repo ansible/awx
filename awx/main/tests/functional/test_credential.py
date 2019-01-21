@@ -327,3 +327,51 @@ def test_credential_update_with_prior(organization_factory, credentialtype_ssh):
     assert cred.inputs['username'] == 'joe'
     assert cred.inputs['password'].startswith('$encrypted$')
     assert decrypt_field(cred, 'password') == 'testing123'
+
+
+@pytest.mark.django_db
+def test_credential_get_input(organization_factory):
+    organization = organization_factory('test').organization
+    type_ = CredentialType(
+        kind='vault',
+        name='somevault',
+        managed_by_tower=True,
+        inputs={
+            'fields': [{
+                'id': 'vault_password',
+                'type': 'string',
+                'secret': True,
+            }, {
+                'id': 'vault_id',
+                'type': 'string',
+                'secret': False
+            }]
+        }
+    )
+    type_.save()
+
+    cred = Credential(
+        organization=organization,
+        credential_type=type_,
+        name="Bob's Credential",
+        inputs={'vault_password': 'testing321'}
+    )
+    cred.save()
+    cred.full_clean()
+
+    assert isinstance(cred, Credential)
+    # verify expected exception is raised when attempting to access an unset
+    # input without providing a default
+    with pytest.raises(AttributeError):
+        cred.get_input('vault_id')
+    # verify that the provided default is used for unset inputs
+    assert cred.get_input('vault_id', default='foo') == 'foo'
+    # verify expected exception is raised when attempting to access an undefined
+    # input without providing a default
+    with pytest.raises(AttributeError):
+        cred.get_input('field_not_on_credential_type')
+    # verify that the provided default is used for undefined inputs
+    assert cred.get_input('field_not_on_credential_type', default='bar') == 'bar'
+    # verify return values for encrypted secret fields are decrypted
+    assert cred.inputs['vault_password'].startswith('$encrypted$')
+    assert cred.get_input('vault_password') == 'testing321'

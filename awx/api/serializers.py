@@ -4334,7 +4334,7 @@ class JobLaunchSerializer(BaseSerializer):
                             passwords_needed=cred.passwords_needed
                         )
                         if cred.credential_type.managed_by_tower and 'vault_id' in cred.credential_type.defined_fields:
-                            cred_dict['vault_id'] = cred.inputs.get('vault_id') or None
+                            cred_dict['vault_id'] = cred.get_input('vault_id', default=None)
                         defaults_dict.setdefault(field_name, []).append(cred_dict)
             else:
                 defaults_dict[field_name] = getattr(obj, field_name)
