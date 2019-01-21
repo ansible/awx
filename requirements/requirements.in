@@ -36,7 +36,7 @@ python-logstash==0.4.6
 python-memcached==1.59
 python-radius==1.0
 python3-saml==1.4.0
-social-auth-core==1.7.0
+social-auth-core==3.0.0
 social-auth-app-django==2.1.0
 redbaron==0.6.3
 requests<2.16  # Older versions rely on certify
