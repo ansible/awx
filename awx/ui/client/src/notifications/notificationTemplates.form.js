@@ -261,6 +261,69 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
+            grafana_url: {
+              label: i18n._('Grafana URL'),
+              type: 'text',
+              awPopOver: i18n._('The base URL of the Grafana server - the /api/annotations endpoint will be added automatically to the base Grafana URL.'),
+              placeholder: 'https://grafana.com',
+              dataPlacement: 'right',
+              dataContainer: "body",
+              awRequiredWhen: {
+                  reqExpression: "grafana_required",
+                  init: "false"
+              },
+              ngShow: "notification_type.value == 'grafana' ",
+              subForm: 'typeSubForm',
+              ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            grafana_key: {
+                label: i18n._('Grafana API Key'),
+                type: 'sensitive',
+                hasShowInputButton: true,
+                name: 'grafana_key',
+                awRequiredWhen: {
+                    reqExpression: "grafana_required",
+                    init: "false"
+                },
+                ngShow: "notification_type.value == 'grafana' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            dashboardId: {
+              label: i18n._('ID of the Dashboard (optional)'),
+              type: 'number',
+              integer: true,
+              ngShow: "notification_type.value == 'grafana' ",
+              subForm: 'typeSubForm',
+              ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            panelId: {
+              label: i18n._('ID of the Panel (optional)'),
+              type: 'number',
+              integer: true,
+              ngShow: "notification_type.value == 'grafana' ",
+              subForm: 'typeSubForm',
+              ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            annotation_tags: {
+              label: i18n._('Tags for the Annotation (optional)'),
+              dataTitle: i18n._('Tags for the Annotation'),
+              type: 'textarea',
+              name: 'annotation_tags',
+              rows: 3,
+              placeholder: 'ansible',
+              awPopOver: i18n._('Enter one Annotation Tag per line, without commas.'),
+              ngShow: "notification_type.value == 'grafana' ",
+              subForm: 'typeSubForm',
+              ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            grafana_no_verify_ssl: {
+                label: i18n._('Disable SSL Verification'),
+                type: 'checkbox',
+                ngShow: "notification_type.value == 'grafana' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
             api_url: {
                 label: 'API URL',
                 type: 'text',
