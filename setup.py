@@ -147,6 +147,9 @@ setup(
         'console_scripts': [
             'awx-manage = awx:manage',
         ],
+        'awx.credential_plugins': [
+            'hashivault = awx.main.credential_plugins.hashivault:hashivault_plugin',
+        ]
     },
     data_files = proc_data_files([
         ("%s" % homedir,        ["config/wsgi.py",

@@ -1,0 +1,15 @@
+version: '2'
+services:
+  # Primary Tower Development Container link
+  awx:
+    links:
+      - hashivault
+  hashivault:
+    image: vault:1.0.1
+    container_name: tools_hashivault_1
+    ports:
+      - '8200:8200'
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: 'vaultdev'
