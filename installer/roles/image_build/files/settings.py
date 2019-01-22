@@ -84,6 +84,9 @@ DATABASES = {
     }
 }
 
+if os.getenv("DATABASE_SSLMODE", False):
+    DATABASES['default']['OPTIONS'] = {'sslmode': os.getenv("DATABASE_SSLMODE")}
+
 BROKER_URL = 'amqp://{}:{}@{}:{}/{}'.format(
     os.getenv("RABBITMQ_USER", None),
     os.getenv("RABBITMQ_PASSWORD", None),
