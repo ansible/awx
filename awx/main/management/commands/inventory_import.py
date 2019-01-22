@@ -4,6 +4,7 @@
 # Python
 import json
 import logging
+import fnmatch
 import os
 import re
 import subprocess
@@ -72,25 +73,36 @@ class AnsibleInventoryLoader(object):
         /usr/bin/ansible/ansible-inventory -i hosts --list
     '''
 
-    def __init__(self, source, is_custom=False):
+    def __init__(self, source, is_custom=False, venv_path=None):
         self.source = source
         self.source_dir = functioning_dir(self.source)
         self.is_custom = is_custom
         self.tmp_private_dir = None
         self.method = 'ansible-inventory'
+        if venv_path:
+            self.venv_path = venv_path
+        else:
+            self.venv_path = settings.ANSIBLE_VENV_PATH
 
     def build_env(self):
         env = dict(os.environ.items())
-        env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
-        env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
+        env['VIRTUAL_ENV'] = self.venv_path
+        env['PATH'] = os.path.join(self.venv_path, "bin") + ":" + env['PATH']
         # Set configuration items that should always be used for updates
         for key, value in STANDARD_INVENTORY_UPDATE_ENV.items():
             if key not in env:
                 env[key] = value
-        venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
+        venv_libdir = os.path.join(self.venv_path, "lib")
         env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
-        if os.path.isdir(os.path.join(venv_libdir, "python2.7")):
-            env['PYTHONPATH'] = os.path.join(venv_libdir, "python2.7", "site-packages") + ":"
+        for version in os.listdir(venv_libdir):
+            if fnmatch.fnmatch(version, 'python[23].*'):
+                if os.path.isdir(os.path.join(venv_libdir, version)):
+                    env['PYTHONPATH'] = os.path.join(venv_libdir, version, "site-packages") + ":"
+                    break
+        # For internal inventory updates, these are not reported in the job_env API
+        logger.info('Using VIRTUAL_ENV: {}'.format(env['VIRTUAL_ENV']))
+        logger.info('Using PATH: {}'.format(env['PATH']))
+        logger.info('Using PYTHONPATH: {}'.format(env.get('PYTHONPATH', None)))
         return env
 
     def get_base_args(self):
@@ -179,6 +191,8 @@ class Command(BaseCommand):
         parser.add_argument('--inventory-id', dest='inventory_id', type=int,
                             default=None, metavar='i',
                             help='id of inventory to sync')
+        parser.add_argument('--venv', dest='venv', type=str, default=None,
+                            help='absolute path to the AWX custom virtualenv to use')
         parser.add_argument('--overwrite', dest='overwrite', action='store_true', default=False,
                             help='overwrite the destination hosts and groups')
         parser.add_argument('--overwrite-vars', dest='overwrite_vars',
@@ -850,6 +864,7 @@ class Command(BaseCommand):
         self.set_logging_level()
         self.inventory_name = options.get('inventory_name', None)
         self.inventory_id = options.get('inventory_id', None)
+        venv_path = options.get('venv', None)
         self.overwrite = bool(options.get('overwrite', False))
         self.overwrite_vars = bool(options.get('overwrite_vars', False))
         self.keep_vars = bool(options.get('keep_vars', False))
@@ -912,7 +927,7 @@ class Command(BaseCommand):
 
             source = self.get_source_absolute_path(self.source)
 
-            data = AnsibleInventoryLoader(source=source, is_custom=self.is_custom).load()
+            data = AnsibleInventoryLoader(source=source, is_custom=self.is_custom, venv_path=venv_path).load()
 
             logger.debug('Finished loading from source: %s', source)
             logger.info('Processing JSON output...')

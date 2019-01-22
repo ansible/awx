@@ -2120,8 +2120,12 @@ class RunInventoryUpdate(BaseTask):
             args.append('--overwrite')
         if inventory_update.overwrite_vars:
             args.append('--overwrite-vars')
-        src = inventory_update.source
 
+        # Declare the virtualenv the management command should activate
+        # as it calls ansible-inventory
+        args.extend(['--venv', inventory_update.ansible_virtualenv_path])
+
+        src = inventory_update.source
         # Add several options to the shell arguments based on the
         # inventory-source-specific setting in the AWX configuration.
         # These settings are "per-source"; it's entirely possible that

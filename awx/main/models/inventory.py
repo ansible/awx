@@ -1741,6 +1741,14 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
             return self.global_instance_groups
         return selected_groups
 
+    @property
+    def ansible_virtualenv_path(self):
+        if self.inventory_source and self.inventory_source.inventory:
+            organization = self.inventory_source.inventory.organization
+            if organization and organization.custom_virtualenv:
+                return organization.custom_virtualenv
+        return settings.ANSIBLE_VENV_PATH
+
     def cancel(self, job_explanation=None, is_chain=False):
         res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation, is_chain=is_chain)
         if res:
