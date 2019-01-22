@@ -51,7 +51,7 @@ docutils==0.14            # via botocore
 dogpile.cache==0.6.5      # via openstacksdk
 entrypoints==0.2.3        # via keyring
 enum34==1.1.6; python_version < '3' # via cryptography, knack, msrest, ovirt-engine-sdk-python
-futures==3.2.0            # via openstacksdk, s3transfer
+futures==3.2.0; python_version < '3' # via openstacksdk, s3transfer
 google-auth==1.6.2
 humanfriendly==4.8        # via azure-cli-core
 idna==2.6                 # via cryptography, requests
