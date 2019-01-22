@@ -373,6 +373,10 @@ class AutoscalePool(WorkerPool):
             # don't use our logger (it accesses the database for configuration)
             _, _, tb = sys.exc_info()
             traceback.print_tb(tb)
+            for conn in connections.all():
+                # If the database connection has a hiccup, re-establish a new
+                # connection
+                conn.close_if_unusable_or_obsolete()
 
     def up(self):
         if self.full:
