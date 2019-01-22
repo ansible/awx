@@ -483,7 +483,7 @@ $(UI_RELEASE_FLAG_FILE): $(I18N_FLAG_FILE) $(UI_RELEASE_DEPS_FLAG_FILE)
 	touch $(UI_RELEASE_FLAG_FILE)
 
 $(UI_RELEASE_DEPS_FLAG_FILE):
-	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 $(NPM_BIN) --unsafe-perm --prefix awx/ui install --no-save awx/ui
+	PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 $(NPM_BIN) --unsafe-perm --prefix awx/ui ci --no-save awx/ui
 	touch $(UI_RELEASE_DEPS_FLAG_FILE)
 
 # END UI RELEASE TASKS
@@ -498,7 +498,7 @@ $(UI_DEPS_FLAG_FILE):
 		rm -rf awx/ui/node_modules; \
 		rm -f ${UI_RELEASE_DEPS_FLAG_FILE}; \
 	fi; \
-	$(NPM_BIN) --unsafe-perm --prefix awx/ui install --no-save awx/ui
+	$(NPM_BIN) --unsafe-perm --prefix awx/ui ci --no-save awx/ui
 	touch $(UI_DEPS_FLAG_FILE)
 
 ui-docker-machine: $(UI_DEPS_FLAG_FILE)

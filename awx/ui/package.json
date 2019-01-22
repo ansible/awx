@@ -136,6 +136,7 @@
     "rrule": "git+https://git@github.com/jkbrzt/rrule#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c",
     "select2": "^4.0.2",
     "sprintf-js": "^1.0.3",
+    "timezone-js": "github:ansible/timezone-js#0.4.14",
     "titlecase": "^1.1.2"
   }
 }
