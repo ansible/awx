@@ -282,7 +282,7 @@ export default
                 $scope.breadcrumb.job_template_name = jobTemplateData.name;
                 var fld, i;
                 for (fld in form.fields) {
-                    if (fld !== 'extra_vars' && fld !== 'survey' && fld !== 'forks' && jobTemplateData[fld] !== null && jobTemplateData[fld] !== undefined) {
+                    if (fld !== 'extra_vars' && fld !== 'survey' && jobTemplateData[fld] !== null && jobTemplateData[fld] !== undefined) {
                         if (form.fields[fld].type === 'select') {
                             if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
                                 for (i = 0; i < $scope[fld + '_options'].length; i++) {
@@ -300,12 +300,6 @@ export default
                             }
                         }
                         master[fld] = $scope[fld];
-                    }
-                    if (fld === 'forks') {
-                        if (jobTemplateData[fld] !== 0) {
-                            $scope[fld] = jobTemplateData[fld];
-                            master[fld] = $scope[fld];
-                        }
                     }
                     if (fld === 'extra_vars') {
                         // Parse extra_vars, converting to YAML.

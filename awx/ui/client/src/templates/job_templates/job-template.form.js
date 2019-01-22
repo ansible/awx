@@ -277,7 +277,7 @@ function(NotificationsList, i18n) {
                     dataTitle: i18n._('Timeout'),
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    awPopOver: "<p>" + i18n._("The amount of time (in seconds) to run before the task is canceled.  Defaults to 0, which means the job will not timeout.") + "</p>",
+                    awPopOver: "<p>" + i18n._("The amount of time (in seconds) to run before the task is canceled. Defaults to 0 for no job timeout.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 diff_mode: {
