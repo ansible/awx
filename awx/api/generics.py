@@ -90,7 +90,7 @@ class LoggedLoginView(auth_views.LoginView):
             logger.info(smart_text(u"User {} logged in.".format(self.request.user.username)))
             ret.set_cookie('userLoggedIn', 'true')
             current_user = UserSerializer(self.request.user)
-            current_user = JSONRenderer().render(current_user.data)
+            current_user = smart_text(JSONRenderer().render(current_user.data))
             current_user = urllib.parse.quote('%s' % current_user, '')
             ret.set_cookie('current_user', current_user, secure=settings.SESSION_COOKIE_SECURE or None)
 
