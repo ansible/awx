@@ -41,6 +41,7 @@ from awx.main.models.mixins import (
     ResourceMixin,
     TaskManagerInventoryUpdateMixin,
     RelatedJobsMixin,
+    CustomVirtualEnvMixin,
 )
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -1622,7 +1623,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMix
         return InventoryUpdate.objects.filter(inventory_source=self)
 
 
-class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin):
+class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, TaskManagerInventoryUpdateMixin, CustomVirtualEnvMixin):
     '''
     Internal job for tracking inventory updates from external sources.
     '''

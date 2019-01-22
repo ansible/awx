@@ -948,6 +948,11 @@ class BaseTask(object):
 
             if not os.path.exists(settings.AWX_PROOT_BASE_PATH):
                 raise RuntimeError('AWX_PROOT_BASE_PATH=%s does not exist' % settings.AWX_PROOT_BASE_PATH)
+
+            # store a record of the venv used at runtime
+            if hasattr(instance, 'custom_virtualenv'):
+                self.update_model(pk, custom_virtualenv=getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
+
             # Fetch ansible version once here to support version-dependent features.
             kwargs['ansible_version'] = get_ansible_version()
             kwargs['private_data_dir'] = self.build_private_data_dir(instance, **kwargs)
