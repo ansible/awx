@@ -195,8 +195,6 @@ spec:
               mountPath: "/etc/tower/conf.d/"
               readOnly: true
           env:
-            - name: AWX_SKIP_MIGRATIONS
-              value: "1"
             - name: DATABASE_USER
               value: {{ pg_username }}
             - name: DATABASE_NAME
