@@ -167,7 +167,7 @@ class TestSwaggerGeneration():
             # replace ISO dates w/ the same value so we don't generate
             # needless diffs
             data = re.sub(
-                r'[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+Z',
+                r'[0-9]{4}-[0-9]{2}-[0-9]{2}(T|\s)[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+(Z|\+[0-9]{2}:[0-9]{2})?',
                 r'2018-02-01T08:00:00.000000Z',
                 data
             )
