@@ -46,10 +46,7 @@ class LogstashFormatterBase(logging.Formatter):
             'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
             'processName', 'relativeCreated', 'thread', 'threadName', 'extra')
 
-        if sys.version_info < (3, 0):
-            easy_types = (basestring, bool, dict, float, int, long, list, type(None))
-        else:
-            easy_types = (str, bool, dict, float, int, list, type(None))
+        easy_types = (str, bool, dict, float, int, list, type(None))
 
         fields = {}
 
@@ -63,22 +60,14 @@ class LogstashFormatterBase(logging.Formatter):
         return fields
 
     def get_debug_fields(self, record):
-        fields = {
+        return {
             'stack_trace': self.format_exception(record.exc_info),
             'lineno': record.lineno,
             'process': record.process,
             'thread_name': record.threadName,
+            'funcName': record.funcName,
+            'processName': record.processName,
         }
-
-        # funcName was added in 2.5
-        if not getattr(record, 'funcName', None):
-            fields['funcName'] = record.funcName
-
-        # processName was added in 2.6
-        if not getattr(record, 'processName', None):
-            fields['processName'] = record.processName
-
-        return fields
 
     @classmethod
     def format_timestamp(cls, time):
@@ -91,10 +80,7 @@ class LogstashFormatterBase(logging.Formatter):
 
     @classmethod
     def serialize(cls, message):
-        if sys.version_info < (3, 0):
-            return json.dumps(message)
-        else:
-            return bytes(json.dumps(message), 'utf-8')
+        return bytes(json.dumps(message), 'utf-8')
 
 
 class LogstashFormatter(LogstashFormatterBase):
