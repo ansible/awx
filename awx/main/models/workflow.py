@@ -276,6 +276,8 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['extra_vars'] = extra_vars
         # ensure that unified jobs created by WorkflowJobs are marked
         data['_eager_fields'] = {'launch_type': 'workflow'}
+        if self.workflow_job and self.workflow_job.created_by:
+            data['_eager_fields']['created_by'] = self.workflow_job.created_by
         # Extra processing in the case that this is a slice job
         if 'job_slice' in self.ancestor_artifacts and is_root_node:
             data['_eager_fields']['allow_simultaneous'] = True
