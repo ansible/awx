@@ -187,6 +187,12 @@ function getInventorySourceDetails () {
         return null;
     }
 
+    if (resource.model.get('summary_fields.inventory_source.source') === 'scm') {
+        // we already show a SOURCE PROJECT item for scm inventory updates, so we
+        // skip the display of the standard source details item.
+        return null;
+    }
+
     const { source } = resource.model.get('summary_fields.inventory_source');
     const choices = mapChoices(resource.model.options('actions.GET.source.choices'));
 
@@ -322,6 +328,33 @@ function getProjectUpdateDetails (updateId) {
     const tooltip = strings.get('tooltips.PROJECT_UPDATE');
 
     return { link, tooltip };
+}
+
+function getInventoryScmDetails (updateId, updateStatus) {
+    const projectId = resource.model.get('summary_fields.source_project.id');
+    const projectName = resource.model.get('summary_fields.source_project.name');
+    const jobId = updateId || resource.model.get('source_project_update');
+    const status = updateStatus || resource.model.get('summary_fields.inventory_source.status');
+
+    if (!projectId || !projectName) {
+        return null;
+    }
+
+    const label = strings.get('labels.INVENTORY_SCM');
+    const jobLink = `/#/jobs/project/${jobId}`;
+    const link = `/#/projects/${projectId}`;
+    const jobTooltip = strings.get('tooltips.INVENTORY_SCM_JOB');
+    const tooltip = strings.get('tooltips.INVENTORY_SCM');
+
+    let icon;
+
+    if (status === 'unknown') {
+        icon = 'fa icon-job-pending';
+    } else {
+        icon = `fa icon-job-${status}`;
+    }
+
+    return { label, link, icon, jobLink, jobTooltip, tooltip, value: projectName };
 }
 
 function getSCMRevisionDetails () {
@@ -718,6 +751,7 @@ function JobDetailsController (
         vm.projectUpdate = getProjectUpdateDetails();
         vm.projectStatus = getProjectStatusDetails();
         vm.scmRevision = getSCMRevisionDetails();
+        vm.inventoryScm = getInventoryScmDetails();
         vm.playbook = getPlaybookDetails();
         vm.resultTraceback = getResultTracebackDetails();
         vm.launchedBy = getLaunchedByDetails();
@@ -748,12 +782,13 @@ function JobDetailsController (
         vm.toggleLabels = toggleLabels;
         vm.showLabels = showLabels;
 
-        unsubscribe = subscribe(({ status, started, finished, scm, environment }) => {
+        unsubscribe = subscribe(({ status, started, finished, scm, inventoryScm, environment }) => {
             vm.started = getStartDetails(started);
             vm.finished = getFinishDetails(finished);
             vm.projectUpdate = getProjectUpdateDetails(scm.id);
             vm.projectStatus = getProjectStatusDetails(scm.status);
             vm.environment = getEnvironmentDetails(environment);
+            vm.inventoryScm = getInventoryScmDetails(inventoryScm.id, inventoryScm.status);
             vm.status = getStatusDetails(status);
             vm.job.status = status;
         });
