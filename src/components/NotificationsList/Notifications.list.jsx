@@ -49,6 +49,19 @@ class Notifications extends Component {
       successTemplateIds: [],
       errorTemplateIds: []
     };
+
+    this.onSearch = this.onSearch.bind(this);
+    this.getQueryParams = this.getQueryParams.bind(this);
+    this.onSort = this.onSort.bind(this);
+    this.onSetPage = this.onSetPage.bind(this);
+    this.onSelectAll = this.onSelectAll.bind(this);
+    this.onSelect = this.onSelect.bind(this);
+    this.toggleError = this.toggleError.bind(this);
+    this.toggleSuccess = this.toggleSuccess.bind(this);
+    this.updateUrl = this.updateUrl.bind(this);
+    this.postToError = this.postToError.bind(this);
+    this.postToSuccess = this.postToSuccess.bind(this);
+    this.fetchNotifications = this.fetchNotifications.bind(this);
   }
 
   componentDidMount () {
@@ -296,58 +309,56 @@ class Notifications extends Component {
             </EmptyStateBody>
           </EmptyState>
         )}
-        <Fragment>
-          {(
-            typeof noInitialResults !== 'undefined'
-            && !noInitialResults
-            && !loading
-            && !error
-          ) && (
-            <Fragment>
-              <DataListToolbar
-                isAllSelected={selected.length === results.length}
-                sortedColumnKey={sortedColumnKey}
-                sortOrder={sortOrder}
-                columns={this.columns}
-                onSearch={this.onSearch}
-                onSort={this.onSort}
-                onSelectAll={this.onSelectAll}
-              />
-              <I18n>
-                {({ i18n }) => (
-                  <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
-                    {results.map(o => (
-                      <NotificationListItem
-                        key={o.id}
-                        itemId={o.id}
-                        name={o.name}
-                        notificationType={o.notification_type}
-                        detailUrl={`notifications/${o.id}`}
-                        parentBreadcrumb={parentBreadcrumb}
-                        isSelected={selected.includes(o.id)}
-                        onSelect={() => this.onSelect(o.id)}
-                        errorTurnedOn={errorTemplateIds.includes(o.id)}
-                        toggleError={this.toggleError}
-                        successTurnedOn={successTemplateIds.includes(o.id)}
-                        toggleSuccess={this.toggleSuccess}
-                      />
-                    ))}
-                  </ul>
-                )}
-              </I18n>
-              <Pagination
-                count={count}
-                page={page}
-                pageCount={pageCount}
-                page_size={page_size}
-                pageSizeOptions={this.pageSizeOptions}
-                onSetPage={this.onSetPage}
-              />
-            </Fragment>
-          )}
-          {loading ? <div>loading...</div> : ''}
-          {error ? <div>error</div> : ''}
-        </Fragment>
+        {(
+          typeof noInitialResults !== 'undefined'
+          && !noInitialResults
+          && !loading
+          && !error
+        ) && (
+          <Fragment>
+            <DataListToolbar
+              isAllSelected={selected.length === results.length}
+              sortedColumnKey={sortedColumnKey}
+              sortOrder={sortOrder}
+              columns={this.columns}
+              onSearch={this.onSearch}
+              onSort={this.onSort}
+              onSelectAll={this.onSelectAll}
+            />
+            <I18n>
+              {({ i18n }) => (
+                <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
+                  {results.map(o => (
+                    <NotificationListItem
+                      key={o.id}
+                      itemId={o.id}
+                      name={o.name}
+                      notificationType={o.notification_type}
+                      detailUrl={`notifications/${o.id}`}
+                      parentBreadcrumb={parentBreadcrumb}
+                      isSelected={selected.includes(o.id)}
+                      onSelect={() => this.onSelect(o.id)}
+                      errorTurnedOn={errorTemplateIds.includes(o.id)}
+                      toggleError={this.toggleError}
+                      successTurnedOn={successTemplateIds.includes(o.id)}
+                      toggleSuccess={this.toggleSuccess}
+                    />
+                  ))}
+                </ul>
+              )}
+            </I18n>
+            <Pagination
+              count={count}
+              page={page}
+              pageCount={pageCount}
+              page_size={page_size}
+              pageSizeOptions={this.pageSizeOptions}
+              onSetPage={this.onSetPage}
+            />
+          </Fragment>
+        )}
+        {loading ? <div>loading...</div> : ''}
+        {error ? <div>error</div> : ''}
       </Fragment>
     );
   }

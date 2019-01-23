@@ -54,18 +54,16 @@ const OrganizationDetail = ({
     switch (currentTab) {
       case 'notifications':
         relatedTemplate = (
-          <Fragment>
-            <NotificationsList
-              getNotifications={(id, reqParams) => api.getOrganizationNotifications(id, reqParams)}
-              getSuccess={(id, reqParams) => api.getOrganizationNotificationSuccess(id, reqParams)}
-              getError={(id, reqParams) => api.getOrganizationNotificationError(id, reqParams)}
-              postSuccess={(id, data) => api.createOrganizationNotificationSuccess(id, data)}
-              postError={(id, data) => api.createOrganizationNotificationError(id, data)}
-              match={match}
-              location={location}
-              history={history}
-            />
-          </Fragment>
+          <NotificationsList
+            getNotifications={(id, reqParams) => api.getOrganizationNotifications(id, reqParams)}
+            getSuccess={(id, reqParams) => api.getOrganizationNotificationSuccess(id, reqParams)}
+            getError={(id, reqParams) => api.getOrganizationNotificationError(id, reqParams)}
+            postSuccess={(id, data) => api.createOrganizationNotificationSuccess(id, data)}
+            postError={(id, data) => api.createOrganizationNotificationError(id, data)}
+            match={match}
+            location={location}
+            history={history}
+          />
         );
         break;
       default:

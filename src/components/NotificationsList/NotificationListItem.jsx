@@ -44,7 +44,7 @@ class NotificationListItem extends React.Component {
     return (
       <I18n>
         {({ i18n }) => (
-          <li key={itemId} className="pf-c-data-list__item">
+          <li key={itemId} className="pf-c-data-list__item pf-u-flex-row pf-u-align-items-center">
             <div className="pf-c-data-list__cell pf-u-flex-row">
               <div className="pf-u-display-inline-flex">
                 <Link
