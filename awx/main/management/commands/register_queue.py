@@ -104,7 +104,7 @@ class Command(BaseCommand):
             changed3 = False
             (ig, created, changed1) = self.get_create_update_instance_group(queuename, inst_per, inst_min)
             if created:
-                print(six.text_type("Creating instance group {}".format(ig.name)))
+                print(six.text_type("Creating instance group {}").format(ig.name))
             elif not created:
                 print(six.text_type("Instance Group already registered {}").format(ig.name))
 
@@ -126,4 +126,3 @@ class Command(BaseCommand):
         if instance_not_found_err:
             print(instance_not_found_err.message)
             sys.exit(1)
-
