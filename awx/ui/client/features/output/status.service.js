@@ -44,6 +44,10 @@ function JobStatusService (moment, message) {
                 id: model.get('summary_fields.project_update.id'),
                 status: model.get('summary_fields.project_update.status')
             },
+            inventoryScm: {
+                id: model.get('source_project_update'),
+                status: model.get('summary_fields.inventory_source.status')
+            }
         };
 
         this.initHostStatusCounts({ model });
@@ -86,6 +90,7 @@ function JobStatusService (moment, message) {
     this.pushStatusEvent = data => {
         const isJobStatusEvent = (this.job === data.unified_job_id);
         const isProjectStatusEvent = (this.project && (this.project === data.project_id));
+        const isInventoryScmStatus = (this.model.get('source_project_update') === data.unified_job_id);
 
         if (isJobStatusEvent) {
             this.setJobStatus(data.status);
@@ -93,6 +98,10 @@ function JobStatusService (moment, message) {
         } else if (isProjectStatusEvent) {
             this.setProjectStatus(data.status);
             this.setProjectUpdateId(data.unified_job_id);
+            this.dispatch();
+        } else if (isInventoryScmStatus) {
+            this.setInventoryScmStatus(data.status);
+            this.setInventoryScmId(data.unified_job_id);
             this.dispatch();
         }
     };
@@ -247,6 +256,14 @@ function JobStatusService (moment, message) {
 
     this.setProjectUpdateId = id => {
         this.state.scm.id = id;
+    };
+
+    this.setInventoryScmStatus = status => {
+        this.state.inventoryScm.status = status;
+    };
+
+    this.setInventoryScmId = id => {
+        this.state.inventoryScm.id = id;
     };
 
     this.setFinished = time => {
