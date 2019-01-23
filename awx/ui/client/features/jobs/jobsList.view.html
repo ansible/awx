@@ -14,6 +14,7 @@
         </smart-search>
     </div>
     <at-list-toolbar
+        ng-if="vm.jobs.length > 0"
         sort-only="false"
         on-collapse="vm.onCollapse"
         on-expand="vm.onExpand"
