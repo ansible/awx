@@ -692,7 +692,7 @@ export default
                         })
                         .catch(({data, status}) => {
                             ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                                msg: 'Failed to update job template. PUT returned status: ' + status });
+                                msg: 'Failed to update job template. PATCH returned status: ' + status });
                         });
                 } catch (err) {
                     Wait('stop');
