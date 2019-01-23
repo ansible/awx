@@ -105,10 +105,15 @@ class AnsibleInventoryLoader(object):
         logger.info('Using PYTHONPATH: {}'.format(env.get('PYTHONPATH', None)))
         return env
 
+    def get_path_to_ansible_inventory(self):
+        venv_exe = os.path.join(self.venv_path, 'bin', 'ansible-inventory')
+        if os.path.exists(venv_exe):
+            return venv_exe
+        return shutil.which('ansible-inventory')
+
     def get_base_args(self):
         # get ansible-inventory absolute path for running in bubblewrap/proot, in Popen
-        abs_ansible_inventory = shutil.which('ansible-inventory')
-        bargs= [abs_ansible_inventory, '-i', self.source]
+        bargs= [self.get_path_to_ansible_inventory(), '-i', self.source]
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 
@@ -407,7 +412,7 @@ class Command(BaseCommand):
         # Build list of all host pks, remove all that should not be deleted.
         del_host_pks = set(hosts_qs.values_list('pk', flat=True))
         if self.instance_id_var:
-            all_instance_ids = self.mem_instance_id_map.keys()
+            all_instance_ids = list(self.mem_instance_id_map.keys())
             instance_ids = []
             for offset in range(0, len(all_instance_ids), self._batch_size):
                 instance_ids = all_instance_ids[offset:(offset + self._batch_size)]
