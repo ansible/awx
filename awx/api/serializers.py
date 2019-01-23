@@ -2175,10 +2175,12 @@ class InventorySourceUpdateSerializer(InventorySourceSerializer):
 
 class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSerializer):
 
+    custom_virtualenv = serializers.ReadOnlyField()
+
     class Meta:
         model = InventoryUpdate
         fields = ('*', 'inventory', 'inventory_source', 'license_error', 'source_project_update',
-                  '-controller_node',)
+                  'custom_virtualenv', '-controller_node',)
 
     def get_related(self, obj):
         res = super(InventoryUpdateSerializer, self).get_related(obj)
@@ -3293,10 +3295,11 @@ class JobDetailSerializer(JobSerializer):
     playbook_counts = serializers.SerializerMethodField(
         help_text=_('A count of all plays and tasks for the job run.'),
     )
+    custom_virtualenv = serializers.ReadOnlyField()
 
     class Meta:
         model = Job
-        fields = ('*', 'host_status_counts', 'playbook_counts',)
+        fields = ('*', 'host_status_counts', 'playbook_counts', 'custom_virtualenv')
 
     def get_playbook_counts(self, obj):
         task_count = obj.job_events.filter(event='playbook_on_task_start').count()
