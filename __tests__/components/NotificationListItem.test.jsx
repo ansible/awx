@@ -26,78 +26,70 @@ describe('<NotificationListItem />', () => {
   });
 
   test('handles success click when toggle is on', () => {
-    const successToggleClickSpy = jest.spyOn(NotificationListItem.prototype, 'successToggleClick');
-    const toggleSuccessPropFn = jest.fn();
+    const toggleNotification = jest.fn();
     wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
           <NotificationListItem
             itemId={9000}
             successTurnedOn
-            toggleSuccess={toggleSuccessPropFn}
+            toggleNotification={toggleNotification}
           />
         </MemoryRouter>
       </I18nProvider>
     );
     wrapper.find('Switch').first().find('input').simulate('change');
-    expect(successToggleClickSpy).toHaveBeenCalledWith(true);
-    expect(toggleSuccessPropFn).toHaveBeenCalledWith(9000, true);
+    expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'success');
   });
 
   test('handles success click when toggle is off', () => {
-    const successToggleClickSpy = jest.spyOn(NotificationListItem.prototype, 'successToggleClick');
-    const toggleSuccessPropFn = jest.fn();
+    const toggleNotification = jest.fn();
     wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
           <NotificationListItem
             itemId={9000}
             successTurnedOn={false}
-            toggleSuccess={toggleSuccessPropFn}
+            toggleNotification={toggleNotification}
           />
         </MemoryRouter>
       </I18nProvider>
     );
     wrapper.find('Switch').first().find('input').simulate('change');
-    expect(successToggleClickSpy).toHaveBeenCalledWith(false);
-    expect(toggleSuccessPropFn).toHaveBeenCalledWith(9000, false);
+    expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'success');
   });
 
   test('handles error click when toggle is on', () => {
-    const errorToggleClickSpy = jest.spyOn(NotificationListItem.prototype, 'errorToggleClick');
-    const toggleErrorPropFn = jest.fn();
+    const toggleNotification = jest.fn();
     wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
           <NotificationListItem
             itemId={9000}
             errorTurnedOn
-            toggleError={toggleErrorPropFn}
+            toggleNotification={toggleNotification}
           />
         </MemoryRouter>
       </I18nProvider>
     );
     wrapper.find('Switch').at(1).find('input').simulate('change');
-    expect(errorToggleClickSpy).toHaveBeenCalledWith(true);
-    expect(toggleErrorPropFn).toHaveBeenCalledWith(9000, true);
+    expect(toggleNotification).toHaveBeenCalledWith(9000, true, 'error');
   });
 
   test('handles error click when toggle is off', () => {
-    const errorToggleClickSpy = jest.spyOn(NotificationListItem.prototype, 'errorToggleClick');
-    const toggleErrorPropFn = jest.fn();
+    const toggleNotification = jest.fn();
     wrapper = mount(
       <I18nProvider>
         <MemoryRouter>
           <NotificationListItem
             itemId={9000}
             errorTurnedOn={false}
-            toggleError={toggleErrorPropFn}
+            toggleNotification={toggleNotification}
           />
         </MemoryRouter>
       </I18nProvider>
     );
     wrapper.find('Switch').at(1).find('input').simulate('change');
-    expect(errorToggleClickSpy).toHaveBeenCalledWith(false);
-    expect(toggleErrorPropFn).toHaveBeenCalledWith(9000, false);
+    expect(toggleNotification).toHaveBeenCalledWith(9000, false, 'error');
   });
 });

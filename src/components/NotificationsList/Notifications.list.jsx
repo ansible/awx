@@ -56,8 +56,7 @@ class Notifications extends Component {
     this.onSetPage = this.onSetPage.bind(this);
     this.onSelectAll = this.onSelectAll.bind(this);
     this.onSelect = this.onSelect.bind(this);
-    this.toggleError = this.toggleError.bind(this);
-    this.toggleSuccess = this.toggleSuccess.bind(this);
+    this.toggleNotification = this.toggleNotification.bind(this);
     this.updateUrl = this.updateUrl.bind(this);
     this.postToError = this.postToError.bind(this);
     this.postToSuccess = this.postToSuccess.bind(this);
@@ -131,12 +130,12 @@ class Notifications extends Component {
     }
   };
 
-  toggleError = (id, isCurrentlyOn) => {
-    this.postToError(id, isCurrentlyOn);
-  };
-
-  toggleSuccess = (id, isCurrentlyOn) => {
-    this.postToSuccess(id, isCurrentlyOn);
+  toggleNotification = (id, isCurrentlyOn, status) => {
+    if (status === 'success') {
+      this.postToSuccess(id, isCurrentlyOn);
+    } else if (status === 'error') {
+      this.postToError(id, isCurrentlyOn);
+    }
   };
 
   updateUrl (queryParams) {
@@ -293,8 +292,6 @@ class Notifications extends Component {
       successTemplateIds,
       errorTemplateIds
     } = this.state;
-    const { match } = this.props;
-    const parentBreadcrumb = { name: i18nMark('Organizations'), url: match.url };
 
     return (
       <Fragment>
@@ -335,13 +332,11 @@ class Notifications extends Component {
                       name={o.name}
                       notificationType={o.notification_type}
                       detailUrl={`notifications/${o.id}`}
-                      parentBreadcrumb={parentBreadcrumb}
                       isSelected={selected.includes(o.id)}
                       onSelect={() => this.onSelect(o.id)}
+                      toggleNotification={this.toggleNotification}
                       errorTurnedOn={errorTemplateIds.includes(o.id)}
-                      toggleError={this.toggleError}
                       successTurnedOn={successTemplateIds.includes(o.id)}
-                      toggleSuccess={this.toggleSuccess}
                     />
                   ))}
                 </ul>

@@ -43,7 +43,7 @@ describe('<Notifications />', () => {
         </I18nProvider>
       </MemoryRouter>
     ).find('Notifications');
-    wrapper.instance().toggleSuccess(1, true);
+    wrapper.instance().toggleNotification(1, true, 'success');
     expect(spy).toHaveBeenCalledWith(1, true);
   });
   test('post success makes request and updates state properly', async () => {
@@ -79,7 +79,7 @@ describe('<Notifications />', () => {
         </I18nProvider>
       </MemoryRouter>
     ).find('Notifications');
-    wrapper.instance().toggleError(1, true);
+    wrapper.instance().toggleNotification(1, true, 'error');
     expect(spy).toHaveBeenCalledWith(1, true);
   });
   test('post error makes request and updates state properly', async () => {

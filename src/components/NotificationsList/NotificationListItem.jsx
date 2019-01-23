@@ -10,31 +10,15 @@ import {
 } from '@patternfly/react-core';
 
 class NotificationListItem extends React.Component {
-  constructor (props) {
-    super(props);
-    this.errorToggleClick = this.errorToggleClick.bind(this);
-    this.successToggleClick = this.successToggleClick.bind(this);
-  }
-
-  errorToggleClick (flag) {
-    const { itemId, toggleError } = this.props;
-    toggleError(itemId, flag);
-  }
-
-  successToggleClick (flag) {
-    const { itemId, toggleSuccess } = this.props;
-    toggleSuccess(itemId, flag);
-  }
-
   render () {
     const {
       itemId,
       name,
       notificationType,
       detailUrl,
-      parentBreadcrumb,
       successTurnedOn,
-      errorTurnedOn
+      errorTurnedOn,
+      toggleNotification
     } = this.props;
 
     const capText = {
@@ -49,8 +33,7 @@ class NotificationListItem extends React.Component {
               <div className="pf-u-display-inline-flex">
                 <Link
                   to={{
-                    pathname: detailUrl,
-                    state: { breadcrumb: [parentBreadcrumb, { name, url: detailUrl }] }
+                    pathname: detailUrl
                   }}
                 >
                   <b>{name}</b>
@@ -69,13 +52,13 @@ class NotificationListItem extends React.Component {
               <Switch
                 label={i18n._(t`Successful`)}
                 isChecked={successTurnedOn}
-                onChange={() => this.successToggleClick(successTurnedOn)}
+                onChange={() => toggleNotification(itemId, successTurnedOn, 'success')}
                 aria-label={i18n._(t`Notification success toggle`)}
               />
               <Switch
                 label={i18n._(t`Failure`)}
                 isChecked={errorTurnedOn}
-                onChange={() => this.errorToggleClick(errorTurnedOn)}
+                onChange={() => toggleNotification(itemId, errorTurnedOn, 'error')}
                 aria-label={i18n._(t`Notification failure toggle`)}
               />
             </div>

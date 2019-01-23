@@ -12,7 +12,7 @@ import {
   Route
 } from 'react-router-dom';
 
-import NotificationsList from '../../../../components/NotificationsList/Notifications.list';
+import OrganizationNotifications from './OrganizationNotifications';
 
 import Tab from '../../../../components/Tabs/Tab';
 import Tabs from '../../../../components/Tabs/Tabs';
@@ -54,12 +54,8 @@ const OrganizationDetail = ({
     switch (currentTab) {
       case 'notifications':
         relatedTemplate = (
-          <NotificationsList
-            getNotifications={(id, reqParams) => api.getOrganizationNotifications(id, reqParams)}
-            getSuccess={(id, reqParams) => api.getOrganizationNotificationSuccess(id, reqParams)}
-            getError={(id, reqParams) => api.getOrganizationNotificationError(id, reqParams)}
-            postSuccess={(id, data) => api.createOrganizationNotificationSuccess(id, data)}
-            postError={(id, data) => api.createOrganizationNotificationError(id, data)}
+          <OrganizationNotifications
+            api={api}
             match={match}
             location={location}
             history={history}
