@@ -81,7 +81,11 @@ class AWXConsumer(ConsumerMixin):
 
     def process_task(self, body, message):
         if 'control' in body:
-            return self.control(body, message)
+            try:
+                return self.control(body, message)
+            except Exception:
+                logger.exception("Exception handling control message:")
+                return
         if len(self.pool):
             if "uuid" in body and body['uuid']:
                 try:
