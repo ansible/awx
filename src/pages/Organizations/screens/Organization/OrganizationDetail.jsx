@@ -12,10 +12,11 @@ import {
   Route
 } from 'react-router-dom';
 
+import OrganizationNotifications from './OrganizationNotifications';
+
 import Tab from '../../../../components/Tabs/Tab';
 import Tabs from '../../../../components/Tabs/Tabs';
 import getTabName from '../../utils';
-
 
 const OrganizationDetail = ({
   location,
@@ -23,10 +24,12 @@ const OrganizationDetail = ({
   parentBreadcrumbObj,
   organization,
   params,
-  currentTab
+  currentTab,
+  api,
+  history
 }) => {
   // TODO: set objectName by param or through grabbing org detail get from api
-  const tabList=['details', 'access', 'teams', 'notifications'];
+  const tabList = ['details', 'access', 'teams', 'notifications'];
 
   const deleteResourceView = () => (
     <Fragment>
@@ -46,19 +49,35 @@ const OrganizationDetail = ({
     </Fragment>
   );
 
-  const resourceView = () => (
-    <Fragment>
-      <Trans>{`${currentTab} detail view  `}</Trans>
-      <Link to={{ pathname: `${match.url}/add-resource`, search: `?${params.toString()}`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
-        <Trans>{`add ${currentTab}`}</Trans>
-      </Link>
-      {'  '}
-      <Link to={{ pathname: `${match.url}/delete-resources`, search: `?${params.toString()}`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
-        <Trans>{`delete ${currentTab}`}</Trans>
-      </Link>
-    </Fragment>
-  );
-
+  const resourceView = () => {
+    let relatedTemplate;
+    switch (currentTab) {
+      case 'notifications':
+        relatedTemplate = (
+          <OrganizationNotifications
+            api={api}
+            match={match}
+            location={location}
+            history={history}
+          />
+        );
+        break;
+      default:
+        relatedTemplate = (
+          <Fragment>
+            <Trans>{`${currentTab} detail view  `}</Trans>
+            <Link to={{ pathname: `${match.url}/add-resource`, search: `?${params.toString()}`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
+              <Trans>{`add ${currentTab}`}</Trans>
+            </Link>
+            {'  '}
+            <Link to={{ pathname: `${match.url}/delete-resources`, search: `?${params.toString()}`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
+              <Trans>{`delete ${currentTab}`}</Trans>
+            </Link>
+          </Fragment>
+        );
+    }
+    return relatedTemplate;
+  };
 
   return (
     <Card className="at-c-orgPane">
@@ -82,21 +101,12 @@ const OrganizationDetail = ({
           )}
         </I18n>
       </CardHeader>
-      <CardBody>
-        {(currentTab && currentTab !== 'details') ? (
-          <Switch>
-            <Route path={`${match.path}/delete-resources`} component={() => deleteResourceView()} />
-            <Route path={`${match.path}/add-resource`} component={() => addResourceView()} />
-            <Route path={`${match.path}`} component={() => resourceView()} />
-          </Switch>
-        ) : (
-          <Fragment>
-            {'detail view  '}
-            <Link to={{ pathname: `${match.url}/edit`, state: { breadcrumb: parentBreadcrumbObj, organization } }}>
-              {'edit'}
-            </Link>
-          </Fragment>
-        )}
+      <CardBody className="at-c-listCardBody">
+        <Switch>
+          <Route path={`${match.path}/delete-resources`} component={() => deleteResourceView()} />
+          <Route path={`${match.path}/add-resource`} component={() => addResourceView()} />
+          <Route path={`${match.path}`} render={(props) => resourceView(props)} />
+        </Switch>
       </CardBody>
     </Card>
   );

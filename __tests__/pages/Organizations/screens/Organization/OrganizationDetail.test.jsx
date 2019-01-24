@@ -12,6 +12,7 @@ describe('<OrganizationDetail />', () => {
           <OrganizationDetail
             match={{ path: '/organizations/:id', url: '/organizations/1' }}
             location={{ search: '', pathname: '/organizations/1' }}
+            params={{}}
           />
         </MemoryRouter>
       </I18nProvider>

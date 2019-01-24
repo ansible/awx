@@ -82,6 +82,10 @@
 
   --pf-c-data-list__item--PaddingTop: 16px;
   --pf-c-data-list__item--PaddingBottom: 16px;
+
+  .pf-c-badge:not(:last-child), .pf-c-switch:not(:last-child) {
+    margin-right: 18px;
+  }
 }
 
 .pf-c-data-list__item {
@@ -105,10 +109,6 @@
 
 .pf-c-data-list__cell a {
   margin-right: 8px;
-}
-
-.pf-c-data-list__cell span {
-  margin-right: 18px;
 }
 
 //
@@ -157,6 +157,16 @@
 .awx-c-list {
   border-top: 1px solid #d7d7d7;
   border-bottom: 1px solid #d7d7d7;
+}
+.at-c-listCardBody {
+  --pf-c-card__footer--PaddingX: 0;
+  --pf-c-card__footer--PaddingY: 0;
+  --pf-c-card__body--PaddingX: 0;
+  --pf-c-card__body--PaddingY: 0;
+}
+.pf-c-data-list__item {
+  --pf-c-data-list__item--PaddingLeft: 20px;
+  --pf-c-data-list__item--PaddingRight: 20px;
 }
 //
 // pf modal overrides

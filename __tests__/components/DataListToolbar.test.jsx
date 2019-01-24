@@ -36,6 +36,7 @@ describe('<DataListToolbar />', () => {
           onSearch={onSearch}
           onSort={onSort}
           onSelectAll={onSelectAll}
+          showSelectAll
         />
       </I18nProvider>
     );

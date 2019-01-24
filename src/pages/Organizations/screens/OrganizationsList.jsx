@@ -75,16 +75,7 @@ class OrganizationsList extends Component {
     this.onSort(sortedColumnKey, sortOrder);
   }
 
-  getQueryParams (overrides = {}) {
-    const { location } = this.props;
-    const { search } = location;
-
-    const searchParams = parseQueryString(search.substring(1));
-
-    return Object.assign({}, this.defaultParams, searchParams, overrides);
-  }
-
-  onSort(sortedColumnKey, sortOrder) {
+  onSort (sortedColumnKey, sortOrder) {
     const { page_size } = this.state;
 
     let order_by = sortedColumnKey;
@@ -125,6 +116,15 @@ class OrganizationsList extends Component {
     } else {
       this.setState({ selected: selected.concat(id) });
     }
+  }
+
+  getQueryParams (overrides = {}) {
+    const { location } = this.props;
+    const { search } = location;
+
+    const searchParams = parseQueryString(search.substring(1));
+
+    return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
   updateUrl (queryParams) {
@@ -212,6 +212,8 @@ class OrganizationsList extends Component {
             onSearch={this.onSearch}
             onSort={this.onSort}
             onSelectAll={this.onSelectAll}
+            showDelete
+            showSelectAll
           />
           <I18n>
             {({ i18n }) => (

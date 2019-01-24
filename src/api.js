@@ -70,6 +70,36 @@ class APIClient {
     return this.http.get(endpoint);
   }
 
+  getOrganizationNotifications (id, params = {}) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/notification_templates/`;
+
+    return this.http.get(endpoint, { params });
+  }
+
+  getOrganizationNotificationSuccess (id, params = {}) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/notification_templates_success/`;
+
+    return this.http.get(endpoint, { params });
+  }
+
+  getOrganizationNotificationError (id, params = {}) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/notification_templates_error/`;
+
+    return this.http.get(endpoint, { params });
+  }
+
+  createOrganizationNotificationSuccess (id, data) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/notification_templates_success/`;
+
+    return this.http.post(endpoint, data);
+  }
+
+  createOrganizationNotificationError (id, data) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/notification_templates_error/`;
+
+    return this.http.post(endpoint, data);
+  }
+
   getInstanceGroups () {
     return this.http.get(API_INSTANCE_GROUPS);
   }
