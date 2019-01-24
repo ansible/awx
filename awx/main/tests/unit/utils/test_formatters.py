@@ -1,4 +1,3 @@
-import six
 
 from awx.main.models import Job, JobEvent
 
@@ -15,7 +14,7 @@ def test_log_from_job_event_object():
 
     # Check entire body of data for any exceptions from getattr on event object
     for fd in data_for_log:
-        if not isinstance(data_for_log[fd], six.string_types):
+        if not isinstance(data_for_log[fd], str):
             continue
         assert 'Exception' not in data_for_log[fd], 'Exception delivered in data: {}'.format(data_for_log[fd])
 

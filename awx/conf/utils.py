@@ -6,8 +6,6 @@ import glob
 import os
 import shutil
 
-import six
-
 # AWX
 from awx.conf.registry import settings_registry
 
@@ -15,7 +13,7 @@ __all__ = ['comment_assignments', 'conf_to_dict']
 
 
 def comment_assignments(patterns, assignment_names, dry_run=True, backup_suffix='.old'):
-    if isinstance(patterns, six.string_types):
+    if isinstance(patterns, str):
         patterns = [patterns]
     diffs = []
     for pattern in patterns:
@@ -34,7 +32,7 @@ def comment_assignments(patterns, assignment_names, dry_run=True, backup_suffix=
 def comment_assignments_in_file(filename, assignment_names, dry_run=True, backup_filename=None):
     from redbaron import RedBaron, indent
 
-    if isinstance(assignment_names, six.string_types):
+    if isinstance(assignment_names, str):
         assignment_names = [assignment_names]
     else:
         assignment_names = assignment_names[:]

@@ -6,7 +6,6 @@ import copy
 import json
 import operator
 import re
-import six
 import urllib.parse
 
 from jinja2 import Environment, StrictUndefined
@@ -80,7 +79,7 @@ class JSONField(upstream_JSONField):
 
 class JSONBField(upstream_JSONBField):
     def get_prep_lookup(self, lookup_type, value):
-        if isinstance(value, six.string_types) and value == "null":
+        if isinstance(value, str) and value == "null":
             return 'null'
         return super(JSONBField, self).get_prep_lookup(lookup_type, value)
 
@@ -95,7 +94,7 @@ class JSONBField(upstream_JSONBField):
     def from_db_value(self, value, expression, connection, context):
         # Work around a bug in django-jsonfield
         # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             return json.loads(value)
         return value
 
@@ -411,7 +410,7 @@ class JSONSchemaField(JSONBField):
             format_checker=self.format_checker
         ).iter_errors(value):
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
+                error.message = error.schema['error'].format(instance=error.instance)
             elif error.validator == 'type':
                 expected_type = error.validator_value
                 if expected_type == 'object':
@@ -450,7 +449,7 @@ class JSONSchemaField(JSONBField):
     def from_db_value(self, value, expression, connection, context):
         # Work around a bug in django-jsonfield
         # https://bitbucket.org/schinckel/django-jsonfield/issues/57/cannot-use-in-the-same-project-as-djangos
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             return json.loads(value)
         return value
 
@@ -547,7 +546,7 @@ class CredentialInputField(JSONSchemaField):
                 v != '$encrypted$',
                 model_instance.pk
             ]):
-                if not isinstance(getattr(model_instance, k), six.string_types):
+                if not isinstance(getattr(model_instance, k), str):
                     raise django_exceptions.ValidationError(
                         _('secret values must be of type string, not {}').format(type(v).__name__),
                         code='invalid',
@@ -564,7 +563,7 @@ class CredentialInputField(JSONSchemaField):
             format_checker=self.format_checker
         ).iter_errors(decrypted_values):
             if error.validator == 'pattern' and 'error' in error.schema:
-                error.message = six.text_type(error.schema['error']).format(instance=error.instance)
+                error.message = error.schema['error'].format(instance=error.instance)
             if error.validator == 'dependencies':
                 # replace the default error messaging w/ a better i18n string
                 # I wish there was a better way to determine the parameters of

@@ -10,7 +10,6 @@ import time
 import json
 from urllib.parse import urljoin
 
-import six
 
 # Django
 from django.conf import settings
@@ -823,7 +822,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
             timeout = now() - datetime.timedelta(seconds=timeout)
             hosts = hosts.filter(ansible_facts_modified__gte=timeout)
         for host in hosts:
-            filepath = os.sep.join(map(six.text_type, [destination, host.name]))
+            filepath = os.sep.join(map(str, [destination, host.name]))
             if not os.path.realpath(filepath).startswith(destination):
                 system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue
@@ -840,7 +839,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def finish_job_fact_cache(self, destination, modification_times):
         destination = os.path.join(destination, 'facts')
         for host in self._get_inventory_hosts():
-            filepath = os.sep.join(map(six.text_type, [destination, host.name]))
+            filepath = os.sep.join(map(str, [destination, host.name]))
             if not os.path.realpath(filepath).startswith(destination):
                 system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue

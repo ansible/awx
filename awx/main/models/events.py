@@ -9,7 +9,6 @@ from django.utils.text import Truncator
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
-import six
 
 from awx.api.versioning import reverse
 from awx.main.fields import JSONField
@@ -35,7 +34,7 @@ def sanitize_event_keys(kwargs, valid_keys):
     for key in [
         'play', 'role', 'task', 'playbook'
     ]:
-        if isinstance(kwargs.get('event_data', {}).get(key), six.string_types):
+        if isinstance(kwargs.get('event_data', {}).get(key), str):
             if len(kwargs['event_data'][key]) > 1024:
                 kwargs['event_data'][key] = Truncator(kwargs['event_data'][key]).chars(1024)
 

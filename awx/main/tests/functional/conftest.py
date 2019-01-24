@@ -3,15 +3,14 @@ import pytest
 from unittest import mock
 import json
 import os
-import six
 import tempfile
 import shutil
+import urllib.parse
 from datetime import timedelta
 from unittest.mock import PropertyMock
 
 # Django
 from django.core.urlresolvers import resolve
-from django.utils.six.moves.urllib.parse import urlparse
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
@@ -523,7 +522,7 @@ def _request(verb):
         if 'format' not in kwargs and 'content_type' not in kwargs:
             kwargs['format'] = 'json'
 
-        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        view, view_args, view_kwargs = resolve(urllib.parse.urlparse(url)[2])
         request = getattr(APIRequestFactory(), verb)(url, **kwargs)
         if isinstance(kwargs.get('cookies', None), dict):
             for key, value in kwargs['cookies'].items():
@@ -730,7 +729,7 @@ def get_db_prep_save(self, value, connection, **kwargs):
         return None
     # default values come in as strings; only non-strings should be
     # run through `dumps`
-    if not isinstance(value, six.string_types):
+    if not isinstance(value, str):
         value = dumps(value)
 
     return value
