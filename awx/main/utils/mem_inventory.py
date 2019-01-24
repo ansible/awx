@@ -54,7 +54,7 @@ class MemGroup(MemObject):
         return '<_in-memory-group_ `{}`>'.format(self.name)
 
     def add_child_group(self, group):
-        assert group.name is not 'all', 'group name is all'
+        assert group.name != 'all', 'group name is all'
         assert isinstance(group, MemGroup), 'not MemGroup instance'
         logger.debug('Adding child group %s to parent %s', group.name, self.name)
         if group not in self.children:
