@@ -6,7 +6,6 @@ from datetime import timedelta
 import logging
 import uuid
 import json
-import six
 import random
 
 # Django
@@ -131,7 +130,7 @@ class TaskManager():
                         job.job_explanation = _(
                             "Workflow Job spawned from workflow could not start because it "
                             "would result in recursion (spawn order, most recent first: {})"
-                        ).format(six.text_type(', ').join([six.text_type('<{}>').format(tmp) for tmp in display_list]))
+                        ).format(', '.join(['<{}>'.format(tmp) for tmp in display_list]))
                     else:
                         logger.debug('Starting workflow-in-workflow id={}, wfjt={}, ancestors={}'.format(
                             job.id, spawn_node.unified_job_template.pk, [wa.pk for wa in workflow_ancestors]))
@@ -182,7 +181,7 @@ class TaskManager():
                 logger.info('Marking %s as %s.', workflow_job.log_format, 'failed' if has_failed else 'successful')
                 result.append(workflow_job.id)
                 new_status = 'failed' if has_failed else 'successful'
-                logger.debug(six.text_type("Transitioning {} to {} status.").format(workflow_job.log_format, new_status))
+                logger.debug("Transitioning {} to {} status.".format(workflow_job.log_format, new_status))
                 update_fields = ['status', 'start_args']
                 workflow_job.status = new_status
                 if reason:
@@ -217,7 +216,7 @@ class TaskManager():
             try:
                 controller_node = rampart_group.choose_online_controller_node()
             except IndexError:
-                logger.debug(six.text_type("No controllers available in group {} to run {}").format(
+                logger.debug("No controllers available in group {} to run {}".format(
                              rampart_group.name, task.log_format))
                 return
 
@@ -240,19 +239,19 @@ class TaskManager():
                 # non-Ansible jobs on isolated instances run on controller
                 task.instance_group = rampart_group.controller
                 task.execution_node = random.choice(list(rampart_group.controller.instances.all().values_list('hostname', flat=True)))
-                logger.info(six.text_type('Submitting isolated {} to queue {}.').format(
+                logger.info('Submitting isolated {} to queue {}.'.format(
                             task.log_format, task.instance_group.name, task.execution_node))
             elif controller_node:
                 task.instance_group = rampart_group
                 task.execution_node = instance.hostname
                 task.controller_node = controller_node
-                logger.info(six.text_type('Submitting isolated {} to queue {} controlled by {}.').format(
+                logger.info('Submitting isolated {} to queue {} controlled by {}.'.format(
                             task.log_format, task.execution_node, controller_node))
             else:
                 task.instance_group = rampart_group
                 if instance is not None:
                     task.execution_node = instance.hostname
-                logger.info(six.text_type('Submitting {} to <instance group, instance> <{},{}>.').format(
+                logger.info('Submitting {} to <instance group, instance> <{},{}>.'.format(
                             task.log_format, task.instance_group_id, task.execution_node))
             with disable_activity_stream():
                 task.celery_task_id = str(uuid.uuid4())
@@ -436,7 +435,7 @@ class TaskManager():
     def process_dependencies(self, dependent_task, dependency_tasks):
         for task in dependency_tasks:
             if self.is_job_blocked(task):
-                logger.debug(six.text_type("Dependent {} is blocked from running").format(task.log_format))
+                logger.debug("Dependent {} is blocked from running".format(task.log_format))
                 continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
@@ -445,16 +444,16 @@ class TaskManager():
                 if idle_instance_that_fits is None:
                     idle_instance_that_fits = rampart_group.find_largest_idle_instance()
                 if self.get_remaining_capacity(rampart_group.name) <= 0:
-                    logger.debug(six.text_type("Skipping group {} capacity <= 0").format(rampart_group.name))
+                    logger.debug("Skipping group {} capacity <= 0".format(rampart_group.name))
                     continue
 
                 execution_instance = rampart_group.fit_task_to_most_remaining_capacity_instance(task)
                 if execution_instance:
-                    logger.debug(six.text_type("Starting dependent {} in group {} instance {}").format(
+                    logger.debug("Starting dependent {} in group {} instance {}".format(
                                  task.log_format, rampart_group.name, execution_instance.hostname))
                 elif not execution_instance and idle_instance_that_fits:
                     execution_instance = idle_instance_that_fits
-                    logger.debug(six.text_type("Starting dependent {} in group {} on idle instance {}").format(
+                    logger.debug("Starting dependent {} in group {} on idle instance {}".format(
                                  task.log_format, rampart_group.name, execution_instance.hostname))
                 if execution_instance:
                     self.graph[rampart_group.name]['graph'].add_job(task)
@@ -464,17 +463,17 @@ class TaskManager():
                     found_acceptable_queue = True
                     break
                 else:
-                    logger.debug(six.text_type("No instance available in group {} to run job {} w/ capacity requirement {}").format(
+                    logger.debug("No instance available in group {} to run job {} w/ capacity requirement {}".format(
                                  rampart_group.name, task.log_format, task.task_impact))
             if not found_acceptable_queue:
-                logger.debug(six.text_type("Dependent {} couldn't be scheduled on graph, waiting for next cycle").format(task.log_format))
+                logger.debug("Dependent {} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
     def process_pending_tasks(self, pending_tasks):
         running_workflow_templates = set([wf.unified_job_template_id for wf in self.get_running_workflow_jobs()])
         for task in pending_tasks:
             self.process_dependencies(task, self.generate_dependencies(task))
             if self.is_job_blocked(task):
-                logger.debug(six.text_type("{} is blocked from running").format(task.log_format))
+                logger.debug("{} is blocked from running".format(task.log_format))
                 continue
             preferred_instance_groups = task.preferred_instance_groups
             found_acceptable_queue = False
@@ -482,7 +481,7 @@ class TaskManager():
             if isinstance(task, WorkflowJob):
                 if task.unified_job_template_id in running_workflow_templates:
                     if not task.allow_simultaneous:
-                        logger.debug(six.text_type("{} is blocked from running, workflow already running").format(task.log_format))
+                        logger.debug("{} is blocked from running, workflow already running".format(task.log_format))
                         continue
                 else:
                     running_workflow_templates.add(task.unified_job_template_id)
@@ -493,17 +492,17 @@ class TaskManager():
                     idle_instance_that_fits = rampart_group.find_largest_idle_instance()
                 remaining_capacity = self.get_remaining_capacity(rampart_group.name)
                 if remaining_capacity <= 0:
-                    logger.debug(six.text_type("Skipping group {}, remaining_capacity {} <= 0").format(
+                    logger.debug("Skipping group {}, remaining_capacity {} <= 0".format(
                                  rampart_group.name, remaining_capacity))
                     continue
 
                 execution_instance = rampart_group.fit_task_to_most_remaining_capacity_instance(task)
                 if execution_instance:
-                    logger.debug(six.text_type("Starting {} in group {} instance {} (remaining_capacity={})").format(
+                    logger.debug("Starting {} in group {} instance {} (remaining_capacity={})".format(
                                  task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity))
                 elif not execution_instance and idle_instance_that_fits:
                     execution_instance = idle_instance_that_fits
-                    logger.debug(six.text_type("Starting {} in group {} instance {} (remaining_capacity={})").format(
+                    logger.debug("Starting {} in group {} instance {} (remaining_capacity={})".format(
                                  task.log_format, rampart_group.name, execution_instance.hostname, remaining_capacity))
                 if execution_instance:
                     self.graph[rampart_group.name]['graph'].add_job(task)
@@ -511,10 +510,10 @@ class TaskManager():
                     found_acceptable_queue = True
                     break
                 else:
-                    logger.debug(six.text_type("No instance available in group {} to run job {} w/ capacity requirement {}").format(
+                    logger.debug("No instance available in group {} to run job {} w/ capacity requirement {}".format(
                                  rampart_group.name, task.log_format, task.task_impact))
             if not found_acceptable_queue:
-                logger.debug(six.text_type("{} couldn't be scheduled on graph, waiting for next cycle").format(task.log_format))
+                logger.debug("{} couldn't be scheduled on graph, waiting for next cycle".format(task.log_format))
 
     def calculate_capacity_consumed(self, tasks):
         self.graph = InstanceGroup.objects.capacity_values(tasks=tasks, graph=self.graph)
@@ -527,7 +526,7 @@ class TaskManager():
         return (task.task_impact + current_capacity > capacity_total)
 
     def consume_capacity(self, task, instance_group):
-        logger.debug(six.text_type('{} consumed {} capacity units from {} with prior total of {}').format(
+        logger.debug('{} consumed {} capacity units from {} with prior total of {}'.format(
                      task.log_format, task.task_impact, instance_group,
                      self.graph[instance_group]['consumed_capacity']))
         self.graph[instance_group]['consumed_capacity'] += task.task_impact

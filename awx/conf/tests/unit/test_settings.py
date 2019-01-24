@@ -13,7 +13,6 @@ from django.core.cache.backends.locmem import LocMemCache
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 import pytest
-import six
 
 from awx.conf import models, fields
 from awx.conf.settings import SettingsWrapper, EncryptedCacheProxy, SETTING_CACHE_NOTSET
@@ -70,7 +69,7 @@ def test_cached_settings_unicode_is_auto_decoded(settings):
 
     value = 'Iñtërnâtiônàlizætiøn'  # this simulates what python-memcached does on cache.set()
     settings.cache.set('DEBUG', value)
-    assert settings.cache.get('DEBUG') == six.u('Iñtërnâtiônàlizætiøn')
+    assert settings.cache.get('DEBUG') == 'Iñtërnâtiônàlizætiøn'
 
 
 def test_read_only_setting(settings):

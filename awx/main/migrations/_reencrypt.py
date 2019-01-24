@@ -1,7 +1,6 @@
 import logging
 import json
 from django.utils.translation import ugettext_lazy as _
-import six
 
 from awx.conf.migrations._reencrypt import (
     decrypt_field,

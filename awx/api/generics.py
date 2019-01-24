@@ -5,7 +5,6 @@
 import inspect
 import logging
 import time
-import six
 import urllib.parse
 
 # Django
@@ -851,14 +850,14 @@ class CopyAPIView(GenericAPIView):
             return field_val
         if isinstance(field_val, dict):
             for sub_field in field_val:
-                if isinstance(sub_field, six.string_types) \
-                        and isinstance(field_val[sub_field], six.string_types):
+                if isinstance(sub_field, str) \
+                        and isinstance(field_val[sub_field], str):
                     try:
                         field_val[sub_field] = decrypt_field(obj, field_name, sub_field)
                     except AttributeError:
                         # Catching the corner case with v1 credential fields
                         field_val[sub_field] = decrypt_field(obj, sub_field)
-        elif isinstance(field_val, six.string_types):
+        elif isinstance(field_val, str):
             try:
                 field_val = decrypt_field(obj, field_name)
             except AttributeError:
@@ -916,7 +915,7 @@ class CopyAPIView(GenericAPIView):
                     obj, field.name, field_val
                 )
         new_obj = model.objects.create(**create_kwargs)
-        logger.debug(six.text_type('Deep copy: Created new object {}({})').format(
+        logger.debug('Deep copy: Created new object {}({})'.format(
             new_obj, model
         ))
         # Need to save separatedly because Djang-crum get_current_user would

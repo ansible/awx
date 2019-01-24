@@ -14,7 +14,6 @@ import urllib.parse
 import threading
 import contextlib
 import tempfile
-import six
 import psutil
 from functools import reduce, wraps
 from io import StringIO
@@ -82,7 +81,7 @@ def get_object_or_403(klass, *args, **kwargs):
 
 
 def to_python_boolean(value, allow_none=False):
-    value = six.text_type(value)
+    value = str(value)
     if value.lower() in ('true', '1', 't'):
         return True
     elif value.lower() in ('false', '0', 'f'):
@@ -90,7 +89,7 @@ def to_python_boolean(value, allow_none=False):
     elif allow_none and value.lower() in ('none', 'null'):
         return None
     else:
-        raise ValueError(_(u'Unable to convert "%s" to boolean') % six.text_type(value))
+        raise ValueError(_(u'Unable to convert "%s" to boolean') % value)
 
 
 def region_sorting(region):
@@ -339,7 +338,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
         netloc = u''
     netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
     if parts.port:
-        netloc = u':'.join([netloc, six.text_type(parts.port)])
+        netloc = u':'.join([netloc, str(parts.port)])
     new_url = urllib.parse.urlunsplit([parts.scheme, netloc, parts.path,
                                        parts.query, parts.fragment])
     if scp_format and parts.scheme == 'git+ssh':
@@ -376,7 +375,7 @@ def _convert_model_field_for_display(obj, field_name, password_fields=None):
     if password_fields is None:
         password_fields = set(getattr(type(obj), 'PASSWORD_FIELDS', [])) | set(['password'])
     if field_name in password_fields or (
-        isinstance(field_val, six.string_types) and
+        isinstance(field_val, str) and
         field_val.startswith('$encrypted$')
     ):
         return u'hidden'
@@ -623,7 +622,7 @@ def parse_yaml_or_json(vars_str, silent_failure=True):
     '''
     if isinstance(vars_str, dict):
         return vars_str
-    elif isinstance(vars_str, six.string_types) and vars_str == '""':
+    elif isinstance(vars_str, str) and vars_str == '""':
         return {}
 
     try:

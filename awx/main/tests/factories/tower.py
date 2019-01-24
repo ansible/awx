@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 
-import six
 
 from awx.main.models import (
     Organization,
@@ -150,7 +149,7 @@ def create_survey_spec(variables=None, default_type='integer', required=True, mi
         vars_list = variables
     else:
         vars_list = [variables]
-    if isinstance(variables[0], six.string_types):
+    if isinstance(variables[0], str):
         slogan = variables[0]
     else:
         slogan = variables[0].get('question_name', 'something')

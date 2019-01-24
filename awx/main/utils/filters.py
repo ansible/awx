@@ -10,7 +10,6 @@ from pyparsing import (
 )
 from logging import Filter, _nameToLevel
 
-import six
 
 from django.apps import apps
 from django.db import models
@@ -154,12 +153,12 @@ class SmartFilter(object):
                 self.result = Host.objects.filter(**kwargs)
 
         def strip_quotes_traditional_logic(self, v):
-            if type(v) is six.text_type and v.startswith('"') and v.endswith('"'):
+            if type(v) is str and v.startswith('"') and v.endswith('"'):
                 return v[1:-1]
             return v
 
         def strip_quotes_json_logic(self, v):
-            if type(v) is six.text_type and v.startswith('"') and v.endswith('"') and v != u'"null"':
+            if type(v) is str and v.startswith('"') and v.endswith('"') and v != u'"null"':
                 return v[1:-1]
             return v
 
@@ -238,7 +237,7 @@ class SmartFilter(object):
             # value
             # ="something"
             if t_len > (v_offset + 2) and t[v_offset] == "\"" and t[v_offset + 2] == "\"":
-                v = u'"' + six.text_type(t[v_offset + 1]) + u'"'
+                v = u'"' + str(t[v_offset + 1]) + u'"'
                 #v = t[v_offset + 1]
             # empty ""
             elif t_len > (v_offset + 1):
@@ -307,9 +306,9 @@ class SmartFilter(object):
         * handle key with __ in it
         '''
         filter_string_raw = filter_string
-        filter_string = six.text_type(filter_string)
+        filter_string = str(filter_string)
 
-        unicode_spaces = list(set(six.text_type(c) for c in filter_string if c.isspace()))
+        unicode_spaces = list(set(str(c) for c in filter_string if c.isspace()))
         unicode_spaces_other = unicode_spaces + [u'(', u')', u'=', u'"']
         atom = CharsNotIn(unicode_spaces_other)
         atom_inside_quotes = CharsNotIn(u'"')

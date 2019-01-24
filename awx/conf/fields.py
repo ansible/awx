@@ -10,8 +10,6 @@ from django.utils.translation import ugettext_lazy as _
 # Django REST Framework
 from rest_framework.fields import *  # noqa
 
-import six
-
 logger = logging.getLogger('awx.conf.fields')
 
 # Use DRF fields to convert/validate settings:
@@ -139,7 +137,7 @@ class KeyValueField(DictField):
     def to_internal_value(self, data):
         ret = super(KeyValueField, self).to_internal_value(data)
         for value in data.values():
-            if not isinstance(value, six.string_types + six.integer_types + (float,)):
+            if not isinstance(value, (str, int, float)):
                 if isinstance(value, OrderedDict):
                     value = dict(value)
                 self.fail('invalid_child', input=value)

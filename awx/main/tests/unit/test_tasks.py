@@ -14,7 +14,6 @@ from backports.tempfile import TemporaryDirectory
 import fcntl
 from unittest import mock
 import pytest
-import six
 import yaml
 
 from django.conf import settings
@@ -1562,7 +1561,7 @@ class TestJobCredentials(TestJobExecution):
         self.task.run(self.pk)
 
     def test_custom_environment_injectors_with_unicode_content(self):
-        value = six.u('Iñtërnâtiônàlizætiøn')
+        value = 'Iñtërnâtiônàlizætiøn'
         some_cloud = CredentialType(
             kind='cloud',
             name='SomeCloud',

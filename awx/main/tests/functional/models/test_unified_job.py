@@ -1,6 +1,5 @@
 import itertools
 import pytest
-import six
 
 # CRUM
 from crum import impersonate
@@ -74,7 +73,7 @@ class TestCreateUnifiedJob:
         new_creds = []
         for cred in jt_linked.credentials.all():
             new_creds.append(Credential.objects.create(
-                name=six.text_type(cred.name) + six.text_type('_new'),
+                name=str(cred.name) + '_new',
                 credential_type=cred.credential_type,
                 inputs=cred.inputs
             ))

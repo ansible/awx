@@ -7,7 +7,6 @@ import json
 import logging
 import operator
 import re
-import six
 import urllib.parse
 from collections import OrderedDict
 from datetime import timedelta
@@ -1046,7 +1045,7 @@ class BaseOAuth2TokenSerializer(BaseSerializer):
         return ret
 
     def _is_valid_scope(self, value):
-        if not value or (not isinstance(value, six.string_types)):
+        if not value or (not isinstance(value, str)):
             return False
         words = value.split()
         for word in words:
@@ -2478,8 +2477,7 @@ class CredentialTypeSerializer(BaseSerializer):
 
 
 # TODO: remove when API v1 is removed
-@six.add_metaclass(BaseSerializerMetaclass)
-class V1CredentialFields(BaseSerializer):
+class V1CredentialFields(BaseSerializer, metaclass=BaseSerializerMetaclass):
 
     class Meta:
         model = Credential
@@ -2497,8 +2495,7 @@ class V1CredentialFields(BaseSerializer):
         return super(V1CredentialFields, self).build_field(field_name, info, model_class, nested_depth)
 
 
-@six.add_metaclass(BaseSerializerMetaclass)
-class V2CredentialFields(BaseSerializer):
+class V2CredentialFields(BaseSerializer, metaclass=BaseSerializerMetaclass):
 
     class Meta:
         model = Credential
@@ -2786,8 +2783,7 @@ class LabelsListMixin(object):
 
 
 # TODO: remove when API v1 is removed
-@six.add_metaclass(BaseSerializerMetaclass)
-class V1JobOptionsSerializer(BaseSerializer):
+class V1JobOptionsSerializer(BaseSerializer, metaclass=BaseSerializerMetaclass):
 
     class Meta:
         model = Credential
@@ -2801,8 +2797,7 @@ class V1JobOptionsSerializer(BaseSerializer):
         return super(V1JobOptionsSerializer, self).build_field(field_name, info, model_class, nested_depth)
 
 
-@six.add_metaclass(BaseSerializerMetaclass)
-class LegacyCredentialFields(BaseSerializer):
+class LegacyCredentialFields(BaseSerializer, metaclass=BaseSerializerMetaclass):
 
     class Meta:
         model = Credential
@@ -4387,7 +4382,7 @@ class JobLaunchSerializer(BaseSerializer):
                 errors.setdefault('credentials', []).append(_(
                     'Removing {} credential at launch time without replacement is not supported. '
                     'Provided list lacked credential(s): {}.'
-                ).format(cred.unique_hash(display=True), ', '.join([six.text_type(c) for c in removed_creds])))
+                ).format(cred.unique_hash(display=True), ', '.join([str(c) for c in removed_creds])))
 
         # verify that credentials (either provided or existing) don't
         # require launch-time passwords that have not been provided
@@ -4725,8 +4720,8 @@ class ScheduleSerializer(LaunchConfigurationBaseSerializer, SchedulePreviewSeria
             raise serializers.ValidationError(_('Manual Project cannot have a schedule set.'))
         elif type(value) == InventorySource and value.source == 'scm' and value.update_on_project_update:
             raise serializers.ValidationError(_(
-                six.text_type('Inventory sources with `update_on_project_update` cannot be scheduled. '
-                              'Schedule its source project `{}` instead.').format(value.source_project.name)))
+                'Inventory sources with `update_on_project_update` cannot be scheduled. '
+                'Schedule its source project `{}` instead.'.format(value.source_project.name)))
         return value
 
 
@@ -5064,6 +5059,6 @@ class FactSerializer(BaseFactSerializer):
         ret = super(FactSerializer, self).to_representation(obj)
         if obj is None:
             return ret
-        if 'facts' in ret and isinstance(ret['facts'], six.string_types):
+        if 'facts' in ret and isinstance(ret['facts'], str):
             ret['facts'] = json.loads(ret['facts'])
         return ret

@@ -1,7 +1,8 @@
+import urllib.parse
+
 import pytest
 
 from django.core.urlresolvers import resolve
-from django.utils.six.moves.urllib.parse import urlparse
 from django.contrib.auth.models import User
 
 from rest_framework.test import (
@@ -33,7 +34,7 @@ def admin():
 @pytest.fixture
 def api_request(admin):
     def rf(verb, url, data=None, user=admin):
-        view, view_args, view_kwargs = resolve(urlparse(url)[2])
+        view, view_args, view_kwargs = resolve(urllib.parse.urlparse(url)[2])
         request = getattr(APIRequestFactory(), verb)(url, data=data, format='json')
         if user:
             force_authenticate(request, user=user)

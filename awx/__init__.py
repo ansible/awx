@@ -91,16 +91,6 @@ def prepare_env():
     # Monkeypatch Django find_commands to also work with .pyc files.
     import django.core.management
     django.core.management.find_commands = find_commands
-    # Fixup sys.modules reference to django.utils.six to allow jsonfield to
-    # work when using Django 1.4.
-    import django.utils
-    try:
-        import django.utils.six
-    except ImportError: # pragma: no cover
-        import six
-        sys.modules['django.utils.six'] = sys.modules['six']
-        django.utils.six = sys.modules['django.utils.six']
-        from django.utils import six # noqa
     # Use the AWX_TEST_DATABASE_* environment variables to specify the test
     # database settings to use when management command is run as an external
     # program via unit tests.

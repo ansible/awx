@@ -4,11 +4,11 @@
 import uuid
 import logging
 import threading
-import six
 import time
 import cProfile
 import pstats
 import os
+import urllib.parse
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -195,7 +195,7 @@ class URLModificationMiddleware(object):
 
     def process_request(self, request):
         if hasattr(request, 'environ') and 'REQUEST_URI' in request.environ:
-            old_path = six.moves.urllib.parse.urlsplit(request.environ['REQUEST_URI']).path
+            old_path = urllib.parse.urlsplit(request.environ['REQUEST_URI']).path
             old_path = old_path[request.path.find(request.path_info):]
         else:
             old_path = request.path_info

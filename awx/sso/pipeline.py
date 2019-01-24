@@ -5,7 +5,6 @@
 import re
 import logging
 
-import six
 
 # Python Social Auth
 from social_core.exceptions import AuthException
@@ -67,10 +66,10 @@ def _update_m2m_from_expression(user, rel, expr, remove=True):
     elif expr is True:
         should_add = True
     else:
-        if isinstance(expr, (six.string_types, type(re.compile('')))):
+        if isinstance(expr, (str, type(re.compile('')))):
             expr = [expr]
         for ex in expr:
-            if isinstance(ex, six.string_types):
+            if isinstance(ex, str):
                 if user.username == ex or user.email == ex:
                     should_add = True
             elif isinstance(ex, type(re.compile(''))):
