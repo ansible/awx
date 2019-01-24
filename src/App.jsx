@@ -35,28 +35,17 @@ class App extends Component {
     this.onAboutModalClose = this.onAboutModalClose.bind(this);
     this.onAboutModalOpen = this.onAboutModalOpen.bind(this);
     this.onNavToggle = this.onNavToggle.bind(this);
-  };
+  }
 
   componentDidMount () {
     this.fetchConfig();
-  }
-
-  async fetchConfig () {
-    const { api } = this.props;
-
-    try {
-      const { data: { ansible_version, custom_virtualenvs, version } } = await api.getConfig();
-      this.setState({ ansible_version, custom_virtualenvs, version });
-    } catch (err) {
-      this.setState({ ansible_version: null, custom_virtualenvs: null, version: null });
-    }
   }
 
   async onLogout () {
     const { api } = this.props;
 
     await api.logout();
-    window.location.replace('/#/login')
+    window.location.replace('/#/login');
   }
 
   onAboutModalOpen () {
@@ -69,6 +58,17 @@ class App extends Component {
 
   onNavToggle () {
     this.setState(({ isNavOpen }) => ({ isNavOpen: !isNavOpen }));
+  }
+
+  async fetchConfig () {
+    const { api } = this.props;
+
+    try {
+      const { data: { ansible_version, custom_virtualenvs, version } } = await api.getConfig();
+      this.setState({ ansible_version, custom_virtualenvs, version });
+    } catch (err) {
+      this.setState({ ansible_version: null, custom_virtualenvs: null, version: null });
+    }
   }
 
   render () {
@@ -100,17 +100,17 @@ class App extends Component {
             <PageHeader
               showNavToggle
               onNavToggle={this.onNavToggle}
-              logo={<TowerLogo linkTo="/"/>}
-              toolbar={
+              logo={<TowerLogo linkTo="/" />}
+              toolbar={(
                 <PageHeaderToolbar
                   isAboutDisabled={!version}
                   onAboutClick={this.onAboutModalOpen}
                   onLogoutClick={this.onLogout}
                 />
-              }
+              )}
             />
           )}
-          sidebar={
+          sidebar={(
             <PageSidebar
               isNavOpen={isNavOpen}
               nav={(
@@ -128,7 +128,7 @@ class App extends Component {
                 </Nav>
               )}
             />
-          }
+          )}
         >
           <ConfigContext.Provider value={config}>
             {render && render({ routeGroups })}

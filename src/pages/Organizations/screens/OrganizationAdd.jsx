@@ -20,10 +20,20 @@ import {
 
 import { ConfigContext } from '../../../context';
 import Lookup from '../../../components/Lookup';
-import AnsibleSelect from '../../../components/AnsibleSelect'
+import AnsibleSelect from '../../../components/AnsibleSelect';
+
 const { light } = PageSectionVariants;
 class OrganizationAdd extends React.Component {
-  constructor(props) {
+  static format (data) {
+    const results = data.results.map((result) => ({
+      id: result.id,
+      name: result.name,
+      isChecked: false
+    }));
+    return results;
+  }
+
+  constructor (props) {
     super(props);
 
     this.handleChange = this.handleChange.bind(this);
@@ -45,87 +55,80 @@ class OrganizationAdd extends React.Component {
     error: '',
   };
 
-  onSelectChange(value, _) {
-    this.setState({ custom_virtualenv: value });
-  };
-
-  onLookupChange(id, _) {
-    let selected = { ...this.state.results }
-    const index = id - 1;
-    selected[index].isChecked = !selected[index].isChecked;
-    this.setState({ selected })
-  }
-
-  resetForm() {
-    this.setState({
-      name: '',
-      description: '',
-    });
-    let reset = [];
-    this.state.results.map((result) => {
-      reset.push({ id: result.id, name: result.name, isChecked: false });
-    })
-    this.setState({ results: reset });
-  }
-
-  handleChange(_, evt) {
-    this.setState({ [evt.target.name]: evt.target.value });
-  }
-
-  async onSubmit() {
-    const { api } = this.props;
-    const data = Object.assign({}, { ...this.state });
-    try {
-      const { data: response } = await api.createOrganization(data);
-      const url = response.related.instance_groups;
-      const selected = this.state.results.filter(group => group.isChecked);
-      try {
-        if (selected.length > 0) {
-          selected.forEach( async (select) => {
-            await api.createInstanceGroups(url, select.id);
-          });
-        }
-      } catch (err) {
-        this.setState({ createInstanceGroupsError: err })
-      } finally {
-        this.resetForm();
-        this.onSuccess(response.id);
-      }
-    }
-    catch (err) {
-      this.setState({ onSubmitError: err })
-    }
-  }
-
-  onCancel() {
-    this.props.history.push('/organizations');
-  }
-
-  onSuccess(id) {
-    this.props.history.push(`/organizations/${id}`);
-  }
-
-  format(data) {
-    let results = [];
-    data.results.map((result) => {
-      results.push({ id: result.id, name: result.name, isChecked: false });
-    });
-    return results;
-  };
-
-  async componentDidMount() {
+  async componentDidMount () {
     const { api } = this.props;
     try {
       const { data } = await api.getInstanceGroups();
       const results = this.format(data);
       this.setState({ results });
     } catch (error) {
-      this.setState({ getInstanceGroupsError: error })
+      this.setState({ getInstanceGroupsError: error });
     }
   }
 
-  render() {
-    const { name, results } = this.state;
+  onSelectChange (value) {
+    this.setState({ custom_virtualenv: value });
+  }
+
+  onLookupChange (id) {
+    const { results } = this.state;
+    const selected = { ...results };
+    const index = id - 1;
+    selected[index].isChecked = !selected[index].isChecked;
+    this.setState({ selected });
+  }
+
+  async onSubmit () {
+    const { api } = this.props;
+    const data = Object.assign({}, { ...this.state });
+    const { results } = this.state;
+    try {
+      const { data: response } = await api.createOrganization(data);
+      const url = response.related.instance_groups;
+      const selected = results.filter(group => group.isChecked);
+      try {
+        if (selected.length > 0) {
+          selected.forEach(async (select) => {
+            await api.createInstanceGroups(url, select.id);
+          });
+        }
+      } catch (err) {
+        this.setState({ createInstanceGroupsError: err });
+      } finally {
+        this.resetForm();
+        this.onSuccess(response.id);
+      }
+    } catch (err) {
+      this.setState({ onSubmitError: err });
+    }
+  }
+
+  onCancel () {
+    const { history } = this.props;
+    history.push('/organizations');
+  }
+
+  onSuccess (id) {
+    const { history } = this.props;
+    history.push(`/organizations/${id}`);
+  }
+
+  handleChange (_, evt) {
+    this.setState({ [evt.target.name]: evt.target.value });
+  }
+
+  resetForm () {
+    this.setState({
+      name: '',
+      description: '',
+    });
+    const { results } = this.state;
+    const reset = results.map((result) => ({ id: result.id, name: result.name, isChecked: false }));
+    this.setState({ results: reset });
+  }
+
+  render () {
+    const { name, results, description, custom_virtualenv } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
 
     return (
@@ -150,7 +153,7 @@ class OrganizationAdd extends React.Component {
                       type="text"
                       id="add-org-form-name"
                       name="name"
-                      value={this.state.name}
+                      value={name}
                       onChange={this.handleChange}
                     />
                   </FormGroup>
@@ -158,7 +161,7 @@ class OrganizationAdd extends React.Component {
                     <TextInput
                       id="add-org-form-description"
                       name="description"
-                      value={this.state.description}
+                      value={description}
                       onChange={this.handleChange}
                     />
                   </FormGroup>
@@ -170,14 +173,14 @@ class OrganizationAdd extends React.Component {
                     />
                   </FormGroup>
                   <ConfigContext.Consumer>
-                    {({ custom_virtualenvs }) =>
+                    {({ custom_virtualenvs }) => (
                       <AnsibleSelect
                         labelName="Ansible Environment"
-                        selected={this.state.custom_virtualenv}
+                        selected={custom_virtualenv}
                         selectChange={this.onSelectChange}
                         data={custom_virtualenvs}
                       />
-                    }
+                    )}
                   </ConfigContext.Consumer>
                 </Gallery>
                 <ActionGroup className="at-align-right">
@@ -200,7 +203,7 @@ class OrganizationAdd extends React.Component {
 }
 
 OrganizationAdd.contextTypes = {
-  custom_virtualenvs: PropTypes.array,
+  custom_virtualenvs: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default withRouter(OrganizationAdd);

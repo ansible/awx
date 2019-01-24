@@ -1,9 +1,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import Lookup from '../../src/components/Lookup';
 import { I18nProvider } from '@lingui/react';
+import Lookup from '../../src/components/Lookup';
 
-const mockData = [{ name: 'foo', id: 0, isChecked: false }];
+let mockData = [{ name: 'foo', id: 0, isChecked: false }];
 describe('<Lookup />', () => {
   test('initially renders succesfully', () => {
     mount(
@@ -46,7 +46,7 @@ describe('<Lookup />', () => {
   });
   test('calls "onRemove" when remove icon is clicked', () => {
     const spy = jest.spyOn(Lookup.prototype, 'onRemove');
-    const mockData = [{ name: 'foo', id: 0, isChecked: false }, { name: 'bar', id: 1, isChecked: true }];
+    mockData = [{ name: 'foo', id: 0, isChecked: false }, { name: 'bar', id: 1, isChecked: true }];
     const wrapper = mount(
       <I18nProvider>
         <Lookup
@@ -61,7 +61,7 @@ describe('<Lookup />', () => {
   });
   test('"wrapTags" method properly handles data', () => {
     const spy = jest.spyOn(Lookup.prototype, 'wrapTags');
-    const mockData = [{ name: 'foo', id: 0, isChecked: false }, { name: 'bar', id: 1, isChecked: false }];
+    mockData = [{ name: 'foo', id: 0, isChecked: false }, { name: 'bar', id: 1, isChecked: false }];
     const wrapper = mount(
       <I18nProvider>
         <Lookup

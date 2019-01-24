@@ -2,8 +2,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 import AnsibleSelect from '../../src/components/AnsibleSelect';
 
-const label = "test select"
-const mockData = ["/venv/baz/", "/venv/ansible/"];
+const label = 'test select';
+const mockData = ['/venv/baz/', '/venv/ansible/'];
 describe('<AnsibleSelect />', () => {
   test('initially renders succesfully', async () => {
     mount(

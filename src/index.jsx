@@ -65,7 +65,7 @@ export function getLanguage (nav) {
   const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
 
   return languageWithoutRegionCode;
-};
+}
 
 //
 //  Function Main
@@ -269,7 +269,7 @@ export async function main (render, api) {
                                   />
                                 )}
                               />
-                          ))
+                            ))
                         )}
                       />
                     )}
@@ -280,7 +280,8 @@ export async function main (render, api) {
           )}
         </I18n>
       </I18nProvider>
-    </HashRouter>, el);
-};
+    </HashRouter>, el
+  );
+}
 
 main(ReactDOM.render, new APIClient(http));

@@ -29,7 +29,7 @@ describe('<DataListToolbar />', () => {
       <I18nProvider>
         <DataListToolbar
           isAllSelected={false}
-          showExpandCollapse={true}
+          showExpandCollapse
           sortedColumnKey="name"
           sortOrder="ascending"
           columns={columns}
@@ -94,10 +94,10 @@ describe('<DataListToolbar />', () => {
     sortDropdownToggle.at(1).simulate('click');
     sortDropdownToggle.at(0).simulate('click');
     toolbar.update();
-    
+
     const sortDropdownItems = toolbar.find(sortDropdownItemsSelector);
     expect(sortDropdownItems.length).toBe(2);
-    
+
     const mockedSortEvent = { target: { innerText: 'Bar' } };
     sortDropdownItems.at(0).simulate('click', mockedSortEvent);
     toolbar = mount(
@@ -114,28 +114,28 @@ describe('<DataListToolbar />', () => {
       </I18nProvider>
     );
     toolbar.update();
-    
+
     const sortDropdownToggleDescending = toolbar.find(sortDropdownToggleSelector);
     expect(sortDropdownToggleDescending.length).toBe(2);
     sortDropdownToggleDescending.at(1).simulate('click');
     sortDropdownToggleDescending.at(0).simulate('click');
     toolbar.update();
-    
+
     const sortDropdownItemsDescending = toolbar.find(sortDropdownItemsSelector);
     expect(sortDropdownItemsDescending.length).toBe(2);
-    
+
     const mockedSortEventDescending = { target: { innerText: 'Bar' } };
     sortDropdownItems.at(0).simulate('click', mockedSortEventDescending);
     toolbar.update();
-    
+
     const searchDropdownToggle = toolbar.find(searchDropdownToggleSelector);
     expect(searchDropdownToggle.length).toBe(1);
     searchDropdownToggle.at(0).simulate('click');
     toolbar.update();
-    
+
     const searchDropdownItems = toolbar.find(searchDropdownItemsSelector);
     expect(searchDropdownItems.length).toBe(3);
-    
+
     const mockedSearchEvent = { target: { innerText: 'Bar' } };
     searchDropdownItems.at(0).simulate('click', mockedSearchEvent);
   });

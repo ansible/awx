@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd'
+import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd';
 
 describe('<OrganizationAdd />', () => {
   test('initially renders succesfully', () => {
@@ -69,7 +69,7 @@ describe('<OrganizationAdd />', () => {
   });
   test('API response is formatted properly', (done) => {
     const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'format');
-    const mockedResp = {data: {id: 1, name: 'foo bar'} };
+    const mockedResp = { data: { id: 1, name: 'foo bar' } };
     const api = { getInstanceGroups: jest.fn().mockResolvedValue(mockedResp) };
     mount(
       <MemoryRouter>
@@ -86,7 +86,7 @@ describe('<OrganizationAdd />', () => {
   test('Successful form submission triggers redirect', (done) => {
     const onSuccess = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onSuccess');
     const resetForm = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'resetForm');
-    const mockedResp = {data: {id: 1, related: {instance_groups: '/bar'}}};
+    const mockedResp = { data: { id: 1, related: { instance_groups: '/bar' } } };
     const api = { createOrganization: jest.fn().mockResolvedValue(mockedResp), createInstanceGroups: jest.fn().mockResolvedValue('done') };
     const wrapper = mount(
       <MemoryRouter>

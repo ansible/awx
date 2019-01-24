@@ -10,7 +10,7 @@ describe('PageHeaderToolbar', () => {
   const pageUserDropdownSelector = 'Dropdown UserIcon';
 
   test('expected content is rendered on initialization', () => {
-    const wrapper = mount(<I18nProvider><PageHeaderToolbar/></I18nProvider>);
+    const wrapper = mount(<I18nProvider><PageHeaderToolbar /></I18nProvider>);
 
     expect(wrapper.find(pageHelpDropdownSelector)).toHaveLength(1);
     expect(wrapper.find(pageUserDropdownSelector)).toHaveLength(1);

@@ -2,7 +2,7 @@ import { mount } from 'enzyme';
 import { main, getLanguage } from '../src/index';
 
 const render = template => mount(template);
-const data = { custom_logo: 'foo', custom_login_info: '' }
+const data = { custom_logo: 'foo', custom_login_info: '' };
 
 describe('index.jsx', () => {
   test('login loads when unauthenticated', async (done) => {
