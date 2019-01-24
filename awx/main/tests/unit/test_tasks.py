@@ -1656,6 +1656,7 @@ class TestJobCredentials(TestJobExecution):
                 'password': 'secret'
             }
         )
+        azure_rm_credential.inputs['secret'] = ''
         azure_rm_credential.inputs['secret'] = encrypt_field(azure_rm_credential, 'secret')
         self.instance.credentials.add(azure_rm_credential)
 
@@ -2089,6 +2090,7 @@ class TestInventoryUpdateCredentials(TestJobExecution):
                     'host': 'https://keystone.example.org'
                 }
             )
+            cred.inputs['ssh_key_data'] = ''
             cred.inputs['ssh_key_data'] = encrypt_field(
                 cred, 'ssh_key_data'
             )

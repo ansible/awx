@@ -32,9 +32,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.renderers import StaticHTMLRenderer, JSONRenderer
 from rest_framework.negotiation import DefaultContentNegotiation
 
-# cryptography
-from cryptography.fernet import InvalidToken
-
 # AWX
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
@@ -858,11 +855,14 @@ class CopyAPIView(GenericAPIView):
                         and isinstance(field_val[sub_field], six.string_types):
                     try:
                         field_val[sub_field] = decrypt_field(obj, field_name, sub_field)
-                    except InvalidToken:
+                    except AttributeError:
                         # Catching the corner case with v1 credential fields
                         field_val[sub_field] = decrypt_field(obj, sub_field)
         elif isinstance(field_val, six.string_types):
-            field_val = decrypt_field(obj, field_name)
+            try:
+                field_val = decrypt_field(obj, field_name)
+            except AttributeError:
+                return field_val
         return field_val
 
     def _build_create_dict(self, obj):

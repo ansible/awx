@@ -345,6 +345,10 @@ def test_credential_get_input(organization_factory):
                 'id': 'vault_id',
                 'type': 'string',
                 'secret': False
+            }, {
+                'id': 'secret',
+                'type': 'string',
+                'secret': True,
             }]
         }
     )
@@ -372,6 +376,12 @@ def test_credential_get_input(organization_factory):
         cred.get_input('field_not_on_credential_type')
     # verify that the provided default is used for undefined inputs
     assert cred.get_input('field_not_on_credential_type', default='bar') == 'bar'
+    # verify expected exception is raised when attempting to access an unset secret
+    # input without providing a default
+    with pytest.raises(AttributeError):
+        cred.get_input('secret')
+    # verify that the provided default is used for undefined inputs
+    assert cred.get_input('secret', default='fiz') == 'fiz'
     # verify return values for encrypted secret fields are decrypted
     assert cred.inputs['vault_password'].startswith('$encrypted$')
     assert cred.get_input('vault_password') == 'testing321'

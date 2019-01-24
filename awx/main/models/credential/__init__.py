@@ -325,10 +325,11 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     @property
     def has_encrypted_ssh_key_data(self):
-        if self.pk:
+        try:
             ssh_key_data = decrypt_field(self, 'ssh_key_data')
-        else:
-            ssh_key_data = self.ssh_key_data
+        except AttributeError:
+            return False
+
         try:
             pem_objects = validate_ssh_private_key(ssh_key_data)
             for pem_object in pem_objects:
@@ -383,9 +384,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         super(Credential, self).save(*args, **kwargs)
 
     def encrypt_field(self, field, ask):
-        if not hasattr(self, field):
+        if field not in self.inputs:
             return None
-
         encrypted = encrypt_field(self, field, ask=ask)
         if encrypted:
             self.inputs[field] = encrypted
@@ -444,7 +444,12 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         :param default(optional[str]): A default return value to use.
         """
         if field_name in self.credential_type.secret_fields:
-            return decrypt_field(self, field_name)
+            try:
+                return decrypt_field(self, field_name)
+            except AttributeError:
+                if 'default' in kwargs:
+                    return kwargs['default']
+                raise AttributeError
         if field_name in self.inputs:
             return self.inputs[field_name]
         if 'default' in kwargs:
