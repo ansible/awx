@@ -1942,7 +1942,19 @@ class azure_rm(PluginFileInjector):
 
 
 class ec2(PluginFileInjector):
+    plugin_name = 'aws_ec2'
+    initial_version = '2.5'
     ini_env_reference = 'EC2_INI_PATH'
+
+    def inventory_as_dict(self, inventory_source):
+        ret = dict(
+            plugin='aws_ec2',
+        )
+        # TODO: all regions currently failing due to:
+        # https://github.com/ansible/ansible/pull/48079
+        if inventory_source.source_regions and 'all' not in inventory_source.source_regions:
+            ret['regions'] = inventory_source.source_regions.split(',')
+        return ret
 
     def build_script_private_data(self, inventory_update, private_data_dir):
         cp = configparser.RawConfigParser()
