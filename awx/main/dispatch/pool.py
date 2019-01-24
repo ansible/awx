@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 import random
 import traceback
 from uuid import uuid4
@@ -325,6 +324,11 @@ class AutoscalePool(WorkerPool):
         2.  Clean up unnecessary, idle workers.
         3.  Check to see if the database says this node is running any tasks
             that aren't actually running.  If so, reap them.
+
+        IMPORTANT: this function is one of the few places in the dispatcher
+        (aside from setting lookups) where we talk to the database.  As such,
+        if there's an outage, this method _can_ throw various
+        django.db.utils.Error exceptions.  Act accordingly.
         """
         orphaned = []
         for w in self.workers[::]:
@@ -366,17 +370,7 @@ class AutoscalePool(WorkerPool):
         for worker in self.workers:
             worker.calculate_managed_tasks()
             running_uuids.extend(list(worker.managed_tasks.keys()))
-        try:
-            reaper.reap(excluded_uuids=running_uuids)
-        except Exception:
-            # we _probably_ failed here due to DB connectivity issues, so
-            # don't use our logger (it accesses the database for configuration)
-            _, _, tb = sys.exc_info()
-            traceback.print_tb(tb)
-            for conn in connections.all():
-                # If the database connection has a hiccup, re-establish a new
-                # connection
-                conn.close_if_unusable_or_obsolete()
+        reaper.reap(excluded_uuids=running_uuids)
 
     def up(self):
         if self.full:
