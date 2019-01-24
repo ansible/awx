@@ -498,7 +498,7 @@ def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
                     if isinstance(override_field_val, (set, list, QuerySet)):
                         getattr(obj2, field_name).add(*override_field_val)
                         continue
-                    if override_field_val.__class__.__name__ is 'ManyRelatedManager':
+                    if override_field_val.__class__.__name__ == 'ManyRelatedManager':
                         src_field_value = override_field_val
                 dest_field = getattr(obj2, field_name)
                 dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
