@@ -113,8 +113,8 @@ function getVerbosityDetails () {
     return { label, value };
 }
 
-function getEnvironmentDetails (custom_virtualenv) {
-    const value = custom_virtualenv || resource.model.get('custom_virtualenv');
+function getEnvironmentDetails (virtualenv) {
+    const value = virtualenv || resource.model.get('custom_virtualenv');
 
     if (!value || value === '') {
         return null;
