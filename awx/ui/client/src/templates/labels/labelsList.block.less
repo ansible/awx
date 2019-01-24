@@ -7,19 +7,16 @@
 }
 
 .LabelList-tagContainer {
-    height: fit-content;
+    display: inline-block;
 }
 
-.LabelList-tagContainer,
-.LabelList-seeMoreLess {
-    display: flex;
+.LabelList-tagContainer {
     max-width: 200px;
 }
 
 .LabelList-tag, .JobSubmission-previewTag {
     border-radius: 5px;
     padding: 2px 10px;
-    margin: 3px 0px;
     font-size: 12px;
     color: @default-interface-txt;
     background-color: @default-list-header-bg;
@@ -36,6 +33,7 @@
     cursor: pointer;
     border-radius: 5px;
     font-size: 11px;
+    display: inherit;
 }
 
 .LabelList-seeMoreLess:hover {
