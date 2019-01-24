@@ -141,18 +141,15 @@ function(NotificationsList, i18n) {
                 },
                 forks: {
                     label: i18n._('Forks'),
-                    id: 'forks-number',
                     type: 'number',
                     integer: true,
-                    min: 1,
+                    min: 0,
+                    default: 0,
                     spinner: true,
-                    'class': "input-small",
-                    column: 1,
-                    awPopOver: i18n._('The number of parallel or simultaneous processes to use while executing the playbook. Value defaults to 0. Refer to the Ansible documentation for details about the configuration file.'),
-                    placeholder: 'DEFAULT',
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
-                    dataContainer: "body",
+                    dataContainer: 'body',
+                    awPopOver: "<p>" + i18n._("The number of parallel or simultaneous processes to use while executing the playbook. Value defaults to 0. Refer to the Ansible documentation for details about the configuration file.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 limit: {
@@ -268,6 +265,19 @@ function(NotificationsList, i18n) {
                     dataPlacement: 'right',
                     dataContainer: 'body',
                     awPopOver: "<p>" + i18n._("Divide the work done by this job template into the specified number of job slices, each running the same tasks against a portion of the inventory.") + "</p>",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                },
+                timeout: {
+                    label: i18n._('Timeout'),
+                    type: 'number',
+                    integer: true,
+                    min: 0,
+                    default: 0,
+                    spinner: true,
+                    dataTitle: i18n._('Timeout'),
+                    dataPlacement: 'right',
+                    dataContainer: 'body',
+                    awPopOver: "<p>" + i18n._("The amount of time (in seconds) to run before the task is canceled. Defaults to 0 for no job timeout.") + "</p>",
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 diff_mode: {
