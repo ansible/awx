@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.js --mode development",
     "test": "jest --watch --coverage",
-    "lint": "eslint --ext .js --ext .jsx . --debug",
+    "lint": "eslint --ext .js --ext .jsx .",
     "add-locale": "lingui add-locale",
     "extract-strings": "lingui extract",
     "compile-strings": "lingui compile"
