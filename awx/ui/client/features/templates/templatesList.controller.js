@@ -389,6 +389,16 @@ function ListTemplatesController(
 
         return html;
     }
+
+    vm.isCollapsed = true;
+
+    vm.onCollapse = () => {
+        vm.isCollapsed = true;
+    };
+
+    vm.onExpand = () => {
+        vm.isCollapsed = false;
+    };
 }
 
 ListTemplatesController.$inject = [
