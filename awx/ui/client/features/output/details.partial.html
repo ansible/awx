@@ -268,6 +268,12 @@
     <div class="JobResults-resultRowText">{{ vm.verbosity.value }}</div>
 </div>
 
+<!-- ENVIRONMENT DETAIL -->
+<div class="JobResults-resultRow" ng-if="vm.environment">
+    <label class="JobResults-resultRowLabel">{{ vm.environment.label }}</label>
+    <div class="JobResults-resultRowText">{{ vm.environment.value }}</div>
+</div>
+
 <!-- IG DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.instanceGroup">
     <label class="JobResults-resultRowLabel">{{ vm.instanceGroup.label }}</label>

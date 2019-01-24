@@ -39,6 +39,7 @@ function JobStatusService (moment, message) {
             elapsed: model.get('elapsed'),
             started: model.get('started'),
             finished: model.get('finished'),
+            environment: model.get('custom_virtualenv'),
             scm: {
                 id: model.get('summary_fields.project_update.id'),
                 status: model.get('summary_fields.project_update.status')
@@ -255,6 +256,12 @@ function JobStatusService (moment, message) {
         this.updateRunningState();
     };
 
+    this.setEnvironment = env => {
+        if (!env) return;
+
+        this.state.environment = env;
+    };
+
     this.setStatsEvent = data => {
         if (!data) return;
 
@@ -296,6 +303,7 @@ function JobStatusService (moment, message) {
                 this.setElapsed(model.get('elapsed'));
                 this.setStarted(model.get('started'));
                 this.setJobStatus(model.get('status'));
+                this.setEnvironment(model.get('custom_virtualenv'));
 
                 this.initHostStatusCounts({ model });
                 this.initPlaybookCounts({ model });
