@@ -113,6 +113,18 @@ function getVerbosityDetails () {
     return { label, value };
 }
 
+function getEnvironmentDetails () {
+    const value = resource.model.get('custom_virtualenv');
+
+    if (!value || value === '') {
+        return null;
+    }
+
+    const label = strings.get('labels.ENVIRONMENT');
+
+    return { label, value };
+}
+
 function getSourceWorkflowJobDetails () {
     const sourceWorkflowJob = resource.model.get('summary_fields.source_workflow_job');
 
@@ -711,6 +723,7 @@ function JobDetailsController (
         vm.launchedBy = getLaunchedByDetails();
         vm.jobExplanation = getJobExplanationDetails();
         vm.verbosity = getVerbosityDetails();
+        vm.environment = getEnvironmentDetails();
         vm.credentials = getCredentialDetails();
         vm.forks = getForkDetails();
         vm.limit = getLimitDetails();
@@ -735,11 +748,12 @@ function JobDetailsController (
         vm.toggleLabels = toggleLabels;
         vm.showLabels = showLabels;
 
-        unsubscribe = subscribe(({ status, started, finished, scm }) => {
+        unsubscribe = subscribe(({ status, started, finished, scm, environment }) => {
             vm.started = getStartDetails(started);
             vm.finished = getFinishDetails(finished);
             vm.projectUpdate = getProjectUpdateDetails(scm.id);
             vm.projectStatus = getProjectStatusDetails(scm.status);
+            vm.environment = getEnvironmentDetails(environment);
             vm.status = getStatusDetails(status);
             vm.job.status = status;
         });
