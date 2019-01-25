@@ -23,16 +23,17 @@ import Lookup from '../../../components/Lookup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 
 const { light } = PageSectionVariants;
-class OrganizationAdd extends React.Component {
-  static format (data) {
-    const results = data.results.map((result) => ({
-      id: result.id,
-      name: result.name,
-      isChecked: false
-    }));
-    return results;
-  }
 
+const format = (data) => {
+  const results = data.results.map((result) => ({
+    id: result.id,
+    name: result.name,
+    isChecked: false
+  }));
+  return results;
+};
+
+class OrganizationAdd extends React.Component {
   constructor (props) {
     super(props);
 
@@ -43,7 +44,6 @@ class OrganizationAdd extends React.Component {
     this.resetForm = this.resetForm.bind(this);
     this.onSuccess = this.onSuccess.bind(this);
     this.onCancel = this.onCancel.bind(this);
-    this.format = this.format.bind(this);
   }
 
   state = {
@@ -59,7 +59,7 @@ class OrganizationAdd extends React.Component {
     const { api } = this.props;
     try {
       const { data } = await api.getInstanceGroups();
-      const results = this.format(data);
+      const results = format(data);
       this.setState({ results });
     } catch (error) {
       this.setState({ getInstanceGroupsError: error });

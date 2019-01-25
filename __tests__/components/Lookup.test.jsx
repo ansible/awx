@@ -26,7 +26,9 @@ describe('<Lookup />', () => {
       </I18nProvider>
     );
     expect(spy).not.toHaveBeenCalled();
-    wrapper.find('#search').simulate('click');
+    debugger;
+    const searchItem = wrapper.find('.pf-c-input-group__text#search');
+    searchItem.first().simulate('click');
     expect(spy).toHaveBeenCalled();
   });
   test('calls "onChecked" when a user changes a checkbox', () => {
@@ -40,7 +42,9 @@ describe('<Lookup />', () => {
         />
       </I18nProvider>
     );
-    wrapper.find('#search').simulate('click');
+    debugger;
+    const searchItem = wrapper.find('.pf-c-input-group__text#search');
+    searchItem.first().simulate('click');
     wrapper.find('input[type="checkbox"]').simulate('change');
     expect(spy).toHaveBeenCalled();
   });
@@ -56,7 +60,8 @@ describe('<Lookup />', () => {
         />
       </I18nProvider>
     );
-    wrapper.find('.awx-c-icon--remove').simulate('click');
+    const removeIcon = wrapper.find('.awx-c-icon--remove').first();
+    removeIcon.simulate('click');
     expect(spy).toHaveBeenCalled();
   });
   test('"wrapTags" method properly handles data', () => {

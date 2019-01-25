@@ -57,28 +57,19 @@ describe('<OrganizationAdd />', () => {
     wrapper.find('button.at-C-CancelButton').prop('onClick')();
     expect(spy).toBeCalled();
   });
-  test('API response data is formatted properly', () => {
-    const mockData = { data: { results: [{ name: 'test instance', id: 1 }] } };
-    const promise = Promise.resolve(mockData);
 
-    return promise.then(({ data }) => {
-      const expected = [{ id: 1, name: 'test instance', isChecked: false }];
-      const results = OrganizationAdd.WrappedComponent.prototype.format(data);
-      expect(results).toEqual(expected);
-    });
-  });
   test('API response is formatted properly', (done) => {
-    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'format');
-    const mockedResp = { data: { id: 1, name: 'foo bar' } };
+    const mockedResp = { data: { results: [{ name: 'test instance', id: 1 }] } };
     const api = { getInstanceGroups: jest.fn().mockResolvedValue(mockedResp) };
-    mount(
+    const wrapper = mount(
       <MemoryRouter>
         <OrganizationAdd api={api} />
       </MemoryRouter>
     );
 
     setImmediate(() => {
-      expect(spy).toHaveBeenCalled();
+      const orgAddElem = wrapper.find('OrganizationAdd');
+      expect([{ id: 1, isChecked: false, name: 'test instance' }]).toEqual(orgAddElem.state().results);
       done();
     });
   });
