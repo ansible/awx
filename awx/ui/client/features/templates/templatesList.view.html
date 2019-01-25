@@ -31,73 +31,87 @@
             </div>
         </div>
     </div>
+    <at-list-toolbar
+        ng-if="vm.templates.length > 0"
+        sort-only="false"
+        on-collapse="vm.onCollapse"
+        on-expand="vm.onExpand"
+        is-collapsed="vm.isCollapsed">
+    </at-list-toolbar>
     <at-list results="vm.templates" id="templates_list">
         <at-row ng-repeat="template in vm.templates"
-            ng-class="{'at-Row--active': (template.id === vm.activeId)}"
+            ng-class="{'at-Row--active': (template.id === vm.activeId), 'at-Row--collapsed': vm.isCollapsed}"
             invalid="vm.isInvalid(template)"
             invalid-tooltip="vm.invalidTooltip"
             id="row-{{ template.id }}">
             <div class="at-Row-items">
-                <at-row-item
-                    header-value="{{ template.name }}"
-                    header-link="/#/templates/job_template/{{ template.id }}"
-                    header-tag="{{ vm.templateTypes[template.type] }}"
-                    ng-if="template.type === 'job_template'">
-                </at-row-item>
-                <at-row-item
-                    header-value="{{ template.name }}"
-                    header-link="/#/templates/workflow_job_template/{{ template.id }}"
-                    header-tag="{{ vm.templateTypes[template.type] }}"
-                    ng-if="template.type === 'workflow_job_template'">
-                </at-row-item>
-                <at-row-item
-                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_ACTIVITY') }}"
-                    smart-status="template">
-                </at-row-item>
-                <at-row-item
-                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INVENTORY') }}"
-                    value="{{ template.summary_fields.inventory.name }}"
-                    value-link="/#/inventories/{{template.summary_fields.inventory.kind === 'smart' ? 'smart' : 'inventory'}}/{{ template.summary_fields.inventory.id }}">
-                </at-row-item>
-                <at-row-item
-                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_PROJECT') }}"
-                    value="{{ template.summary_fields.project.name }}"
-                    value-link="/#/projects/{{ template.summary_fields.project.id }}">
-                </at-row-item>
-                <at-row-item
-                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_CREDENTIALS') }}"
-                    tag-values="template.summary_fields.credentials"
-                    tags-are-creds="true">
-                    <at-toggle-tag ng-init="credTags=vm.buildCredentialTags(template.summary_fields.credentials)" tags="credTags"></at-toggle-tag>
-                </at-row-item>
-                <at-row-item
-                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
-                    value-bind-html="{{ vm.getModified(template) }}">
-                </at-row-item>
-                <at-row-item
-                    label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RAN') }}"
-                    value-bind-html="{{ vm.getLastRan(template) }}">
-                </at-row-item>
-                <labels-list class="LabelList" show-delete="false" is-row-item="true" state="template">
-                </labels-list>
-            </div>
-            <div class="at-Row-actions">
-                <at-launch-template template="template"
-                    ng-show="template.summary_fields.user_capabilities.start">
-                </at-launch-template>
-                <at-row-action icon="fa-copy" ng-click="vm.copyTemplate(template)"
-                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.copy"
-                    tooltip="{{:: vm.strings.get('listActions.COPY', vm.getType(template)) }}">
-                </at-row-action>
-                <at-row-action icon="fa-sitemap" ng-click="vm.openWorkflowVisualizer(template)"
-                    ng-show="!vm.isPortalMode"
-                    ng-if="template.type === 'workflow_job_template'"
-                    tooltip="{{:: vm.strings.get('list.OPEN_WORKFLOW_VISUALIZER') }}">
-                </at-row-action>
-                <at-row-action icon="fa-trash" ng-click="vm.deleteTemplate(template)"
-                    ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.delete"
-                    tooltip="{{:: vm.strings.get('listActions.DELETE', vm.getType(template)) }}">
-                </at-row-action>
+                <div class="at-Row-container">
+                    <div class="at-Row-container">
+                        <at-row-item
+                            header-value="{{ template.name }}"
+                            header-link="/#/templates/job_template/{{ template.id }}"
+                            header-tag="{{ vm.templateTypes[template.type] }}"
+                            ng-if="template.type === 'job_template'">
+                        </at-row-item>
+                        <at-row-item
+                            header-value="{{ template.name }}"
+                            header-link="/#/templates/workflow_job_template/{{ template.id }}"
+                            header-tag="{{ vm.templateTypes[template.type] }}"
+                            ng-if="template.type === 'workflow_job_template'">
+                        </at-row-item>
+                        <at-row-item
+                            smart-status="template">
+                        </at-row-item>
+                    </div>
+                    <div class="at-Row-actions">
+                        <at-launch-template template="template"
+                            ng-show="template.summary_fields.user_capabilities.start">
+                        </at-launch-template>
+                        <at-row-action icon="fa-copy" ng-click="vm.copyTemplate(template)"
+                            ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.copy"
+                            tooltip="{{:: vm.strings.get('listActions.COPY', vm.getType(template)) }}">
+                        </at-row-action>
+                        <at-row-action icon="fa-sitemap" ng-click="vm.openWorkflowVisualizer(template)"
+                            ng-show="!vm.isPortalMode"
+                            ng-if="template.type === 'workflow_job_template'"
+                            tooltip="{{:: vm.strings.get('list.OPEN_WORKFLOW_VISUALIZER') }}">
+                        </at-row-action>
+                        <at-row-action icon="fa-trash" ng-click="vm.deleteTemplate(template)"
+                            ng-show="!vm.isPortalMode && template.summary_fields.user_capabilities.delete"
+                            tooltip="{{:: vm.strings.get('listActions.DELETE', vm.getType(template)) }}">
+                        </at-row-action>
+                    </div>
+                </div>
+                <div class="at-Row-container--wrapped">
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_INVENTORY') }}"
+                        value="{{ template.summary_fields.inventory.name }}"
+                        value-link="/#/inventories/{{template.summary_fields.inventory.kind === 'smart' ? 'smart' : 'inventory'}}/{{ template.summary_fields.inventory.id }}">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_PROJECT') }}"
+                        value="{{ template.summary_fields.project.name }}"
+                        value-link="/#/projects/{{ template.summary_fields.project.id }}">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_MODIFIED') }}"
+                        value-bind-html="{{ vm.getModified(template) }}">
+                    </at-row-item>
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_RAN') }}"
+                        value-bind-html="{{ vm.getLastRan(template) }}">
+                    </at-row-item>
+                </div>
+                <div class="at-Row-container--wrapped">
+                    <at-row-item
+                        label-value="{{:: vm.strings.get('list.ROW_ITEM_LABEL_CREDENTIALS') }}"
+                        tag-values="template.summary_fields.credentials"
+                        tags-are-creds="true">
+                        <at-toggle-tag ng-init="credTags=vm.buildCredentialTags(template.summary_fields.credentials)" tags="credTags"></at-toggle-tag>
+                    </at-row-item>
+                    <labels-list class="LabelList" show-delete="false" is-row-item="true" state="template">
+                    </labels-list>
+                </div>
             </div>
         </at-row>
     </at-list>
