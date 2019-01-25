@@ -23,6 +23,7 @@ const Breadcrumbs = ({ breadcrumbConfig }) => {
     >
       <Breadcrumb>
         <Route
+          path="/:path"
           render={(props) => <Crumb breadcrumbConfig={breadcrumbConfig} {...props} />}
         />
       </Breadcrumb>
