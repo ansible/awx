@@ -26,7 +26,6 @@ describe('<Lookup />', () => {
       </I18nProvider>
     );
     expect(spy).not.toHaveBeenCalled();
-    debugger;
     const searchItem = wrapper.find('.pf-c-input-group__text#search');
     searchItem.first().simulate('click');
     expect(spy).toHaveBeenCalled();
@@ -41,8 +40,7 @@ describe('<Lookup />', () => {
           data={mockData}
         />
       </I18nProvider>
-    );
-    debugger;
+    );    
     const searchItem = wrapper.find('.pf-c-input-group__text#search');
     searchItem.first().simulate('click');
     wrapper.find('input[type="checkbox"]').simulate('change');
