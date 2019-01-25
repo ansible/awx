@@ -2209,6 +2209,44 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
         return res
 
 
+class InventoryUpdateDetailSerializer(InventoryUpdateSerializer):
+
+    source_project = serializers.SerializerMethodField(
+        help_text=_('The project used for this job.'),
+        method_name='get_source_project_id'
+    )
+
+    class Meta:
+        model = InventoryUpdate
+        fields = ('*', 'source_project',)
+
+    def get_source_project(self, obj):
+        return getattrd(obj, 'source_project_update.unified_job_template', None)
+
+    def get_source_project_id(self, obj):
+        return getattrd(obj, 'source_project_update.unified_job_template.id', None)
+
+    def get_related(self, obj):
+        res = super(InventoryUpdateDetailSerializer, self).get_related(obj)
+        source_project_id = self.get_source_project_id(obj)
+
+        if source_project_id:
+            res['source_project'] = self.reverse('api:project_detail', kwargs={'pk': source_project_id})
+        return res
+
+    def get_summary_fields(self, obj):
+        summary_fields = super(InventoryUpdateDetailSerializer, self).get_summary_fields(obj)
+        summary_obj = self.get_source_project(obj)
+
+        if summary_obj:
+            summary_fields['source_project'] = {}
+            for field in SUMMARIZABLE_FK_FIELDS['project']:
+                value = getattr(summary_obj, field, None)
+                if value is not None:
+                    summary_fields['source_project'][field] = value
+        return summary_fields
+
+
 class InventoryUpdateListSerializer(InventoryUpdateSerializer, UnifiedJobListSerializer):
 
     class Meta:

@@ -1972,7 +1972,7 @@ class InventoryInventorySourcesUpdate(RetrieveAPIView):
             details['status'] = None
             if inventory_source.can_update:
                 update = inventory_source.update()
-                details.update(InventoryUpdateSerializer(update, context=self.get_serializer_context()).to_representation(update))
+                details.update(InventoryUpdateDetailSerializer(update, context=self.get_serializer_context()).to_representation(update))
                 details['status'] = 'started'
                 details['inventory_update'] = update.id
                 successes += 1
@@ -2135,7 +2135,7 @@ class InventorySourceUpdateView(RetrieveAPIView):
                 headers = {'Location': update.get_absolute_url(request=request)}
                 data = OrderedDict()
                 data['inventory_update'] = update.id
-                data.update(InventoryUpdateSerializer(update, context=self.get_serializer_context()).to_representation(update))
+                data.update(InventoryUpdateDetailSerializer(update, context=self.get_serializer_context()).to_representation(update))
                 return Response(data, status=status.HTTP_202_ACCEPTED, headers=headers)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
@@ -2150,7 +2150,7 @@ class InventoryUpdateList(ListAPIView):
 class InventoryUpdateDetail(UnifiedJobDeletionMixin, RetrieveDestroyAPIView):
 
     model = InventoryUpdate
-    serializer_class = InventoryUpdateSerializer
+    serializer_class = InventoryUpdateDetailSerializer
 
 
 class InventoryUpdateCredentialsList(SubListAPIView):
