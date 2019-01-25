@@ -29,7 +29,7 @@
                     id="schedulerName"
                     ng-model="schedulerName" required
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd) || credentialRequiresPassword"
-                    placeholder="Schedule name">
+                    placeholder="{{strings.get('form.SCHEDULE_NAME')}}">
                 <div class="error"
                     ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required">
                     {{ strings.get('form.NAME_REQUIRED_MESSAGE') }}
@@ -71,7 +71,7 @@
                             ScheduleTime-input SpinnerInput"
                         aw-spinner="schedulerStartHour"
                         ng-model="schedulerStartHour"
-                        placeholder="HH24"
+                        placeholder="{{strings.get('form.HH24')}}"
                         aw-min="0" min="0" aw-max="23"
                         max="23" data-zero-pad="2" required
                         ng-change="timeChange()" >
@@ -87,7 +87,7 @@
                             SchedulerTime-input SpinnerInput"
                         aw-spinner="schedulerStartMinute"
                         ng-model="schedulerStartMinute"
-                        placeholder="MM"
+                        placeholder="{{strings.get('form.MM')}}"
                         min="0" max="59" data-zero-pad="2"
                         required
                         ng-change="timeChange()" >
@@ -103,7 +103,7 @@
                             SchedulerTime-input SpinnerInput"
                         aw-spinner="schedulerStartSecond"
                         ng-model="schedulerStartSecond"
-                        placeholder="SS"
+                        placeholder="{{strings.get('form.SS')}}"
                         min="0" max="59" data-zero-pad="2"
                         required
                         ng-change="timeChange()" >
@@ -521,7 +521,7 @@
                                 ScheduleTime-input SpinnerInput"
                             aw-spinner="$parent.schedulerEndHour"
                             ng-model="$parent.schedulerEndHour"
-                            placeholder="HH24"
+                            placeholder="{{strings.get('form.HH24')}}"
                             aw-min="0" min="0" aw-max="23"
                             max="23" data-zero-pad="2" required
                             ng-change="schedulerEndChange('schedulerEndHour', $parent.schedulerEndHour)" >
@@ -537,7 +537,7 @@
                                 SchedulerTime-input SpinnerInput"
                             aw-spinner="$parent.schedulerEndMinute"
                             ng-model="$parent.schedulerEndMinute"
-                            placeholder="MM"
+                            placeholder="{{strings.get('form.MM')}}"
                             min="0" max="59" data-zero-pad="2"
                             required
                             ng-change="schedulerEndChange('schedulerEndMinute', $parent.schedulerEndMinute)" >
@@ -553,7 +553,7 @@
                                 SchedulerTime-input SpinnerInput"
                             aw-spinner="$parent.schedulerEndSecond"
                             ng-model="$parent.schedulerEndSecond"
-                            placeholder="SS"
+                            placeholder="{{strings.get('form.SS')}}"
                             min="0" max="59" data-zero-pad="2"
                             required
                             ng-change="schedulerEndChange('schedulerEndSecond', $parent.schedulerEndSecond)" >
@@ -598,7 +598,8 @@
                         class="SchedulerFormDetail-dateFormatsLabel">
                         {{ strings.get('form.DATE_FORMAT') }}
                     </label>
-                    <label class="SchedulerFormDetail-radioLabel">
+                    <label class="radio-inline
+                        SchedulerFormDetail-radioLabel">
                         <input type="radio"
                             class="SchedulerFormDetail-radioButton"
                             ng-model="dateChoice"
@@ -606,7 +607,8 @@
                             value="local" >
                         {{ strings.get('form.LOCAL_TIME_ZONE') }}
                     </label>
-                    <label class="SchedulerFormDetail-radioLabel">
+                    <label class="radio-inline
+                        SchedulerFormDetail-radioLabel">
                         <input type="radio"
                             class="SchedulerFormDetail-radioButton"
                             ng-model="dateChoice"

@@ -195,7 +195,7 @@
                         resourceName: $filter('sanitize')(inventory_source.name),
                         body: deleteModalBody,
                         action: action,
-                        actionText: 'DELETE'
+                        actionText: i18n._('DELETE')
                     });
                     $rootScope.promptActionBtnClass = 'Modal-errorButton';
                 });

@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter',
-    function($scope, list, Dataset, Wait, Rest, ProcessErrors, Prompt, $state, $filter) {
+export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter', 'i18n',
+    function($scope, list, Dataset, Wait, Rest, ProcessErrors, Prompt, $state, $filter, i18n) {
         init();
 
         function init() {
@@ -54,7 +54,7 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                     </div>
                 `,
                 action: action,
-                actionText: 'REMOVE'
+                actionText: i18n._('REMOVE')
             });
         };
 
@@ -87,7 +87,7 @@ export default ['$scope', 'ListDefinition', 'Dataset', 'Wait', 'Rest', 'ProcessE
                     </div>
                 `,
                 action: action,
-                actionText: 'REMOVE'
+                actionText: i18n._('REMOVE')
             });
         };
     }

@@ -251,7 +251,7 @@ export default ['i18n', 'NotificationsList', 'TemplateList',
                 actions: {
                     add: {
                         ngClick: "$state.go('.add')",
-                        label: 'Add',
+                        label: i18n._('Add'),
                         awToolTip: i18n._('Add a permission'),
                         actionClass: 'at-Button--add',
                         actionId: 'button-add',

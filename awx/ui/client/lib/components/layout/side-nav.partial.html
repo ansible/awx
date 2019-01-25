@@ -8,11 +8,11 @@
         </div>
         <div class="at-SettingsSubPane" ng-class="{'at-SettingsSubPane--visible': vm.showSettingsSubMenu}">
             <div class="at-SettingsSubPane-content">
-                <a ui-sref="settings.form({form: 'auth'})">Authentication</a>
-                <a ui-sref="settings.form({form: 'jobs'})">Jobs</a>
-                <a ui-sref="settings.form({form: 'system'})">System</a>
-                <a ui-sref="settings.form({form: 'ui'})">User Interface</a>
-                <a ui-sref="settings.form({form: 'license'})" ng-if="vm.product === 'Tower'">License</a>
+                <a ui-sref="settings.form({form: 'auth'})">{{ layoutVm.getString('AUTHENTICATION') }}</a>
+                <a ui-sref="settings.form({form: 'jobs'})">{{ layoutVm.getString('JOBS') }}</a>
+                <a ui-sref="settings.form({form: 'system'})">{{ layoutVm.getString('SYSTEM') }}</a>
+                <a ui-sref="settings.form({form: 'ui'})">{{ layoutVm.getString('USER_INTERFACE') }}</a>
+                <a ui-sref="settings.form({form: 'license'})" ng-if="vm.product === 'Tower'">{{ layoutVm.getString('LICENSE') }}</a>
             </div>
         </div>
 </div>

@@ -67,7 +67,7 @@ function LegacyCredentialsService () {
                 actions: {
                     add: {
                         ngClick: '$state.go(\'.add\')',
-                        label: 'Add',
+                        label: N_('Add'),
                         awToolTip: N_('Add a permission'),
                         actionClass: 'at-Button--add',
                         actionId: 'button-add',

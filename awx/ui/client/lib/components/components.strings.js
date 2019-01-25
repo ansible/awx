@@ -89,7 +89,11 @@ function ComponentsStrings (BaseString) {
         VIEWS_HEADER: t.s('Views'),
         RESOURCES_HEADER: t.s('Resources'),
         ACCESS_HEADER: t.s('Access'),
-        ADMINISTRATION_HEADER: t.s('Administration')
+        ADMINISTRATION_HEADER: t.s('Administration'),
+        AUTHENTICATION: t.s('Authentication'),
+        SYSTEM: t.s('System'),
+        USER_INTERFACE: t.s('User Interface'),
+        LICENSE: t.s('License')
     };
 
     ns.relaunch = {

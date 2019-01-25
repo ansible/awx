@@ -22,7 +22,7 @@ export default ['templateUrl', function(templateUrl) {
             };
 
         },
-        controller: ['$scope', 'QuerySet', 'GetBasePath', 'HostsList', '$compile', 'generateList', function($scope, qs, GetBasePath, HostsList, $compile, GenerateList) {
+        controller: ['$scope', 'QuerySet', 'GetBasePath', 'HostsList', '$compile', 'generateList', 'i18n', function($scope, qs, GetBasePath, HostsList, $compile, GenerateList, i18n) {
 
             function init() {
 
@@ -55,7 +55,7 @@ export default ['templateUrl', function(templateUrl) {
                         delete hostList.fields.inventory.ngClick;
                         hostList.fields.inventory.columnClass = 'col-sm-6';
                         hostList.fields.inventory.ngBind = 'host.summary_fields.inventory.name';
-                        hostList.emptyListText = 'You must have access to at least one host in order to create a smart inventory host filter';
+                        hostList.emptyListText = i18n._('You must have access to at least one host in order to create a smart inventory host filter');
                         hostList.layoutClass = 'List-defaultLayout';
                         let html = GenerateList.build({
                             list: hostList,
