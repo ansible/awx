@@ -53,7 +53,7 @@ describe('<Breadcrumb />', () => {
     ];
 
     routes.forEach(([location, crumbLength]) => {
-      const breadcrumbWrapper = mount(
+      breadcrumbWrapper = mount(
         <MemoryRouter initialEntries={[location]}>
           <Breadcrumbs
             breadcrumbConfig={config}
@@ -63,8 +63,6 @@ describe('<Breadcrumb />', () => {
 
       expect(breadcrumbWrapper.find('BreadcrumbItem')).toHaveLength(crumbLength);
       breadcrumbWrapper.unmount();
-    })
-
+    });
   });
-
 });

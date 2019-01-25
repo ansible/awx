@@ -1,11 +1,8 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { Trans } from '@lingui/macro';
 import {
   PageSection,
-  PageSectionVariants,
-  Title,
   Form,
   FormGroup,
   TextInput,
@@ -21,8 +18,6 @@ import {
 import { ConfigContext } from '../../../context';
 import Lookup from '../../../components/Lookup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
-
-const { light } = PageSectionVariants;
 
 const format = (data) => {
   const results = data.results.map((result) => ({
@@ -132,72 +127,65 @@ class OrganizationAdd extends React.Component {
     const enabled = name.length > 0; // TODO: add better form validation
 
     return (
-      <Fragment>
-        <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">
-            <Trans>Organization Add</Trans>
-          </Title>
-        </PageSection>
-        <PageSection>
-          <Card>
-            <CardBody>
-              <Form autoComplete="off">
-                <Gallery gutter="md">
-                  <FormGroup
-                    label="Name"
+      <PageSection>
+        <Card>
+          <CardBody>
+            <Form autoComplete="off">
+              <Gallery gutter="md">
+                <FormGroup
+                  label="Name"
+                  isRequired
+                  fieldId="add-org-form-name"
+                >
+                  <TextInput
                     isRequired
-                    fieldId="add-org-form-name"
-                  >
-                    <TextInput
-                      isRequired
-                      type="text"
-                      id="add-org-form-name"
-                      name="name"
-                      value={name}
-                      onChange={this.handleChange}
+                    type="text"
+                    id="add-org-form-name"
+                    name="name"
+                    value={name}
+                    onChange={this.handleChange}
+                  />
+                </FormGroup>
+                <FormGroup label="Description" fieldId="add-org-form-description">
+                  <TextInput
+                    id="add-org-form-description"
+                    name="description"
+                    value={description}
+                    onChange={this.handleChange}
+                  />
+                </FormGroup>
+                <FormGroup label="Instance Groups" fieldId="simple-form-instance-groups">
+                  <Lookup
+                    lookupHeader="Instance Groups"
+                    lookupChange={this.onLookupChange}
+                    data={results}
+                  />
+                </FormGroup>
+                <ConfigContext.Consumer>
+                  {({ custom_virtualenvs }) => (
+                    <AnsibleSelect
+                      labelName="Ansible Environment"
+                      selected={custom_virtualenv}
+                      selectChange={this.onSelectChange}
+                      data={custom_virtualenvs}
                     />
-                  </FormGroup>
-                  <FormGroup label="Description" fieldId="add-org-form-description">
-                    <TextInput
-                      id="add-org-form-description"
-                      name="description"
-                      value={description}
-                      onChange={this.handleChange}
-                    />
-                  </FormGroup>
-                  <FormGroup label="Instance Groups" fieldId="simple-form-instance-groups">
-                    <Lookup
-                      lookupHeader="Instance Groups"
-                      lookupChange={this.onLookupChange}
-                      data={results}
-                    />
-                  </FormGroup>
-                  <ConfigContext.Consumer>
-                    {({ custom_virtualenvs }) => (
-                      <AnsibleSelect
-                        labelName="Ansible Environment"
-                        selected={custom_virtualenv}
-                        selectChange={this.onSelectChange}
-                        data={custom_virtualenvs}
-                      />
-                    )}
-                  </ConfigContext.Consumer>
-                </Gallery>
-                <ActionGroup className="at-align-right">
-                  <Toolbar>
-                    <ToolbarGroup>
-                      <Button className="at-C-SubmitButton" variant="primary" onClick={this.onSubmit} isDisabled={!enabled}>Save</Button>
-                    </ToolbarGroup>
-                    <ToolbarGroup>
-                      <Button className="at-C-CancelButton" variant="secondary" onClick={this.onCancel}>Cancel</Button>
-                    </ToolbarGroup>
-                  </Toolbar>
-                </ActionGroup>
-              </Form>
-            </CardBody>
-          </Card>
-        </PageSection>
-      </Fragment>
+                  )}
+                </ConfigContext.Consumer>
+              </Gallery>
+              <ActionGroup className="at-align-right">
+                <Toolbar>
+                  <ToolbarGroup>
+                    <Button className="at-C-SubmitButton" variant="primary" onClick={this.onSubmit} isDisabled={!enabled}>Save</Button>
+                  </ToolbarGroup>
+                  <ToolbarGroup>
+                    <Button className="at-C-CancelButton" variant="secondary" onClick={this.onCancel}>Cancel</Button>
+                  </ToolbarGroup>
+                </Toolbar>
+              </ActionGroup>
+            </Form>
+          </CardBody>
+        </Card>
+      </PageSection>
     );
   }
 }
