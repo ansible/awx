@@ -1897,7 +1897,7 @@ class gce(PluginFileInjector):
             service_account_file="creds.json",
             auth_kind="serviceaccount"
         )
-        if inventory_source.source_regions:
+        if inventory_source.source_regions and 'all' not in inventory_source.source_regions:
             ret['zones'] = inventory_source.source_regions.split(',')
         return ret
 
