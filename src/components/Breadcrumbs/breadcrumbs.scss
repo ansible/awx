@@ -1,0 +1,15 @@
+.pf-c-breadcrumb__item {
+  text-transform: capitalize;
+}
+
+.pf-c-breadcrumb__item.heading {
+  --pf-c-breadcrumb__heading--FontSize: 20px;
+  line-height: 24px;
+  flex: 100%;
+}
+
+.pf-c-breadcrumb__item:nth-last-child(2) {
+  .pf-c-breadcrumb__item-divider {
+    display: none;
+  }
+}

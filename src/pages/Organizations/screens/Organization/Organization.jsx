@@ -1,128 +1,166 @@
-import React, { Component, Fragment } from 'react';
-import { i18nMark } from '@lingui/react';
+import React, { Component } from 'react';
+import { I18n, i18nMark } from '@lingui/react';
+import { Trans, t } from '@lingui/macro';
 import {
   Switch,
   Route,
   withRouter,
+  Redirect
 } from 'react-router-dom';
 import {
+  Card,
+  CardBody,
+  CardHeader,
   PageSection
 } from '@patternfly/react-core';
 
-import OrganizationBreadcrumb from '../../components/OrganizationBreadcrumb';
 import OrganizationDetail from './OrganizationDetail';
 import OrganizationEdit from './OrganizationEdit';
+import OrganizationNotifications from './OrganizationNotifications';
+import Tabs from '../../../../components/Tabs/Tabs';
+import Tab from '../../../../components/Tabs/Tab';
 
 class Organization extends Component {
   constructor (props) {
     super(props);
 
-    let { breadcrumb: parentBreadcrumbObj, organization } = props.location.state || {};
-    if (!parentBreadcrumbObj) {
-      parentBreadcrumbObj = 'loading';
-    }
-    if (!organization) {
-      organization = 'loading';
-    }
     this.state = {
-      parentBreadcrumbObj,
-      organization,
+      organization: null,
       error: false,
-      loading: false,
-      mounted: false
+      loading: true,
     };
 
     this.fetchOrganization = this.fetchOrganization.bind(this);
   }
 
   componentDidMount () {
-    this.setState({ mounted: true }, () => {
-      const { organization } = this.state;
-      if (organization === 'loading') {
-        this.fetchOrganization();
-      }
-    });
+    this.fetchOrganization();
   }
 
-  componentWillUnmount () {
-    this.setState({ mounted: false });
+  async componentDidUpdate (prevProps) {
+    const { location } = this.props;
+    if (location !== prevProps.location) {
+      await this.fetchOrganization();
+    }
   }
 
   async fetchOrganization () {
-    const { mounted } = this.state;
-    const { api } = this.props;
-
-    if (mounted) {
-      this.setState({ error: false, loading: true });
-
-      const { match } = this.props;
-      const { parentBreadcrumbObj, organization } = this.state;
-      try {
-        const { data } = await api.getOrganizationDetails(match.params.id);
-        if (organization === 'loading') {
-          this.setState({ organization: data });
-        }
-        const { name } = data;
-        if (parentBreadcrumbObj === 'loading') {
-          this.setState({ parentBreadcrumbObj: [{ name: i18nMark('Organizations'), url: '/organizations' }, { name, url: match.url }] });
-        }
-      } catch (err) {
-        this.setState({ error: true });
-      } finally {
-        this.setState({ loading: false });
-      }
+    const {
+      api,
+      match,
+      setBreadcrumb
+    } = this.props;
+    try {
+      const { data } = await api.getOrganizationDetails(+match.params.id);
+      this.setState({ organization: data });
+      setBreadcrumb(data);
+    } catch (error) {
+      this.setState({ error: true });
+    } finally {
+      this.setState({ loading: false });
     }
   }
 
   render () {
-    const { location, match, api, history } = this.props;
-    const { parentBreadcrumbObj, organization, error, loading } = this.state;
-    const params = new URLSearchParams(location.search);
-    const currentTab = params.get('tab') || 'details';
+    const {
+      location,
+      match,
+      api,
+      history
+    } = this.props;
+
+    const {
+      organization,
+      error,
+      loading
+    } = this.state;
+
+    const tabElements = [
+      { name: i18nMark('Details'), link: `${match.url}/details` },
+      { name: i18nMark('Access'), link: `${match.url}/access` },
+      { name: i18nMark('Teams'), link: `${match.url}/teams` },
+      { name: i18nMark('Notifications'), link: `${match.url}/notifications` },
+    ];
+
+    let cardHeader = (
+      <CardHeader>
+        <I18n>
+          {({ i18n }) => (
+            <Tabs
+              labelText={i18n._(t`Organization detail tabs`)}
+              closeButton={{ link: '/organizations', text: i18nMark('Close') }}
+            >
+              {tabElements.map(tabElement => (
+                <Tab
+                  key={tabElement.name}
+                  link={tabElement.link}
+                  replace
+                >
+                  {tabElement.name}
+                </Tab>
+              ))}
+            </Tabs>
+          )}
+        </I18n>
+      </CardHeader>
+    );
+
+    if (location.pathname.endsWith('edit')) {
+      cardHeader = null;
+    }
 
     return (
-      <Fragment>
-        <OrganizationBreadcrumb
-          parentObj={parentBreadcrumbObj}
-          currentTab={currentTab}
-          location={location}
-          organization={organization}
-        />
-        <PageSection>
+      <PageSection>
+        <Card>
+          { cardHeader }
           <Switch>
+            <Redirect
+              from="/organizations/:id"
+              to="/organizations/:id/details"
+              exact
+            />
             <Route
-              path={`${match.path}/edit`}
+              path="/organizations/:id/edit"
               render={() => (
                 <OrganizationEdit
-                  location={location}
                   match={match}
-                  parentBreadcrumbObj={parentBreadcrumbObj}
-                  organization={organization}
-                  params={params}
-                  currentTab={currentTab}
                 />
               )}
             />
             <Route
-              path={`${match.path}`}
+              path="/organizations/:id/details"
               render={() => (
                 <OrganizationDetail
-                  location={location}
-                  match={match}
-                  parentBreadcrumbObj={parentBreadcrumbObj}
                   organization={organization}
-                  params={params}
-                  currentTab={currentTab}
-                  history={history}
+                  match={match}
+                  location={location}
+                />
+              )}
+            />
+            <Route
+              path="/organizations/:id/access"
+              render={() => <CardBody><h1><Trans>Access</Trans></h1></CardBody>}
+            />
+            <Route
+              path="/organizations/:id/teams"
+              render={() => <CardBody><h1><Trans>Teams</Trans></h1></CardBody>}
+            />
+            <Route
+              path="/organizations/:id/notifications"
+              render={() => (
+                <OrganizationNotifications
                   api={api}
+                  match={match}
+                  location={location}
+                  history={history}
                 />
               )}
             />
           </Switch>
           {error ? 'error!' : ''}
           {loading ? 'loading...' : ''}
-        </PageSection>
-      </Fragment>
+        </Card>
+      </PageSection>
     );
   }
 }

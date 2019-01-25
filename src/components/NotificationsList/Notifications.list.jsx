@@ -65,9 +65,7 @@ class Notifications extends Component {
 
   componentDidMount () {
     const queryParams = this.getQueryParams();
-    // TODO: remove this hack once tab query param is gone
-    const { tab, ...queryParamsWithoutTab } = queryParams;
-    this.fetchNotifications(queryParamsWithoutTab);
+    this.fetchNotifications(queryParams);
   }
 
   onSearch () {
@@ -81,10 +79,8 @@ class Notifications extends Component {
     const { search } = location;
 
     const searchParams = parseQueryString(search.substring(1));
-    // TODO: remove this hack once tab query param is gone
-    const { tab, ...queryParamsWithoutTab } = searchParams;
 
-    return Object.assign({}, this.defaultParams, queryParamsWithoutTab, overrides);
+    return Object.assign({}, this.defaultParams, searchParams, overrides);
   }
 
   onSort = (sortedColumnKey, sortOrder) => {
@@ -240,8 +236,6 @@ class Notifications extends Component {
       }
 
       this.setState(stateToUpdate);
-      // TODO: remove this hack once tab query param is gone
-      this.updateUrl({ ...queryParams, tab: 'notifications' });
 
       const notificationTemplateIds = results
         .map(notificationTemplate => notificationTemplate.id)
@@ -299,7 +293,7 @@ class Notifications extends Component {
           <EmptyState>
             <EmptyStateIcon icon={CubesIcon} />
             <Title size="lg">
-              <Trans>No Notifictions Found</Trans>
+              <Trans>No Notifications Found</Trans>
             </Title>
             <EmptyStateBody>
               <Trans>Please add a notification template to populate this list</Trans>
@@ -331,7 +325,7 @@ class Notifications extends Component {
                       itemId={o.id}
                       name={o.name}
                       notificationType={o.notification_type}
-                      detailUrl={`notifications/${o.id}`}
+                      detailUrl={`/notifications/${o.id}`}
                       isSelected={selected.includes(o.id)}
                       onSelect={() => this.onSelect(o.id)}
                       toggleNotification={this.toggleNotification}

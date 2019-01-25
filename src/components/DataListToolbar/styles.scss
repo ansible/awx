@@ -3,7 +3,7 @@
   --awx-toolbar--BorderColor: var(--pf-global--Color--light-200);
   --awx-toolbar--BorderWidth: var(--pf-global--BorderWidth--sm);
 
-  border: var(--awx-toolbar--BorderWidth) solid var(--awx-toolbar--BorderColor);
+  border-bottom: var(--awx-toolbar--BorderWidth) solid var(--awx-toolbar--BorderColor);
   background-color: var(--awx-toolbar--BackgroundColor);
   height: 70px;
   padding-top: 5px;
