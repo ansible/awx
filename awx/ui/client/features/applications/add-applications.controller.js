@@ -1,4 +1,4 @@
-function AddApplicationsController (models, $state, strings, $scope, Alert, $filter) {
+function AddApplicationsController (models, $state, strings, $scope, Alert, $filter, i18n) {
     const vm = this || {};
 
     const { application, me, organization } = models;
@@ -28,12 +28,12 @@ function AddApplicationsController (models, $state, strings, $scope, Alert, $fil
 
     vm.form.organization = {
         type: 'field',
-        label: 'Organization',
+        label: i18n._('Organization'),
         id: 'organization'
     };
     vm.form.description = {
         type: 'String',
-        label: 'Description',
+        label: i18n._('Description'),
         id: 'description'
     };
 
@@ -112,6 +112,7 @@ AddApplicationsController.$inject = [
     '$scope',
     'Alert',
     '$filter',
+    'i18n'
 ];
 
 export default AddApplicationsController;

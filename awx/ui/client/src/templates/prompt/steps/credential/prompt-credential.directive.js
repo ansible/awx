@@ -6,8 +6,8 @@
 
 import promptCredentialController from './prompt-credential.controller';
 
-export default [ 'templateUrl', '$compile', 'generateList',
-    (templateUrl, $compile, GenerateList) => {
+export default [ 'templateUrl', '$compile', 'generateList', 'i18n',
+    (templateUrl, $compile, GenerateList, i18n) => {
     return {
         scope: {
           promptData: '=',
@@ -34,7 +34,7 @@ export default [ 'templateUrl', '$compile', 'generateList',
                 if(credKind && scope.promptData.prompts.credentials.credentialTypes[credKind] === "vault") {
                     list.fields.name.modalColumnClass = 'col-md-6';
                     list.fields.info = {
-                        label: 'Vault ID',
+                        label: i18n._('Vault ID'),
                         ngBind: 'credential.inputs.vault_id',
                         key: false,
                         nosort: true,

@@ -115,6 +115,12 @@ function OutputStrings (BaseString) {
         STANDARD_OUT: t.s('Standard Out'),
         STANDARD_ERROR: t.s('Standard Error')
     };
+
+    ns.workflow_status = {
+        SUCCESSFUL: t.s('SUCCESSFUL'),
+        FAILED: t.s('FAILED'),
+        NO_JOBS_FINISHED: t.s('NO JOBS FINISHED')
+    };
 }
 
 OutputStrings.$inject = ['BaseStringService'];

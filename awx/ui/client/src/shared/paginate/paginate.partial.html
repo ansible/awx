@@ -42,7 +42,7 @@
          -->
         <span class="Paginate-itemsOf">{{ 'ITEMS' | translate }}&nbsp;
             <span>{{dataRange}}</span>
-            <span ng-hide="dataset.count <= basePageSize">of {{dataset.count | number}}</span>
+            <span ng-hide="dataset.count <= basePageSize">{{ 'of' | translate }} {{dataset.count | number}}</span>
         </span>
         <div class="Paginate-filteringDropdowns" ng-hide="hideViewPerPage || dataset.count <= basePageSize">
             <div class="Paginate-filterLabel" translate>VIEW PER PAGE</div>

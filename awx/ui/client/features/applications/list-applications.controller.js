@@ -101,7 +101,7 @@ function ListApplicationsController (
             resourceName: $filter('sanitize')(app.name),
             body: deleteModalBody,
             action,
-            actionText: 'DELETE'
+            actionText: strings.get('DELETE')
         });
     };
 }

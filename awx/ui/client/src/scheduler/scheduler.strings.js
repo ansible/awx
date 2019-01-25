@@ -56,7 +56,12 @@ function SchedulerStrings (BaseString) {
         CANCEL: t.s('Cancel'),
         SAVE: t.s('Save'),
         WARNING: t.s('Warning'),
-        CREDENTIAL_REQUIRES_PASSWORD_WARNING: t.s('This Job Template has a default credential that requires a password before launch.  Adding or editing schedules is prohibited while this credential is selected.  To add or edit a schedule, credentials that require a password must be removed from the Job Template.')
+        CREDENTIAL_REQUIRES_PASSWORD_WARNING: t.s('This Job Template has a default credential that requires a password before launch.  Adding or editing schedules is prohibited while this credential is selected.  To add or edit a schedule, credentials that require a password must be removed from the Job Template.'),
+        SCHEDULE_NAME: t.s('Schedule name'),
+        HH24: t.s('HH24'),
+        MM: t.s('MM'),
+        SS: t.s('SS'),
+        DAYS_DATA: t.s('Days of data to keep')
     };
 
     ns.prompt = {

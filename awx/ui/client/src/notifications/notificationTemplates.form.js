@@ -325,7 +325,7 @@ export default ['i18n', function(i18n) {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             api_url: {
-                label: 'API URL',
+                label: i18n._('API URL'),
                 type: 'text',
                 placeholder: 'https://mycompany.hipchat.com',
                 awRequiredWhen: {

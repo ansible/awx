@@ -120,6 +120,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.labels = jobLabels;
             $scope.showManualControls = false;
             $scope.readOnly = true;
+            $scope.count = count.val;
 
             // Start elapsed time updater for job known to be running
             if ($scope.workflow.started !== null && $scope.workflow.status === 'running') {
@@ -287,6 +288,9 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                             $scope.$broadcast("refreshWorkflowChart");
                         }
                     });
+
+                    $scope.count = workflowResultsService
+                        .getCounts($scope.graphState.arrayOfNodesForChart);
             }
             getLabelsAndTooltips();
         });

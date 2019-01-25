@@ -125,10 +125,10 @@ export default ['$scope', 'ListDefinition', '$rootScope', 'GetBasePath',
         };
         // Prompt depends on having $rootScope.promptActionBtnClass available...
         Prompt({
-            hdr: 'Delete Host',
+            hdr: i18n._('Delete Host'),
             body: body,
             action: action,
-            actionText: 'DELETE',
+            actionText: i18n._('DELETE'),
         });
         $rootScope.promptActionBtnClass = 'Modal-errorButton';
     };
