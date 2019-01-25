@@ -28,7 +28,6 @@ from django.utils import timezone
 from crum import get_current_request, get_current_user
 from crum.signals import current_user_getter
 
-import six
 
 # AWX
 from awx.main.models import * # noqa
@@ -117,7 +116,7 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     elif sender == Group.inventory_sources.through:
         sender_name = 'group.inventory_sources'
     else:
-        sender_name = six.text_type(sender._meta.verbose_name)
+        sender_name = str(sender._meta.verbose_name)
     if kwargs['signal'] == post_save:
         if sender == Job:
             return
@@ -147,7 +146,7 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         pass
     else:
         return
-    sender_name = six.text_type(sender._meta.verbose_name)
+    sender_name = str(sender._meta.verbose_name)
     logger.debug("%s created or deleted, updating inventory computed fields: %r %r",
                  sender_name, sender, kwargs)
     try:
@@ -437,7 +436,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
         # Special case where Job survey password variables need to be hidden
         if type(instance) == Job:
             changes['credentials'] = [
-                six.text_type('{} ({})').format(c.name, c.id)
+                '{} ({})'.format(c.name, c.id)
                 for c in instance.credentials.iterator()
             ]
             changes['labels'] = [l.name for l in instance.labels.iterator()]

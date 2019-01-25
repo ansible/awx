@@ -1,5 +1,4 @@
 import re
-import six
 import yaml
 
 
@@ -9,7 +8,7 @@ __all__ = ['safe_dump', 'SafeLoader']
 class SafeStringDumper(yaml.SafeDumper):
 
     def represent_data(self, value):
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             return self.represent_scalar('!unsafe', value)
         return super(SafeStringDumper, self).represent_data(value)
 
@@ -17,7 +16,7 @@ class SafeStringDumper(yaml.SafeDumper):
 class SafeLoader(yaml.Loader):
 
     def construct_yaml_unsafe(self, node):
-        class UnsafeText(six.text_type):
+        class UnsafeText(str):
             __UNSAFE__ = True
         node = UnsafeText(self.construct_scalar(node))
         return node
@@ -75,7 +74,7 @@ def sanitize_jinja(arg):
     """
     For some string, prevent usage of Jinja-like flags
     """
-    if isinstance(arg, six.string_types):
+    if isinstance(arg, str):
         # If the argument looks like it contains Jinja expressions
         # {{ x }} ...
         if re.search(r'\{\{[^}]+}}', arg) is not None:

@@ -19,7 +19,6 @@ from django.utils.encoding import smart_str, smart_bytes
 from awx.main.expect import run, isolated_manager
 
 from django.conf import settings
-import six
 
 HERE, FILENAME = os.path.split(__file__)
 
@@ -107,7 +106,7 @@ def test_cancel_callback_error():
 
 
 @pytest.mark.timeout(3)  # https://github.com/ansible/tower/issues/2391#issuecomment-401946895
-@pytest.mark.parametrize('value', ['abc123', six.u('Iñtërnâtiônàlizætiøn')])
+@pytest.mark.parametrize('value', ['abc123', 'Iñtërnâtiônàlizætiøn'])
 def test_env_vars(value):
     stdout = StringIO()
     status, rc = run.run_pexpect(

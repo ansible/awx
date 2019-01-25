@@ -4,7 +4,6 @@ import importlib
 import sys
 import traceback
 
-import six
 
 from awx.main.tasks import dispatch_startup, inform_cluster_of_shutdown
 
@@ -90,7 +89,7 @@ class TaskWorker(BaseWorker):
             try:
                 if getattr(exc, 'is_awx_task_error', False):
                     # Error caused by user / tracked in job output
-                    logger.warning(six.text_type("{}").format(exc))
+                    logger.warning("{}".format(exc))
                 else:
                     task = body['task']
                     args = body.get('args', [])

@@ -13,7 +13,6 @@ import logging
 import os
 import re
 import shutil
-import six
 import stat
 import tempfile
 import time
@@ -93,7 +92,7 @@ def dispatch_startup():
             with disable_activity_stream():
                 sch.save()
         except Exception:
-            logger.exception(six.text_type("Failed to rebuild schedule {}.").format(sch))
+            logger.exception("Failed to rebuild schedule {}.".format(sch))
 
     #
     # When the dispatcher starts, if the instance cannot be found in the database,
@@ -125,8 +124,8 @@ def inform_cluster_of_shutdown():
             reaper.reap(this_inst)
         except Exception:
             logger.exception('failed to reap jobs for {}'.format(this_inst.hostname))
-        logger.warning(six.text_type('Normal shutdown signal for instance {}, '
-                       'removed self from capacity pool.').format(this_inst.hostname))
+        logger.warning('Normal shutdown signal for instance {}, '
+                       'removed self from capacity pool.'.format(this_inst.hostname))
     except Exception:
         logger.exception('Encountered problem with normal shutdown signal.')
 
@@ -164,14 +163,14 @@ def apply_cluster_membership_policies():
             ])
             for hostname in ig.policy_instance_list:
                 if hostname not in instance_hostnames_map:
-                    logger.info(six.text_type("Unknown instance {} in {} policy list").format(hostname, ig.name))
+                    logger.info("Unknown instance {} in {} policy list".format(hostname, ig.name))
                     continue
                 inst = instance_hostnames_map[hostname]
                 group_actual.instances.append(inst.id)
                 # NOTE: arguable behavior: policy-list-group is not added to
                 # instance's group count for consideration in minimum-policy rules
             if group_actual.instances:
-                logger.info(six.text_type("Policy List, adding Instances {} to Group {}").format(group_actual.instances, ig.name))
+                logger.info("Policy List, adding Instances {} to Group {}".format(group_actual.instances, ig.name))
 
             if ig.controller_id is None:
                 actual_groups.append(group_actual)
@@ -199,7 +198,7 @@ def apply_cluster_membership_policies():
                 i.groups.append(g.obj.id)
                 policy_min_added.append(i.obj.id)
             if policy_min_added:
-                logger.info(six.text_type("Policy minimum, adding Instances {} to Group {}").format(policy_min_added, g.obj.name))
+                logger.info("Policy minimum, adding Instances {} to Group {}".format(policy_min_added, g.obj.name))
 
         # Finally, process instance policy percentages
         for g in sorted(actual_groups, key=lambda x: len(x.instances)):
@@ -215,7 +214,7 @@ def apply_cluster_membership_policies():
                 i.groups.append(g.obj.id)
                 policy_per_added.append(i.obj.id)
             if policy_per_added:
-                logger.info(six.text_type("Policy percentage, adding Instances {} to Group {}").format(policy_per_added, g.obj.name))
+                logger.info("Policy percentage, adding Instances {} to Group {}".format(policy_per_added, g.obj.name))
 
         # Determine if any changes need to be made
         needs_change = False
@@ -259,15 +258,15 @@ def delete_project_files(project_path):
     if os.path.exists(project_path):
         try:
             shutil.rmtree(project_path)
-            logger.info(six.text_type('Success removing project files {}').format(project_path))
+            logger.info('Success removing project files {}'.format(project_path))
         except Exception:
-            logger.exception(six.text_type('Could not remove project directory {}').format(project_path))
+            logger.exception('Could not remove project directory {}'.format(project_path))
     if os.path.exists(lock_file):
         try:
             os.remove(lock_file)
-            logger.debug(six.text_type('Success removing {}').format(lock_file))
+            logger.debug('Success removing {}'.format(lock_file))
         except Exception:
-            logger.exception(six.text_type('Could not remove lock file {}').format(lock_file))
+            logger.exception('Could not remove lock file {}'.format(lock_file))
 
 
 @task()
@@ -288,7 +287,7 @@ def send_notifications(notification_list, job_id=None):
             notification.status = "successful"
             notification.notifications_sent = sent
         except Exception as e:
-            logger.error(six.text_type("Send Notification Failed {}").format(e))
+            logger.error("Send Notification Failed {}".format(e))
             notification.status = "failed"
             notification.error = smart_str(e)
             update_fields.append('error')
@@ -296,7 +295,7 @@ def send_notifications(notification_list, job_id=None):
             try:
                 notification.save(update_fields=update_fields)
             except Exception:
-                logger.exception(six.text_type('Error saving notification {} result.').format(notification.id))
+                logger.exception('Error saving notification {} result.'.format(notification.id))
 
 
 @task()
@@ -327,7 +326,7 @@ def purge_old_stdout_files():
     for f in os.listdir(settings.JOBOUTPUT_ROOT):
         if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT,f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
             os.unlink(os.path.join(settings.JOBOUTPUT_ROOT,f))
-            logger.info(six.text_type("Removing {}").format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
+            logger.info("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
 
 
 @task(queue=get_local_queuename)
@@ -340,7 +339,7 @@ def cluster_node_heartbeat():
 
     (changed, instance) = Instance.objects.get_or_register()
     if changed:
-        logger.info(six.text_type("Registered tower node '{}'").format(instance.hostname))
+        logger.info("Registered tower node '{}'".format(instance.hostname))
 
     for inst in list(instance_list):
         if inst.hostname == settings.CLUSTER_HOST_ID:
@@ -352,7 +351,7 @@ def cluster_node_heartbeat():
     if this_inst:
         startup_event = this_inst.is_lost(ref_time=nowtime)
         if this_inst.capacity == 0 and this_inst.enabled:
-            logger.warning(six.text_type('Rejoining the cluster as instance {}.').format(this_inst.hostname))
+            logger.warning('Rejoining the cluster as instance {}.'.format(this_inst.hostname))
         if this_inst.enabled:
             this_inst.refresh_capacity()
         elif this_inst.capacity != 0 and not this_inst.enabled:
@@ -367,11 +366,12 @@ def cluster_node_heartbeat():
         if other_inst.version == "":
             continue
         if Version(other_inst.version.split('-', 1)[0]) > Version(awx_application_version.split('-', 1)[0]) and not settings.DEBUG:
-            logger.error(six.text_type("Host {} reports version {}, but this node {} is at {}, shutting down")
-                            .format(other_inst.hostname,
-                                    other_inst.version,
-                                    this_inst.hostname,
-                                    this_inst.version))
+            logger.error("Host {} reports version {}, but this node {} is at {}, shutting down".format(
+                other_inst.hostname,
+                other_inst.version,
+                this_inst.hostname,
+                this_inst.version
+            ))
             # Shutdown signal will set the capacity to zero to ensure no Jobs get added to this instance.
             # The heartbeat task will reset the capacity to the system capacity after upgrade.
             stop_local_services(communicate=False)
@@ -392,17 +392,17 @@ def cluster_node_heartbeat():
             if other_inst.capacity != 0 and not settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 other_inst.capacity = 0
                 other_inst.save(update_fields=['capacity'])
-                logger.error(six.text_type("Host {} last checked in at {}, marked as lost.").format(
+                logger.error("Host {} last checked in at {}, marked as lost.".format(
                     other_inst.hostname, other_inst.modified))
             elif settings.AWX_AUTO_DEPROVISION_INSTANCES:
                 deprovision_hostname = other_inst.hostname
                 other_inst.delete()
-                logger.info(six.text_type("Host {} Automatically Deprovisioned.").format(deprovision_hostname))
+                logger.info("Host {} Automatically Deprovisioned.".format(deprovision_hostname))
         except DatabaseError as e:
             if 'did not affect any rows' in str(e):
-                logger.debug(six.text_type('Another instance has marked {} as lost').format(other_inst.hostname))
+                logger.debug('Another instance has marked {} as lost'.format(other_inst.hostname))
             else:
-                logger.exception(six.text_type('Error marking {} as lost').format(other_inst.hostname))
+                logger.exception('Error marking {} as lost'.format(other_inst.hostname))
 
 
 @task(queue=get_local_queuename)
@@ -429,7 +429,7 @@ def awx_isolated_heartbeat():
             isolated_instance.save(update_fields=['last_isolated_check'])
     # Slow pass looping over isolated IGs and their isolated instances
     if len(isolated_instance_qs) > 0:
-        logger.debug(six.text_type("Managing isolated instances {}.").format(','.join([inst.hostname for inst in isolated_instance_qs])))
+        logger.debug("Managing isolated instances {}.".format(','.join([inst.hostname for inst in isolated_instance_qs])))
         isolated_manager.IsolatedManager.health_check(isolated_instance_qs, awx_application_version)
 
 
@@ -462,7 +462,7 @@ def awx_periodic_scheduler():
         try:
             job_kwargs = schedule.get_job_kwargs()
             new_unified_job = schedule.unified_job_template.create_unified_job(**job_kwargs)
-            logger.info(six.text_type('Spawned {} from schedule {}-{}.').format(
+            logger.info('Spawned {} from schedule {}-{}.'.format(
                 new_unified_job.log_format, schedule.name, schedule.pk))
 
             if invalid_license:
@@ -575,7 +575,7 @@ def update_host_smart_inventory_memberships():
                     changed_inventories.add(smart_inventory)
             SmartInventoryMembership.objects.bulk_create(memberships)
     except IntegrityError as e:
-        logger.error(six.text_type("Update Host Smart Inventory Memberships failed due to an exception: {}").format(e))
+        logger.error("Update Host Smart Inventory Memberships failed due to an exception: {}".format(e))
         return
     # Update computed fields for changed inventories outside atomic action
     for smart_inventory in changed_inventories:
@@ -602,7 +602,7 @@ def delete_inventory(inventory_id, user_id, retries=5):
                 'inventories-status_changed',
                 {'group_name': 'inventories', 'inventory_id': inventory_id, 'status': 'deleted'}
             )
-            logger.debug(six.text_type('Deleted inventory {} as user {}.').format(inventory_id, user_id))
+            logger.debug('Deleted inventory {} as user {}.'.format(inventory_id, user_id))
         except Inventory.DoesNotExist:
             logger.exception("Delete Inventory failed due to missing inventory: " + str(inventory_id))
             return
@@ -626,7 +626,7 @@ def with_path_cleanup(f):
                     elif os.path.exists(p):
                         os.remove(p)
                 except OSError:
-                    logger.exception(six.text_type("Failed to remove tmp file: {}").format(p))
+                    logger.exception("Failed to remove tmp file: {}".format(p))
             self.cleanup_paths = []
     return _wrapped
 
@@ -1064,13 +1064,13 @@ class BaseTask(object):
         try:
             self.post_run_hook(instance, status, **kwargs)
         except Exception:
-            logger.exception(six.text_type('{} Post run hook errored.').format(instance.log_format))
+            logger.exception('{} Post run hook errored.'.format(instance.log_format))
         instance = self.update_model(pk)
         if instance.cancel_flag:
             status = 'canceled'
             cancel_wait = (now() - instance.modified).seconds if instance.modified else 0
             if cancel_wait > 5:
-                logger.warn(six.text_type('Request to cancel {} took {} seconds to complete.').format(instance.log_format, cancel_wait))
+                logger.warn('Request to cancel {} took {} seconds to complete.'.format(instance.log_format, cancel_wait))
 
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements,
@@ -1079,7 +1079,7 @@ class BaseTask(object):
         try:
             self.final_run_hook(instance, status, **kwargs)
         except Exception:
-            logger.exception(six.text_type('{} Final run hook errored.').format(instance.log_format))
+            logger.exception('{} Final run hook errored.'.format(instance.log_format))
         instance.websocket_emit_status(status)
         if status != 'successful':
             if status == 'canceled':
@@ -1258,7 +1258,7 @@ class RunJob(BaseTask):
                 env['ANSIBLE_NET_SSH_KEYFILE'] = ssh_keyfile
 
             authorize = network_cred.get_input('authorize', default=False)
-            env['ANSIBLE_NET_AUTHORIZE'] = six.text_type(int(authorize))
+            env['ANSIBLE_NET_AUTHORIZE'] = str(int(authorize))
             if authorize:
                 env['ANSIBLE_NET_AUTH_PASS'] = network_cred.get_input('authorize_password', default='')
 
@@ -1684,15 +1684,15 @@ class RunProjectUpdate(BaseTask):
             if not inv_src.update_on_project_update:
                 continue
             if inv_src.scm_last_revision == scm_revision:
-                logger.debug(six.text_type('Skipping SCM inventory update for `{}` because '
-                                           'project has not changed.').format(inv_src.name))
+                logger.debug('Skipping SCM inventory update for `{}` because '
+                             'project has not changed.'.format(inv_src.name))
                 continue
-            logger.debug(six.text_type('Local dependent inventory update for `{}`.').format(inv_src.name))
+            logger.debug('Local dependent inventory update for `{}`.'.format(inv_src.name))
             with transaction.atomic():
                 if InventoryUpdate.objects.filter(inventory_source=inv_src,
                                                   status__in=ACTIVE_STATES).exists():
-                    logger.info(six.text_type('Skipping SCM inventory update for `{}` because '
-                                              'another update is already active.').format(inv_src.name))
+                    logger.info('Skipping SCM inventory update for `{}` because '
+                                'another update is already active.'.format(inv_src.name))
                     continue
                 local_inv_update = inv_src.create_inventory_update(
                     _eager_fields=dict(
@@ -1705,8 +1705,9 @@ class RunProjectUpdate(BaseTask):
             try:
                 inv_update_class().run(local_inv_update.id)
             except Exception:
-                logger.exception(six.text_type('{} Unhandled exception updating dependent SCM inventory sources.')
-                                 .format(project_update.log_format))
+                logger.exception('{} Unhandled exception updating dependent SCM inventory sources.'.format(
+                    project_update.log_format
+                ))
 
             try:
                 project_update.refresh_from_db()
@@ -1719,10 +1720,10 @@ class RunProjectUpdate(BaseTask):
                 logger.warning('%s Dependent inventory update deleted during execution.', project_update.log_format)
                 continue
             if project_update.cancel_flag:
-                logger.info(six.text_type('Project update {} was canceled while updating dependent inventories.').format(project_update.log_format))
+                logger.info('Project update {} was canceled while updating dependent inventories.'.format(project_update.log_format))
                 break
             if local_inv_update.cancel_flag:
-                logger.info(six.text_type('Continuing to process project dependencies after {} was canceled').format(local_inv_update.log_format))
+                logger.info('Continuing to process project dependencies after {} was canceled'.format(local_inv_update.log_format))
             if local_inv_update.status == 'successful':
                 inv_src.scm_last_revision = scm_revision
                 inv_src.save(update_fields=['scm_last_revision'])
@@ -1731,7 +1732,7 @@ class RunProjectUpdate(BaseTask):
         try:
             fcntl.flock(self.lock_fd, fcntl.LOCK_UN)
         except IOError as e:
-            logger.error(six.text_type("I/O error({0}) while trying to open lock file [{1}]: {2}").format(e.errno, instance.get_lock_file(), e.strerror))
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, instance.get_lock_file(), e.strerror))
             os.close(self.lock_fd)
             raise
 
@@ -1749,7 +1750,7 @@ class RunProjectUpdate(BaseTask):
         try:
             self.lock_fd = os.open(lock_path, os.O_RDONLY | os.O_CREAT)
         except OSError as e:
-            logger.error(six.text_type("I/O error({0}) while trying to open lock file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
+            logger.error("I/O error({0}) while trying to open lock file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
             raise
 
         start_time = time.time()
@@ -1757,23 +1758,23 @@ class RunProjectUpdate(BaseTask):
             try:
                 instance.refresh_from_db(fields=['cancel_flag'])
                 if instance.cancel_flag:
-                    logger.info(six.text_type("ProjectUpdate({0}) was cancelled".format(instance.pk)))
+                    logger.info("ProjectUpdate({0}) was cancelled".format(instance.pk))
                     return
                 fcntl.flock(self.lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
             except IOError as e:
                 if e.errno not in (errno.EAGAIN, errno.EACCES):
                     os.close(self.lock_fd)
-                    logger.error(six.text_type("I/O error({0}) while trying to aquire lock on file [{1}]: {2}").format(e.errno, lock_path, e.strerror))
+                    logger.error("I/O error({0}) while trying to aquire lock on file [{1}]: {2}".format(e.errno, lock_path, e.strerror))
                     raise
                 else:
                     time.sleep(1.0)
         waiting_time = time.time() - start_time
 
         if waiting_time > 1.0:
-            logger.info(six.text_type(
+            logger.info(
                 '{} spent {} waiting to acquire lock for local source tree '
-                'for path {}.').format(instance.log_format, waiting_time, lock_path))
+                'for path {}.'.format(instance.log_format, waiting_time, lock_path))
 
     def pre_run_hook(self, instance, **kwargs):
         # re-create root project folder if a natural disaster has destroyed it
@@ -1790,7 +1791,7 @@ class RunProjectUpdate(BaseTask):
             if lines:
                 p.scm_revision = lines[0].strip()
             else:
-                logger.info(six.text_type("{} Could not find scm revision in check").format(instance.log_format))
+                logger.info("{} Could not find scm revision in check".format(instance.log_format))
             p.playbook_files = p.playbooks
             p.inventory_files = p.inventories
             p.save()
@@ -1912,7 +1913,7 @@ class RunInventoryUpdate(BaseTask):
                 ec2_opts['cache_path'] = cache_path
             ec2_opts.setdefault('cache_max_age', '300')
             for k, v in ec2_opts.items():
-                cp.set(section, k, six.text_type(v))
+                cp.set(section, k, str(v))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
 
@@ -1931,7 +1932,7 @@ class RunInventoryUpdate(BaseTask):
                 vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
 
             for k, v in vmware_opts.items():
-                cp.set(section, k, six.text_type(v))
+                cp.set(section, k, str(v))
 
         elif inventory_update.source == 'satellite6':
             section = 'foreman'
@@ -1950,7 +1951,7 @@ class RunInventoryUpdate(BaseTask):
                 elif k == 'satellite6_want_hostcollections' and isinstance(v, bool):
                     want_hostcollections = v
                 else:
-                    cp.set(section, k, six.text_type(v))
+                    cp.set(section, k, str(v))
 
             if credential:
                 cp.set(section, 'url', credential.get_input('host', default=''))
@@ -2009,7 +2010,7 @@ class RunInventoryUpdate(BaseTask):
 
             azure_rm_opts = dict(inventory_update.source_vars_dict.items())
             for k, v in azure_rm_opts.items():
-                cp.set(section, k, six.text_type(v))
+                cp.set(section, k, str(v))
 
         # Return INI content.
         if cp.sections():
@@ -2094,7 +2095,7 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
                 if str(env_k) not in env and str(env_k) not in settings.INV_ENV_VARIABLE_BLACKLIST:
-                    env[str(env_k)] = six.text_type(inventory_update.source_vars_dict[env_k])
+                    env[str(env_k)] = str(inventory_update.source_vars_dict[env_k])
         elif inventory_update.source == 'tower':
             env['TOWER_INVENTORY'] = inventory_update.instance_filters
             env['TOWER_LICENSE_TYPE'] = get_licenser().validate()['license_type']
@@ -2410,7 +2411,7 @@ class RunSystemJob(BaseTask):
                              '--management-jobs', '--ad-hoc-commands', '--workflow-jobs',
                              '--notifications'])
         except Exception:
-            logger.exception(six.text_type("{} Failed to parse system job").format(system_job.log_format))
+            logger.exception("{} Failed to parse system job".format(system_job.log_format))
         return args
 
     def build_env(self, instance, **kwargs):
@@ -2436,7 +2437,7 @@ def _reconstruct_relationships(copy_mapping):
                 setattr(new_obj, field_name, related_obj)
             elif field.many_to_many:
                 for related_obj in getattr(old_obj, field_name).all():
-                    logger.debug(six.text_type('Deep copy: Adding {} to {}({}).{} relationship').format(
+                    logger.debug('Deep copy: Adding {} to {}({}).{} relationship'.format(
                         related_obj, new_obj, model, field_name
                     ))
                     getattr(new_obj, field_name).add(copy_mapping.get(related_obj, related_obj))
@@ -2448,7 +2449,7 @@ def deep_copy_model_obj(
     model_module, model_name, obj_pk, new_obj_pk,
     user_pk, sub_obj_list, permission_check_func=None
 ):
-    logger.info(six.text_type('Deep copy {} from {} to {}.').format(model_name, obj_pk, new_obj_pk))
+    logger.info('Deep copy {} from {} to {}.'.format(model_name, obj_pk, new_obj_pk))
     from awx.api.generics import CopyAPIView
     from awx.main.signals import disable_activity_stream
     model = getattr(importlib.import_module(model_module), model_name, None)

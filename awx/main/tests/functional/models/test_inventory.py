@@ -2,7 +2,6 @@
 
 import pytest
 from unittest import mock
-import six
 
 from django.core.exceptions import ValidationError
 
@@ -249,7 +248,7 @@ def test_inventory_update_name(inventory, inventory_source):
 
 @pytest.mark.django_db
 def test_inventory_name_with_unicode(inventory, inventory_source):
-    inventory.name = six.u('オオオ')
+    inventory.name = 'オオオ'
     inventory.save()
     iu = inventory_source.update()
     assert iu.name.startswith(inventory.name)

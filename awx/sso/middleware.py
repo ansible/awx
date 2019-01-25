@@ -5,7 +5,6 @@
 import urllib.parse
 
 # Six
-import six
 
 # Django
 from django.conf import settings
@@ -83,7 +82,7 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
             return redirect(url)
 
     def get_message(self, request, exception):
-        msg = six.text_type(exception)
+        msg = str(exception)
         if msg and msg[-1] not in '.?!':
             msg = msg + '.'
         return msg

@@ -7,7 +7,6 @@ import os
 import re
 import stat
 import tempfile
-import six
 
 # Jinja2
 from jinja2 import Template
@@ -418,11 +417,11 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
             type_alias = self.credential_type_id
         if self.kind == 'vault' and self.has_input('vault_id'):
             if display:
-                fmt_str = six.text_type('{} (id={})')
+                fmt_str = '{} (id={})'
             else:
-                fmt_str = six.text_type('{}_{}')
+                fmt_str = '{}_{}'
             return fmt_str.format(type_alias, self.get_input('vault_id'))
-        return six.text_type(type_alias)
+        return str(type_alias)
 
     @staticmethod
     def unique_dict(cred_qs):
@@ -679,9 +678,7 @@ class CredentialType(CommonModelNameNotUnique):
             try:
                 injector_field.validate_env_var_allowed(env_var)
             except ValidationError as e:
-                logger.error(six.text_type(
-                    'Ignoring prohibited env var {}, reason: {}'
-                ).format(env_var, e))
+                logger.error('Ignoring prohibited env var {}, reason: {}'.format(env_var, e))
                 continue
             env[env_var] = Template(tmpl).render(**namespace)
             safe_env[env_var] = Template(tmpl).render(**safe_namespace)

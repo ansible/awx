@@ -3,7 +3,6 @@ import hashlib
 import logging
 from collections import namedtuple
 
-import six
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
 from django.utils.encoding import smart_str, smart_bytes
@@ -144,6 +143,6 @@ def encrypt_dict(data, fields):
 
 
 def is_encrypted(value):
-    if not isinstance(value, six.string_types):
+    if not isinstance(value, str):
         return False
     return value.startswith('$encrypted$') and len(value) > len('$encrypted$')

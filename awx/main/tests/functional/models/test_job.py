@@ -1,5 +1,4 @@
 import pytest
-import six
 
 from awx.main.models import JobTemplate, Job, JobHostSummary, WorkflowJob
 
@@ -71,12 +70,12 @@ def test_job_host_summary_representation(host):
         host=host, job=job,
         changed=1, dark=2, failures=3, ok=4, processed=5, skipped=6
     )
-    assert 'single-host changed=1 dark=2 failures=3 ok=4 processed=5 skipped=6' == six.text_type(jhs)
+    assert 'single-host changed=1 dark=2 failures=3 ok=4 processed=5 skipped=6' == str(jhs)
 
     # Representation should be robust to deleted related items
     jhs = JobHostSummary.objects.get(pk=jhs.id)
     host.delete()
-    assert 'N/A changed=1 dark=2 failures=3 ok=4 processed=5 skipped=6' == six.text_type(jhs)
+    assert 'N/A changed=1 dark=2 failures=3 ok=4 processed=5 skipped=6' == str(jhs)
 
 
 @pytest.mark.django_db

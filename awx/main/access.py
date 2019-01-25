@@ -5,7 +5,6 @@
 import os
 import sys
 import logging
-import six
 from functools import reduce
 
 # Django
@@ -2590,7 +2589,7 @@ class RoleAccess(BaseAccess):
         if (isinstance(obj.content_object, Organization) and
                 obj.role_field in (Organization.member_role.field.parent_role + ['member_role'])):
             if not isinstance(sub_obj, User):
-                logger.error(six.text_type('Unexpected attempt to associate {} with organization role.').format(sub_obj))
+                logger.error('Unexpected attempt to associate {} with organization role.'.format(sub_obj))
                 return False
             if not UserAccess(self.user).can_admin(sub_obj, None, allow_orphans=True):
                 return False
