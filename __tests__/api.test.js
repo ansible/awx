@@ -105,7 +105,7 @@ describe('APIClient (api.js)', () => {
     const mockHttp = ({ post: jest.fn(createPromise) });
 
     const api = new APIClient(mockHttp);
-    const data = { name: 'test '};
+    const data = { name: 'test ' };
     await api.createOrganization(data);
 
     expect(mockHttp.post).toHaveBeenCalledTimes(1);

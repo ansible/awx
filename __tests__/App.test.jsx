@@ -7,8 +7,6 @@ import { asyncFlush } from '../jest.setup';
 
 import App from '../src/App';
 
-const DEFAULT_ACTIVE_GROUP = 'views_group';
-
 describe('<App />', () => {
   test('expected content is rendered', () => {
     const appWrapper = mount(
@@ -60,13 +58,13 @@ describe('<App />', () => {
     const ansible_version = '111';
     const version = '222';
 
-    const getConfig = jest.fn(() => Promise.resolve({ data: { ansible_version, version} }));
+    const getConfig = jest.fn(() => Promise.resolve({ data: { ansible_version, version } }));
     const api = { getConfig };
 
     const wrapper = mount(
       <MemoryRouter>
         <I18nProvider>
-          <App api={api}/>
+          <App api={api} />
         </I18nProvider>
       </MemoryRouter>
     );

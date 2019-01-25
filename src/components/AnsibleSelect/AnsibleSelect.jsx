@@ -7,7 +7,7 @@ import {
 } from '@patternfly/react-core';
 
 class AnsibleSelect extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props);
     this.onSelectChange = this.onSelectChange.bind(this);
   }
@@ -16,34 +16,39 @@ class AnsibleSelect extends React.Component {
     count: 1,
   }
 
-  static getDerivedStateFromProps(nexProps, _) {
+  static getDerivedStateFromProps (nexProps) {
     if (nexProps.data) {
       return {
         count: nexProps.data.length,
-      }
+      };
     }
     return null;
   }
-  onSelectChange(val, _) {
-    this.props.selectChange(val);
+
+  onSelectChange (val) {
+    const { selectChange } = this.props;
+    selectChange(val);
   }
 
-  render() {
+  render () {
     const { count } = this.state;
+    const { labelName, selected, data } = this.props;
+    let elem;
     if (count > 1) {
-      return (
-        <FormGroup label={this.props.labelName} fieldId="ansible-select">
-          <Select value={this.props.selected} onChange={this.onSelectChange} aria-label="Select Input">
-            {this.props.data.map((datum, index) => (
-              <SelectOption isDisabled={datum.disabled} key={index} value={datum} label={datum} />
+      elem = (
+        <FormGroup label={labelName} fieldId="ansible-select">
+          <Select value={selected} onChange={this.onSelectChange} aria-label="Select Input">
+            {data.map((datum) => (
+              <SelectOption isDisabled={datum.disabled} key={datum} value={datum} label={datum} />
             ))}
           </Select>
         </FormGroup>
-      )
+      );
+    } else {
+      elem = null;
     }
-    else {
-      return null;
-    }
+
+    return elem;
   }
 }
 

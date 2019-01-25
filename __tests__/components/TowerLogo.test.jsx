@@ -57,7 +57,6 @@ describe('<TowerLogo />', () => {
   });
 
   test('handles mouse over and out state.hover changes', () => {
-    const onLogoClick = jest.fn();
     logoWrapper = mount(
       <MemoryRouter>
         <I18nProvider>

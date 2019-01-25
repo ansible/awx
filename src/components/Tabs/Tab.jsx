@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 
 import './tabs.scss';
 
-
 const Tab = ({ location, match, tab, currentTab, children, breadcrumb }) => {
   const tabClasses = () => {
     let classes = 'pf-c-tabs__item';
@@ -28,13 +27,14 @@ const Tab = ({ location, match, tab, currentTab, children, breadcrumb }) => {
   return (
     <li className={tabClasses()}>
       <Link
-        className={'pf-c-tabs__button'}
+        className="pf-c-tabs__button"
         to={{ pathname: `${match.url}`, search: tabParams(), state: { breadcrumb } }}
-        replace={tab === currentTab}>
+        replace={tab === currentTab}
+      >
         {children}
       </Link>
     </li>
-  )
-}
+  );
+};
 
 export default Tab;

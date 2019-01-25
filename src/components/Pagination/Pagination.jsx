@@ -49,6 +49,7 @@ class Pagination extends Component {
 
     event.preventDefault();
 
+    // eslint-disable-next-line no-bitwise
     const isPositiveInteger = value >>> 0 === parseFloat(value) && parseInt(value, 10) > 0;
     const isValid = isPositiveInteger && parseInt(value, 10) <= pageCount;
 
@@ -73,7 +74,7 @@ class Pagination extends Component {
   }
 
   onNext () {
-    const { onSetPage, page, pageCount, page_size } = this.props;
+    const { onSetPage, page, page_size } = this.props;
     const nextPage = page + 1;
 
     onSetPage(nextPage, page_size);
@@ -82,7 +83,7 @@ class Pagination extends Component {
   onLast () {
     const { onSetPage, pageCount, page_size } = this.props;
 
-    onSetPage(pageCount, page_size)
+    onSetPage(pageCount, page_size);
   }
 
   onTogglePageSize (isOpen) {
@@ -160,7 +161,7 @@ class Pagination extends Component {
               <LevelItem>
                 <Split gutter="md" className="pf-u-display-flex pf-u-align-items-center">
                   <SplitItem>
-                    <Trans>{itemMin} - {itemMax} of {count}</Trans>
+                    <Trans>{`${itemMin} - ${itemMax} of ${count}`}</Trans>
                   </SplitItem>
                   <SplitItem>
                     <div className="pf-c-input-group">
@@ -187,7 +188,8 @@ class Pagination extends Component {
                   <SplitItem isMain>
                     <form onSubmit={this.onSubmit}>
                       <Trans>
-                        Page <TextInput
+                        {'Page '}
+                        <TextInput
                           isDisabled={pageCount === 1}
                           aria-label={i18n._(t`Page Number`)}
                           style={{
@@ -201,7 +203,9 @@ class Pagination extends Component {
                           value={value}
                           type="text"
                           onChange={this.onPageChange}
-                        /> of {pageCount}
+                        />
+                        {' of '}
+                        {pageCount}
                       </Trans>
                     </form>
                   </SplitItem>

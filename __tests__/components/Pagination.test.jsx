@@ -162,7 +162,7 @@ describe('<Pagination />', () => {
           pageSizeOptions={[5, 10, 25, 50]}
           onSetPage={onSetPage}
         />
-        </I18nProvider>
+      </I18nProvider>
     );
   });
 });

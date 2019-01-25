@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd'
+import OrganizationAdd from '../../../../src/pages/Organizations/screens/OrganizationAdd';
 
 describe('<OrganizationAdd />', () => {
   test('initially renders succesfully', () => {
@@ -57,28 +57,19 @@ describe('<OrganizationAdd />', () => {
     wrapper.find('button.at-C-CancelButton').prop('onClick')();
     expect(spy).toBeCalled();
   });
-  test('API response data is formatted properly', () => {
-    const mockData = { data: { results: [{ name: 'test instance', id: 1 }] } };
-    const promise = Promise.resolve(mockData);
 
-    return promise.then(({ data }) => {
-      const expected = [{ id: 1, name: 'test instance', isChecked: false }];
-      const results = OrganizationAdd.WrappedComponent.prototype.format(data);
-      expect(results).toEqual(expected);
-    });
-  });
   test('API response is formatted properly', (done) => {
-    const spy = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'format');
-    const mockedResp = {data: {id: 1, name: 'foo bar'} };
+    const mockedResp = { data: { results: [{ name: 'test instance', id: 1 }] } };
     const api = { getInstanceGroups: jest.fn().mockResolvedValue(mockedResp) };
-    mount(
+    const wrapper = mount(
       <MemoryRouter>
         <OrganizationAdd api={api} />
       </MemoryRouter>
     );
 
     setImmediate(() => {
-      expect(spy).toHaveBeenCalled();
+      const orgAddElem = wrapper.find('OrganizationAdd');
+      expect([{ id: 1, isChecked: false, name: 'test instance' }]).toEqual(orgAddElem.state().results);
       done();
     });
   });
@@ -86,7 +77,7 @@ describe('<OrganizationAdd />', () => {
   test('Successful form submission triggers redirect', (done) => {
     const onSuccess = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'onSuccess');
     const resetForm = jest.spyOn(OrganizationAdd.WrappedComponent.prototype, 'resetForm');
-    const mockedResp = {data: {id: 1, related: {instance_groups: '/bar'}}};
+    const mockedResp = { data: { id: 1, related: { instance_groups: '/bar' } } };
     const api = { createOrganization: jest.fn().mockResolvedValue(mockedResp), createInstanceGroups: jest.fn().mockResolvedValue('done') };
     const wrapper = mount(
       <MemoryRouter>

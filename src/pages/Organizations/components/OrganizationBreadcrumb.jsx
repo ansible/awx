@@ -70,7 +70,6 @@ const OrganizationBreadcrumb = ({ parentObj, organization, currentTab, location 
         </Fragment>
       );
     } else {
-
       breadcrumb = (
         <Fragment>
           {generateCrumb(true)}

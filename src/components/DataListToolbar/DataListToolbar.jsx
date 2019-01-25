@@ -53,10 +53,6 @@ class DataListToolbar extends React.Component {
     this.onSort = this.onSort.bind(this);
   }
 
-  handleSearchInputChange (searchValue) {
-    this.setState({ searchValue });
-  }
-
   onSortDropdownToggle (isSortDropdownOpen) {
     this.setState({ isSortDropdownOpen });
   }
@@ -95,6 +91,10 @@ class DataListToolbar extends React.Component {
     const newSortOrder = sortOrder === 'ascending' ? 'descending' : 'ascending';
 
     onSort(sortedColumnKey, newSortOrder);
+  }
+
+  handleSearchInputChange (searchValue) {
+    this.setState({ searchValue });
   }
 
   render () {
@@ -223,7 +223,7 @@ class DataListToolbar extends React.Component {
                         variant="plain"
                         aria-label={i18n._(t`Sort`)}
                       >
-                        <SortIcon/>
+                        <SortIcon />
                       </Button>
                     </ToolbarItem>
                   </ToolbarGroup>
