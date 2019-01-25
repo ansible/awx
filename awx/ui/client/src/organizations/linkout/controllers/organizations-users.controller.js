@@ -6,10 +6,10 @@
 
 export default ['$stateParams', '$scope', 'OrgUserList','Rest', '$state',
     '$compile', 'Wait', 'OrgUsersDataset',
-    'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
+    'Prompt', 'ProcessErrors', 'GetBasePath', '$filter', 'i18n',
     function($stateParams, $scope, OrgUserList, Rest, $state,
         $compile, Wait, OrgUsersDataset, Prompt, ProcessErrors,
-        GetBasePath, $filter) {
+        GetBasePath, $filter, i18n) {
 
         var orgBase = GetBasePath('organizations');
 
@@ -62,10 +62,10 @@ export default ['$stateParams', '$scope', 'OrgUserList','Rest', '$state',
             };
 
             Prompt({
-                hdr: 'Delete',
-                body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the following user from this organization?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+                hdr: i18n._('Delete'),
+                body: `<div class="Prompt-bodyQuery">${i18n._('Are you sure you want to remove the following user from this organization?')}</div><div class="Prompt-bodyTarget">` + $filter('sanitize')(name) + '</div>',
                 action: action,
-                actionText: 'DELETE'
+                actionText: i18n._('DELETE')
             });
         };
 

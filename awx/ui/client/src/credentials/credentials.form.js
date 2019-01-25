@@ -414,7 +414,7 @@ export default ['i18n', function(i18n) {
                     ngShow: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
-                    label: 'Save',
+                    label: i18n._('Save'),
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true,
                     ngShow: '(credential_obj.summary_fields.user_capabilities.edit || canAdd)' //Disable when $pristine or $invalid, optional
@@ -444,7 +444,7 @@ export default ['i18n', function(i18n) {
                         add: {
                             mode: 'all',
                             ngClick: "$state.go('.add')",
-                            label: 'Add',
+                            label: i18n._('Add'),
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'at-Button--add',
                             actionId: 'button-add',

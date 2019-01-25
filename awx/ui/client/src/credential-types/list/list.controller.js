@@ -107,7 +107,7 @@ export default ['$rootScope', '$scope', 'Wait', 'CredentialTypesList',
                         body: deleteModalBody,
                         action: action,
                         hideActionButton: credentialTypeInUse ? true : false,
-                        actionText: 'DELETE'
+                        actionText: i18n._('DELETE')
                     });
                 });
         };

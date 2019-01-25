@@ -158,7 +158,7 @@ export default ['i18n', function(i18n) {
                     actions: {
                         add: {
                             ngClick: "$state.go('.add')",
-                            label: 'Add',
+                            label: i18n._('Add'),
                             awToolTip: i18n._('Grant Permission'),
                             actionClass: 'at-Button--add',
                             actionId: 'button-add',

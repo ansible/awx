@@ -412,7 +412,7 @@ export default ['$compile', 'Attr', 'Icon',
                                 });
                             }
                             if (field_action === 'pending_deletion') {
-                                innerTable += `<a ng-if='${list.iterator}.pending_deletion'>Pending Delete</a>`;
+                                innerTable += `<a ng-if='${list.iterator}.pending_deletion'>${i18n._('Pending Delete')}</a>`;
                             } else if (field_action === 'submit') {
                                 innerTable += `<at-launch-template template="${list.iterator}" ng-if="${list.iterator}.summary_fields.user_capabilities.start"></at-launch-template>`;
                             } else {

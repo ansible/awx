@@ -1857,7 +1857,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 html += `
                     <div class="List-noItems" ng-show="is_superuser">
-                        System Administrators have access to all ${collection.iterator}s
+                        ${i18n._('System Administrators have access to all ' + collection.iterator + 's')}
                     </div>
                 `;
 
@@ -1883,7 +1883,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         </div>`;
                 }
                 if (collection.fieldActions) {
-                    html += `<div class="List-tableHeader List-tableHeader--actions ${collection.fieldActions.columnClass}">Actions</div>`;
+                    html += `<div class="List-tableHeader List-tableHeader--actions ${collection.fieldActions.columnClass}">${i18n._('Actions')}</div>`;
                 }
                 html += "</div>";
 

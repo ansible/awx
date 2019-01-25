@@ -5,10 +5,10 @@
  *************************************************/
 
 export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
-    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', '$rootScope',
+    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', '$rootScope', 'i18n',
     'GetBasePath', 'Wait', '$state', 'ToggleNotification', 'CreateSelect2', 'InstanceGroupsService', 'InstanceGroupsData', 'ConfigData',
     function($scope, $location, $stateParams, OrgAdminLookup,
-        OrganizationForm, Rest, ProcessErrors, Prompt, $rootScope,
+        OrganizationForm, Rest, ProcessErrors, Prompt, $rootScope, i18n,
         GetBasePath, Wait, $state, ToggleNotification, CreateSelect2, InstanceGroupsService, InstanceGroupsData, ConfigData) {
 
         let form = OrganizationForm(),
@@ -159,10 +159,10 @@ export default ['$scope', '$location', '$stateParams', 'OrgAdminLookup',
             };
 
             Prompt({
-                hdr: 'Delete',
+                hdr: i18n._('Delete'),
                 body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the ' + title + ' below from ' + $scope.name + '?</div><div class="Prompt-bodyTarget">' + name + '</div>',
                 action: action,
-                actionText: 'DELETE'
+                actionText: i18n._('DELETE')
             });
 
         };

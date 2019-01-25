@@ -57,13 +57,13 @@ let lists = [{
                 return qs.search(path, $stateParams.user_search);
             }
         ],
-        OrgUserList: ['UserList', 'GetBasePath', '$stateParams', function(UserList, GetBasePath, $stateParams) {
+        OrgUserList: ['UserList', 'GetBasePath', '$stateParams', 'i18n', function(UserList, GetBasePath, $stateParams, i18n) {
             let list = _.cloneDeep(UserList);
             delete list.actions.add;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/users`;
             list.searchRowActions = {
                 add: {
-                    awToolTip: 'Add existing user to organization',
+                    awToolTip: i18n._('Add existing user to organization'),
                     actionClass: 'at-Button--add',
                     actionId: 'button-add',
                     ngClick: 'addUsers()'
@@ -101,14 +101,14 @@ let lists = [{
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        OrgTeamList: ['TeamList', 'GetBasePath', '$stateParams', function(TeamList, GetBasePath, $stateParams) {
+        OrgTeamList: ['TeamList', 'GetBasePath', '$stateParams', 'i18n', function(TeamList, GetBasePath, $stateParams, i18n) {
             let list = _.cloneDeep(TeamList);
             delete list.actions.add;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
-            list.listTitle = N_('Teams') + ` | {{ name }}`;
+            list.listTitle = i18n._('Teams') + ` | {{ name }}`;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/teams`;
-            list.emptyListText = `${N_('This list is populated by teams added from the')}&nbsp;<a ui-sref='teams.add'>${N_('Teams')}</a>&nbsp;${N_('section')}`;
+            list.emptyListText = `${i18n._('This list is populated by teams added from the')}&nbsp;<a ui-sref='teams.add'>${N_('Teams')}</a>&nbsp;${N_('section')}`;
             return list;
         }],
         OrgTeamsDataset: ['OrgTeamList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -147,15 +147,15 @@ let lists = [{
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        OrgInventoryList: ['InventoryList', 'GetBasePath', '$stateParams', function(InventoryList, GetBasePath, $stateParams) {
+        OrgInventoryList: ['InventoryList', 'GetBasePath', '$stateParams', 'i18n', function(InventoryList, GetBasePath, $stateParams, i18n) {
             let list = _.cloneDeep(InventoryList);
             delete list.actions.add;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
             list.title = true;
-            list.listTitle = N_('Inventories') + ` | {{ name }}`;
+            list.listTitle = i18n._('Inventories') + ` | {{ name }}`;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/inventories`;
-            list.emptyListText = `${N_("This list is populated by inventories added from the")}&nbsp;<a ui-sref='inventories.add'>${N_("Inventories")}</a>&nbsp;${N_("section")}`;
+            list.emptyListText = `${i18n._("This list is populated by inventories added from the")}&nbsp;<a ui-sref='inventories.add'>${N_("Inventories")}</a>&nbsp;${N_("section")}`;
             return list;
         }],
         OrgInventoryDataset: ['OrgInventoryList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -199,14 +199,14 @@ let lists = [{
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        OrgProjectList: ['ProjectList', 'GetBasePath', '$stateParams', function(ProjectList, GetBasePath, $stateParams) {
+        OrgProjectList: ['ProjectList', 'GetBasePath', '$stateParams', 'i18n', function(ProjectList, GetBasePath, $stateParams, i18n) {
             let list = _.cloneDeep(ProjectList);
             delete list.actions;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
-            list.listTitle = N_('Projects') + ` | {{ name }}`;
+            list.listTitle = i18n._('Projects') + ` | {{ name }}`;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/projects`;
-            list.emptyListText = `${N_("This list is populated by projects added from the")}&nbsp;<a ui-sref='projects.add'>${N_("Projects")}</a>&nbsp;${N_("section")}`;
+            list.emptyListText = `${i18n._("This list is populated by projects added from the")}&nbsp;<a ui-sref='projects.add'>${N_("Projects")}</a>&nbsp;${N_("section")}`;
             return list;
         }],
         OrgProjectDataset: ['OrgProjectList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -267,18 +267,18 @@ let lists = [{
                 return qs.search(path, $stateParams[`user_search`]);
             }
         ],
-        OrgAdminList: ['UserList', 'GetBasePath', '$stateParams', function(UserList, GetBasePath, $stateParams) {
+        OrgAdminList: ['UserList', 'GetBasePath', '$stateParams', 'i18n', function(UserList, GetBasePath, $stateParams, i18n) {
             let list = _.cloneDeep(UserList);
             delete list.actions.add;
             list.basePath = `${GetBasePath('organizations')}${$stateParams.organization_id}/admins`;
             list.searchRowActions = {
                 add: {
-                    awToolTip: 'Add existing user to organization as administrator',
+                    awToolTip: i18n._('Add existing user to organization as administrator'),
                     actionClass: 'at-Button--add',
                     ngClick: 'addUsers()'
                 }
             };
-            list.listTitle = N_('Admins') + ` | {{ name }}`;
+            list.listTitle = i18n._('Admins') + ` | {{ name }}`;
             return list;
         }]
     }

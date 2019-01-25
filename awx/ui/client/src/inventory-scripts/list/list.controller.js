@@ -127,7 +127,7 @@ export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
                         resourceName: $filter('sanitize')(name),
                         body: deleteModalBody,
                         action: action,
-                        actionText: 'DELETE'
+                        actionText: i18n._('DELETE')
                     });
                 });
         };

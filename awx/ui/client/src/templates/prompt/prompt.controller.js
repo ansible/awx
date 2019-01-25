@@ -1,8 +1,5 @@
-export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings',
-    function (Rest, GetBasePath, ProcessErrors, CredentialType, strings) {
-
-        // strings.get('deleteResource.HEADER')
-        // ${strings.get('deleteResource.CONFIRM', 'template')}
+export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings',
+    function (ProcessErrors, CredentialType, strings) {
 
         const vm = this || {};
 
@@ -186,7 +183,7 @@ export default [ 'Rest', 'GetBasePath', 'ProcessErrors', 'CredentialTypeModel', 
                         }
                         vm.steps.preview.tab.order = order;
                         vm.steps.preview.tab._disabled = vm.readOnlyPrompts ? false : true;
-                        modal.show('PROMPT');
+                        modal.show(strings.get('prompt.PROMPT'));
                         vm.promptData.triggerModalOpen = false;
 
                         modal.onClose = () => {

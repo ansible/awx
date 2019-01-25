@@ -75,11 +75,11 @@ export default ['$scope', 'Rest', 'TeamList', 'Prompt',
             };
 
             Prompt({
-                hdr: 'Delete',
+                hdr: i18n._('Delete'),
                 resourceName: $filter('sanitize')(name),
                 body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete this team?') + '</div>',
                 action: action,
-                actionText: 'DELETE'
+                actionText: i18n._('DELETE')
             });
         };
     }
