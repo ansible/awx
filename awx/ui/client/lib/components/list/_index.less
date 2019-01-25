@@ -118,7 +118,7 @@
 }
 
 .at-Row--collapsed {
-    max-height: 50px !important;
+    max-height: 50px;
 }
 .at-Row--active {
     border-left: @at-border-style-list-active-indicator;
@@ -174,7 +174,6 @@
 
 .at-Row-actions {
     display: flex;
-    flex-wrap: wrap;
 }
 
 .at-Row-items {
@@ -351,8 +350,10 @@
 }
 
 @media screen and (max-width: @at-breakpoint-compact-list) {
-    .at-Row-actions {
-        flex-direction: column;
+    .at-Row--collapsed {
+        max-height: 60px;
+    }
+    .at-Row-actions {   
         align-items: center;
     }
 

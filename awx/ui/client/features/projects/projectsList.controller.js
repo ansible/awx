@@ -417,6 +417,16 @@ function projectsListController (
         }
         return tooltip;
     }
+
+    vm.isCollapsed = true;
+
+    vm.onCollapse = () => {
+        vm.isCollapsed = true;
+    };
+
+    vm.onExpand = () => {
+        vm.isCollapsed = false;
+    };
 }
 
 projectsListController.$inject = [
