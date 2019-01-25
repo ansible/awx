@@ -9,7 +9,7 @@ Please see the Tower documentation as well as Ansible blog posts for basic SAML 
 See http://python-social-auth-docs.readthedocs.io/en/latest/backends/saml.html#advanced-settings for more information.
 
 # Configure SAML for Team and Organization Membership
-AWX can be configured to look for particular attributes that contain AWX Team and Organization membership to associate with users when they login to AWX. The attribute names are defined in AWX settings. Specifically, the authentication settings tab and SAML sub category fields *SAML Team Map* and *SAML Organization Attribute Mapping*. The meaning and usefulness of these settings is best motivated through example.
+AWX can be configured to look for particular attributes that contain AWX Team and Organization membership to associate with users when they login to AWX. The attribute names are defined in AWX settings. Specifically, the authentication settings tab and SAML sub category fields *SAML Team Attribute Mapping* and *SAML Organization Attribute Mapping*. The meaning and usefulness of these settings is best motivated through example.
 
 **Example SAML Organization Attribute Mapping**
 Below is an example SAML attribute that embeds user organization membership in the attribute *member-of*.
@@ -44,7 +44,7 @@ Below, the corresponding AWX configuration.
 
 **remove_admins:** True to remove user from all organizations that it is admin before adding the user to the list of Organizations admins. False to keep the user in whatever Organization(s) they are in as admin while adding the user as an Organization administrator in the SAML attribute.
 
-**Example SAML Team Map**
+**Example SAML Team Attribute Mapping**
 Below is another example of a SAML attribute that contains a Team membership in a list.
 ```
   <saml:AttributeStatement>
