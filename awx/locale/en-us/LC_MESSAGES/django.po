@@ -2020,7 +2020,7 @@ msgstr ""
 
 #: awx/main/conf.py:286
 msgid ""
-"Allows roles to be dynamically downlaoded from a requirements.yml file for "
+"Allows roles to be dynamically downloaded from a requirements.yml file for "
 "SCM projects."
 msgstr ""
 
