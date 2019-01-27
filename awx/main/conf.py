@@ -295,7 +295,7 @@ register(
     field_class=fields.BooleanField,
     default=True,
     label=_('Enable Role Download'),
-    help_text=_('Allows roles to be dynamically downlaoded from a requirements.yml file for SCM projects.'),
+    help_text=_('Allows roles to be dynamically downloaded from a requirements.yml file for SCM projects.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
