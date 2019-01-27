@@ -1,4 +1,3 @@
-# check_docker.yml
 ---
 - name: postgres_data_dir should be defined
   assert:

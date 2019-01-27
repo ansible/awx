@@ -1,3 +1,4 @@
+---
 - import_tasks: set_image.yml
 
 - import_tasks: standalone.yml

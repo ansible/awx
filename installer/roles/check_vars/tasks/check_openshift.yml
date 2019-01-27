@@ -1,4 +1,3 @@
-# check_openshift.yml
 ---
 - name: openshift_project should be defined
   assert:

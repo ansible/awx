@@ -1,4 +1,3 @@
-# main.yml
 ---
 - include_tasks: check_openshift.yml
   when: openshift_host is defined and openshift_host != ''
