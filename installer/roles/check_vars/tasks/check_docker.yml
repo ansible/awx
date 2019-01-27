@@ -3,12 +3,12 @@
 - name: postgres_data_dir should be defined
   assert:
     that:
-    - postgres_data_dir is defined and postgres_data_dir != ''
+      - postgres_data_dir is defined and postgres_data_dir != ''
     msg: "Set the value of 'postgres_data_dir' in the inventory file."
   when: pg_hostname is not defined or pg_hostname == ''
 
 - name: host_port should be defined
   assert:
     that:
-    - host_port is defined and host_port != ''
+      - host_port is defined and host_port != ''
     msg: "Set the value of 'host_port' in the inventory file."
