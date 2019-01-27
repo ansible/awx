@@ -54,4 +54,3 @@
   fail:
     msg: "{{ openshift_auth_result.stderr | default('Invalid token') }}"
   when: openshift_auth_result.rc is defined and openshift_auth_result.rc != 0
-
