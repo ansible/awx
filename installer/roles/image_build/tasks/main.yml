@@ -25,7 +25,7 @@
 
 - name: AWX Distribution
   debug:
-    msg: "{{ awx_sdist_file }}"
+    var: awx_sdist_file
 
 - name: Stat distribution file
   stat:
