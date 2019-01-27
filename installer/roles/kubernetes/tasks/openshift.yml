@@ -23,7 +23,7 @@
   when:
     - pg_hostname is not defined or pg_hostname == ''
     - openshift_pg_emptydir is defined
-    - (openshift_pg_emptydir | bool) != true
+    - not (openshift_pg_emptydir | bool)
 
 - name: Set postgresql service name
   set_fact:
