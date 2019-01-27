@@ -5,7 +5,9 @@
     username: "{{ docker_registry_username }}"
     password: "{{ docker_registry_password }}"
     reauthorize: yes
-  when: docker_registry is defined and docker_registry_password is defined
+  when:
+    - docker_registry is defined
+    - docker_registry_password is defined
   delegate_to: localhost
 
 - name: Remove local images to ensure proper push behavior

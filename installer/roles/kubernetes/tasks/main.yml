@@ -1,7 +1,9 @@
 ---
 - fail:
     msg: "Only set one of kubernetes_context or openshift_host"
-  when: openshift_host is defined and kubernetes_context is defined
+  when:
+    - openshift_host is defined
+    - kubernetes_context is defined
 
 - include_tasks: "{{ tasks }}"
   loop:
@@ -95,7 +97,8 @@
       stable/postgresql
   when:
     - pg_hostname is not defined or pg_hostname == ''
-    - postgres_svc_details is defined and postgres_svc_details.rc != 0
+    - postgres_svc_details is defined
+    - postgres_svc_details.rc != 0
     - kubernetes_context is defined
   register: kubernetes_pg_activate
   no_log: yes
