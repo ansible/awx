@@ -71,7 +71,7 @@
   archive:
     path: "{{ playbook_dir }}/tower-openshift-backup-{{ now }}"
     dest: "{{ item }}"
-  with_items:
+  loop:
     - "{{ playbook_dir }}/tower-openshift-backup-{{ now }}.tar.gz"
     - "{{ playbook_dir }}/tower-openshift-backup-latest.tar.gz"
 

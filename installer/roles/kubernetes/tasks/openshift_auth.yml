@@ -9,7 +9,7 @@
   file:
     path: "{{ item  }}"
     state: directory
-  with_items:
+  loop:
     - "{{ kubernetes_base_path }}"
     - "{{ openshift_oc_config_file | dirname }}"
 

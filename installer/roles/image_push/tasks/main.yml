@@ -35,7 +35,7 @@
         repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ web_image }}"
         tag: "{{ item }}"
         push: yes
-      with_items:
+      loop:
         - "latest"
         - "{{ awx_version }}"
 
@@ -45,7 +45,7 @@
         repository: "{{ docker_registry }}/{{ docker_registry_repository }}/{{ task_image }}"
         tag: "{{ item }}"
         push: yes
-      with_items:
+      loop:
         - "latest"
         - "{{ awx_version }}"
   delegate_to: localhost

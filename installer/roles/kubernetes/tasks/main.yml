@@ -4,7 +4,7 @@
   when: openshift_host is defined and kubernetes_context is defined
 
 - include_tasks: "{{ tasks }}"
-  with_items:
+  loop:
     - openshift_auth.yml
     - openshift.yml
   loop_control:
@@ -12,7 +12,7 @@
   when: openshift_host is defined
 
 - include_tasks: "{{ tasks }}"
-  with_items:
+  loop:
     - kubernetes_auth.yml
     - kubernetes.yml
   loop_control:
@@ -128,7 +128,7 @@
 - name: Render deployment templates
   set_fact:
     "{{ item }}": "{{ lookup('template', item + '.yml.j2') }}"
-  with_items:
+  loop:
     - 'configmap'
     - 'deployment'
     - 'secret'
@@ -137,7 +137,7 @@
 - name: Apply Deployment
   shell: |
     echo {{ item | quote }} | {{ kubectl_or_oc }} apply -f -
-  with_items:
+  loop:
     - "{{ configmap }}"
     - "{{ deployment }}"
     - "{{ secret }}"
