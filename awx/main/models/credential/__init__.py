@@ -32,7 +32,6 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.utils import encrypt_field
-from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS
 from . import injectors as builtin_injectors
 
 __all__ = ['Credential', 'CredentialType', 'V1Credential', 'build_safe_env']
@@ -163,7 +162,6 @@ class V1Credential(object):
             max_length=32,
             blank=True,
             default='',
-            choices=CHOICES_PRIVILEGE_ESCALATION_METHODS,
             help_text=_('Privilege escalation method.')
         ),
         'become_username': models.CharField(

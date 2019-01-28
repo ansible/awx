@@ -1,13 +1,11 @@
 # Copyright (c) 2017 Ansible by Red Hat
 # All Rights Reserved.
 
-import itertools
-
 import pytest
 from django.core.exceptions import ValidationError
 
 from awx.main.utils import decrypt_field
-from awx.main.models import Credential, CredentialType, V1Credential
+from awx.main.models import Credential, CredentialType
 
 from rest_framework import serializers
 
@@ -206,10 +204,11 @@ def test_vault_validation(organization, inputs, valid):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('become_method, valid', list(zip(
-    dict(V1Credential.FIELDS['become_method'].choices).keys(),
-    itertools.repeat(True)
-)) + [('invalid-choice', False)])
+@pytest.mark.parametrize('become_method, valid', [
+    ('', True),
+    ('sudo', True),
+    ('custom-plugin', True),
+])
 def test_choices_validity(become_method, valid, organization):
     inputs = {'become_method': become_method}
     cred_type = CredentialType.defaults['ssh']()
