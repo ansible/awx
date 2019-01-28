@@ -26,7 +26,7 @@ from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.utils import get_cpu_capacity, get_mem_capacity, get_system_task_capacity
 from awx.main.models.mixins import RelatedJobsMixin
 
-__all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState',)
+__all__ = ('Instance', 'InstanceGroup', 'JobOrigin', 'TowerScheduleState', 'TowerAnalyticsState')
 
 
 class HasPolicyEditsMixin(HasEditsMixin):
@@ -249,6 +249,10 @@ class InstanceGroup(HasPolicyEditsMixin, BaseModel, RelatedJobsMixin):
 
 class TowerScheduleState(SingletonModel):
     schedule_last_run = models.DateTimeField(auto_now_add=True)
+
+
+class TowerAnalyticsState(SingletonModel):
+    last_run = models.DateTimeField(auto_now_add=True)
 
 
 class JobOrigin(models.Model):

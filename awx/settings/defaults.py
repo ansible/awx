@@ -484,6 +484,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.purge_old_stdout_files',
         'schedule': timedelta(days=7)
     },
+    'gather_analytics': {
+        'task': 'awx.main.tasks.gather_analytics',
+        'schedule': timedelta(days=1)
+    },
     'task_manager': {
         'task': 'awx.main.scheduler.tasks.run_task_manager',
         'schedule': timedelta(seconds=20),
@@ -956,6 +960,7 @@ TOWER_ADMIN_ALERTS = True
 TOWER_URL_BASE = "https://towerhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
+INSIGHTS_AGENT_MIME = 'application/example'
 
 TOWER_SETTINGS_MANIFEST = {}
 
