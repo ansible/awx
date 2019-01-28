@@ -481,6 +481,19 @@ function getLimitDetails () {
     return { label, value };
 }
 
+function getExecutionNodeDetails () {
+    const executionNode = resource.model.get('execution_node');
+
+    if (!executionNode) {
+        return null;
+    }
+
+    const label = strings.get('labels.EXECUTION_NODE');
+    const value = $filter('sanitize')(executionNode);
+
+    return { label, value };
+}
+
 function getInstanceGroupDetails () {
     const instanceGroup = resource.model.get('summary_fields.instance_group');
 
@@ -761,6 +774,7 @@ function JobDetailsController (
         vm.credentials = getCredentialDetails();
         vm.forks = getForkDetails();
         vm.limit = getLimitDetails();
+        vm.executionNode = getExecutionNodeDetails();
         vm.instanceGroup = getInstanceGroupDetails();
         vm.jobTags = getJobTagDetails();
         vm.skipTags = getSkipTagDetails();
