@@ -44,6 +44,14 @@ function AtSideNavController ($scope, $window) {
             vm.isExpanded = false;
         }
     });
+
+    $(window).resize(() => {
+        if ($window.innerWidth <= breakpoint) {
+            vm.isExpanded = false;
+        } else {
+            vm.isExpanded = true;
+        }
+    });
 }
 
 AtSideNavController.$inject = ['$scope', '$window'];
