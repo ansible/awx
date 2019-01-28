@@ -234,7 +234,7 @@ function ListTemplatesController(
                     dismissButton: false,
                     dismissOnTimeout: true
                 });
-                $state.go('.', null, { reload: true });
+                refreshTemplates();
             })
             .catch(createErrorHandler('copy job template', 'POST'))
             .finally(() => Wait('stop'));
@@ -264,7 +264,7 @@ function ListTemplatesController(
                                 dismissButton: false,
                                 dismissOnTimeout: true
                             });
-                            $state.go('.', null, { reload: true });
+                            refreshTemplates();
                         })
                         .catch(createErrorHandler('copy workflow', 'POST'))
                         .finally(() => Wait('stop'));
