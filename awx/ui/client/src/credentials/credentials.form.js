@@ -278,10 +278,9 @@ export default ['i18n', function(i18n) {
                 "become_method": {
                     label: i18n._("Privilege Escalation"),
                     // hintText: "If your playbooks use privilege escalation (\"sudo: true\", \"su: true\", etc), you can specify the username to become, and the password to use here.",
-                    type: 'select',
+                    type: 'text',
                     ngShow: "kind.value == 'ssh'",
                     dataTitle: i18n._('Privilege Escalation'),
-                    ngOptions: 'become.label for become in become_options track by become.value',
                     awPopOver: "<p>" + i18n.sprintf(i18n._("Specify a method for %s operations. " +
                     "This is equivalent to specifying the %s parameter, where %s could be "+
                     "%s"), "'become'", "<code>--become-method=BECOME_METHOD</code>", "<code>BECOME_METHOD</code>", "<code>sudo | su | pbrun | pfexec | runas</code>") + " <br>" + i18n.sprintf(i18n._("(defaults to %s)"), "<code>sudo</code>") + "</p>",
