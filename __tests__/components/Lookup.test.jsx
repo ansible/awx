@@ -40,7 +40,7 @@ describe('<Lookup />', () => {
           data={mockData}
         />
       </I18nProvider>
-    );    
+    );
     const searchItem = wrapper.find('.pf-c-input-group__text#search');
     searchItem.first().simulate('click');
     wrapper.find('input[type="checkbox"]').simulate('change');

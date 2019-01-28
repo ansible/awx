@@ -10,9 +10,8 @@ describe('<OrganizationDetail />', () => {
       <I18nProvider>
         <MemoryRouter initialEntries={['/organizations/1']} initialIndex={0}>
           <OrganizationDetail
-            match={{ path: '/organizations/:id', url: '/organizations/1' }}
-            location={{ search: '', pathname: '/organizations/1' }}
-            params={{}}
+            match={{ url: '/organizations/1' }}
+            organization={{ name: 'Default' }}
           />
         </MemoryRouter>
       </I18nProvider>

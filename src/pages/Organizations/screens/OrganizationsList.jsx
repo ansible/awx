@@ -6,11 +6,10 @@ import {
   withRouter
 } from 'react-router-dom';
 import { I18n, i18nMark } from '@lingui/react';
-import { Trans, t } from '@lingui/macro';
+import { t } from '@lingui/macro';
 import {
   PageSection,
   PageSectionVariants,
-  Title,
 } from '@patternfly/react-core';
 
 import DataListToolbar from '../../../components/DataListToolbar';
@@ -177,7 +176,6 @@ class OrganizationsList extends Component {
 
   render () {
     const {
-      light,
       medium,
     } = PageSectionVariants;
     const {
@@ -193,15 +191,9 @@ class OrganizationsList extends Component {
       selected,
     } = this.state;
     const { match } = this.props;
-    const parentBreadcrumb = { name: i18nMark('Organizations'), url: match.url };
 
     return (
       <Fragment>
-        <PageSection variant={light} className="pf-m-condensed">
-          <Title size="2xl">
-            <Trans>Organizations</Trans>
-          </Title>
-        </PageSection>
         <PageSection variant={medium}>
           <DataListToolbar
             addUrl={`${match.url}/add`}
@@ -224,7 +216,6 @@ class OrganizationsList extends Component {
                     itemId={o.id}
                     name={o.name}
                     detailUrl={`${match.url}/${o.id}`}
-                    parentBreadcrumb={parentBreadcrumb}
                     userCount={o.summary_fields.related_field_counts.users}
                     teamCount={o.summary_fields.related_field_counts.teams}
                     isSelected={selected.includes(o.id)}

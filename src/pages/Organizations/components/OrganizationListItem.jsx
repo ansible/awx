@@ -17,7 +17,6 @@ export default ({
   isSelected,
   onSelect,
   detailUrl,
-  parentBreadcrumb
 }) => (
   <li key={itemId} className="pf-c-data-list__item" aria-labelledby="check-action-item1">
     <div className="pf-c-data-list__check">
@@ -35,17 +34,14 @@ export default ({
     <div className="pf-c-data-list__cell">
       <span id="check-action-item1">
         <Link
-          to={{
-            pathname: detailUrl,
-            state: { breadcrumb: [parentBreadcrumb, { name, url: detailUrl }] }
-          }}
+          to={`${detailUrl}`}
         >
           <b>{name}</b>
         </Link>
       </span>
     </div>
     <div className="pf-c-data-list__cell">
-      <Link to={`${detailUrl}?tab=access`}>
+      <Link to={`${detailUrl}/access`}>
         <Trans>Users</Trans>
       </Link>
       <Badge isRead>
@@ -53,7 +49,7 @@ export default ({
         {userCount}
         {' '}
       </Badge>
-      <Link to={`${detailUrl}?tab=teams`}>
+      <Link to={`${detailUrl}/teams`}>
         <Trans>Teams</Trans>
       </Link>
       <Badge isRead>
