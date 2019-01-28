@@ -322,6 +322,19 @@ def send_notifications(notification_list, job_id=None):
 
 
 @task()
+def gather_analytics():
+    if settings.PENDO_TRACKING_STATE == 'off':
+        return
+    try:
+        tgz = analytics.gather()
+        logger.debug('gathered analytics: {}'.format(tgz))
+        analytics.ship(tgz)
+    finally:
+        if os.path.exists(tgz):
+            os.remove(tgz)
+
+
+@task()
 def run_administrative_checks():
     logger.warn("Running administrative checks.")
     if not settings.TOWER_ADMIN_ALERTS:

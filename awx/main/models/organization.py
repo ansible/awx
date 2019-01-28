@@ -156,7 +156,9 @@ class Profile(CreatedModifiedModel):
 
 class UserSessionMembership(BaseModel):
     '''
-    A lookup table for session membership given user.
+    A lookup table for API session membership given user. Note, there is a
+    different session created by channels for websockets using the same 
+    underlying model.  
     '''
 
     class Meta:

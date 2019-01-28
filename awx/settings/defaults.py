@@ -5,6 +5,7 @@ import os
 import re  # noqa
 import sys
 from datetime import timedelta
+from celery.schedules import crontab
 
 # global settings
 from django.conf import global_settings
@@ -486,6 +487,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.purge_old_stdout_files',
         'schedule': timedelta(days=7)
     },
+    'gather_analytics': {
+        'task': 'awx.main.tasks.gather_analytics',
+        'schedule': crontab(hour=0)
+    },
     'task_manager': {
         'task': 'awx.main.scheduler.tasks.run_task_manager',
         'schedule': timedelta(seconds=20),
@@ -958,6 +963,7 @@ TOWER_ADMIN_ALERTS = True
 TOWER_URL_BASE = "https://towerhost"
 
 INSIGHTS_URL_BASE = "https://example.org"
+INSIGHTS_AGENT_MIME = 'application/example'
 
 TOWER_SETTINGS_MANIFEST = {}
 
