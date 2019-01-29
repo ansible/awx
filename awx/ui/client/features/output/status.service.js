@@ -279,6 +279,12 @@ function JobStatusService (moment, message) {
         this.state.environment = env;
     };
 
+    this.setExecutionNode = node => {
+        if (!node) return;
+
+        this.state.executionNode = node;
+    };
+
     this.setStatsEvent = data => {
         if (!data) return;
 
@@ -321,6 +327,7 @@ function JobStatusService (moment, message) {
                 this.setStarted(model.get('started'));
                 this.setJobStatus(model.get('status'));
                 this.setEnvironment(model.get('custom_virtualenv'));
+                this.setExecutionNode(model.get('execution_node'));
 
                 this.initHostStatusCounts({ model });
                 this.initPlaybookCounts({ model });
