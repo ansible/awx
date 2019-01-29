@@ -18,6 +18,7 @@ import '@patternfly/patternfly-next/patternfly.css';
 import './app.scss';
 import './components/Pagination/styles.scss';
 import './components/DataListToolbar/styles.scss';
+import './components/SelectedList/styles.scss';
 
 import APIClient from './api';
 

@@ -8,8 +8,12 @@ import {
   Toolbar,
   ToolbarGroup,
 } from '@patternfly/react-core';
+import { I18n } from '@lingui/react';
+import { t } from '@lingui/macro';
 
 import CheckboxListItem from '../ListItem';
+
+import SelectedList from '../SelectedList';
 
 class Lookup extends React.Component {
   constructor (props) {
@@ -28,9 +32,9 @@ class Lookup extends React.Component {
     this.handleModalToggle();
   }
 
-  onChecked (_, evt) {
+  onChecked (row) {
     const { lookupChange } = this.props;
-    lookupChange(evt.target.value);
+    lookupChange(row);
   }
 
   onRemove (evt) {
@@ -57,7 +61,7 @@ class Lookup extends React.Component {
 
   render () {
     const { isModalOpen } = this.state;
-    const { data, lookupHeader } = this.props;
+    const { data, lookupHeader, selected } = this.props;
     return (
       <div className="pf-c-input-group awx-lookup">
         <Button className="pf-c-input-group__text" aria-label="search" id="search" onClick={this.onLookup}>
@@ -77,10 +81,22 @@ class Lookup extends React.Component {
                 itemId={i.id}
                 name={i.name}
                 isSelected={i.isChecked}
-                onSelect={this.onChecked}
+                onSelect={() => this.onChecked(i)}
               />
             ))}
           </ul>
+          {selected.length > 0 && (
+            <I18n>
+              {({ i18n }) => (
+                <SelectedList
+                  label={i18n._(t`Selected`)}
+                  selected={selected}
+                  showOverflowAfter={5}
+                  onRemove={this.onChecked}
+                />
+              )}
+            </I18n>
+          )}
           <ActionGroup className="at-align-right">
             <Toolbar>
               <ToolbarGroup>

@@ -92,4 +92,85 @@ describe('<OrganizationAdd />', () => {
       done();
     });
   });
+
+  test('onSelectChange successfully sets custom_virtualenv state', () => {
+    const wrapper = mount(
+      <MemoryRouter>
+        <OrganizationAdd api={{}} />
+      </MemoryRouter>
+    ).find('OrganizationAdd');
+    wrapper.instance().onSelectChange('foobar');
+    expect(wrapper.state('custom_virtualenv')).toBe('foobar');
+  });
+
+  test('onLookupChange successfully adds/removes row from selectedInstanceGroups state', () => {
+    const wrapper = mount(
+      <MemoryRouter>
+        <OrganizationAdd api={{}} />
+      </MemoryRouter>
+    ).find('OrganizationAdd');
+    wrapper.setState({ results: [{
+      id: 1,
+      name: 'foo'
+    }] });
+    wrapper.instance().onLookupChange({
+      id: 1,
+      name: 'foo'
+    });
+    expect(wrapper.state('results')).toEqual([{
+      id: 1,
+      name: 'foo',
+      isChecked: true
+    }]);
+    expect(wrapper.state('selectedInstanceGroups')).toEqual([{
+      id: 1,
+      name: 'foo'
+    }]);
+    wrapper.instance().onLookupChange({
+      id: 1,
+      name: 'foo'
+    });
+    expect(wrapper.state('results')).toEqual([{
+      id: 1,
+      name: 'foo',
+      isChecked: false
+    }]);
+    expect(wrapper.state('selectedInstanceGroups')).toEqual([]);
+  });
+
+  test('onSubmit posts instance groups from selectedInstanceGroups', async () => {
+    const createOrganizationFn = jest.fn().mockResolvedValue({
+      data: {
+        id: 1,
+        name: 'mock org',
+        related: {
+          instance_groups: '/api/v2/organizations/1/instance_groups'
+        }
+      }
+    });
+    const createInstanceGroupsFn = jest.fn().mockResolvedValue('done');
+    const api = {
+      createOrganization: createOrganizationFn,
+      createInstanceGroups: createInstanceGroupsFn
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        <OrganizationAdd api={api} />
+      </MemoryRouter>
+    ).find('OrganizationAdd');
+    wrapper.setState({
+      name: 'mock org',
+      selectedInstanceGroups: [{
+        id: 1,
+        name: 'foo'
+      }]
+    });
+    await wrapper.instance().onSubmit();
+    expect(createOrganizationFn).toHaveBeenCalledWith({
+      custom_virtualenv: '',
+      description: '',
+      name: 'mock org'
+    });
+    expect(createInstanceGroupsFn).toHaveBeenCalledWith('/api/v2/organizations/1/instance_groups', 1);
+  });
 });

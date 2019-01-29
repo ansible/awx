@@ -11,6 +11,7 @@ describe('<Lookup />', () => {
         lookup_header="Foo Bar"
         lookupChange={() => { }}
         data={mockData}
+        selected={[]}
       />
     );
   });
@@ -22,6 +23,7 @@ describe('<Lookup />', () => {
           lookup_header="Foo Bar"
           lookupChange={() => { }}
           data={mockData}
+          selected={[]}
         />
       </I18nProvider>
     );
@@ -38,6 +40,7 @@ describe('<Lookup />', () => {
           lookup_header="Foo Bar"
           lookupChange={() => { }}
           data={mockData}
+          selected={[]}
         />
       </I18nProvider>
     );
@@ -55,6 +58,7 @@ describe('<Lookup />', () => {
           lookup_header="Foo Bar"
           lookupChange={() => { }}
           data={mockData}
+          selected={[]}
         />
       </I18nProvider>
     );
@@ -71,6 +75,7 @@ describe('<Lookup />', () => {
           lookup_header="Foo Bar"
           lookupChange={() => { }}
           data={mockData}
+          selected={[]}
         />
       </I18nProvider>
     );

@@ -45,9 +45,9 @@ class OrganizationAdd extends React.Component {
     name: '',
     description: '',
     results: [],
-    instance_groups: [],
     custom_virtualenv: '',
     error: '',
+    selectedInstanceGroups: []
   };
 
   async componentDidMount () {
@@ -57,7 +57,7 @@ class OrganizationAdd extends React.Component {
       const results = format(data);
       this.setState({ results });
     } catch (error) {
-      this.setState({ getInstanceGroupsError: error });
+      this.setState({ error });
     }
   }
 
@@ -65,36 +65,56 @@ class OrganizationAdd extends React.Component {
     this.setState({ custom_virtualenv: value });
   }
 
-  onLookupChange (id) {
-    const { results } = this.state;
-    const selected = { ...results };
-    const index = id - 1;
-    selected[index].isChecked = !selected[index].isChecked;
-    this.setState({ selected });
+  onLookupChange (row) {
+    const { results, selectedInstanceGroups } = this.state;
+    const selectedIndex = selectedInstanceGroups
+      .findIndex(instanceGroup => instanceGroup.id === row.id);
+    const resultsIndex = results.findIndex(instanceGroup => instanceGroup.id === row.id);
+    if (selectedIndex > -1) {
+      // Remove it from the list of selected instance groups
+      selectedInstanceGroups.splice(selectedIndex, 1);
+      if (resultsIndex > -1) {
+        results[resultsIndex].isChecked = false;
+      }
+      this.setState({ selectedInstanceGroups, results });
+    } else {
+      // Add it to the list of selected instance groups
+      if (resultsIndex > -1) {
+        results[resultsIndex].isChecked = true;
+      }
+      this.setState(prevState => ({
+        results,
+        selectedInstanceGroups: [...prevState.selectedInstanceGroups, row]
+      }));
+    }
   }
 
   async onSubmit () {
     const { api } = this.props;
-    const data = Object.assign({}, { ...this.state });
-    const { results } = this.state;
+    const { name, description, custom_virtualenv } = this.state;
+    const data = {
+      name,
+      description,
+      custom_virtualenv
+    };
+    const { selectedInstanceGroups } = this.state;
     try {
       const { data: response } = await api.createOrganization(data);
       const url = response.related.instance_groups;
-      const selected = results.filter(group => group.isChecked);
       try {
-        if (selected.length > 0) {
-          selected.forEach(async (select) => {
+        if (selectedInstanceGroups.length > 0) {
+          selectedInstanceGroups.forEach(async (select) => {
             await api.createInstanceGroups(url, select.id);
           });
         }
       } catch (err) {
-        this.setState({ createInstanceGroupsError: err });
+        this.setState({ error: err });
       } finally {
         this.resetForm();
         this.onSuccess(response.id);
       }
     } catch (err) {
-      this.setState({ onSubmitError: err });
+      this.setState({ error: err });
     }
   }
 
@@ -123,7 +143,14 @@ class OrganizationAdd extends React.Component {
   }
 
   render () {
-    const { name, results, description, custom_virtualenv } = this.state;
+    const {
+      name,
+      results,
+      description,
+      custom_virtualenv,
+      selectedInstanceGroups,
+      error
+    } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
 
     return (
@@ -159,6 +186,7 @@ class OrganizationAdd extends React.Component {
                     lookupHeader="Instance Groups"
                     lookupChange={this.onLookupChange}
                     data={results}
+                    selected={selectedInstanceGroups}
                   />
                 </FormGroup>
                 <ConfigContext.Consumer>
@@ -182,6 +210,7 @@ class OrganizationAdd extends React.Component {
                   </ToolbarGroup>
                 </Toolbar>
               </ActionGroup>
+              { error ? <div>error</div> : '' }
             </Form>
           </CardBody>
         </Card>
