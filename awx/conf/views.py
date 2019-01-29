@@ -135,7 +135,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
                 setting.value = value
                 setting.save(update_fields=['value'])
                 settings_change_list.append(key)
-        if settings_change_list and 'migrate_to_database_settings' not in sys.argv:
+        if settings_change_list:
             handle_setting_changes.delay(settings_change_list)
 
     def destroy(self, request, *args, **kwargs):
@@ -150,7 +150,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
                 continue
             setting.delete()
             settings_change_list.append(setting.key)
-        if settings_change_list and 'migrate_to_database_settings' not in sys.argv:
+        if settings_change_list:
             handle_setting_changes.delay(settings_change_list)
 
         # When TOWER_URL_BASE is deleted from the API, reset it to the hostname
