@@ -137,8 +137,6 @@ def read_content(private_data_dir, env, inventory_update):
                 references[abs_file_path] = filename  # plugin filenames are universal
         except IsADirectoryError:
             dir_contents[abs_file_path] = '<directory>'
-    print('dir contents')
-    print(dir_contents)
 
     # Declare cross-file references, also use special keywords if it is the cache
     cache_referenced = False
@@ -169,8 +167,6 @@ def read_content(private_data_dir, env, inventory_update):
         raise AssertionError(
             'A cache file was referenced but never created, files:\n{}'.format(
                 json.dumps(dir_contents, indent=4)))
-    print('dir contents')
-    print(dir_contents)
 
     content = {}
     for abs_file_path, file_content in dir_contents.items():
@@ -181,8 +177,6 @@ def read_content(private_data_dir, env, inventory_update):
         reference_key = references[abs_file_path]
         file_content = private_key_regex.sub('{{private_key}}', file_content)
         content[reference_key] = file_content
-    print(' contents')
-    print(content)
 
     return content
 

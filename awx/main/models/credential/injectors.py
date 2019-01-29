@@ -30,11 +30,13 @@ def gce(cred, env, private_data_dir):
         'token_uri': 'https://accounts.google.com/o/oauth2/token',
     }
 
-    path = os.path.join(private_data_dir, 'creds.json')
-    with open(path, 'w') as f:
-        json.dump(json_cred, f, indent=2)
+    handle, path = tempfile.mkstemp(dir=private_data_dir)
+    f = os.fdopen(handle, 'w')
+    json.dump(json_cred, f, indent=2)
+    f.close()
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
     env['GCE_CREDENTIALS_FILE_PATH'] = path
+    return path
 
 
 def azure_rm(cred, env, private_data_dir):

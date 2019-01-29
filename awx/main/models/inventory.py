@@ -1324,19 +1324,26 @@ class InventorySourceOptions(BaseModel):
         # in other cases we do not specify which plugin to use
         return None
 
-    def get_deprecated_credential(self, kind):
-        for cred in self.credentials.all():
-            if cred.credential_type.kind == kind:
-                return cred
-        else:
-            return None
-
     def get_cloud_credential(self):
+        """Return the credential which is directly tied to the inventory source type.
+        """
         credential = None
-        for cred in self.credentials.all():
-            if cred.credential_type.kind != 'vault':
-                credential = cred
+        if self.source in CLOUD_PROVIDERS:
+            cred_kind = self.source.replace('ec2', 'aws')
+            for cred in self.credentials.all():
+                if cred.kind == cred_kind:
+                    credential = cred
         return credential
+
+    def get_extra_credentials(self):
+        """Return all credentials that are not used by the inventory source injector.
+        """
+        primary_cred = self.get_cloud_credential()
+        extra_creds = []
+        for cred in self.credentials.all():
+            if primary_cred and cred.pk != primary_cred.pk:
+                extra_creds.append(cred)
+        return extra_creds
 
     @property
     def credential(self):
@@ -1711,14 +1718,6 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/jobs/inventory/{}".format(self.pk))
 
-    @property
-    def ansible_virtualenv_path(self):
-        if self.inventory and self.inventory.organization:
-            virtualenv = self.inventory.organization.custom_virtualenv
-            if virtualenv:
-                return virtualenv
-        return settings.ANSIBLE_VENV_PATH
-
     def get_actual_source_path(self):
         '''Alias to source_path that combines with project path for for SCM file based sources'''
         if self.inventory_source_id is None or self.inventory_source.source_project_id is None:
@@ -1834,8 +1833,8 @@ class PluginFileInjector(object):
     def filename(self):
         return '{0}.yml'.format(self.plugin_name)
 
-    def inventory_contents(self, inventory_source):
-        return yaml.safe_dump(self.inventory_as_dict(inventory_source), default_flow_style=False)
+    def inventory_contents(self, inventory_update, private_data_dir):
+        return yaml.safe_dump(self.inventory_as_dict(inventory_update, private_data_dir), default_flow_style=False)
 
     def should_use_plugin(self):
         return bool(
@@ -1843,36 +1842,59 @@ class PluginFileInjector(object):
             Version(self.ansible_version) >= Version(self.initial_version)
         )
 
-    def build_env(self, *args, **kwargs):
-        if self.should_use_plugin():
-            return self.build_plugin_env(*args, **kwargs)
-        else:
-            return self.build_script_env(*args, **kwargs)
+    @staticmethod
+    def get_builtin_injector(source):
+        from awx.main.models.credential import injectors as builtin_injectors
+        cred_kind = source.replace('ec2', 'aws')
+        if cred_kind not in dir(builtin_injectors):
+            return None
+        return getattr(builtin_injectors, cred_kind)
 
-    def build_plugin_env(self, inventory_update, env, private_data_dir):
+    def build_env(self, inventory_update, env, private_data_dir):
+        if self.should_use_plugin():
+            injector_env = self.get_plugin_env(inventory_update, private_data_dir)
+        else:
+            injector_env = self.get_script_env(inventory_update, private_data_dir)
+        env.update(injector_env)
         return env
 
-    def build_script_env(self, inventory_update, env, private_data_dir):
-        return env
+    def get_plugin_env(self, inventory_update, private_data_dir, safe=False):
+        return self.get_script_env(inventory_update, private_data_dir, safe)
 
-    def build_private_data(self, *args, **kwargs):
+    def get_script_env(self, inventory_update, private_data_dir, safe=False):
+        """By default, we will apply the standard managed_by_tower injectors
+        for the script injection
+        """
+        injected_env = {}
+        credential = inventory_update.get_cloud_credential()
+        builtin_injector = self.get_builtin_injector(inventory_update.source)
+        if builtin_injector is None:
+            return {}
+        builtin_injector(credential, injected_env, private_data_dir)
+        if safe:
+            from awx.main.models.credential import build_safe_env
+            injected_env = build_safe_env(injected_env)
+        return injected_env
+
+    def build_private_data(self, inventory_update, private_data_dir):
         if self.should_use_plugin():
-            return self.build_private_data(*args, **kwargs)
+            return self.build_plugin_private_data(inventory_update, private_data_dir)
         else:
-            return self.build_private_data(*args, **kwargs)
+            return self.build_script_private_data(inventory_update, private_data_dir)
 
-    def build_script_private_data(self, *args, **kwargs):
-        pass
+    def build_script_private_data(self, inventory_update, private_data_dir):
+        return None
 
-    def build_plugin_private_data(self, *args, **kwargs):
-        pass
+    def build_plugin_private_data(self, inventory_update, private_data_dir):
+        return None
 
 
 class gce(PluginFileInjector):
     plugin_name = 'gcp_compute'
     initial_version = '2.6'
 
-    def build_script_env(self, inventory_update, env, private_data_dir):
+    def get_script_env(self, inventory_update, private_data_dir):
+        env = super(gce, self).get_script_env(inventory_update, private_data_dir)
         env['GCE_ZONE'] = inventory_update.source_regions if inventory_update.source_regions != 'all' else ''  # noqa
 
         # by default, the GCE inventory source caches results on disk for
@@ -1886,20 +1908,43 @@ class gce(PluginFileInjector):
         env['GCE_INI_PATH'] = path
         return env
 
-    def inventory_as_dict(self, inventory_source):
+    def inventory_as_dict(self, inventory_update, private_data_dir):
         # NOTE: generalizing this to be use templating like credential types would be nice
         # but with YAML content that need to inject list parameters into the YAML,
         # it is hard to see any clean way we can possibly do this
+        credential = inventory_update.get_cloud_credential()
+        builtin_injector = self.get_builtin_injector(inventory_update.source)
+        creds_path = builtin_injector(credential, {}, private_data_dir)
         ret = dict(
             plugin='gcp_compute',
-            projects=[inventory_source.get_cloud_credential().project],
+            projects=[credential.get_input('project', default='')],
             filters=None,  # necessary cruft, see: https://github.com/ansible/ansible/pull/50025
-            service_account_file="creds.json",
+            service_account_file=creds_path,
             auth_kind="serviceaccount"
         )
-        if inventory_source.source_regions and 'all' not in inventory_source.source_regions:
-            ret['zones'] = inventory_source.source_regions.split(',')
+        if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
+            ret['zones'] = inventory_update.source_regions.split(',')
         return ret
+
+    def get_plugin_env(self, inventory_update, private_data_dir, safe=False):
+        # gce wants everything defined in inventory & cred files
+        return {}
+
+
+class rhv(PluginFileInjector):
+
+    def get_script_env(self, inventory_update, private_data_dir):
+        """Unlike the others, ovirt uses the custom credential templating
+        """
+        env = {'INVENTORY_UPDATE_ID': inventory_update.pk}
+        safe_env = env.copy()
+        args = []
+        safe_args = []
+        credential = inventory_update.get_cloud_credential()
+        credential.credential_type.inject_credential(
+            credential, env, safe_env, args, safe_args, private_data_dir
+        )
+        return env
 
 
 for cls in PluginFileInjector.__subclasses__():

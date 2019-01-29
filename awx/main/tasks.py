@@ -1939,6 +1939,10 @@ class RunInventoryUpdate(BaseTask):
 
         If no private data is needed, return None.
         """
+        if inventory_update.source in InventorySource.injectors:
+            injector = InventorySource.injectors[inventory_update.source](kwargs['ansible_version'])
+            return injector.build_private_data(inventory_update, kwargs.get('private_data_dir', None))
+
         private_data = {'credentials': {}}
         credential = inventory_update.get_cloud_credential()
 
@@ -2283,10 +2287,9 @@ class RunInventoryUpdate(BaseTask):
         src = inventory_update.source
         if src in CLOUD_PROVIDERS:
             if src in InventorySource.injectors:
-                cloud_cred = inventory_update.get_cloud_credential()
-                injector = InventorySource.injectors[cloud_cred.kind](self.get_ansible_version(inventory_update))
+                injector = InventorySource.injectors[inventory_update.source](self.get_ansible_version(inventory_update))
                 if injector.should_use_plugin():
-                    content = injector.inventory_contents(inventory_update)
+                    content = injector.inventory_contents(inventory_update, kwargs['private_data_dir'])
                     # must be a statically named file
                     inventory_path = os.path.join(private_data_dir, injector.filename)
                     with open(inventory_path, 'w') as f:
@@ -2333,8 +2336,8 @@ class RunInventoryUpdate(BaseTask):
         return None
 
     def build_credentials_list(self, inventory_update):
-        # TODO: allow multiple custom creds for inv updates
-        return [inventory_update.get_cloud_credential()]
+        # All credentials not used by inventory source injector
+        return [inventory_update.get_extra_credentials()]
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)

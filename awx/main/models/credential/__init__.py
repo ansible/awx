@@ -718,8 +718,8 @@ class CredentialType(CommonModelNameNotUnique):
                 os.chmod(path, stat.S_IRUSR)
                 return path
 
-            path = build_extra_vars_file(extra_vars, private_data_dir)
             if extra_vars:
+                path = build_extra_vars_file(extra_vars, private_data_dir)
                 args.extend(['-e', '@%s' % path])
 
 
