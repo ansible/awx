@@ -537,7 +537,7 @@ class CredentialType(CommonModelNameNotUnique):
             if field['id'] == field_id:
                 if 'choices' in field:
                     return field['choices'][0]
-                return {'string': '', 'boolean': False, 'become_method': ''}[field['type']]
+                return {'string': '', 'boolean': False}[field['type']]
 
     @classmethod
     def default(cls, f):
@@ -734,7 +734,7 @@ def ssh(cls):
             }, {
                 'id': 'become_method',
                 'label': ugettext_noop('Privilege Escalation Method'),
-                'type': 'become_method',
+                'type': 'string',
                 'help_text': ugettext_noop('Specify a method for "become" operations. This is '
                                            'equivalent to specifying the --become-method '
                                            'Ansible parameter.')

@@ -510,8 +510,6 @@ class CredentialInputField(JSONSchemaField):
         properties = {}
         for field in model_instance.credential_type.inputs.get('fields', []):
             field = field.copy()
-            if field['type'] == 'become_method':
-                field['type'] = 'string'
             properties[field['id']] = field
             if field.get('choices', []):
                 field['enum'] = list(field['choices'])[:]
@@ -655,7 +653,7 @@ class CredentialTypeInputField(JSONSchemaField):
                     'items': {
                         'type': 'object',
                         'properties': {
-                            'type': {'enum': ['string', 'boolean', 'become_method']},
+                            'type': {'enum': ['string', 'boolean']},
                             'format': {'enum': ['ssh_private_key']},
                             'choices': {
                                 'type': 'array',
@@ -715,14 +713,6 @@ class CredentialTypeInputField(JSONSchemaField):
             if 'type' not in field:
                 # If no type is specified, default to string
                 field['type'] = 'string'
-
-            if field['type'] == 'become_method':
-                if not model_instance.managed_by_tower:
-                    raise django_exceptions.ValidationError(
-                        _('become_method is a reserved type name'),
-                        code='invalid',
-                        params={'value': value},
-                    )
 
             for key in ('choices', 'multiline', 'format', 'secret',):
                 if key in field and field['type'] != 'string':

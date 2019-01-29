@@ -2496,8 +2496,6 @@ class CredentialTypeSerializer(BaseSerializer):
                 field['label'] = _(field['label'])
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
-                if field['type'] == 'become_method':
-                    field['type'] = 'string'
         return value
 
     def filter_field_metadata(self, fields, method):
