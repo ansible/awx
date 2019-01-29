@@ -1210,3 +1210,6 @@ SILENCED_SYSTEM_CHECKS = ['models.E006']
 
 # Use middleware to get request statistics
 AWX_REQUEST_PROFILE = False
+
+# Delete temporary directories created to store playbook run-time
+AWX_CLEANUP_PATHS = True

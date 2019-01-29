@@ -1,4 +1,4 @@
-ansible-runner>=1.2.0
+#ansible-runner>=1.2.0
 appdirs==1.4.2
 asgi-amqp==1.1.3
 asgiref==1.1.2
