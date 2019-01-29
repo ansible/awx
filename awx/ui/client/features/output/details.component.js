@@ -114,13 +114,14 @@ function getVerbosityDetails () {
 }
 
 function getEnvironmentDetails (virtualenv) {
-    const value = virtualenv || resource.model.get('custom_virtualenv');
+    const customVirtualenv = virtualenv || resource.model.get('custom_virtualenv');
 
-    if (!value || value === '') {
+    if (!customVirtualenv || customVirtualenv === '') {
         return null;
     }
 
     const label = strings.get('labels.ENVIRONMENT');
+    const value = $filter('sanitize')(customVirtualenv);
 
     return { label, value };
 }
@@ -345,6 +346,7 @@ function getInventoryScmDetails (updateId, updateStatus) {
     const link = `/#/projects/${projectId}`;
     const jobTooltip = strings.get('tooltips.INVENTORY_SCM_JOB');
     const tooltip = strings.get('tooltips.INVENTORY_SCM');
+    const value = $filter('sanitize')(projectName);
 
     let icon;
 
@@ -354,7 +356,7 @@ function getInventoryScmDetails (updateId, updateStatus) {
         icon = `fa icon-job-${status}`;
     }
 
-    return { label, link, icon, jobLink, jobTooltip, tooltip, value: projectName };
+    return { label, link, icon, jobLink, jobTooltip, tooltip, value };
 }
 
 function getSCMRevisionDetails () {
