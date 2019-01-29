@@ -117,9 +117,9 @@ def read_content(private_data_dir, env, inventory_update):
     return a dictionary `content` with file contents, keyed off environment variable
         that references the file
     """
-    references = {}
+    inverse_env = {}
     for key, value in env.items():
-        references[value] = key
+        inverse_env[value] = key
 
     cache_file_regex = re.compile(r'/tmp/awx_{0}_[a-zA-Z0-9_]+/{1}_cache[a-zA-Z0-9_]+'.format(
         inventory_update.id, inventory_update.source)
@@ -127,8 +127,11 @@ def read_content(private_data_dir, env, inventory_update):
     private_key_regex = re.compile(r'-----BEGIN ENCRYPTED PRIVATE KEY-----.*-----END ENCRYPTED PRIVATE KEY-----')
 
     dir_contents = {}
+    references = {}
     for filename in os.listdir(private_data_dir):
         abs_file_path = os.path.join(private_data_dir, filename)
+        if abs_file_path in inverse_env:
+            references[abs_file_path] = inverse_env[abs_file_path]
         try:
             with open(abs_file_path, 'r') as f:
                 dir_contents[abs_file_path] = f.read()
@@ -172,8 +175,8 @@ def read_content(private_data_dir, env, inventory_update):
     for abs_file_path, file_content in dir_contents.items():
         if abs_file_path not in references:
             raise AssertionError(
-                "File {} is not referenced by any other file or environment variable:\n{}\n{}".format(
-                    abs_file_path, json.dumps(env, indent=4), json.dumps(dir_contents, indent=4)))
+                "File {} is not referenced. References and files:\n{}\n{}".format(
+                    abs_file_path, json.dumps(references, indent=4), json.dumps(dir_contents, indent=4)))
         reference_key = references[abs_file_path]
         file_content = private_key_regex.sub('{{private_key}}', file_content)
         content[reference_key] = file_content
@@ -228,7 +231,7 @@ def test_inventory_script_structure(this_kind, script_or_plugin, inventory):
         base_dir = os.path.join(DATA, script_or_plugin)
         if not os.path.exists(base_dir):
             os.mkdir(base_dir)
-        ref_dir = os.path.join(base_dir, this_kind)
+        ref_dir = os.path.join(base_dir, this_kind)  # this_kind is a global
         if set_files:
             create_reference_data(ref_dir, content)
             pytest.skip('You set MAKE_INVENTORY_REFERENCE_FILES, so this created files, unset to run actual test.')
@@ -250,5 +253,7 @@ def test_inventory_script_structure(this_kind, script_or_plugin, inventory):
         with mock.patch('awx.main.models.inventory.PluginFileInjector.should_use_plugin', return_value=use_plugin):
             # Also do not send websocket status updates
             with mock.patch.object(UnifiedJob, 'websocket_emit_status', mock.Mock()):
+                # The point of this test is that we replace run_pexpect with assertions
                 with mock.patch('awx.main.expect.run.run_pexpect', substitute_run):
+                    # so this sets up everything for a run and then yields control over to substitute_run
                     task.run(inventory_update.pk)

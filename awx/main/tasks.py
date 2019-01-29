@@ -3,7 +3,6 @@
 
 # Python
 from collections import OrderedDict, namedtuple
-import configparser
 import errno
 import fnmatch
 import functools
@@ -24,7 +23,6 @@ try:
     import psutil
 except Exception:
     psutil = None
-from io import StringIO
 import urllib.parse as urlparse
 
 # Django
@@ -1940,194 +1938,8 @@ class RunInventoryUpdate(BaseTask):
         If no private data is needed, return None.
         """
         if inventory_update.source in InventorySource.injectors:
-            injector = InventorySource.injectors[inventory_update.source](kwargs['ansible_version'])
-            return injector.build_private_data(inventory_update, kwargs.get('private_data_dir', None))
-
-        private_data = {'credentials': {}}
-        credential = inventory_update.get_cloud_credential()
-
-        if inventory_update.source == 'openstack':
-            openstack_auth = dict(auth_url=credential.get_input('host', default=''),
-                                  username=credential.get_input('username', default=''),
-                                  password=credential.get_input('password', default=''),
-                                  project_name=credential.get_input('project', default=''))
-            if credential.has_input('domain'):
-                openstack_auth['domain_name'] = credential.get_input('domain', default='')
-
-            private_state = inventory_update.source_vars_dict.get('private', True)
-            verify_state = credential.get_input('verify_ssl', default=True)
-            # Retrieve cache path from inventory update vars if available,
-            # otherwise create a temporary cache path only for this update.
-            cache = inventory_update.source_vars_dict.get('cache', {})
-            if not isinstance(cache, dict):
-                cache = {}
-            if not cache.get('path', ''):
-                cache_path = tempfile.mkdtemp(prefix='openstack_cache', dir=private_data_dir)
-                cache['path'] = cache_path
-            openstack_data = {
-                'clouds': {
-                    'devstack': {
-                        'private': private_state,
-                        'verify': verify_state,
-                        'auth': openstack_auth,
-                    },
-                },
-                'cache': cache,
-            }
-            ansible_variables = {
-                'use_hostnames': True,
-                'expand_hostvars': False,
-                'fail_on_errors': True,
-            }
-            provided_count = 0
-            for var_name in ansible_variables:
-                if var_name in inventory_update.source_vars_dict:
-                    ansible_variables[var_name] = inventory_update.source_vars_dict[var_name]
-                    provided_count += 1
-            if provided_count:
-                openstack_data['ansible'] = ansible_variables
-            private_data['credentials'][credential] = yaml.safe_dump(
-                openstack_data, default_flow_style=False, allow_unicode=True
-            )
-            return private_data
-
-        cp = configparser.RawConfigParser()
-        # Build custom ec2.ini for ec2 inventory script to use.
-        if inventory_update.source == 'ec2':
-            section = 'ec2'
-            cp.add_section(section)
-            ec2_opts = dict(inventory_update.source_vars_dict.items())
-            regions = inventory_update.source_regions or 'all'
-            regions = ','.join([x.strip() for x in regions.split(',')])
-            regions_blacklist = ','.join(settings.EC2_REGIONS_BLACKLIST)
-            ec2_opts['regions'] = regions
-            ec2_opts.setdefault('regions_exclude', regions_blacklist)
-            ec2_opts.setdefault('destination_variable', 'public_dns_name')
-            ec2_opts.setdefault('vpc_destination_variable', 'ip_address')
-            ec2_opts.setdefault('route53', 'False')
-            ec2_opts.setdefault('all_instances', 'True')
-            ec2_opts.setdefault('all_rds_instances', 'False')
-            ec2_opts.setdefault('include_rds_clusters', 'False')
-            ec2_opts.setdefault('rds', 'False')
-            ec2_opts.setdefault('nested_groups', 'True')
-            ec2_opts.setdefault('elasticache', 'False')
-            ec2_opts.setdefault('stack_filters', 'False')
-            if inventory_update.instance_filters:
-                ec2_opts.setdefault('instance_filters', inventory_update.instance_filters)
-            group_by = [x.strip().lower() for x in inventory_update.group_by.split(',') if x.strip()]
-            for choice in inventory_update.get_ec2_group_by_choices():
-                value = bool((group_by and choice[0] in group_by) or (not group_by and choice[0] != 'instance_id'))
-                ec2_opts.setdefault('group_by_%s' % choice[0], str(value))
-            if 'cache_path' not in ec2_opts:
-                cache_path = tempfile.mkdtemp(prefix='ec2_cache', dir=private_data_dir)
-                ec2_opts['cache_path'] = cache_path
-            ec2_opts.setdefault('cache_max_age', '300')
-            for k, v in ec2_opts.items():
-                cp.set(section, k, str(v))
-        # Allow custom options to vmware inventory script.
-        elif inventory_update.source == 'vmware':
-
-            section = 'vmware'
-            cp.add_section(section)
-            cp.set('vmware', 'cache_max_age', '0')
-            cp.set('vmware', 'validate_certs', str(settings.VMWARE_VALIDATE_CERTS))
-            cp.set('vmware', 'username', credential.get_input('username', default=''))
-            cp.set('vmware', 'password', credential.get_input('password', default=''))
-            cp.set('vmware', 'server', credential.get_input('host', default=''))
-
-            vmware_opts = dict(inventory_update.source_vars_dict.items())
-            if inventory_update.instance_filters:
-                vmware_opts.setdefault('host_filters', inventory_update.instance_filters)
-            if inventory_update.group_by:
-                vmware_opts.setdefault('groupby_patterns', inventory_update.group_by)
-
-            for k, v in vmware_opts.items():
-                cp.set(section, k, str(v))
-
-        elif inventory_update.source == 'satellite6':
-            section = 'foreman'
-            cp.add_section(section)
-
-            group_patterns = '[]'
-            group_prefix = 'foreman_'
-            want_hostcollections = 'False'
-            foreman_opts = dict(inventory_update.source_vars_dict.items())
-            foreman_opts.setdefault('ssl_verify', 'False')
-            for k, v in foreman_opts.items():
-                if k == 'satellite6_group_patterns' and isinstance(v, str):
-                    group_patterns = v
-                elif k == 'satellite6_group_prefix' and isinstance(v, str):
-                    group_prefix = v
-                elif k == 'satellite6_want_hostcollections' and isinstance(v, bool):
-                    want_hostcollections = v
-                else:
-                    cp.set(section, k, str(v))
-
-            if credential:
-                cp.set(section, 'url', credential.get_input('host', default=''))
-                cp.set(section, 'user', credential.get_input('username', default=''))
-                cp.set(section, 'password', credential.get_input('password', default=''))
-
-            section = 'ansible'
-            cp.add_section(section)
-            cp.set(section, 'group_patterns', group_patterns)
-            cp.set(section, 'want_facts', 'True')
-            cp.set(section, 'want_hostcollections', str(want_hostcollections))
-            cp.set(section, 'group_prefix', group_prefix)
-
-            section = 'cache'
-            cp.add_section(section)
-            cp.set(section, 'path', '/tmp')
-            cp.set(section, 'max_age', '0')
-
-        elif inventory_update.source == 'cloudforms':
-            section = 'cloudforms'
-            cp.add_section(section)
-
-            if credential:
-                cp.set(section, 'url', credential.get_input('host', default=''))
-                cp.set(section, 'username', credential.get_input('username', default=''))
-                cp.set(section, 'password', credential.get_input('password', default=''))
-                cp.set(section, 'ssl_verify', "false")
-
-            cloudforms_opts = dict(inventory_update.source_vars_dict.items())
-            for opt in ['version', 'purge_actions', 'clean_group_keys', 'nest_tags', 'suffix', 'prefer_ipv4']:
-                if opt in cloudforms_opts:
-                    cp.set(section, opt, str(cloudforms_opts[opt]))
-
-            section = 'cache'
-            cp.add_section(section)
-            cp.set(section, 'max_age', "0")
-            cache_path = tempfile.mkdtemp(
-                prefix='cloudforms_cache',
-                dir=private_data_dir
-            )
-            cp.set(section, 'path', cache_path)
-
-        elif inventory_update.source == 'azure_rm':
-            section = 'azure'
-            cp.add_section(section)
-            cp.set(section, 'include_powerstate', 'yes')
-            cp.set(section, 'group_by_resource_group', 'yes')
-            cp.set(section, 'group_by_location', 'yes')
-            cp.set(section, 'group_by_tag', 'yes')
-
-            if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
-                cp.set(
-                    section, 'locations',
-                    ','.join([x.strip() for x in inventory_update.source_regions.split(',')])
-                )
-
-            azure_rm_opts = dict(inventory_update.source_vars_dict.items())
-            for k, v in azure_rm_opts.items():
-                cp.set(section, k, str(v))
-
-        # Return INI content.
-        if cp.sections():
-            f = StringIO()
-            cp.write(f)
-            private_data['credentials'][credential] = f.getvalue()
-            return private_data
+            injector = InventorySource.injectors[inventory_update.source](self.get_ansible_version(inventory_update))
+            return injector.build_private_data(inventory_update, private_data_dir)
 
     def build_passwords(self, inventory_update, runtime_passwords):
         """Build a dictionary of authentication/credential information for
@@ -2171,41 +1983,13 @@ class RunInventoryUpdate(BaseTask):
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
         env.update(STANDARD_INVENTORY_UPDATE_ENV)
-        plugin_name = inventory_update.get_inventory_plugin_name()
+        plugin_name = inventory_update.get_inventory_plugin_name(self.get_ansible_version(inventory_update))
         if plugin_name is not None:
             env['ANSIBLE_INVENTORY_ENABLED'] = plugin_name
 
-        # Set environment variables specific to each source.
-        #
-        # These are set here and then read in by the various Ansible inventory
-        # modules, which will actually do the inventory sync.
-        #
-        # The inventory modules are vendored in AWX in the
-        # `awx/plugins/inventory` directory; those files should be kept in
-        # sync with those in Ansible core at all times.
-
-        ini_mapping = {
-            'ec2': 'EC2_INI_PATH',
-            'vmware': 'VMWARE_INI_PATH',
-            'azure_rm': 'AZURE_INI_PATH',
-            'openstack': 'OS_CLIENT_CONFIG_FILE',
-            'satellite6': 'FOREMAN_INI_PATH',
-            'cloudforms': 'CLOUDFORMS_INI_PATH'
-        }
-        if inventory_update.source in ini_mapping:
-            cred_data = private_data_files.get('credentials', {})
-            env[ini_mapping[inventory_update.source]] = cred_data.get(
-                inventory_update.get_cloud_credential(), ''
-            )
-
         if inventory_update.source in InventorySource.injectors:
-            # TODO: mapping from credential.kind to inventory_source.source
             injector = InventorySource.injectors[inventory_update.source](self.get_ansible_version(inventory_update))
-            env = injector.build_env(inventory_update, env, private_data_dir)
-
-        if inventory_update.source == 'tower':
-            env['TOWER_INVENTORY'] = inventory_update.instance_filters
-            env['TOWER_LICENSE_TYPE'] = get_licenser().validate()['license_type']
+            env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
 
         if inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
@@ -2289,7 +2073,7 @@ class RunInventoryUpdate(BaseTask):
             if src in InventorySource.injectors:
                 injector = InventorySource.injectors[inventory_update.source](self.get_ansible_version(inventory_update))
                 if injector.should_use_plugin():
-                    content = injector.inventory_contents(inventory_update, kwargs['private_data_dir'])
+                    content = injector.inventory_contents(inventory_update, private_data_dir)
                     # must be a statically named file
                     inventory_path = os.path.join(private_data_dir, injector.filename)
                     with open(inventory_path, 'w') as f:
