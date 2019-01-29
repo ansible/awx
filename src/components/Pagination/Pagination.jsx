@@ -7,11 +7,7 @@ import {
   DropdownDirection,
   DropdownItem,
   DropdownToggle,
-  Level,
-  LevelItem,
-  TextInput,
-  Split,
-  SplitItem,
+  TextInput
 } from '@patternfly/react-core';
 
 class Pagination extends Component {
@@ -120,120 +116,102 @@ class Pagination extends Component {
     const itemMin = ((page - 1) * page_size) + 1;
     const itemMax = itemMin + itemCount - 1;
 
-    const disabledStyle = {
-      backgroundColor: '#EDEDED',
-      border: '1px solid #C2C2CA',
-      borderRadius: '0px',
-      color: '#C2C2CA',
-    };
-
     return (
       <I18n>
         {({ i18n }) => (
           <div className="awx-pagination">
-            <Level>
-              <LevelItem>
-                <Dropdown
-                  onToggle={this.onTogglePageSize}
-                  onSelect={this.onSelectPageSize}
-                  direction={up}
-                  isOpen={isOpen}
-                  toggle={(
-                    <DropdownToggle
-                      className="togglePageSize"
-                      onToggle={this.onTogglePageSize}
+            <div className="awx-pagination__page-size-selection">
+              <Trans>Items Per Page</Trans>
+              <Dropdown
+                onToggle={this.onTogglePageSize}
+                onSelect={this.onSelectPageSize}
+                direction={up}
+                isOpen={isOpen}
+                toggle={(
+                  <DropdownToggle
+                    className="togglePageSize"
+                    onToggle={this.onTogglePageSize}
+                  >
+                    {page_size}
+                  </DropdownToggle>
+                )}
+              >
+                {opts.map(option => (
+                  <DropdownItem
+                    key={option}
+                    component="button"
+                  >
+                    {option}
+                  </DropdownItem>
+                ))}
+              </Dropdown>
+            </div>
+            <div className="awx-pagination__counts">
+              <div className="awx-pagination__item-count">
+                <Trans>{`Items ${itemMin} - ${itemMax} of ${count}`}</Trans>
+              </div>
+              {pageCount !== 1 && (
+                <div className="awx-pagination__page-count">
+                  <div className="pf-c-input-group">
+                    <Button
+                      className="awx-pagination__page-button"
+                      variant="tertiary"
+                      aria-label={i18n._(t`First`)}
+                      isDisabled={isOnFirst}
+                      onClick={this.onFirst}
                     >
-                      {page_size}
-                    </DropdownToggle>
-                  )}
-                >
-                  {opts.map(option => (
-                    <DropdownItem
-                      key={option}
-                      component="button"
+                      <i className="fas fa-angle-double-left" />
+                    </Button>
+                    <Button
+                      className="awx-pagination__page-button"
+                      variant="tertiary"
+                      aria-label={i18n._(t`Previous`)}
+                      isDisabled={isOnFirst}
+                      onClick={this.onPrevious}
                     >
-                      {option}
-                    </DropdownItem>
-                  ))}
-                </Dropdown>
-                <Trans> Per Page</Trans>
-              </LevelItem>
-              <LevelItem>
-                <Split gutter="md" className="pf-u-display-flex pf-u-align-items-center">
-                  <SplitItem>
-                    <Trans>{`${itemMin} - ${itemMax} of ${count}`}</Trans>
-                  </SplitItem>
-                  <SplitItem>
-                    <div className="pf-c-input-group">
-                      <Button
-                        variant="tertiary"
-                        aria-label={i18n._(t`First`)}
-                        style={isOnFirst ? disabledStyle : {}}
-                        isDisabled={isOnFirst}
-                        onClick={this.onFirst}
-                      >
-                        <i className="fas fa-angle-double-left" />
-                      </Button>
-                      <Button
-                        variant="tertiary"
-                        aria-label={i18n._(t`Previous`)}
-                        style={isOnFirst ? disabledStyle : {}}
-                        isDisabled={isOnFirst}
-                        onClick={this.onPrevious}
-                      >
-                        <i className="fas fa-angle-left" />
-                      </Button>
-                    </div>
-                  </SplitItem>
-                  <SplitItem isMain>
-                    <form onSubmit={this.onSubmit}>
-                      <Trans>
-                        {'Page '}
-                        <TextInput
-                          isDisabled={pageCount === 1}
-                          aria-label={i18n._(t`Page Number`)}
-                          style={{
-                            height: '30px',
-                            width: '30px',
-                            textAlign: 'center',
-                            padding: '0',
-                            margin: '0',
-                            ...(pageCount === 1 ? disabledStyle : {})
-                          }}
-                          value={value}
-                          type="text"
-                          onChange={this.onPageChange}
-                        />
-                        {' of '}
-                        {pageCount}
-                      </Trans>
-                    </form>
-                  </SplitItem>
-                  <SplitItem>
-                    <div className="pf-c-input-group">
-                      <Button
-                        variant="tertiary"
-                        aria-label={i18n._(t`Next`)}
-                        style={isOnLast ? disabledStyle : {}}
-                        isDisabled={isOnLast}
-                        onClick={this.onNext}
-                      >
-                        <i className="fas fa-angle-right" />
-                      </Button>
-                      <Button
-                        variant="tertiary"
-                        aria-label={i18n._(t`Last`)}
-                        style={isOnLast ? disabledStyle : {}}
-                        isDisabled={isOnLast}
-                        onClick={this.onLast}
-                      >
-                        <i className="fas fa-angle-double-right" />
-                      </Button>
-                    </div>
-                  </SplitItem>
-                </Split>
-              </LevelItem>
-            </Level>
+                      <i className="fas fa-angle-left" />
+                    </Button>
+                  </div>
+                  <form
+                    className="awx-pagination__page-input-form"
+                    onSubmit={this.onSubmit}
+                  >
+                    <Trans>
+                      {'Page '}
+                      <TextInput
+                        className="awx-pagination__page-input"
+                        aria-label={i18n._(t`Page Number`)}
+                        value={value}
+                        type="text"
+                        onChange={this.onPageChange}
+                      />
+                      {' of '}
+                      {pageCount}
+                    </Trans>
+                  </form>
+                  <div className="pf-c-input-group">
+                    <Button
+                      className="awx-pagination__page-button"
+                      variant="tertiary"
+                      aria-label={i18n._(t`Next`)}
+                      isDisabled={isOnLast}
+                      onClick={this.onNext}
+                    >
+                      <i className="fas fa-angle-right" />
+                    </Button>
+                    <Button
+                      className="awx-pagination__page-button"
+                      variant="tertiary"
+                      aria-label={i18n._(t`Last`)}
+                      isDisabled={isOnLast}
+                      onClick={this.onLast}
+                    >
+                      <i className="fas fa-angle-double-right" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </I18n>

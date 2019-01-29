@@ -120,8 +120,8 @@ describe('<Pagination />', () => {
   });
 
   test('submit a new page by typing in input works', () => {
-    const textInputSelector = '.pf-l-split__item.pf-m-main .pf-c-form-control';
-    const submitFormSelector = '.pf-l-split__item.pf-m-main form';
+    const textInputSelector = '.awx-pagination__page-input.pf-c-form-control';
+    const submitFormSelector = '.awx-pagination__page-input-form';
     const onSetPage = jest.fn();
 
     pagination = mount(
