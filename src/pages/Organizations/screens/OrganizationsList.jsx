@@ -8,6 +8,7 @@ import {
 import { I18n, i18nMark } from '@lingui/react';
 import { t } from '@lingui/macro';
 import {
+  Card,
   PageSection,
   PageSectionVariants,
 } from '@patternfly/react-core';
@@ -195,46 +196,48 @@ class OrganizationsList extends Component {
     return (
       <Fragment>
         <PageSection variant={medium}>
-          <DataListToolbar
-            addUrl={`${match.url}/add`}
-            isAllSelected={selected.length === results.length}
-            sortedColumnKey={sortedColumnKey}
-            sortOrder={sortOrder}
-            columns={this.columns}
-            onSearch={this.onSearch}
-            onSort={this.onSort}
-            onSelectAll={this.onSelectAll}
-            showDelete
-            showSelectAll
-          />
-          <I18n>
-            {({ i18n }) => (
-              <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
-                { results.map(o => (
-                  <OrganizationListItem
-                    key={o.id}
-                    itemId={o.id}
-                    name={o.name}
-                    detailUrl={`${match.url}/${o.id}`}
-                    userCount={o.summary_fields.related_field_counts.users}
-                    teamCount={o.summary_fields.related_field_counts.teams}
-                    isSelected={selected.includes(o.id)}
-                    onSelect={() => this.onSelect(o.id)}
-                  />
-                ))}
-              </ul>
-            )}
-          </I18n>
-          <Pagination
-            count={count}
-            page={page}
-            pageCount={pageCount}
-            page_size={page_size}
-            pageSizeOptions={this.pageSizeOptions}
-            onSetPage={this.onSetPage}
-          />
-          { loading ? <div>loading...</div> : '' }
-          { error ? <div>error</div> : '' }
+          <Card>
+            <DataListToolbar
+              addUrl={`${match.url}/add`}
+              isAllSelected={selected.length === results.length}
+              sortedColumnKey={sortedColumnKey}
+              sortOrder={sortOrder}
+              columns={this.columns}
+              onSearch={this.onSearch}
+              onSort={this.onSort}
+              onSelectAll={this.onSelectAll}
+              showDelete
+              showSelectAll
+            />
+            <I18n>
+              {({ i18n }) => (
+                <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
+                  { results.map(o => (
+                    <OrganizationListItem
+                      key={o.id}
+                      itemId={o.id}
+                      name={o.name}
+                      detailUrl={`${match.url}/${o.id}`}
+                      userCount={o.summary_fields.related_field_counts.users}
+                      teamCount={o.summary_fields.related_field_counts.teams}
+                      isSelected={selected.includes(o.id)}
+                      onSelect={() => this.onSelect(o.id)}
+                    />
+                  ))}
+                </ul>
+              )}
+            </I18n>
+            <Pagination
+              count={count}
+              page={page}
+              pageCount={pageCount}
+              page_size={page_size}
+              pageSizeOptions={this.pageSizeOptions}
+              onSetPage={this.onSetPage}
+            />
+            { loading ? <div>loading...</div> : '' }
+            { error ? <div>error</div> : '' }
+          </Card>
         </PageSection>
       </Fragment>
     );
