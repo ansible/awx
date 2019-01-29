@@ -51,6 +51,7 @@ function OutputStrings (BaseString) {
     ns.labels = {
         CREDENTIAL: t.s('Credential'),
         ENVIRONMENT: t.s('Environment'),
+        EXECUTION_NODE: t.s('Execution Node'),
         EXTRA_VARS: t.s('Extra Variables'),
         FINISHED: t.s('Finished'),
         FORKS: t.s('Forks'),

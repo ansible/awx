@@ -481,6 +481,19 @@ function getLimitDetails () {
     return { label, value };
 }
 
+function getExecutionNodeDetails (node) {
+    const executionNode = node || resource.model.get('execution_node');
+
+    if (!executionNode) {
+        return null;
+    }
+
+    const label = strings.get('labels.EXECUTION_NODE');
+    const value = $filter('sanitize')(executionNode);
+
+    return { label, value };
+}
+
 function getInstanceGroupDetails () {
     const instanceGroup = resource.model.get('summary_fields.instance_group');
 
@@ -761,6 +774,7 @@ function JobDetailsController (
         vm.credentials = getCredentialDetails();
         vm.forks = getForkDetails();
         vm.limit = getLimitDetails();
+        vm.executionNode = getExecutionNodeDetails();
         vm.instanceGroup = getInstanceGroupDetails();
         vm.jobTags = getJobTagDetails();
         vm.skipTags = getSkipTagDetails();
@@ -782,12 +796,21 @@ function JobDetailsController (
         vm.toggleLabels = toggleLabels;
         vm.showLabels = showLabels;
 
-        unsubscribe = subscribe(({ status, started, finished, scm, inventoryScm, environment }) => {
+        unsubscribe = subscribe(({
+            status,
+            started,
+            finished,
+            scm,
+            inventoryScm,
+            environment,
+            executionNode
+        }) => {
             vm.started = getStartDetails(started);
             vm.finished = getFinishDetails(finished);
             vm.projectUpdate = getProjectUpdateDetails(scm.id);
             vm.projectStatus = getProjectStatusDetails(scm.status);
             vm.environment = getEnvironmentDetails(environment);
+            vm.executionNode = getExecutionNodeDetails(executionNode);
             vm.inventoryScm = getInventoryScmDetails(inventoryScm.id, inventoryScm.status);
             vm.status = getStatusDetails(status);
             vm.job.status = status;

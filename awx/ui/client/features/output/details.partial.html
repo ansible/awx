@@ -295,6 +295,12 @@
     <div class="JobResults-resultRowText">{{ vm.environment.value }}</div>
 </div>
 
+<!-- EXECUTION Node DETAIL -->
+<div class="JobResults-resultRow" ng-if="vm.executionNode">
+  <label class="JobResults-resultRowLabel">{{ vm.executionNode.label }}</label>
+  <div class="JobResults-resultRowText">{{ vm.executionNode.value }}</div>
+</div>
+
 <!-- IG DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.instanceGroup">
     <label class="JobResults-resultRowLabel">{{ vm.instanceGroup.label }}</label>
@@ -319,7 +325,6 @@
         </a>
     </div>
 </div>
-
 
 <!-- EXTRA VARIABLES DETAIL -->
 <at-code-mirror
