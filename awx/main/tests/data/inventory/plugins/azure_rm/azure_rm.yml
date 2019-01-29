@@ -1,0 +1,4 @@
+plugin: azure_rm
+regions:
+- southcentralus
+- westus

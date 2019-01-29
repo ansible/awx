@@ -57,15 +57,13 @@ import os
 import sys
 import time
 from distutils.version import StrictVersion
+from io import StringIO
 
-try:
-    import json
-except:
-    import simplejson as json
+import json
 
-import os_client_config
-import shade
-import shade.inventory
+import openstack as sdk
+from openstack.cloud import inventory as sdk_inventory
+from openstack.config import loader as cloud_config
 
 CONFIG_FILES = ['/etc/ansible/openstack.yaml', '/etc/ansible/openstack.yml']
 
@@ -149,7 +147,7 @@ def get_host_groups_from_cloud(inventory):
     if hasattr(inventory, 'extra_config'):
         use_hostnames = inventory.extra_config['use_hostnames']
         list_args['expand'] = inventory.extra_config['expand_hostvars']
-        if StrictVersion(shade.__version__) >= StrictVersion("1.6.0"):
+        if StrictVersion(sdk.version.__version__) >= StrictVersion("0.13.0"):
             list_args['fail_on_cloud_config'] = \
                 inventory.extra_config['fail_on_errors']
     else:
@@ -192,8 +190,13 @@ def is_cache_stale(cache_file, cache_expiration_time, refresh=False):
 
 
 def get_cache_settings(cloud=None):
-    config = os_client_config.config.OpenStackConfig(
-        config_files=os_client_config.config.CONFIG_FILES + CONFIG_FILES)
+    config_files = cloud_config.CONFIG_FILES + CONFIG_FILES
+    if cloud:
+        config = cloud_config.OpenStackConfig(
+            config_files=config_files).get_one(cloud=cloud)
+    else:
+        config = cloud_config.OpenStackConfig(
+            config_files=config_files).get_all()[0]
     # For inventory-wide caching
     cache_expiration_time = config.get_cache_expiration_time()
     cache_path = config.get_cache_path()
@@ -231,15 +234,17 @@ def parse_args():
 def main():
     args = parse_args()
     try:
-        config_files = os_client_config.config.CONFIG_FILES + CONFIG_FILES
-        shade.simple_logging(debug=args.debug)
+        # openstacksdk library may write to stdout, so redirect this
+        sys.stdout = StringIO()
+        config_files = cloud_config.CONFIG_FILES + CONFIG_FILES
+        sdk.enable_logging(debug=args.debug)
         inventory_args = dict(
             refresh=args.refresh,
             config_files=config_files,
             private=args.private,
             cloud=args.cloud,
         )
-        if hasattr(shade.inventory.OpenStackInventory, 'extra_config'):
+        if hasattr(sdk_inventory.OpenStackInventory, 'extra_config'):
             inventory_args.update(dict(
                 config_key='ansible',
                 config_defaults={
@@ -249,14 +254,15 @@ def main():
                 }
             ))
 
-        inventory = shade.inventory.OpenStackInventory(**inventory_args)
+        inventory = sdk_inventory.OpenStackInventory(**inventory_args)
 
+        sys.stdout = sys.__stdout__
         if args.list:
             output = get_host_groups(inventory, refresh=args.refresh, cloud=args.cloud)
         elif args.host:
             output = to_json(inventory.get_host(args.host))
         print(output)
-    except shade.OpenStackCloudException as e:
+    except sdk.exceptions.OpenStackCloudException as e:
         sys.stderr.write('%s\n' % e.message)
         sys.exit(1)
     sys.exit(0)

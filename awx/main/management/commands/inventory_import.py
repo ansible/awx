@@ -27,6 +27,7 @@ from awx.main.models.inventory import (
     Host
 )
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
+from awx.main.utils.ansible import filter_non_json_lines
 
 # other AWX imports
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
@@ -173,15 +174,21 @@ class AnsibleInventoryLoader(object):
             cmd = self.get_proot_args(cmd, env)
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-        stdout, stderr = proc.communicate()
-        stdout = smart_text(stdout)
+        raw_stdout, stderr = proc.communicate()
+        raw_stdout = smart_text(raw_stdout)
         stderr = smart_text(stderr)
 
         if self.tmp_private_dir:
             shutil.rmtree(self.tmp_private_dir, True)
         if proc.returncode != 0:
             raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % (
-                self.method, proc.returncode, stdout, stderr))
+                self.method, proc.returncode, raw_stdout, stderr))
+
+        # Openstack inventory plugin gives non-JSON lines
+        # Also, running with higher verbosity gives non-JSON lines
+        stdout = filter_non_json_lines(raw_stdout)
+        if stdout is not raw_stdout:
+            logger.warning('Output had lines stripped to obtain JSON format.')
 
         for line in stderr.splitlines():
             logger.error(line)
@@ -313,6 +320,7 @@ class Command(BaseCommand):
         source = source.replace('rhv.py', 'ovirt4.py')
         source = source.replace('satellite6.py', 'foreman.py')
         source = source.replace('vmware.py', 'vmware_inventory.py')
+        source = source.replace('openstack.py', 'openstack_inventory.py')
         if not os.path.exists(source):
             raise IOError('Source does not exist: %s' % source)
         source = os.path.join(os.getcwd(), os.path.dirname(source),

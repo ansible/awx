@@ -236,7 +236,12 @@ def test_inventory_script_structure(this_kind, script_or_plugin, inventory):
             create_reference_data(ref_dir, content)
             pytest.skip('You set MAKE_INVENTORY_REFERENCE_FILES, so this created files, unset to run actual test.')
         else:
-            expected_file_list = os.listdir(ref_dir)
+            try:
+                expected_file_list = os.listdir(ref_dir)
+            except FileNotFoundError as e:
+                raise FileNotFoundError(
+                    'Maybe you never made reference files? '
+                    'MAKE_INVENTORY_REFERENCE_FILES=true py.test ...\noriginal: {}'.format(e))
             assert set(expected_file_list) == set(content.keys()), (
                 'Inventory update runtime environment does not have expected files'
             )

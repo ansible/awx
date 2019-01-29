@@ -1983,13 +1983,19 @@ class RunInventoryUpdate(BaseTask):
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
         env.update(STANDARD_INVENTORY_UPDATE_ENV)
-        plugin_name = inventory_update.get_inventory_plugin_name(self.get_ansible_version(inventory_update))
-        if plugin_name is not None:
-            env['ANSIBLE_INVENTORY_ENABLED'] = plugin_name
 
+        injector = None
         if inventory_update.source in InventorySource.injectors:
             injector = InventorySource.injectors[inventory_update.source](self.get_ansible_version(inventory_update))
-            env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
+
+        env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
+
+        if injector is not None:
+            # All CLOUD_PROVIDERS sources implement as either script or auto plugin
+            if injector.should_use_plugin():
+                env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
+            else:
+                env['ANSIBLE_INVENTORY_ENABLED'] = 'script'
 
         if inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
@@ -2069,21 +2075,21 @@ class RunInventoryUpdate(BaseTask):
 
     def build_inventory(self, inventory_update, private_data_dir):
         src = inventory_update.source
-        if src in CLOUD_PROVIDERS:
-            if src in InventorySource.injectors:
-                injector = InventorySource.injectors[src](self.get_ansible_version(inventory_update))
-                if injector.should_use_plugin():
-                    content = injector.inventory_contents(inventory_update, private_data_dir)
-                    # must be a statically named file
-                    inventory_path = os.path.join(private_data_dir, injector.filename)
-                    with open(inventory_path, 'w') as f:
-                        f.write(content)
-                    os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-                else:
-                    # Use the vendored script path
-                    inventory_path = self.get_path_to('..', 'plugins', 'inventory', '%s.py' % src)
+
+        injector = None
+        if inventory_update.source in InventorySource.injectors:
+            injector = InventorySource.injectors[src](self.get_ansible_version(inventory_update))
+
+        if injector is not None:
+            if injector.should_use_plugin():
+                content = injector.inventory_contents(inventory_update, private_data_dir)
+                # must be a statically named file
+                inventory_path = os.path.join(private_data_dir, injector.filename)
+                with open(inventory_path, 'w') as f:
+                    f.write(content)
+                os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             else:
-                # TODO: get rid of this else after all CLOUD_PROVIDERS have injectors written
+                # Use the vendored script path
                 inventory_path = self.get_path_to('..', 'plugins', 'inventory', '%s.py' % src)
         elif src == 'scm':
             inventory_path = inventory_update.get_actual_source_path()
