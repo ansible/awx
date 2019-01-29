@@ -481,8 +481,8 @@ function getLimitDetails () {
     return { label, value };
 }
 
-function getExecutionNodeDetails () {
-    const executionNode = resource.model.get('execution_node');
+function getExecutionNodeDetails (node) {
+    const executionNode = node || resource.model.get('execution_node');
 
     if (!executionNode) {
         return null;
@@ -796,12 +796,21 @@ function JobDetailsController (
         vm.toggleLabels = toggleLabels;
         vm.showLabels = showLabels;
 
-        unsubscribe = subscribe(({ status, started, finished, scm, inventoryScm, environment }) => {
+        unsubscribe = subscribe(({
+            status,
+            started,
+            finished,
+            scm,
+            inventoryScm,
+            environment,
+            executionNode
+        }) => {
             vm.started = getStartDetails(started);
             vm.finished = getFinishDetails(finished);
             vm.projectUpdate = getProjectUpdateDetails(scm.id);
             vm.projectStatus = getProjectStatusDetails(scm.status);
             vm.environment = getEnvironmentDetails(environment);
+            vm.executionNode = getExecutionNodeDetails(executionNode);
             vm.inventoryScm = getInventoryScmDetails(inventoryScm.id, inventoryScm.status);
             vm.status = getStatusDetails(status);
             vm.job.status = status;
