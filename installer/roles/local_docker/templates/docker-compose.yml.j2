@@ -52,11 +52,11 @@ services:
       DATABASE_PASSWORD: {{ pg_password }}
       DATABASE_PORT: {{ pg_port }}
       DATABASE_HOST: {{ pg_hostname|default("postgres") }}
-      RABBITMQ_USER: guest
-      RABBITMQ_PASSWORD: guest
+      RABBITMQ_USER: "{{ rabbitmq_default_username }}"
+      RABBITMQ_PASSWORD: "{{ rabbitmq_default_password }}"
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_VHOST: awx
+      RABBITMQ_PORT: {{ rabbitmq_port }}
+      RABBITMQ_VHOST: "{{ rabbitmq_default_vhost }}"
       MEMCACHED_HOST: memcached
       MEMCACHED_PORT: 11211
       AWX_ADMIN_USER: {{ admin_user|default('admin') }}
@@ -111,11 +111,11 @@ services:
       DATABASE_PASSWORD: {{ pg_password }}
       DATABASE_HOST: {{ pg_hostname|default("postgres") }}
       DATABASE_PORT: {{ pg_port }}
-      RABBITMQ_USER: guest
-      RABBITMQ_PASSWORD: guest
+      RABBITMQ_USER: "{{ rabbitmq_default_username }}"
+      RABBITMQ_PASSWORD: "{{ rabbitmq_default_password }}"
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_VHOST: awx
+      RABBITMQ_PORT: {{ rabbitmq_port }}
+      RABBITMQ_VHOST: "{{ rabbitmq_default_vhost }}"
       MEMCACHED_HOST: memcached
       MEMCACHED_PORT: 11211
       AWX_ADMIN_USER: {{ admin_user|default('admin') }}
@@ -125,8 +125,10 @@ services:
     image: {{ rabbitmq_image }}
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_VHOST: awx
-      RABBITMQ_ERLANG_COOKIE: cookiemonster
+      RABBITMQ_DEFAULT_VHOST: "{{ rabbitmq_default_vhost }}"
+      RABBITMQ_ERLANG_COOKIE: "{{ rabbitmq_erlang_cookie }}"
+      RABBITMQ_DEFAULT_USER: "{{ rabbitmq_default_username }}"
+      RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_default_password }}"
 
   memcached:
     image: memcached:alpine
