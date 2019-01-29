@@ -23,7 +23,7 @@
                         Your session timed out due to inactivity. Please sign in.
                     </div>
                 </div>
-                <div class="LoginModal-alert LoginModal-alert--error" ng-show="userLoggedOut">
+                <div class="LoginModal-alert LoginModal-alert--error" ng-show="userLoggedOut && !sessionExpired && !attemptFailed && !thirdPartyAttemptFailed && !sessionLimitExpired" translate>
                     <i class="LoginModal-alertIcon fa fa-exclamation-triangle"></i>
                     <div class="LoginModal-alertText" translate>
                         You have been logged out. Please sign in.
