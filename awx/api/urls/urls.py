@@ -47,6 +47,7 @@ from .inventory_update import urls as inventory_update_urls
 from .inventory_script import urls as inventory_script_urls
 from .credential_type import urls as credential_type_urls
 from .credential import urls as credential_urls
+from .credential_input_source import urls as credential_input_source_urls
 from .role import urls as role_urls
 from .job_template import urls as job_template_urls
 from .job import urls as job_urls
@@ -119,6 +120,7 @@ v1_urls = [
 v2_urls = [
     url(r'^$', ApiV2RootView.as_view(), name='api_v2_root_view'),
     url(r'^credential_types/', include(credential_type_urls)),
+    url(r'^credential_input_sources/', include(credential_input_source_urls)),
     url(r'^hosts/(?P<pk>[0-9]+)/ansible_facts/$', HostAnsibleFactsDetail.as_view(), name='host_ansible_facts_detail'),
     url(r'^jobs/(?P<pk>[0-9]+)/extra_credentials/$', JobExtraCredentialsList.as_view(), name='job_extra_credentials_list'),
     url(r'^jobs/(?P<pk>[0-9]+)/credentials/$', JobCredentialsList.as_view(), name='job_credentials_list'),
