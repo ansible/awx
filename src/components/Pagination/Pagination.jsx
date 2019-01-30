@@ -152,7 +152,7 @@ class Pagination extends Component {
               </div>
               {pageCount !== 1 && (
                 <div className="awx-pagination__page-count">
-                  <div className="pf-c-input-group">
+                  <div className="pf-c-input-group pf-m-previous">
                     <Button
                       className="awx-pagination__page-button"
                       variant="tertiary"

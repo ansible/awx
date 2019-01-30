@@ -1,7 +1,7 @@
 .awx-pagination {
   --awx-pagination--BackgroundColor: var(--pf-global--BackgroundColor--light-100);
   --awx-pagination--BorderColor: var(--pf-global--BackgroundColor--light-300);
-  --awx-pagination--disabled-BackgroundColor: #EDEDED;
+  --awx-pagination--disabled-BackgroundColor: #f2f2f2;
   --awx-pagination--disabled-Color: #C2C2CA;
 
   border-top: 1px solid var(--awx-pagination--BorderColor);
@@ -17,10 +17,6 @@
   --pf-global--target-size--MinHeight: 30px;
   --pf-global--target-size--MinWidth: 30px;
   --pf-global--FontSize--md: 14px;
-
-  .awx-pagination__page-size-selection {
-    // font-weight: normal;
-  }
 
   .awx-pagination__page-size-selection .pf-c-dropdown__toggle {
     font-weight: bold;
@@ -72,13 +68,20 @@
   }
   
   .pf-c-input-group {
-    border-right: 1px solid var(--awx-pagination--BorderColor);
     height: 56px;
+  }
+
+  .pf-c-input-group.pf-m-previous {
+    border-right: 1px solid var(--awx-pagination--BorderColor);
   }
 
   .pf-c-input-group .pf-c-button.pf-m-disabled {
     border: 1px solid var(--awx-pagination--BorderColor);
     background-color: var(--awx-pagination--disabled-BackgroundColor);
     color: var(--awx-pagination--disabled-Color);
+  }
+
+  .pf-c-input-group.pf-m-previous .pf-c-button.pf-m-disabled {
+    border-right: 0;
   }
 }
