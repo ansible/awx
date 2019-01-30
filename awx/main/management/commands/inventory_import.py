@@ -27,6 +27,7 @@ from awx.main.models.inventory import (
     Host
 )
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
+from awx.main.utils.ansible import filter_non_json_lines
 
 # other AWX imports
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
@@ -73,12 +74,13 @@ class AnsibleInventoryLoader(object):
         /usr/bin/ansible/ansible-inventory -i hosts --list
     '''
 
-    def __init__(self, source, is_custom=False, venv_path=None):
+    def __init__(self, source, is_custom=False, venv_path=None, verbosity=0):
         self.source = source
         self.source_dir = functioning_dir(self.source)
         self.is_custom = is_custom
         self.tmp_private_dir = None
         self.method = 'ansible-inventory'
+        self.verbosity = verbosity
         if venv_path:
             self.venv_path = venv_path
         else:
@@ -114,6 +116,8 @@ class AnsibleInventoryLoader(object):
     def get_base_args(self):
         # get ansible-inventory absolute path for running in bubblewrap/proot, in Popen
         bargs= [self.get_path_to_ansible_inventory(), '-i', self.source]
+        if self.verbosity:
+            bargs.append('-%s' % ('v' * min(5, self.verbosity)))
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 
@@ -153,15 +157,21 @@ class AnsibleInventoryLoader(object):
             cmd = self.get_proot_args(cmd, env)
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-        stdout, stderr = proc.communicate()
-        stdout = smart_text(stdout)
+        raw_stdout, stderr = proc.communicate()
+        raw_stdout = smart_text(raw_stdout)
         stderr = smart_text(stderr)
 
         if self.tmp_private_dir:
             shutil.rmtree(self.tmp_private_dir, True)
         if proc.returncode != 0:
             raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % (
-                self.method, proc.returncode, stdout, stderr))
+                self.method, proc.returncode, raw_stdout, stderr))
+
+        # Openstack inventory plugin gives non-JSON lines
+        # Also, running with higher verbosity gives non-JSON lines
+        stdout, warnings = filter_non_json_lines(raw_stdout)
+        if warnings:
+            logger.warn(warnings)
 
         for line in stderr.splitlines():
             logger.error(line)
@@ -932,7 +942,10 @@ class Command(BaseCommand):
 
             source = self.get_source_absolute_path(self.source)
 
-            data = AnsibleInventoryLoader(source=source, is_custom=self.is_custom, venv_path=venv_path).load()
+            data = AnsibleInventoryLoader(
+                source=source, is_custom=self.is_custom, venv_path=venv_path,
+                verbosity=self.verbosity
+            ).load()
 
             logger.debug('Finished loading from source: %s', source)
             logger.info('Processing JSON output...')
