@@ -23,23 +23,17 @@ class Lookup extends React.Component {
     };
     this.handleModalToggle = this.handleModalToggle.bind(this);
     this.onLookup = this.onLookup.bind(this);
-    this.onChecked = this.onChecked.bind(this);
     this.wrapTags = this.wrapTags.bind(this);
-    this.onRemove = this.onRemove.bind(this);
+    this.toggleSelected = this.toggleSelected.bind(this);
   }
 
   onLookup () {
     this.handleModalToggle();
   }
 
-  onChecked (row) {
+  toggleSelected (row) {
     const { lookupChange } = this.props;
     lookupChange(row);
-  }
-
-  onRemove (evt) {
-    const { lookupChange } = this.props;
-    lookupChange(evt.target.id);
   }
 
   handleModalToggle () {
@@ -52,7 +46,7 @@ class Lookup extends React.Component {
     return tags.filter(tag => tag.isChecked).map((tag) => (
       <span className="awx-c-tag--pill" key={tag.id}>
         {tag.name}
-        <Button className="awx-c-icon--remove" id={tag.id} onClick={this.onRemove}>
+        <Button className="awx-c-icon--remove" id={tag.id} onClick={() => this.toggleSelected(tag)}>
           x
         </Button>
       </span>
@@ -81,7 +75,7 @@ class Lookup extends React.Component {
                 itemId={i.id}
                 name={i.name}
                 isSelected={i.isChecked}
-                onSelect={() => this.onChecked(i)}
+                onSelect={() => this.toggleSelected(i)}
               />
             ))}
           </ul>
@@ -92,7 +86,7 @@ class Lookup extends React.Component {
                   label={i18n._(t`Selected`)}
                   selected={selected}
                   showOverflowAfter={5}
-                  onRemove={this.onChecked}
+                  onRemove={this.toggleSelected}
                 />
               )}
             </I18n>

@@ -32,8 +32,8 @@ describe('<Lookup />', () => {
     searchItem.first().simulate('click');
     expect(spy).toHaveBeenCalled();
   });
-  test('calls "onChecked" when a user changes a checkbox', () => {
-    const spy = jest.spyOn(Lookup.prototype, 'onChecked');
+  test('calls "toggleSelected" when a user changes a checkbox', () => {
+    const spy = jest.spyOn(Lookup.prototype, 'toggleSelected');
     const wrapper = mount(
       <I18nProvider>
         <Lookup
@@ -49,8 +49,8 @@ describe('<Lookup />', () => {
     wrapper.find('input[type="checkbox"]').simulate('change');
     expect(spy).toHaveBeenCalled();
   });
-  test('calls "onRemove" when remove icon is clicked', () => {
-    const spy = jest.spyOn(Lookup.prototype, 'onRemove');
+  test('calls "toggleSelected" when remove icon is clicked', () => {
+    const spy = jest.spyOn(Lookup.prototype, 'toggleSelected');
     mockData = [{ name: 'foo', id: 0, isChecked: false }, { name: 'bar', id: 1, isChecked: true }];
     const wrapper = mount(
       <I18nProvider>
