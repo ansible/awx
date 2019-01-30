@@ -93,6 +93,26 @@ describe('<OrganizationAdd />', () => {
     });
   });
 
+  test('updateSelectedInstanceGroups successfully sets selectedInstanceGroups state', () => {
+    const wrapper = mount(
+      <MemoryRouter>
+        <OrganizationAdd api={{}} />
+      </MemoryRouter>
+    ).find('OrganizationAdd');
+    wrapper.instance().updateSelectedInstanceGroups([
+      {
+        id: 1,
+        name: 'foo'
+      }
+    ]);
+    expect(wrapper.state('selectedInstanceGroups')).toEqual([
+      {
+        id: 1,
+        name: 'foo'
+      }
+    ]);
+  });
+
   test('onSelectChange successfully sets custom_virtualenv state', () => {
     const wrapper = mount(
       <MemoryRouter>
@@ -101,41 +121,6 @@ describe('<OrganizationAdd />', () => {
     ).find('OrganizationAdd');
     wrapper.instance().onSelectChange('foobar');
     expect(wrapper.state('custom_virtualenv')).toBe('foobar');
-  });
-
-  test('onLookupChange successfully adds/removes row from selectedInstanceGroups state', () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <OrganizationAdd api={{}} />
-      </MemoryRouter>
-    ).find('OrganizationAdd');
-    wrapper.setState({ results: [{
-      id: 1,
-      name: 'foo'
-    }] });
-    wrapper.instance().onLookupChange({
-      id: 1,
-      name: 'foo'
-    });
-    expect(wrapper.state('results')).toEqual([{
-      id: 1,
-      name: 'foo',
-      isChecked: true
-    }]);
-    expect(wrapper.state('selectedInstanceGroups')).toEqual([{
-      id: 1,
-      name: 'foo'
-    }]);
-    wrapper.instance().onLookupChange({
-      id: 1,
-      name: 'foo'
-    });
-    expect(wrapper.state('results')).toEqual([{
-      id: 1,
-      name: 'foo',
-      isChecked: false
-    }]);
-    expect(wrapper.state('selectedInstanceGroups')).toEqual([]);
   });
 
   test('onSubmit posts instance groups from selectedInstanceGroups', async () => {

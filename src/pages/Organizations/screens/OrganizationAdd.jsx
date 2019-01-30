@@ -34,11 +34,11 @@ class OrganizationAdd extends React.Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.onSelectChange = this.onSelectChange.bind(this);
-    this.onLookupChange = this.onLookupChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.resetForm = this.resetForm.bind(this);
     this.onSuccess = this.onSuccess.bind(this);
     this.onCancel = this.onCancel.bind(this);
+    this.updateSelectedInstanceGroups = this.updateSelectedInstanceGroups.bind(this);
   }
 
   state = {
@@ -63,30 +63,6 @@ class OrganizationAdd extends React.Component {
 
   onSelectChange (value) {
     this.setState({ custom_virtualenv: value });
-  }
-
-  onLookupChange (row) {
-    const { results, selectedInstanceGroups } = this.state;
-    const selectedIndex = selectedInstanceGroups
-      .findIndex(instanceGroup => instanceGroup.id === row.id);
-    const resultsIndex = results.findIndex(instanceGroup => instanceGroup.id === row.id);
-    if (selectedIndex > -1) {
-      // Remove it from the list of selected instance groups
-      selectedInstanceGroups.splice(selectedIndex, 1);
-      if (resultsIndex > -1) {
-        results[resultsIndex].isChecked = false;
-      }
-      this.setState({ selectedInstanceGroups, results });
-    } else {
-      // Add it to the list of selected instance groups
-      if (resultsIndex > -1) {
-        results[resultsIndex].isChecked = true;
-      }
-      this.setState(prevState => ({
-        results,
-        selectedInstanceGroups: [...prevState.selectedInstanceGroups, row]
-      }));
-    }
   }
 
   async onSubmit () {
@@ -126,6 +102,10 @@ class OrganizationAdd extends React.Component {
   onSuccess (id) {
     const { history } = this.props;
     history.push(`/organizations/${id}`);
+  }
+
+  updateSelectedInstanceGroups (selectedInstanceGroups) {
+    this.setState({ selectedInstanceGroups });
   }
 
   handleChange (_, evt) {
@@ -184,7 +164,7 @@ class OrganizationAdd extends React.Component {
                 <FormGroup label="Instance Groups" fieldId="simple-form-instance-groups">
                   <Lookup
                     lookupHeader="Instance Groups"
-                    lookupChange={this.onLookupChange}
+                    onLookupSave={this.updateSelectedInstanceGroups}
                     data={results}
                     selected={selectedInstanceGroups}
                   />
