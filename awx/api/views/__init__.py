@@ -523,7 +523,7 @@ class AuthView(APIView):
                 not feature_enabled('ldap')) or \
                 (not feature_enabled('enterprise_auth') and
                  name in ['saml', 'radius']):
-                    continue
+                continue
 
             login_url = reverse('social:begin', args=(name,))
             complete_url = request.build_absolute_uri(reverse('social:complete', args=(name,)))
