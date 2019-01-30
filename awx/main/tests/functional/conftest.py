@@ -251,6 +251,33 @@ def credentialtype_insights():
 
 
 @pytest.fixture
+def credentialtype_external():
+    external_type_inputs = {
+        'fields': [{
+            'id': 'url',
+            'label': 'Server URL',
+            'type': 'string',
+            'help_text': 'The server url.'
+        }, {
+            'id': 'token',
+            'label': 'Token',
+            'type': 'string',
+            'secret': True,
+            'help_text': 'An access token for the server.'
+        }],
+        'required': ['url', 'token'],
+    }
+    external_type = CredentialType(
+        kind='external',
+        managed_by_tower=True,
+        name='External Service',
+        inputs=external_type_inputs
+    )
+    external_type.save()
+    return external_type
+
+
+@pytest.fixture
 def credential(credentialtype_aws):
     return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred',
                                      inputs={'username': 'something', 'password': 'secret'})
@@ -291,6 +318,18 @@ def org_credential(organization, credentialtype_aws):
     return Credential.objects.create(credential_type=credentialtype_aws, name='test-cred',
                                      inputs={'username': 'something', 'password': 'secret'},
                                      organization=organization)
+
+
+@pytest.fixture
+def external_credential(credentialtype_external):
+    return Credential.objects.create(credential_type=credentialtype_external, name='external-cred',
+                                     inputs={'url': 'http://testhost.com', 'token': 'secret1'})
+
+
+@pytest.fixture
+def other_external_credential(credentialtype_external):
+    return Credential.objects.create(credential_type=credentialtype_external, name='other-external-cred',
+                                     inputs={'url': 'http://testhost.com', 'token': 'secret2'})
 
 
 @pytest.fixture
