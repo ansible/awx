@@ -48,7 +48,7 @@ export default [ 'ProcessErrors', 'CredentialTypeModel', 'TemplatesStrings',
 
                     let credentialType = new CredentialType();
 
-                    credentialType.http.get()
+                    credentialType.http.get({ params: { page_size: 200 }})
                     .then( (response) => {
                         vm.promptDataClone.prompts.credentials.credentialTypes = {};
                         vm.promptDataClone.prompts.credentials.credentialTypeOptions = [];
