@@ -299,7 +299,7 @@ class SettingsWrapper(UserSettingsHolder):
             self.__dict__['_awx_conf_preload_expires'] = time.time() + SETTING_CACHE_TIMEOUT
             # Check for any settings that have been defined in Python files and
             # make those read-only to avoid overriding in the database.
-            if not self._awx_conf_init_readonly and 'migrate_to_database_settings' not in sys.argv:
+            if not self._awx_conf_init_readonly:
                 defaults_snapshot = self._get_default('DEFAULTS_SNAPSHOT')
                 for key in get_writeable_settings(self.registry):
                     init_default = defaults_snapshot.get(key, None)
