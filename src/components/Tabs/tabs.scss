@@ -35,6 +35,10 @@
     }
   }
 
+  .pf-c-tabs__item:first-child .pf-c-tabs__button:before {
+    border-left: 0;
+  }
+
   .pf-c-tabs__item:not(.pf-m-current):hover
   .pf-c-tabs__button::after {
     border-top: none;
