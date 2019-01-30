@@ -22,7 +22,7 @@ django-taggit==0.22.2
 djangorestframework==3.7.7
 djangorestframework-yaml==1.0.3
 irc==16.2
-jinja2=2.10
+jinja2==2.10
 jsonschema==2.6.0
 Markdown==2.6.11    # used for formatting API help
 ordereddict==1.1
