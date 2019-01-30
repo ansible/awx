@@ -357,10 +357,10 @@ class TaskManager():
         return False
 
     def get_latest_project_update(self, job):
-            latest_project_update = ProjectUpdate.objects.filter(project=job.project, job_type='check').order_by("-created")
-            if not latest_project_update.exists():
-                return None
-            return latest_project_update.first()
+        latest_project_update = ProjectUpdate.objects.filter(project=job.project, job_type='check').order_by("-created")
+        if not latest_project_update.exists():
+            return None
+        return latest_project_update.first()
 
     def should_update_related_project(self, job, latest_project_update):
         now = tz_now()
