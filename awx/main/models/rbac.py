@@ -204,7 +204,7 @@ class Role(models.Model):
                 value = description.get('default')
 
         if '%s' in value and content_type:
-                    value = value % model_name
+            value = value % model_name
 
         return value
 
