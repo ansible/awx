@@ -17,7 +17,7 @@
   }
   .pf-l-split__item:not(:last-child):after {
     content: "";
-    background-color: #d7d7d7;
+    background-color: var(--awx-selectedList--BorderColor);
     width: 1px;
     height: 30px;
     display: block;
@@ -28,7 +28,4 @@
     margin-right: 10px;
     margin-bottom: 10px;
   }
-  // .pf-c-button {
-  //   font-size: var(--awx-selectedList--FontSize);
-  // }
 }
