@@ -46,7 +46,7 @@ from awx.main.constants import (
     CENSOR_VALUE,
 )
 from awx.main.models import (
-    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential,
+    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialInputSource,
     CredentialType, CustomInventoryScript, Fact, Group, Host, Instance,
     InstanceGroup, Inventory, InventorySource, InventoryUpdate,
     InventoryUpdateEvent, Job, JobEvent, JobHostSummary, JobLaunchConfig,
@@ -2629,6 +2629,7 @@ class CredentialSerializer(BaseSerializer):
         ))
         if self.version > 1:
             res['copy'] = self.reverse('api:credential_copy', kwargs={'pk': obj.pk})
+            res['input_sources'] = self.reverse('api:credential_input_source_sublist', kwargs={'pk': obj.pk})
 
         # TODO: remove when API v1 is removed
         if self.version > 1:
@@ -2813,6 +2814,43 @@ class CredentialSerializerCreate(CredentialSerializer):
             credential.admin_role.parents.add(team.admin_role)
             credential.use_role.parents.add(team.member_role)
         return credential
+
+
+class CredentialInputSourceSerializer(BaseSerializer):
+    source_credential_name = serializers.SerializerMethodField(
+        read_only=True,
+        help_text=_('The name of the source credential.')
+    )
+    source_credential_type = serializers.SerializerMethodField(
+        read_only=True,
+        help_text=_('The credential type of the source credential.')
+    )
+
+    class Meta:
+        model = CredentialInputSource
+        fields = (
+            'id',
+            'type',
+            'url',
+            'input_field_name',
+            'target_credential',
+            'source_credential',
+            'source_credential_type',
+            'source_credential_name',
+            'created',
+            'modified',
+        )
+        extra_kwargs = {
+            'input_field_name': {'required': True},
+            'target_credential': {'required': True},
+            'source_credential': {'required': True},
+        }
+
+    def get_source_credential_name(self, obj):
+        return obj.source_credential.name
+
+    def get_source_credential_type(self, obj):
+        return obj.source_credential.credential_type.id
 
 
 class UserCredentialSerializerCreate(CredentialSerializerCreate):
