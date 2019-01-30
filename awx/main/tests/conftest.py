@@ -140,6 +140,7 @@ def pytest_runtest_teardown(item, nextitem):
     # this is a local test cache, so we want every test to start with empty cache
     cache.clear()
 
+
 @pytest.fixture(scope='session', autouse=True)
 def mock_external_credential_input_sources():
     # Credential objects query their related input sources on initialization.

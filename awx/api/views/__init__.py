@@ -1419,6 +1419,33 @@ class CredentialCopy(CopyAPIView):
     copy_return_serializer_class = serializers.CredentialSerializer
 
 
+class CredentialInputSourceDetail(RetrieveUpdateDestroyAPIView):
+
+    view_name = _("Credential Input Source Detail")
+
+    model = models.CredentialInputSource
+    serializer_class = serializers.CredentialInputSourceSerializer
+
+
+class CredentialInputSourceList(ListCreateAPIView):
+
+    view_name = _("Credential Input Sources")
+
+    model = models.CredentialInputSource
+    serializer_class = serializers.CredentialInputSourceSerializer
+
+
+class CredentialInputSourceSubList(SubListAPIView):
+
+    view_name = _("Credential Input Sources")
+
+    model = models.CredentialInputSource
+    serializer_class = serializers.CredentialInputSourceSerializer
+    parent_model = models.Credential
+    relationship = 'input_source'
+    parent_key = 'target_credential'
+
+
 class HostRelatedSearchMixin(object):
 
     @property

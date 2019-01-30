@@ -30,8 +30,8 @@ from awx.main.utils import (
 )
 from awx.main.models import (
     ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialType,
-    CustomInventoryScript, Group, Host, Instance, InstanceGroup, Inventory,
-    InventorySource, InventoryUpdate, InventoryUpdateEvent, Job, JobEvent,
+    CredentialInputSource, CustomInventoryScript, Group, Host, Instance, InstanceGroup,
+    Inventory, InventorySource, InventoryUpdate, InventoryUpdateEvent, Job, JobEvent,
     JobHostSummary, JobLaunchConfig, JobTemplate, Label, Notification,
     NotificationTemplate, Organization, Project, ProjectUpdate,
     ProjectUpdateEvent, Role, Schedule, SystemJob, SystemJobEvent,
@@ -1161,6 +1161,19 @@ class CredentialAccess(BaseAccess):
         #if obj.user is None and obj.team is None:
         #    return True
         return self.can_change(obj, None)
+
+
+class CredentialInputSourceAccess(BaseAccess):
+    '''
+    I can see credential input sources when:
+     - I'm a superuser (TODO: Update)
+    I can create credential input sources when:
+     - I'm a superuser (TODO: Update)
+    I can delete credential input sources when:
+     - I'm a superuser (TODO: Update)
+    '''
+
+    model = CredentialInputSource
 
 
 class TeamAccess(BaseAccess):
