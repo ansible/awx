@@ -153,7 +153,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         max_length=32,
         choices=ALL_STATUS_CHOICES,
         default='ok',
-        editable=False,
+        editable=False
     )
     credentials = models.ManyToManyField(
         'Credential',
@@ -596,12 +596,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default='',
         editable=False,
         help_text=_("The node the job executed on."),
+        db_index=True,
     )
     controller_node = models.TextField(
         blank=True,
         default='',
         editable=False,
         help_text=_("The instance that managed the isolated execution environment."),
+        db_index=True,
     )
     notifications = models.ManyToManyField(
         'Notification',
@@ -618,6 +620,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         choices=STATUS_CHOICES,
         default='new',
         editable=False,
+        db_index=True,
     )
     failed = models.BooleanField(
         default=False,

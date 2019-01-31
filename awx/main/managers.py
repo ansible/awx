@@ -172,7 +172,7 @@ class InstanceGroupManager(models.Manager):
             graph = {group.name: {} for group in qs}
         for group_name in graph:
             self.zero_out_group(graph, group_name, breakdown)
-        for t in tasks:
+        for t in tasks.iterator():
             # TODO: dock capacity for isolated job management tasks running in queue
             impact = t.task_impact
             if t.status == 'waiting' or not t.execution_node:

@@ -547,7 +547,11 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         help_text=_("If ran as part of sliced jobs, the total number of slices. "
                     "If 1, job is not part of a sliced job."),
     )
-
+    host_impact = models.IntegerField(
+        blank=True,
+        default=None,
+        null=True,
+    )
 
     def _get_parent_field_name(self):
         return 'job_template'
@@ -691,7 +695,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         if self.launch_type == 'callback':
             count_hosts = 2
         else:
-            count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
+            if self.host_impact is None:
+                self.host_impact = Host.objects.filter(inventory__jobs__pk=self.pk).count()
+                self.save(update_fields=['host_impact'])
+            count_hosts = self.host_impact
             if self.job_slice_count > 1:
                 # Integer division intentional
                 count_hosts = (count_hosts + self.job_slice_count - self.job_slice_number) // self.job_slice_count

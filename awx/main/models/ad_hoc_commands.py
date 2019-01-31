@@ -86,6 +86,11 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         blank=True,
         default='',
     ))
+    host_impact = models.IntegerField(
+        blank=True,
+        default=None,
+        null=True,
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -182,7 +187,10 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
-        count_hosts = Host.objects.filter( enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
+        if self.host_impact is None:
+            self.host_impact = Host.objects.filter( enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
+            self.save(update_fields=['host_impact'])
+        count_hosts = self.host_impact
         return min(count_hosts, 5 if self.forks == 0 else self.forks) + 1
 
     def copy(self):
