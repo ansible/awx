@@ -12,6 +12,7 @@ import sys
 import time
 import traceback
 import shutil
+from distutils.version import LooseVersion as Version
 
 # Django
 from django.conf import settings
@@ -37,6 +38,7 @@ from awx.main.utils import (
     build_proot_temp_dir,
     get_licenser
 )
+from awx.main.utils.common import _get_ansible_version
 from awx.main.signals import disable_activity_stream
 from awx.main.constants import STANDARD_INVENTORY_UPDATE_ENV
 
@@ -124,13 +126,16 @@ class AnsibleInventoryLoader(object):
 
     def get_base_args(self):
         # get ansible-inventory absolute path for running in bubblewrap/proot, in Popen
-
+        ansible_inventory_path = self.get_path_to_ansible_inventory()
         # NOTE: why do we add "python" to the start of these args?
         # the script that runs ansible-inventory specifies a python interpreter
         # that makes no sense in light of the fact that we put all the dependencies
         # inside of /venv/ansible, so we override the specified interpreter
         # https://github.com/ansible/ansible/issues/50714
-        bargs = ['python', self.get_path_to_ansible_inventory(), '-i', self.source]
+        bargs = ['python', ansible_inventory_path, '-i', self.source]
+        ansible_version = _get_ansible_version(ansible_inventory_path[:-len('-inventory')])
+        if ansible_version != 'unknown' and Version(ansible_version) >= Version('2.5'):
+            bargs.extend(['--playbook-dir', self.source_dir])
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 
