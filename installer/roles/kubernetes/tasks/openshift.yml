@@ -28,7 +28,3 @@
   set_fact:
     postgresql_service_name: "postgresql"
   when: "pg_hostname is not defined or pg_hostname == ''"
-
-- name: Add privileged SCC to service account
-  shell: |
-    {{ openshift_oc_bin }} adm policy add-scc-to-user privileged system:serviceaccount:{{ openshift_project }}:awx
