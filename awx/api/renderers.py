@@ -1,6 +1,8 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
+from django.utils.safestring import SafeText
+
 # Django REST Framework
 from rest_framework import renderers
 from rest_framework.request import override_method
@@ -17,6 +19,19 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
         if view.request.method == 'OPTIONS' and not isinstance(renderer, renderers.JSONRenderer):
             return renderers.JSONRenderer()
         return renderer
+
+    def get_content(self, renderer, data, accepted_media_type, renderer_context):
+        if isinstance(data, SafeText):
+            # Older versions of Django (pre-2.0) have a py3 bug which causes
+            # bytestrings marked as "safe" to not actually get _treated_ as
+            # safe; this causes certain embedded strings (like the stdout HTML
+            # view) to be improperly escaped
+            # see: https://github.com/ansible/awx/issues/3108
+            # https://code.djangoproject.com/ticket/28121
+            return data
+        return super(BrowsableAPIRenderer, self).get_content(renderer, data,
+                                                             accepted_media_type,
+                                                             renderer_context)
 
     def get_context(self, data, accepted_media_type, renderer_context):
         # Store the associated response status to know how to populate the raw
