@@ -954,7 +954,8 @@ class BaseTask(object):
                 self.update_model(pk, custom_virtualenv=getattr(instance, 'ansible_virtualenv_path', settings.ANSIBLE_VENV_PATH))
 
             # Fetch ansible version once here to support version-dependent features.
-            kwargs['ansible_version'] = get_ansible_version()
+            kwargs['ansible_version'] = get_ansible_version(
+                ansible_path=self.get_path_to_ansible(instance, executable='ansible'))
             kwargs['private_data_dir'] = self.build_private_data_dir(instance, **kwargs)
 
             # Fetch "cached" fact data from prior runs and put on the disk
