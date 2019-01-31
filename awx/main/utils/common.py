@@ -882,7 +882,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         path = os.path.realpath(path)
         new_args.extend(['--bind', '%s' % (path,), '%s' % (path,)])
     if kwargs.get('isolated'):
-        if 'ansible-playbook' in args:
+        if '/bin/ansible-playbook' in ' '.join(args):
             # playbook runs should cwd to the SCM checkout dir
             new_args.extend(['--chdir', os.path.join(kwargs['private_data_dir'], 'project')])
         else:
