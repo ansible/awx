@@ -5,7 +5,6 @@
 import copy
 import json
 import logging
-import operator
 import re
 import urllib.parse
 from collections import OrderedDict
@@ -45,7 +44,6 @@ from awx.main.constants import (
     ANSI_SGR_PATTERN,
     ACTIVE_STATES,
     CENSOR_VALUE,
-    CHOICES_PRIVILEGE_ESCALATION_METHODS,
 )
 from awx.main.models import * # noqa
 from awx.main.models.base import NEW_JOB_TYPE_CHOICES
@@ -2498,9 +2496,6 @@ class CredentialTypeSerializer(BaseSerializer):
                 field['label'] = _(field['label'])
                 if 'help_text' in field:
                     field['help_text'] = _(field['help_text'])
-                if field['type'] == 'become_method':
-                    field.pop('type')
-                    field['choices'] = list(map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS))
         return value
 
     def filter_field_metadata(self, fields, method):

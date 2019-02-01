@@ -4,7 +4,6 @@
 # Python
 import copy
 import json
-import operator
 import re
 import urllib.parse
 
@@ -45,7 +44,7 @@ from awx.main.utils.filters import SmartFilter
 from awx.main.utils.encryption import encrypt_value, decrypt_value, get_encryption_key
 from awx.main.validators import validate_ssh_private_key
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
-from awx.main.constants import CHOICES_PRIVILEGE_ESCALATION_METHODS, ENV_BLACKLIST
+from awx.main.constants import ENV_BLACKLIST
 from awx.main import utils
 
 
@@ -511,9 +510,6 @@ class CredentialInputField(JSONSchemaField):
         properties = {}
         for field in model_instance.credential_type.inputs.get('fields', []):
             field = field.copy()
-            if field['type'] == 'become_method':
-                field.pop('type')
-                field['choices'] = list(map(operator.itemgetter(0), CHOICES_PRIVILEGE_ESCALATION_METHODS))
             properties[field['id']] = field
             if field.get('choices', []):
                 field['enum'] = list(field['choices'])[:]
@@ -657,7 +653,7 @@ class CredentialTypeInputField(JSONSchemaField):
                     'items': {
                         'type': 'object',
                         'properties': {
-                            'type': {'enum': ['string', 'boolean', 'become_method']},
+                            'type': {'enum': ['string', 'boolean']},
                             'format': {'enum': ['ssh_private_key']},
                             'choices': {
                                 'type': 'array',
@@ -717,17 +713,6 @@ class CredentialTypeInputField(JSONSchemaField):
             if 'type' not in field:
                 # If no type is specified, default to string
                 field['type'] = 'string'
-
-            if field['type'] == 'become_method':
-                if not model_instance.managed_by_tower:
-                    raise django_exceptions.ValidationError(
-                        _('become_method is a reserved type name'),
-                        code='invalid',
-                        params={'value': value},
-                    )
-                else:
-                    field.pop('type')
-                    field['choices'] = CHOICES_PRIVILEGE_ESCALATION_METHODS
 
             for key in ('choices', 'multiline', 'format', 'secret',):
                 if key in field and field['type'] != 'string':
