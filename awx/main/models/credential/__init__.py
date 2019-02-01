@@ -933,6 +933,10 @@ def openstack(cls):
                                            'It is only needed for Keystone v3 authentication '
                                            'URLs. Refer to Ansible Tower documentation for '
                                            'common scenarios.')
+            }, {
+                'id': 'no_verify_ssl',
+                'label': ugettext_noop('Disable SSL Verification'),
+                'type': 'boolean'
             }],
             'required': ['username', 'password', 'host', 'project']
         }
