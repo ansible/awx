@@ -32,9 +32,6 @@ from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
 from awx.main.utils import (
     ignore_inventory_computed_fields,
-    check_proot_installed,
-    wrap_args_with_proot,
-    build_proot_temp_dir,
     get_licenser
 )
 from awx.main.signals import disable_activity_stream
@@ -117,40 +114,10 @@ class AnsibleInventoryLoader(object):
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 
-    def get_proot_args(self, cmd, env):
-        cwd = os.getcwd()
-        if not check_proot_installed():
-            raise RuntimeError("proot is not installed but is configured for use")
-
-        kwargs = {}
-        if self.is_custom:
-            # use source's tmp dir for proot, task manager will delete folder
-            logger.debug("Using provided directory '{}' for isolation.".format(self.source_dir))
-            kwargs['proot_temp_dir'] = self.source_dir
-            cwd = self.source_dir
-        else:
-            # we cannot safely store tmp data in source dir or trust script contents
-            if env['AWX_PRIVATE_DATA_DIR']:
-                # If this is non-blank, file credentials are being used and we need access
-                private_data_dir = functioning_dir(env['AWX_PRIVATE_DATA_DIR'])
-                logger.debug("Using private credential data in '{}'.".format(private_data_dir))
-                kwargs['private_data_dir'] = private_data_dir
-            self.tmp_private_dir = build_proot_temp_dir()
-            logger.debug("Using fresh temporary directory '{}' for isolation.".format(self.tmp_private_dir))
-            kwargs['proot_temp_dir'] = self.tmp_private_dir
-            kwargs['proot_show_paths'] = [functioning_dir(self.source)]
-        logger.debug("Running from `{}` working directory.".format(cwd))
-
-        return wrap_args_with_proot(cmd, cwd, **kwargs)
-
     def command_to_json(self, cmd):
         data = {}
         stdout, stderr = '', ''
         env = self.build_env()
-
-        if ((self.is_custom or 'AWX_PRIVATE_DATA_DIR' in env) and
-                getattr(settings, 'AWX_PROOT_ENABLED', False)):
-            cmd = self.get_proot_args(cmd, env)
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
         stdout, stderr = proc.communicate()
