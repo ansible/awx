@@ -127,16 +127,18 @@ class Organization extends Component {
                 />
               )}
             />
-            <Route
-              path="/organizations/:id/details"
-              render={() => (
-                <OrganizationDetail
-                  organization={organization}
-                  match={match}
-                  location={location}
-                />
-              )}
-            />
+            {organization && (
+              <Route
+                path="/organizations/:id/details"
+                render={() => (
+                  <OrganizationDetail
+                    api={api}
+                    match={match}
+                    organization={organization}
+                  />
+                )}
+              />
+            )}
             <Route
               path="/organizations/:id/access"
               render={() => <CardBody><h1><Trans>Access</Trans></h1></CardBody>}

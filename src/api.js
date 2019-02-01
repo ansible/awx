@@ -70,6 +70,12 @@ class APIClient {
     return this.http.get(endpoint);
   }
 
+  getOrganizationInstanceGroups (id, params = {}) {
+    const endpoint = `${API_ORGANIZATIONS}${id}/instance_groups/`;
+
+    return this.http.get(endpoint, { params });
+  }
+
   getOrganizationNotifications (id, params = {}) {
     const endpoint = `${API_ORGANIZATIONS}${id}/notification_templates/`;
 
