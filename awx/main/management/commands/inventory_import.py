@@ -141,6 +141,9 @@ class AnsibleInventoryLoader(object):
             kwargs['proot_show_paths'] = [functioning_dir(self.source)]
         logger.debug("Running from `{}` working directory.".format(cwd))
 
+        if self.venv_path != settings.ANSIBLE_VENV_PATH:
+            kwargs['proot_custom_virtualenv'] = self.venv_path
+
         return wrap_args_with_proot(cmd, cwd, **kwargs)
 
     def command_to_json(self, cmd):
