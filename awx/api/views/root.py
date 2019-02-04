@@ -27,6 +27,7 @@ from awx.main.utils import (
 )
 from awx.api.versioning import reverse, get_request_version, drf_reverse
 from awx.conf.license import get_license, feature_enabled
+from awx.main.constants import PRIVILEGE_ESCALATION_METHODS
 from awx.main.models import (
     Project,
     Organization,
@@ -203,7 +204,8 @@ class ApiV1ConfigView(APIView):
             version=get_awx_version(),
             ansible_version=get_ansible_version(),
             eula=render_to_string("eula.md") if license_data.get('license_type', 'UNLICENSED') != 'open' else '',
-            analytics_status=pendo_state
+            analytics_status=pendo_state,
+            become_methods=PRIVILEGE_ESCALATION_METHODS,
         )
 
         # If LDAP is enabled, user_ldap_fields will return a list of field
