@@ -221,13 +221,7 @@ class OrganizationsList extends Component {
                 <Trans>Please add an organization to populate this list</Trans>
               </EmptyStateBody>
             </EmptyState>
-          )}
-          {(
-            typeof noInitialResults !== 'undefined'
-            && !noInitialResults
-            && !loading
-            && !error
-          ) && (
+          ) || (
             <Fragment>
               <DataListToolbar
                 addUrl={`${match.url}/add`}
