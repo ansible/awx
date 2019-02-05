@@ -1,4 +1,11 @@
-function EditCredentialsController (models, $state, $scope, strings, componentsStrings) {
+function EditCredentialsController (
+    models,
+    $state,
+    $scope,
+    strings,
+    componentsStrings,
+    ConfigService
+) {
     const vm = this || {};
 
     const { me, credential, credentialType, organization, isOrgCredAdmin } = models;
@@ -103,6 +110,19 @@ function EditCredentialsController (models, $state, $scope, strings, componentsS
 
                 $scope.$watch(`vm.form.${gceFileInputSchema.id}._value`, vm.gceOnFileInputChanged);
                 $scope.$watch('vm.form.ssh_key_data._isBeingReplaced', vm.gceOnReplaceKeyChanged);
+            } else if (credentialType.get('name') === 'Machine') {
+                const apiConfig = ConfigService.get();
+                const become = fields.find((field) => field.id === 'become_method');
+                become._isDynamic = true;
+                become._choices = Array.from(apiConfig.become_methods, method => method[0]);
+                // Add the value to the choices if it doesn't exist in the preset list
+                if (become._value && become._value !== '') {
+                    const optionMatches = become._choices
+                        .findIndex((option) => option === become._value);
+                    if (optionMatches === -1) {
+                        become._choices.push(become._value);
+                    }
+                }
             }
 
             return fields;
@@ -189,7 +209,8 @@ EditCredentialsController.$inject = [
     '$state',
     '$scope',
     'CredentialsStrings',
-    'ComponentsStrings'
+    'ComponentsStrings',
+    'ConfigService'
 ];
 
 export default EditCredentialsController;
