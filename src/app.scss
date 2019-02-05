@@ -2,26 +2,35 @@
 // masthead overrides
 //
 
-.pf-l-page__header-brand {
+.pf-c-page__header-brand {
   max-width: 255px;
 }
 
-.pf-l-page__header-brand-link {
+.pf-c-page__header-brand-link {
   max-width: 85px;
 }
 
-.pf-l-page__header-brand-link img {
+.pf-c-page__header-brand-link img {
   transform: scale(1.1, 1.1);
   position: relative;
-  top: -4px;
+}
+
+.pf-c-page__header-tools .pf-l-toolbar__item {
+  margin-left: 20px;
+}
+
+.pf-c-page__header-tools .pf-c-dropdown__toggle:before {
+  --pf-c-dropdown__toggle--BorderBottomColor: var(--pf-global--BackgroundColor--light-100);
+  --pf-c-dropdown__toggle--hover--BorderBottomColor: var(--pf-global--BackgroundColor--light-100);
+  --pf-c-dropdown__toggle--expanded--BorderBottomColor: var(--pf-global--BackgroundColor--light-100);
 }
 
 //
 // sidebar overrides
 //
 
-.pf-l-page__sidebar{
-  --pf-l-page__sidebar--md--Width: 255px;
+.pf-c-page__sidebar{
+  --pf-c-page__sidebar--md--Width: 255px;
 
   .pf-c-nav {
     overflow-y: auto;
@@ -114,6 +123,7 @@
 //
 // about modal overrides
 //
+
 .pf-c-backdrop .pf-c-about-modal-box {
   --pf-c-about-modal-box--MaxHeight: 40rem;
   --pf-c-about-modal-box--MaxWidth: 63rem;
@@ -127,61 +137,25 @@
   }
 }
 
-.awx-lookup {
-  min-height: 36px;
-}
 .pf-c-input-group__text {
   &:hover {
     cursor: pointer;
   }
 }
-.awx-c-tag--pill {
-  color: white;
-  background-color: rgb(0, 123, 186);
-  border-radius: 3px;
-  margin: 1px 2px;
-  padding: 0 10px;
-  display: inline-block;
-}
+
 //
-// layout styles
+// data list overrides
 //
-.at-align-right {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-}
-//
-// list styles
-//
-.awx-c-list {
-  border-top: 1px solid #d7d7d7;
-  border-bottom: 1px solid #d7d7d7;
-}
-.at-c-listCardBody {
-  --pf-c-card__footer--PaddingX: 0;
-  --pf-c-card__footer--PaddingY: 0;
-  --pf-c-card__body--PaddingX: 0;
-  --pf-c-card__body--PaddingY: 0;
-}
+
 .pf-c-data-list__item {
   --pf-c-data-list__item--PaddingLeft: 20px;
   --pf-c-data-list__item--PaddingRight: 20px;
 }
+
 //
 // pf modal overrides
 //
-.awx-c-modal {
-  width: 550px;
-  margin: 0;
-}
 
-.awx-c-icon--remove {
-  padding-left: 10px;
-  &:hover {
-    cursor: pointer;
-  }
-}
 .pf-c-modal-box__footer {
   --pf-c-modal-box__footer--PaddingTop: 0;
   --pf-c-modal-box__footer--PaddingBottom: 0;
@@ -197,4 +171,73 @@
 .pf-c-modal-box__body {
   --pf-c-modal-box__body--PaddingLeft: 20px;
   --pf-c-modal-box__body--PaddingRight: 20px;
+}
+
+//
+// pf card overrides
+//
+
+.pf-c-card {
+  display: flex;
+}
+
+.pf-c-card__header {
+  padding: 0;
+}
+
+//
+// pf empty state overrides
+//
+
+.pf-c-empty-state {
+  align-self: center;
+}
+
+//
+// assorted custom component styles
+// note that these should be given a consistent prefix
+// and bem style, as well as moved into component-based scss files
+//
+
+.awx-lookup {
+  min-height: 36px;
+}
+
+.awx-c-modal {
+  width: 550px;
+  margin: 0;
+}
+
+.awx-c-icon--remove {
+  padding-left: 10px;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.at-align-right {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.awx-c-list {
+  border-top: 1px solid #d7d7d7;
+  border-bottom: 1px solid #d7d7d7;
+}
+
+.awx-c-tag--pill {
+  color: var(--pf-global--BackgroundColor--light-100);
+  background-color: rgb(0, 123, 186);
+  border-radius: 3px;
+  margin: 1px 2px;
+  padding: 0 10px;
+  display: inline-block;
+}
+
+.at-c-listCardBody {
+  --pf-c-card__footer--PaddingX: 0;
+  --pf-c-card__footer--PaddingY: 0;
+  --pf-c-card__body--PaddingX: 0;
+  --pf-c-card__body--PaddingY: 0;
 }

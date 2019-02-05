@@ -6,13 +6,17 @@ import {
   withRouter
 } from 'react-router-dom';
 import { I18n, i18nMark } from '@lingui/react';
-import { t } from '@lingui/macro';
+import { Trans, t } from '@lingui/macro';
 import {
   Card,
+  EmptyState,
+  EmptyStateIcon,
+  EmptyStateBody,
   PageSection,
   PageSectionVariants,
+  Title
 } from '@patternfly/react-core';
-
+import { CubesIcon } from '@patternfly/react-icons';
 import DataListToolbar from '../../../components/DataListToolbar';
 import OrganizationListItem from '../components/OrganizationListItem';
 import Pagination from '../../../components/Pagination';
@@ -157,7 +161,7 @@ class OrganizationsList extends Component {
 
       const pageCount = Math.ceil(count / page_size);
 
-      this.setState({
+      const stateToUpdate = {
         count,
         page,
         pageCount,
@@ -166,7 +170,17 @@ class OrganizationsList extends Component {
         sortedColumnKey,
         results,
         selected: [],
-      });
+      };
+
+      // This is in place to track whether or not the initial request
+      // return any results.  If it did not, we show the empty state.
+      // This will become problematic once search is in play because
+      // the first load may have query params (think bookmarked search)
+      if (typeof noInitialResults === 'undefined') {
+        stateToUpdate.noInitialResults = results.length === 0;
+      }
+
+      this.setState(stateToUpdate);
       this.updateUrl(queryParams);
     } catch (err) {
       this.setState({ error: true });
@@ -183,6 +197,7 @@ class OrganizationsList extends Component {
       count,
       error,
       loading,
+      noInitialResults,
       page,
       pageCount,
       page_size,
@@ -194,52 +209,64 @@ class OrganizationsList extends Component {
     const { match } = this.props;
 
     return (
-      <Fragment>
-        <PageSection variant={medium}>
-          <Card>
-            <DataListToolbar
-              addUrl={`${match.url}/add`}
-              isAllSelected={selected.length === results.length}
-              sortedColumnKey={sortedColumnKey}
-              sortOrder={sortOrder}
-              columns={this.columns}
-              onSearch={this.onSearch}
-              onSort={this.onSort}
-              onSelectAll={this.onSelectAll}
-              showDelete
-              showSelectAll
-            />
-            <I18n>
-              {({ i18n }) => (
-                <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
-                  { results.map(o => (
-                    <OrganizationListItem
-                      key={o.id}
-                      itemId={o.id}
-                      name={o.name}
-                      detailUrl={`${match.url}/${o.id}`}
-                      userCount={o.summary_fields.related_field_counts.users}
-                      teamCount={o.summary_fields.related_field_counts.teams}
-                      isSelected={selected.includes(o.id)}
-                      onSelect={() => this.onSelect(o.id)}
-                    />
-                  ))}
-                </ul>
-              )}
-            </I18n>
-            <Pagination
-              count={count}
-              page={page}
-              pageCount={pageCount}
-              page_size={page_size}
-              pageSizeOptions={this.pageSizeOptions}
-              onSetPage={this.onSetPage}
-            />
-            { loading ? <div>loading...</div> : '' }
-            { error ? <div>error</div> : '' }
-          </Card>
-        </PageSection>
-      </Fragment>
+      <PageSection variant={medium}>
+        <Card>
+          {noInitialResults && (
+            <EmptyState>
+              <EmptyStateIcon icon={CubesIcon} />
+              <Title size="lg">
+                <Trans>No Organizations Found</Trans>
+              </Title>
+              <EmptyStateBody>
+                <Trans>Please add an organization to populate this list</Trans>
+              </EmptyStateBody>
+            </EmptyState>
+          ) || (
+            <Fragment>
+              <DataListToolbar
+                addUrl={`${match.url}/add`}
+                isAllSelected={selected.length === results.length}
+                sortedColumnKey={sortedColumnKey}
+                sortOrder={sortOrder}
+                columns={this.columns}
+                onSearch={this.onSearch}
+                onSort={this.onSort}
+                onSelectAll={this.onSelectAll}
+                showDelete
+                showSelectAll
+              />
+              <I18n>
+                {({ i18n }) => (
+                  <ul className="pf-c-data-list" aria-label={i18n._(t`Organizations List`)}>
+                    { results.map(o => (
+                      <OrganizationListItem
+                        key={o.id}
+                        itemId={o.id}
+                        name={o.name}
+                        detailUrl={`${match.url}/${o.id}`}
+                        userCount={o.summary_fields.related_field_counts.users}
+                        teamCount={o.summary_fields.related_field_counts.teams}
+                        isSelected={selected.includes(o.id)}
+                        onSelect={() => this.onSelect(o.id)}
+                      />
+                    ))}
+                  </ul>
+                )}
+              </I18n>
+              <Pagination
+                count={count}
+                page={page}
+                pageCount={pageCount}
+                page_size={page_size}
+                pageSizeOptions={this.pageSizeOptions}
+                onSetPage={this.onSetPage}
+              />
+              { loading ? <div>loading...</div> : '' }
+              { error ? <div>error</div> : '' }
+            </Fragment>
+          )}
+        </Card>
+      </PageSection>
     );
   }
 }
