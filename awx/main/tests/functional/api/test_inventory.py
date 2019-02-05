@@ -281,6 +281,36 @@ def test_host_filter_unicode(post, admin_user, organization):
     assert si.host_filter == u'ansible_facts__ansible_distribution=レッドハット'
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize("lookup", ['icontains', 'has_keys'])
+def test_host_filter_invalid_ansible_facts_lookup(post, admin_user, organization, lookup):
+    resp = post(
+        reverse('api:inventory_list'),
+        data={
+            'name': 'smart inventory', 'kind': 'smart',
+            'organization': organization.pk,
+            'host_filter': u'ansible_facts__ansible_distribution__{}=cent'.format(lookup)
+        },
+        user=admin_user,
+        expect=400
+    )
+    assert 'ansible_facts does not support searching with __{}'.format(lookup) in json.dumps(resp.data)
+
+
+@pytest.mark.django_db
+def test_host_filter_ansible_facts_exact(post, admin_user, organization):
+    post(
+        reverse('api:inventory_list'),
+        data={
+            'name': 'smart inventory', 'kind': 'smart',
+            'organization': organization.pk,
+            'host_filter': 'ansible_facts__ansible_distribution__exact="CentOS"'
+        },
+        user=admin_user,
+        expect=201
+    )
+
+
 @pytest.mark.parametrize("role_field,expected_status_code", [
     (None, 403),
     ('admin_role', 201),

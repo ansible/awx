@@ -47,7 +47,7 @@ from awx.main.constants import (
 )
 from awx.main.models import * # noqa
 from awx.main.models.base import NEW_JOB_TYPE_CHOICES
-from awx.main.fields import ImplicitRoleField
+from awx.main.fields import ImplicitRoleField, JSONBField
 from awx.main.utils import (
     get_type_for_model, get_model_for_type, timestamp_apiformat,
     camelcase_to_underscore, getattrd, parse_yaml_or_json,
@@ -1542,6 +1542,18 @@ class InventorySerializer(BaseSerializerWithVariables):
     def validate_host_filter(self, host_filter):
         if host_filter:
             try:
+                for match in JSONBField.get_lookups().keys():
+                    if match == 'exact':
+                        # __exact is allowed
+                        continue
+                    match = '__{}'.format(match)
+                    if re.match(
+                        'ansible_facts[^=]+{}='.format(match),
+                        host_filter
+                    ):
+                        raise models.base.ValidationError({
+                            'host_filter': 'ansible_facts does not support searching with {}'.format(match)
+                        })
                 SmartFilter().query_from_string(host_filter)
             except RuntimeError as e:
                 raise models.base.ValidationError(e)
