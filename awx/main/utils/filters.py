@@ -8,8 +8,8 @@ from pyparsing import (
     CharsNotIn,
     ParseException,
 )
+import logging
 from logging import Filter, _nameToLevel
-
 
 from django.apps import apps
 from django.db import models
@@ -18,6 +18,8 @@ from django.conf import settings
 from awx.main.utils.common import get_search_fields
 
 __all__ = ['SmartFilter', 'ExternalLoggerEnabled']
+
+logger = logging.getLogger('awx.main.utils')
 
 
 class FieldFromSettings(object):
@@ -171,9 +173,24 @@ class SmartFilter(object):
               relationship refered to to see if it's a jsonb type.
         '''
         def _json_path_to_contains(self, k, v):
+            from awx.main.fields import JSONBField  # avoid a circular import
             if not k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP):
                 v = self.strip_quotes_traditional_logic(v)
                 return (k, v)
+
+            for match in JSONBField.get_lookups().keys():
+                match = '__{}'.format(match)
+                if k.endswith(match):
+                    if match == '__exact':
+                        # appending __exact is basically a no-op, because that's
+                        # what the query means if you leave it off
+                        k = k[:-len(match)]
+                    logger.error(
+                        'host_filter:{} does not support searching with {}'.format(
+                            SmartFilter.SEARCHABLE_RELATIONSHIP,
+                            match
+                        )
+                    )
 
             # Strip off leading relationship key
             if k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP + '__'):

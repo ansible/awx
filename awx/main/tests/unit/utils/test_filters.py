@@ -105,6 +105,7 @@ class TestSmartFilterQueryFromString():
         ('a__b__c=false', Q(**{u"a__b__c": False})),
         ('a__b__c=null', Q(**{u"a__b__c": None})),
         ('ansible_facts__a="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
+        ('ansible_facts__a__exact="true"', Q(**{u"ansible_facts__contains": {u"a": u"true"}})),
         #('"a__b\"__c"="true"', Q(**{u"a__b\"__c": "true"})),
         #('a__b\"__c="true"', Q(**{u"a__b\"__c": "true"})),
     ])
