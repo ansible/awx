@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from django.utils.timezone import now as tz_now
+from django.utils.translation import ugettext_lazy as _
 
 
 # AWX
@@ -42,6 +43,12 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin, CustomVi
         'InstanceGroup',
         blank=True,
     )
+    max_hosts = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+        help_text=_('Maximum number of hosts allowed to be managed by this organization.'),
+    )
+
     admin_role = ImplicitRoleField(
         parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     )
