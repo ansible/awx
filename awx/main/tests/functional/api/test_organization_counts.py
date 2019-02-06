@@ -5,7 +5,7 @@ from awx.api.versioning import reverse
 
 @pytest.fixture
 def organization_resource_creator(organization, user):
-    def rf(users, admins, job_templates, projects, inventories, teams):
+    def rf(users, admins, job_templates, projects, inventories, teams, hosts):
 
         # Associate one resource of every type with the organization
         for i in range(users):
@@ -48,7 +48,8 @@ COUNTS_PRIMES = {
     'job_templates': 3,
     'projects': 3,
     'inventories': 7,
-    'teams': 5
+    'teams': 5,
+    'hosts': 0,
 }
 COUNTS_ZEROS = {
     'users': 0,
@@ -56,7 +57,8 @@ COUNTS_ZEROS = {
     'job_templates': 0,
     'projects': 0,
     'inventories': 0,
-    'teams': 0
+    'teams': 0,
+    'hosts': 0,
 }
 
 
@@ -92,7 +94,8 @@ def test_org_counts_detail_member(resourced_organization, user, get):
         'job_templates': 0,
         'projects': 0,
         'inventories': 0,
-        'teams': 0
+        'teams': 0,
+        'hosts': 0,
     }
 
 
@@ -123,7 +126,8 @@ def test_org_counts_list_member(resourced_organization, user, get):
         'job_templates': 0,
         'projects': 0,
         'inventories': 0,
-        'teams': 0
+        'teams': 0,
+        'hosts': 0,
     }
 
 
@@ -230,5 +234,6 @@ def test_JT_associated_with_project(organizations, project, user, get):
         'job_templates': 1,
         'projects': 1,
         'inventories': 0,
-        'teams': 0
+        'teams': 0,
+        'hosts': 0,
     }
