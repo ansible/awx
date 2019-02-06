@@ -185,12 +185,13 @@ class SmartFilter(object):
                         # appending __exact is basically a no-op, because that's
                         # what the query means if you leave it off
                         k = k[:-len(match)]
-                    logger.error(
-                        'host_filter:{} does not support searching with {}'.format(
-                            SmartFilter.SEARCHABLE_RELATIONSHIP,
-                            match
+                    else:
+                        logger.error(
+                            'host_filter:{} does not support searching with {}'.format(
+                                SmartFilter.SEARCHABLE_RELATIONSHIP,
+                                match
+                            )
                         )
-                    )
 
             # Strip off leading relationship key
             if k.startswith(SmartFilter.SEARCHABLE_RELATIONSHIP + '__'):
