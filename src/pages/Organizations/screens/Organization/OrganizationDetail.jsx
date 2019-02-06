@@ -17,7 +17,7 @@ const detailWrapperStyle = {
 
 const detailLabelStyle = {
   fontWeight: '700',
-  lineHeight: '30px',
+  lineHeight: '24px',
   marginRight: '20px',
   minWidth: '150px',
   textAlign: 'right'
