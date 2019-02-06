@@ -1743,6 +1743,10 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin, 
 
     @property
     def ansible_virtualenv_path(self):
+        if self.inventory_source and self.inventory_source.source_project:
+            project = self.inventory_source.source_project
+            if project and project.custom_virtualenv:
+                return project.custom_virtualenv
         if self.inventory_source and self.inventory_source.inventory:
             organization = self.inventory_source.inventory.organization
             if organization and organization.custom_virtualenv:
