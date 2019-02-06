@@ -10,6 +10,7 @@
   --pf-global--link--Color: #484848;
   --pf-global--link--Color--hover: #484848;
   --pf-global--link--TextDecoration--hover: none;
+  --pf-global--FontWeight--normal: 700;
 
   &:before {
     border-bottom: 1px solid var(--pf-c-tabs__item--BorderColor);
@@ -50,6 +51,10 @@
   .pf-c-tabs__button:not(.pf-m-current)::after {
     border-bottom: 3px solid var(--pf-global--Color--dark-200);
     border-top: none;
+  }
+
+  .pf-c-tabs__button.pf-m-current {
+    color: var(--pf-c-tabs__item--m-current--Color);
   }
 
   .pf-c-tabs__button.pf-m-current::after {
