@@ -139,7 +139,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
         (0, 'system_warning', _('System Warning'), False),
         (0, 'error', _('Error'), True),
     ]
-    FAILED_EVENTS = [x[1] for x in EVENT_TYPES if x[3]]
     EVENT_CHOICES = [(x[1], x[2]) for x in EVENT_TYPES]
     LEVEL_FOR_EVENT = dict([(x[1], x[0]) for x in EVENT_TYPES])
 
@@ -150,14 +149,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
     event_data = JSONField(
         blank=True,
         default={},
-    )
-    failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    changed = models.BooleanField(
-        default=False,
-        editable=False,
     )
     uuid = models.CharField(
         max_length=1024,
@@ -265,26 +256,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
         # Update event model fields from event data.
         updated_fields = set()
         event_data = self.event_data
-        res = event_data.get('res', None)
-        if self.event in self.FAILED_EVENTS and not event_data.get('ignore_errors', False):
-            self.failed = True
-            updated_fields.add('failed')
-        if isinstance(res, dict):
-            if res.get('changed', False):
-                self.changed = True
-                updated_fields.add('changed')
-        if self.event == 'playbook_on_stats':
-            try:
-                failures_dict = event_data.get('failures', {})
-                dark_dict = event_data.get('dark', {})
-                self.failed = bool(sum(failures_dict.values()) +
-                                   sum(dark_dict.values()))
-                updated_fields.add('failed')
-                changed_dict = event_data.get('changed', {})
-                self.changed = bool(sum(changed_dict.values()))
-                updated_fields.add('changed')
-            except (AttributeError, TypeError):
-                pass
         for field in ('playbook', 'play', 'task', 'role'):
             value = force_text(event_data.get(field, '')).strip()
             if value != getattr(self, field):
@@ -328,8 +299,7 @@ class BasePlaybookEvent(CreatedModifiedModel):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        # Update model fields and related objects unless we're only updating
-        # failed/changed flags triggered from a child event.
+        # Update model fields and related objects
         from_parent_update = kwargs.pop('from_parent_update', False)
         if not from_parent_update:
             # Update model fields from event data.
@@ -353,8 +323,6 @@ class BasePlaybookEvent(CreatedModifiedModel):
             if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
                 self._update_hosts()
             if self.event == 'playbook_on_stats':
-                self._update_parents_failed_and_changed()
-
                 hostnames = self._hostnames()
                 self._update_host_summary_from_stats(hostnames)
                 try:
@@ -434,15 +402,6 @@ class JobEvent(BasePlaybookEvent):
             setattr(self, 'host_name', value)
             updated_fields.add('host_name')
         return updated_fields
-
-    def _update_parents_failed_and_changed(self):
-        # Update parent events to reflect failed, changed
-        runner_events = JobEvent.objects.filter(job=self.job,
-                                                event__startswith='runner_on')
-        changed_events = runner_events.filter(changed=True)
-        failed_events = runner_events.filter(failed=True)
-        JobEvent.objects.filter(uuid__in=changed_events.values_list('parent_uuid', flat=True)).update(changed=True)
-        JobEvent.objects.filter(uuid__in=failed_events.values_list('parent_uuid', flat=True)).update(failed=True)
 
     def _update_hosts(self, extra_host_pks=None):
         # Update job event hosts m2m from host_name, propagate to parent events.
@@ -650,20 +609,11 @@ class AdHocCommandEvent(BaseCommandEvent):
         ('system_warning', _('System Warning'), False),
         ('error', _('Error'), False),
     ]
-    FAILED_EVENTS = [x[0] for x in EVENT_TYPES if x[2]]
     EVENT_CHOICES = [(x[0], x[1]) for x in EVENT_TYPES]
 
     event = models.CharField(
         max_length=100,
         choices=EVENT_CHOICES,
-    )
-    failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    changed = models.BooleanField(
-        default=False,
-        editable=False,
     )
     ad_hoc_command = models.ForeignKey(
         'AdHocCommand',
@@ -693,15 +643,6 @@ class AdHocCommandEvent(BaseCommandEvent):
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
         res = self.event_data.get('res', None)
-        if self.event in self.FAILED_EVENTS:
-            if not self.event_data.get('ignore_errors', False):
-                self.failed = True
-                if 'failed' not in update_fields:
-                    update_fields.append('failed')
-        if isinstance(res, dict) and res.get('changed', False):
-            self.changed = True
-            if 'changed' not in update_fields:
-                update_fields.append('changed')
         self.host_name = self.event_data.get('host', '').strip()
         if 'host_name' not in update_fields:
             update_fields.append('host_name')
@@ -742,14 +683,6 @@ class InventoryUpdateEvent(BaseCommandEvent):
     def event(self):
         return 'verbose'
 
-    @property
-    def failed(self):
-        return False
-
-    @property
-    def changed(self):
-        return False
-
 
 class SystemJobEvent(BaseCommandEvent):
 
@@ -774,11 +707,3 @@ class SystemJobEvent(BaseCommandEvent):
     @property
     def event(self):
         return 'verbose'
-
-    @property
-    def failed(self):
-        return False
-
-    @property
-    def changed(self):
-        return False

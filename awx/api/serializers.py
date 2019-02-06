@@ -4054,8 +4054,8 @@ class JobEventSerializer(BaseSerializer):
     class Meta:
         model = JobEvent
         fields = ('*', '-name', '-description', 'job', 'event', 'counter',
-                  'event_display', 'event_data', 'event_level', 'failed',
-                  'changed', 'uuid', 'parent_uuid', 'host', 'host_name', 'parent',
+                  'event_display', 'event_data', 'event_level', 
+                  'uuid', 'parent_uuid', 'host', 'host_name', 'parent',
                   'playbook', 'play', 'task', 'role', 'stdout', 'start_line', 'end_line',
                   'verbosity')
 
@@ -4183,8 +4183,8 @@ class AdHocCommandEventSerializer(BaseSerializer):
     class Meta:
         model = AdHocCommandEvent
         fields = ('*', '-name', '-description', 'ad_hoc_command', 'event',
-                  'counter', 'event_display', 'event_data', 'failed',
-                  'changed', 'uuid', 'host', 'host_name', 'stdout',
+                  'counter', 'event_display', 'event_data',
+                  'uuid', 'host', 'host_name', 'stdout',
                   'start_line', 'end_line', 'verbosity')
 
     def get_related(self, obj):
