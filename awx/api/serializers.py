@@ -1229,7 +1229,7 @@ class OrganizationSerializer(BaseSerializer):
 
     class Meta:
         model = Organization
-        fields = ('*', 'custom_virtualenv',)
+        fields = ('*', 'max_hosts', 'custom_virtualenv',)
 
     def get_related(self, obj):
         res = super(OrganizationSerializer, self).get_related(obj)
