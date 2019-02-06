@@ -16,9 +16,15 @@ const detailWrapperStyle = {
 };
 
 const detailLabelStyle = {
-  minWidth: '150px',
+  fontWeight: '700',
+  lineHeight: '30px',
   marginRight: '20px',
+  minWidth: '150px',
   textAlign: 'right'
+};
+
+const detailValueStyle = {
+  lineHeight: '24px'
 };
 
 const Detail = ({ label, value }) => {
@@ -27,7 +33,7 @@ const Detail = ({ label, value }) => {
     detail = (
       <TextContent style={detailWrapperStyle}>
         <Text component={TextVariants.h6} style={detailLabelStyle}>{ label }</Text>
-        <Text component={TextVariants.p}>{ value }</Text>
+        <Text component={TextVariants.p} style={detailValueStyle}>{ value }</Text>
       </TextContent>
     );
   }
@@ -105,7 +111,7 @@ class OrganizationDetail extends Component {
                   >
                     <Trans>Instance Groups</Trans>
                   </Text>
-                  <div>
+                  <div style={detailValueStyle}>
                     {instanceGroups.map(instanceGroup => (
                       <BasicChip
                         key={instanceGroup.id}
