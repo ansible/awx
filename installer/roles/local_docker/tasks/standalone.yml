@@ -156,3 +156,8 @@
       MEMCACHED_PORT: "11211"
       AWX_ADMIN_USER: "{{ admin_user|default('admin') }}"
       AWX_ADMIN_PASSWORD: "{{ admin_password|default('password') }}"
+  register: awx_task_container
+
+- name: Update CA trust in awx_task container
+  command: docker exec awx_task '/usr/bin/update-ca-trust'
+  when: awx_task_container.changed
