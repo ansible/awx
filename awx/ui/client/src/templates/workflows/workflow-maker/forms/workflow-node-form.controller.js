@@ -221,6 +221,7 @@ export default ['$scope', 'TemplatesService', 'JobTemplateModel', 'PromptService
                             $scope.promptModalMissingReqFields = false;
                         }
                     }
+                    watchForPromptChanges();
                     $scope.nodeFormDataLoaded = true;
                 } else if (
                     _.get($scope, 'nodeConfig.node.fullUnifiedJobTemplateObject.unified_job_type') === 'job_template' ||
