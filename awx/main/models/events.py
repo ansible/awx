@@ -352,9 +352,16 @@ class BasePlaybookEvent(CreatedModifiedModel):
         if hasattr(self, 'job') and not from_parent_update:
             if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
                 self._update_hosts()
-            if self.event == 'playbook_on_stats':
-                self._update_parents_failed_and_changed()
+            if self.parent_uuid:
+                kwargs = {}
+                if self.changed is True:
+                    kwargs['changed'] = True
+                if self.failed is True:
+                    kwargs['failed'] = True
+                if kwargs:
+                    JobEvent.objects.filter(job_id=self.job_id, uuid=self.parent_uuid).update(**kwargs)
 
+            if self.event == 'playbook_on_stats':
                 hostnames = self._hostnames()
                 self._update_host_summary_from_stats(hostnames)
                 try:
@@ -434,15 +441,6 @@ class JobEvent(BasePlaybookEvent):
             setattr(self, 'host_name', value)
             updated_fields.add('host_name')
         return updated_fields
-
-    def _update_parents_failed_and_changed(self):
-        # Update parent events to reflect failed, changed
-        runner_events = JobEvent.objects.filter(job=self.job,
-                                                event__startswith='runner_on')
-        changed_events = runner_events.filter(changed=True)
-        failed_events = runner_events.filter(failed=True)
-        JobEvent.objects.filter(uuid__in=changed_events.values_list('parent_uuid', flat=True)).update(changed=True)
-        JobEvent.objects.filter(uuid__in=failed_events.values_list('parent_uuid', flat=True)).update(failed=True)
 
     def _update_hosts(self, extra_host_pks=None):
         # Update job event hosts m2m from host_name, propagate to parent events.
