@@ -17,6 +17,7 @@ from awx.conf.license import (
 from awx.main.models import (
     ActivityStream,
     Inventory,
+    Host,
     Project,
     JobTemplate,
     WorkflowJobTemplate,
@@ -119,6 +120,7 @@ class OrganizationDetail(RelatedJobsPreventDeleteMixin, RetrieveUpdateDestroyAPI
             organization__id=org_id).count()
         org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).filter(
             project__organization__id=org_id).count()
+        org_counts['hosts'] = Host.objects.org_active_count(org_id)
 
         full_context['related_field_counts'] = {}
         full_context['related_field_counts'][org_id] = org_counts

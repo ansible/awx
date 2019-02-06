@@ -29,7 +29,7 @@ from awx.main.models.ha import (
 )
 from awx.main.models.organization import Team
 from awx.main.models.projects import Project
-from awx.main.models.inventory import Inventory
+from awx.main.models.inventory import Inventory, Host
 from awx.main.models.jobs import JobTemplate
 from awx.conf.license import (
     feature_enabled,
@@ -235,6 +235,8 @@ class OrganizationCountsMixin(object):
         db_results['projects'] = project_qs\
             .values('organization').annotate(Count('organization')).order_by('organization')
 
+        db_results['hosts'] = Host.objects.active_counts_by_org()
+
         # Other members and admins of organization are always viewable
         db_results['users'] = org_qs.annotate(
             users=Count('member_role__members', distinct=True),
@@ -246,7 +248,7 @@ class OrganizationCountsMixin(object):
             org_id = org['id']
             count_context[org_id] = {
                 'inventories': 0, 'teams': 0, 'users': 0, 'job_templates': 0,
-                'admins': 0, 'projects': 0}
+                'admins': 0, 'projects': 0, 'hosts': 0}
 
         for res, count_qs in db_results.items():
             if res == 'job_templates_project':
@@ -255,6 +257,8 @@ class OrganizationCountsMixin(object):
                 org_reference = JT_inventory_reference
             elif res == 'users':
                 org_reference = 'id'
+            elif res == 'hosts':
+                org_reference = 'inventory__organization'
             else:
                 org_reference = 'organization'
             for entry in count_qs:
