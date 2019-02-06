@@ -14,6 +14,7 @@ function OutputStrings (BaseString) {
     };
 
     ns.tooltips = {
+        ARTIFACTS: t.s('Read-only view of artifacts added to the job template'),
         CANCEL: t.s('Cancel'),
         COLLAPSE_OUTPUT: t.s('Collapse Output'),
         DELETE: t.s('Delete'),
@@ -49,6 +50,7 @@ function OutputStrings (BaseString) {
     };
 
     ns.labels = {
+        ARTIFACTS: t.s('Artifacts'),
         CREDENTIAL: t.s('Credential'),
         ENVIRONMENT: t.s('Environment'),
         EXECUTION_NODE: t.s('Execution Node'),
