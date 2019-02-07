@@ -5,12 +5,12 @@
  *************************************************/
 
 export default ['$scope', 'TemplatesService',
-    'ProcessErrors', 'CreateSelect2', '$q', 'JobTemplateModel',
-    'Empty', 'PromptService', 'Rest', 'TemplatesStrings', 'WorkflowChartService',
+    'ProcessErrors', '$q',
+    'PromptService', 'TemplatesStrings', 'WorkflowChartService',
     'Wait', '$state',
     function ($scope, TemplatesService,
-        ProcessErrors, CreateSelect2, $q, JobTemplate,
-        Empty, PromptService, Rest, TemplatesStrings, WorkflowChartService,
+        ProcessErrors, $q,
+        PromptService, TemplatesStrings, WorkflowChartService,
         Wait, $state
     ) {
 
@@ -159,6 +159,11 @@ export default ['$scope', 'TemplatesService',
                                     });
                                 });
                             }
+                        }).catch(({ data, status }) => {
+                            Wait('stop');
+                            ProcessErrors($scope, data, status, null, {
+                                hdr: $scope.strings.get('error.HEADER')
+                            });
                         }));
                     } else if (nodeRef[workflowMakerNodeId].isEdited) {
                         editPromises.push(TemplatesService.editWorkflowNode({
@@ -360,14 +365,26 @@ export default ['$scope', 'TemplatesService',
                                     .then(() => {
                                         Wait('stop');
                                         $scope.closeDialog();
+                                    }).catch(({ data, status }) => {
+                                        Wait('stop');
+                                        ProcessErrors($scope, data, status, null, {
+                                            hdr: $scope.strings.get('error.HEADER')
+                                        });
                                     });
                             }).catch(({
                                 data,
                                 status
                             }) => {
                                 Wait('stop');
-                                ProcessErrors($scope, data, status, null, {});
+                                ProcessErrors($scope, data, status, null, {
+                                    hdr: $scope.strings.get('error.HEADER')
+                                });
                             });
+                    }).catch(({ data, status }) => {
+                        Wait('stop');
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: $scope.strings.get('error.HEADER')
+                        });
                     });
 
             } else {
@@ -381,6 +398,11 @@ export default ['$scope', 'TemplatesService',
                         Wait('stop');
                         $scope.closeDialog();
                         $state.transitionTo('templates');
+                    }).catch(({ data, status }) => {
+                        Wait('stop');
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: $scope.strings.get('error.HEADER')
+                        });
                     });
             }
         };
