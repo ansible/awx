@@ -5,12 +5,12 @@
  *************************************************/
 
 export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
-    'Alert', 'ProcessErrors', 'GenerateForm', 'Prompt',
+    'Alert', 'ProcessErrors', 'GenerateForm', 'Prompt', 'isNotificationAdmin',
     'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
     'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification',
     'i18n', 'OrgAdminLookup', 'ConfigData', 'scmCredentialType',
     function($scope, $rootScope, $stateParams, ProjectsForm, Rest, Alert,
-    ProcessErrors, GenerateForm, Prompt, GetBasePath,
+    ProcessErrors, GenerateForm, Prompt, isNotificationAdmin, GetBasePath,
     GetProjectPath, Authorization, GetChoices, Empty, Wait, ProjectUpdate,
     $state, CreateSelect2, ToggleNotification, i18n, OrgAdminLookup,
     ConfigData, scmCredentialType) {
@@ -27,6 +27,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
             $scope.base_dir = '';
             const virtualEnvs = ConfigData.custom_virtualenvs || [];
             $scope.custom_virtualenvs_options = virtualEnvs;
+            $scope.isNotificationAdmin = isNotificationAdmin || false;
         }
 
         $scope.$watch('project_obj.summary_fields.user_capabilities.edit', function(val) {

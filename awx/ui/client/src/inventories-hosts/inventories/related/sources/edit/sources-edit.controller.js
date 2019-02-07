@@ -4,23 +4,22 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state', '$stateParams', '$scope', 'ParseVariableString',
-    'rbacUiControlService', 'ToJSON', 'ParseTypeChange', 'GroupsService',
+export default ['$state', '$scope', 'ParseVariableString', 'ParseTypeChange',
     'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
     'SourcesService', 'inventoryData', 'inventorySourcesOptions', 'Empty',
     'Wait', 'Rest', 'Alert', '$rootScope', 'i18n', 'InventoryHostsStrings',
-    'ProcessErrors', 'inventorySource',
-    function($state, $stateParams, $scope, ParseVariableString,
-        rbacUiControlService, ToJSON,ParseTypeChange, GroupsService,
+    'ProcessErrors', 'inventorySource', 'isNotificationAdmin',
+    function($state, $scope, ParseVariableString, ParseTypeChange,
         GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions,
         SourcesService, inventoryData, inventorySourcesOptions, Empty,
         Wait, Rest, Alert, $rootScope, i18n, InventoryHostsStrings,
-        ProcessErrors, inventorySource) {
+        ProcessErrors, inventorySource, isNotificationAdmin) {
 
         const inventorySourceData = inventorySource.get();
 
         $scope.projectBasePath = GetBasePath('projects') + '?not__status=never updated';
         $scope.canAdd = inventorySourcesOptions.actions.POST;
+        $scope.isNotificationAdmin = isNotificationAdmin || false;
         // instantiate expected $scope values from inventorySourceData
         _.assign($scope,
             {credential: inventorySourceData.credential},
