@@ -15,7 +15,7 @@
             <div class="row" ng-show="wf_maker_templates.length === 0 && !(searchTags | isEmpty)">
                 <div class="col-lg-12 List-searchNoResults" translate>No records matched your search.</div>
             </div>
-            <div class="List-noItems" ng-show="wf_maker_templates.length === 0 && (searchTags | isEmpty)">PLEASE ADD ITEMS TO THIS LIST</div>
+            <div class="List-noItems" ng-show="wf_maker_templates.length === 0 && (searchTags | isEmpty)" translate>PLEASE ADD ITEMS TO THIS LIST</div>
             <div class="list-table-container" ng-show="wf_maker_templates.length > 0">
                 <div id="templates_table" class="List-table" is-extended="false">
                     <div class="List-lookupLayout List-tableHeaderRow">

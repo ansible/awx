@@ -404,7 +404,10 @@ export default ['$scope', 'TemplatesService',
             $scope.graphState.nodeBeingAdded = workflowMakerNodeIdCounter;
 
             $scope.graphState.arrayOfLinksForChart.push({
-                source: {id: parent.id},
+                source: {
+                    id: parent.id,
+                    unifiedJobTemplate: parent.unifiedJobTemplate
+                },
                 target: {id: workflowMakerNodeIdCounter},
                 edgeType: "placeholder"
             });
@@ -439,7 +442,10 @@ export default ['$scope', 'TemplatesService',
             $scope.graphState.nodeBeingAdded = workflowMakerNodeIdCounter;
 
             $scope.graphState.arrayOfLinksForChart.push({
-                source: {id: link.source.id},
+                source: {
+                    id: link.source.id,
+                    unifiedJobTemplate: link.source.unifiedJobTemplate
+                },
                 target: {id: workflowMakerNodeIdCounter},
                 edgeType: "placeholder"
             });
@@ -480,6 +486,7 @@ export default ['$scope', 'TemplatesService',
                     $scope.graphState.arrayOfLinksForChart.map( (link) => {
                         if (link.target.id === nodeId) {
                             link.edgeType = edgeType.value;
+                            link.target.unifiedJobTemplate = selectedTemplate;
                         }
                     });
                 }
@@ -489,6 +496,15 @@ export default ['$scope', 'TemplatesService',
                     nodeRef[$scope.nodeConfig.nodeId].promptData = _.cloneDeep(promptData);
                     nodeRef[$scope.nodeConfig.nodeId].isEdited = true;
                     $scope.graphState.nodeBeingEdited = null;
+
+                    $scope.graphState.arrayOfLinksForChart.map( (link) => {
+                        if (link.target.id === nodeId) {
+                            link.target.unifiedJobTemplate = selectedTemplate;
+                        }
+                        if (link.source.id === nodeId) {
+                            link.source.unifiedJobTemplate = selectedTemplate;
+                        }
+                    });
                 }
             }
 
