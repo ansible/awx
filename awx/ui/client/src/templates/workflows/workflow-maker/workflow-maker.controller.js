@@ -817,6 +817,10 @@ export default ['$scope', 'TemplatesService',
                     $scope.cancelLinkForm();
                 }
 
+                if ($scope.nodeConfig && $scope.nodeConfig.nodeId === nodeId) {
+                    $scope.cancelNodeForm();
+                }
+
                 // Remove the node from the array
                 for( let i = $scope.graphState.arrayOfNodesForChart.length; i--; ){
                     if ($scope.graphState.arrayOfNodesForChart[i].id === nodeId) {
