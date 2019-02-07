@@ -2202,8 +2202,8 @@ class InventoryUpdateSerializer(UnifiedJobSerializer, InventorySourceOptionsSeri
 
     class Meta:
         model = InventoryUpdate
-        fields = ('*', 'inventory', 'inventory_source', 'license_error', 'source_project_update',
-                  'custom_virtualenv', '-controller_node',)
+        fields = ('*', 'inventory', 'inventory_source', 'license_error', 'org_host_limit_error',
+                  'source_project_update', 'custom_virtualenv', '-controller_node',)
 
     def get_related(self, obj):
         res = super(InventoryUpdateSerializer, self).get_related(obj)
