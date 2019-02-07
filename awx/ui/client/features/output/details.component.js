@@ -577,8 +577,8 @@ function getExtraVarsDetails () {
     return { label, tooltip, value, disabled, name };
 }
 
-function getArtifactsDetails () {
-    const artifacts = resource.model.get('artifacts');
+function getArtifactsDetails (val) {
+    const artifacts = val || resource.model.get('artifacts');
 
     if (!artifacts) {
         return null;
@@ -823,6 +823,7 @@ function JobDetailsController (
             scm,
             inventoryScm,
             environment,
+            artifacts,
             executionNode
         }) => {
             vm.started = getStartDetails(started);
@@ -830,6 +831,7 @@ function JobDetailsController (
             vm.projectUpdate = getProjectUpdateDetails(scm.id);
             vm.projectStatus = getProjectStatusDetails(scm.status);
             vm.environment = getEnvironmentDetails(environment);
+            vm.artifacts = getArtifactsDetails(artifacts);
             vm.executionNode = getExecutionNodeDetails(executionNode);
             vm.inventoryScm = getInventoryScmDetails(inventoryScm.id, inventoryScm.status);
             vm.status = getStatusDetails(status);
