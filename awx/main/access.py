@@ -330,6 +330,25 @@ class BaseAccess(object):
             elif "features" not in validation_info:
                 raise LicenseForbids(_("Features not found in active license."))
 
+    def check_org_host_limit(self, data, add_host_name=None):
+        validation_info = get_licenser().validate()
+        if validation_info.get('license_type', 'UNLICENSED') == 'open':
+            return
+
+        inventory = get_object_from_data('inventory', Inventory, data)
+        org = inventory.organization
+        if org is None or org.max_hosts == 0:
+            return
+
+        active_count = Host.objects.org_active_count(org.id)
+        if active_count > org.max_hosts:
+            raise PermissionDenied(_("Organization host limit of %s has been exceeded.") % org.max_hosts)
+
+        if add_host_name:
+            host_exists = Host.objects.filter(inventory__organization=org.id, name=add_host_name).exists()
+            if not host_exists and active_count == org.max_hosts:
+                raise PermissionDenied(_("Organization host limit of %s has been reached.") % org.max_hosts)
+
     def get_user_capabilities(self, obj, method_list=[], parent_obj=None, capabilities_cache={}):
         if obj is None:
             return {}
@@ -360,7 +379,7 @@ class BaseAccess(object):
                 user_capabilities[display_method] = self.user.is_superuser
                 continue
             elif display_method == 'copy' and isinstance(obj, Project) and obj.scm_type == '':
-                # Connot copy manual project without errors
+                # Cannot copy manual project without errors
                 user_capabilities[display_method] = False
                 continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, Group):  # TODO: remove in 3.3
@@ -628,7 +647,7 @@ class OAuth2ApplicationAccess(BaseAccess):
         return self.model.objects.filter(organization__in=org_access_qs)
 
     def can_change(self, obj, data):
-        return self.user.is_superuser or self.check_related('organization', Organization, data, obj=obj, 
+        return self.user.is_superuser or self.check_related('organization', Organization, data, obj=obj,
                                                             role_field='admin_role', mandatory=True)
 
     def can_delete(self, obj):
@@ -636,7 +655,7 @@ class OAuth2ApplicationAccess(BaseAccess):
 
     def can_add(self, data):
         if self.user.is_superuser:
-            return True    
+            return True
         if not data:
             return Organization.accessible_objects(self.user, 'admin_role').exists()
         return self.check_related('organization', Organization, data, role_field='admin_role', mandatory=True)
@@ -650,29 +669,29 @@ class OAuth2TokenAccess(BaseAccess):
      - I am the user of the token.
     I can create an OAuth2 app token when:
      - I have the read permission of the related application.
-    I can read, change or delete a personal token when: 
+    I can read, change or delete a personal token when:
      - I am the user of the token
      - I am the superuser
     I can create an OAuth2 Personal Access Token when:
-     - I am a user.  But I can only create a PAT for myself.  
+     - I am a user.  But I can only create a PAT for myself.
     '''
 
     model = OAuth2AccessToken
-    
+
     select_related = ('user', 'application')
-    
-    def filtered_queryset(self):        
+
+    def filtered_queryset(self):
         org_access_qs = Organization.objects.filter(
             Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
         return self.model.objects.filter(application__organization__in=org_access_qs)  | self.model.objects.filter(user__id=self.user.pk)
-        
+
     def can_delete(self, obj):
         if (self.user.is_superuser) | (obj.user == self.user):
             return True
         elif not obj.application:
             return False
         return self.user in obj.application.organization.admin_role
-        
+
     def can_change(self, obj, data):
         return self.can_delete(obj)
 
@@ -840,6 +859,10 @@ class HostAccess(BaseAccess):
 
         # Check to see if we have enough licenses
         self.check_license(add_host_name=data.get('name', None))
+
+        # Check the per-org limit
+        self.check_org_host_limit(data, add_host_name=data.get('name', None))
+
         return True
 
     def can_change(self, obj, data):
@@ -851,6 +874,9 @@ class HostAccess(BaseAccess):
         # Prevent renaming a host that might exceed license count
         if data and 'name' in data:
             self.check_license(add_host_name=data['name'])
+
+            # Check the per-org limit
+            self.check_org_host_limit(data, add_host_name=data['name'])
 
         # Checks for admin or change permission on inventory, controls whether
         # the user can edit variable data.
@@ -1346,7 +1372,7 @@ class JobTemplateAccess(BaseAccess):
             return self.user in project.use_role
         else:
             return False
-    
+
     @check_superuser
     def can_copy_related(self, obj):
         '''
@@ -1362,6 +1388,10 @@ class JobTemplateAccess(BaseAccess):
         # Check license.
         if validate_license:
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit({'inventory': obj})
+
             if obj.survey_enabled:
                 self.check_license(feature='surveys')
             if Instance.objects.active_count() > 1:
@@ -1519,6 +1549,9 @@ class JobAccess(BaseAccess):
     def can_start(self, obj, validate_license=True):
         if validate_license:
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit({'inventory': obj})
 
         # A super user can relaunch a job
         if self.user.is_superuser:
@@ -1886,6 +1919,10 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if validate_license:
             # check basic license, node count
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit({'inventory': obj})
+
             # if surveys are added to WFJTs, check license here
             if obj.survey_enabled:
                 self.check_license(feature='surveys')
@@ -1956,6 +1993,9 @@ class WorkflowJobAccess(BaseAccess):
     def can_start(self, obj, validate_license=True):
         if validate_license:
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit({'inventory': obj})
 
         if self.user.is_superuser:
             return True
@@ -2032,6 +2072,9 @@ class AdHocCommandAccess(BaseAccess):
 
         if validate_license:
             self.check_license()
+
+            # Check the per-org limit
+            self.check_org_host_limit(data)
 
         # If a credential is provided, the user should have use access to it.
         if not self.check_related('credential', Credential, data, role_field='use_role'):
@@ -2442,7 +2485,7 @@ class ActivityStreamAccess(BaseAccess):
     model = ActivityStream
     prefetch_related = ('organization', 'user', 'inventory', 'host', 'group',
                         'inventory_update', 'credential', 'credential_type', 'team',
-                        'ad_hoc_command', 'o_auth2_application', 'o_auth2_access_token', 
+                        'ad_hoc_command', 'o_auth2_application', 'o_auth2_access_token',
                         'notification_template', 'notification', 'label', 'role', 'actor',
                         'schedule', 'custom_inventory_script', 'unified_job_template',
                         'workflow_job_template_node',)
