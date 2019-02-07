@@ -57,8 +57,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                     },
                     resolve: {
                         add: {
-                            Inventory: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
-                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                            Inventory: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors', 'i18n',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors, i18n){
                                     if($stateParams.inventory_id){
                                         let path = `${GetBasePath('inventory')}${$stateParams.inventory_id}`;
                                         Rest.setUrl(path);
@@ -67,15 +67,15 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                 return data.data;
                                             }).catch(function(response) {
                                                 ProcessErrors(null, response.data, response.status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get inventory info. GET returned status: ' +
+                                                    hdr: i18n._('Error!'),
+                                                    msg: i18n._('Failed to get inventory info. GET returned status: ') +
                                                         response.status
                                                 });
                                             });
                                     }
                             }],
-                            Project: ['Rest', 'GetBasePath', 'ProcessErrors', '$transition$',
-                                function(Rest, GetBasePath, ProcessErrors, $transition$){
+                            Project: ['Rest', 'GetBasePath', 'ProcessErrors', '$transition$', 'i18n',
+                                function(Rest, GetBasePath, ProcessErrors, $transition$, i18n){
                                     if($transition$.params().credential_id){
                                         let path = `${GetBasePath('projects')}?credential__id=${Number($transition$.params().credential_id)}`;
                                         Rest.setUrl(path);
@@ -84,8 +84,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                 return data.data.results[0];
                                             }).catch(function(response) {
                                                 ProcessErrors(null, response.data, response.status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get project info. GET returned status: ' +
+                                                    hdr: i18n._('Error!'),
+                                                    msg: i18n._('Failed to get project info. GET returned status: ') +
                                                         response.status
                                                 });
                                             });
@@ -98,50 +98,49 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                 return data.data;
                                             }).catch(function(response) {
                                                 ProcessErrors(null, response.data, response.status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get project info. GET returned status: ' +
+                                                    hdr: i18n._('Error!'),
+                                                    msg: i18n._('Failed to get project info. GET returned status: ') +
                                                         response.status
                                                 });
                                             });
                                     }
                             }],
-                            availableLabels: ['ProcessErrors', 'TemplatesService',
-                                function(ProcessErrors, TemplatesService) {
+                            availableLabels: ['ProcessErrors', 'TemplatesService', 'i18n',
+                                function(ProcessErrors, TemplatesService, i18n) {
                                     return TemplatesService.getAllLabelOptions()
                                         .then(function(labels){
                                             return labels;
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get labels. GET returned status: ') +
                                                     response.status
                                             });
                                         });
                             }],
-                            checkPermissions: ['Rest', 'GetBasePath', 'TemplatesService', 'Alert', 'ProcessErrors', '$state',
-                                function(Rest, GetBasePath, TemplatesService, Alert, ProcessErrors, $state) {
+                            checkPermissions: ['TemplatesService', 'Alert', 'ProcessErrors', '$state', 'i18n',
+                                function(TemplatesService, Alert, ProcessErrors, $state, i18n) {
                                     return TemplatesService.getJobTemplateOptions()
                                         .then(function(data) {
                                             if (!data.actions.POST) {
                                                 $state.go("^");
-                                                Alert('Permission Error', 'You do not have permission to add a job template.', 'alert-info');
+                                                Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a job template.'), 'alert-info');
                                             }
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get job template options. OPTIONS returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get job template options. OPTIONS returned status: ') +
                                                     response.status
                                             });
                                         });
                             }],
-                            ConfigData: ['ConfigService', 'ProcessErrors', (ConfigService, ProcessErrors) => {
+                            ConfigData: ['ConfigService', 'ProcessErrors', 'i18n', (ConfigService, ProcessErrors, i18n) => {
                                 return ConfigService.getConfig()
                                     .then(response => response)
                                     .catch(({data, status}) => {
                                         ProcessErrors(null, data, status, null, {
-                                            hdr: 'Error!',
-                                            msg: 'Failed to get config. GET returned status: ' +
-                                                'status: ' + status
+                                            hdr: i18n._('Error!'),
+                                            msg: i18n._('Failed to get config. GET returned status: ') + status
                                         });
                                     });
                             }]
@@ -167,21 +166,21 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                     },
                     resolve: {
                         edit: {
-                            jobTemplateData: ['$stateParams', 'TemplatesService', 'ProcessErrors',
-                                function($stateParams, TemplatesService, ProcessErrors) {
+                            jobTemplateData: ['$stateParams', 'TemplatesService', 'ProcessErrors', 'i18n',
+                                function($stateParams, TemplatesService, ProcessErrors, i18n) {
                                     return TemplatesService.getJobTemplate($stateParams.job_template_id)
                                         .then(function(res) {
                                             return res.data;
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get job template. GET returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get job template. GET returned status: ') +
                                                     response.status
                                             });
                                         });
                             }],
-                            projectGetPermissionDenied: ['Rest', 'ProcessErrors', 'jobTemplateData',
-                                function(Rest, ProcessErrors, jobTemplateData) {
+                            projectGetPermissionDenied: ['Rest', 'ProcessErrors', 'jobTemplateData', 'i18n',
+                                function(Rest, ProcessErrors, jobTemplateData, i18n) {
                                     if(jobTemplateData.related.project) {
                                         Rest.setUrl(jobTemplateData.related.project);
                                         return Rest.get()
@@ -191,9 +190,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                             .catch(({data, status}) => {
                                                 if (status !== 403) {
                                                     ProcessErrors(null, data, status, null, {
-                                                        hdr: 'Error!',
-                                                        msg: 'Failed to get project. GET returned ' +
-                                                            'status: ' + status
+                                                        hdr: i18n._('Error!'),
+                                                        msg: i18n._('Failed to get project. GET returned status: ') + status
                                                     });
                                                     return false;
                                                 }
@@ -206,8 +204,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                         return false;
                                     }
                             }],
-                            inventoryGetPermissionDenied: ['Rest', 'ProcessErrors', 'jobTemplateData',
-                                function(Rest, ProcessErrors, jobTemplateData) {
+                            inventoryGetPermissionDenied: ['Rest', 'ProcessErrors', 'jobTemplateData', 'i18n',
+                                function(Rest, ProcessErrors, jobTemplateData, i18n) {
                                     if(jobTemplateData.related.inventory) {
                                         Rest.setUrl(jobTemplateData.related.inventory);
                                         return Rest.get()
@@ -217,9 +215,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                             .catch(({data, status}) => {
                                                 if (status !== 403) {
                                                     ProcessErrors(null, data, status, null, {
-                                                        hdr: 'Error!',
-                                                        msg: 'Failed to get project. GET returned ' +
-                                                            'status: ' + status
+                                                        hdr: i18n._('Error!'),
+                                                        msg: i18n._('Failed to get project. GET returned status: ') + status
                                                     });
                                                     return false;
                                                 }
@@ -232,8 +229,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                         return false;
                                     }
                             }],
-                            InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
-                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                            InstanceGroupsData: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors', 'i18n',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors, i18n){
                                     let path = `${GetBasePath('job_templates')}${$stateParams.job_template_id}/instance_groups/`;
                                     Rest.setUrl(path);
                                     return Rest.get()
@@ -244,47 +241,59 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                         })
                                         .catch(({data, status}) => {
                                             ProcessErrors(null, data, status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get instance groups. GET returned ' +
-                                                    'status: ' + status
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get instance groups. GET returned status: ') + status
                                             });
                                     });
                                 }],
-                            availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
-                                function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
+                            availableLabels: ['ProcessErrors', 'TemplatesService', 'i18n',
+                                function(ProcessErrors, TemplatesService, i18n) {
                                     return TemplatesService.getAllLabelOptions()
                                         .then(function(labels){
                                             return labels;
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get labels. GET returned status: ') +
                                                     response.status
                                             });
                                         });
                             }],
-                            selectedLabels: ['Rest', '$stateParams', 'GetBasePath', 'TemplatesService', 'ProcessErrors',
-                                function(Rest, $stateParams, GetBasePath, TemplatesService, ProcessErrors) {
+                            selectedLabels: ['$stateParams', 'TemplatesService', 'ProcessErrors', 'i18n',
+                                function($stateParams, TemplatesService, ProcessErrors, i18n) {
                                     return TemplatesService.getAllJobTemplateLabels($stateParams.job_template_id)
                                         .then(function(labels){
                                             return labels;
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get workflow job template labels. GET returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get workflow job template labels. GET returned status: ') +
                                                     response.status
                                             });
                                         });
                             }],
-                            ConfigData: ['ConfigService', 'ProcessErrors', (ConfigService, ProcessErrors) => {
+                            ConfigData: ['ConfigService', 'ProcessErrors', 'i18n', (ConfigService, ProcessErrors, i18n) => {
                                 return ConfigService.getConfig()
                                     .then(response => response)
                                     .catch(({data, status}) => {
                                         ProcessErrors(null, data, status, null, {
-                                            hdr: 'Error!',
-                                            msg: 'Failed to get config. GET returned status: ' +
-                                                'status: ' + status
+                                            hdr: i18n._('Error!'),
+                                            msg: i18n._('Failed to get config. GET returned status: ') + status
                                         });
+                                    });
+                            }],
+                            isNotificationAdmin: ['Rest', 'ProcessErrors', 'GetBasePath', 'i18n',
+                                function(Rest, ProcessErrors, GetBasePath, i18n) {
+                                    Rest.setUrl(`${GetBasePath('organizations')}?role_level=notification_admin_role&page_size=1`);
+                                    return Rest.get()
+                                        .then(({data}) => {
+                                            return data.count > 0;
+                                        })
+                                        .catch(({data, status}) => {
+                                            ProcessErrors(null, data, status, null, {
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get organizations for which this user is a notification administrator. GET returned ') + status
+                                            });
                                     });
                             }]
                         }
@@ -301,8 +310,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                     },
                     resolve: {
                         add: {
-                            Inventory: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
-                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                            Inventory: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors', 'i18n',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors, i18n){
                                     if($stateParams.inventory_id){
                                         let path = `${GetBasePath('inventory')}${$stateParams.inventory_id}`;
                                         Rest.setUrl(path);
@@ -311,38 +320,38 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                 return data.data;
                                             }).catch(function(response) {
                                                 ProcessErrors(null, response.data, response.status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get inventory info. GET returned status: ' +
+                                                    hdr: i18n._('Error!'),
+                                                    msg: i18n._('Failed to get inventory info. GET returned status: ') +
                                                         response.status
                                                 });
                                             });
                                     }
                             }],
-                            availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
-                                function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
+                            availableLabels: ['ProcessErrors', 'TemplatesService', 'i18n',
+                                function(ProcessErrors, TemplatesService, i18n) {
                                     return TemplatesService.getAllLabelOptions()
                                         .then(function(labels){
                                             return labels;
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get labels. GET returned status: ') +
                                                     response.status
                                             });
                                         });
                             }],
-                            checkPermissions: ['Rest', 'GetBasePath', 'TemplatesService', 'Alert', 'ProcessErrors', '$state',
-                                function(Rest, GetBasePath, TemplatesService, Alert, ProcessErrors, $state) {
+                            checkPermissions: ['TemplatesService', 'Alert', 'ProcessErrors', '$state', 'i18n',
+                                function(TemplatesService, Alert, ProcessErrors, $state, i18n) {
                                     return TemplatesService.getWorkflowJobTemplateOptions()
                                         .then(function(data) {
                                             if (!data.actions.POST) {
                                                 $state.go("^");
-                                                Alert('Permission Error', 'You do not have permission to add a workflow job template.', 'alert-info');
+                                                Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a workflow job template.'), 'alert-info');
                                             }
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get workflow job template options. OPTIONS returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get workflow job template options. OPTIONS returned status: ') +
                                                     response.status
                                             });
                                         });
@@ -369,8 +378,8 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                     },
                     resolve: {
                         edit: {
-                            Inventory: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors',
-                                function($stateParams, Rest, GetBasePath, ProcessErrors){
+                            Inventory: ['$stateParams', 'Rest', 'GetBasePath', 'ProcessErrors', 'i18n',
+                                function($stateParams, Rest, GetBasePath, ProcessErrors, i18n){
                                     if($stateParams.inventory_id){
                                         let path = `${GetBasePath('inventory')}${$stateParams.inventory_id}`;
                                         Rest.setUrl(path);
@@ -379,48 +388,48 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                                 return data.data;
                                             }).catch(function(response) {
                                                 ProcessErrors(null, response.data, response.status, null, {
-                                                    hdr: 'Error!',
-                                                    msg: 'Failed to get inventory info. GET returned status: ' +
+                                                    hdr: i18n._('Error!'),
+                                                    msg: i18n._('Failed to get inventory info. GET returned status: ') +
                                                         response.status
                                                 });
                                             });
                                     }
                             }],
-                            availableLabels: ['Rest', '$stateParams', 'GetBasePath', 'ProcessErrors', 'TemplatesService',
-                                function(Rest, $stateParams, GetBasePath, ProcessErrors, TemplatesService) {
+                            availableLabels: ['ProcessErrors', 'TemplatesService', 'i18n',
+                                function(ProcessErrors, TemplatesService, i18n) {
                                     return TemplatesService.getAllLabelOptions()
                                         .then(function(labels){
                                             return labels;
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get labels. GET returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get labels. GET returned status: ') +
                                                     response.status
                                             });
                                         });
                             }],
-                            selectedLabels: ['Rest', '$stateParams', 'GetBasePath', 'TemplatesService', 'ProcessErrors',
-                                function(Rest, $stateParams, GetBasePath, TemplatesService, ProcessErrors) {
+                            selectedLabels: ['$stateParams', 'TemplatesService', 'ProcessErrors', 'i18n',
+                                function($stateParams, TemplatesService, ProcessErrors, i18n) {
                                     return TemplatesService.getAllWorkflowJobTemplateLabels($stateParams.workflow_job_template_id)
                                         .then(function(labels){
                                             return labels;
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get workflow job template labels. GET returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get workflow job template labels. GET returned status: ') +
                                                     response.status
                                             });
                                         });
                             }],
-                            workflowJobTemplateData: ['$stateParams', 'TemplatesService', 'ProcessErrors',
-                                function($stateParams, TemplatesService, ProcessErrors) {
+                            workflowJobTemplateData: ['$stateParams', 'TemplatesService', 'ProcessErrors', 'i18n',
+                                function($stateParams, TemplatesService, ProcessErrors, i18n) {
                                     return TemplatesService.getWorkflowJobTemplate($stateParams.workflow_job_template_id)
                                         .then(function(res) {
                                             return res.data;
                                         }).catch(function(response){
                                             ProcessErrors(null, response.data, response.status, null, {
-                                                hdr: 'Error!',
-                                                msg: 'Failed to get workflow job template. GET returned status: ' +
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get workflow job template. GET returned status: ') +
                                                     response.status
                                             });
                                         });
@@ -433,6 +442,20 @@ angular.module('templates', [surveyMaker.name, jobTemplates.name, labels.name, p
                                         .then(({data}) => {
                                             return data;
                                         });
+                            }],
+                            isNotificationAdmin: ['Rest', 'ProcessErrors', 'GetBasePath', 'i18n',
+                                function(Rest, ProcessErrors, GetBasePath, i18n) {
+                                    Rest.setUrl(`${GetBasePath('organizations')}?role_level=notification_admin_role&page_size=1`);
+                                    return Rest.get()
+                                        .then(({data}) => {
+                                            return data.count > 0;
+                                        })
+                                        .catch(({data, status}) => {
+                                            ProcessErrors(null, data, status, null, {
+                                                hdr: i18n._('Error!'),
+                                                msg: i18n._('Failed to get organizations for which this user is a notification administrator. GET returned ') + status
+                                            });
+                                    });
                             }]
                         }
                     }

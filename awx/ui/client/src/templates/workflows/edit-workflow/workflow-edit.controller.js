@@ -10,12 +10,12 @@ export default [
     'Wait', 'Empty', 'ToJSON', 'initSurvey', '$state', 'CreateSelect2',
     'ParseVariableString', 'TemplatesService', 'Rest', 'ToggleNotification',
     'OrgAdminLookup', 'availableLabels', 'selectedLabels', 'workflowJobTemplateData', 'i18n',
-    'workflowLaunch', '$transitions', 'WorkflowJobTemplateModel', 'Inventory',
+    'workflowLaunch', '$transitions', 'WorkflowJobTemplateModel', 'Inventory', 'isNotificationAdmin',
     function($scope, $stateParams, WorkflowForm, GenerateForm, Alert,
         ProcessErrors, GetBasePath, $q, ParseTypeChange, Wait, Empty,
         ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
         TemplatesService, Rest, ToggleNotification, OrgAdminLookup, availableLabels, selectedLabels, workflowJobTemplateData, i18n,
-        workflowLaunch, $transitions, WorkflowJobTemplate, Inventory
+        workflowLaunch, $transitions, WorkflowJobTemplate, Inventory, isNotificationAdmin
     ) {
 
         $scope.missingTemplates = _.has(workflowLaunch, 'node_templates_missing') && workflowLaunch.node_templates_missing.length > 0 ? true : false;
@@ -25,6 +25,8 @@ export default [
                 $scope.canAddWorkflowJobTemplate = false;
             }
         });
+
+        $scope.isNotificationAdmin = isNotificationAdmin || false;
 
         const criteriaObj = {
             from: (state) => state.name === 'templates.editWorkflowJobTemplate.workflowMaker',

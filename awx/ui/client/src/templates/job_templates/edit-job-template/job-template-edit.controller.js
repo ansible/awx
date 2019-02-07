@@ -11,22 +11,22 @@
 */
 
 export default
-    [   '$filter', '$scope', '$rootScope',
-        '$location', '$stateParams', 'JobTemplateForm', 'GenerateForm',
+    [   '$filter', '$scope',
+        '$stateParams', 'JobTemplateForm', 'GenerateForm',
         'Rest', 'Alert',  'ProcessErrors', 'GetBasePath', 'hashSetup',
         'ParseTypeChange', 'Wait', 'selectedLabels', 'i18n',
-        'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
-        'initSurvey', '$state', 'CreateSelect2',
+        'Empty', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
+        'initSurvey', '$state', 'CreateSelect2', 'isNotificationAdmin',
         'ToggleNotification','$q', 'InstanceGroupsService', 'InstanceGroupsData',
         'MultiCredentialService', 'availableLabels', 'projectGetPermissionDenied',
         'inventoryGetPermissionDenied', 'jobTemplateData', 'ParseVariableString', 'ConfigData',
         function(
-            $filter, $scope, $rootScope,
-            $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
+            $filter, $scope,
+            $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
             ProcessErrors, GetBasePath, hashSetup,
             ParseTypeChange, Wait, selectedLabels, i18n,
-            Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit,
-            SurveyControllerInit, $state, CreateSelect2,
+            Empty, ToJSON, GetChoices, CallbackHelpInit,
+            SurveyControllerInit, $state, CreateSelect2, isNotificationAdmin,
             ToggleNotification, $q, InstanceGroupsService, InstanceGroupsData,
             MultiCredentialService, availableLabels, projectGetPermissionDenied,
             inventoryGetPermissionDenied, jobTemplateData, ParseVariableString, ConfigData
@@ -64,6 +64,7 @@ export default
                 $scope.skip_tag_options = [];
                 const virtualEnvs = ConfigData.custom_virtualenvs || [];
                 $scope.custom_virtualenvs_options = virtualEnvs;
+                $scope.isNotificationAdmin = isNotificationAdmin || false;
 
                 SurveyControllerInit({
                     scope: $scope,
