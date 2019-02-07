@@ -169,6 +169,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
             $scope.parseType = 'yaml';
             $scope.varsTooltip= i18n._('Read only view of extra variables added to the workflow.');
             $scope.varsLabel = i18n._('Extra Variables');
+            $scope.varsName = 'extra_vars';
 
             // Click binding for the expand/collapse button on the standard out log
             $scope.stdoutFullScreen = false;

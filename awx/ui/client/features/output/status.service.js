@@ -40,6 +40,7 @@ function JobStatusService (moment, message) {
             started: model.get('started'),
             finished: model.get('finished'),
             environment: model.get('custom_virtualenv'),
+            artifacts: model.get('artifacts'),
             scm: {
                 id: model.get('summary_fields.project_update.id'),
                 status: model.get('summary_fields.project_update.status')
@@ -279,6 +280,12 @@ function JobStatusService (moment, message) {
         this.state.environment = env;
     };
 
+    this.setArtifacts = val => {
+        if (!val) return;
+
+        this.state.artifacts = val;
+    };
+
     this.setExecutionNode = node => {
         if (!node) return;
 
@@ -327,6 +334,7 @@ function JobStatusService (moment, message) {
                 this.setStarted(model.get('started'));
                 this.setJobStatus(model.get('status'));
                 this.setEnvironment(model.get('custom_virtualenv'));
+                this.setArtifacts(model.get('artifacts'));
                 this.setExecutionNode(model.get('execution_node'));
 
                 this.initHostStatusCounts({ model });
