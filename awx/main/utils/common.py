@@ -168,8 +168,8 @@ def _get_ansible_version(ansible_path):
 
 
 @memoize()
-def get_ansible_version(ansible_path='ansible'):
-    return _get_ansible_version(ansible_path)
+def get_ansible_version():
+    return _get_ansible_version('ansible')
 
 
 @memoize()

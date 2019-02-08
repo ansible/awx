@@ -2,6 +2,8 @@ ansible:
   expand_hostvars: true
   fail_on_errors: true
   use_hostnames: false
+cache:
+  path: {{ cache_dir }}
 clouds:
   devstack:
     auth:
@@ -11,3 +13,4 @@ clouds:
       project_name: fooo
       username: fooo
     private: false
+    verify: false

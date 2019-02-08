@@ -58,11 +58,12 @@ idna==2.6                 # via cryptography, requests
 ipaddress==1.0.19         # via cryptography, openstacksdk
 iso8601==0.1.12           # via keystoneauth1, openstacksdk
 isodate==0.6.0            # via msrest
+jinja2==2.10
 jmespath==0.9.3           # via azure-cli-core, boto3, botocore, knack, openstacksdk
 jsonpatch==1.21           # via openstacksdk
 jsonpointer==2.0          # via jsonpatch
 keyring==15.1.0           # via msrestazure
-keystoneauth1==3.4.0      # via openstacksdk, os-client-config
+keystoneauth1==3.11.2     # via openstacksdk, os-client-config
 knack==0.3.3              # via azure-cli-core
 lxml==4.1.1               # via ncclient, pyvmomi
 monotonic==1.4            # via humanfriendly

@@ -1988,14 +1988,20 @@ class RunInventoryUpdate(BaseTask):
         if inventory_update.source in InventorySource.injectors:
             injector = InventorySource.injectors[inventory_update.source](self.get_ansible_version(inventory_update))
 
-        env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
-
         if injector is not None:
+            env = injector.build_env(inventory_update, env, private_data_dir, private_data_files)
             # All CLOUD_PROVIDERS sources implement as either script or auto plugin
             if injector.should_use_plugin():
                 env['ANSIBLE_INVENTORY_ENABLED'] = 'auto'
             else:
                 env['ANSIBLE_INVENTORY_ENABLED'] = 'script'
+
+        # Automatic transformation of group names
+        # https://github.com/ansible/ansible/pull/52748
+        if inventory_update.compatibility_mode:
+            env['ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS'] = 'never'
+        else:
+            env['ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS'] = 'always'
 
         if inventory_update.source in ['scm', 'custom']:
             for env_k in inventory_update.source_vars_dict:
@@ -2090,7 +2096,7 @@ class RunInventoryUpdate(BaseTask):
                 os.chmod(inventory_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             else:
                 # Use the vendored script path
-                inventory_path = self.get_path_to('..', 'plugins', 'inventory', '%s.py' % src)
+                inventory_path = self.get_path_to('..', 'plugins', 'inventory', injector.script_name)
         elif src == 'scm':
             inventory_path = inventory_update.get_actual_source_path()
         elif src == 'custom':

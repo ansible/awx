@@ -291,6 +291,14 @@
     </div>
 </div>
 
+<!-- COMPATIBILITY MODE DETAIL -->
+<div class="JobResults-resultRow" ng-show="vm.compatibilityMode">
+    <label class="JobResults-resultRowLabel">{{ vm.compatibilityMode.label }}</label>
+    <div class="JobResults-resultRowText">
+        {{ vm.compatibilityMode.value }}
+    </div>
+</div>
+
 <!-- FORKS DETAIL -->
 <div class="JobResults-resultRow" ng-if="vm.forks">
     <label class="JobResults-resultRowLabel">{{ vm.forks.label }}</label>

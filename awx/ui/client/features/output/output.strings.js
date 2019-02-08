@@ -76,6 +76,7 @@ function OutputStrings (BaseString) {
         NAME: t.s('Name'),
         OVERWRITE: t.s('Overwrite'),
         OVERWRITE_VARS: t.s('Overwrite Vars'),
+        COMPATIBILITY_MODE: t.s('Compatibility Mode'),
         PLAYBOOK: t.s('Playbook'),
         PROJECT: t.s('Project'),
         RESULT_TRACEBACK: t.s('Error Details'),

@@ -2,5 +2,5 @@ clouds_yaml_path:
 - {{ file_reference }}
 expand_hostvars: true
 fail_on_errors: true
-inventory_hostname: name
+inventory_hostname: uuid
 plugin: openstack

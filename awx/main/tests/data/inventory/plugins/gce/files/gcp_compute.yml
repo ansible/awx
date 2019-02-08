@@ -1,0 +1,46 @@
+auth_kind: serviceaccount
+compose:
+  ansible_ssh_host: networkInterfaces | json_query("[0].accessConfigs[0].natIP")
+  gce_description: description if description else None
+  gce_id: id
+  gce_machine_type: machineType
+  gce_metadata: metadata.get("items", []) | items2dict(key_name="key", value_name="value")
+  gce_name: name
+  gce_network: networkInterfaces | json_query("[0].network.name")
+  gce_private_ip: networkInterfaces | json_query("[0].networkIP")
+  gce_public_ip: networkInterfaces | json_query("[0].accessConfigs[0].natIP")
+  gce_status: status
+  gce_subnetwork: networkInterfaces | json_query("[0].subnetwork.name")
+  gce_tags: tags | json_query("items")
+  gce_zone: zone
+hostnames:
+- name
+- public_ip
+- private_ip
+keyed_groups:
+- key: networkInterfaces | json_query("[0].subnetwork.name")
+  prefix: network
+- key: networkInterfaces | json_query("[0].networkIP")
+  prefix: ''
+  separator: ''
+- key: networkInterfaces | json_query("[0].accessConfigs[0].natIP")
+  prefix: ''
+  separator: ''
+- key: machineType
+  prefix: ''
+  separator: ''
+- key: zone
+  prefix: ''
+  separator: ''
+- key: tags | json_query("items")
+  prefix: tag
+- key: status | lower
+  prefix: status
+plugin: gcp_compute
+projects:
+- fooo
+service_account_file: {{ file_reference }}
+use_contrib_script_compatible_sanitization: true
+zones:
+- us-east4-a
+- us-west1-b

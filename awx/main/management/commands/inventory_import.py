@@ -27,7 +27,6 @@ from awx.main.models.inventory import (
     Host
 )
 from awx.main.utils.mem_inventory import MemInventory, dict_to_mem_data
-from awx.main.utils.ansible import filter_non_json_lines
 
 # other AWX imports
 from awx.main.models.rbac import batch_role_ancestor_rebuilding
@@ -126,12 +125,12 @@ class AnsibleInventoryLoader(object):
     def get_base_args(self):
         # get ansible-inventory absolute path for running in bubblewrap/proot, in Popen
 
-        # NOTE:  why do we add "python" to the start of these args?
+        # NOTE: why do we add "python" to the start of these args?
         # the script that runs ansible-inventory specifies a python interpreter
         # that makes no sense in light of the fact that we put all the dependencies
         # inside of /venv/ansible, so we override the specified interpreter
         # https://github.com/ansible/ansible/issues/50714
-        bargs= ['python', self.get_path_to_ansible_inventory(), '-i', self.source]
+        bargs = ['python', self.get_path_to_ansible_inventory(), '-i', self.source]
         logger.debug('Using base command: {}'.format(' '.join(bargs)))
         return bargs
 
@@ -174,21 +173,15 @@ class AnsibleInventoryLoader(object):
             cmd = self.get_proot_args(cmd, env)
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-        raw_stdout, stderr = proc.communicate()
-        raw_stdout = smart_text(raw_stdout)
+        stdout, stderr = proc.communicate()
+        stdout = smart_text(stdout)
         stderr = smart_text(stderr)
 
         if self.tmp_private_dir:
             shutil.rmtree(self.tmp_private_dir, True)
         if proc.returncode != 0:
             raise RuntimeError('%s failed (rc=%d) with stdout:\n%s\nstderr:\n%s' % (
-                self.method, proc.returncode, raw_stdout, stderr))
-
-        # Openstack inventory plugin gives non-JSON lines
-        # Also, running with higher verbosity gives non-JSON lines
-        stdout = filter_non_json_lines(raw_stdout)
-        if stdout is not raw_stdout:
-            logger.warning('Output had lines stripped to obtain JSON format.')
+                self.method, proc.returncode, stdout, stderr))
 
         for line in stderr.splitlines():
             logger.error(line)
@@ -315,12 +308,6 @@ class Command(BaseCommand):
             raise NotImplementedError('Value of enabled {} not understood.'.format(enabled))
 
     def get_source_absolute_path(self, source):
-        # Sanity check: We sanitize these module names for our API but Ansible proper doesn't follow
-        # good naming conventions
-        source = source.replace('rhv.py', 'ovirt4.py')
-        source = source.replace('satellite6.py', 'foreman.py')
-        source = source.replace('vmware.py', 'vmware_inventory.py')
-        source = source.replace('openstack.py', 'openstack_inventory.py')
         if not os.path.exists(source):
             raise IOError('Source does not exist: %s' % source)
         source = os.path.join(os.getcwd(), os.path.dirname(source),
@@ -893,12 +880,24 @@ class Command(BaseCommand):
         self._create_update_group_children()
         self._create_update_group_hosts()
 
+    def remote_tower_license_compare(self, local_license_type):
+        # this requires https://github.com/ansible/ansible/pull/52747
+        source_vars = self.all_group.variables
+        remote_license_type = source_vars.get('tower_metadata', {}).get('license_type', None)
+        if remote_license_type is None:
+            raise CommandError('Unexpected Error: Tower inventory plugin missing needed metadata!')
+        if local_license_type != remote_license_type:
+            raise CommandError('Tower server licenses must match: source: {} local: {}'.format(
+                remote_license_type, local_license_type
+            ))
+
     def check_license(self):
         license_info = get_licenser().validate()
+        local_license_type = license_info.get('license_type', 'UNLICENSED')
         if license_info.get('license_key', 'UNLICENSED') == 'UNLICENSED':
             logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise CommandError('No license found!')
-        elif license_info.get('license_type', 'UNLICENSED') == 'open':
+        elif local_license_type == 'open':
             return
         available_instances = license_info.get('available_instances', 0)
         free_instances = license_info.get('free_instances', 0)
@@ -907,6 +906,13 @@ class Command(BaseCommand):
         if time_remaining <= 0 and not license_info.get('demo', False):
             logger.error(LICENSE_EXPIRED_MESSAGE)
             raise CommandError("License has expired!")
+        # special check for tower-type inventory sources
+        # but only if running the plugin
+        TOWER_SOURCE_FILES = ['tower.yml', 'tower.yaml']
+        if self.inventory_source.source == 'tower' and any(f in self.source for f in TOWER_SOURCE_FILES):
+            # only if this is the 2nd call to license check, we cannot compare before running plugin
+            if hasattr(self, 'all_group'):
+                self.remote_tower_license_compare(local_license_type)
         if free_instances < 0:
             d = {
                 'new_count': new_count,

@@ -24,6 +24,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from django.utils.encoding import iri_to_uri
 from django.db.models import Q
 
 # REST Framework
@@ -1180,6 +1181,11 @@ class InventorySourceOptions(BaseModel):
         default=False,
         help_text=_('Overwrite local variables from remote inventory source.'),
     )
+    compatibility_mode = models.BooleanField(
+        default=True,
+        help_text=_('This field is deprecated and will be removed in a future release. '
+                    'Restore old hostvars and names from before the transition to inventory plugins.'),
+    )
     timeout = models.IntegerField(
         blank=True,
         default=0,
@@ -1219,21 +1225,12 @@ class InventorySourceOptions(BaseModel):
             ('ami_id', _('Image ID')),
             ('availability_zone', _('Availability Zone')),
             ('aws_account', _('Account')),
-            # These should have been added, but plugins do not support them
-            # so we will avoid introduction, because it would regress anyway
-            # ('elasticache_cluster', _('ElastiCache Cluster')),
-            # ('elasticache_engine', _('ElastiCache Engine')),
-            # ('elasticache_parameter_group', _('ElastiCache Parameter Group')),
-            # ('elasticache_replication_group', _('ElastiCache Replication Group')),
             ('instance_id', _('Instance ID')),
             ('instance_state', _('Instance State')),
             ('platform', _('Platform')),
             ('instance_type', _('Instance Type')),
             ('key_pair', _('Key Name')),
-            # ('rds_engine', _('RDS Engine')),
-            # ('rds_parameter_group', _('RDP Parameter Group')),
             ('region', _('Region')),
-            # ('route53_names', _('Route53 Names')),
             ('security_group', _('Security Group')),
             ('tag_keys', _('Tags')),
             ('tag_none', _('Tag None')),
@@ -1341,7 +1338,7 @@ class InventorySourceOptions(BaseModel):
         primary_cred = self.get_cloud_credential()
         extra_creds = []
         for cred in self.credentials.all():
-            if primary_cred and cred.pk != primary_cred.pk:
+            if primary_cred is None or cred.pk != primary_cred.pk:
                 extra_creds.append(cred)
         return extra_creds
 
@@ -1555,7 +1552,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions, RelatedJobsMix
             return True
         elif self.source == 'gce':
             # These updates will hang if correct credential is not supplied
-            return bool(self.get_cloud_credential().kind == 'gce')
+            credential = self.get_cloud_credential()
+            return bool(credential and credential.kind == 'gce')
         return True
 
     def create_inventory_update(self, **kwargs):
@@ -1820,11 +1818,17 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
         return reverse('api:inventory_script_detail', kwargs={'pk': self.pk}, request=request)
 
 
-# TODO: move these to their own file somewhere?
+# TODO: move to awx/main/models/inventory/injectors.py
 class PluginFileInjector(object):
+    # if plugin_name is not given, no inventory plugin functionality exists
     plugin_name = None  # Ansible core name used to reference plugin
+    # if initial_version is None, but we have plugin name, injection logic exists,
+    # but it is vaporware, meaning we do not use it for some reason in Ansible core
     initial_version = None  # at what version do we switch to the plugin
     ini_env_reference = None  # env var name that points to old ini config file
+    # base injector should be one of None, "managed", or "template"
+    # this dictates which logic to borrow from playbook injectors
+    base_injector = None
 
     def __init__(self, ansible_version):
         # This is InventoryOptions instance, could be source or inventory update
@@ -1832,24 +1836,41 @@ class PluginFileInjector(object):
 
     @property
     def filename(self):
+        """Inventory filename for using the inventory plugin
+        This is created dynamically, but the auto plugin requires this exact naming
+        """
         return '{0}.yml'.format(self.plugin_name)
 
+    @property
+    def script_name(self):
+        """Name of the script located in awx/plugins/inventory
+        """
+        return '{0}.py'.format(self.__class__.__name__)
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        """Default implementation of inventory plugin file contents.
+        There are some valid cases when all parameters can be obtained from
+        the environment variables, example "plugin: linode" is valid
+        ideally, however, some options should be filled from the inventory source data
+        """
+        if self.plugin_name is None:
+            raise NotImplementedError('At minimum the plugin name is needed for inventory plugin use.')
+        return {'plugin': self.plugin_name}
+
     def inventory_contents(self, inventory_update, private_data_dir):
-        return yaml.safe_dump(self.inventory_as_dict(inventory_update, private_data_dir), default_flow_style=False)
+        """Returns a string that is the content for the inventory file for the inventory plugin
+        """
+        return yaml.safe_dump(
+            self.inventory_as_dict(inventory_update, private_data_dir),
+            default_flow_style=False,
+            width=1000
+        )
 
     def should_use_plugin(self):
         return bool(
-            self.initial_version and
+            self.plugin_name and self.initial_version and
             Version(self.ansible_version) >= Version(self.initial_version)
         )
-
-    @staticmethod
-    def get_builtin_injector(source):
-        from awx.main.models.credential import injectors as builtin_injectors
-        cred_kind = source.replace('ec2', 'aws')
-        if cred_kind not in dir(builtin_injectors):
-            return None
-        return getattr(builtin_injectors, cred_kind)
 
     def build_env(self, inventory_update, env, private_data_dir, private_data_files):
         if self.should_use_plugin():
@@ -1865,12 +1886,27 @@ class PluginFileInjector(object):
         """
         injected_env = {}
         credential = inventory_update.get_cloud_credential()
-        builtin_injector = self.get_builtin_injector(inventory_update.source)
-        if builtin_injector is not None:
-            builtin_injector(credential, injected_env, private_data_dir)
+        # some sources may have no credential, specifically ec2
+        if credential is None:
+            return injected_env
+        if self.base_injector == 'managed':
+            from awx.main.models.credential import injectors as builtin_injectors
+            cred_kind = inventory_update.source.replace('ec2', 'aws')
+            if cred_kind in dir(builtin_injectors):
+                getattr(builtin_injectors, cred_kind)(credential, injected_env, private_data_dir)
+                if safe:
+                    from awx.main.models.credential import build_safe_env
+                    return build_safe_env(injected_env)
+        elif self.base_injector == 'template':
+            injected_env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)  # so injector knows this is inventory
+            safe_env = injected_env.copy()
+            args = []
+            safe_args = []
+            credential.credential_type.inject_credential(
+                credential, injected_env, safe_env, args, safe_args, private_data_dir
+            )
             if safe:
-                from awx.main.models.credential import build_safe_env
-                injected_env = build_safe_env(injected_env)
+                return safe_env
         return injected_env
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files, safe=False):
@@ -1916,32 +1952,103 @@ class PluginFileInjector(object):
 
 class azure_rm(PluginFileInjector):
     plugin_name = 'azure_rm'
-    initial_version = '2.7'
+    initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
     ini_env_reference = 'AZURE_INI_PATH'
+    base_injector = 'managed'
+
+    def get_plugin_env(self, *args, **kwargs):
+        ret = super(azure_rm, self).get_plugin_env(*args, **kwargs)
+        # We need native jinja2 types so that tags can give JSON null value
+        ret['ANSIBLE_JINJA2_NATIVE'] = str(True)
+        return ret
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
-        ret = dict(
-            plugin=self.plugin_name,
+        ret = super(azure_rm, self).inventory_as_dict(inventory_update, private_data_dir)
+
+        source_vars = inventory_update.source_vars_dict
+
+        group_by_hostvar = {
+            'location': {'prefix': '', 'separator': '', 'key': 'location'},
+            'tag': {'prefix': '', 'separator': '', 'key': 'tags.keys() | list if tags else []'},
+            # Introduced with https://github.com/ansible/ansible/pull/53046
+            'security_group': {'prefix': '', 'separator': '', 'key': 'security_group'},
+            'resource_group': {'prefix': '', 'separator': '', 'key': 'resource_group'},
+            # Note, os_family was not documented correctly in script, but defaulted to grouping by it
+            'os_family': {'prefix': '', 'separator': '', 'key': 'os_disk.operating_system_type'}
+        }
+        # by default group by everything
+        # always respect user setting, if they gave it
+        group_by = [
+            grouping_name for grouping_name in group_by_hostvar
+            if source_vars.get('group_by_{}'.format(grouping_name), True)
+        ]
+        ret['keyed_groups'] = [group_by_hostvar[grouping_name] for grouping_name in group_by]
+        if 'tag' in group_by:
+            # Nasty syntax to reproduce "key_value" group names in addition to "key"
+            ret['keyed_groups'].append({
+                'prefix': '', 'separator': '',
+                'key': r'dict(tags.keys() | map("regex_replace", "^(.*)$", "\1_") | list | zip(tags.values() | list)) if tags else []'
+            })
+
+        if inventory_update.compatibility_mode:
+            # Dashes actually were not configurable in azure_rm.py script
+            # however, we do not want unicode, so we use this
+            ret['use_contrib_script_compatible_sanitization'] = True
             # By default the script did not filter hosts
-            default_host_filters=[],
-            # Groups that the script returned
-            keyed_groups=[
-                {'prefix': '', 'separator': '', 'key': 'location'},
-                {'prefix': '', 'separator': '', 'key': 'powerstate'},
-                {'prefix': '', 'separator': '', 'key': 'name'}
-            ],
-            hostvar_expressions={
+            ret['default_host_filters'] = []
+            # User-given host filters
+            user_filters = []
+            old_filterables = [
+                ('resource_groups', 'resource_group'),
+                ('tags', 'tags')
+                # locations / location would be an entry
+                # but this would conflict with source_regions
+            ]
+            for key, loc in old_filterables:
+                value = source_vars.get(key, None)
+                if value and isinstance(value, str):
+                    user_filters.append('{} not in {}'.format(
+                        loc, value.split(',')
+                    ))
+            if user_filters:
+                ret.setdefault('exclude_host_filters', [])
+                ret['exclude_host_filters'].extend(user_filters)
+
+            # One static group that was returned by script
+            ret['conditional_groups'] = {'azure': True}
+            # Compatibility hostvars
+            ret['hostvar_expressions'] = {
                 'provisioning_state': 'provisioning_state | title',
                 'computer_name': 'name',
                 'type': 'resource_type',
-                'private_ip': 'private_ipv4_addresses | json_query("[0]")'
+                'private_ip': 'private_ipv4_addresses | json_query("[0]")',
+                'public_ip': 'public_ipv4_addresses | json_query("[0]")',
+                'tags': 'tags if tags else None'
             }
-        )
+            # Special functionality from script
+            if source_vars.get('use_private_ip', False):
+                ret['hostvar_expressions']['ansible_host'] = 'private_ipv4_addresses | json_query("[0]")'
+        else:
+            # Hopefully no one is using this after moving to plugins, but applying this
+            # setting will at least trigger the global redactor to warn user
+            if 'replace_dash_in_groups' in source_vars:
+                ret['use_contrib_script_compatible_sanitization'] = not source_vars['replace_dash_in_groups']
+            if inventory_update.instance_filters:
+                ret.setdefault('exclude_host_filters', [])
+                for filter in inventory_update.instance_filters.split(','):
+                    if not filter:
+                        continue
+                    ret['exclude_host_filters'].append(filter)
 
-        # TODO: all regions currently failing due to:
-        # https://github.com/ansible/ansible/pull/48079
         if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
-            ret['regions'] = inventory_update.source_regions.split(',')
+            # initialize a list for this section in inventory file
+            ret.setdefault('exclude_host_filters', [])
+            # make a python list of the regions we will use
+            python_regions = [x.strip() for x in inventory_update.source_regions.split(',')]
+            # convert that list in memory to python syntax in a string
+            # now put that in jinja2 syntax operating on hostvar key "location"
+            # and put that as an entry in the exclusions list
+            ret['exclude_host_filters'].append("location not in {}".format(repr(python_regions)))
         return ret
 
     def build_script_private_data(self, inventory_update, private_data_dir):
@@ -1967,11 +2074,17 @@ class azure_rm(PluginFileInjector):
 
 class ec2(PluginFileInjector):
     plugin_name = 'aws_ec2'
-    initial_version = '2.6'  # 2.5 has bugs forming keyed groups
+    initial_version = '2.8'  # Driven by unsafe group names issue, parent_group templating, hostvars
     ini_env_reference = 'EC2_INI_PATH'
+    base_injector = 'managed'
+
+    def get_plugin_env(self, *args, **kwargs):
+        ret = super(ec2, self).get_plugin_env(*args, **kwargs)
+        # We need native jinja2 types so that ec2_state_code will give integer
+        ret['ANSIBLE_JINJA2_NATIVE'] = str(True)
+        return ret
 
     def _compat_compose_vars(self):
-        # https://gist.github.com/s-hertel/089c613914c051f443b53ece6995cc77
         return {
             # vars that change
             'ec2_block_devices': (
@@ -1990,10 +2103,11 @@ class ec2(PluginFileInjector):
             'ec2_reason': 'state_transition_reason',
             'ec2_security_group_ids': "security_groups | map(attribute='group_id') | list |  join(',')",
             'ec2_security_group_names': "security_groups | map(attribute='group_name') | list |  join(',')",
+            'ec2_tag_Name': 'tags.Name',
             'ec2_state': 'state.name',
             'ec2_state_code': 'state.code',
             'ec2_state_reason': 'state_reason.message if state_reason is defined else ""',
-            'ec2_sourceDestCheck': 'source_dest_check | lower | string',  # butchered snake_case case not a typo.
+            'ec2_sourceDestCheck': 'source_dest_check | default(false) | lower | string',  # butchered snake_case case not a typo.
             'ec2_account_id': 'network_interfaces | json_query("[0].owner_id")',
             # vars that just need ec2_ prefix
             'ec2_ami_launch_index': 'ami_launch_index | string',
@@ -2004,7 +2118,7 @@ class ec2(PluginFileInjector):
             'ec2_image_id': 'image_id',
             'ec2_instance_type': 'instance_type',
             'ec2_key_name': 'key_name',
-            'ec2_launch_time': 'launch_time',
+            'ec2_launch_time': r'launch_time | regex_replace(" ", "T") | regex_replace("(\+)(\d\d):(\d)(\d)$", ".\g<2>\g<3>Z")',
             'ec2_platform': 'platform | default("")',
             'ec2_private_dns_name': 'private_dns_name',
             'ec2_private_ip_address': 'private_ip_address',
@@ -2012,57 +2126,133 @@ class ec2(PluginFileInjector):
             'ec2_region': 'placement.region',
             'ec2_root_device_name': 'root_device_name',
             'ec2_root_device_type': 'root_device_type',
-            'ec2_spot_instance_request_id': 'spot_instance_request_id',
-            'ec2_subnet_id': 'subnet_id',
+            # many items need blank defaults because the script tended to keep a common schema
+            'ec2_spot_instance_request_id': 'spot_instance_request_id | default("")',
+            'ec2_subnet_id': 'subnet_id | default("")',
             'ec2_virtualization_type': 'virtualization_type',
-            'ec2_vpc_id': 'vpc_id'
+            'ec2_vpc_id': 'vpc_id | default("")',
+            # same as ec2_ip_address, the script provided this
+            'ansible_host': 'public_ip_address',
+            # new with https://github.com/ansible/ansible/pull/53645
+            'ec2_eventsSet': 'events | default("")',
+            'ec2_persistent': 'persistent | default(false)',
+            'ec2_requester_id': 'requester_id | default("")'
         }
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(ec2, self).inventory_as_dict(inventory_update, private_data_dir)
+
         keyed_groups = []
         group_by_hostvar = {
-            'ami_id': {'prefix': '', 'separator': '', 'key': 'image_id'},
-            'availability_zone': {'prefix': '', 'separator': '', 'key': 'placement.availability_zone'},
-            'aws_account': None,  # not an option with plugin
-            'instance_id': {'prefix': '', 'separator': '', 'key': 'instance_id'},  # normally turned off
-            'instance_state': {'prefix': 'instance_state', 'key': 'state.name'},
-            'platform': {'prefix': 'platform', 'key': 'platform'},
-            'instance_type': {'prefix': 'type', 'key': 'instance_type'},
-            'key_pair': {'prefix': 'key', 'key': 'key_name'},
-            'region': {'prefix': '', 'separator': '', 'key': 'placement.region'},
+            'ami_id': {'prefix': '', 'separator': '', 'key': 'image_id', 'parent_group': 'images'},
+            # 2 entries for zones for same groups to establish 2 parentage trees
+            'availability_zone': {'prefix': '', 'separator': '', 'key': 'placement.availability_zone', 'parent_group': 'zones'},
+            'aws_account': {'prefix': '', 'separator': '', 'key': 'network_interfaces | json_query("[0].owner_id")', 'parent_group': 'accounts'},
+            'instance_id': {'prefix': '', 'separator': '', 'key': 'instance_id', 'parent_group': 'instances'},  # normally turned off
+            'instance_state': {'prefix': 'instance_state', 'key': 'state.name', 'parent_group': 'instance_states'},
+            'platform': {'prefix': 'platform', 'key': 'platform | default("undefined")', 'parent_group': 'platforms'},
+            'instance_type': {'prefix': 'type', 'key': 'instance_type', 'parent_group': 'types'},
+            'key_pair': {'prefix': 'key', 'key': 'key_name', 'parent_group': 'keys'},
+            'region': {'prefix': '', 'separator': '', 'key': 'placement.region', 'parent_group': 'regions'},
             # Security requires some ninja jinja2 syntax, credit to s-hertel
-            'security_group': {'prefix': 'security_group', 'key': 'security_groups | json_query("[].group_name")'},
-            'tag_keys': {'prefix': 'tag', 'key': 'tags'},
-            'tag_none': None,  # grouping by no tags isn't a different thing with plugin
+            'security_group': {'prefix': 'security_group', 'key': 'security_groups | json_query("[].group_name")', 'parent_group': 'security_groups'},
+            'tag_keys': [
+                {'prefix': 'tag', 'key': 'tags', 'parent_group': 'tags'},
+                {'prefix': 'tag', 'key': 'tags.keys()', 'parent_group': 'tags'}
+            ],
+            # 'tag_none': None,  # grouping by no tags isn't a different thing with plugin
             # naming is redundant, like vpc_id_vpc_8c412cea, but intended
-            'vpc_id': {'prefix': 'vpc_id', 'key': 'vpc_id'},
+            'vpc_id': {'prefix': 'vpc_id', 'key': 'vpc_id', 'parent_group': 'vpcs'},
         }
-        # -- same as script here --
+        # -- same-ish as script here --
         group_by = [x.strip().lower() for x in inventory_update.group_by.split(',') if x.strip()]
         for choice in inventory_update.get_ec2_group_by_choices():
-            value = bool((group_by and choice[0] in group_by) or (not group_by and choice[0] != 'instance_id'))
+            value = bool(
+                (
+                    group_by and choice[0] in group_by
+                ) or (
+                    (not group_by) and choice[0] != 'instance_id'
+                )
+            )
             # -- end sameness to script --
             if value:
                 this_keyed_group = group_by_hostvar.get(choice[0], None)
                 # If a keyed group syntax does not exist, there is nothing we can do to get this group
                 if this_keyed_group is not None:
-                    keyed_groups.append(this_keyed_group)
+                    if isinstance(this_keyed_group, list):
+                        keyed_groups.extend(this_keyed_group)
+                    else:
+                        keyed_groups.append(this_keyed_group)
+        # special case, this parentage is only added if both zones and regions are present
+        if 'region' in group_by and 'availability_zone' in group_by:
+            keyed_groups.append({'prefix': '', 'separator': '', 'key': 'placement.availability_zone', 'parent_group': '{{ placement.region }}'})
+
+        source_vars = inventory_update.source_vars_dict
+        # This is a setting from the script, hopefully no one used it
+        # if true, it replaces dashes, but not in region / loc names
+        replace_dash = bool(source_vars.get('replace_dash_in_groups', True))
+        if inventory_update.compatibility_mode:
+            legacy_regex = {
+                True: r"[^A-Za-z0-9\_]",
+                False: r"[^A-Za-z0-9\_\-]"  # do not replace dash, dash is whitelisted
+            }[replace_dash]
+            list_replacer = 'map("regex_replace", "{rx}", "_") | list'.format(rx=legacy_regex)
+            # this option, a plugin option, will allow dashes, but not unicode
+            # when set to False, unicode will be allowed, but it was not allowed by script
+            # thus, we always have to use this option, and always use our custom regex
+            ret['use_contrib_script_compatible_sanitization'] = True
+            for grouping_data in keyed_groups:
+                if grouping_data['key'] in ('placement.region', 'placement.availability_zone'):
+                    # us-east-2 is always us-east-2 according to ec2.py
+                    # no sanitization in region-ish groups for the script standards, ever ever
+                    continue
+                if grouping_data['key'] == 'tags':
+                    # dict jinja2 transformation
+                    grouping_data['key'] = 'dict(tags.keys() | {replacer} | zip(tags.values() | {replacer}))'.format(
+                        replacer=list_replacer
+                    )
+                elif grouping_data['key'] == 'tags.keys()' or grouping_data['prefix'] == 'security_group':
+                    # list jinja2 transformation
+                    grouping_data['key'] += ' | {replacer}'.format(replacer=list_replacer)
+                else:
+                    # string transformation
+                    grouping_data['key'] += ' | regex_replace("{rx}", "_")'.format(rx=legacy_regex)
+
+        # This was an allowed ec2.ini option, also plugin option, so pass through
+        if source_vars.get('boto_profile', None):
+            ret['boto_profile'] = source_vars['boto_profile']
+
+        elif not replace_dash:
+            # Using the plugin, but still want dashes whitelisted
+            ret['use_contrib_script_compatible_sanitization'] = True
+
+        if keyed_groups:
+            ret['keyed_groups'] = keyed_groups
 
         # Instance ID not part of compat vars, because of settings.EC2_INSTANCE_ID_VAR
         # remove this variable at your own peril, there be dragons
         compose_dict = {'ec2_id': 'instance_id'}
-        # TODO: add an ability to turn this off
-        compose_dict.update(self._compat_compose_vars())
+        inst_filters = {}
 
-        inst_filters = {
-            # The script returned all states by default, the plugin does not
+        if inventory_update.compatibility_mode:
+            # TODO: add an ability to turn this off
+            compose_dict.update(self._compat_compose_vars())
+            # plugin provides "aws_ec2", but not this which the script gave
+            ret['groups'] = {'ec2': True}
+            # public_ip as hostname is non-default plugin behavior, script behavior
+            ret['hostnames'] = [
+                'network-interface.addresses.association.public-ip',
+                'dns-name',
+                'private-dns-name'
+            ]
+            # The script returned only running state by default, the plugin does not
             # https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html#options
             # options: pending | running | shutting-down | terminated | stopping | stopped
-            'instance-state-name': [
-                'running'
-                # 'pending', 'running', 'shutting-down', 'terminated', 'stopping', 'stopped'
-            ]
-        }
+            inst_filters['instance-state-name'] = ['running']
+
+        if compose_dict:
+            ret['compose'] = compose_dict
+
         if inventory_update.instance_filters:
             # logic used to live in ec2.py, now it belongs to us. Yay more code?
             filter_sets = [f for f in inventory_update.instance_filters.split(',') if f]
@@ -2077,22 +2267,12 @@ class ec2(PluginFileInjector):
                     continue
                 inst_filters[filter_key] = filter_value
 
-        ret = dict(
-            plugin=self.plugin_name,
-            hostnames=[
-                'network-interface.addresses.association.public-ip',  # non-default
-                'dns-name',
-                'private-dns-name'
-            ],
-            keyed_groups=keyed_groups,
-            groups={'ec2': True},  # plugin provides "aws_ec2", but not this
-            compose=compose_dict,
-            filters=inst_filters
-        )
-        # TODO: all regions currently failing due to:
-        # https://github.com/ansible/ansible/pull/48079
+        if inst_filters:
+            ret['filters'] = inst_filters
+
         if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
             ret['regions'] = inventory_update.source_regions.split(',')
+
         return ret
 
     def build_script_private_data(self, inventory_update, private_data_dir):
@@ -2133,7 +2313,8 @@ class ec2(PluginFileInjector):
 
 class gce(PluginFileInjector):
     plugin_name = 'gcp_compute'
-    initial_version = '2.6'
+    initial_version = '2.8'  # Driven by unsafe group names issue, hostvars
+    base_injector = 'managed'
 
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
         env = super(gce, self).get_script_env(inventory_update, private_data_dir, private_data_files)
@@ -2154,8 +2335,7 @@ class gce(PluginFileInjector):
         # missing: gce_image, gce_uuid
         # https://github.com/ansible/ansible/issues/51884
         return {
-            'gce_id': 'id',
-            'gce_description': 'description | default(None)',
+            'gce_description': 'description if description else None',
             'gce_machine_type': 'machineType',
             'gce_name': 'name',
             'gce_network': 'networkInterfaces | json_query("[0].network.name")',
@@ -2164,20 +2344,31 @@ class gce(PluginFileInjector):
             'gce_status': 'status',
             'gce_subnetwork': 'networkInterfaces | json_query("[0].subnetwork.name")',
             'gce_tags': 'tags | json_query("items")',
-            'gce_zone': 'zone'
+            'gce_zone': 'zone',
+            'gce_metadata': 'metadata.get("items", []) | items2dict(key_name="key", value_name="value")',
+            # We need this as long as hostnames is non-default, otherwise hosts
+            # will not be addressed correctly, was returned in script
+            'ansible_ssh_host': 'networkInterfaces | json_query("[0].accessConfigs[0].natIP")'
         }
 
     def inventory_as_dict(self, inventory_update, private_data_dir):
+        ret = super(gce, self).inventory_as_dict(inventory_update, private_data_dir)
         credential = inventory_update.get_cloud_credential()
-        builtin_injector = self.get_builtin_injector(inventory_update.source)
-        creds_path = builtin_injector(credential, {}, private_data_dir)
 
-        # gce never processed ther group_by options, if it had, we would selectively
-        # apply those options here, but it didn't, so they are added here
-        # and we may all hope that one day they can die, and rest in peace
+        # auth related items
+        from awx.main.models.credential.injectors import gce as builtin_injector
+        ret['service_account_file'] = builtin_injector(credential, {}, private_data_dir)
+        ret['projects'] = [credential.get_input('project', default='')]
+        ret['auth_kind'] = "serviceaccount"
+
+        filters = []
+        # TODO: implement gce group_by options
+        # gce never processed the group_by field, if it had, we would selectively
+        # apply those options here, but it did not, so all groups are added here
         keyed_groups = [
             # the jinja2 syntax is duplicated with compose
             # https://github.com/ansible/ansible/issues/51883
+            {'prefix': 'network', 'key': 'networkInterfaces | json_query("[0].subnetwork.name")'},  # gce_subnetwork
             {'prefix': '', 'separator': '', 'key': 'networkInterfaces | json_query("[0].networkIP")'},  # gce_private_ip
             {'prefix': '', 'separator': '', 'key': 'networkInterfaces | json_query("[0].accessConfigs[0].natIP")'},  # gce_public_ip
             {'prefix': '', 'separator': '', 'key': 'machineType'},
@@ -2185,34 +2376,46 @@ class gce(PluginFileInjector):
             {'prefix': 'tag', 'key': 'tags | json_query("items")'},  # gce_tags
             {'prefix': 'status', 'key': 'status | lower'}
         ]
+        # This will be used as the gce instance_id, must be universal, non-compat
+        compose_dict = {'gce_id': 'id'}
 
-        # We need this as long as hostnames is non-default, otherwise hosts
-        # will not be addressed correctly, so not considered a "compat" change
-        compose_dict = {'ansible_ssh_host': 'networkInterfaces | json_query("[0].accessConfigs[0].natIP")'}
-        # These are only those necessary to emulate old hostvars
-        compose_dict.update(self._compat_compose_vars())
+        if inventory_update.compatibility_mode:
+            # The gce.py script never sanitized any names in any way
+            ret['use_contrib_script_compatible_sanitization'] = True
+            # Add in old hostvars aliases
+            compose_dict.update(self._compat_compose_vars())
+            # Non-default names to match script
+            ret['hostnames'] = ['name', 'public_ip', 'private_ip']
+        elif inventory_update.instance_filters:
+            for filter in inventory_update.instance_filters.split(','):
+                if not filter:
+                    continue
+                filters.append(filter)
 
-        ret = dict(
-            plugin=self.plugin_name,
-            projects=[credential.get_input('project', default='')],
-            filters=None,  # necessary cruft, see: https://github.com/ansible/ansible/pull/50025
-            service_account_file=creds_path,
-            auth_kind="serviceaccount",
-            hostnames=['name', 'public_ip', 'private_ip'],  # need names to match with script
-            keyed_groups=keyed_groups,
-            compose=compose_dict,
-        )
+        if keyed_groups:
+            ret['keyed_groups'] = keyed_groups
+        if filters:
+            ret['filters'] = filters
+        if compose_dict:
+            ret['compose'] = compose_dict
         if inventory_update.source_regions and 'all' not in inventory_update.source_regions:
             ret['zones'] = inventory_update.source_regions.split(',')
         return ret
 
     def get_plugin_env(self, inventory_update, private_data_dir, private_data_files, safe=False):
         # gce wants everything defined in inventory & cred files
+        # this explicitly turns off injection of environment variables
         return {}
 
 
 class vmware(PluginFileInjector):
+    # plugin_name = 'vmware_vm_inventory'  # FIXME: implement me
     ini_env_reference = 'VMWARE_INI_PATH'
+    base_injector = 'managed'
+
+    @property
+    def script_name(self):
+        return 'vmware_inventory.py'  # exception
 
     def build_script_private_data(self, inventory_update, private_data_dir):
         cp = configparser.RawConfigParser()
@@ -2242,7 +2445,12 @@ class vmware(PluginFileInjector):
 class openstack(PluginFileInjector):
     ini_env_reference = 'OS_CLIENT_CONFIG_FILE'
     plugin_name = 'openstack'
-    initial_version = '2.5'
+    # minimum version of 2.7.8 may be theoretically possible
+    initial_version = '2.8'  # Driven by consistency with other sources
+
+    @property
+    def script_name(self):
+        return 'openstack_inventory.py'  # exception
 
     def _get_clouds_dict(self, inventory_update, credential, private_data_dir, mk_cache=True):
         openstack_auth = dict(auth_url=credential.get_input('host', default=''),
@@ -2347,23 +2555,25 @@ class openstack(PluginFileInjector):
 
 
 class rhv(PluginFileInjector):
+    """ovirt uses the custom credential templating, and that is all
+    """
+    # plugin_name = 'FIXME'  # contribute inventory plugin to Ansible
+    base_injector = 'template'
 
-    def get_script_env(self, inventory_update, private_data_dir, private_data_files):
-        """Unlike the others, ovirt uses the custom credential templating
-        """
-        env = {'INVENTORY_UPDATE_ID': inventory_update.pk}
-        safe_env = env.copy()
-        args = []
-        safe_args = []
-        credential = inventory_update.get_cloud_credential()
-        credential.credential_type.inject_credential(
-            credential, env, safe_env, args, safe_args, private_data_dir
-        )
-        return env
+    @property
+    def script_name(self):
+        return 'ovirt4.py'  # exception
 
 
 class satellite6(PluginFileInjector):
+    plugin_name = 'foreman'
     ini_env_reference = 'FOREMAN_INI_PATH'
+    # initial_version = '2.8'  # FIXME: turn on after plugin is validated
+    # No base injector, because this does not work in playbooks. Bug??
+
+    @property
+    def script_name(self):
+        return 'foreman.py'  # exception
 
     def build_script_private_data(self, inventory_update, private_data_dir):
         cp = configparser.RawConfigParser()
@@ -2406,9 +2616,22 @@ class satellite6(PluginFileInjector):
 
         return self.dump_cp(cp, credential)
 
+    def get_plugin_env(self, inventory_update, private_data_dir, private_data_files, safe=False):
+        # this assumes that this is merged
+        # https://github.com/ansible/ansible/pull/52693
+        credential = inventory_update.get_cloud_credential()
+        ret = {}
+        if credential:
+            ret['FOREMAN_SERVER'] = credential.get_input('host', default='')
+            ret['FOREMAN_USER'] = credential.get_input('username', default='')
+            ret['FOREMAN_PASSWORD'] = credential.get_input('password', default='')
+        return ret
+
 
 class cloudforms(PluginFileInjector):
+    # plugin_name = 'FIXME'  # contribute inventory plugin to Ansible
     ini_env_reference = 'CLOUDFORMS_INI_PATH'
+    # Also no base_injector because this does not work in playbooks
 
     def build_script_private_data(self, inventory_update, private_data_dir):
         cp = configparser.RawConfigParser()
@@ -2441,12 +2664,29 @@ class cloudforms(PluginFileInjector):
 
 
 class tower(PluginFileInjector):
+    plugin_name = 'tower'
+    base_injector = 'template'
+    initial_version = '2.8'  # Driven by "include_metadata" hostvars
 
     def get_script_env(self, inventory_update, private_data_dir, private_data_files):
         env = super(tower, self).get_script_env(inventory_update, private_data_dir, private_data_files)
         env['TOWER_INVENTORY'] = inventory_update.instance_filters
         env['TOWER_LICENSE_TYPE'] = get_licenser().validate().get('license_type', 'unlicensed')
         return env
+
+    def inventory_as_dict(self, inventory_update, private_data_dir):
+        # Credentials injected as env vars, same as script
+        try:
+            # plugin can take an actual int type
+            identifier = int(inventory_update.instance_filters)
+        except ValueError:
+            # inventory_id could be a named URL
+            identifier = iri_to_uri(inventory_update.instance_filters)
+        return {
+            'plugin': self.plugin_name,
+            'inventory_id': identifier,
+            'include_metadata': True  # used for license check
+        }
 
 
 for cls in PluginFileInjector.__subclasses__():

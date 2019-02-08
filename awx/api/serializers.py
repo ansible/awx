@@ -1950,7 +1950,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
                   'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
-                  'timeout', 'verbosity')
+                  'compatibility_mode', 'timeout', 'verbosity')
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)

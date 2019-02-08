@@ -355,6 +355,17 @@ export default ['NotificationsList', 'i18n', function(NotificationsList, i18n){
                     dataPlacement: 'right',
                     ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd))"
                 }, {
+                    name: 'compatibility_mode',
+                    label: i18n._('Compatibility Mode'),
+                    type: 'checkbox',
+                    ngShow: "source.value !== '' && source.value !== null",
+                    awPopOver: "<p>" + i18n._("If checked, additional duplicate host variables will be added to obtain compatibility with the old inventory scripts.") + '</p><p>' +
+                                i18n._("When not checked and running as inventory plugins, only modern variable names will be used.") + "</p>",
+                    dataTitle: i18n._('Compatibility Mode'),
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    ngDisabled: "(!(inventory_source_obj.summary_fields.user_capabilities.edit || canAdd))"
+                }, {
                     name: 'update_on_launch',
                     label: i18n._('Update on Launch'),
                     type: 'checkbox',

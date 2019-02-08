@@ -25,7 +25,9 @@ STANDARD_INVENTORY_UPDATE_ENV = {
     # Failure to parse inventory should always be fatal
     'ANSIBLE_INVENTORY_UNPARSED_FAILED': 'True',
     # Always use the --export option for ansible-inventory
-    'ANSIBLE_INVENTORY_EXPORT': 'True'
+    'ANSIBLE_INVENTORY_EXPORT': 'True',
+    # Redirecting output to stderr allows JSON parsing to still work with -vvv
+    'ANSIBLE_VERBOSE_TO_STDERR': 'True'
 }
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
 ACTIVE_STATES = CAN_CANCEL
