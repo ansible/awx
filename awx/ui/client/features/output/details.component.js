@@ -579,7 +579,8 @@ function getExtraVarsDetails () {
 
 function getArtifactsDetails (val) {
     const artifacts = val || resource.model.get('artifacts');
-    if (!artifacts || (Object.entries(artifacts).length === 0 && artifacts.constructor === Object)) {
+    if (!artifacts || (Object.entries(artifacts).length === 0 &&
+        artifacts.constructor === Object)) {
         return null;
     }
 
