@@ -970,6 +970,10 @@ ManagedCredentialType(
                                        'It is only needed for Keystone v3 authentication '
                                        'URLs. Refer to Ansible Tower documentation for '
                                        'common scenarios.')
+        }, {
+            'id': 'verify_ssl',
+            'label': ugettext_noop('Verify SSL'),
+            'type': 'boolean'
         }],
         'required': ['username', 'password', 'host', 'project']
     }

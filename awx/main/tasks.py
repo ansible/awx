@@ -1167,10 +1167,12 @@ class RunJob(BaseTask):
                                       project_name=credential.get_input('project', default=''))
                 if credential.has_input('domain'):
                     openstack_auth['domain_name'] = credential.get_input('domain', default='')
+                verify_state = credential.get_input('verify_ssl', default=True)
                 openstack_data = {
                     'clouds': {
                         'devstack': {
                             'auth': openstack_auth,
+                            'verify': verify_state,
                         },
                     },
                 }
@@ -1875,6 +1877,7 @@ class RunInventoryUpdate(BaseTask):
                 openstack_auth['domain_name'] = credential.get_input('domain', default='')
 
             private_state = inventory_update.source_vars_dict.get('private', True)
+            verify_state = credential.get_input('verify_ssl', default=True)
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
             cache = inventory_update.source_vars_dict.get('cache', {})
@@ -1887,6 +1890,7 @@ class RunInventoryUpdate(BaseTask):
                 'clouds': {
                     'devstack': {
                         'private': private_state,
+                        'verify': verify_state,
                         'auth': openstack_auth,
                     },
                 },
