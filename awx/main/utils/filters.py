@@ -297,7 +297,11 @@ class SmartFilter(object):
             self.result = None
             i = 2
             while i < len(t[0]):
-                if not self.result:
+                '''
+                Do NOT observe self.result. It will cause the sql query to be executed.
+                We do not want that. We only want to build the query.
+                '''
+                if isinstance(self.result, type(None)):
                     self.result = t[0][0].result
                 right = t[0][i].result
                 self.result = self.execute_logic(self.result, right)
