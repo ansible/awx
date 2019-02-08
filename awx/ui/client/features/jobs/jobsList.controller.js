@@ -86,10 +86,33 @@ function ListJobsController (
         }
 
         if (job.job_slice_number && job.job_slice_count) {
-            return `Slice Job ${job.job_slice_number}/${job.job_slice_count}`;
+            return `${strings.get('list.SLICE_JOB')} ${job.job_slice_number}/${job.job_slice_count}`;
         }
 
         return null;
+    };
+
+    vm.getTranslatedStatusString = (status) => {
+        switch (status) {
+            case 'new':
+                return strings.get('list.NEW');
+            case 'pending':
+                return strings.get('list.PENDING');
+            case 'waiting':
+                return strings.get('list.WAITING');
+            case 'running':
+                return strings.get('list.RUNNING');
+            case 'successful':
+                return strings.get('list.SUCCESSFUL');
+            case 'failed':
+                return strings.get('list.FAILED');
+            case 'error':
+                return strings.get('list.ERROR');
+            case 'canceled':
+                return strings.get('list.CANCELED');
+            default:
+                return status;
+        }
     };
 
     vm.getSref = ({ type, id }) => {

@@ -28,7 +28,7 @@
                 <div class="at-Row-container">
                     <at-row-item
                         status="{{ job.status }}"
-                        status-tip="{{ vm.strings.get('list.STATUS_TOOLTIP', job.status) }}"
+                        status-tip="{{ vm.strings.get('list.STATUS_TOOLTIP', vm.getTranslatedStatusString(job.status)) }}"
                         header-value="{{ job.id }} - {{ job.name }}"
                         header-state="{{ vm.getSref(job) }}"
                         header-tag="{{ vm.jobTypes[job.type] }}"
