@@ -214,3 +214,11 @@ def remove_become_methods(apps, schema_editor):
     become_credtype = CredentialType.objects.filter(kind='ssh', managed_by_tower=True).first()
     become_credtype.inputs = CredentialType.defaults.get('ssh')().inputs
     become_credtype.save()
+
+
+def add_openstack_verify_field(apps, schema_editor):
+    openstack_credtype = CredentialType.objects.get(
+        kind='cloud', name='OpenStack', managed_by_tower=True
+    )
+    openstack_credtype.inputs = CredentialType.defaults.get('openstack')().inputs
+    openstack_credtype.save()
