@@ -8,7 +8,11 @@ import {
     AWX_E2E_CLUSTER_WORKERS,
     AWX_E2E_LAUNCH_URL,
     AWX_E2E_TIMEOUT_ASYNC,
-    AWX_E2E_TIMEOUT_MEDIUM
+    AWX_E2E_TIMEOUT_MEDIUM,
+    AWX_E2E_SCREENSHOTS_ENABLED,
+    AWX_E2E_SCREENSHOTS_ON_ERROR,
+    AWX_E2E_SCREENSHOTS_ON_FAILURE,
+    AWX_E2E_SCREENSHOTS_PATH,
 } from './settings';
 
 const resolve = location => path.resolve(__dirname, location);
@@ -38,6 +42,12 @@ module.exports = {
                     chromedriver.stop();
                     done();
                 }
+            },
+            screenshots: {
+                enabled: AWX_E2E_SCREENSHOTS_ENABLED,
+                on_error: AWX_E2E_SCREENSHOTS_ON_ERROR,
+                on_failure: AWX_E2E_SCREENSHOTS_ON_FAILURE,
+                path: AWX_E2E_SCREENSHOTS_PATH,
             }
         },
         // Note: These are environment-specific overrides to the default
