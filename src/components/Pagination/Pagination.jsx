@@ -105,10 +105,13 @@ class Pagination extends Component {
       pageCount,
       page_size,
       pageSizeOptions,
+      style
     } = this.props;
     const { value, isOpen } = this.state;
-
-    const opts = pageSizeOptions.slice().reverse().filter(o => o !== page_size);
+    let opts;
+    if (pageSizeOptions) {
+      opts = pageSizeOptions.slice().reverse().filter(o => o !== page_size);
+    }
     const isOnFirst = page === 1;
     const isOnLast = page === pageCount;
 
@@ -119,33 +122,35 @@ class Pagination extends Component {
     return (
       <I18n>
         {({ i18n }) => (
-          <div className="awx-pagination">
-            <div className="awx-pagination__page-size-selection">
-              <Trans>Items Per Page</Trans>
-              <Dropdown
-                onToggle={this.onTogglePageSize}
-                onSelect={this.onSelectPageSize}
-                direction={up}
-                isOpen={isOpen}
-                toggle={(
-                  <DropdownToggle
-                    className="togglePageSize"
-                    onToggle={this.onTogglePageSize}
-                  >
-                    {page_size}
-                  </DropdownToggle>
-                )}
-              >
-                {opts.map(option => (
-                  <DropdownItem
-                    key={option}
-                    component="button"
-                  >
-                    {option}
-                  </DropdownItem>
-                ))}
-              </Dropdown>
-            </div>
+          <div className="awx-pagination" style={style}>
+            {opts && (
+              <div className="awx-pagination__page-size-selection">
+                <Trans>Items Per Page</Trans>
+                <Dropdown
+                  onToggle={this.onTogglePageSize}
+                  onSelect={this.onSelectPageSize}
+                  direction={up}
+                  isOpen={isOpen}
+                  toggle={(
+                    <DropdownToggle
+                      className="togglePageSize"
+                      onToggle={this.onTogglePageSize}
+                    >
+                      {page_size}
+                    </DropdownToggle>
+                  )}
+                >
+                  {opts.map(option => (
+                    <DropdownItem
+                      key={option}
+                      component="button"
+                    >
+                      {option}
+                    </DropdownItem>
+                  ))}
+                </Dropdown>
+              </div>
+            )}
             <div className="awx-pagination__counts">
               <div className="awx-pagination__item-count">
                 <Trans>{`Items ${itemMin} - ${itemMax} of ${count}`}</Trans>

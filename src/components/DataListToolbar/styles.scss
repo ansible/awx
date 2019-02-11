@@ -1,6 +1,6 @@
 .awx-toolbar {
   --awx-toolbar--BackgroundColor: var(--pf-global--BackgroundColor--light-100);
-  --awx-toolbar--BorderColor: var(--pf-global--Color--light-200);
+  --awx-toolbar--BorderColor: #d1d1d1;
   --awx-toolbar--BorderWidth: var(--pf-global--BorderWidth--sm);
 
   border-bottom: var(--awx-toolbar--BorderWidth) solid var(--awx-toolbar--BorderColor);

@@ -6,10 +6,6 @@ import {
   Form,
   FormGroup,
   TextInput,
-  ActionGroup,
-  Toolbar,
-  ToolbarGroup,
-  Button,
   Gallery,
   Card,
   CardBody,
@@ -18,75 +14,58 @@ import {
 import { ConfigContext } from '../../../context';
 import Lookup from '../../../components/Lookup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
+import FormActionGroup from '../../../components/FormActionGroup';
 
-const format = (data) => {
-  const results = data.results.map((result) => ({
-    id: result.id,
-    name: result.name,
-    isChecked: false
-  }));
-  return results;
+const initialFormState = {
+  name: '',
+  description: '',
+  custom_virtualenv: '',
+  instanceGroups: [],
+  error: '',
 };
 
 class OrganizationAdd extends React.Component {
   constructor (props) {
     super(props);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.onSelectChange = this.onSelectChange.bind(this);
+    this.getInstanceGroups = this.getInstanceGroups.bind(this);
+    this.onFieldChange = this.onFieldChange.bind(this);
+    this.onLookupSave = this.onLookupSave.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-    this.resetForm = this.resetForm.bind(this);
-    this.onSuccess = this.onSuccess.bind(this);
     this.onCancel = this.onCancel.bind(this);
-    this.updateSelectedInstanceGroups = this.updateSelectedInstanceGroups.bind(this);
+    this.onSuccess = this.onSuccess.bind(this);
   }
 
-  state = {
-    name: '',
-    description: '',
-    results: [],
-    custom_virtualenv: '',
-    error: '',
-    selectedInstanceGroups: []
-  };
+  state = initialFormState;
 
-  async componentDidMount () {
-    const { api } = this.props;
-    try {
-      const { data } = await api.getInstanceGroups();
-      const results = format(data);
-      this.setState({ results });
-    } catch (error) {
-      this.setState({ error });
-    }
+  onFieldChange (val, evt) {
+    this.setState({ [evt.target.name]: val || evt.target.value });
   }
 
-  onSelectChange (value) {
-    this.setState({ custom_virtualenv: value });
+  onLookupSave (val, targetName) {
+    this.setState({ [targetName]: val });
   }
 
   async onSubmit () {
     const { api } = this.props;
-    const { name, description, custom_virtualenv } = this.state;
+    const { name, description, custom_virtualenv, instanceGroups } = this.state;
     const data = {
       name,
       description,
       custom_virtualenv
     };
-    const { selectedInstanceGroups } = this.state;
     try {
       const { data: response } = await api.createOrganization(data);
-      const url = response.related.instance_groups;
+      const instanceGroupsUrl = response.related.instance_groups;
       try {
-        if (selectedInstanceGroups.length > 0) {
-          selectedInstanceGroups.forEach(async (select) => {
-            await api.createInstanceGroups(url, select.id);
+        if (instanceGroups.length > 0) {
+          instanceGroups.forEach(async (select) => {
+            await api.createInstanceGroups(instanceGroupsUrl, select.id);
           });
         }
       } catch (err) {
         this.setState({ error: err });
       } finally {
-        this.resetForm();
         this.onSuccess(response.id);
       }
     } catch (err) {
@@ -104,31 +83,18 @@ class OrganizationAdd extends React.Component {
     history.push(`/organizations/${id}`);
   }
 
-  updateSelectedInstanceGroups (selectedInstanceGroups) {
-    this.setState({ selectedInstanceGroups });
-  }
-
-  handleChange (_, evt) {
-    this.setState({ [evt.target.name]: evt.target.value });
-  }
-
-  resetForm () {
-    this.setState({
-      name: '',
-      description: '',
-    });
-    const { results } = this.state;
-    const reset = results.map((result) => ({ id: result.id, name: result.name, isChecked: false }));
-    this.setState({ results: reset });
+  async getInstanceGroups (params) {
+    const { api } = this.props;
+    const data = await api.getInstanceGroups(params);
+    return data;
   }
 
   render () {
     const {
       name,
-      results,
       description,
       custom_virtualenv,
-      selectedInstanceGroups,
+      instanceGroups,
       error
     } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
@@ -146,11 +112,10 @@ class OrganizationAdd extends React.Component {
                 >
                   <TextInput
                     isRequired
-                    type="text"
                     id="add-org-form-name"
                     name="name"
                     value={name}
-                    onChange={this.handleChange}
+                    onChange={this.onFieldChange}
                   />
                 </FormGroup>
                 <FormGroup label="Description" fieldId="add-org-form-description">
@@ -158,38 +123,36 @@ class OrganizationAdd extends React.Component {
                     id="add-org-form-description"
                     name="description"
                     value={description}
-                    onChange={this.handleChange}
+                    onChange={this.onFieldChange}
                   />
                 </FormGroup>
-                <FormGroup label="Instance Groups" fieldId="simple-form-instance-groups">
+                <FormGroup label="Instance Groups" fieldId="add-org-form-instance-groups">
                   <Lookup
                     lookupHeader="Instance Groups"
-                    onLookupSave={this.updateSelectedInstanceGroups}
-                    data={results}
-                    selected={selectedInstanceGroups}
+                    name="instanceGroups"
+                    value={instanceGroups}
+                    onLookupSave={this.onLookupSave}
+                    getEndpoint={this.getInstanceGroups}
                   />
                 </FormGroup>
                 <ConfigContext.Consumer>
                   {({ custom_virtualenvs }) => (
                     <AnsibleSelect
+                      fieldId="add-org-form-virtual-env"
                       labelName="Ansible Environment"
-                      selected={custom_virtualenv}
-                      selectChange={this.onSelectChange}
+                      name="custom_virtualenv"
+                      value={custom_virtualenv}
+                      onChange={this.onFieldChange}
                       data={custom_virtualenvs}
                     />
                   )}
                 </ConfigContext.Consumer>
               </Gallery>
-              <ActionGroup className="at-align-right">
-                <Toolbar>
-                  <ToolbarGroup>
-                    <Button className="at-C-SubmitButton" variant="primary" onClick={this.onSubmit} isDisabled={!enabled}>Save</Button>
-                  </ToolbarGroup>
-                  <ToolbarGroup>
-                    <Button className="at-C-CancelButton" variant="secondary" onClick={this.onCancel}>Cancel</Button>
-                  </ToolbarGroup>
-                </Toolbar>
-              </ActionGroup>
+              <FormActionGroup
+                onSubmit={this.onSubmit}
+                submitDisabled={!enabled}
+                onCancel={this.onCancel}
+              />
               { error ? <div>error</div> : '' }
             </Form>
           </CardBody>

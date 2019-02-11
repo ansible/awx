@@ -106,8 +106,8 @@ class APIClient {
     return this.http.post(endpoint, data);
   }
 
-  getInstanceGroups () {
-    return this.http.get(API_INSTANCE_GROUPS);
+  getInstanceGroups (params) {
+    return this.http.get(API_INSTANCE_GROUPS, { params });
   }
 
   createInstanceGroups (url, id) {

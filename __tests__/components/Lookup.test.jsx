@@ -7,13 +7,34 @@ let mockData = [{ name: 'foo', id: 1, isChecked: false }];
 describe('<Lookup />', () => {
   test('initially renders succesfully', () => {
     mount(
-      <Lookup
-        lookup_header="Foo Bar"
-        onLookupSave={() => { }}
-        data={mockData}
-        selected={[]}
-      />
+      <I18nProvider>
+        <Lookup
+          lookup_header="Foo Bar"
+          name="fooBar"
+          value={mockData}
+          onLookupSave={() => { }}
+          getEndpoint={() => { }}
+        />
+      </I18nProvider>
     );
+  });
+  test('API response is formatted properly', (done) => {
+    const wrapper = mount(
+      <I18nProvider>
+        <Lookup
+          lookup_header="Foo Bar"
+          name="fooBar"
+          value={mockData}
+          onLookupSave={() => { }}
+          getEndpoint={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
+        />
+      </I18nProvider>
+    ).find('Lookup');
+
+    setImmediate(() => {
+      expect(wrapper.state().results).toEqual([{ id: 1, name: 'test instance' }]);
+      done();
+    });
   });
   test('Opens modal when search icon is clicked', () => {
     const spy = jest.spyOn(Lookup.prototype, 'handleModalToggle');
@@ -22,9 +43,10 @@ describe('<Lookup />', () => {
       <I18nProvider>
         <Lookup
           lookup_header="Foo Bar"
+          name="fooBar"
+          value={mockSelected}
           onLookupSave={() => { }}
-          data={mockData}
-          selected={mockSelected}
+          getEndpoint={() => { }}
         />
       </I18nProvider>
     ).find('Lookup');
@@ -39,34 +61,39 @@ describe('<Lookup />', () => {
     }]);
     expect(wrapper.state('isModalOpen')).toEqual(true);
   });
-  test('calls "toggleSelected" when a user changes a checkbox', () => {
+  test('calls "toggleSelected" when a user changes a checkbox', (done) => {
     const spy = jest.spyOn(Lookup.prototype, 'toggleSelected');
+    const mockSelected = [{ name: 'foo', id: 1 }];
     const wrapper = mount(
       <I18nProvider>
         <Lookup
           lookup_header="Foo Bar"
+          name="fooBar"
+          value={mockSelected}
           onLookupSave={() => { }}
-          data={mockData}
-          selected={[]}
+          getEndpoint={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
         />
       </I18nProvider>
     );
-    const searchItem = wrapper.find('.pf-c-input-group__text#search');
-    searchItem.first().simulate('click');
-    wrapper.find('input[type="checkbox"]').simulate('change');
-    expect(spy).toHaveBeenCalled();
+    setImmediate(() => {
+      const searchItem = wrapper.find('.pf-c-input-group__text#search');
+      searchItem.first().simulate('click');
+      wrapper.find('input[type="checkbox"]').simulate('change');
+      expect(spy).toHaveBeenCalled();
+      done();
+    });
   });
   test('calls "toggleSelected" when remove icon is clicked', () => {
     const spy = jest.spyOn(Lookup.prototype, 'toggleSelected');
     mockData = [{ name: 'foo', id: 1, isChecked: false }, { name: 'bar', id: 2, isChecked: true }];
-    const mockSelected = [{ name: 'foo', id: 1 }, { name: 'bar', id: 2 }];
     const wrapper = mount(
       <I18nProvider>
         <Lookup
           lookup_header="Foo Bar"
+          name="fooBar"
+          value={mockData}
           onLookupSave={() => { }}
-          data={mockData}
-          selected={mockSelected}
+          getEndpoint={() => { }}
         />
       </I18nProvider>
     );
@@ -124,9 +151,10 @@ describe('<Lookup />', () => {
       <I18nProvider>
         <Lookup
           lookup_header="Foo Bar"
+          name="fooBar"
+          value={mockData}
           onLookupSave={onLookupSaveFn}
-          data={mockData}
-          selected={[]}
+          getEndpoint={() => { }}
         />
       </I18nProvider>
     ).find('Lookup');
@@ -142,6 +170,6 @@ describe('<Lookup />', () => {
     expect(onLookupSaveFn).toHaveBeenCalledWith([{
       id: 1,
       name: 'foo'
-    }]);
+    }], 'fooBar');
   });
 });
