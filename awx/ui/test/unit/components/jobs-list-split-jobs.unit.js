@@ -35,11 +35,10 @@ describe('View: Split Jobs List', () => {
             get: (str) => {
                 if (str === 'list.SLICE_JOB') {
                     return 'Slice Job';
-                } else {
-                    return '';
                 }
+                return '';
             }
-        }
+        };
 
         ProcessErrors = jasmine.createSpy('ProcessErrors');
         Wait = jasmine.createSpy('Wait');
