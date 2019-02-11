@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'GetBasePath', 'ProcessErrors', 'TemplatesStrings',
-    function($state, moment, $timeout, $window, $filter, Rest, GetBasePath, ProcessErrors, TemplatesStrings) {
+export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
+    function(moment, $timeout, $window, $filter, TemplatesStrings) {
 
     return {
         scope: {
@@ -206,50 +206,8 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
             const updateGraph = () => {
                 if(scope.dimensionsSet) {
                     const buildLinkTooltip = (d) => {
-                        let sourceNode = d3.select(`#node-${d.source.id}`);
-                        const sourceNodeX = d3.transform(sourceNode.attr("transform")).translate[0];
-                        const sourceNodeY = d3.transform(sourceNode.attr("transform")).translate[1];
-                        let targetNode = d3.select(`#node-${d.target.id}`);
-                        const targetNodeX = d3.transform(targetNode.attr("transform")).translate[0];
-                        const targetNodeY = d3.transform(targetNode.attr("transform")).translate[1];
-                        let xPos, yPos, arrowPoints;
-                        if (nodePositionMap[d.source.id].y === nodePositionMap[d.target.id].y) {
-                            xPos = (sourceNodeX + nodeW + targetNodeX)/2 - 50;
-                            yPos = (sourceNodeY + nodeH + targetNodeY)/2 - 70;
-                             arrowPoints = {
-                                pt1: {
-                                    x: xPos + 40,
-                                    y: yPos + 47
-                                },
-                                pt2: {
-                                    x: xPos + 60,
-                                    y: yPos + 47
-                                },
-                                pt3: {
-                                    x: xPos + 50,
-                                    y: yPos + 57
-                                }
-                            };
-                        } else {
-                            xPos = (sourceNodeX + nodeW + targetNodeX)/2 - 120;
-                            yPos = (sourceNodeY + nodeH + targetNodeY)/2 - 30;
-                             arrowPoints = {
-                                pt1: {
-                                    x: xPos + 100,
-                                    y: yPos + 17
-                                },
-                                pt2: {
-                                    x: xPos + 100,
-                                    y: yPos + 33
-                                },
-                                pt3: {
-                                    x: xPos + 110,
-                                    y: yPos + 25
-                                }
-                            };
-                        }
-                         let edgeTypeLabel;
-                         switch(d.edgeType) {
+                        let edgeTypeLabel;
+                        switch(d.edgeType) {
                             case "always":
                                 edgeTypeLabel = TemplatesStrings.get('workflow_maker.ALWAYS');
                                 break;
@@ -260,24 +218,74 @@ export default ['$state','moment', '$timeout', '$window', '$filter', 'Rest', 'Ge
                                 edgeTypeLabel = TemplatesStrings.get('workflow_maker.ON_FAILURE');
                                 break;
                         }
-                         let linkInstructionText = !scope.readOnly ? TemplatesStrings.get('workflow_maker.EDIT_LINK_TOOLTIP') : TemplatesStrings.get('workflow_maker.VIEW_LINK_TOOLTIP');
-                         let linkTooltip = svgGroup.append("g")
-                          .attr("class", "WorkflowChart-tooltip");
-                         linkTooltip.append("foreignObject")
-                            .attr("transform", `translate(${xPos},${yPos})`)
+                        let linkInstructionText = !scope.readOnly ? TemplatesStrings.get('workflow_maker.EDIT_LINK_TOOLTIP') : TemplatesStrings.get('workflow_maker.VIEW_LINK_TOOLTIP');
+                        let linkTooltip = svgGroup.append("g")
+                            .attr("class", "WorkflowChart-tooltip");
+                        const tipRef = linkTooltip.append("foreignObject")
+                            // In order for this to work in FF a height of at least 1 must be present
                             .attr("width", 100)
-                            .attr("height", 50)
+                            .attr("height", 1)
+                            .style("overflow", "visible")
                             .html(function(){
                                 return `<div class='WorkflowChart-tooltipContents'>
-                                          <div>${TemplatesStrings.get('workflow_maker.RUN')}: ${edgeTypeLabel}</div>
-                                          <div>${linkInstructionText}</div>
+                                        <div>${TemplatesStrings.get('workflow_maker.RUN')}: ${edgeTypeLabel}</div>
+                                        <div>${linkInstructionText}</div>
                                         </div>`;
                             });
-                         linkTooltip.append("polygon")
+                        const tipDimensions = tipRef.select('.WorkflowChart-tooltipContents').node().getBoundingClientRect();
+                        let sourceNode = d3.select(`#node-${d.source.id}`);
+                        const sourceNodeX = d3.transform(sourceNode.attr("transform")).translate[0];
+                        const sourceNodeY = d3.transform(sourceNode.attr("transform")).translate[1];
+                        let targetNode = d3.select(`#node-${d.target.id}`);
+                        const targetNodeX = d3.transform(targetNode.attr("transform")).translate[0];
+                        const targetNodeY = d3.transform(targetNode.attr("transform")).translate[1];
+                        let xPos, yPos, arrowPoints;
+                        const scaledHeight = tipDimensions.height/zoomObj.scale();
+
+                        if (nodePositionMap[d.source.id].y === nodePositionMap[d.target.id].y) {
+                            xPos = (sourceNodeX + nodeW + targetNodeX)/2 - 50;
+                            yPos = sourceNodeY + nodeH/2 - scaledHeight - 20;
+                             arrowPoints = {
+                                pt1: {
+                                    x: xPos + 40,
+                                    y: yPos + scaledHeight
+                                },
+                                pt2: {
+                                    x: xPos + 60,
+                                    y: yPos + scaledHeight
+                                },
+                                pt3: {
+                                    x: xPos + 50,
+                                    y: yPos + scaledHeight + 10
+                                }
+                            };
+                        } else {
+                            xPos = (sourceNodeX + nodeW + targetNodeX)/2 - 120;
+                            yPos = (sourceNodeY + (nodeH/2) + targetNodeY + (nodeH/2))/2 - (scaledHeight/2);
+                             arrowPoints = {
+                                pt1: {
+                                    x: xPos + 100,
+                                    y: yPos + (scaledHeight/2) - 10
+                                },
+                                pt2: {
+                                    x: xPos + 100,
+                                    y: yPos + (scaledHeight/2) + 10
+                                },
+                                pt3: {
+                                    x: xPos + 110,
+                                    y: yPos + (scaledHeight/2)
+                                }
+                            };
+                        }
+
+                        linkTooltip.append("polygon")
                             .attr("class", "WorkflowChart-tooltipArrow")
                             .attr("points", function() {
                                 return `${arrowPoints.pt1.x},${arrowPoints.pt1.y} ${arrowPoints.pt2.x},${arrowPoints.pt2.y} ${arrowPoints.pt3.x},${arrowPoints.pt3.y}`;
                             });
+
+                        tipRef.attr('height', scaledHeight);
+                        tipRef.attr("transform", `translate(${xPos},${yPos})`);
                     };
 
                     let g = new dagre.graphlib.Graph();
