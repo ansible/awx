@@ -31,6 +31,15 @@ describe('View: Split Jobs List', () => {
                 options: () => ['foo', 'bar'],
             }
         ];
+        JobsStrings = {
+            get: (str) => {
+                if (str === 'list.SLICE_JOB') {
+                    return 'Slice Job';
+                } else {
+                    return '';
+                }
+            }
+        }
 
         ProcessErrors = jasmine.createSpy('ProcessErrors');
         Wait = jasmine.createSpy('Wait');
@@ -44,7 +53,7 @@ describe('View: Split Jobs List', () => {
         $provide.value('Prompt', Prompt);
         $provide.value('Rest', angular.noop);
         $provide.value('SearchBasePath', '');
-        $provide.value('JobsStrings', angular.noop);
+        $provide.value('JobsStrings', JobsStrings);
         $provide.value('QuerySet', angular.noop);
 
         $provide.provider('$stateProvider', { $get: jasmine.createSpy('$get'), });
