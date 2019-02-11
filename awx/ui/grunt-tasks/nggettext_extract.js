@@ -4,7 +4,8 @@ let source = [
     'client/lib/**/*.js',
     'client/lib/**/*.html',
     'client/src/**/*.js',
-    'client/src/**/*.html'
+    'client/src/**/*.html',
+    'client/*.ejs'
 ];
 
 module.exports = {
