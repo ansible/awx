@@ -225,6 +225,7 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                             // In order for this to work in FF a height of at least 1 must be present
                             .attr("width", 100)
                             .attr("height", 1)
+                            .style("overflow", "visible")
                             .html(function(){
                                 return `<div class='WorkflowChart-tooltipContents'>
                                         <div>${TemplatesStrings.get('workflow_maker.RUN')}: ${edgeTypeLabel}</div>
@@ -283,8 +284,8 @@ export default ['moment', '$timeout', '$window', '$filter', 'TemplatesStrings',
                                 return `${arrowPoints.pt1.x},${arrowPoints.pt1.y} ${arrowPoints.pt2.x},${arrowPoints.pt2.y} ${arrowPoints.pt3.x},${arrowPoints.pt3.y}`;
                             });
 
-                        tipRef.attr('height', tipDimensions.height);
-                        tipRef.attr("transform", `translate(${xPos},${yPos})`)
+                        tipRef.attr('height', scaledHeight);
+                        tipRef.attr("transform", `translate(${xPos},${yPos})`);
                     };
 
                     let g = new dagre.graphlib.Graph();
