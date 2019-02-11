@@ -24,7 +24,8 @@ const detailLabelStyle = {
 };
 
 const detailValueStyle = {
-  lineHeight: '24px'
+  lineHeight: '24px',
+  wordBreak: 'break-all'
 };
 
 const Detail = ({ label, value }) => {
