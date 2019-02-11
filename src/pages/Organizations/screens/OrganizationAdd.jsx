@@ -40,14 +40,15 @@ class OrganizationAdd extends React.Component {
     this.onCancel = this.onCancel.bind(this);
     this.updateSelectedInstanceGroups = this.updateSelectedInstanceGroups.bind(this);
   }
-
+  
   state = {
     name: '',
     description: '',
     results: [],
     custom_virtualenv: '',
     error: '',
-    selectedInstanceGroups: []
+    selectedInstanceGroups: [],
+    defaultEnv: '/venv/ansible/'
   };
 
   async componentDidMount () {
@@ -129,6 +130,7 @@ class OrganizationAdd extends React.Component {
       description,
       custom_virtualenv,
       selectedInstanceGroups,
+      defaultEnv,
       error
     } = this.state;
     const enabled = name.length > 0; // TODO: add better form validation
@@ -176,6 +178,7 @@ class OrganizationAdd extends React.Component {
                       selected={custom_virtualenv}
                       selectChange={this.onSelectChange}
                       data={custom_virtualenvs}
+                      defaultSelected={defaultEnv}
                     />
                   )}
                 </ConfigContext.Consumer>
