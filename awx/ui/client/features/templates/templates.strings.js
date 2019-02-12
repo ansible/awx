@@ -106,7 +106,7 @@ function TemplatesStrings (BaseString) {
         WORKFLOW: t.s('Workflow'),
         WARNING: t.s('Warning'),
         TOTAL_NODES: t.s('TOTAL NODES'),
-        ADD_A_TEMPLATE: t.s('ADD A TEMPLATE'),
+        ADD_A_NODE: t.s('ADD A NODE'),
         EDIT_TEMPLATE: t.s('EDIT TEMPLATE'),
         JOBS: t.s('JOBS'),
         PLEASE_CLICK_THE_START_BUTTON: t.s('Please click the start button to build your workflow.'),
