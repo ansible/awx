@@ -194,7 +194,7 @@ function projectsListController (
                     dismissButton: false,
                     dismissOnTimeout: true
                 });
-                $state.go('.', null, { reload: true });
+                reloadList();
             })
             .catch(createErrorHandler('copy project', 'GET'))
             .finally(() => Wait('stop'));
