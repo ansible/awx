@@ -132,6 +132,26 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
+            timeout: {
+                label: i18n._('Timeout'),
+                type: 'number',
+                integer: true,
+                default: 30,
+                min: 1,
+                max: 120,
+                spinner: true,
+                dataTitle: i18n._('Timeout'),
+                dataPlacement: 'right',
+                dataContainer: 'body',
+                awRequiredWhen: {
+                    reqExpression: "email_required",
+                    init: "false"
+                },
+                awPopOver: "<p>" + i18n._("The amount of time (in seconds) before the email notification stops trying to reach the host and times out. Ranges from 1 to 120 seconds.") + "</p>",
+                ngShow: "notification_type.value == 'email' ",
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
             channels: {
                 label: i18n._('Destination Channels'),
                 type: 'textarea',

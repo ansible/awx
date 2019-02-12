@@ -122,7 +122,6 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                             $scope.notification_template_form[subFldName].$setPristine();
                         }
                     } else {
-                        $scope[fld] = null;
                         $scope.notification_template_form[fld].$setPristine();
                     }
                 }
@@ -200,10 +199,12 @@ export default ['Rest', 'Wait', 'NotificationsFormObject',
                 if (field.type === 'number') {
                     $scope[i] = Number($scope[i]);
                 }
-                if (i === "username" && $scope.notification_type.value === "email" && value === null) {
+                if (i === "username" && $scope.notification_type.value === "email" && (value === null || !value
+                )) {
                     $scope[i] = "";
                 }
-                if (field.type === 'sensitive' && value === null) {
+                if (field.type === 'sensitive' && (value === null || !value
+                )) {
                     $scope[i] = "";
                 }
                 return $scope[i];
