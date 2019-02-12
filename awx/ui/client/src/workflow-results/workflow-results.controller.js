@@ -54,6 +54,7 @@ export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
                     EDIT_WORKFLOW: i18n._('Edit the workflow job template'),
                     EDIT_SLICE_TEMPLATE: i18n._('Edit the slice job template'),
                     EDIT_SCHEDULE: i18n._('Edit the schedule'),
+                    EDIT_INVENTORY: i18n._('Edit the inventory'),
                     SOURCE_WORKFLOW_JOB: i18n._('View the source Workflow Job'),
                     TOGGLE_STDOUT_FULLSCREEN: i18n._('Expand Output'),
                     STATUS: '' // re-assigned elsewhere
