@@ -25,9 +25,9 @@ class AnsibleSelect extends React.Component {
     return null;
   }
 
-  onSelectChange (val) {
-    const { selectChange } = this.props;
-    selectChange(val);
+  onSelectChange (val, event) {
+    const { onChange } = this.props;
+    onChange(val, event);
   }
 
   render () {
