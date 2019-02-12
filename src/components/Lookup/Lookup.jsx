@@ -19,8 +19,8 @@ import Pagination from '../Pagination';
 const paginationStyling = {
   paddingLeft: '0',
   justifyContent: 'flex-end',
-  borderRight: '1px solid #d1d1d1',
-  borderBottom: '1px solid #d1d1d1',
+  borderRight: '1px solid #ebebeb',
+  borderBottom: '1px solid #ebebeb',
   borderTop: '0'
 };
 
