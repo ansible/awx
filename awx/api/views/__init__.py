@@ -2509,7 +2509,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                 ).format(
                     allowed_types=', '.join(JobTemplateSurveySpec.ALLOWED_TYPES.keys()), **context
                 )))
-            if 'default' in survey_item:
+            if 'default' in survey_item and survey_item['default'] != '':
                 if not isinstance(survey_item['default'], JobTemplateSurveySpec.ALLOWED_TYPES[qtype]):
                     type_label = 'string'
                     if qtype in ['integer', 'float']:
