@@ -16,14 +16,6 @@ import Lookup from '../../../components/Lookup';
 import AnsibleSelect from '../../../components/AnsibleSelect';
 import FormActionGroup from '../../../components/FormActionGroup';
 
-const initialFormState = {
-  name: '',
-  description: '',
-  custom_virtualenv: '',
-  instanceGroups: [],
-  error: '',
-};
-
 class OrganizationAdd extends React.Component {
   constructor (props) {
     super(props);
@@ -34,9 +26,15 @@ class OrganizationAdd extends React.Component {
     this.onSubmit = this.onSubmit.bind(this);
     this.onCancel = this.onCancel.bind(this);
     this.onSuccess = this.onSuccess.bind(this);
-  }
 
-  state = initialFormState;
+    this.state = {
+      name: '',
+      description: '',
+      custom_virtualenv: '',
+      instanceGroups: [],
+      error: '',
+    };
+  }
 
   onFieldChange (val, evt) {
     this.setState({ [evt.target.name]: val || evt.target.value });
@@ -132,7 +130,7 @@ class OrganizationAdd extends React.Component {
                     name="instanceGroups"
                     value={instanceGroups}
                     onLookupSave={this.onLookupSave}
-                    getEndpoint={this.getInstanceGroups}
+                    getItems={this.getInstanceGroups}
                   />
                 </FormGroup>
                 <ConfigContext.Consumer>

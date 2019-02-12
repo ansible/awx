@@ -13,7 +13,7 @@ describe('<Lookup />', () => {
           name="fooBar"
           value={mockData}
           onLookupSave={() => { }}
-          getEndpoint={() => { }}
+          getItems={() => { }}
         />
       </I18nProvider>
     );
@@ -26,7 +26,7 @@ describe('<Lookup />', () => {
           name="fooBar"
           value={mockData}
           onLookupSave={() => { }}
-          getEndpoint={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
+          getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
         />
       </I18nProvider>
     ).find('Lookup');
@@ -46,7 +46,7 @@ describe('<Lookup />', () => {
           name="fooBar"
           value={mockSelected}
           onLookupSave={() => { }}
-          getEndpoint={() => { }}
+          getItems={() => { }}
         />
       </I18nProvider>
     ).find('Lookup');
@@ -71,7 +71,7 @@ describe('<Lookup />', () => {
           name="fooBar"
           value={mockSelected}
           onLookupSave={() => { }}
-          getEndpoint={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
+          getItems={() => ({ data: { results: [{ name: 'test instance', id: 1 }] } })}
         />
       </I18nProvider>
     );
@@ -93,7 +93,7 @@ describe('<Lookup />', () => {
           name="fooBar"
           value={mockData}
           onLookupSave={() => { }}
-          getEndpoint={() => { }}
+          getItems={() => { }}
         />
       </I18nProvider>
     );
@@ -154,7 +154,7 @@ describe('<Lookup />', () => {
           name="fooBar"
           value={mockData}
           onLookupSave={onLookupSaveFn}
-          getEndpoint={() => { }}
+          getItems={() => { }}
         />
       </I18nProvider>
     ).find('Lookup');

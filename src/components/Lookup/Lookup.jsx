@@ -50,13 +50,13 @@ class Lookup extends React.Component {
   }
 
   async getData (queryParams) {
-    const { getEndpoint } = this.props;
+    const { getItems } = this.props;
     const { page } = queryParams;
 
     this.setState({ error: false });
 
     try {
-      const { data } = await getEndpoint(queryParams);
+      const { data } = await getItems(queryParams);
       const { results, count } = data;
 
       const stateToUpdate = {
@@ -150,7 +150,7 @@ class Lookup extends React.Component {
                 <Button key="cancel" variant="secondary" onClick={this.handleModalToggle}>{(results.length === 0) ? i18n._(t`Close`) : i18n._(t`Cancel`)}</Button>
               ]}
             >
-              {(results.length === 0) && (
+              {(results.length === 0) ? (
                 <EmptyState>
                   <EmptyStateIcon icon={CubesIcon} />
                   <Title size="lg">
@@ -160,7 +160,7 @@ class Lookup extends React.Component {
                     <Trans>{`Please add ${lookupHeader.toLowerCase()} to populate this list`}</Trans>
                   </EmptyStateBody>
                 </EmptyState>
-              ) || (
+              ) : (
                 <Fragment>
                   <ul className="pf-c-data-list awx-c-list">
                     {results.map(i => (
