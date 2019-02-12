@@ -140,6 +140,16 @@ class TestWorkflowJobAccess:
         JobLaunchConfig.objects.create(job=workflow_job)
         assert WorkflowJobAccess(rando).can_start(workflow_job)
 
+    def test_can_start_with_limits(self, workflow_job, inventory, admin_user):
+        inventory.organization.max_hosts = 1
+        inventory.organization.save()
+        inventory.hosts.create(name="Existing host 1")
+        inventory.hosts.create(name="Existing host 2")
+        workflow_job.inventory = inventory
+        workflow_job.save()
+
+        assert WorkflowJobAccess(admin_user).can_start(workflow_job)
+
     def test_cannot_relaunch_friends_job(self, wfjt, rando, alice):
         workflow_job = wfjt.workflow_jobs.create(name='foo', created_by=alice)
         JobLaunchConfig.objects.create(
