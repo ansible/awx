@@ -11,7 +11,7 @@ from django.utils.encoding import smart_str, force_text
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import CommonModelNameNotUnique, CreatedModifiedModel
 from awx.main.utils import encrypt_field, decrypt_field, set_environ
 from awx.main.notifications.email_backend import CustomEmailBackend
 from awx.main.notifications.slack_backend import SlackBackend

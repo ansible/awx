@@ -16,7 +16,6 @@ from django.utils.translation import ugettext_lazy as _
 # AWX
 from awx.api.versioning import reverse
 from django.contrib.auth.models import User # noqa
-from awx.main.models.base import * # noqa
 
 __all__ = [
     'Role',

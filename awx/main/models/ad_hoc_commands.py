@@ -14,9 +14,11 @@ from django.core.exceptions import ValidationError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    prevent_search, AD_HOC_JOB_TYPE_CHOICES, VERBOSITY_CHOICES, VarsDictProperty
+)
 from awx.main.models.events import AdHocCommandEvent
-from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.unified_jobs import UnifiedJob
 from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')

@@ -25,9 +25,16 @@ from rest_framework.exceptions import ParseError
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    BaseModel, CreatedModifiedModel,
+    prevent_search,
+    JOB_TYPE_CHOICES, VERBOSITY_CHOICES,
+    VarsDictProperty
+)
 from awx.main.models.events import JobEvent, SystemJobEvent
-from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.unified_jobs import (
+    UnifiedJobTemplate, UnifiedJob
+)
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
