@@ -41,4 +41,16 @@ describe('<AnsibleSelect />', () => {
     expect(wrapper.find('FormGroup')).toHaveLength(0);
     expect(wrapper.find('Select')).toHaveLength(0);
   });
+  test('Returns correct select options if defaultSelected props is passed', () => {
+    const wrapper = mount(
+      <AnsibleSelect
+        selected="foo"
+        selectChange={() => { }}
+        labelName={label}
+        data={mockData}
+        defaultSelected={mockData[1]}
+      />
+    );
+    expect(wrapper.find('Select')).toHaveLength(1);
+  });
 });

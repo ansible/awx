@@ -40,7 +40,7 @@ class OrganizationAdd extends React.Component {
     this.onCancel = this.onCancel.bind(this);
     this.updateSelectedInstanceGroups = this.updateSelectedInstanceGroups.bind(this);
   }
-  
+
   state = {
     name: '',
     description: '',
