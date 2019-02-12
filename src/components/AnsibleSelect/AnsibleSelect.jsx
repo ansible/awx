@@ -38,7 +38,7 @@ class AnsibleSelect extends React.Component {
       elem = (
         <FormGroup label={labelName} fieldId="ansible-select">
           <Select value={selected} onChange={this.onSelectChange} aria-label="Select Input">
-            <SelectOption isDisabled key="" value="" label={`Use Default ${labelName}`} />
+            <SelectOption key="" value="" label={`Use Default ${labelName}`} />
             {data.map((datum) => (datum !== defaultSelected
               ? (<SelectOption key={datum} value={datum} label={datum} />) : null))
             }
