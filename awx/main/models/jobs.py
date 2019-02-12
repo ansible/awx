@@ -805,7 +805,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
     def get_notification_friendly_name(self):
         return "Job"
 
-    def _get_inventory_hosts(self, only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified',]):
+    def _get_inventory_hosts(
+        self,
+        only=['name', 'ansible_facts', 'ansible_facts_modified', 'modified', 'inventory_id']
+    ):
         if not self.inventory:
             return []
         return self.inventory.hosts.only(*only)

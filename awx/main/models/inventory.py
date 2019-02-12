@@ -239,7 +239,7 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin, RelatedJobsMixin):
         hosts_kw = dict()
         if not show_all:
             hosts_kw['enabled'] = True
-        fetch_fields = ['name', 'id', 'variables']
+        fetch_fields = ['name', 'id', 'variables', 'inventory_id']
         if towervars:
             fetch_fields.append('enabled')
         hosts = self.hosts.filter(**hosts_kw).order_by('name').only(*fetch_fields)
