@@ -374,6 +374,18 @@ def test_edit_inventory_host(put, host, alice, role_field, expected_status_code)
     put(reverse('api:host_detail', kwargs={'pk': host.id}), data, alice, expect=expected_status_code)
 
 
+@pytest.mark.django_db
+def test_edit_inventory_host_with_limits(put, host, admin_user):
+    # The per-Organization host limits functionality should be a no-op on AWX.
+    inventory = host.inventory
+    inventory.organization.max_hosts = 1
+    inventory.organization.save()
+    inventory.hosts.create(name='Alternate host')
+
+    data = {'name': 'New name', 'description': 'Hello world'}
+    put(reverse('api:host_detail', kwargs={'pk': host.id}), data, admin_user, expect=200)
+
+
 @pytest.mark.parametrize("role_field,expected_status_code", [
     (None, 403),
     ('admin_role', 204),
