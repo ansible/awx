@@ -64,6 +64,7 @@ class AWXWSGIHandler(WSGIHandler):
             # "normal" middleware
             if getattr(resolve(request.path), 'url_name', '') == 'migrations_notran':
                 # short-circuit middleware
+                request._cors_enabled = False
                 return self._get_response(request)
         except django.urls.Resolver404:
             pass
