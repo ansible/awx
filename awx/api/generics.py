@@ -33,9 +33,17 @@ from rest_framework.negotiation import DefaultContentNegotiation
 
 # AWX
 from awx.api.filters import FieldLookupBackend
-from awx.main.models import *  # noqa
+from awx.main.models import (
+    UnifiedJob, UnifiedJobTemplate, User, Role
+)
 from awx.main.access import access_registry
-from awx.main.utils import * # noqa
+from awx.main.utils import (
+    camelcase_to_underscore,
+    get_search_fields,
+    getattrd,
+    get_object_or_400,
+    decrypt_field
+)
 from awx.main.utils.db import get_all_field_names
 from awx.api.serializers import ResourceAccessListElementSerializer, CopySerializer, UserSerializer
 from awx.api.versioning import URLPathVersioning, get_request_version

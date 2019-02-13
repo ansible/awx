@@ -30,7 +30,14 @@ from crum.signals import current_user_getter
 
 
 # AWX
-from awx.main.models import * # noqa
+from awx.main.models import (
+    ActivityStream, AdHocCommandEvent, Group, Host, InstanceGroup, Inventory,
+    InventorySource, InventoryUpdateEvent, Job, JobEvent, JobHostSummary,
+    JobTemplate, OAuth2AccessToken, Organization, Project, ProjectUpdateEvent,
+    Role, SystemJob, SystemJobEvent, SystemJobTemplate, UnifiedJob,
+    UnifiedJobTemplate, User, UserSessionMembership,
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR
+)
 from awx.main.constants import CENSOR_VALUE
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, get_current_apps
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates

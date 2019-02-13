@@ -10,7 +10,7 @@ import pytest
 from unittest import mock
 
 # AWX
-from awx.main.models import * # noqa
+from awx.main.models import ProjectUpdate
 from awx.api.versioning import reverse
 
 

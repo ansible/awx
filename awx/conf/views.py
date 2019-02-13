@@ -17,10 +17,15 @@ from rest_framework import serializers
 from rest_framework import status
 
 # Tower
-from awx.api.generics import *  # noqa
+from awx.api.generics import (
+    APIView,
+    GenericAPIView,
+    ListAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 from awx.api.permissions import IsSuperUser
 from awx.api.versioning import reverse, get_request_version
-from awx.main.utils import *  # noqa
+from awx.main.utils import camelcase_to_underscore
 from awx.main.utils.handlers import AWXProxyHandler, LoggingConnectivityException
 from awx.main.tasks import handle_setting_changes
 from awx.conf.license import get_licensed_features

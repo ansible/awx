@@ -167,7 +167,7 @@ class SystemctlScanService(BaseService):
 
 
 def main():
-    module = AnsibleModule(argument_spec = dict())
+    module = AnsibleModule(argument_spec = dict())  # noqa
     service_modules = (ServiceScanService, SystemctlScanService)
     all_services = {}
     incomplete_warning = False

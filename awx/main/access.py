@@ -28,7 +28,17 @@ from awx.main.utils import (
     to_python_boolean,
     get_licenser,
 )
-from awx.main.models import * # noqa
+from awx.main.models import (
+    ActivityStream, AdHocCommand, AdHocCommandEvent, Credential, CredentialType,
+    CustomInventoryScript, Group, Host, Instance, InstanceGroup, Inventory,
+    InventorySource, InventoryUpdate, InventoryUpdateEvent, Job, JobEvent,
+    JobHostSummary, JobLaunchConfig, JobTemplate, Label, Notification,
+    NotificationTemplate, Organization, Project, ProjectUpdate,
+    ProjectUpdateEvent, Role, Schedule, SystemJob, SystemJobEvent,
+    SystemJobTemplate, Team, UnifiedJob, UnifiedJobTemplate, WorkflowJob,
+    WorkflowJobNode, WorkflowJobTemplate, WorkflowJobTemplateNode,
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR
+)
 from awx.main.models.mixins import ResourceMixin
 
 from awx.conf.license import LicenseForbids, feature_enabled
@@ -434,12 +444,16 @@ class InstanceAccess(BaseAccess):
                    skip_sub_obj_read_check=False):
         if relationship == 'rampart_groups' and isinstance(sub_obj, InstanceGroup):
             return self.user.is_superuser
-        return super(InstanceAccess, self).can_attach(obj, sub_obj, relationship, *args, **kwargs)
+        return super(InstanceAccess, self).can_attach(
+            obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check
+        )
 
     def can_unattach(self, obj, sub_obj, relationship, data=None):
         if relationship == 'rampart_groups' and isinstance(sub_obj, InstanceGroup):
             return self.user.is_superuser
-        return super(InstanceAccess, self).can_unattach(obj, sub_obj, relationship, *args, **kwargs)
+        return super(InstanceAccess, self).can_unattach(
+            obj, sub_obj, relationship, relationship, data=data
+        )
 
     def can_add(self, data):
         return False
@@ -1341,7 +1355,7 @@ class JobTemplateAccess(BaseAccess):
         '''
 
         # obj.credentials.all() is accessible ONLY when object is saved (has valid id)
-        credential_manager = getattr(obj, 'credentials', None) if getattr(obj, 'id', False) else Credentials.objects.none()
+        credential_manager = getattr(obj, 'credentials', None) if getattr(obj, 'id', False) else Credential.objects.none()
         return reduce(lambda prev, cred: prev and self.user in cred.use_role, credential_manager.all(), True)
 
     def can_start(self, obj, validate_license=True):
@@ -1850,7 +1864,6 @@ class WorkflowJobTemplateAccess(BaseAccess):
             qs = obj.workflow_job_template_nodes
             qs = qs.prefetch_related('unified_job_template', 'inventory__use_role', 'credentials__use_role')
             for node in qs.all():
-                node_errors = {}
                 if node.inventory and self.user not in node.inventory.use_role:
                     missing_inventories.append(node.inventory.name)
                 for cred in node.credentials.all():
@@ -1859,8 +1872,6 @@ class WorkflowJobTemplateAccess(BaseAccess):
                 ujt = node.unified_job_template
                 if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
                     missing_ujt.append(ujt.name)
-                if node_errors:
-                    wfjt_errors[node.id] = node_errors
             if missing_ujt:
                 self.messages['templates_unable_to_copy'] = missing_ujt
             if missing_credentials:

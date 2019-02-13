@@ -47,7 +47,7 @@ def get_system_id(filname):
 
 
 def main():
-    module = AnsibleModule(
+    module = AnsibleModule(  # noqa
         argument_spec = dict()
     )
 

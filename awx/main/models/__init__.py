@@ -6,27 +6,60 @@ from django.conf import settings # noqa
 from django.db.models.signals import pre_delete  # noqa
 
 # AWX
-from awx.main.models.base import * # noqa
-from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.organization import * # noqa
-from awx.main.models.credential import * # noqa
-from awx.main.models.projects import * # noqa
-from awx.main.models.inventory import * # noqa
-from awx.main.models.jobs import * # noqa
-from awx.main.models.events import * # noqa
-from awx.main.models.ad_hoc_commands import * # noqa
-from awx.main.models.schedules import * # noqa
-from awx.main.models.activity_stream import * # noqa
-from awx.main.models.ha import * # noqa
-from awx.main.models.rbac import * # noqa
-from awx.main.models.mixins import * # noqa
-from awx.main.models.notifications import * # noqa
-from awx.main.models.fact import * # noqa
-from awx.main.models.label import * # noqa
-from awx.main.models.workflow import * # noqa
-from awx.main.models.channels import * # noqa
+from awx.main.models.base import (  # noqa
+    BaseModel, prevent_search, CLOUD_INVENTORY_SOURCES, VERBOSITY_CHOICES
+)
+from awx.main.models.unified_jobs import (  # noqa
+    UnifiedJob, UnifiedJobTemplate, StdoutMaxBytesExceeded
+)
+from awx.main.models.organization import (  # noqa
+    Organization, Profile, Team, UserSessionMembership
+)
+from awx.main.models.credential import (  # noqa
+    Credential, CredentialType, V1Credential, build_safe_env
+)
+from awx.main.models.projects import Project, ProjectUpdate  # noqa
+from awx.main.models.inventory import (  # noqa
+    CustomInventoryScript, Group, Host, Inventory, InventorySource,
+    InventoryUpdate, SmartInventoryMembership
+)
+from awx.main.models.jobs import (  # noqa
+    Job, JobHostSummary, JobLaunchConfig, JobTemplate, SystemJob,
+    SystemJobTemplate,
+)
+from awx.main.models.events import (  # noqa
+    AdHocCommandEvent, InventoryUpdateEvent, JobEvent, ProjectUpdateEvent,
+    SystemJobEvent,
+)
+from awx.main.models.ad_hoc_commands import AdHocCommand # noqa
+from awx.main.models.schedules import Schedule # noqa
+from awx.main.models.activity_stream import ActivityStream # noqa
+from awx.main.models.ha import (  # noqa
+    Instance, InstanceGroup, JobOrigin, TowerScheduleState,
+)
+from awx.main.models.rbac import (  # noqa
+    Role, batch_role_ancestor_rebuilding, get_roles_on_resource,
+    role_summary_fields_generator, ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ROLE_SINGLETON_SYSTEM_AUDITOR,
+)
+from awx.main.models.mixins import (  # noqa
+    CustomVirtualEnvMixin, ResourceMixin, SurveyJobMixin,
+    SurveyJobTemplateMixin, TaskManagerInventoryUpdateMixin,
+    TaskManagerJobMixin, TaskManagerProjectUpdateMixin,
+    TaskManagerUnifiedJobMixin,
+)
+from awx.main.models.notifications import Notification, NotificationTemplate # noqa
+from awx.main.models.fact import Fact # noqa
+from awx.main.models.label import Label # noqa
+from awx.main.models.workflow import (  # noqa
+    WorkflowJob, WorkflowJobNode, WorkflowJobOptions, WorkflowJobTemplate,
+    WorkflowJobTemplateNode,
+)
+from awx.main.models.channels import ChannelGroup # noqa
 from awx.api.versioning import reverse
-from awx.main.models.oauth import * # noqa
+from awx.main.models.oauth import ( # noqa
+    OAuth2AccessToken, OAuth2Application
+)
 from oauth2_provider.models import Grant, RefreshToken # noqa -- needed django-oauth-toolkit model migrations
 
 
@@ -50,7 +83,10 @@ _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
 
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User  # noqa
-from awx.main.access import * # noqa
+from awx.main.access import (  # noqa
+    get_user_queryset, check_user_access, check_user_access_with_errors,
+    user_accessible_objects
+)
 
 
 User.add_to_class('get_queryset', get_user_queryset)

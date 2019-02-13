@@ -1,10 +1,15 @@
 import pytest
 
 from django.core.exceptions import ImproperlyConfigured
+from django.conf import settings
 
 from awx.api.versioning import reverse
 from awx.main.middleware import URLModificationMiddleware
-from awx.main.models import * # noqa
+from awx.main.models import (  # noqa
+    Credential, CustomInventoryScript, Group, Host, Instance, InstanceGroup,
+    Inventory, InventorySource, JobTemplate, NotificationTemplate,
+    Organization, Project, User, WorkflowJobTemplate,
+)
 from awx.conf import settings_registry
 
 

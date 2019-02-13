@@ -44,13 +44,13 @@ SHELL_PLUS_PRINT_SQL = False
 
 # show colored logs in the dev environment
 # to disable this, set `COLOR_LOGS = False` in awx/settings/local_settings.py
-LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'
+LOGGING['handlers']['console']['()'] = 'awx.main.utils.handlers.ColorHandler'  # noqa
 # task system does not propagate to AWX, so color log these too
-LOGGING['handlers']['task_system'] = LOGGING['handlers']['console'].copy()
+LOGGING['handlers']['task_system'] = LOGGING['handlers']['console'].copy()  # noqa
 COLOR_LOGS = True
 
 # Pipe management playbook output to console
-LOGGING['loggers']['awx.isolated.manager.playbooks']['propagate'] = True
+LOGGING['loggers']['awx.isolated.manager.playbooks']['propagate'] = True  # noqa
 
 ALLOWED_HOSTS = ['*']
 
@@ -92,7 +92,7 @@ PENDO_TRACKING_STATE = "off"
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
 try:
     import django_jenkins
-    INSTALLED_APPS += (django_jenkins.__name__,)
+    INSTALLED_APPS += (django_jenkins.__name__,)  # noqa
     PROJECT_APPS = ('awx.main.tests', 'awx.api.tests',)
 except ImportError:
     pass
