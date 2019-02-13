@@ -9,7 +9,7 @@ describe('<AnsibleSelect />', () => {
     mount(
       <AnsibleSelect
         selected="foo"
-        selectChange={() => { }}
+        onChange={() => { }}
         labelName={label}
         data={mockData}
       />
@@ -20,7 +20,7 @@ describe('<AnsibleSelect />', () => {
     const wrapper = mount(
       <AnsibleSelect
         selected="foo"
-        selectChange={() => { }}
+        onChange={() => { }}
         labelName={label}
         data={mockData}
       />
@@ -33,7 +33,7 @@ describe('<AnsibleSelect />', () => {
     const wrapper = mount(
       <AnsibleSelect
         selected="foo"
-        selectChange={() => { }}
+        onChange={() => { }}
         labelName={label}
         data={null}
       />
