@@ -29,14 +29,14 @@ from django.db.models.query import QuerySet
 from django.db.models import Q
 
 # Django REST Framework
-from rest_framework.exceptions import ParseError, PermissionDenied
+from rest_framework.exceptions import ParseError
 from django.utils.encoding import smart_str
 from django.utils.text import slugify
 from django.apps import apps
 
 logger = logging.getLogger('awx.main.utils')
 
-__all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize', 'memoize_delete',
+__all__ = ['get_object_or_400', 'camelcase_to_underscore', 'memoize', 'memoize_delete',
            'get_ansible_version', 'get_ssh_version', 'get_licenser', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'copy_model_by_class', 'region_sorting',
            'copy_m2m_relationships', 'prefetch_page_capabilities', 'to_python_boolean',
@@ -63,21 +63,6 @@ def get_object_or_400(klass, *args, **kwargs):
         raise ParseError(*e.args)
     except queryset.model.MultipleObjectsReturned as e:
         raise ParseError(*e.args)
-
-
-def get_object_or_403(klass, *args, **kwargs):
-    '''
-    Return a single object from the given model or queryset based on the query
-    params, otherwise raise an exception that will return in a 403 response.
-    '''
-    from django.shortcuts import _get_queryset
-    queryset = _get_queryset(klass)
-    try:
-        return queryset.get(*args, **kwargs)
-    except queryset.model.DoesNotExist as e:
-        raise PermissionDenied(*e.args)
-    except queryset.model.MultipleObjectsReturned as e:
-        raise PermissionDenied(*e.args)
 
 
 def to_python_boolean(value, allow_none=False):
@@ -912,13 +897,6 @@ def timestamp_apiformat(timestamp):
     if timestamp.endswith('+00:00'):
         timestamp = timestamp[:-6] + 'Z'
     return timestamp
-
-
-# damn you python 2.6
-def timedelta_total_seconds(timedelta):
-    return (
-        timedelta.microseconds + 0.0 +
-        (timedelta.seconds + timedelta.days * 24 * 3600) * 10 ** 6) / 10 ** 6
 
 
 class NoDefaultProvided(object):
