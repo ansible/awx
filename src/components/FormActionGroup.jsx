@@ -21,13 +21,13 @@ const buttonGroupStyle = {
   marginRight: '20px'
 };
 
-export default ({ onSubmit, isDisabled, onCancel }) => (
+export default ({ onSubmit, submitDisabled, onCancel }) => (
   <I18n>
     {({ i18n }) => (
       <ActionGroup style={formActionGroupStyle}>
         <Toolbar>
           <ToolbarGroup style={buttonGroupStyle}>
-            <Button aria-label={i18n._(t`Save`)} variant="primary" onClick={onSubmit} isDisabled={isDisabled}>{i18n._(t`Save`)}</Button>
+            <Button aria-label={i18n._(t`Save`)} variant="primary" onClick={onSubmit} isDisabled={submitDisabled}>{i18n._(t`Save`)}</Button>
           </ToolbarGroup>
           <ToolbarGroup>
             <Button aria-label={i18n._(t`Cancel`)} variant="secondary" onClick={onCancel}>{i18n._(t`Cancel`)}</Button>
