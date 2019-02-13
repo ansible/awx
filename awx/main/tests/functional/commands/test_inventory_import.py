@@ -4,6 +4,7 @@
 # Python
 import pytest
 from unittest import mock
+import os
 
 # Django
 from django.core.management.base import CommandError
@@ -197,6 +198,65 @@ class TestINIImports:
         h = inventory.hosts.all()[0]
         assert h.name == 'foo'
         assert h.variables_dict == {"some_hostvar": "foobar"}
+
+    @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
+    def test_memberships_are_respected(self, inventory):
+        """This tests that if import 1 added a group-group and group-host memberhip
+        that import 2 will not remove those memberships, even when adding
+        importing the same parent groups
+        """
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {
+                "hostvars": {"foo": {}}
+            },
+            "all": {
+                "children": ["ungrouped", "is_a_parent", "has_a_host", "is_a_child"]
+            },
+            "is_a_parent": {
+                "children": ["is_a_child"]
+            },
+            "has_a_host": {
+                "hosts": ["foo"]
+            },
+            "ungrouped": {
+                "hosts": []
+            }
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__)
+        assert inventory.hosts.count() == 1  # baseline worked
+
+        inv_src2 = inventory.inventory_sources.create(
+            name='bar', overwrite=True
+        )
+        os.environ['INVENTORY_SOURCE_ID'] = str(inv_src2.pk)
+        os.environ['INVENTORY_UPDATE_ID'] = str(inv_src2.create_unified_job().pk)
+        # scenario where groups are already imported, and overwrite is true
+        inv_src2.groups.add(inventory.groups.get(name='is_a_parent'))
+        inv_src2.groups.add(inventory.groups.get(name='has_a_host'))
+
+        inventory_import.AnsibleInventoryLoader._data = {
+            "_meta": {
+                "hostvars": {"bar": {}}
+            },
+            "all": {
+                "children": ["ungrouped", "is_a_parent", "has_a_host"]
+            },
+            "ungrouped": {
+                "hosts": ["bar"]
+            }
+        }
+        cmd = inventory_import.Command()
+        cmd.handle(inventory_id=inventory.pk, source=__file__, overwrite=True)
+
+        del os.environ['INVENTORY_SOURCE_ID']
+        del os.environ['INVENTORY_UPDATE_ID']
+
+        # the overwriting import did not destroy relationships from first import
+        parent_group = inventory.groups.get(name='is_a_parent')
+        assert parent_group.children.count() == 1
+        has_host_group = inventory.groups.get(name='has_a_host')
+        assert has_host_group.hosts.count() == 1
 
     @mock.patch.object(inventory_import, 'AnsibleInventoryLoader', MockLoader)
     def test_recursive_group_error(self, inventory):
