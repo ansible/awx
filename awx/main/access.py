@@ -1391,7 +1391,7 @@ class JobTemplateAccess(BaseAccess):
             self.check_license()
 
             # Check the per-org limit
-            self.check_org_host_limit({'inventory': obj})
+            self.check_org_host_limit({'inventory': obj.inventory})
 
             if obj.survey_enabled:
                 self.check_license(feature='surveys')
@@ -1552,7 +1552,7 @@ class JobAccess(BaseAccess):
             self.check_license()
 
             # Check the per-org limit
-            self.check_org_host_limit({'inventory': obj})
+            self.check_org_host_limit({'inventory': obj.inventory})
 
         # A super user can relaunch a job
         if self.user.is_superuser:
@@ -1922,7 +1922,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
             self.check_license()
 
             # Check the per-org limit
-            self.check_org_host_limit({'inventory': obj})
+            self.check_org_host_limit({'inventory': obj.inventory})
 
             # if surveys are added to WFJTs, check license here
             if obj.survey_enabled:
@@ -1996,7 +1996,7 @@ class WorkflowJobAccess(BaseAccess):
             self.check_license()
 
             # Check the per-org limit
-            self.check_org_host_limit({'inventory': obj})
+            self.check_org_host_limit({'inventory': obj.inventory})
 
         if self.user.is_superuser:
             return True
