@@ -26,18 +26,19 @@ class AnsibleSelect extends React.Component {
   }
 
   onSelectChange (val, event) {
-    const { onChange } = this.props;
+    const { onChange, name } = this.props;
+    event.target.name = name;
     onChange(val, event);
   }
 
   render () {
     const { count } = this.state;
-    const { labelName, selected, data, fieldId } = this.props;
+    const { labelName, value, data, fieldId } = this.props;
     let elem;
     if (count > 1) {
       elem = (
         <FormGroup label={labelName} fieldId={fieldId || 'ansible-select'}>
-          <Select value={selected} id={`select-${fieldId}` || 'ansible-select-element'} onChange={this.onSelectChange} aria-label="Select Input">
+          <Select value={value} id={`select-${fieldId}` || 'ansible-select-element'} onChange={this.onSelectChange} aria-label="Select Input">
             {data.map((datum) => (
               <SelectOption isDisabled={datum.disabled} key={datum} value={datum} label={datum} />
             ))}
