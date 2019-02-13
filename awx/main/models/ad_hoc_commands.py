@@ -43,8 +43,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         null=True,
         on_delete=models.SET_NULL,
     )
-    limit = models.CharField(
-        max_length=1024,
+    limit = models.TextField(
         blank=True,
         default='',
     )
