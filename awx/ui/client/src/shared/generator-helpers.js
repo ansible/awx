@@ -22,7 +22,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 .factory('Attr', function () {
     return function (obj, key, fld) {
         var i, s, result,
-            value = (typeof obj[key] === "string") ? obj[key].replace(/[\'\"]/g, '&quot;') : obj[key];
+            value = (typeof obj[key] === "string") ? obj[key].replace(/[\"]/g, '&quot;').replace(/[\']/g, '&apos;') : obj[key];
 
         if (/^ng/.test(key)) {
             result = 'ng-' + key.replace(/^ng/, '').toLowerCase() + "=\"" + value + "\" ";
