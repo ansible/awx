@@ -135,14 +135,14 @@ class OrganizationAdd extends React.Component {
                 </FormGroup>
                 <ConfigContext.Consumer>
                   {({ custom_virtualenvs }) => (
-                    <AnsibleSelect
-                      fieldId="add-org-form-virtual-env"
-                      labelName="Ansible Environment"
-                      name="custom_virtualenv"
-                      value={custom_virtualenv}
-                      onChange={this.onFieldChange}
-                      data={custom_virtualenvs}
-                    />
+                    <FormGroup label="Ansible Environment" fieldId="add-org-form-custom-virtualenv">
+                      <AnsibleSelect
+                        name="custom_virtualenv"
+                        value={custom_virtualenv}
+                        onChange={this.onFieldChange}
+                        data={custom_virtualenvs}
+                      />
+                    </FormGroup>
                   )}
                 </ConfigContext.Consumer>
               </Gallery>
