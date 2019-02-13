@@ -125,12 +125,7 @@ class Lookup extends React.Component {
 
   render () {
     const { isModalOpen, lookupSelectedItems, error, results, count, page, page_size } = this.state;
-    const { value } = this.props;
-    let { lookupHeader } = this.props;
-
-    if (!lookupHeader) {
-      lookupHeader = 'items';
-    }
+    const { lookupHeader = 'items', value } = this.props;
 
     return (
       <I18n>
