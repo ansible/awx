@@ -43,12 +43,27 @@ class TestInventoryScript:
         data = inventory.get_script_data()
         assert 'all' in data
         assert data['all'] == {
-            'hosts': [],
-            'children': [],
             'vars': {
                 'a1': 'a1'
             }
         }
+
+    def test_empty_group(self, inventory):
+        inventory.groups.create(name='ghost')
+        data = inventory.get_script_data()
+        # canonical behavior same as ansible-inventory
+        # group not provided top-level to avoid host / group confusion
+        # still list group as a child of the all group
+        assert 'ghost' not in data
+        assert 'ghost' in data['all']['children']
+
+    def test_empty_group_with_vars(self, inventory):
+        inventory.groups.create(name='ghost2', variables={'foo': 'bar'})
+        data = inventory.get_script_data()
+        # must be top-level key so group vars can be provided
+        assert 'ghost2' in data
+        assert data['ghost2']['vars'] == {'foo': 'bar'}
+        assert 'ghost2' in data['all']['children']
 
     def test_grandparent_group(self, inventory):
         g1 = inventory.groups.create(name='g1', variables={'v1': 'v1'})
@@ -62,13 +77,11 @@ class TestInventoryScript:
         assert 'g1' in data
         assert 'g2' in data
         assert data['g1'] == {
-            'hosts': [],
             'children': ['g2'],
             'vars': {'v1': 'v1'}
         }
         assert data['g2'] == {
             'hosts': ['h1'],
-            'children': [],
             'vars': {'v2': 'v2'}
         }
 
@@ -93,10 +106,10 @@ class TestInventoryScript:
             g2.hosts.add(host)
         for i in range(3):
             expected_data = {
-                'contains_all_hosts': {'hosts': ['host{}'.format(i)], 'children': [], 'vars': {}},
+                'contains_all_hosts': {'hosts': ['host{}'.format(i)]},
             }
             if i < 2:
-                expected_data['contains_two_hosts'] = {'hosts': ['host{}'.format(i)], 'children': [], 'vars': {}}
+                expected_data['contains_two_hosts'] = {'hosts': ['host{}'.format(i)]}
             data = inventory.get_script_data(slice_number=i + 1, slice_count=3)
             data.pop('all')
             assert data == expected_data
