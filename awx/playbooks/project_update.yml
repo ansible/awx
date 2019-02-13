@@ -50,12 +50,12 @@
           version: "{{scm_branch|quote}}"
           force: "{{scm_clean}}"
           accept_hostkey: "{{scm_accept_hostkey|default(omit)}}"
-        register: scm_result
+        register: git_result
 
       - name: Set the git repository version
         set_fact:
-          scm_version: "{{ scm_result['after'] }}"
-        when: "'after' in scm_result"
+          scm_version: "{{ git_result['after'] }}"
+        when: "'after' in git_result"
       when: scm_type == 'git'
 
     - block:
@@ -65,12 +65,12 @@
           repo: "{{scm_url|quote}}"
           revision: "{{scm_branch|quote}}"
           force: "{{scm_clean}}"
-        register: scm_result
+        register: hg_result
 
       - name: Set the hg repository version
         set_fact:
-          scm_version: "{{ scm_result['after'] }}"
-        when: "'after' in scm_result"
+          scm_version: "{{ hg_result['after'] }}"
+        when: "'after' in hg_result"
 
       - name: parse hg version string properly
         set_fact:
@@ -86,12 +86,12 @@
           force: "{{scm_clean}}"
           username: "{{scm_username|default(omit)}}"
           password: "{{scm_password|default(omit)}}"
-        register: scm_result
+        register: svn_result
 
       - name: Set the svn repository version
         set_fact:
-          scm_version: "{{ scm_result['after'] }}"
-        when: "'after' in scm_result"
+          scm_version: "{{ svn_result['after'] }}"
+        when: "'after' in svn_result"
 
       - name: parse subversion version string properly
         set_fact:
@@ -144,13 +144,13 @@
         args:
           chdir: "{{project_path|quote}}/roles"
         register: galaxy_result
-        when: doesRequirementsExist.stat.exists and scm_result is undefined
+        when: doesRequirementsExist.stat.exists and (scm_version is undefined or (git_result is defined and git_result['before'] == git_result['after']))
         changed_when: "'was installed successfully' in galaxy_result.stdout"
 
       - name: fetch galaxy roles from requirements.yml (forced update)
         command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ --force
         args:
           chdir: "{{project_path|quote}}/roles"
-        when: doesRequirementsExist.stat.exists and scm_result is defined
+        when: doesRequirementsExist.stat.exists and galaxy_result is skipped
 
-      when: scm_full_checkout|bool and roles_enabled|bool
+      when: roles_enabled|bool
