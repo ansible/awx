@@ -25,7 +25,7 @@ from awx.main.fields import (ImplicitRoleField, CredentialInputField,
 from awx.main.utils import decrypt_field
 from awx.main.utils.safe_yaml import safe_dump
 from awx.main.validators import validate_ssh_private_key
-from awx.main.models.base import * # noqa
+from awx.main.models.base import CommonModelNameNotUnique, PasswordFieldsModel
 from awx.main.models.mixins import ResourceMixin
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,

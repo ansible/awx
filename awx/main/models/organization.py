@@ -15,7 +15,10 @@ from django.utils.timezone import now as tz_now
 # AWX
 from awx.api.versioning import reverse
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    BaseModel, CommonModel, CommonModelNameNotUnique, CreatedModifiedModel,
+    NotificationFieldsModel
+)
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,

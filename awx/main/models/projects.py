@@ -18,7 +18,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 
 # AWX
 from awx.api.versioning import reverse
-from awx.main.models.base import * # noqa
+from awx.main.models.base import PROJECT_UPDATE_JOB_TYPE_CHOICES, PERM_INVENTORY_DEPLOY
 from awx.main.models.events import ProjectUpdateEvent
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -28,6 +28,7 @@ from awx.main.models.unified_jobs import (
     UnifiedJob,
     UnifiedJobTemplate,
 )
+from awx.main.models.jobs import Job
 from awx.main.models.mixins import (
     ResourceMixin,
     TaskManagerProjectUpdateMixin,

@@ -46,7 +46,15 @@ from crum import impersonate
 from awx import __version__ as awx_application_version
 from awx.main.constants import CLOUD_PROVIDERS, PRIVILEGE_ESCALATION_METHODS, STANDARD_INVENTORY_UPDATE_ENV
 from awx.main.access import access_registry
-from awx.main.models import * # noqa
+from awx.main.models import (
+    Schedule, TowerScheduleState, Instance, InstanceGroup,
+    UnifiedJob, Notification,
+    Inventory, SmartInventoryMembership,
+    Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob,
+    Project,
+    JobEvent, ProjectUpdateEvent, InventoryUpdateEvent, AdHocCommandEvent, SystemJobEvent,
+    build_safe_env
+)
 from awx.main.constants import ACTIVE_STATES
 from awx.main.exceptions import AwxTaskError
 from awx.main.queue import CallbackQueueDispatcher

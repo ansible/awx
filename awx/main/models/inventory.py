@@ -33,9 +33,15 @@ from awx.main.fields import (
     SmartFilterField,
 )
 from awx.main.managers import HostManager
-from awx.main.models.base import * # noqa
+from awx.main.models.base import (
+    BaseModel,
+    CommonModelNameNotUnique,
+    VarsDictProperty,
+    CLOUD_INVENTORY_SOURCES,
+    prevent_search
+)
 from awx.main.models.events import InventoryUpdateEvent
-from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.unified_jobs import UnifiedJob, UnifiedJobTemplate
 from awx.main.models.mixins import (
     ResourceMixin,
     TaskManagerInventoryUpdateMixin,
