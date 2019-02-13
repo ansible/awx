@@ -6,9 +6,9 @@
                   ng-model="state._value"
                   ng-attr-tabindex="{{ tab || undefined }}"
                   ng-disabled="state._disabled || form.disabled"
-                  ng-options="{{ state._exp }}"
                   id="{{ state._formId }}_{{ state.id }}_dynamic_select">
-              <option style="display:none"></option>
+                <option value=""></option>
+                <option ng-repeat="option in state._data" label="{{option}}" value="{{option}}">{{option}}</option>
           </select>
       </div>
       <at-input-message></at-input-message>
