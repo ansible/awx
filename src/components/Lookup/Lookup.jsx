@@ -1,32 +1,81 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 
-import { SearchIcon } from '@patternfly/react-icons';
+import { SearchIcon, CubesIcon } from '@patternfly/react-icons';
 import {
   Modal,
   Button,
-  ActionGroup,
-  Toolbar,
-  ToolbarGroup,
+  EmptyState,
+  EmptyStateIcon,
+  EmptyStateBody,
+  Title
 } from '@patternfly/react-core';
 import { I18n } from '@lingui/react';
-import { t, Trans } from '@lingui/macro';
+import { Trans, t } from '@lingui/macro';
 
 import CheckboxListItem from '../ListItem';
-
 import SelectedList from '../SelectedList';
+import Pagination from '../Pagination';
+
+const paginationStyling = {
+  paddingLeft: '0',
+  justifyContent: 'flex-end',
+  borderRight: '1px solid #ebebeb',
+  borderBottom: '1px solid #ebebeb',
+  borderTop: '0'
+};
 
 class Lookup extends React.Component {
   constructor (props) {
     super(props);
     this.state = {
       isModalOpen: false,
-      lookupSelectedItems: []
+      lookupSelectedItems: [],
+      results: [],
+      count: 0,
+      page: 1,
+      page_size: 5,
+      error: null
     };
+    this.onSetPage = this.onSetPage.bind(this);
     this.handleModalToggle = this.handleModalToggle.bind(this);
     this.wrapTags = this.wrapTags.bind(this);
     this.toggleSelected = this.toggleSelected.bind(this);
     this.saveModal = this.saveModal.bind(this);
+    this.getData = this.getData.bind(this);
   }
+
+  componentDidMount () {
+    const { page_size, page } = this.state;
+    this.getData({ page_size, page });
+  }
+
+  async getData (queryParams) {
+    const { getItems } = this.props;
+    const { page } = queryParams;
+
+    this.setState({ error: false });
+
+    try {
+      const { data } = await getItems(queryParams);
+      const { results, count } = data;
+
+      const stateToUpdate = {
+        page,
+        results,
+        count
+      };
+
+      this.setState(stateToUpdate);
+    } catch (err) {
+      this.setState({ error: true });
+    }
+  }
+
+  onSetPage = async (pageNumber, pageSize) => {
+    const page = parseInt(pageNumber, 10);
+    const page_size = parseInt(pageSize, 10);
+    this.getData({ page_size, page });
+  };
 
   toggleSelected (row) {
     const { lookupSelectedItems } = this.state;
@@ -44,12 +93,12 @@ class Lookup extends React.Component {
 
   handleModalToggle () {
     const { isModalOpen } = this.state;
-    const { selected } = this.props;
+    const { value } = this.props;
     // Resets the selected items from parent state whenever modal is opened
     // This handles the case where the user closes/cancels the modal and
     // opens it again
     if (!isModalOpen) {
-      this.setState({ lookupSelectedItems: [...selected] });
+      this.setState({ lookupSelectedItems: [...value] });
     }
     this.setState((prevState) => ({
       isModalOpen: !prevState.isModalOpen,
@@ -57,13 +106,13 @@ class Lookup extends React.Component {
   }
 
   saveModal () {
-    const { onLookupSave } = this.props;
+    const { onLookupSave, name } = this.props;
     const { lookupSelectedItems } = this.state;
-    onLookupSave(lookupSelectedItems);
+    onLookupSave(lookupSelectedItems, name);
     this.handleModalToggle();
   }
 
-  wrapTags (tags) {
+  wrapTags (tags = []) {
     return tags.map(tag => (
       <span className="awx-c-tag--pill" key={tag.id}>
         {tag.name}
@@ -75,34 +124,61 @@ class Lookup extends React.Component {
   }
 
   render () {
-    const { isModalOpen, lookupSelectedItems } = this.state;
-    const { data, lookupHeader, selected } = this.props;
+    const { isModalOpen, lookupSelectedItems, error, results, count, page, page_size } = this.state;
+    const { lookupHeader = 'items', value } = this.props;
+
     return (
-      <div className="pf-c-input-group awx-lookup">
-        <Button className="pf-c-input-group__text" aria-label="search" id="search" onClick={this.handleModalToggle}>
-          <SearchIcon />
-        </Button>
-        <div className="pf-c-form-control">{this.wrapTags(selected)}</div>
-        <Modal
-          className="awx-c-modal"
-          title={`Select ${lookupHeader}`}
-          isOpen={isModalOpen}
-          onClose={this.handleModalToggle}
-        >
-          <ul className="pf-c-data-list awx-c-list">
-            {data.map(i => (
-              <CheckboxListItem
-                key={i.id}
-                itemId={i.id}
-                name={i.name}
-                isSelected={lookupSelectedItems.some(item => item.id === i.id)}
-                onSelect={() => this.toggleSelected(i)}
-              />
-            ))}
-          </ul>
-          {lookupSelectedItems.length > 0 && (
-            <I18n>
-              {({ i18n }) => (
+      <I18n>
+        {({ i18n }) => (
+          <div className="pf-c-input-group awx-lookup">
+            <Button className="pf-c-input-group__text" aria-label="search" id="search" onClick={this.handleModalToggle}>
+              <SearchIcon />
+            </Button>
+            <div className="pf-c-form-control">{this.wrapTags(value)}</div>
+            <Modal
+              className="awx-c-modal"
+              title={`Select ${lookupHeader}`}
+              isOpen={isModalOpen}
+              onClose={this.handleModalToggle}
+              actions={[
+                <Button key="save" variant="primary" onClick={this.saveModal} style={(results.length === 0) ? { display: 'none' } : {}}>{i18n._(t`Save`)}</Button>,
+                <Button key="cancel" variant="secondary" onClick={this.handleModalToggle}>{(results.length === 0) ? i18n._(t`Close`) : i18n._(t`Cancel`)}</Button>
+              ]}
+            >
+              {(results.length === 0) ? (
+                <EmptyState>
+                  <EmptyStateIcon icon={CubesIcon} />
+                  <Title size="lg">
+                    <Trans>{`No ${lookupHeader} Found`}</Trans>
+                  </Title>
+                  <EmptyStateBody>
+                    <Trans>{`Please add ${lookupHeader.toLowerCase()} to populate this list`}</Trans>
+                  </EmptyStateBody>
+                </EmptyState>
+              ) : (
+                <Fragment>
+                  <ul className="pf-c-data-list awx-c-list">
+                    {results.map(i => (
+                      <CheckboxListItem
+                        key={i.id}
+                        itemId={i.id}
+                        name={i.name}
+                        isSelected={lookupSelectedItems.some(item => item.id === i.id)}
+                        onSelect={() => this.toggleSelected(i)}
+                      />
+                    ))}
+                  </ul>
+                  <Pagination
+                    count={count}
+                    page={page}
+                    pageCount={Math.ceil(count / page_size)}
+                    page_size={page_size}
+                    onSetPage={this.onSetPage}
+                    style={paginationStyling}
+                  />
+                </Fragment>
+              )}
+              {lookupSelectedItems.length > 0 && (
                 <SelectedList
                   label={i18n._(t`Selected`)}
                   selected={lookupSelectedItems}
@@ -110,24 +186,11 @@ class Lookup extends React.Component {
                   onRemove={this.toggleSelected}
                 />
               )}
-            </I18n>
-          )}
-          <ActionGroup className="at-align-right">
-            <Toolbar>
-              <ToolbarGroup>
-                <Button className="at-C-SubmitButton" variant="primary" onClick={this.saveModal}>
-                  <Trans>Select</Trans>
-                </Button>
-              </ToolbarGroup>
-              <ToolbarGroup>
-                <Button className="at-C-CancelButton" variant="secondary" onClick={this.handleModalToggle}>
-                  <Trans>Cancel</Trans>
-                </Button>
-              </ToolbarGroup>
-            </Toolbar>
-          </ActionGroup>
-        </Modal>
-      </div>
+              { error ? <div>error</div> : '' }
+            </Modal>
+          </div>
+        )}
+      </I18n>
     );
   }
 }
