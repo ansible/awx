@@ -12,3 +12,6 @@
 - name: Start the containers
   docker_service:
     project_src: "{{ docker_compose_dir }}"
+    
+- name: Update CA trust in awx_web container
+  command: docker exec awx_web_1 '/usr/bin/update-ca-trust'
