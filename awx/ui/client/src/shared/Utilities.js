@@ -596,7 +596,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     minimumResultsForSearch = params.minimumResultsForSearch ? params.minimumResultsForSearch : Infinity;
 
                     if (scope && selectOptions) {
-                        original_options = _.cloneDeep(scope[selectOptions]);
+                        original_options = _.get(scope, selectOptions);
                     }
 
                 $.fn.select2.amd.require([
@@ -675,13 +675,16 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
                     if (addNew && !multiple) {
                         $(element).on('select2:select', (e) => {
-                            scope[model] = e.params.data.text;
-                            scope[selectOptions] = _.cloneDeep(original_options);
+                            _.set(scope, model, e.params.data.text);
+                            const optionsClone = _.clone(original_options);
+                            _.set(scope, selectOptions, optionsClone);
                             if (e.params.data.id === "") {
                                 return;
                             }
-                            if (scope[selectOptions].indexOf(e.params.data.text) === -1) {
-                                scope[selectOptions].push(e.params.data.text);
+                            const optionMatches = original_options.findIndex((option) => option === e.params.data.text);
+                            if (optionMatches === -1) {
+                                optionsClone.push(e.params.data.text);
+                                _.set(scope, selectOptions, optionsClone);
                             }
                             $(element).select2(config);
                         });

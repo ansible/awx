@@ -1,4 +1,11 @@
-function AddCredentialsController (models, $state, $scope, strings, componentsStrings) {
+function AddCredentialsController (
+    models,
+    $state,
+    $scope,
+    strings,
+    componentsStrings,
+    ConfigService
+) {
     const vm = this || {};
 
     const { me, credential, credentialType, organization } = models;
@@ -48,6 +55,11 @@ function AddCredentialsController (models, $state, $scope, strings, componentsSt
             if (credentialType.get('name') === 'Google Compute Engine') {
                 fields.splice(2, 0, gceFileInputSchema);
                 $scope.$watch(`vm.form.${gceFileInputSchema.id}._value`, vm.gceOnFileInputChanged);
+            } else if (credentialType.get('name') === 'Machine') {
+                const apiConfig = ConfigService.get();
+                const become = fields.find((field) => field.id === 'become_method');
+                become._isDynamic = true;
+                become._choices = Array.from(apiConfig.become_methods, method => method[0]);
             }
 
             return fields;
@@ -136,7 +148,8 @@ AddCredentialsController.$inject = [
     '$state',
     '$scope',
     'CredentialsStrings',
-    'ComponentsStrings'
+    'ComponentsStrings',
+    'ConfigService'
 ];
 
 export default AddCredentialsController;

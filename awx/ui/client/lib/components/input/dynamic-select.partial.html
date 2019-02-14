@@ -1,0 +1,16 @@
+<div class="col-sm-{{::col}} at-InputContainer">
+  <div class="form-group at-u-flat">
+      <at-input-label></at-input-label>
+      <div class="at-InputSelect">
+           <select class="form-control at-InputSelect-select"
+                  ng-model="state._value"
+                  ng-attr-tabindex="{{ tab || undefined }}"
+                  ng-disabled="state._disabled || form.disabled"
+                  id="{{ state._formId }}_{{ state.id }}_dynamic_select">
+                <option value=""></option>
+                <option ng-repeat="option in state._data" label="{{option}}" value="{{option}}">{{option}}</option>
+          </select>
+      </div>
+      <at-input-message></at-input-message>
+  </div>
+</div>

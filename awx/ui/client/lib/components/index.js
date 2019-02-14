@@ -2,6 +2,7 @@ import atLibServices from '~services';
 
 import actionGroup from '~components/action/action-group.directive';
 import divider from '~components/utility/divider.directive';
+import dynamicSelect from '~components/input/dynamic-select.directive';
 import form from '~components/form/form.directive';
 import formAction from '~components/form/action.directive';
 import inputCheckbox from '~components/input/checkbox.directive';
@@ -53,6 +54,7 @@ angular
     ])
     .directive('atActionGroup', actionGroup)
     .directive('atDivider', divider)
+    .directive('atDynamicSelect', dynamicSelect)
     .directive('atForm', form)
     .directive('atFormAction', formAction)
     .directive('atInputCheckbox', inputCheckbox)
