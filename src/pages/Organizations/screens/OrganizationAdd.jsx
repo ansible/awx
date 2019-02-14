@@ -33,6 +33,7 @@ class OrganizationAdd extends React.Component {
       custom_virtualenv: '',
       instanceGroups: [],
       error: '',
+      defaultEnv: '/venv/ansible/',
     };
   }
 
@@ -92,6 +93,7 @@ class OrganizationAdd extends React.Component {
       name,
       description,
       custom_virtualenv,
+      defaultEnv,
       instanceGroups,
       error
     } = this.state;
@@ -137,10 +139,12 @@ class OrganizationAdd extends React.Component {
                   {({ custom_virtualenvs }) => (
                     <FormGroup label="Ansible Environment" fieldId="add-org-form-custom-virtualenv">
                       <AnsibleSelect
+                        label="Ansible Environment"
                         name="custom_virtualenv"
                         value={custom_virtualenv}
                         onChange={this.onFieldChange}
                         data={custom_virtualenvs}
+                        defaultSelected={defaultEnv}
                       />
                     </FormGroup>
                   )}
@@ -151,7 +155,7 @@ class OrganizationAdd extends React.Component {
                 submitDisabled={!enabled}
                 onCancel={this.onCancel}
               />
-              { error ? <div>error</div> : '' }
+              {error ? <div>error</div> : ''}
             </Form>
           </CardBody>
         </Card>

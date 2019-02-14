@@ -32,22 +32,20 @@ class AnsibleSelect extends React.Component {
 
   render () {
     const { count } = this.state;
-    const { value, data } = this.props;
+    const { label = '', value, data, defaultSelected } = this.props;
     let elem;
     if (count > 1) {
       elem = (
         <Select value={value} onChange={this.onSelectChange} aria-label="Select Input">
-          {data.map((datum) => (
-            <SelectOption isDisabled={datum.disabled} key={datum} value={datum} label={datum} />
-          ))}
+          {data.map((datum) => (datum === defaultSelected
+            ? (<SelectOption key="" value="" label={`Use Default ${label}`} />) : (<SelectOption key={datum} value={datum} label={datum} />)))
+          }
         </Select>
       );
     } else {
       elem = null;
     }
-
     return elem;
   }
 }
-
 export default AnsibleSelect;
